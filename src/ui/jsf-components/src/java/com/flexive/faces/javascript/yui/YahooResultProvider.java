@@ -44,9 +44,7 @@ import com.flexive.shared.search.FxResultSet;
 import com.flexive.shared.security.PermissionSet;
 import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.structure.FxProperty;
-import com.flexive.shared.value.FxDouble;
-import com.flexive.shared.value.FxFloat;
-import com.flexive.shared.value.FxValue;
+import com.flexive.shared.value.*;
 import com.flexive.shared.value.renderer.FxValueRendererFactory;
 import com.flexive.war.JsonWriter;
 import org.apache.commons.logging.Log;
@@ -55,6 +53,9 @@ import org.apache.commons.logging.LogFactory;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringWriter;
+import java.util.Date;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 /**
  * Provides map interfaces for generating JSON row and column information
@@ -124,15 +125,23 @@ public class YahooResultProvider implements Serializable {
     private static void createResultRows(FxResultSet result, JsonWriter writer, int firstColumn) throws IOException {
         writer.startAttribute("rows");
         writer.startArray();
+        final SimpleDateFormat sortableDateFormat = new SimpleDateFormat("yyyyMMdd");
         for (FxResultRow row : result.getResultRows()) {
             writer.startMap();
             for (int i = firstColumn; i <= result.getColumnCount(); i++) {
                 final Object value = row.getValue(i);
                 final String output;
+
                 if (value instanceof FxFloat || value instanceof FxDouble) {
                     // always format decimal numbers in English locale, because
                     // the YUI datatable currently does not work with "," as separator (instead of ".")
                     output = FxValueRendererFactory.getInstance(null).format((FxValue) value);
+                } else if (value instanceof FxDate || value instanceof FxDateTime) {
+                    final Date date = (Date) ((FxValue) value).getBestTranslation();
+                    output = createSortableDate(sortableDateFormat, value, date);
+                } else if (value instanceof FxDateRange || value instanceof FxDateTimeRange) {
+                    final DateRange range = (DateRange) ((FxValue) value).getBestTranslation();
+                    output = createSortableDate(sortableDateFormat, value, range != null ? range.getLower() : null);
                 } else {
                     output = FxJsfUtils.formatResultValue(value, null, null, null);
                 }
@@ -159,6 +168,12 @@ public class YahooResultProvider implements Serializable {
         writer.closeArray();
     }
 
+    private static String createSortableDate(SimpleDateFormat sortableDateFormat, Object value, Date date) {
+        // add sortable value to enable sorting independent of the string representation
+        return (date != null ? "<!--" + sortableDateFormat.format(date) + "-->" : "")
+                + FxJsfUtils.formatResultValue(value, null, null, null);
+    }
+
     /**
      * Renders the response schema needed for the YUI datatable.
      *
@@ -176,16 +191,18 @@ public class YahooResultProvider implements Serializable {
         for (int i = firstColumn; i <= result.getColumnCount(); i++) {
             writer.startMap();
             writer.writeAttribute("key", getColumnKey(result, i));
-            String parser = "YAHOO.util.DataSource.parseString";    // the YUI data parser used for sorting
+            String parser = "string";    // the YUI data parser used for sorting
+            boolean funref = false;     // is parser a direct function reference?
             try {
                 if ("@pk".equals(result.getColumnName(i))) {
                     // PKs get rendered as <id>.<version>
-                    parser = "YAHOO.util.DataSource.parseNumber";
+                    parser = "number";
                 } else {
                     // set parser according to property type
                     final FxProperty property = environment.getProperty(result.getColumnName(i));
-                    if (property.getEmptyValue().getDefaultTranslation() instanceof Number) {
-                        parser = "YAHOO.util.DataSource.parseNumber";
+                    final Class valueClass = property.getEmptyValue().getValueClass();
+                    if (Number.class.isAssignableFrom(valueClass)) {
+                        parser = "number";
                     }
                 }
             } catch (FxRuntimeException e) {
@@ -194,7 +211,7 @@ public class YahooResultProvider implements Serializable {
                     LOG.debug("Property '" + result.getColumnName(i) + " not found (ignored): " + e.getMessage(), e);
                 }
             }
-            writer.writeAttribute("parser", parser, false);
+            writer.writeAttribute("parser", parser, !funref);
             writer.closeMap();
         }
         // include primary key in attribute pk, if available

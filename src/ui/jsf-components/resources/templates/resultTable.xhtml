@@ -20,7 +20,12 @@ Parameters:
                the result set's viewtype is used, otherwise it defaults to LIST.
     clickHandler - an optional Javascript method for handling clicks on the table. The first two parameters
                 are the element that received the click and the primary key, if available.
-
+    actionColumnHandler - an optional instance of type flexive.yui.datatable.ActionColumnHandler
+                for generating the contents of the "Action" column - an additional column that can be used
+                for displaying custom actions for contents and that will only be visible when this parameter is set.
+                The flexive.yui.datatable.ActionColumnHandler#getActionColumn method is passed the primary
+                key and the permissions of the column, which can be null if the search result does not contain the
+                @pk or @permissions properties.
 <ui:composition>
 
     <c:if test="#{empty var}">
@@ -37,8 +42,9 @@ Parameters:
             flexive.yui.onYahooLoaded(function() {
                 var containerElName = "#{var}_datatable";
                 var createFun = function(result) {
+                    var actionColumnHandler = #{empty actionColumnHandler ? 'null' : actionColumnHandler};
                     // get JSON representation of the search result
-                    var view = flexive.yui.datatable.getViewWrapper(result);
+                    var view = flexive.yui.datatable.getViewWrapper(result, actionColumnHandler);
                     var isThumbnails = result.viewType == "THUMBNAILS";
 
                     var dataSource = new YAHOO.util.DataSource(view.getRows());

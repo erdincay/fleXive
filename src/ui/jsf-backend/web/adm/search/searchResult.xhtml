@@ -53,8 +53,7 @@
                 function onContextMenu(type, args) {
                     // extract PK
                     var pk = flexive.yui.datatable.getPk(resultTable, this.contextEventTarget);
-                    document.getElementById("frm:contentEditorId").value = pk.id;
-                    document.getElementById("frm:contentEditorVersion").value = pk.version;
+                    storePk(pk);
 
                     var selectedIds = getSelectedIds();
                     var briefcaseId = getBriefcaseId();
@@ -64,10 +63,10 @@
                     }
                     switch (menuItem.id) {
                         case "show":
-                            document.getElementById("frm:showButton").onclick();
+                            openContent(pk);
                             break;
                         case "edit":
-                            document.getElementById("frm:editButton").onclick();
+                            editContent(pk);
                             break;
                         case "showScreenview":
                             var a = document.createElement("a");
@@ -80,14 +79,7 @@
                             parent.getContentClipboard().set(selectedIds);
                             break;
                         case "delete":
-                            confirmDialog("#{fxMessageBean['SearchResult.dialog.confirm.deleteRow']}", function() {
-                                try {
-                                    flexive.util.getJsonRpc().ContentEditor.remove(pk.id);
-                                    reload();
-                                } catch (e) {
-                                    alertDialog(e);
-                                }
-                            });
+                            deleteContent(pk);
                             break;
                         case "deleteSelected":
                             confirmDialog("#{fxMessageBean['SearchResult.dialog.confirm.deleteSelection']}", function() {
@@ -100,12 +92,7 @@
                             });
                             break;
                         case "deleteBriefcase":
-                            try {
-                                flexive.util.getJsonRpc().BriefcaseEditor.removeItems(briefcaseId, [pk.id]);
-                                reload();
-                            } catch (e) {
-                                alertDialog(e);
-                            }
+                            deleteFromBriefcase(pk);
                             break;
                         case "deleteBriefcaseSelected":
                             try {
@@ -120,24 +107,97 @@
                 }
 
                 function reload() {
+                    parent.lockScreen();
                     document.forms["frm"].submit();
+                }
+
+                function storePk(/* PK */ pk) {
+                    document.getElementById("frm:contentEditorId").value = pk.id;
+                    document.getElementById("frm:contentEditorVersion").value = pk.version;
+                }
+
+                function openContent(/* PK */ pk) {
+                    storePk(pk);
+                    document.getElementById("frm:showButton").onclick();
+                }
+
+                function editContent(/* PK */ pk) {
+                    storePk(pk);
+                    document.getElementById("frm:editButton").onclick();
+                }
+
+                function deleteContent(/* PK */ pk) {
+                    confirmDialog("#{fxMessageBean['SearchResult.dialog.confirm.deleteRow']}", function() {
+                        try {
+                            flexive.util.getJsonRpc().ContentEditor.remove(pk.id);
+                            reload();
+                        } catch (e) {
+                            alertDialog(e);
+                        }
+                    });
+                }
+
+                function deleteFromBriefcase(/* PK */ pk) {
+                    try {
+                        flexive.util.getJsonRpc().BriefcaseEditor.removeItems(getBriefcaseId(), [pk.id]);
+                        reload();
+                    } catch (e) {
+                        alertDialog(e);
+                    }
+                }
+
+                function openContextMenuAt(el) {
+                    var xy = YAHOO.util.Dom.getXY(el);
+                    resultsMenu.moveTo(xy[0], xy[1]);
+                    resultsMenu.contextEventTarget = el;
+                    resultsMenu.triggerContextMenuEvent.fire();
+                    resultsMenu.show();
+                }
+
+                /** Add action links in list mode */
+                var _actionColumnHandler = new flexive.yui.datatable.ActionColumnHandler();
+                _actionColumnHandler.getActionColumn = function(pk, permissions) {
+                    if (pk == null) {
+                        return "";
+                    }
+                    var out = [];
+                    var pkArg = "flexive.util.parsePk(\"" + pk.toString() + "\")";
+                    if (permissions == null || permissions["edit"]) {
+                        out.push("<a href='javascript:editContent(" + pkArg + ");'>#{fxMessageBean['SearchResult.button.action.edit']}</a>");
+                    } else if (permissions == null || permissions["read"]) {
+                        out.push("<a href='javascript:openContent(" + pkArg + ");'>#{fxMessageBean['SearchResult.button.action.open']}</a>");
+                    }
+                    if (permissions == null || permissions["delete"]) {
+                        out.push("<a href='javascript:deleteContent(" + pkArg + ");'>#{fxMessageBean['SearchResult.button.action.delete']}</a>");
+                    }
+                    if (getBriefcaseId() != -1) {
+                        // remove from briefcase
+                        out.push("<a href='javascript:deleteFromBriefcase(" + pkArg + ");'>#{fxMessageBean['SearchResult.button.action.deleteFromBriefcase']}</a>");
+                    }
+                    var id = "more_link_" + pk.toString();
+                    out.push("<a id='" + id + "' href='javascript:openContextMenuAt(\"" + id + "\")'>#{fxMessageBean['SearchResult.button.action.more']}</a>");
+                    return out.join(" | ");
                 }
             //-->
             </script>
 
             <c:if test="#{fxSearchResultBean.queryBuilder != null}">
-                <h:inputHidden id="rowCount" value="#{fxSearchResultBean.rowCount}"/>
+                <!-- Eager fetching of result: #{fxSearchResultBean.result} -->
+                <h:inputHidden id="fetchRows" value="#{fxSearchResultBean.fetchRows}"/>
                 <h:inputHidden id="versionFilter" value="#{fxSearchResultBean.versionFilter}"/>
+                <h:inputHidden id="sortColumnKey" value="#{fxSearchResultBean.sortColumnKey}"/>
+                <h:inputHidden id="sortDirection" value="#{fxSearchResultBean.sortDirection}"/>
+                <h:inputHidden id="paginatorPage" value="#{fxSearchResultBean.paginatorPage}"/>
                 <h:inputHidden id="contentEditorId" value="#{contentEditorBean.id}"/>
                 <h:inputHidden id="contentEditorVersion" value="#{contentEditorBean.version}"/>
 
                 <h:selectOneListbox id="typeId" value="#{fxSearchResultBean.typeId}" size="1">
                     <f:selectItems value="#{fxSearchResultBean.contentTypeItems}"/>
-                    <a4j:support event="onchange" reRender="refreshResults"/>
+                    <a4j:support event="onchange" actionListener="#{fxSearchResultBean.resetTableView}" reRender="refreshResults"/>
                 </h:selectOneListbox>
                 <h:selectOneListbox id="version" value="#{fxSearchResultBean.versionFilter}" size="1">
                     <f:selectItems value="#{fxSearchResultBean.versionItems}"/>
-                    <a4j:support event="onchange" reRender="refreshResults"/>
+                    <a4j:support event="onchange" actionListener="#{fxSearchResultBean.resetTableView}" reRender="refreshResults"/>
                 </h:selectOneListbox>
 
                 <a4j:outputPanel id="refreshResults">
@@ -146,7 +206,7 @@
 
 
                 <div id="resultTableContainer">
-                    <fx:resultTable var="resultTable" value="#{fxSearchResultBean.result}"/>
+                    <fx:resultTable var="resultTable" value="#{fxSearchResultBean.result}" actionColumnHandler="_actionColumnHandler"/>
                 </div>
 
                 <fx:menu name="resultsMenu" beforeShow="onShowContextMenu" clickHandler="onContextMenu" trigger="'resultTableContainer'">
@@ -163,10 +223,10 @@
                 </fx:menu>
 
                 <div style="display:none">
-                    <h:commandLink id="showButton" action="#{contentEditorBean.load}">
+                    <h:commandLink id="showButton" action="#{contentEditorBean.load}" onclick="parent.lockScreen()">
                         <f:setPropertyActionListener value="#{true}" target="#{contentEditorBean.readOnly}"/>
                     </h:commandLink>
-                    <h:commandLink id="editButton" action="#{contentEditorBean.load}">
+                    <h:commandLink id="editButton" action="#{contentEditorBean.load}" onclick="parent.lockScreen()">
                         <f:setPropertyActionListener value="#{false}" target="#{contentEditorBean.readOnly}"/>
                     </h:commandLink>
                 </div>
@@ -191,9 +251,49 @@
         </a4j:form>
 
         <script type="text/javascript">
+        <!--
             if (parent.reloadBriefcases) {
                 parent.reloadBriefcases();
             }
+            
+            flexive.yui.onYahooLoaded(function() {
+                // store sort information in form variables
+                resultTable.subscribe("columnSortEvent", function(args) {
+                    document.getElementById("frm:sortColumnKey").value = args.column.key;
+                    document.getElementById("frm:sortDirection").value = args.dir;
+                });
+                // subscribe to paginator changes
+                var paginator = resultTable.get("paginator");
+                paginator.subscribe("pageChange", function(event) {
+                    document.getElementById("frm:paginatorPage").value = event.newValue;
+                });
+                paginator.subscribe("rowsPerPageChange", function(event) {
+                    document.getElementById("frm:fetchRows").value = event.newValue;
+                });
+
+                // fetch old sort information, apply it if the column still exists
+                var sortColumnKey = "#{fxSearchResultBean.sortColumnKey}";
+                if (sortColumnKey != "null" && sortColumnKey.length > 0) {
+                    var col = resultTable.getColumn(sortColumnKey);
+                    if (col != null) {
+                        resultTable.sortColumn(col, "#{fxSearchResultBean.sortDirection}");
+                    } else {
+                        // reset sort information
+                        document.getElementById("frm:sortColumnKey").value = "";
+                    }
+                }
+
+                // fetch old page/rows per page settings
+                var page = #{fxSearchResultBean.paginatorPage};
+                var rowsPerPage = #{fxSearchResultBean.fetchRows};
+                if (rowsPerPage > 0) {
+                    paginator.setRowsPerPage(rowsPerPage, false);
+                }
+                if (page > 0) {
+                    paginator.setPage(page, false);
+                }
+            });
+        //-->
         </script>
     </ui:define>
 

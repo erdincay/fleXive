@@ -9,9 +9,8 @@
 	margin-bottom: 1px;
 }
 
-.dojoMenuItem2{
-	white-space: nowrap;
-	margin: 0;
+.dojoPopupMenu2 td {
+    padding: 1px 2px 1px 2px;
 }
 
 .dojoMenuItem2Hover {

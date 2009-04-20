@@ -205,7 +205,10 @@ public class FxResultSetImpl implements Serializable, FxResultSet {
                     name = name.substring(name.indexOf('.') + 1);
                 }
                 if (name.indexOf('@') != -1) {
-                    columnLabels[i] = name;     // don't translate virtual properties
+                    columnLabels[i] = FxSharedUtils.getMessage(
+                            FxSharedUtils.SHARED_BUNDLE,
+                            "shared.result.columns." + name
+                    ).toString();
                 } else {
                     FxString label;
                     try {

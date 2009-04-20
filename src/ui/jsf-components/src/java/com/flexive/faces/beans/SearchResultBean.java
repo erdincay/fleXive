@@ -49,6 +49,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.faces.model.SelectItem;
+import javax.faces.event.ActionEvent;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -63,7 +64,6 @@ public class SearchResultBean implements ActionBean, Serializable {
     private ResultSessionData sessionData = null;
     private Briefcase briefcase = null; // cached briefcase object for briefcase queries
     private VersionFilter versionFilter = VersionFilter.MAX;
-    private int rowCount = -1;
 
     // cache settings
     private FxSQLSearchParams.CacheMode cacheMode = FxSQLSearchParams.CacheMode.ON;
@@ -139,7 +139,6 @@ public class SearchResultBean implements ActionBean, Serializable {
 
     private SqlQueryBuilder createSqlQueryBuilder() {
         final SqlQueryBuilder builder = new SqlQueryBuilder(location, getViewType());
-        builder.maxRows(getFetchRows());
         builder.filterVersion(getVersionFilter());
         return builder;
     }
@@ -149,6 +148,8 @@ public class SearchResultBean implements ActionBean, Serializable {
         getSessionData().setBriefcaseId(-1);
         setTypeId(-1);
         setVersionFilter(VersionFilter.MAX);
+        setPaginatorPage(1);
+        setSortColumnKey(null);
     }
 
     /**
@@ -205,6 +206,24 @@ public class SearchResultBean implements ActionBean, Serializable {
                     .startRow(0)
                     .maxRows(Integer.MAX_VALUE)
                     .getResult();
+            if (getTypeId() != -1) {
+                // check if type ID is still available
+                boolean found = false;
+                for (FxFoundType foundType : result.getContentTypes()) {
+                    if (foundType.getContentTypeId() == getTypeId()) {
+                        found = true;
+                        break;
+                    }
+                }
+                // reset type ID if it is no longer present (e.g. because a content was removed)
+                if (!found) {
+                    setTypeId(-1);
+                }
+            }
+            if (getTypeId() == -1 && result.getContentTypes().size() == 1) {
+                // no type selected, but only one found - search already performed for the specific type
+                setTypeId(result.getContentTypes().get(0).getContentTypeId());
+            }
         }
         return result;
     }
@@ -393,12 +412,59 @@ public class SearchResultBean implements ActionBean, Serializable {
         return result;
     }
 
-    public int getRowCount() {
-        return rowCount;
+    /**
+     * Returns the column key of the column that is currently used for sorting.
+     *
+     * @return  the column key of the column that is currently used for sorting. If null or empty,
+     * the predefined sort order from the result preferences is used.
+     * @since 3.1
+     */
+    public String getSortColumnKey() {
+        return getSessionData().getSortColumnKey();
     }
 
-    public void setRowCount(int rowCount) {
-        this.rowCount = rowCount;
+    public void setSortColumnKey(String sortColumnKey) {
+        getSessionData().setSortColumnKey(sortColumnKey);
+    }
+
+    /**
+     * Return the sort direction as returned by the YUI datatable.
+     *
+     * @return  the sort direction as returned by the YUI datatable.
+     * @since 3.1
+     */
+    public String getSortDirection() {
+        return getSessionData().getSortDirection();
+    }
+
+    public void setSortDirection(String sortDirection) {
+        getSessionData().setSortDirection(sortDirection);
+    }
+
+    /**
+     * Return the page index of the paginator.
+     *
+     * @return  the page index of the paginator.
+     * @since 3.1
+     */
+    public int getPaginatorPage() {
+        return getSessionData().getPaginatorPage();
+    }
+
+    public void setPaginatorPage(int paginatorPage) {
+        getSessionData().setPaginatorPage(paginatorPage);
+    }
+
+    /**
+     * Reset the client-side table view parameters (sort, page number),
+     * called e.g. when the content type filter changed.
+     *
+     * @param event the change event
+     * @since 3.1
+     */
+    public void resetTableView(ActionEvent event) {
+        setSortColumnKey(null);
+        setPaginatorPage(1);
     }
 
     /**

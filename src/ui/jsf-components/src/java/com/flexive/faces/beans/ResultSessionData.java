@@ -62,6 +62,9 @@ public class ResultSessionData implements Serializable {
     private int startRow;
     private int fetchRows = 25;
     private long typeId = -1;
+    private String sortColumnKey;
+    private String sortDirection;
+    private int paginatorPage;
     private VersionFilter versionFilter = VersionFilter.MAX;
     private List<FxFoundType> contentTypes = new ArrayList<FxFoundType>(0);
 
@@ -203,6 +206,33 @@ public class ResultSessionData implements Serializable {
 
     public void setVersionFilter(VersionFilter versionFilter) {
         this.versionFilter = versionFilter;
+        saveInSession();
+    }
+
+    public String getSortColumnKey() {
+        return sortColumnKey;
+    }
+
+    public void setSortColumnKey(String sortColumnKey) {
+        this.sortColumnKey = sortColumnKey;
+        saveInSession();
+    }
+
+    public String getSortDirection() {
+        return sortDirection;
+    }
+
+    public void setSortDirection(String sortDirection) {
+        this.sortDirection = sortDirection;
+        saveInSession();
+    }
+
+    public int getPaginatorPage() {
+        return paginatorPage;
+    }
+
+    public void setPaginatorPage(int paginatorPage) {
+        this.paginatorPage = paginatorPage;
         saveInSession();
     }
 }

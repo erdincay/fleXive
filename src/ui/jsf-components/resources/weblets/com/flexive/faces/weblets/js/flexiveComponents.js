@@ -225,10 +225,10 @@ flexive.yui.datatable = new function() {
      *
      * @param result    the search result object as returned by fxSearchResultBean.jsonResult
      */
-    this.getViewWrapper = function(result) {
+    this.getViewWrapper = function(result, actionColumnHandler) {
         return result.viewType == "THUMBNAILS"
-                ? new flexive.yui.datatable.ThumbnailView(result)
-                : new flexive.yui.datatable.ListView(result);
+                ? new flexive.yui.datatable.ThumbnailView(result, actionColumnHandler)
+                : new flexive.yui.datatable.ListView(result, actionColumnHandler);
     };
 
     /**
@@ -264,14 +264,33 @@ flexive.yui.datatable = new function() {
      * A property is set if the current user has the appropriate rights to perform the action.</p>
      */
     this.getPermissions = function(/* YAHOO.widget.DataTable */ dataTable, /* Element */ element) {
-        var p = this.getRecordValue(dataTable, element, "permissions");
+        return this.decodePermissions(this.getRecordValue(dataTable, element, "permissions"));
+    };
+
+    /**
+     * Decode the permissions bitmask as returned by the search result.
+     *
+     * @param permissions   the permissions bitmask as returned by the search result.
+     * @return  <p>a permissions object with the following boolean properties: <ul>
+     * <li>read</li>
+     * <li>edit</li>
+     * <li>relate</li>
+     * <li>delete</li>
+     * <li>export</li>
+     * <li>create</li>
+     * </ul>
+     * A property is set if the current user has the appropriate rights to perform the action.</p>
+     * @since 3.1
+     */
+    this.decodePermissions = function(/* Integer */ permissions) {
         return {
-            "read": (p & 1)  > 0,
-            "create": (p & 2) > 0,
-            "delete": (p & 4) > 0,
-            "edit": (p & 8) > 0,
-            "export": (p & 16) > 0,
-            "relate": (p & 32) > 0
+            "read": (permissions & 1)  > 0,
+            "create": (permissions & 2) > 0,
+            "delete": (permissions & 4) > 0,
+            "edit": (permissions & 8) > 0,
+            "export": (permissions & 16) > 0,
+            "relate": (permissions & 32) > 0,
+            encode: function() { return permissions; }
         };
     };
 
@@ -337,22 +356,49 @@ flexive.yui.datatable = new function() {
  * List result view - returns the linear result list of the search result
  * @param result    the search result object as returned by fxSearchResultBean.jsonResult
  */
-flexive.yui.datatable.ListView = function(result) {
+flexive.yui.datatable.ListView = function(result, actionColumnHandler) {
     this.result = result;
     this.rowsPerPage = 25;
+    this.actionColumnHandler = actionColumnHandler;
+    this.responseSchema = this.result.responseSchema;
+    this.rows = this.result.rows;
+    this.columns = this.result.columns;
+    if (this.actionColumnHandler != null) {
+        // add action column to column headers
+        this.columns.push({
+            key: "__actions",
+            label: "",
+            sortable: false
+        });
+
+        // extend response schema with action column
+        this.responseSchema.fields.push({
+            key: "__actions",
+            parser: "string"
+        });
+
+        // generate action column markup
+        for (var i = 0; i < this.rows.length; i++) {
+            var row = this.rows[i];
+            row.__actions = this.actionColumnHandler.getActionColumn(
+                    row["pk"] != null ? flexive.util.parsePk(row["pk"]) : null,
+                    row["permissions"] != null ? flexive.yui.datatable.decodePermissions(row["permissions"]) : null
+            );
+        }
+    }
 };
 
 flexive.yui.datatable.ListView.prototype = {
     getColumns: function() {
-        return this.result.columns;
+        return this.columns;
     },
 
     getResponseSchema: function() {
-        return this.result.responseSchema;
+        return this.responseSchema;
     },
 
     getRows: function() {
-        return this.result.rows;
+        return this.rows;
     }
 };
 
@@ -360,11 +406,12 @@ flexive.yui.datatable.ListView.prototype = {
  * Thumbnail view - projects the linear result list to a thumbnail grid
  * @param result    the search result object as returned by fxSearchResultBean.jsonResult
  */
-flexive.yui.datatable.ThumbnailView = function(result) {
+flexive.yui.datatable.ThumbnailView = function(result, actionColumnHandler) {
     this.result = result;
     this.previewSize = flexive.PreviewSizes.PREVIEW2;
     this.gridColumns = Math.max(1, Math.round(YAHOO.util.Dom.getViewportWidth() / (this.previewSize.size * 1.3)));
     this.rowsPerPage = 5;
+    this.actionColumnHandler = actionColumnHandler;
 };
 
 flexive.yui.datatable.ThumbnailView.prototype = {
@@ -372,7 +419,7 @@ flexive.yui.datatable.ThumbnailView.prototype = {
     getColumns: function() {
         var columns = [];
         for (var i = 0; i < this.gridColumns; i++) {
-            columns.push({ key: "c" + i, label: "" })
+            columns.push({ key: "c" + i, label: "" });
         }
         return columns;
     },
@@ -415,6 +462,25 @@ flexive.yui.datatable.ThumbnailView.prototype = {
             fields.push("c" + i);
         }
         return { "fields": fields };
+    }
+};
+
+/**
+ * A callback handler that generates the "Action" column (e.g. edit links) of a result row.
+ *
+ * @since 3.1
+ */
+flexive.yui.datatable.ActionColumnHandler = function() {
+};
+
+flexive.yui.datatable.ActionColumnHandler.prototype = {
+    /**
+     * Return the HTML for the result column of the given PK.
+     *
+     * @param pk    the primary key of the column, as returned by flexive.util.parsePk(String)
+     * @param permissions the row permissions, as returned by flexive.yui.datatable.decodePermissions
+     */
+    getActionColumn: function(/* PK */ pk, /* Permissions */ permissions) {
     }
 };
 
