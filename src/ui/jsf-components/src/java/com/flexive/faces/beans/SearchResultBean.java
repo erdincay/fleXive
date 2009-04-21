@@ -178,8 +178,9 @@ public class SearchResultBean implements ActionBean, Serializable {
      */
     public String listView() {
         setViewType(ResultViewType.LIST);
-        setFetchRows((Integer) getFetchRowItems().get(1).getValue());
+        setFetchRows(-1);
         setStartRow(0);
+        resetTableView(null);
         return show();
     }
 
@@ -191,6 +192,8 @@ public class SearchResultBean implements ActionBean, Serializable {
     public String thumbView() {
         setViewType(ResultViewType.THUMBNAILS);
         setStartRow(0);
+        setFetchRows(-1);
+        resetTableView(null);
         return show();
     }
 

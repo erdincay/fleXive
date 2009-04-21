@@ -37,6 +37,7 @@ import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.faces.messages.FxFacesMsgInfo;
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.shared.EJBLookup;
+import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.interfaces.ContentEngine;
@@ -82,6 +83,7 @@ public class ContentGeneratorBean {
             } else {
                 folder = null;
             }
+            final String typeName = CacheAdmin.getEnvironment().getType(type).getName();
             final long startTime = System.currentTimeMillis();
             long initializeTime = 0;
             long randomizeTime = 0;
@@ -99,7 +101,9 @@ public class ContentGeneratorBean {
                 saveTime += System.currentTimeMillis() - start;
                 if (folder != null) {
                     start = System.currentTimeMillis();
-                    treeEngine.save(FxTreeNodeEdit.createNewChildNode(folder).setReference(pk));
+                    treeEngine.save(
+                            FxTreeNodeEdit.createNewChildNode(folder).setName(typeName + "-" + pk).setReference(pk)
+                    );
                     treeTime += System.currentTimeMillis() - start;
                 }
             }

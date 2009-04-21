@@ -14,7 +14,31 @@
 <ui:composition template="/adm/contentTemplate.xhtml">
     <ui:define name="head">
         <script type="text/javascript" src="#{fxSystemBean.contextPath}/pub/js/#{adm:versionedUrl('selection.js')}"> </script>
+        <script type="text/javascript" src="#{fxSystemBean.contextPath}/adm/js/#{adm:versionedUrl('searchResult.js')}"> </script>
         <script type="text/javascript" src="#{weblet:url('com.flexive.faces.weblets','/js/lytebox.js')}"></script>
+
+        <script type="text/javascript">
+        <!--
+            function getBriefcaseId() {
+                return #{empty fxSearchResultBean.briefcase ? -1 : fxSearchResultBean.briefcase.id};
+            }
+
+            function getViewType() {
+                return "#{fxSearchResultBean.viewType}";
+            }
+        
+            var MESSAGES = {
+                "SearchResult.dialog.confirm.deleteSelection": "#{fxMessageBean['SearchResult.dialog.confirm.deleteSelection']}",
+                "SearchResult.dialog.confirm.deleteRow": "#{fxMessageBean['SearchResult.dialog.confirm.deleteRow']}",
+                "SearchResult.button.action.edit": "#{fxMessageBean['SearchResult.button.action.edit']}",
+                "SearchResult.button.action.open": "#{fxMessageBean['SearchResult.button.action.open']}",
+                "SearchResult.button.action.delete": "#{fxMessageBean['SearchResult.button.action.delete']}",
+                "SearchResult.button.action.deleteFromBriefcase": "#{fxMessageBean['SearchResult.button.action.deleteFromBriefcase']}",
+                "SearchResult.button.action.more": "#{fxMessageBean['SearchResult.button.action.more']}",
+                "SearchResult.status.copied": "#{fxMessageBean['SearchResult.status.copied']}"
+            }
+        //-->
+        </script>
     </ui:define>
 
     <ui:define name="body">
@@ -23,163 +47,6 @@
             <h:inputHidden value="#{fxSearchResultBean.viewType}"/>
 
             <adm:resultTabs activeTab="results"/>
-
-            <script type="text/javascript">
-            <!--
-                function onShowContextMenu() {
-                    try {
-                        var perms = flexive.yui.datatable.getPermissions(resultTable, this.contextEventTarget);
-                        var selectedIds = getSelectedIds();
-                        var briefcaseId = getBriefcaseId();
-                        flexive.yui.setMenuItem("deleteSelected", "disabled", selectedIds.length == 0 || !perms["delete"]);
-                        flexive.yui.setMenuItem("copy", "disabled", selectedIds.length == 0);
-                        flexive.yui.setMenuItem("deleteBriefcaseSelected", "disabled", briefcaseId == -1 || selectedIds.length == 0);
-                        flexive.yui.setMenuItem("deleteBriefcase", "disabled", briefcaseId == -1);
-                        flexive.yui.setMenuItem("edit", "disabled", !perms.edit);
-                        flexive.yui.setMenuItem("delete", "disabled", !perms["delete"]);
-                    } catch (e) {
-                        alertDialog(e);
-                    }
-                }
-
-                function getSelectedIds() {
-                    return flexive.util.getPkIds(flexive.yui.datatable.getSelectedPks(resultTable));
-                }
-
-                function getBriefcaseId() {
-                    return #{empty fxSearchResultBean.briefcase ? -1 : fxSearchResultBean.briefcase.id};
-                }
-
-                function onContextMenu(type, args) {
-                    // extract PK
-                    var pk = flexive.yui.datatable.getPk(resultTable, this.contextEventTarget);
-                    storePk(pk);
-
-                    var selectedIds = getSelectedIds();
-                    var briefcaseId = getBriefcaseId();
-                    var menuItem = args[1];
-                    if (menuItem.cfg.getProperty("disabled")) {
-                        return;
-                    }
-                    switch (menuItem.id) {
-                        case "show":
-                            openContent(pk);
-                            break;
-                        case "edit":
-                            editContent(pk);
-                            break;
-                        case "showScreenview":
-                            var a = document.createElement("a");
-                            a.href = getBase()+"thumbnail/pk" + pk.id + "." + pk.version + "/so";
-                            a.rel = "lytebox";
-                            a.title = "Screenview " + pk.id + "." + pk.version;
-                            myLytebox.start(a, false, false);
-                            break;
-                        case "copy":
-                            parent.getContentClipboard().set(selectedIds);
-                            break;
-                        case "delete":
-                            deleteContent(pk);
-                            break;
-                        case "deleteSelected":
-                            confirmDialog("#{fxMessageBean['SearchResult.dialog.confirm.deleteSelection']}", function() {
-                                try {
-                                    flexive.util.getJsonRpc().ContentEditor.removeMultiple(selectedIds);
-                                    reload();
-                                } catch (e) {
-                                    alertDialog(e);
-                                }
-                            });
-                            break;
-                        case "deleteBriefcase":
-                            deleteFromBriefcase(pk);
-                            break;
-                        case "deleteBriefcaseSelected":
-                            try {
-                                flexive.util.getJsonRpc().BriefcaseEditor.removeItems(briefcaseId, selectedIds);
-                                reload();
-                            } catch (e) {
-                                alertDialog(e);
-                            }
-                            break;
-                        default:
-                    }
-                }
-
-                function reload() {
-                    parent.lockScreen();
-                    document.forms["frm"].submit();
-                }
-
-                function storePk(/* PK */ pk) {
-                    document.getElementById("frm:contentEditorId").value = pk.id;
-                    document.getElementById("frm:contentEditorVersion").value = pk.version;
-                }
-
-                function openContent(/* PK */ pk) {
-                    storePk(pk);
-                    document.getElementById("frm:showButton").onclick();
-                }
-
-                function editContent(/* PK */ pk) {
-                    storePk(pk);
-                    document.getElementById("frm:editButton").onclick();
-                }
-
-                function deleteContent(/* PK */ pk) {
-                    confirmDialog("#{fxMessageBean['SearchResult.dialog.confirm.deleteRow']}", function() {
-                        try {
-                            flexive.util.getJsonRpc().ContentEditor.remove(pk.id);
-                            reload();
-                        } catch (e) {
-                            alertDialog(e);
-                        }
-                    });
-                }
-
-                function deleteFromBriefcase(/* PK */ pk) {
-                    try {
-                        flexive.util.getJsonRpc().BriefcaseEditor.removeItems(getBriefcaseId(), [pk.id]);
-                        reload();
-                    } catch (e) {
-                        alertDialog(e);
-                    }
-                }
-
-                function openContextMenuAt(el) {
-                    var xy = YAHOO.util.Dom.getXY(el);
-                    resultsMenu.moveTo(xy[0], xy[1]);
-                    resultsMenu.contextEventTarget = el;
-                    resultsMenu.triggerContextMenuEvent.fire();
-                    resultsMenu.show();
-                }
-
-                /** Add action links in list mode */
-                var _actionColumnHandler = new flexive.yui.datatable.ActionColumnHandler();
-                _actionColumnHandler.getActionColumn = function(pk, permissions) {
-                    if (pk == null) {
-                        return "";
-                    }
-                    var out = [];
-                    var pkArg = "flexive.util.parsePk(\"" + pk.toString() + "\")";
-                    if (permissions == null || permissions["edit"]) {
-                        out.push("<a href='javascript:editContent(" + pkArg + ");'>#{fxMessageBean['SearchResult.button.action.edit']}</a>");
-                    } else if (permissions == null || permissions["read"]) {
-                        out.push("<a href='javascript:openContent(" + pkArg + ");'>#{fxMessageBean['SearchResult.button.action.open']}</a>");
-                    }
-                    if (permissions == null || permissions["delete"]) {
-                        out.push("<a href='javascript:deleteContent(" + pkArg + ");'>#{fxMessageBean['SearchResult.button.action.delete']}</a>");
-                    }
-                    if (getBriefcaseId() != -1) {
-                        // remove from briefcase
-                        out.push("<a href='javascript:deleteFromBriefcase(" + pkArg + ");'>#{fxMessageBean['SearchResult.button.action.deleteFromBriefcase']}</a>");
-                    }
-                    var id = "more_link_" + pk.toString();
-                    out.push("<a id='" + id + "' href='javascript:openContextMenuAt(\"" + id + "\")'>#{fxMessageBean['SearchResult.button.action.more']}</a>");
-                    return out.join(" | ");
-                }
-            //-->
-            </script>
 
             <c:if test="#{fxSearchResultBean.queryBuilder != null}">
                 <!-- Eager fetching of result: #{fxSearchResultBean.result} -->
@@ -233,15 +100,15 @@
             </c:if>
 
             <br/>
-            <adm:commandButton id="listButton" labelKey="SearchResult.button.view.list"
-                               bean="#{fxSearchResultBean}" action="listView"
-                               icon="view_list" location="both"
-                               rendered="#{fxSearchResultBean.viewType != 'LIST'}"/>
             <adm:commandButton id="thumbsButton" labelKey="SearchResult.button.view.thumbs"
                                bean="#{fxSearchResultBean}" action="thumbView"
-                               icon="view_thumbs" location="both"
-                               rendered="#{fxSearchResultBean.viewType != 'THUMBNAILS'}"/>
-            <adm:commandButton id="preferencesButton" labelKey="ResultPreferences.button.open" bean="#{resultPreferencesBean}" action="show" icon="configure" location="both">
+                               icon="view_thumbs" location="both"/>
+            <adm:commandButton id="listButton" labelKey="SearchResult.button.view.list"
+                               bean="#{fxSearchResultBean}" action="listView"
+                               icon="view_list" location="both" separator="after"/>
+            <adm:commandButton id="preferencesButton" labelKey="ResultPreferences.button.open"
+                               bean="#{resultPreferencesBean}" action="show"
+                               icon="configure" location="both">
                 <f:setPropertyActionListener value="#{fxSearchResultBean.typeId}" target="#{resultPreferencesBean.type}"/>
                 <f:setPropertyActionListener value="#{fxSearchResultBean.viewType}" target="#{resultPreferencesBean.viewType}"/>
             </adm:commandButton>

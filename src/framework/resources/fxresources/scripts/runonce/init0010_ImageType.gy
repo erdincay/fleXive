@@ -151,7 +151,8 @@ se.createTypeScriptMapping(si.getId(), typeId, true, true);
 
 EJBLookup.resultPreferencesEngine.saveSystemDefault(
         new ResultPreferences(
-                [new ResultColumnInfo("@pk"),
+                [new ResultColumnInfo("#image/imageBinary"),
+                 new ResultColumnInfo("@pk"),
                  new ResultColumnInfo("#image/caption"),
                  new ResultColumnInfo("#image/filename"),
                  new ResultColumnInfo("#image/keywords"),

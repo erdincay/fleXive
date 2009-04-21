@@ -77,6 +77,7 @@ Parameters:
                         // enable cell highlighting
                         dataTable.subscribe("cellMouseoverEvent", dataTable.onEventHighlightCell);
                         dataTable.subscribe("cellMouseoutEvent", dataTable.onEventUnhighlightCell);
+                        document.getElementById(containerElName).className += " flexiveResultThumbnails";
                     } else {
                         // enable row selection
                         if (selectionEnabled) {
@@ -88,12 +89,15 @@ Parameters:
                         // enable row highlighting
                         dataTable.subscribe("rowMouseoverEvent", dataTable.onEventHighlightRow);
                         dataTable.subscribe("rowMouseoutEvent", dataTable.onEventUnhighlightRow);
+                        document.getElementById(containerElName).className += " flexiveResultList";
                     }
                     return dataTable;
                 }
                 // disable text selection
-                document.getElementById(containerElName).onselectstart = function() { return false; };
-                document.getElementById(containerElName).style.MozUserSelect = "none";
+                var elContainer = document.getElementById(containerElName);
+                elContainer.onselectstart = function() { return false; };
+                elContainer.style.MozUserSelect = "none";
+
 
                 #{var} = createFun(#{fx:getJsonResult(value, viewType)});
                 #{var}._reset = function(result) {

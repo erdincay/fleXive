@@ -58,6 +58,11 @@ import java.util.Arrays;
  */
 public class Thumbnail extends UIOutput {
     public static final String COMPONENT_TYPE = "flexive.Thumbnail";
+    /**
+     * CSS class of the image being rendered.
+     * @since 3.1
+     */
+    public static final String CSS_CLASS = "fxThumbnail";
     
     private FxPK pk;
     private FxBinary binary;
@@ -111,7 +116,9 @@ public class Thumbnail extends UIOutput {
             ((HtmlOutputText) body).setValue(link.substring(1));    // don't return absolute URLs to the client
         } else {
             body = FxJsfUtils.addChildComponent(this, HtmlGraphicImage.COMPONENT_TYPE);
-            ((HtmlGraphicImage) body).setUrl(link);
+            final HtmlGraphicImage image = (HtmlGraphicImage) body;
+            image.setUrl(link);
+            image.setStyleClass(CSS_CLASS);
         }
     }
 

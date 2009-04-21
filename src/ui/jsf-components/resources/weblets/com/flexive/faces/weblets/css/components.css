@@ -499,3 +499,59 @@ img.button {
     position: absolute;
     display: block;
 }
+
+/* fx:resultTable styles */
+
+/* Hide header row in thumbnail view */
+.flexiveResultThumbnails thead {
+    display: none;
+}
+
+/* Horizontally center thumbnails */
+.flexiveResultThumbnails img.resultThumbnail,
+.flexiveResultList tbody img.fxThumbnail {
+    display: block;
+    margin: auto;   /* center horizontally */
+}
+
+.flexiveResultThumbnails .yui-dt-liner {
+    position: relative;
+    height: 100px;  /* 85px thumbnail + 15px footer */
+}
+
+.flexiveResultThumbnails .thumbnailContainer {
+    display: table-cell;
+    height: 85px;
+    width: 85px;
+    vertical-align: middle;
+}
+
+/* Thumbnail footer */
+.flexiveResultThumbnails .resultThumbnailCaption,
+.flexiveResultThumbnails .resultThumbnailAction {
+    background-color: #555;
+    color: #DDD;
+    height: 15px;
+    line-height: 15px;
+}
+
+.flexiveResultThumbnails .resultThumbnailCaption {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+
+    padding-left: 0.5em;
+    padding-right: 20%; /* never occupy space of (optional) action item */
+    overflow: hidden;
+}
+
+.flexiveResultThumbnails .resultThumbnailAction {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 20%;
+
+    text-align: right;
+    padding-right: 0.5em;
+}

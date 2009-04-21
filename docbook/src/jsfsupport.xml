@@ -1385,6 +1385,23 @@
                                 </para>
                             </listitem>
                         </varlistentry>
+                        <varlistentry>
+                            <term>actionColumnHandler</term>
+                            <listitem>
+                                <para>
+                                    An optional instance of type
+                                    <type>flexive.yui.datatable.ActionColumnHandler</type>
+                                    for generating the contents of the "Action" column - an additional column that can
+                                    be used for displaying custom actions for contents and that will only be visible
+                                    when this parameter is set. The
+                                    <code language="javascript">
+                                        flexive.yui.datatable.ActionColumnHandler#getActionColumn
+                                    </code>
+                                    method is passed the primary key and the permissions of the column, which can be
+                                    null if the search result does not contain the @pk or @permissions properties.
+                                </para>
+                            </listitem>
+                        </varlistentry>
                     </variablelist>
                 </section>
 

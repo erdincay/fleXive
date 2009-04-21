@@ -19,7 +19,7 @@
         }
 
         function setFocus() {
-            var userInput = document.getElementById("fxLoginForm:username");
+            var userInput = window.document.getElementById("fxLoginForm:username");
             userInput.focus();
             userInput.select();
         }
@@ -72,7 +72,8 @@
                 <tr>
                     <td align="right"></td>
                     <td align="left" >
-                        <h:selectBooleanCheckbox type="text" id="takeOver" value="#{fxAuthenticationBean.takeover}"/>
+                        <h:selectBooleanCheckbox type="text" id="takeOver" value="#{fxAuthenticationBean.takeover}"
+                                onkeypress="return onReturnEval(event, 'document.getElementById(\'fxLoginForm:loginButton\').onclick()')"/>
                     </td>
                     <td align="left" valign="middle" width="220">
                         <div class="tooltip">

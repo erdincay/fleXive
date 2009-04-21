@@ -34,12 +34,6 @@ var messages = {};
 
 window.onresize = windowResize;
 
-var contentClipboard = new ContentClipboard();
-
-function getContentClipboard() {
-    return contentClipboard;
-}
-
 function stopPropagation(ev) {
     try {
         ev.stopPropagation();
@@ -622,12 +616,55 @@ function showError(element) {
         var errorObj = clientIdsWithError[i];
         var id = errorObj[0];
         if (id==element.id) {
-            document.getElementById("toolbarMessage").innerHTML= "<font color='red'>"+errorObj[1]+"<font>";
+            document.getElementById("toolbarMessage").innerHTML = "<font color='red'>"+errorObj[1]+"<font>";
             return;
         }
     }
 }
 
+var _statusMessageTimeout;
+var _statusMessageAnim;
+function showStatusMessage(message, timeout) {
+    window.clearTimeout(_statusMessageTimeout);
+    if (_statusMessageAnim) {
+        _statusMessageAnim.stop();
+    }
+
+    var el = document.getElementById("toolbarMessage");
+
+    // fade-in animation
+    el.innerHTML = "<div id=\"toolbarMessageWrapper\" style=\"opacity: 0;"
+            + (document.all ? " background-color: #f9fcef" : "")   // background hack is required for IE animations 
+            + "\">" + message + "</div>";
+    _statusMessageAnim = fadeIn("toolbarMessageWrapper", 0.3);
+
+    if (timeout == null || timeout > 0) {
+        _statusMessageTimeout = window.setTimeout(
+                function() {
+                    _statusMessageAnim = fadeOut("toolbarMessageWrapper", 1.0, function() { el.innerHTML = ""; });
+                },
+                timeout != null ? timeout : 5000
+        );
+    }
+}
+
+function fadeIn(elementId, /* seconds */ duration, /* function */ onComplete) {
+    animateOpacity(elementId, duration, onComplete, 0.0, 1.0);
+}
+
+function fadeOut(elementId, /* seconds */ duration, /* function */ onComplete) {
+    animateOpacity(elementId, duration, onComplete, 1.0, 0.0);
+}
+
+function animateOpacity(elementId, /* seconds */ duration, /* function */ onComplete, opacityFrom, opacityTo) {
+    var anim = new YAHOO.util.Anim(elementId, { opacity: { from: opacityFrom, to: opacityTo} }, duration);
+    if (onComplete) {
+        anim.onComplete.subscribe(onComplete);
+    }
+    anim.animate();
+    return anim;
+
+}
 function findElementById(elementId) {
     try {
         // Cut away 'null:' in case the form is not defined but still included in the elementId
@@ -792,3 +829,43 @@ function _promptDialog(message, defaultValue, onSuccess) {
     e.onSuccess = onSuccess;
     e.dialog.show();
 }
+
+// A simple clipboard for content objects
+var ContentClipboard = function() {
+    this.ids = [];
+};
+
+ContentClipboard.prototype = {
+    // set the clipboard content to the given object ID array
+    set: function(contentIds) {
+        this.ids = [];
+        // copy IDs to our own array to prevent aliasing and inter-frame issues
+        for (var i = 0; i < contentIds.length; i++) {
+            this.ids.push(contentIds[i]);
+        }
+        showStatusMessage(messages["Global.status.clipboard.copied"].replace("{0}", contentIds.length));
+    },
+
+    // get the current clipboard contents as object ID array
+    get: function() {
+        return this.ids != null ? this.ids : [];
+    },
+
+    // clear the clipboard
+    clear: function() {
+        this.ids = [];
+    },
+
+    // returns true for empty clipboards
+    isEmpty: function() {
+        return this.get().length == 0;
+    }
+};
+
+// Define singleton clipboard instance
+var contentClipboard = new ContentClipboard();
+
+function getContentClipboard() {
+    return contentClipboard;
+}
+

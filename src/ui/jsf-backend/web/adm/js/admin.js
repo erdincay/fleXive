@@ -209,37 +209,6 @@ TreeHandler.prototype = {
 };
 
 
-// A simple clipboard for content objects
-var ContentClipboard = function() {
-    this.ids = [];
-};
-
-ContentClipboard.prototype = {
-    // set the clipboard content to the given object ID array
-    set: function(contentIds) {
-        this.ids = [];
-        // copy IDs to our own array to prevent aliasing and inter-frame issues
-        for (var i = 0; i < contentIds.length; i++) {
-            this.ids.push(contentIds[i]);
-        }
-    },
-
-    // get the current clipboard contents as object ID array
-    get: function() {
-        return this.ids != null ? this.ids : [];
-    },
-
-    // clear the clipboard
-    clear: function() {
-        this.ids = [];
-    },
-
-    // returns true for empty clipboards
-    isEmpty: function() {
-        return this.get().length == 0;
-    }
-};
-
 /**
  * DHTML replacement for Javascript's confirm() dialog
  * @param message       the message to be displayed

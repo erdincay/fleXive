@@ -34,6 +34,7 @@ package com.flexive.faces;
 import com.flexive.faces.beans.MessageBean;
 import com.flexive.faces.messages.FxFacesMessage;
 import com.flexive.faces.messages.FxFacesMessages;
+import com.flexive.faces.components.Thumbnail;
 import com.flexive.shared.*;
 import com.flexive.shared.search.FxPaths;
 import com.flexive.shared.content.FxPK;
@@ -148,7 +149,7 @@ public class FxJsfUtils {
                             FxContext.getUserTicket().getLanguage())
                     + "\" alt=\""
                     + FxFormatUtils.escapeForJavaScript(binary.getBestTranslation().getName())
-                    + "\"/>";
+                    + "\" class=\"" + Thumbnail.CSS_CLASS + "\"/>";
         } else if (value instanceof FxValue) {
             //noinspection unchecked
             return FxValueRendererFactory.getInstance().format((FxValue) value);

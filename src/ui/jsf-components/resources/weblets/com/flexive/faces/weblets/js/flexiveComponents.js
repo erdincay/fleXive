@@ -133,6 +133,17 @@ flexive.util = new function() {
         return result;
     };
 
+
+    /**
+     * Escapes single and double quotes of the given string.
+     * @param string    the input value
+     * @return  the value with escaped quotes
+     * @since 3.1
+     */
+    this.escapeQuotes = function(string) {
+        return string.replace("'", "\\'").replace('"', '\\"');
+    };
+    
 };
 
 // Yahoo UI (YUI) helper methods and classes
@@ -409,7 +420,7 @@ flexive.yui.datatable.ListView.prototype = {
 flexive.yui.datatable.ThumbnailView = function(result, actionColumnHandler) {
     this.result = result;
     this.previewSize = flexive.PreviewSizes.PREVIEW2;
-    this.gridColumns = Math.max(1, Math.round(YAHOO.util.Dom.getViewportWidth() / (this.previewSize.size * 1.3)));
+    this.gridColumns = Math.max(1, Math.round(YAHOO.util.Dom.getViewportWidth() / (this.previewSize.size * 1.4)));
     this.rowsPerPage = 5;
     this.actionColumnHandler = actionColumnHandler;
 };
@@ -429,15 +440,27 @@ flexive.yui.datatable.ThumbnailView.prototype = {
         var grid = [];
         var currentRow = { "pk" : [], "permissions": [] };    // the columns of the current row
         var currentColumn = 0;
+        var textColumnKey = this.result.columns.length > 0 ? this.result.columns[0].key : null;
         for (var i = 0; i < this.result.rowCount; i++) {
             var resultRow = this.result.rows[i];
             var data = "";
             if (resultRow.pk != null) {
-                data = "<img src=\"" + flexive.util.getThumbnailURL(resultRow.pk, this.previewSize, true) + "\"/>";
+                data = "<div class=\"thumbnailContainer\"><img src=\""
+                        + flexive.util.getThumbnailURL(resultRow.pk, this.previewSize, true)
+                        + "\" class=\"resultThumbnail\"/></div>";
             }
-            /*if (resultRow["c1"] != null) {
-                data += "<br/>" + resultRow["c1"];
-            }*/
+            if (textColumnKey != null) {
+                var text = resultRow[textColumnKey];
+                data += "<br/><div class=\"resultThumbnailCaption\" title=\""
+                        + flexive.util.escapeQuotes(text) + "\">"
+                        + resultRow[textColumnKey]
+                        + "</div>";
+            }
+            if (this.actionColumnHandler != null) {
+                data += "<div class=\"resultThumbnailAction\">"
+                        + this.actionColumnHandler.getActionColumn(resultRow.pk, resultRow.permissions)
+                        + "</div>";
+            }
             if (currentColumn >= this.gridColumns) {
                 // grid row completed
                 grid.push(currentRow);

@@ -129,7 +129,7 @@ function getScrollHeight() {
 }
 
 function escapeQuotes(string) {
-    return string.replace("'", "\\'").replace('"', '\\"');
+    return flexive.util.escapeQuotes(string);
 }
 
 /**
