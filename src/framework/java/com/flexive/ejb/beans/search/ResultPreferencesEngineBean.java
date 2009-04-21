@@ -169,11 +169,10 @@ public class ResultPreferencesEngineBean implements ResultPreferencesEngine, Res
      * otherwise a new result preferences object with the new timestamp is returned.
      */
     private ResultPreferences checkProperties(ResultPreferences preferences) {
-        // TODO check structure timestamp
-        if (preferences.getLastChecked() != -1) {
+        final FxEnvironment environment = CacheAdmin.getEnvironment();
+        if (preferences.getLastChecked() >= environment.getTimeStamp()) {
             return null;
         }
-        final FxEnvironment environment = CacheAdmin.getEnvironment();
         ResultPreferencesEdit rpe = preferences.getEditObject();
 
         // clean up selected columns
