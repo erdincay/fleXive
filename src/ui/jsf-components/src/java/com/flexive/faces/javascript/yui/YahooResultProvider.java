@@ -117,6 +117,7 @@ public class YahooResultProvider implements Serializable {
             writer.writeAttribute("key", getColumnKey(result, i));
             writer.writeAttribute("label", result.getColumnLabel(i));
             writer.writeAttribute("sortable", true);
+            writer.writeAttribute("resizeable", true);
             writer.closeMap();
         }
         writer.closeArray();
