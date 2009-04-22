@@ -7,14 +7,15 @@
 function onShowContextMenu() {
     try {
         var perms = flexive.yui.datatable.getPermissions(resultTable, this.contextEventTarget);
+        var pk = flexive.yui.datatable.getPk(resultTable, this.contextEventTarget);
         var selectedIds = getSelectedIds();
         var briefcaseId = getBriefcaseId();
-        flexive.yui.setMenuItem("deleteSelected", "disabled", selectedIds.length == 0 || !perms["delete"]);
-        flexive.yui.setMenuItem("copy", "disabled", selectedIds.length == 0);
-        flexive.yui.setMenuItem("deleteBriefcaseSelected", "disabled", briefcaseId == -1 || selectedIds.length == 0);
-        flexive.yui.setMenuItem("deleteBriefcase", "disabled", briefcaseId == -1);
+        flexive.yui.setMenuItem("copy", "disabled", selectedIds.length == 0 && pk == null);
         flexive.yui.setMenuItem("edit", "disabled", !perms.edit);
         flexive.yui.setMenuItem("delete", "disabled", !perms["delete"]);
+        if (getBriefcaseId() != -1) {
+            flexive.yui.setMenuItem("deleteBriefcase", "disabled", briefcaseId == -1);
+        }
     } catch (e) {
         alertDialog(e);
     }
@@ -51,38 +52,65 @@ function onContextMenu(type, args) {
             myLytebox.start(a, false, false);
             break;
         case "copy":
-            parent.getContentClipboard().set(selectedIds);
+            parent.getContentClipboard().set(selectedIds.length > 0 ? selectedIds : [pk.id]);
             break;
         case "delete":
-            deleteContent(pk);
+            if (getSelectedIds().length > 0) {
+                confirmDialog(MESSAGES["SearchResult.dialog.confirm.deleteSelection"], function() {
+                    try {
+                        flexive.util.getJsonRpc().ContentEditor.removeMultiple(selectedIds);
+                        if (getViewType() == "LIST") {
+                            var rowsDeleted = flexive.yui.datatable.deleteSelectedRows(resultTable);
+                            modifyTypeCount(-rowsDeleted);
+                        } else {
+                            reload();
+                        }
+                    } catch (e) {
+                        alertDialog(e);
+                    }
+                });
+            } else {
+                deleteContent(pk);
+            }
+            invalidateSessionCache();
             break;
-        case "deleteSelected":
-            confirmDialog(MESSAGES["SearchResult.dialog.confirm.deleteSelection"], function() {
+        case "deleteBriefcase":
+            if (getSelectedIds().length > 0) {
                 try {
-                    flexive.util.getJsonRpc().ContentEditor.removeMultiple(selectedIds);
-                    reload();
+                    flexive.util.getJsonRpc().BriefcaseEditor.removeItems(briefcaseId, selectedIds);
+                    if (getViewType() == "LIST") {
+                        var rowsDeleted = flexive.yui.datatable.deleteSelectedRows(resultTable);
+                        modifyTypeCount(-rowsDeleted);
+                    } else {
+                        reload();
+                    }
                 } catch (e) {
                     alertDialog(e);
                 }
-            });
+            } else {
+                deleteFromBriefcase(pk);
+            }
+            invalidateSessionCache();
             break;
-        case "deleteBriefcase":
-            deleteFromBriefcase(pk);
-            break;
-        case "deleteBriefcaseSelected":
-            try {
-                flexive.util.getJsonRpc().BriefcaseEditor.removeItems(briefcaseId, selectedIds);
-                reload();
-            } catch (e) {
-                alertDialog(e);
+        case "selectAll":
+            if (getViewType() == "LIST") {
+                flexive.yui.datatable.selectAllRows(resultTable);
+            } else {
+                flexive.yui.datatable.selectAllCells(resultTable);
             }
             break;
         default:
+            alert("Unknown action: " + menuItem.id);
     }
+}
+
+function invalidateSessionCache() {
+    document.getElementById("frm:invalidateCacheButton").click();
 }
 
 function reload() {
     parent.lockScreen();
+    document.getElementById("frm:clearCache").value = true;
     document.forms["frm"].submit();
 }
 
@@ -105,9 +133,18 @@ function deleteContent(/* PK */ pk) {
     confirmDialog(MESSAGES["SearchResult.dialog.confirm.deleteRow"], function() {
         try {
             flexive.util.getJsonRpc().ContentEditor.remove(pk.id);
-            reload();
+            if (getViewType() == "LIST") {
+                var rowsDeleted = flexive.yui.datatable.deleteMatchingRows(
+                        resultTable,
+                        function(record) { return record.getData("pk") == pk.toString(); }
+                );
+                modifyTypeCount(-rowsDeleted);
+            } else {
+                reload();
+            }
         } catch (e) {
             alertDialog(e);
+            reload();
         }
     });
 }
@@ -115,10 +152,33 @@ function deleteContent(/* PK */ pk) {
 function deleteFromBriefcase(/* PK */ pk) {
     try {
         flexive.util.getJsonRpc().BriefcaseEditor.removeItems(getBriefcaseId(), [pk.id]);
-        reload();
+        if (getViewType() == "LIST") {
+            var rowsDeleted = flexive.yui.datatable.deleteMatchingRows(
+                    resultTable,
+                    function(record) { return record.getData("pk") == pk.toString(); }
+            );
+            modifyTypeCount(-rowsDeleted);
+        } else {
+            reload();
+        }
     } catch (e) {
         alertDialog(e);
     }
+}
+
+function modifyTypeCount(/* int */ delta) {
+    var option = getSelectedOption(document.getElementById("frm:typeId"));
+    if (option.value == -1) {
+        return; // cannot adapt infotype count on shared page
+    }
+    var text = option.text;
+    var match = text.match(/(.*)\((\d+)\)/);
+    if (!match) {
+        alert("Invalid label format, failed to modify type count: " + text);
+        return;
+    }
+    var newCount = parseInt(RegExp.$2) + delta;
+    option.text = RegExp.$1 + " (" + newCount + ")";
 }
 
 function openContextMenuAt(el) {

@@ -34,8 +34,7 @@
                 "SearchResult.button.action.open": "#{fxMessageBean['SearchResult.button.action.open']}",
                 "SearchResult.button.action.delete": "#{fxMessageBean['SearchResult.button.action.delete']}",
                 "SearchResult.button.action.deleteFromBriefcase": "#{fxMessageBean['SearchResult.button.action.deleteFromBriefcase']}",
-                "SearchResult.button.action.more": "#{fxMessageBean['SearchResult.button.action.more']}",
-                "SearchResult.status.copied": "#{fxMessageBean['SearchResult.status.copied']}"
+                "SearchResult.button.action.more": "#{fxMessageBean['SearchResult.button.action.more']}"
             }
         //-->
         </script>
@@ -55,16 +54,28 @@
                 <h:inputHidden id="sortColumnKey" value="#{fxSearchResultBean.sortColumnKey}"/>
                 <h:inputHidden id="sortDirection" value="#{fxSearchResultBean.sortDirection}"/>
                 <h:inputHidden id="paginatorPage" value="#{fxSearchResultBean.paginatorPage}"/>
+                <h:inputHidden id="clearCache" value="#{fxSearchResultBean.clearCache}"/>
                 <h:inputHidden id="contentEditorId" value="#{contentEditorBean.id}"/>
                 <h:inputHidden id="contentEditorVersion" value="#{contentEditorBean.version}"/>
 
                 <h:selectOneListbox id="typeId" value="#{fxSearchResultBean.typeId}" size="1">
                     <f:selectItems value="#{fxSearchResultBean.contentTypeItems}"/>
-                    <a4j:support event="onchange" actionListener="#{fxSearchResultBean.resetTableView}" reRender="refreshResults"/>
+                    <a4j:support event="onchange"
+                                 actionListener="#{fxSearchResultBean.resetTableView}"
+                                 onsubmit="setBusyCursor();"
+                                 oncomplete="setDefaultCursor();"
+                                 reRender="refreshResults"
+                                 eventsQueue="updateResults"
+                            />
                 </h:selectOneListbox>
                 <h:selectOneListbox id="version" value="#{fxSearchResultBean.versionFilter}" size="1">
                     <f:selectItems value="#{fxSearchResultBean.versionItems}"/>
-                    <a4j:support event="onchange" actionListener="#{fxSearchResultBean.resetTableView}" reRender="refreshResults"/>
+                    <a4j:support event="onchange" actionListener="#{fxSearchResultBean.resetTableView}"
+                                 onsubmit="setBusyCursor();"
+                                 oncomplete="setDefaultCursor();"
+                                 reRender="refreshResults"
+                                 eventsQueue="updateResults"
+                            />
                 </h:selectOneListbox>
 
                 <a4j:outputPanel id="refreshResults">
@@ -77,16 +88,24 @@
                 </div>
 
                 <fx:menu name="resultsMenu" beforeShow="onShowContextMenu" clickHandler="onContextMenu" trigger="'resultTableContainer'">
-                    <fx:menuItem id="show" labelKey="SearchResult.menu.show" icon="open"/>
-                    <fx:menuItem id="showScreenview" labelKey="SearchResult.menu.showScreenview" icon="open"/>
-                    <fx:menuItem id="edit" labelKey="SearchResult.menu.edit" icon="edit"/>
-                    <!--<fx:menuSeparator/>-->
-                    <fx:menuItem id="copy" labelKey="SearchResult.menu.copy" icon="copy"/>
-                    <!--<fx:menuSeparator/>-->
-                    <fx:menuItem id="deleteBriefcase" labelKey="SearchResult.menu.deleteBriefcase" icon="removeBriefcaseItems"/>
-                    <fx:menuItem id="deleteBriefcaseSelected" labelKey="SearchResult.menu.deleteBriefcaseSelected" icon="removeBriefcaseItems"/>
-                    <fx:menuItem id="delete" labelKey="SearchResult.menu.delete" icon="remove"/>
-                    <fx:menuItem id="deleteSelected" labelKey="SearchResult.menu.deleteSelected" icon="remove"/>
+                    <fx:menuItemGroup>
+                        <fx:menuItem id="show" labelKey="SearchResult.menu.show" icon="open"/>
+                        <fx:menuItem id="showScreenview" labelKey="SearchResult.menu.showScreenview" icon="open"/>
+                        <fx:menuItem id="edit" labelKey="SearchResult.menu.edit" icon="edit"/>
+                    </fx:menuItemGroup>
+
+                    <fx:menuItemGroup>
+                        <fx:menuItem id="copy" labelKey="SearchResult.menu.copy" icon="copy"/>
+                        <c:if test="#{fxSearchResultBean.briefcaseId != -1}">
+                            <fx:menuItem id="deleteBriefcase" labelKey="SearchResult.menu.deleteBriefcase" icon="removeBriefcaseItems"/>
+                        </c:if>
+                        <fx:menuItem id="delete" labelKey="SearchResult.menu.delete" icon="remove"/>
+                    </fx:menuItemGroup>
+
+                    <fx:menuItemGroup>
+                        <fx:menuItem id="selectAll" labelKey="SearchResult.menu.selectAll"/>
+                    </fx:menuItemGroup>
+
                 </fx:menu>
 
                 <div style="display:none">
@@ -102,16 +121,22 @@
             <br/>
             <adm:commandButton id="thumbsButton" labelKey="SearchResult.button.view.thumbs"
                                bean="#{fxSearchResultBean}" action="thumbView"
-                               icon="view_thumbs" location="both"/>
+                               icon="view_thumbs#{fxSearchResultBean.viewType == 'THUMBNAILS' ? '_active' : ''}" location="toolbar" lockscreen="false"/>
             <adm:commandButton id="listButton" labelKey="SearchResult.button.view.list"
                                bean="#{fxSearchResultBean}" action="listView"
-                               icon="view_list" location="both" separator="after"/>
+                               icon="view_list#{fxSearchResultBean.viewType == 'LIST' ? '_active' : ''}" location="toolbar"  lockscreen="false" separator="after"/>
             <adm:commandButton id="preferencesButton" labelKey="ResultPreferences.button.open"
                                bean="#{resultPreferencesBean}" action="show"
                                icon="configure" location="both">
                 <f:setPropertyActionListener value="#{fxSearchResultBean.typeId}" target="#{resultPreferencesBean.type}"/>
                 <f:setPropertyActionListener value="#{fxSearchResultBean.viewType}" target="#{resultPreferencesBean.viewType}"/>
             </adm:commandButton>
+
+            <a4j:outputPanel id="emptyPanel">
+            </a4j:outputPanel>
+            <a4j:commandButton id="invalidateCacheButton" reRender="emptyPanel" style="display: none">
+                <f:setPropertyActionListener value="true" target="#{fxSearchResultBean.clearCache}"/>
+            </a4j:commandButton>
 
             <adm:toolbarPluginButtons/>
 

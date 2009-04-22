@@ -648,6 +648,10 @@
         <body-content>JSP</body-content>
     </tag>
     <tag>
+        <name>menuItemGroup</name>
+        <body-content>JSP</body-content>
+    </tag>
+    <tag>
         <name>resultValue</name>
         <body-content>JSP</body-content>
         <attribute>

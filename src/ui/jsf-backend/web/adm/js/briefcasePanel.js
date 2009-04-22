@@ -33,7 +33,7 @@ BriefcasePanel.prototype = {
             var item = this.items[i];
             var linkId = "bc_i" + item.id;
             out.push("<a id=\"" + linkId + "\" href=\"javascript:" + this.showBriefcaseHandler + "(" + item.id + ")\" class=\"briefcaseItem\">");
-            out.push("<div briefcaseId=\"" + item.id + "\">");
+            out.push("<div briefcaseId=\"" + item.id + "\" briefcaseName=\"" + flexive.util.escapeQuotes(item.name) + "\">");
             out.push("<div class=\"briefcaseIcon\">");
             if (item.aclId != -1) {
                 // render shared icon overlay - add onclick handler for IE7

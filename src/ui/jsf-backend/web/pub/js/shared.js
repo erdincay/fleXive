@@ -219,3 +219,17 @@ function onReturnEval(event, expression) {
     return false;   // don't "execute" the enter key
 }
 
+/* Returns the value of the selected option of the given select element,
+   or null if no option is selected. */
+function getSelectedOptionValue(selectElement) {
+    var option = getSelectedOption(selectElement);
+    return option != null ? option.value : null;
+}
+
+function getSelectedOption(selectElement) {
+    if (selectElement == null || selectElement.selectedIndex < 0 || selectElement.options == null ||
+        selectElement.selectedIndex >= selectElement.options.length)
+        return null;
+    else
+        return selectElement.options[selectElement.selectedIndex];
+}

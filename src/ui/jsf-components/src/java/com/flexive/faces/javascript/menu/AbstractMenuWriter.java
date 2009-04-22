@@ -126,8 +126,17 @@ public abstract class AbstractMenuWriter<TMenuItem extends AbstractMenuItemData<
     }
 
     public void writeItem(TMenuItem item) throws IOException {
-        startItem(item);
-        closeItem();
+        if (item.isItemGroup()) {
+            out.startArray();
+            for (TMenuItem child : item.getMenuItems()) {
+                writeItem(child);
+            }
+            out.closeArray();
+        } else {
+            // normal menu item
+            startItem(item);
+            closeItem();
+        }
     }
 
     /**

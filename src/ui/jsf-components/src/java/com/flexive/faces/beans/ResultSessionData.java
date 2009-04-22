@@ -35,6 +35,7 @@ import com.flexive.faces.FxJsfUtils;
 import com.flexive.shared.search.FxFoundType;
 import com.flexive.shared.search.ResultLocation;
 import com.flexive.shared.search.ResultViewType;
+import com.flexive.shared.search.FxResultSet;
 import com.flexive.shared.search.query.SqlQueryBuilder;
 import com.flexive.shared.search.query.VersionFilter;
 import com.flexive.shared.value.BinaryDescriptor;
@@ -67,6 +68,7 @@ public class ResultSessionData implements Serializable {
     private int paginatorPage;
     private VersionFilter versionFilter = VersionFilter.MAX;
     private List<FxFoundType> contentTypes = new ArrayList<FxFoundType>(0);
+    private FxResultSet result;
 
     // Keep a reference on the current session if not retrieved from a JSF context
     private transient HttpSession session = null;
@@ -133,6 +135,9 @@ public class ResultSessionData implements Serializable {
     }
 
     public void setQueryBuilder(SqlQueryBuilder queryBuilder) {
+        if (this.queryBuilder != null) {
+            this.result = null;
+        }
         this.queryBuilder = queryBuilder;
         saveInSession();
     }
@@ -151,6 +156,9 @@ public class ResultSessionData implements Serializable {
     }
 
     public void setBriefcaseId(long briefcaseId) {
+        if (this.briefcaseId != briefcaseId) {
+            this.result = null;
+        }
         this.briefcaseId = briefcaseId;
         saveInSession();
     }
@@ -160,6 +168,9 @@ public class ResultSessionData implements Serializable {
     }
 
     public void setViewType(ResultViewType viewType) {
+        if (this.viewType == null || !this.viewType.equals(viewType)) {
+            this.result = null;
+        }
         this.viewType = viewType;
         saveInSession();
     }
@@ -187,6 +198,9 @@ public class ResultSessionData implements Serializable {
     }
 
     public void setTypeId(long typeId) {
+        if (typeId != this.typeId) {
+            this.result = null;
+        }
         this.typeId = typeId;
         saveInSession();
     }
@@ -205,6 +219,9 @@ public class ResultSessionData implements Serializable {
     }
 
     public void setVersionFilter(VersionFilter versionFilter) {
+        if (versionFilter != this.versionFilter) {
+            this.result = null;
+        }
         this.versionFilter = versionFilter;
         saveInSession();
     }
@@ -233,6 +250,15 @@ public class ResultSessionData implements Serializable {
 
     public void setPaginatorPage(int paginatorPage) {
         this.paginatorPage = paginatorPage;
+        saveInSession();
+    }
+
+    public FxResultSet getResult() {
+        return result;
+    }
+
+    public void setResult(FxResultSet result) {
+        this.result = result;
         saveInSession();
     }
 }

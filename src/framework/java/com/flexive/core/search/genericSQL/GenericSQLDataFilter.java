@@ -185,6 +185,9 @@ public class GenericSQLDataFilter extends DataFilter {
                 LOG.debug("SQL getResult: \n" + dataSelect + "\n");
             }
             sql = "INSERT INTO " + search.getCacheTable() + " " + dataSelect;
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("Filter SQL: " + sql);
+            }
             stmt = getConnection().createStatement();
             if (isQueryTimeoutSupported())
                 stmt.setQueryTimeout(search.getParams().getQueryTimeout());

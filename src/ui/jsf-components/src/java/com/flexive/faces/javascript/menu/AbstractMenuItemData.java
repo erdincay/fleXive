@@ -35,10 +35,7 @@ import com.flexive.faces.javascript.RelativeUriMapper;
 import com.flexive.war.JsonWriter;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * A menu item.
@@ -46,25 +43,37 @@ import java.util.Map;
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-public abstract class AbstractMenuItemData<T extends AbstractMenuItemData<T>> implements MenuItemContainer<T> {
+public abstract class AbstractMenuItemData<T extends AbstractMenuItemData<T>> implements MenuItemContainer<T>, Iterable<T> {
     protected final String id;
     protected final String title;
     protected final String icon;
     protected final String onClick;
     protected final Map<String, Object> properties;
     protected final List<T> menuItems;
+    protected final boolean itemGroup;
 
     protected AbstractMenuItemData(String title) {
-        this(null, title, null, null, new HashMap<String, Object>(), new ArrayList<T>());
+        this(null, title, null, null, new HashMap<String, Object>(), new ArrayList<T>(), false);
     }
 
-    protected AbstractMenuItemData(String id, String title, String icon, String onClick, Map<String, Object> properties, List<T> menuItems) {
+    /**
+     * Creates a container menu item (for item groups).
+     *
+     * @param menuItems the nested menu items
+     * @since 3.1
+     */
+    protected AbstractMenuItemData(List<T> menuItems) {
+        this(null, null, null, null, new HashMap<String, Object>(), menuItems, true);
+    }
+
+    protected AbstractMenuItemData(String id, String title, String icon, String onClick, Map<String, Object> properties, List<T> menuItems, boolean itemGroup) {
         this.id = id;
         this.title = title;
         this.icon = icon;
         this.onClick = onClick;
         this.properties = properties != null ? properties : new HashMap<String, Object>();
         this.menuItems = menuItems;
+        this.itemGroup = itemGroup;
     }
 
     public abstract void renderItemAttributes(JsonWriter out, RelativeUriMapper uriMapper, Map<String, String> subscriptions,
@@ -102,5 +111,41 @@ public abstract class AbstractMenuItemData<T extends AbstractMenuItemData<T>> im
 
     public Map<String, Object> getProperties() {
         return properties;
+    }
+
+    /**
+     * Returns true if this item has no information on itself, but acts as a group container for
+     * its menu items.
+     *
+     * @return  true for item group containers
+     * @since 3.1
+     */
+    public boolean isItemGroup() {
+        return itemGroup;
+    }
+
+    public Iterator<T> iterator() {
+        return new Iterator<T>() {
+            int index = 0;
+            Iterator<T> current;
+
+            public boolean hasNext() {
+                return (current != null && current.hasNext()) || index < menuItems.size();
+            }
+
+            public T next() {
+                if (current != null && current.hasNext()) {
+                    return current.next();
+                }
+                // go to next menu item
+                final T item = menuItems.get(index++);
+                current = item.iterator();
+                return item;
+            }
+
+            public void remove() {
+                throw new UnsupportedOperationException();
+            }
+        };
     }
 }

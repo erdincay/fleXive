@@ -154,11 +154,9 @@ EJBLookup.resultPreferencesEngine.saveSystemDefault(
                 [new ResultColumnInfo("#image/imageBinary"),
                  new ResultColumnInfo("@pk"),
                  new ResultColumnInfo("#image/caption"),
+                 new ResultColumnInfo("#image/dateCreated"),
                  new ResultColumnInfo("#image/filename"),
-                 new ResultColumnInfo("#image/keywords"),
-                 new ResultColumnInfo("#image/author"),
-                 new ResultColumnInfo("#image/pixelXDimension"),
-                 new ResultColumnInfo("#image/pixelYDimension")
+                 new ResultColumnInfo("#image/author")
                 ],
                 [new ResultOrderByInfo("#image/caption", SortDirection.ASCENDING)],
                 25, 0

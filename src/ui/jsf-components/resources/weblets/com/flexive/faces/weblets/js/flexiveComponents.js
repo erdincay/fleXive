@@ -361,6 +361,73 @@ flexive.yui.datatable = new function() {
         }
         return selectedPks;
     };
+
+    /**
+     * Delete all selected rows from the datatable.
+     *
+     * @param dataTable the datatable instance
+     * @return the number of rows deleted
+     * @since 3.1
+     */
+    this.deleteSelectedRows = function(/* YAHOO.widget.DataTable */ dataTable) {
+        var recordSet = dataTable.getRecordSet();
+        var rows = dataTable.getSelectedRows();
+        for (var i = 0; i < rows.length; i++) {
+            dataTable.deleteRow(recordSet.getRecordIndex(recordSet.getRecord(rows[i])));
+        }
+        return rows.length;
+    };
+
+    /**
+     * Delete all rows where the given function returns true.
+     *
+     * @param dataTable the datatable
+     * @param predicateFn a function that takes the record as an argument and returns "true" if the row matches
+     * @return the number of rows deleted
+     * @since 3.1
+     */
+    this.deleteMatchingRows = function(/* YAHOO.widget.DataTable */ dataTable, predicateFn) {
+        var recordSet = dataTable.getRecordSet();
+        var records = recordSet.getRecords();
+        var numDeleted = 0;
+        for (var i = 0; i < records.length; i++) {
+            var record = records[i];
+            if (predicateFn(record)) {
+                dataTable.deleteRow(recordSet.getRecordIndex(record));
+                numDeleted++;
+            }
+        }
+        return numDeleted;
+    };
+
+    /**
+     * Selects all rows of the given datatable.
+     *
+     * @param dataTable the datatable widget
+     * @since 3.1
+     */
+    this.selectAllRows = function(/* YAHOO.widget.DataTable */ dataTable) {
+        var records = dataTable.getRecordSet().getRecords();
+        for (var i = 0; i < records.length; i++) {
+            dataTable.selectRow(records[i]);
+        }
+    };
+    
+    /**
+     * Selects all cells of the given datatable.
+     *
+     * @param dataTable the datatable widget
+     * @since 3.1
+     */
+    this.selectAllCells = function(/* YAHOO.widget.DataTable */ dataTable) {
+        var recordSet = dataTable.getRecordSet();
+        var records = recordSet.getRecords();
+        dataTable.selectCell(1);
+        /*for (var i = 0; i < records.length; i++) {
+            dataTable.selectCell(recordSet.getRecordIndex(records[i]));
+        }*/
+    };
+
 };
 
 /**
@@ -420,7 +487,10 @@ flexive.yui.datatable.ListView.prototype = {
 flexive.yui.datatable.ThumbnailView = function(result, actionColumnHandler) {
     this.result = result;
     this.previewSize = flexive.PreviewSizes.PREVIEW2;
-    this.gridColumns = Math.max(1, Math.round(YAHOO.util.Dom.getViewportWidth() / (this.previewSize.size * 1.4)));
+    this.gridColumns = Math.min(
+            Math.max(1, Math.round(YAHOO.util.Dom.getViewportWidth() / (this.previewSize.size * 1.4))),
+            result.rows.length
+    );
     this.rowsPerPage = 5;
     this.actionColumnHandler = actionColumnHandler;
 };

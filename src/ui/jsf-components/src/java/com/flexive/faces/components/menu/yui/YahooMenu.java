@@ -66,7 +66,8 @@ public class YahooMenu extends UIOutput implements MenuItemContainer<YahooMenuIt
 
         // add icons
         FxJavascriptUtils.beginStyleSheet(writer);
-        for (YahooMenuItemData item : getMenuItems()) {
+        // traverse menu item tree
+        for (YahooMenuItemData item : new YahooMenuItemData(menuItems)) {
             if (isNotBlank(item.getIcon())) {
                 final String imageUrl = uriMapper.getAbsoluteUri(ICON_PATH + "/" + item.getIcon() + ".png");
                 writer.write("li#" + item.getId() + " .yuimenuitemlabel { background: url(" + imageUrl + ") no-repeat }\n");

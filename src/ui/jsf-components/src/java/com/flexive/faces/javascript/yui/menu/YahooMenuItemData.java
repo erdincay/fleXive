@@ -24,9 +24,19 @@ public class YahooMenuItemData extends AbstractMenuItemData<YahooMenuItemData> {
         super(title);
     }
 
+    /**
+     * Creates a container menu item (for item groups).
+     *
+     * @param menuItems the nested menu items
+     * @since 3.1
+     */
+    public YahooMenuItemData(List<YahooMenuItemData> menuItems) {
+        super(menuItems);
+    }
+
     public YahooMenuItemData(String id, String title, String icon, String onClick, String obj, String url,
                              Map<String, Object> properties, List<YahooMenuItemData> menuItems) {
-        super(id, title, icon, onClick, properties, menuItems);
+        super(id, title, icon, onClick, properties, menuItems, false);
         this.url = url;
         this.obj = obj;
     }

@@ -29,32 +29,51 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the file!
  ***************************************************************/
-package com.flexive.shared.search;
+package com.flexive.faces.components.menu.yui;
 
-import com.flexive.shared.ObjectWithLabel;
-import com.flexive.shared.value.FxString;
+import com.flexive.faces.javascript.menu.MenuItemContainer;
+import com.flexive.faces.javascript.yui.menu.YahooMenuItemData;
+import com.flexive.faces.FxJsfUtils;
 
-import java.io.Serializable;
+import javax.faces.component.UIOutput;
+import javax.faces.context.FacesContext;
+import java.util.List;
+import java.util.ArrayList;
+import java.io.IOException;
 
 /**
- * Interface for query result locations
+ * A menu item group for YUI's menu widget. Menu item groups are grouped on the same level, separated
+ * with horizontal separator lines.
  *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
+ * @since 3.1
  */
-public interface ResultLocation extends ObjectWithLabel, Serializable {
-    FxString getLabel();
+public class YahooMenuItemGroup extends UIOutput implements MenuItemContainer<YahooMenuItemData> {
+    private final List<YahooMenuItemData> menuItems = new ArrayList<YahooMenuItemData>();
 
-    String getName();
+    public YahooMenuItemGroup() {
+        setRendererType(null);
+    }
+
+    @SuppressWarnings({"unchecked"})
+    @Override
+    public void encodeBegin(FacesContext context) throws IOException {
+        final MenuItemContainer container = FxJsfUtils.findAncestor(this, MenuItemContainer.class);
+        container.addMenuItem(new YahooMenuItemData(menuItems));
+    }
 
     /**
-     * Returns true if the last search result for the given location should be cached in the user session. This feature
-     * is implemented in the web layer, not in the core engines - for example, if you use the
-     * JSF components' SearchResultBean, the last search result will be cached if this flag is set for the
-     * result location.
-     *
-     * @return  true if results for the given location should be cached in the user session
-     * @since 3.1
+     * {@inheritDoc}
      */
-    boolean isCacheInSession();
+    public void addMenuItem(YahooMenuItemData menuItem) {
+        menuItems.add(menuItem);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public List<YahooMenuItemData> getMenuItems() {
+        return menuItems;
+    }
 }

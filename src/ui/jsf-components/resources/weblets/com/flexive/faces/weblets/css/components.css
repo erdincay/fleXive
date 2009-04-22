@@ -507,6 +507,11 @@ img.button {
     display: none;
 }
 
+flexiveResultThumbnails > table,
+flexiveResultList > table {
+    max-width: 99%;
+}
+
 /* Horizontally center thumbnails */
 .flexiveResultThumbnails img.resultThumbnail,
 .flexiveResultList tbody img.fxThumbnail {

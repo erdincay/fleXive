@@ -118,6 +118,12 @@
             <component-type>flexive.YahooMenuItem</component-type>
         </component>
     </tag>
+    <tag>
+        <tag-name>menuItemGroup</tag-name>
+        <component>
+            <component-type>flexive.YahooMenuItemGroup</component-type>
+        </component>
+    </tag>
 
     <tag>
         <tag-name>resultValue</tag-name>

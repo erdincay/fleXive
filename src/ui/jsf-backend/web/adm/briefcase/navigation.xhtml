@@ -21,6 +21,7 @@
             // briefcase methods
             var activeItem = null;
             var contextBriefcaseId = null;
+            var contextBriefcaseName = null;
             var contextQueryName = null;
 
             // Called when this page is brought to the foreground by parent.gotoNavMenu
@@ -70,6 +71,8 @@
             function showContextMenu() {
                 var selectionAvailable = !parent.getContentClipboard().isEmpty();
                 contextBriefcaseId = null;
+                contextBriefcaseName = null;
+                getContextBriefcaseName();  // force initialization of briefcase name (IE workaround)
                 findMenuItem(getContextMenu(), "open").setDisabled(getContextBriefcaseId() == -1);
                 findMenuItem(getContextMenu(), "delete").setDisabled(getContextBriefcaseId() == -1);
                 findMenuItem(getContextMenu(), "addSelection").setDisabled(!selectionAvailable);
@@ -114,6 +117,11 @@
                     }
                     flexive.util.getJsonRpc().BriefcaseEditor.add(getContextBriefcaseId(), ids);
                     parent.getContentClipboard().clear();
+                    parent.showStatusMessage(
+                            "#{fxMessageBean['Briefcase.status.addedSelection']}"
+                            .replace("{0}", ids.length)
+                            .replace("{1}", getContextBriefcaseName())
+                    );
                     briefcasePanel.reload();
                 } catch (e) {
                     alertDialog(e.message);
@@ -154,6 +162,15 @@
                     contextBriefcaseId = parent != null ? parent.getAttribute("briefcaseId") : -1;
                 }
                 return contextBriefcaseId;
+            }
+
+            // Returns the briefcase name where the context menu was opened
+            function getContextBriefcaseName() {
+                if (contextBriefcaseName == null) {
+                    var parent = findParentWithAttribute(getContextMenu().openEvent, "briefcaseName");
+                    contextBriefcaseName = parent != null ? parent.getAttribute("briefcaseName") : null;
+                }
+                return contextBriefcaseName;
             }
 
             // create a new search query

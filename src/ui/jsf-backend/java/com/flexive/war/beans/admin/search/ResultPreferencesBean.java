@@ -144,6 +144,9 @@ public class ResultPreferencesBean {
         try {
             getResultPreferencesEngine().save(getResultPreferences(), type, viewType, location);
             new FxFacesMsgInfo("ResultPreferences.nfo.saved").addToContext();
+            
+            // invalidate cached result from search bean
+            FxJsfUtils.getManagedBean(SearchResultBean.class).setResult(null);
         } catch (FxApplicationException e) {
             new FxFacesMsgErr("ResultPreferences.err.save", e).addToContext();
         }
@@ -215,6 +218,14 @@ public class ResultPreferencesBean {
         moveColumnProperty(1);
     }
 
+    public void moveColumnPropertyTop(ActionEvent event) {
+        moveColumnProperty(-editColumnIndex);
+    }
+
+    public void moveColumnPropertyBottom(ActionEvent event) {
+        moveColumnProperty(getSelectedColumns().size() - editColumnIndex);
+    }
+    
     private void moveColumnProperty(int moveDelta) {
         if (editColumnIndex == -1) {
             return;

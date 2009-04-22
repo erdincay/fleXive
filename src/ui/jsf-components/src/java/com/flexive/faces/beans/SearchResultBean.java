@@ -198,13 +198,16 @@ public class SearchResultBean implements ActionBean, Serializable {
     }
 
     public FxResultSet getResult() throws FxApplicationException {
+        if (location.isCacheInSession()) {
+            result = getSessionData().getResult();
+        }
         if (result == null) {
             if (Boolean.TRUE.equals(createBriefcase)) {
                 getQueryBuilder().saveInBriefcase(briefcaseName, briefcaseDescription, briefcaseAclId);
                 new FxFacesMsgInfo("Briefcase.nfo.created", briefcaseName).addToContext();
             }
 
-            result = getQueryBuilder()
+            final FxResultSet result = getQueryBuilder()
                     .select("@pk", "@permissions", "@*")
                     .startRow(0)
                     .maxRows(Integer.MAX_VALUE)
@@ -227,8 +230,17 @@ public class SearchResultBean implements ActionBean, Serializable {
                 // no type selected, but only one found - search already performed for the specific type
                 setTypeId(result.getContentTypes().get(0).getContentTypeId());
             }
+
+            setResult(result);
         }
         return result;
+    }
+
+    public void setResult(FxResultSet result) {
+        this.result = result;
+        if (location.isCacheInSession()) {
+            getSessionData().setResult(result);
+        }
     }
 
     public SqlQueryBuilder getQueryBuilder() {
@@ -458,6 +470,20 @@ public class SearchResultBean implements ActionBean, Serializable {
         getSessionData().setPaginatorPage(paginatorPage);
     }
 
+    public boolean isClearCache() {
+        return false;
+    }
+
+    /**
+     * Set marker flag to remove the current search result from the session cache.
+     *
+     * @param clearCache    marker flag to remove the current search result from the session cache.
+     */
+    public void setClearCache(boolean clearCache) {
+        if (clearCache) {
+            setResult(null);
+        }
+    }
     /**
      * Reset the client-side table view parameters (sort, page number),
      * called e.g. when the content type filter changed.

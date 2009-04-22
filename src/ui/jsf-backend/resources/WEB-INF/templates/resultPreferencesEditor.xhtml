@@ -54,7 +54,13 @@ Renders the body content in a info box.
                     </f:facet>
                     #{resultPreferencesBean.propertyLabelMap[info.propertyName]}
                 </t:column>
-                <t:column width="70">
+                <t:column width="100">
+                    <!-- Move column to the top -->
+                    <a4j:commandLink reRender="preferencesPanel" actionListener="#{resultPreferencesBean.moveColumnPropertyTop}">
+                        <f:setPropertyActionListener target="#{resultPreferencesBean.editColumnIndex}" value="#{rowIndex}"/>
+                        <t:graphicImage alt="#{fxMessageBean['ResultPreferences.button.info.top']}"
+                                        url="/adm/images/commandButton/top.png" border="0"/>
+                    </a4j:commandLink>
                     <!-- Move column up -->
                     <a4j:commandLink reRender="preferencesPanel" actionListener="#{resultPreferencesBean.moveColumnPropertyUp}">
                         <f:setPropertyActionListener target="#{resultPreferencesBean.editColumnIndex}" value="#{rowIndex}"/>
@@ -67,6 +73,13 @@ Renders the body content in a info box.
                         <f:setPropertyActionListener target="#{resultPreferencesBean.editColumnIndex}" value="#{rowIndex}"/>
                         <t:graphicImage alt="#{fxMessageBean['ResultPreferences.button.info.down']}"
                                         url="/adm/images/commandButton/down.png" border="0"/>
+                    </a4j:commandLink>
+                    <!-- Move column to the bottom -->
+                    <a4j:commandLink reRender="preferencesPanel"
+                                     actionListener="#{resultPreferencesBean.moveColumnPropertyBottom}">
+                        <f:setPropertyActionListener target="#{resultPreferencesBean.editColumnIndex}" value="#{rowIndex}"/>
+                        <t:graphicImage alt="#{fxMessageBean['ResultPreferences.button.info.bottom']}"
+                                        url="/adm/images/commandButton/bottom.png" border="0"/>
                     </a4j:commandLink>
                     <!-- Delete column -->
                     <a4j:commandLink reRender="preferencesPanel" actionListener="#{resultPreferencesBean.removeColumnProperty}">

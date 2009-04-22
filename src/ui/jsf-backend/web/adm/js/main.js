@@ -626,7 +626,7 @@ var _statusMessageTimeout;
 var _statusMessageAnim;
 function showStatusMessage(message, timeout) {
     window.clearTimeout(_statusMessageTimeout);
-    if (_statusMessageAnim) {
+    if (_statusMessageAnim != null) {
         _statusMessageAnim.stop();
     }
 
@@ -649,11 +649,11 @@ function showStatusMessage(message, timeout) {
 }
 
 function fadeIn(elementId, /* seconds */ duration, /* function */ onComplete) {
-    animateOpacity(elementId, duration, onComplete, 0.0, 1.0);
+    return animateOpacity(elementId, duration, onComplete, 0.0, 1.0);
 }
 
 function fadeOut(elementId, /* seconds */ duration, /* function */ onComplete) {
-    animateOpacity(elementId, duration, onComplete, 1.0, 0.0);
+    return animateOpacity(elementId, duration, onComplete, 1.0, 0.0);
 }
 
 function animateOpacity(elementId, /* seconds */ duration, /* function */ onComplete, opacityFrom, opacityTo) {
@@ -868,4 +868,3 @@ var contentClipboard = new ContentClipboard();
 function getContentClipboard() {
     return contentClipboard;
 }
-

@@ -509,3 +509,13 @@ function transferInputValue(formname, inputSource, inputDest) {
     var value = document.getElementById(formname+":"+inputSource).value;
     document.getElementById(formname+":"+inputDest).value = value;
 }
+
+
+function setBusyCursor() {
+    document.body.style.cursor = "progress";
+}
+
+
+function setDefaultCursor() {
+    document.body.style.cursor = "auto";
+}

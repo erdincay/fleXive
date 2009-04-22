@@ -257,6 +257,9 @@ public class SqlSearch {
 
             // Select all desired rows for the resultset
             selectSql = ds.build(con);
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("Select SQL: " + selectSql);
+            }
 
             stmt = con.createStatement();
             stmt.executeUpdate("SET @rownr=1");

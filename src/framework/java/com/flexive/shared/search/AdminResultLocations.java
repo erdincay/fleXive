@@ -43,22 +43,43 @@ import java.io.Serializable;
  * @version $Rev$
  */
 public enum AdminResultLocations implements ResultLocation {
-    /** Main admin search results */
-    ADMIN,
-    /** Default location to be used when no location is specified */
-    DEFAULT,
-    /** Browse references popup (FxReference input helper) */
-    BROWSE_REFERENCES;
+    /**
+     * Main admin search results
+     */
+    ADMIN(true),
+    /**
+     * Default location to be used when no location is specified
+     */
+    DEFAULT(false),
+    /**
+     * Browse references popup (FxReference input helper)
+     */
+    BROWSE_REFERENCES(false);
 
-    /** {@inheritDoc} */
+    private final boolean cacheInSession;
+
+    AdminResultLocations(boolean cacheInSession) {
+        this.cacheInSession = cacheInSession;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public FxString getLabel() {
         return FxSharedUtils.getEnumLabel(this);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public String getName() {
         return getClass().getName() + "." + name();
     }
 
-
+    /**
+     * {@inheritDoc}
+     */
+    public boolean isCacheInSession() {
+        return cacheInSession;
+    }
 }

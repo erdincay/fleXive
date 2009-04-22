@@ -50,6 +50,11 @@
         <component-class>com.flexive.faces.components.menu.yui.YahooMenuItem</component-class>
     </component>
 
+    <component>
+        <component-type>flexive.YahooMenuItemGroup</component-type>
+        <component-class>com.flexive.faces.components.menu.yui.YahooMenuItemGroup</component-class>
+    </component>
+
 
     <component>
         <component-type>flexive.FxContentView</component-type>

@@ -19,7 +19,7 @@ public class DojoMenuItemData extends AbstractMenuItemData<DojoMenuItemData> {
     }
 
     public DojoMenuItemData(String id, String title, String icon, String onClick, Map<String, Object> properties, List<DojoMenuItemData> menuItems) {
-        super(id, title, icon, onClick, properties, menuItems);
+        super(id, title, icon, onClick, properties, menuItems, false);
     }
 
     @Override
