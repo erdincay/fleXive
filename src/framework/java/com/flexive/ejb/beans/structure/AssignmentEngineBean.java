@@ -238,7 +238,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             ps.setLong(8, pos);
             if (parentXPath == null || "/".equals(parentXPath))
                 parentXPath = "";
-            ps.setString(9, type.getName() + parentXPath + "/" + assignmentAlias);
+            ps.setString(9, type.getName() + XPathElement.stripType(parentXPath) + "/" + assignmentAlias);
             ps.setString(10, assignmentAlias);
             ps.setNull(11, Types.NUMERIC);
             if (tmp == null)
