@@ -158,10 +158,22 @@ EJBLookup.resultPreferencesEngine.saveSystemDefault(
                  new ResultColumnInfo("#image/filename"),
                  new ResultColumnInfo("#image/author")
                 ],
-                [new ResultOrderByInfo("#image/caption", SortDirection.ASCENDING)],
+                [new ResultOrderByInfo("#image/dateCreated", SortDirection.DESCENDING)],
                 25, 0
         ),
         CacheAdmin.environment.getType(IMAGE_TYPE).id,
         ResultViewType.LIST,
+        AdminResultLocations.values()
+)
+EJBLookup.resultPreferencesEngine.saveSystemDefault(
+        new ResultPreferences(
+                [new ResultColumnInfo("#image/caption"),
+                 new ResultColumnInfo("#image/dateCreated")
+                ],
+                [new ResultOrderByInfo("#image/dateCreated", SortDirection.DESCENDING)],
+                25, 0
+        ),
+        CacheAdmin.environment.getType(IMAGE_TYPE).id,
+        ResultViewType.THUMBNAILS,
         AdminResultLocations.values()
 )

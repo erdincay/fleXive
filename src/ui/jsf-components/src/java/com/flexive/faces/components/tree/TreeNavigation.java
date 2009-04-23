@@ -80,6 +80,7 @@ import java.io.IOException;
  *
  * @author Daniel Lichtenberger, UCS
  * @version $Rev$
+ * @since 3.1
  */
 public class TreeNavigation extends UIOutput implements NamingContainer {
     public static final String COMPONENT_TYPE = "flexive.TreeNavigation";

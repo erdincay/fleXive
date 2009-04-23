@@ -11,9 +11,9 @@
 
     <licenses>
         <license>
-              <name>GNU Lesser General Public License (LGPL)</name>
-              <url>http://www.fsf.org/licensing/licenses/lgpl.txt</url>
-           </license>
+            <name>GNU Lesser General Public License (LGPL)</name>
+            <url>http://www.fsf.org/licensing/licenses/lgpl.txt</url>
+        </license>
     </licenses>
     <url>http://www.flexive.org/</url>
     <issueManagement>

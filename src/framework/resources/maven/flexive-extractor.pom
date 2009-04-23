@@ -89,5 +89,14 @@
             </exclusions>
         </dependency>
 
+        <!-- If you include SwingLabs' pdf-renderer, a preview image will be generated when
+             creating a "Document" instance with a PDF file -->
+        <dependency>
+            <groupId>com.flexive</groupId>
+            <artifactId>pdf-renderer</artifactId>
+            <version>1.0-20090423</version>
+            <optional>true</optional>
+        </dependency>
+
     </dependencies>
 </project>
