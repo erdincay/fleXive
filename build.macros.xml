@@ -136,6 +136,7 @@
         <attribute name="srcdir"/>
         <attribute name="builddir"/>
         <attribute name="jarfile"/>
+        <element name="jar-elements" optional="true"/>
         <sequential>
             <makeMessages srcdir="@{srcdir}/resources/messages" dest="@{builddir}/PluginMessages"/>
             <buildScriptIndex dir="@{srcdir}/resources/scripts"/>
@@ -147,6 +148,7 @@
                 <fileset dir="@{srcdir}/web" includes="**/*"/>
 
                 <zipfileset dir="@{srcdir}/resources/scripts" prefix="@{name}Resources/scripts" includes="**/*"/>
+                <jar-elements/>
             </jar>
         </sequential>
     </macrodef>

@@ -909,14 +909,14 @@ database.vendor=MySQL
     <!-- ============================= Plugin targets ================================ -->
 
     <target name="jar.jsf.components" depends="compile.ui.shared">
-        <buildPlugin name="jsf-core" srcdir="${flexive.base.ui.components.dir}"/>
-
-        <!-- explode YUI and TinyMCE editor files in into jsf core plugins JAR under com/flexive/faces/weblets/js -->
-        <jar jarfile="${build.ui.jar.dir}/flexive-plugin-jsf-core.jar" update="true">
-            <zipfileset src="${flexive.base.ui.shared.dir}/resources/lib/tiny_mce.zip" prefix="com/flexive/faces/weblets/js"/>
-            <zipfileset src="${flexive.base.ui.shared.dir}/resources/lib/yui-${web.ui.yui.version}.zip" prefix="com/flexive/faces/weblets/js/yui"/>
-        </jar>
-
+        <buildPlugin name="jsf-core" srcdir="${flexive.base.ui.components.dir}">
+            <plugin-jar-elements>
+                <!-- explode YUI and TinyMCE editor files in into jsf core plugins JAR under com/flexive/faces/weblets/js -->
+                <zipfileset src="${flexive.base.ui.shared.dir}/resources/lib/tiny_mce.zip" prefix="com/flexive/faces/weblets/js"/>
+                <zipfileset src="${flexive.base.ui.shared.dir}/resources/lib/yui-${web.ui.yui.version}.zip" prefix="com/flexive/faces/weblets/js/yui"/>
+            </plugin-jar-elements>
+        </buildPlugin>
+        
         <buildPlugin name="jsf-testrunner" srcdir="${flexive.base.ui.dir}/jsf-testrunner"/>
         <buildPlugin name="globalconfig" srcdir="${flexive.base.ui.dir}/jsf-globalconfig"/>
         <buildPlugin name="jsf-feedbackPlugin" srcdir="${flexive.base.ui.dir}/jsf-feedbackPlugin"/>
@@ -934,11 +934,16 @@ database.vendor=MySQL
     <macrodef name="buildPlugin">
         <attribute name="name"/>
         <attribute name="srcdir"/>
+        <element name="plugin-jar-elements" optional="true"/>
         <sequential>
             <compilePlugin srcdir="@{srcdir}" builddir="${build.ui.components.dir}/@{name}"
                            classpathref="classpath.build.plugin"/>
             <buildPluginJar name="@{name}" srcdir="@{srcdir}" builddir="${build.ui.components.dir}/@{name}"
-                            jarfile="${build.ui.jar.dir}/flexive-plugin-@{name}.jar"/>
+                            jarfile="${build.ui.jar.dir}/flexive-plugin-@{name}.jar">
+                <jar-elements>
+                    <plugin-jar-elements/>
+                </jar-elements>
+            </buildPluginJar>
         </sequential>
     </macrodef>
 
