@@ -93,11 +93,16 @@ function onContextMenu(type, args) {
             invalidateSessionCache();
             break;
         case "selectAll":
+            flexive.yui.datatable.selectAllRows(resultTable);
+            parent.showStatusMessage(MESSAGES["SearchResult.status.selected"].replace("{0}", getSelectedIds().length));
+            break;
+        case "selectAllOnPage":
             if (getViewType() == "LIST") {
-                flexive.yui.datatable.selectAllRows(resultTable);
+                flexive.yui.datatable.selectAllPageRows(resultTable);
             } else {
-                flexive.yui.datatable.selectAllCells(resultTable);
+                flexive.yui.datatable.selectAllPageCells(resultTable);
             }
+            parent.showStatusMessage(MESSAGES["SearchResult.status.selected"].replace("{0}", getSelectedIds().length));
             break;
         default:
             alert("Unknown action: " + menuItem.id);

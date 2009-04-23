@@ -414,18 +414,36 @@ flexive.yui.datatable = new function() {
     };
     
     /**
-     * Selects all cells of the given datatable.
+     * Selects all rows of the given datatable on the current page.
      *
      * @param dataTable the datatable widget
      * @since 3.1
      */
-    this.selectAllCells = function(/* YAHOO.widget.DataTable */ dataTable) {
-        var recordSet = dataTable.getRecordSet();
-        var records = recordSet.getRecords();
-        dataTable.selectCell(1);
-        /*for (var i = 0; i < records.length; i++) {
-            dataTable.selectCell(recordSet.getRecordIndex(records[i]));
-        }*/
+    this.selectAllPageRows = function(/* YAHOO.widget.DataTable */ dataTable) {
+        var trEl = dataTable.getFirstTrEl();
+        while (trEl != null) {
+            dataTable.selectRow(trEl);
+            trEl = trEl.nextSibling;
+        }
+    };
+
+    /**
+     * Selects all cells of the given datatable on the current page.
+     * As of 2.7.0, the YUI datatable does not support selection of off-page cells.
+     *
+     * @param dataTable the datatable widget
+     * @since 3.1
+     */
+    this.selectAllPageCells = function(/* YAHOO.widget.DataTable */ dataTable) {
+        var trEl = dataTable.getFirstTrEl();
+        while (trEl != null) {
+            var tdEl = dataTable.getFirstTdEl(trEl);
+            while (tdEl != null) {
+                dataTable.selectCell(tdEl);
+                tdEl = tdEl.nextSibling;
+            }
+            trEl = trEl.nextSibling;
+        }
     };
 
 };

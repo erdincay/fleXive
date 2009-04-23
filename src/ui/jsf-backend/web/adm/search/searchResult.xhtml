@@ -34,7 +34,8 @@
                 "SearchResult.button.action.open": "#{fxMessageBean['SearchResult.button.action.open']}",
                 "SearchResult.button.action.delete": "#{fxMessageBean['SearchResult.button.action.delete']}",
                 "SearchResult.button.action.deleteFromBriefcase": "#{fxMessageBean['SearchResult.button.action.deleteFromBriefcase']}",
-                "SearchResult.button.action.more": "#{fxMessageBean['SearchResult.button.action.more']}"
+                "SearchResult.button.action.more": "#{fxMessageBean['SearchResult.button.action.more']}",
+                "SearchResult.status.selected": "#{fxMessageBean['SearchResult.status.selected']}"
             }
         //-->
         </script>
@@ -103,7 +104,10 @@
                     </fx:menuItemGroup>
 
                     <fx:menuItemGroup>
-                        <fx:menuItem id="selectAll" labelKey="SearchResult.menu.selectAll"/>
+                        <c:if test="#{fxSearchResultBean.viewType == 'LIST'}">
+                            <fx:menuItem id="selectAll" labelKey="SearchResult.menu.selectAll"/>
+                        </c:if>
+                        <fx:menuItem id="selectAllOnPage" labelKey="SearchResult.menu.selectAllOnPage"/>
                     </fx:menuItemGroup>
 
                 </fx:menu>
@@ -158,9 +162,11 @@
                 var paginator = resultTable.get("paginator");
                 paginator.subscribe("pageChange", function(event) {
                     document.getElementById("frm:paginatorPage").value = event.newValue;
+                    window.scrollTo(0, 0);
                 });
                 paginator.subscribe("rowsPerPageChange", function(event) {
                     document.getElementById("frm:fetchRows").value = event.newValue;
+                    window.scrollTo(0, 0);
                 });
 
                 // fetch old sort information, apply it if the column still exists

@@ -141,8 +141,6 @@ Parameters:
                         actionListener="#{fxQueryEditorBean.createOrSubquery}"
                         eventsQueue="queryEditor"
                         value="Join selected nodes with or"/>
-        <!-- include a dummy date picker to trigger loading of the myfaces scripts at page load time -->
-        <t:inputDate popupCalendar="true"/>
     </div>
 
     <a href="javascript:document.getElementById('frm:refreshSqlButton').onclick();sqlPopupDialog.show();">#{fxMessageBean['QueryEditor.button.sql']}</a>
