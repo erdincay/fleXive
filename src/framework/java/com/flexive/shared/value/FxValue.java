@@ -458,6 +458,41 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
     }
 
     /**
+     * Returns true if the translation for the given language is valid. An empty translation
+     * is always valid.
+     *
+     * @param languageId     the language ID
+     * @return               true if the translation for the given language is valid
+     * @since 3.1
+     */
+    public boolean isValid(long languageId) {
+        final T value = getTranslation(languageId);
+        if (value == null || !(value instanceof String)) {
+            // empty or non-string translations are always valid
+            return true;
+        }
+        // try a conversion to the native type
+        try {
+            fromString((String) value);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * Returns true if the translation for the given language is valid. An empty translation
+     * is always valid.
+     *
+     * @param language       the language
+     * @return               true if the translation for the given language is valid
+     * @since 3.1
+     */
+    public boolean isValid(FxLanguage language) {
+        return isValid(language != null ? language.getId() : -1);
+    }
+
+    /**
      * Returns the value that caused {@link #isValid} to return false. If isValid() is true,
      * a RuntimeException is thrown.
      *

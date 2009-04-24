@@ -331,7 +331,7 @@ class EditModeHelper extends RenderHelper {
     }
 
     private void renderDateInput(UIComponent parent, String inputId, FxLanguage language) {
-        final Date date = value.isTranslationEmpty(language) ? null : (Date) value.getTranslation(language);
+        final Date date = value.isTranslationEmpty(language) || !value.isValid(language) ? null : (Date) value.getTranslation(language);
         createDateInput(parent, inputId, date);
     }
 
@@ -339,6 +339,7 @@ class EditModeHelper extends RenderHelper {
         final HtmlInputText input = (HtmlInputText) FxJsfUtils.addChildComponent(parent, HtmlInputText.COMPONENT_TYPE);
         input.setId(stripForm(inputId));
         input.setSize(10);
+        input.setMaxlength(10);
         input.setValue(date == null ? "" : FxFormatUtils.toString(date));
 
         //createInputDate(parent, inputId, language);
@@ -365,7 +366,10 @@ class EditModeHelper extends RenderHelper {
     private void renderDateTimeInput(UIComponent parent, String inputId, FxLanguage language) {
 //        createInputDate(parent, inputId, language).setType("full");
 
-        final Date date = value.isTranslationEmpty(language) ? null : (Date) value.getTranslation(language);
+        final Date date =
+                value.isTranslationEmpty(language) || (!value.isValid(language))
+                        ? null      // no or invalid translation - do not set date
+                        : (Date) value.getTranslation(language);
         createDateTimeInput(parent, inputId, date);
     }
 

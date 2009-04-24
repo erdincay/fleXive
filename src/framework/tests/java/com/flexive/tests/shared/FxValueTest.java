@@ -32,9 +32,12 @@
 package com.flexive.tests.shared;
 
 import com.flexive.shared.value.*;
+import com.flexive.shared.FxLanguage;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import org.testng.Assert;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -71,24 +74,24 @@ public class FxValueTest {
     @Test(dataProvider = "testInstances")
     public <T, TDerived extends FxValue<T, TDerived>> void testIsValid(ValueTestBean<T, TDerived> testBean) {
         FxValue<T, TDerived> value = testBean.getValue().copy();
-        Assert.assertTrue(value.isValid(), "Test value should be valid: " + value);
-        Assert.assertTrue(!value.isMultiLanguage(), "Value must not be multilingual: " + value);
+        assertTrue(value.isValid(), "Test value should be valid: " + value);
+        assertTrue(!value.isMultiLanguage(), "Value must not be multilingual: " + value);
 
         // test valid string values
         for (String validValue : testBean.getValidStringValues()) {
             //noinspection unchecked
             ((FxValue) value).setValue(validValue);
-            Assert.assertTrue(value.isValid(), "String value should be valid: " + validValue);
+            assertTrue(value.isValid(), "String value should be valid: " + validValue);
         }
 
         // test invalid string values
         for (String invalidValue : testBean.getInvalidStringValues()) {
             //noinspection unchecked
             ((FxValue) value).setValue(invalidValue);
-            Assert.assertTrue(!value.isValid(), "String value should not be valid: " + invalidValue);
+            assertTrue(!value.isValid(), "String value should not be valid: " + invalidValue);
         }
         value.setValue(testBean.getValueElement());
-        Assert.assertTrue(value.isValid(), "Value must be valid: " + testBean.getValueElement());
+        assertTrue(value.isValid(), "Value must be valid: " + testBean.getValueElement());
     }
 
     @Test(dataProvider = "testInstances")
@@ -99,7 +102,7 @@ public class FxValueTest {
         for (String validValue : testBean.getValidStringValues()) {
             //noinspection unchecked
             ((FxValue) value).setValue(validValue);
-            Assert.assertTrue(value.isValid());
+            assertTrue(value.isValid());
             try {
                 value.getErrorValue();
                 Assert.fail("Valid values cannot return error values.");
@@ -117,14 +120,14 @@ public class FxValueTest {
                 // pass
             }
         } else {
-            Assert.assertTrue(value.getErrorValue() != null, "Invalid values must return an error value.");
+            assertTrue(value.getErrorValue() != null, "Invalid values must return an error value.");
         }
         // if isValid(), then getErrorValue() must throw an IllegalStateException.
         for (String invalidValue : testBean.getInvalidStringValues()) {
             //noinspection unchecked
             ((FxValue) value).setValue(invalidValue);
-            Assert.assertTrue(!value.isValid());
-            Assert.assertTrue(value.getErrorValue() != null, "Invalid value must return an error value.");
+            assertTrue(!value.isValid());
+            assertTrue(value.getErrorValue() != null, "Invalid value must return an error value.");
         }
     }
 
@@ -135,9 +138,9 @@ public class FxValueTest {
     @Test
     public void testUpdateEmptyValue() {
         FxNumber number = new FxNumber(0).setEmpty();
-        Assert.assertTrue(number.isEmpty());
+        assertTrue(number.isEmpty());
         number.setValue(0);
-        Assert.assertTrue(!number.isEmpty(), "FxNumber still empty after explicit value update.");
+        assertTrue(!number.isEmpty(), "FxNumber still empty after explicit value update.");
     }
 
     /**
@@ -147,7 +150,20 @@ public class FxValueTest {
     public void testNoAccessEquals() {
         final FxString value = new FxString(false, "test");
         final FxNoAccess noAccess = new FxNoAccess(null, value);
-        Assert.assertTrue(!noAccess.equals(new FxNoAccess(null, value)));
+        assertFalse(noAccess.equals(new FxNoAccess(null, value)));
+    }
+
+    @SuppressWarnings({"unchecked"})
+    @Test
+    public void multiLanguageValidTest() {
+        // create a FxValue with valid and invalid entries
+        final FxNumber value = new FxNumber(true, 41).setTranslation(FxLanguage.ENGLISH, 21);
+        // force string value into content - this will usually happen for user input from an input component
+        ((FxValue) value).setTranslation(FxLanguage.GERMAN, "abc");
+        assertFalse(value.isValid());
+        assertTrue(value.isValid(FxLanguage.SYSTEM_ID));
+        assertTrue(value.isValid(FxLanguage.ENGLISH));
+        assertFalse(value.isValid(FxLanguage.GERMAN));
     }
 
     @DataProvider(name = "testInstances")
