@@ -37,6 +37,7 @@ function invokeContentAction(url, action, parameters) {
     for (var key in parameters) {
         queryString += "&" + key + "=" + encodeURIComponent(parameters[key]);
     }
+    setBusyCursor();
     loadContentPage(url + queryString);
 }
 
@@ -517,5 +518,5 @@ function setBusyCursor() {
 
 
 function setDefaultCursor() {
-    document.body.style.cursor = "auto";
+    document.body.style.cursor = "default";
 }

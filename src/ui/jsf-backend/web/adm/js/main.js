@@ -59,7 +59,9 @@ function endDrag(ev) {
     contentFrameObj.style.display='inline';
     slbg.style.display='none';
     slbgLine.style.display='none';
-    getNavFrameWnd().windowResize();
+    if (getNavFrameWnd().windowResize) {
+        getNavFrameWnd().windowResize();
+    }
 }
 
 
@@ -545,6 +547,14 @@ function pageLoaded(responseId,renderTime,bTreeWasModified) {
     renderToolbar();
     renderErrors();
     unlockScreen();
+    setDefaultCursor();
+    // remove busy cursors in navigation frames set via admin.js
+    for (var i = 0; i < 4; i++) {
+        var frame = frames["treeNavFrame_" + i];
+        if (frame.setDefaultCursor) {
+            frame.setDefaultCursor();
+        }
+    }
     if (bTreeWasModified && getNavFrameWnd().reloadContentTree) {
         getNavFrameWnd().reloadContentTree();
     }
