@@ -13,6 +13,10 @@ body a {
     text-decoration:none;
 }
 
+a > img {
+    border: 0;
+}
+
 #toolbarMessage {
     margin-left:10px;
     height:10px;

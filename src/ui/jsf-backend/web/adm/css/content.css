@@ -15,6 +15,10 @@ a {
   font-weight:bold;  
 }
 
+a > img {
+    border: 0;
+}
+
 .commandButton {
     border: 0;
     height: 22px;
