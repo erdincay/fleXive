@@ -351,12 +351,18 @@
     <tag>
       <name>linearizeFxValueInputs</name>
       <body-content>JSP</body-content>
-      <description>Helper tag to linearize the navigation between all fx:fxValueInput instances on a page. After activating the first input on the page, the user can navigation to all following using the "tab" key (i.e. the tabindex will be directly ascending for all succeeding inputs, skipping other navigation elements and the language selects).  This tag requires YUI. Add this near the end of the page, but before the call to fx:yuiSetup.  </description>
+      <description>Helper tag to linearize the navigation between all fx:fxValueInput instances on a page. After activating the first input on the page, the user can navigate to all following using the "tab" key (i.e. the tabindex will be strictly increasing for all succeeding inputs, skipping other navigation elements and the language selects).  This tag requires YUI. Add this component near the end of the page, but before the call to fx:yuiSetup.  </description>
       <attribute>
         <name>startIndex</name>
         <required>false</required>
         <rtexprvalue>false</rtexprvalue>
         <description>the first tab-index to be used</description>
+      </attribute>
+      <attribute>
+        <name>rootNode</name>
+        <required>false</required>
+        <rtexprvalue>false</rtexprvalue>
+        <description>an optional root DOM node ID where the search for fx:fxValueInput elements should start</description>
       </attribute>
     </tag>
     <tag>
