@@ -985,8 +985,8 @@ public final class FxEnvironmentImpl implements FxEnvironment {
         if (properties != null)
             for (FxProperty prop : properties) {
                 ref = false;
-                for (FxAssignment as : this.propertyAssignmentsAll)
-                    if (as instanceof FxPropertyAssignment && ((FxPropertyAssignment) as).getProperty().getId() == prop.getId()) {
+                for (FxPropertyAssignment as : this.propertyAssignmentsAll)
+                    if (as.getProperty().getId() == prop.getId()) {
                         ref = true;
                     }
                 prop.setReferenced(ref);
@@ -997,8 +997,8 @@ public final class FxEnvironmentImpl implements FxEnvironment {
         if (groups != null)
             for (FxGroup group : groups) {
                 ref = false;
-                for (FxAssignment as : this.groupAssignmentsAll)
-                    if (as instanceof FxGroupAssignment && ((FxGroupAssignment) as).getGroup().getId() == group.getId()) {
+                for (FxGroupAssignment as : this.groupAssignmentsAll)
+                    if (as.getGroup().getId() == group.getId()) {
                         ref = true;
                     }
                 group.setReferenced(ref);

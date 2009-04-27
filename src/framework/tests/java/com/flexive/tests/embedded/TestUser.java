@@ -125,7 +125,7 @@ public class TestUser {
     }
 
     public void setRoles(Role[] roles) {
-        this.roles = roles;
+        this.roles = roles.clone();
     }
 
 

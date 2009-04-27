@@ -192,11 +192,13 @@ public class FxPaths implements Serializable {
     @Override
     public String toString() {
         if (paths == null) return "";
-        String result = "";
+        final StringBuilder result = new StringBuilder();
         for (Path path : paths) {
-            if (result.length() > 0) result += "\n";
-            result += path.getCaption();
+            if (result.length() > 0) {
+                result.append("\n");
+            }
+            result.append(path.getCaption());
         }
-        return result;
+        return result.toString();
     }
 }

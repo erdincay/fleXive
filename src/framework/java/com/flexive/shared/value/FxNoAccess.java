@@ -137,7 +137,7 @@ public final class FxNoAccess extends FxValue<Object, FxNoAccess> {
      */
     @Override
     public long[] getTranslatedLanguages() {
-        return translatedLanguages;
+        return translatedLanguages.clone();
     }
 
     /**

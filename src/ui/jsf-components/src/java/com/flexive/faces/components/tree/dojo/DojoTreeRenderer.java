@@ -194,7 +194,7 @@ public class DojoTreeRenderer extends Renderer {
     public void encodeChildren(FacesContext context, UIComponent component) throws IOException {
         DojoTree tree = ((DojoTree) component);
         TreeNodeWriter nodeWriter = tree.getNodeWriter();
-        for (Object child : component.getChildren()) {
+        for (UIComponent child : component.getChildren()) {
             if (child instanceof DojoTreeNode) {
                 DojoTreeNode treeNode = (DojoTreeNode) child;
                 treeNode.writeTreeNodes(nodeWriter);
@@ -204,11 +204,8 @@ public class DojoTreeRenderer extends Renderer {
                 JsonRpcCall rpcCall = (JsonRpcCall) child;
                 rpcCall.encodeBegin(context);
                 rpcCall.encodeEnd(context);
-            } else if (child instanceof UIComponent) {
-                UIComponent childComponent = (UIComponent) child;
-                childComponent.encodeBegin(context);
-                childComponent.encodeChildren(context);
-                childComponent.encodeEnd(context);
+            } else  {
+                child.encodeAll(context);
             }
         }
     }
