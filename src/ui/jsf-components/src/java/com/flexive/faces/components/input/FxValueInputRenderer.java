@@ -75,6 +75,7 @@ public class FxValueInputRenderer extends Renderer {
     protected static final String CSS_READONLYCONTAINER = "fxValueInputReadOnly";
     protected static final String CSS_LANG_CONTAINER = "fxValueInputRow";
     protected static final String CSS_LANG_CONTAINER_FIRST = "firstRow";
+    protected static final String CSS_VALUE_INPUT_FIELD = "fxValueField";   // marker class for actual data input fields exposed to the user 
     protected static final String CSS_TEXT_INPUT = "fxValueTextInput";
     protected static final String CSS_TEXTAREA = "fxValueTextArea";
     protected static final String CSS_TEXTAREA_HTML = "fxValueTextAreaHtml";

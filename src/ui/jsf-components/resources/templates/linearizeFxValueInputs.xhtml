@@ -1,0 +1,45 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+      xmlns:t="http://myfaces.apache.org/tomahawk">
+
+Description:
+Helper tag to linearize the navigation between all fx:fxValueInput instances on a page.
+After activating the first input on the page, the user can navigate to all following using
+the "tab" key (i.e. the tabindex will be strictly increasing for all succeeding inputs, skipping
+other navigation elements and the language selects).
+
+This tag requires YUI. Add this component near the end of the page, but before the call to fx:yuiSetup.
+
+Parameters:
+startIndex - the first tab-index to be used
+rootNode - an optional root DOM node ID where the search for fx:fxValueInput elements should start
+
+<ui:composition>
+
+<c:if test="#{empty startIndex}">
+    <c:set var="startIndex" value="1"/>
+</c:if>
+<script type="text/javascript">
+<!--
+    flexive.yui.require("selector");
+    flexive.yui.onYahooLoaded(function() {
+        var tabIndex = #{startIndex};
+        var rootNode = '#{empty rootNode ? 'null' : rootNode}';
+        var nodes = YAHOO.util.Selector.query(".fxValueInput .fxValueField", rootNode != "null" ? rootNode : null);
+        for (var i = 0; i < nodes.length; i++) {
+            nodes[i].tabIndex = tabIndex++;
+        }
+    });
+//-->
+</script>
+
+</ui:composition>
+
+
+</html>

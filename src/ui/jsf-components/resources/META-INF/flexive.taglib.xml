@@ -55,6 +55,10 @@
         <source>../templates/yuiSetup.xhtml</source>
     </tag>
     <tag>
+        <tag-name>linearizeFxValueInputs</tag-name>
+        <source>../templates/linearizeFxValueInputs.xhtml</source>
+    </tag>
+    <tag>
         <tag-name>colorPicker</tag-name>
        <handler-class>com.flexive.faces.components.ColorPickerHandler</handler-class>
     </tag>

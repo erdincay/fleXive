@@ -32,6 +32,7 @@
 package com.flexive.faces.components.input;
 
 import com.flexive.faces.FxJsfUtils;
+import static com.flexive.faces.components.input.FxValueInputRenderer.*;
 import com.flexive.faces.beans.MessageBean;
 import com.flexive.faces.beans.UserConfigurationBean;
 import com.flexive.faces.javascript.FxJavascriptUtils;
@@ -228,7 +229,7 @@ class EditModeHelper extends RenderHelper {
             input.setMaxlength(value.getMaxInputLength());
         }
         input.setValue(getTextValue(value, languageId));
-        input.setStyleClass(FxValueInputRenderer.CSS_TEXT_INPUT + singleLanguageStyle(languageId));
+        input.setStyleClass(CSS_VALUE_INPUT_FIELD + " " + CSS_TEXT_INPUT + singleLanguageStyle(languageId));
 
         // add autocomplete YUI component
         if (StringUtils.isNotBlank(inputComponent.getAutocompleteHandler())) {
@@ -266,7 +267,7 @@ class EditModeHelper extends RenderHelper {
         // create selectone component
         final HtmlSelectOneListbox listbox = (HtmlSelectOneListbox) createUISelect(parent, inputId, HtmlSelectOneListbox.COMPONENT_TYPE);
         listbox.setSize(1);
-        listbox.setStyleClass(FxValueInputRenderer.CSS_INPUTELEMENTWIDTH + singleLanguageStyle(language));
+        listbox.setStyleClass(CSS_VALUE_INPUT_FIELD + " " + FxValueInputRenderer.CSS_INPUTELEMENTWIDTH + singleLanguageStyle(language));
         // update posted value
         if (selectValue.getTranslation(language) != null) {
             listbox.setValue(selectValue.getTranslation(language).getId());
@@ -285,7 +286,7 @@ class EditModeHelper extends RenderHelper {
             // render a single line dropdown
             final HtmlSelectOneListbox listbox = (HtmlSelectOneListbox) createUISelect(parent, inputId, HtmlSelectOneListbox.COMPONENT_TYPE);
             listbox.setSize(1);
-            listbox.setStyleClass(FxValueInputRenderer.CSS_INPUTELEMENTWIDTH + singleLanguageStyle(language));
+            listbox.setStyleClass(CSS_VALUE_INPUT_FIELD + " " + FxValueInputRenderer.CSS_INPUTELEMENTWIDTH + singleLanguageStyle(language));
             if (selected.length > 0) {
                 // choose first selected element - other selections get discarded
                 listbox.setValue(selected[0]);
@@ -294,7 +295,7 @@ class EditModeHelper extends RenderHelper {
         } else {
             // render a "multiple" select list
             final HtmlSelectManyListbox listbox = (HtmlSelectManyListbox) createUISelect(parent, inputId, HtmlSelectManyListbox.COMPONENT_TYPE);
-            listbox.setStyleClass(FxValueInputRenderer.CSS_INPUTELEMENTWIDTH + singleLanguageStyle(language));
+            listbox.setStyleClass(CSS_VALUE_INPUT_FIELD + " " + FxValueInputRenderer.CSS_INPUTELEMENTWIDTH + singleLanguageStyle(language));
             listbox.setSelectedValues(selected);
             storeSelectItems(listbox, selectValue.getSelectList());
             // automatically limit select list rows for very long lists
@@ -341,6 +342,7 @@ class EditModeHelper extends RenderHelper {
         input.setSize(10);
         input.setMaxlength(10);
         input.setValue(date == null ? "" : FxFormatUtils.toString(date));
+        input.setStyleClass(CSS_VALUE_INPUT_FIELD);
 
         //createInputDate(parent, inputId, language);
         final HtmlGraphicImage img = (HtmlGraphicImage) FxJsfUtils.addChildComponent(parent, HtmlGraphicImage.COMPONENT_TYPE);
@@ -391,6 +393,7 @@ class EditModeHelper extends RenderHelper {
         input.setId(stripForm(inputId) + suffix);
         input.setSize(2);
         input.setMaxlength(2);
+        input.setStyleClass(CSS_VALUE_INPUT_FIELD);
         if (value != -1) {
             input.setValue(new Formatter().format("%02d", value));
         }
@@ -478,7 +481,7 @@ class EditModeHelper extends RenderHelper {
         final HtmlInputFileUpload upload = (HtmlInputFileUpload) FxJsfUtils.addChildComponent(parent, HtmlInputFileUpload.COMPONENT_TYPE);
         addHtmlAttributes(component, upload);
         upload.setId(stripForm(inputId));
-        upload.setStyleClass("fxValueFileInput");
+        upload.setStyleClass("fxValueFileInput " + CSS_VALUE_INPUT_FIELD);
     }
 
     private void renderCheckbox(UIComponent parent, String inputId, FxLanguage language) throws IOException {
@@ -486,6 +489,7 @@ class EditModeHelper extends RenderHelper {
         checkbox.setId(stripForm(inputId));
         checkbox.setValue(value.getTranslation(language));
         addHtmlAttributes(component, checkbox);
+        checkbox.setStyleClass(CSS_VALUE_INPUT_FIELD);
     }
 
     private HtmlOutputText renderLiteral(UIComponent parent, String value) {
@@ -850,7 +854,7 @@ class EditModeHelper extends RenderHelper {
             }
             if (useHTMLEditor) {
                 writer.startElement("div", null);
-                writer.writeAttribute("class", FxValueInputRenderer.CSS_TEXTAREA_HTML_OUTER, null);
+                writer.writeAttribute("class", CSS_TEXTAREA_HTML_OUTER, null);
             }
             writer.startElement("textarea", null);
             writer.writeAttribute("id", inputClientId, null);
@@ -858,7 +862,7 @@ class EditModeHelper extends RenderHelper {
             if (useHTMLEditor) {
                 // render tinyMCE editor
                 writer.writeAttribute("name", inputClientId, null);
-                writer.writeAttribute("class", FxValueInputRenderer.CSS_TEXTAREA_HTML + singleLanguageStyle(languageId), null);
+                writer.writeAttribute("class", CSS_VALUE_INPUT_FIELD + " " + CSS_TEXTAREA_HTML + singleLanguageStyle(languageId), null);
                 writer.writeText(getTextValue(value, languageId), null);
                 writer.endElement("textarea");
                 writer.endElement("div");
@@ -883,7 +887,7 @@ class EditModeHelper extends RenderHelper {
             } else {
                 // render standard text area
                 writer.writeAttribute("name", inputClientId, null);
-                writer.writeAttribute("class", FxValueInputRenderer.CSS_TEXTAREA + singleLanguageStyle(languageId), null);
+                writer.writeAttribute("class", CSS_VALUE_INPUT_FIELD + " " + FxValueInputRenderer.CSS_TEXTAREA + singleLanguageStyle(languageId), null);
                 if (rows > 0)
                     writer.writeAttribute("rows", String.valueOf(rows), null);
                 writer.writeText(getTextValue(value, languageId), null);

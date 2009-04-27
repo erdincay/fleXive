@@ -1554,6 +1554,83 @@
                 </section>
             </section>
 
+            <section xml:id="jcl_fx_linearize_fxvalue_inputs">
+                <title>
+                    <code language="xhtml">&lt;fx:linearizeFxValueInputs></code>
+                </title>
+
+                <para>
+                    Helper tag to linearize the navigation between all fx:fxValueInput instances on a page.
+                    After activating the first input on the page, the user can navigate to all following using
+                    the "tab" key (i.e. the tabindex will be strictly increasing for all succeeding inputs, skipping
+                    other navigation elements and the language selects).
+                </para>
+
+                <para>
+                    This tag requires &yui;. Add this near the end of the page, but before the call to
+                    <link linkend="jcl_fx_yuisetup">fx:yuiSetup</link>.
+                </para>
+
+                <section xml:id="jcl_fx_linearize_fxvalue_inputs_synopsis">
+                    <title>Synopsis</title>
+                    <programlisting language="xhtml"><![CDATA[<fx:linearizeFxValueInputs [startIndex="index"] [rootNode="nodeId"]/>
+]]></programlisting>
+                </section>
+
+                <section xml:id="jcl_fx_linearize_fxvalue_inputs_parameters">
+                    <title>Parameters</title>
+                    <variablelist>
+                        <varlistentry>
+                            <term>startIndex</term>
+                            <listitem>
+                                <para>
+                                    The first tab-index to be used (default: 1).
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>rootNode</term>
+                            <listitem>
+                                <para>
+                                    An optional root DOM node ID where the search for fx:fxValueInput elements
+                                    should start (default: the entire document will be searched).
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                </section>
+
+                <section xml:id="jcl_fx_linearize_fxvalue_inputs_examples">
+                    <title>Examples</title>
+                    <example xml:id="jcl_fx_linearize_fxvalue_inputs_examples_nested">
+                        <title>Using the color picker with a JSF input component</title>
+
+                        <para>
+                            In this example, an existing JSF text input component will be augmented
+                            with a color picker.
+                        </para>
+
+                        <programlisting language="xhtml"><![CDATA[<h:inputText id="color" value="#{myBean.color}" size="7">
+    <fx:colorPicker/>
+</h:inputText>
+]]></programlisting>
+                    </example>
+
+                    <example xml:id="jcl_fx_linearize_fxvalue_inputs_examples_standalone">
+                        <title>Using the color picker for a form input</title>
+
+                        <para>
+                            The color picker can be used "stand-alone" for any text-based form input.
+                            To do so, just set the form input element ID with the
+                            <parameter>inputId</parameter>
+                            parameter.
+                        </para>
+
+                        <programlisting language="xhtml"><![CDATA[<input type="text" id="myinput" size="7"/>
+<fx:colorPicker inputId="myinput"/>]]></programlisting>
+                    </example>
+                </section>
+            </section>
 
         </section>
 
@@ -1827,6 +1904,8 @@
 
                 <para>
                     Initializes the &yui; widgets on the current page and loads all required libraries.
+                    Note that you still have to initialize the YUI bootstrap loader using
+                    <link linkend="jcl_fx_includes">&lt;fx:includes yui="true"></link>.
                 </para>
 
                 <para>
