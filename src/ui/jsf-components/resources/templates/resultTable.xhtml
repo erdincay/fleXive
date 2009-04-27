@@ -56,7 +56,9 @@ Parameters:
                             template : "#{fxMessageBean['ResultTable.label.rowSelect']}",
                             rowsPerPage : view.rowsPerPage,
                             rowsPerPageOptions : isThumbnails ? [5, 10, 25, 50] : [10,25,50,100]
-                        }) }
+                          }),
+                          draggableColumns: true
+                        }
                     );
                     var __clickHandlerFn = #{empty clickHandler ? 'null' : clickHandler};
                     var __clickHandler = __clickHandlerFn == null ? null :

@@ -4,6 +4,11 @@
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
+
+function getTypeIdSelect() {
+    return document.getElementById("frm:typeId");
+}
+
 function onShowContextMenu() {
     try {
         var perms = flexive.yui.datatable.getPermissions(resultTable, this.contextEventTarget);
@@ -172,7 +177,7 @@ function deleteFromBriefcase(/* PK */ pk) {
 }
 
 function modifyTypeCount(/* int */ delta) {
-    var option = getSelectedOption(document.getElementById("frm:typeId"));
+    var option = getSelectedOption(getTypeIdSelect());
     if (option.value == -1) {
         return; // cannot adapt infotype count on shared page
     }

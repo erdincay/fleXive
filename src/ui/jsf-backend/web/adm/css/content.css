@@ -384,7 +384,11 @@ tr.yui-dt-selected td.yui-dt-desc,
 tr.yui-dt-selected a,
 tr.yui-dt-even td.yui-dt-selected,
 tr.yui-dt-odd td.yui-dt-selected {
-    background: #b8ce74 !important; 
+    background: #b8ce74 !important;
     color: #000 !important;
 }
 
+/* Drag'n'Drop target bar */
+.yui-dt-coltarget {
+    background-color: #D3DCB7 !important;
+}

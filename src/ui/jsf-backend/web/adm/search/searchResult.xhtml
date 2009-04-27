@@ -26,7 +26,15 @@
             function getViewType() {
                 return "#{fxSearchResultBean.viewType}";
             }
-        
+
+            function getEncodedViewType() {
+                return "#{fx:encodeEnum(fxSearchResultBean.viewType)}";
+            }
+
+            function getEncodedLocation() {
+                return "#{fx:encodeEnum(fxSearchResultBean.location)}";
+            }
+
             var MESSAGES = {
                 "SearchResult.dialog.confirm.deleteSelection": "#{fxMessageBean['SearchResult.dialog.confirm.deleteSelection']}",
                 "SearchResult.dialog.confirm.deleteRow": "#{fxMessageBean['SearchResult.dialog.confirm.deleteRow']}",
@@ -35,7 +43,8 @@
                 "SearchResult.button.action.delete": "#{fxMessageBean['SearchResult.button.action.delete']}",
                 "SearchResult.button.action.deleteFromBriefcase": "#{fxMessageBean['SearchResult.button.action.deleteFromBriefcase']}",
                 "SearchResult.button.action.more": "#{fxMessageBean['SearchResult.button.action.more']}",
-                "SearchResult.status.selected": "#{fxMessageBean['SearchResult.status.selected']}"
+                "SearchResult.status.selected": "#{fxMessageBean['SearchResult.status.selected']}",
+                "SearchResult.status.column.reordered": "#{fxMessageBean['SearchResult.status.column.reordered']}"
             }
         //-->
         </script>
@@ -128,7 +137,10 @@
                                icon="view_thumbs#{fxSearchResultBean.viewType == 'THUMBNAILS' ? '_active' : ''}" location="toolbar" lockscreen="false"/>
             <adm:commandButton id="listButton" labelKey="SearchResult.button.view.list"
                                bean="#{fxSearchResultBean}" action="listView"
-                               icon="view_list#{fxSearchResultBean.viewType == 'LIST' ? '_active' : ''}" location="toolbar"  lockscreen="false" separator="after"/>
+                               icon="view_list#{fxSearchResultBean.viewType == 'LIST' ? '_active' : ''}" location="toolbar"  lockscreen="false"/>
+            <adm:commandButton id="refreshButton" labelKey="SearchResult.button.view.refresh"
+                               bean="#{fxSearchResultBean}" action="refresh"
+                               icon="reload" location="toolbar"  lockscreen="true" separator="after"/>
             <adm:commandButton id="preferencesButton" labelKey="ResultPreferences.button.open"
                                bean="#{resultPreferencesBean}" action="show"
                                icon="configure" location="both">
@@ -157,6 +169,40 @@
                 resultTable.subscribe("columnSortEvent", function(args) {
                     document.getElementById("frm:sortColumnKey").value = args.column.key;
                     document.getElementById("frm:sortDirection").value = args.dir;
+                });
+                // store new column order in result preferences
+                resultTable.subscribe("columnReorderEvent", function(args) {
+                    if (args.column.getKey() == "__actions") {
+                        return; // reordered the actions column, do nothing
+                    }
+                    // skip actions column
+                    var index = args.column.getKeyIndex();
+                    for (var i = 0; i < index; i++) {
+                        if (resultTable.getColumnSet().getColumn(i).getKey() == "__actions") {
+                            // skip actions column for the result preferences index
+                            index -= 1;
+                            break;
+                        }
+                    }
+                    flexive.util.getJsonRpc().YahooResultProvider.reorderResultColumn(
+                            function(result, exception) {
+                                if (exception != null) {
+                                    alertDialog(exception.message);
+                                    return;
+                                }
+                                parent.showStatusMessage(
+                                        MESSAGES["SearchResult.status.column.reordered"]
+                                                .replace("{0}", args.column.label)
+                                                .replace("{1}", (index + 1))
+                                );
+                                invalidateSessionCache();
+                            },
+                            getSelectedOptionValue(getTypeIdSelect()),
+                            getEncodedViewType(),
+                            getEncodedLocation(),
+                            args.column.getKey(),
+                            index
+                    );
                 });
                 // subscribe to paginator changes
                 var paginator = resultTable.get("paginator");

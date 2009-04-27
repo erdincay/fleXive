@@ -34,19 +34,22 @@
 package com.flexive.faces.javascript.yui;
 
 import com.flexive.faces.FxJsfUtils;
+import com.flexive.faces.converter.EnumConverter;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
+import static com.flexive.shared.EJBLookup.getResultPreferencesEngine;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxRuntimeException;
-import com.flexive.shared.search.FxFoundType;
-import com.flexive.shared.search.FxResultRow;
-import com.flexive.shared.search.FxResultSet;
+import com.flexive.shared.exceptions.FxInvalidParameterException;
+import com.flexive.shared.exceptions.FxUpdateException;
+import com.flexive.shared.search.*;
 import com.flexive.shared.security.PermissionSet;
 import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.structure.FxProperty;
 import com.flexive.shared.value.*;
 import com.flexive.shared.value.renderer.FxValueRendererFactory;
 import com.flexive.war.JsonWriter;
+import com.google.common.collect.Lists;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -54,6 +57,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringWriter;
 import java.util.Date;
+import java.util.ArrayList;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
@@ -71,10 +75,10 @@ public class YahooResultProvider implements Serializable {
     /**
      * Returns a complete JSON representation of the given search result.
      *
-     * @param result        the search result to be rendered
-     * @param firstColumn   index of the first column to be rendered (1-based)
+     * @param result      the search result to be rendered
+     * @param firstColumn index of the first column to be rendered (1-based)
      * @return the search result in JSON notation
-     * @throws java.io.IOException  if the JSON output could not be written
+     * @throws java.io.IOException if the JSON output could not be written
      */
     public static String getSearchResultJSON(FxResultSet result, int firstColumn) throws IOException {
         final StringWriter out = new StringWriter();
@@ -107,6 +111,57 @@ public class YahooResultProvider implements Serializable {
         writer.closeMap();
         writer.finishResponse();
         return out.toString();
+    }
+
+    /**
+     * Moves the given column to the new index in the user's result preferences.
+     *
+     * @param encodedLocation the location, encoded using fx:encodeEnum
+     * @param encodedViewType the view type, encoded using fx:encodeEnum
+     * @param columnKey       the column key (i.e. the property/assignment name)
+     * @param index           the new index (0-based)
+     * @return nothing
+     * @since 3.1
+     */
+    public String reorderResultColumn(long typeId, String encodedViewType, String encodedLocation, String columnKey, int index) throws FxApplicationException {
+        final ResultViewType viewType = (ResultViewType) EnumConverter.getValue(encodedViewType);
+        final ResultLocation location = (ResultLocation) EnumConverter.getValue(encodedLocation);
+        final ResultPreferences preferences = getResultPreferencesEngine().load(typeId, viewType, location);
+        final ArrayList<ResultColumnInfo> columns = Lists.newArrayList(preferences.getSelectedColumns());
+
+        if (columnKey.indexOf('/') != -1) {
+            // assignment --> prefix with #
+            columnKey = "#" + columnKey;
+        }
+        // get column index for columnKey
+        ResultColumnInfo column = null;
+        for (ResultColumnInfo rci : columns) {
+            if (rci.getPropertyName().equalsIgnoreCase(columnKey)) {
+                column = rci;
+                break;
+            }
+        }
+        if (column == null) {
+            throw new FxUpdateException("ex.jsf.searchResult.resultPreferences.columnNotFound", columnKey);
+        }
+
+        // move column to new position
+        final int oldIndex = columns.indexOf(column);
+        columns.remove(oldIndex);
+        columns.add(
+                Math.min(
+                        columns.size() - 1,
+                        index > oldIndex ? index - 1 : index
+                ),
+                column
+        );
+
+        // store new result preferences
+        getResultPreferencesEngine().saveInSource(
+                new ResultPreferences(columns, preferences.getOrderByColumns(), preferences.getRowsPerPage(), preferences.getThumbBoxSize()),
+                typeId, viewType, location
+        );
+        return "[]";
     }
 
     private static void createResultColumns(FxResultSet result, JsonWriter writer, int firstColumn) throws IOException {
@@ -159,7 +214,7 @@ public class YahooResultProvider implements Serializable {
                 perms |= (permissions.isMayRead() ? 1 : 0);         // read
                 perms |= (permissions.isMayCreate() ? 1 : 0) << 1;  // create
                 perms |= (permissions.isMayDelete() ? 1 : 0) << 2;  // delete
-                perms |= (permissions.isMayEdit() ? 1 : 0)   << 3;  // edit
+                perms |= (permissions.isMayEdit() ? 1 : 0) << 3;  // edit
                 perms |= (permissions.isMayExport() ? 1 : 0) << 4;  // export
                 perms |= (permissions.isMayRelate() ? 1 : 0) << 5;  // relate
                 writer.writeAttribute("permissions", perms);
@@ -178,10 +233,10 @@ public class YahooResultProvider implements Serializable {
     /**
      * Renders the response schema needed for the YUI datatable.
      *
-     * @param result    the result to be written
-     * @param writer    the JSON output writer
-     * @param firstColumn   the first column to be included (1-based)
-     * @throws java.io.IOException  on output errors
+     * @param result      the result to be written
+     * @param writer      the JSON output writer
+     * @param firstColumn the first column to be included (1-based)
+     * @throws java.io.IOException on output errors
      */
     private static void createResponseSchema(FxResultSet result, JsonWriter writer, int firstColumn) throws IOException {
         writer.startAttribute("responseSchema");
@@ -233,8 +288,8 @@ public class YahooResultProvider implements Serializable {
     /**
      * Writes the current type counts for each found content type.
      *
-     * @param writer      the target writer
-     * @param result      the search result
+     * @param writer the target writer
+     * @param result the search result
      * @throws java.io.IOException if the output could not be written
      */
     private void writeUpdatedTypeCounts(JsonWriter writer, FxResultSet result) throws IOException {

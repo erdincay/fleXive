@@ -95,6 +95,23 @@ public interface ResultPreferencesEngine {
     void save(ResultPreferences preferences, long typeId, ResultViewType viewType, ResultLocation location) throws FxApplicationException;
 
     /**
+     * Save the given result preferences for the current user, using the type ID where the existing result preferences
+     * are stored. If a type does not specify result preferences, the fallback preferences will be updated.
+     * <p>
+     * Only when a user has no own result preferences and uses the system default's, a new configuration
+     * entry will be created (instead of updating the shared result preferences).
+     * </p>
+     *
+     * @param preferences   the preferences to be saved
+     * @param typeId        the content type ID
+     * @param viewType      the view type (list, thumbs)
+     * @param location      the "location" where the results will be displayed
+     * @throws FxApplicationException   if the result preferences could not be updated
+     * @since 3.1
+     */
+    void saveInSource(ResultPreferences preferences, long typeId, ResultViewType viewType, ResultLocation location) throws FxApplicationException;
+
+    /**
      * Save the given result preferences as the default settings for the given type, viewtype, and location.
      * Only the global supervisor can do this.
      *

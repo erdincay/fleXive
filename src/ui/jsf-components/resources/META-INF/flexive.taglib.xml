@@ -173,5 +173,11 @@
         <function-class>com.flexive.faces.beans.PageBean</function-class>
         <function-signature>java.lang.String absoluteUrl(java.lang.String, java.lang.String)</function-signature>
     </function>
+
+    <function>
+        <function-name>encodeEnum</function-name>
+        <function-class>com.flexive.faces.converter.EnumConverter</function-class>
+        <function-signature>java.lang.String encodeEnum(java.lang.Enum)</function-signature>
+    </function>
 </facelet-taglib>
 

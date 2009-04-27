@@ -56,7 +56,6 @@ import java.util.Arrays;
 @Stateless(name = "ResultPreferencesEngine", mappedName="ResultPreferencesEngine")
 public class ResultPreferencesEngineBean implements ResultPreferencesEngine, ResultPreferencesEngineLocal {
     private static final Log LOG = LogFactory.getLog(ResultPreferencesEngineBean.class);
-
     @EJB
     ConfigurationEngineLocal configuration;
     @EJB
@@ -67,6 +66,10 @@ public class ResultPreferencesEngineBean implements ResultPreferencesEngine, Res
     /** {@inheritDoc} */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public ResultPreferences load(long typeId, ResultViewType viewType, ResultLocation location) throws FxApplicationException {
+        return loadWithType(typeId, viewType, location).getPreferences();
+    }
+
+    private LoadResult loadWithType(long typeId, ResultViewType viewType, ResultLocation location) throws FxApplicationException {
         ResultPreferences preferences;
         try {
             preferences = configuration.get(SystemParameters.USER_RESULT_PREFERENCES, getKey(typeId, viewType, location));
@@ -74,7 +77,7 @@ public class ResultPreferencesEngineBean implements ResultPreferencesEngine, Res
             if (typeId >= 0) {
                 final FxType type = CacheAdmin.getEnvironment().getType(typeId);
                 // use parent type or global default (FX-482)
-                return load(type.getParent() != null ? type.getParent().getId() : -1, viewType, location);
+                return loadWithType(type.getParent() != null ? type.getParent().getId() : -1, viewType, location);
             } else if (typeId == -1) {
                 // if no global default is defined, use hardcoded default settings
                 preferences = new ResultPreferences(Arrays.asList(
@@ -102,9 +105,9 @@ public class ResultPreferencesEngineBean implements ResultPreferencesEngine, Res
             } finally {
                 FxContext.get().stopRunAsSystem();
             }
-            return checkedPreferences;
+            return new LoadResult(typeId, checkedPreferences);
         }
-        return preferences;
+        return new LoadResult(typeId, preferences);
     }
 
     /** {@inheritDoc} */
@@ -136,6 +139,16 @@ public class ResultPreferencesEngineBean implements ResultPreferencesEngine, Res
             throw new FxInvalidParameterException("preferences", "ex.ResultPreferences.save.empty");
         }
         configuration.put(SystemParameters.USER_RESULT_PREFERENCES, getKey(typeId, viewType, location), preferences);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void saveInSource(ResultPreferences preferences, long typeId, ResultViewType viewType, ResultLocation location) throws FxApplicationException {
+        final LoadResult result = loadWithType(typeId, viewType, location);
+        // save for the root type
+        save(preferences, result.getTypeId(), viewType, location);
     }
 
     /** {@inheritDoc} */
@@ -217,4 +230,23 @@ public class ResultPreferencesEngineBean implements ResultPreferencesEngine, Res
         rpe.setLastChecked(System.currentTimeMillis());
         return rpe;
     }
+
+    private static class LoadResult {
+        private final long typeId;
+        private final ResultPreferences preferences;
+
+        private LoadResult(long typeId, ResultPreferences preferences) {
+            this.typeId = typeId;
+            this.preferences = preferences;
+        }
+
+        public long getTypeId() {
+            return typeId;
+        }
+
+        public ResultPreferences getPreferences() {
+            return preferences;
+        }
+    }
+
 }

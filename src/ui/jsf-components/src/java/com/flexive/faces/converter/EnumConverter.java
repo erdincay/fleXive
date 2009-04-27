@@ -76,7 +76,18 @@ public class EnumConverter implements Converter {
         if (object == null) {
             return null;
         }
-        Enum value = (Enum) object;
+        return encodeEnum((Enum) object);
+
+    }
+
+    /**
+     * Encode an Enum value to a string that can be decoded using {@link EnumConverter#getValue(String)}.
+     * <p>This method is exposed in JSF-EL as <code>fx:encodeEnum</code>.</p>
+     *
+     * @param value the Enum value to be encoded
+     * @return  the encoded string representation
+     */
+    public static String encodeEnum(Enum value) {
         // replace inner class suffixes of class name and append enum name
         return value.getClass().getName().replaceFirst("\\$\\d+$", "") + "::" + value.name();
     }

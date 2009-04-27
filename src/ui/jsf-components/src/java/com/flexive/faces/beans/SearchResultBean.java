@@ -197,6 +197,16 @@ public class SearchResultBean implements ActionBean, Serializable {
         return show();
     }
 
+    /**
+     * Refresh the current results (clear cache).
+     *
+     * @return  the next page
+     */
+    public String refresh() {
+        setResult(null);
+        return show();
+    }
+
     public FxResultSet getResult() throws FxApplicationException {
         if (location.isCacheInSession()) {
             result = getSessionData().getResult();
