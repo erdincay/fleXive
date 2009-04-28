@@ -28,7 +28,7 @@ input.fxValueDefaultLanguageRadio {
     float: right;
 }
 
-.FxHTMLInput .fxValueInputRow .fxValueTextAreaContainer {
+.FxHTMLInput .fxValueInputRow .fxValueHtmlEditorContainer {
     padding-top: 25px;  /* Move below language select */
 }
 

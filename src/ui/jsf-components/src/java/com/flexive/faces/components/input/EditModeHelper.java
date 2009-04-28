@@ -857,7 +857,11 @@ class EditModeHelper extends RenderHelper {
             }
             final String wrapperElementId = inputClientId + "_wrap";
             writer.startElement("div", null);
-            writer.writeAttribute("class", CSS_TEXTAREA_HTML_OUTER + " " + CSS_RESIZEABLE, null);
+            writer.writeAttribute("class",
+                    (useHTMLEditor ? CSS_TEXTAREA_HTML_OUTER : CSS_TEXTAREA_OUTER)
+                            + " " + CSS_RESIZEABLE,
+                    null
+            );
             writer.writeAttribute("id", wrapperElementId, null);
             writer.startElement("textarea", null);
             writer.writeAttribute("id", inputClientId, null);
