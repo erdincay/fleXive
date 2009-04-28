@@ -20,6 +20,7 @@ div.fxValueInput {
 div.fxValueInputRow {
     /*position: relative;*/
     width: 225px;
+    min-height: 20px;   /* avoid problems with floating checkboxes */
     padding: 1px 1px 1px 0;
 }
 
@@ -42,8 +43,13 @@ input.fxValueDefaultLanguageRadio {
     z-index: 999;
 }
 
-select.fxValueSelectInput, .fxValueInputElementWidth, input.fxValueTextInput, textarea.fxValueTextArea  {
+select.fxValueSelectInput, .fxValueInputElementWidth, input.fxValueTextInput {
     width: 175px;
+}
+
+textarea.fxValueTextArea, textarea.fxValueTextAreaHtml {
+    width: 100%;    /* Size will be constrained by .fxValueTextAreaContainer */
+    height: 100%;
 }
 
 /* Stretch single-language inputs over space normally occupied by the language select */
@@ -61,22 +67,20 @@ select.fxValueSelectInput, .fxValueInputElementWidth, input.fxValueTextInput, te
     width: 80% !important;     /* leave room for the browse references button, overrides yui-skin-sam autocomplete width */
 }
 
-.fxValueInput input {
+.fxValueInput input,
+.fxValueInput textarea {
     border: 1px solid gray;
 }
 
 .fxValueInput input[type="checkbox"] {
-    border: none;   /* looks ugly in IE */
+    border: none;           /* looks ugly in IE */
+    margin: 0 0.3em 0 0;    /* don't use vertical margins to ensure the checkbox isn't higher than the main input (FF Windows) */
 }
 
-textarea.fxValueTextArea,
-textarea.fxValueTextAreaHtml {
+.fxValueTextAreaContainer {
     height: 150px;
 }
 
-textarea.fxValueTextAreaHtml {
-    width: 100%;
-}
 
 input.fxValueTextInput {
     /*float: left;*/
@@ -293,7 +297,6 @@ td.scrollPosition input {
 /* form input styles */
 
 fieldset.formFields {
-    width: 450px;
     border-width: 1px;
     border-style: solid;
     border-color: #bdbdbd;
@@ -559,4 +562,9 @@ flexiveResultList > table {
 
     text-align: right;
     padding-right: 0.5em;
+}
+
+/* fx:resizeable container */
+.fxResizeable {
+    padding: 0 9px 8px 0;   /* create room for resizable textarea handles */
 }

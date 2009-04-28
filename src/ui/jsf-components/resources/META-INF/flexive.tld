@@ -366,6 +366,11 @@
       </attribute>
     </tag>
     <tag>
+      <name>resizeable</name>
+      <body-content>JSP</body-content>
+      <description>Adds a YUI Resize control for the body contents.  </description>
+    </tag>
+    <tag>
         <name>colorPicker</name>
         <body-content>JSP</body-content>
         <description>

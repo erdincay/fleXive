@@ -33,6 +33,7 @@ package com.flexive.faces.javascript;
 
 import org.apache.commons.lang.StringUtils;
 
+import javax.faces.context.ResponseWriter;
 import java.io.IOException;
 import java.io.Writer;
 
@@ -73,7 +74,7 @@ public class FxJavascriptUtils {
     /**
      * Starts an inline stylesheet tag.
      *
-     * @param out   the output writer
+     * @param out the output writer
      * @throws IOException if the code could not be written
      */
     public static void beginStyleSheet(Writer out) throws IOException {
@@ -83,7 +84,7 @@ public class FxJavascriptUtils {
     /**
      * Ends an inline stylesheet tag.
      *
-     * @param out   the output writer
+     * @param out the output writer
      * @throws IOException if the code could not be written
      */
     public static void endStyleSheet(Writer out) throws IOException {
@@ -132,11 +133,31 @@ public class FxJavascriptUtils {
     /**
      * Renders a function to be called when Yahoo UI has been loaded.
      *
-     * @param out   the output writer
-     * @param fn    the javascript function, either a reference or an anonymous function
-     * @throws IOException  if the code could not be written
+     * @param out the output writer
+     * @param fn  the javascript function, either a reference or an anonymous function
+     * @throws IOException if the code could not be written
      */
     public static void onYahooLoaded(Writer out, String fn) throws IOException {
         out.write("flexive.yui.onYahooLoaded(" + fn + ");\n");
+    }
+
+    /**
+     * Add YUI's Resizable control to the given DOM ID.
+     *
+     * @param writer        the output writer
+     * @param elementId     the target DOM element
+     * @throws IOException  if the code could not be written
+     * @since 3.1
+     */
+    public static void makeResizable(ResponseWriter writer, String elementId) throws IOException {
+        beginJavascript(writer);
+        writeYahooRequires(writer, "resize");
+        onYahooLoaded(
+                writer,
+                "function() { "
+                + "new YAHOO.util.Resize(\"" + elementId + "\");"
+                + " }"
+        );
+        endJavascript(writer);
     }
 }

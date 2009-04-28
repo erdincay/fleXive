@@ -36,6 +36,9 @@ import static com.flexive.faces.components.input.FxValueInputRenderer.*;
 import com.flexive.faces.beans.MessageBean;
 import com.flexive.faces.beans.UserConfigurationBean;
 import com.flexive.faces.javascript.FxJavascriptUtils;
+import static com.flexive.faces.javascript.FxJavascriptUtils.beginJavascript;
+import static com.flexive.faces.javascript.FxJavascriptUtils.writeYahooRequires;
+import static com.flexive.faces.javascript.FxJavascriptUtils.endJavascript;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxFormatUtils;
 import com.flexive.shared.FxLanguage;
@@ -852,10 +855,10 @@ class EditModeHelper extends RenderHelper {
                 renderTextInput(getInputComponent(), this, value, inputClientId, languageId);
                 return;
             }
-            if (useHTMLEditor) {
-                writer.startElement("div", null);
-                writer.writeAttribute("class", CSS_TEXTAREA_HTML_OUTER, null);
-            }
+            final String wrapperElementId = inputClientId + "_wrap";
+            writer.startElement("div", null);
+            writer.writeAttribute("class", CSS_TEXTAREA_HTML_OUTER + " " + CSS_RESIZEABLE, null);
+            writer.writeAttribute("id", wrapperElementId, null);
             writer.startElement("textarea", null);
             writer.writeAttribute("id", inputClientId, null);
             writeHtmlAttributes(getInputComponent(), writer);
@@ -892,6 +895,8 @@ class EditModeHelper extends RenderHelper {
                     writer.writeAttribute("rows", String.valueOf(rows), null);
                 writer.writeText(getTextValue(value, languageId), null);
                 writer.endElement("textarea");
+                writer.endElement("div");
+                FxJavascriptUtils.makeResizable(writer, wrapperElementId);
             }
         }
 
@@ -922,8 +927,8 @@ class EditModeHelper extends RenderHelper {
             out.write("<div id=\"" + containerId + "\" class=\"fxValueInputAutocomplete\"> </div>");
 
             // initialize autocomplete
-            FxJavascriptUtils.beginJavascript(out);
-            FxJavascriptUtils.writeYahooRequires(out, "autocomplete");
+            beginJavascript(out);
+            writeYahooRequires(out, "autocomplete");
             FxJavascriptUtils.onYahooLoaded(out,
                     "function() {\n"
                             + "    var handler = eval('(' + \"" + StringUtils.replace(autocompleteHandler, "\"", "\\\"") + "\" + ')');\n"
@@ -933,7 +938,7 @@ class EditModeHelper extends RenderHelper {
                             + "    ac.forceSelection = false;\n"
                             + "}"
             );
-            FxJavascriptUtils.endJavascript(out);
+            endJavascript(out);
         }
 
         public String getAutocompleteHandler() {
@@ -985,8 +990,8 @@ class EditModeHelper extends RenderHelper {
             final ResponseWriter out = facesContext.getResponseWriter();
             final String containerId = "cal_" + inputClientId;
             out.write("<div id=\"" + containerId + "\" class=\"popupCalendar\"> </div>\n");
-            FxJavascriptUtils.beginJavascript(out);
-            FxJavascriptUtils.writeYahooRequires(out, "calendar");
+            beginJavascript(out);
+            writeYahooRequires(out, "calendar");
             FxJavascriptUtils.onYahooLoaded(out,
                     "function() {\n"
                             + "    var button = document.getElementById('" + buttonId + "');\n"
@@ -1011,7 +1016,7 @@ class EditModeHelper extends RenderHelper {
                             + "          function() { cal.show(); Dom.setXY(container, Dom.getXY(button)); }, cal, true);\n"
                             + "}"
             );
-            FxJavascriptUtils.endJavascript(out);
+            endJavascript(out);
         }
 
         @Override

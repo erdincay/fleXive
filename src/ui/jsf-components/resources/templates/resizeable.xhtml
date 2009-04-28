@@ -1,0 +1,37 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+      xmlns:t="http://myfaces.apache.org/tomahawk">
+
+Description:
+Adds a YUI Resize control for the body contents. The child element should specify 100% for both
+width and height to adapt to the resize box size. 
+
+Parameters:
+
+<ui:composition>
+
+    <div id="fx_resizeable_#{fxSystemBean.counter['fx_resizeable']}" class="fxResizeable">
+        <ui:insert/>
+    </div>
+
+    <script type="text/javascript">
+    <!--
+        flexive.yui.require("resize");
+        flexive.yui.onYahooLoaded(
+                function() {
+                    new YAHOO.util.Resize("fx_resizeable_#{fxSystemBean.counterValue['fx_resizeable']}");
+                }
+        );
+    //-->
+    </script>
+
+</ui:composition>
+
+
+</html>

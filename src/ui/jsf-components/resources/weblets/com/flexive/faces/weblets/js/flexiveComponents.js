@@ -161,15 +161,19 @@ flexive.yui = new function() {
     this.load = function() {
         if (this.requiredComponents.length > 0) {
             // load Yahoo UI only if at least one component is required
-            var loader = new YAHOO.util.YUILoader({
-                        base: flexive.componentsWebletUrl + "js/yui/",
-                        require: this.requiredComponents,
-                        loadOptional: true,
-                        onSuccess: function() {
-                            flexive.yui.processOnYahoo();
-                        }
-                });
-            loader.insert();
+            try {
+                var loader = new YAHOO.util.YUILoader({
+                            base: flexive.componentsWebletUrl + "js/yui/",
+                            require: this.requiredComponents,
+                            loadOptional: true,
+                            onSuccess: function() {
+                                flexive.yui.processOnYahoo();
+                            }
+                    });
+                loader.insert();
+            } catch (e) {
+                // exception during initialization, probably YUI hasn't been included on the page
+            }
         } else {
             flexive.yui.processOnYahoo();   // FX-428
         }

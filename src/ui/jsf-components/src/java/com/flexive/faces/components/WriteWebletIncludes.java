@@ -32,10 +32,8 @@
 package com.flexive.faces.components;
 
 import com.flexive.faces.FxJsfUtils;
-import com.flexive.faces.FxJsfComponentUtils;
 import static com.flexive.faces.FxJsfComponentUtils.getBooleanValue;
 import com.flexive.faces.beans.SystemBean;
-import com.flexive.faces.javascript.FxJavascriptUtils;
 import static com.flexive.faces.javascript.FxJavascriptUtils.beginJavascript;
 import static com.flexive.faces.javascript.FxJavascriptUtils.endJavascript;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
@@ -65,6 +63,8 @@ public class WriteWebletIncludes extends UIOutput {
     private static final String WEBLET_TINYMCE = "com.flexive.faces.weblets/js/tiny_mce/tiny_mce.js";
     private static final String WEBLET_YUI = "com.flexive.faces.weblets/js/yui/yuiloader/yuiloader-min.js";
     private static final String WEBLET_JSONRPC = "com.flexive.faces.weblets/js/jsonrpc.js";
+
+    private static final String PADDING = "\n    ";
 
     private Map<String, Boolean> weblets = new HashMap<String, Boolean>();
     private boolean htmlEditor = false;
@@ -131,11 +131,10 @@ public class WriteWebletIncludes extends UIOutput {
     public void encodeBegin(FacesContext facesContext) throws IOException {
         super.encodeBegin(facesContext);
         final ResponseWriter out = facesContext.getResponseWriter();
-        final String padding = "\n    ";
         if (FxJsfUtils.getRequest().getAttribute(REQ_RENDERED) == null) {
             // render weblet includes only once
             for (String weblet : weblets.keySet()) {
-                out.write(padding);
+                out.write(PADDING);
                 out.write(StringUtils.defaultString(getWebletInclude(weblet)));
             }
             FxJsfUtils.getRequest().setAttribute(REQ_RENDERED, true);
@@ -146,19 +145,23 @@ public class WriteWebletIncludes extends UIOutput {
         out.write("flexive.componentsWebletUrl='" + FacesWebletUtils.getURL(facesContext, "com.flexive.faces.weblets", "") + "';\n");
         endJavascript(out);
         if (isHtmlEditor()) {
-            out.write(padding);
-            out.write(getWebletInclude(WEBLET_TINYMCE));
-            out.write(padding);
+            renderWebletInclude(out, WEBLET_TINYMCE);
+            out.write(PADDING);
             beginJavascript(out);
             out.write("flexive.input.initHtmlEditor(false);");
             endJavascript(out);
         }
         if (isYui()) {
-            out.write(getWebletInclude(WEBLET_YUI));
+            renderWebletInclude(out, WEBLET_YUI);
         }
         if (isJsonRpc()) {
-            out.write(getWebletInclude(WEBLET_JSONRPC));
+            renderWebletInclude(out, WEBLET_JSONRPC);
         }
+    }
+
+    private void renderWebletInclude(ResponseWriter out, String weblet) throws IOException {
+        out.write(PADDING);
+        out.write(getWebletInclude(weblet));
     }
 
     public boolean isHtmlEditor() {

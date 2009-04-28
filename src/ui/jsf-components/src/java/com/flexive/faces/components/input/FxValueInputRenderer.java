@@ -84,6 +84,7 @@ public class FxValueInputRenderer extends Renderer {
     protected static final String CSS_LANG_ICON = "fxValueInputLanguageIcon";
     protected static final String CSS_SINGLE_LANG = "singleLanguage";
     protected static final String CSS_FIND_REFERENCES = "findReferencesIcon";
+    protected static final String CSS_RESIZEABLE = "fxResizeable";
     private static final String DBG = "fxValueInput: ";
 
     /**

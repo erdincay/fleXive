@@ -32,7 +32,11 @@
     <adm:tab label="#{fxMessageBean['SqlSearch.fxsql.tabtitle.query']}" active="true" id="tab1"/>
 
     <a4j:region>
-        <h:inputTextarea id="query" value="#{sqlSearchBean.query}" style="width:98%" rows="10"/>
+        <div style="width: 95%">
+            <fx:resizeable>
+                <h:inputTextarea id="query" value="#{sqlSearchBean.query}" style="width:100%; height: 100%" rows="10"/>
+            </fx:resizeable>
+        </div>
         <br/>
         <h:panelGroup id="briefcaseSettings">
     <!--
@@ -44,7 +48,7 @@
     -->
             <fx:formRow label="#{fxMessageBean['SqlSearch.fxsql.field.createBriefcase']}" id="createBriefcase">
                 <t:selectBooleanCheckbox id="createBriefcase" value="#{sqlSearchBean.createBriefcase}"
-                                         onchange="toggleBriefcase(this)"/>
+                                         onclick="toggleBriefcase(this)"/>
             </fx:formRow>
 
             <h:panelGroup id="briefcaseData" style="display:none">

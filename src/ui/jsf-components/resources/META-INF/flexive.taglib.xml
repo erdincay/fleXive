@@ -59,6 +59,10 @@
         <source>../templates/linearizeFxValueInputs.xhtml</source>
     </tag>
     <tag>
+        <tag-name>resizeable</tag-name>
+        <source>../templates/resizeable.xhtml</source>
+    </tag>
+    <tag>
         <tag-name>colorPicker</tag-name>
        <handler-class>com.flexive.faces.components.ColorPickerHandler</handler-class>
     </tag>
