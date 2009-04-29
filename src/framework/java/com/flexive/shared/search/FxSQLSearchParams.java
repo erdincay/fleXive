@@ -34,7 +34,7 @@ package com.flexive.shared.search;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxLanguage;
 import com.flexive.shared.FxSharedUtils;
-import com.flexive.shared.FxFormatUtils;
+import com.flexive.shared.interfaces.SearchEngine;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.UserTicket;
@@ -42,10 +42,6 @@ import com.flexive.shared.security.UserTicket;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Date;
-import java.text.SimpleDateFormat;
-
-import org.apache.commons.lang.StringUtils;
 
 /**
  * Search parameters
@@ -54,7 +50,6 @@ import org.apache.commons.lang.StringUtils;
  */
 public class FxSQLSearchParams implements Serializable {
     private static final long serialVersionUID = -3154811997979332790L;
-    private static final int DEFAULT_QUERY_TIMEOUT = 15; /*seconds*/
 
     /**
      * The cache modes of the search.
@@ -277,7 +272,7 @@ public class FxSQLSearchParams implements Serializable {
      * @return the query timeout
      */
     public int getQueryTimeout() {
-        return (queryTimeout < 0) ? DEFAULT_QUERY_TIMEOUT : queryTimeout;
+        return (queryTimeout < 0) ? SearchEngine.DEFAULT_QUERY_TIMEOUT : queryTimeout;
     }
 
 }

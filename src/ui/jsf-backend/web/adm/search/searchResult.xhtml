@@ -165,6 +165,9 @@
             }
             
             flexive.yui.onYahooLoaded(function() {
+                if (resultTable == null) {
+                    return; // no result available
+                }
                 // store sort information in form variables
                 resultTable.subscribe("columnSortEvent", function(args) {
                     document.getElementById("frm:sortColumnKey").value = args.column.key;

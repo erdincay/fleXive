@@ -36,6 +36,7 @@ import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.faces.messages.FxFacesMsgInfo;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
+import com.flexive.shared.interfaces.SearchEngine;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxInvalidQueryNodeException;
 import com.flexive.shared.exceptions.FxRuntimeException;
@@ -70,6 +71,8 @@ import java.util.Scanner;
 public class QueryEditorBean implements Serializable {
     private static final Log LOG = LogFactory.getLog(QueryEditorBean.class);
     private static final long serialVersionUID = -7734399826904382438L;
+    private static final String SESSION_QUERY = "query";
+    private static final String SESSION_TIMEOUT = "timeout";
 
     /**
      * JSF root component containing the query editor
@@ -84,6 +87,7 @@ public class QueryEditorBean implements Serializable {
     private int removeNodeId = -1;
     private String nodeSelection = null;
     private boolean reloadSearchPanel = false;
+    private int queryTimeout = SearchEngine.DEFAULT_QUERY_TIMEOUT;
 
     private SqlQueryBuilder queryBuilder;
     private ResultLocation location = AdminResultLocations.ADMIN;
@@ -196,6 +200,7 @@ public class QueryEditorBean implements Serializable {
             new FxFacesMsgErr("QueryEditor.err.buildQuery", e).addToContext();
             return false;
         }
+        builder.timeout(queryTimeout);
         return true;
     }
 
@@ -398,7 +403,7 @@ public class QueryEditorBean implements Serializable {
 
     public QueryRootNode getRootNode() {
         if (rootNode == null) {
-            rootNode = (QueryRootNode) FxJsfUtils.getSession().getAttribute(getQueryTreeStore());
+            rootNode = (QueryRootNode) sessionGet(SESSION_QUERY);
         }
         if (rootNode == null) {
             try {
@@ -443,7 +448,7 @@ public class QueryEditorBean implements Serializable {
      * Stores the current query in the user session.
      */
     private void updateQueryStore() {
-        FxJsfUtils.getSession().setAttribute(getQueryTreeStore(), rootNode);
+        sessionPut(SESSION_QUERY, rootNode);
     }
 
     public ResultLocation getLocation() {
@@ -481,6 +486,19 @@ public class QueryEditorBean implements Serializable {
         this.addNodeLive = addNodeLive;
     }
 
+    public int getQueryTimeout() {
+        final Object sessionTimeout = sessionGet(SESSION_TIMEOUT);
+        if (sessionTimeout != null) {
+            queryTimeout = (Integer) sessionTimeout;
+        }
+        return queryTimeout;
+    }
+
+    public void setQueryTimeout(int queryTimeout) {
+        this.queryTimeout = queryTimeout;
+        sessionPut(SESSION_TIMEOUT, queryTimeout);
+    }
+
     /**
      * Return the current tab title of the query tab.
      *
@@ -497,10 +515,20 @@ public class QueryEditorBean implements Serializable {
      *
      * @return the session attribute key for storing the current query
      */
-    private String getQueryTreeStore() {
+    private String getQueryTreeStore(String key) {
         return "FlexiveSearchQueryTree/" + location + "/" + QueryRootNode.Type.CONTENTSEARCH
+                + "/" + key
                 + FacesContext.getCurrentInstance().getViewRoot().getViewId();
     }
+
+    private Object sessionGet(String key) {
+        return FxJsfUtils.getSessionAttribute(getQueryTreeStore(key));
+    }
+
+    private void sessionPut(String key, Object value) {
+        FxJsfUtils.setSessionAttribute(getQueryTreeStore(key), value);
+    }
+
 
     public boolean isReloadSearchPanel() {
         return reloadSearchPanel;

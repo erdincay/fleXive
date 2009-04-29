@@ -7,7 +7,8 @@
       xmlns:c="http://java.sun.com/jstl/core"
       xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
       xmlns:adm="http://www.flexive.com/jsf/admin"
-      xmlns:fx="http://www.flexive.com/jsf/core">
+      xmlns:fx="http://www.flexive.com/jsf/core"
+      xmlns:rich="http://richfaces.org/rich">
 <body>
 
 <ui:composition template="/adm/contentTemplate.xhtml">
@@ -36,39 +37,49 @@
                                 addAssignmentNode="form['frm:addAssignmentNodeId']"
                                 addAssignmentNodeValue="#{fxQueryEditorBean.addAssignmentNodeId}"
                                 selectionNode="form['frm:nodeSelection']"
-                                emptyMessageKey="QueryEditor.label.emptyQuery.backend"/>
+                                emptyMessageKey="QueryEditor.label.emptyQuery.backend">
+
+                    <ui:define name="tableFooter">
+
+                        <rich:simpleTogglePanel label="#{fxMessageBean['QueryEditor.label.legend.parameters']}" switchType="client" opened="false"
+                                                styleClass="queryRoot" style="width: 596px; margin:-1px 0 0 0">
+                            <!-- Cache options -->
+            <!--                <fx:formRow labelKey="QueryEditor.label.cacheMode" id="cacheMode">
+                                <h:selectOneListbox id="cacheMode" value="#{fxSearchResultBean.cacheMode}" size="1" required="true">
+                                    <f:selectItems value="#{fxSelectBean.cacheModes}" />
+                                </h:selectOneListbox>
+                            </fx:formRow>
+                -->
+
+                            <fx:formRow labelKey="QueryEditor.label.query.timeout" id="queryTimeout">
+                                <h:inputText id="queryTimeout" value="#{fxQueryEditorBean.queryTimeout}"/>
+                            </fx:formRow>
+                            <fx:formRow labelKey="QueryEditor.label.briefcase.create" id="createBriefcase">
+                                <t:selectBooleanCheckbox id="createBriefcase" value="#{fxSearchResultBean.createBriefcase}"
+                                                         onclick="toggleBriefcase(this)"/>
+                            </fx:formRow>
+
+                            <h:panelGroup id="briefcaseData" style="display:#{fxSearchResultBean.createBriefcase ? 'block' : 'none'}">
+                                <fx:formRow labelKey="QueryEditor.label.briefcase.name" id="briefcaseName" >
+                                    <h:inputText id="briefcaseName" value="#{fxSearchResultBean.briefcaseName}" styleClass="fxValueTextInput"/>
+                                </fx:formRow>
+                                <fx:formRow labelKey="QueryEditor.label.briefcase.description" id="briefcaseDescription">
+                                    <h:inputText id="briefcaseDescription" value="#{fxSearchResultBean.briefcaseDescription}" styleClass="fxValueTextInput"/>
+                                </fx:formRow>
+                                <fx:formRow labelKey="QueryEditor.label.briefcase.shared" id="briefcaseACL">
+                                    <h:selectOneListbox id="briefcaseACL" value="#{fxSearchResultBean.briefcaseAclId}" size="1" styleClass="fxValueSelectInput">
+                                        <f:selectItem itemValue="-1" itemLabel=""/>
+                                        <f:selectItems value="#{fxSelectBean.briefcaseACLs}" />
+                                    </h:selectOneListbox>
+                                </fx:formRow>
+                            </h:panelGroup>
+                        </rich:simpleTogglePanel>
+
+                    </ui:define>
+                    
+                </fx:queryEditor>
 			</a4j:region>
 
-            <br/>
-            <fx:fieldSet legend="#{fxMessageBean['QueryEditor.label.legend.parameters']}">
-                <!-- Cache options -->
-<!--                <fx:formRow labelKey="QueryEditor.label.cacheMode" id="cacheMode">
-                    <h:selectOneListbox id="cacheMode" value="#{fxSearchResultBean.cacheMode}" size="1" required="true">
-                        <f:selectItems value="#{fxSelectBean.cacheModes}" />
-                    </h:selectOneListbox>
-                </fx:formRow>
-    -->
-
-                <fx:formRow labelKey="QueryEditor.label.briefcase.create" id="createBriefcase">
-                    <t:selectBooleanCheckbox id="createBriefcase" value="#{fxSearchResultBean.createBriefcase}"
-                                             onclick="toggleBriefcase(this)"/>
-                </fx:formRow>
-
-                <h:panelGroup id="briefcaseData" style="display:#{fxSearchResultBean.createBriefcase ? 'block' : 'none'}">
-                    <fx:formRow labelKey="QueryEditor.label.briefcase.name" id="briefcaseName" >
-                        <h:inputText id="briefcaseName" value="#{fxSearchResultBean.briefcaseName}" styleClass="fxValueTextInput"/>
-                    </fx:formRow>
-                    <fx:formRow labelKey="QueryEditor.label.briefcase.description" id="briefcaseDescription">
-                        <h:inputText id="briefcaseDescription" value="#{fxSearchResultBean.briefcaseDescription}" styleClass="fxValueTextInput"/>
-                    </fx:formRow>
-                    <fx:formRow labelKey="QueryEditor.label.briefcase.shared" id="briefcaseACL">
-                        <h:selectOneListbox id="briefcaseACL" value="#{fxSearchResultBean.briefcaseAclId}" size="1" styleClass="fxValueSelectInput">
-                            <f:selectItem itemValue="-1" itemLabel=""/>
-                            <f:selectItems value="#{fxSelectBean.briefcaseACLs}" />
-                        </h:selectOneListbox>
-                    </fx:formRow>
-                </h:panelGroup>
-            </fx:fieldSet>
 
             <br/><br/>
 			
@@ -85,9 +96,12 @@
             <adm:commandButton id="saveDefaultButton" location="both" bean="#{fxQueryEditorBean}" action="saveDefault" labelKey="QueryEditor.button.saveDefault" confirmKey="QueryEditor.confirm.saveDefault" icon="home">
                 <f:setPropertyActionListener target="#{fxQueryEditorBean.location}" value="#{fxSystemBean.adminResultLocation}"/>
             </adm:commandButton>
+            <adm:commandButton id="showSql" location="both" onclick="showQueryEditorSql(); return false;" lockscreen="false" 
+                               icon="showsql" labelKey="QueryEditor.button.sql"/>
             <!--<adm:commandButton id="preferencesButton" location="toolbar" labelKey="ResultPreferences.button.open" bean="#{resultPreferencesBean}" action="show" icon="configure"/>-->
 
             <adm:toolbarPluginButtons/>
+
 
             <script type="text/javascript">
             <!--

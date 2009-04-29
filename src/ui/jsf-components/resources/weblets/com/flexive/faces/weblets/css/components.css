@@ -115,11 +115,14 @@ div.fxValueInputAutocomplete {
 
 /* Query editor */
 
+.queryRoot {
+    width: 600px;
+}
+
 table.queryRoot {
     border-collapse: separate;
     border: 1px solid #A0A0A0;
     background-color: #EAF1D6;
-    width: 600px;
 }
 
 table.queryRoot td.nestedTable {

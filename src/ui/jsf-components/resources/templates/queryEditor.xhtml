@@ -21,6 +21,8 @@ Parameters:
     addAssignmentNodeValue = id of the preselected node (no node will be selected for -1 or empty values)
     selectionNode = form element for storing the current selection (a comma-separated list of node IDs)
     emptyMessageKey = message key of the message to be displayed when the current query is empty
+    showSqlButton = if true, a (Javascript) button for displaying the current query's FxSQL representation will be displayed.
+                    You can also invoke this functionality from the outside by calling the showQueryEditorSql() function. 
 
 <ui:composition>
 
@@ -36,6 +38,15 @@ Parameters:
                 flexive.yui.setMenuItem("or", "disabled", rowSelection.selectedIds.length < 2);
             } catch (e) {
                 alert(e);
+            }
+        }
+
+        function showQueryEditorSql() {
+            if (sqlPopupDialog.cfg.getProperty("visible")) {
+                sqlPopupDialog.hide();
+            } else {
+                document.getElementById('frm:refreshSqlButton').onclick();
+                sqlPopupDialog.show();
             }
         }
     //-->
@@ -94,6 +105,11 @@ Parameters:
                 </div>
             </ui:fragment>
 
+            <ui:fragment rendered="#{not empty nodes}">
+                <ui:insert name="tableFooter"/>
+            </ui:fragment>
+
+
             <script type="text/javascript">
 
                 rowSelection.updateActiveRow(#{addAssignmentNodeValue});
@@ -112,38 +128,40 @@ Parameters:
     <div style="display:none">
         <!-- Add property command link -->
         <a4j:commandButton id="addAssignmentButton"
-                       reRender="queryEditor"
+                       reRender="queryEditor,sqlPopupPanel"
                        actionListener="#{fxQueryEditorBean.addAssignment}"
                        eventsQueue="queryEditor"
                        value="Add property"/>
         <a4j:commandButton id="addPropertyButton"
-                       reRender="queryEditor"
+                       reRender="queryEditor,sqlPopupPanel"
                        actionListener="#{fxQueryEditorBean.addProperty}"
                        eventsQueue="queryEditor"
                        value="Add property"/>
         <a4j:commandButton id="addTreeNodeButton"
-                       reRender="queryEditor"
+                       reRender="queryEditor,sqlPopupPanel"
                        actionListener="#{fxQueryEditorBean.addTreeNode}"
                        eventsQueue="queryEditor"
                        value="Add tree node"/>
         <a4j:commandButton id="addTypeButton"
-                       reRender="queryEditor"
+                       reRender="queryEditor,sqlPopupPanel"
                        actionListener="#{fxQueryEditorBean.addTypeQuery}"
                        eventsQueue="queryEditor"
                        value="Add type"/>
         <a4j:commandButton id="createAndSubquery"
-                        reRender="queryEditor"
+                        reRender="queryEditor,sqlPopupPanel"
                         actionListener="#{fxQueryEditorBean.createAndSubquery}"
                         eventsQueue="queryEditor"
                         value="Join selected nodes with and"/>
         <a4j:commandButton id="createOrSubquery"
-                        reRender="queryEditor"
+                        reRender="queryEditor,sqlPopupPanel"
                         actionListener="#{fxQueryEditorBean.createOrSubquery}"
                         eventsQueue="queryEditor"
                         value="Join selected nodes with or"/>
     </div>
 
-    <a href="javascript:document.getElementById('frm:refreshSqlButton').onclick();sqlPopupDialog.show();">#{fxMessageBean['QueryEditor.button.sql']}</a>
+    <ui:fragment rendered="showSqlButton">
+        <a href="javascript:showQueryEditorSql();">#{fxMessageBean['QueryEditor.button.sql']}</a>
+    </ui:fragment>
 
 </ui:composition>
 

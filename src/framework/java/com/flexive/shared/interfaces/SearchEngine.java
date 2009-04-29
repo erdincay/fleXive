@@ -54,6 +54,11 @@ public interface SearchEngine {
      *
      */
     String PROP_USERWILDCARD = "@*";
+    /**
+     * The default query timeout in seconds.
+     * @since 3.1
+     */
+    int DEFAULT_QUERY_TIMEOUT = 30; 
 
     /**
      * Executes a query.

@@ -42,6 +42,10 @@ Parameters:
             flexive.yui.onYahooLoaded(function() {
                 var containerElName = "#{var}_datatable";
                 var createFun = function(result) {
+                    if (result == null) {
+                        // no result available, return dummy object
+                        return null;
+                    }
                     var actionColumnHandler = #{empty actionColumnHandler ? 'null' : actionColumnHandler};
                     // get JSON representation of the search result
                     var view = flexive.yui.datatable.getViewWrapper(result, actionColumnHandler);
@@ -102,12 +106,14 @@ Parameters:
 
 
                 #{var} = createFun(#{fx:getJsonResult(value, viewType)});
-                #{var}._reset = function(result) {
-                    var reset = #{var}._reset;  // keep old method
-                    // wipe out the entire datatable and create a new one
-                    #{var}.destroy();
-                    #{var} = createFun(result);
-                    #{var}._reset = reset;
+                if (#{var} != null) {
+                    #{var}._reset = function(result) {
+                        var reset = #{var}._reset;  // keep old method
+                        // wipe out the entire datatable and create a new one
+                        #{var}.destroy();
+                        #{var} = createFun(result);
+                        #{var}._reset = reset;
+                    }
                 }
             });
         //-->

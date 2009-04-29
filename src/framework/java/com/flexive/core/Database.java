@@ -434,10 +434,7 @@ public final class Database {
      * @return true if the SqlError is a unique constraint violation
      */
     public static boolean isUniqueConstraintViolation(Exception exc) {
-        if (!(exc instanceof SQLException)) {
-            return false;
-        }
-        int sqlErr = ((SQLException) exc).getErrorCode();
+        final int sqlErr = getSqlErrorCode(exc);
         switch (FxContext.get().getDivisionData().getDbVendor()) {
             case MySQL:
                 //see http://dev.mysql.com/doc/refman/5.1/en/error-messages-server.html
@@ -468,10 +465,7 @@ public final class Database {
      * @return true if the SqlError is a foreign key violation
      */
     public static boolean isForeignKeyViolation(Exception exc) {
-        if (!(exc instanceof SQLException)) {
-            return false;
-        }
-        final int errorCode = ((SQLException) exc).getErrorCode();
+        final int errorCode = getSqlErrorCode(exc);
         switch (FxContext.get().getDivisionData().getDbVendor()) {
             case MySQL:
                 //see http://dev.mysql.com/doc/refman/5.0/en/error-messages-server.html
@@ -482,6 +476,41 @@ public final class Database {
             default:
                 return false;
         }
+    }
+
+    /**
+     * Returns true if the given exception was caused by a query timeout.
+     *
+     * @param e the exception to be examined
+     * @return  true if the given exception was caused by a query timeout
+     * @since 3.1
+     */
+    public static boolean isQueryTimeout(Exception e) {
+        final int errorCode = getSqlErrorCode(e);
+        switch (FxContext.get().getDivisionData().getDbVendor()) {
+            case MySQL:
+                //see http://dev.mysql.com/doc/refman/5.0/en/error-messages-server.html
+                return errorCode == 1317 || errorCode == 1028
+                        || e.getClass().getName().equals("com.mysql.jdbc.exceptions.MySQLTimeoutException");
+            case H2:
+                //see http://h2database.com/javadoc/org/h2/constant/ErrorCode.html#c23002
+                return errorCode == 90051;
+            default:
+                return false;
+        }
+    }
+
+    /**
+     * Returns the error code if the given exception is an SQLException, or -1 otherwise.
+     *
+     * @param e the exception to be examined
+     * @return  the error code if the given exception is an SQLException, or -1 otherwise.
+     */
+    private static int getSqlErrorCode(Exception e) {
+        if (!(e instanceof SQLException)) {
+            return -1;
+        }
+        return ((SQLException) e).getErrorCode();
     }
 
     /**

@@ -74,6 +74,8 @@ public class SearchResultBean implements ActionBean, Serializable {
     private String briefcaseName;
     private Boolean createBriefcase;
 
+    private boolean queryFailed;    // set to true in request when query execution failed to prevent re-submission during processing
+
 
     /**
      * {@inheritDoc}
@@ -163,11 +165,7 @@ public class SearchResultBean implements ActionBean, Serializable {
             new FxFacesMsgErr("Briefcase.err.name").addToContext();
             return FxJsfUtils.getManagedBean(QueryEditorBean.class).show();
         }
-        try {
-            getResult();
-        } catch (FxApplicationException e) {
-            new FxFacesMsgErr(e).addToContext();
-        }
+        getResult();
         return "contentResult";
     }
 
@@ -207,43 +205,59 @@ public class SearchResultBean implements ActionBean, Serializable {
         return show();
     }
 
-    public FxResultSet getResult() throws FxApplicationException {
+    public FxResultSet getResult() {
         if (location.isCacheInSession()) {
             result = getSessionData().getResult();
         }
-        if (result == null) {
-            if (Boolean.TRUE.equals(createBriefcase)) {
-                getQueryBuilder().saveInBriefcase(briefcaseName, briefcaseDescription, briefcaseAclId);
-                new FxFacesMsgInfo("Briefcase.nfo.created", briefcaseName).addToContext();
-            }
+        if (result == null && !queryFailed) {
+            try {
+                if (Boolean.TRUE.equals(createBriefcase)) {
+                    getQueryBuilder().saveInBriefcase(briefcaseName, briefcaseDescription, briefcaseAclId);
+                    new FxFacesMsgInfo("Briefcase.nfo.created", briefcaseName).addToContext();
+                }
 
-            final FxResultSet result = getQueryBuilder()
-                    .select("@pk", "@permissions", "@*")
-                    .startRow(0)
-                    .maxRows(Integer.MAX_VALUE)
-                    .getResult();
-            if (getTypeId() != -1) {
-                // check if type ID is still available
-                boolean found = false;
-                for (FxFoundType foundType : result.getContentTypes()) {
-                    if (foundType.getContentTypeId() == getTypeId()) {
-                        found = true;
-                        break;
+                final FxResultSet result = getQueryBuilder()
+                        .select("@pk", "@permissions", "@*")
+                        .startRow(0)
+                        .maxRows(Integer.MAX_VALUE)
+                        .getResult();
+                if (getTypeId() != -1) {
+                    // check if type ID is still available
+                    boolean found = false;
+                    for (FxFoundType foundType : result.getContentTypes()) {
+                        if (foundType.getContentTypeId() == getTypeId()) {
+                            found = true;
+                            break;
+                        }
+                    }
+                    // reset type ID if it is no longer present (e.g. because a content was removed)
+                    if (!found) {
+                        setTypeId(-1);
                     }
                 }
-                // reset type ID if it is no longer present (e.g. because a content was removed)
-                if (!found) {
-                    setTypeId(-1);
+                if (getTypeId() == -1 && result.getContentTypes().size() == 1) {
+                    // no type selected, but only one found - search already performed for the specific type
+                    setTypeId(result.getContentTypes().get(0).getContentTypeId());
                 }
-            }
-            if (getTypeId() == -1 && result.getContentTypes().size() == 1) {
-                // no type selected, but only one found - search already performed for the specific type
-                setTypeId(result.getContentTypes().get(0).getContentTypeId());
-            }
 
-            setResult(result);
+                setResult(result);
+            } catch (FxApplicationException e ) {
+                if (!e.isMessageLogged()) {
+                    LOG.warn("Failed to execute query: " + e.getMessage(), e);
+                }
+                onQueryException(e);
+            } catch (Exception e) {
+                onQueryException(e);
+            }
         }
         return result;
+    }
+
+    private void onQueryException(Exception e) {
+        new FxFacesMsgErr(e).addToContext();
+        queryFailed = true;     // prevent execution on next getter call of this request
+        getSessionData().setContentTypes(new ArrayList<FxFoundType>(0));
+        resetFilters();
     }
 
     public void setResult(FxResultSet result) {
@@ -523,7 +537,7 @@ public class SearchResultBean implements ActionBean, Serializable {
      */
     public static String getJsonResult(Object key, String viewType) throws IOException {
         if (key == null) {
-            return "{}";
+            return null;
         }
         final ResultViewType resultViewType = StringUtils.isNotBlank(viewType)
                 ? ResultViewType.valueOf(viewType.toUpperCase())

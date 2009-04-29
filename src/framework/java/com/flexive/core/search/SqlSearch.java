@@ -324,6 +324,13 @@ public class SqlSearch {
         } catch (FxSqlSearchException exc) {
             throw exc;
         } catch (SQLException exc) {
+            if (Database.isQueryTimeout(exc)) {
+                if (LOG.isWarnEnabled()) {
+                    LOG.warn("Query timeout after " + params.getQueryTimeout() + " seconds:\n"
+                            + query + "\n\nSQL:\n" + selectSql);
+                }
+                throw new FxSqlSearchException(exc, "ex.sqlSearch.query.timeout", params.getQueryTimeout());
+            }
             throw new FxSqlSearchException(LOG, exc, "ex.sqlSearch.failed", exc.getMessage(), query, selectSql);
         } catch (Exception e) {
             throw new FxSqlSearchException(LOG, e, "ex.sqlSearch.failed", e.getMessage(), query, selectSql);
