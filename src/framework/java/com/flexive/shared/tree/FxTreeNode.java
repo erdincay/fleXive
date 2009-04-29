@@ -57,6 +57,7 @@ public class FxTreeNode implements Serializable, SelectableObjectWithLabel, Sele
     private boolean markForDelete = false;
     protected FxString label = null;
     protected FxPK reference;
+    protected long referenceTypeId = 0;
     protected FxTreeMode mode;
     protected int position;
     protected List<FxTreeNode> children;
@@ -98,6 +99,7 @@ public class FxTreeNode implements Serializable, SelectableObjectWithLabel, Sele
      * @param id               node id
      * @param parentNodeId     id of the parent node
      * @param reference        pk of the referenced content
+     * @param referenceTypeId  type id of the referenced content
      * @param ACLId            acl of the referenced content
      * @param name             name (part of the path)
      * @param path             complete path from the root node
@@ -118,13 +120,14 @@ public class FxTreeNode implements Serializable, SelectableObjectWithLabel, Sele
      * @param mayRelate        relate permission for the calling user
      * @param mayExport        export permission for the calling user
      */
-    public FxTreeNode(FxTreeMode mode, long id, long parentNodeId, FxPK reference, long ACLId, String name, String path,
+    public FxTreeNode(FxTreeMode mode, long id, long parentNodeId, FxPK reference, long referenceTypeId, long ACLId, String name, String path,
                       FxString label, int position, List<FxTreeNode> children, List<Long> childIds, int depth,
                       int totalChildCount, int directChildCount, boolean leaf, boolean dirty, long modifiedAt,
                       String data, boolean mayEdit, boolean mayCreate, boolean mayDelete, boolean mayRelate, boolean mayExport) {
         this.path = FxFormatUtils.escapeTreePath(path);
         this.label = label;
         this.reference = reference;
+        this.referenceTypeId = referenceTypeId;
         this.ACLId = ACLId;
         this.mode = mode;
         this.position = position;
@@ -238,6 +241,15 @@ public class FxTreeNode implements Serializable, SelectableObjectWithLabel, Sele
      */
     public FxPK getReference() {
         return reference;
+    }
+
+    /**
+     * Get the type id of the referenced content
+     * 
+     * @return type id of the referenced content
+     */
+    public long getReferenceTypeId() {
+        return referenceTypeId;
     }
 
     /**
@@ -466,7 +478,7 @@ public class FxTreeNode implements Serializable, SelectableObjectWithLabel, Sele
      */
     public static FxTreeNode createErrorNode(long nodeId, String message) {
         return new FxTreeNode(FxTreeMode.Edit, nodeId, 0,
-                FxPK.createNewPK(), ACLCategory.INSTANCE.getDefaultId(), "Error", message, new FxString(false, "Error"), Integer.MAX_VALUE,
+                FxPK.createNewPK(), 0L, ACLCategory.INSTANCE.getDefaultId(), "Error", message, new FxString(false, "Error"), Integer.MAX_VALUE,
                 new ArrayList<FxTreeNode>(0), new ArrayList<Long>(0), 0, 0, 0, true, true,
                 System.currentTimeMillis(), "", true, true, true, true, true);
     }
@@ -507,7 +519,7 @@ public class FxTreeNode implements Serializable, SelectableObjectWithLabel, Sele
      */
     public static FxTreeNode createNewTemporaryChildNode(FxTreeNode parentNode) {
         FxTreeNode n = new FxTreeNode(parentNode.getMode(), (System.currentTimeMillis() * -1), parentNode.getId(),
-                FxPK.createNewPK(), ACLCategory.INSTANCE.getDefaultId(), "@@TMP", "",
+                FxPK.createNewPK(), 0L, ACLCategory.INSTANCE.getDefaultId(), "@@TMP", "",
                 new FxString(parentNode.getLabel().isMultiLanguage(), ""), Integer.MAX_VALUE,
                 new ArrayList<FxTreeNode>(0), new ArrayList<Long>(0), 0, 0, 0, true, true,
                 System.currentTimeMillis(), "", true, true, true, true, true).flagTemporary();

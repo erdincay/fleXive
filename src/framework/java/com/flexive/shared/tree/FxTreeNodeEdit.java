@@ -60,10 +60,10 @@ public class FxTreeNodeEdit extends FxTreeNode implements Serializable {
      * @param node the tree node to make editable
      */
     public FxTreeNodeEdit(FxTreeNode node) {
-        super(node.getMode(), node.getId(), node.getParentNodeId(), node.getReference(), node.getACLId(), node.getName(), node.getPath(),
-                node.getLabel(), node.getPosition(), node.getChildren(), node.getChildIds(), node.getDepth(),
-                node.getTotalChildCount(), node.getDirectChildCount(), node.isLeaf(), node.isDirty(),
-                node.getModifiedAt(), node.getData(), true, true, true, true, true);
+        super(node.getMode(), node.getId(), node.getParentNodeId(), node.getReference(), node.getReferenceTypeId(), 
+                node.getACLId(), node.getName(), node.getPath(), node.getLabel(), node.getPosition(), node.getChildren(),
+                node.getChildIds(), node.getDepth(), node.getTotalChildCount(), node.getDirectChildCount(),
+                node.isLeaf(), node.isDirty(), node.getModifiedAt(), node.getData(), true, true, true, true, true);
         this.isNew = false;
         this.newName = node.getName();
         this.originalMode = node.getMode();
@@ -77,7 +77,7 @@ public class FxTreeNodeEdit extends FxTreeNode implements Serializable {
      */
     public FxTreeNodeEdit(String name) {
         super(FxTreeMode.Edit, (System.currentTimeMillis() * -1), ROOT_NODE,
-                FxPK.createNewPK(), ACLCategory.INSTANCE.getDefaultId(), name, "", new FxString(false, name), Integer.MAX_VALUE,
+                FxPK.createNewPK(), 0L, ACLCategory.INSTANCE.getDefaultId(), name, "", new FxString(false, name), Integer.MAX_VALUE,
                 new ArrayList<FxTreeNode>(0), new ArrayList<Long>(0), 0, 0, 0, true, true,
                 System.currentTimeMillis(), "", true, true, true, true, true);
         this.isNew = true;
@@ -91,7 +91,7 @@ public class FxTreeNodeEdit extends FxTreeNode implements Serializable {
      */
     public FxTreeNodeEdit(String name, long parentNode) {
         super(FxTreeMode.Edit, (System.currentTimeMillis() * -1), parentNode,
-                FxPK.createNewPK(), ACLCategory.INSTANCE.getDefaultId(), name, "", new FxString(false, name), Integer.MAX_VALUE,
+                FxPK.createNewPK(), 0L, ACLCategory.INSTANCE.getDefaultId(), name, "", new FxString(false, name), Integer.MAX_VALUE,
                 new ArrayList<FxTreeNode>(0), new ArrayList<Long>(0), 0, 0, 0, true, true,
                 System.currentTimeMillis(), "", true, true, true, true, true);
         this.isNew = true;
@@ -106,7 +106,7 @@ public class FxTreeNodeEdit extends FxTreeNode implements Serializable {
      */
     public static FxTreeNodeEdit createNewChildNode(FxTreeNode parentNode) {
         FxTreeNodeEdit edit = new FxTreeNode(parentNode.getMode(), (System.currentTimeMillis() * -1), parentNode.getId(),
-                FxPK.createNewPK(), parentNode.getACLId(), "", "", new FxString(parentNode.getLabel().isMultiLanguage(), ""), Integer.MAX_VALUE,
+                FxPK.createNewPK(), 0L, parentNode.getACLId(), "", "", new FxString(parentNode.getLabel().isMultiLanguage(), ""), Integer.MAX_VALUE,
                 new ArrayList<FxTreeNode>(0), new ArrayList<Long>(0), 0, 0, 0, true, true,
                 System.currentTimeMillis(), "", true, true, true, true, true).asEditable();
         edit.isNew = true;
@@ -121,7 +121,7 @@ public class FxTreeNodeEdit extends FxTreeNode implements Serializable {
      */
     public static FxTreeNodeEdit createNew(String name) {
         FxTreeNodeEdit edit = new FxTreeNode(FxTreeMode.Edit, (System.currentTimeMillis() * -1), ROOT_NODE,
-                FxPK.createNewPK(), ACLCategory.INSTANCE.getDefaultId(), name, "", new FxString(false, name), Integer.MAX_VALUE,
+                FxPK.createNewPK(), 0L, ACLCategory.INSTANCE.getDefaultId(), name, "", new FxString(false, name), Integer.MAX_VALUE,
                 new ArrayList<FxTreeNode>(0), new ArrayList<Long>(0), 0, 0, 0, true, true,
                 System.currentTimeMillis(), "", true, true, true, true, true).asEditable();
         edit.isNew = true;

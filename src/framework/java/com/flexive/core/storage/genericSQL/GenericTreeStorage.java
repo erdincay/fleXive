@@ -712,7 +712,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
                 }
                 FxString label = Database.loadContentDataFxString(con, "FTEXT1024", "ID=" + _ref.getId() + " AND " +
                         (mode == FxTreeMode.Live ? "ISMAX_VER=1" : "ISLIVE_VER=1") + " AND TPROP=" + EJBLookup.getConfigurationEngine().get(SystemParameters.TREE_CAPTION_PROPERTY));
-                return new FxTreeNode(mode, _id, _parent, _ref, _acl, _name, getPathById(con, mode, _id), label,
+                return new FxTreeNode(mode, _id, _parent, _ref, _type.getId(), _acl, _name, getPathById(con, mode, _id), label,
                         _pos, new ArrayList<FxTreeNode>(0), new ArrayList<Long>(0), _depth, _totalChilds, _directChilds,
                         _directChilds == 0, _dirty, _modified, _data, _edit, _create, _delete, _relate, _export);
             } else
@@ -781,7 +781,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
                 FxString label = Database.loadContentDataFxString(con, "FTEXT1024", "ID=" + _ref.getId() + " AND " +
                         (mode == FxTreeMode.Live ? "ISMAX_VER=1" : "ISLIVE_VER=1") + " AND TPROP=" + EJBLookup.getConfigurationEngine().get(SystemParameters.TREE_CAPTION_PROPERTY));
 
-                FxTreeNode node = new FxTreeNode(mode, _id, _parent, _ref, rs.getLong(12), _name, getPathById(con, mode, _id), label,
+                FxTreeNode node = new FxTreeNode(mode, _id, _parent, _ref, _type.getId(), rs.getLong(12), _name, getPathById(con, mode, _id), label,
                         _pos, new ArrayList<FxTreeNode>(0), new ArrayList<Long>(0), _depth, _totalChilds, _directChilds,
                         _directChilds == 0, _dirty, _modified, _data, _edit, _create, _delete, _relate, _export);
                 ret.add(node);
@@ -893,7 +893,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
                 if (_read && (!env.getMandator(_mandator).isActive() || type.getState() == TypeState.Unavailable))
                     _read = false; //filter out inactive mandators and unavailable types
                 if (_read) {
-                    FxTreeNode node = new FxTreeNode(mode, _id, _parent, _ref, _acl, _name, FxTreeNode.PATH_NOT_LOADED, label,
+                    FxTreeNode node = new FxTreeNode(mode, _id, _parent, _ref, _tdef, _acl, _name, FxTreeNode.PATH_NOT_LOADED, label,
                             _pos, new ArrayList<FxTreeNode>(10), new ArrayList<Long>(10), _depth, _totalChilds, _directChilds,
                             _directChilds == 0, _dirty, _modified, _data, _edit, _create, _delete, _relate, _export);
                     FxTreeNode parent = data.get(node.getParentNodeId());
