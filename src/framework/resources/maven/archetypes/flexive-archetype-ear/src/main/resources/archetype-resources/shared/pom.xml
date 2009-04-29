@@ -10,6 +10,15 @@
 	<name>shared</name>
 	<packaging>jar</packaging>
     <dependencies>
+
+        <!-- Disable this dependency if you don't need to process binary documents (Word, PDF, Excel, ...)
+             and want to save about 7 MB of libraries -->
+        <dependency>
+            <groupId>com.flexive</groupId>
+            <artifactId>flexive-extractor-documents</artifactId>
+            <type>pom</type>
+        </dependency>
+
         <dependency>
             <groupId>javax.ejb</groupId>
             <artifactId>ejb-api</artifactId>

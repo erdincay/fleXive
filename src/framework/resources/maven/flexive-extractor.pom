@@ -30,71 +30,17 @@
     </scm>
 
     <dependencies>
-        <dependency>
-            <groupId>pdfbox</groupId>
-            <artifactId>pdfbox</artifactId>
-            <version>0.7.3</version>
-            <optional>false</optional>
 
-            <exclusions>
-                <exclusion>
-                    <groupId>bouncycastle</groupId>
-                    <artifactId>bcmail-jdk14</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>bouncycastle</groupId>
-                    <artifactId>bcprov-jdk14</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.poi</groupId>
-            <artifactId>poi</artifactId>
-            <version>3.2-FINAL</version>
-
-            <exclusions>
-                <exclusion>
-                    <groupId>log4j</groupId>
-                    <artifactId>log4j</artifactId>
-                </exclusion>
-            </exclusions>
-
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.poi</groupId>
-            <artifactId>poi-contrib</artifactId>
-            <version>3.2-FINAL</version>
-
-            <exclusions>
-                <exclusion>
-                    <groupId>log4j</groupId>
-                    <artifactId>log4j</artifactId>
-                </exclusion>
-            </exclusions>
-
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.poi</groupId>
-            <artifactId>poi-scratchpad</artifactId>
-            <version>3.2-FINAL</version>
-
-            <exclusions>
-                <exclusion>
-                    <groupId>log4j</groupId>
-                    <artifactId>log4j</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <!-- If you include SwingLabs' pdf-renderer, a preview image will be generated when
-             creating a "Document" instance with a PDF file -->
+        <!--
+            Include a dependency to flexive-extractor-documents if you want to handle binary formats
+            like PDF, Word, Excel, PowerPoint ....
+            
+            These libraries are rather large, so they are disabled by default.
+        -->
         <dependency>
             <groupId>com.flexive</groupId>
-            <artifactId>pdf-renderer</artifactId>
-            <version>1.0-20090423</version>
+            <artifactId>flexive-extractor-documents</artifactId>
+            <version>@FLEXIVE_VERSION@</version>
             <optional>true</optional>
         </dependency>
 

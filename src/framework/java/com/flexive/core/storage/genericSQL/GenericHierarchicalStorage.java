@@ -38,8 +38,7 @@ import com.flexive.core.LifeCycleInfoImpl;
 import com.flexive.core.conversion.ConversionEngine;
 import com.flexive.core.storage.ContentStorage;
 import com.flexive.core.storage.StorageManager;
-import com.flexive.extractor.ExtractedData;
-import com.flexive.extractor.HtmlExtractor;
+import com.flexive.extractor.htmlExtractor.HtmlExtractor;
 import com.flexive.shared.*;
 import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.content.*;
@@ -51,9 +50,9 @@ import com.flexive.shared.scripting.FxScriptBinding;
 import com.flexive.shared.scripting.FxScriptEvent;
 import com.flexive.shared.scripting.FxScriptResult;
 import com.flexive.shared.security.ACL;
+import com.flexive.shared.security.ACLPermission;
 import com.flexive.shared.security.Mandator;
 import com.flexive.shared.security.UserTicket;
-import com.flexive.shared.security.ACLPermission;
 import com.flexive.shared.stream.BinaryUploadPayload;
 import com.flexive.shared.stream.FxStreamUtils;
 import com.flexive.shared.structure.*;
@@ -1029,17 +1028,15 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                         checkDataType(FxHTML.class, value, data.getXPathFull());
                         boolean useTidy = ((FxHTML) value).isTidyHTML();
                         ps.setBoolean(pos[1], useTidy);
-                        if (useTidy)
-                            translatedValue = doTidy(data.getXPathFull(), (String) translatedValue);
-                        String extracted;
-                        ExtractedData xd = HtmlExtractor.extract(useTidy
-                                ? (String) translatedValue
-                                : doTidy(data.getXPathFull(), (String) translatedValue));
-                        if (xd == null) {
-                            throw new FxUpdateException("ex.content.value.extraction.failed");
-                        } else
-                            extracted = xd.getText();
-                        ps.setString(pos[2], extracted);
+                        final String extractorInput = doTidy(data.getXPathFull(), (String) translatedValue);
+                        if (useTidy) {
+                            translatedValue = extractorInput;
+                        } 
+                        final HtmlExtractor result = new HtmlExtractor(
+                                extractorInput,
+                                true
+                        );
+                        ps.setString(pos[2], result.getText());
                         ps.setString(pos[0], (String) translatedValue);
                         break;
                     case String1024:

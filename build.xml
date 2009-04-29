@@ -775,6 +775,7 @@ database.vendor=MySQL
         <maven-deploy-with-sources path="${build.ui.jar.dir}" name="flexive-backend"/>
 
         <maven-deploy-with-sources path="${flexive.lib.dir}" name="flexive-extractor"/>
+        <maven-deploy file="${flexive.base.build.dir}/flexive-extractor-documents.pom" pom="flexive-extractor-documents.pom"/>
         <maven-deploy-with-sources path="${flexive.lib.dir}" name="flexive-sqlParser"/>
         <maven-deploy file="${flexive.lib.dir}/fxStream.jar" pom="fxStream.pom"/>
         <maven-deploy-with-sources path="${flexive.lib.dir}" name="flexive-h2"/>
