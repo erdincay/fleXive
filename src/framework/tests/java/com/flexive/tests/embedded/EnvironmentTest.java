@@ -165,6 +165,35 @@ public class EnvironmentTest {
         }
     }
 
+    /**
+     * Tests #propertyExistsInType and #groupExistsInType
+     */
+    @Test(groups= {"ejb", "environment"})
+    public void testPropAndGroupExistWithinTypes() {
+        final String typeName = "CONTACTDATA";
+        final String prop1 = "NAME";
+        final String group1 = "ADDRESS";
+        final String assignment = "DISPLAYNAME";
+        final String nonExistingType = "IDONTEXIST01234";
+        Assert.assertTrue(getEnvironment().propertyExistsInType(typeName, prop1));
+        Assert.assertTrue(getEnvironment().propertyExistsInType(typeName, prop1.toLowerCase()));
+        Assert.assertTrue(getEnvironment().groupExistsInType(typeName, group1));
+        Assert.assertTrue(getEnvironment().groupExistsInType(typeName, group1.toLowerCase()));
+        Assert.assertFalse(getEnvironment().groupExistsInType(typeName, assignment));
+        Assert.assertFalse(getEnvironment().groupExistsInType(typeName, assignment.toLowerCase()));
+
+        try {
+            getEnvironment().propertyExistsInType(nonExistingType, prop1);
+        } catch(Exception e){
+            // expected
+        }
+
+        try {
+            getEnvironment().groupExistsInType(nonExistingType, prop1);
+        } catch(Exception e) {
+            // expected
+        }
+    }
 
     private <T> void testUnmodifiableList(String source, List<T> list, T dummyInstance) {
         try {

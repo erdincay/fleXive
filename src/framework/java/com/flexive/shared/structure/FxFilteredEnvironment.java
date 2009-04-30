@@ -309,6 +309,20 @@ public final class FxFilteredEnvironment implements FxEnvironment {
     /**
      * {@inheritDoc}
      */
+    public boolean propertyExistsInType(String typeName, String propertyName) {
+        return environment.propertyExistsInType(typeName, propertyName);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean groupExistsInType(String typeName, String groupName) {
+        return environment.groupExistsInType(typeName, groupName);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public boolean assignmentExists(String xPath) {
         return environment.assignmentExists(xPath);
     }

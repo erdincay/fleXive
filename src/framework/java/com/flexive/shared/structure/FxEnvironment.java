@@ -247,6 +247,24 @@ public interface FxEnvironment extends Serializable {
     boolean propertyExists(String name);
 
     /**
+     * Check if a property exists within the given type
+     *
+     * @param typeName the type's name
+     * @param propertyName the property's name
+     * @return exists
+     */
+    public boolean propertyExistsInType(String typeName, String propertyName);
+
+    /**
+     * Check if a group exists within the given type
+     *
+     * @param typeName the type's name
+     * @param groupName the group's name
+     * @return exists
+     */
+    public boolean groupExistsInType(String typeName, String groupName);
+
+    /**
      * Check if an assignment with the requested XPath exists
      *
      * @param xPath XPath of the assignment

@@ -162,7 +162,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
         throw new FxNotFoundException("ex.stepdefinition.load.notFound", id).asRuntimeException();
     }
 
-     /**
+    /**
      * {@inheritDoc}
      */
     public StepDefinition getStepDefinition(String name) {
@@ -635,10 +635,45 @@ public final class FxEnvironmentImpl implements FxEnvironment {
     /**
      * {@inheritDoc}
      */
+    public boolean propertyExistsInType(String typeName, String propertyName) {
+        if (!typeExists(typeName))
+            throw new FxNotFoundException("ex.structure.type.notFound.name", typeName).asRuntimeException();
+
+        for (FxPropertyAssignment a : getPropertyAssignments(true)) {
+            if (a.getAssignedType().getId() == getType(typeName).getId() && !a.isDerivedAssignment()) {
+                if (propertyName.toUpperCase().equals(a.getProperty().getName()))
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean groupExistsInType(String typeName, String groupName) {
+        if (!typeExists(typeName))
+            throw new FxNotFoundException("ex.structure.type.notFound.name", typeName).asRuntimeException();
+
+        for (FxGroupAssignment a : getGroupAssignments(true)) {
+            if (a.getAssignedType().getId() == getType(typeName).getId() && !a.isDerivedAssignment()) {
+                if (groupName.toUpperCase().equals(a.getGroup().getName()))
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+
     public boolean assignmentExists(String xPath) {
         if (xPath != null && xPath.trim().length() > 0) {
             try {
-                if( !XPathElement.isValidXPath(xPath) )
+                if (!XPathElement.isValidXPath(xPath))
                     return false; //avoid exceptions on malformed xpath's
                 xPath = XPathElement.toXPathNoMult(xPath);
             } catch (FxInvalidParameterException e) {
@@ -655,8 +690,8 @@ public final class FxEnvironmentImpl implements FxEnvironment {
      * {@inheritDoc}
      */
     public boolean groupExists(String name) {
-        for(FxGroup check: groups)
-            if( check.getName().equalsIgnoreCase(name))
+        for (FxGroup check : groups)
+            if (check.getName().equalsIgnoreCase(name))
                 return true;
         return false;
     }
