@@ -99,11 +99,7 @@ public class FxPermissionUtils {
                 addACLName(lacking, ticket.getLanguage(), stepACL);
             if (!contentAllowed)
                 addACLName(lacking, ticket.getLanguage(), contentACL);
-            String[] params = new String[lacking.size() + 1];
-            params[0] = "ex.acl.name." + permission.toString().toLowerCase();
-            for (int i = 0; i < lacking.size(); i++)
-                params[i + 1] = lacking.get(i);
-            throw new FxNoAccessException("ex.acl.noAccess.extended." + lacking.size(), (Object[]) params);
+            throw noAccess(permission, lacking);
         }
         return typeAllowed && stepAllowed && contentAllowed;
     }
@@ -156,13 +152,17 @@ public class FxPermissionUtils {
                 addACLName(lacking, ticket.getLanguage(), si.getStepACL());
             if (!contentAllowed)
                 addACLName(lacking, ticket.getLanguage(), si.getContentACL());
-            String[] params = new String[lacking.size() + 1];
-            params[0] = "ex.acl.name." + permission.toString().toLowerCase();
-            for (int i = 0; i < lacking.size(); i++)
-                params[i + 1] = lacking.get(i);
-            throw new FxNoAccessException("ex.acl.noAccess.extended." + lacking.size(), (Object[]) params);
+            throw noAccess(permission, lacking);
         }
         return typeAllowed && stepAllowed && contentAllowed && propertyAllowed;
+    }
+
+    private static FxNoAccessException noAccess(ACLPermission permission, List<String> lacking) {
+        String[] params = new String[lacking.size() + 1];
+        params[0] = "ex.acl.name." + permission.toString().toLowerCase();
+        for (int i = 0; i < lacking.size(); i++)
+            params[i + 1] = lacking.get(i);
+        return new FxNoAccessException("ex.acl.noAccess.extended." + lacking.size(), (Object[]) params);
     }
 
     /**

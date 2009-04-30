@@ -593,4 +593,15 @@ public final class FxFormatUtils {
                     e.getMessage()).asRuntimeException();
         }
     }
+
+    /**
+     * Remove special command characters (such as newlines) from the given string.
+     *
+     * @param text  the string to be filtered
+     * @return      the string without command characters
+     * @since       3.1
+     */
+    public static String removeCommandChars(String text) {
+        return text.replaceAll("[\\x00-\\x09\\x0B-\\x1F]","");
+    }
 }

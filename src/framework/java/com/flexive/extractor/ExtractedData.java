@@ -31,6 +31,8 @@
  ***************************************************************/
 package com.flexive.extractor;
 
+import com.flexive.shared.FxFormatUtils;
+
 import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Hashtable;
@@ -47,7 +49,7 @@ public class ExtractedData implements Serializable {
             this.text = "";
             return;
         }
-        this.text = text.trim().replaceAll("[\\x00-\\x09\\x0B-\\x1F]","");
+        this.text = FxFormatUtils.removeCommandChars(text.trim());
     }
 
     /**

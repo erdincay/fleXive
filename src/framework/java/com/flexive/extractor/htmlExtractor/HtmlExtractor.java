@@ -31,6 +31,8 @@
  ***************************************************************/
 package com.flexive.extractor.htmlExtractor;
 
+import com.flexive.shared.FxFormatUtils;
+
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
@@ -166,7 +168,7 @@ public class HtmlExtractor {
      * @return the extracted text
      */
     public String getText() {
-        return this.result.toString();
+        return FxFormatUtils.removeCommandChars(this.result.toString().trim());
     }
 
     /**
