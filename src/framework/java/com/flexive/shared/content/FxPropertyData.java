@@ -156,7 +156,7 @@ public class FxPropertyData extends FxData {
      */
     @Override
     public boolean isEmpty() {
-        return this.value.isEmpty();
+        return this.value == null || this.value.isEmpty();
     }
 
     /**

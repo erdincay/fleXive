@@ -40,7 +40,7 @@
 //author: Markus Plesser, Unique Computing Solutions GmbH
 import com.flexive.shared.value.*
 
-if( content.getPropertyData("/Document").isEmpty() ) {
+if( !content.containsValue("/Document") ) {
     println "No document present to parse!"
     return content
 }
@@ -48,9 +48,9 @@ if( content.getPropertyData("/Document").isEmpty() ) {
 def binValue = content.getPropertyData("/Document").value.defaultTranslation
 if( binValue.metadata == null || binValue.metadata.length() < 20) {
     println "No metadata present for document to process!"
-    if( content.getValue("/TITLE").isEmpty() )
+    if( !content.containsValue("/TITLE"))
         content.setValue("/TITLE", new FxString(true, (String)binValue.name))
-    if( content.getValue("/ENCRYPTED").isEmpty() )
+    if( !content.containsValue("/ENCRYPTED"))
         content.setValue("/ENCRYPTED", new FxBoolean(false, false))
     return content
 }
@@ -134,14 +134,14 @@ cmap.each() {key, value ->
         case "DateTime":
         fxvalue = new FxDateTime(false, new java.util.Date(Long.valueOf(value)))
 //        println "Time is " + content.getValue("/$key").bestTranslation.time + " empty:" + content.getValue("/$key").isEmpty()
-        if (content.getValue("/$key").isEmpty()) {
+        if (!content.containsValue("/$key")) {
             content.getValue("/$key").setEmpty()
         }
         break
     }
     if (fxvalue != null) {
 //        println "fxValue=" + fxvalue
-        if (content.getValue("/" + key).isEmpty()) {
+        if (!content.containsValue("/" + key)) {
             content.setValue("/" + key, fxvalue);
 //            println "/$key -> $fxvalue"
         }
@@ -149,8 +149,8 @@ cmap.each() {key, value ->
 }
 
 
-if( content.getValue("/TITLE").isEmpty() )
+if( !content.containsValue("/TITLE") )
     content.setValue("/TITLE", new FxString(true, (String)binValue.name))
-if( content.getValue("/ENCRYPTED").isEmpty() )
+if( !content.containsValue("/ENCRYPTED") )
     content.setValue("/ENCRYPTED", new FxBoolean(false, false))
 return content

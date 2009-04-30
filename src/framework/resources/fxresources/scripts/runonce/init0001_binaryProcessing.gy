@@ -36,8 +36,3 @@ EJBLookup.getScriptingEngine().createScriptFromLibrary(FxScriptEvent.BinaryPrevi
     "BinaryProcessor_Images.gy",
     "BinaryProcessor_Images.gy",
     "Binary processing for images")
-
-EJBLookup.getScriptingEngine().createScriptFromLibrary(FxScriptEvent.BinaryPreviewProcess,
-    "BinaryProcessor_Documents.gy",
-    "BinaryProcessor_Documents.gy",
-    "Binary processing for documents")

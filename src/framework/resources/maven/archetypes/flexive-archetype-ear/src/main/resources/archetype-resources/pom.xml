@@ -72,7 +72,6 @@
             <dependency>
                 <groupId>com.flexive</groupId>
                 <artifactId>flexive-extractor-documents</artifactId>
-                <type>pom</type>
                 <version>${flexive.version}</version>
             </dependency>
             <dependency>

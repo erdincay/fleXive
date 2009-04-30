@@ -91,9 +91,7 @@ class DocumentType {
     }
 
     void createScriptMappings() {
-        long scriptId = EJBLookup.scriptingEngine.createScriptFromLibrary(FxScriptEvent.BeforeContentCreate,
-            "DocumentMetaParser.gy", "DocumentMetaParser.gy", "Script filling document properties").id;
-        EJBLookup.scriptingEngine.createTypeScriptMapping(scriptId, type.id, true, true)
+      // move to flexive-extractor-documents
     }
 }
 

@@ -731,11 +731,8 @@ public class FxContent implements Serializable {
      * @return if a value exists for the given XPath that is not empty
      */
     public boolean containsValue(String XPath) {
-        try {
-            return !getValue(XPath).isEmpty();
-        } catch (Exception e) {
-            return false;
-        }
+        final FxValue value = getValue(XPath);
+        return value != null && !value.isEmpty();
     }
 
     /**

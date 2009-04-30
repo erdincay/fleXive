@@ -151,9 +151,11 @@
                                 </tr>
                             </thead>
                             <c:forEach var="drop" items="#{fxSystemBean.dropApplications}">
-                                <tr>
-                                    <td><a href="#{fxSystemBean.serverBase}/#{drop.contextRoot}" target="#{drop.name}">#{drop.displayName}</a></td>
-                                </tr>
+                                <c:if test="#{drop.webContextAvailable}">
+                                    <tr>
+                                        <td><a href="#{fxSystemBean.serverBase}/#{drop.contextRoot}" target="#{drop.name}">#{drop.displayName}</a></td>
+                                    </tr>
+                                </c:if>
                             </c:forEach>
                         </table>
                     </c:if>

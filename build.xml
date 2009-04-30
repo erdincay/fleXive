@@ -34,6 +34,7 @@
 
 	<property name="sqlparser.jar" value="flexive-sqlParser.jar"/>
 	<property name="extractor.jar" value="flexive-extractor.jar"/>
+	<property name="extractor-documents.jar" value="flexive-extractor-documents.jar"/>
 
     <!-- check if sqlParser has been run -->
 	<available file="${flexive.lib.dir}/${sqlparser.jar}" property="missing.parsers"/>
@@ -229,6 +230,7 @@
 
 		<safeDelete file="${flexive.lib.dir}/${sqlparser.jar}"/>
 		<safeDelete file="${flexive.lib.dir}/${extractor.jar}"/>
+		<safeDelete file="${flexive.lib.dir}/${extractor-documents.jar}"/>
 	</target>
 
 	<target name="gen.parsers" depends="clean.parsers, prepare" description="Generate SQL and HTML parsers">
@@ -260,6 +262,9 @@
             <fileset dir="${build.framework.classes.dir}">
 				<include name="com/flexive/extractor/**"/>
 			</fileset>
+        </jar>
+        <jar jarfile="${flexive.lib.dir}/${extractor-documents.jar}">
+            <fileset  dir="${flexive.resources.framework.dir}/extractor-documents-resources" includes="**/*"/>
         </jar>
 	</target>
 
@@ -521,7 +526,7 @@
             <zipfileset prefix="lib" dir="${flexive.drop.dir}" includes="*.jar" excludes="*-ejb.jar,*.war,*.par"/>
 
             <!-- Shared libraries -->
-            <zipfileset prefix="lib" dir="${flexive.lib.dir}" includes="${sqlparser.jar},${extractor.jar},cglib*.jar,fxStream.jar,commons-io-1.1.jar,sanselan.jar,quartz*.jar,PDFRenderer.jar,commons-*.jar,jbosscache-core.jar,jgroups.jar,jboss-common-core-42-compat.jar,urlrewrite-*.jar,google-collect*.jar,jsr173_1.0_api.jar,jtidy.jar"/>
+            <zipfileset prefix="lib" dir="${flexive.lib.dir}" includes="${sqlparser.jar},${extractor.jar},${extractor-documents.jar},cglib*.jar,fxStream.jar,commons-io-1.1.jar,sanselan.jar,quartz*.jar,PDFRenderer.jar,commons-*.jar,jbosscache-core.jar,jgroups.jar,jboss-common-core-42-compat.jar,urlrewrite-*.jar,google-collect*.jar,jsr173_1.0_api.jar,jtidy.jar"/>
             <zipfileset prefix="lib" dir="${flexive.lib.dir}/groovy" includes="*.jar"/>
             <zipfileset prefix="lib" dir="${build.ui.jar.dir}" includes="*.jar" excludes="flexive-plugin-jsf-testrunner.jar"/>
             <zipfileset prefix="lib" dir="${build.ui.jar.dir}">
@@ -594,6 +599,7 @@
         <!-- Create flexive distribution -->
         <copy file="${flexive.lib.dir}/${sqlparser.jar}" tofile="${flexive.dist.lib.dir}/${sqlparser.jar}"/>
 		<copy file="${flexive.lib.dir}/${extractor.jar}" tofile="${flexive.dist.lib.dir}/${extractor.jar}"/>
+		<copy file="${flexive.lib.dir}/${extractor-documents.jar}" tofile="${flexive.dist.lib.dir}/${extractor-documents.jar}"/>
 		<copy file="${flexive.build.framework.jar.dir}/flexive-ant.jar" tofile="${flexive.dist.lib.dir}/flexive-ant.jar"/>
         <copy file="${flexive.build.framework.jar.dir}/flexive-shared.jar" tofile="${flexive.dist.lib.dir}/flexive-shared.jar"/>
         <copy todir="${flexive.dist.lib.dir}">
@@ -775,7 +781,7 @@ database.vendor=MySQL
         <maven-deploy-with-sources path="${build.ui.jar.dir}" name="flexive-backend"/>
 
         <maven-deploy-with-sources path="${flexive.lib.dir}" name="flexive-extractor"/>
-        <maven-deploy file="${flexive.base.build.dir}/flexive-extractor-documents.pom" pom="flexive-extractor-documents.pom"/>
+        <maven-deploy file="${flexive.lib.dir}/${extractor-documents.jar}" pom="flexive-extractor-documents.pom"/>
         <maven-deploy-with-sources path="${flexive.lib.dir}" name="flexive-sqlParser"/>
         <maven-deploy file="${flexive.lib.dir}/fxStream.jar" pom="fxStream.pom"/>
         <maven-deploy-with-sources path="${flexive.lib.dir}" name="flexive-h2"/>

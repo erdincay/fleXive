@@ -423,7 +423,9 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.ScriptManagement);
         String code = FxSharedUtils.loadFromInputStream(FxSharedUtils.getResourceStream(dropName + "Resources/scripts/library/" + libraryname), -1);
         if (code == null || code.length() == 0) { // this might be a jar file
-            LOG.info("Failed to locate script in regular application library, checking for drop application in classpath JARs");
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Failed to locate script in regular application library, checking for drop application in classpath JARs");
+            }
             JarInputStream jarStream;
             try {
                 final FxDropApplication dropApplication = FxSharedUtils.getDropApplication(dropName);

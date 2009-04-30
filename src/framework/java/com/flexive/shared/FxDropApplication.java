@@ -106,11 +106,25 @@ public class FxDropApplication implements Serializable {
     /**
      * Return the context root of the web application. This defaults to the <code>name</code>,
      * but can be customized in <code>flexive-application.properties</code>.
+     * <p>
+     * When an application uses <p>flexive-application.properties</p> but does not specify a
+     * contextRoot, it is assumed that the application does not provide a web context.
+     * </p>
      *
      * @return the context root of the web application
      */
     public String getContextRoot() {
         return contextRoot;
+    }
+
+    /**
+     * Returns true when the drop application has a web context available (i.e. a context root has been set).
+     *
+     * @return  true when the drop application has a web context available (i.e. a context root has been set).
+     * @since 3.0.3
+     */
+    public boolean isWebContextAvailable() {
+        return contextRoot != null;
     }
 
     /**

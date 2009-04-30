@@ -8,7 +8,6 @@
     <artifactId>flexive-extractor-documents</artifactId>
     <version>@FLEXIVE_VERSION@</version>
     <description>Flexive Metadata Extractor</description>
-    <packaging>pom</packaging>
 
     <licenses>
         <license>

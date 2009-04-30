@@ -34,6 +34,7 @@ package com.flexive.shared;
 import com.flexive.shared.exceptions.FxCreateException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxNotFoundException;
+import com.flexive.shared.exceptions.FxLoadException;
 import com.flexive.shared.structure.FxAssignment;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.value.FxValue;
@@ -165,8 +166,9 @@ public final class FxSharedUtils {
      * @param searchPattern the pattern to be examined as a String
      * @param isFile        if true, the searchPattern is treated as a file name, if false, the searchPattern will be treated as a path
      * @return Returns all entries found for the given search pattern as a Map<String, String>, or null if no matches were found
+     * @throws IOException  on I/O errors
      */
-    public static Map<String, String> getContentsFromJarStream(JarInputStream jarStream, String searchPattern, boolean isFile) {
+    public static Map<String, String> getContentsFromJarStream(JarInputStream jarStream, String searchPattern, boolean isFile) throws IOException {
         Map<String, String> jarContents = new HashMap<String, String>();
         int found = 0;
         try {
@@ -186,10 +188,10 @@ public final class FxSharedUtils {
                         }
                     }
                 }
-                LOG.info("Found " + found + " entries in the JarInputStream for the pattern " + searchPattern);
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Found " + found + " entries in the JarInputStream for the pattern " + searchPattern);
+                }
             }
-        } catch (Exception e) {
-            LOG.error("Failed to load entries from JAR file: " + e.getMessage(), e);
         } finally {
             if (jarStream != null) {
                 try {
@@ -198,7 +200,7 @@ public final class FxSharedUtils {
                     LOG.warn("Failed to close stream: " + e.getMessage(), e);
                 }
             } else {
-                LOG.error("JarInputStream parameter was null, no search performed");
+                LOG.warn("JarInputStream parameter was null, no search performed");
             }
         }
 
@@ -214,27 +216,28 @@ public final class FxSharedUtils {
      * @param entry     the given entry in the jar file
      * @return the entry's content as a String
      */
-    public static String readFromJarEntry(JarInputStream jarStream, JarEntry entry) {
+    public static String readFromJarEntry(JarInputStream jarStream, JarEntry entry) throws IOException {
         String fileContent = "";
-        try {
-            if (entry.getSize() >= 0) {
-                // allocate buffer for the entire (uncompressed) script code
-                final byte[] buffer = new byte[(int) entry.getSize()];
-                // decompress JAR entry
-                if (jarStream.read(buffer, 0, (int) entry.getSize()) != entry.getSize()) {
-                    LOG.error("Failed to read complete script code for script: " + entry.getName());
-                }
-                fileContent = new String(buffer, "UTF-8").trim();
-            } else {
-                // use this method if the file size cannot be determined
-                //(might be the case with jar files created with some jar tools)
-                int currentByte;
-                while ((currentByte = jarStream.read()) != -1) {
-                    fileContent = fileContent + (char) currentByte;
-                }
+        if (entry.getSize() >= 0) {
+            // allocate buffer for the entire (uncompressed) script code
+            final byte[] buffer = new byte[(int) entry.getSize()];
+            // decompress JAR entry
+            int offset = 0;
+            int readBytes;
+            while ((readBytes = jarStream.read(buffer, offset, (int) entry.getSize() - offset)) > 0) {
+                offset += readBytes;
             }
-        } catch (Exception e) {
-            LOG.error(e.getMessage());
+            if (offset != entry.getSize()) {
+                throw new IOException("Failed to read complete script code for script: "+ entry.getName());
+            }
+            fileContent = new String(buffer, "UTF-8").trim();
+        } else {
+            // use this method if the file size cannot be determined
+            //(might be the case with jar files created with some jar tools)
+            int currentByte;
+            while ((currentByte = jarStream.read()) != -1) {
+                fileContent = fileContent + (char) currentByte;
+            }
         }
         return fileContent;
     }
@@ -351,7 +354,7 @@ public final class FxSharedUtils {
                     dropApplications.add(
                             new FxDropApplication(
                                     name,
-                                    defaultString(contextRoot, name),
+                                    contextRoot,
                                     defaultString(displayName, name),
                                     path
                             )
@@ -475,7 +478,7 @@ public final class FxSharedUtils {
     /**
      * Helperclass holding the result of the <code>executeCommand</code> method
      *
-     * @see FxSharedUtils#executeCommand(String,String...)
+     * @see FxSharedUtils#executeCommand(String, String[])
      */
     public static final class ProcessResult {
         private String commandLine;
