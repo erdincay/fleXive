@@ -217,7 +217,7 @@ public final class FxSharedUtils {
      * @return the entry's content as a String
      */
     public static String readFromJarEntry(JarInputStream jarStream, JarEntry entry) throws IOException {
-        String fileContent = "";
+        final String fileContent;
         if (entry.getSize() >= 0) {
             // allocate buffer for the entire (uncompressed) script code
             final byte[] buffer = new byte[(int) entry.getSize()];
@@ -234,10 +234,13 @@ public final class FxSharedUtils {
         } else {
             // use this method if the file size cannot be determined
             //(might be the case with jar files created with some jar tools)
-            int currentByte;
-            while ((currentByte = jarStream.read()) != -1) {
-                fileContent = fileContent + (char) currentByte;
+            final StringBuilder out = new StringBuilder();
+            final byte[] buf = new byte[1024];
+            int readBytes;
+            while ((readBytes = jarStream.read(buf, 0, buf.length)) > 0) {
+                out.append(new String(buf, 0, readBytes, "UTF-8"));
             }
+            fileContent = out.toString();
         }
         return fileContent;
     }
