@@ -11,6 +11,23 @@
       xmlns:fx="http://www.flexive.com/jsf/core">
 
 <ui:composition template="/adm/templates/navigation.xhtml">
+    <ui:define name="head">
+        <!-- Render tree node styles for types with icons -->
+        <style type="text/css">
+            <ui:repeat var="type" value="#{fxSystemBean.environment.types}">
+                <ui:fragment rendered="#{not type.icon.isEmpty}">
+                    .TreeIconContent_#{type.id} {
+                        background-image: url('<fx:thumbnail pk="#{type.icon.defaultTranslation}" urlOnly="true" previewSize="original" width="16" height="16"/>');
+                    }
+                </ui:fragment>
+                <ui:fragment rendered="#{type.icon.isEmpty}">
+                    .TreeIconContent_#{type.id} {
+                        background-image: url("adm/images/tree/content.png");
+                    }
+                </ui:fragment>
+            </ui:repeat>
+        </style>
+    </ui:define>
     <ui:define name="content">
 
 		<script type="text/javascript">

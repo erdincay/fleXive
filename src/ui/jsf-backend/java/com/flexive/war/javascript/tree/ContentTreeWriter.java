@@ -64,7 +64,7 @@ public class ContentTreeWriter implements Serializable {
     private static final Log LOG = LogFactory.getLog(ContentTreeWriter.class);
 
     private static final String DOCTYPE_NODE = "ContentNode";
-    private static final String DOCTYPE_CONTENT = "ContentObject";
+    private static final String DOCTYPE_CONTENT = "Content_";   // content + type ID
 
     /**
      * Render the content tree beginning at the given node up to maxDepth levels deep.
@@ -159,14 +159,19 @@ public class ContentTreeWriter implements Serializable {
         properties.put("widgetId", "node_" + node.getId());
         properties.put("isDirty", liveTreeEnabled && node.isDirty());
         properties.put("mayEdit", node.isMayEdit());
-        if (node.hasReference())
+        if (node.hasReference()) {
             properties.put("referenceId", node.getReference().getId());
+            properties.put("referenceTypeId", node.getReferenceTypeId());
+        }
 
         setAllowedActions(actionsDisabled, node, liveTreeEnabled);
-        if (actionsDisabled.size() > 0)
+        if (actionsDisabled.size() > 0) {
             properties.put("actionsDisabled", actionsDisabled);
+        }
 
-        final String docType = node.hasReference() ? DOCTYPE_CONTENT : DOCTYPE_NODE;
+        final String docType = node.getReferenceTypeId() != -1
+                ? DOCTYPE_CONTENT + node.getReferenceTypeId() 
+                : DOCTYPE_NODE;
         final String label = pathMode ? node.getName() : node.getLabel().getBestTranslation();
         properties.put("nodeText", label);
         if (node.isLeaf()) {
