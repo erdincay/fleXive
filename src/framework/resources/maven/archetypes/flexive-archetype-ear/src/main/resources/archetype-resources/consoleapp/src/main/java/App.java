@@ -1,6 +1,5 @@
-package com.flexive.example.console;
+package ${package};
 
-import com.flexive.example.shared.interfaces.EJBExample;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.exceptions.FxApplicationException;
@@ -13,7 +12,7 @@ import java.util.Map;
  *
  * <p>
  * Execute with:<br/>
- * {@code  mvn install exec:java -Dexec.mainClass=com.flexive.example.console.App -Dopenejb.base=../openejb/}
+ * {@code  mvn install exec:java -Dexec.mainClass=${package}.App -Dopenejb.base=../openejb/}
  * </p>
  *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)

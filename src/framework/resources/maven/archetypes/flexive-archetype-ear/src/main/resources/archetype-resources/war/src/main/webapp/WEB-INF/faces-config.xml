@@ -20,7 +20,7 @@
 
     <managed-bean>
         <managed-bean-name>exampleBean</managed-bean-name>
-        <managed-bean-class>com.flexive.example.${artifactId}.ManagedExampleBean</managed-bean-class>
+        <managed-bean-class>${package}.ManagedExampleBean</managed-bean-class>
         <managed-bean-scope>request</managed-bean-scope>
     </managed-bean>
 

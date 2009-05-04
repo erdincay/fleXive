@@ -119,7 +119,7 @@
     
     <servlet>
         <servlet-name>SampleServlet</servlet-name>
-        <servlet-class>SampleServlet</servlet-class>
+        <servlet-class>${package}.SampleServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
     </servlet>
     

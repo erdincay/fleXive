@@ -1,10 +1,8 @@
 #set( $symbol_pound = '#' )
 #set( $symbol_dollar = '$' )
 #set( $symbol_escape = '\' )
-package com.flexive.example.ejb;
+package ${package};
 
-import com.flexive.example.shared.interfaces.EJBExample;
-import com.flexive.example.shared.interfaces.EJBExampleLocal;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.search.FxFoundType;

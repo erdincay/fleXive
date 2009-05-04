@@ -21,7 +21,7 @@
                 <configuration>
                     <programs>
                         <program>
-                            <mainClass>com.flexive.examples.console.App</mainClass>
+                            <mainClass>${package}.App</mainClass>
                             <name>app</name>
                         </program>
                     </programs>

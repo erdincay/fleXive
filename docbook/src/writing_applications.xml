@@ -1093,7 +1093,7 @@ BUILD SUCCESSFUL]]></screen>
                 </para>
                 <para>
                     <command>mvn archetype:generate -DarchetypeGroupId=com.flexive
-                        -DarchetypeArtifactId=flexive-archetype-ear -DarchetypeVersion=0.0.1-SNAPSHOT
+                        -DarchetypeArtifactId=flexive-archetype-ear -DarchetypeVersion=1.0-SNAPSHOT
                         -DarchetypeRepository=http://repo.flexive.org/maven2/ -DgroupId=mygroup
                         -DartifactId=hello-flexive -Dversion=0.1-SNAPSHOT
                     </command>

@@ -60,8 +60,8 @@
 
         <dependency>
             <groupId>org.hibernate</groupId>
-            <artifactId>jtidy-r8</artifactId>
-            <version>20060801</version>
+            <artifactId>jtidy</artifactId>
+            <version>r8-20060801</version>
         </dependency>
     </dependencies>
 </project>

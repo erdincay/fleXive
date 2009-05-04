@@ -13,7 +13,7 @@
         <module id="ear" dir="ear" name="ear"/>
         <module id="war" dir="war" name="war">
             <fileSets>
-                <fileSet filtered="true" encoding="UTF-8">
+                <fileSet filtered="true" packaged="true" encoding="UTF-8">
                     <directory>src/main/java</directory>
                     <includes>
                         <include>**/*.java</include>
@@ -42,7 +42,7 @@
         </module>
         <module id="ejb-jar" dir="ejb-jar" name="ejb-jar">
             <fileSets>
-                <fileSet filtered="true" encoding="UTF-8">
+                <fileSet filtered="true" packaged="true" encoding="UTF-8">
                     <directory>src/main/java</directory>
                     <includes>
                         <include>**/*.java</include>
@@ -52,7 +52,7 @@
         </module>
         <module id="shared" dir="shared" name="shared">
             <fileSets>
-                <fileSet filtered="true" encoding="UTF-8">
+                <fileSet filtered="true" packaged="true" encoding="UTF-8">
                     <directory>src/main/java</directory>
                     <includes>
                         <include>**/*.java</include>
@@ -69,7 +69,7 @@
         </module>
         <module id="consoleapp" dir="consoleapp" name="consoleapp">
             <fileSets>
-                <fileSet filtered="true" encoding="UTF-8">
+                <fileSet filtered="true" packaged="true" encoding="UTF-8">
                     <directory>src/main/java</directory>
                     <includes>
                         <include>**/*.java</include>
