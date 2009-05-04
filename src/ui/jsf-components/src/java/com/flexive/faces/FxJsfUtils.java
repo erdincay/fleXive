@@ -46,6 +46,7 @@ import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.scripting.FxScriptInfo;
 import com.flexive.shared.security.UserTicket;
+import com.flexive.shared.security.Account;
 import com.flexive.shared.structure.FxSelectList;
 import com.flexive.shared.structure.FxSelectListItem;
 import com.flexive.war.FxRequest;
@@ -65,7 +66,6 @@ import javax.faces.component.UIViewRoot;
 import javax.faces.context.FacesContext;
 import static javax.faces.context.FacesContext.getCurrentInstance;
 import javax.faces.model.SelectItem;
-import javax.faces.model.SelectItemGroup;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
@@ -134,8 +134,21 @@ public class FxJsfUtils {
      *
      * @param value the value to be formatted
      * @return the formatted string value
+     * @deprecated
      */
     public static String formatResultValue(Object value, ContentLinkFormatter linkFormatter, String linkFormat, String itemLinkFormat) {
+        return formatResultValue(null, value, linkFormatter, linkFormat, itemLinkFormat);
+    }
+
+    /**
+     * Formats the value as returned from a flexive search query.
+     *
+     * @param propertyName the (optional) property name for the given value
+     * @param value the value to be formatted
+     * @return the formatted string value
+     * @since 3.1
+     */
+    public static String formatResultValue(String propertyName, Object value, ContentLinkFormatter linkFormatter, String linkFormat, String itemLinkFormat) {
         linkFormatter = linkFormatter != null ? linkFormatter : ContentLinkFormatter.getInstance();
         if (value == null || (value instanceof FxValue && ((FxValue) value).isEmpty())) {
             return "<i>" + FxSharedUtils.getEmptyResultMessage() + "</i>";
@@ -151,8 +164,19 @@ public class FxJsfUtils {
                     + FxFormatUtils.escapeForJavaScript(binary.getBestTranslation().getName())
                     + "\" class=\"" + Thumbnail.CSS_CLASS + "\"/>";
         } else if (value instanceof FxValue) {
+            final FxValue fxValue = (FxValue) value;
+            if (!fxValue.isEmpty() && propertyName != null) {
+                // resolve system-internal properties
+                if ("ACL".equals(propertyName)) {
+                    return CacheAdmin.getEnvironment().getACL((Long) fxValue.getBestTranslation()).getLabel().toString();
+                } else if ("TYPEDEF".equals(propertyName)) {
+                    return CacheAdmin.getEnvironment().getType((Long) fxValue.getBestTranslation()).getLabel().toString();
+                } else if ("CREATED_BY".equals(propertyName) || "MODIFIED_BY".equals(propertyName)) {
+                    return resolveUserId((Long) fxValue.getBestTranslation()); 
+                }
+            }
             //noinspection unchecked
-            return FxValueRendererFactory.getInstance().format((FxValue) value);
+            return FxValueRendererFactory.getInstance().format(fxValue);
         } else if (value instanceof FxPK) {
             return linkFormatter.format(linkFormat, (FxPK) value);
         } else if (value instanceof FxPaths) {
@@ -160,6 +184,29 @@ public class FxJsfUtils {
         } else {
             return value.toString(); // unsupported type
         }
+    }
+
+    private static String resolveUserId(long accountId) {
+        final String contextKey = FxJsfUtils.class.getName() + "_accounts";
+
+        // fetch all accounts, cache in context scope
+        if (FxContext.get().getAttribute(contextKey) == null) {
+            try {
+                FxContext.get().setAttribute(contextKey, EJBLookup.getAccountEngine().loadAll());
+            } catch (FxApplicationException e) {
+                throw e.asRuntimeException();
+            }
+        }
+
+        @SuppressWarnings({"unchecked"}) final List<Account> accounts =
+                (List<Account>) FxContext.get().getAttribute(contextKey);
+        for (Account account : accounts) {
+            if (account.getId() == accountId) {
+                return account.getName();
+            }
+        }
+        // could not resolve user ID - should not happen
+        return String.valueOf(accountId);
     }
 
     /**

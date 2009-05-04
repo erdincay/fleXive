@@ -96,8 +96,8 @@ INSERT INTO FXS_ACLASSIGNMENTS VALUES (2, 1, TRUE, FALSE, FALSE, FALSE, TRUE, FA
 
 -- Default Instance ACL
 INSERT INTO FXS_ACL VALUES (2, 0, 'Default Instance ACL', 'Default ACL for content instances', 1, '#0000AA', 2, UNIX_TIMESTAMP()*1000, 1, UNIX_TIMESTAMP()*1000);
-INSERT INTO FXS_ACL_T VALUES (2, 1, TRUE, 'Default ACL for content instances (may create, read and edit)');
-INSERT INTO FXS_ACL_T VALUES (2, 2, FALSE, 'Standard ACL fuer contents (Erstellen, Lese- und Bearbeitenberechtigung)');
+INSERT INTO FXS_ACL_T VALUES (2, 1, TRUE, 'Default ACL for content instances');
+INSERT INTO FXS_ACL_T VALUES (2, 2, FALSE, 'Standard ACL fuer contents');
 -- Assign group everyone to default content ACL, read/edit/create/export
 INSERT INTO FXS_ACLASSIGNMENTS VALUES (1, 2, TRUE, FALSE, TRUE, FALSE, TRUE, TRUE, 1, UNIX_TIMESTAMP()*1000, 1, UNIX_TIMESTAMP()*1000);
 -- Assign group "owner" to Default Instance ACL, read/edit/delete

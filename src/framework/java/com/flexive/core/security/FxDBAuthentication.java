@@ -157,7 +157,10 @@ public final class FxDBAuthentication {
                 if (lastLogin.getTime() >= SYS_UP) {
                     FxAccountInUseException aiu = new FxAccountInUseException(username, lastLoginFrom, lastLogin);
                     if (LOG.isInfoEnabled()) LOG.info(aiu);
-                    increaseFailedLoginAttempts(con, id);
+                    // don't log this as an invalid login attempt - this happens routinely when a session times
+                    // out and the cached session data has not been evicted by the maintenance task yet
+                    
+                    //increaseFailedLoginAttempts(con, id);
                     throw aiu;
                 }
             }

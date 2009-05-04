@@ -40,7 +40,6 @@ import com.flexive.shared.EJBLookup;
 import static com.flexive.shared.EJBLookup.getResultPreferencesEngine;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxRuntimeException;
-import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxUpdateException;
 import com.flexive.shared.search.*;
 import com.flexive.shared.security.PermissionSet;
@@ -52,14 +51,15 @@ import com.flexive.war.JsonWriter;
 import com.google.common.collect.Lists;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.lang.ArrayUtils;
 
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringWriter;
-import java.util.Date;
-import java.util.ArrayList;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Arrays;
 
 /**
  * Provides map interfaces for generating JSON row and column information
@@ -71,6 +71,7 @@ import java.text.SimpleDateFormat;
 public class YahooResultProvider implements Serializable {
     private static final long serialVersionUID = -4200104398592163875L;
     private static final Log LOG = LogFactory.getLog(YahooResultProvider.class);
+    private static final String[] RESOLVED_SYSTEM_PROPS = new String[]{ "ACL", "TYPEDEF", "CREATED_BY", "MODIFIED_BY" };
 
     /**
      * Returns a complete JSON representation of the given search result.
@@ -182,6 +183,7 @@ public class YahooResultProvider implements Serializable {
         writer.startAttribute("rows");
         writer.startArray();
         final SimpleDateFormat sortableDateFormat = new SimpleDateFormat("yyyyMMdd");
+        final FxEnvironment environment = CacheAdmin.getEnvironment();
         for (FxResultRow row : result.getResultRows()) {
             writer.startMap();
             for (int i = firstColumn; i <= result.getColumnCount(); i++) {
@@ -199,7 +201,7 @@ public class YahooResultProvider implements Serializable {
                     final DateRange range = (DateRange) ((FxValue) value).getBestTranslation();
                     output = createSortableDate(sortableDateFormat, value, range != null ? range.getLower() : null);
                 } else {
-                    output = FxJsfUtils.formatResultValue(value, null, null, null);
+                    output = FxJsfUtils.formatResultValue(result.getColumnName(i), value, null, null, null);
                 }
                 writer.writeAttribute(getColumnKey(result, i), output);
             }
@@ -249,22 +251,24 @@ public class YahooResultProvider implements Serializable {
             writer.writeAttribute("key", getColumnKey(result, i));
             String parser = "string";    // the YUI data parser used for sorting
             boolean funref = false;     // is parser a direct function reference?
+            final String columnName = result.getColumnName(i);
             try {
-                if ("@pk".equals(result.getColumnName(i))) {
+                if ("@pk".equals(columnName)) {
                     // PKs get rendered as <id>.<version>
                     parser = "number";
                 } else {
                     // set parser according to property type
-                    final FxProperty property = environment.getProperty(result.getColumnName(i));
+                    final FxProperty property = environment.getProperty(columnName);
                     final Class valueClass = property.getEmptyValue().getValueClass();
-                    if (Number.class.isAssignableFrom(valueClass)) {
+                    if (Number.class.isAssignableFrom(valueClass)
+                            && ArrayUtils.indexOf(RESOLVED_SYSTEM_PROPS, columnName) == -1) {
                         parser = "number";
                     }
                 }
             } catch (FxRuntimeException e) {
                 // property not found, use default
                 if (LOG.isDebugEnabled()) {
-                    LOG.debug("Property '" + result.getColumnName(i) + " not found (ignored): " + e.getMessage(), e);
+                    LOG.debug("Property '" + columnName + " not found (ignored): " + e.getMessage(), e);
                 }
             }
             writer.writeAttribute("parser", parser, !funref);
