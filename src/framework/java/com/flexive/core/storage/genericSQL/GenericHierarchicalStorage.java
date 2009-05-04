@@ -150,29 +150,24 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     protected static final String CONTENT_DATA_INSERT = "INSERT INTO " + TBL_CONTENT_DATA +
             //1  2   3   4    5      6     7         8     9      10          11        12                 13      14    15          16
             "(ID,VER,POS,LANG,ASSIGN,XPATH,XPATHMULT,XMULT,XINDEX,PARENTXMULT,ISMAX_VER,ISLIVE_VER,ISGROUP,ISMLDEF,TPROP,PARENTXPATH,XDEPTH," +
-            //17     18   19     20       21       22       23        24        25
-            "FSELECT,FREF,FDATE1,FDATE1_Y,FDATE1_M,FDATE1_D,FDATE1_HH,FDATE1_MM,FDATE1_SS," +
-            //26    27       28       29       30        31        32        33    34    35     36   37      38
-            "FDATE2,FDATE2_Y,FDATE2_M,FDATE2_D,FDATE2_HH,FDATE2_MM,FDATE2_SS,FBLOB,FCLOB,UFCLOB,FINT,FBIGINT,FTEXT1024," +
-            //39        40      41     42
+            //17     18   19     20     21    22    23     24   25      26
+            "FSELECT,FREF,FDATE1,FDATE2,FBLOB,FCLOB,UFCLOB,FINT,FBIGINT,FTEXT1024," +
+            //27        28      29     30
             "UFTEXT1024,FDOUBLE,FFLOAT,FBOOL)" +
             //                              ISGROUP     16
             "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,false,?,?,?,?," +
-            "?,?,?,?,?,?,?,?,?," +
-            "?,?,?,?,?,?,?,?,?,?,?,?,?," +
+            "?,?,?,?,?,?,?,?,?,?," +
             "?,?,?,?)";
 
     //single update statement for content data
     protected static final String CONTENT_DATA_UPDATE = "UPDATE " + TBL_CONTENT_DATA +
             //        1         2
             " SET POS=?,ISMLDEF=?," +
-            //       3      4        5          6          7          8           9           10          11
-            "FSELECT=?,FREF=?,FDATE1=?,FDATE1_Y=?,FDATE1_M=?,FDATE1_D=?,FDATE1_HH=?,FDATE1_MM=?,FDATE1_SS=?," +
-            //      12         13         14         15          16          17          18      19      20       21
-            "FDATE2=?,FDATE2_Y=?,FDATE2_M=?,FDATE2_D=?,FDATE2_HH=?,FDATE2_MM=?,FDATE2_SS=?,FBLOB=?,FCLOB=?,UFCLOB=?," +
-            //    22        23          24           25        26       27      28
+            //       3      4        5        6       7       8        9
+            "FSELECT=?,FREF=?,FDATE1=?,FDATE2=?,FBLOB=?,FCLOB=?,UFCLOB=?," +
+            //    10        11          12           13        14       15      16
             "FINT=?,FBIGINT=?,FTEXT1024=?,UFTEXT1024=?,FDOUBLE=?,FFLOAT=?,FBOOL=? " +
-            //        29        30         31           32              33
+            //        17        18         19           20              21
             "WHERE ID=? AND VER=? AND LANG=? AND ASSIGN=? AND XPATHMULT=?";
 
     //                                                                                                       1         2
@@ -258,9 +253,9 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     //position of first value
     protected final static int INSERT_VALUE_POS = 16;
     //position of last value
-    protected final static int INSERT_END_POS = 42;
+    protected final static int INSERT_END_POS = 30;
     //position of the id field (start of the wqhere clause) for detail updates
-    protected final static int UPDATE_ID_POS = 29;
+    protected final static int UPDATE_ID_POS = 17;
     protected final static int UPDATE_POS_POS = 1;
     protected final static int UPDATE_MLDEF_POS = 2;
 
@@ -321,9 +316,9 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             return -1;
         switch (prop.getDataType()) {
             case String1024:
-                return insert ? 39 : 25; //UFTEXT1024
+                return insert ? 27 : 13; //UFTEXT1024
             case Text:
-                return insert ? 35 : 21; //UFCLOB
+                return insert ? 23 : 9; //UFCLOB
             default:
                 return -1;
         }
@@ -352,55 +347,53 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         detailColumnInsertPosHash = new HashMap<FxDataType, int[]>(20);
         detailColumnUpdatePosHash = new HashMap<FxDataType, int[]>(20);
         detailColumnNameHash.put(FxDataType.Binary, array("FBLOB"));
-        detailColumnInsertPosHash.put(FxDataType.Binary, array(33));
-        detailColumnUpdatePosHash.put(FxDataType.Binary, array(19));
+        detailColumnInsertPosHash.put(FxDataType.Binary, array(21));
+        detailColumnUpdatePosHash.put(FxDataType.Binary, array(7));
         detailColumnNameHash.put(FxDataType.Boolean, array("FBOOL"));
-        detailColumnInsertPosHash.put(FxDataType.Boolean, array(42));
-        detailColumnUpdatePosHash.put(FxDataType.Boolean, array(28));
-        detailColumnNameHash.put(FxDataType.Date, array("FDATE1", "FDATE1_Y", "FDATE1_M", "FDATE1_D"));
-        detailColumnInsertPosHash.put(FxDataType.Date, array(19, 20, 21, 22));
-        detailColumnUpdatePosHash.put(FxDataType.Date, array(5, 6, 7, 8));
-        detailColumnNameHash.put(FxDataType.DateRange, array("FDATE1", "FDATE1_Y", "FDATE1_M", "FDATE1_D",
-                "FDATE2", "FDATE2_Y", "FDATE2_M", "FDATE2_D"));
-        detailColumnInsertPosHash.put(FxDataType.DateRange, array(19, 20, 21, 22, 26, 27, 28, 29));
-        detailColumnUpdatePosHash.put(FxDataType.DateRange, array(5, 6, 7, 8, 12, 13, 14, 15));
-        detailColumnNameHash.put(FxDataType.DateTime, array("FDATE1", "FDATE1_Y", "FDATE1_M", "FDATE1_D", "FDATE1_HH", "FDATE1_MM", "FDATE1_SS"));
-        detailColumnInsertPosHash.put(FxDataType.DateTime, array(19, 20, 21, 22, 23, 24, 25));
-        detailColumnUpdatePosHash.put(FxDataType.DateTime, array(5, 6, 7, 8, 9, 10, 11));
-        detailColumnNameHash.put(FxDataType.DateTimeRange, array("FDATE1", "FDATE1_Y", "FDATE1_M", "FDATE1_D", "FDATE1_HH", "FDATE1_MM", "FDATE1_SS",
-                "FDATE2", "FDATE2_Y", "FDATE2_M", "FDATE2_D", "FDATE2_HH", "FDATE2_MM", "FDATE2_SS"));
-        detailColumnInsertPosHash.put(FxDataType.DateTimeRange, array(19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32));
-        detailColumnUpdatePosHash.put(FxDataType.DateTimeRange, array(5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18));
+        detailColumnInsertPosHash.put(FxDataType.Boolean, array(30));
+        detailColumnUpdatePosHash.put(FxDataType.Boolean, array(16));
+        detailColumnNameHash.put(FxDataType.Date, array("FDATE1"));
+        detailColumnInsertPosHash.put(FxDataType.Date, array(19));
+        detailColumnUpdatePosHash.put(FxDataType.Date, array(5));
+        detailColumnNameHash.put(FxDataType.DateRange, array("FDATE1", "FDATE2"));
+        detailColumnInsertPosHash.put(FxDataType.DateRange, array(19, 20));
+        detailColumnUpdatePosHash.put(FxDataType.DateRange, array(5, 6));
+        detailColumnNameHash.put(FxDataType.DateTime, array("FDATE1"));
+        detailColumnInsertPosHash.put(FxDataType.DateTime, array(19));
+        detailColumnUpdatePosHash.put(FxDataType.DateTime, array(5));
+        detailColumnNameHash.put(FxDataType.DateTimeRange, array("FDATE1", "FDATE2"));
+        detailColumnInsertPosHash.put(FxDataType.DateTimeRange, array(19, 20));
+        detailColumnUpdatePosHash.put(FxDataType.DateTimeRange, array(5, 6));
         detailColumnNameHash.put(FxDataType.Double, array("FDOUBLE"));
-        detailColumnInsertPosHash.put(FxDataType.Double, array(40));
-        detailColumnUpdatePosHash.put(FxDataType.Double, array(26));
+        detailColumnInsertPosHash.put(FxDataType.Double, array(28));
+        detailColumnUpdatePosHash.put(FxDataType.Double, array(14));
         detailColumnNameHash.put(FxDataType.Float, array("FFLOAT"));
-        detailColumnInsertPosHash.put(FxDataType.Float, array(41));
-        detailColumnUpdatePosHash.put(FxDataType.Float, array(27));
+        detailColumnInsertPosHash.put(FxDataType.Float, array(29));
+        detailColumnUpdatePosHash.put(FxDataType.Float, array(15));
         detailColumnNameHash.put(FxDataType.LargeNumber, array("FBIGINT"));
-        detailColumnInsertPosHash.put(FxDataType.LargeNumber, array(37));
-        detailColumnUpdatePosHash.put(FxDataType.LargeNumber, array(23));
+        detailColumnInsertPosHash.put(FxDataType.LargeNumber, array(25));
+        detailColumnUpdatePosHash.put(FxDataType.LargeNumber, array(11));
         detailColumnNameHash.put(FxDataType.Number, array("FINT"));
-        detailColumnInsertPosHash.put(FxDataType.Number, array(36));
-        detailColumnUpdatePosHash.put(FxDataType.Number, array(22));
+        detailColumnInsertPosHash.put(FxDataType.Number, array(24));
+        detailColumnUpdatePosHash.put(FxDataType.Number, array(10));
         detailColumnNameHash.put(FxDataType.Reference, array("FREF"));
         detailColumnInsertPosHash.put(FxDataType.Reference, array(18));
         detailColumnUpdatePosHash.put(FxDataType.Reference, array(4));
         detailColumnNameHash.put(FxDataType.String1024, array("FTEXT1024"));
-        detailColumnInsertPosHash.put(FxDataType.String1024, array(38));
-        detailColumnUpdatePosHash.put(FxDataType.String1024, array(24));
+        detailColumnInsertPosHash.put(FxDataType.String1024, array(26));
+        detailColumnUpdatePosHash.put(FxDataType.String1024, array(12));
         detailColumnNameHash.put(FxDataType.Text, array("FCLOB"));
-        detailColumnInsertPosHash.put(FxDataType.Text, array(34));
-        detailColumnUpdatePosHash.put(FxDataType.Text, array(20));
+        detailColumnInsertPosHash.put(FxDataType.Text, array(22));
+        detailColumnUpdatePosHash.put(FxDataType.Text, array(8));
         detailColumnNameHash.put(FxDataType.HTML, array("FCLOB", "FBOOL", "UFCLOB"));
-        detailColumnInsertPosHash.put(FxDataType.HTML, array(34, 42, 35));
-        detailColumnUpdatePosHash.put(FxDataType.HTML, array(20, 28, 21));
+        detailColumnInsertPosHash.put(FxDataType.HTML, array(22, 30, 23));
+        detailColumnUpdatePosHash.put(FxDataType.HTML, array(8, 16, 9));
         detailColumnNameHash.put(FxDataType.SelectOne, array("FSELECT"));
         detailColumnInsertPosHash.put(FxDataType.SelectOne, array(17));
         detailColumnUpdatePosHash.put(FxDataType.SelectOne, array(3));
         detailColumnNameHash.put(FxDataType.SelectMany, array("FSELECT", "FTEXT1024"/*comma separated list of selected id's*/));
-        detailColumnInsertPosHash.put(FxDataType.SelectMany, array(17, 38/*comma separated list of selected id's*/));
-        detailColumnUpdatePosHash.put(FxDataType.SelectMany, array(3, 24/*comma separated list of selected id's*/));
+        detailColumnInsertPosHash.put(FxDataType.SelectMany, array(17, 26/*comma separated list of selected id's*/));
+        detailColumnUpdatePosHash.put(FxDataType.SelectMany, array(3, 12/*comma separated list of selected id's*/));
 
         mainColumnHash = new HashMap<Long, String[]>(20);
         mainColumnHash.put(0L, array("ID"));
@@ -1059,21 +1052,21 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                         gc.set(GregorianCalendar.SECOND, 0);
                         gc.set(GregorianCalendar.MILLISECOND, 0);
                         ps.setDate(pos[0], new java.sql.Date(gc.getTimeInMillis()));
-                        ps.setInt(pos[1], gc.get(GregorianCalendar.YEAR));
-                        ps.setInt(pos[2], gc.get(GregorianCalendar.MONTH) + 1);
-                        ps.setInt(pos[3], gc.get(GregorianCalendar.DAY_OF_MONTH));
+//                        ps.setInt(pos[1], gc.get(GregorianCalendar.YEAR));
+//                        ps.setInt(pos[2], gc.get(GregorianCalendar.MONTH) + 1);
+//                        ps.setInt(pos[3], gc.get(GregorianCalendar.DAY_OF_MONTH));
                         break;
                     case DateTime:
                         checkDataType(FxDateTime.class, value, data.getXPathFull());
                         if (gc == null) gc = new GregorianCalendar();
                         gc.setTime((java.util.Date) translatedValue);
                         ps.setTimestamp(pos[0], new Timestamp(gc.getTimeInMillis()));
-                        ps.setInt(pos[1], gc.get(GregorianCalendar.YEAR));
-                        ps.setInt(pos[2], gc.get(GregorianCalendar.MONTH) + 1);
-                        ps.setInt(pos[3], gc.get(GregorianCalendar.DAY_OF_MONTH));
-                        ps.setInt(pos[4], gc.get(GregorianCalendar.HOUR_OF_DAY));
-                        ps.setInt(pos[5], gc.get(GregorianCalendar.MINUTE));
-                        ps.setInt(pos[6], gc.get(GregorianCalendar.SECOND));
+//                        ps.setInt(pos[1], gc.get(GregorianCalendar.YEAR));
+//                        ps.setInt(pos[2], gc.get(GregorianCalendar.MONTH) + 1);
+//                        ps.setInt(pos[3], gc.get(GregorianCalendar.DAY_OF_MONTH));
+//                        ps.setInt(pos[4], gc.get(GregorianCalendar.HOUR_OF_DAY));
+//                        ps.setInt(pos[5], gc.get(GregorianCalendar.MINUTE));
+//                        ps.setInt(pos[6], gc.get(GregorianCalendar.SECOND));
                         break;
                     case DateRange:
                         checkDataType(FxDateRange.class, value, data.getXPathFull());
@@ -1084,38 +1077,38 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                         gc.set(GregorianCalendar.SECOND, 0);
                         gc.set(GregorianCalendar.MILLISECOND, 0);
                         ps.setDate(pos[0], new java.sql.Date(gc.getTimeInMillis()));
-                        ps.setInt(pos[1], gc.get(GregorianCalendar.YEAR));
-                        ps.setInt(pos[2], gc.get(GregorianCalendar.MONTH) + 1);
-                        ps.setInt(pos[3], gc.get(GregorianCalendar.DAY_OF_MONTH));
+//                        ps.setInt(pos[1], gc.get(GregorianCalendar.YEAR));
+//                        ps.setInt(pos[2], gc.get(GregorianCalendar.MONTH) + 1);
+//                        ps.setInt(pos[3], gc.get(GregorianCalendar.DAY_OF_MONTH));
                         gc.setTime(((DateRange) translatedValue).getUpper());
                         gc.set(GregorianCalendar.HOUR, 0);
                         gc.set(GregorianCalendar.MINUTE, 0);
                         gc.set(GregorianCalendar.SECOND, 0);
                         gc.set(GregorianCalendar.MILLISECOND, 0);
-                        ps.setDate(pos[4], new java.sql.Date(gc.getTimeInMillis()));
-                        ps.setInt(pos[5], gc.get(GregorianCalendar.YEAR));
-                        ps.setInt(pos[6], gc.get(GregorianCalendar.MONTH) + 1);
-                        ps.setInt(pos[7], gc.get(GregorianCalendar.DAY_OF_MONTH));
+                        ps.setDate(pos[1], new java.sql.Date(gc.getTimeInMillis()));
+//                        ps.setInt(pos[5], gc.get(GregorianCalendar.YEAR));
+//                        ps.setInt(pos[6], gc.get(GregorianCalendar.MONTH) + 1);
+//                        ps.setInt(pos[7], gc.get(GregorianCalendar.DAY_OF_MONTH));
                         break;
                     case DateTimeRange:
                         checkDataType(FxDateTimeRange.class, value, data.getXPathFull());
                         if (gc == null) gc = new GregorianCalendar();
                         gc.setTime(((DateRange) translatedValue).getLower());
                         ps.setTimestamp(pos[0], new Timestamp(gc.getTimeInMillis()));
-                        ps.setInt(pos[1], gc.get(GregorianCalendar.YEAR));
-                        ps.setInt(pos[2], gc.get(GregorianCalendar.MONTH) + 1);
-                        ps.setInt(pos[3], gc.get(GregorianCalendar.DAY_OF_MONTH));
-                        ps.setInt(pos[4], gc.get(GregorianCalendar.HOUR_OF_DAY));
-                        ps.setInt(pos[5], gc.get(GregorianCalendar.MINUTE));
-                        ps.setInt(pos[6], gc.get(GregorianCalendar.SECOND));
+//                        ps.setInt(pos[1], gc.get(GregorianCalendar.YEAR));
+//                        ps.setInt(pos[2], gc.get(GregorianCalendar.MONTH) + 1);
+//                        ps.setInt(pos[3], gc.get(GregorianCalendar.DAY_OF_MONTH));
+//                        ps.setInt(pos[4], gc.get(GregorianCalendar.HOUR_OF_DAY));
+//                        ps.setInt(pos[5], gc.get(GregorianCalendar.MINUTE));
+//                        ps.setInt(pos[6], gc.get(GregorianCalendar.SECOND));
                         gc.setTime(((DateRange) translatedValue).getUpper());
-                        ps.setTimestamp(pos[7], new Timestamp(gc.getTimeInMillis()));
-                        ps.setInt(pos[8], gc.get(GregorianCalendar.YEAR));
-                        ps.setInt(pos[9], gc.get(GregorianCalendar.MONTH) + 1);
-                        ps.setInt(pos[10], gc.get(GregorianCalendar.DAY_OF_MONTH));
-                        ps.setInt(pos[11], gc.get(GregorianCalendar.HOUR_OF_DAY));
-                        ps.setInt(pos[12], gc.get(GregorianCalendar.MINUTE));
-                        ps.setInt(pos[13], gc.get(GregorianCalendar.SECOND));
+                        ps.setTimestamp(pos[1], new Timestamp(gc.getTimeInMillis()));
+//                        ps.setInt(pos[8], gc.get(GregorianCalendar.YEAR));
+//                        ps.setInt(pos[9], gc.get(GregorianCalendar.MONTH) + 1);
+//                        ps.setInt(pos[10], gc.get(GregorianCalendar.DAY_OF_MONTH));
+//                        ps.setInt(pos[11], gc.get(GregorianCalendar.HOUR_OF_DAY));
+//                        ps.setInt(pos[12], gc.get(GregorianCalendar.MINUTE));
+//                        ps.setInt(pos[13], gc.get(GregorianCalendar.SECOND));
                         break;
                     case Binary:
                         checkDataType(FxBinary.class, value, data.getXPathFull());
@@ -1318,7 +1311,6 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             ps.setLong(1, created.getId());
             ps.setInt(2, created.getVersion()); //version
             ps.setInt(3, created.getQuality()); //quality
-//            ps.setString(4, binary.getHandle());
             ps.setString(4, created.getName());
             ps.setLong(5, created.getSize());
             ps.setString(6, created.getMetadata());
@@ -1626,13 +1618,13 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                                 currValue = new FxDateRange(multiLang, currLang,
                                         new DateRange(
                                                 rs.getDate(columns[0]),
-                                                rs.getDate(getColumns(((FxPropertyAssignment) currAssignment).getProperty())[4]))
+                                                rs.getDate(getColumns(((FxPropertyAssignment) currAssignment).getProperty())[1]))
                                 );
                             else
                                 currValue.setTranslation(currLang,
                                         new DateRange(
                                                 rs.getDate(columns[0]),
-                                                rs.getDate(getColumns(((FxPropertyAssignment) currAssignment).getProperty())[4]))
+                                                rs.getDate(getColumns(((FxPropertyAssignment) currAssignment).getProperty())[1]))
                                 );
                             break;
                         case DateTimeRange:
@@ -1640,13 +1632,13 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                                 currValue = new FxDateTimeRange(multiLang, currLang,
                                         new DateRange(
                                                 rs.getTimestamp(columns[0]),
-                                                rs.getTimestamp(getColumns(((FxPropertyAssignment) currAssignment).getProperty())[7]))
+                                                rs.getTimestamp(getColumns(((FxPropertyAssignment) currAssignment).getProperty())[1]))
                                 );
                             else
                                 currValue.setTranslation(currLang,
                                         new DateRange(
                                                 rs.getTimestamp(columns[0]),
-                                                rs.getTimestamp(getColumns(((FxPropertyAssignment) currAssignment).getProperty())[7]))
+                                                rs.getTimestamp(getColumns(((FxPropertyAssignment) currAssignment).getProperty())[1]))
                                 );
                             break;
                         case Binary:
