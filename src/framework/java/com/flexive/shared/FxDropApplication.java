@@ -37,6 +37,7 @@ import java.io.Serializable;
 import java.io.IOException;
 import java.util.jar.JarInputStream;
 import java.net.URL;
+import java.net.MalformedURLException;
 
 /**
  * Information about a "drop application" deployed as part of the flexive EAR.
@@ -154,8 +155,13 @@ public class FxDropApplication implements Serializable {
      * @throws IOException if the JAR file stream could not be opened
      */
     public JarInputStream getResourceJarStream() throws IOException {
-        return resourceJarURL != null
-                ? new JarInputStream(new URL(resourceJarURL).openStream())
-                : null;
+        try {
+            return resourceJarURL != null
+                    ? new JarInputStream(new URL(resourceJarURL).openStream())
+                    : null;
+        } catch (MalformedURLException e) {
+            //try again using JBoss v5 vfszip ...
+            return new JarInputStream(new URL("vfszip:" + resourceJarURL).openStream());
+        }
     }
 }
