@@ -1600,36 +1600,6 @@
                     </variablelist>
                 </section>
 
-                <section xml:id="jcl_fx_linearize_fxvalue_inputs_examples">
-                    <title>Examples</title>
-                    <example xml:id="jcl_fx_linearize_fxvalue_inputs_examples_nested">
-                        <title>Using the color picker with a JSF input component</title>
-
-                        <para>
-                            In this example, an existing JSF text input component will be augmented
-                            with a color picker.
-                        </para>
-
-                        <programlisting language="xhtml"><![CDATA[<h:inputText id="color" value="#{myBean.color}" size="7">
-    <fx:colorPicker/>
-</h:inputText>
-]]></programlisting>
-                    </example>
-
-                    <example xml:id="jcl_fx_linearize_fxvalue_inputs_examples_standalone">
-                        <title>Using the color picker for a form input</title>
-
-                        <para>
-                            The color picker can be used "stand-alone" for any text-based form input.
-                            To do so, just set the form input element ID with the
-                            <parameter>inputId</parameter>
-                            parameter.
-                        </para>
-
-                        <programlisting language="xhtml"><![CDATA[<input type="text" id="myinput" size="7"/>
-<fx:colorPicker inputId="myinput"/>]]></programlisting>
-                    </example>
-                </section>
             </section>
 
         </section>

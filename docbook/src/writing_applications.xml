@@ -1078,6 +1078,21 @@ BUILD SUCCESSFUL]]></screen>
                 The archetypes are (as the rest of the Maven modules) still under development, so please
                 report rough edges or missing features in our &flexiveIssues;.
             </para>
+            <tip>
+                <title>Maven snapshot versions</title>
+                <para>
+                    The snapshot versions in our Maven repository (
+                    <code>3.0-SNAPSHOT</code>
+                    and
+                    <code>3.1-SNAPSHOT</code>)
+                    are updated automatically from our internal Continuous Integration server (&hudson;)
+                    with the latest stable build of the corresponding branch. A build is considered
+                    "stable" in this context when no testcase fails.
+                    The snapshot versions are a convenient way of getting and testing the latest features,
+                    however these builds are not tested manually and may cause all kinds of havoc
+                    including data loss. If possible, it is recommended to use stable versions.
+                </para>
+            </tip>
 
             <section xml:id="writing_applications_maven_archetypes_ear">
                 <title>The EAR archetype</title>
@@ -1093,9 +1108,8 @@ BUILD SUCCESSFUL]]></screen>
                 </para>
                 <para>
                     <command>mvn archetype:generate -DarchetypeGroupId=com.flexive
-                        -DarchetypeArtifactId=flexive-archetype-ear -DarchetypeVersion=1.0-SNAPSHOT
-                        -DarchetypeRepository=http://repo.flexive.org/maven2/ -DgroupId=mygroup
-                        -DartifactId=hello-flexive -Dversion=0.1-SNAPSHOT
+                        -DarchetypeArtifactId=flexive-archetype-ear -DarchetypeVersion=0.6
+                        -DarchetypeRepository=http://repo.flexive.org/maven2/
                     </command>
                 </para>
                 <para>
@@ -1124,21 +1138,6 @@ BUILD SUCCESSFUL]]></screen>
                         command.
                     </para>
                 </warning>
-                <tip>
-                    <title>Maven snapshot versions</title>
-                    <para>
-                        The snapshot versions in our Maven repository (
-                        <code>3.0-SNAPSHOT</code>
-                        and
-                        <code>3.1-SNAPSHOT</code>)
-                        are updated automatically from our internal Continuous Integration server (&hudson;)
-                        with the latest stable build of the corresponding branch. A build is considered
-                        "stable" in this context if no testcase fails.
-                        The snapshot versions are a convenient way of getting and testing the latest features,
-                        however these builds are not tested manually and may cause all kinds of havoc
-                        including data loss. If possible, it is recommended to use stable versions.
-                    </para>
-                </tip>
                 <para>
                     The following commands (issued in the project directory) will walk you through the most important
                     features:
@@ -1211,6 +1210,36 @@ BUILD SUCCESSFUL]]></screen>
                             </para>
                         </listitem>
                     </itemizedlist>
+                </para>
+            </section>
+
+            <section xml:id="writing_applications_maven_archetypes_war">
+                <title>The WAR archetype</title>
+
+                <para>
+                    The archetype
+                    <code>flexive-archetype-war</code>
+                    provides a base for packaging a &flexive; application for EJB 3.1-compatible
+                    containers that support EJB deployment for WAR applications.
+                </para>
+                <para>
+                    Currently the support is targeted on the features provided by the Glassfish 3 Prelude
+                    release, but no Glassfish-specific features are required. To create a new project:
+                </para>
+
+                <para>
+                    <command>mvn archetype:generate -DarchetypeGroupId=com.flexive
+                        -DarchetypeArtifactId=flexive-archetype-war -DarchetypeVersion=1.0-SNAPSHOT
+                        -DarchetypeRepository=http://repo.flexive.org/maven2/
+                    </command>
+                </para>
+
+                <para>
+                    Invoke
+                    <command>mvn package</command>
+                    to create the WAR file, and deploy it to a web container with EJB 3.1 support,
+                    such as Glassfish 3. For additional setup required for Glassfish please see
+                    <biblioref linkend="bib_blog_maven_war"/>.
                 </para>
             </section>
         </section>
