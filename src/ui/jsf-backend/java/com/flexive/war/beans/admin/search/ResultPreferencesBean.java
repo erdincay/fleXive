@@ -42,24 +42,22 @@ import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.faces.messages.FxFacesMsgInfo;
 import com.flexive.faces.messages.FxFacesMsgWarn;
 import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.FxSharedUtils;
 import static com.flexive.shared.EJBLookup.getResultPreferencesEngine;
+import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.exceptions.FxRuntimeException;
 import com.flexive.shared.search.*;
 import com.flexive.shared.structure.FxEnvironment;
+import com.flexive.shared.structure.FxGroupAssignment;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.structure.FxType;
-import com.flexive.shared.structure.FxGroupAssignment;
-import com.google.common.collect.Collections2;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Multimaps;
 import com.google.common.collect.HashMultimap;
-import org.apache.myfaces.component.html.ext.HtmlDataTable;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.myfaces.component.html.ext.HtmlDataTable;
 
 import javax.faces.component.UIComponent;
 import javax.faces.component.UIViewRoot;
@@ -437,7 +435,7 @@ public class ResultPreferencesBean {
     private List<SelectItemGroup> filteredPropertiesGroup(List<FxPropertyAssignment> contentProperties, String title, boolean includeDerived) {
 
         // assign properties to the type that originally defined them
-        final HashMultimap<FxType, FxPropertyAssignment> byType = new HashMultimap<FxType, FxPropertyAssignment>();
+        final HashMultimap<FxType, FxPropertyAssignment> byType = HashMultimap.create();
         final FxType rootType = CacheAdmin.getEnvironment().getType(FxType.ROOT_ID);
         for (FxPropertyAssignment assignment : contentProperties) {
             if (includeDerived && assignment.isDerivedAssignment()
