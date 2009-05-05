@@ -253,7 +253,7 @@ public interface ContentStorage {
     void storeBinary(Connection con, long id, int version, int quality, String name, long length, InputStream binary) throws FxApplicationException;
 
     /**
-     * Create a new or update an existing binary
+     * Create a new or update an existing binary preview
      *
      * @param con     an open and valid Connection
      * @param id      id of the binary
@@ -264,8 +264,9 @@ public interface ContentStorage {
      * @param height  height of the preview
      * @param length  length of the binary
      * @param binary  the binary
+     * @throws FxApplicationException on errors
      */
-    void updateBinaryPreview(Connection con, long id, int version, int quality, int preview, int width, int height, long length, InputStream binary);
+    void updateBinaryPreview(Connection con, long id, int version, int quality, int preview, int width, int height, long length, InputStream binary) throws FxApplicationException;
 
     /**
      * Get the number of references that exist for the requested content id

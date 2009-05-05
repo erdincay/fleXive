@@ -29,46 +29,45 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the file!
  ***************************************************************/
-package com.flexive.core.storage.h2;
+package com.flexive.core.storage.binary;
 
-import com.flexive.core.storage.ContentStorage;
-import com.flexive.core.storage.binary.BinaryStorage;
-import com.flexive.core.storage.mySQL.MySQLHierarchicalStorage;
-import com.flexive.core.storage.genericSQL.GenericHierarchicalStorage;
-import com.flexive.core.storage.genericSQL.GenericBinarySQLStorage;
-import com.flexive.shared.exceptions.FxDbException;
-import com.flexive.shared.exceptions.FxRuntimeException;
-
-import java.sql.Connection;
+import java.io.File;
 
 /**
- * H2 implementation of hierarchical content handling
+ * Helper class to encapsulate information about a file in the binary transit space
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-public class H2HierarchicalStorage extends GenericHierarchicalStorage {
-    private static final H2HierarchicalStorage instance = new H2HierarchicalStorage();
+public class BinaryTransitFileInfo {
+    private final File binaryTransitFile;
+    private final String mimeType;
 
     /**
      * Ctor
-     */
-    public H2HierarchicalStorage() {
-        super(new GenericBinarySQLStorage());
-    }
-
-    /**
-     * Singleton getter
      *
-     * @return ContentStorage
+     * @param binaryTransitFile File handle to the binary in transit
+     * @param mimeType          detected mime type
      */
-    public static ContentStorage getInstance() {
-        return instance;
+    public BinaryTransitFileInfo(File binaryTransitFile, String mimeType) {
+        this.binaryTransitFile = binaryTransitFile;
+        this.mimeType = mimeType;
     }
 
     /**
-     * {@inheritDoc}
+     * Get the File handle for the binary transit file
+     *
+     * @return File handle for the binary transit file
      */
-    public void lockTables(Connection con, long id, int version) throws FxRuntimeException {
-        //do nothing for H2 since we rely on MVCC
+    public File getBinaryTransitFile() {
+        return binaryTransitFile;
+    }
+
+    /**
+     * Get the detected mime type
+     *
+     * @return detected mime type
+     */
+    public String getMimeType() {
+        return mimeType;
     }
 }

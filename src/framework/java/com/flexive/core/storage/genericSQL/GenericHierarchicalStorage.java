@@ -38,6 +38,7 @@ import com.flexive.core.LifeCycleInfoImpl;
 import com.flexive.core.conversion.ConversionEngine;
 import com.flexive.core.storage.ContentStorage;
 import com.flexive.core.storage.StorageManager;
+import com.flexive.core.storage.binary.BinaryStorage;
 import com.flexive.extractor.htmlExtractor.HtmlExtractor;
 import com.flexive.shared.*;
 import com.flexive.shared.configuration.SystemParameters;
@@ -45,16 +46,12 @@ import com.flexive.shared.content.*;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.HistoryTrackerEngine;
 import com.flexive.shared.interfaces.ScriptingEngine;
-import com.flexive.shared.media.FxMediaEngine;
 import com.flexive.shared.scripting.FxScriptBinding;
 import com.flexive.shared.scripting.FxScriptEvent;
-import com.flexive.shared.scripting.FxScriptResult;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.ACLPermission;
 import com.flexive.shared.security.Mandator;
 import com.flexive.shared.security.UserTicket;
-import com.flexive.shared.stream.BinaryUploadPayload;
-import com.flexive.shared.stream.FxStreamUtils;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.*;
 import com.flexive.shared.workflow.Step;
@@ -83,35 +80,6 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
 
     private static final Log LOG = LogFactory.getLog(GenericHierarchicalStorage.class);
 
-    /**
-     * {@inheritDoc}
-     */
-    public String getTableName(FxProperty prop) {
-        if (prop.isSystemInternal())
-            return DatabaseConst.TBL_CONTENT;
-        return DatabaseConst.TBL_CONTENT_DATA;
-    }
-
-    /**
-     * Helper to convert a var array of string to a 'real' string array
-     *
-     * @param data strings to put into an array
-     * @return string array from parameters
-     */
-    protected static String[] array(String... data) {
-        return data;
-    }
-
-    /**
-     * Helper to convert a var array of int to a 'real' int array
-     *
-     * @param data ints to put into an array
-     * @return int array from parameters
-     */
-    protected static int[] array(int... data) {
-        return data;
-    }
-
     protected static final String CONTENT_MAIN_INSERT = "INSERT INTO " + TBL_CONTENT +
             // 1  2   3    4   5    6       7        8
             " (ID,VER,TDEF,ACL,STEP,MAX_VER,LIVE_VER,ISMAX_VER," +
@@ -128,10 +96,6 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             "RELSRC_ID=?,RELSRC_VER=?,RELDST_ID=?,RELDST_VER=?,RELSRC_POS=?,RELDST_POS=?,MODIFIED_BY=?,MODIFIED_AT=? " +
             //        18        19
             "WHERE ID=? AND VER=?";
-    protected static final String CONTENT_MAIN_BINARY_UPDATE = "UPDATE " + TBL_CONTENT + " SET " +
-            //       1          2              3          4          5         6
-            "DBIN_ID=?,DBIN_VER=?,DBIN_QUALITY=?,DBIN_ACL=? WHERE ID=? AND VER=?";
-
     //                                                        1  2   3    4   5    6       7        8         9
     protected static final String CONTENT_MAIN_LOAD = "SELECT ID,VER,TDEF,ACL,STEP,MAX_VER,LIVE_VER,ISMAX_VER,ISLIVE_VER," +
             //10      11       12        13         14        15         16         17         18         19
@@ -191,12 +155,16 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     protected static final String CONTENT_VER_UPDATE_2 = "UPDATE " + TBL_CONTENT + " SET ISMAX_VER=(MAX_VER=VER), ISLIVE_VER=(LIVE_VER=VER) WHERE ID=?";
     protected static final String CONTENT_VER_UPDATE_3 = "UPDATE " + TBL_CONTENT_DATA + " SET ISMAX_VER=(VER=?), ISLIVE_VER=(VER=?) WHERE ID=?";
 
+    protected static final String CONTENT_STEP_GETVERSIONS = "SELECT VER FROM " + TBL_CONTENT + " WHERE STEP=? AND ID=? AND VER<>?";
     protected static final String CONTENT_STEP_DEPENDENCIES = "UPDATE " + TBL_CONTENT + " SET STEP=? WHERE STEP=? AND ID=? AND VER<>?";
 
 
     protected static final String CONTENT_REFERENCE_LIVE = "SELECT VER, ACL, STEP, TDEF, CREATED_BY FROM " + TBL_CONTENT + " WHERE ID=? AND ISLIVE_VER=TRUE";
     protected static final String CONTENT_REFERENCE_MAX = "SELECT VER, ACL, STEP, TDEF, CREATED_BY FROM " + TBL_CONTENT + " WHERE ID=? AND ISMAX_VER=TRUE";
     protected static final String CONTENT_REFERENCE_CAPTION = "SELECT FTEXT1024 FROM " + TBL_CONTENT_DATA + " WHERE ID=? AND VER=? AND TPROP=?";
+    protected static final String CONTENT_REFERENCE_BYTYPE = "SELECT COUNT(DISTINCT d.ID) FROM " + TBL_CONTENT + " c, " +
+            TBL_CONTENT_DATA + " d, " + TBL_STRUCT_ASSIGNMENTS + " a, " + TBL_STRUCT_PROPERTIES + " p " +
+            "WHERE c.TDEF=a.TYPEDEF AND a.APROPERTY=p.ID AND p.REFTYPE=? AND d.ASSIGN=a.ID AND d.TPROP=p.ID";
 
     //getContentVersionInfo() statement
     protected static final String CONTENT_VER_INFO = "SELECT ID, VER, MAX_VER, LIVE_VER, CREATED_BY, CREATED_AT, MODIFIED_BY, MODIFIED_AT, STEP FROM " + TBL_CONTENT + " WHERE ID=?";
@@ -213,35 +181,18 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     protected static final String CONTENT_MAIN_REMOVE = "DELETE FROM " + TBL_CONTENT + " WHERE ID=?";
     protected static final String CONTENT_DATA_REMOVE = "DELETE FROM " + TBL_CONTENT_DATA + " WHERE ID=?";
     protected static final String CONTENT_DATA_FT_REMOVE = "DELETE FROM " + TBL_CONTENT_DATA_FT + " WHERE ID=?";
-    protected static final String CONTENT_BINARY_REMOVE = "DELETE FROM " + TBL_CONTENT_BINARY + " WHERE ID IN (SELECT DISTINCT d.FBLOB FROM " + TBL_CONTENT_DATA + " d WHERE d.ID=?)";
     protected static final String SQL_WHERE_VER = " AND VER=?";
     protected static final String CONTENT_MAIN_REMOVE_VER = CONTENT_MAIN_REMOVE + SQL_WHERE_VER;
     protected static final String CONTENT_DATA_REMOVE_VER = CONTENT_DATA_REMOVE + SQL_WHERE_VER;
     protected static final String CONTENT_DATA_FT_REMOVE_VER = CONTENT_DATA_FT_REMOVE + SQL_WHERE_VER;
-    protected static final String CONTENT_BINARY_REMOVE_VER = CONTENT_BINARY_REMOVE + SQL_WHERE_VER;
-    protected static final String CONTENT_BINARY_TRANSIT_CLEANUP = "DELETE FROM " + TBL_BINARY_TRANSIT + " WHERE EXPIRE<?";
 
     protected static final String CONTENT_MAIN_REMOVE_TYPE = "DELETE FROM " + TBL_CONTENT + " WHERE TDEF=?";
     protected static final String CONTENT_DATA_REMOVE_TYPE = "DELETE FROM " + TBL_CONTENT_DATA + " WHERE ID IN (SELECT DISTINCT ID FROM " + TBL_CONTENT + " WHERE TDEF=?)";
     protected static final String CONTENT_DATA_FT_REMOVE_TYPE = "DELETE FROM " + TBL_CONTENT_DATA_FT + " WHERE ID IN (SELECT DISTINCT ID FROM " + TBL_CONTENT + " WHERE TDEF=?)";
-    protected static final String CONTENT_BINARY_REMOVE_ID = "DELETE FROM " + TBL_CONTENT_BINARY + " WHERE ID=?";
-    protected static final String CONTENT_BINARY_REMOVE_GET = "SELECT DISTINCT FBLOB FROM " + TBL_CONTENT_DATA + " WHERE ID=?";
-    protected static final String CONTENT_BINARY_REMOVE_TYPE_GET = "SELECT DISTINCT FBLOB FROM " + TBL_CONTENT_DATA + " d, " + TBL_CONTENT + " c WHERE d.ID=c.ID and c.TDEF=?";
 
     protected static final String CONTENT_TYPE_PK_RETRIEVE_VERSIONS = "SELECT DISTINCT ID,VER FROM " + TBL_CONTENT + " WHERE TDEF=? ORDER BY ID,VER";
     protected static final String CONTENT_TYPE_PK_RETRIEVE_IDS = "SELECT DISTINCT ID FROM " + TBL_CONTENT + " WHERE TDEF=? ORDER BY ID";
-
-    //    select into xx () select  FBLOB1,FBLOB2,?,?,?
-    protected static final String BINARY_TRANSIT_HEADER = "SELECT FBLOB FROM " + TBL_BINARY_TRANSIT + " WHERE BKEY=?";
-    //                                                                                     1  2   3             4(handle)5    6                  7                    8                    9       10         11    12
-    protected static final String BINARY_TRANSIT = "INSERT INTO " + TBL_CONTENT_BINARY + "(ID,VER,QUALITY,FBLOB,NAME,BLOBSIZE,XMLMETA,CREATED_AT,MIMETYPE,PREVIEW_REF,ISIMAGE,RESOLUTION,WIDTH,HEIGHT,PREV1,PREV1_WIDTH,PREV1_HEIGHT,PREV2,PREV2_WIDTH,PREV2_HEIGHT,PREV3,PREV3_WIDTH,PREV3_HEIGHT,PREV1SIZE,PREV2SIZE,PREV3SIZE) " +
-            //      1 2 3       4 5 6       7                                 8 9 10 11
-            "SELECT ?,?,?,FBLOB,?,?,?," + Database.getTimestampFunction() + ",?,PREVIEW_REF,?,?,?,?,PREV1,PREV1_WIDTH,PREV1_HEIGHT,PREV2,PREV2_WIDTH,PREV2_HEIGHT,PREV3,PREV3_WIDTH,PREV3_HEIGHT,PREV1SIZE,PREV2SIZE,PREV3SIZE FROM " + TBL_BINARY_TRANSIT + " WHERE BKEY=?";
-    //                                                                                                   1              2               3        4              5               6        7              8               9            10           11           12           13
-    protected static final String BINARY_TRANSIT_PREVIEWS = "UPDATE " + TBL_BINARY_TRANSIT + " SET PREV1=?, PREV1_WIDTH=?, PREV1_HEIGHT=?, PREV2=?, PREV2_WIDTH=?, PREV2_HEIGHT=?, PREV3=?, PREV3_WIDTH=?, PREV3_HEIGHT=?, PREV1SIZE=?, PREV2SIZE=?, PREV3SIZE=? WHERE BKEY=?";
-    protected static final String BINARY_TRANSIT_PREVIEWS_REF = "UPDATE " + TBL_BINARY_TRANSIT + " SET PREVIEW_REF=? WHERE BKEY=?";
-    //                                                                                                                                                                          1         2             3
-    protected static final String BINARY_DESC_LOAD = "SELECT NAME,BLOBSIZE,XMLMETA,CREATED_AT,MIMETYPE,ISIMAGE,RESOLUTION,WIDTH,HEIGHT FROM " + TBL_CONTENT_BINARY + " WHERE ID=? AND VER=? AND QUALITY=?";
+    protected static final String CONTENT_GET_TYPE = "SELECT DISTINCT TDEF FROM " + TBL_CONTENT + " WHERE ID=?";
 
     protected static final String CONTENT_FULLTEXT_INSERT = "INSERT INTO " + TBL_CONTENT_DATA_FT + "(ID,VER,LANG,ASSIGN,XMULT,VALUE) VALUES (?,?,?,?,?,?)";
     //                                                                                                    1          2         3          4            5           6
@@ -263,75 +214,6 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     protected final static int FT_VALUE_POS_INSERT = 6;
     protected final static int FT_LANG_POS_UPDATE = 4;
     protected final static int FT_VALUE_POS_UPDATE = 1;
-
-    /**
-     * Set a prepared statements values to <code>NULL</code> from startPos to endPos
-     *
-     * @param ps       prepared statement
-     * @param startPos start position
-     * @param endPos   end position
-     * @throws SQLException on errors
-     */
-    protected static void clearPreparedStatement(PreparedStatement ps, int startPos, int endPos) throws SQLException {
-        for (int i = startPos; i <= endPos; i++)
-            ps.setNull(i, Types.NULL);
-    }
-
-    /**
-     * Lock table needed for update operations for a content
-     *
-     * @param con an open and valid connection
-     * @param id id of the content
-     * @param version optional version, if <=0 all versions will be locked
-     * @throws FxDbException nested in a FxRuntimeException on errors
-     */
-    public abstract void lockTables(Connection con, long id, int version) throws FxRuntimeException;
-
-
-    /**
-     * {@inheritDoc}
-     */
-    public String getUppercaseColumn(FxProperty prop) {
-        if (prop.isSystemInternal())
-            return null;
-        switch (prop.getDataType()) {
-            case String1024:
-                return "UFTEXT1024";
-            case Text:
-                return "UFCLOB";
-            default:
-                return null;
-        }
-    }
-
-    /**
-     * Get the insert position of the uppercase column for a detail property or <code>-1</code> if no uppercase column exists
-     *
-     * @param prop   detail property
-     * @param insert get column pos for an insert or update?
-     * @return insert position of the uppercase column for a detail property or <code>-1</code> if no uppercase column exists
-     */
-    public int getUppercaseColumnPos(FxProperty prop, boolean insert) {
-        if (prop.isSystemInternal())
-            return -1;
-        switch (prop.getDataType()) {
-            case String1024:
-                return insert ? 27 : 13; //UFTEXT1024
-            case Text:
-                return insert ? 23 : 9; //UFCLOB
-            default:
-                return -1;
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public String getQueryUppercaseColumn(FxProperty property) {
-        if (!property.isSystemInternal() && property.getDataType() == FxDataType.HTML)
-            return "UPPER(UFCLOB)";
-        return getUppercaseColumn(property);
-    }
 
     // propertyId -> column names
     protected static final HashMap<Long, String[]> mainColumnHash;
@@ -419,6 +301,110 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         mainColumnHash.put(20L, array("CAPTION"));
     }
 
+    protected BinaryStorage binaryStorage;
+
+    protected GenericHierarchicalStorage(BinaryStorage binaryStorage) {
+        this.binaryStorage = binaryStorage;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getTableName(FxProperty prop) {
+        if (prop.isSystemInternal())
+            return DatabaseConst.TBL_CONTENT;
+        return DatabaseConst.TBL_CONTENT_DATA;
+    }
+
+    /**
+     * Helper to convert a var array of string to a 'real' string array
+     *
+     * @param data strings to put into an array
+     * @return string array from parameters
+     */
+    protected static String[] array(String... data) {
+        return data;
+    }
+
+    /**
+     * Helper to convert a var array of int to a 'real' int array
+     *
+     * @param data ints to put into an array
+     * @return int array from parameters
+     */
+    protected static int[] array(int... data) {
+        return data;
+    }
+
+    /**
+     * Set a prepared statements values to <code>NULL</code> from startPos to endPos
+     *
+     * @param ps       prepared statement
+     * @param startPos start position
+     * @param endPos   end position
+     * @throws SQLException on errors
+     */
+    protected static void clearPreparedStatement(PreparedStatement ps, int startPos, int endPos) throws SQLException {
+        for (int i = startPos; i <= endPos; i++)
+            ps.setNull(i, Types.NULL);
+    }
+
+    /**
+     * Lock table needed for update operations for a content
+     *
+     * @param con     an open and valid connection
+     * @param id      id of the content
+     * @param version optional version, if <=0 all versions will be locked
+     * @throws FxRuntimeException containing a FxDbException
+     */
+    public abstract void lockTables(Connection con, long id, int version) throws FxRuntimeException;
+
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getUppercaseColumn(FxProperty prop) {
+        if (prop.isSystemInternal())
+            return null;
+        switch (prop.getDataType()) {
+            case String1024:
+                return "UFTEXT1024";
+            case Text:
+                return "UFCLOB";
+            default:
+                return null;
+        }
+    }
+
+    /**
+     * Get the insert position of the uppercase column for a detail property or <code>-1</code> if no uppercase column exists
+     *
+     * @param prop   detail property
+     * @param insert get column pos for an insert or update?
+     * @return insert position of the uppercase column for a detail property or <code>-1</code> if no uppercase column exists
+     */
+    public int getUppercaseColumnPos(FxProperty prop, boolean insert) {
+        if (prop.isSystemInternal())
+            return -1;
+        switch (prop.getDataType()) {
+            case String1024:
+                return insert ? 27 : 13; //UFTEXT1024
+            case Text:
+                return insert ? 23 : 9; //UFCLOB
+            default:
+                return -1;
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getQueryUppercaseColumn(FxProperty property) {
+        if (!property.isSystemInternal() && property.getDataType() == FxDataType.HTML)
+            return "UPPER(UFCLOB)";
+        return getUppercaseColumn(property);
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -456,7 +442,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         content.getRootGroup().compactPositions(true);
         content.checkValidity();
         FxPK pk = createMainEntry(con, newId, 1, content);
-        PreparedStatement ps = null;
+        PreparedStatement ps;
         PreparedStatement ps_ft = null;
         try {
             if (sql == null)
@@ -468,7 +454,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             ps_ft.executeBatch();
             checkUniqueConstraints(con, env, sql, pk, content.getTypeId());
             content.resolveBinaryPreview();
-            updateContentBinaryEntry(con, pk, content.getBinaryPreviewId(), content.getBinaryPreviewACL());
+            binaryStorage.updateContentBinaryEntry(con, pk, content.getBinaryPreviewId(), content.getBinaryPreviewACL());
             FxType type = env.getType(content.getTypeId());
             if (type.isTrackHistory())
                 EJBLookup.getHistoryTrackerEngine().track(type, pk, ConversionEngine.getXStream().toXML(content),
@@ -558,7 +544,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         lockTables(con, content.getPk().getId(), -1);
 
         FxPK pk;
-        PreparedStatement ps = null;
+        PreparedStatement ps;
         PreparedStatement ps_ft = null;
         try {
             int new_version = getContentVersionInfo(con, content.getPk().getId()).getMaxVersion() + 1;
@@ -572,7 +558,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             ps.executeBatch();
             ps_ft.executeBatch();
             checkUniqueConstraints(con, env, sql, pk, content.getTypeId());
-            updateContentBinaryEntry(con, pk, content.getBinaryPreviewId(), content.getBinaryPreviewACL());
+            binaryStorage.updateContentBinaryEntry(con, pk, content.getBinaryPreviewId(), content.getBinaryPreviewACL());
         } catch (FxApplicationException e) {
             if (e instanceof FxCreateException)
                 throw (FxCreateException) e;
@@ -633,7 +619,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             PreparedStatement ps = null;
             try {
                 if (type.isTrackHistory()) {
-                    ps = con.prepareStatement("SELECT VER FROM " + TBL_CONTENT + " WHERE STEP=? AND ID=? AND VER<>?");
+                    ps = con.prepareStatement(CONTENT_STEP_GETVERSIONS);
                     ps.setLong(1, stepId);
                     ps.setLong(2, id);
                     ps.setInt(3, ignoreVersion);
@@ -668,7 +654,6 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             }
         }
     }
-
 
     /**
      * {@inheritDoc}
@@ -801,7 +786,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 if (curr.isProperty()) {
                     prop = ((FxPropertyAssignment) env.getAssignment(curr.getAssignmentId())).getProperty();
                     if (!prop.isSystemInternal())
-                        insertPropertyData(prop, data, con, ps, ps_ft, sql, pk, ((FxPropertyData) curr), maxVersion, liveVersion);
+                        insertPropertyData(prop, data, con, ps, ps_ft, pk, ((FxPropertyData) curr), maxVersion, liveVersion);
                 } else {
                     insertGroupData(con, sql, pk, ((FxGroupData) curr), maxVersion, liveVersion);
                     createDetailEntries(con, ps, ps_ft, env, sql, pk, maxVersion, liveVersion, ((FxGroupData) curr).getChildren());
@@ -839,7 +824,6 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      * @param con       an open and valid connection
      * @param ps        batch prepared statement for detail inserts
      * @param ps_ft     batch prepared statement for fulltext inserts
-     * @param sql       an optional StringBuffer
      * @param pk        primary key of the content
      * @param data      the value
      * @param isMaxVer  is this content in the max. version?
@@ -850,7 +834,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      * @throws SQLException        on SQL errors
      */
     protected void insertPropertyData(FxProperty prop, List<FxData> allData, Connection con,
-                                      PreparedStatement ps, PreparedStatement ps_ft, StringBuilder sql, FxPK pk,
+                                      PreparedStatement ps, PreparedStatement ps_ft, FxPK pk,
                                       FxPropertyData data, boolean isMaxVer, boolean isLiveVer) throws SQLException, FxDbException, FxUpdateException, FxNoAccessException {
         if (data == null || data.isEmpty())
             return;
@@ -894,7 +878,6 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      * @param con     an open and valid connection
      * @param ps      batch prepared statement for detail updates
      * @param ps_ft   batch prepared statement for fulltext updates
-     * @param sql     sql
      * @param pk      primary key
      * @param data    property data unless change is a group change
      * @throws SQLException        on errors
@@ -903,7 +886,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      * @throws FxNoAccessException for FxNoAccess values
      */
     protected void updatePropertyData(FxDelta.FxDeltaChange change, FxProperty prop, List<FxData> allData,
-                                      Connection con, PreparedStatement ps, PreparedStatement ps_ft, StringBuilder sql, FxPK pk, FxPropertyData data)
+                                      Connection con, PreparedStatement ps, PreparedStatement ps_ft, FxPK pk, FxPropertyData data)
             throws SQLException, FxDbException, FxUpdateException, FxNoAccessException {
         if ((change.isProperty() && (data == null || data.isEmpty())) || !(change.isDataChange() || change.isPositionChange()))
             return;
@@ -967,12 +950,8 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                                  Connection con, FxPropertyData data, PreparedStatement ps, PreparedStatement ps_ft,
                                  int upperColumnPos, boolean includeFullText) throws SQLException, FxUpdateException, FxDbException, FxNoAccessException {
         FxValue value = data.getValue();
-        if (value instanceof FxNoAccess) {
+        if (value instanceof FxNoAccess)
             throw new FxNoAccessException("ex.content.value.noaccess");
-            /*FxContext.get().runAsSystem();
-            value = ((FxNoAccess) value).getWrappedValue();
-            FxContext.get().stopRunAsSystem();*/
-        }
         if (value.isMultiLanguage() != ((FxPropertyAssignment) data.getAssignment()).isMultiLang()) {
             if (((FxPropertyAssignment) data.getAssignment()).isMultiLang())
                 throw new FxUpdateException("ex.content.value.invalid.multilanguage.ass.multi", data.getXPathFull());
@@ -1024,7 +1003,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                         final String extractorInput = doTidy(data.getXPathFull(), (String) translatedValue);
                         if (useTidy) {
                             translatedValue = extractorInput;
-                        } 
+                        }
                         final HtmlExtractor result = new HtmlExtractor(
                                 extractorInput,
                                 true
@@ -1052,21 +1031,12 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                         gc.set(GregorianCalendar.SECOND, 0);
                         gc.set(GregorianCalendar.MILLISECOND, 0);
                         ps.setDate(pos[0], new java.sql.Date(gc.getTimeInMillis()));
-//                        ps.setInt(pos[1], gc.get(GregorianCalendar.YEAR));
-//                        ps.setInt(pos[2], gc.get(GregorianCalendar.MONTH) + 1);
-//                        ps.setInt(pos[3], gc.get(GregorianCalendar.DAY_OF_MONTH));
                         break;
                     case DateTime:
                         checkDataType(FxDateTime.class, value, data.getXPathFull());
                         if (gc == null) gc = new GregorianCalendar();
                         gc.setTime((java.util.Date) translatedValue);
                         ps.setTimestamp(pos[0], new Timestamp(gc.getTimeInMillis()));
-//                        ps.setInt(pos[1], gc.get(GregorianCalendar.YEAR));
-//                        ps.setInt(pos[2], gc.get(GregorianCalendar.MONTH) + 1);
-//                        ps.setInt(pos[3], gc.get(GregorianCalendar.DAY_OF_MONTH));
-//                        ps.setInt(pos[4], gc.get(GregorianCalendar.HOUR_OF_DAY));
-//                        ps.setInt(pos[5], gc.get(GregorianCalendar.MINUTE));
-//                        ps.setInt(pos[6], gc.get(GregorianCalendar.SECOND));
                         break;
                     case DateRange:
                         checkDataType(FxDateRange.class, value, data.getXPathFull());
@@ -1077,38 +1047,20 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                         gc.set(GregorianCalendar.SECOND, 0);
                         gc.set(GregorianCalendar.MILLISECOND, 0);
                         ps.setDate(pos[0], new java.sql.Date(gc.getTimeInMillis()));
-//                        ps.setInt(pos[1], gc.get(GregorianCalendar.YEAR));
-//                        ps.setInt(pos[2], gc.get(GregorianCalendar.MONTH) + 1);
-//                        ps.setInt(pos[3], gc.get(GregorianCalendar.DAY_OF_MONTH));
                         gc.setTime(((DateRange) translatedValue).getUpper());
                         gc.set(GregorianCalendar.HOUR, 0);
                         gc.set(GregorianCalendar.MINUTE, 0);
                         gc.set(GregorianCalendar.SECOND, 0);
                         gc.set(GregorianCalendar.MILLISECOND, 0);
                         ps.setDate(pos[1], new java.sql.Date(gc.getTimeInMillis()));
-//                        ps.setInt(pos[5], gc.get(GregorianCalendar.YEAR));
-//                        ps.setInt(pos[6], gc.get(GregorianCalendar.MONTH) + 1);
-//                        ps.setInt(pos[7], gc.get(GregorianCalendar.DAY_OF_MONTH));
                         break;
                     case DateTimeRange:
                         checkDataType(FxDateTimeRange.class, value, data.getXPathFull());
                         if (gc == null) gc = new GregorianCalendar();
                         gc.setTime(((DateRange) translatedValue).getLower());
                         ps.setTimestamp(pos[0], new Timestamp(gc.getTimeInMillis()));
-//                        ps.setInt(pos[1], gc.get(GregorianCalendar.YEAR));
-//                        ps.setInt(pos[2], gc.get(GregorianCalendar.MONTH) + 1);
-//                        ps.setInt(pos[3], gc.get(GregorianCalendar.DAY_OF_MONTH));
-//                        ps.setInt(pos[4], gc.get(GregorianCalendar.HOUR_OF_DAY));
-//                        ps.setInt(pos[5], gc.get(GregorianCalendar.MINUTE));
-//                        ps.setInt(pos[6], gc.get(GregorianCalendar.SECOND));
                         gc.setTime(((DateRange) translatedValue).getUpper());
                         ps.setTimestamp(pos[1], new Timestamp(gc.getTimeInMillis()));
-//                        ps.setInt(pos[8], gc.get(GregorianCalendar.YEAR));
-//                        ps.setInt(pos[9], gc.get(GregorianCalendar.MONTH) + 1);
-//                        ps.setInt(pos[10], gc.get(GregorianCalendar.DAY_OF_MONTH));
-//                        ps.setInt(pos[11], gc.get(GregorianCalendar.HOUR_OF_DAY));
-//                        ps.setInt(pos[12], gc.get(GregorianCalendar.MINUTE));
-//                        ps.setInt(pos[13], gc.get(GregorianCalendar.SECOND));
                         break;
                     case Binary:
                         checkDataType(FxBinary.class, value, data.getXPathFull());
@@ -1118,7 +1070,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                         } else {
                             try {
                                 //transfer the binary from the transit table to the binary table
-                                BinaryDescriptor created = binaryTransit(con, binary);
+                                BinaryDescriptor created = binaryStorage.binaryTransit(con, binary);
                                 ps.setLong(pos[0], created.getId());
                                 //check all other properties if they contain the same handle
                                 //and replace with the data of the new binary
@@ -1126,7 +1078,6 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                                     if (_curr instanceof FxPropertyData && !_curr.isEmpty() &&
                                             ((FxPropertyData) _curr).getValue() instanceof FxBinary) {
                                         FxBinary _val = (FxBinary) ((FxPropertyData) _curr).getValue();
-//                                            System.out.println("replacing "+_curr.getXPathFull());
                                         _val._replaceHandle(binary.getHandle(), created);
                                     }
                                 }
@@ -1171,7 +1122,6 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         } else {
             switch (prop.getDataType()) {
                 //TODO: implement datatype specific insert
-
                 default:
                     throw new FxDbException(LOG, "ex.db.notImplemented.store", prop.getDataType().getName());
             }
@@ -1191,7 +1141,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     private static void checkReference(Connection con, FxType expectedType, FxPK ref, String xpath) throws FxDbException {
         PreparedStatement ps = null;
         try {
-            ps = con.prepareStatement("SELECT DISTINCT TDEF FROM " + TBL_CONTENT + " WHERE ID=?");
+            ps = con.prepareStatement(CONTENT_GET_TYPE);
             ps.setLong(1, ref.getId());
             ResultSet rs = ps.executeQuery();
             if (rs == null || !rs.next())
@@ -1256,76 +1206,6 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         }
         content = out.toString();
         return content;
-    }
-
-
-    /**
-     * Transfer a binary from the transit to the 'real' binary table
-     *
-     * @param con    open and valid connection
-     * @param binary the binary descriptor
-     * @return descriptor of final binary
-     * @throws SQLException           on errors
-     * @throws FxApplicationException on errors looking up the sequencer
-     */
-    private BinaryDescriptor binaryTransit(Connection con, BinaryDescriptor binary) throws FxApplicationException, SQLException {
-        long id = EJBLookup.getSequencerEngine().getId(FxSystemSequencer.BINARY);
-        return binaryTransit(con, binary, id, 1, 1);
-    }
-
-    /**
-     * Transfer a binary from the transit to the 'real' binary table
-     *
-     * @param con     open and valid connection
-     * @param binary  the binary descriptor
-     * @param id      desired id
-     * @param version desired version
-     * @param quality desired quality
-     * @return descriptor of final binary
-     * @throws SQLException           on errors
-     * @throws FxApplicationException on errors looking up the sequencer
-     */
-    private BinaryDescriptor binaryTransit(Connection con, BinaryDescriptor binary, long id, int version, int quality) throws FxApplicationException, SQLException {
-//        System.out.println("Binary transit: " + binary.getName() + "/" + binary.getHandle());
-        PreparedStatement ps = null;
-        BinaryDescriptor created;
-
-        try {
-            double resolution = 0.0;
-            int width = 0;
-            int height = 0;
-            boolean isImage = binary.getMimeType().startsWith("image/");
-            if (isImage) {
-                try {
-                    width = Integer.parseInt(FxXMLUtils.getElementData(binary.getMetadata(), "width"));
-                    height = Integer.parseInt(FxXMLUtils.getElementData(binary.getMetadata(), "height"));
-                    resolution = Double.parseDouble(FxXMLUtils.getElementData(binary.getMetadata(), "xResolution"));
-                } catch (NumberFormatException e) {
-                    //ignore
-                    LOG.warn(e, e);
-                }
-            }
-            created = new BinaryDescriptor(CacheAdmin.getStreamServers(), id, version, quality, java.lang.System.currentTimeMillis(),
-                    binary.getName(), binary.getSize(), binary.getMetadata(), binary.getMimeType(), isImage, resolution, width, height);
-            ps = con.prepareStatement(BINARY_TRANSIT);
-            ps.setLong(1, created.getId());
-            ps.setInt(2, created.getVersion()); //version
-            ps.setInt(3, created.getQuality()); //quality
-            ps.setString(4, created.getName());
-            ps.setLong(5, created.getSize());
-            ps.setString(6, created.getMetadata());
-            ps.setString(7, created.getMimeType());
-            ps.setBoolean(8, created.isImage());
-            ps.setDouble(9, created.getResolution());
-            ps.setInt(10, created.getWidth());
-            ps.setInt(11, created.getHeight());
-            ps.setString(12, binary.getHandle());
-            ps.executeUpdate();
-        } finally {
-            if (ps != null)
-                ps.close();
-        }
-        return created;
     }
 
     /**
@@ -1642,7 +1522,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                                 );
                             break;
                         case Binary:
-                            BinaryDescriptor desc = loadBinaryDescriptor(server, con, rs.getLong(columns[0]));
+                            BinaryDescriptor desc = binaryStorage.loadBinaryDescriptor(server, con, rs.getLong(columns[0]));
                             if (currValue == null)
                                 currValue = new FxBinary(multiLang, currLang, desc);
                             else
@@ -1777,35 +1657,6 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             if (ps != null)
                 ps.close();
         }
-    }
-
-    /**
-     * Load a binary descriptor
-     *
-     * @param server server side StreamServers that can provide the binary
-     * @param con    open connection
-     * @param id     id of the binary (in FX_BINARY table)
-     * @return BinaryDescriptor
-     * @throws SQLException  on errors
-     * @throws FxDbException on errors
-     */
-    private BinaryDescriptor loadBinaryDescriptor(List<ServerLocation> server, Connection con, long id) throws SQLException, FxDbException {
-        PreparedStatement ps = null;
-        try {
-            ps = con.prepareStatement(BINARY_DESC_LOAD);
-            ps.setLong(1, id);
-            ps.setInt(2, 1); //ver
-            ps.setInt(3, 1); //ver
-            ResultSet rs = ps.executeQuery();
-            if (rs != null && rs.next()) {
-                return new BinaryDescriptor(server, id, 1, 1, rs.getLong(4), rs.getString(1), rs.getLong(2), rs.getString(3),
-                        rs.getString(5), rs.getBoolean(6), rs.getDouble(7), rs.getInt(8), rs.getInt(9));
-            }
-        } finally {
-            if (ps != null)
-                ps.close();
-        }
-        throw new FxDbException("ex.content.binary.loadDescriptor.failed", id);
     }
 
     /**
@@ -1962,17 +1813,17 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                             if (change.isGroup()) {
                                 if (change.isPositionChange() && !change.isDataChange()) {
                                     //groups can only change position
-                                    updatePropertyData(change, null, null, con, ps_update, ps_ft_update, sql, pk, null);
+                                    updatePropertyData(change, null, null, con, ps_update, ps_ft_update, pk, null);
                                 }
                             } else {
                                 FxProperty prop = env.getProperty(((FxPropertyData) change.getNewData()).getPropertyId());
                                 if (!change._isUpdateable()) {
                                     deleteDetailData(con, sql, pk, change.getOriginalData());
-                                    insertPropertyData(prop, content.getData("/"), con, ps_insert, ps_ft_insert, sql, pk,
+                                    insertPropertyData(prop, content.getData("/"), con, ps_insert, ps_ft_insert, pk,
                                             ((FxPropertyData) change.getNewData()),
                                             content.isMaxVersion(), content.isLiveVersion());
                                 } else {
-                                    updatePropertyData(change, prop, content.getData("/"), con, ps_update, ps_ft_update, sql, pk,
+                                    updatePropertyData(change, prop, content.getData("/"), con, ps_update, ps_ft_update, pk,
                                             ((FxPropertyData) change.getNewData()));
                                 }
                                 //check if the property changed is a FQN
@@ -2016,7 +1867,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                             insertGroupData(con, sql, pk, (FxGroupData) change.getNewData(), content.isMaxVersion(), content.isLiveVersion());
                         else
                             insertPropertyData(env.getProperty(((FxPropertyData) change.getNewData()).getPropertyId()),
-                                    content.getData("/"), con, ps_insert, ps_ft_insert, sql, pk, ((FxPropertyData) change.getNewData()),
+                                    content.getData("/"), con, ps_insert, ps_ft_insert, pk, ((FxPropertyData) change.getNewData()),
                                     content.isMaxVersion(), content.isLiveVersion());
                     }
                     if (checkScripting)
@@ -2045,7 +1896,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             content.resolveBinaryPreview();
             if (original.getBinaryPreviewId() != content.getBinaryPreviewId() ||
                     original.getBinaryPreviewACL() != content.getBinaryPreviewACL())
-                updateContentBinaryEntry(con, pk, content.getBinaryPreviewId(), content.getBinaryPreviewACL());
+                binaryStorage.updateContentBinaryEntry(con, pk, content.getBinaryPreviewId(), content.getBinaryPreviewACL());
             enableDetailUniqueChecks(con);
             LifeCycleInfoImpl.updateLifeCycleInfo(TBL_CONTENT, "ID", "VER",
                     content.getPk().getId(), content.getPk().getVersion(), false, false);
@@ -2113,29 +1964,6 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         } finally {
             if (stmt != null)
                 stmt.close();
-        }
-    }
-
-    protected void updateContentBinaryEntry(Connection con, FxPK pk, long binaryId, long binaryACL) throws FxUpdateException {
-        PreparedStatement ps = null;
-        try {
-            ps = con.prepareStatement(CONTENT_MAIN_BINARY_UPDATE);
-            ps.setLong(1, binaryId);
-            ps.setInt(2, 1); //ver
-            ps.setInt(3, 1); //quality
-            ps.setLong(4, binaryACL);
-            ps.setLong(5, pk.getId());
-            ps.setInt(6, pk.getVersion());
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            throw new FxUpdateException(LOG, e, "ex.db.sqlError", e.getMessage());
-        } finally {
-            if (ps != null)
-                try {
-                    ps.close();
-                } catch (SQLException e) {
-                    //ignore
-                }
         }
     }
 
@@ -2301,35 +2129,33 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      * Check if content(s) may be removed.
      * This method handles referential integrity incase the used database does not support it
      *
-     * @param con an open and valid connection
-     * @param type the contents structure type
-     * @param id id of the content (optional, used if allForType is <code>false</code>)
-     * @param version version of the content (optional, used if allForType is <code>false</code> and allVersions is <code>false</code>)
-     * @param allForType remove all instances of the given type?
+     * @param con         an open and valid connection
+     * @param type        the contents structure type
+     * @param id          id of the content (optional, used if allForType is <code>false</code>)
+     * @param version     version of the content (optional, used if allForType is <code>false</code> and allVersions is <code>false</code>)
+     * @param allForType  remove all instances of the given type?
      * @param allVersions remove all versions or only the requested one?
      * @throws FxRemoveException if referential integrity would be violated
      */
     public void checkContentRemoval(Connection con, long type, long id, int version, boolean allForType, boolean allVersions) throws FxRemoveException {
         //to be implemented/overwritten for specific database implementations
-        if( LOG.isDebugEnabled() )
-            LOG.debug("Removing type:"+type+" id:"+id+" ver:"+version+" allForType:"+allForType+" allVersions:"+allVersions);
-        if( !allVersions && !allForType)
+        if (LOG.isDebugEnabled())
+            LOG.debug("Removing type:" + type + " id:" + id + " ver:" + version + " allForType:" + allForType + " allVersions:" + allVersions);
+        if (!allVersions && !allForType)
             return;  //specific version may be removed if not all of the type are removed
         try {
             PreparedStatement ps = null;
             try {
                 if (allForType) {
-                    ps = con.prepareStatement("SELECT COUNT(DISTINCT d.ID) FROM " + TBL_CONTENT + " c, " +
-                            TBL_CONTENT_DATA + " d, " + TBL_STRUCT_ASSIGNMENTS + " a, " + TBL_STRUCT_PROPERTIES + " p " +
-                            "WHERE c.TDEF=a.TYPEDEF AND a.APROPERTY=p.ID AND p.REFTYPE=? AND d.ASSIGN=a.ID AND d.TPROP=p.ID");
+                    ps = con.prepareStatement(CONTENT_REFERENCE_BYTYPE);
                     ps.setLong(1, type);
                 } else {
                     ps = con.prepareStatement("SELECT COUNT(*) FROM " + TBL_CONTENT_DATA + " WHERE FREF=?");
                     ps.setLong(1, id);
                 }
                 ResultSet rs = ps.executeQuery();
-                if( rs.next() && rs.getLong(1) != 0 ) {
-                    if( allForType)
+                if (rs.next() && rs.getLong(1) != 0) {
+                    if (allForType)
                         throw new FxRemoveException("ex.content.reference.inUse.type", CacheAdmin.getEnvironment().getType(type), rs.getLong(1));
                     else
                         throw new FxRemoveException("ex.content.reference.inUse.instance", id, rs.getLong(1));
@@ -2358,32 +2184,11 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             ps.setLong(1, pk.getId());
             ps.executeUpdate();
             ps.close();
-            List<Long> binaries = null;
-            ps = con.prepareStatement(CONTENT_BINARY_REMOVE_GET);
-            ps.setLong(1, pk.getId());
-            ResultSet rs = ps.executeQuery();
-            while (rs != null && rs.next()) {
-                if (binaries == null)
-                    binaries = new ArrayList<Long>(20);
-                binaries.add(rs.getLong(1));
-            }
-            ps.close();
+            binaryStorage.removeBinariesForPK(con, pk);
             ps = con.prepareStatement(CONTENT_DATA_REMOVE);
             ps.setLong(1, pk.getId());
             ps.executeUpdate();
             ps.close();
-            if (binaries != null) {
-                ps = con.prepareStatement(CONTENT_BINARY_REMOVE_ID);
-                for (Long id : binaries) {
-                    ps.setLong(1, id);
-                    try {
-                        ps.executeUpdate();
-                    } catch (SQLException e) {
-                        //ok, might still be in use elsewhere
-                    }
-                }
-                ps.close();
-            }
             ps = con.prepareStatement(CONTENT_MAIN_REMOVE);
             ps.setLong(1, pk.getId());
             ps.executeUpdate();
@@ -2429,11 +2234,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             ps.setInt(2, ver);
             ps.executeUpdate();
             ps.close();
-            ps = con.prepareStatement(CONTENT_BINARY_REMOVE_VER);
-            ps.setLong(1, pk.getId());
-            ps.setInt(2, ver);
-            ps.executeUpdate();
-            ps.close();
+            binaryStorage.removeBinariesForVersion(con, new FxPK(pk.getId(), ver));
             ps = con.prepareStatement(CONTENT_DATA_REMOVE_VER);
             ps.setLong(1, pk.getId());
             ps.setInt(2, ver);
@@ -2483,33 +2284,11 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             ps.setLong(1, type.getId());
             ps.executeUpdate();
             ps.close();
-
-            List<Long> binaries = null;
-            ps = con.prepareStatement(CONTENT_BINARY_REMOVE_TYPE_GET);
-            ps.setLong(1, type.getId());
-            rs = ps.executeQuery();
-            while (rs != null && rs.next()) {
-                if (binaries == null)
-                    binaries = new ArrayList<Long>(20);
-                binaries.add(rs.getLong(1));
-            }
-            ps.close();
+            binaryStorage.removeBinariesForType(con, type.getId());
             ps = con.prepareStatement(CONTENT_DATA_REMOVE_TYPE);
             ps.setLong(1, type.getId());
             ps.executeUpdate();
             ps.close();
-            if (binaries != null) {
-                ps = con.prepareStatement(CONTENT_BINARY_REMOVE_ID);
-                for (Long id : binaries) {
-                    ps.setLong(1, id);
-                    try {
-                        ps.executeUpdate();
-                    } catch (SQLException e) {
-                        //ok, might still be in use elsewhere
-                    }
-                }
-                ps.close();
-            }
             ps = con.prepareStatement(CONTENT_MAIN_REMOVE_TYPE);
             ps.setLong(1, type.getId());
             return ps.executeUpdate();
@@ -2564,299 +2343,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      * {@inheritDoc}
      */
     public void maintenance(Connection con) {
-        PreparedStatement ps = null;
-        try {
-            ps = con.prepareStatement(CONTENT_BINARY_TRANSIT_CLEANUP);
-            ps.setLong(1, System.currentTimeMillis());
-            int count = ps.executeUpdate();
-            if (count > 0)
-                LOG.info(count + " expired binary transit entries removed");
-        } catch (SQLException e) {
-            LOG.error(e, e);
-        } finally {
-            if (ps != null)
-                try {
-                    ps.close();
-                } catch (SQLException e) {
-                    //ignore
-                }
-        }
-    }
-
-
-    /**
-     * {@inheritDoc}
-     */
-    public void prepareSave(Connection con, FxContent content) throws FxInvalidParameterException, FxDbException {
-        // key: handle, value: [mimeType,metaData]
-        Map<String, String[]> mimeMetaMap = new HashMap<String, String[]>(5);
-        try {
-            for (FxData data : content.getRootGroup().getChildren())
-                try {
-                    _prepareSave(mimeMetaMap, con, data);
-                } catch (FxApplicationException e) {
-                    LOG.error(e); //not supposed to be thrown if called with a mimeMetaMap
-                }
-        } catch (SQLException e) {
-            throw new FxDbException(LOG, e, "ex.db.sqlError", e.getMessage());
-        }
-    }
-
-
-    /**
-     * {@inheritDoc}
-     */
-    public void prepareBinary(Connection con, FxBinary binary) throws SQLException, FxApplicationException {
-        prepareBinary(con, null, binary);
-    }
-
-    /**
-     * Prepare and identify a binary
-     *
-     * @param con         an open and valid Connection
-     * @param mimeMetaMap optional mimeMetaMap to avoid saving duplicates, if <code>null</code>, binary will be transfered to the real binary space
-     * @param binary      the binary to process (BinaryDescriptor's may be altered or replaced after calling this method!)
-     * @throws java.sql.SQLException  on errors
-     * @throws FxApplicationException on errors
-     */
-    public void prepareBinary(Connection con, Map<String, String[]> mimeMetaMap, FxBinary binary) throws SQLException, FxApplicationException {
-        for (long lang : binary.getTranslatedLanguages()) {
-            BinaryDescriptor bd = binary.getTranslation(lang);
-            if (bd.isEmpty()) {
-                //remove empty languages to prevent further processing (FX-327)
-                binary.removeLanguage(lang);
-                continue;
-            }
-            if (!bd.isNewBinary())
-                continue;
-            if (mimeMetaMap != null && mimeMetaMap.containsKey(bd.getHandle())) {
-                String[] mm = mimeMetaMap.get(bd.getHandle());
-                BinaryDescriptor bdNew = new BinaryDescriptor(bd.getHandle(), bd.getName(), bd.getSize(), mm[0], mm[1]);
-                binary.setTranslation(lang, bdNew);
-            } else {
-                BinaryDescriptor bdNew = identifyAndTransferTransitBinary(con, bd);
-                if (mimeMetaMap == null)
-                    bdNew = binaryTransit(con, bdNew);
-                binary.setTranslation(lang, bdNew);
-                if (mimeMetaMap != null)
-                    mimeMetaMap.put(bdNew.getHandle(), new String[]{bdNew.getMimeType(), bdNew.getMetadata()});
-            }
-        }
-    }
-
-    private void _prepareSave(Map<String, String[]> mimeMetaMap, Connection con, FxData data) throws SQLException, FxApplicationException {
-        if (data instanceof FxGroupData)
-            for (FxData sub : ((FxGroupData) data).getChildren())
-                _prepareSave(mimeMetaMap, con, sub);
-        else if (data instanceof FxPropertyData) {
-            FxPropertyData pdata = (FxPropertyData) data;
-            if (pdata.isContainsDefaultValue() && !pdata.isEmpty())
-                ((FxPropertyData) data).setContainsDefaultValue(false);
-            if (!pdata.isEmpty() && pdata.getValue() instanceof FxBinary) {
-                FxBinary bin = (FxBinary) pdata.getValue();
-                prepareBinary(con, mimeMetaMap, bin);
-            }
-        }
-    }
-
-    /**
-     * Identifies a binary in the transit table and generates previews etc.
-     *
-     * @param con    an open and valid Connection
-     * @param binary the binary to identify
-     * @return BinaryDescriptor
-     * @throws SQLException           on errors
-     * @throws FxApplicationException on errors
-     */
-    private BinaryDescriptor identifyAndTransferTransitBinary(Connection con, BinaryDescriptor binary) throws SQLException, FxApplicationException {
-        //check if already identified
-        if (!StringUtils.isEmpty(binary.getMetadata()))
-            return binary;
-        PreparedStatement ps = null;
-        File binaryFile = null;
-        File previewFile1 = null, previewFile2 = null, previewFile3 = null;
-        InputStream in = null;
-        FileOutputStream fos = null;
-        FileInputStream pin1 = null, pin2 = null, pin3 = null;
-        int[] dimensionsPreview1 = {0, 0};
-        int[] dimensionsPreview2 = {0, 0};
-        int[] dimensionsPreview3 = {0, 0};
-        String mimeType = "unknown";
-        String metaData = "<empty/>";
-        ResultSet rs = null;
-        try {
-            ps = con.prepareStatement(BINARY_TRANSIT_HEADER);
-            ps.setString(1, binary.getHandle());
-
-            rs = ps.executeQuery();
-            if (rs.next()) {
-                byte[] header = null;
-                try {
-                    header = rs.getBlob(1).getBytes(1, 48);
-                } catch (Throwable t) {
-                    // ignore, header migth be smaller than 48
-                }
-                mimeType = FxMediaEngine.detectMimeType(header, binary.getName());
-            }
-
-            binaryFile = File.createTempFile("FXBIN_", "_TEMP");
-            in = rs.getBlob(1).getBinaryStream();
-            fos = new FileOutputStream(binaryFile);
-            byte[] buffer = new byte[4096];
-            int read;
-            while ((read = in.read(buffer)) != -1)
-                fos.write(buffer, 0, read);
-            fos.close();
-            fos = null;
-            in.close();
-            in = null;
-            boolean processed = false;
-            boolean useDefaultPreview = true;
-            int defaultId = BinaryDescriptor.SYS_UNKNOWN;
-
-            FxScriptBinding binding;
-            ScriptingEngine scripting = EJBLookup.getScriptingEngine();
-            for (long script : scripting.getByScriptEvent(FxScriptEvent.BinaryPreviewProcess)) {
-                binding = new FxScriptBinding();
-                binding.setVariable("processed", processed);
-                binding.setVariable("useDefaultPreview", useDefaultPreview);
-                binding.setVariable("defaultId", defaultId);
-                binding.setVariable("mimeType", mimeType);
-                binding.setVariable("metaData", metaData);
-                binding.setVariable("binaryFile", binaryFile);
-                binding.setVariable("previewFile1", previewFile1);
-                binding.setVariable("previewFile2", previewFile2);
-                binding.setVariable("previewFile3", previewFile3);
-                binding.setVariable("dimensionsPreview1", dimensionsPreview1);
-                binding.setVariable("dimensionsPreview2", dimensionsPreview2);
-                binding.setVariable("dimensionsPreview3", dimensionsPreview3);
-                try {
-                    FxScriptResult result = scripting.runScript(script, binding);
-                    binding = result.getBinding();
-                    processed = (Boolean) binding.getVariable("processed");
-                    if (processed) {
-                        useDefaultPreview = (Boolean) binding.getVariable("useDefaultPreview");
-                        defaultId = (Integer) binding.getVariable("defaultId");
-                        previewFile1 = (File) binding.getVariable("previewFile1");
-                        previewFile2 = (File) binding.getVariable("previewFile2");
-                        previewFile3 = (File) binding.getVariable("previewFile3");
-                        dimensionsPreview1 = (int[]) binding.getVariable("dimensionsPreview1");
-                        dimensionsPreview2 = (int[]) binding.getVariable("dimensionsPreview2");
-                        dimensionsPreview3 = (int[]) binding.getVariable("dimensionsPreview3");
-                        metaData = (String) binding.getVariable("metaData");
-                        break;
-                    }
-                } catch (Throwable e) {
-                    LOG.error("Error running binary processing script: " + e.getMessage());
-                }
-            }
-            //check if values for preview are valid
-            if (!useDefaultPreview) {
-                if (previewFile1 == null || !previewFile1.exists() ||
-                        previewFile2 == null || !previewFile2.exists() ||
-                        previewFile3 == null || !previewFile3.exists() ||
-                        dimensionsPreview1 == null || dimensionsPreview1.length != 2 || dimensionsPreview1[0] < 0 || dimensionsPreview1[1] < 0 ||
-                        dimensionsPreview1 == null || dimensionsPreview2.length != 2 || dimensionsPreview2[0] < 0 || dimensionsPreview2[1] < 0 ||
-                        dimensionsPreview1 == null || dimensionsPreview3.length != 2 || dimensionsPreview3[0] < 0 || dimensionsPreview3[1] < 0) {
-                    LOG.warn("Invalid preview parameters! Setting to default/unknown!");
-                    useDefaultPreview = true;
-                    defaultId = BinaryDescriptor.SYS_UNKNOWN;
-                }
-            } else {
-                //only negative values are allowed
-                if (defaultId >= 0) {
-                    defaultId = BinaryDescriptor.SYS_UNKNOWN;
-                    LOG.warn("Only default preview id's that are negative and defined in BinaryDescriptor as constants are allowed!");
-                }
-            }
-
-            if (!useDefaultPreview) {
-                ps.close();
-//                ps = con.prepareStatement("SELECT * FROM "+TBL_BINARY_TRANSIT+" WHERE BKEY=? FOR UPDATE");
-//                ps.setString(1, binary.getHandle());
-//                ps.executeQuery();
-//                ps.close();
-                ps = con.prepareStatement(BINARY_TRANSIT_PREVIEWS);
-                pin1 = new FileInputStream(previewFile1);
-                pin2 = new FileInputStream(previewFile2);
-                pin3 = new FileInputStream(previewFile3);
-                ps.setBinaryStream(1, pin1, (int) previewFile1.length());
-                ps.setInt(2, dimensionsPreview1[0]);
-                ps.setInt(3, dimensionsPreview1[1]);
-                ps.setBinaryStream(4, pin2, (int) previewFile2.length());
-                ps.setInt(5, dimensionsPreview2[0]);
-                ps.setInt(6, dimensionsPreview2[1]);
-                ps.setBinaryStream(7, pin3, (int) previewFile3.length());
-                ps.setInt(8, dimensionsPreview3[0]);
-                ps.setInt(9, dimensionsPreview3[1]);
-                ps.setInt(10, (int) previewFile1.length());
-                ps.setInt(11, (int) previewFile2.length());
-                ps.setInt(12, (int) previewFile3.length());
-                ps.setString(13, binary.getHandle());
-                ps.executeUpdate();
-            } else {
-                ps.close();
-                ps = con.prepareStatement(BINARY_TRANSIT_PREVIEWS_REF);
-                ps.setLong(1, defaultId);
-                ps.setString(2, binary.getHandle());
-                ps.executeUpdate();
-            }
-        } catch (IOException e) {
-            LOG.error("Stream reading failed:" + e.getMessage(), e);
-//        } catch (XMLStreamException e) {
-//            LOG.error("XMLStream processing failed: " + e.getMessage(), e);
-        } finally {
-            try {
-                if (fos != null)
-                    fos.close();
-                if (in != null)
-                    in.close();
-                if (pin1 != null)
-                    pin1.close();
-                if (pin2 != null)
-                    pin2.close();
-                if (pin3 != null)
-                    pin3.close();
-            } catch (IOException e) {
-                LOG.error("Stream closing failed: " + e.getMessage(), e);
-            }
-            if (binaryFile != null && !binaryFile.delete())
-                binaryFile.deleteOnExit();
-            if (previewFile1 != null && !previewFile1.delete())
-                previewFile1.deleteOnExit();
-            if (previewFile2 != null && !previewFile2.delete())
-                previewFile2.deleteOnExit();
-            if (previewFile3 != null && !previewFile3.delete())
-                previewFile3.deleteOnExit();
-            if (rs != null)
-                rs.close();
-            if (ps != null)
-                ps.close();
-        }
-        //TODO: if we have a word, excel or powerpoint extract all possible infos and put them into the metaData
-        return new BinaryDescriptor(binary.getHandle(), binary.getName(), binary.getSize(), mimeType, metaData);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void storeBinary(Connection con, long id, int version, int quality, String name, long length, InputStream binary) throws FxApplicationException {
-//        System.out.println("INSTALLING ["+name+"] length="+length);
-        try {
-            BinaryUploadPayload payload = FxStreamUtils.uploadBinary(length, binary);
-            BinaryDescriptor desc = new BinaryDescriptor(payload.getHandle(), name, length, null, null);
-            desc = identifyAndTransferTransitBinary(con, desc);
-            binaryTransit(con, desc, id, version, quality);
-        } catch (SQLException e) {
-            throw new FxDbException(LOG, e, "ex.db.sqlError", e.getMessage());
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void updateBinaryPreview(Connection con, long id, int version, int quality, int preview, int width, int height, long length, InputStream binary) {
-        //TODO: code me!
+        binaryStorage.removeExpiredTransitEntries(con);
     }
 
     /**
@@ -2965,6 +2452,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         try {
             return uniqueConditionsMet(con, CacheAdmin.getEnvironment(), new StringBuilder(500), mode, prop, typeId, pk, false);
         } catch (SQLException e) {
+            //noinspection ThrowableInstanceNeverThrown
             throw new FxApplicationException(e, "ex.db.sqlError", e.getMessage()).asRuntimeException();
         } catch (FxApplicationException e) {
             throw e.asRuntimeException();
@@ -3052,6 +2540,15 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         }
     }
 
+    /**
+     * Perform unique mode checks
+     *
+     * @param con        an open and valid connection
+     * @param sql        current sql statement with checks
+     * @param uniqueMode the unique mode to check
+     * @throws SQLException           on errors
+     * @throws FxApplicationException on unique constraint violations
+     */
     private void doCheckUniqueConstraint(Connection con, String sql, UniqueMode uniqueMode) throws SQLException, FxApplicationException {
         Statement s = null;
         try {
@@ -3059,6 +2556,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             ResultSet rs = s.executeQuery(sql);
             if (rs != null && rs.next()) {
                 if (uniqueMode == UniqueMode.Instance || rs.getInt(2) > 0)
+                    //noinspection ThrowableInstanceNeverThrown
                     throw new FxConstraintViolationException("ex.content.contraint.unique.xpath", rs.getString(1), uniqueMode).setAffectedXPath(rs.getString(1));
             }
         } finally {
@@ -3135,7 +2633,6 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     public void updateXPath(Connection con, long assignmentId, String originalXPath, String newXPath) throws FxUpdateException, FxInvalidParameterException {
         LOG.info("Updating all instances from [" + originalXPath + "] to [" + newXPath + "]...");
         PreparedStatement psRead = null, psWrite = null;
-//        int count = 0;
         List<XPathElement> xorg = XPathElement.split(originalXPath);
         List<XPathElement> xnew = XPathElement.split(newXPath);
         if (xorg.size() != xnew.size())
@@ -3192,7 +2689,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      * {@inheritDoc}
      */
     public long getTypeInstanceCount(Connection con, long typeId) throws SQLException {
-                PreparedStatement ps = null;
+        PreparedStatement ps = null;
         long count = 0;
         try {
             ps = con.prepareStatement("SELECT COUNT(*) FROM " + TBL_CONTENT + " WHERE TDEF=?");
@@ -3205,6 +2702,72 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 ps.close();
         }
         return count;
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    public void prepareSave(Connection con, FxContent content) throws FxInvalidParameterException, FxDbException {
+        // key: handle, value: [mimeType,metaData]
+        Map<String, String[]> mimeMetaMap = new HashMap<String, String[]>(5);
+        try {
+            for (FxData data : content.getRootGroup().getChildren())
+                try {
+                    _prepareSave(mimeMetaMap, con, data);
+                } catch (FxApplicationException e) {
+                    LOG.error(e); //not supposed to be thrown if called with a mimeMetaMap
+                }
+        } catch (SQLException e) {
+            throw new FxDbException(LOG, e, "ex.db.sqlError", e.getMessage());
+        }
+    }
+
+    /**
+     * Internal prepare save that walks through all groups to discover binaries that are to be processed
+     *
+     * @param mimeMetaMap optional meta map to avoid duplicates, can be <code>null</code>
+     * @param con         an open and valid connection
+     * @param data        current FxDate object to inspect
+     * @throws SQLException           on errors
+     * @throws FxApplicationException on errors
+     */
+    private void _prepareSave(Map<String, String[]> mimeMetaMap, Connection con, FxData data) throws SQLException, FxApplicationException {
+        if (data instanceof FxGroupData)
+            for (FxData sub : ((FxGroupData) data).getChildren())
+                _prepareSave(mimeMetaMap, con, sub);
+        else if (data instanceof FxPropertyData) {
+            FxPropertyData pdata = (FxPropertyData) data;
+            if (pdata.isContainsDefaultValue() && !pdata.isEmpty())
+                ((FxPropertyData) data).setContainsDefaultValue(false);
+            if (!pdata.isEmpty() && pdata.getValue() instanceof FxBinary) {
+                FxBinary bin = (FxBinary) pdata.getValue();
+                binaryStorage.prepareBinary(con, mimeMetaMap, bin);
+            }
+        }
+    }
+
+    //Binary handling
+
+    /**
+     * {@inheritDoc}
+     */
+    public void storeBinary(Connection con, long id, int version, int quality, String name, long length, InputStream binary) throws FxApplicationException {
+        binaryStorage.storeBinary(con, id, version, quality, name, length, binary);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void updateBinaryPreview(Connection con, long id, int version, int quality, int preview, int width, int height, long length, InputStream binary) throws FxApplicationException {
+        binaryStorage.updateBinaryPreview(con, id, version, quality, preview, width, height, length, binary);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void prepareBinary(Connection con, FxBinary binary) throws SQLException, FxApplicationException {
+        binaryStorage.prepareBinary(con, null, binary);
     }
 }
 

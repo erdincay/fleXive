@@ -33,7 +33,9 @@ package com.flexive.core.storage.mySQL;
 
 import com.flexive.core.DatabaseConst;
 import com.flexive.core.storage.ContentStorage;
+import com.flexive.core.storage.binary.BinaryStorage;
 import com.flexive.core.storage.genericSQL.GenericHierarchicalStorage;
+import com.flexive.core.storage.genericSQL.GenericBinarySQLStorage;
 import com.flexive.shared.exceptions.FxDbException;
 import com.flexive.shared.exceptions.FxRuntimeException;
 import org.apache.commons.logging.Log;
@@ -53,6 +55,13 @@ public class MySQLHierarchicalStorage extends GenericHierarchicalStorage {
     private static final Log LOG = LogFactory.getLog(MySQLHierarchicalStorage.class);
 
     private static final MySQLHierarchicalStorage instance = new MySQLHierarchicalStorage();
+
+    /**
+     * Ctor
+     */
+    public MySQLHierarchicalStorage() {
+        super(new GenericBinarySQLStorage());
+    }
 
     /**
      * Singleton getter
