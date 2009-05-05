@@ -35,6 +35,7 @@ import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.FxFormatUtils;
+import static com.flexive.shared.FxSharedUtils.checkParameterNull;
 import com.flexive.shared.interfaces.SearchEngine;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
@@ -197,6 +198,7 @@ public class SqlQueryBuilder implements Serializable {
      * @return  the input column name, including the table alias
      */
     private String injectQuotes(String column) {
+        checkParameterNull(column, "column");
         if (column.indexOf('/') == -1) {
             return column;
         }
@@ -246,6 +248,7 @@ public class SqlQueryBuilder implements Serializable {
      */
     public SqlQueryBuilder condition(FxAssignment assignment, PropertyValueComparator comparator,
                                         FxValue<?, ?> value) {
+        checkParameterNull(comparator, "comparator");
         renderCondition(comparator.getSql(assignment, value));
         tables.add(Table.CONTENT);
         return this;
@@ -261,6 +264,7 @@ public class SqlQueryBuilder implements Serializable {
      */
     public SqlQueryBuilder condition(FxProperty property, PropertyValueComparator comparator,
                                         FxValue<?, ?> value) {
+        checkParameterNull(comparator, "comparator");
         renderCondition(comparator.getSql(property, value));
         tables.add(Table.CONTENT);
         return this;
@@ -275,6 +279,7 @@ public class SqlQueryBuilder implements Serializable {
      * @return this
      */
     public SqlQueryBuilder condition(String propertyName, PropertyValueComparator comparator, FxValue<?, ?> value) {
+        checkParameterNull(comparator, "comparator");
         renderCondition(comparator.getSql(injectQuotes(propertyName), value));
         tables.add(Table.CONTENT);
         return this;
@@ -289,6 +294,7 @@ public class SqlQueryBuilder implements Serializable {
      * @return this
      */
     public SqlQueryBuilder condition(String propertyName, PropertyValueComparator comparator, Object value) {
+        checkParameterNull(comparator, "comparator");
         renderCondition(comparator.getSql(injectQuotes(propertyName), value));
         tables.add(Table.CONTENT);
         return this;
@@ -301,6 +307,7 @@ public class SqlQueryBuilder implements Serializable {
      * @return this
      */
     public SqlQueryBuilder fulltext(String value) {
+        checkParameterNull(value, "value");
         return condition("*", PropertyValueComparator.EQ, value);
     }
 
@@ -313,6 +320,7 @@ public class SqlQueryBuilder implements Serializable {
      * @return  this
      */
     public SqlQueryBuilder type(String typeName) {
+        checkParameterNull(typeName, "typeName");
         condition("typedef", PropertyValueComparator.EQ, CacheAdmin.getEnvironment().getType(typeName).getId());
         return this;
     }
@@ -349,6 +357,7 @@ public class SqlQueryBuilder implements Serializable {
      * @return  this
      */
     public SqlQueryBuilder isChild(String path) {
+        checkParameterNull(path, "path");
         renderCondition("IS CHILD OF " + FxFormatUtils.escapeForSql(path));
         tables.add(Table.CONTENT);
         return this;
@@ -373,6 +382,7 @@ public class SqlQueryBuilder implements Serializable {
      * @return  this
      */
     public SqlQueryBuilder isDirectChild(String path) {
+        checkParameterNull(path, "path");
         renderCondition("IS DIRECT CHILD OF " + FxFormatUtils.escapeForSql(path));
         tables.add(Table.CONTENT);
         return this;
@@ -416,6 +426,7 @@ public class SqlQueryBuilder implements Serializable {
      * @return  this
      */
     public SqlQueryBuilder select(String... columns) {
+        checkParameterNull(columns, "columns");
         selectColumns.clear();
         selectColumns.addAll(Arrays.asList(columns));
         if (columns.length > 0) {
@@ -461,6 +472,7 @@ public class SqlQueryBuilder implements Serializable {
      * @return  this
      */
     public SqlQueryBuilder filterVersion(VersionFilter filter) {
+        checkParameterNull(filter, "filter");
         removeFilter("VERSION");
         return uniqueFilter("VERSION", filter.name());
     }
@@ -516,6 +528,7 @@ public class SqlQueryBuilder implements Serializable {
      * @return  this
      */
     public SqlQueryBuilder orderBy(String column, SortDirection direction) {
+        checkParameterNull(column, "column");
         clearOrderBy();
         final int columnIndex = FxSharedUtils.getColumnIndex(getColumnNames(), column);
         if (columnIndex == -1) {
@@ -534,6 +547,7 @@ public class SqlQueryBuilder implements Serializable {
      * @return  this
      */
     public SqlQueryBuilder orderBy(int columnIndex, SortDirection direction) {
+        checkParameterNull(direction, "direction");
         clearOrderBy();
         final List<String> names = getColumnNames();
         if (columnIndex <= names.size()) {
@@ -585,6 +599,7 @@ public class SqlQueryBuilder implements Serializable {
      * @return this
      */
     public SqlQueryBuilder enterSub(Operator operator) {
+        checkParameterNull(operator, "operator");
         assertNotFrozen();
         if (expressionCounter.size() > 0 && expressionCounter.peek() > 0) {
             whereConditions.append(" ").append(operatorStack.peek()).append(" ");
@@ -663,6 +678,7 @@ public class SqlQueryBuilder implements Serializable {
     }
 
     public SqlQueryBuilder viewType(ResultViewType viewType) {
+        checkParameterNull(viewType, "viewType");
         this.viewType = viewType;
         return this;
     }
@@ -740,6 +756,7 @@ public class SqlQueryBuilder implements Serializable {
      * @param condition the condition to be rendered.
      */
     private void renderCondition(String condition) {
+        checkParameterNull(condition, "condition");
         if (operatorStack.isEmpty() && whereConditions.length() == 0) {
             // implicitly open first scope
             andSub();

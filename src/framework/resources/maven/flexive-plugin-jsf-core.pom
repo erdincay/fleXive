@@ -86,6 +86,12 @@
             <artifactId>weblets-impl</artifactId>
             <version>1.0</version>
             <optional>false</optional>
+            <exclusions>
+                <exclusion>
+                    <groupId>xml-apis</groupId>
+                    <artifactId>xml-apis</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>

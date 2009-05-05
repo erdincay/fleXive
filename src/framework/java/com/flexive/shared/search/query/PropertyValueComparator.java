@@ -33,6 +33,7 @@ package com.flexive.shared.search.query;
 
 import com.flexive.shared.FxFormatUtils;
 import com.flexive.shared.FxSharedUtils;
+import static com.flexive.shared.FxSharedUtils.checkParameterNull;
 import com.flexive.shared.exceptions.FxInvalidStateException;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.search.Table;
@@ -124,8 +125,10 @@ public enum PropertyValueComparator implements ValueComparator {
 	}
 
     public final String getSql(FxAssignment assignment, FxValue value) {
+        checkParameterNull(assignment, "assignment");
         final String sqlValue;
         if (needsInput) {
+            checkParameterNull(value, "value");
             if (value.isEmpty()) {
                 throw new FxInvalidStateException("ex.sqlQueryBuilder.value.empty", assignment.getLabel(), id).asRuntimeException();
             }
@@ -143,8 +146,10 @@ public enum PropertyValueComparator implements ValueComparator {
 	}
 
     public final String getSql(FxProperty property, FxValue value) {
+        checkParameterNull(property, "property");
         final String sqlValue;
         if (needsInput) {
+            checkParameterNull(value, "value");
             try {
                 sqlValue = value.getSqlValue();
             } catch (RuntimeException e) {
@@ -174,6 +179,8 @@ public enum PropertyValueComparator implements ValueComparator {
      * @return  the SQL query
      */
     protected String getSql(String leftHandSide, String rightHandSide) {
+        checkParameterNull(leftHandSide, "leftHandSide");
+        checkParameterNull(rightHandSide, "rightHandSide");
         return leftHandSide + " " + id + " " + rightHandSide;
     }
 
