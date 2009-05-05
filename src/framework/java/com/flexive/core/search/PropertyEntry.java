@@ -402,7 +402,7 @@ public class PropertyEntry {
                     }
                     break;
                 case DateRange:
-                    final Pair<Date, Date> pair = decodeDateRange(rs, pos, 4);
+                    final Pair<Date, Date> pair = decodeDateRange(rs, pos, 1);
                     if (pair.getFirst() == null || pair.getSecond() == null) {
                         result = new FxDateRange(multilanguage, FxLanguage.SYSTEM_ID, FxDateRange.EMPTY);
                         result.setEmpty(FxLanguage.SYSTEM_ID);
@@ -411,7 +411,7 @@ public class PropertyEntry {
                     }
                     break;
                 case DateTimeRange:
-                    final Pair<Date, Date> pair2 = decodeDateRange(rs, pos, 7);
+                    final Pair<Date, Date> pair2 = decodeDateRange(rs, pos, 1);
                     if (pair2.getFirst() == null || pair2.getSecond() == null) {
                         result = new FxDateTimeRange(multilanguage, FxLanguage.SYSTEM_ID, FxDateRange.EMPTY);
                         result.setEmpty(FxLanguage.SYSTEM_ID);
