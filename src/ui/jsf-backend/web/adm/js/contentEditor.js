@@ -51,16 +51,13 @@ function fileInputChanged() {
 }
 
 function saveHtmlEditors() {
-    var instances = [];
-    for (var instanceName in tinyMCE.instances) {
-        if (tinyMCE.isInstance(tinyMCE.instances[instanceName])) {
-            instances.push(tinyMCE.instances[instanceName]);
-        }
-    }
-    if (instances.length > 0) {
-        tinyMCE.triggerSave();
-        for (var i = 0; i < instances.length; i++) {
-            tinyMCE.execCommand("mceRemoveControl", false, instances[i].editorId);
+    tinyMCE.triggerSave();
+    for (var i = 0; i < tinyMCE.editors.length; i++) {
+        var editor = tinyMCE.editors[i];
+        try {
+            editor.remove();
+        } catch (e) {
+            alert("Failed to remove editor: " + e);
         }
     }
 }

@@ -882,14 +882,6 @@ class EditModeHelper extends RenderHelper {
                     request.setAttribute(REQUEST_EDITORINIT, true);
                 }
                 writer.write("tinyMCE.execCommand('mceAddControl', false, '" + inputClientId + "');\n");
-                if (FxJsfUtils.isAjaxRequest()) {
-                    // explicitly set content for firefox, since it messes up HTML markup
-                    // when populated directly from the textarea content
-                    writer.write("if (tinyMCE.isGecko) {\n");
-                    writer.write("    tinyMCE.execInstanceCommand('" + inputClientId + "', 'mceSetContent', false, '"
-                            + FxFormatUtils.escapeForJavaScript(getTextValue(value, languageId), false, false) + "');\n");
-                    writer.write("}\n");
-                }
                 writer.endElement("script");
             } else {
                 // render standard text area

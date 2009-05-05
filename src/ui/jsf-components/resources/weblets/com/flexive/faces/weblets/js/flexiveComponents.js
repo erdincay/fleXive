@@ -668,9 +668,11 @@ flexive.input = new function() {
     // trigger tinyMCE repaint on IE
     this._fixHtmlEditorsIE = function() {
         if (typeof(window.tinyMCE) != 'undefined' && tinyMCE.isIE) {
-            for (var instanceName in tinyMCE.instances) {
-                if (tinyMCE.isInstance(tinyMCE.instances[instanceName])) {
-                    tinyMCE.execInstanceCommand(instanceName, "mceCleanup");
+            for (var i = 0; i < tinyMCE.editors.length; i++) {
+                try {
+                    tinyMCE.editors[i].mceCleanup();
+                } catch (e) {
+                    // ignore
                 }
             }
         }
@@ -687,7 +689,7 @@ flexive.input = new function() {
                     editor_selector: "fxValueTextAreaHtml",
                     theme: "advanced",
                     plugins: "paste,fullscreen,inlinepopups",
-                    language: "en", //flexive.guiTranslation,   // see http://issuetracker.flexive.org/jira/browse/FX-547
+                    language: flexive.guiTranslation,   
                     entity_encoding: "raw",     // don't replace special characters (like umlaut) with HTML entities
 
                     // general layout options
