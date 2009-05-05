@@ -921,8 +921,18 @@ database.vendor=MySQL
         <buildPlugin name="jsf-core" srcdir="${flexive.base.ui.components.dir}">
             <plugin-jar-elements>
                 <!-- explode YUI and TinyMCE editor files in into jsf core plugins JAR under com/flexive/faces/weblets/js -->
-                <zipfileset src="${flexive.base.ui.shared.dir}/resources/lib/tiny_mce.zip" prefix="com/flexive/faces/weblets/js"/>
-                <zipfileset src="${flexive.base.ui.shared.dir}/resources/lib/yui-${web.ui.yui.version}.zip" prefix="com/flexive/faces/weblets/js/yui"/>
+
+                <zipfileset src="${flexive.base.ui.shared.dir}/resources/lib/tiny_mce.zip" prefix="com/flexive/faces/weblets/js" includes="**/*">
+                    <!-- Exclude source javascript files -->
+                    <exclude name="**/*_src.js"/>
+                </zipfileset>
+
+                <!-- Include the rest of YUI (skins, images, ...) -->
+                <zipfileset src="${flexive.base.ui.shared.dir}/resources/lib/yui-${web.ui.yui.version}.zip" prefix="com/flexive/faces/weblets/js/yui">
+                    <include name="**/*"/>
+                    <!-- Exclude debug JS files -->
+                    <exclude name="**/*-debug.js"/>
+                </zipfileset>
             </plugin-jar-elements>
         </buildPlugin>
         

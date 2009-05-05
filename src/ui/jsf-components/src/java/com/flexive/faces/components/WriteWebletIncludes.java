@@ -38,6 +38,8 @@ import static com.flexive.faces.javascript.FxJavascriptUtils.beginJavascript;
 import static com.flexive.faces.javascript.FxJavascriptUtils.endJavascript;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxNotFoundException;
+import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.FxContext;
 
 import javax.faces.component.UIOutput;
 import javax.faces.context.FacesContext;
@@ -143,6 +145,12 @@ public class WriteWebletIncludes extends UIOutput {
         beginJavascript(out);
         out.write("flexive.baseUrl='" + FxJsfUtils.getManagedBean(SystemBean.class).getDocumentBase() + "';\n");
         out.write("flexive.componentsWebletUrl='" + FacesWebletUtils.getURL(facesContext, "com.flexive.faces.weblets", "") + "';\n");
+        out.write("flexive.yuiBase=flexive.componentsWebletUrl + 'js/yui/';\n");
+        final String languageIso = FxContext.getUserTicket().getLanguage().getIso2digit().toLowerCase();
+        out.write("flexive.locale='" + languageIso + "';\n");
+        out.write("flexive.guiTranslation='"
+                + (FxSharedUtils.isTranslatedLocale(languageIso) ? languageIso : "en")
+                + "';\n");
         endJavascript(out);
         if (isHtmlEditor()) {
             renderWebletInclude(out, WEBLET_TINYMCE);

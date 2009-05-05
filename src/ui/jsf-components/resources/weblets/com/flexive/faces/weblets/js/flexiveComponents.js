@@ -161,9 +161,12 @@ flexive.yui = new function() {
     this.load = function() {
         if (this.requiredComponents.length > 0) {
             // load Yahoo UI only if at least one component is required
+
+            // if you want to load the debug version of YUI, you have to change flexive.yuiBase to the
+            // path of a full YUI installation - the flexive JAR includes only the minimized versions 
             try {
                 var loader = new YAHOO.util.YUILoader({
-                            base: flexive.componentsWebletUrl + "js/yui/",
+                            base: flexive.yuiBase,
                             require: this.requiredComponents,
                             loadOptional: true,
                             onSuccess: function() {
@@ -684,7 +687,7 @@ flexive.input = new function() {
                     editor_selector: "fxValueTextAreaHtml",
                     theme: "advanced",
                     plugins: "paste,fullscreen,inlinepopups",
-                    language: tinyMCE.guiLanguage ? tinyMCE.guiLanguage : "en",
+                    language: "en", //flexive.guiTranslation,   // see http://issuetracker.flexive.org/jira/browse/FX-547
                     entity_encoding: "raw",     // don't replace special characters (like umlaut) with HTML entities
 
                     // general layout options

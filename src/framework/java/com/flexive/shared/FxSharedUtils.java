@@ -78,7 +78,7 @@ public final class FxSharedUtils {
     private static String fxHeader = "[fleXive]";
     private static boolean fxSnapshotVersion = false;
     private static String bundledGroovyVersion = "unknown";
-    private static List<String> translatedLocales = Arrays.asList("en");
+    private static List<String> translatedLocales = Collections.unmodifiableList(Arrays.asList("en"));
 
 
     /**
@@ -133,9 +133,9 @@ public final class FxSharedUtils {
             if (StringUtils.isNotBlank(languagesValue)) {
                 final String[] languages = StringUtils.split(languagesValue, ",");
                 for (int i = 0; i < languages.length; i++) {
-                    languages[i] = languages[i].trim();
+                    languages[i] = languages[i].trim().toLowerCase();
                 }
-                translatedLocales = Arrays.asList(languages);
+                translatedLocales = Collections.unmodifiableList(Arrays.asList(languages));
             }
         } catch (Exception e) {
             LOG.error(e);
@@ -928,6 +928,34 @@ public final class FxSharedUtils {
                     args[i] = tmp;
         }
         return FxFormatUtils.formatResource(resource, localeId, args);
+    }
+
+    /**
+     * Returns true if the given locale is localized in the flexive application
+     * (compile-time parameter flexive.translatedLocales set in flexive.properties).
+     *
+     * @param localeIsoCode the locale ISO code, e.g. "en" or "de"
+     * @return  true if the given locale is localized (at least for some messages).
+     * @since 3.1
+     */
+    public static boolean isTranslatedLocale(String localeIsoCode) {
+        for (String locale : translatedLocales) {
+            if (locale.equalsIgnoreCase(localeIsoCode)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Returns the list of translated locales, as specified in flexive.properties
+     * (flexive.translatedLocales).
+     *
+     * @return  the list of translated locales, in lowercase
+     * @since   3.1
+     */
+    public static List<String> getTranslatedLocales() {
+        return translatedLocales;
     }
 
     /**
