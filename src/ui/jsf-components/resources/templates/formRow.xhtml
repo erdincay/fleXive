@@ -18,54 +18,65 @@ labelKey = Message key (overrides label)
 tooltipKey = Message key of the tooltip (if not specified and labelKey is set, it defaults to #{labelKey}.tooltip)
 newLine = if a newline should be rendered after the input row (default: true)
 width = overrides the default width (value in pixel, eg width="100")
+relativeWidth = overrides the default width (value in %, eg width="100"), overwrites the width if given
 height = overrides the default height (value in pixel, eg height="80")
 
 <ui:composition>
 
-<c:if test="${!empty height}">
-    <c:set var="overrideStyle" value="#{overrideStyle};height:#{height}px" />
-</c:if>
-<c:if test="${!empty width}">
-    <c:set var="overrideStyle" value="#{overrideStyle};width:#{width}px" />
-    <c:set var="overrideInputStyle" value="#{overrideInputStyle};width:#{width-140}px"/>
-</c:if>
-<c:if test="#{!empty labelKey}">
-    <c:set var="label" value="#{fxMessageBean[labelKey]}"/>
-</c:if>
-<c:if test="#{empty tooltipKey and not empty labelKey and empty tooltip}">
-    <c:set var="tooltipKey" value="#{labelKey}.tooltip"/>
-</c:if>
-<c:if test="#{!empty tooltipKey and fxSystemBean.messageExists[tooltipKey]}">
-    <c:set var="tooltip" value="#{fxMessageBean[tooltipKey]}"/>
-</c:if>
+    <c:if test="${!empty height}">
+        <c:set var="overrideStyle" value="#{overrideStyle};height:#{height}px"/>
+    </c:if>
+    <c:if test="${!empty width}">
+        <c:set var="overrideStyle" value="#{overrideStyle};width:#{width}px"/>
+        <c:set var="overrideInputStyle" value="#{overrideInputStyle};width:#{width-140}px"/>
+    </c:if>
+    <c:if test="#{!empty relativeWidth}">
+        <c:if test="#{relativeWidth gt 100}">
+            <c:set var="overrideStyle" value="#{overrideStyle};width:100%"/>
+            <c:set var="overrideInputStyle" value="#{overrideInputStyle};width:20%"/>
+        </c:if>
+        <c:if test="#{relativeWidth le 100}">
+            <c:set var="overrideStyle" value="#{overrideStyle};width:#{relativeWidth}%"/>
+            <c:set var="overrideInputStyle" value="#{overrideInputStyle};width:#{relativeWidth * 0.80}%"/>
+        </c:if>
+    </c:if>
+    <c:if test="#{!empty labelKey}">
+        <c:set var="label" value="#{fxMessageBean[labelKey]}"/>
+    </c:if>
+    <c:if test="#{empty tooltipKey and not empty labelKey and empty tooltip}">
+        <c:set var="tooltipKey" value="#{labelKey}.tooltip"/>
+    </c:if>
+    <c:if test="#{!empty tooltipKey and fxSystemBean.messageExists[tooltipKey]}">
+        <c:set var="tooltip" value="#{fxMessageBean[tooltipKey]}"/>
+    </c:if>
 
-<div class="formRow" style="#{overrideStyle}">
+    <div class="formRow" style="#{overrideStyle}">
 
-    <div class="formLabelContainer">
-        <div class="#{empty tooltip ? '' : 'tooltip'}">
-            <div class="formLabel" title="#{empty tooltip ? label : ''}">
-                <c:if test="#{!empty id}">
-                    <h:outputLabel id="#{id}Label" for="#{id}" value="#{label}"/>
-                </c:if>
-                <c:if test="#{empty id}">
-                    #{label}
-                </c:if>
-            </div>
-            <div class="tooltipContent">
-                <h:outputText value="#{tooltip}" escape="false"/>
+        <div class="formLabelContainer">
+            <div class="#{empty tooltip ? '' : 'tooltip'}">
+                <div class="formLabel" title="#{empty tooltip ? label : ''}">
+                    <c:if test="#{!empty id}">
+                        <h:outputLabel id="#{id}Label" for="#{id}" value="#{label}"/>
+                    </c:if>
+                    <c:if test="#{empty id}">
+                        #{label}
+                    </c:if>
+                </div>
+                <div class="tooltipContent">
+                    <h:outputText value="#{tooltip}" escape="false"/>
+                </div>
             </div>
         </div>
+
+        <div class="formInputElement" style="#{overrideInputStyle}">
+            <ui:insert/>
+        </div>
+
     </div>
 
-    <div class="formInputElement" style="#{overrideInputStyle}">
-		<ui:insert/>
-	</div>
-
-</div>
-
-<c:if test="${newLine != 'false'}">
-	<br clear="all"/>
-</c:if>
+    <c:if test="${newLine != 'false'}">
+        <br clear="all"/>
+    </c:if>
 
 </ui:composition>
 

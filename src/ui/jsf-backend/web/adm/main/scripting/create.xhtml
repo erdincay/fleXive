@@ -23,14 +23,13 @@
                 <t:saveState value="#{scriptBean.sinfo.code}"/>
 
                 <adm:tab label="#{fxMessageBean['Script.tabtitle.create']}" active="true" id="tab1"/>
-                <fx:formRow labelKey="Script.field.name" id="name">
+                <fx:formRow labelKey="Script.field.name" id="name" newLine="false" relativeWidth="100">
                     <h:inputText id="name" value="#{scriptBean.sinfo.name}" size="30">
                         <a4j:support event="onkeyup" reRender="scriptnameerror,all, verifyPanel" eventsQueue="main"
                                      requestDelay="500" oncomplete="ajaxButtonRequest()"/>
                     </h:inputText>
+                    <h:outputText id="scriptnameerror" value="#{scriptBean.nameErrorMsg}" style="color:red; padding-left:4px"/>
                 </fx:formRow>
-
-                <h:outputText id="scriptnameerror" value="#{scriptBean.nameErrorMsg}" style="color:red"/>
 
                 <a4j:outputPanel id="all" layout="block">
                     <fx:formRow labelKey="Script.field.event.default" id="event">
