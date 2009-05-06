@@ -688,16 +688,16 @@ flexive.input = new function() {
                     dialog_type: "modal",
                     editor_selector: "fxValueTextAreaHtml",
                     theme: "advanced",
-                    plugins: "paste,fullscreen,inlinepopups",
+                    plugins: "paste,fullscreen,inlinepopups,searchreplace,advlink",
                     language: flexive.guiTranslation,   
                     entity_encoding: "raw",     // don't replace special characters (like umlaut) with HTML entities
 
                     // general layout options
                     theme_advanced_layout_manager: "SimpleLayout",
                     theme_advanced_toolbar_location : "top",
-                    theme_advanced_buttons1: "pastetext,pasteword,separator,undo,redo"
-                        + ",separator,link,unlink,separator,bullist,justifyleft,justifycenter,justifyright,justifyfull,separator,code",
-                    theme_advanced_buttons2: "bold,italic,underline,strikethrough,sub,sup,separator,forecolor,fontsizeselect,removeformat",
+                    theme_advanced_buttons1: "paste,pastetext,pasteword,separator,undo,redo,removeformat,replace"
+                        + ",separator,link,unlink,charmap,separator,bullist,numlist,separator,justifyleft,justifycenter,justifyright,justifyfull,separator,code",
+                    theme_advanced_buttons2: "bold,italic,underline,strikethrough,separator,forecolor,formatselect,fontselect,fontsizeselect",
                     theme_advanced_buttons3: "",
                     theme_advanced_toolbar_align: "left",
                     theme_advanced_resizing : true,
