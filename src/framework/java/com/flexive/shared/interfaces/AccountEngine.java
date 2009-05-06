@@ -274,6 +274,21 @@ public interface AccountEngine {
      */
     void addGroup(long accountId, long groupId) throws FxApplicationException;
 
+    /**
+     * Sets the groups a user defined by its unique id belongs to.
+     * <p/>
+     * The caller must be in role ROLE_GROUP_MANAGEMENT or AccountManagement, and may
+     * only update users belonging to his mandator. He may only assign groups that also belong to
+     * his mandator, plus GROUP_EVERYONE and GROUP_OWNER.<br>
+     * GROUP_GLOBAL_SUPERVISOR may set all groups for all users.
+     *
+     * @param accountId the accountId
+     * @param groups    the groups the user should belong to
+     * @throws FxNoAccessException    if the calling user lacks the permissions to set the groups
+     * @throws FxNotFoundException    if the user does not exist
+     * @throws FxUpdateException      if setting the groups failed
+     * @throws FxApplicationException on errors
+     */
     void setGroups(long accountId, List<UserGroup> groups) throws FxApplicationException;
 
 

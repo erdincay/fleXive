@@ -1928,7 +1928,8 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                     else
                         tracker.track(type, pk,
                                 update.getNewData().isGroup() ? null :
-                                        xs.toXML(((FxPropertyData) update.getNewData()).getValue()),
+                                        "<original>\n"+xs.toXML(((FxPropertyData) update.getOriginalData()).getValue())+"\n</original>\n"+
+                                        "<new>\n"+xs.toXML(((FxPropertyData) update.getNewData()).getValue())+"\n</new>\n",
                                 "history.content.data.update", update.getXPath());
 
                 }

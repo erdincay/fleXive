@@ -55,6 +55,15 @@ public interface HistoryTrackerEngine {
     void track(String key, Object... args);
 
     /**
+     * Write a history entry with custom data
+     *
+     * @param data custom data/message
+     * @param key  key of the message (history. ...)
+     * @param args arguments needed by the key
+     */
+    void trackData(String data, String key, Object... args);
+
+    /**
      * Write a history entry for a type
      *
      * @param type affected type

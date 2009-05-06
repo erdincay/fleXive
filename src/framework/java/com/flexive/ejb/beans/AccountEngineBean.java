@@ -35,8 +35,8 @@ import com.flexive.core.Database;
 import static com.flexive.core.DatabaseConst.*;
 import com.flexive.core.LifeCycleInfoImpl;
 import com.flexive.core.security.LoginLogoutHandler;
-import com.flexive.core.security.UserTicketStore;
 import com.flexive.core.security.UserTicketImpl;
+import com.flexive.core.security.UserTicketStore;
 import com.flexive.shared.*;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxPK;
@@ -68,7 +68,7 @@ import java.util.List;
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-@Stateless(name = "AccountEngine", mappedName="AccountEngine")
+@Stateless(name = "AccountEngine", mappedName = "AccountEngine")
 @TransactionAttribute(TransactionAttributeType.SUPPORTS)
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
@@ -309,7 +309,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
         }
     }
 
-     /**
+    /**
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
@@ -487,6 +487,22 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             for (long scriptId : scriptIds)
                 scripting.runScript(scriptId, binding);
 
+            StringBuilder sbHistory = new StringBuilder(1000);
+            sbHistory.append("<account action=\"create\">\n").
+                    append("  <id>").append(newId).append("</id>\n").
+                    append("  <mandator>").append(CacheAdmin.getEnvironment().getMandator(mandatorId).getName()).append("</mandator>\n").
+                    append("  <username>").append(userName).append("</username>\n").
+                    append("  <loginname>").append(loginName).append("</loginname>\n").
+                    append("  <email>").append(email).append("</email>\n").
+                    append("  <validfrom>").append(FxFormatUtils.toString(validFrom)).append("</validfrom>\n").
+                    append("  <validto>").append(FxFormatUtils.toString(validTo)).append("</validto>\n").
+                    append("  <description><![CDATA[").append(description).append("]]></description>\n").
+                    append("  <active>").append(isActive).append("</active>\n").
+                    append("  <confirmed>").append(isConfirmed).append("</confirmed>\n").
+                    append("  <multilogin>").append(allowMultiLogin).append("</multilogin>\n").
+                    append("</account>");
+            EJBLookup.getHistoryTrackerEngine().trackData(sbHistory.toString(), "history.account.created", loginName);
+
             // EVERY users is a member of group EVERYONE and his mandator
             final long[] groups = {UserGroup.GROUP_EVERYONE, group.loadMandatorGroup(mandatorId).getId()};
             ri.runAsSystem();
@@ -513,7 +529,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
         }
     }
 
-    private static String checkLoginName(String name) throws FxInvalidParameterException {
+    private String checkLoginName(String name) throws FxInvalidParameterException {
         if (name == null || name.length() == 0)
             throw new FxInvalidParameterException("loginName", "ex.account.login.noName");
         if (name.length() > 255)
@@ -521,7 +537,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
         return name.trim();
     }
 
-    private static String checkUserName(String name) throws FxInvalidParameterException {
+    private String checkUserName(String name) throws FxInvalidParameterException {
         if (name == null || name.length() == 0)
             throw new FxInvalidParameterException("name", "ex.account.name.noName");
         if (name.length() > 255)
@@ -536,7 +552,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
      * @param validTo   the to date
      * @throws FxInvalidParameterException if the dates are invalid
      */
-    private static void checkDates(final Date validFrom, final Date validTo) throws FxInvalidParameterException {
+    private void checkDates(final Date validFrom, final Date validTo) throws FxInvalidParameterException {
         if (validFrom == null)
             throw new FxInvalidParameterException("VALID_FROM", "ex.account.login.validFrom.missing");
         if (validTo == null)
@@ -610,6 +626,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             } finally {
                 FxContext.get().stopRunAsSystem();
             }
+            EJBLookup.getHistoryTrackerEngine().trackData("history.account.remove", account.getLoginName());
         } catch (SQLException exc) {
             ctx.setRollbackOnly();
             throw new FxRemoveException(LOG, exc, "ex.account.delete.failed.sql", accountId, exc.getMessage(), curSql);
@@ -645,7 +662,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
      *         position MAY_SET_ROLES: set roles for the user<br>
      *         position MAY_SET_GROUPS: set groups for the user
      */
-    private static boolean[] _checkPermissions(Account account) {
+    private boolean[] _checkPermissions(Account account) {
         final UserTicket ticket = FxContext.getUserTicket();
         if (ticket.isGlobalSupervisor() ||
                 (ticket.getMandatorId() == account.getMandatorId() &&
@@ -729,7 +746,17 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             throw new FxUpdateException(exc);
         }
 
+        StringBuilder sbHistory = new StringBuilder(1000);
+        sbHistory.append("<original>\n");
+        for (UserGroup org : currentlyAssigned)
+            sbHistory.append("  <group id=\"").append(org.getId()).append("\" mandator=\"").
+                    append(org.getMandatorId()).append("\">").append(org.getName()).append("</group>\n");
+        sbHistory.append("</original>\n").append("<new>\n");
+
         for (long grp : groups) {
+            UserGroup g = group.load(grp);
+            sbHistory.append("  <group id=\"").append(g.getId()).append("\" mandator=\"").
+                    append(g.getMandatorId()).append("\">").append(g.getName()).append("</group>\n");
             // Do not check the special gropups
             if (grp == UserGroup.GROUP_EVERYONE) continue;
             if (grp == UserGroup.GROUP_OWNER) continue;
@@ -737,7 +764,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             if (FxSharedUtils.indexOfSelectableObject(currentlyAssigned, grp) != -1) continue;
             // Perform the check for all regular groups, loading an inaccessible
             // group will throw an exception which is what we want here
-            UserGroup g = group.load(grp);
+
             if (g.isSystem())
                 continue;
             //make sure the calling user is assigned all roles of the group as well
@@ -749,6 +776,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
                     throw new FxNoAccessException("ex.account.group.assign.wrongMandator", g.getName(), accountId);
             }
         }
+        sbHistory.append("</new>\n");
 
         // Write group assignments to the database
         Connection con = null;
@@ -766,6 +794,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
                 ps.close();
                 ps = con.prepareStatement("INSERT INTO " + TBL_ASSIGN_GROUPS + " (ACCOUNT,USERGROUP) VALUES (?,?)");
             }
+
             // Store the new assignments of the user
             for (long group : groups) {
                 // Skipp 'null' group
@@ -777,6 +806,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             LifeCycleInfoImpl.updateLifeCycleInfo(TBL_ACCOUNTS, "ID", accountId);
             // Ensure any active ticket of the updated user are refreshed
             UserTicketStore.flagDirtyHavingUserId(accountId);
+            EJBLookup.getHistoryTrackerEngine().trackData(sbHistory.toString(), "history.account.setGroups", account.getLoginName());
         } catch (SQLException exc) {
             ctx.setRollbackOnly();
             throw new FxUpdateException(LOG, exc, "ex.account.roles.updateFailed.sql", accountId, exc.getMessage());
@@ -814,14 +844,20 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
         Connection con = null;
         PreparedStatement ps = null;
 
+        StringBuilder sbHistory = new StringBuilder(1000);
+
         try {
             roles = FxArrayUtils.removeDuplicates(roles);
             con = Database.getDbConnection();
 
             UserTicket ticket = FxContext.getUserTicket();
+            List<Role> orgRoles = getRoles(accountId, RoleLoadMode.FROM_USER_ONLY);
+            sbHistory.append("<original>\n");
+            for(Role org: orgRoles)
+                    sbHistory.append("  <role id=\"").append(org.getId()).append("\">").append(org.getName()).append("</role>\n");
+            sbHistory.append("</original>\n");
             //only allow to assign roles which the calling user is a member of (unless it is a global supervisor)
             if (!ticket.isGlobalSupervisor() && !(ticket.isMandatorSupervisor() && account.getMandatorId() == ticket.getMandatorId())) {
-                List<Role> orgRoles = getRoles(accountId, RoleLoadMode.FROM_USER_ONLY);
                 final long[] orgRoleIds = FxSharedUtils.getSelectableObjectIds(orgRoles);
                 //check removed roles
                 for (long check : orgRoleIds) {
@@ -854,6 +890,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
                         + " (ACCOUNT,USERGROUP,ROLE) VALUES (?,?,?)");
             }
 
+            sbHistory.append("<new>\n");
             // Store the new assignments of the account
             for (long role : roles) {
                 if (Role.isUndefined(role)) continue;
@@ -861,11 +898,13 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
                 ps.setLong(2, UserGroup.GROUP_NULL);
                 ps.setLong(3, role);
                 ps.executeUpdate();
+                sbHistory.append("  <role id=\"").append(role).append("\">").append(Role.getById(role).getName()).append("</role>\n");
             }
+            sbHistory.append("</new>\n");
             LifeCycleInfoImpl.updateLifeCycleInfo(TBL_ACCOUNTS, "ID", accountId);
             // Ensure any active ticket of the updated account are refreshed
             UserTicketStore.flagDirtyHavingUserId(accountId);
-
+            EJBLookup.getHistoryTrackerEngine().trackData(sbHistory.toString(), "history.account.setRoles", account.getLoginName());
         } catch (SQLException exc) {
             ctx.setRollbackOnly();
             throw new FxUpdateException(LOG, exc, "ex.account.roles.updateFailed.sql", accountId, exc.getMessage());
@@ -917,7 +956,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public List<Account> loadAll(String name, String loginName, String email, Boolean isActive,
-                             Boolean isConfirmed, Long mandatorId, int[] isInRole, long[] isInGroup, int startIdx, int maxEntries)
+                                 Boolean isConfirmed, Long mandatorId, int[] isInRole, long[] isInGroup, int startIdx, int maxEntries)
             throws FxApplicationException {
 
         Connection con = null;
@@ -1022,8 +1061,8 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
      * @return the sql filter String
      * @throws FxNoAccessException if the user does not have access
      */
-    private static String _buildSearchStmt(UserTicket ticket, String name, String loginName, String email, Boolean isActive,
-                                           Boolean isConfirmed, Long mandatorId, int[] isInRole, long[] isInGroup, boolean isCountOnly)
+    private String _buildSearchStmt(UserTicket ticket, String name, String loginName, String email, Boolean isActive,
+                                    Boolean isConfirmed, Long mandatorId, int[] isInRole, long[] isInGroup, boolean isCountOnly)
             throws FxNoAccessException {
 
         // Do no filter GROUP_UNDEFINED (=null value)
@@ -1126,6 +1165,21 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
         // Load the account to update
         Account account = load(accountId);
 
+        StringBuilder sbHistory = new StringBuilder(1000);
+        sbHistory.append("<original>\n").
+                append("  <id>").append(accountId).append("</id>\n").
+                append("  <mandator>").append(CacheAdmin.getEnvironment().getMandator(account.getMandatorId()).getName()).append("</mandator>\n").
+                append("  <username>").append(account.getName()).append("</username>\n").
+                append("  <loginname>").append(account.getLoginName()).append("</loginname>\n").
+                append("  <email>").append(account.getEmail()).append("</email>\n").
+                append("  <validfrom>").append(account.getValidFromString()).append("</validfrom>\n").
+                append("  <validto>").append(account.getValidToString()).append("</validto>\n").
+                append("  <description><![CDATA[").append(account.getDescription()).append("]]></description>\n").
+                append("  <active>").append(account.isActive()).append("</active>\n").
+                append("  <confirmed>").append(account.isValidated()).append("</confirmed>\n").
+                append("  <multilogin>").append(account.isAllowMultiLogin()).append("</multilogin>\n").
+                append("</original>\n");
+
         final UserTicket ticket = FxContext.getUserTicket();
         // Determine if only fields are accessed that the use may alter for himself
         final boolean protectedFields = (name != null || loginName != null || isConfirmed != null || isActive != null ||
@@ -1218,6 +1272,21 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
                 // Ensure any active ticket of the updated user are refreshed
                 UserTicketStore.flagDirtyHavingUserId(account.getId());
             }
+
+            sbHistory.append("<new>\n").
+                    append("  <id>").append(accountId).append("</id>\n").
+                    append("  <mandator>").append(CacheAdmin.getEnvironment().getMandator(account.getMandatorId()).getName()).append("</mandator>\n").
+                    append("  <username>").append(name).append("</username>\n").
+                    append("  <loginname>").append(loginName).append("</loginname>\n").
+                    append("  <email>").append(email).append("</email>\n").
+                    append("  <validfrom>").append(FxFormatUtils.toString(validFrom)).append("</validfrom>\n").
+                    append("  <validto>").append(FxFormatUtils.toString(validTo)).append("</validto>\n").
+                    append("  <description><![CDATA[").append(description).append("]]></description>\n").
+                    append("  <active>").append(isActive).append("</active>\n").
+                    append("  <confirmed>").append(isConfirmed).append("</confirmed>\n").
+                    append("  <multilogin>").append(allowMultiLogin).append("</multilogin>\n").
+                    append("</new>");
+            EJBLookup.getHistoryTrackerEngine().trackData(sbHistory.toString(), "history.account.update", account.getLoginName());
         } catch (SQLException exc) {
             final boolean uniqueConstraintViolation = Database.isUniqueConstraintViolation(exc);
             ctx.setRollbackOnly();

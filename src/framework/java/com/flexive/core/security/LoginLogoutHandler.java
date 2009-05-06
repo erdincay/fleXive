@@ -31,6 +31,7 @@
  ***************************************************************/
 package com.flexive.core.security;
 
+import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.exceptions.FxAccountInUseException;
 import com.flexive.shared.exceptions.FxLoginFailedException;
@@ -53,7 +54,6 @@ import java.util.HashSet;
  */
 public final class LoginLogoutHandler {
 
-    private static final String LOGIN_CTX = "FxLogin";
     private static final Log LOG = LogFactory.getLog(LoginLogoutHandler.class);
 
     /**
@@ -109,9 +109,11 @@ public final class LoginLogoutHandler {
             UserTicketStore.storeSubject(sub);
             // flag success
             success = true;
+            EJBLookup.getHistoryTrackerEngine().track("history.account.login", ticket.getLoginName());
             // Return the ticket
             return ticket;
         } catch (FxLoginFailedException exc) {
+            EJBLookup.getHistoryTrackerEngine().track("history.account.login.error", username);
             throw exc;
         } catch (FxAccountInUseException exc) {
             throw exc;
@@ -145,8 +147,10 @@ public final class LoginLogoutHandler {
         }
 
         try {
+            String loginname = FxContext.getUserTicket().getLoginName();
             FxAuthenticationHandler.logout(FxContext.getUserTicket());
             UserTicketStore.removeSubject();
+            EJBLookup.getHistoryTrackerEngine().track("history.account.logout", loginname);
         } catch (Exception exc) {
             FxLogoutFailedException lfe = new FxLogoutFailedException("Logout failed", exc);
             if (LOG.isDebugEnabled()) LOG.debug(lfe);

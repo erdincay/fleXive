@@ -88,6 +88,14 @@ public class HistoryTrackerEngineBean implements HistoryTrackerEngine, HistoryTr
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
+    public void trackData(String data, String key, Object... args) {
+        track(null, null, data, key, args);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public void track(FxType type, String key, Object... args) {
         track(type, null, null, key, args);
     }

@@ -115,7 +115,6 @@ public class FxAuthenticationHandler {
         binding.setVariable("ticket", ticket);
         boolean scriptCalled = false;
         for (Long eventId : events) {
-            FxScriptResult res = null;
             try {
                 scripting.runScript(eventId, binding);
                 scriptCalled = true;
