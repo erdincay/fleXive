@@ -681,8 +681,7 @@ flexive.input = new function() {
     // initialize the TinyMCE HTML editor
     this.initHtmlEditor = function(autoPopulate) {
         try {
-            tinyMCE.baseURL = flexive.componentsWebletUrl + "js/tiny_mce";
-            tinyMCE.srcMode = ""; // "_src" to enable original sourcefiles
+            tinymce.baseURL = flexive.componentsWebletUrl + "js/tiny_mce";
             tinyMCE.init({
                     mode: autoPopulate ? "specific_textareas" : "exact",
                     dialog_type: "modal",

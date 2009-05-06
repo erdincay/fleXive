@@ -32,38 +32,67 @@
 package com.flexive.war.filter;
 
 import com.flexive.war.FxRequest;
+import static com.flexive.war.FxRequest.Browser;
+import com.google.common.collect.Maps;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Collections;
+import java.util.Map;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
-class BrowserDetect {
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
 
-    public static final String WINDOWS = "windows";
-    public static final String MAC = "mac";
-    public static final String LINUX = "linux";
-    public static final String UNIX = "unix";
+public class BrowserDetect {
+    private static final Log LOG = LogFactory.getLog(BrowserDetect.class);
 
-    public static final String IE = "msie";
-    public static final String FIREFOX = "firefox";
-    public static final String MOZILLA = "mozilla"; // NOT Firefox
-    public static final String SAFARI = "safari";
-    public static final String OPERA = "opera";
-    public static final String KONQUEROR = "konqueror";
+    private static final String WINDOWS = "windows";
+    private static final String MAC = "mac";
+    private static final String LINUX = "linux";
+    private static final String UNIX = "unix";
 
-    public static final String UNKNOWN = "unknown";
+    private static final Pattern P_VERSION = Pattern.compile("\\d+(\\.\\d+)?");
+    private static final Map<FxRequest.Browser, String> BROWSER_IDS;
+    private static final Map<FxRequest.Browser, String> BROWSER_VERSION_OVERRIDES;
+    static {
+        final Map<FxRequest.Browser, String> ids = Maps.newLinkedHashMap();
+        ids.put(Browser.OPERA, "opera");    // check opera before MSIE
+        ids.put(Browser.IE, "msie");
+        ids.put(Browser.FIREFOX, "firefox");
+        ids.put(Browser.SAFARI, "safari");
+        ids.put(Browser.KONQUEROR, "konqueror");
+        ids.put(Browser.CHROME, "chrome");
+        ids.put(Browser.GALEON, "galeon");
+        ids.put(Browser.EPIPHANY, "epiphany");
+        ids.put(Browser.CAMINO, "camino");
+        ids.put(Browser.MOZILLA, "mozilla");    // fallback for mozilla-compatible browsers
+        ids.put(Browser.UNKNOWN, "");
+        BROWSER_IDS = Collections.unmodifiableMap(ids);
+
+        final Map<FxRequest.Browser, String> versionIdOverrides = Maps.newHashMap();
+        //versionIdOverrides.put(Browser.SAFARI, "version");
+        BROWSER_VERSION_OVERRIDES = Collections.unmodifiableMap(versionIdOverrides);
+    }
 
     private String ua;
     private FxRequest.OperatingSystem os;
     private FxRequest.Browser browser;
+    private double browserVersion = -1;
+    private static final double DEFAULT_VERSION = 1.0;
 
 
-    protected BrowserDetect(HttpServletRequest request) {
-        ua = request.getHeader("User-Agent");
-        if (ua != null) {
-            ua = ua.toLowerCase();
-        } else {
+    public BrowserDetect(String userAgent) {
+        ua = userAgent != null ? userAgent.toLowerCase() : null;
+        if (ua == null) {
             os = FxRequest.OperatingSystem.UNKNOWN;
-            browser = FxRequest.Browser.UNKNOWN;
+            browser = Browser.UNKNOWN;
+            browserVersion = DEFAULT_VERSION;
         }
+    }
+
+    public BrowserDetect(HttpServletRequest request) {
+        this(request.getHeader("User-Agent"));
     }
 
     /**
@@ -89,21 +118,48 @@ class BrowserDetect {
      */
     public FxRequest.Browser getBrowser() {
         if (browser == null) {
-            /*
-             * Opera's user agent string contains "msie," so check for it before checking for
-             * IE. Same for checking for Firefox before Mozilla.
-             */
-            if (ua.indexOf(SAFARI) > -1) browser = FxRequest.Browser.SAFARI;
-            else if (ua.indexOf(OPERA) > -1) browser = FxRequest.Browser.OPERA;
-            else if (ua.indexOf(KONQUEROR) > -1) browser = FxRequest.Browser.KONQUEROR;
-            else if (ua.indexOf(IE) > -1) browser = FxRequest.Browser.IE;
-            else if (ua.indexOf(FIREFOX) > -1) browser = FxRequest.Browser.FIREFOX;
-            else if (ua.indexOf(MOZILLA) > -1) browser = FxRequest.Browser.MOZILLA;
-            else browser = FxRequest.Browser.UNKNOWN;
+            browser = Browser.UNKNOWN;
+            for (Map.Entry<Browser, String> entry : BROWSER_IDS.entrySet()) {
+                if (ua.indexOf(entry.getValue()) != -1) {
+                    browser = entry.getKey();
+                    break;
+                }
+            }
         }
-
         return browser;
     }
 
-
+    /**
+     * Return the browser version, if available.
+     *
+     * @return  the browser version, if available.
+     * @since 3.1
+     */
+    public double getBrowserVersion() {
+        if (browserVersion < 0) {
+            final String versionString;
+            final Browser browser = getBrowser();
+            if (BROWSER_VERSION_OVERRIDES.containsKey(browser)) {
+                versionString = BROWSER_VERSION_OVERRIDES.get(browser);
+            } else {
+                versionString = BROWSER_IDS.get(browser);
+            }
+            final int pos = ua.indexOf(versionString);
+            browserVersion = DEFAULT_VERSION;
+            if (pos != -1) {
+                final Matcher matcher = P_VERSION.matcher(ua);
+                if (matcher.find(pos + versionString.length() + 1)) {
+                    try {
+                        browserVersion = Double.parseDouble(ua.substring(matcher.start(), matcher.end()));
+                    } catch (NumberFormatException e) {
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug("Failed to extract browser version from user agent: '" + ua + "'");
+                        }
+                        browserVersion = DEFAULT_VERSION;
+                    }
+                }
+            }
+        }
+        return browserVersion;
+    }
 }

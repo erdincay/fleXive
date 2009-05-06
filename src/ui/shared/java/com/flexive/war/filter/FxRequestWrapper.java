@@ -55,6 +55,7 @@ public class FxRequestWrapper extends HttpServletRequestWrapper implements FxReq
     private String pageType;
     private boolean isWebdavRequest = false;
     private String realRequestUriNoContext = null;
+    private BrowserDetect browserDetect;
 
 
     public boolean isWebDavMethod() {
@@ -173,6 +174,13 @@ public class FxRequestWrapper extends HttpServletRequestWrapper implements FxReq
         return requestUriNoContext;
     }
 
+    private BrowserDetect getBrowserDetect() {
+        if (browserDetect == null) {
+            browserDetect = new BrowserDetect(this.getRequest());
+        }
+        return browserDetect;
+    }
+
 
     /**
      * Returns the operating system that gernerated the request.
@@ -180,16 +188,23 @@ public class FxRequestWrapper extends HttpServletRequestWrapper implements FxReq
      * @return the operating system that generated the request
      */
     public OperatingSystem getOperatingSystem() {
-        return new BrowserDetect(this.getRequest()).getOs();
+        return getBrowserDetect().getOs();
     }
 
     /**
-     * Returns the browser that gernerated the request.
+     * Returns the browser that generated the request.
      *
      * @return the browser that generated the request
      */
     public Browser getBrowser() {
-        return new BrowserDetect(this.getRequest()).getBrowser();
+        return getBrowserDetect().getBrowser();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public double getBrowserVersion() {
+        return getBrowserDetect().getBrowserVersion();
     }
 
     /**

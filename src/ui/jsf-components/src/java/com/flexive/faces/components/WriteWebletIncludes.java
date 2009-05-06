@@ -145,8 +145,13 @@ public class WriteWebletIncludes extends UIOutput {
         }
         // init flexiveComponents.js
         beginJavascript(out);
-        out.write("flexive.baseUrl='" + FxJsfUtils.getManagedBean(SystemBean.class).getDocumentBase() + "';\n");
-        out.write("flexive.componentsWebletUrl='" + FacesWebletUtils.getURL(facesContext, "com.flexive.faces.weblets", "") + "';\n");
+        final SystemBean systemBean = FxJsfUtils.getManagedBean(SystemBean.class);
+        out.write("flexive.baseUrl='" + systemBean.getDocumentBase() + "';\n");
+        out.write("flexive.componentsWebletUrl='"
+                + systemBean.getServerBase()
+                + FacesWebletUtils.getURL(facesContext, "com.flexive.faces.weblets", "")
+                + "';\n"
+        );
         out.write("flexive.yuiBase=flexive.componentsWebletUrl + 'js/yui/';\n");
         final String languageIso = FxContext.getUserTicket().getLanguage().getIso2digit().toLowerCase();
         out.write("flexive.locale='" + languageIso + "';\n");

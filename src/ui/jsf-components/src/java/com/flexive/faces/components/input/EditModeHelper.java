@@ -36,9 +36,7 @@ import static com.flexive.faces.components.input.FxValueInputRenderer.*;
 import com.flexive.faces.beans.MessageBean;
 import com.flexive.faces.beans.UserConfigurationBean;
 import com.flexive.faces.javascript.FxJavascriptUtils;
-import static com.flexive.faces.javascript.FxJavascriptUtils.beginJavascript;
-import static com.flexive.faces.javascript.FxJavascriptUtils.writeYahooRequires;
-import static com.flexive.faces.javascript.FxJavascriptUtils.endJavascript;
+import static com.flexive.faces.javascript.FxJavascriptUtils.*;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxFormatUtils;
 import com.flexive.shared.FxLanguage;
@@ -73,7 +71,6 @@ import java.util.*;
  * @version $Rev$
  */
 class EditModeHelper extends RenderHelper {
-    private static final String REQUEST_EDITORINIT = "REQUEST_EDITORINIT";
     private static final String JS_OBJECT = "fxValue";
 
     private boolean multiLine = false;
@@ -855,11 +852,14 @@ class EditModeHelper extends RenderHelper {
                 renderTextInput(getInputComponent(), this, value, inputClientId, languageId);
                 return;
             }
+            // make textareas resizable? - IE <= 7.0 not supported, because it cannot scale textareas to 100% height
+            final boolean makeResizeable = !FxJsfUtils.isOlderBrowserThan(FxRequest.Browser.IE, 8.0);
+
             final String wrapperElementId = inputClientId + "_wrap";
             writer.startElement("div", null);
             writer.writeAttribute("class",
                     (useHTMLEditor ? CSS_TEXTAREA_HTML_OUTER : CSS_TEXTAREA_OUTER)
-                            + " " + CSS_RESIZEABLE,
+                            + (makeResizeable ? " " + CSS_RESIZEABLE : ""),
                     null
             );
             writer.writeAttribute("id", wrapperElementId, null);
@@ -873,16 +873,9 @@ class EditModeHelper extends RenderHelper {
                 writer.writeText(getTextValue(value, languageId), null);
                 writer.endElement("textarea");
                 writer.endElement("div");
-                final FxRequest request = FxJsfUtils.getRequest();
-                writer.startElement("script", null);
-                writer.writeAttribute("type", "text/javascript", null);
-                if (FxJsfUtils.isAjaxRequest() && request.getAttribute(REQUEST_EDITORINIT) == null) {
-                    // reset tinyMCE to avoid getDoc() error messages
-                    writer.write("tinyMCE.idCounter = 0;\n");
-                    request.setAttribute(REQUEST_EDITORINIT, true);
-                }
+                beginJavascript(writer);
                 writer.write("tinyMCE.execCommand('mceAddControl', false, '" + inputClientId + "');\n");
-                writer.endElement("script");
+                endJavascript(writer);
             } else {
                 // render standard text area
                 writer.writeAttribute("name", inputClientId, null);
@@ -892,7 +885,10 @@ class EditModeHelper extends RenderHelper {
                 writer.writeText(getTextValue(value, languageId), null);
                 writer.endElement("textarea");
                 writer.endElement("div");
-                FxJavascriptUtils.makeResizable(writer, wrapperElementId);
+                if (makeResizeable) {
+                    FxJavascriptUtils.makeResizable(writer, wrapperElementId);
+                }
+
             }
         }
 
@@ -925,7 +921,7 @@ class EditModeHelper extends RenderHelper {
             // initialize autocomplete
             beginJavascript(out);
             writeYahooRequires(out, "autocomplete");
-            FxJavascriptUtils.onYahooLoaded(out,
+            onYahooLoaded(out,
                     "function() {\n"
                             + "    var handler = eval('(' + \"" + StringUtils.replace(autocompleteHandler, "\"", "\\\"") + "\" + ')');\n"
                             + "    var ds = handler.getDataSource();\n"
@@ -988,7 +984,7 @@ class EditModeHelper extends RenderHelper {
             out.write("<div id=\"" + containerId + "\" class=\"popupCalendar\"> </div>\n");
             beginJavascript(out);
             writeYahooRequires(out, "calendar");
-            FxJavascriptUtils.onYahooLoaded(out,
+            onYahooLoaded(out,
                     "function() {\n"
                             + "    var button = document.getElementById('" + buttonId + "');\n"
                             + "    var container = document.getElementById('" + containerId + "');\n"

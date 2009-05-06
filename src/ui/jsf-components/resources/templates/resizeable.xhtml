@@ -16,20 +16,26 @@ Parameters:
 
 <ui:composition>
 
-    <div id="fx_resizeable_#{fxSystemBean.counter['fx_resizeable']}" class="fxResizeable">
+    <c:if test="#{fxSystemBean.browser == 'IE' and fxSystemBean.browserVersion lt 8.0}">
         <ui:insert/>
-    </div>
+    </c:if>
+    
+    <c:if test="#{fxSystemBean.browser != 'IE' or fxSystemBean.browserVersion ge 8.0}">
+        <div id="fx_resizeable_#{fxSystemBean.counter['fx_resizeable']}" class="fxResizeable">
+            <ui:insert/>
+        </div>
 
-    <script type="text/javascript">
-    <!--
-        flexive.yui.require("resize");
-        flexive.yui.onYahooLoaded(
-                function() {
-                    new YAHOO.util.Resize("fx_resizeable_#{fxSystemBean.counterValue['fx_resizeable']}");
-                }
-        );
-    //-->
-    </script>
+        <script type="text/javascript">
+        <!--
+            flexive.yui.require("resize");
+            flexive.yui.onYahooLoaded(
+                    function() {
+                        new YAHOO.util.Resize("fx_resizeable_#{fxSystemBean.counterValue['fx_resizeable']}");
+                    }
+            );
+        //-->
+        </script>
+    </c:if>
 
 </ui:composition>
 

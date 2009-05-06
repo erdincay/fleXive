@@ -49,7 +49,7 @@ select.fxValueSelectInput, .fxValueInputElementWidth, input.fxValueTextInput {
 
 textarea.fxValueTextArea, textarea.fxValueTextAreaHtml {
     width: 100%;    /* Size will be constrained by .fxValueTextAreaContainer */
-    height: 100%;
+    height: 140px;
 }
 
 /* Stretch single-language inputs over space normally occupied by the language select */
@@ -79,6 +79,10 @@ textarea.fxValueTextArea, textarea.fxValueTextAreaHtml {
 
 .fxValueTextAreaContainer {
     height: 150px;
+}
+
+.fxResizeable textArea.fxValueTextArea {
+    height: 100%;   /* stretch to dynamic container size */
 }
 
 

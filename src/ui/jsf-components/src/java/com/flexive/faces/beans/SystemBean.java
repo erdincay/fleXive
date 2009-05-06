@@ -272,6 +272,16 @@ public class SystemBean implements Serializable {
     }
 
     /**
+     * Returns the browser version that the client is using
+     *
+     * @return the browser version the client is using
+     * @since 3.1
+     */
+    public double getBrowserVersion() {
+        return FxJsfUtils.getRequest().getBrowserVersion();
+    }
+
+    /**
      * Returns the browser that the client is using
      *
      * @return the browser the client is using

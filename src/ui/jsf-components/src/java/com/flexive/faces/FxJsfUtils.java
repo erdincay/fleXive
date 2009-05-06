@@ -981,4 +981,30 @@ public class FxJsfUtils {
     public static UIComponent findComponent(FacesContext context, String clientId) {
         return context.getViewRoot().findComponent(clientId);
     }
+
+    /**
+     * Returns true if the current request is served for the given browser, with at least the given
+     * browser version.
+     *
+     * @param browser   the desired browser
+     * @param minVersion    the minimum version. If set to -1, it is not checked.
+     * @return  true if the current browser matches the requested parameters
+     * @since 3.1
+     */
+    public static boolean isBrowser(FxRequest.Browser browser, double minVersion) {
+        return browser.equals(getRequest().getBrowser()) && getRequest().getBrowserVersion() >= minVersion;
+    }
+
+    /**
+     * Returns true if the current request is served for the given browser, but the version does
+     * not meet the given minimum version.
+     *
+     * @param browser   the desired browser
+     * @param minVersion    the minimum version. If set to -1, it is not checked.
+     * @return  true if the current browser is served by the given browser, but the version is too old
+     * @since 3.1
+     */
+    public static boolean isOlderBrowserThan(FxRequest.Browser browser, double minVersion) {
+        return browser.equals(getRequest().getBrowser()) && getRequest().getBrowserVersion() < minVersion;
+    }
 }

@@ -43,7 +43,7 @@ public interface FxRequest extends HttpServletRequest {
 
     // All recognized browsers
     enum Browser {
-        KONQUEROR, IE, FIREFOX, MOZILLA, SAFARI, OPERA, UNKNOWN
+        KONQUEROR, IE, FIREFOX, MOZILLA, SAFARI, OPERA, CHROME, GALEON, EPIPHANY, CAMINO, UNKNOWN
     }
 
     // All recognized operating systems
@@ -94,6 +94,14 @@ public interface FxRequest extends HttpServletRequest {
      * @return the browser that generated the request
      */
     Browser getBrowser();
+
+    /**
+     * Returns the browser version that generated the request.
+     *
+     * @return the browser version that generated the request
+     * @since 3.1
+     */
+    double getBrowserVersion();
 
     /**
      * Returns the request URI without the context.
