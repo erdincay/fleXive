@@ -65,7 +65,7 @@
                 <a4j:outputPanel id="verifyPanel" layout="block">
                     <adm:commandButton id="verifyButton" labelKey="Script.button.verify" bean="#{scriptBean}"
                                        action="checkScriptSyntax" icon="check"
-                                       rendered="#{scriptBean.verifyButtonEnabled}"/>
+                                       rendered="#{scriptBean.verifyButtonEnabled}" ajax="true"/>
                 </a4j:outputPanel>
                 <adm:toolbarPluginButtons/>
             </a4j:region>

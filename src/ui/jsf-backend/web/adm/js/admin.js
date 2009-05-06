@@ -281,7 +281,7 @@ function initialiseAjaxComponent() {
 /**
  * This function retrieves both commandButtons from the content iframe of the rendered page as well as all toolbar buttons.
  * It then applies logical rules to rerender the toolbar buttons according to the current state of the ajax request.
- * 
+ *
  */
 function regAjaxComponentInToolbar() {
     var regEx1;
@@ -431,7 +431,22 @@ function regAjaxComponentInToolbar() {
         parent.renderToolbar();
     };
 
+    // specifically looks for commandButtons whose ajax attribute was set to "true"
+    var discoverAjaxButtonsInToolbar = function() {
+        if (parent.ajaxButtonIds.length < 1) {
+            var count = 0;
+            for (var i = 0; i < toolbarButtonIds.length; i++) {
+                if (toolbarButtonIds[i].match('AJAX')) {
+                    parent.ajaxButtonIds[count] = toolbarButtonIds[i];
+                    count++;
+                }
+
+            }
+        }
+    }
+
     // actual rendering logic
+    discoverAjaxButtonsInToolbar();
     if (parent.ajaxButtonIds.length > 0) {
         if (parent.toolbarIds.length != parent.ajaxButtonIds.length) { // commandbutton's location="content"
             toolbarRenderAction_1();
@@ -507,8 +522,8 @@ function linearSearch(searchItem, targetArray, regEx) {
  */
 
 function transferInputValue(formname, inputSource, inputDest) {
-    var value = document.getElementById(formname+":"+inputSource).value;
-    document.getElementById(formname+":"+inputDest).value = value;
+    var value = document.getElementById(formname + ":" + inputSource).value;
+    document.getElementById(formname + ":" + inputDest).value = value;
 }
 
 

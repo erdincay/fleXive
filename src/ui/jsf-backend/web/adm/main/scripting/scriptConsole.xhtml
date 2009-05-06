@@ -22,36 +22,39 @@
                     <legend>#{fxMessageBean['ScriptConsole.group.code']}</legend>
                     <a4j:outputPanel ajaxRendered="true" layout="block" style="width: 700px;">
                         <fx:resizeable>
-                            <h:inputTextarea id="codeArea" value="#{scriptConsoleBean.code}" rows="15" style="width: 100%; height: 100%"/>
+                            <h:inputTextarea id="codeArea" value="#{scriptConsoleBean.code}" rows="15"
+                                             style="width: 100%; height: 100%"/>
                         </fx:resizeable>
                     </a4j:outputPanel>
                     <br/>
                     #{fxMessageBean['ScriptConsole.label.Language']}&nbsp;
                     <h:selectOneListbox label="XXX" size="1" value="#{scriptConsoleBean.language}">
                         <f:selectItems value="#{fxSelectBean.scriptingEngines}"/>
-                        <a4j:support event="onchange" reRender="verifyButton"/>
+                        <a4j:support event="onchange" reRender="verifyPanel" oncomplete="ajaxButtonRequest()"/>
                     </h:selectOneListbox>
                     <br/>
                     <h:selectBooleanCheckbox title="#{fxMessageBean['ScriptConsole.label.runAtWeb']}"
                                              value="#{scriptConsoleBean.web}"/>
                     #{fxMessageBean['ScriptConsole.label.runAtWeb']}<br/><br/>
-                    <a4j:commandButton id="executeButton" reRender="resultPanel"
-                                       value="#{fxMessageBean['ScriptConsole.button.execute']}"
-                                       onclick="parent.lockScreen()" oncomplete="parent.unlockScreen();flexive.yui.processOnYahoo();document.getElementById('frm:codeArea').focus();"/>
-                    <adm:shortcut elementId="frm:executeButton"/>
-                    <a4j:commandButton id="defaultImports" value="#{fxMessageBean['Script.button.defaultImports']}"
-                                       action="#{scriptConsoleBean.addDefaultImports}" reRender="codeArea"
-                                       eventsQueue="main" requestDelay="300"
-                                       style="margin-left:20px"/>
+
+                    <adm:commandButton id="executeButton" labelKey="ScriptConsole.button.execute" icon="run"
+                                       location="both" lockscreen="false" bean="#{scriptConsoleBean}"
+                                       action="runScript"/>
+                    <adm:shortcut elementId="commandButton_executeButton"/>
+
+                    <adm:commandButton id="defaultImports" labelKey="Script.button.defaultImports" icon="compact"
+                                       bean="#{scriptConsoleBean}" action="addDefaultImports" location="both"
+                                       lockscreen="false"/>
+
                     <a4j:outputPanel ajaxRendered="true" id="verifyPanel">
-                        <a4j:commandButton id="verifyButton" value="#{fxMessageBean['Script.button.verify']}"
-                                           rendered="#{scriptConsoleBean.verifyButtonEnabled}"
-                                           action="#{scriptConsoleBean.checkScriptSyntax}" style="margin-left:20px"/>
+                        <adm:commandButton id="verifyButton" labelKey="Script.button.verify" icon="check"
+                                           bean="#{scriptConsoleBean}" action="checkScriptSyntax"
+                                           rendered="#{scriptConsoleBean.verifyButtonEnabled}" location="both"
+                                           lockscreen="false" ajax="true"/>
                     </a4j:outputPanel>
                 </fieldset>
-
                 <br/><br/>
-                <a4j:outputPanel id="resultPanel">
+                <a4j:outputPanel id="resultPanel" rendered="#{scriptConsoleBean.result != null}">
                     <pre>#{scriptConsoleBean.result}</pre>
                     <span style="color:gray;font-style:italic;">
                         #{fxMessageBean['ScriptConsole.label.executionTime, #{scriptConsoleBean.executionTime}']}

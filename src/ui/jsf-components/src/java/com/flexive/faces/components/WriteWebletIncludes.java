@@ -77,6 +77,7 @@ public class WriteWebletIncludes extends UIOutput {
     public WriteWebletIncludes() {
         weblets.put("com.flexive.faces.weblets/js/flexiveComponents.js", false);
         weblets.put("com.flexive.faces.weblets/css/components.css", false);
+        weblets.put("com.flexive.faces.weblets/css/componentsIE.css", false);
         if (FxJsfUtils.getRequest() != null) {
             FxJsfUtils.getRequest().setAttribute(REQ_WEBLETS, weblets);
         }

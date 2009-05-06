@@ -56,6 +56,7 @@ public class ScriptConsoleBean {
     private boolean web;
     private String language = "groovy"; // initial setting for script syntax check
     private boolean verifyButtonEnabled = false;
+    private Object result;
 
     public String getCode() {
         return code;
@@ -90,27 +91,41 @@ public class ScriptConsoleBean {
     }
 
     public Object getResult() {
+        return result;
+    }
+
+    public void setResult(Object result) {
+        this.result = result;
+    }
+
+    /**
+     * Runs the given code
+     */
+    public void runScript() {
         if (StringUtils.isBlank(code)) {
-            return "";
-        }
-        long start = System.currentTimeMillis();
-        try {
-            if (web && FxSharedUtils.isGroovyScript("console." + language)) {
-                if (!FxContext.getUserTicket().isInRole(Role.ScriptExecution))
-                    return "No permission to execute scripts!";
-                GroovyShell shell = new GroovyShell();
-                Script script = shell.parse(code);
-                return script.run();
-            } else {
-                return EJBLookup.getScriptingEngine().runScript("console." + language, null, code).getResult();
+            result = "";
+        } else {
+            long start = System.currentTimeMillis();
+            try {
+                if (web && FxSharedUtils.isGroovyScript("console." + language)) {
+                    if (!FxContext.getUserTicket().isInRole(Role.ScriptExecution))
+                        result = "No permission to execute scripts!";
+                    else {
+                        GroovyShell shell = new GroovyShell();
+                        Script script = shell.parse(code);
+                        result = script.run();
+                    }
+                } else {
+                    result = EJBLookup.getScriptingEngine().runScript("console." + language, null, code).getResult();
+                }
+            } catch (Exception e) {
+                StringWriter writer = new StringWriter();
+                e.printStackTrace(new PrintWriter(writer));
+                final String msg = e.getCause() != null ? e.getCause().getMessage() : e.getMessage();
+                result = new Formatter().format("Exception caught: %s%n%s", msg, writer.getBuffer());
+            } finally {
+                executionTime = System.currentTimeMillis() - start;
             }
-        } catch (Exception e) {
-            StringWriter writer = new StringWriter();
-            e.printStackTrace(new PrintWriter(writer));
-            final String msg = e.getCause() != null ? e.getCause().getMessage() : e.getMessage();
-            return new Formatter().format("Exception caught: %s%n%s", msg, writer.getBuffer());
-        } finally {
-            executionTime = System.currentTimeMillis() - start;
         }
     }
 

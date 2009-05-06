@@ -30,6 +30,7 @@ titleKey - [optional]  message key for the button title (overrides title when sp
  iconUrl - [optional] the url (aboslute, including the context path)
                       of the icon to be displayed (i.e. /flexive/images/myIcon.png)
  rendered - [optional] flag to supress rendering of the whole component
+ ajax - [optional] flag to indicate that the button is part of an ajax request
 
 <ui:composition>
 
@@ -81,6 +82,10 @@ titleKey - [optional]  message key for the button title (overrides title when sp
 
         <c:if test="#{not empty icon}">
             <c:set var="iconUrl" value="#{fxSystemBean.contextPath}/adm/images/commandButton/#{icon}.png"/>
+        </c:if>
+
+        <c:if test="#{ajax}">
+            <c:set var="id" value="#{id}AJAX"/>
         </c:if>
 
         <c:if test="${location == 'content'}">
