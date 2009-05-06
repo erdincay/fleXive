@@ -186,7 +186,7 @@ WHERE #ARTICLE/TITLE LIKE 'Earthquake%']]></programlisting>
                 <programlisting language="sql"><![CDATA[SELECT @pk, @permissions]]></programlisting>
 
                 The column returns instances of
-                <link href="http://www.flexive.org/docs/javadoc/shared/com/flexive/shared/security/PermissionSet.html">
+                <link xlink:href="http://www.flexive.org/docs/javadoc/shared/com/flexive/shared/security/PermissionSet.html">
                     <classname>com.flexive.shared.security.PermissionSet</classname>.
                 </link>
             </para>

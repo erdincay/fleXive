@@ -775,9 +775,9 @@
                                     An optional input mapper for rendering the input control. For example, properties
                                     referencing other content may need a custom input mapper that provides a select list
                                     of content instances. For more information take a look at the
-                                    <ulink url="&flexiveJavadocBase;shared/com/flexive/shared/value/mapper/InputMapper.html">
+                                    <link xlink:href="&flexiveJavadocBase;shared/com/flexive/shared/value/mapper/InputMapper.html">
                                         InputMapper
-                                    </ulink>
+                                    </link>
                                     documentation and at
                                     <xref linkend="jcl_fx_content_ex_inputmappers"/>.
                                 </para>
@@ -875,8 +875,8 @@
                         <title>An autocomplete handler for user names</title>
                         <para>
                             In this example, we use the predefined JSON/RPC autocomplete provider
-                            <ulink url="&fisheyeBase;src/ui/jsf-components/src/java/com/flexive/faces/javascript/AutoCompleteProvider.java">
-                                AutoCompleteProvider#userQuery(String query)</ulink>.
+                            <link xlink:href="&fisheyeBase;src/ui/jsf-components/src/java/com/flexive/faces/javascript/AutoCompleteProvider.java">
+                                AutoCompleteProvider#userQuery(String query)</link>.
                             It searches for user account names based on the user input and returns possible matches.
                         </para>
                         <programlisting language="xhtml"><![CDATA[<script type="text/javascript">
@@ -1255,8 +1255,8 @@
                             <listitem>
                                 <para>
                                     The desired size of the thumbnail. Valid values are taken from
-                                    <ulink url="&flexiveJavadocBase;/shared/com/flexive/shared/value/BinaryDescriptor.PreviewSizes.html">
-                                        BinaryDescriptor.PreviewSizes</ulink>:
+                                    <link xlink:href="&flexiveJavadocBase;/shared/com/flexive/shared/value/BinaryDescriptor.PreviewSizes.html">
+                                        BinaryDescriptor.PreviewSizes</link>:
                                     <itemizedlist>
                                         <listitem>
                                             <para><code>PREVIEW1</code>,
@@ -1659,9 +1659,9 @@
                             <listitem>
                                 <para>
                                     The variable name where the current tree node of type
-                                    <ulink url="&flexiveJavadocBase;shared/com/flexive/shared/tree/FxTreeNode.html">
+                                    <link xlink:href="&flexiveJavadocBase;shared/com/flexive/shared/tree/FxTreeNode.html">
                                         FxTreeNode
-                                    </ulink>
+                                    </link>
                                     will be exposed to the page.
                                 </para>
                             </listitem>

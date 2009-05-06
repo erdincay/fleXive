@@ -4,16 +4,16 @@
 <!ENTITY xpath "XPath">
 <!ENTITY messagekey "message key">
 <!ENTITY flexiveJavadocBase "http://www.flexive.org/docs/3.1/javadoc/">
-<!ENTITY flexiveJavadoc "<ulink url='&flexiveJavadocBase;'>&flexive; JavaDoc</ulink>">
+<!ENTITY flexiveJavadoc "<link xlink:href='&flexiveJavadocBase;'>&flexive; JavaDoc</link>">
 <!ENTITY filesBase "../files/">
-<!ENTITY flexiveIssues "<ulink url='http://issuetracker.flexive.org/jira/secure/Dashboard.jspa'>issue tracker</ulink>">
+<!ENTITY flexiveIssues "<link xlink:href='http://issuetracker.flexive.org/jira/secure/Dashboard.jspa'>issue tracker</link>">
 <!ENTITY fisheyeBase "http://source.flexive.org/browse/fleXive/trunk/">
 <!ENTITY flexiveApi "&flexive; API">
-<!ENTITY weblets "<ulink url='https://weblets.dev.java.net/'><glossterm>Weblets</glossterm></ulink>">
+<!ENTITY weblets "<link xlink:href='https://weblets.dev.java.net/'><glossterm>Weblets</glossterm></link>">
 <!ENTITY division "<glossterm>division</glossterm>">
-<!ENTITY yui "<ulink url='http://developer.yahoo.com/yui/'>Yahoo UI</ulink>">
-<!ENTITY jsonRpcJava "<ulink url='http://oss.metaparadigm.com/jsonrpc/'>JSON-RPC-Java</ulink>">
-<!ENTITY xstream "<ulink url='http://xstream.codehaus.org/'>XStream</ulink>">
+<!ENTITY yui "<link xlink:href='http://developer.yahoo.com/yui/'>Yahoo UI</link>">
+<!ENTITY jsonRpcJava "<link xlink:href='http://oss.metaparadigm.com/jsonrpc/'>JSON-RPC-Java</link>">
+<!ENTITY xstream "<link xlink:href='http://xstream.codehaus.org/'>XStream</link>">
 <!ENTITY ajax4jsf "Ajax4jsf">
 <!ENTITY jee5 "JavaEE 5">
 <!ENTITY fxsql "FxSQL">
@@ -22,20 +22,20 @@
 <!ENTITY list_yes_restrictions "(X)">
 <!ENTITY list_no "-">
 <!ENTITY templateProject "&flexive; template project">
-<!ENTITY jdk6 "<ulink url='http://java.sun.com/javase/downloads/index.jsp'>JDK 6</ulink>">
-<!ENTITY ant "<ulink url='http://ant.apache.org/'>Apache Ant</ulink>">
-<!ENTITY maven "<ulink url='http://maven.apache.org/'>Apache Maven</ulink>">
-<!ENTITY groovy "<ulink url='http://groovy.codehaus.org/'>Groovy</ulink>">
+<!ENTITY jdk6 "<link xlink:href='http://java.sun.com/javase/downloads/index.jsp'>JDK 6</link>">
+<!ENTITY ant "<link xlink:href='http://ant.apache.org/'>Apache Ant</link>">
+<!ENTITY maven "<link xlink:href='http://maven.apache.org/'>Apache Maven</link>">
+<!ENTITY groovy "<link xlink:href='http://groovy.codehaus.org/'>Groovy</link>">
 <!ENTITY mavenRepoUrl "http://repo.flexive.org/maven2/">
-<!ENTITY mavenRepo "<ulink url='&mavenRepoUrl;'>&mavenRepoUrl;</ulink>">
+<!ENTITY mavenRepo "<link xlink:href='&mavenRepoUrl;'>&mavenRepoUrl;</link>">
 <!ENTITY mavenVersion "3.1-SNAPSHOT">
-<!ENTITY hudson "<ulink url='https://hudson.dev.java.net/'>Hudson</ulink>">
-<!ENTITY eclipse "<ulink url='http://www.eclipse.org/'>Eclipse</ulink>">
-<!ENTITY idea "<ulink url='http://www.jetbrains.com/idea/'>IntelliJ IDEA</ulink>">
-<!ENTITY productsArticle "<ulink url='http://www.onjava.com/pub/a/onjava/2008/04/30/introducing-flexive-a-complementary-approach-to-java-ee-5-web-development.html'>an ONJava.com article</ulink>"> 
+<!ENTITY hudson "<link xlink:href='https://hudson.dev.java.net/'>Hudson</link>">
+<!ENTITY eclipse "<link xlink:href='http://www.eclipse.org/'>Eclipse</link>">
+<!ENTITY idea "<link xlink:href='http://www.jetbrains.com/idea/'>IntelliJ IDEA</link>">
+<!ENTITY productsArticle "<link xlink:href='http://www.onjava.com/pub/a/onjava/2008/04/30/introducing-flexive-a-complementary-approach-to-java-ee-5-web-development.html'>an ONJava.com article</link>">
 
 <!-- Website references -->
-<!ENTITY downloadsPage "<ulink url='http://www.flexive.org/download'>download page</ulink>">
+<!ENTITY downloadsPage "<link xlink:href='http://www.flexive.org/download'>download page</link>">
 
 <!-- JSF beans -->
 <!ENTITY contentViewBean "fxContentViewBean">

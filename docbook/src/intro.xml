@@ -49,9 +49,9 @@
             <listitem>
                 <para>
                     The &flexive;
-                    <link href="http://www.flexive.org">website</link>
+                    <link xlink:href="http://www.flexive.org">website</link>
                     will provide you with top-level information about &flexive;. Have a look at
-                    the "<link href="http://www.flexive.org/explore-flexive">Explore [fleXive]</link>" section.
+                    the "<link xlink:href="http://www.flexive.org/explore-flexive">Explore [fleXive]</link>" section.
                 </para>
             </listitem>
             <listitem>
@@ -63,14 +63,14 @@
             <listitem>
                 <para>
                     In the &flexive;
-                    <link href="http://wiki.flexive.org">wiki</link>
+                    <link xlink:href="http://wiki.flexive.org">wiki</link>
                     you will find more tutorials, HowTo's, samples and developer infos
                 </para>
             </listitem>
             <listitem>
                 <para>
-                    <link href="http://www.flexive.org/faq">FAQ</link>'s are anwered on the &flexive;
-                    <link href="http://www.flexive.org">website</link>
+                    <link xlink:href="http://www.flexive.org/faq">FAQ</link>'s are anwered on the &flexive;
+                    <link xlink:href="http://www.flexive.org">website</link>
                 </para>
             </listitem>
         </orderedlist>

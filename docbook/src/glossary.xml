@@ -3,7 +3,7 @@
         <!ENTITY % global_entities SYSTEM "global.ent">
         %global_entities;
         ]>
-<glossary xmlns="http://docbook.org/ns/docbook" xml:id="glossary">
+<glossary xmlns="http://docbook.org/ns/docbook" xml:id="glossary" xmlns:xlink="http://www.w3.org/1999/xlink">
     <title>Glossary</title>
 
     <glossentry xml:id="gloss_extension_point">

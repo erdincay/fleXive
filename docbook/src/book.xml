@@ -4,7 +4,7 @@
         %global_entities;
         ]>
 
-<book xmlns="http://docbook.org/ns/docbook" xmlns:xi="http://www.w3.org/2001/XInclude">
+<book xmlns="http://docbook.org/ns/docbook" xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:xlink="http://www.w3.org/1999/xlink">
     <title><trademark class='trade'>&flexive;</trademark> 3.1 Reference Documentation</title>
     <subtitle>
         Revision @@build.number@@, @@build.time@@

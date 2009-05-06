@@ -18,20 +18,20 @@
 
         <itemizedlist>
             <listitem>
-                <ulink url="&filesBase;example-helloworld.zip">helloworld</ulink>
+                <link xlink:href="&filesBase;example-helloworld.zip">helloworld</link>
                 is our canonical hello-world application,
             </listitem>
             <listitem>
-                <ulink url="&filesBase;example-tutorial01-documentstore.zip">tutorial01-documentstore</ulink>
+                <link xlink:href="&filesBase;example-tutorial01-documentstore.zip">tutorial01-documentstore</link>
                 show some of the document-handling capabilities in &flexive;,
             </listitem>
             <listitem>
-                <ulink url="&filesBase;example-products.zip">products</ulink>
+                <link xlink:href="&filesBase;example-products.zip">products</link>
                 shows a localized frontend for a product database realized in &flexive; that also has
                 pretty URLs and a URL-based locale selector ("/de" and "/en"), and
             </listitem>
             <listitem>
-                <ulink url="&filesBase;example-announcement-submission.zip">announcement-submission</ulink>
+                <link xlink:href="&filesBase;example-announcement-submission.zip">announcement-submission</link>
                 shows a basic security setup of a publishing application with two usergroups ("editors" and "users").
             </listitem>
         </itemizedlist>
@@ -71,10 +71,10 @@ helloworld.ear  helloworld-shared.jar  helloworld.war
             your local or on a remote machine. If not, follow the instructions in
             <xref linkend="installation"/>.
             The complete source code can be found
-            <ulink url="&filesBase;example-helloworld.zip">here</ulink>
+            <link xlink:href="&filesBase;example-helloworld.zip">here</link>
             or in the subversion repository under
-            <ulink url="http://source.flexive.org/browse/fleXive/trunk/src/examples/helloworld">
-                src/examples/helloworld</ulink>.
+            <link xlink:href="http://source.flexive.org/browse/fleXive/trunk/src/examples/helloworld">
+                src/examples/helloworld</link>.
         </para>
         <para>
             First we create a new &flexive; project: go to the directory where you unpacked the distribution,
@@ -165,7 +165,7 @@ BUILD SUCCESSFUL
                 directory,
                 <filename>hello001.groovy</filename>.
                 A straight-forward way of setting up &flexive; structures is by using the
-                <ulink url="&flexiveJavadocBase;shared/index.html?com/flexive/shared/scripting/groovy/GroovyTypeBuilder.html">GroovyTypeBuilder</ulink>
+                <link xlink:href="&flexiveJavadocBase;shared/index.html?com/flexive/shared/scripting/groovy/GroovyTypeBuilder.html">GroovyTypeBuilder</link>
                 for &flexive; types, using the Groovy scripting language.
             </para>
 
@@ -256,7 +256,7 @@ BUILD SUCCESSFUL
 
             <para>
                 For the web interface of the application we use JSF 1.2, using
-                <link href="https://facelets.dev.java.net/">Facelets</link>
+                <link xlink:href="https://facelets.dev.java.net/">Facelets</link>
                 for creating the JSF views (i.e. we use plain XHTML templates instead of JSP).
                 &Flexive; includes components for rendering and editing &flexive; contents in JSF applications,
                 although you could also use other web framework like Struts or Tapestry - you'd just miss the convenient
@@ -265,11 +265,11 @@ BUILD SUCCESSFUL
 
             <para>
                 If you are not familiar with JSF tag libraries please refer to the
-                <link href="http://java.sun.com/javaee/javaserverfaces/1.2_MR1/docs/tlddocs/index.html">Tag Library
+                <link xlink:href="http://java.sun.com/javaee/javaserverfaces/1.2_MR1/docs/tlddocs/index.html">Tag Library
                     Documentation
                 </link>
                 or try the
-                <link href="http://java.sun.com/javaee/5/docs/tutorial/doc/bnaph.html">JSF section of the Java EE 5
+                <link xlink:href="http://java.sun.com/javaee/5/docs/tutorial/doc/bnaph.html">JSF section of the Java EE 5
                     Tutorial.
                 </link>
             </para>
@@ -376,10 +376,10 @@ BUILD SUCCESSFUL
             </para>
             <para>
                 After deploying the application, point your browser to
-                <link href="http://localhost:8080/flexive/adm/">http://localhost:8080/flexive/adm/
+                <link xlink:href="http://localhost:8080/flexive/adm/">http://localhost:8080/flexive/adm/
                 </link>
                 to open the &backendGui; (default credentials: supervisor/supervisor), or
-                <link href="http://localhost:8080/helloworld/">http://localhost:8080/helloworld/
+                <link xlink:href="http://localhost:8080/helloworld/">http://localhost:8080/helloworld/
                 </link>
                 to open the application.
 
@@ -462,7 +462,7 @@ BUILD SUCCESSFUL
                 Use your local installation of the &flexive; distribution as described in
                 <xref linkend="first_flexive_application"/>
                 to create a new project. The complete source code can be found
-                <ulink url="&filesBase;example-tutorial01-documentstore.zip">here</ulink>.
+                <link xlink:href="&filesBase;example-tutorial01-documentstore.zip">here</link>.
                 We start by defining our data model used for storing documents. We assign the standard caption property
                 <property>/caption</property>
                 for document captions, and add a
@@ -748,10 +748,10 @@ BUILD SUCCESSFUL
             </para>
             <para>
                 After deploying the application, point your browser to
-                <link href="http://localhost:8080/flexive/adm/">http://localhost:8080/flexive/adm/
+                <link xlink:href="http://localhost:8080/flexive/adm/">http://localhost:8080/flexive/adm/
                 </link>
                 to open the &backendGui; (default credentials: supervisor/supervisor), or
-                <link href="http://localhost:8080/tutorial01-documentstore/">http://localhost:8080/tutorial01-documentstore/
+                <link xlink:href="http://localhost:8080/tutorial01-documentstore/">http://localhost:8080/tutorial01-documentstore/
                 </link>
                 to open the application.
             </para>

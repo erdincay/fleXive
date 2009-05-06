@@ -29,7 +29,7 @@
         </para>
         <para>
             The scripting language of choice is
-            <link href="http://groovy.codehaus.org">Groovy</link>, but if JavaSE 6 or higher is used any language
+            <link xlink:href="$1">$2</link>, but if JavaSE 6 or higher is used any language
             supported by the Java Scripting API can be used.
         </para>
     </section>
@@ -42,7 +42,7 @@
             <constant>bindings</constant>. A script that is called before a content instance is saved will for example
             require a reference to the content instance in its bindings.
             Please see the
-            <link href="http://www.flexive.org/docs/javadoc/shared/index.html?com/flexive/shared/scripting/FxScriptEvent.html">API documentation</link> of
+            <link xlink:href="http://www.flexive.org/docs/javadoc/shared/index.html?com/flexive/shared/scripting/FxScriptEvent.html">API documentation</link> of
             <classname>FxScriptEvent</classname>
             for further information.
         </para>

@@ -4,16 +4,16 @@
         %global_entities;
         ]>
 <section xml:id="building_from_source" xmlns="http://docbook.org/ns/docbook"
-         xmlns:xi="http://www.w3.org/2001/XInclude">
+         xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:xlink="http://www.w3.org/1999/xlink">
     <title>Building &Flexive; from source</title>
     <para>
         This procedure is for those building &Flexive; from the
-        <link href="http://www.flexive.org/download">source code</link>.
+        <link xlink:href="http://www.flexive.org/download">source code</link>.
         <itemizedlist>
             <listitem>Copy the
                 <filename>build.properties.sample</filename>
                 file located in the root directory of the
-                <link href="http://www.flexive.org/download">&Flexive; source code</link>
+                <link xlink:href="http://www.flexive.org/download">&Flexive; source code</link>
                 to
                 <filename>build.properties</filename>.
                 <xi:include href="../listings/installation_build.properties.xml"/>
@@ -23,7 +23,7 @@
                 before
                 <code>ant all</code>
                 in the root directory of the
-                <link href="http://www.flexive.org/download">&Flexive; source code,</link>
+                <link xlink:href="http://www.flexive.org/download">&Flexive; source code,</link>
                 where the
                 <filename>build.xml</filename>
                 file
@@ -42,9 +42,9 @@
                 </para>
                 <itemizedlist>
                     <listitem>Note: to successfully compile &Flexive;
-                        <link href="http://java.sun.com/javase/downloads/index.jsp">JAVA 1.6</link>
+                        <link xlink:href="http://java.sun.com/javase/downloads/index.jsp">JAVA 1.6</link>
                         and
-                        <link href="http://ant.apache.org/">Apache ANT 1.7</link>
+                        <link xlink:href="http://ant.apache.org/">Apache ANT 1.7</link>
                         is needed
                     </listitem>
                     <listitem>Be also sure to set the

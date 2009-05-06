@@ -11,9 +11,9 @@
 
     <para>
         The
-        <ulink url="&flexiveJavadocBase;shared/com/flexive/shared/interfaces/GenericConfigurationEngine.html">
+        <link xlink:href="&flexiveJavadocBase;shared/com/flexive/shared/interfaces/GenericConfigurationEngine.html">
             configuration engine
-        </ulink>
+        </link>
         provides a hierarchical storage for configuration properties.
         It allows to override default parameters with user-specific settings, and uses the
         distributed cache to avoid database lookups.
@@ -69,9 +69,9 @@
                                 <para>
                                     for entries that are shared across a &flexive; application. The application
                                     is identified using
-                                    <ulink url="&flexiveJavadocBase;shared/com/flexive/shared/FxContext.html#getApplicationId()">
+                                    <link xlink:href="&flexiveJavadocBase;shared/com/flexive/shared/FxContext.html#getApplicationId()">
                                         FxContext#getApplicationId()
-                                    </ulink>,
+                                    </link>,
                                     which is initialized with the servlet context path (for web applications).
                                     Thus, if the context path changes, the existing application-based configuration
                                     entries will no longer be available.
@@ -92,9 +92,9 @@
                     </variablelist>
                     <para>
                         A
-                        <ulink url="&flexiveJavadocBase;shared/com/flexive/shared/configuration/ParameterScope.html">
+                        <link xlink:href="&flexiveJavadocBase;shared/com/flexive/shared/configuration/ParameterScope.html">
                             ParameterScope
-                        </ulink>
+                        </link>
                         also specifies a fallback scope, for example a
                         <emphasis>user</emphasis>
                         parameter uses
@@ -111,9 +111,9 @@
                         be used as a fallback: the global configuration is (by definition) outside the scope
                         of a running &flexive; application, and cannot be updated without using the
                         authentication methods of the
-                        <ulink url="&flexiveJavadocBase;shared/com/flexive/shared/interfaces/GlobalConfigurationEngine.html">
+                        <link xlink:href="&flexiveJavadocBase;shared/com/flexive/shared/interfaces/GlobalConfigurationEngine.html">
                             GlobalConfigurationEngine
-                        </ulink>.
+                        </link>.
                     </para>
                 </listitem>
             </itemizedlist>
@@ -126,9 +126,9 @@
 
         <para>
             A parameter is defined using one of the
-            <ulink url="&flexiveJavadocBase;shared/com/flexive/shared/configuration/parameters/ParameterFactory.html">
+            <link xlink:href="&flexiveJavadocBase;shared/com/flexive/shared/configuration/parameters/ParameterFactory.html">
                 ParameterFactory
-            </ulink>
+            </link>
             methods. The parameter interface uses Java generics to provide typesafe manipulation of the
             configuration values, for example it is not possible (using the configuration APIs) to store a String value
             in an Integer parameter. Let's start with declaring a configuration parameter of type Integer:

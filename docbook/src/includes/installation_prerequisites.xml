@@ -3,7 +3,7 @@
         <!ENTITY % global_entities SYSTEM "../global.ent">
         %global_entities;
         ]>
-<section xml:id="run_flexive" xmlns="http://docbook.org/ns/docbook">
+<section xml:id="run_flexive" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink">
     <title>
         To run &Flexive; and develop &Flexive; applications you need...
     </title>
@@ -14,7 +14,7 @@
             </listitem>
             <listitem>
                 <para>The
-                    <link href="http://java.sun.com/javase/downloads/index.jsp">Sun
+                    <link xlink:href="http://java.sun.com/javase/downloads/index.jsp">Sun
                         Java 6 Platform, Standard Edition Development Kit
                     </link>
                 </para>
@@ -31,13 +31,13 @@
             </listitem>
             <listitem>
                 <para>An application server (
-                    <link href="http://labs.jboss.com/">JBoss</link>
+                    <link xlink:href="http://labs.jboss.com/">JBoss</link>
                     or
-                    <link href="http://glassfish.dev.java.net/">Glassfish</link>) with EJB3 support
+                    <link xlink:href="http://glassfish.dev.java.net/">Glassfish</link>) with EJB3 support
                 </para>
                 <orderedlist>
                     <listitem>Either download and install
-                        <link href="http://labs.jboss.com/">JBoss 4.2.2.GA</link>
+                        <link xlink:href="http://labs.jboss.com/">JBoss 4.2.2.GA</link>
                         or later
                         (
                         <code>${jboss.home}</code>
@@ -45,7 +45,7 @@
                         directory)
                     </listitem>
                     <listitem>or download and install
-                        <link href="https://glassfish.dev.java.net/public/alldownloads.html#Promoted_binary_builds">
+                        <link xlink:href="https://glassfish.dev.java.net/public/alldownloads.html#Promoted_binary_builds">
                             Glassfish V2
                         </link>
                         or later (
@@ -56,11 +56,11 @@
             </listitem>
             <listitem>
                 <para>A database (at the moment only
-                    <link href="http://www.mysql.com/">MySql</link>
+                    <link xlink:href="http://www.mysql.com/">MySql</link>
                     is supported)
                 </para>
                 <para>Download and install
-                <link href="http://www.mysql.com/">MySql 5.0</link>
+                <link xlink:href="http://www.mysql.com/">MySql 5.0</link>
                 or later</para>
                 <para>
                     Currently, choosing UTF-8 as the default charset causes issues with the database setup
@@ -69,22 +69,22 @@
             </listitem>
             <listitem>
                 <para>
-                    <link href="http://www.imagemagick.org/script/binary-releases.php">ImageMagick</link>
+                    <link xlink:href="http://www.imagemagick.org/script/binary-releases.php">ImageMagick</link>
                     version 6.3.4 or later (optional)
                 </para>
             </listitem>
             <listitem>
                 <para>
-                    <link href="http://ant.apache.org">Apache ANT 1.7</link>
+                    <link xlink:href="http://ant.apache.org">Apache ANT 1.7</link>
                     and the ant-optional package
                 </para>
             </listitem>
             <listitem>
                 <para>A
-                    <link href="http://www.flexive.org/download">&Flexive; binary distribution
+                    <link xlink:href="http://www.flexive.org/download">&Flexive; binary distribution
                     </link>
                     or the
-                    <link href="http://www.flexive.org/download">&Flexive; source code,
+                    <link xlink:href="http://www.flexive.org/download">&Flexive; source code,
                     </link>
                     if you want to
                     <link linkend="building_from_source">build &Flexive; from source

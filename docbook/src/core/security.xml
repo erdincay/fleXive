@@ -107,7 +107,7 @@
             Access control lists - which are assigned to user groups - define a list (Read, Edit, Create, etc.) of
             permissions attached to an arbitrary object like content instances, types, properties (and property
             assignments) or select lists. See
-            <link href="http://en.wikipedia.org/wiki/Access_control_list">this</link>
+            <link xlink:href="http://en.wikipedia.org/wiki/Access_control_list">this</link>
             article on Wikipedia for more information about access control lists.
             For the purpose of easier organization and logical grouping &flexive; categorizes ACL's into the following
             groups:
