@@ -77,7 +77,8 @@ public class WriteWebletIncludes extends UIOutput {
     public WriteWebletIncludes() {
         weblets.put("com.flexive.faces.weblets/js/flexiveComponents.js", false);
         weblets.put("com.flexive.faces.weblets/css/components.css", false);
-        weblets.put("com.flexive.faces.weblets/css/componentsIE.css", false);
+        if(FxJsfUtils.getRequest() != null && String.valueOf(FxJsfUtils.getRequest().getBrowser()).equalsIgnoreCase("IE"))
+            weblets.put("com.flexive.faces.weblets/css/componentsIE.css", false);
         if (FxJsfUtils.getRequest() != null) {
             FxJsfUtils.getRequest().setAttribute(REQ_WEBLETS, weblets);
         }
