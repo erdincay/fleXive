@@ -58,7 +58,7 @@ import static com.flexive.tests.embedded.FxTestUtils.logout;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
 import org.testng.Assert;
-import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.*;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -67,6 +67,8 @@ import org.testng.annotations.Test;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 /**
  * FxSQL search query engine tests.
@@ -109,7 +111,7 @@ public class SearchEngineTest {
         login(TestUsers.REGULAR);
         final List<FxPK> testPks = new SqlQueryBuilder().select("@pk").type(TEST_TYPE).getResult().collectColumn(1);
         testInstanceCount = testPks.size();
-        Assert.assertTrue(testInstanceCount > 0, "No instances of test type " + TEST_TYPE + " found.");
+        assertTrue(testInstanceCount > 0, "No instances of test type " + TEST_TYPE + " found.");
         // link test instances in tree
         for (FxPK pk : testPks) {
             generatedNodeIds.add(
@@ -135,12 +137,12 @@ public class SearchEngineTest {
                 .condition("caption", PropertyValueComparator.LIKE, "test caption%")
                 .condition("comment", PropertyValueComparator.LIKE, "folder comment%")
                 .closeSub().getResult();
-        Assert.assertTrue(result.getRowCount() == 25, "Expected to fetch 25 rows, got: " + result.getRowCount());
-        Assert.assertTrue(result.getColumnIndex("caption") == 1, "Unexpected column index for caption: " + result.getColumnIndex("caption"));
-        Assert.assertTrue(result.getColumnIndex("comment") == 2, "Unexpected column index for comment: " + result.getColumnIndex("comment"));
+        assertTrue(result.getRowCount() == 25, "Expected to fetch 25 rows, got: " + result.getRowCount());
+        assertTrue(result.getColumnIndex("caption") == 1, "Unexpected column index for caption: " + result.getColumnIndex("caption"));
+        assertTrue(result.getColumnIndex("comment") == 2, "Unexpected column index for comment: " + result.getColumnIndex("comment"));
         for (int i = 1; i <= result.getRowCount(); i++) {
-            Assert.assertTrue(result.getString(i, 1).startsWith("test caption"), "Unexpected column value: " + result.getString(i, 1));
-            Assert.assertTrue(result.getString(i, 2).startsWith("folder comment"), "Unexpected column value: " + result.getString(i, 2));
+            assertTrue(result.getString(i, 1).startsWith("test caption"), "Unexpected column value: " + result.getString(i, 1));
+            assertTrue(result.getString(i, 2).startsWith("folder comment"), "Unexpected column value: " + result.getString(i, 2));
         }
     }
 
@@ -150,9 +152,9 @@ public class SearchEngineTest {
                 .condition("caption", PropertyValueComparator.LIKE, "test caption%")
                 .orSub().condition("comment", PropertyValueComparator.LIKE, "folder comment 1")
                 .condition("comment", PropertyValueComparator.LIKE, "folder comment 2").closeSub().getResult();
-        Assert.assertTrue(result.getRowCount() == 2, "Expected to fetch 2 rows, got: " + result.getRowCount());
+        assertTrue(result.getRowCount() == 2, "Expected to fetch 2 rows, got: " + result.getRowCount());
         for (int i = 1; i <= 2; i++) {
-            Assert.assertTrue(result.getString(i, 1).matches("test caption [12]"), "Unexpected column value: " + result.getString(i, 1));
+            assertTrue(result.getString(i, 1).matches("test caption [12]"), "Unexpected column value: " + result.getString(i, 1));
         }
     }
 
@@ -181,10 +183,10 @@ public class SearchEngineTest {
     @Test
     public void filterByTypeTest() throws FxApplicationException {
         final FxResultSet result = new SqlQueryBuilder().select("typedef").filterType("FOLDER").getResult();
-        Assert.assertTrue(result.getRowCount() > 0);
+        assertTrue(result.getRowCount() > 0);
         final FxType folderType = CacheAdmin.getEnvironment().getType("FOLDER");
         for (FxResultRow row : result.getResultRows()) {
-            Assert.assertTrue(folderType.getId() == ((FxLargeNumber) row.getValue(1)).getBestTranslation(),
+            assertTrue(folderType.getId() == ((FxLargeNumber) row.getValue(1)).getBestTranslation(),
                     "Unexpected result type: " + row.getValue(1) + ", expected: " + folderType.getId());
         }
     }
@@ -197,8 +199,8 @@ public class SearchEngineTest {
         final FxResultSet result = getSearchEngine().search(selectFolders, 0, Integer.MAX_VALUE, params);
         long bcId = result.getCreatedBriefcaseId();
         try {
-            Assert.assertTrue(result.getRowCount() > 0);
-            Assert.assertTrue(result.getCreatedBriefcaseId() != -1, "Briefcase should have been created, but no ID returned.");
+            assertTrue(result.getRowCount() > 0);
+            assertTrue(result.getCreatedBriefcaseId() != -1, "Briefcase should have been created, but no ID returned.");
 
             // select briefcase
             final FxResultSet briefcase = new SqlQueryBuilder().filterBriefcase(result.getCreatedBriefcaseId()).getResult();
@@ -215,7 +217,7 @@ public class SearchEngineTest {
         long briefcaseId = -1;
         try {
             final FxResultSet result = new SqlQueryBuilder().saveInBriefcase("SqlQueryBuilderTest").getResult();
-            Assert.assertTrue(result.getRowCount() > 0);
+            assertTrue(result.getRowCount() > 0);
             briefcaseId = result.getCreatedBriefcaseId();
             final Briefcase briefcase = EJBLookup.getBriefcaseEngine().load(briefcaseId);
             Assert.assertEquals(briefcase.getSize(), result.getTotalRowCount(),
@@ -231,9 +233,9 @@ public class SearchEngineTest {
     public void typeConditionTest() throws FxApplicationException {
         final FxResultSet result = new SqlQueryBuilder().select("typedef").type(FxType.CONTACTDATA).getResult();
         final FxType cdType = CacheAdmin.getEnvironment().getType(FxType.CONTACTDATA);
-        Assert.assertTrue(result.getRowCount() > 0);
+        assertTrue(result.getRowCount() > 0);
         for (FxResultRow row : result.getResultRows()) {
-            Assert.assertTrue(((FxLargeNumber) row.getFxValue(1)).getDefaultTranslation() == cdType.getId(),
+            assertTrue(((FxLargeNumber) row.getFxValue(1)).getDefaultTranslation() == cdType.getId(),
                     "Unexpected type in result, expected " + cdType.getId() + ", was: " + row.getFxValue(1));
         }
     }
@@ -254,10 +256,10 @@ public class SearchEngineTest {
                 + result.getRowCount() + " instead of " + testInstanceCount);
         final int idx = 1;
         for (FxResultRow row : result.getResultRows()) {
-            Assert.assertTrue(dataType.getValueClass().isAssignableFrom(row.getFxValue(idx).getClass()),
+            assertTrue(dataType.getValueClass().isAssignableFrom(row.getFxValue(idx).getClass()),
                     "Invalid class returned for datatype " + dataType + ": " + row.getFxValue(idx).getClass() + " instead of " + dataType.getValueClass());
-            Assert.assertTrue(row.getFxValue(idx).getXPathName() != null, "XPath was null");
-            Assert.assertTrue(row.getFxValue(idx).getXPathName().equalsIgnoreCase(getTestPropertyName(name)), "Invalid property name: " + row.getFxValue(idx).getXPathName() + ", expected: " + getTestPropertyName(name));
+            assertTrue(row.getFxValue(idx).getXPathName() != null, "XPath was null");
+            assertTrue(row.getFxValue(idx).getXPathName().equalsIgnoreCase(getTestPropertyName(name)), "Invalid property name: " + row.getFxValue(idx).getXPathName() + ", expected: " + getTestPropertyName(name));
         }
     }
 
@@ -274,12 +276,12 @@ public class SearchEngineTest {
         final FxResultSet result = new SqlQueryBuilder().select(getTestPropertyName(name))
                 .condition("typedef", PropertyValueComparator.NE, CacheAdmin.getEnvironment().getType(TEST_TYPE).getId())
                 .getResult();
-        Assert.assertTrue(result.getRowCount() > 0);
+        assertTrue(result.getRowCount() > 0);
         final int idx = 1;
         for (FxResultRow row : result.getResultRows()) {
-            Assert.assertTrue(dataType.getValueClass().isAssignableFrom(row.getFxValue(idx).getClass()),
+            assertTrue(dataType.getValueClass().isAssignableFrom(row.getFxValue(idx).getClass()),
                     "Invalid class returned for datatype " + dataType + ": " + row.getFxValue(idx).getClass() + " instead of " + dataType.getValueClass());
-            Assert.assertTrue(row.getFxValue(idx).isEmpty(), "Value should be empty: " + row.getFxValue(idx));
+            assertTrue(row.getFxValue(idx).isEmpty(), "Value should be empty: " + row.getFxValue(idx));
         }
     }
 
@@ -289,7 +291,7 @@ public class SearchEngineTest {
                 getTestPropertyName("string")).type(TEST_TYPE).getResult();
         final int idx = 5;
         for (FxResultRow row : result.getResultRows()) {
-            Assert.assertTrue(getTestPropertyName("string").equalsIgnoreCase(row.getFxValue(idx).getXPathName()),
+            assertTrue(getTestPropertyName("string").equalsIgnoreCase(row.getFxValue(idx).getXPathName()),
                     "Invalid property name from XPath: " + row.getFxValue(idx).getXPathName()
                             + ", expected: " + getTestPropertyName("string"));
         }
@@ -299,7 +301,7 @@ public class SearchEngineTest {
     public void orderByTest(String name, FxDataType dataType) throws FxApplicationException {
         final FxResultSet result = new SqlQueryBuilder().select("@pk", getTestPropertyName(name)).type(TEST_TYPE)
                 .orderBy(2, SortDirection.ASCENDING).getResult();
-        Assert.assertTrue(result.getRowCount() > 0);
+        assertTrue(result.getRowCount() > 0);
         assertAscendingOrder(result, 2);
     }
 
@@ -308,14 +310,14 @@ public class SearchEngineTest {
         final String[] props = {"id", "version", "typedef", "mandator", "acl", "created_by",
                 "created_at", "modified_by", "modified_at"};
         final FxResultSet result = new SqlQueryBuilder().select(props).maxRows(50).getResult();
-        Assert.assertTrue(result.getRowCount() > 0);
+        assertTrue(result.getRowCount() > 0);
         for (FxResultRow row : result.getResultRows()) {
             for (String property : props) {
                 final Object value = row.getValue(property);
-                Assert.assertTrue(value != null);
+                assertTrue(value != null);
                 if (value instanceof FxValue) {
                     final FxValue fxValue = (FxValue) value;
-                    Assert.assertTrue(StringUtils.isNotBlank(fxValue.getXPath()) && !"/".equals(fxValue.getXPath()),
+                    assertTrue(StringUtils.isNotBlank(fxValue.getXPath()) && !"/".equals(fxValue.getXPath()),
                             "XPath not set in search result for system property " + property);
                 }
             }
@@ -325,13 +327,13 @@ public class SearchEngineTest {
     @Test
     public void selectPermissionsTest() throws FxApplicationException {
         final FxResultSet result = new SqlQueryBuilder().select("@pk", "@permissions").type(TEST_TYPE).getResult();
-        Assert.assertTrue(result.getRowCount() > 0);
+        assertTrue(result.getRowCount() > 0);
         for (FxResultRow row : result.getResultRows()) {
             final FxPK pk = row.getPk(1);
             final PermissionSet permissions = row.getPermissions(2);
-            Assert.assertTrue(permissions.isMayRead());
+            assertTrue(permissions.isMayRead());
             final PermissionSet contentPerms = getContentEngine().load(pk).getPermissions();
-            Assert.assertTrue(contentPerms.equals(permissions), "Permissions from search: " + permissions + ", content: " + contentPerms);
+            assertTrue(contentPerms.equals(permissions), "Permissions from search: " + permissions + ", content: " + contentPerms);
         }
     }
 
@@ -352,13 +354,13 @@ public class SearchEngineTest {
         // sort by the second column taken from the result preferences - needs "virtual" columns
         final FxResultSet result = getSearchEngine().search(
                 "SELECT @pk, id, @* FROM content CO FILTER type='" + TEST_TYPE + "' ORDER BY 4 DESC", 0, 9999, null);
-        Assert.assertTrue(result.getRowCount() > 0);
+        assertTrue(result.getRowCount() > 0);
         assertDescendingOrder(result, 4);
 
         try {
             getSearchEngine().search(
                     "SELECT co.@pk, co.id, co.@* FROM content CO FILTER co.type='" + TEST_TYPE + "' ORDER BY 5 DESC", 0, 9999, null);
-            Assert.fail("Selected result preference column should not be present in result set");
+            fail("Selected result preference column should not be present in result set");
         } catch (FxApplicationException e) {
             // pass
         }
@@ -369,7 +371,7 @@ public class SearchEngineTest {
                 .filterType(TEST_TYPE).getResult(), 4);
         try {
             new SqlQueryBuilder().select("@pk", "id", "@*").orderBy(5, SortDirection.ASCENDING).getResult();
-            Assert.fail("Selected result preference column should not be present in result set");
+            fail("Selected result preference column should not be present in result set");
         } catch (FxApplicationException e) {
             // pass - the exception was thrown by the search engine, so it's a FxApplicationException
             // instead of a FxRuntimeException
@@ -439,7 +441,7 @@ public class SearchEngineTest {
                     new SqlQueryBuilder().condition(assignmentName, comparator, value).getResult();
                     // no exception thrown, consider it a success
                 } catch (Exception e) {
-                    Assert.fail("Failed to submit for property " + dataType + " with comparator " + comparator
+                    fail("Failed to submit for property " + dataType + " with comparator " + comparator
                             + ":\n" + e.getMessage() + ", thrown at:\n"
                             + StringUtils.join(e.getStackTrace(), '\n'));
                 }
@@ -468,11 +470,11 @@ public class SearchEngineTest {
         final String assignmentName = TEST_TYPE + "/" + getTestPropertyName(name);
         final SqlQueryBuilder builder = getDateQuery(assignmentName, PropertyValueComparator.LT, value, dateFunction);
         final FxResultSet result = builder.getResult();
-        Assert.assertTrue(result.getRowCount() > 0, "Query returned no results:\n\n" + builder.getQuery());
+        assertTrue(result.getRowCount() > 0, "Query returned no results:\n\n" + builder.getQuery());
         final Calendar cal = Calendar.getInstance();
         for (FxResultRow row : result.getResultRows()) {
             cal.setTime(row.getDate(1));
-            Assert.assertTrue(cal.get(calendarField) < value, row.getDate(1) + " should be before " + value + ", data type = " + name);
+            assertTrue(cal.get(calendarField) < value, row.getDate(1) + " should be before " + value + ", data type = " + name);
         }
     }
 
@@ -486,28 +488,28 @@ public class SearchEngineTest {
         final int year = Calendar.getInstance().get(Calendar.YEAR);
         // get objects created this year
         FxResultSet result = new SqlQueryBuilder().select("year(created_at)").condition("year(created_at)", PropertyValueComparator.EQ, year).getResult();
-        Assert.assertTrue(result.getRowCount() > 0);
+        assertTrue(result.getRowCount() > 0);
         for (FxResultRow row : result.getResultRows()) {
-            Assert.assertTrue(row.getInt(1) == year, "Expected " + year + ", got: " + row.getInt(1));
+            assertTrue(row.getInt(1) == year, "Expected " + year + ", got: " + row.getInt(1));
         }
 
         // select a date from the details table
         final String dateAssignmentName = TEST_TYPE + "/" + getTestPropertyName("date");
         result = new SqlQueryBuilder().select(dateAssignmentName, "year(" + dateAssignmentName + ")")
                 .condition(dateAssignmentName, PropertyValueComparator.NOT_EMPTY, null).getResult();
-        Assert.assertTrue(result.getRowCount() > 0);
+        assertTrue(result.getRowCount() > 0);
         final Calendar cal = Calendar.getInstance();
         for (FxResultRow row : result.getResultRows()) {
             cal.setTime(row.getDate(1));
-            Assert.assertTrue(cal.get(Calendar.YEAR) == row.getInt(2), "Expected year " + cal.get(Calendar.YEAR) + ", got: " + row.getInt(2));
+            assertTrue(cal.get(Calendar.YEAR) == row.getInt(2), "Expected year " + cal.get(Calendar.YEAR) + ", got: " + row.getInt(2));
         }
 
         // check if it is possible to select the same column twice, but with different functions
         result = new SqlQueryBuilder().select("year(created_at)", "month(created_at)").condition("year(created_at)", PropertyValueComparator.EQ, year).getResult();
-        Assert.assertTrue(result.getRowCount() > 0);
+        assertTrue(result.getRowCount() > 0);
         for (FxResultRow row : result.getResultRows()) {
-            Assert.assertTrue(row.getInt(1) == year, "Expected " + year + ", got: " + row.getInt(1));
-            Assert.assertTrue(row.getInt(2) != year && row.getInt(2) <= 12, "Invalid month value: " + row.getInt(2));
+            assertTrue(row.getInt(1) == year, "Expected " + year + ", got: " + row.getInt(1));
+            assertTrue(row.getInt(2) != year && row.getInt(2) <= 12, "Invalid month value: " + row.getInt(2));
         }
     }
 
@@ -532,31 +534,31 @@ public class SearchEngineTest {
             final FxValue value = getTestValue(name, comparator);
             final SqlQueryBuilder builder = new SqlQueryBuilder().select("@pk", assignmentName).condition(assignmentName, comparator, value);
             final FxResultSet result = builder.getResult();
-            Assert.assertTrue(result.getRowCount() > 0, "Cannot test on empty result sets, query=\n" + builder.getQuery());
+            assertTrue(result.getRowCount() > 0, "Cannot test on empty result sets, query=\n" + builder.getQuery());
             for (FxResultRow row : result.getResultRows()) {
                 final FxValue rowValue = row.getFxValue(2);
                 switch (comparator) {
                     case EQ:
-                        Assert.assertTrue(rowValue.compareTo(value) == 0,
+                        assertTrue(rowValue.compareTo(value) == 0,
                                 "Result value " + rowValue + " is not equal to " + value + " (compareTo = "
                                         + rowValue.compareTo(value) + ")\n\nQuery:" + builder.getQuery());
                         Assert.assertEquals(rowValue.getBestTranslation(), value.getBestTranslation(),
                                 "Result value " + rowValue + " is not equal to " + value + "\n\nQuery:" + builder.getQuery());
                         break;
                     case LT:
-                        Assert.assertTrue(rowValue.compareTo(value) < 0, "Result value " + rowValue + " is not less than " + value + "\n\nQuery:" + builder.getQuery());
+                        assertTrue(rowValue.compareTo(value) < 0, "Result value " + rowValue + " is not less than " + value + "\n\nQuery:" + builder.getQuery());
                         break;
                     case LE:
-                        Assert.assertTrue(rowValue.compareTo(value) <= 0, "Result value " + rowValue + " is not less or equal to " + value + "\n\nQuery:" + builder.getQuery());
+                        assertTrue(rowValue.compareTo(value) <= 0, "Result value " + rowValue + " is not less or equal to " + value + "\n\nQuery:" + builder.getQuery());
                         break;
                     case GT:
-                        Assert.assertTrue(rowValue.compareTo(value) > 0, "Result value " + rowValue + " is not greater than " + value + "\n\nQuery:" + builder.getQuery());
+                        assertTrue(rowValue.compareTo(value) > 0, "Result value " + rowValue + " is not greater than " + value + "\n\nQuery:" + builder.getQuery());
                         break;
                     case GE:
-                        Assert.assertTrue(rowValue.compareTo(value) >= 0, "Result value " + rowValue + " is not greater or equal to " + value + "\n\nQuery:" + builder.getQuery());
+                        assertTrue(rowValue.compareTo(value) >= 0, "Result value " + rowValue + " is not greater or equal to " + value + "\n\nQuery:" + builder.getQuery());
                         break;
                     default:
-                        Assert.fail("Invalid comparator: " + comparator + "\n\nQuery:" + builder.getQuery());
+                        fail("Invalid comparator: " + comparator + "\n\nQuery:" + builder.getQuery());
                 }
             }
         }
@@ -574,7 +576,7 @@ public class SearchEngineTest {
     private FxValue getTestValue(String name, PropertyValueComparator comparator) throws FxApplicationException {
         final FxResultSet result = new SqlQueryBuilder().select(getTestPropertyName(name)).type(TEST_TYPE).getResult();
         final List<FxValue> values = result.collectColumn(1);
-        Assert.assertTrue(values.size() == testInstanceCount, "Expected " + testInstanceCount + " rows, got: " + values.size());
+        assertTrue(values.size() == testInstanceCount, "Expected " + testInstanceCount + " rows, got: " + values.size());
         for (FxValue value : values) {
             if (value == null || value.isEmpty()) {
                 continue;
@@ -613,7 +615,7 @@ public class SearchEngineTest {
                         }
                         break;
                     default:
-                        Assert.fail("Cannot check relative ordering for comparator " + comparator);
+                        fail("Cannot check relative ordering for comparator " + comparator);
                 }
                 if (match > 0 && count > match) {
                     // this value is matched by _some_ other row values, so it's suitable as test input
@@ -637,7 +639,7 @@ public class SearchEngineTest {
         final FxResultSet result = new SqlQueryBuilder().select("@pk", "acl", "acl.label", "acl.name",
                 "acl.mandator", "acl.description", "acl.cat_type", "acl.color", "acl.created_by", "acl.created_at",
                 "acl.modified_by", "acl.modified_at").type(TEST_TYPE).getResult();
-        Assert.assertTrue(result.getRowCount() > 0);
+        assertTrue(result.getRowCount() > 0);
         for (FxResultRow row : result.getResultRows()) {
             final ACL acl = CacheAdmin.getEnvironment().getACL(row.getLong("acl"));
             final FxContent content = getContentEngine().load(row.getPk(1));
@@ -663,7 +665,7 @@ public class SearchEngineTest {
     public void stepSelectorTest() throws FxApplicationException {
         final FxResultSet result = new SqlQueryBuilder().select("@pk", "step", "step.label", "step.id", "step.stepdef",
                 "step.workflow", "step.acl").getResult();
-        Assert.assertTrue(result.getRowCount() > 0);
+        assertTrue(result.getRowCount() > 0);
         for (FxResultRow row : result.getResultRows()) {
             final Step step = CacheAdmin.getEnvironment().getStep(row.getLong("step"));
             final StepDefinition definition = CacheAdmin.getEnvironment().getStepDefinition(step.getStepDefinitionId());
@@ -675,7 +677,7 @@ public class SearchEngineTest {
                         "Invalid step for instance " + row.getPk(1) + ": " + step.getId()
                                 + ", content engine returned " + content.getStepId());
             } catch (FxNoAccessException e) {
-                Assert.fail("Content engine denied read access to instance " + row.getPk(1) + " that was returned by search.");
+                fail("Content engine denied read access to instance " + row.getPk(1) + " that was returned by search.");
             }
 
             // check fields selected from the ACL table
@@ -696,7 +698,7 @@ public class SearchEngineTest {
                 Assert.assertEquals(content.getPermissions(), row.getPermissions("@permissions"),
                         "Content perm: " + content.getPermissions() + ", search perm: " + row.getPermissions(2));
             } catch (FxNoAccessException e) {
-                Assert.fail("Search returned contact data #" + row.getPk(1)
+                fail("Search returned contact data #" + row.getPk(1)
                         + ", but content engine disallows access: " + e.getMessage());
             }
         }
@@ -712,12 +714,12 @@ public class SearchEngineTest {
     @Test
     public void selectAllPermissionsTest() throws FxApplicationException {
         final FxResultSet result = getSearchEngine().search("SELECT @pk", 0, 999999, null);
-        Assert.assertTrue(result.getRowCount() > 0);
+        assertTrue(result.getRowCount() > 0);
         for (FxResultRow row : result.getResultRows()) {
             try {
                 getContentEngine().load(row.getPk(1));
             } catch (FxNoAccessException e) {
-                Assert.fail("Content engine denied read access to instance " + row.getPk(1) + " that was returned by search.");
+                fail("Content engine denied read access to instance " + row.getPk(1) + " that was returned by search.");
             }
         }
     }
@@ -727,7 +729,7 @@ public class SearchEngineTest {
         final FxResultSet result = new SqlQueryBuilder().select("@pk", "mandator", "mandator.id",
                 "mandator.metadata", "mandator.is_active", "mandator.created_by", "mandator.created_at",
                 "mandator.modified_by", "mandator.modified_at").getResult();
-        Assert.assertTrue(result.getRowCount() > 0);
+        assertTrue(result.getRowCount() > 0);
         for (FxResultRow row : result.getResultRows()) {
             final Mandator mandator = CacheAdmin.getEnvironment().getMandator(row.getLong("mandator"));
             final FxContent content = getContentEngine().load(row.getPk(1));
@@ -737,7 +739,7 @@ public class SearchEngineTest {
             if (row.getValue("mandator.metadata") != null) {
                 long mand = row.getLong("mandator.metadata");
                 if (!(mand == 0 || mand == -1))
-                    Assert.fail("Invalid mandator: " + mand + "! Expected 0 or -1 (System default or test division)");
+                    fail("Invalid mandator: " + mand + "! Expected 0 or -1 (System default or test division)");
             }
             assertEquals(row.getLong("mandator.is_active"), mandator.isActive() ? 1 : 0, "Invalid value for field: is_active");
             checkLifecycleInfo(row, "mandator", mandator.getLifeCycleInfo());
@@ -753,7 +755,7 @@ public class SearchEngineTest {
                     name + ".created_at", name + ".modified_by", name + ".modified_at",
                     name + ".is_active", name + ".is_validated", name + ".lang", name + ".login_name",
                     name + ".allow_multilogin", name + ".default_node").maxRows(10).getResult();
-            Assert.assertTrue(result.getRowCount() == 10, "Expected 10 result rows");
+            assertTrue(result.getRowCount() == 10, "Expected 10 result rows");
             for (FxResultRow row : result.getResultRows()) {
                 final Account account = EJBLookup.getAccountEngine().load(row.getLong(name));
                 assertEquals(row.getString(name + ".username"), account.getName(), "Invalid value for field: username");
@@ -781,12 +783,12 @@ public class SearchEngineTest {
     @Test
     public void treeSelectorTest() throws FxApplicationException {
         final FxResultSet result = new SqlQueryBuilder().select("@pk", "@path").isChild(FxTreeNode.ROOT_NODE).getResult();
-        Assert.assertTrue(result.getRowCount() > 0);
+        assertTrue(result.getRowCount() > 0);
         for (FxResultRow row : result.getResultRows()) {
             final List<FxPaths.Path> paths = row.getPaths(2);
-            Assert.assertTrue(paths.size() > 0, "Returned no path information for content " + row.getPk(1));
+            assertTrue(paths.size() > 0, "Returned no path information for content " + row.getPk(1));
             for (FxPaths.Path path : paths) {
-                Assert.assertTrue(path.getItems().size() > 0, "Empty path returned");
+                assertTrue(path.getItems().size() > 0, "Empty path returned");
                 final FxPaths.Item leaf = path.getItems().get(path.getItems().size() - 1);
                 Assert.assertEquals(leaf.getReferenceId(), row.getPk(1).getId(), "Expected reference ID " + row.getPk(1)
                         + ", got: " + leaf.getReferenceId() + " (nodeId=" + leaf.getNodeId() + ")");
@@ -811,9 +813,9 @@ public class SearchEngineTest {
 
         // find a suitable test content instance
         FxResultSet result = new SqlQueryBuilder().select("@pk").condition("version", PropertyValueComparator.GT, 1).getResult();
-        Assert.assertTrue(result.getRowCount() > 0);
+        assertTrue(result.getRowCount() > 0);
         final FxPK pk = result.<FxPK>collectColumn(1).get(0);
-        Assert.assertTrue(pk.getVersion() > 1);
+        assertTrue(pk.getVersion() > 1);
 
         // create a test folder
         long folderNodeId = -1;
@@ -827,7 +829,7 @@ public class SearchEngineTest {
             Assert.assertEquals(result.getRowCount(), 1, "Expected one child, got: " + result.getRowCount()
                     + " (" + result.collectColumn(1) + ")");
             // should return maximum version
-            Assert.assertTrue(result.getResultRow(0).getPk(1).getVersion() == pk.getVersion());
+            assertTrue(result.getResultRow(0).getPk(1).getVersion() == pk.getVersion());
         } finally {
             if (folderNodeId != -1) {
                 getTreeEngine().remove(FxTreeNodeEdit.createNew("").setId(folderNodeId), true, true);
@@ -838,16 +840,16 @@ public class SearchEngineTest {
     @Test
     public void fulltextSearchTest() throws FxApplicationException {
         final FxResultSet result = new SqlQueryBuilder().select("@pk", getTestPropertyName("string")).type(TEST_TYPE).maxRows(1).getResult();
-        Assert.assertTrue(result.getRowCount() == 1, "Expected only one result, got: " + result.getRowCount());
+        assertTrue(result.getRowCount() == 1, "Expected only one result, got: " + result.getRowCount());
 
         // perform a fulltext query against the first word
         final FxPK pk = result.getResultRow(0).getPk(1);
         final String[] words = StringUtils.split(((FxString) result.getResultRow(0).getFxValue(2)).getBestTranslation(), ' ');
-        Assert.assertTrue(words.length > 0);
-        Assert.assertTrue(words[0].length() > 0, "Null length word: " + words[0]);
+        assertTrue(words.length > 0);
+        assertTrue(words[0].length() > 0, "Null length word: " + words[0]);
         final FxResultSet ftresult = new SqlQueryBuilder().select("@pk").fulltext(words[0]).getResult();
-        Assert.assertTrue(ftresult.getRowCount() > 0, "Expected at least one result for fulltext query '" + words[0] + "'");
-        Assert.assertTrue(ftresult.collectColumn(1).contains(pk), "Didn't find pk " + pk + " in result, got: " + ftresult.collectColumn(1));
+        assertTrue(ftresult.getRowCount() > 0, "Expected at least one result for fulltext query '" + words[0] + "'");
+        assertTrue(ftresult.collectColumn(1).contains(pk), "Didn't find pk " + pk + " in result, got: " + ftresult.collectColumn(1));
     }
 
     @Test
@@ -858,27 +860,27 @@ public class SearchEngineTest {
         Collections.sort(allVersions);
         Collections.sort(liveVersions);
         Collections.sort(maxVersions);
-        Assert.assertTrue(allVersions.size() > 0, "All versions result must not be empty");
-        Assert.assertTrue(liveVersions.size() > 0, "Live versions result must not be empty");
-        Assert.assertTrue(maxVersions.size() > 0, "Max versions result must not be empty");
-        Assert.assertTrue(allVersions.size() > liveVersions.size(), "Expected more than only live versions");
-        Assert.assertTrue(allVersions.size() > maxVersions.size(), "Expected more than only max versions");
-        Assert.assertTrue(!liveVersions.equals(maxVersions), "Expected different results for max and live version filter");
+        assertTrue(allVersions.size() > 0, "All versions result must not be empty");
+        assertTrue(liveVersions.size() > 0, "Live versions result must not be empty");
+        assertTrue(maxVersions.size() > 0, "Max versions result must not be empty");
+        assertTrue(allVersions.size() > liveVersions.size(), "Expected more than only live versions");
+        assertTrue(allVersions.size() > maxVersions.size(), "Expected more than only max versions");
+        assertTrue(!liveVersions.equals(maxVersions), "Expected different results for max and live version filter");
         for (FxPK pk : liveVersions) {
             final FxContent content = getContentEngine().load(pk);
-            Assert.assertTrue(content.isLiveVersion(), "Expected live version for " + pk);
+            assertTrue(content.isLiveVersion(), "Expected live version for " + pk);
         }
         for (FxPK pk : maxVersions) {
             final FxContent content = getContentEngine().load(pk);
-            Assert.assertTrue(content.isMaxVersion(), "Expected max version for " + pk);
-            Assert.assertTrue(content.getVersion() == 1 || !content.isLiveVersion());
+            assertTrue(content.isMaxVersion(), "Expected max version for " + pk);
+            assertTrue(content.getVersion() == 1 || !content.isLiveVersion());
         }
     }
 
     @Test
     public void lastContentChangeTest() throws FxApplicationException {
         final long lastContentChange = getSearchEngine().getLastContentChange(false);
-        Assert.assertTrue(lastContentChange > 0);
+        assertTrue(lastContentChange > 0);
         final FxContent content = getContentEngine().initialize(TEST_TYPE);
         content.setAclId(TestUsers.getInstanceAcl().getId());
         content.setValue("/" + getTestPropertyName("string"), new FxString(false, "lastContentChangeTest"));
@@ -887,7 +889,7 @@ public class SearchEngineTest {
             Assert.assertEquals(getSearchEngine().getLastContentChange(false), lastContentChange,
                     "Didn't touch contents, but lastContentChange timestamp was increased");
             pk = getContentEngine().save(content);
-            Assert.assertTrue(getSearchEngine().getLastContentChange(false) > lastContentChange,
+            assertTrue(getSearchEngine().getLastContentChange(false) > lastContentChange,
                     "Saved content, but lastContentChange timestamp was not increased: "
                             + getSearchEngine().getLastContentChange(false));
         } finally {
@@ -898,14 +900,14 @@ public class SearchEngineTest {
     @Test
     public void lastContentChangeTreeTest() throws FxApplicationException {
         final long lastContentChange = getSearchEngine().getLastContentChange(false);
-        Assert.assertTrue(lastContentChange > 0);
+        assertTrue(lastContentChange > 0);
         final long nodeId = getTreeEngine().save(FxTreeNodeEdit.createNew("lastContentChangeTreeTest"));
         try {
             final long editContentChange = getSearchEngine().getLastContentChange(false);
-            Assert.assertTrue(editContentChange > lastContentChange,
+            assertTrue(editContentChange > lastContentChange,
                     "Saved content, but lastContentChange timestamp was not increased: " + editContentChange);
             getTreeEngine().activate(FxTreeMode.Edit, nodeId, false);
-            Assert.assertTrue(getSearchEngine().getLastContentChange(true) > editContentChange,
+            assertTrue(getSearchEngine().getLastContentChange(true) > editContentChange,
                     "Activated content, but live mode lastContentChange timestamp was not increased: "
                             + getSearchEngine().getLastContentChange(true));
             Assert.assertEquals(getSearchEngine().getLastContentChange(false), editContentChange,
@@ -941,16 +943,16 @@ public class SearchEngineTest {
             pk = getContentEngine().save(content);
 
             // content should be retrievable
-            Assert.assertTrue(new SqlQueryBuilder().condition("id", EQ, pk.getId()).getResult().getRowCount() > 0,
+            assertTrue(new SqlQueryBuilder().condition("id", EQ, pk.getId()).getResult().getRowCount() > 0,
                     "Test value from active mandator not found");
 
             getMandatorEngine().deactivate(mandatorId);
             // content should be removed from result
-            Assert.assertTrue(new SqlQueryBuilder().condition("id", EQ, pk.getId()).getResult().getRowCount() == 0,
+            assertTrue(new SqlQueryBuilder().condition("id", EQ, pk.getId()).getResult().getRowCount() == 0,
                     "Content from deactivated mandators should not be retrievable");
             try {
                 getContentEngine().load(pk);
-                Assert.fail("ContentEngine returned content from deactivated mandator.");
+                fail("ContentEngine returned content from deactivated mandator.");
             } catch (FxApplicationException e) {
                 // pass
             }
@@ -978,8 +980,8 @@ public class SearchEngineTest {
             pk = getContentEngine().save(content);
             final FxResultSet result = getSearchEngine().search("SELECT id WHERE "
                     + getTestPropertyName("string") + " = 'te''st'", 0, 10, null);
-            Assert.assertTrue(result.getRowCount() == 1, "Escaped string property not returned");
-            Assert.assertTrue(result.getResultRow(0).getLong(1) == pk.getId());
+            assertTrue(result.getRowCount() == 1, "Escaped string property not returned");
+            assertTrue(result.getResultRow(0).getLong(1) == pk.getId());
         } finally {
             removePk(pk);
         }
@@ -1042,8 +1044,8 @@ public class SearchEngineTest {
         assertExactPkMatch(content.getPk(), new SqlQueryBuilder().select("@pk").condition("created_at", EQ, new FxDateTime(false, createdAt)).condition("id", EQ, content.getPk().getId()).getResult().<FxPK>collectColumn(1));
         assertExactPkMatch(content.getPk(), new SqlQueryBuilder().select("@pk").condition("created_at", PropertyValueComparator.LE, new FxDateTime(false, createdAt)).condition("id", EQ, content.getPk().getId()).getResult().<FxPK>collectColumn(1));
         assertExactPkMatch(content.getPk(), new SqlQueryBuilder().select("@pk").condition("created_at", PropertyValueComparator.GE, new FxDateTime(false, createdAt)).condition("id", EQ, content.getPk().getId()).getResult().<FxPK>collectColumn(1));
-        Assert.assertTrue(new SqlQueryBuilder().select("@pk").condition("created_at", PropertyValueComparator.LT, new FxDateTime(false, createdAt)).condition("id", EQ, content.getPk().getId()).getResult().getRowCount() == 0);
-        Assert.assertTrue(new SqlQueryBuilder().select("@pk").condition("created_at", PropertyValueComparator.GT, new FxDateTime(false, createdAt)).condition("id", EQ, content.getPk().getId()).getResult().getRowCount() == 0);
+        assertTrue(new SqlQueryBuilder().select("@pk").condition("created_at", PropertyValueComparator.LT, new FxDateTime(false, createdAt)).condition("id", EQ, content.getPk().getId()).getResult().getRowCount() == 0);
+        assertTrue(new SqlQueryBuilder().select("@pk").condition("created_at", PropertyValueComparator.GT, new FxDateTime(false, createdAt)).condition("id", EQ, content.getPk().getId()).getResult().getRowCount() == 0);
     }
 
     @Test
@@ -1051,7 +1053,7 @@ public class SearchEngineTest {
         final FxPropertyAssignment assignment = getTestPropertyAssignment("string");
         final FxResultSet result = getSearchEngine().search("SELECT #" + assignment.getId() + " WHERE #" + assignment.getId() + " IS NOT NULL",
                 0, 10, null);
-        Assert.assertTrue(result.getRowCount() > 0);
+        assertTrue(result.getRowCount() > 0);
     }
 
     @Test
@@ -1064,7 +1066,7 @@ public class SearchEngineTest {
                 .condition(TEST_TYPE + "/grouptop/" + dateProperty, PropertyValueComparator.NOT_EMPTY, null)
                 .condition("YEAR(" + TEST_TYPE + "/grouptop/" + dateProperty + ")", PropertyValueComparator.GT, 0)
                 .getResult();
-        Assert.assertTrue(result.getRowCount() > 0);
+        assertTrue(result.getRowCount() > 0);
     }
 
 
@@ -1074,7 +1076,7 @@ public class SearchEngineTest {
         final FxResultSet result = getSearchEngine().search("SELECT /* field1 */ id, * \n" +
                 "WHERE -- line comment\n" +
                 "/* comment */ (/* comment*/ id != 0) or (/*comment*/#" + assignment.getId() + " IS NULL)", 0, 10, null);
-        Assert.assertTrue(result.getRowCount() > 0);
+        assertTrue(result.getRowCount() > 0);
 
     }
 
@@ -1083,14 +1085,14 @@ public class SearchEngineTest {
         final FxResultSet result = getSearchEngine().search("SELECT tbl.@pk, tbl.caption\n" +
                 "FROM content tbl\n" +
                 "WHERE tbl.id > 0", 0, 10, null);
-        Assert.assertTrue(result.getRowCount() > 0);
+        assertTrue(result.getRowCount() > 0);
     }
 
     @Test
     public void selectEmptyPathTest() throws FxApplicationException {
         // select path for all items, will include empty paths like contact data
         final FxResultSet result = getSearchEngine().search("SELECT @path", 0, 99999, null);
-        Assert.assertTrue(result.getRowCount() > 0);
+        assertTrue(result.getRowCount() > 0);
     }
 
     @Test
@@ -1098,13 +1100,13 @@ public class SearchEngineTest {
         final FxPropertyAssignment assignment = getTestPropertyAssignment("number");
         final FxResultSet result = new SqlQueryBuilder().select("id", assignment.getXPath())
                 .orderBy(assignment.getXPath(), SortDirection.ASCENDING).getResult();
-        Assert.assertTrue(result.getRowCount() > 0);
+        assertTrue(result.getRowCount() > 0);
     }
 
     @Test
     public void searchForStepTest() throws FxApplicationException {
         final FxResultSet result = getSearchEngine().search("SELECT step WHERE step=" + StepDefinition.EDIT_STEP_ID, 0, 10, null);
-        Assert.assertTrue(result.getRowCount() > 0, "At least one instance expected to be in the 'edit' step");
+        assertTrue(result.getRowCount() > 0, "At least one instance expected to be in the 'edit' step");
     }
 
     @Test
@@ -1142,7 +1144,7 @@ public class SearchEngineTest {
             // don't set the value, removal should be ok
             pk = getContentEngine().save(content);
             // select permissions, delete perm should be set
-            Assert.assertTrue(new SqlQueryBuilder().select("@permissions")
+            assertTrue(new SqlQueryBuilder().select("@permissions")
                     .condition("id", PropertyValueComparator.EQ, pk.getId())
                     .getResult()
                     .<PermissionSet>collectColumn(1)
@@ -1157,7 +1159,7 @@ public class SearchEngineTest {
             // removal should not work now
             try {
                 getContentEngine().remove(pk);
-                Assert.fail("Content could be removed although delete property permission not set");
+                fail("Content could be removed although delete property permission not set");
             } catch (FxApplicationException e) {
                 // pass
             }
@@ -1202,14 +1204,14 @@ public class SearchEngineTest {
                     .type(TEST_TYPE)
                     .maxRows(maxRows)
                     .getResult();
-            Assert.assertTrue(result.getRowCount() == maxRows, "Expected " + maxRows + " rows but got " + result.getRowCount());
+            assertTrue(result.getRowCount() == maxRows, "Expected " + maxRows + " rows but got " + result.getRowCount());
             final FxPK pk = result.getResultRow(0).getPk(1);
 
             // get reference value from the content engine
             final FxString reference = (FxString) getContentEngine().load(pk).getValue("/stringSearchPropML");
-            Assert.assertTrue(StringUtils.isNotBlank(reference.getTranslation(ENGLISH)));
-            Assert.assertTrue(StringUtils.isNotBlank(reference.getTranslation(GERMAN)));
-            Assert.assertTrue(!reference.getTranslation(ENGLISH).equals(reference.getTranslation(GERMAN)));
+            assertTrue(StringUtils.isNotBlank(reference.getTranslation(ENGLISH)));
+            assertTrue(StringUtils.isNotBlank(reference.getTranslation(GERMAN)));
+            assertTrue(!reference.getTranslation(ENGLISH).equals(reference.getTranslation(GERMAN)));
 
             // compare translated values in the search result
             checkResultTranslation((FxString) result.getResultRow(0).getFxValue(2), reference, ENGLISH);
@@ -1251,15 +1253,15 @@ public class SearchEngineTest {
     public void isEmptyQueryTest_FX381() throws FxApplicationException {
         final SqlQueryBuilder builder = new SqlQueryBuilder()
                 .condition(getTestPropertyAssignment("string"), PropertyValueComparator.EMPTY, null);
-        Assert.assertTrue(builder.getResult().getRows().isEmpty(), "Did not expect to find empty instances");
+        assertTrue(builder.getResult().getRows().isEmpty(), "Did not expect to find empty instances");
         FxPK pk = null;
         try {
             pk = getContentEngine().save(getContentEngine().initialize(TEST_TYPE));
-            Assert.assertFalse(getContentEngine().load(pk).containsValue("/" + getTestPropertyName("string")),
+            assertFalse(getContentEngine().load(pk).containsValue("/" + getTestPropertyName("string")),
                     "Instance should not contain a value for property " + getTestPropertyName("string"));
             final FxResultSet result = builder.getResult();
-            Assert.assertTrue(!result.getRows().isEmpty(), "Should have returned instance " + pk);
-            Assert.assertTrue(result.getRowCount() == 1, "Expected 1 row, got " + result.getRowCount());
+            assertTrue(!result.getRows().isEmpty(), "Should have returned instance " + pk);
+            assertTrue(result.getRowCount() == 1, "Expected 1 row, got " + result.getRowCount());
         } finally {
             if (pk != null) {
                 getContentEngine().remove(pk);
@@ -1267,10 +1269,25 @@ public class SearchEngineTest {
         }
     }
 
+    @Test
+    public void virtualPropertyCondition() {
+        final SqlQueryBuilder builder = new SqlQueryBuilder().condition("@pk", PropertyValueComparator.EQ, "21.1");
+        try {
+            builder.getResult();
+            fail("Virtual properties like @pk cannot be queried");
+        } catch (FxApplicationException e) {
+            final StringWriter trace = new StringWriter();
+            e.printStackTrace(new PrintWriter(trace));
+            assertFalse(e.getCause() instanceof NullPointerException,
+                    "Error should not be handled by generic NPE, exception was:\n" + trace
+            );
+        }
+    }
+
     private void queryForCaption(String name) throws FxApplicationException {
         final FxResultSet result = new SqlQueryBuilder().select("caption").condition("caption", PropertyValueComparator.EQ, name).getResult();
-        Assert.assertTrue(result.getRowCount() == 1, "Expected one result row, got: " + result.getRowCount());
-        Assert.assertTrue(name.equals(result.getResultRow(0).getString(1)), "Expected " + name + ", got: " + result.getResultRow(0).getString(1));
+        assertTrue(result.getRowCount() == 1, "Expected one result row, got: " + result.getRowCount());
+        assertTrue(name.equals(result.getResultRow(0).getString(1)), "Expected " + name + ", got: " + result.getResultRow(0).getString(1));
     }
 
     private void checkResultTranslation(FxString resultValue, FxString reference, long language) {
@@ -1284,8 +1301,8 @@ public class SearchEngineTest {
     }
 
     private void assertExactPkMatch(FxPK pk, List<FxPK> pks) {
-        Assert.assertTrue(pks.size() == 1, "No rows returned for exact match");
-        Assert.assertTrue(pks.get(0).equals(pk), "Exact match did not return expected column - expected " + pk + ", got: " + pks.get(0));
+        assertTrue(pks.size() == 1, "No rows returned for exact match");
+        assertTrue(pks.get(0).equals(pk), "Exact match did not return expected column - expected " + pk + ", got: " + pks.get(0));
     }
 
     private List<FxPK> getPksForVersion(VersionFilter versionFilter) throws FxApplicationException {
@@ -1323,7 +1340,7 @@ public class SearchEngineTest {
         FxValue oldValue = null;
         for (FxResultRow row : result.getResultRows()) {
             // check order
-            Assert.assertTrue(oldValue == null || (ascending
+            assertTrue(oldValue == null || (ascending
                     ? row.getFxValue(column).compareTo(oldValue) >= 0
                     : row.getFxValue(column).compareTo(oldValue) <= 0),
                     row.getFxValue(column) + " is not "

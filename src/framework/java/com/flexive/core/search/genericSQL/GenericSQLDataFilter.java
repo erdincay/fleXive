@@ -515,9 +515,14 @@ public class GenericSQLDataFilter extends DataFilter {
 
         final Constant constant = cond.getConstant();
         final PropertyEntry entry = getPropertyResolver().get(stmt, prop);
-        final String filter = prop.isAssignment()
-                ? "ASSIGN=" + entry.getAssignment().getId()
-                : "TPROP=" + entry.getProperty().getId();
+        final String filter;
+        if (prop.isAssignment()) {
+            filter = "ASSIGN=" + entry.getAssignment().getId();
+        } else if (entry.getProperty() != null) {
+            filter = "TPROP=" + entry.getProperty().getId();
+        } else {
+            throw new FxSqlSearchException("ex.sqlSearch.filter.condition.structure", prop.getPropertyName());
+        }
 
         if (entry.getTableName().equals(DatabaseConst.TBL_CONTENT_DATA) &&
                 cond.getComperator().equals(Condition.Comparator.IS) &&
