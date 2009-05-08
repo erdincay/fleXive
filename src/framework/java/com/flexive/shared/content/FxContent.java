@@ -573,6 +573,8 @@ public class FxContent implements Serializable {
      */
     @SuppressWarnings({"unchecked"})
     public FxContent setValue(String XPath, Object value) throws FxNotFoundException, FxInvalidParameterException, FxNoAccessException, FxCreateException {
+        if (value instanceof FxValue)
+            return this.setValue(XPath, (FxValue) value);
         FxValue val = getPropertyData(XPath).getValue();
         if (val.isMultiLanguage())
             val.setDefaultTranslation(value);
