@@ -41,6 +41,8 @@ import com.flexive.shared.structure.FxGroupAssignment;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.value.FxValue;
+import com.flexive.shared.security.ACL;
+import com.flexive.shared.security.ACLAssignment;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
@@ -61,6 +63,8 @@ public class ConversionEngine {
     public final static String KEY_TYPE = "type";
     public static final String KEY_PROPERTY_AS = "propertyAssignment";
     public static final String KEY_GROUP_AS = "groupAssignment";
+    public static final String KEY_ACL = "acl";
+    public static final String KEY_ACLASSIGNMENT = "aclAssignment";
     public static final String SYS_LANG = "--";
 
     /**
@@ -77,6 +81,8 @@ public class ConversionEngine {
         xs.aliasType(KEY_TYPE, FxType.class);
         xs.aliasType(KEY_GROUP_AS, FxGroupAssignment.class);
         xs.aliasType(KEY_PROPERTY_AS, FxPropertyAssignment.class);
+        xs.aliasType(KEY_ACL, ACL.class);
+        xs.aliasType(KEY_ACLASSIGNMENT, ACLAssignment.class);
         xs.registerConverter(new FxValueConverter());
         xs.registerConverter(new FxPropertyDataConverter());
         xs.registerConverter(new FxGroupDataConverter());
@@ -85,6 +91,8 @@ public class ConversionEngine {
         xs.registerConverter(new FxTypeConverter());
         xs.registerConverter(new FxPropertyAssignmentConverter());
         xs.registerConverter(new FxGroupAssignmentConverter());
+        xs.registerConverter(new ACLConverter());
+        xs.registerConverter(new ACLAssignmentConverter());
         return xs;
     }
 
@@ -143,9 +151,11 @@ public class ConversionEngine {
             }
         }
         if (!reader.hasMoreChildren())
+            //noinspection ThrowableInstanceNeverThrown
             throw new FxConversionException("ex.conversion.missingNode", nodeName).asRuntimeException();
         reader.moveDown();
         if (!reader.getNodeName().equals(nodeName))
+            //noinspection ThrowableInstanceNeverThrown
             throw new FxConversionException("ex.conversion.wrongNode", nodeName, reader.getNodeName()).asRuntimeException();
         FxValue value = (FxValue) ctx.convertAnother(caller, FxValue.class);
         reader.moveUp();

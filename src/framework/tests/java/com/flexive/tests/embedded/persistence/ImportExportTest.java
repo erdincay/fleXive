@@ -34,6 +34,9 @@ package com.flexive.tests.embedded.persistence;
 import com.flexive.core.conversion.ConversionEngine;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
+import com.flexive.shared.security.ACLCategory;
+import com.flexive.shared.security.ACL;
+import com.flexive.shared.security.ACLAssignment;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.exceptions.FxAccountInUseException;
 import com.flexive.shared.exceptions.FxApplicationException;
@@ -111,6 +114,21 @@ public class ImportExportTest {
         FxContent co = ce.initialize(FxType.CONTACTDATA);
         XStream xs = ConversionEngine.getXStream();
         final String xml = xs.toXML(co);
+        Assert.assertEquals(xml, xs.toXML(xs.fromXML(xml)));
+    }
+
+    /**
+     * Test ACL
+     *
+     * @throws FxApplicationException on errors
+     */
+    public void aclMarshalling() throws FxApplicationException {
+        XStream xs = ConversionEngine.getXStream();
+        ACL testACL = CacheAdmin.getEnvironment().getDefaultACL(ACLCategory.INSTANCE);
+        String xml = xs.toXML(testACL);
+        Assert.assertEquals(xml, xs.toXML(xs.fromXML(xml)));
+        ACLAssignment as = EJBLookup.getAclEngine().loadAssignments(testACL.getId()).get(0);
+        xml = xs.toXML(as);
         Assert.assertEquals(xml, xs.toXML(xs.fromXML(xml)));
     }
 

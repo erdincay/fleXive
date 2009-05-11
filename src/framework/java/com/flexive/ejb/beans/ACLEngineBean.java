@@ -32,8 +32,9 @@
 package com.flexive.ejb.beans;
 
 import com.flexive.core.Database;
-import com.flexive.core.LifeCycleInfoImpl;
 import static com.flexive.core.DatabaseConst.*;
+import com.flexive.core.LifeCycleInfoImpl;
+import com.flexive.core.conversion.ConversionEngine;
 import com.flexive.core.security.UserTicketStore;
 import com.flexive.core.structure.StructureLoader;
 import com.flexive.shared.*;
@@ -43,6 +44,7 @@ import com.flexive.shared.interfaces.*;
 import com.flexive.shared.security.*;
 import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.value.FxString;
+import com.thoughtworks.xstream.XStream;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -61,7 +63,7 @@ import java.util.List;
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-@Stateless(name = "ACLEngine", mappedName="ACLEngine")
+@Stateless(name = "ACLEngine", mappedName = "ACLEngine")
 @TransactionAttribute(TransactionAttributeType.SUPPORTS)
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
@@ -189,6 +191,9 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
             } catch (FxNotFoundException e) {
                 LOG.error(e, e);
             }
+            ACL created = CacheAdmin.getEnvironment().getACL(newId);
+            EJBLookup.getHistoryTrackerEngine().trackData(ConversionEngine.getXStream().toXML(created),
+                    "history.acl.create", created.getName());
             return newId;
         } catch (SQLException exc) {
             final boolean uniqueConstraintViolation = Database.isUniqueConstraintViolation(exc);
@@ -253,6 +258,8 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
             // Refresh all UserTicket that are affected
             UserTicketStore.flagDirtyHavingACL(id);
             StructureLoader.removeACL(FxContext.get().getDivisionId(), id);
+            EJBLookup.getHistoryTrackerEngine().trackData(ConversionEngine.getXStream().toXML(theACL),
+                    "history.acl.remove", theACL.getName());
         } catch (SQLException exc) {
             final boolean uniqueConstraintViolation = Database.isUniqueConstraintViolation(exc);
             final boolean keyViolation = Database.isForeignKeyViolation(exc);
@@ -276,10 +283,13 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
                        List<ACLAssignment> assignments)
             throws FxApplicationException {
         UserTicket ticket = FxContext.getUserTicket();
+        boolean keepAssignment = assignments == null;
         // Load the current version of the ACL
         ACL theACL = load(id);
+        List<ACLAssignment> orgAssignments = null;
+        if (!keepAssignment)
+            orgAssignments = loadAssignments(id);
 
-        boolean keepAssignment = assignments == null;
         // Check the assignments array: Every group may only be contained once
         if (assignments == null) {
             assignments = new ArrayList<ACLAssignment>(0);
@@ -392,6 +402,23 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
             } catch (FxNotFoundException e) {
                 LOG.error(e, e);
             }
+            StringBuilder sbHistory = new StringBuilder(1000);
+            final XStream xStream = ConversionEngine.getXStream();
+            sbHistory.append("<original>\n").append(xStream.toXML(theACL)).append("</original>\n");
+            if (orgAssignments != null) {
+                sbHistory.append("<originalAssignments>\n");
+                for (ACLAssignment aa : orgAssignments)
+                    sbHistory.append(xStream.toXML(aa));
+                sbHistory.append("</originalAssignments>\n");
+            }
+            sbHistory.append("<new>\n").append(xStream.toXML(CacheAdmin.getEnvironment().getACL(id))).append("</new>\n");
+            if (orgAssignments != null) {
+                sbHistory.append("<newAssignments>\n");
+                for (ACLAssignment aa : loadAssignments(id))
+                    sbHistory.append(xStream.toXML(aa));
+                sbHistory.append("</newAssignments>\n");
+            }
+            EJBLookup.getHistoryTrackerEngine().trackData(sbHistory.toString(), "history.acl.update", theACL.getName());
         } catch (SQLException exc) {
             final boolean uniqueConstraintViolation = Database.isUniqueConstraintViolation(exc);
             ctx.setRollbackOnly();
@@ -521,6 +548,11 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
 
             // Update active UserTickets
             UserTicketStore.flagDirtyHavingGroupId(groupId);
+
+            StringBuilder sbHistory = new StringBuilder(1000);
+            ACLAssignment as = loadAssignments(aclId, groupId).get(0);
+            sbHistory.append(ConversionEngine.getXStream().toXML(as));
+            EJBLookup.getHistoryTrackerEngine().trackData(sbHistory.toString(), "history.acl.assign", CacheAdmin.getEnvironment().getACL(aclId).getName());
         } catch (Exception exc) {
             ctx.setRollbackOnly();
             throw new FxCreateException(LOG, exc, "ex.aclAssignment.createFailed");

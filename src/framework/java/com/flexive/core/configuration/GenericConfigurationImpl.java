@@ -33,6 +33,7 @@ package com.flexive.core.configuration;
 
 import com.flexive.core.Database;
 import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.EJBLookup;
 import com.flexive.shared.cache.FxCacheException;
 import com.flexive.shared.configuration.Parameter;
 import com.flexive.shared.configuration.ParameterData;
@@ -231,6 +232,14 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
                         (Serializable) SerializationUtils.clone((Serializable) value)
                         : new NullParameter());
             }
+            StringBuilder sbHistory = new StringBuilder(1000);
+            sbHistory.append("<parameter type=\"").append(parameter.getScope().name()).append("\">\n");
+            sbHistory.append("  <path><![CDATA[").append(parameter.getPath()).append("]]></path>\n");
+            sbHistory.append("  <key><![CDATA[").append(key).append("]]></key>\n");
+            sbHistory.append("  <value><![CDATA[").append(String.valueOf(value)).append("]]></value>\n");
+            sbHistory.append("</parameter>\n");
+            EJBLookup.getHistoryTrackerEngine().trackData(sbHistory.toString(), "history.parameter.set",
+                    parameter.getScope().name(), parameter.getPath(), key);
         } catch (SQLException se) {
             FxUpdateException ue = new FxUpdateException(LOG, se, "ex.db.sqlError", se.getMessage());
             LOG.error(ue, se);
@@ -381,6 +390,12 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
                     deleteCache(cachePath, key);
                 }
             }
+            if (key == null)
+                EJBLookup.getHistoryTrackerEngine().track("history.parameter.remove.path",
+                        parameter.getScope().name(), parameter.getPath());
+            else
+                EJBLookup.getHistoryTrackerEngine().track("history.parameter.remove.key",
+                        parameter.getScope().name(), parameter.getPath(), key);
         } catch (SQLException e) {
             throw new FxRemoveException(LOG, e, "ex.db.sqlError", e.getMessage());
         } finally {
