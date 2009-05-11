@@ -26,7 +26,7 @@
                 <t:saveState value="#{accountBean.activeFilterCheckbox}"/>
                 <t:saveState value="#{accountBean.validatedFilterCheckbox}"/>
                 <h:panelGrid columns="2">
-                    Mandator:&nbsp;
+                    #{fxMessageBean['Account.field.mandator']}:&nbsp;
                     <h:selectOneListbox id="acct_mandator" value="#{accountBean.mandator}" size="1"
                                         converter="SelectableConverter" onchange="document.listForm.submit();">
                         <f:selectItems value="#{fxSelectBean.mandatorsForEdit}" />

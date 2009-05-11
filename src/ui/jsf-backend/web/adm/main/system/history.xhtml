@@ -1,0 +1,109 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:jstl="http://java.sun.com/jsp/jstl/functions"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+<body>
+
+<ui:composition template="/adm/contentTemplate.xhtml">
+    <ui:define name="body">
+        <h:form id="frm">
+
+            <script type="text/javascript">
+                <!--
+                var userAcHandler = new flexive.yui.AutoCompleteHandler(function(query) {
+                    return eval("(" + flexive.util.getJsonRpc().AutoCompleteProvider.userQuery(query) + ")");
+                });
+                //-->
+            </script>
+
+            <adm:tab labelKey="History.tabtitle.main" active="true" id="tab1"/>
+
+            <a4j:outputPanel id="historyPanel">
+
+                <fx:formRow id="maxEntries" labelKey="History.label.maxEntries">
+                    <h:inputText id="maxEntries" value="#{historyBean.maxEntries}" size="5"/>
+                </fx:formRow>
+                <fx:formRow id="account" labelKey="History.label.account">
+                    <fx:fxValueInput value="#{historyBean.accountMatch}" autocompleteHandler="userAcHandler"/>
+                </fx:formRow>
+                <fx:formRow id="startDate" labelKey="History.label.startDate">
+                    <fx:fxValueInput value="#{historyBean.startDate}"/>
+                </fx:formRow>
+                <fx:formRow id="endDate" labelKey="History.label.endDate">
+                    <fx:fxValueInput value="#{historyBean.endDate}"/>
+                </fx:formRow>
+                <fx:formRow id="typeId" labelKey="History.label.type">
+                    <h:inputText id="typeId" value="#{historyBean.type}" size="5"/>
+                </fx:formRow>
+                <fx:formRow id="contentId" labelKey="History.label.content">
+                    <h:inputText id="contentId" value="#{historyBean.content}" size="5"/>
+                </fx:formRow>
+                <fx:formRow id="category" labelKey="History.label.category">
+                    <h:selectOneListbox id="cat" value="#{historyBean.category}" size="1" required="true">
+                        <f:selectItems value="#{historyBean.availableGroups}"/>
+                    </h:selectOneListbox>
+                </fx:formRow>
+                <br/>
+
+
+                <c:set var="list" value="#{historyBean.list}"/>
+                <c:set var="listLength" value="#{jstl:length(list)}"/>
+                #{fxMessageBean['History.label.foundEntries,#{listLength}']}<br/>
+                <adm:sortableTable id="table">
+                    <table id="table">
+                        <thead>
+                        <tr>
+                            <th class="tblHeader" field="timestamp" dataType="Date">
+                                #{fxMessageBean['History.field.timestamp']}
+                            </th>
+                            <th class="tblHeader" field="account" dataType="String">
+                                #{fxMessageBean['History.field.account']}
+                            </th>
+                            <th class="tblHeader" field="message" dataType="String">
+                                #{fxMessageBean['History.field.message']}
+                            </th>
+                            <th class="tblHeader" field="application" dataType="String">
+                                #{fxMessageBean['History.field.application']}
+                            </th>
+                            <th class="tblHeader" field="host" dataType="String">
+                                #{fxMessageBean['History.field.host']}
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <ui:repeat value="#{list}" var="history">
+                            <tr value="#{history.timestp}">
+                                <td nowrap="nowrap"><h:outputText value="#{historyBean.dateFormat[history.timestp]}"/>
+                                </td>
+                                <td><h:outputText value="#{history.loginName}"/></td>
+                                <td><h:outputText value="#{history.message}"/></td>
+                                <td><h:outputText value="#{history.application}"/></td>
+                                <td><h:outputText value="#{history.host}"/></td>
+                            </tr>
+                        </ui:repeat>
+                        </tbody>
+                    </table>
+                </adm:sortableTable>
+
+
+                <adm:commandButton id="historyQuerySearch" labelKey="History.button.query" location="both"
+                                   icon="search" lockscreen="false" bean="#{historyBean}" action="performQuery"/>
+
+            </a4j:outputPanel>
+
+            <adm:toolbarPluginButtons/>
+
+        </h:form>
+    </ui:define>
+</ui:composition>
+
+</body>
+</html>

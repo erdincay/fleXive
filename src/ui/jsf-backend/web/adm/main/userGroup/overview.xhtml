@@ -14,7 +14,7 @@
 
         <h:form id="frm">
 
-            <adm:tab label="#{fxMessageBean['UserGroup.tabtitle.overview']}" active="true" id="tab1"/>
+            <adm:tab labelKey="UserGroup.tabtitle.overview" active="true" id="tab1"/>
 
             <!-- Mandator select is only shown for global supervisors -->
             <c:if test="${fxSystemBean.userTicket.globalSupervisor}">

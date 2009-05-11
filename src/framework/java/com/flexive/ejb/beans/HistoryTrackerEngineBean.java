@@ -51,6 +51,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -58,7 +59,7 @@ import java.util.List;
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-@Stateless(name = "HistoryTrackerEngine", mappedName="HistoryTrackerEngine")
+@Stateless(name = "HistoryTrackerEngine", mappedName = "HistoryTrackerEngine")
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class HistoryTrackerEngineBean implements HistoryTrackerEngine, HistoryTrackerEngineLocal {
 
@@ -170,6 +171,42 @@ public class HistoryTrackerEngineBean implements HistoryTrackerEngine, HistoryTr
                         rs.getLong(8), rs.getLong(9), rs.getInt(10), rs.getString(6), rs.getString(7),
                         loadData ? rs.getString(11) : "No permission to load to data!"
                 ));
+        } catch (Exception ex) {
+            LOG.error(ex.getMessage());
+        } finally {
+            Database.closeObjects(HistoryTrackerEngineBean.class, con, ps);
+        }
+        return ret;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public List<FxHistory> getEntries(String keyMatch, Long accountMatch, Long typeMatch, Long contentMatch, Date startDate, Date endDate, int maxEntries) {
+        List<FxHistory> ret = new ArrayList<FxHistory>(100);
+        Connection con = null;
+        PreparedStatement ps = null;
+        try {
+            con = Database.getDbConnection();
+            String query = "";
+            if (accountMatch != null) query += " AND ACCOUNT=" + accountMatch;
+            if (typeMatch != null) query += " AND TYPEID=" + Long.valueOf(typeMatch);
+            if (contentMatch != null) query += " AND PKID=" + Long.valueOf(contentMatch);
+            ps = con.prepareStatement(HISTORY_SELECT + " WHERE TIMESTP>=? AND TIMESTP<=? AND ACTION_KEY LIKE ? " + query + " ORDER BY TIMESTP DESC");
+            ps.setLong(1, startDate == null ? 0 : startDate.getTime());
+            ps.setLong(2, endDate == null ? Long.MAX_VALUE - 1 : endDate.getTime());
+            ps.setString(3, (StringUtils.isEmpty(keyMatch) ? "" : keyMatch) + "%");
+            ResultSet rs = ps.executeQuery();
+            boolean loadData = FxContext.getUserTicket().isGlobalSupervisor();
+            int count = 0;
+            while (rs != null && rs.next()) {
+                if (count++ >= maxEntries)
+                    break;
+                ret.add(new FxHistory(rs.getLong(3), rs.getLong(1), rs.getString(2), rs.getString(4), rs.getString(5).split("\\|"),
+                        rs.getLong(8), rs.getLong(9), rs.getInt(10), rs.getString(6), rs.getString(7),
+                        loadData ? rs.getString(11) : "No permission to load to data!"
+                ));
+            }
         } catch (Exception ex) {
             LOG.error(ex.getMessage());
         } finally {

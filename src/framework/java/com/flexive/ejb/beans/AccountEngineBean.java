@@ -501,7 +501,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
                     append("  <confirmed>").append(isConfirmed).append("</confirmed>\n").
                     append("  <multilogin>").append(allowMultiLogin).append("</multilogin>\n").
                     append("</account>");
-            EJBLookup.getHistoryTrackerEngine().trackData(sbHistory.toString(), "history.account.created", loginName);
+            EJBLookup.getHistoryTrackerEngine().trackData(sbHistory.toString(), "history.account.create", loginName);
 
             // EVERY users is a member of group EVERYONE and his mandator
             final long[] groups = {UserGroup.GROUP_EVERYONE, group.loadMandatorGroup(mandatorId).getId()};

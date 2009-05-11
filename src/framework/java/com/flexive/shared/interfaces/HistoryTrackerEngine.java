@@ -36,6 +36,7 @@ import com.flexive.shared.content.FxPK;
 import com.flexive.shared.structure.FxType;
 
 import javax.ejb.Remote;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -88,8 +89,22 @@ public interface HistoryTrackerEngine {
      * If no content with this id exists, an empty list is returned.
      *
      * @param contentId requested content id
-     * @return date ordered list of entries for the requested content
+     * @return date ordered (descending) list of entries for the requested content
      */
     List<FxHistory> getContentEntries(long contentId);
+
+    /**
+     * Get a list of history entries that matches the requested options (<code>null</code> means any)
+     *
+     * @param keyMatch     message key
+     * @param accountMatch account id
+     * @param typeMatch    type id
+     * @param contentMatch content id
+     * @param startDate    start date
+     * @param endDate      end date
+     * @param maxEntries   maximum number of entries to return
+     * @return date ordered (descending) list of matched entries
+     */
+    List<FxHistory> getEntries(String keyMatch, Long accountMatch, Long typeMatch, Long contentMatch, Date startDate, Date endDate, int maxEntries);
 
 }
