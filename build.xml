@@ -184,11 +184,22 @@
 		<mkdir dir="${invalid.path}"/>
         <javac-call srcdir="${flexive.src.framework.dir}"
                     destdir="${build.framework.classes.dir}"
-                    includes="com/flexive/tools/**/*.java"/>
+                    includes="com/flexive/tools/**/*.java">
+            <classpath refid="classpath.build.framework"/>
+        </javac-call>
         <jar jarfile="${flexive.build.framework.jar.dir}/flexive-ant.jar">
             <fileset dir="${build.framework.classes.dir}">
-                <include name="com/flexive/tools/**/*"/>
+                <include name="com/flexive/tools/ant/**/*"/>
             </fileset>
+        </jar>
+        <jar jarfile="${flexive.build.framework.jar.dir}/openUrl.jar">
+            <fileset dir="${build.framework.classes.dir}">
+                <include name="com/flexive/tools/OpenUrl*"/>
+            </fileset>
+            <manifest>
+                <attribute name="Class-Path" value="extlib/h2.jar"/>
+                <attribute name="Main-Class" value="com.flexive.tools.OpenUrl"/>
+            </manifest>
         </jar>
         <taskdef name="applicationDescriptorBuilder"
                  classname="com.flexive.tools.ant.ApplicationDescriptorBuilderTask"
@@ -639,6 +650,9 @@
             <mapper type="flatten"/>
         </copy>
         <delete dir="${flexive.dist.extlib.dir}" includes="jsf-facelets-src.jar"/>
+
+        <!-- Copy openURL helper application (com.flexive.tools.OpenUrl) -->
+        <copy todir="${flexive.dist.dir}" file="${flexive.build.framework.jar.dir}/openUrl.jar"/>
 
         <!-- Copy global deployment descriptors -->
         <copy todir="${flexive.dist.meta.dir}">

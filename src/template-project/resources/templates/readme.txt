@@ -1,0 +1,1 @@
+Place your Facelets templates in this directory.

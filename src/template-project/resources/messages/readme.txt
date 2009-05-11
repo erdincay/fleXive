@@ -1,0 +1,1 @@
+Place your application messages in property files in this directory.

@@ -24,7 +24,10 @@
             applications="no"
             programGroup="yes"
             startMenu="no"
-            target="$INSTALL_PATH/startup/startup.html"
+            workingDirectory="$INSTALL_PATH/flexive-dist"
+            terminal="false"
+            target="$INSTALL_PATH/flexive-dist/openUrl.jar"
+            commandLine="http://localhost:8080/flexive/adm"
     />
     <shortcut
             name="Uninstall"

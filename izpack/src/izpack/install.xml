@@ -9,7 +9,9 @@
         <appname>flexive</appname>
         <appversion>3.1-SNAPSHOT</appversion>
         <url>http://www.flexive.org/</url>
+        <javaversion>1.5</javaversion>
     </info>
+
 
     <!-- 
         The gui preferences indication.
@@ -74,7 +76,6 @@
             <file src="openejb.conf.xml" targetdir="$INSTALL_PATH/jetty-6.1.17"/>
             <file src="start.sh" targetdir="$INSTALL_PATH"/>
             <file src="start.bat" targetdir="$INSTALL_PATH"/>
-            <fileset dir="startup" targetdir="$INSTALL_PATH/startup"/>
 
             <!--<file src="script.bat" targetdir="$INSTALL_PATH"/>-->
             <!--<parsable targetfile="$INSTALL_PATH/script.bat"/>-->

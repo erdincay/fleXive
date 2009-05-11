@@ -11,7 +11,7 @@
 
     <properties>
         <staging.dir>${project.build.directory}/staging</staging.dir>
-        <izpack-standalone.version>4.2.1</izpack-standalone.version>
+        <izpack-standalone.version>4.3.0</izpack-standalone.version>
         <ant.version>1.7.1</ant.version>
 
         <jetty.baseUrl>http://dist.codehaus.org/jetty/jetty-6.1.17/</jetty.baseUrl>

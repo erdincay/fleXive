@@ -1,0 +1,1 @@
+Place your application's libraries in this directory. The will be added to the EAR's lib/ folder.

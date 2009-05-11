@@ -25,8 +25,11 @@
             applications="no"
             programGroup="yes"
             startMenu="no"
-            type="Link"
-            url="file://$INSTALL_PATH/startup/startup.html"
+            type="Application"
+            workingDirectory="$INSTALL_PATH/flexive-dist"
+            terminal="false"
+            target="/usr/bin/env"
+            commandLine="java -jar openUrl.jar http://localhost:8080/flexive/adm"
             Categories="Development;Java;Database"
     />
     <shortcut
