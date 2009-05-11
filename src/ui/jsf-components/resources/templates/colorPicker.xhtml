@@ -20,9 +20,9 @@ Parameters:
 
 <ui:composition>
     <div id="preview#{inputId}" class="colorPickerPreview">
-        <img src="#{weblet:url('com.flexive.faces.weblets', '/images/empty.gif')}" width="12" height="12"/>
+        <img src="#{fx:webletUrl('com.flexive.faces.weblets', '/images/empty.gif')}" width="12" height="12"/>
     </div>
-    <img id="show#{inputId}" src="#{weblet:url('com.flexive.faces.weblets', '/images/pickColor.png')}" class="button"
+    <img id="show#{inputId}" src="#{fx:webletUrl('com.flexive.faces.weblets', '/images/pickColor.png')}" class="button"
             alt="#{fxMessageBean['ColorPicker.button.open']}" title="#{fxMessageBean['ColorPicker.button.open']}"/>
 
     <div id="colorpickerpanel_#{inputId}" class="yui-picker-panel">

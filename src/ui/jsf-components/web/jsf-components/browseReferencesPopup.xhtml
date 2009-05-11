@@ -80,14 +80,14 @@
                     </td>
                     <td>
                         <a4j:commandLink id="submitSearchButton" reRender="results" eventsQueue="updateResults">
-                            <img src="#{weblet:url('com.flexive.faces.weblets', '/images/findReferences.png')}" style="border:0"
+                            <img src="#{fx:webletUrl('com.flexive.faces.weblets', '/images/findReferences.png')}" style="border:0"
                                  alt="#{fxMessageBean['BrowseReferences.button.find']}"
                                  title="#{fxMessageBean['BrowseReferences.button.find']}"/>
                         </a4j:commandLink>
                     </td>
                     <td>
                         <a href="javascript:clearReference()">
-                            <img src="#{weblet:url('com.flexive.faces.weblets', '/images/clearReference.png')}" style="border:0"
+                            <img src="#{fx:webletUrl('com.flexive.faces.weblets', '/images/clearReference.png')}" style="border:0"
                                 alt="#{fxMessageBean['BrowseReferences.button.clear']}"
                                 title="#{fxMessageBean['BrowseReferences.button.clear']}"/>
                         </a>

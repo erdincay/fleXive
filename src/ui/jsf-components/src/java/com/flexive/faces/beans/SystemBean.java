@@ -64,6 +64,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.MissingResourceException;
 
+import net.java.dev.weblets.FacesWebletUtils;
+
 public class SystemBean implements Serializable {
     private static final long serialVersionUID = 6592229045042549537L;
     private static final FacesMessageMap messageMap = new FacesMessageMap();
@@ -668,5 +670,20 @@ public class SystemBean implements Serializable {
      */
     public static String concat(Object s1, Object s2) {
         return String.valueOf(s1) + String.valueOf(s2);
+    }
+
+    /**
+     * Replacement for fx:webletUrl that uses the current faces context (fx:webletUrl).
+     *
+     * @param weblet    the weblet ID
+     * @param pathInfo  the weblet path
+     * @return          an URL for the given weblet
+     */
+    public static String getWebletUrl(String weblet, String pathInfo) {
+        return FacesWebletUtils.getURL(
+                FacesContext.getCurrentInstance(),
+                weblet,
+                pathInfo
+        );
     }
 }
