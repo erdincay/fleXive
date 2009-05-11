@@ -167,4 +167,33 @@
         </sequential>
     </macrodef>
 
+    <!-- ========================= Deployment ========================== -->
+    <macrodef name="deployToJetty" description="Deploy an EAR file to a Jetty installation">
+        <attribute name="earfile"/>
+        <attribute name="jettydir"/>
+        <sequential >
+            <!-- Unzip EJBs and libraries to lib/ext -->
+            <unzip dest="@{jettydir}/lib/ext/flexive" overwrite="true" src="@{earfile}">
+                <patternset>
+                    <include name="lib/**"/>
+                    <include name="*-ejb.jar"/>
+                    <include name="lib/*-ejb.jar"/>
+                </patternset>
+            </unzip>
+
+            <!-- Install WAR applications to webapps -->
+            <unzip dest="@{jettydir}/webapps" overwrite="true" src="@{earfile}">
+                <patternset>
+                    <include name="*.war"/>
+                </patternset>
+            </unzip>
+
+            <!-- Install JSF runtime -->
+            <copy todir="@{jettydir}/lib/ext/flexive-environment">
+                <fileset dir="${dist.basedir}/extlib" includes="jsf-api.jar,jsf-impl.jar,el-api.jar,el-ri.jar"/>
+            </copy>
+            
+        </sequential>
+    </macrodef>
+
 </project>

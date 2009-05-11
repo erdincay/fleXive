@@ -638,7 +638,7 @@
             <path refid="flexive.shared-libs.path"/>
             <mapper type="flatten"/>
         </copy>
-        <delete dir="${flexive.dist.extlib.dir}" includes="el-ri.jar, el-api.jar, jsf-impl.jar, jsf-facelets-src.jar"/>
+        <delete dir="${flexive.dist.extlib.dir}" includes="jsf-facelets-src.jar"/>
 
         <!-- Copy global deployment descriptors -->
         <copy todir="${flexive.dist.meta.dir}">

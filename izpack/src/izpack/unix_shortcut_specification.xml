@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+        
+<shortcuts>
+    <programGroup defaultName="flexive" location="applications"/>
+    <shortcut
+            name="fleXive 3.1"
+            description="Launch a [fleXive] 3.1 server"
+            encoding="UTF-8"
+            desktop="yes"
+            applications="no"
+            programGroup="yes"
+            startMenu="no"
+            workingDirectory="$INSTALL_PATH"
+            target="/usr/bin/env"
+            commandLine="sh start.sh"
+            type="Application"
+            terminal="true"
+            Categories="Development;Java;Database"
+    />
+    <shortcut
+            name="Open fleXive 3.1 Backend"
+            description="Open the fleXive backend application in your web browser"
+            encoding="UTF-8"
+            desktop="yes"
+            applications="no"
+            programGroup="yes"
+            startMenu="no"
+            type="Link"
+            url="file://$INSTALL_PATH/startup/startup.html"
+            Categories="Development;Java;Database"
+    />
+    <shortcut
+            name="Uninstall"
+            description="Uninstall [fleXive] 3.1"
+            encoding="UTF-8"
+            desktop="no"
+            applications="no"
+            programGroup="yes"
+            startMenu="no"
+            workingDirectory="$INSTALL_PATH/Uninstaller"
+            target="/usr/bin/env"
+            commandLine="java -jar uninstaller.jar"
+            type="Application"
+            terminal="false"
+            Categories="Development;Java;Database"
+    />
+
+</shortcuts>

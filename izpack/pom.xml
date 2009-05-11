@@ -1,0 +1,240 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.flexive</groupId>
+    <artifactId>installer</artifactId>
+    <version>1.0-SNAPSHOT</version>
+
+    <name>[fleXive] installer based on Jetty and OpenEJB</name>
+    <packaging>jar</packaging>
+
+    <properties>
+        <staging.dir>${project.build.directory}/staging</staging.dir>
+        <izpack-standalone.version>4.2.1</izpack-standalone.version>
+        <ant.version>1.7.1</ant.version>
+
+        <jetty.baseUrl>http://dist.codehaus.org/jetty/jetty-6.1.17/</jetty.baseUrl>
+        <jetty.zipFile>jetty-6.1.17.zip</jetty.zipFile>
+    </properties>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>org.codehaus.izpack</groupId>
+            <artifactId>izpack-standalone-compiler</artifactId>
+            <version>${izpack-standalone.version}</version>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.codehaus.plexus</groupId>
+            <artifactId>plexus-utils</artifactId>
+            <version>1.5.6</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.ant</groupId>
+            <artifactId>ant</artifactId>
+            <version>${ant.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.openejb</groupId>
+            <artifactId>openejb-ejbd</artifactId>
+            <version>3.1</version>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-lang</groupId>
+                    <artifactId>commons-lang</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+                <!-- Exclude activeio dependency, because it currently
+                     fails to resolve on public repos -->
+                <exclusion>
+                    <groupId>org.apache.activemq</groupId>
+                    <artifactId>activeio-core</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+
+        <defaultGoal>package</defaultGoal>
+
+        <finalName>${project.artifactId}</finalName>
+
+        <plugins>
+
+            <!-- configure the compiler to use 1.5  -->
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                    <source>1.5</source>
+                    <target>1.5</target>
+                </configuration>
+            </plugin>
+
+            <!-- Package listeners -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <classesDirectory>target/classes</classesDirectory>
+                    <finalName>staging/bin/customActions/FlexiveInstallListener</finalName>
+                    <includes>
+                        <include>com/flexive/izpack/install/FlexiveInstallListener*</include>
+                    </includes>
+                </configuration>
+            </plugin>
+
+            <!-- Fetch Jetty, ant -->
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>process-resources</phase>
+                        <configuration>
+                            <tasks>
+                                <get
+                                        src="${jetty.baseUrl}${jetty.zipFile}"
+                                        dest="${basedir}/src/izpack/${jetty.zipFile}"
+                                        usetimestamp="true"
+                                        verbose="true"
+                                        />
+                            </tasks>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!--  copy other checked resource into staging area, expected by install.xml -->
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.1</version>
+                <executions>
+                    <execution>
+                        <id>create-staging-area</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <tasks>
+                                <copy todir="${staging.dir}">
+                                    <fileset dir="${basedir}/src/izpack"/>
+                                    <fileset dir="../build" includes="flexive-dist.zip"/>
+                                </copy>
+                                <!-- replace database.properties in flexive-dist -->
+                                <touch file="${basedir}/src/izpack/database.properties"/>
+                                <jar destfile="${staging.dir}/flexive-dist.zip" update="true">
+                                    <zipfileset prefix="flexive-dist" dir="${basedir}/src/izpack"
+                                                includes="database.properties"/>
+                                </jar>
+                                <!-- Copy OpenEJB into staging area -->
+                                <copy todir="${staging.dir}/openejb-3.1">
+                                    <fileset dir="${basedir}/../lib/openejb-3.1" includes="**/*" excludes="logs/**"/>
+                                </copy>
+                            </tasks>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!--  prepare dependencies so that izpack jar tag to pickup at compile time -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.1</version>
+                <executions>
+                    <execution>
+                        <id>standard-installer</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <stripVersion>true</stripVersion>
+                            <excludeGroupIds>org.codehaus.izpack</excludeGroupIds>
+                            <excludeScope>provided</excludeScope>
+                            <!-- dont want standalone compiler -->
+                            <outputDirectory>${staging.dir}/dependency</outputDirectory>
+                        </configuration>
+                    </execution>
+
+                    <!-- Copy OpenEJB to own directory -->
+                    <execution>
+                        <id>standard-installer-openejb</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <stripVersion>false</stripVersion>
+                            <outputDirectory>${staging.dir}/dependency/openejb</outputDirectory>
+                            <includeScope>provided</includeScope>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.izpack</groupId>
+                <artifactId>izpack-maven-plugin</artifactId>
+                <version>1.0-alpha-4</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.codehaus.izpack</groupId>
+                        <artifactId>izpack-standalone-compiler</artifactId>
+                        <version>${izpack-standalone.version}</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <izpackBasedir>${staging.dir}</izpackBasedir>
+                    <customPanelDirectory>${staging.dir}</customPanelDirectory>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>standard-installer</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>izpack</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+        </plugins>
+
+    </build>
+
+    <repositories>
+        <repository>
+            <id>maven-dev-repository.dev.java.net</id>
+            <name>Java.net Dev Repository for Maven</name>
+            <url>https://maven-repository.dev.java.net/repository/</url>
+            <layout>legacy</layout>
+            <snapshots>
+                <updatePolicy>never</updatePolicy>
+            </snapshots>
+        </repository>
+    </repositories>
+
+</project>

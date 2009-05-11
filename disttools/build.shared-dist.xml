@@ -42,6 +42,15 @@ you must shutdown flexive before the update and then restart flexive.
         <globalconfig-setup/>
     </target>
 
+    <target name="deploy.jetty"
+            description="Deploy an EAR file to Jetty">
+        <input taskname="flexive" addproperty="jetty.dir"
+               message="Jetty directory:"/>
+        <input taskname="flexive" addproperty="ear.file"
+               message="EAR file:"/>
+        <deployToJetty earfile="${ear.file}" jettydir="${jetty.dir}"/>
+    </target>
+
     <macrodef name="collectApplications" description="Copies all flexive applications to a single directory.">
         <attribute name="todir" description="The target directory."/>
         <sequential>
