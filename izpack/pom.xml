@@ -209,6 +209,7 @@
                 <configuration>
                     <izpackBasedir>${staging.dir}</izpackBasedir>
                     <customPanelDirectory>${staging.dir}</customPanelDirectory>
+                    <installerFile>${project.build.directory}/flexive-installer.jar</installerFile>
                 </configuration>
                 <executions>
                     <execution>
