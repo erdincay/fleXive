@@ -49,7 +49,7 @@ import java.util.Map;
 
 
 /**
- * History viewer
+ * History viewer bean
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
@@ -69,6 +69,13 @@ public class HistoryBean {
     private String type;
     private String content;
 
+    private FxHistory selectedEntry;
+
+    /**
+     * Get all available history groups to select from
+     *
+     * @return available history groups
+     */
     public List<SelectItem> getAvailableGroups() {
         if (availableGroups == null) {
             availableGroups = new ArrayList<SelectItem>(10);
@@ -82,6 +89,14 @@ public class HistoryBean {
             availableGroups.add(new SelectItem("history.assignment.", "Assignments"));
         }
         return availableGroups;
+    }
+
+    public FxHistory getSelectedEntry() {
+        return selectedEntry;
+    }
+
+    public void setSelectedEntry(FxHistory selectedEntry) {
+        this.selectedEntry = selectedEntry;
     }
 
     public String getType() {
@@ -160,7 +175,6 @@ public class HistoryBean {
         return dateMap;
     }
 
-
     /**
      * Get the list of history entries based on user selections
      *
@@ -170,7 +184,20 @@ public class HistoryBean {
         return results;
     }
 
+    /**
+     * Setter for the list for ajax postbacks
+     *
+     * @param list the result list
+     */
+    public void setList(List<FxHistory> list) {
+        this.results = list;
+    }
 
+    /**
+     * Execute the query
+     *
+     * @return navigation result
+     */
     public String performQuery() {
         Long account;
         if (accountMatch != null && !accountMatch.isEmpty()) {
@@ -187,7 +214,7 @@ public class HistoryBean {
             }
         } else
             account = null;
-        Long typeId = !StringUtils.isEmpty(type) ? Long.valueOf(type) : null;
+        Long typeId = !StringUtils.isEmpty(type) ? (Long.valueOf(type) >= 0 ? Long.valueOf(type) : null) : null;
         Long contentId = !StringUtils.isEmpty(content) ? Long.valueOf(content) : null;
 
         results = EJBLookup.getHistoryTrackerEngine().getEntries(category, account, typeId, contentId,

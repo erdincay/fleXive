@@ -241,6 +241,17 @@ public class SelectBean implements Serializable {
     }
 
     /**
+     * Returns all types within the system with an empty element.
+     *
+     * @return all type in the system with an empty element
+     * @throws FxApplicationException if the types could not be fetched successfully.
+     */
+    public List<SelectItem> getTypesWithEmpty() throws FxApplicationException {
+        List<FxType> typesList = CacheAdmin.getFilteredEnvironment().getTypes(true, true, true, false);
+        return  FxJsfUtils.asSelectListWithLabel(typesList, true);
+    }
+
+    /**
      * Returns all roles.
      *
      * @return all roles

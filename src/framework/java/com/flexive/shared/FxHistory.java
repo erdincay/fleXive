@@ -53,9 +53,26 @@ public class FxHistory implements Serializable {
     private String application;
     private String host;
     private String data;
+    private String session;
 
+    /**
+     * Ctor
+     *
+     * @param timestp        timestamp
+     * @param accountId      account id
+     * @param loginName      login name
+     * @param key            message key
+     * @param args           message arguments separated by '|'
+     * @param typeId         type id
+     * @param contentId      content id
+     * @param contentVersion content version
+     * @param application    application name
+     * @param host           remote host
+     * @param data           optional data
+     * @param session        session id
+     */
     public FxHistory(long timestp, long accountId, String loginName, String key, String[] args, long typeId, long contentId,
-                     int contentVersion, String application, String host, String data) {
+                     int contentVersion, String application, String host, String data, String session) {
         this.timestp = timestp;
         this.accountId = accountId;
         this.loginName = loginName;
@@ -67,6 +84,7 @@ public class FxHistory implements Serializable {
         this.application = application;
         this.host = host;
         this.data = data;
+        this.session = session;
     }
 
     public long getTimestp() {
@@ -105,18 +123,50 @@ public class FxHistory implements Serializable {
         return data;
     }
 
+    public String getSession() {
+        return session;
+    }
+
+    /**
+     * Is additional data available?
+     *
+     * @return additional data available
+     */
     public boolean hasData() {
         return data != null && !"".equals(data);
     }
 
+    /**
+     * Bean compliant hasDate for JSF ...
+     *
+     * @return data is available
+     */
+    public boolean getHasData() {
+        return hasData();
+    }
+
+    /**
+     * Is this entry related to a content?
+     *
+     * @return entry related to a content
+     */
     public boolean isContentSpecific() {
         return contentId > 0;
     }
 
     /**
+     * Is this entry related to a type?
+     *
+     * @return entry related to a type
+     */
+    public boolean isTypeSpecific() {
+        return typeId >= 0;
+    }
+
+    /**
      * Get the message formatted in the calling users locale (if available)
      *
-     * @return message formatted in the calling users locale (if available) 
+     * @return message formatted in the calling users locale (if available)
      */
     public String getMessage() {
         FxLanguage lang = FxContext.getUserTicket().getLanguage();

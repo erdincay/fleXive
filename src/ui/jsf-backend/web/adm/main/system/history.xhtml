@@ -9,13 +9,15 @@
       xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
       xmlns:adm="http://www.flexive.com/jsf/admin"
       xmlns:jstl="http://java.sun.com/jsp/jstl/functions"
-      xmlns:fx="http://www.flexive.com/jsf/core">
+      xmlns:fx="http://www.flexive.com/jsf/core"
+      xmlns:rich="http://richfaces.org/rich">
 <body>
 
 <ui:composition template="/adm/contentTemplate.xhtml">
     <ui:define name="body">
+        <a4j:region id="historyPanel">
         <h:form id="frm">
-
+            <t:saveState value="#{historyBean.list}"/>
             <script type="text/javascript">
                 <!--
                 var userAcHandler = new flexive.yui.AutoCompleteHandler(function(query) {
@@ -26,7 +28,44 @@
 
             <adm:tab labelKey="History.tabtitle.main" active="true" id="tab1"/>
 
-            <a4j:outputPanel id="historyPanel">
+                <rich:modalPanel id="panel" height="450" width="650" resizeable="true">
+                    <f:facet name="header">
+                        #{fxMessageBean['History.tabtitle.details']}
+                    </f:facet>
+                    <f:facet name="controls">
+                        <h:panelGroup>
+                            <h:graphicImage value="/adm/images/toolbar/close.png" style="cursor:pointer"
+                                            id="closeIcon"/>
+                            <rich:componentControl for="panel" attachTo="closeIcon" operation="hide" event="onclick"/>
+                        </h:panelGroup>
+                    </f:facet>
+
+                    <div class="modalPanel" style="overflow:scroll !important;height:410px;width:630px;">
+
+                        <a4j:outputPanel id="messageContainer">
+                            <b>#{fxMessageBean['History.field.timestamp']}:</b> #{historyBean.dateFormat[historyBean.selectedEntry.timestp]}<br/>
+                            <b>#{fxMessageBean['History.field.account']}:</b> #{historyBean.selectedEntry.loginName}[id=#{historyBean.selectedEntry.accountId}]<br/>
+                            <b>#{fxMessageBean['History.field.application']}:</b> #{historyBean.selectedEntry.application}<br/>
+                            <b>#{fxMessageBean['History.field.session']}:</b> #{historyBean.selectedEntry.session}<br/>
+                            <b>#{fxMessageBean['History.field.host']}:</b> #{historyBean.selectedEntry.host}<br/>
+                            <br/>
+                            <b>#{fxMessageBean['History.field.message']}:</b> #{historyBean.selectedEntry.message}<br/>
+                            <br/>
+                            <ui:fragment rendered="#{historyBean.selectedEntry.typeSpecific}">
+                                <br/>
+                                <b>#{fxMessageBean['History.field.type']}:</b> #{fxMapBean.types[historyBean.selectedEntry.typeId]}<br/>
+                            </ui:fragment>
+                            <ui:fragment rendered="#{historyBean.selectedEntry.contentSpecific}">
+                                <b>#{fxMessageBean['History.field.content']}:</b> #{historyBean.selectedEntry.contentId}.#{historyBean.selectedEntry.contentVersion}<br/>
+                            </ui:fragment>
+                            <ui:fragment rendered="#{historyBean.selectedEntry.hasData}">
+                                <br/>
+                                <b>#{fxMessageBean['History.field.details']}:</b>
+                                <pre>#{historyBean.selectedEntry.data}</pre>
+                            </ui:fragment>
+                        </a4j:outputPanel>
+                    </div>
+                </rich:modalPanel>
 
                 <fx:formRow id="maxEntries" labelKey="History.label.maxEntries">
                     <h:inputText id="maxEntries" value="#{historyBean.maxEntries}" size="5"/>
@@ -41,7 +80,9 @@
                     <fx:fxValueInput value="#{historyBean.endDate}"/>
                 </fx:formRow>
                 <fx:formRow id="typeId" labelKey="History.label.type">
-                    <h:inputText id="typeId" value="#{historyBean.type}" size="5"/>
+                    <h:selectOneListbox id="typ" value="#{historyBean.type}" size="1" required="false">
+                        <f:selectItems value="#{fxSelectBean.typesWithEmpty}"/>
+                    </h:selectOneListbox>
                 </fx:formRow>
                 <fx:formRow id="contentId" labelKey="History.label.content">
                     <h:inputText id="contentId" value="#{historyBean.content}" size="5"/>
@@ -84,7 +125,10 @@
                                 <td nowrap="nowrap"><h:outputText value="#{historyBean.dateFormat[history.timestp]}"/>
                                 </td>
                                 <td><h:outputText value="#{history.loginName}"/></td>
-                                <td><h:outputText value="#{history.message}"/></td>
+                                <td><a4j:commandLink reRender="messageContainer"  onclick="Richfaces.showModalPanel('frm:panel')">
+                                        <f:setPropertyActionListener value="#{history}" target="#{historyBean.selectedEntry}"/>
+                                        <h:outputText value="#{history.message}"/>
+                                    </a4j:commandLink></td>
                                 <td><h:outputText value="#{history.application}"/></td>
                                 <td><h:outputText value="#{history.host}"/></td>
                             </tr>
@@ -93,15 +137,15 @@
                     </table>
                 </adm:sortableTable>
 
-
                 <adm:commandButton id="historyQuerySearch" labelKey="History.button.query" location="both"
                                    icon="search" lockscreen="false" bean="#{historyBean}" action="performQuery"/>
 
-            </a4j:outputPanel>
+
 
             <adm:toolbarPluginButtons/>
 
         </h:form>
+        </a4j:region>
     </ui:define>
 </ui:composition>
 

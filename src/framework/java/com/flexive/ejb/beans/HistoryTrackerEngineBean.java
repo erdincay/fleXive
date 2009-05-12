@@ -74,8 +74,8 @@ public class HistoryTrackerEngineBean implements HistoryTrackerEngine, HistoryTr
 
     //                                                   1       2         3       4          5           6
     private static final String HISTORY_SELECT = "SELECT ACCOUNT,LOGINNAME,TIMESTP,ACTION_KEY,ACTION_ARGS,APPLICATION," +
-            //7         8      9    10    11
-            "REMOTEHOST,TYPEID,PKID,PKVER,DATA FROM " + TBL_HISTORY;
+            //7         8      9    10    11   12
+            "REMOTEHOST,TYPEID,PKID,PKVER,DATA,SESSION FROM " + TBL_HISTORY;
 
     /**
      * {@inheritDoc}
@@ -169,7 +169,7 @@ public class HistoryTrackerEngineBean implements HistoryTrackerEngine, HistoryTr
             while (rs != null && rs.next())
                 ret.add(new FxHistory(rs.getLong(3), rs.getLong(1), rs.getString(2), rs.getString(4), rs.getString(5).split("\\|"),
                         rs.getLong(8), rs.getLong(9), rs.getInt(10), rs.getString(6), rs.getString(7),
-                        loadData ? rs.getString(11) : "No permission to load to data!"
+                        loadData ? rs.getString(11) : "No permission to load to data!", rs.getString(12)
                 ));
         } catch (Exception ex) {
             LOG.error(ex.getMessage());
@@ -202,9 +202,12 @@ public class HistoryTrackerEngineBean implements HistoryTrackerEngine, HistoryTr
             while (rs != null && rs.next()) {
                 if (count++ >= maxEntries)
                     break;
+                long typeId = rs.getLong(8);
+                if( rs.wasNull() )
+                    typeId = -1;
                 ret.add(new FxHistory(rs.getLong(3), rs.getLong(1), rs.getString(2), rs.getString(4), rs.getString(5).split("\\|"),
-                        rs.getLong(8), rs.getLong(9), rs.getInt(10), rs.getString(6), rs.getString(7),
-                        loadData ? rs.getString(11) : "No permission to load to data!"
+                        typeId, rs.getLong(9), rs.getInt(10), rs.getString(6), rs.getString(7),
+                        loadData ? rs.getString(11) : "No permission to load to data!", rs.getString(12)
                 ));
             }
         } catch (Exception ex) {
