@@ -3,8 +3,9 @@
 <shortcuts>
     <programGroup defaultName="flexive" location="applications"/>
     <shortcut
-            name="fleXive 3.1"
-            description="Launch a [fleXive] 3.1 server"
+            name="Launch fleXive ${flexive.version} server"
+            description="Launch a [fleXive] ${flexive.version} server"
+            iconFile="$INSTALL_PATH/icon_start.png"
             encoding="UTF-8"
             desktop="yes"
             applications="no"
@@ -18,8 +19,9 @@
             Categories="Development;Java;Database"
     />
     <shortcut
-            name="Open fleXive 3.1 Backend"
+            name="Open fleXive Backend"
             description="Open the fleXive backend application in your web browser"
+            iconFile="$INSTALL_PATH/icon_backend.png"
             encoding="UTF-8"
             desktop="yes"
             applications="no"
@@ -34,7 +36,8 @@
     />
     <shortcut
             name="Uninstall"
-            description="Uninstall [fleXive] 3.1"
+            description="Uninstall [fleXive] ${flexive.version}"
+            iconFile="$INSTALL_PATH/icon_uninstall.png"
             encoding="UTF-8"
             desktop="no"
             applications="no"

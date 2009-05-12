@@ -7,17 +7,32 @@
     -->
     <info>
         <appname>flexive</appname>
-        <appversion>3.1-SNAPSHOT</appversion>
+        <appversion>${flexive.version}</appversion>
         <url>http://www.flexive.org/</url>
         <javaversion>1.5</javaversion>
+
+        <!-- Pack200 greatly reduces the download size, but it does not seem to work correctly
+             for the Jetty and flexive packs -->
+        <!--<pack200/>-->
     </info>
 
-
+    <!-- Passthru Maven variables to files filtered by the installer (e.g. shortcut specifications) -->
+    <variables>
+        <variable name="flexive.version" value="${flexive.version}"/>
+    </variables>
     <!-- 
         The gui preferences indication.
         Sets the installer window to 640x480. It will not be able to change the size.
     -->
-    <guiprefs width="640" height="480" resizable="yes"/>
+    <guiprefs width="640" height="480" resizable="yes">
+        <modifier key="langDisplayType" value="native"/>
+        <modifier key="useHeadingPanel" value="yes"/>
+        <modifier key="headingLineCount" value="1"/>
+        <modifier key="headingFontSize" value="1.3"/>
+        <modifier key="headingBackgroundColor" value="0x00ffffff"/>
+        <modifier key="headingPanelCounter" value="text"/>
+        <modifier key="headingPanelCounterPos" value="inHeading"/>
+    </guiprefs>
 
     <!-- 
         The locale section.
@@ -35,6 +50,10 @@
     <resources>
         <res id="LicencePanel.licence" src="Licence.txt"/>
         <res id="InfoPanel.info" src="Readme.txt"/>
+
+        <!--<res id="Installer.image" src="installer-image.png"/>-->
+        <res id="Heading.image" src="installer-header.png"/>
+        
         <res id="Unix_shortcutSpec.xml" src="unix_shortcut_specification.xml"/>
         <res id="shortcutSpec.xml" src="windows_shortcut_specification.xml"/>
     </resources>
@@ -77,12 +96,19 @@
             <file src="start.sh" targetdir="$INSTALL_PATH"/>
             <file src="start.bat" targetdir="$INSTALL_PATH"/>
 
+            <file src="icon_start.ico" targetdir="$INSTALL_PATH"/>
+            <file src="icon_start.png" targetdir="$INSTALL_PATH"/>
+            <file src="icon_backend.png" targetdir="$INSTALL_PATH"/>
+            <file src="icon_backend.ico" targetdir="$INSTALL_PATH"/>
+            <file src="icon_uninstall.png" targetdir="$INSTALL_PATH"/>
+            <file src="icon_uninstall.ico" targetdir="$INSTALL_PATH"/>
+
             <!--<file src="script.bat" targetdir="$INSTALL_PATH"/>-->
             <!--<parsable targetfile="$INSTALL_PATH/script.bat"/>-->
             <!-- The file will be parsed -->
         </pack>
-        <pack name="[fleXive] distribution" required="yes">
-            <description>[fleXive] distribution</description>
+        <pack name="[fleXive] ${flexive.version}" required="yes">
+            <description>[fleXive] distribution, release ${flexive.version}.</description>
             <file src="flexive-dist.zip" targetdir="$INSTALL_PATH" unpack="true"/>
         </pack>
         <pack name="Jetty WebServer" required="yes">
