@@ -123,7 +123,18 @@
             <name>ajax</name>
             <required>false</required>
             <rtexprvalue>false</rtexprvalue>
-            <description>[optional] flag to indicate that the button is part of an ajax request</description>
+            <description>[optional] flag to indicate that the button is part of an ajax request causing the toolbar t.b.
+                rendered correctly. This flag has no effect for content-only buttons. If the ajax button is the last of
+                several such buttons, consider using a separator
+            </description>
+        </attribute>
+        <attribute>
+            <name>toolbarPosition</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>[optional] the position in the toolbar (starting at 0) for an ajax-enabled button. This value
+                is ignored if ajax=false. Separators must be considered when giving the position
+            </description>
         </attribute>
     </tag>
     <tag>

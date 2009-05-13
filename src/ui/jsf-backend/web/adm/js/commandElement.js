@@ -59,3 +59,62 @@ function getCommandElementScript(callerWindow,id) {
         return null;
     }
 }
+
+//======================================================================================================================
+// This function copies all relevant ajax-enabled commandbuttons (which also reside in the toolbar) and their
+// positions(if given) to the corresponding arrays in main.js.
+//======================================================================================================================
+function registerAjaxToolbarButtons(ajax, location, id, toolbarPosition) {
+    // add the ajax-enabled buttons to the corresp. js array IFF they are registered in the toolbar
+    if (ajax && (location == 'both' || location == 'toolbar')) {
+        var registeredId = false;
+        var registeredIdToolbar = false;
+        var regIdsLength = parent.ajaxRegisteredIds.length;
+        var toolbarLength = parent.ajaxRegisteredIdsToolbarOnly.length;
+        // check if button already in array
+        for (var i = 0; i < regIdsLength; i++) {
+            if (parent.ajaxRegisteredIds[i] == id)
+                registeredId = true;
+        }
+        // check if toolbar only button already in array
+        for (var i = 0; i < toolbarLength; i++) {
+            if (parent.ajaxRegisteredIdsToolbarOnly[i] == id)
+                registeredIdToolbar = true;
+        }
+        if (!registeredId) {
+            parent.ajaxRegisteredIds[regIdsLength] = id;
+        }
+        if (!registeredIdToolbar && location == 'toolbar') {
+            parent.ajaxRegisteredIdsToolbarOnly[toolbarLength] = id;
+        }
+        // toolbar position will be arbitrary (previous to a re-render) if not set
+        if (toolbarPosition != 'NOTSET') {
+            for (var i = 0; i < parent.ajaxRegisteredIds.length; i++) {
+                if (parent.ajaxRegisteredIds[i] == id)
+                    parent.ajaxRegisteredIdPositions[i] = toolbarPosition;
+            }
+        }
+
+        if(parent.ajaxRegisteredIdPositions.length > 1)
+            sortAjaxPositions();
+    }
+}
+
+//======================================================================================================================
+// A very simple linear one-pass sorting algorithm (which should prove sufficient for the given number of
+// commandButtons in the toolbar) to sort the ajaxRegisteredButtons & ids on a (partial) page-rerender.
+//======================================================================================================================
+function sortAjaxPositions() {
+    for (var i = 0; i < parent.ajaxRegisteredIdPositions.length; i++) {
+        if (i + 1 < parent.ajaxRegisteredIdPositions.length) {
+            if (parent.ajaxRegisteredIdPositions[i] > parent.ajaxRegisteredIdPositions[i + 1]) {
+                var tmp = parent.ajaxRegisteredIdPositions[i + 1];
+                parent.ajaxRegisteredIdPositions[i + 1] = parent.ajaxRegisteredIdPositions[i];
+                parent.ajaxRegisteredIdPositions[i] = tmp;
+                tmp = parent.ajaxRegisteredIds[i + 1];
+                parent.ajaxRegisteredIds[i + 1] = parent.ajaxRegisteredIds[i];
+                parent.ajaxRegisteredIds[i] = tmp;
+            }
+        }
+    }
+}

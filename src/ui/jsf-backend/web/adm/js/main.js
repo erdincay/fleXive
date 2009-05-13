@@ -385,13 +385,22 @@ var toolbarImages = [];
 var toolbarHelp   = [];
 var toolbarClick  = [];
 var toolbarIds    = [];
-var ajaxButtonIds = [];
+var ajaxRegisteredIds = []; // ajax-enabled buttons
+var ajaxRegisteredIdPositions = [];
+var ajaxRegisteredIdsToolbarOnly = [];
 
 function clearToolbar() {
     toolbarImages=[];
     toolbarHelp=[];
     toolbarClick=[];
     toolbarIds=[];
+}
+
+// clear ajax-enabled buttons
+function clearAjaxRegisteredIds() {
+    ajaxRegisteredIds = [];
+    ajaxRegisteredIdPositions = [];
+    ajaxRegisteredIdsToolbarOnly = [];
 }
 
 function getCallerElement(caller,id) {
@@ -562,6 +571,7 @@ function pageLoaded(responseId,renderTime,bTreeWasModified) {
 
 function beginPage() {
     clearToolbar();
+    clearAjaxRegisteredIds();
     clearTabs();
     clearclientIdsWithError();
 }

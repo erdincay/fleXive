@@ -279,211 +279,186 @@ function initialiseAjaxComponent() {
 }
 
 /**
- * This function retrieves both commandButtons from the content iframe of the rendered page as well as all toolbar buttons.
- * It then applies logical rules to rerender the toolbar buttons according to the current state of the ajax request.
- *
+ * This function provides the rendering logic for ajax-enabled command buttons in the toolbar
+ * The actual logic will only be executed if ajaxButtons are found in parent.ajaxRegisteredIds (main.js).
+ * [i.e. the corresponding adm:commandButtons's "ajax" attribute was set to "true"]
  */
 function regAjaxComponentInToolbar() {
-    var regEx1;
-    var tbContentButtonCount = 0; // counts the toolbar buttons which are the same as in the content
-    var countTbButtons = 0; // general var for counting buttins in the toolbar
-    var countButtons = 0;
-    var toolbarButtonIds = new Array();
-    var contentButtonIds = new Array();
-    var _toolbarHelp = new Array(); // variables f. holding commandButton attributes
-    var _toolbarClick = new Array();
-    var _toolbarImages = new Array();
-    var _toolbarHelpRest = new Array(); // variables f. holding toolbar button (attributes)
-    var _toolbarClickRest = new Array(); // which do not exist in the content frame
-    var _toolbarImagesRest = new Array();
+    // retrieve the content frame (kept in sep. var for possible future changes)
+    var contentFrame = window.parent.document.getElementById('contentFrame');
+    var content = contentFrame.contentWindow.document;
+    var cmdButtonId = 'commandButton_';
+    var cmdElementId = 'commandElement_';
+    // vars holding toolbar elements
     var _toolBar = window.parent.document.getElementById('fxToolbar'); // window.parent.document must be called!
-    var _iframe = window.parent.document.getElementById('contentFrame');
-    var childNodeCounter_1 = 1;
-    var childNodeCounter_2 = 3;
-    if (document.all) { // IE ONLY!
-        childNodeCounter_1 = 0;
-        childNodeCounter_2 = 1;
+    var toolbarButtonIds = [];
+    var _toolbarHelp = [];
+    var _toolbarClick = [];
+    var _toolbarImages = [];
+    var countTbButtons = 0;
+
+    // retrieve the current toolbar buttons from the DOM (leaving out ajaxButtons) tree
+    function getToolbarButtons() {
+        if (_toolBar != null) {
+            var _images = _toolBar.getElementsByTagName('img');
+            if (_images.length > 0) {
+                for (var i = 0; i < _images.length; i++) {
+                    var img = _images[i].id;
+                    if (img == "" && _images[i].src.indexOf('separator.png' >= 0)) { // separator
+                        toolbarButtonIds[countTbButtons] = '';
+                        _toolbarHelp[countTbButtons] = ''; // _images[i].alt;
+                        _toolbarClick[countTbButtons] = '';
+                        _toolbarImages[countTbButtons] = _images[i].src;
+                        countTbButtons++;
+                    } else { // "regular" button
+                        toolbarButtonIds[countTbButtons] = img.substring(0, img.indexOf('_')); //img;
+                        _toolbarHelp[countTbButtons] = _images[i].alt;
+                        _toolbarClick[countTbButtons] = '_caller.triggerCommandElement_' + img.substring(0, img.indexOf('_')) + '()';
+                        _toolbarImages[countTbButtons] = _images[i].src;
+                        countTbButtons++;
+                    }
+                }
+            }
+        }
     }
 
-    // retrieve the buttons from the content (residing in the iframe)
-    if (_iframe != null) {
-        var content = _iframe.contentWindow.document;
-        var elements = content.getElementsByTagName('div'); // retrieve all divs
-        regEx1 = /commandButton_.*/;
-        for (var i = 0; i < elements.length; i++) {
-            var el = elements[i].id;
-            if (el != null && el.match(regEx1)) {
-                if (elements[i].childNodes[childNodeCounter_1] != null) { // is null on ajax generated buttons // doesn't work in ie!
-                    contentButtonIds[countButtons] = el.substring(el.indexOf('_') + 1, el.length);
-                    var help = elements[i].childNodes[childNodeCounter_1].childNodes[childNodeCounter_2].childNodes[childNodeCounter_1].innerHTML;
-                    _toolbarHelp[countButtons] = help.replace(/[\t\r\n]*/g, '').replace(/^\s*/, '').replace(/\s*$/, '');
-                    _toolbarClick[countButtons] = '_caller.triggerCommandElement_' + contentButtonIds[countButtons] + '()';
-                    var imgsrc = elements[i].childNodes[childNodeCounter_1].childNodes[childNodeCounter_1].childNodes[childNodeCounter_1].src;
-                    _toolbarImages[countButtons] = imgsrc.substring(imgsrc.indexOf('/flexive'), imgsrc.length);
-                    countButtons++;
+    /**
+     * Check which of the registered ajax buttons are present in the DOM tree and add or remove them
+     * from the toolbar
+     */
+    function renderAjaxButtonsToToolbar() {
+        var rerender = false;
+        // if parent.toolbarIds.length != toolbarButtonIds.length ==> ajaxButtons were rendered, add them to the local vars
+        if (parent.toolbarIds.length != toolbarButtonIds.length) {
+            rerender = addAjaxButtonsFromParent();
+            // special case: refresh w/o a rerender = ajax request w/o changes
+            if (!rerender)
+                copyToolbarButtonsToParent();
+
+            // if a toolbarPosition was given for the ajax buttons, reorder the relevant arrays
+            if (rerender && parent.ajaxRegisteredIdPositions.length > 0 && (parent.ajaxRegisteredIdPositions.length == parent.ajaxRegisteredIds.length)) {
+                var smallestNonRenderedPos = -1; // var to keep track of buttons which are not rendered 
+                for (var i = 0; i < parent.ajaxRegisteredIds.length; i++) {
+                    if (linearSearch(parent.ajaxRegisteredIds[i], parent.ajaxRegisteredIdsToolbarOnly, false) >= 0) {
+                        if (linearSearch(parent.ajaxRegisteredIds[i], parent.toolbarIds, true) >= 0)
+                            rerender = reorderToolbarButtons(i, smallestNonRenderedPos);
+                        else
+                            smallestNonRenderedPos = i;
+                    } else { // reorder only if the commandbutton was rendered
+                        if (content.getElementById(cmdButtonId + parent.ajaxRegisteredIds[i]) != null)
+                            rerender = reorderToolbarButtons(i, smallestNonRenderedPos);
+                        else
+                            smallestNonRenderedPos = i;
+                    }
+                }
+            }
+        } else { // case2: button(s) need(s) to be removed
+            // check which ajax buttons were disabled
+            for (var i = 0; i < parent.ajaxRegisteredIds.length; i++) {
+                //                var removeId = -1;
+                if (linearSearch(parent.ajaxRegisteredIds[i], parent.ajaxRegisteredIdsToolbarOnly, false) >= 0) {
+                    if (content.getElementById(cmdElementId + parent.ajaxRegisteredIds[i]) == null) {
+                        if (removeAjaxButtonFromToolbar(i) >= 0)
+                            rerender = true;
+                    }
                 } else {
-                    countButtons++; // FF: increase counter for AJAX buttons
+                    if (content.getElementById(cmdButtonId + parent.ajaxRegisteredIds[i]) == null) {
+                        if (removeAjaxButtonFromToolbar(i) >= 0)
+                            rerender = true;
+                    }
                 }
             }
         }
+        return rerender;
     }
 
-    // retrieve the toolbar buttons
-    if (_toolBar != null) {
-        var _images = _toolBar.getElementsByTagName('img');
-        regEx1 = /.*_toolbarIcon/;
-        if (_images.length > 0) {
-            for (var i = 0; i < _images.length; i++) {
-                var img = _images[i].id;
-                if (img != null) {
-                    if (img == "") {
-                        if (_images[i].src.indexOf('separator.png') != -1) { // unnecessary?
-                            toolbarButtonIds[countTbButtons] = img;
-                            _toolbarHelpRest[countTbButtons] = _images[i].alt;
-                            _toolbarClickRest[countTbButtons] = '';
-                            _toolbarImagesRest[countTbButtons] = _images[i].src;
-                            countTbButtons++;
-                        }
-                    } else {
-                        var index = linearSearch(img.substring(0, img.indexOf('_')), contentButtonIds, false);
-                        if (img.match(regEx1) && index != -1) {
-                            tbContentButtonCount++;
-                        } else {
-                            toolbarButtonIds[countTbButtons] = img.substring(0, img.indexOf('_'));
-                            _toolbarHelpRest[countTbButtons] = _images[i].alt;
-                            _toolbarClickRest[countTbButtons] = '_caller.triggerCommandElement_' + img.substring(0, img.indexOf('_')) + '()';
-                            _toolbarImagesRest[countTbButtons] = _images[i].src;
-                            countTbButtons++;
-                        }
-                    }
-                }
+    // copies the data to the parent arrays
+    var copyToolbarButtonsToParent = function() {
+        parent.clearToolbar(); // clear the toolbar first
+        parent.toolbarIds = toolbarButtonIds.slice(0);
+        parent.toolbarImages = _toolbarImages.slice(0);
+        parent.toolbarClick = _toolbarClick.slice(0);
+        parent.toolbarHelp = _toolbarHelp.slice(0);
+    };
+
+    /**
+     * Copies the data from the rendered page (incl. ajax requests). IFF
+     * the ajaxbuttons are not in the toolbar
+     */
+    var addAjaxButtonsFromParent = function() { // reassign all variables in main.js
+        var rerender = false;
+        var positionsToCopy = [];
+        var j = 0;
+
+        for (var i = 0; i < parent.toolbarIds.length; i++) {
+            if (linearSearch(parent.toolbarIds[i], toolbarButtonIds, true) < 0) {
+                positionsToCopy[j] = i;
+                j++;
             }
         }
-    }
 
-    // fills the parent. variables with the information from the rendered page (incl. ajax requests).
-    var fillToolbar = function() { // reassign all variables in main.js
-        parent.toolbarImages = _toolbarImages.concat(parent.toolbarImages);
-        parent.toolbarIds = contentButtonIds.concat(parent.toolbarIds);
-        parent.toolbarClick = _toolbarClick.concat(parent.toolbarClick);
-        parent.toolbarHelp = _toolbarHelp.concat(parent.toolbarHelp);
-        if (toolbarButtonIds.length > 0) {
-            parent.toolbarImages = parent.toolbarImages.concat(_toolbarImagesRest);
-            parent.toolbarIds = parent.toolbarIds.concat(toolbarButtonIds);
-            parent.toolbarClick = parent.toolbarClick.concat(_toolbarClickRest);
-            parent.toolbarHelp = parent.toolbarHelp.concat(_toolbarHelpRest);
+        if (positionsToCopy.length > 0) {
+            for (var i = 0; i < positionsToCopy.length; i++) {
+                var last = toolbarButtonIds.length;
+                toolbarButtonIds[last] = parent.toolbarIds[positionsToCopy[i]];
+                _toolbarImages[last] = parent.toolbarImages[positionsToCopy[i]];
+                _toolbarClick[last] = parent.toolbarClick[positionsToCopy[i]];
+                _toolbarHelp[last] = parent.toolbarHelp[positionsToCopy[i]];
+            }
+            rerender = true;
         }
+        return rerender;
     };
 
-    // removes ajax buttons from the toolbar
-    var removeFromToolbar = function() {
-        if (parent.ajaxButtonIds.length > 0) {
-            for (var i = 0; i < parent.ajaxButtonIds.length; i++) {
-                var index = linearSearch(parent.ajaxButtonIds[i], toolbarButtonIds, false);
-                if (index != -1) {
-                    toolbarButtonIds.splice(index, 1);
-                    _toolbarImagesRest.splice(index, 1);
-                    _toolbarClickRest.splice(index, 1);
-                    _toolbarHelpRest.splice(index, 1);
-                }
+    // Removes a button from the toolbar
+    var removeAjaxButtonFromToolbar = function(element) {
+        var removeId = linearSearch(parent.ajaxRegisteredIds[element], toolbarButtonIds, false);
+        if (removeId >= 0) {
+            toolbarButtonIds.splice(removeId, 1);
+            _toolbarImages.splice(removeId, 1);
+            _toolbarClick.splice(removeId, 1);
+            _toolbarHelp.splice(removeId, 1);
+        }
+        return removeId;
+    };
+
+    // refactorisation of reordering algorithm
+    var reorderToolbarButtons = function(currentElement, smallestNonRenderedPos) {
+        var rerender = false;
+        var oldpos = -1;
+        if (parent.ajaxRegisteredIds.length == parent.ajaxRegisteredIdPositions.length) { // safety fallback
+            oldpos = linearSearch(parent.ajaxRegisteredIds[currentElement], toolbarButtonIds, false);
+            if (oldpos >= 0) {
+                // check the smallest non-rendered position
+                if (smallestNonRenderedPos != -1 && smallestNonRenderedPos < currentElement)
+                    currentElement = smallestNonRenderedPos;
+
+                reorder(oldpos, parent.ajaxRegisteredIdPositions[currentElement]);
+                rerender = true;
             }
         }
+        return rerender;
     };
 
-    // IE will have all ajax buttons in the DOM tree, FF won't, hence some entries need to be removed.
-    var removeFromContentForIE = function(inputArray) {
-        for (var i = 0; i < inputArray.length; i++) {
-            var index = linearSearch(inputArray[i], contentButtonIds, false);
-            if (index != -1) {
-                removeFromContent(index);
-            }
-        }
+    // helper function for "reorderToolbarButtons"
+    var reorder = function(oldpos, newpos) {
+        var tmpId = toolbarButtonIds.splice(oldpos, 1);
+        var tmpImg = _toolbarImages.splice(oldpos, 1);
+        var tmpClick = _toolbarClick.splice(oldpos, 1);
+        var tmpHelp = _toolbarHelp.splice(oldpos, 1);
+
+        toolbarButtonIds.splice(newpos, 0, tmpId[0]);
+        _toolbarImages.splice(newpos, 0, tmpImg[0]);
+        _toolbarClick.splice(newpos, 0, tmpClick[0]);
+        _toolbarHelp.splice(newpos, 0, tmpHelp[0]);
     };
 
-    // similar to the previous function, also IE only.
-    var removeFromContent = function(index) {
-        contentButtonIds.splice(index, 1);
-        _toolbarImages.splice(index, 1);
-        _toolbarClick.splice(index, 1);
-        _toolbarHelp.splice(index, 1);
-    };
-
-    // action1: rerender a vanilla toolbar, as given by the initial state of the page
-    var toolbarRenderAction_1 = function() {
-        parent.clearToolbar();
-        removeFromToolbar();
-        fillToolbar();
-        parent.renderToolbar();
-        parent.ajaxButtonIds.length = 0;// clear the ajaxButtonIds
-    };
-
-    // action2: clear the toolbar, rerender after retrieving the corresponing buttons
-    var toolbarRenderAction_2 = function() {
-        parent.clearToolbar();
-        fillToolbar();
-        parent.renderToolbar();
-    };
-
-    // action3: same as action2, also stores all ajax buttons in a separate variable in main.js
-    var toolbarRenderAction_3 = function() {
-        parent.ajaxButtonIds = parent.toolbarIds.slice(0);
-        fillToolbar();
-        parent.renderToolbar();
-    };
-
-    // specifically looks for commandButtons whose ajax attribute was set to "true"
-    var discoverAjaxButtonsInToolbar = function() {
-        if (parent.ajaxButtonIds.length < 1) {
-            var count = 0;
-            for (var i = 0; i < toolbarButtonIds.length; i++) {
-                if (toolbarButtonIds[i].match('AJAX')) {
-                    parent.ajaxButtonIds[count] = toolbarButtonIds[i];
-                    count++;
-                }
-
-            }
-        }
-    }
-
-    // actual rendering logic
-    discoverAjaxButtonsInToolbar();
-    if (parent.ajaxButtonIds.length > 0) {
-        if (parent.toolbarIds.length != parent.ajaxButtonIds.length) { // commandbutton's location="content"
-            toolbarRenderAction_1();
-        } else if (parent.ajaxButtonIds.length == parent.toolbarIds.length) { // we are probably dealing with an "empty" submission
-            if (document.all) {
-                var contentOnlyButtonIndex = linearSearch('_LOCCONTENT', contentButtonIds, true);
-                if (contentOnlyButtonIndex < 0) {
-                    toolbarRenderAction_2();
-                } else {
-                    while (contentOnlyButtonIndex >= 0) {
-                        removeFromContent(contentOnlyButtonIndex);
-                        contentOnlyButtonIndex = linearSearch('_LOCCONTENT', contentButtonIds, true);
-                    }
-                }
-            }
-            toolbarRenderAction_2();
-        }
-    } else { // commandButton's location="toolbar" / "content"
-        if (parent.toolbarIds.length != (contentButtonIds.length + toolbarButtonIds.length)) {
-            if (document.all) { // IE ajax call, need to remove ajaxbutton from contentButtonIds
-                var contentOnlyButtonIndex = linearSearch('_LOCCONTENT', contentButtonIds, true);
-                if (contentOnlyButtonIndex < 0) {
-                    removeFromContentForIE(parent.toolbarIds);
-                    toolbarRenderAction_3();
-                } else {
-                    while (contentOnlyButtonIndex >= 0) {
-                        removeFromContent(contentOnlyButtonIndex);
-                        contentOnlyButtonIndex = linearSearch('_LOCCONTENT', contentButtonIds, true);
-                    }
-                    if (parent.toolbarIds.length != (contentButtonIds.length + toolbarButtonIds.length)) {
-                        removeFromContentForIE(parent.toolbarIds);
-                        toolbarRenderAction_3();
-                    }
-                }
-            } else {
-                toolbarRenderAction_3();
-            }
+    // rendering logic
+    if (parent.ajaxRegisteredIds.length > 0) {
+        getToolbarButtons();
+        if (renderAjaxButtonsToToolbar()) {
+            copyToolbarButtonsToParent();
+            parent.renderToolbar();
         }
     }
 }

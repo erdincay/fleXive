@@ -12,25 +12,25 @@ Basic [fleXive] command element template.
 It will lock the screen when the data is submitted, unless the lockscreen attribute is set to false.
 
 Parameters:
- label - the button label
- labelKey - message key for the button label (overrides label when specified)
- title - [optional] the button title (used by browsers to display tooltip on mouseover)
+label - the button label
+labelKey - message key for the button label (overrides label when specified)
+title - [optional] the button title (used by browsers to display tooltip on mouseover)
 titleKey - [optional]  message key for the button title (overrides title when specified).
                        if not specified and labelKey is set, it defaults to #{labelKey}.title
- confirmKey - [optional] message key for a confirm dialog that will be displayed before the action is called
- bean - the bean that the action belongs to
- action - the action to call
- immediate - [optional] the jsf immediate flag
- page - [optional] the page to render when the button is clicked
- location - [optional] The location where the icon is displayed [content|toolbar|both]. The default is content
- separator - [optional], [before|after|none] If displayed in the toolbar a separator will be placed before or after the icon.
- onclick - [optional] the onClick event of the action link
- lockscreen - [optional] if false, the screen will not be locked when clicking this button
- icon - [optional] the name of the icon to be displayed. the icon name is mapped to the url "adm/images/commandButton/${icon}.png"
- iconUrl - [optional] the url (aboslute, including the context path)
-                      of the icon to be displayed (i.e. /flexive/images/myIcon.png)
- rendered - [optional] flag to supress rendering of the whole component
- ajax - [optional] flag to indicate that the button is part of an ajax request
+confirmKey - [optional] message key for a confirm dialog that will be displayed before the action is called
+bean - the bean that the action belongs to
+action - the action to call
+immediate - [optional] the jsf immediate flag
+page - [optional] the page to render when the button is clicked
+location - [optional] The location where the icon is displayed [content|toolbar|both]. The default is content
+separator - [optional], [before|after|none] If displayed in the toolbar a separator will be placed before or after the icon.
+onclick - [optional] the onClick event of the action link
+lockscreen - [optional] if false, the screen will not be locked when clicking this button
+icon - [optional] the name of the icon to be displayed. the icon name is mapped to the url "adm/images/commandButton/${icon}.png"
+iconUrl - [optional] the url (aboslute, including the context path) of the icon to be displayed (i.e. /flexive/images/myIcon.png)
+rendered - [optional] flag to supress rendering of the whole component
+ajax - [optional] flag to indicate that the button is part of an ajax request causing the toolbar t.b. rendered correctly. This flag has no effect for content-only buttons. If the ajax button is the last of several such buttons, consider using a separator.
+toolbarPosition - [optional] the position in the toolbar (starting at 0) for an ajax-enabled button. This value is ignored if ajax=false. Separators must be considered when giving the position.
 
 <ui:composition>
 
@@ -84,12 +84,12 @@ titleKey - [optional]  message key for the button title (overrides title when sp
             <c:set var="iconUrl" value="#{fxSystemBean.contextPath}/adm/images/commandButton/#{icon}.png"/>
         </c:if>
 
-        <c:if test="#{ajax}">
-            <c:set var="id" value="#{id}AJAX"/>
+        <c:if test="#{empty ajax or ajax == null}">
+            <c:set var="ajax" value="false"/>
         </c:if>
 
-        <c:if test="${location == 'content'}">
-            <c:set var="id" value="#{id}_LOCCONTENT"/>
+        <c:if test="#{empty toolbarPosition or toolbarPosition == null}">
+            <c:set var="toolbarPosition" value="NOTSET"/>
         </c:if>
 
         <div id="commandElement_#{id}" style="display:none">
@@ -102,8 +102,9 @@ titleKey - [optional]  message key for the button title (overrides title when sp
         <script type="text/javascript" language="javascript">
             parent.registerCommandElement(this,'#{id}','#{fxMessageBean[confirmKey]}',#{lockscreen});
             function triggerCommandElement_#{id}() {
-                eval(parent.getCommandElementScript(self,'#{id}'))
+                eval(parent.getCommandElementScript(self,'#{id}'));
             }
+            parent.registerAjaxToolbarButtons(#{ajax}, '#{location}', '#{id}', '#{toolbarPosition}');
         </script>
 
         <c:if test="${location=='both' || location=='content'}">

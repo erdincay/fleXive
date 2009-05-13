@@ -46,11 +46,11 @@
                                        bean="#{scriptConsoleBean}" action="addDefaultImports" location="both"
                                        lockscreen="false"/>
 
-                    <a4j:outputPanel ajaxRendered="true" id="verifyPanel">
+                    <a4j:outputPanel id="verifyPanel" layout="block">
                         <adm:commandButton id="verifyButton" labelKey="Script.button.verify" icon="check"
                                            bean="#{scriptConsoleBean}" action="checkScriptSyntax"
-                                           rendered="#{scriptConsoleBean.verifyButtonEnabled}" location="both"
-                                           lockscreen="false" ajax="true"/>
+                                           rendered="#{scriptConsoleBean.verifyButtonEnabled}"
+                                           lockscreen="false" ajax="true" toolbarPosition="2"/>
                     </a4j:outputPanel>
                 </fieldset>
                 <br/><br/>

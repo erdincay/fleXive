@@ -36,10 +36,13 @@ package com.flexive.war.beans.admin.main;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.security.Role;
+import com.flexive.faces.messages.FxFacesMsgErr;
 import groovy.lang.GroovyShell;
 import groovy.lang.Script;
 import org.apache.commons.lang.StringUtils;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Formatter;
@@ -99,27 +102,17 @@ public class ScriptConsoleBean {
     }
 
     /**
-     * Runs the given code
+     * Runs the given script code
      */
     public void runScript() {
-        if (StringUtils.isBlank(code)) {
-            result = "";
-        } else {
+        if (StringUtils.isBlank(code))
+            new FxFacesMsgErr("Script.err.noCodeProvided").addToContext();
+        else {
             long start = System.currentTimeMillis();
             try {
-                if (web && FxSharedUtils.isGroovyScript("console." + language)) {
-                    if (!FxContext.getUserTicket().isInRole(Role.ScriptExecution))
-                        result = "No permission to execute scripts!";
-                    else {
-                        GroovyShell shell = new GroovyShell();
-                        Script script = shell.parse(code);
-                        result = script.run();
-                    }
-                } else {
-                    result = EJBLookup.getScriptingEngine().runScript("console." + language, null, code).getResult();
-                }
+                result = runScript(code, "console." + language, web);
             } catch (Exception e) {
-                StringWriter writer = new StringWriter();
+                final StringWriter writer = new StringWriter();
                 e.printStackTrace(new PrintWriter(writer));
                 final String msg = e.getCause() != null ? e.getCause().getMessage() : e.getMessage();
                 result = new Formatter().format("Exception caught: %s%n%s", msg, writer.getBuffer());
@@ -127,6 +120,31 @@ public class ScriptConsoleBean {
                 executionTime = System.currentTimeMillis() - start;
             }
         }
+    }
+
+    /**
+     * Static refactorisation to run scripts
+     *
+     * @param code       the given script code
+     * @param scriptName the script's name
+     * @param web        run at web layer?
+     * @return Object the result
+     * @throws FxApplicationException on errors
+     */
+    static Object runScript(String code, String scriptName, boolean web) throws FxApplicationException {
+        Object result;
+        if (web && FxSharedUtils.isGroovyScript(scriptName)) {
+            if (!FxContext.getUserTicket().isInRole(Role.ScriptExecution))
+                result = "No permission to execute scripts!";
+            else {
+                GroovyShell shell = new GroovyShell();
+                Script script = shell.parse(code);
+                result = script.run();
+            }
+        } else {
+            result = EJBLookup.getScriptingEngine().runScript(scriptName, null, code).getResult();
+        }
+        return result;
     }
 
     /**
@@ -140,12 +158,7 @@ public class ScriptConsoleBean {
      * @return Returns true if the current selected scripting language is "Groovy"
      */
     public boolean isVerifyButtonEnabled() {
-        if (FxSharedUtils.isGroovyScript("console." + language)) {
-            setVerifyButtonEnabled(true);
-        } else {
-            setVerifyButtonEnabled(false);
-        }
-        return this.verifyButtonEnabled;
+        return verifyButtonEnabled = FxSharedUtils.isGroovyScript("console." + language);
     }
 
     /**
@@ -161,7 +174,8 @@ public class ScriptConsoleBean {
      * e.g. "Script.defaultImports.groovy")
      */
     public void addDefaultImports() {
-        String code = getCode() == null ? "" : getCode();
-        setCode(ScriptBean.getClassImports(language) + code);
+        if (code == null)
+            code = "";
+        code = ScriptBean.getClassImports(language) + code;
     }
 }

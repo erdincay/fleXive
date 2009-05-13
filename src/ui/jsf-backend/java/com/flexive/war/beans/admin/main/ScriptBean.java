@@ -53,10 +53,9 @@ import javax.faces.model.SelectItem;
 import javax.script.ScriptEngineFactory;
 import javax.script.ScriptEngineManager;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.io.StringWriter;
+import java.io.PrintWriter;
 
 import groovy.lang.GroovyShell;
 import org.apache.commons.lang.StringUtils;
@@ -83,8 +82,11 @@ public class ScriptBean {
     private long selectedScriptEventId = -1;
     private FxScriptRunInfo currentRunInfo;
     private String nameErrorMsg;
-    private boolean inputFieldDisabled = true;
+    private boolean inputFieldEnabled = false;
     private boolean verifyButtonEnabled = false;
+    private boolean executeButtonEnabled = false;
+    private Object result;
+    private long executionTime;
 
     private static final String ID_CACHE_KEY = ScriptBean.class + "_id";
 
@@ -134,6 +136,11 @@ public class ScriptBean {
         this.selectedScriptEventId = selectedScriptEventId;
     }
 
+    /**
+     * Retrieves the list of all scripts for the given event
+     *
+     * @return returns the List<FxScriptInfo> for the given event
+     */
     public List<FxScriptInfo> getScriptsForEvent() {
         long eventId = getSelectedScriptEventId();
         List<FxScriptInfo> scriptsForEvent = new ArrayList<FxScriptInfo>();
@@ -167,7 +174,6 @@ public class ScriptBean {
      *
      * @return the next page to render
      */
-
     public String editScript() {
         ensureScriptIdSet();
         setSinfo(CacheAdmin.getEnvironment().getScript(id).asEditable());
@@ -287,6 +293,45 @@ public class ScriptBean {
     }
 
     /**
+     * Runs the given script code in the console
+     */
+    public void runScriptInConsole() {
+        if (StringUtils.isBlank(sinfo.getCode())) {
+            new FxFacesMsgErr("Script.err.noCodeProvided").addToContext();
+        } else {
+            long start = System.currentTimeMillis();
+            try {
+                result = ScriptConsoleBean.runScript(sinfo.getCode(), sinfo.getName(), false);
+            } catch (Exception e) {
+                final StringWriter writer = new StringWriter();
+                e.printStackTrace(new PrintWriter(writer));
+                final String msg = e.getCause() != null ? e.getCause().getMessage() : e.getMessage();
+                result = new Formatter().format("Exception caught: %s%n%s", msg, writer.getBuffer());
+            } finally {
+                executionTime = System.currentTimeMillis() - start;
+            }
+        }
+    }
+
+    /**
+     * Returns the result object
+     *
+     * @return Object result
+     */
+    public Object getResult() {
+        return result;
+    }
+
+    /**
+     * Returns the time (ms) it took to execute the script
+     *
+     * @return long executionTime
+     */
+    public long getExecutionTime() {
+        return executionTime;
+    }
+
+    /**
      * Creates a new script from the beans data.
      *
      * @return the next jsf page to render
@@ -323,7 +368,6 @@ public class ScriptBean {
      * @return the next page to render
      */
     public String saveScript() {
-
         final UserTicket ticket = FxContext.getUserTicket();
         if (!ticket.isInRole(Role.ScriptManagement)) {
             new FxFacesMsgErr("Script.err.editPerm").addToContext();
@@ -343,6 +387,11 @@ public class ScriptBean {
         }
     }
 
+    /**
+     * Returns the list of types which the script is mapped to
+     *
+     * @return returns the List<Map.Entry<Long, String>> of type mapping names
+     */
     public List<Map.Entry<Long, String>> getTypeMappingNames() {
         if (this.typeMappingNames == null)
             this.typeMappingNames = new HashMap<Long, String>();
@@ -353,6 +402,11 @@ public class ScriptBean {
         return list;
     }
 
+    /**
+     * Returns the list of assignments which the script is mapped to
+     *
+     * @return returns the List<Map.Entry<Long, String>> of assignment mapping names
+     */
     public List<Map.Entry<Long, String>> getAssignmentMappingNames() {
         if (this.assignmentMappingNames == null)
             this.assignmentMappingNames = new HashMap<Long, String>();
@@ -451,17 +505,17 @@ public class ScriptBean {
     /**
      * Sets the boolean inputFieldDisabled
      *
-     * @param inputFieldDisabled boolean value enabling or disabling the input fields
+     * @param inputFieldEnabled boolean value enabling or disabling the input fields
      */
-    public void setInputFieldDisabled(boolean inputFieldDisabled) {
-        this.inputFieldDisabled = inputFieldDisabled;
+    public void setInputFieldEnabled(boolean inputFieldEnabled) {
+        this.inputFieldEnabled = inputFieldEnabled;
     }
 
     /**
      * @return boolean inputFieldDisabled
      */
-    public boolean isInputFieldDisabled() {
-        return this.inputFieldDisabled;
+    public boolean isInputFieldEnabled() {
+        return this.inputFieldEnabled;
     }
 
     /**
@@ -479,46 +533,70 @@ public class ScriptBean {
     }
 
     /**
+     * @param executeButtonEnabled sets the execute/ run script button
+     */
+    public void setExecuteButtonEnabled(boolean executeButtonEnabled) {
+        this.executeButtonEnabled = executeButtonEnabled;
+    }
+
+    /**
+     * @return returns true if the script event is set to FxScriptEvent.Manual
+     */
+    public boolean isExecuteButtonEnabled() {
+        return executeButtonEnabled;
+    }
+
+    /**
+     * Check the current script event and set a default if necessary
+     */
+    public void checkScriptEvent() {
+        if(sinfo.getEvent() == null)
+            sinfo.setEvent(FxScriptEvent.Manual); // set a default
+        executeButtonEnabled = sinfo.getEvent() == FxScriptEvent.Manual;
+    }
+
+    /**
      * Verifies the script name (i.e. the file extension) against the available script engines
      * sets inputFieldDisabled(true/false) and nameErrorMsg(String msg)
      */
     private void verifyScriptName() {
         final String name = sinfo.getName();
         if (StringUtils.isBlank(name)) {
-            setNameErrorMsg(null);
-            setInputFieldDisabled(true);
-            setVerifyButtonEnabled(false);
+            nameErrorMsg = null;
+            inputFieldEnabled = false;
+            verifyButtonEnabled = false;
+            executeButtonEnabled = false;
         } else if (!FxSharedUtils.isGroovyScript(name) && !checkScriptEngineExtensions(name)) {
-            setNameErrorMsg(MessageBean.getInstance().getMessage("Script.err.name"));
-            setInputFieldDisabled(true);
-            setVerifyButtonEnabled(false);
+            nameErrorMsg = (MessageBean.getInstance().getMessage("Script.err.name"));
+            inputFieldEnabled = false;
+            verifyButtonEnabled = false;
+            executeButtonEnabled = false;
         } else {
-            setNameErrorMsg(null);
-            setInputFieldDisabled(false);
+            nameErrorMsg = null;
+            inputFieldEnabled = true;
+            checkScriptEvent();
             // separately enable the Groovy syntax verification button
             if (FxSharedUtils.isGroovyScript(name)) {
-                setVerifyButtonEnabled(true);
+                verifyButtonEnabled = true;
             }
         }
     }
 
     /**
-     * Checks all available extensions from the ScriptEngineFactory
+     * Checks all available extensions from the ScriptEngineFactory and sets the current language
      *
      * @param scriptName Name of the script
      * @return true if the given script name contains a valid extension found in the scripting engine
      */
     private boolean checkScriptEngineExtensions(String scriptName) {
-        boolean validExtension = false;
         for (ScriptEngineFactory f : new ScriptEngineManager().getEngineFactories()) {
             for (String ext : f.getExtensions()) {
                 if (scriptName.toLowerCase().contains("." + ext)) {
-                    validExtension = true;
-                    break;
+                    return true;
                 }
             }
         }
-        return validExtension;
+        return false;
     }
 
     /**
