@@ -29,6 +29,11 @@ Data sources
 Creating new projects:
 ----------------------
 
+You can use the flexive distribution in flexive-dist/ for creating new
+projects. It is recommended, however, to use a separate application
+server like JBoss or Glassfish for deployment, since Jetty does not support
+EAR deployment and requires more configuration.
+
 * Create an Ant-based project:
     cd flexive-dist
     ant project.create

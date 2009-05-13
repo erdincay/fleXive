@@ -67,7 +67,7 @@
         <!--<panel classname="InfoPanel"/>-->
         <!--<panel classname="LicencePanel"/>-->
         <panel classname="TargetPanel"/>
-        <panel classname="PacksPanel"/>
+        <!--panel classname="PacksPanel"/-->
         <panel classname="InstallPanel"/>
         <panel classname="ShortcutPanel"/>
         <panel classname="FinishPanel"/>
