@@ -329,7 +329,7 @@ function regAjaxComponentInToolbar() {
     function renderAjaxButtonsToToolbar() {
         var rerender = false;
         // if parent.toolbarIds.length != toolbarButtonIds.length ==> ajaxButtons were rendered, add them to the local vars
-        if (parent.toolbarIds.length != toolbarButtonIds.length) {
+        if (!compareToolbarWithParent()) {
             rerender = addAjaxButtonsFromParent();
             // special case: refresh w/o a rerender = ajax request w/o changes
             if (!rerender)
@@ -371,6 +371,31 @@ function regAjaxComponentInToolbar() {
         }
         return rerender;
     }
+
+    // compares the locally generated toolbar with the parent toolbar
+    // disregarding separators
+    var compareToolbarWithParent = function() {
+        if(parent.toolbarIds.length == toolbarButtonIds.length)
+            return true;
+        else {
+            var localIds = toolbarButtonIds.slice(0);
+            var parentIds = parent.toolbarIds.slice(0);
+            var idx = -1;
+            while(true) { // local ids
+                idx = localIds.indexOf('');
+                if(idx < 0)
+                    break;
+                localIds.splice(idx, 1);
+            }
+            while(true) { // parent ids
+                idx = parentIds.indexOf('');
+                if(idx < 0)
+                    break;
+                parentIds.splice(idx, 1);
+            }
+            return localIds.length == parentIds.length;
+        }
+    };
 
     // copies the data to the parent arrays
     var copyToolbarButtonsToParent = function() {
