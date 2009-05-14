@@ -382,13 +382,13 @@ function regAjaxComponentInToolbar() {
             var parentIds = parent.toolbarIds.slice(0);
             var idx = -1;
             while(true) { // local ids
-                idx = localIds.indexOf('');
+                idx = linearSearch('', localIds, false);
                 if(idx < 0)
                     break;
                 localIds.splice(idx, 1);
             }
             while(true) { // parent ids
-                idx = parentIds.indexOf('');
+                idx = linearSearch('', parentIds, false);
                 if(idx < 0)
                     break;
                 parentIds.splice(idx, 1);
