@@ -37,9 +37,9 @@ import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.scripting.FxScriptInfo;
 import com.flexive.shared.scripting.FxScriptMapping;
 import com.flexive.shared.security.ACL;
+import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.security.Mandator;
 import com.flexive.shared.security.UserTicket;
-import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.workflow.Route;
 import com.flexive.shared.workflow.Step;
 import com.flexive.shared.workflow.StepDefinition;
@@ -63,6 +63,7 @@ import java.util.List;
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
+@SuppressWarnings({"ThrowableInstanceNeverThrown"})
 public final class FxFilteredEnvironment implements FxEnvironment {
     private static final long serialVersionUID = 4401591013752540846L;
 
@@ -86,7 +87,7 @@ public final class FxFilteredEnvironment implements FxEnvironment {
         return environment.getStepDefinition(id);
     }
 
-     /**
+    /**
      * {@inheritDoc}
      */
     public StepDefinition getStepDefinition(String name) {
@@ -393,24 +394,48 @@ public final class FxFilteredEnvironment implements FxEnvironment {
     }
 
     /**
+     * Filter all types the user has no read permission for
+     *
+     * @param list list of types
+     * @return filtered list containing only types the user has read permission for
+     */
+    private List<FxType> filterReadableTypes(List<FxType> list) {
+        boolean needFilter = false;
+        final UserTicket ticket = FxContext.getUserTicket();
+        for (FxType t : list) {
+            if (t.isUseTypePermissions() && !ticket.mayReadACL(t.getACL().getId(), -1)) {
+                needFilter = true;
+                break;
+            }
+        }
+        if (!needFilter)
+            return list;
+        List<FxType> filtered = new ArrayList<FxType>(list.size() - 1);
+        for (FxType t : list)
+            if (!t.isUseTypePermissions() || ticket.mayReadACL(t.getACL().getId(), -1))
+                filtered.add(t);
+        return Collections.unmodifiableList(filtered);
+    }
+
+    /**
      * {@inheritDoc}
      */
     public List<FxType> getTypes() {
-        return getTypes(true, true, true, true);
+        return filterReadableTypes(getTypes(true, true, true, true));
     }
 
     /**
      * {@inheritDoc}
      */
     public List<FxType> getTypes(boolean returnBaseTypes, boolean returnDerivedTypes, boolean returnTypes, boolean returnRelations) {
-        return environment.getTypes(returnBaseTypes, returnDerivedTypes, returnTypes, returnRelations);
+        return filterReadableTypes(environment.getTypes(returnBaseTypes, returnDerivedTypes, returnTypes, returnRelations));
     }
 
     /**
      * {@inheritDoc}
      */
     public List<FxType> getReferencingRelationTypes(long typeId) {
-        return environment.getReferencingRelationTypes(typeId);
+        return filterReadableTypes(environment.getReferencingRelationTypes(typeId));
     }
 
     /**

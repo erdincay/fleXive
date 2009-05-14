@@ -248,6 +248,8 @@ public class CacheAdmin {
      * @return a {@link com.flexive.shared.structure.FxFilteredEnvironment} for the calling user.
      */
     public static FxEnvironment getFilteredEnvironment() {
+        if(FxContext.getUserTicket().isGlobalSupervisor())
+            return getEnvironment();
         return new FxFilteredEnvironment(getEnvironment());
     }
 
