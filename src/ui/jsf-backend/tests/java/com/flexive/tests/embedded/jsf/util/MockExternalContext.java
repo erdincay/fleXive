@@ -71,7 +71,7 @@ public class MockExternalContext extends ExternalContext {
         }
 
         public ServletContext getContext(String s) {
-            return null;  //To change body of implemented methods use File | Settings | File Templates.
+            return this;
         }
 
         public int getMajorVersion() {
@@ -143,7 +143,7 @@ public class MockExternalContext extends ExternalContext {
         }
 
         public Enumeration getInitParameterNames() {
-            return null;  //To change body of implemented methods use File | Settings | File Templates.
+            return Collections.enumeration(new ArrayList());
         }
 
         public Object getAttribute(String s) {
