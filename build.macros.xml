@@ -172,6 +172,9 @@
         <attribute name="earfile"/>
         <attribute name="jettydir"/>
         <sequential >
+            <!-- Clear EJB deployment directory -->
+            <delete  dir="@{jettydir}/lib/ext/flexive"/>
+            
             <!-- Unzip EJBs and libraries to lib/ext -->
             <unzip dest="@{jettydir}/lib/ext/flexive" overwrite="true" src="@{earfile}">
                 <patternset>
@@ -193,6 +196,16 @@
                 <fileset dir="${dist.basedir}/extlib" includes="jsf-api.jar,jsf-impl.jar,el-api.jar,el-ri.jar"/>
             </copy>
             
+        </sequential>
+    </macrodef>
+
+    <macrodef name="runJetty" description="Launch Jetty with OpenEJB">
+        <attribute name="jettydir"/>
+        <sequential >
+            <java dir="@{jettydir}" fork="true" jar="@{jettydir}/start.jar">
+                <jvmarg value="-Xmx128m"/>
+                <jvmarg value="-Dopenejb.configuration=openejb.conf.xml"/>
+            </java>
         </sequential>
     </macrodef>
 

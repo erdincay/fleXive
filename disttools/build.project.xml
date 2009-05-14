@@ -21,6 +21,13 @@
     <property name="package.shared" value="${fxProject}-shared.jar"/>
     <property name="package.ejb" value="${fxProject}-ejb.jar"/>
 
+    <!-- Deployment options -->
+    <!-- Include project deployment properties that can be used to override the distribution one's -->
+    <property file="deployment.properties"/>
+    <!-- Specify default EAR name -->
+    <property name="deploy.ear.file" value="${build.dist.dir}/${package.ear}"/>
+    <property file="${dist.basedir}/deployment.properties"/>
+
     <taskdef name="applicationDescriptorBuilder"
              classname="com.flexive.tools.ant.ApplicationDescriptorBuilderTask"
              classpath="${flexive.ant.jar}"/>
@@ -164,4 +171,7 @@ db.config.create
     </target>
 
     <target name="package" depends="project.precompile,compile,project.postcompile,package.shared,package.ejb,package.war,package.ear,project.postpackage"/>
+    
+    <!-- ear is and alias for "package" (to be consistent with the distribution's targets -->
+    <target name="ear" depends="package"/>
 </project>

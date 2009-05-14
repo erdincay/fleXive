@@ -95,6 +95,7 @@
             <file src="openejb.conf.xml" targetdir="$INSTALL_PATH/jetty-6.1.17"/>
             <file src="start.sh" targetdir="$INSTALL_PATH"/>
             <file src="start.bat" targetdir="$INSTALL_PATH"/>
+            <file src="deployment.properties" targetdir="$INSTALL_PATH/flexive-dist"/>
 
             <file src="icon_start.ico" targetdir="$INSTALL_PATH"/>
             <file src="icon_start.png" targetdir="$INSTALL_PATH"/>

@@ -64,8 +64,6 @@ public class FlexiveInstallListener implements InstallerListener {
         project.executeTarget("glassfish.libs");
 
         handler.progress(1, "Installing flexive.ear");
-        project.setProperty("jetty.dir", "../" + JETTY_DIR);
-        project.setProperty("ear.file", "flexive.ear");
         project.executeTarget("deploy.jetty");
 
         // Workaround for http://jira.codehaus.org/browse/IZPACK-179 (empty logs/ directory is not created)

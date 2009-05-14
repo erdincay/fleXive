@@ -13,6 +13,7 @@
     <property name="mysql.classpathref" value="lib.path"/>
 
     <property file="database.properties"/>
+    <property file="deployment.properties"/>
     <import file="build.macros.xml"/>
     <import file="build.shared-dist.xml"/>
     <import file="build.properties-dist.xml"/>

@@ -169,9 +169,10 @@
                                 <!--<unzip src="../build/flexive-dist.zip" dest="${staging.dir}"/>-->
                                 <!-- replace database.properties in flexive-dist -->
                                 <touch file="${basedir}/src/izpack/database.properties"/>
+                                <touch file="${basedir}/src/izpack/deployment.properties"/>
                                 <jar destfile="${staging.dir}/flexive-dist.zip" update="true">
                                     <zipfileset prefix="flexive-dist" dir="${basedir}/src/izpack"
-                                                includes="database.properties"/>
+                                                includes="database.properties,deployment.properties"/>
                                 </jar>
                                 <!-- Copy OpenEJB into staging area -->
                                 <copy todir="${staging.dir}/openejb-3.1">
