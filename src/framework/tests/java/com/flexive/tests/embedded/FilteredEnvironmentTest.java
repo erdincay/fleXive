@@ -104,8 +104,14 @@ public class FilteredEnvironmentTest extends EnvironmentTest {
             login(TestUsers.SUPERVISOR);
             final ACL acl = getEnvironment().getDefaultACL(ACLCategory.STRUCTURE);
             typeId = EJBLookup.getTypeEngine().save(FxTypeEdit.createNew(TYPE_NAME, new FxString("test"), acl));
+            logout();
+
+            login(TestUsers.GUEST);
             final long originalPropertiesSize = getEnvironment().getProperties(true, true).size();
             final int originalAssignmentsSize = getEnvironment().getPropertyAssignments().size();
+            logout();
+
+            login(TestUsers.SUPERVISOR);
             EJBLookup.getAssignmentEngine().createProperty(typeId, FxPropertyEdit.createNew(PROPERTY_NAME,
                     new FxString(""), new FxString(""), FxMultiplicity.MULT_0_1,
                     getEnvironment().getDefaultACL(ACLCategory.STRUCTURE),
