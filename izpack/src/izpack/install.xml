@@ -114,7 +114,7 @@
         </pack>
         <pack name="Jetty WebServer" required="yes">
             <description>Jetty WebServer</description>
-            <file src="jetty-6.1.17.zip" targetdir="$INSTALL_PATH" unpack="true"/>
+            <fileset dir="jetty-6.1.17" targetdir="$INSTALL_PATH/jetty-6.1.17"/>
         </pack>
         <pack name="OpenEJB Container" required="yes">
             <description>OpenEJB container</description>

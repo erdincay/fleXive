@@ -17,6 +17,7 @@
         <jetty.version>6.1.17</jetty.version>
         <jetty.baseUrl>http://dist.codehaus.org/jetty/jetty-${jetty.version}/</jetty.baseUrl>
         <jetty.zipFile>jetty-${jetty.version}.zip</jetty.zipFile>
+        <jetty.staging.dir>${staging.dir}/jetty-${jetty.version}</jetty.staging.dir>
     </properties>
                
     <dependencies>
@@ -117,7 +118,28 @@
                                         usetimestamp="true"
                                         verbose="true"
                                         />
-                                <!--<unzip src="${basedir}/src/izpack/${jetty.zipFile}" dest="${staging.dir}/jetty"/>-->
+                                <unzip src="${basedir}/src/izpack/${jetty.zipFile}" dest="${staging.dir}"/>
+
+                                <!-- Clean up default installation -->
+                                <delete>
+                                    <fileset dir="${jetty.staging.dir}/contexts">
+                                        <include name="*.xml"/>
+                                    </fileset>
+
+                                    <fileset dir="${jetty.staging.dir}/webapps">
+                                        <include name="cometd.war"/>
+                                    </fileset>
+                                </delete>
+                                <delete dir="${jetty.staging.dir}/webapps/test"/>
+                                <delete dir="${jetty.staging.dir}/webapps/test-jaas"/>
+                                <delete dir="${jetty.staging.dir}/contexts/test.d"/>
+                                <delete dir="${jetty.staging.dir}/contexts/test-jndi.d"/>
+                                <delete dir="${jetty.staging.dir}/examples"/>
+                                <delete dir="${jetty.staging.dir}/javadoc"/>
+                                <delete dir="${jetty.staging.dir}/modules"/>
+                                <delete dir="${jetty.staging.dir}/contrib"/>
+                                <delete dir="${jetty.staging.dir}/distribution"/>
+                                <delete dir="${jetty.staging.dir}/jxr"/>
                             </tasks>
                         </configuration>
                         <goals>

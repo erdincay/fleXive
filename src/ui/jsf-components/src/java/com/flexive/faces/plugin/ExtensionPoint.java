@@ -31,6 +31,8 @@
  ***************************************************************/
 package com.flexive.faces.plugin;
 
+import java.io.Serializable;
+
 /**
  * <p>
  * An extension point where plugins can be registered. An extension point specifies
@@ -53,7 +55,7 @@ package com.flexive.faces.plugin;
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-public abstract class ExtensionPoint<PEX extends PluginExecutor> {
+public abstract class ExtensionPoint<PEX extends PluginExecutor> implements Serializable {
     private final String name;
 
     /**

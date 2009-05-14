@@ -111,7 +111,7 @@ public class FxQuartz {
         props.put("org.quartz.scheduler.instanceId", StdSchedulerFactory.AUTO_GENERATE_INSTANCE_ID);
 //        props.put("org.quartz.scheduler.xaTransacted", "false");
         props.put(StdSchedulerFactory.PROP_THREAD_POOL_CLASS, SimpleThreadPool.class.getCanonicalName());
-        props.put("org.quartz.threadPool.threadCount", String.valueOf(5));
+        props.put("org.quartz.threadPool.threadCount", String.valueOf(1));
         props.put("org.quartz.jobStore.nonManagedTXDataSource", "fxQuartzNoTXDS");
 
         props.put(StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME, "FxQuartzScheduler_Division_" + FxContext.get().getDivisionId());

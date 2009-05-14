@@ -67,7 +67,8 @@ public class FlexiveInstallListener implements InstallerListener {
         project.executeTarget("deploy.jetty");
 
         // Workaround for http://jira.codehaus.org/browse/IZPACK-179 (empty logs/ directory is not created)
-        if (!new File(idata.getInstallPath() + "/" + JETTY_DIR + "/logs").mkdir()) {
+        final File logsDir = new File(idata.getInstallPath() + "/" + JETTY_DIR + "/logs");
+        if (!logsDir.exists() && !logsDir.mkdir()) {
             System.err.println("Failed to create /logs directory for Jetty.");
         }
 

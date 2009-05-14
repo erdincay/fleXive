@@ -66,7 +66,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * @version $Rev$
  * @since 3.0.2
  */
-public class RssProviderBean {
+public class RssProviderBean implements Serializable {
+    private static final long serialVersionUID = -1235304053736133239L;
     private static final Log LOG = LogFactory.getLog(RssProviderBean.class);
 
     /**

@@ -39,7 +39,7 @@
         Password
     ]]></Resource>
 
-    <SecurityService id="Default Security Service"/>
+    <!--SecurityService id="Default Security Service"/-->
 
     <Deployments dir="lib/ext/flexive/"/>
     <!--TransactionService id="Default Transaction Manager"/-->

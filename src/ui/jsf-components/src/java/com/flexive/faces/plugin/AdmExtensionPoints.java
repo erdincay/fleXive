@@ -45,6 +45,7 @@ public final class AdmExtensionPoints {
      */
     public static final ExtensionPoint<TreePluginExecutor> ADM_MAIN_NAVIGATION =
             new ExtensionPoint<TreePluginExecutor>("/tree/adm/main") {
+                private static final long serialVersionUID = 1219939488484948444L;
             };
 
     /**
@@ -54,6 +55,7 @@ public final class AdmExtensionPoints {
      */
     public static final ExtensionPoint<ToolbarPluginExecutor> ADM_TOOLBAR_PLUGINS =
             new ExtensionPoint<ToolbarPluginExecutor>("/toolbar/adm") {
+                private static final long serialVersionUID = 7462360601805144810L;
             };
 
     private AdmExtensionPoints() {
