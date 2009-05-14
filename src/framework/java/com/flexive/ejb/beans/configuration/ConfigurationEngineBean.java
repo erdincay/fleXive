@@ -35,9 +35,9 @@ import com.flexive.shared.configuration.Parameter;
 import com.flexive.shared.configuration.ParameterScope;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.*;
+import com.flexive.shared.Pair;
 
 import javax.ejb.*;
-import java.io.Serializable;
 import java.util.*;
 
 /**
@@ -83,12 +83,9 @@ public class ConfigurationEngineBean implements ConfigurationEngine, Configurati
     public <T> T get(Parameter<T> parameter, String key, boolean ignoreDefault)
             throws FxApplicationException {
         for (GenericConfigurationEngine config : getAvailableConfigurations(parameter.getScope())) {
-            try {
-                return config.get(parameter, key, true);
-                // CHECKSTYLE:OFF
-            } catch (FxNotFoundException e) {
-                // try next config 
-                // CHECKSTYLE:ON
+            final Pair<Boolean, T> result = config.tryGet(parameter, key, true);
+            if (result.getFirst()) {
+                return result.getSecond();
             }
         }
         // parameter does not exist in any configuration, use default value if available
@@ -100,6 +97,23 @@ public class ConfigurationEngineBean implements ConfigurationEngine, Configurati
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public <T> Pair<Boolean, T> tryGet(Parameter<T> parameter, String key, boolean ignoreDefault) {
+        try {
+            for (GenericConfigurationEngine config : getAvailableConfigurations(parameter.getScope())) {
+                final Pair<Boolean, T> result = config.tryGet(parameter, key, true);
+                if (result.getFirst()) {
+                    return result;
+                }
+            }
+        } catch (FxInvalidParameterException e) {
+            return new Pair<Boolean, T>(false, null);
+        }
+        return new Pair<Boolean, T>(false, null);
+    }
 
     /**
      * {@inheritDoc}

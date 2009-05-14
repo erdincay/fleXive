@@ -33,6 +33,7 @@ package com.flexive.shared.interfaces;
 
 import com.flexive.shared.configuration.Parameter;
 import com.flexive.shared.exceptions.*;
+import com.flexive.shared.Pair;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -125,7 +126,21 @@ public abstract interface GenericConfigurationEngine {
      */
     <T> T get(Parameter<T> parameter, String key, boolean ignoreDefault)
         throws FxApplicationException;
-	
+
+    /**
+     * Try to fetch the given parameter. Returns (true, [value]) when the parameter was found
+     * (value can be null), (false, null) otherwise.
+     * <p/>
+     * This is mainly a performance optimization for {@link ConfigurationEngine} to avoid
+     * throwing (possibly expensive) application exceptions from EJB calls.  
+     *
+     * @param parameter the parameter
+     * @param ignoreDefault
+     * @return  true if the configuration contains a value for the given parameter.
+     * @since 3.1
+     */
+    <T> Pair<Boolean, T> tryGet(Parameter<T> parameter, String key, boolean ignoreDefault);
+
 	/**
 	 * Retrieves all key/value pairs stored under the path of the given parameter.
 	 * 

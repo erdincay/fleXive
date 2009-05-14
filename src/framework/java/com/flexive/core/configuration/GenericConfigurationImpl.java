@@ -34,6 +34,7 @@ package com.flexive.core.configuration;
 import com.flexive.core.Database;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
+import com.flexive.shared.Pair;
 import com.flexive.shared.cache.FxCacheException;
 import com.flexive.shared.configuration.Parameter;
 import com.flexive.shared.configuration.ParameterData;
@@ -310,15 +311,7 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
      */
     public <T> T get(Parameter<T> parameter, String key)
             throws FxApplicationException {
-        try {
-            return parameter.getValue(getParameter(parameter, parameter.getPath().getValue(), key));
-        } catch (FxNotFoundException e) {
-            if (parameter.getDefaultValue() != null) {
-                return parameter.getDefaultValue();
-            } else {
-                throw e;
-            }
-        }
+        return get(parameter, key, false);
     }
 
     /**
@@ -326,16 +319,33 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
      */
     public <T> T get(Parameter<T> parameter, String key, boolean ignoreDefault)
             throws FxApplicationException {
+        final Pair<Boolean, T> result = tryGet(parameter, key, ignoreDefault);
+        if (result.getFirst()) {
+            return result.getSecond();
+        }
+        throw new FxNotFoundException("ex.configuration.parameter.notfound", parameter.getPath(), key);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public <T> Pair<Boolean, T> tryGet(Parameter<T> parameter, String key, boolean ignoreDefault) {
         try {
-            return parameter.getValue(getParameter(parameter, parameter.getPath().getValue(), key));
+            final T value = parameter.getValue(
+                    getParameter(parameter, parameter.getPath().getValue(), key)
+            );
+            return new Pair<Boolean, T>(true, value);
         } catch (FxNotFoundException e) {
             if (!ignoreDefault && parameter.getDefaultValue() != null) {
-                return parameter.getDefaultValue();
+                return new Pair<Boolean, T>(true, parameter.getDefaultValue());
             } else {
-                throw e;
+                return new Pair<Boolean, T>(false, null);
             }
+        } catch (FxApplicationException e) {
+            return new Pair<Boolean, T>(false, null);
         }
     }
+
 
     /**
      * {@inheritDoc}
