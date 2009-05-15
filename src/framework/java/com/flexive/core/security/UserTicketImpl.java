@@ -92,9 +92,12 @@ public class UserTicketImpl implements UserTicket, Serializable {
      */
     public static UserTicket getGuestTicket() {
         FxContext si = FxContext.get();
-        if (CacheAdmin.isEnvironmentLoaded() && CacheAdmin.getEnvironment().getTimeStamp() != STRUCTURE_TIMESTAMP) {
-            STRUCTURE_TIMESTAMP = CacheAdmin.getEnvironment().getTimeStamp();
-            reloadGuestTicketAssignments(false);
+        if (CacheAdmin.isEnvironmentLoaded()) {
+            final FxEnvironment environment = CacheAdmin.getEnvironment();
+            if (environment.getTimeStamp() != STRUCTURE_TIMESTAMP) {
+                STRUCTURE_TIMESTAMP = environment.getTimeStamp();
+                reloadGuestTicketAssignments(false);
+            }
         }
         synchronized(UserTicketImpl.class) {
             // Don't use the class lock for the entire method, because otherwise it could

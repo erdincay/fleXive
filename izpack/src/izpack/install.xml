@@ -104,6 +104,9 @@
             <file src="icon_uninstall.png" targetdir="$INSTALL_PATH"/>
             <file src="icon_uninstall.ico" targetdir="$INSTALL_PATH"/>
 
+            <executable targetfile="$INSTALL_PATH/start.sh" os="unix" stage="never" failure="warn" keep="true"/>
+            <executable targetfile="$INSTALL_PATH/start.sh" os="mac" stage="never" failure="warn" keep="true"/>
+
             <!--<file src="script.bat" targetdir="$INSTALL_PATH"/>-->
             <!--<parsable targetfile="$INSTALL_PATH/script.bat"/>-->
             <!-- The file will be parsed -->

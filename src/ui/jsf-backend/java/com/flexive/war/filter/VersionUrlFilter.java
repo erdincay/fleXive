@@ -8,7 +8,9 @@ import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.Date;
+import java.net.URLEncoder;
 
 /**
  * Removes an optional flexive version identifier used for creating unique resource URLs from the request.
@@ -24,10 +26,18 @@ import java.util.Date;
  * @since 3.1
  */
 public class VersionUrlFilter implements Filter {
-    public static final String URL_PATTERN = "$VF_" + FxSharedUtils.getFlexiveVersion();
+    public static final String URL_PATTERN;
     private static final Log LOG = LogFactory.getLog(VersionUrlFilter.class);
 
     private FilterConfig config;
+
+    static {
+        try {
+            URL_PATTERN = "$VF_" + URLEncoder.encode(FxSharedUtils.getFlexiveVersion(), "UTF-8");
+        } catch(UnsupportedEncodingException e) {
+            throw new IllegalArgumentException("Failed to create URL pattern: " + e.getMessage(), e);
+        }
+    }
 
     public void init(FilterConfig filterConfig) throws ServletException {
         this.config = filterConfig;
@@ -44,10 +54,13 @@ public class VersionUrlFilter implements Filter {
                 LOG.trace("Removed version string from URI '" + requestUri + "', new URI: '" + uri + "'.");
             }
             // disable cache for -SNAPSHOT versions (similar to Weblets)
+            final HttpServletResponse response = (HttpServletResponse) servletResponse;
             if (FxSharedUtils.isSnapshotVersion()) {
-                final HttpServletResponse response = (HttpServletResponse) servletResponse;
                 response.setDateHeader("Expires", 0);
                 response.setDateHeader("Last-modified", new Date().getTime());
+            } else {
+                // set expiry date far in the future, since we're certain the contents won't change
+                response.setDateHeader("Expires", new Date().getTime() + 30L * 24 * 3600 * 1000);
             }
             // forward to real path
             request.getRequestDispatcher(uri).forward(servletRequest, servletResponse);

@@ -53,13 +53,12 @@ public class FxFoundType implements Serializable {
     /**
      * Constructor.
      *
-     * @param contentTypeId the content type id
+     * @param type the content type
      * @param foundEntries  the amount of entries found by the query
      */
-    public FxFoundType(long contentTypeId, int foundEntries) {
-        this.contentTypeId = contentTypeId;
+    public FxFoundType(FxType type, int foundEntries) {
+        this.contentTypeId = type.getId();
         this.foundEntries = foundEntries;
-        final FxType type = CacheAdmin.getEnvironment().getType(contentTypeId);
         this.displayName = type.getDisplayName();
         this.description = type.getLabel();
     }

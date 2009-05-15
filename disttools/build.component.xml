@@ -29,6 +29,12 @@ To build and maintain your component, please use the following tasks:
 
 package
         Creates the packaged JAR distribution of your component.
+
+install
+        Package the component and install it to ${dist.basedir}/applications.
+
+uninstall
+        Remove the component from ${dist.basedir}/applications.
         ]]></echo>
         <input message="Please enter a target name, or quit to exit:" addproperty="info.targetname"/>
         <antcall target="${info.targetname}"/>
@@ -53,6 +59,7 @@ package
     </target>
 
     <target name="compile" depends="prepare" description="Compile all java sources">
+        <mkdir dir="${basedir}/lib"/>   <!-- for additional compile-time dependencies -->
         <compilePlugin srcdir="${basedir}" builddir="${build.dir}" classpathref="dist.path"/>
     </target>
 
@@ -63,4 +70,14 @@ package
     </target>
 
     <target name="package" depends="compile,package.jar"/>
+
+    <target name="install" depends="package">
+        <copy file="${build.dist.dir}/${package.jar}" todir="${dist.basedir}/applications"/>
+        <echo taskname="flexive">Installed component to ${dist.basedir}/applications.</echo>
+    </target>
+
+    <target name="uninstall">
+        <remove file="${dist.basedir}/applications/${package.jar}"/>
+        <echo taskname="flexive">Removed component from ${dist.basedir}/applications.</echo>
+    </target>
 </project>

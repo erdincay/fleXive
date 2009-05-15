@@ -40,6 +40,7 @@ import com.flexive.core.storage.FxTreeNodeInfo;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.core.storage.genericSQL.GenericTreeStorage;
 import com.flexive.shared.*;
+import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxSqlSearchException;
 import com.flexive.shared.search.DateFunction;
@@ -96,9 +97,11 @@ public class GenericSQLDataFilter extends DataFilter {
     private int foundEntryCount;
     private boolean truncated;
     private Connection con;
+    private FxEnvironment environment;
 
     public GenericSQLDataFilter(Connection con, SqlSearch search) throws FxSqlSearchException {
         super(con, search);
+        this.environment = CacheAdmin.getEnvironment();
         this.con = con;
         final long[] briefcaseIds = getStatement().getBriefcaseFilter();
         if (briefcaseIds.length == 0) {
@@ -239,7 +242,7 @@ public class GenericSQLDataFilter extends DataFilter {
                     " WHERE search_id=" + search.getSearchId() + " GROUP BY tdef");
             foundEntryCount = 0;
             while (rs != null && rs.next()) {
-                final FxFoundType type = new FxFoundType(rs.getLong(2), rs.getInt(1));
+                final FxFoundType type = new FxFoundType(environment.getType(rs.getLong(2)), rs.getInt(1));
                 foundEntryCount += type.getFoundEntries();
                 contentTypes.add(type);
             }
@@ -393,13 +396,13 @@ public class GenericSQLDataFilter extends DataFilter {
         } catch (FxApplicationException e) {
             throw new FxSqlSearchException(LOG, e, "ex.sqlSearch.filter.loadTreeNode", parentNode, e.getMessage());
         }
-        String mandators = CacheAdmin.getEnvironment().getInactiveMandatorList();
+        String mandators = environment.getInactiveMandatorList();
         final String mandatorFilter;
         if (mandators.length() > 0)
             mandatorFilter = " AND cd.mandator NOT IN(" + mandators + ")";
         else
             mandatorFilter = mandators; //empty
-        String types = CacheAdmin.getEnvironment().getDeactivatedTypesList();
+        String types = environment.getDeactivatedTypesList();
         final String typeFilter;
         if (types.length() > 0)
             typeFilter = " AND cd.tdef NOT IN(" + types + ")";
@@ -672,7 +675,7 @@ public class GenericSQLDataFilter extends DataFilter {
      */
     private String getInactiveMandatorsFilter(String tblAlias) {
         String tbl = (tblAlias == null || tblAlias.length() == 0) ? "" : tblAlias + ".";
-        String mandators = CacheAdmin.getEnvironment().getInactiveMandatorList();
+        String mandators = environment.getInactiveMandatorList();
         if (mandators.length() > 0)
             return " AND " + tbl + "mandator NOT IN(" + mandators + ")";
         else
@@ -687,7 +690,7 @@ public class GenericSQLDataFilter extends DataFilter {
      */
     private String getDeactivatedTypesFilter(String tblAlias) {
         String tbl = (tblAlias == null || tblAlias.length() == 0) ? "" : tblAlias + ".";
-        String types = CacheAdmin.getEnvironment().getDeactivatedTypesList();
+        String types = environment.getDeactivatedTypesList();
         if (types.length() > 0)
             return " AND " + tbl + "tdef NOT IN(" + types + ")";
         else
