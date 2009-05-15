@@ -141,7 +141,7 @@ public class XPathElement implements Serializable {
     /**
      * Split an XPath into its elements
      *
-     * @param XPath
+     * @param XPath the XPath
      * @return XPathElement array
      * @throws FxInvalidParameterException for invalid elements
      */
@@ -165,9 +165,9 @@ public class XPathElement implements Serializable {
     /**
      * Get the last (rightmost) element of an XPath
      *
-     * @param XPath
+     * @param XPath the XPath
      * @return last (rightmost) element of an XPath
-     * @throws FxInvalidParameterException
+     * @throws FxInvalidParameterException on errors
      */
     public static XPathElement lastElement(String XPath) throws FxInvalidParameterException {
         if (StringUtils.isEmpty(XPath) || !isValidXPath(XPath))
@@ -181,7 +181,7 @@ public class XPathElement implements Serializable {
      * @param XPath full XPath, only used if exception is thrown
      * @param alias alias to convert to an XPathElement
      * @return XPathElement
-     * @throws FxInvalidParameterException
+     * @throws FxInvalidParameterException on errors
      */
     public static XPathElement toElement(String XPath, String alias) throws FxInvalidParameterException {
         if (StringUtils.isEmpty(alias) || alias.indexOf('/') >= 0)
@@ -199,13 +199,11 @@ public class XPathElement implements Serializable {
     /**
      * Check if this XPath is valid
      *
-     * @param XPath
+     * @param XPath the XPath
      * @return valid or not
      */
     public static boolean isValidXPath(String XPath) {
-        if ("/".equals(XPath))
-            return true;
-        return !StringUtils.isEmpty(XPath) && XPathPattern.matcher(XPath).matches();
+        return "/".equals(XPath) || !StringUtils.isEmpty(XPath) && XPathPattern.matcher(XPath).matches();
     }
 
 
@@ -395,6 +393,7 @@ public class XPathElement implements Serializable {
         FxSharedUtils.checkParameterEmpty(xPath, "xpath");
         final Matcher matcher = PKPattern.matcher(xPath);
         if (!matcher.find()) {
+            //noinspection ThrowableInstanceNeverThrown
             throw new FxInvalidParameterException("xpath", "ex.xpath.element.noPk", xPath).asRuntimeException();
         }
         return FxPK.fromString(matcher.group(1));

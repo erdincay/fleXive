@@ -34,7 +34,6 @@ package com.flexive.shared;
 import com.flexive.shared.exceptions.FxCreateException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxNotFoundException;
-import com.flexive.shared.exceptions.FxLoadException;
 import com.flexive.shared.structure.FxAssignment;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.value.FxValue;
@@ -60,6 +59,7 @@ import java.util.jar.JarInputStream;
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
+@SuppressWarnings({"ThrowableInstanceNeverThrown"})
 public final class FxSharedUtils {
     private static final Log LOG = LogFactory.getLog(FxSharedUtils.class);
 
@@ -215,6 +215,7 @@ public final class FxSharedUtils {
      * @param jarStream the given JarInputStream
      * @param entry     the given entry in the jar file
      * @return the entry's content as a String
+     * @throws java.io.IOException on errors
      */
     public static String readFromJarEntry(JarInputStream jarStream, JarEntry entry) throws IOException {
         final String fileContent;
@@ -910,6 +911,7 @@ public final class FxSharedUtils {
      */
     public static String getLocalizedMessage(String resourceBundle, long localeId, String localeIso, String key, Object... args) {
         if (key == null) {
+            //noinspection ThrowableInstanceNeverThrown
             LOG.error("No key given!", new Throwable());
             return "##NO_KEY_GIVEN";
         }

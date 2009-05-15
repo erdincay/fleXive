@@ -663,8 +663,8 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
             success = true;
         } catch (SQLException exc) {
             if (Database.isUniqueConstraintViolation(exc))
-                throw new FxEntryExistsException("ex.scripting.mapping.types.notUnique", scriptId, typeId);
-            throw new FxCreateException(LOG, exc, "ex.scripting.mapping.types.create.failed", scriptId, typeId, exc.getMessage());
+                throw new FxEntryExistsException("ex.scripting.mapping.type.notUnique", scriptId, typeId);
+            throw new FxCreateException(LOG, exc, "ex.scripting.mapping.type.create.failed", scriptId, typeId, exc.getMessage());
         } finally {
             Database.closeObjects(ScriptingEngineBean.class, con, ps);
             if (!success)
@@ -901,8 +901,8 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
             success = true;
         } catch (SQLException exc) {
             if (Database.isUniqueConstraintViolation(exc))
-                throw new FxEntryExistsException("ex.scripting.mapping.types.notUnique", scriptId, typeId);
-            throw new FxUpdateException(LOG, exc, "ex.scripting.mapping.types.update.failed", scriptId, typeId, exc.getMessage());
+                throw new FxEntryExistsException("ex.scripting.mapping.type.notUnique", scriptId, typeId);
+            throw new FxUpdateException(LOG, exc, "ex.scripting.mapping.type.update.failed", scriptId, typeId, exc.getMessage());
         } finally {
             Database.closeObjects(ScriptingEngineBean.class, con, ps);
             if (!success)

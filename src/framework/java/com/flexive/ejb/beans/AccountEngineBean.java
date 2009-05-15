@@ -626,7 +626,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             } finally {
                 FxContext.get().stopRunAsSystem();
             }
-            EJBLookup.getHistoryTrackerEngine().trackData("history.account.remove", account.getLoginName());
+            EJBLookup.getHistoryTrackerEngine().track("history.account.remove", account.getLoginName());
         } catch (SQLException exc) {
             ctx.setRollbackOnly();
             throw new FxRemoveException(LOG, exc, "ex.account.delete.failed.sql", accountId, exc.getMessage(), curSql);

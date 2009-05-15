@@ -844,4 +844,32 @@ public class ContentEngineTest {
             ass.save(pa.asEditable().setDefaultMultiplicity(1), false);
         }
     }
+
+    @Test
+    public void removeXPathTest() throws FxApplicationException {
+        FxContent test = co.initialize(TEST_TYPE);
+        FxString testValue1 = new FxString("Hello world1");
+        FxString testValue2 = new FxString("Hello world2");
+        FxString testValue3 = new FxString("Hello world3");
+
+        //test with property
+        test.setValue("/TestProperty3[1]", testValue1);
+        test.setValue("/TestProperty3[2]", testValue2);
+        test.setValue("/TestProperty3[3]", testValue3);
+        test.remove("/TestProperty3[2]");
+        Assert.assertFalse(test.containsValue("/TestProperty3[3]"));
+        Assert.assertEquals(test.getValue("/TestProperty3[2]"), testValue3, "Propery gap should have been closed and [3] is now [2]");
+        test.remove("/TestProperty3");
+        Assert.assertFalse(test.containsValue("/TestProperty4[3]"));
+
+        //test with group
+        test.setValue("/TestGroup1/TestGroup1_2[1]/TestProperty1_2_1[1]", testValue1);
+        test.setValue("/TestGroup1/TestGroup1_2[2]/TestProperty1_2_1[1]", testValue2);
+        test.setValue("/TestGroup1/TestGroup1_2[3]/TestProperty1_2_1[1]", testValue3);
+        test.remove("/TestGroup1/TestGroup1_2[2]");
+        Assert.assertFalse(test.containsValue("/TestGroup1/TestGroup1_2[3]/TestProperty1_2_1[1]"));
+        Assert.assertEquals(test.getValue("/TestGroup1/TestGroup1_2[2]/TestProperty1_2_1[1]"), testValue3, "Group gap should have been closed and [3] is now [2]");
+        test.remove("/TestGroup1/TestGroup1_2");
+        Assert.assertFalse(test.containsValue("/TestGroup1/TestGroup1_2[1]/TestProperty1_2_1[1]"));
+    }
 }

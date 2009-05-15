@@ -42,7 +42,9 @@ import com.flexive.shared.value.FxValue;
 import org.apache.commons.lang.ArrayUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * FxData extension for groups
@@ -132,6 +134,7 @@ public class FxGroupData extends FxData {
             }
         }
         if (currPos == -1)
+            //noinspection ThrowableInstanceNeverThrown
             throw new FxNotFoundException("ex.xpath.alias.notFound", xp).asRuntimeException();
 
         newPos = currPos + delta;
@@ -212,6 +215,7 @@ public class FxGroupData extends FxData {
      * @throws FxNotFoundException         on errors
      * @throws FxCreateException           on errors
      */
+    @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     public FxData addEmptyChild(String xPath, int pos) throws FxInvalidParameterException, FxNoAccessException, FxNotFoundException, FxCreateException {
         FxType type;
         List<FxAssignment> childAssignments;
@@ -523,6 +527,29 @@ public class FxGroupData extends FxData {
             throw new FxInvalidParameterException("ex.content.xpath.remove.notFound", data.getXPathFull());
 
         data.compact();
+        compactPositions(false);
+    }
+
+    /**
+     * Remove the requested children and compact indices and positions
+     *
+     * @param dataList list of FxData to remove
+     * @throws FxInvalidParameterException on errors
+     * @throws FxNoAccessException         on errors
+     */
+    public void removeChildren(List<FxData> dataList) throws FxInvalidParameterException, FxNoAccessException {
+        Map<String, FxData> compactCandidates = new HashMap<String, FxData>(dataList.size());
+        for (FxData data : dataList) {
+            if (!data.isRemoveable())
+                throw new FxNoAccessException("ex.content.xpath.remove.invalid", data.getXPathFull());
+
+            if (!this.data.remove(data))
+                throw new FxInvalidParameterException("ex.content.xpath.remove.notFound", data.getXPathFull());
+            if (!compactCandidates.containsKey(data.getXPath()))
+                compactCandidates.put(data.getXPath(), data);
+        }
+        for (FxData compactData : compactCandidates.values())
+            compactData.compact();
         compactPositions(false);
     }
 

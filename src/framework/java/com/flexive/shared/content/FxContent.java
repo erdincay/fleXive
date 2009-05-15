@@ -271,7 +271,7 @@ public class FxContent implements Serializable {
 
     /**
      * Checks if the given PK matches the content PK. This method allows to match PKs with generic
-     * version information (including {@link FxPK#LIVE} or {@link FxPK#MAX}), which the 
+     * version information (including {@link FxPK#LIVE} or {@link FxPK#MAX}), which the
      * {@link FxPK#equals(Object)} FxPK equals method cannot do.
      *
      * @param otherPk the PK to be matched
@@ -407,11 +407,10 @@ public class FxContent implements Serializable {
 
     /**
      * Get all FxData (Group or Property) entries for the given XPath.
-     *
+     * <p/>
      * Note: If the XPath refers to a group, only its child entries are returned
-     * and not the FxData of the group itsself. For accessing the group data ittself
+     * and not the FxData of the group itsself. For accessing the group data itself
      * use {@link #getGroupData(String)} instead.
-     *
      *
      * @param XPath requested XPath
      * @return FxData elements for the given XPath
@@ -682,11 +681,11 @@ public class FxContent implements Serializable {
      * @return FxValue or <code>null</code> if no value is set
      * @see #getPropertyData(String)
      */
-    public FxValue getValue(String XPath)  {
+    public FxValue getValue(String XPath) {
         try {
             return getPropertyData(XPath).getValue();
         } catch (FxApplicationException e) {
-            if( isXPathValid(XPath, true))
+            if (isXPathValid(XPath, true))
                 return null; //just not set, see FX-473
             throw e.asRuntimeException();
         }
@@ -810,9 +809,21 @@ public class FxContent implements Serializable {
      */
     public void remove(String XPath) throws FxInvalidParameterException, FxNotFoundException, FxNoAccessException {
         FxSharedUtils.checkParameterEmpty(XPath, "XPATH");
-        XPath = XPathElement.stripType(XPathElement.toXPathMult(XPath));
-        List<FxData> found = getData(XPath);
+        XPath = XPathElement.stripType(XPath);
         FxData data = null;
+        if (!XPathElement.lastElement(XPath).isIndexDefined()) {
+            //remove all
+            String parentGroup = XPathElement.stripLastElement(XPath);
+            data = getGroupData(parentGroup);
+            List<FxData> remove = new ArrayList<FxData>(10);
+            for (FxData child : ((FxGroupData) data).getChildren())
+                if (child.getXPath().equals(XPath))
+                    remove.add(child);
+            ((FxGroupData) data).removeChildren(remove);
+            return;
+        }
+        XPath = XPathElement.toXPathMult(XPath);
+        List<FxData> found = getData(XPath);
         if (found.size() == 1) {
             if (found.get(0).getXPathFull().equals(XPath))
                 data = found.get(0); //property
