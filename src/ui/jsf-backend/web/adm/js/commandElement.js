@@ -4,42 +4,45 @@
 // @callerWindow: the calling window
 // @id: the unique id of the command element
 //======================================================================================================================
-function registerCommandElement(callerWindow,id,confirmTxt,lockscreen) {
+function registerCommandElement(callerWindow, id, confirmTxt, lockscreen, disabled) {
     try {
         var doc = callerWindow.document;
-        // Retrieve the command link
-        var linkElement = getFirstLinkElement(callerWindow.document,"commandElement_"+id);
-        // Retrieve the onClick action from the command link
-        // Add the lock screen function
-        //var onClickAction = getJsfOnClick(linkElement);
-        //onClickAction = "parent.lockScreen();"+onClickAction;
-        // DL: this also works with JSF 1.2 RI
-        var onClickAction = "document.getElementById('" + linkElement.getAttribute("id") + "').onclick();";
-        if (lockscreen) {
-            onClickAction = "parent.lockScreen();" + onClickAction;
-        }
-        // Add the confirm script part if needed
-        if (confirmTxt && confirmTxt!=null && confirmTxt!='') {
-            onClickAction="confirmDialog('"+confirmTxt+"', function() { "+onClickAction+" })";
+        if (disabled)
+            onClickAction = "";
+        else {
+            // Retrieve the command link
+            var linkElement = getFirstLinkElement(callerWindow.document, "commandElement_" + id);
+            // Retrieve the onClick action from the command link
+            // Add the lock screen function
+            //var onClickAction = getJsfOnClick(linkElement);
+            //onClickAction = "parent.lockScreen();"+onClickAction;
+            // DL: this also works with JSF 1.2 RI
+            var onClickAction = "document.getElementById('" + linkElement.getAttribute("id") + "').onclick();";
+            if (lockscreen) {
+                onClickAction = "parent.lockScreen();" + onClickAction;
+            }
+            // Add the confirm script part if needed
+            if (confirmTxt && confirmTxt != null && confirmTxt != '') {
+                onClickAction = "confirmDialog('" + confirmTxt + "', function() { " + onClickAction + " })";
+            }
         }
         // Store the action within the caller
-        eval("callerWindow.commandElementAction_"+id+"=\""+onClickAction+"\"");
+        eval("callerWindow.commandElementAction_" + id + "=\"" + onClickAction + "\"");
         if (callerWindow.flexive != null) {
             callerWindow.flexive.yui.onYahooLoaded(
-                function() {
-                    if (callerWindow.document.getElementById("commandButton_" + id) != null) {
-                        callerWindow.document.getElementById("commandButton_" + id).onclick =
-                                    function() {
-                                        callerWindow.eval(onClickAction);
-                                        return false;
-                                    };
+                    function() {
+                        if (callerWindow.document.getElementById("commandButton_" + id) != null) {
+                            callerWindow.document.getElementById("commandButton_" + id).onclick =
+                            function() {
+                                callerWindow.eval(onClickAction);
+                                return false;
+                            };
+                        }
                     }
-                }
-            );
+                    );
         }
-
     } catch (e) {
-        alertDialog("Unable to register the command element '"+id+"': "+e);
+        alertDialog("Unable to register the command element '" + id + "': " + e);
     }
 }
 
@@ -51,11 +54,11 @@ function registerCommandElement(callerWindow,id,confirmTxt,lockscreen) {
 // @callerWindow: the calling window
 // @id: the unique id of the command element
 //======================================================================================================================
-function getCommandElementScript(callerWindow,id) {
+function getCommandElementScript(callerWindow, id) {
     try {
-        return eval("callerWindow.commandElementAction_"+id);
+        return eval("callerWindow.commandElementAction_" + id);
     } catch (e) {
-        alertDialog("Unable to trigger the command element '"+id+"': "+e);
+        alertDialog("Unable to trigger the command element '" + id + "': " + e);
         return null;
     }
 }
@@ -95,7 +98,7 @@ function registerAjaxToolbarButtons(ajax, location, id, toolbarPosition) {
             }
         }
 
-        if(parent.ajaxRegisteredIdPositions.length > 1)
+        if (parent.ajaxRegisteredIdPositions.length > 1)
             sortAjaxPositions();
     }
 }

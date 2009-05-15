@@ -30,7 +30,9 @@ icon - [optional] the name of the icon to be displayed. the icon name is mapped 
 iconUrl - [optional] the url (aboslute, including the context path)
 of the icon to be displayed (i.e. /flexive/images/myIcon.png)
 rendered - [optional] flag to supress rendering of the whole component
-ajax - [optional] flag to indicate that the button is part of an ajax request
+ajax - [optional] flag to indicate that the button is part of an ajax request causing the toolbar t.b. rendered correctly. This flag has no effect for content-only buttons. If the ajax button is the last of several such buttons, consider using a separator.
+toolbarPosition - [optional] the position in the toolbar (starting at 0) for an ajax-enabled button. This value is ignored if ajax=false. Separators must be considered when giving the position.
+buttonDisabled - [optional] renders the commandElement, but disables its functionality
 
 <ui:composition template="/adm/templates/commandElement.xhtml">
 
@@ -42,17 +44,28 @@ ajax - [optional] flag to indicate that the button is part of an ajax request
             <c:set var="iconUrl" value="/adm/images/commandButton/#{icon}.png"/>
         </c:if>
 
-        <div id="commandButton_#{id}" class="commandButton" title="#{title}">
+        <c:set var="commandButtonStyle" value="commandButton"/>
+        <c:set var="commandButtonIconStyle" value="commandButtonIcon"/>
+        <c:set var="commandButtonLabelStyle" value="commandButtonLabel"/>
+        <c:set var="commandButtonRightStyle" value="commandButtonRight"/>
+
+        <c:if test="#{buttonDisabled}">
+            <c:set var="commandButtonIconStyle" value="commandButtonIconDisabled"/>
+            <c:set var="commandButtonLabelStyle" value="commandButtonLabelDisabled"/>
+            <c:set var="commandButtonRightStyle" value="commandButtonRightDisabled"/>
+        </c:if>
+
+        <div id="commandButton_#{id}" class="#{commandButtonStyle}" title="#{title}">
             <div style="display:table-row; height:22px; float:left">
-                <div class="commandButtonIcon">
+                <div class="#{commandButtonIconStyle}">
                     <img alt="#{id}_icon" id="#{id}_icon" src="#{iconUrl}" border="0"/>
                 </div>
-                <div class="commandButtonLabel">
+                <div class="#{commandButtonLabelStyle}">
                     <div class="commandButtonLabelText">
                         #{label}
                     </div>
                 </div>
-                <div class="commandButtonRight">
+                <div class="#{commandButtonRightStyle}">
                 </div>
             </div>
         </div>

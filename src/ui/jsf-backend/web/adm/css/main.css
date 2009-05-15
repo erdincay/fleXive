@@ -201,13 +201,17 @@ a > img {
     background-image:url("../images/layout/topBg.gif");
 }
 
-.fxToolbarIcon {
+.fxToolbarIcon, .fxToolbarIconDisabled {
     margin-top:5px;
     margin-left:3px;
     padding: 3px;
     cursor:pointer;
     opacity: 0.75;
     border: 0;
+}
+
+.fxToolbarIconDisabled {
+    opacity: 0.50;
 }
 
 .fxToolbarIcon:hover {

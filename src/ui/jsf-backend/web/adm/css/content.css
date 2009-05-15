@@ -29,7 +29,7 @@ a > img {
     cursor: pointer;
 }
 
-.commandButtonRight {
+.commandButtonRight, .commandButtonRightDisabled {
     background-image: url("../images/commandButton/buttonRight.gif");
     overflow: hidden;
     width: 6px;
@@ -38,7 +38,12 @@ a > img {
     vertical-align: middle;
 }
 
-.commandButtonLabel {
+.commandButtonRightDisabled {
+    background-image: url("../images/commandButton/buttonRightDisabled.gif");
+    opacity:0.50;
+}
+
+.commandButtonLabel, .commandButtonLabelDisabled {
     background-image: url("../images/commandButton/buttonBG.gif");
     overflow: hidden;
     padding-right: 5px;
@@ -51,6 +56,11 @@ a > img {
     margin:auto;
 }
 
+.commandButtonLabelDisabled {
+    background-image: url("../images/commandButton/buttonBGDisabled.gif");
+    opacity:0.50;
+}
+
 .commandButtonLabelText {
     text-decoration: none;
     color: gray;
@@ -59,7 +69,7 @@ a > img {
     float:left;
 }
 
-.commandButtonIcon {
+.commandButtonIcon, .commandButtonIconDisabled {
     overflow: hidden;
     border-left: 1px solid #d3d3d2;
     background-image: url("../images/commandButton/buttonBG.gif");
@@ -68,6 +78,11 @@ a > img {
     padding-top: 3px;
     height:22px;
     float:left;
+}
+
+.commandButtonIconDisabled {
+    background-image: url("../images/commandButton/buttonBGDisabled.gif");
+    opacity:0.50;
 }
 
 .commandButton:hover .commandButtonLabel, .commandButton:hover .commandButtonIcon {

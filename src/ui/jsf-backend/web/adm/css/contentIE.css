@@ -1,3 +1,7 @@
 .commandButtonLabel {
     padding-top:4px;
 }
+
+.commandButtonRightDisabled, .commandButtonLabelDisabled, .commandButtonIconDisabled {
+    filter: alpha(opacity = 50);
+}

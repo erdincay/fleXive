@@ -26,9 +26,9 @@
                 <adm:tab label="#{fxMessageBean['Script.tabtitle.create']}" active="true" id="tab1"/>
                 <fx:formRow labelKey="Script.field.name" id="name" newLine="false" relativeWidth="100">
                     <h:inputText id="name" value="#{scriptBean.sinfo.name}" size="30">
-                        <a4j:support event="onkeyup" reRender="scriptnameerror,all, verifyPanel, executePanel"
-                                     eventsQueue="main"
-                                     requestDelay="500" oncomplete="ajaxButtonRequest();"/>
+                        <a4j:support event="onkeyup" reRender="scriptnameerror,all, verifyPanel, executePanel, importPanel"
+                                     eventsQueue="main" requestDelay="500" action="#{scriptBean.verifyScriptName}"
+                                     oncomplete="ajaxButtonRequest();"/>
                     </h:inputText>
                     <h:outputText id="scriptnameerror" value="#{scriptBean.nameErrorMsg}"
                                   style="color:red; padding-left:4px"/>
@@ -41,8 +41,7 @@
                             <f:selectItems value="#{fxSelectBean.allScriptEventsAsEnum}"/>
                             <a4j:support event="onchange" reRender="executePanel"
                                          action="#{scriptBean.checkScriptEvent}"
-                                         eventsQueue="main" requestDelay="500"
-                                         oncomplete="ajaxButtonRequest();"/>
+                                         eventsQueue="main" requestDelay="500" oncomplete="ajaxButtonRequest();"/>
                         </h:selectOneListbox>
                     </fx:formRow>
 
@@ -63,13 +62,16 @@
                 <adm:commandButton id="cancelButton" labelKey="Script.button.cancel"
                                    icon="cancel" action="scriptOverview"/>
 
-                <adm:commandButton id="defaultImports" labelKey="Script.button.defaultImports"
-                                   icon="compact" bean="#{scriptBean}" action="addDefaultImports"/>
+                <a4j:outputPanel id="importPanel" layout="block">
+                    <adm:commandButton id="defaultImports" labelKey="Script.button.defaultImports"
+                                       icon="compact" bean="#{scriptBean}" action="addDefaultImports"
+                                       buttonDisabled="#{!scriptBean.inputFieldEnabled}" ajax="true" toolbarPosition="2"/>
+                </a4j:outputPanel>
 
                 <a4j:outputPanel id="executePanel" layout="block">
                     <adm:commandButton id="executeButton" labelKey="Script.button.run" icon="run"
                                        lockscreen="false" bean="#{scriptBean}"
-                                       rendered="#{scriptBean.executeButtonEnabled and scriptBean.inputFieldEnabled}"
+                                       buttonDisabled="#{!scriptBean.executeButtonEnabled}"
                                        action="runScriptInConsole" ajax="true" toolbarPosition="3"/>
                 </a4j:outputPanel>
 

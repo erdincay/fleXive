@@ -201,6 +201,7 @@ public class ScriptBean {
         setDesc(sinfo.getDescription());
         setCode(sinfo.getCode());
         setActive(sinfo.isActive());
+        verifyScriptName();
         return "scriptEdit";
     }
 
@@ -498,7 +499,6 @@ public class ScriptBean {
      * @return Returns the error message
      */
     public String getNameErrorMsg() {
-        verifyScriptName();
         return this.nameErrorMsg;
     }
 
@@ -550,16 +550,16 @@ public class ScriptBean {
      * Check the current script event and set a default if necessary
      */
     public void checkScriptEvent() {
-        if(sinfo.getEvent() == null)
+        if (sinfo.getEvent() == null)
             sinfo.setEvent(FxScriptEvent.Manual); // set a default
         executeButtonEnabled = sinfo.getEvent() == FxScriptEvent.Manual;
     }
 
     /**
-     * Verifies the script name (i.e. the file extension) against the available script engines
-     * sets inputFieldDisabled(true/false) and nameErrorMsg(String msg)
+     * Action method to verify the script name (i.e. the file extension) against the available script engines
+     * - sets the various boolean field / button enablers
      */
-    private void verifyScriptName() {
+    public void verifyScriptName() {
         final String name = sinfo.getName();
         if (StringUtils.isBlank(name)) {
             nameErrorMsg = null;

@@ -385,6 +385,7 @@ var toolbarImages = [];
 var toolbarHelp   = [];
 var toolbarClick  = [];
 var toolbarIds    = [];
+var toolbarStyle = [];
 var ajaxRegisteredIds = []; // ajax-enabled buttons
 var ajaxRegisteredIdPositions = [];
 var ajaxRegisteredIdsToolbarOnly = [];
@@ -394,6 +395,7 @@ function clearToolbar() {
     toolbarHelp=[];
     toolbarClick=[];
     toolbarIds=[];
+    toolbarStyle=[];
 }
 
 // clear ajax-enabled buttons
@@ -449,7 +451,7 @@ function getCallerElement(caller,id) {
 // @url: the url to cal (not used at the moment)
 // @icon: the icon to use in the toolbar
 //======================================================================================================================
-function addToolbarItem(responseId,caller,id,helpTxt,url,iconUrl) {
+function addToolbarItem(responseId,caller,id,helpTxt,url,iconUrl,disabled) {
     try {
         _caller = caller;
 
@@ -465,6 +467,11 @@ function addToolbarItem(responseId,caller,id,helpTxt,url,iconUrl) {
         toolbarHelp[pos]=helpTxt;
         toolbarClick[pos]="_caller.triggerCommandElement_"+id+"()";
         toolbarIds[pos]=id;
+        
+        if(disabled) { // set the css style class
+            toolbarStyle[pos]="fxToolbarIconDisabled";
+        }
+
     } catch (e) {
         alertDialog("Unable to trigger the command element '"+id+"' from the toolbar: "+e);
     }
@@ -504,6 +511,8 @@ function renderToolbar() {
         if( pos > 0 && toolbarIds[pos] == '' && toolbarIds[pos-1] == '' )
             continue; //prevent double separators
         clazz = toolbarIds[pos] == '' ? "fxToolbarSeparator" : "fxToolbarIcon";
+        if(toolbarStyle[pos] != null && toolbarStyle[pos] == "fxToolbarIconDisabled")
+            clazz = "fxToolbarIconDisabled";
         html += "<img "+
                 (toolbarIds[pos] != '' ? "id=\"" + toolbarIds[pos] + "_toolbarIcon\" " : "")+
                 "src=\"" + toolbarImages[pos] +

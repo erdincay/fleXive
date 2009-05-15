@@ -31,6 +31,7 @@ iconUrl - [optional] the url (aboslute, including the context path) of the icon 
 rendered - [optional] flag to supress rendering of the whole component
 ajax - [optional] flag to indicate that the button is part of an ajax request causing the toolbar t.b. rendered correctly. This flag has no effect for content-only buttons. If the ajax button is the last of several such buttons, consider using a separator.
 toolbarPosition - [optional] the position in the toolbar (starting at 0) for an ajax-enabled button. This value is ignored if ajax=false. Separators must be considered when giving the position.
+buttonDisabled - [optional] renders the commandElement, but disables its functionality
 
 <ui:composition>
 
@@ -92,15 +93,20 @@ toolbarPosition - [optional] the position in the toolbar (starting at 0) for an 
             <c:set var="toolbarPosition" value="NOTSET"/>
         </c:if>
 
+        <c:if test="#{empty buttonDisabled or buttonDisabled == null}">
+            <c:set var="buttonDisabled" value="false"/>
+        </c:if>
+
         <div id="commandElement_#{id}" style="display:none">
-            <h:commandLink id="#{id}" action="#{bean[action]}" onclick="#{onclick}" immediate="#{immediate}">
+            <h:commandLink id="#{id}" action="#{bean[action]}" onclick="#{onclick}" immediate="#{immediate}"
+                           disabled="#{buttonDisabled}">
                 <c:if test="#{page!=null}"><f:param name="page" value="#{page}"/></c:if>
                 <ui:insert/>
             </h:commandLink>
         </div>
 
         <script type="text/javascript" language="javascript">
-            parent.registerCommandElement(this,'#{id}','#{fxMessageBean[confirmKey]}',#{lockscreen});
+            parent.registerCommandElement(this,'#{id}','#{fxMessageBean[confirmKey]}',#{lockscreen}, #{buttonDisabled});
             function triggerCommandElement_#{id}() {
                 eval(parent.getCommandElementScript(self,'#{id}'));
             }
@@ -119,7 +125,7 @@ toolbarPosition - [optional] the position in the toolbar (starting at 0) for an 
             </c:if>
 
             <script type="text/javascript" language="javascript">
-                parent.addToolbarItem('#{fxSystemBean.response.id}',this,'#{id}','#{title}','','#{iconUrl}');
+                parent.addToolbarItem('#{fxSystemBean.response.id}',this,'#{id}','#{title}','','#{iconUrl}', #{buttonDisabled});
             </script>
             <c:if test="${separator=='after'}">
                 <script type="text/javascript" language="javascript">

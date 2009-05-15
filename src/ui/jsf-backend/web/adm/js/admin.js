@@ -328,15 +328,23 @@ function regAjaxComponentInToolbar() {
      */
     function renderAjaxButtonsToToolbar() {
         var rerender = false;
+        var reorder = true;
         // if parent.toolbarIds.length != toolbarButtonIds.length ==> ajaxButtons were rendered, add them to the local vars
         if (!compareToolbarWithParent()) {
             rerender = addAjaxButtonsFromParent();
-            // special case: refresh w/o a rerender = ajax request w/o changes
-            if (!rerender)
-                copyToolbarButtonsToParent();
+
+            if (!rerender) {
+                // special case: some ajax buttons are removed, others are rerendered but stay on the page
+                rerender = removeAjaxButtonsFromToolbar();
+                if (!rerender) {// special case: refresh w/o a rerender = ajax request w/o changes
+                    copyToolbarButtonsToParent(false);
+                    rerender = true;
+                    reorder = false;
+                }
+            }
 
             // if a toolbarPosition was given for the ajax buttons, reorder the relevant arrays
-            if (rerender && parent.ajaxRegisteredIdPositions.length > 0 && (parent.ajaxRegisteredIdPositions.length == parent.ajaxRegisteredIds.length)) {
+            if (reorder && rerender && parent.ajaxRegisteredIdPositions.length > 0 && (parent.ajaxRegisteredIdPositions.length == parent.ajaxRegisteredIds.length)) {
                 var smallestNonRenderedPos = -1; // var to keep track of buttons which are not rendered 
                 for (var i = 0; i < parent.ajaxRegisteredIds.length; i++) {
                     if (linearSearch(parent.ajaxRegisteredIds[i], parent.ajaxRegisteredIdsToolbarOnly, false) >= 0) {
@@ -353,21 +361,7 @@ function regAjaxComponentInToolbar() {
                 }
             }
         } else { // case2: button(s) need(s) to be removed
-            // check which ajax buttons were disabled
-            for (var i = 0; i < parent.ajaxRegisteredIds.length; i++) {
-                //                var removeId = -1;
-                if (linearSearch(parent.ajaxRegisteredIds[i], parent.ajaxRegisteredIdsToolbarOnly, false) >= 0) {
-                    if (content.getElementById(cmdElementId + parent.ajaxRegisteredIds[i]) == null) {
-                        if (removeAjaxButtonFromToolbar(i) >= 0)
-                            rerender = true;
-                    }
-                } else {
-                    if (content.getElementById(cmdButtonId + parent.ajaxRegisteredIds[i]) == null) {
-                        if (removeAjaxButtonFromToolbar(i) >= 0)
-                            rerender = true;
-                    }
-                }
-            }
+            rerender = removeAjaxButtonsFromToolbar();
         }
         return rerender;
     }
@@ -375,21 +369,21 @@ function regAjaxComponentInToolbar() {
     // compares the locally generated toolbar with the parent toolbar
     // disregarding separators
     var compareToolbarWithParent = function() {
-        if(parent.toolbarIds.length == toolbarButtonIds.length)
+        if (parent.toolbarIds.length == toolbarButtonIds.length)
             return true;
         else {
             var localIds = toolbarButtonIds.slice(0);
             var parentIds = parent.toolbarIds.slice(0);
             var idx = -1;
-            while(true) { // local ids
+            while (true) { // local ids
                 idx = linearSearch('', localIds, false);
-                if(idx < 0)
+                if (idx < 0)
                     break;
                 localIds.splice(idx, 1);
             }
-            while(true) { // parent ids
+            while (true) { // parent ids
                 idx = linearSearch('', parentIds, false);
-                if(idx < 0)
+                if (idx < 0)
                     break;
                 parentIds.splice(idx, 1);
             }
@@ -398,8 +392,22 @@ function regAjaxComponentInToolbar() {
     };
 
     // copies the data to the parent arrays
-    var copyToolbarButtonsToParent = function() {
+    var copyToolbarButtonsToParent = function(copyOnly) {
+        var localToolbarStyle = [];
+        // check if any of the newly assigned buttons has a different toolbarStyle ("disabled" buttons)
+        if (!copyOnly && parent.toolbarStyle.length > 0) {
+            for (var i = 0; i < parent.toolbarIds.length; i++) {
+                if (parent.toolbarStyle[i] != null) { // get the id from the local toolbarButton array
+                    var idx = linearSearch(parent.toolbarIds[i], toolbarButtonIds, false);
+                    if (idx >= 0)
+                        localToolbarStyle[idx] = parent.toolbarStyle[i];
+                }
+            }
+        }
+
         parent.clearToolbar(); // clear the toolbar first
+        if (localToolbarStyle.length > 0)
+            parent.toolbarStyle = localToolbarStyle.slice(0); // copy to the parent
         parent.toolbarIds = toolbarButtonIds.slice(0);
         parent.toolbarImages = _toolbarImages.slice(0);
         parent.toolbarClick = _toolbarClick.slice(0);
@@ -410,7 +418,7 @@ function regAjaxComponentInToolbar() {
      * Copies the data from the rendered page (incl. ajax requests). IFF
      * the ajaxbuttons are not in the toolbar
      */
-    var addAjaxButtonsFromParent = function() { // reassign all variables in main.js
+    var addAjaxButtonsFromParent = function() {
         var rerender = false;
         var positionsToCopy = [];
         var j = 0;
@@ -435,8 +443,28 @@ function regAjaxComponentInToolbar() {
         return rerender;
     };
 
-    // Removes a button from the toolbar
-    var removeAjaxButtonFromToolbar = function(element) {
+    var removeAjaxButtonsFromToolbar = function() {
+        var rerender = false;
+        // check which ajax buttons were disabled
+        for (var i = 0; i < parent.ajaxRegisteredIds.length; i++) {
+            //                var removeId = -1;
+            if (linearSearch(parent.ajaxRegisteredIds[i], parent.ajaxRegisteredIdsToolbarOnly, false) >= 0) {
+                if (content.getElementById(cmdElementId + parent.ajaxRegisteredIds[i]) == null) {
+                    if (removeElementFromToolbarButtonIds(i) >= 0)
+                        rerender = true;
+                }
+            } else {
+                if (content.getElementById(cmdButtonId + parent.ajaxRegisteredIds[i]) == null) {
+                    if (removeElementFromToolbarButtonIds(i) >= 0)
+                        rerender = true;
+                }
+            }
+        }
+        return rerender;
+    };
+
+    // Helper function to remove a button from the (local) toolbar arrays
+    var removeElementFromToolbarButtonIds = function(element) {
         var removeId = linearSearch(parent.ajaxRegisteredIds[element], toolbarButtonIds, false);
         if (removeId >= 0) {
             toolbarButtonIds.splice(removeId, 1);
@@ -482,7 +510,7 @@ function regAjaxComponentInToolbar() {
     if (parent.ajaxRegisteredIds.length > 0) {
         getToolbarButtons();
         if (renderAjaxButtonsToToolbar()) {
-            copyToolbarButtonsToParent();
+            copyToolbarButtonsToParent(false);
             parent.renderToolbar();
         }
     }

@@ -136,6 +136,12 @@
                 is ignored if ajax=false. Separators must be considered when giving the position
             </description>
         </attribute>
+        <attribute>
+            <name>buttonDisabled</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>[optional] renders the commandElement, but disables its functionality</description>
+        </attribute>
     </tag>
     <tag>
         <name>commandIcon</name>

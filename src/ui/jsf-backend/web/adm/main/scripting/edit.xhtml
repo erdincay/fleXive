@@ -29,8 +29,8 @@
                 <fx:formRow labelKey="Script.field.name" id="name" relativeWidth="100">
                     <h:inputText id="name" value="#{scriptBean.sinfo.name}" size="30"
                                  readonly="#{!fxSystemBean.isInRole['ScriptManagement']}">
-                        <a4j:support event="onkeyup" reRender="scriptnameerror, all, verifyPanel, executePanel"
-                                     eventsQueue="main" requestDelay="500"
+                        <a4j:support event="onkeyup" reRender="scriptnameerror, all, verifyPanel, executePanel, importPanel"
+                                     eventsQueue="main" requestDelay="500" action="#{scriptBean.verifyScriptName}"
                                      oncomplete="ajaxButtonRequest()"/>
                     </h:inputText>
                     <h:outputText id="scriptnameerror" value="#{scriptBean.nameErrorMsg}"
@@ -102,18 +102,24 @@
                                        confirmKey="Script.confirm.delete"
                                        icon="delete" bean="#{scriptBean}" action="deleteScript"/>
 
+                    <a4j:outputPanel id="importPanel" layout="block">
+                        <adm:commandButton id="defaultImports" labelKey="Script.button.defaultImports"
+                                           icon="compact" bean="#{scriptBean}" action="addDefaultImports"
+                                           ajax="true" toolbarPosition="3" buttonDisabled="#{!scriptBean.inputFieldEnabled}"/>
+                    </a4j:outputPanel>
+
                     <a4j:outputPanel id="executePanel" layout="block">
                         <adm:commandButton id="executeButton" labelKey="Script.button.run" icon="run"
                                            lockscreen="false" bean="#{scriptBean}" action="runScriptInConsole"
-                                           rendered="#{scriptBean.executeButtonEnabled}" ajax="true"
-                                           toolbarPosition="3"/>
+                                           buttonDisabled="#{!scriptBean.executeButtonEnabled}" ajax="true"
+                                           toolbarPosition="4"/>
                     </a4j:outputPanel>
 
                     <a4j:outputPanel id="verifyPanel" layout="block">
                         <adm:commandButton id="verifyButton" labelKey="Script.button.verify" bean="#{scriptBean}"
                                            action="checkScriptSyntax" icon="check" lockscreen="false"
                                            rendered="#{scriptBean.verifyButtonEnabled}" ajax="true"
-                                           toolbarPosition="4"/>
+                                           toolbarPosition="5"/>
                     </a4j:outputPanel>
                 </ui:fragment>
 

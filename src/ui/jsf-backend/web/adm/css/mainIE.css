@@ -2,3 +2,7 @@
 #header1Div {
     right:2px;
 }
+
+.fxToolbarIconDisabled {
+    filter: alpha(opacity = 50);
+}
