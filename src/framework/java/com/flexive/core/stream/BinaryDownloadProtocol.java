@@ -31,21 +31,21 @@
  ***************************************************************/
 package com.flexive.core.stream;
 
-import com.flexive.core.Database;
-import static com.flexive.core.DatabaseConst.TBL_CONTENT_BINARY;
+import com.flexive.core.storage.StorageManager;
+import com.flexive.core.storage.binary.BinaryInputStream;
+import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.media.FxMediaEngine;
 import com.flexive.shared.stream.BinaryDownloadPayload;
+import com.flexive.shared.structure.TypeStorageMode;
+import com.flexive.shared.value.BinaryDescriptor;
 import com.flexive.stream.DataPacket;
 import com.flexive.stream.StreamException;
 import com.flexive.stream.StreamProtocol;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.ByteBuffer;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 
 /**
  * Stream protocol to download binaries
@@ -54,119 +54,89 @@ import java.sql.SQLException;
  */
 public class BinaryDownloadProtocol extends StreamProtocol<BinaryDownloadPayload> {
 
-    private Connection con = null;
-    private PreparedStatement ps = null;
-    private InputStream bin = null;
+    protected static final Log LOG = LogFactory.getLog(BinaryDownloadProtocol.class);
+
+    private BinaryInputStream bin = null;
     private byte[] _buffer;
     private int pre_read = 0;
 
+    /**
+     * Ctor
+     */
     public BinaryDownloadProtocol() {
         super(BinaryDownloadPayload.class);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public StreamProtocol<BinaryDownloadPayload> getInstance() {
         return new BinaryDownloadProtocol();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean canHandle(DataPacket<BinaryDownloadPayload> dataPacket) throws StreamException {
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public DataPacket<BinaryDownloadPayload> processPacket(DataPacket<BinaryDownloadPayload> dataPacket) throws StreamException {
         if (dataPacket.isExpectResponse() && dataPacket.isExpectStream()) {
             String mimeType;
             int datasize;
+
             try {
-                assert con == null : "processPacket called twice";
-                con = Database.getDbConnection(dataPacket.getPayload().getDivision());
-                String column = "FBLOB";
-                String sizeColumn = "BLOBSIZE";
-                switch (dataPacket.getPayload().getSize()) {
-                    case 1:
-                        column = "PREV1";
-                        sizeColumn = "PREV1SIZE";
-                        break;
-                    case 2:
-                        column = "PREV2";
-                        sizeColumn = "PREV2SIZE";
-                        break;
-                    case 3:
-                        column = "PREV3";
-                        sizeColumn = "PREV3SIZE";
-                        break;
-                }
-                long previewId = 0;
-                ResultSet rs;
-                if (!"FBLOB".equals(column)) {
-                    //unless the real content is requested, try to find the correct preview image
-                    ps = con.prepareStatement("SELECT PREVIEW_REF FROM " + TBL_CONTENT_BINARY +
-                            " WHERE ID=? AND VER=? AND QUALITY=?");
-                    ps.setLong(1, dataPacket.getPayload().getId());
-                    ps.setInt(2, dataPacket.getPayload().getVersion());
-                    ps.setInt(3, dataPacket.getPayload().getQuality());
-                    rs = ps.executeQuery();
-                    if (rs != null && rs.next()) {
-                        previewId = rs.getLong(1);
-                        if (rs.wasNull())
-                            previewId = 0;
-                    }
-                    ps.close();
-                }
-                ps = con.prepareStatement("SELECT " + column + ",MIMETYPE," + sizeColumn + " FROM " + TBL_CONTENT_BINARY +
-                        " WHERE ID=? AND VER=? AND QUALITY=?");
-                if (previewId != 0)
-                    ps.setLong(1, previewId);
-                else
-                    ps.setLong(1, dataPacket.getPayload().getId());
-                ps.setInt(2, dataPacket.getPayload().getVersion());
-                ps.setInt(3, dataPacket.getPayload().getQuality());
-                rs = ps.executeQuery();
-                if (rs == null || !rs.next()) {
-                    return new DataPacket<BinaryDownloadPayload>(new BinaryDownloadPayload(true, "ex.stream.notFound"), false);
-                }
-                bin = rs.getBinaryStream(1);
-                mimeType = rs.getString(2);
-                datasize = rs.getInt(3);
-                _buffer = new byte[4096];
-                if (!mimeType.startsWith("image")) {
-                    try {
-                        pre_read = bin.read(_buffer, 0, 100);
-                    } catch (IOException e) {
-                        //silently ignore
-                    }
-                    String tmp = FxMediaEngine.detectMimeType(_buffer);
-                    if (tmp.startsWith("image"))
-                        mimeType = tmp;
-                } else
-                    pre_read = 0;
-            } catch (SQLException e) {
-                return new DataPacket<BinaryDownloadPayload>(new BinaryDownloadPayload(true, "SQL Error: " + e.getMessage()), false);
-            } finally {
-                if (bin == null)
-                    Database.closeObjects(BinaryUploadProtocol.class, con, ps);
+                bin = StorageManager.getContentStorage(TypeStorageMode.Hierarchical).fetchBinary(
+                        dataPacket.getPayload().getDivision(),
+                        BinaryDescriptor.PreviewSizes.fromSize(dataPacket.getPayload().getSize()),
+                        dataPacket.getPayload().getId(),
+                        dataPacket.getPayload().getVersion(),
+                        dataPacket.getPayload().getQuality());
+            } catch (FxNotFoundException e) {
+                LOG.error("Failed to lookup content storage for division #" + dataPacket.getPayload().getDivision() + ": " + e.getLocalizedMessage());
             }
+            if (!bin.isBinaryFound())
+                return new DataPacket<BinaryDownloadPayload>(new BinaryDownloadPayload(true, "ex.stream.notFound"), false);
+            mimeType = bin.getMimeType();
+            datasize = bin.getSize();
+            _buffer = new byte[4096];
+            if (!mimeType.startsWith("image")) {
+                try {
+                    pre_read = bin.read(_buffer, 0, 100);
+                } catch (IOException e) {
+                    //silently ignore
+                }
+                String tmp = FxMediaEngine.detectMimeType(_buffer);
+                if (tmp.startsWith("image"))
+                    mimeType = tmp;
+            } else
+                pre_read = 0;
             return new DataPacket<BinaryDownloadPayload>(new BinaryDownloadPayload(mimeType, datasize), false);
         }
         return null;
     }
 
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void closeResources() {
-        if (bin != null) {
-            Database.closeObjects(BinaryUploadProtocol.class, con, ps);
+        try {
+            if (bin != null) bin.close();
+        } catch (IOException e) {
+            LOG.error("Failed to close binary input stream: " + e.getMessage(), e);
         }
     }
 
     /**
-     * Callback for sending streamed data
-     *
-     * @param buffer ByteBuffer to write the data into
-     * @return true if more data needs to be sent and this method should be called again
-     * @throws IOException
+     * {@inheritDoc}
      */
     @Override
     public boolean sendStream(ByteBuffer buffer) throws IOException {

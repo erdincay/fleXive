@@ -40,9 +40,13 @@ import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.structure.FxProperty;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.structure.UniqueMode;
+import com.flexive.shared.value.BinaryDescriptor;
 import com.flexive.shared.value.FxBinary;
+import com.flexive.core.storage.binary.BinaryInputStream;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
@@ -239,6 +243,31 @@ public interface ContentStorage {
     //specialized repository methods
 
     /**
+     * Receive a binary transit
+     *
+     * @param divisionId   division
+     * @param handle       binary handle
+     * @param expectedSize the expected size of the binary
+     * @param ttl          time to live in the transit space
+     * @return an output stream that receives the binary
+     * @throws SQLException on errors
+     * @throws IOException  on errors
+     */
+    OutputStream receiveTransitBinary(int divisionId, String handle, long expectedSize, long ttl) throws SQLException, IOException;
+
+    /**
+     * Fetch a binary as an InputStream, if the requested binary is not found, return <code>null</code>
+     *
+     * @param divisionId    division
+     * @param size          requested preview size (images only)
+     * @param binaryId      id
+     * @param binaryVersion version
+     * @param binaryQuality quality
+     * @return InputStream, if the requested binary is not found <code>null</code>
+     */
+    BinaryInputStream fetchBinary(int divisionId, BinaryDescriptor.PreviewSizes size, long binaryId, int binaryVersion, int binaryQuality);
+
+    /**
      * Create a new or update an existing binary
      *
      * @param con     an open and valid Connection
@@ -330,7 +359,7 @@ public interface ContentStorage {
     /**
      * Get the number of instances for a given type
      *
-     * @param con an open and valid db connection
+     * @param con    an open and valid db connection
      * @param typeId the type's id
      * @return the number of content instances found for the given type id
      * @throws SQLException on errors

@@ -39,8 +39,11 @@ import com.flexive.shared.value.BinaryDescriptor;
 import com.flexive.shared.value.FxBinary;
 import com.flexive.stream.ServerLocation;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
@@ -50,6 +53,31 @@ import java.util.Map;
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public interface BinaryStorage {
+
+    /**
+     * Receive a binary transit
+     *
+     * @param divisionId   division
+     * @param handle       binary handle
+     * @param expectedSize the expected size of the binary
+     * @param ttl          time to live in the transit space
+     * @return an output stream that receives the binary
+     * @throws SQLException on errors
+     * @throws IOException  on errors
+     */
+    OutputStream receiveTransitBinary(int divisionId, String handle, long expectedSize, long ttl) throws SQLException, IOException;
+
+    /**
+     * Fetch a binary as an InputStream, if the requested binary is not found, return <code>null</code>
+     *
+     * @param divisionId    division
+     * @param size          requested preview size (images only)
+     * @param binaryId      id
+     * @param binaryVersion version
+     * @param binaryQuality quality
+     * @return InputStream, if the requested binary is not found <code>null</code>
+     */
+    BinaryInputStream fetchBinary(int divisionId, BinaryDescriptor.PreviewSizes size, long binaryId, int binaryVersion, int binaryQuality);
 
     /**
      * Internal binary update to set binary id and acl for the main data

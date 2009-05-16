@@ -33,6 +33,7 @@ package com.flexive.core.storage.genericSQL;
 
 import com.flexive.core.Database;
 import static com.flexive.core.DatabaseConst.*;
+import com.flexive.core.storage.binary.BinaryInputStream;
 import com.flexive.core.storage.binary.BinaryStorage;
 import com.flexive.core.storage.binary.BinaryTransitFileInfo;
 import com.flexive.shared.CacheAdmin;
@@ -102,6 +103,79 @@ public class GenericBinarySQLStorage implements BinaryStorage {
     protected static final String CONTENT_BINARY_REMOVE_TYPE_GET = "SELECT DISTINCT FBLOB FROM " + TBL_CONTENT_DATA + " d, " + TBL_CONTENT + " c WHERE d.ID=c.ID and c.TDEF=?";
     protected static final String CONTENT_BINARY_REMOVE_RESETDATA_ID = "UPDATE " + TBL_CONTENT_DATA + " SET FBLOB=NULL WHERE ID=?";
     protected static final String CONTENT_BINARY_REMOVE_RESETDATA_TYPE = "UPDATE " + TBL_CONTENT_DATA + " SET FBLOB=NULL WHERE ID IN (SELECT DISTINCT ID FROM " + TBL_CONTENT + " WHERE TDEF=?)";
+
+    /**
+     * {@inheritDoc}
+     */
+    public OutputStream receiveTransitBinary(int divisionId, String handle, long expectedSize, long ttl) throws SQLException, IOException {
+        return new GenericBinarySQLOutputStream(Database.getDbConnection(divisionId), handle, expectedSize, ttl);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public BinaryInputStream fetchBinary(int divisionId, BinaryDescriptor.PreviewSizes size, long binaryId, int binaryVersion, int binaryQuality) {
+        Connection con = null;
+        PreparedStatement ps = null;
+        String mimeType;
+        int datasize;
+        try {
+            con = Database.getDbConnection(divisionId);
+            String column = "FBLOB";
+            String sizeColumn = "BLOBSIZE";
+            switch (size) {
+                case PREVIEW1:
+                    column = "PREV1";
+                    sizeColumn = "PREV1SIZE";
+                    break;
+                case PREVIEW2:
+                    column = "PREV2";
+                    sizeColumn = "PREV2SIZE";
+                    break;
+                case PREVIEW3:
+                    column = "PREV3";
+                    sizeColumn = "PREV3SIZE";
+                    break;
+            }
+            long previewId = 0;
+            ResultSet rs;
+            if (!"FBLOB".equals(column)) {
+                //unless the real content is requested, try to find the correct preview image
+                ps = con.prepareStatement("SELECT PREVIEW_REF FROM " + TBL_CONTENT_BINARY +
+                        " WHERE ID=? AND VER=? AND QUALITY=?");
+                ps.setLong(1, binaryId);
+                ps.setInt(2, binaryVersion);
+                ps.setInt(3, binaryQuality);
+                rs = ps.executeQuery();
+                if (rs != null && rs.next()) {
+                    previewId = rs.getLong(1);
+                    if (rs.wasNull())
+                        previewId = 0;
+                }
+                ps.close();
+            }
+            ps = con.prepareStatement("SELECT " + column + ",MIMETYPE," + sizeColumn + " FROM " + TBL_CONTENT_BINARY +
+                    " WHERE ID=? AND VER=? AND QUALITY=?");
+            if (previewId != 0)
+                ps.setLong(1, previewId);
+            else
+                ps.setLong(1, binaryId);
+            ps.setInt(2, binaryVersion);
+            ps.setInt(3, binaryQuality);
+            rs = ps.executeQuery();
+            if (rs == null || !rs.next()) {
+                Database.closeObjects(GenericBinarySQLInputStream.class, con, ps);
+                return new GenericBinarySQLInputStream(false);
+            }
+            InputStream bin = rs.getBinaryStream(1);
+            mimeType = rs.getString(2);
+            datasize = rs.getInt(3);
+            return new GenericBinarySQLInputStream(con, ps, true, bin, mimeType, datasize);
+        } catch (SQLException e) {
+            Database.closeObjects(GenericBinarySQLInputStream.class, con, ps);
+            return new GenericBinarySQLInputStream(false);
+        }
+    }
 
     /**
      * {@inheritDoc}

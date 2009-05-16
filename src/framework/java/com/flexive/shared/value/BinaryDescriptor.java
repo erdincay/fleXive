@@ -140,13 +140,26 @@ public class BinaryDescriptor implements Serializable {
                     return p;
             return PreviewSizes.ORIGINAL;
         }
+
+        /**
+         * Get a previewSize from a numeric String
+         *
+         * @param size size constant
+         * @return PreviewSizes
+         */
+        public static PreviewSizes fromSize(int size) {
+            for (PreviewSizes p : PreviewSizes.values())
+                if (p.getBlobIndex() == size)
+                    return p;
+            return PreviewSizes.ORIGINAL;
+        }
     }
 
     private final String handle;
     private final boolean newBinary;
     private final List<ServerLocation> server;
 
-    private long id=-1;
+    private long id = -1;
     private final int version;
     private final int quality;
     private final long creationTime;
@@ -320,7 +333,7 @@ public class BinaryDescriptor implements Serializable {
      * @param binaryId binary id
      */
     public void setId(long binaryId) {
-        if( this.id == -1)
+        if (this.id == -1)
             this.id = binaryId;
     }
 
@@ -396,7 +409,7 @@ public class BinaryDescriptor implements Serializable {
      * @return creation timestamp
      */
     public long getCreationTime() {
-        if( creationTime == -1 )
+        if (creationTime == -1)
             return System.currentTimeMillis();
         return creationTime;
     }

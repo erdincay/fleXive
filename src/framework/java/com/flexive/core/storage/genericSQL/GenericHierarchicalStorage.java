@@ -39,6 +39,7 @@ import com.flexive.core.conversion.ConversionEngine;
 import com.flexive.core.storage.ContentStorage;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.core.storage.binary.BinaryStorage;
+import com.flexive.core.storage.binary.BinaryInputStream;
 import com.flexive.extractor.htmlExtractor.HtmlExtractor;
 import com.flexive.shared.*;
 import com.flexive.shared.configuration.SystemParameters;
@@ -2749,6 +2750,20 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     }
 
     //Binary handling
+
+    /**
+     * {@inheritDoc}
+     */
+    public OutputStream receiveTransitBinary(int divisionId, String handle, long expectedSize, long ttl) throws SQLException, IOException {
+        return binaryStorage.receiveTransitBinary(divisionId, handle, expectedSize, ttl);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public BinaryInputStream fetchBinary(int divisionId, BinaryDescriptor.PreviewSizes size, long binaryId, int binaryVersion, int binaryQuality) {
+        return binaryStorage.fetchBinary(divisionId, size, binaryId, binaryVersion, binaryQuality);
+    }
 
     /**
      * {@inheritDoc}
