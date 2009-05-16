@@ -75,7 +75,7 @@ public interface BinaryStorage {
      * @param binaryId      id
      * @param binaryVersion version
      * @param binaryQuality quality
-     * @return InputStream, if the requested binary is not found <code>null</code>
+     * @return BinaryInputStream
      */
     BinaryInputStream fetchBinary(int divisionId, BinaryDescriptor.PreviewSizes size, long binaryId, int binaryVersion, int binaryQuality);
 
