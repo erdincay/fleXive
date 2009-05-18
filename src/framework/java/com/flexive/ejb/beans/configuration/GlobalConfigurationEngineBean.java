@@ -33,7 +33,7 @@ package com.flexive.ejb.beans.configuration;
 
 import com.flexive.core.Database;
 import static com.flexive.core.DatabaseConst.TBL_GLOBAL_CONFIG;
-import com.flexive.core.configuration.GenericConfigurationImpl;
+import com.flexive.ejb.beans.configuration.GenericConfigurationImpl;
 import com.flexive.ejb.mbeans.FxCache;
 import com.flexive.shared.*;
 import com.flexive.shared.cache.FxCacheException;
@@ -54,9 +54,7 @@ import javax.management.InstanceAlreadyExistsException;
 import javax.management.MBeanRegistrationException;
 import javax.management.NotCompliantMBeanException;
 import javax.management.ObjectName;
-import javax.naming.Context;
 import javax.naming.NamingException;
-import javax.sql.DataSource;
 import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;

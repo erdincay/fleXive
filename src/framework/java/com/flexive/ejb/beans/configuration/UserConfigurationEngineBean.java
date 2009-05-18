@@ -32,8 +32,9 @@
 package com.flexive.ejb.beans.configuration;
 
 import com.flexive.core.Database;
+import com.flexive.core.DatabaseConst;
 import static com.flexive.core.DatabaseConst.TBL_USER_CONFIG;
-import com.flexive.core.configuration.GenericConfigurationImpl;
+import com.flexive.ejb.beans.configuration.GenericConfigurationImpl;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.exceptions.FxNoAccessException;
 import com.flexive.shared.interfaces.UserConfigurationEngine;
@@ -54,85 +55,19 @@ import java.sql.SQLException;
 @TransactionManagement(TransactionManagementType.CONTAINER)
 @TransactionAttribute(TransactionAttributeType.REQUIRED)
 @Stateless(name = "UserConfigurationEngine", mappedName="UserConfigurationEngine")
-public class UserConfigurationEngineBean extends GenericConfigurationImpl implements UserConfigurationEngine, UserConfigurationEngineLocal {
-    /**
-     * User config cache root. Be sure to set timeout for this cache
-     * region, otherwise user configuration data will never expire from the cache.
-     */
-    private static final String CACHE_ROOT = "/userConfig/";
+public class UserConfigurationEngineBean extends CustomIdConfigurationImpl implements UserConfigurationEngine, UserConfigurationEngineLocal {
 
-
-    /** {@inheritDoc} */
-    @Override
-    protected Connection getConnection() throws SQLException {
-        return Database.getDbConnection();
+    public UserConfigurationEngineBean() {
+        super("user", DatabaseConst.TBL_USER_CONFIG, "user_id", true);
     }
 
-    /** {@inheritDoc} */
     @Override
-    protected PreparedStatement getInsertStatement(Connection conn, String path, String key, String value)
-            throws SQLException, FxNoAccessException {
-        String sql = "INSERT INTO " + TBL_USER_CONFIG + "(user_id, cpath, ckey, cvalue) VALUES (?, ?, ?, ?)";
-        PreparedStatement stmt = conn.prepareStatement(sql);
-        stmt.setLong(1, FxContext.getUserTicket().getUserId());
-        stmt.setString(2, path);
-        stmt.setString(3, key);
-        stmt.setString(4, value);
-        return stmt;
+    protected void setId(PreparedStatement stmt, int column) throws SQLException {
+        stmt.setLong(column, FxContext.get().getTicket().getUserId());
     }
 
-    /** {@inheritDoc} */
     @Override
-    protected PreparedStatement getSelectStatement(Connection conn, String path, String key) throws SQLException {
-        String sql = "SELECT cvalue FROM " + TBL_USER_CONFIG + " WHERE user_id=? AND cpath=? AND ckey=?";
-        PreparedStatement stmt = conn.prepareStatement(sql);
-        stmt.setLong(1, FxContext.getUserTicket().getUserId());
-        stmt.setString(2, path);
-        stmt.setString(3, key);
-        return stmt;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    protected PreparedStatement getSelectStatement(Connection conn, String path) throws SQLException {
-        String sql = "SELECT ckey, cvalue FROM " + TBL_USER_CONFIG + " WHERE user_id=? AND cpath=?";
-        PreparedStatement stmt = conn.prepareStatement(sql);
-        stmt.setLong(1, FxContext.getUserTicket().getUserId());
-        stmt.setString(2, path);
-        return stmt;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    protected PreparedStatement getUpdateStatement(Connection conn, String path, String key, String value)
-            throws SQLException, FxNoAccessException {
-        String sql = "UPDATE " + TBL_USER_CONFIG + " SET cvalue=? WHERE user_id=? AND cpath=? AND ckey=?";
-        PreparedStatement stmt = conn.prepareStatement(sql);
-        stmt.setString(1, value);
-        stmt.setLong(2, FxContext.getUserTicket().getUserId());
-        stmt.setString(3, path);
-        stmt.setString(4, key);
-        return stmt;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    protected PreparedStatement getDeleteStatement(Connection conn, String path, String key)
-            throws SQLException, FxNoAccessException {
-        String sql = "DELETE FROM " + TBL_USER_CONFIG + " WHERE user_id=? AND cpath=? "
-            + (key != null ? " AND ckey=?" : "");
-        PreparedStatement stmt = conn.prepareStatement(sql);
-        stmt.setLong(1, FxContext.getUserTicket().getUserId());
-        stmt.setString(2, path);
-        if (key != null) {
-            stmt.setString(3, key);
-        }
-        return stmt;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    protected String getCachePath(String path) {
-        return CACHE_ROOT + FxContext.getUserTicket().getUserId() + path;
+    protected boolean mayUpdate() {
+        return !FxContext.getUserTicket().isGuest();
     }
 }

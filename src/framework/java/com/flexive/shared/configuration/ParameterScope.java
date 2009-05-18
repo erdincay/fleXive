@@ -52,6 +52,18 @@ public enum ParameterScope {
      */
     DIVISION_ONLY,
     /**
+     * Node parameter (with division configuration fallback). The node name can be set with the
+     * system property {@code flexive.nodename} and defaults to the system hostname as returned by
+     * InetAddress.getLocalHost().getHostName().
+     *
+     * @since 3.1
+     */
+    NODE(ParameterScope.DIVISION_ONLY),
+    /**
+     * Node parameter (without fallback).
+     */
+    NODE_ONLY,
+    /**
      * Application parameter scope (with division configuration fallback). The division fallback
      * does not include the global configuration, because this configuration is outside the scope
      * of a running fleXive application and cannot be updated by a flexive user without using

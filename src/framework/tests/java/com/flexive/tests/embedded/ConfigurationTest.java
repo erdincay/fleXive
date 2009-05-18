@@ -63,6 +63,7 @@ public class ConfigurationTest {
     private DivisionConfigurationEngine divisionConfiguration;
     private UserConfigurationEngine userConfiguration;
     private ApplicationConfigurationEngine applicationConfiguration;
+    private NodeConfigurationEngine nodeConfiguration;
     private ConfigurationEngine configuration;
 
     public ConfigurationTest() {
@@ -92,6 +93,7 @@ public class ConfigurationTest {
         userConfiguration = EJBLookup.getUserConfigurationEngine();
         configuration = EJBLookup.getConfigurationEngine();
         applicationConfiguration = EJBLookup.getApplicationConfigurationEngine();
+        nodeConfiguration = EJBLookup.getNodeConfigurationEngine();
     }
 
     @BeforeMethod
@@ -334,7 +336,8 @@ public class ConfigurationTest {
                     && FxContext.get().isGlobalAuthenticated())
                     || (checkConfiguration instanceof DivisionConfigurationEngine && ticket.isGlobalSupervisor())
                     || (checkConfiguration instanceof ApplicationConfigurationEngine && ticket.isGlobalSupervisor())
-                    || (checkConfiguration instanceof UserConfigurationEngine);
+                    || (checkConfiguration instanceof NodeConfigurationEngine && ticket.isGlobalSupervisor())
+                    || (checkConfiguration instanceof UserConfigurationEngine && !ticket.isGuest());
         }
 
 
@@ -423,6 +426,16 @@ public class ConfigurationTest {
     @Test
     public void userConfiguration() throws Exception {
         testGenericConfiguration(userConfiguration);
+    }
+
+    /**
+     * Test the node configuration
+     *
+     * @throws Exception if an error occured
+     */
+    @Test
+    public void nodeConfiguration() throws Exception {
+        testGenericConfiguration(nodeConfiguration);
     }
 
     /**
@@ -558,29 +571,20 @@ public class ConfigurationTest {
      * @param parameter the parameter to be deleted
      */
     private void cleanup(Parameter<? extends Serializable> parameter) {
+        tryRemove(parameter, globalConfiguration, ParameterScope.GLOBAL);
+        tryRemove(parameter, divisionConfiguration, ParameterScope.DIVISION);
+        tryRemove(parameter, userConfiguration, ParameterScope.USER);
+        tryRemove(parameter, nodeConfiguration, ParameterScope.NODE);
+    }
+
+    private void tryRemove(Parameter<? extends Serializable> parameter, GenericConfigurationEngine configuration, ParameterScope scope) {
         try {
-            globalConfiguration.remove(parameter);
-            assertAccess(parameter, ParameterScope.GLOBAL);
+            configuration.remove(parameter);
+            assertAccess(parameter, scope);
         } catch (FxNoAccessException e) {
-            assertNoAccess(parameter, ParameterScope.GLOBAL);
+            assertNoAccess(parameter, scope);
         } catch (Exception e) {
-            System.out.println("Failed to delete parameter from global config: " + e.getMessage());
-        }
-        try {
-            divisionConfiguration.remove(parameter);
-            assertAccess(parameter, ParameterScope.DIVISION);
-        } catch (FxNoAccessException e) {
-            assertNoAccess(parameter, ParameterScope.DIVISION);
-        } catch (Exception e) {
-            System.out.println("Failed to delete parameter from division config: " + e.getMessage());
-        }
-        try {
-            userConfiguration.remove(parameter);
-            assertAccess(parameter, ParameterScope.USER);
-        } catch (FxNoAccessException e) {
-            assertNoAccess(parameter, ParameterScope.USER);
-        } catch (Exception e) {
-            System.out.println("Failed to delete parameter from user config: " + e.getMessage());
+            System.out.println("Failed to delete parameter from " + scope.name() + " config: " + e.getMessage());
         }
     }
 
@@ -600,15 +604,22 @@ public class ConfigurationTest {
         for (ParameterScope scope : fallbacks) {
             try {
                 T value = null;
+                final GenericConfigurationEngine config;
                 if (scope == ParameterScope.GLOBAL) {
-                    value = globalConfiguration.get(parameter, parameter.getData().getKey(), true);
+                    config = globalConfiguration;
                 } else if (scope == ParameterScope.DIVISION || scope == ParameterScope.DIVISION_ONLY) {
-                    value = divisionConfiguration.get(parameter, parameter.getData().getKey(), true);
+                    config = divisionConfiguration;
                 } else if (scope == ParameterScope.USER || scope == ParameterScope.USER_ONLY) {
-                    value = userConfiguration.get(parameter, parameter.getData().getKey(), true);
+                    config = userConfiguration;
+                } else if (scope == ParameterScope.APPLICATION || scope == ParameterScope.APPLICATION_ONLY) {
+                    config = applicationConfiguration;
+                } else if (scope == ParameterScope.NODE || scope == ParameterScope.NODE_ONLY) {
+                    config = nodeConfiguration;
                 } else {
                     Assert.fail("Unexpected parameter scope: " + scope);
+                    throw new UnsupportedOperationException();
                 }
+                value = config.get(parameter, parameter.getData().getKey(), true);
                 // parameter exists in config, check value and return
                 Assert.assertTrue((expected == null && value == null) || expected.equals(value), "Unexpected parameter value");
                 return;

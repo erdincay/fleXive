@@ -35,7 +35,6 @@ import com.flexive.shared.configuration.Parameter;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.Pair;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map;
 
@@ -45,7 +44,7 @@ import java.util.Map;
  * 
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  *
- * @see com.flexive.core.configuration.GenericConfigurationImpl
+ * @see com.flexive.ejb.beans.configuration.GenericConfigurationImpl
  * @see com.flexive.shared.configuration.Parameter
  */
 

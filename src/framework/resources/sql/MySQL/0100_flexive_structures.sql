@@ -1180,6 +1180,21 @@ DEFAULT CHARSET = LATIN1
 COMMENT = 'Application configuration table';
 
 -- -------------------------
+-- Node configuration table
+-- -------------------------
+
+CREATE TABLE FXS_NODECONFIGURATION (
+    NODE_ID VARCHAR(255) NOT NULL,
+	CPATH VARCHAR(255) NOT NULL,
+	CKEY VARCHAR(255) CHARACTER SET UTF8 NOT NULL,
+	CVALUE LONGTEXT CHARACTER SET UTF8,
+	PRIMARY KEY (NODE_ID, CPATH, CKEY)
+)
+ENGINE = InnoDB
+DEFAULT CHARSET = LATIN1
+COMMENT = 'Node configuration table';
+
+-- -------------------------
 -- References to FX_CONTENT
 -- -------------------------
 ALTER TABLE FXS_MANDATOR ADD FOREIGN KEY FK_MAND_META (METADATA) REFERENCES FX_CONTENT (ID)

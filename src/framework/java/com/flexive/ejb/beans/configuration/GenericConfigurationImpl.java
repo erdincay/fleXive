@@ -29,7 +29,7 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the file!
  ***************************************************************/
-package com.flexive.core.configuration;
+package com.flexive.ejb.beans.configuration;
 
 import com.flexive.core.Database;
 import com.flexive.shared.CacheAdmin;

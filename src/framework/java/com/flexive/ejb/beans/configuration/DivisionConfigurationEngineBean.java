@@ -33,7 +33,7 @@ package com.flexive.ejb.beans.configuration;
 
 import com.flexive.core.Database;
 import static com.flexive.core.DatabaseConst.TBL_DIVISION_CONFIG;
-import com.flexive.core.configuration.GenericConfigurationImpl;
+import com.flexive.ejb.beans.configuration.GenericConfigurationImpl;
 import com.flexive.core.storage.ContentStorage;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.shared.EJBLookup;

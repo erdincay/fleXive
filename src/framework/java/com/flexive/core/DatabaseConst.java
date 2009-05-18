@@ -156,6 +156,10 @@ public final class DatabaseConst {
      */
     public static final String TBL_APPLICATION_CONFIG = "FXS_APPLICATIONCONFIGURATION";
     /**
+     * Node configuration table
+     */
+    public static final String TBL_NODE_CONFIG = "FXS_NODECONFIGURATION";
+    /**
      * Language definition table
      */
     public static final String TBL_LANG = "FXS_LANG";

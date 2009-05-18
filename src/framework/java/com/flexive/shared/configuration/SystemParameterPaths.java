@@ -77,11 +77,20 @@ public enum SystemParameterPaths implements ParameterPath {
     /** unit test entry */
     TEST_USER("/test/user", ParameterScope.USER),
     /** unit test entry */
-    TEST_USER_ONLY("/test/useronly", ParameterScope.USER_ONLY);
+    TEST_USER_ONLY("/test/useronly", ParameterScope.USER_ONLY),
+    /** unit test entry */
+    TEST_APPLICATION("/test/application", ParameterScope.APPLICATION),
+    /** unit test entry */
+    TEST_APPLICATION_ONLY("/test/application", ParameterScope.APPLICATION_ONLY),
+    /** unit test entry */
+    TEST_NODE("/test/node", ParameterScope.NODE),
+    /** unit test entry */
+    TEST_NODE_ONLY("/test/nodeonly", ParameterScope.NODE_ONLY);
     
     /** Paths used only for unit testing */
     private static final SystemParameterPaths[] TESTPATHS = {
-        TEST_GLOBAL, TEST_DIVISION, TEST_DIVISION_ONLY, TEST_USER, TEST_USER_ONLY
+            TEST_GLOBAL, TEST_DIVISION, TEST_DIVISION_ONLY, TEST_USER, TEST_USER_ONLY,
+            TEST_APPLICATION, TEST_APPLICATION_ONLY, TEST_NODE, TEST_NODE_ONLY
     };
 
     private String value;

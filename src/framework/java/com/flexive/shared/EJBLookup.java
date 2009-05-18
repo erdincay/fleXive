@@ -171,6 +171,16 @@ public class EJBLookup {
     }
 
     /**
+     * Lookup of the NodeConfigurationEngine EJB.
+     *
+     * @return a reference to the NodeConfigurationEngine EJB
+     * @since 3.1
+     */
+    public static NodeConfigurationEngine getNodeConfigurationEngine() {
+        return getEngine(NodeConfigurationEngine.class);
+    }
+
+    /**
      * Lookup of the GlobalConfigurationBean EJB.
      *
      * @return a reference to the GlobalConfigurationBean EJB.

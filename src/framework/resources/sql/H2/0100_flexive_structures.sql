@@ -1108,6 +1108,19 @@ CREATE TABLE FXS_APPLICATIONCONFIGURATION (
 COMMENT ON TABLE FXS_APPLICATIONCONFIGURATION IS 'Application configuration table';
 
 -- -------------------------
+-- Node configuration table
+-- -------------------------
+
+CREATE TABLE FXS_NODECONFIGURATION (
+    NODE_ID VARCHAR(255) NOT NULL,
+	CPATH VARCHAR(255) NOT NULL,
+	CKEY VARCHAR(255) NOT NULL,
+	CVALUE LONGTEXT,
+	PRIMARY KEY (NODE_ID, CPATH, CKEY)
+);
+COMMENT ON TABLE FXS_NODECONFIGURATION IS 'Node configuration table';
+
+-- -------------------------
 -- References to FX_CONTENT
 -- -------------------------
 -- ALTER TABLE FXS_MANDATOR ADD FOREIGN KEY (METADATA) REFERENCES FX_CONTENT (ID)

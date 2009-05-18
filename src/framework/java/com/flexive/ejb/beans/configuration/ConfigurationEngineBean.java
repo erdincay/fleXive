@@ -57,6 +57,8 @@ public class ConfigurationEngineBean implements ConfigurationEngine, Configurati
     private GlobalConfigurationEngineLocal globalConfiguration;
     @EJB
     private ApplicationConfigurationEngineLocal applicationConfiguration;
+    @EJB
+    private NodeConfigurationEngineLocal nodeConfiguration;
 
     /**
      * {@inheritDoc}
@@ -281,6 +283,8 @@ public class ConfigurationEngineBean implements ConfigurationEngine, Configurati
             return userConfiguration;
         } else if (scope == ParameterScope.APPLICATION || scope == ParameterScope.APPLICATION_ONLY) {
             return applicationConfiguration;
+        } else if (scope == ParameterScope.NODE || scope == ParameterScope.NODE_ONLY) {
+            return nodeConfiguration;
         } else {
             throw new FxInvalidParameterException("SCOPE", "ex.configuration.parameter.scope.invalid", scope);
         }
