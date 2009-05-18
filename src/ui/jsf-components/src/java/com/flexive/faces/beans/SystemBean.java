@@ -78,6 +78,7 @@ public class SystemBean implements Serializable {
     private Map<Object, FxContent> contentMap;
     private Map<Object, FxContent> explodedContentMap;
     private Map<String, DataModel> queries;
+    private String nodeName;
 
     /**
      * Resets all counters between phases.
@@ -659,6 +660,19 @@ public class SystemBean implements Serializable {
      */
     public boolean isAjaxRequest() {
         return FxJsfUtils.isAjaxRequest();
+    }
+
+    /**
+     * Return the name of the current network node.
+     *
+     * @return  the name of the current network node.
+     * @since 3.1
+     */
+    public String getNodeName() {
+        if (nodeName == null) {
+            nodeName = EJBLookup.getNodeConfigurationEngine().getNodeName();
+        }
+        return nodeName;
     }
 
     /**

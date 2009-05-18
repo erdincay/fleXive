@@ -20,6 +20,9 @@
             <a4j:outputPanel id="systemInfos">
                 <!-- General system/runtime information  -->
                 <fx:fieldSet legendKey="SystemInfo.group.general">
+                    <fx:formRow labelKey="SystemInfo.field.nodename">
+                        #{fxSystemBean.nodeName}
+                    </fx:formRow>
                     <fx:formRow labelKey="SystemInfo.field.dateTime">
                         #{systemInfoBean.dateTime}
                     </fx:formRow>

@@ -14,7 +14,7 @@ import java.sql.SQLException;
  * @author Daniel Lichtenberger, UCS
  * @version $Rev$
  */
-public abstract class CustomIdConfigurationImpl extends GenericConfigurationImpl {
+abstract class CustomIdConfigurationImpl extends GenericConfigurationImpl {
     private final String configurationName;
     private final String idColumn;
     private final String tableName;

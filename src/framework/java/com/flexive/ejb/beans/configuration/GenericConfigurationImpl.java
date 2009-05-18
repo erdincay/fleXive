@@ -68,7 +68,7 @@ import java.util.Map;
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 
-public abstract class GenericConfigurationImpl implements GenericConfigurationEngine {
+abstract class GenericConfigurationImpl implements GenericConfigurationEngine {
     private static final Log LOG = LogFactory.getLog(GenericConfigurationImpl.class);
 
     /**
