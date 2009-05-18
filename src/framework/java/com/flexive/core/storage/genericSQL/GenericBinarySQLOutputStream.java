@@ -53,7 +53,7 @@ public class GenericBinarySQLOutputStream extends PipedOutputStream implements R
     private static final Log LOG = LogFactory.getLog(GenericBinarySQLOutputStream.class);
 
     PipedInputStream pipe;
-    Connection con;
+    private int divisionId;
     private String handle;
     private long expectedSize;
     private long ttl;
@@ -63,14 +63,15 @@ public class GenericBinarySQLOutputStream extends PipedOutputStream implements R
     /**
      * Ctor
      *
-     * @param con          an open and valid db connection
+     * @param divisionId   division
      * @param handle       binary handle
      * @param expectedSize expected size of the binary
      * @param ttl          time to live in the transit space
      * @throws IOException on errors
+     * @throws SQLException if no connection could be obtained
      */
-    GenericBinarySQLOutputStream(Connection con, String handle, long expectedSize, long ttl) throws IOException {
-        this.con = con;
+    GenericBinarySQLOutputStream(int divisionId, String handle, long expectedSize, long ttl) throws IOException, SQLException {
+        this.divisionId = divisionId;
         this.handle = handle;
         this.expectedSize = expectedSize;
         this.ttl = ttl;
@@ -93,7 +94,9 @@ public class GenericBinarySQLOutputStream extends PipedOutputStream implements R
             LOG.error("Receiving thread got interrupted: " + e.getMessage(), e);
         }
         PreparedStatement ps = null;
+        Connection con = null;
         try {
+            con = Database.getDbConnection(divisionId);
             ps = con.prepareStatement("UPDATE " + DatabaseConst.TBL_BINARY_TRANSIT + " SET TFER_DONE=?, BLOBSIZE=? WHERE BKEY=?");
             ps.setBoolean(1, true);
             ps.setLong(2, count);
@@ -120,7 +123,9 @@ public class GenericBinarySQLOutputStream extends PipedOutputStream implements R
      */
     public void run() {
         PreparedStatement ps = null;
+        Connection con = null;
         try {
+            con = Database.getDbConnection(divisionId);
             ps = con.prepareStatement("INSERT INTO " + DatabaseConst.TBL_BINARY_TRANSIT + " (BKEY,FBLOB,TFER_DONE,EXPIRE) VALUES(?,?,FALSE,?)");
             ps.setString(1, handle);
             ps.setBinaryStream(2, pipe, (int) expectedSize);
@@ -137,7 +142,7 @@ public class GenericBinarySQLOutputStream extends PipedOutputStream implements R
         } catch (SQLException e) {
             LOG.error("SQL error storing binary: " + e.getMessage(), e);
         } finally {
-            Database.closeObjects(GenericBinarySQLOutputStream.class, null, ps);
+            Database.closeObjects(GenericBinarySQLOutputStream.class, con, ps);
         }
     }
 }

@@ -108,7 +108,7 @@ public class GenericBinarySQLStorage implements BinaryStorage {
      * {@inheritDoc}
      */
     public OutputStream receiveTransitBinary(int divisionId, String handle, long expectedSize, long ttl) throws SQLException, IOException {
-        return new GenericBinarySQLOutputStream(Database.getDbConnection(divisionId), handle, expectedSize, ttl);
+        return new GenericBinarySQLOutputStream(divisionId, handle, expectedSize, ttl);
     }
 
     /**
