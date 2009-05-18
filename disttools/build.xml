@@ -234,13 +234,6 @@ e.g. /domains/domain1/lib/ext.
         <attribute name="name"/>
         <attribute name="templatename"/>
         <sequential >
-            <!-- Add flexive-dist library to IDEA module file -->
-            <replace file="@{basedir}/@{name}.iml">
-                <replacetoken><![CDATA[<orderEntry type="inheritedJdk" />]]></replacetoken>
-                <replacevalue><![CDATA[<orderEntry type="inheritedJdk" />
-        <orderEntry type="library" name="flexive-dist" level="application" />]]></replacevalue>
-            </replace>
-
             <!-- Set project name in project files -->
             <replace dir="@{basedir}" includes="*.iml,.project,.classpath"
                      token="@{templatename}" value="@{name}"/>
