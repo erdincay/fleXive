@@ -9,9 +9,19 @@
       xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
       xmlns:adm="http://www.flexive.com/jsf/admin"
       xmlns:fx="http://www.flexive.com/jsf/core">
-<body>
 
 <ui:composition template="/adm/contentTemplate.xhtml">
+    <head>
+        <ui:define name="head">
+            <script language="javascript" type="text/javascript"
+                    src="#{fxSystemBean.contextPath}/adm/js/edit_area/edit_area_full.js">
+            </script>
+            <script type="text/javascript">activateEditArea('frm:codeArea', true, "#{scriptConsoleBean.userLang}");
+            </script>
+        </ui:define>
+    </head>
+
+    <body>
 
     <ui:define name="body">
         <a4j:form id="frm">
@@ -21,16 +31,17 @@
                 <fieldset class="formFields">
                     <legend>#{fxMessageBean['ScriptConsole.group.code']}</legend>
                     <a4j:outputPanel ajaxRendered="true" layout="block" style="width: 700px;">
-                        <fx:resizeable>
-                            <h:inputTextarea id="codeArea" value="#{scriptConsoleBean.code}" rows="15"
-                                             style="width: 100%; height: 100%"/>
-                        </fx:resizeable>
+                        <h:inputTextarea id="codeArea" value="#{scriptConsoleBean.code}" cols="100" rows="25"
+                                         style="width: 100%"/>
                     </a4j:outputPanel>
                     <br/>
                     #{fxMessageBean['ScriptConsole.label.Language']}&nbsp;
                     <h:selectOneListbox label="XXX" size="1" value="#{scriptConsoleBean.language}">
                         <f:selectItems value="#{fxSelectBean.scriptingEngines}"/>
-                        <a4j:support event="onchange" reRender="verifyPanel" oncomplete="ajaxButtonRequest()"/>
+                        <a4j:support event="onchange" reRender="verifyPanel"
+                                     oncomplete="ajaxButtonRequest();
+                                     activateEditArea('frm:codeArea', true, '#{scriptConsoleBean.userLang}',
+                                     '#{scriptConsoleBean.language}');"/>
                     </h:selectOneListbox>
                     <br/>
                     <h:selectBooleanCheckbox title="#{fxMessageBean['ScriptConsole.label.runAtWeb']}"
@@ -66,7 +77,9 @@
         </a4j:form>
     </ui:define>
 
+
+    </body>
+
 </ui:composition>
 
-</body>
 </html>

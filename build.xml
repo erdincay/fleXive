@@ -460,6 +460,11 @@
                 <include name="*"/>
                 <include name="src/**/*"/>
             </zipfileset>
+
+            <!-- include EditArea from ZIP file, install in /adm/js/edit_area  -->
+            <zipfileset src="${resources.ui.jsf.dir}/lib/edit_area.zip" prefix="adm/js/"
+                        includes="**/*">
+            </zipfileset>
         </war>
 	</target>
 

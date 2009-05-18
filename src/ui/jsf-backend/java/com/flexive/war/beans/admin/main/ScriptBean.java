@@ -87,6 +87,8 @@ public class ScriptBean {
     private boolean executeButtonEnabled = false;
     private Object result;
     private long executionTime;
+    private String userLang = "en";
+    private String language = "groovy";
 
     private static final String ID_CACHE_KEY = ScriptBean.class + "_id";
 
@@ -167,6 +169,14 @@ public class ScriptBean {
 
     public void setActive(boolean active) {
         this.active = active;
+    }
+
+    public void setLanguage(String language) {
+        this.language = language;
+    }
+
+    public String getLanguage() {
+        return language;
     }
 
     /**
@@ -578,7 +588,10 @@ public class ScriptBean {
             // separately enable the Groovy syntax verification button
             if (FxSharedUtils.isGroovyScript(name)) {
                 verifyButtonEnabled = true;
-            }
+                language = "gy";
+            } else // set language = extension
+                language = name.substring(name.lastIndexOf(".") + 1, name.length());
+
         }
     }
 
@@ -657,5 +670,20 @@ public class ScriptBean {
             }
         }
         return defImports;
+    }
+
+    /**
+     * @param userLang set the current user's language
+     */
+    public void setUserLang(String userLang) {
+        this.userLang = userLang;
+    }
+
+    /**
+     * @return returns the current user's language
+     */
+    public String getUserLang() {
+        userLang = FxContext.getUserTicket().getLanguage().getIso2digit();
+        return userLang;
     }
 }

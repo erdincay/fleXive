@@ -542,13 +542,50 @@ function linearSearch(searchItem, targetArray, regEx) {
 }
 
 /**
+ * Activates the EditArea js plugin
+ * @param id the form's id
+ * @param init boolean value whether the EditArea should be initialised
+ */
+function activateEditArea(id, init, userLang, syntax) {
+    if (init) {
+        if (userLang == null)
+            userLang = "en";
+        if (syntax == null)
+            syntax = "js";
+        if (syntax == "groovy" || syntax == "gy")
+            syntax = "js";
+
+        parent.contentFrameObj.contentWindow.editAreaLoader.init({
+            id : id,
+            syntax: syntax,
+            start_highlight: true,
+            language: userLang,
+            font_size: 8,
+            allow_resize: "both",
+            change_callback: "editAreaChange"
+        });
+    }
+}
+
+/**
+ * Helper function for the EditArea onchange callback, sets the value
+ * of the textarea html element
+ * @param id the form id
+ */
+function editAreaChange(id) {
+    var contentFrame = parent.contentFrameObj.contentWindow.document;
+    if (contentFrame.getElementById(id) != null) {
+        contentFrame.getElementById(id).value = parent.contentFrameObj.contentWindow.editAreaLoader.getValue(id);
+    }
+}
+
+/**
  * Copies the value of the input source element to input destination element.
  *
  * @param formname name of the form
  * @param inputSource id of the input source
  * @param inputDest id of the input destination
  */
-
 function transferInputValue(formname, inputSource, inputDest) {
     var value = document.getElementById(formname + ":" + inputSource).value;
     document.getElementById(formname + ":" + inputDest).value = value;

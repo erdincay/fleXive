@@ -60,6 +60,7 @@ public class ScriptConsoleBean {
     private String language = "groovy"; // initial setting for script syntax check
     private boolean verifyButtonEnabled = false;
     private Object result;
+    private String userLang = "en";
 
     public String getCode() {
         return code;
@@ -177,5 +178,20 @@ public class ScriptConsoleBean {
         if (code == null)
             code = "";
         code = ScriptBean.getClassImports(language) + code;
+    }
+
+    /**
+     * @param userLang set the current user's language
+     */
+    public void setUserLang(String userLang) {
+        this.userLang = userLang;
+    }
+
+    /**
+     * @return returns the current user's language
+     */
+    public String getUserLang() {
+        userLang = FxContext.getUserTicket().getLanguage().getIso2digit();
+        return userLang;
     }
 }

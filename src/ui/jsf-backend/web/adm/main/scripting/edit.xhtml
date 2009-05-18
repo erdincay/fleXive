@@ -9,16 +9,27 @@
       xmlns:adm="http://www.flexive.com/jsf/admin"
       xmlns:fx="http://www.flexive.com/jsf/core"
       xmlns:a4j="https://ajax4jsf.dev.java.net/ajax">
-<body>
 
 <ui:composition template="/adm/contentTemplate.xhtml">
+    <head>
+        <ui:define name="head">
+            <script language="javascript" type="text/javascript"
+                    src="#{fxSystemBean.contextPath}/adm/js/edit_area/edit_area_full.js"></script>
+            <script type="text/javascript">activateEditArea('frm:code', #{scriptBean.inputFieldEnabled},
+            '#{scriptBean.userLang}', '#{scriptBean.language}');
+            </script>
+        </ui:define>
+    </head>
 
+    <body>
     <ui:define name="body">
         <h:form id="frm">
             <a4j:region>
                 <t:saveState value="#{scriptBean.inputFieldEnabled}"/>
                 <t:saveState value="#{scriptBean.verifyButtonEnabled}"/>
                 <t:saveState value="#{scriptBean.executeButtonEnabled}"/>
+                <t:saveState value="#{scriptBean.userLang}"/>
+                <t:saveState value="#{scriptBean.language}"/>
                 <t:saveState value="#{scriptBean.sinfo.event}"/>
                 <t:saveState value="#{scriptBean.sinfo.description}"/>
                 <t:saveState value="#{scriptBean.sinfo.code}"/>
@@ -29,9 +40,11 @@
                 <fx:formRow labelKey="Script.field.name" id="name" relativeWidth="100">
                     <h:inputText id="name" value="#{scriptBean.sinfo.name}" size="30"
                                  readonly="#{!fxSystemBean.isInRole['ScriptManagement']}">
-                        <a4j:support event="onkeyup" reRender="scriptnameerror, all, verifyPanel, executePanel, importPanel"
+                        <a4j:support event="onkeyup"
+                                     reRender="scriptnameerror, all, verifyPanel, executePanel, importPanel"
                                      eventsQueue="main" requestDelay="500" action="#{scriptBean.verifyScriptName}"
-                                     oncomplete="ajaxButtonRequest()"/>
+                                     oncomplete="ajaxButtonRequest();
+                                     activateEditArea('frm:code', #{scriptBean.inputFieldEnabled}, '#{scriptBean.userLang}', '#{scriptBean.language}')"/>
                     </h:inputText>
                     <h:outputText id="scriptnameerror" value="#{scriptBean.nameErrorMsg}"
                                   style="color:red; padding-left:4px"/>
@@ -105,7 +118,8 @@
                     <a4j:outputPanel id="importPanel" layout="block">
                         <adm:commandButton id="defaultImports" labelKey="Script.button.defaultImports"
                                            icon="compact" bean="#{scriptBean}" action="addDefaultImports"
-                                           ajax="true" toolbarPosition="3" buttonDisabled="#{!scriptBean.inputFieldEnabled}"/>
+                                           ajax="true" toolbarPosition="3"
+                                           buttonDisabled="#{!scriptBean.inputFieldEnabled}"/>
                     </a4j:outputPanel>
 
                     <a4j:outputPanel id="executePanel" layout="block">
@@ -138,8 +152,6 @@
             </a4j:region>
         </h:form>
     </ui:define>
-
+    </body>
 </ui:composition>
-
-</body>
 </html>
