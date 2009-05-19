@@ -1,40 +1,88 @@
+/***************************************************************
+ *  This file is part of the [fleXive](R) backend application.
+ *
+ *  Copyright (c) 1999-2008
+ *  UCS - unique computing solutions gmbh (http://www.ucs.at)
+ *  All rights reserved
+ *
+ *  The [fleXive](R) backend application is free software; you can redistribute
+ *  it and/or modify it under the terms of the GNU General Public
+ *  License as published by the Free Software Foundation;
+ *  either version 2 of the License, or (at your option) any
+ *  later version.
+ *
+ *  The GNU General Public License can be found at
+ *  http://www.gnu.org/licenses/gpl.html.
+ *  A copy is found in the textfile GPL.txt and important notices to the
+ *  license from the author are found in LICENSE.txt distributed with
+ *  these libraries.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  For further information about UCS - unique computing solutions gmbh,
+ *  please see the company website: http://www.ucs.at
+ *
+ *  For further information about [fleXive](R), please see the
+ *  project website: http://www.flexive.org
+ *
+ *
+ *  This copyright notice MUST APPEAR in all copies of the file!
+ ***************************************************************/
 package com.flexive.ejb.beans.configuration;
 
-import com.flexive.shared.interfaces.NodeConfigurationEngineLocal;
-import com.flexive.shared.interfaces.NodeConfigurationEngine;
-import com.flexive.shared.FxContext;
 import com.flexive.core.DatabaseConst;
+import com.flexive.shared.FxContext;
+import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.interfaces.NodeConfigurationEngine;
+import com.flexive.shared.interfaces.NodeConfigurationEngineLocal;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import javax.ejb.*;
-import java.sql.SQLException;
 import java.sql.PreparedStatement;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
+import java.sql.SQLException;
 
 /**
- * @author Daniel Lichtenberger, UCS
+ * NodeConfigurationEngine implementation
+ *
+ * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
+ * @since 3.1
  */
 @Stateless(name = "NodeConfigurationEngine", mappedName = "NodeConfigurationEngine")
 @TransactionAttribute(TransactionAttributeType.SUPPORTS)
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class NodeConfigurationEngineBean extends CustomIdConfigurationImpl implements NodeConfigurationEngine, NodeConfigurationEngineLocal {
     private static final Log LOG = LogFactory.getLog(NodeConfigurationEngineBean.class);
-    private static final String NODE_ID = _getHostName();
+    private static final String NODE_ID = StringUtils.defaultString(System.getProperty("flexive.nodename"), FxSharedUtils.getHostName());
 
+    static {
+        if (LOG.isInfoEnabled())
+            LOG.info("Determined nodename (override with system property flexive.nodename): " + NODE_ID);
+    }
+
+    /**
+     * Ctor
+     */
     public NodeConfigurationEngineBean() {
         super("node", DatabaseConst.TBL_NODE_CONFIG, "node_id", true);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected void setId(PreparedStatement stmt, int column) throws SQLException {
         stmt.setString(column, NODE_ID);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected boolean mayUpdate() {
         return FxContext.getUserTicket().isGlobalSupervisor();
@@ -45,23 +93,5 @@ public class NodeConfigurationEngineBean extends CustomIdConfigurationImpl imple
      */
     public String getNodeName() {
         return NODE_ID;
-    }
-
-    private static String _getHostName() {
-        String id;
-        try {
-            id = StringUtils.defaultString(System.getProperty("flexive.nodename"), InetAddress.getLocalHost().getHostName());
-            if (StringUtils.isBlank(id)) {
-                id = "localhost";
-                LOG.warn("Hostname was empty, using \"localhost\" (override with system property flexive.nodename.");
-            }
-        } catch (UnknownHostException e) {
-            LOG.warn("Failed to determine node ID, using \"localhost\" (override with system property flexive.nodename): " + e.getMessage(), e);
-            id = "localhost";
-        }
-        if (LOG.isInfoEnabled()) {
-            LOG.info("Determined nodename (override with system property flexive.nodename): " + id);
-        }
-        return id;
     }
 }

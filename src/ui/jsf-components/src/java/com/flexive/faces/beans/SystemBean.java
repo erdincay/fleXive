@@ -66,6 +66,12 @@ import java.util.MissingResourceException;
 
 import net.java.dev.weblets.FacesWebletUtils;
 
+/**
+ * Generic [fleXive] System informations and access to various functions
+ *
+ * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+ * @version $Rev$
+ */
 public class SystemBean implements Serializable {
     private static final long serialVersionUID = 6592229045042549537L;
     private static final FacesMessageMap messageMap = new FacesMessageMap();
@@ -251,6 +257,11 @@ public class SystemBean implements Serializable {
         return "http" + (request.isSecure() ? "s://" : "://") + FxRequestUtils.getExternalServerName(request);
     }
 
+    /**
+     * Get the document base (server base and context path)
+     *
+     * @return document base (server base and context path)
+     */
     public String getDocumentBase() {
         return getServerBase() + getContextPath() + "/";
     }
@@ -610,6 +621,12 @@ public class SystemBean implements Serializable {
         return explodedContentMap;
     }
 
+    /**
+     * Perform a FxSQL query
+     * key=query string
+     *
+     * @return DataModel
+     */
     public Map<String, DataModel> getQuery() {
         if (queries == null) {
             queries = FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<String, DataModel>() {
@@ -673,6 +690,15 @@ public class SystemBean implements Serializable {
             nodeName = EJBLookup.getNodeConfigurationEngine().getNodeName();
         }
         return nodeName;
+    }
+
+    /**
+     * Get the host name
+     *
+     * @return host name
+     */
+    public String getHostName() {
+        return FxSharedUtils.getHostName();
     }
 
     /**

@@ -47,12 +47,16 @@ import org.apache.commons.logging.LogFactory;
 
 import java.io.*;
 import java.net.URL;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.Collator;
 import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarInputStream;
+import java.lang.reflect.Method;
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * Flexive shared utility functions.
@@ -79,6 +83,8 @@ public final class FxSharedUtils {
     private static boolean fxSnapshotVersion = false;
     private static String bundledGroovyVersion = "unknown";
     private static List<String> translatedLocales = Collections.unmodifiableList(Arrays.asList("en"));
+    private static String hostname = null;
+    private static String appserver = null;
 
 
     /**
@@ -140,6 +146,133 @@ public final class FxSharedUtils {
         } catch (Exception e) {
             LOG.error(e);
         }
+    }
+
+    /**
+     * Get the current hosts name
+     *
+     * @return current hosts name
+     * @since 3.1
+     */
+    public static String getHostName() {
+        if( hostname != null )
+            return hostname;
+        String _hostname;
+        try {
+            _hostname = InetAddress.getLocalHost().getHostName();
+            if (StringUtils.isBlank(_hostname)) {
+                _hostname = "localhost";
+                LOG.warn("Hostname was empty, using \"localhost\"");
+            }
+        } catch (UnknownHostException e) {
+            LOG.warn("Failed to determine node ID, using \"localhost\": " + e.getMessage(), e);
+            _hostname = "localhost";
+        }
+        hostname = _hostname;
+        return hostname;
+    }
+
+    /**
+     * Get the name of the application server [fleXive] is running on
+     *
+     * @return name of the application server [fleXive] is running on
+     * @since 3.1
+     */
+    public static String getApplicationServerName() {
+        if( appserver != null )
+            return appserver;
+        if (System.getProperty("product.name") != null) {
+            // Glassfish / Sun AS
+            String ver =  System.getProperty("product.name");
+            if (System.getProperty("com.sun.jbi.domain.name") != null)
+                ver += " (Domain: " + System.getProperty("com.sun.jbi.domain.name") + ")";
+            appserver = ver;
+        } else if (System.getProperty("jboss.home.dir") != null) {
+            appserver = "JBoss (unknown version)";
+            try {
+                final Class<?> cls = Class.forName("org.jboss.Version");
+                Method m = cls.getMethod("getInstance");
+                Object v = m.invoke(null);
+                Method pr = cls.getMethod("getProperties");
+                Map props = (Map)pr.invoke(v);
+                String ver = "JBoss";
+                if( props.containsKey("version.major") && props.containsKey("version.minor")) {
+                    if( props.containsKey("version.name"))
+                        ver = ver + " [" + props.get("version.name")+"]";
+                    ver = ver + " "+props.get("version.major") + "." + props.get("version.minor");
+                    if( props.containsKey("version.revision"))
+                        ver = ver + "." + props.get("version.revision");
+                    if( props.containsKey("version.tag"))
+                        ver = ver + " " + props.get("version.tag");
+                    if( props.containsKey("build.day"))
+                        ver = ver + " built "+props.get("build.day");
+                }
+                appserver = ver;
+            } catch (ClassNotFoundException e) {
+                //ignore
+            } catch (NoSuchMethodException e) {
+                //ignore
+            } catch (IllegalAccessException e) {
+                //ignore
+            } catch (InvocationTargetException e) {
+                //ignore
+            }
+        } else if (System.getProperty("openejb.version") != null) {
+            // try to get Jetty version
+            String jettyVersion = "";
+            try {
+                final Class<?> cls = Class.forName("org.mortbay.jetty.Server");
+                jettyVersion = " (Jetty "
+                        + cls.getPackage().getImplementationVersion()
+                        + ")";
+            } catch (ClassNotFoundException e) {
+                // no Jetty version...
+            }
+            appserver = "OpenEJB " + System.getProperty("openejb.version") + jettyVersion;
+        } else if (System.getProperty("weblogic.home") != null) {
+            String server = System.getProperty("weblogic.Name");
+            String wlVersion = "";
+            try {
+                final Class<?> cls = Class.forName("weblogic.common.internal.VersionInfo");
+                Method m = cls.getMethod("theOne");
+                Object serverVersion = m.invoke(null);
+                Method sv = m.invoke(null).getClass().getMethod("getImplementationVersion");
+                wlVersion = " " + String.valueOf(sv.invoke(serverVersion));
+            } catch (ClassNotFoundException e) {
+                //ignore
+            } catch (NoSuchMethodException e) {
+                //ignore
+            } catch (InvocationTargetException e) {
+                //ignore
+            } catch (IllegalAccessException e) {
+                //ignore
+            }
+            if (StringUtils.isEmpty(server))
+                appserver = "WebLogic" + wlVersion;
+            else
+                appserver = "WebLogic" + wlVersion + " (server: " + server + ")";
+        } else if (System.getProperty("org.apache.geronimo.home.dir") != null) {
+            String gVersion = "";
+            try {
+                final Class<?> cls = Class.forName("org.apache.geronimo.system.serverinfo.ServerConstants");
+                Method m = cls.getMethod("getVersion");
+                gVersion = " " + String.valueOf(m.invoke(null));
+                m = cls.getMethod("getBuildDate");
+                gVersion = gVersion + " ("+String.valueOf(m.invoke(null))+")";
+            } catch (ClassNotFoundException e) {
+                //ignore
+            } catch (NoSuchMethodException e) {
+                //ignore
+            } catch (InvocationTargetException e) {
+                //ignore
+            } catch (IllegalAccessException e) {
+                //ignore
+            }
+            appserver = "Apache Geronimo "+gVersion;
+        } else {
+            appserver = "unknown";
+        }
+        return appserver;
     }
 
     /**

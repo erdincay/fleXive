@@ -34,16 +34,15 @@
 package com.flexive.war.beans.admin.main;
 
 import com.flexive.shared.EJBLookup;
+import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.media.FxMediaEngine;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.Formatter;
-import java.util.Map;
 
 /**
  * JSF Bean exposing miscellaneous system/runtime parameters.
@@ -52,19 +51,40 @@ import java.util.Map;
  * @version $Rev$
  */
 public class SystemInfoBean {
+    private static final Log LOG = LogFactory.getLog(SystemInfoBean.class);
 
+    /**
+     * Get the current date/time
+     *
+     * @return current date/time
+     */
     public Date getDateTime() {
         return new Date();
     }
 
+    /**
+     * Get the java version
+     *
+     * @return java version
+     */
     public String getJavaVersion() {
         return System.getProperty("java.version") + " (" + System.getProperty("java.vendor") + ")";
     }
 
+    /**
+     * Get the number of available processors
+     *
+     * @return number of available processors
+     */
     public int getProcessors() {
         return Runtime.getRuntime().availableProcessors();
     }
 
+    /**
+     * Get amount of free memory
+     *
+     * @return amount of free memory
+     */
     public String getFreeMemoryMB() {
         return new Formatter().format("%.2f MB (of %.2f MB, max. %.2f MB)",
                 (double) Runtime.getRuntime().freeMemory() / 1024. / 1024.,
@@ -72,128 +92,78 @@ public class SystemInfoBean {
                 (double) Runtime.getRuntime().maxMemory() / 1024. / 1024.).toString();
     }
 
+    /**
+     * Get the operating system name and architecture
+     *
+     * @return operating system name and architecture
+     */
     public String getOperatingSystem() {
         return System.getProperty("os.name") + " " + System.getProperty("os.arch");
     }
 
+    /**
+     * Is ImageMagick available?
+     *
+     * @return ImageMagick available?
+     */
     public boolean isIMAvailable() {
         return FxMediaEngine.hasImageMagickInstalled();
     }
 
+    /**
+     * Get the installed version of ImageMagick
+     *
+     * @return installed version of ImageMagick
+     */
     public String getIMVersion() {
         return FxMediaEngine.getImageMagickVersion();
     }
 
+    /**
+     * Does [fleXive] use ImageMagick to identify images?
+     *
+     * @return use ImageMagick to identify images?
+     */
     public boolean isUseIMIdentify() {
         return FxMediaEngine.isImageMagickIdentifySupported();
     }
 
+    /**
+     * Get the name of the application server [fleXive] is running on
+     *
+     * @return application server
+     */
     public String getApplicationServerName() {
-        if (System.getProperty("product.name") != null) {
-            // Glassfish / Sun AS
-            String ver =  System.getProperty("product.name");
-            if (System.getProperty("com.sun.jbi.domain.name") != null)
-                ver += " (Domain: " + System.getProperty("com.sun.jbi.domain.name") + ")";
-            return ver;
-        } else if (System.getProperty("jboss.home.dir") != null) {
-            try {
-                final Class<?> cls = Class.forName("org.jboss.Version");
-                Method m = cls.getMethod("getInstance");
-                Object v = m.invoke(null);
-                Method pr = cls.getMethod("getProperties");
-                Map props = (Map)pr.invoke(v);
-                String ver = "JBoss";
-                if( props.containsKey("version.major") && props.containsKey("version.minor")) {
-                    if( props.containsKey("version.name"))
-                        ver = ver + " [" + props.get("version.name")+"]";
-                    ver = ver + " "+props.get("version.major") + "." + props.get("version.minor");
-                    if( props.containsKey("version.revision"))
-                        ver = ver + "." + props.get("version.revision");
-                    if( props.containsKey("version.tag"))
-                        ver = ver + " " + props.get("version.tag");
-                    if( props.containsKey("build.day"))
-                        ver = ver + " built "+props.get("build.day");
-                }
-                return ver;
-            } catch (ClassNotFoundException e) {
-                //ignore
-            } catch (NoSuchMethodException e) {
-                //ignore
-            } catch (IllegalAccessException e) {
-                //ignore
-            } catch (InvocationTargetException e) {
-                //ignore
-            }
-            return "JBoss";
-        } else if (System.getProperty("openejb.version") != null) {
-            // try to get Jetty version
-            String jettyVersion = "";
-            try {
-                final Class<?> cls = Class.forName("org.mortbay.jetty.Server");
-                jettyVersion = " (Jetty "
-                        + cls.getPackage().getImplementationVersion()
-                        + ")";
-            } catch (ClassNotFoundException e) {
-                // no Jetty version...
-            }
-            return "OpenEJB " + System.getProperty("openejb.version") + jettyVersion;
-        } else if (System.getProperty("weblogic.home") != null) {
-            String server = System.getProperty("weblogic.Name");
-            String wlVersion = "";
-            try {
-                final Class<?> cls = Class.forName("weblogic.common.internal.VersionInfo");
-                Method m = cls.getMethod("theOne");
-                Object serverVersion = m.invoke(null);
-                Method sv = m.invoke(null).getClass().getMethod("getImplementationVersion");
-                wlVersion = " " + String.valueOf(sv.invoke(serverVersion));
-            } catch (ClassNotFoundException e) {
-                //ignore
-            } catch (NoSuchMethodException e) {
-                //ignore
-            } catch (InvocationTargetException e) {
-                //ignore
-            } catch (IllegalAccessException e) {
-                //ignore
-            }
-            if (StringUtils.isEmpty(server))
-                return "WebLogic" + wlVersion;
-            else
-                return "WebLogic" + wlVersion + " (server: " + server + ")";
-        } else if (System.getProperty("org.apache.geronimo.home.dir") != null) {
-            String gVersion = "";
-            try {
-                final Class<?> cls = Class.forName("org.apache.geronimo.system.serverinfo.ServerConstants");
-                Method m = cls.getMethod("getVersion");
-                gVersion = " " + String.valueOf(m.invoke(null));
-                m = cls.getMethod("getBuildDate");
-                gVersion = gVersion + " ("+String.valueOf(m.invoke(null))+")";
-            } catch (ClassNotFoundException e) {
-                //ignore
-            } catch (NoSuchMethodException e) {
-                //ignore
-            } catch (InvocationTargetException e) {
-                //ignore
-            } catch (IllegalAccessException e) {
-                //ignore
-            }
-            return "Apache Geronimo "+gVersion;
-        } else {
-            return "unknown";
-        }
+        return FxSharedUtils.getApplicationServerName();
     }
 
+    /**
+     * Get information about the database used for the current division
+     *
+     * @return information about the database used for the current division
+     */
     public String getDatabaseInfo() {
         return EJBLookup.getDivisionConfigurationEngine().getDatabaseInfo();
     }
 
-    public Long getDatabaseSchemaVersion() throws FxApplicationException {
-        return EJBLookup.getDivisionConfigurationEngine().get(SystemParameters.DB_VERSION);
+    /**
+     * Get the used database schema version
+     *
+     * @return used database schema version
+     */
+    public Long getDatabaseSchemaVersion() {
+        try {
+            return EJBLookup.getDivisionConfigurationEngine().get(SystemParameters.DB_VERSION);
+        } catch (FxApplicationException e) {
+            LOG.error(e);
+            return -1L;
+        }
     }
 
     /**
      * Returns true if the global configuration plugin is installed.
      *
-     * @return  true if the global configuration plugin is installed.
+     * @return true if the global configuration plugin is installed.
      * @since 3.1
      */
     public boolean isGlobalConfigurationPluginInstalled() {
