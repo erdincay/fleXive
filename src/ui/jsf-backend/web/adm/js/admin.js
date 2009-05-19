@@ -562,7 +562,8 @@ function activateEditArea(id, init, userLang, syntax) {
             language: userLang,
             font_size: 8,
             allow_resize: "both",
-            change_callback: "editAreaChange"
+            change_callback: "editAreaChange",
+            plugins: "executeScript"
         });
     }
 }

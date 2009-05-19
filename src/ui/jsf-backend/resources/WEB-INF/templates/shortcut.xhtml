@@ -39,6 +39,7 @@ keycode - the keycode of the shortcut key (default: 13 (=Enter))
 
     <script type="text/javascript">
     <!--
+    function captureKeyStroke() {
         flexive.yui.require("event");
 
         flexive.yui.onYahooLoaded(function() {
@@ -46,12 +47,18 @@ keycode - the keycode of the shortcut key (default: 13 (=Enter))
             new YAHOO.util.KeyListener(document,
                                    {  ctrl: #{ctrl}, keys: #{keycode} },
                                    { fn: function() {
-                                       document.getElementById("#{elementId}").#{elementAction}(); 
+                                       document.getElementById('#{elementId}').#{elementAction}();
                                    } }
             ).enable();
 
         });
+    }
     //-->
+    </script>
+    <script type="text/javascript">
+        var targetElementId = '#{elementId}'; // EditArea variables
+        var targetElementAction = '#{elementAction}';
+        captureKeyStroke();
     </script>
 
 </ui:composition>
