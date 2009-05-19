@@ -48,15 +48,15 @@ import java.util.regex.Pattern;
  */
 public class XPathElement implements Serializable {
     private static final long serialVersionUID = 2037392183607142045L;
-    private static String PK = "@pk=(NEW|\\d*\\.(LIVE|MAX|\\d*))";
+    private static String PK = "@(pk|PK)=(NEW|\\d*\\.(LIVE|MAX|\\d*))";
     /**
      * First element must start with a "/",
-     * an XPath element must start with a letter followed by an optional letter/number/underscore combination
+     * an XPath element must start with a letter or underscore followed by an optional letter/number/underscore combination
      * and may end with an optional multiplicity like [x] where x is a number
      */
-    private static Pattern XPathPattern = Pattern.compile("([A-Z][A-Z_0-9]{0,}(\\[" + PK + "\\]){0,1}){0,1}(\\/[A-Z][A-Z_0-9]{0,}(\\[[0-9]{1,}\\]){0,1}){1,}");
+    private static Pattern XPathPattern = Pattern.compile("([A-Z_][A-Z_0-9 _]*(\\[" + PK + "\\])?)?(/[A-Z][A-Z_0-9]*(\\[[0-9]+\\])?)+");
     private static Pattern PKPattern = Pattern.compile(PK);
-    private static Pattern doubleSlashPattern = Pattern.compile("[\\/]{2,}");
+    private static Pattern doubleSlashPattern = Pattern.compile("/{2,}");
     private String alias;
     private int index;
     private boolean indexDefined;
@@ -277,29 +277,37 @@ public class XPathElement implements Serializable {
      * Get the given XPath with no indices
      *
      * @param XPath XPath with indices
-     * @return XPath with indices stripped
+     * @return XPath with indices stripped, in upper case
      * @throws FxInvalidParameterException for invalid XPath
      */
     public static String toXPathNoMult(String XPath) throws FxInvalidParameterException {
         if (StringUtils.isEmpty(XPath) || "/".equals(XPath))
             return "/";
         XPath = XPath.toUpperCase();
-        String type = null;
-        if (XPath.charAt(0) != '/' && XPath.indexOf('/') > 0) {
-            //we have a full qualified XPath with type name that needs to be stripped temporarily
-            type = XPath.substring(0, XPath.indexOf('/'));
-            if (type.indexOf('[') > 0)
-                type = type.substring(0, type.indexOf('['));
-            XPath = XPath.substring(XPath.indexOf('/'));
-        }
         if (!isValidXPath(XPath))
             throw new FxInvalidParameterException("XPATH", "ex.xpath.invalid", XPath);
-        String[] xp = XPath.substring(1).split("\\/"); //skip first '/' to avoid empty entries
-        StringBuffer xpc = new StringBuffer(XPath.length() + 10);
+        if (XPath.indexOf('[') == -1) {
+            // fast path for the case where we don't have to do anything because the XPath does not contain
+            // a type parameter (PK) or multiplicities
+            return XPath;
+        }
+        String type = null;
+        final int firstSep = XPath.indexOf('/');
+        if (XPath.charAt(0) != '/' && firstSep > 0) {
+            //we have a full qualified XPath with type name that needs to be stripped temporarily
+            type = XPath.substring(0, firstSep);
+            final int typeParamSep = type.indexOf('[');
+            if (typeParamSep > 0)
+                type = type.substring(0, typeParamSep);
+            XPath = XPath.substring(firstSep);
+        }
+        final String[] xp = XPath.substring(1).split("\\/"); //skip first '/' to avoid empty entries
+        final StringBuffer xpc = new StringBuffer(XPath.length() + 10);
         for (String xpcurr : xp) {
             xpc.append('/');
-            if (xpcurr.indexOf('[') > 0)
-                xpc.append(xpcurr.substring(0, xpcurr.indexOf('[')));
+            final int multSep = xpcurr.indexOf('[');
+            if (multSep > 0)
+                xpc.append(xpcurr.substring(0, multSep));
             else
                 xpc.append(xpcurr);
         }
@@ -396,6 +404,6 @@ public class XPathElement implements Serializable {
             //noinspection ThrowableInstanceNeverThrown
             throw new FxInvalidParameterException("xpath", "ex.xpath.element.noPk", xPath).asRuntimeException();
         }
-        return FxPK.fromString(matcher.group(1));
+        return FxPK.fromString(matcher.group(2));
     }
 }
