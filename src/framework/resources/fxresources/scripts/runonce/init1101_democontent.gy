@@ -50,4 +50,9 @@ article.setValue("/caption", new FxString(FxLanguage.ENGLISH, "Welcome to [fleXi
 article.setValue("/title", new FxString(false, "Welcome to [flexive] 3.1"))
 article.setValue("/longtexthtml", new FxHTML(false,
 """<p>Welcome to your installation of [fleXive] 3.1.</p><h3>What is [fleXive]?</h3><p>[fleXive] is a <strong>Java EE 5 open-source (LGPL) framework</strong> for the development of complex and evolving (web-)applications. It <strong>speeds up development</strong> as it handles numerous important application issues and keeps your application flexible over the development-cycle.</p>"""))
-EJBLookup.treeEngine.save(FxTreeNodeEdit.createNew("Welcome to [flexive] 3.1").setReference(EJBLookup.contentEngine.save(article)))
+def pk = article.save().pk
+EJBLookup.treeEngine.save(FxTreeNodeEdit.createNew("Welcome to [flexive] 3.1").setReference(pk))
+
+// create demo briefcase
+def bcId = EJBLookup.briefcaseEngine.create("Demo Briefcase", "Briefcases are collections of objects. You can add and remove objects to a briefcase, and also share them with other users.", null)
+EJBLookup.briefcaseEngine.addItems(bcId, pk.id)

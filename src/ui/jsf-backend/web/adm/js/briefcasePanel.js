@@ -33,7 +33,9 @@ BriefcasePanel.prototype = {
             var item = this.items[i];
             var linkId = "bc_i" + item.id;
             out.push("<a id=\"" + linkId + "\" href=\"javascript:" + this.showBriefcaseHandler + "(" + item.id + ")\" class=\"briefcaseItem\">");
-            out.push("<div briefcaseId=\"" + item.id + "\" briefcaseName=\"" + flexive.util.escapeQuotes(item.name) + "\">");
+            var escapedName = flexive.util.escapeQuotes(item.name);
+            out.push("<div briefcaseId=\"" + item.id + "\" briefcaseName=\"" + escapedName 
+                    + "\" title=\"" + escapedName + " (" + item.size + ")\">");
             out.push("<div class=\"briefcaseIcon\">");
             if (item.aclId != -1) {
                 // render shared icon overlay - add onclick handler for IE7
@@ -41,7 +43,8 @@ BriefcasePanel.prototype = {
                         + " onclick=\"document.getElementById('" + linkId + "').click()\"/>");
             }
             out.push("</div>");
-            out.push("<div class=\"briefcaseSize\">" + item.size + "</div>");
+            var sizeText = item.size >= 1000 ? "<strong>" + (parseInt(item.size / 1000)) + "k</strong>" : item.size;
+            out.push("<div class=\"briefcaseSize\">" + sizeText + "</div>");
             out.push(item.name);
             out.push("</div>");
             out.push("</a>");

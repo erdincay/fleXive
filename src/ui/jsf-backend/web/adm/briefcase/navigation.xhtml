@@ -238,16 +238,22 @@
     <ui:define name="content">
         <adm:messages disableErrorRegistration="true"/>
 
-        <h5>#{fxMessageBean['SearchQueries.label.overview']}</h5>
-        <a href="javascript:createQuery()">#{fxMessageBean['SearchQueries.button.new']}</a>
+        <h5>
+            #{fxMessageBean['SearchQueries.label.overview']}
+            (<a href="javascript:createQuery()">#{fxMessageBean['SearchQueries.button.new']}</a>)
+        </h5>
+
         <div id="queryContainer">
 
         </div>
 
         <br clear="all"/>
         
-        <h5>#{fxMessageBean['Briefcase.label.briefcases']}</h5>
-        <a href="javascript:createBriefcase()">#{fxMessageBean['Briefcase.button.create']}</a>
+        <h5>
+            #{fxMessageBean['Briefcase.label.briefcases']}
+            (<a href="javascript:createBriefcase()">#{fxMessageBean['Briefcase.button.create']}</a>)
+        </h5>
+
         <div id="briefcaseContainer">
 
         </div>
