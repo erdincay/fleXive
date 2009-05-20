@@ -646,6 +646,15 @@ BUILD SUCCESSFUL]]></screen>
                     </orderedlist>
                 </para>
 
+                <para>
+                    Please also note that if you want to work with the sources of the framework (not the distribution),
+                    we provide a
+                    <filename>flexive.ipr.sample</filename>
+                    project sample file which you can copy to
+                    <filename>flexive.ipr</filename>
+                    and start coding and exploring right away.
+                </para>
+
             </section>
         </section>
 

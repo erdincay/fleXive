@@ -58,6 +58,7 @@ import java.util.*;
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
+@SuppressWarnings({"ThrowableInstanceNeverThrown"})
 public final class FxEnvironmentImpl implements FxEnvironment {
     private static final long serialVersionUID = 7107237825721203341L;
 

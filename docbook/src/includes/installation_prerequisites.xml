@@ -57,7 +57,9 @@
             <listitem>
                 <para>A database (at the moment only
                     <link xlink:href="http://www.mysql.com/">MySql</link>
-                    is supported)
+                    and
+                    <link xlink:href="http://www.h2database.com/">H2</link>
+                    are supported)
                 </para>
                 <para>Download and install
                 <link xlink:href="http://www.mysql.com/">MySql 5.0</link>
