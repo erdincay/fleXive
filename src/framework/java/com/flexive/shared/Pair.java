@@ -31,13 +31,17 @@
  ***************************************************************/
 package com.flexive.shared;
 
+import java.io.Serializable;
+
 /**
- * A generic pair.
+ * A generic pair. Serialization is best-effort, if both X and Y are serializable, then the Pair can also be serialized.
  *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-public class Pair<X, Y> {
+public class Pair<X, Y> implements Serializable {
+    private static final long serialVersionUID = 7921567133986775278L;
+
     private final X first;
     private final Y second;
 

@@ -31,17 +31,12 @@
  ***************************************************************/
 package com.flexive.ejb.beans.configuration;
 
-import com.flexive.core.Database;
 import com.flexive.core.DatabaseConst;
-import static com.flexive.core.DatabaseConst.TBL_USER_CONFIG;
-import com.flexive.ejb.beans.configuration.GenericConfigurationImpl;
 import com.flexive.shared.FxContext;
-import com.flexive.shared.exceptions.FxNoAccessException;
 import com.flexive.shared.interfaces.UserConfigurationEngine;
 import com.flexive.shared.interfaces.UserConfigurationEngineLocal;
 
 import javax.ejb.*;
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
@@ -51,23 +46,38 @@ import java.sql.SQLException;
  *  
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-
 @TransactionManagement(TransactionManagementType.CONTAINER)
 @TransactionAttribute(TransactionAttributeType.REQUIRED)
 @Stateless(name = "UserConfigurationEngine", mappedName="UserConfigurationEngine")
-public class UserConfigurationEngineBean extends CustomIdConfigurationImpl implements UserConfigurationEngine, UserConfigurationEngineLocal {
+public class UserConfigurationEngineBean extends CustomDomainConfigurationImpl<Long> implements UserConfigurationEngine, UserConfigurationEngineLocal {
 
     public UserConfigurationEngineBean() {
         super("user", DatabaseConst.TBL_USER_CONFIG, "user_id", true);
     }
 
     @Override
-    protected void setId(PreparedStatement stmt, int column) throws SQLException {
-        stmt.setLong(column, FxContext.get().getTicket().getUserId());
+    protected Long getCurrentDomain() {
+        return FxContext.get().getTicket().getUserId();
+    }
+
+    @Override
+    protected void setDomain(PreparedStatement stmt, int column, Long domains) throws SQLException {
+        stmt.setLong(column, domains);
     }
 
     @Override
     protected boolean mayUpdate() {
         return !FxContext.getUserTicket().isGuest();
+    }
+
+    @Override
+    protected boolean mayListDomains() {
+        // only the global supervisor may get a list of (potentially) all user IDs
+        return FxContext.getUserTicket().isGlobalSupervisor();
+    }
+
+    @Override
+    protected boolean mayUpdateForeignDomains() {
+        return FxContext.getUserTicket().isGlobalSupervisor();
     }
 }

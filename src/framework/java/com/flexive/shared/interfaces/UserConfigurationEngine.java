@@ -40,6 +40,6 @@ import javax.ejb.Remote;
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 @Remote
-public interface UserConfigurationEngine extends GenericConfigurationEngine {
+public interface UserConfigurationEngine extends CustomDomainConfigurationEngine<Long> {
 
 }

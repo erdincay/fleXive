@@ -67,8 +67,7 @@ import java.util.Map;
  *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-
-abstract class GenericConfigurationImpl implements GenericConfigurationEngine {
+public abstract class GenericConfigurationImpl implements GenericConfigurationEngine {
     private static final Log LOG = LogFactory.getLog(GenericConfigurationImpl.class);
 
     /**
@@ -197,7 +196,7 @@ abstract class GenericConfigurationImpl implements GenericConfigurationEngine {
     /**
      * {@inheritDoc}
      */
-    public <T> void put(Parameter<T> parameter, String key, T value)
+    public <T extends Serializable> void put(Parameter<T> parameter, String key, T value)
             throws FxApplicationException {
 
         if (!parameter.isValid(value)) {
@@ -253,7 +252,7 @@ abstract class GenericConfigurationImpl implements GenericConfigurationEngine {
     /**
      * {@inheritDoc}
      */
-    public <T> void put(Parameter<T> parameter, T value) throws FxApplicationException {
+    public <T extends Serializable> void put(Parameter<T> parameter, T value) throws FxApplicationException {
         put(parameter, parameter.getData().getKey(), value);
     }
 
@@ -267,7 +266,7 @@ abstract class GenericConfigurationImpl implements GenericConfigurationEngine {
      * @throws FxLoadException     if the parameter could not be loaded
      * @throws FxNotFoundException if the parameter does not exist
      */
-    protected <T> Object getParameter(Parameter<T> parameter, String path, String key) throws FxLoadException, FxNotFoundException {
+    protected <T extends Serializable> Object getParameter(Parameter<T> parameter, String path, String key) throws FxLoadException, FxNotFoundException {
         String cachePath = getCachePath(path);
         if (cachePath != null) {
             // try cache first
@@ -302,14 +301,14 @@ abstract class GenericConfigurationImpl implements GenericConfigurationEngine {
     /**
      * {@inheritDoc}
      */
-    public <T> T get(Parameter<T> parameter) throws FxApplicationException {
+    public <T extends Serializable> T get(Parameter<T> parameter) throws FxApplicationException {
         return get(parameter, parameter.getData().getKey());
     }
 
     /**
      * {@inheritDoc}
      */
-    public <T> T get(Parameter<T> parameter, String key)
+    public <T extends Serializable> T get(Parameter<T> parameter, String key)
             throws FxApplicationException {
         return get(parameter, key, false);
     }
@@ -317,7 +316,7 @@ abstract class GenericConfigurationImpl implements GenericConfigurationEngine {
     /**
      * {@inheritDoc}
      */
-    public <T> T get(Parameter<T> parameter, String key, boolean ignoreDefault)
+    public <T extends Serializable> T get(Parameter<T> parameter, String key, boolean ignoreDefault)
             throws FxApplicationException {
         final Pair<Boolean, T> result = tryGet(parameter, key, ignoreDefault);
         if (result.getFirst()) {
@@ -329,7 +328,7 @@ abstract class GenericConfigurationImpl implements GenericConfigurationEngine {
     /**
      * {@inheritDoc}
      */
-    public <T> Pair<Boolean, T> tryGet(Parameter<T> parameter, String key, boolean ignoreDefault) {
+    public <T extends Serializable> Pair<Boolean, T> tryGet(Parameter<T> parameter, String key, boolean ignoreDefault) {
         try {
             final T value = parameter.getValue(
                     getParameter(parameter, parameter.getPath().getValue(), key)
@@ -350,7 +349,7 @@ abstract class GenericConfigurationImpl implements GenericConfigurationEngine {
     /**
      * {@inheritDoc}
      */
-    public <T> Map<String, T> getAll(Parameter<T> parameter) throws FxApplicationException {
+    public <T extends Serializable> Map<String, T> getAll(Parameter<T> parameter) throws FxApplicationException {
         Connection conn = null;
         PreparedStatement stmt = null;
         ParameterData<T> data = parameter.getData();
@@ -374,14 +373,14 @@ abstract class GenericConfigurationImpl implements GenericConfigurationEngine {
     /**
      * {@inheritDoc}
      */
-    public <T> Collection<String> getKeys(Parameter<T> parameter) throws FxApplicationException {
+    public <T extends Serializable> Collection<String> getKeys(Parameter<T> parameter) throws FxApplicationException {
         return getAll(parameter).keySet();
     }
 
     /**
      * {@inheritDoc}
      */
-    public <T> void remove(Parameter<T> parameter, String key)
+    public <T extends Serializable> void remove(Parameter<T> parameter, String key)
             throws FxApplicationException {
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -416,7 +415,7 @@ abstract class GenericConfigurationImpl implements GenericConfigurationEngine {
     /**
      * {@inheritDoc}
      */
-    public <T> void remove(Parameter<T> parameter)
+    public <T extends Serializable> void remove(Parameter<T> parameter)
             throws FxApplicationException {
         remove(parameter, parameter.getKey());
     }
@@ -424,7 +423,7 @@ abstract class GenericConfigurationImpl implements GenericConfigurationEngine {
     /**
      * {@inheritDoc}
      */
-    public <T> void removeAll(Parameter<T> parameter)
+    public <T extends Serializable> void removeAll(Parameter<T> parameter)
             throws FxApplicationException {
         remove(parameter, null);
     }

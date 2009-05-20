@@ -38,6 +38,7 @@ import com.flexive.shared.FxLanguage;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.security.*;
 import com.flexive.shared.value.FxString;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
 
@@ -244,7 +245,7 @@ public class TestUsers {
         }
         if (StringUtils.isBlank(enableUsers)) {
 //            return Collections.unmodifiableList(Arrays.asList(new TestUser[]{SUPERVISOR}));
-            return new ArrayList<TestUser>(Arrays.asList(new TestUser[]{SUPERVISOR}));
+            return Lists.newArrayList(SUPERVISOR, REGULAR, GUEST);
         } else if ("all".equalsIgnoreCase(enableUsers)) {
             return ALL_USERS;
         } else {

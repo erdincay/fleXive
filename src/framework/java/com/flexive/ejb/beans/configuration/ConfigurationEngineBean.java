@@ -39,6 +39,7 @@ import com.flexive.shared.Pair;
 
 import javax.ejb.*;
 import java.util.*;
+import java.io.Serializable;
 
 /**
  * Configuration wrapper implementation.
@@ -64,7 +65,7 @@ public class ConfigurationEngineBean implements ConfigurationEngine, Configurati
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public <T> T get(Parameter<T> parameter, String key)
+    public <T extends Serializable> T get(Parameter<T> parameter, String key)
             throws FxApplicationException {
         return get(parameter, key, false);
     }
@@ -73,7 +74,7 @@ public class ConfigurationEngineBean implements ConfigurationEngine, Configurati
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public <T> T get(Parameter<T> parameter) throws FxApplicationException {
+    public <T extends Serializable> T get(Parameter<T> parameter) throws FxApplicationException {
         return get(parameter, parameter.getData().getKey());
     }
 
@@ -82,7 +83,7 @@ public class ConfigurationEngineBean implements ConfigurationEngine, Configurati
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public <T> T get(Parameter<T> parameter, String key, boolean ignoreDefault)
+    public <T extends Serializable> T get(Parameter<T> parameter, String key, boolean ignoreDefault)
             throws FxApplicationException {
         for (GenericConfigurationEngine config : getAvailableConfigurations(parameter.getScope())) {
             final Pair<Boolean, T> result = config.tryGet(parameter, key, true);
@@ -103,7 +104,7 @@ public class ConfigurationEngineBean implements ConfigurationEngine, Configurati
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public <T> Pair<Boolean, T> tryGet(Parameter<T> parameter, String key, boolean ignoreDefault) {
+    public <T extends Serializable> Pair<Boolean, T> tryGet(Parameter<T> parameter, String key, boolean ignoreDefault) {
         try {
             for (GenericConfigurationEngine config : getAvailableConfigurations(parameter.getScope())) {
                 final Pair<Boolean, T> result = config.tryGet(parameter, key, true);
@@ -121,7 +122,7 @@ public class ConfigurationEngineBean implements ConfigurationEngine, Configurati
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public <T> void putInSource(Parameter<T> parameter, String key, T value) throws FxApplicationException {
+    public <T extends Serializable> void putInSource(Parameter<T> parameter, String key, T value) throws FxApplicationException {
         getSource(parameter, key).put(parameter, key, value);
     }
 
@@ -129,11 +130,11 @@ public class ConfigurationEngineBean implements ConfigurationEngine, Configurati
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public <T> void putInSource(Parameter<T> parameter, T value) throws FxApplicationException {
+    public <T extends Serializable> void putInSource(Parameter<T> parameter, T value) throws FxApplicationException {
         putInSource(parameter, parameter.getData().getKey(), value);
     }
 
-    private <T> GenericConfigurationEngine getSource(Parameter<T> parameter, String key) throws FxApplicationException {
+    private <T extends Serializable> GenericConfigurationEngine getSource(Parameter<T> parameter, String key) throws FxApplicationException {
         final List<GenericConfigurationEngine> availableConfigurations = getAvailableConfigurations(parameter.getScope());
         for (GenericConfigurationEngine config : availableConfigurations) {
             try {
@@ -156,7 +157,7 @@ public class ConfigurationEngineBean implements ConfigurationEngine, Configurati
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public <T> Map<String, T> getAll(Parameter<T> parameter) throws FxApplicationException {
+    public <T extends Serializable> Map<String, T> getAll(Parameter<T> parameter) throws FxApplicationException {
         List<GenericConfigurationEngine> configs;
         try {
             configs = getAvailableConfigurations(parameter.getScope());
@@ -177,7 +178,7 @@ public class ConfigurationEngineBean implements ConfigurationEngine, Configurati
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public <T> Collection<String> getKeys(Parameter<T> parameter) throws FxApplicationException {
+    public <T extends Serializable> Collection<String> getKeys(Parameter<T> parameter) throws FxApplicationException {
         return getAll(parameter).keySet();
     }
 
@@ -185,7 +186,7 @@ public class ConfigurationEngineBean implements ConfigurationEngine, Configurati
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public <T> void put(Parameter<T> parameter, String key, T value)
+    public <T extends Serializable> void put(Parameter<T> parameter, String key, T value)
             throws FxApplicationException {
         try {
             getPrimaryConfiguration(parameter.getScope()).put(parameter, key, value);
@@ -198,7 +199,7 @@ public class ConfigurationEngineBean implements ConfigurationEngine, Configurati
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public <T> void put(Parameter<T> parameter, T value)
+    public <T extends Serializable> void put(Parameter<T> parameter, T value)
             throws FxApplicationException {
         try {
             getPrimaryConfiguration(parameter.getScope()).put(parameter, value);
@@ -212,7 +213,7 @@ public class ConfigurationEngineBean implements ConfigurationEngine, Configurati
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public <T> void remove(Parameter<T> parameter, String key)
+    public <T extends Serializable> void remove(Parameter<T> parameter, String key)
             throws FxApplicationException {
         try {
             getPrimaryConfiguration(parameter.getScope()).remove(parameter, key);
@@ -225,7 +226,7 @@ public class ConfigurationEngineBean implements ConfigurationEngine, Configurati
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public <T> void remove(Parameter<T> parameter)
+    public <T extends Serializable> void remove(Parameter<T> parameter)
             throws FxApplicationException {
         try {
             getPrimaryConfiguration(parameter.getScope()).remove(parameter);
@@ -238,7 +239,7 @@ public class ConfigurationEngineBean implements ConfigurationEngine, Configurati
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public <T> void removeAll(Parameter<T> parameter)
+    public <T extends Serializable> void removeAll(Parameter<T> parameter)
             throws FxApplicationException {
         try {
             getPrimaryConfiguration(parameter.getScope()).removeAll(parameter);

@@ -64,6 +64,20 @@
                             </listitem>
                         </varlistentry>
                         <varlistentry>
+                            <term>node</term>
+                            <listitem>
+                                <para>
+                                    for entries that are specific to an individual node in the network,
+                                    such as filesystem paths. The node ID defaults to the node's
+                                    hostname, but can be overridden with the system property
+                                    <code>flexive.nodename</code>.
+                                    The current node name can be determined using
+                                    <link xlink:href="&flexiveJavadocBase;shared/com/flexive/shared/interfaces/NodeConfigurationEngine.html#getNodeName()">
+                                        NodeConfigurationEngine#getNodeName()</link>.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
                             <term>application</term>
                             <listitem>
                                 <para>

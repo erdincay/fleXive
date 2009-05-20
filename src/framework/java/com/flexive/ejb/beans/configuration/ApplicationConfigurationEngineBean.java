@@ -17,17 +17,22 @@ import java.sql.PreparedStatement;
 @TransactionAttribute(TransactionAttributeType.REQUIRED)
 @Stateless(name = "ApplicationConfigurationEngine", mappedName="ApplicationConfigurationEngine")
 public class ApplicationConfigurationEngineBean
-        extends CustomIdConfigurationImpl
+        extends CustomDomainConfigurationImpl<String>
         implements ApplicationConfigurationEngine, ApplicationConfigurationEngineLocal {
 
 
     public ApplicationConfigurationEngineBean() {
         super("application", DatabaseConst.TBL_APPLICATION_CONFIG, "application_id", true);
     }
-    
+
     @Override
-    protected void setId(PreparedStatement stmt, int column) throws SQLException {
-        stmt.setString(column, FxContext.get().getApplicationId());
+    protected String getCurrentDomain() {
+        return FxContext.get().getApplicationId();
+    }
+
+    @Override
+    protected void setDomain(PreparedStatement stmt, int column, String domain) throws SQLException {
+        stmt.setString(column, domain);
     }
 
     @Override
@@ -35,4 +40,13 @@ public class ApplicationConfigurationEngineBean
         return FxContext.getUserTicket().isGlobalSupervisor();
     }
 
+    @Override
+    protected boolean mayListDomains() {
+        return true;    // list of applications can be seen by anyone
+    }
+
+    @Override
+    protected boolean mayUpdateForeignDomains() {
+        return FxContext.getUserTicket().isGlobalSupervisor();
+    }
 }

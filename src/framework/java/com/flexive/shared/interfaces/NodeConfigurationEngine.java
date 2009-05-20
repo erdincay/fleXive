@@ -44,7 +44,7 @@ import javax.ejb.Remote;
  * @since 3.1
  */
 @Remote
-public interface NodeConfigurationEngine extends GenericConfigurationEngine {
+public interface NodeConfigurationEngine extends CustomDomainConfigurationEngine<String> {
 
     /**
      * Return this node's name.

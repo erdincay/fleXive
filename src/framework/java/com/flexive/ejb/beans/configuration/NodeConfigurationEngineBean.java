@@ -56,7 +56,7 @@ import java.sql.SQLException;
 @Stateless(name = "NodeConfigurationEngine", mappedName = "NodeConfigurationEngine")
 @TransactionAttribute(TransactionAttributeType.SUPPORTS)
 @TransactionManagement(TransactionManagementType.CONTAINER)
-public class NodeConfigurationEngineBean extends CustomIdConfigurationImpl implements NodeConfigurationEngine, NodeConfigurationEngineLocal {
+public class NodeConfigurationEngineBean extends CustomDomainConfigurationImpl<String> implements NodeConfigurationEngine, NodeConfigurationEngineLocal {
     private static final Log LOG = LogFactory.getLog(NodeConfigurationEngineBean.class);
     private static final String NODE_ID = StringUtils.defaultString(System.getProperty("flexive.nodename"), FxSharedUtils.getHostName());
 
@@ -72,12 +72,33 @@ public class NodeConfigurationEngineBean extends CustomIdConfigurationImpl imple
         super("node", DatabaseConst.TBL_NODE_CONFIG, "node_id", true);
     }
 
+
+    @Override
+    public String getCurrentDomain() {
+        return NODE_ID;
+    }
+
     /**
      * {@inheritDoc}
      */
     @Override
-    protected void setId(PreparedStatement stmt, int column) throws SQLException {
-        stmt.setString(column, NODE_ID);
+    protected void setDomain(PreparedStatement stmt, int column, String domains) throws SQLException {
+        stmt.setString(column, domains);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getNodeName() {
+        return getCurrentDomain();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected boolean mayListDomains() {
+        return true;    // list of nodes may be seen by anyone
     }
 
     /**
@@ -91,7 +112,8 @@ public class NodeConfigurationEngineBean extends CustomIdConfigurationImpl imple
     /**
      * {@inheritDoc}
      */
-    public String getNodeName() {
-        return NODE_ID;
+    @Override
+    protected boolean mayUpdateForeignDomains() {
+        return FxContext.getUserTicket().isGlobalSupervisor();
     }
 }

@@ -50,6 +50,7 @@ import com.flexive.shared.security.Role;
 import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.structure.FxAssignment;
 import com.flexive.shared.structure.FxType;
+import com.google.common.collect.Lists;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import groovy.lang.Script;
@@ -946,7 +947,9 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
                 return;
             }
             //noinspection unchecked
-            final List<FxScriptRunInfo> divisionRunOnceInfos = getDivisionConfigurationEngine().get(SystemParameters.DIVISION_RUNONCE_INFOS);
+            final ArrayList<FxScriptRunInfo> divisionRunOnceInfos = Lists.newArrayList(
+                    getDivisionConfigurationEngine().get(SystemParameters.DIVISION_RUNONCE_INFOS)
+            );
 
             LocalScriptingCache.runOnceInfos = new CopyOnWriteArrayList<FxScriptRunInfo>();
             LocalScriptingCache.runOnceInfos.addAll(divisionRunOnceInfos);

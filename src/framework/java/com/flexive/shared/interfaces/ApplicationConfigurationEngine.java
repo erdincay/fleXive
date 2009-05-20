@@ -16,5 +16,5 @@ import javax.ejb.Remote;
  * @since 3.1
  */
 @Remote
-public interface ApplicationConfigurationEngine extends GenericConfigurationEngine {
+public interface ApplicationConfigurationEngine extends CustomDomainConfigurationEngine<String> {
 }
