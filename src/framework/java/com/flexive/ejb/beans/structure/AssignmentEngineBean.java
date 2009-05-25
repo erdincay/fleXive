@@ -1119,7 +1119,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             String XPath;
             if (!group.getXPath().startsWith(group.getAssignedType().getName())) {
                 if (group.getAlias() != null)
-                    XPath = XPathElement.buildXPath(false, group.getAssignedType().getName(), group.getXPath());
+                    XPath = XPathElement.buildXPath(false, group.getAssignedType().getName(), XPathElement.stripType(group.getXPath()));
                 else
                     XPath = "/";
             } else
