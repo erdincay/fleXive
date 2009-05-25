@@ -37,7 +37,6 @@ import static com.flexive.shared.configuration.SystemParameterPaths.*;
 import com.flexive.shared.configuration.parameters.ParameterFactory;
 
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Flexive system parameter definitions.
@@ -65,15 +64,15 @@ public class SystemParameters {
     /**
      * Root login parameter
      */
-    public static final Parameter<String> GLOBAL_ROOT_LOGIN = ParameterFactory.newInstance(String.class, SystemParameterPaths.GLOBAL_CONFIG, "root_login", "admin");
+    public static final Parameter<String> GLOBAL_ROOT_LOGIN = ParameterFactory.newInstance(String.class, GLOBAL_CONFIG, "root_login", "admin");
     /**
      * Root password parameter
      */
-    public static final Parameter<String> GLOBAL_ROOT_PASSWORD = ParameterFactory.newInstance(String.class, SystemParameterPaths.GLOBAL_CONFIG, "root_password", "123456");
+    public static final Parameter<String> GLOBAL_ROOT_PASSWORD = ParameterFactory.newInstance(String.class, GLOBAL_CONFIG, "root_password", "123456");
     /**
      * Division datasource parameter
      */
-    public static final Parameter<String> GLOBAL_DATASOURCES = ParameterFactory.newInstance(String.class, SystemParameterPaths.GLOBAL_DIVISIONS_DS, "", "");
+    public static final Parameter<String> GLOBAL_DATASOURCES = ParameterFactory.newInstance(String.class, GLOBAL_DIVISIONS_DS, "", "");
     /**
      * Divison domain matcher parameter
      */
@@ -107,13 +106,25 @@ public class SystemParameters {
      */
     public static final Parameter<Boolean> TREE_LIVE_ENABLED = ParameterFactory.newInstance(Boolean.class, DIVISION_TREE, "liveTree", true);
     /**
+     * Wether to store binary transit files in the database or filesystem
+     */
+    public static final Parameter<Boolean> BINARY_TRANSIT_DB = ParameterFactory.newInstance(Boolean.class, DIVISION_TREE, "binaryTransitDB", true);
+    /**
+     * Path on the current nodes filesystem for binary transit files
+     */
+    public static final Parameter<String> NODE_TRANSIT_PATH = ParameterFactory.newInstance(String.class, NODE_CONFIG, "nodeTransitPath", "~/flexive/transit");
+    /**
+     * Path on the current nodes filesystem for binary files
+     */
+    public static final Parameter<String> NODE_BINARY_PATH = ParameterFactory.newInstance(String.class, NODE_CONFIG, "nodeTransitPath", "~/flexive/binaries");
+    /**
      * Download URL for exports
      */
     public static final Parameter<String> EXPORT_DOWNLOAD_URL = ParameterFactory.newInstance(String.class, DIVISION_CONFIG, "exportURL", "http://localhost:8080/flexive/download");
     /**
      * The default input language for multilingual input fields
      */
-    public static final Parameter<Long> USER_DEFAULTINPUTLANGUAGE = ParameterFactory.newInstance(Long.class, SystemParameterPaths.USER_CONFIG, "input.defaultLanguage", -1L);
+    public static final Parameter<Long> USER_DEFAULTINPUTLANGUAGE = ParameterFactory.newInstance(Long.class, USER_CONFIG, "input.defaultLanguage", -1L);
     /**
      * Parameter for specifying the URL mapping for the thumbnail servlet. Set this to the prefix mapped to the thumbnail
      * servlet as specified in your application's web.xml.

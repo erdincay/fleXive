@@ -68,6 +68,9 @@ public enum SystemParameterPaths implements ParameterPath {
     /** Miscellaneous user preferences */
     USER_CONFIG("/userPreferences", ParameterScope.USER),
 
+    /** Node specific configuration */
+    NODE_CONFIG("/nodeConfig", ParameterScope.NODE),
+
     /** unit test entry */
     TEST_GLOBAL("/test/global", ParameterScope.GLOBAL),
     /** unit test entry */

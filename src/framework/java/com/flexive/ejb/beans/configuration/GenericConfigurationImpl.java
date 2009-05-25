@@ -42,9 +42,10 @@ import com.flexive.shared.configuration.parameters.NullParameter;
 import com.flexive.shared.configuration.parameters.UnsetParameter;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.GenericConfigurationEngine;
+import org.apache.commons.lang.SerializationUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.commons.lang.SerializationUtils;
 
 import java.io.Serializable;
 import java.sql.*;
@@ -73,8 +74,8 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
     /**
      * Return a (new or existing) Connection to the configuration table.
      *
-     * @throws SQLException if the connection could not be retrieved
      * @return a Connection to the configuration table.
+     * @throws SQLException if the connection could not be retrieved
      */
     protected abstract Connection getConnection() throws SQLException;
 
@@ -91,8 +92,8 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
      * @param conn the current connection
      * @param path the requested path
      * @param key  the requested key
-     * @throws SQLException if a database error occurs
      * @return a PreparedStatement selecting the value for the given path/key combination
+     * @throws SQLException if a database error occurs
      */
     protected abstract PreparedStatement getSelectStatement(Connection conn, String path, String key)
             throws SQLException;
@@ -109,8 +110,8 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
      *
      * @param conn the current connection
      * @param path the requested path
-     * @throws SQLException if a database error occurs
      * @return a PreparedStatement selecting all keys and values for the given path
+     * @throws SQLException if a database error occurs
      */
     protected abstract PreparedStatement getSelectStatement(Connection conn, String path) throws SQLException;
 
@@ -122,9 +123,9 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
      * @param path  path of the parameter
      * @param key   key to be updated
      * @param value the new value to be stored
+     * @return a PreparedStatement updating the given row
      * @throws SQLException        if a database error occurs
      * @throws FxNoAccessException if the caller is not permitted to update the given parameter
-     * @return a PreparedStatement updating the given row
      */
     protected abstract PreparedStatement getUpdateStatement(Connection conn, String path, String key, String value)
             throws SQLException, FxNoAccessException;
@@ -137,9 +138,9 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
      * @param path  path of the new row
      * @param key   key of the new row
      * @param value value of the new row
+     * @return a PreparedStatement for inserting the given path/key/value
      * @throws SQLException        if a database error occurs
      * @throws FxNoAccessException if the caller is not permitted to create the given parameter
-     * @return a PreparedStatement for inserting the given path/key/value
      */
     protected abstract PreparedStatement getInsertStatement(Connection conn, String path, String key, String value)
             throws SQLException, FxNoAccessException;
@@ -207,11 +208,17 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
         Connection conn = null;
         PreparedStatement stmt = null;
         ParameterData<T> data = parameter.getData();
+        String oldValue = null;
         try {
             conn = getConnection();
             stmt = getSelectStatement(conn, data.getPath().getValue(), key);
             ResultSet rs = stmt.executeQuery();
             boolean valueExists = rs.next();
+            if (valueExists) {
+                oldValue = rs.getString(1);
+                if (!StringUtils.isEmpty(oldValue) && oldValue.equals(String.valueOf(value)))
+                    return; //no changes
+            }
             stmt.close();
             stmt = null;
             if (valueExists) {
@@ -236,6 +243,8 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
             sbHistory.append("<parameter type=\"").append(parameter.getScope().name()).append("\">\n");
             sbHistory.append("  <path><![CDATA[").append(parameter.getPath()).append("]]></path>\n");
             sbHistory.append("  <key><![CDATA[").append(key).append("]]></key>\n");
+            if (oldValue != null)
+                sbHistory.append("  <oldValue><![CDATA[").append(oldValue).append("]]></oldValue>\n");
             sbHistory.append("  <value><![CDATA[").append(String.valueOf(value)).append("]]></value>\n");
             sbHistory.append("</parameter>\n");
             EJBLookup.getHistoryTrackerEngine().trackData(sbHistory.toString(), "history.parameter.set",
@@ -260,12 +269,13 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
      * Get a configuration parameter identified by a path and a key.
      *
      * @param parameter the actual parameter instance
-     * @param path path of the parameter
-     * @param key  key of the parameter
+     * @param path      path of the parameter
+     * @param key       key of the parameter
      * @return the parameter value
      * @throws FxLoadException     if the parameter could not be loaded
      * @throws FxNotFoundException if the parameter does not exist
      */
+    @SuppressWarnings({"RedundantCast"})
     protected <T extends Serializable> Object getParameter(Parameter<T> parameter, String path, String key) throws FxLoadException, FxNotFoundException {
         String cachePath = getCachePath(path);
         if (cachePath != null) {

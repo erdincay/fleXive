@@ -33,10 +33,10 @@
  ***************************************************************/
 package com.flexive.war.beans.admin;
 
-import com.flexive.shared.EJBLookup;
-import com.flexive.shared.exceptions.FxApplicationException;
-import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.faces.messages.FxFacesMsgErr;
+import com.flexive.shared.EJBLookup;
+import com.flexive.shared.configuration.SystemParameters;
+import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.war.filter.VersionUrlFilter;
 
 /**
@@ -47,6 +47,8 @@ import com.flexive.war.filter.VersionUrlFilter;
  */
 public class AdminConfigurationBean {
     private Boolean treeLiveEnabled;
+    private Boolean binaryTransitDB;
+    private String binaryTransitPath;
     private String exportURLprefix;
 
     /**
@@ -56,7 +58,9 @@ public class AdminConfigurationBean {
     public void updateConfiguration() {
         try {
             EJBLookup.getConfigurationEngine().putInSource(SystemParameters.TREE_LIVE_ENABLED, isTreeLiveEnabled());
+            EJBLookup.getConfigurationEngine().putInSource(SystemParameters.BINARY_TRANSIT_DB, isBinaryTransitDB());
             EJBLookup.getDivisionConfigurationEngine().put(SystemParameters.EXPORT_DOWNLOAD_URL, getExportURLprefix());
+            EJBLookup.getNodeConfigurationEngine().put(SystemParameters.NODE_TRANSIT_PATH, getBinaryTransitPath());
         } catch (FxApplicationException e) {
             new FxFacesMsgErr(e).addToContext();
         }
@@ -70,9 +74,8 @@ public class AdminConfigurationBean {
      * @see SystemParameters#TREE_LIVE_ENABLED
      */
     public boolean isTreeLiveEnabled() throws FxApplicationException {
-        if (treeLiveEnabled == null) {
-            return EJBLookup.getConfigurationEngine().get(SystemParameters.TREE_LIVE_ENABLED);
-        }
+        if (treeLiveEnabled == null)
+            treeLiveEnabled = EJBLookup.getConfigurationEngine().get(SystemParameters.TREE_LIVE_ENABLED);
         return treeLiveEnabled;
     }
 
@@ -80,9 +83,43 @@ public class AdminConfigurationBean {
         this.treeLiveEnabled = treeLiveEnabled;
     }
 
+    /**
+     * Returns true if binary transits are stored in the database
+     *
+     * @return true if binary transits are stored in the database
+     * @throws FxApplicationException on system errors
+     * @see SystemParameters#BINARY_TRANSIT_DB
+     */
+    public boolean isBinaryTransitDB() throws FxApplicationException {
+        if (binaryTransitDB == null)
+            binaryTransitDB = EJBLookup.getConfigurationEngine().get(SystemParameters.BINARY_TRANSIT_DB);
+        return binaryTransitDB;
+    }
+
+    /**
+     * Returns the path on the local filesystem for binary transit files
+     *
+     * @return path on the local filesystem for binary transit files
+     * @throws FxApplicationException on system errors
+     * @see SystemParameters#NODE_TRANSIT_PATH
+     */
+    public String getBinaryTransitPath() throws FxApplicationException {
+        if (binaryTransitPath == null)
+            binaryTransitPath = EJBLookup.getNodeConfigurationEngine().get(SystemParameters.NODE_TRANSIT_PATH);
+        return binaryTransitPath;
+    }
+
+    public void setBinaryTransitDB(boolean binaryTransitDB) {
+        this.binaryTransitDB = binaryTransitDB;
+    }
+
+    public void setBinaryTransitPath(String binaryTransitPath) {
+        this.binaryTransitPath = binaryTransitPath;
+    }
+
     public String getExportURLprefix() throws FxApplicationException {
-        if( exportURLprefix == null )
-            return EJBLookup.getDivisionConfigurationEngine().get(SystemParameters.EXPORT_DOWNLOAD_URL);
+        if (exportURLprefix == null)
+            exportURLprefix = EJBLookup.getDivisionConfigurationEngine().get(SystemParameters.EXPORT_DOWNLOAD_URL);
         return exportURLprefix;
     }
 
@@ -94,12 +131,13 @@ public class AdminConfigurationBean {
      * Inserts the current flexive version into the given URL. Available in EL via
      * {@code #{adm:versionedUrl(String)}.
      *
-     * @return  the URL with the current version
+     * @param url the url to version
+     * @return the URL with the current version
      */
     public static String getVersionedUrl(String url) {
         final int pos = Math.max(url.lastIndexOf('.'), url.lastIndexOf('/'));
         return pos != -1
                 ? url.substring(0, pos) + VersionUrlFilter.URL_PATTERN + url.substring(pos)
-                : VersionUrlFilter.URL_PATTERN + url; 
+                : VersionUrlFilter.URL_PATTERN + url;
     }
 }

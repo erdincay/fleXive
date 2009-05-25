@@ -41,16 +41,19 @@ import java.io.File;
 public class BinaryTransitFileInfo {
     private final File binaryTransitFile;
     private final String mimeType;
+    private boolean DBStorage;
 
     /**
      * Ctor
      *
      * @param binaryTransitFile File handle to the binary in transit
      * @param mimeType          detected mime type
+     * @param DBStorage         is the transit file stored in the database?
      */
-    public BinaryTransitFileInfo(File binaryTransitFile, String mimeType) {
+    public BinaryTransitFileInfo(File binaryTransitFile, String mimeType, boolean DBStorage) {
         this.binaryTransitFile = binaryTransitFile;
         this.mimeType = mimeType;
+        this.DBStorage = DBStorage;
     }
 
     /**
@@ -69,5 +72,14 @@ public class BinaryTransitFileInfo {
      */
     public String getMimeType() {
         return mimeType;
+    }
+
+    /**
+     * Is the transit file stored in the database?
+     *
+     * @return is the transit file stored in the database?
+     */
+    public boolean isDBStorage() {
+        return DBStorage;
     }
 }

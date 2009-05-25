@@ -26,6 +26,14 @@
                 <h:inputText id="exportURLprefix" value="#{adminConfigurationBean.exportURLprefix}" size="50"/>
             </fx:formRow>
 
+            <fx:formRow id="binaryTransitDB" labelKey="SystemConfiguration.label.binaryTransitDB">
+                <h:selectBooleanCheckbox id="binaryTransitDB" value="#{adminConfigurationBean.binaryTransitDB}"/>
+            </fx:formRow>
+
+            <fx:formRow id="binaryTransitPath" labelKey="SystemConfiguration.label.binaryTransitPath">
+                <h:inputText id="binaryTransitPath" value="#{adminConfigurationBean.binaryTransitPath}" size="127"/>
+            </fx:formRow>
+
             <br/>
             
             <adm:commandButton labelKey="SystemConfiguration.button.save" location="both" bean="#{adminConfigurationBean}"
