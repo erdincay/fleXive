@@ -362,6 +362,7 @@ public class FxPropertyAssignmentEdit extends FxPropertyAssignment {
      * Set the alias of this property assignment.
      * Property assignments may define an alias to allow multiple use of the same property but
      * using a different name. The alias is the rightmost part of the XPath used to address an assignment.
+     * Will affect the XPath as well.
      *
      * @param alias the alias of this assignment
      * @return this
@@ -370,7 +371,13 @@ public class FxPropertyAssignmentEdit extends FxPropertyAssignment {
     public FxPropertyAssignmentEdit setAlias(String alias) throws FxInvalidParameterException {
         if (StringUtils.isEmpty(alias))
             throw new FxInvalidParameterException("ALIAS", "ex.structure.assignment.noAlias");
-        this.alias = alias;
+        //only react to alias changes
+        if (!this.alias.trim().toUpperCase().equals(alias.trim().toUpperCase())) {
+            this.alias = alias.trim().toUpperCase();
+            List<XPathElement> xpe = XPathElement.split(this.XPath);
+            xpe.set(xpe.size() - 1, new XPathElement(this.alias, 1, true));
+            this.XPath = XPathElement.toXPathNoMult(xpe);
+        }
         return this;
     }
 

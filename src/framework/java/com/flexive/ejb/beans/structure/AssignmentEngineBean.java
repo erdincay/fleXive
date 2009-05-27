@@ -799,7 +799,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
     /**
      * Updates a group assignment
      *
-     * @param con a valid and open connection
+     * @param con   a valid and open connection
      * @param group the FxGroupAssignment to be changed
      * @return returns true if changes were made to the group assignment
      * @throws FxApplicationException on errors
@@ -889,16 +889,20 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 if (!XPathElement.isValidXPath(XPathElement.stripType(group.getXPath())) ||
                         group.getAlias().equals(XPathElement.lastElement(XPathElement.stripType(org.getXPath())).getAlias()))
                     throw new FxUpdateException("ex.structure.assignment.noXPath");
+                // generate correct XPATH
+                if (!group.getXPath().startsWith(group.getAssignedType().getName()))
+                    group.setXPath(group.getAssignedType().getName() + group.getXPath());
                 //avoid duplicates
                 if (org.getAssignedType().isXPathValid(group.getXPath(), true))
                     throw new FxUpdateException("ex.structure.assignment.exists", group.getXPath(), group.getAssignedType().getName());
-                //TODO: make sure just the alias changed
+                // update db entries
                 ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET XPATH=?, XALIAS=? WHERE ID=?");
                 ps.setString(1, group.getXPath());
                 ps.setString(2, group.getAlias());
                 ps.setLong(3, group.getId());
                 ps.executeUpdate();
                 ps.close();
+                // update the relevant content instances
                 ContentStorage storage = StorageManager.getContentStorage(TypeStorageMode.Hierarchical);
                 storage.updateXPath(con, group.getId(), XPathElement.stripType(org.getXPath()),
                         XPathElement.stripType(group.getXPath()));
@@ -1099,9 +1103,9 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
     /**
      * Creates a group assignment
      *
-     * @param con a valid and open connection
-     * @param sql an instance of StringBuilder
-     * @param group an instance of the FxGroupAssignment to be persisted
+     * @param con                  a valid and open connection
+     * @param sql                  an instance of StringBuilder
+     * @param group                an instance of the FxGroupAssignment to be persisted
      * @param createSubAssignments if true calls createGroupAssignment is called recursively to create sub assignments
      * @return returns the assignmentId
      * @throws FxApplicationException on errors
@@ -1204,7 +1208,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
     /**
      * Updates a property
      *
-     * @param con a valid and open connection
+     * @param con  a valid and open connection
      * @param prop the instance of FxPropertyEdit to be changed
      * @return returns true if changes were made to the property
      * @throws FxApplicationException on errors
@@ -1302,9 +1306,9 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                             checkReferencedType(con, (FxReference) prop.getDefaultValue(), prop.getReferencedType());
                             //check for referencing assignments
                             final List<FxPropertyAssignment> refAssignments = CacheAdmin.getEnvironment().getReferencingPropertyAssignments(prop.getId());
-                            for(FxPropertyAssignment refAssignment: refAssignments) {
-                                if( refAssignment.hasAssignmentDefaultValue() && refAssignment.getDefaultValue() instanceof FxReference)
-                                    checkReferencedType(con, (FxReference)refAssignment.getDefaultValue(), prop.getReferencedType());
+                            for (FxPropertyAssignment refAssignment : refAssignments) {
+                                if (refAssignment.hasAssignmentDefaultValue() && refAssignment.getDefaultValue() instanceof FxReference)
+                                    checkReferencedType(con, (FxReference) refAssignment.getDefaultValue(), prop.getReferencedType());
                             }
                         }
                         ps = con.prepareStatement("UPDATE " + TBL_STRUCT_PROPERTIES + " SET REFTYPE=? WHERE ID=?");
@@ -1498,12 +1502,12 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
     /**
      * Check if the type of the given references matches the given type
      *
-     * @param con an open and valid connection
+     * @param con   an open and valid connection
      * @param value the value containing references
-     * @param type the type the references should match
+     * @param type  the type the references should match
      * @throws FxNotFoundException on errors
-     * @throws FxLoadException on errors
-     * @throws FxUpdateException if type does not match
+     * @throws FxLoadException     on errors
+     * @throws FxUpdateException   if type does not match
      */
     private void checkReferencedType(Connection con, FxReference value, FxType type) throws FxNotFoundException, FxLoadException, FxUpdateException {
         ContentStorage storage = StorageManager.getContentStorage(TypeStorageMode.Hierarchical);
@@ -1601,36 +1605,33 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     changesDesc.append("position=").append(finalPos);
                     changes = true;
                 }
-                //not supported yet
-                if (!original.getXPath().equals(modified.getXPath())) {
-                    throw new FxUpdateException("ex.structure.modification.notSuppoerted", "xPath");
-                    /*
-                    //TODO:check for valid XPath
-                    ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET XPATH=? WHERE ID=?");
-                    ps.setString(1, prop.getXPath());
-                    ps.setLong(2, prop.getId());
+                // alias / xpath change
+                if (!original.getXPath().equals(modified.getXPath()) || !original.getAlias().equals(modified.getAlias())) {
+                    if (!XPathElement.isValidXPath(XPathElement.stripType(modified.getXPath())) ||
+                            modified.getAlias().equals(XPathElement.lastElement(XPathElement.stripType(original.getXPath())).getAlias()))
+                        throw new FxUpdateException("ex.structure.assignment.noXPath");
+                    // generate correct XPATH
+                    if (!modified.getXPath().startsWith(modified.getAssignedType().getName()))
+                        modified.setXPath(modified.getAssignedType().getName() + modified.getXPath());
+                    //avoid duplicates
+                    if (original.getAssignedType().isXPathValid(modified.getXPath(), true))
+                        throw new FxUpdateException("ex.structure.assignment.exists", modified.getXPath(), modified.getAssignedType().getName());
+                    // update db entries
+                    ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET XPATH=?, XALIAS=? WHERE ID=?");
+                    ps.setString(1, modified.getXPath());
+                    ps.setString(2, modified.getAlias());
+                    ps.setLong(3, modified.getId());
                     ps.executeUpdate();
                     ps.close();
+                    // update the relevant content instances
+                    ContentStorage storage = StorageManager.getContentStorage(TypeStorageMode.Hierarchical);
+                    storage.updateXPath(con, modified.getId(), XPathElement.stripType(original.getXPath()),
+                            XPathElement.stripType(modified.getXPath()));
+
                     if (changes)
                         changesDesc.append(',');
-                    changesDesc.append("xPath=").append(prop.getXPath());
+                    changesDesc.append("xPath=").append(modified.getXPath()).append(",alias=").append(modified.getAlias());
                     changes = true;
-                    */
-                }
-                //not supported yet
-                if (!original.getAlias().equals(modified.getAlias())) {
-                    throw new FxUpdateException("ex.structure.modification.notSuppoerted", "alias");
-                    /*
-                    ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET XALIAS=? WHERE ID=?");
-                    ps.setString(1, prop.getAlias());
-                    ps.setLong(2, prop.getId());
-                    ps.executeUpdate();
-                    ps.close();
-                    if (changes)
-                        changesDesc.append(',');
-                    changesDesc.append("alias=").append(prop.getAlias());
-                    changes = true;
-                    */
                 }
                 // change the assignment's ACL
                 if (original.getACL().getId() != modified.getACL().getId()) {
@@ -1786,8 +1787,8 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
     /**
      * Creates a property assignment
      *
-     * @param con a valid and open connection
-     * @param sql an instance of StringBuilder
+     * @param con  a valid and open connection
+     * @param sql  an instance of StringBuilder
      * @param prop an instance of FxPropertyAssignmentEdit to be persisted
      * @return the property assignmentId
      * @throws FxApplicationException on errors
