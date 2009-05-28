@@ -50,6 +50,7 @@ import org.apache.commons.logging.LogFactory;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.io.Serializable;
 
 /**
  * Bean behind groupAssignmentEditor.xhtml, groupEditor.xhtml and groupOptionEditor to
@@ -58,9 +59,10 @@ import java.util.ArrayList;
  * @author Gerhard Glos (gerhard.glos@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 
-public class GroupEditorBean {
-
+public class GroupEditorBean implements Serializable {
+    private static final long serialVersionUID = 1712834106156641081L;
     private static final Log LOG = LogFactory.getLog(GroupEditorBean.class);
+    
     private FxGroupEdit group = null;
     private FxGroupAssignmentEdit assignment = null;
     private String assignmentMinMul = null;

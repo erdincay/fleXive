@@ -41,6 +41,7 @@ import com.flexive.faces.messages.FxFacesMsgErr;
 
 import javax.faces.event.ActionEvent;
 import java.util.List;
+import java.io.Serializable;
 
 /**
  * Languages settings
@@ -48,7 +49,8 @@ import java.util.List;
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-public class LanguagesBean {
+public class LanguagesBean implements Serializable {
+    private static final long serialVersionUID = 3076818793559505451L;
 
     private boolean ignoreUsage;
     private LanguageEngine lang;

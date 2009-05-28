@@ -601,3 +601,25 @@ function setBusyCursor() {
 function setDefaultCursor() {
     document.body.style.cursor = "default";
 }
+
+/**
+ * Flashes the target element's background color to indicate that something happened to the element.
+ * This requires the "animation" module of YUI to be loaded.
+ *
+ * @param elementId         the target element ID
+ * @param flashColor        the highlight color
+ * @param backgroundColor   the (approximate) background color of the element or the element's background
+ * @return                  the animation (useful for chaining)
+ */
+function flash(elementId, flashColor, backgroundColor) {
+//    if (document.all) {
+//        return null;     // IE seems to play animations a bit too choppy for my taste...
+//    }
+    var anim = new YAHOO.util.ColorAnim(elementId, { backgroundColor: { from: backgroundColor, to: flashColor } }, 0.3, YAHOO.util.Easing.easeInStrong);
+    var anim2 = new YAHOO.util.ColorAnim(elementId, { backgroundColor: { to: backgroundColor } }, 1.5, YAHOO.util.Easing.easeOutStrong);
+    anim.onComplete.subscribe(function() { anim2.animate(); });
+    // remove element background after animation
+    anim2.onComplete.subscribe(function() { document.getElementById(elementId).style.backgroundColor = ""; });
+    anim.animate();
+    return anim2;
+}

@@ -51,6 +51,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.io.Serializable;
 
 /**
  * Workflow service beans.
@@ -58,7 +59,8 @@ import java.util.Map;
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-public class WorkflowBean {
+public class WorkflowBean implements Serializable {
+    private static final long serialVersionUID = 4771311329266251588L;
     /**
      * Session key to store the last inserted step id (for validation purposes)
      */

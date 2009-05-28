@@ -45,6 +45,7 @@ import org.apache.commons.lang.StringUtils;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.io.Serializable;
 import java.util.Formatter;
 
 /**
@@ -53,7 +54,9 @@ import java.util.Formatter;
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-public class ScriptConsoleBean {
+public class ScriptConsoleBean implements Serializable {
+    private static final long serialVersionUID = -938270211808872146L;
+
     private String code;
     private long executionTime;
     private boolean web;

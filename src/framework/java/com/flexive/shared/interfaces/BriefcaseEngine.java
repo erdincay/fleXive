@@ -162,4 +162,14 @@ public interface BriefcaseEngine {
      * @throws FxApplicationException   if the items could not be loaded
      */
     long[] getItems(long id) throws FxApplicationException;
+
+    /**
+     * Moves items from one briefcase to another.
+     *
+     * @param fromId    the source briefcase ID
+     * @param toId      the target briefcase ID
+     * @param objectIds the ID(s) of the items to be moved
+     * @since 3.1
+     */
+    void moveItems(long fromId, long toId, long[] objectIds) throws FxApplicationException;
 }

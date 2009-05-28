@@ -20,6 +20,7 @@ import javax.faces.context.FacesContext;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
+import java.io.Serializable;
 
 /**
  * Miscellaneous tests for the fx:content component
@@ -27,7 +28,9 @@ import java.util.Map;
  * @author Daniel Lichtenberger, UCS
  * @version $Rev$
  */
-public class FxContentViewTestBean {
+public class FxContentViewTestBean implements Serializable {
+    private static final long serialVersionUID = -3992202330679445333L;
+
     private List<String> testPropertyNames;
     private FxPK searchTestPK;
 

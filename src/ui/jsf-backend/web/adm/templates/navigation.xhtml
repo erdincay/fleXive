@@ -23,7 +23,7 @@
         djConfig.baseRelativePath = "pub/js/dojoNavigation/";
     </script>
     <script type="text/javascript" src="#{fxSystemBean.contextPath}/pub/js/dojoNavigation/#{adm:versionedUrl('dojo.js')}"></script>
-    <fx:includes jsonRpc="true"/>
+    <fx:includes jsonRpc="true" yui="true"/>
 
 
     <script type="text/javascript">
@@ -87,7 +87,7 @@
     </script>
     <ui:insert name="head" />
 </head>
-    <body onload="windowResize()">
+    <body onload="windowResize()" class="yui-skin-sam">
     <h:form id="mainNavForm">
         <c:forEach items="#{navigationMenuBean.topItems}" var="item">
             <a href="javascript:goto(#{item.id})">
@@ -144,6 +144,8 @@
             <ui:include src="/adm/templates/navigation.menu.tabs.xhtml"/>
         </fx:dojoMenu>
     </ui:insert>
+
+    <fx:yuiSetup/>
 
     </body>
 

@@ -48,6 +48,7 @@ import com.flexive.shared.search.FxResultSet;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.io.Serializable;
 
 /**
  * Management of Briefcases.
@@ -55,7 +56,8 @@ import java.util.List;
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-public class BriefcaseBean {
+public class BriefcaseBean implements Serializable {
+    private static final long serialVersionUID = 476640267963403730L;
 
     private BriefcaseEngine briefcaseEng;
     private List<Briefcase> list;

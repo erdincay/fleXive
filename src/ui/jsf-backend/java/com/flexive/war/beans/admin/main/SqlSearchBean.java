@@ -50,6 +50,7 @@ import javax.faces.event.ActionEvent;
 import javax.faces.model.SelectItem;
 import java.util.ArrayList;
 import java.util.List;
+import java.io.Serializable;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -59,7 +60,8 @@ import org.apache.commons.lang.StringUtils;
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-public class SqlSearchBean {
+public class SqlSearchBean implements Serializable {
+    private static final long serialVersionUID = 798836315971509225L;
 
     private String query;
     private FxResultSet queryResult;

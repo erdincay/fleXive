@@ -37,6 +37,7 @@ import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.structure.FxStructureOption;
 
 import java.util.*;
+import java.io.Serializable;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -50,7 +51,8 @@ import org.apache.commons.lang.StringUtils;
  * @author Gerhard Glos (gerhard.glos@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 
-public class OptionWrapper {
+public class OptionWrapper implements Serializable {
+    private static final long serialVersionUID = -5173344480449973475L;
     private static String[] standardOptionKeys = {FxStructureOption.OPTION_HTML_EDITOR,
             FxStructureOption.OPTION_MULTILINE,
             FxStructureOption.OPTION_SEARCHABLE,

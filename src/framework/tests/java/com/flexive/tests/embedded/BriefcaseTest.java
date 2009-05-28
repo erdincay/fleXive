@@ -32,6 +32,8 @@
 package com.flexive.tests.embedded;
 
 import com.flexive.shared.EJBLookup;
+import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxLogoutFailedException;
 import com.flexive.shared.interfaces.BriefcaseEngine;
@@ -44,6 +46,7 @@ import static com.flexive.tests.embedded.FxTestUtils.login;
 import static com.flexive.tests.embedded.FxTestUtils.logout;
 import org.apache.commons.lang.ArrayUtils;
 import org.testng.Assert;
+import static org.testng.Assert.assertEquals;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -75,9 +78,9 @@ public class BriefcaseTest {
         final long briefcaseId = be.create("test briefcase", "test description", null);
         try {
             final Briefcase briefcase = be.load(briefcaseId);
-            Assert.assertEquals(briefcase.getName(), "test briefcase");
-            Assert.assertEquals(briefcase.getDescription(), "test description");
-            Assert.assertEquals(be.getItems(briefcaseId).length, 0, "Briefcase should be empty");
+            assertEquals(briefcase.getName(), "test briefcase");
+            assertEquals(briefcase.getDescription(), "test description");
+            assertEquals(be.getItems(briefcaseId).length, 0, "Briefcase should be empty");
         } finally {
             be.remove(briefcaseId);
         }
@@ -96,18 +99,18 @@ public class BriefcaseTest {
             }
             Assert.assertTrue(!ids.isEmpty(), "No objects found for testing the briefcase engine");
             be.addItems(briefcaseId, ArrayUtils.toPrimitive(ids.toArray(new Long[ids.size()])));
-            Assert.assertEquals(be.getItems(briefcaseId).length, ids.size());
+            assertEquals(be.getItems(briefcaseId).length, ids.size());
             // add them again - shouldn't change briefcase
             be.addItems(briefcaseId, ArrayUtils.toPrimitive(ids.toArray(new Long[ids.size()])));
-            Assert.assertEquals(be.getItems(briefcaseId).length, ids.size());
+            assertEquals(be.getItems(briefcaseId).length, ids.size());
 
             // query briefcase
             final FxResultSet briefcaseResult = new SqlQueryBuilder().filterBriefcase(briefcaseId).select("@pk").getResult();
-            Assert.assertEquals(briefcaseResult.getRowCount(), ids.size(), "Briefcase does not contain all items added previously");
-            Assert.assertEquals(be.getItems(briefcaseId).length, ids.size(), "Briefcase does not contain all items added previously");
+            assertEquals(briefcaseResult.getRowCount(), ids.size(), "Briefcase does not contain all items added previously");
+            assertEquals(be.getItems(briefcaseId).length, ids.size(), "Briefcase does not contain all items added previously");
             // query briefcase with a condition
             final FxResultSet briefcaseResult2 = new SqlQueryBuilder().filterBriefcase(briefcaseId).select("@pk").condition("id", PropertyValueComparator.NE, 0).getResult();
-            Assert.assertEquals(briefcaseResult2.getRowCount(), ids.size(), "Briefcase does not contain all items added previously");
+            assertEquals(briefcaseResult2.getRowCount(), ids.size(), "Briefcase does not contain all items added previously");
 
 
             // replace briefcase content with first row only
@@ -122,17 +125,43 @@ public class BriefcaseTest {
 
             // clear briefcase
             be.clear(briefcaseId);
-            Assert.assertEquals(new SqlQueryBuilder().filterBriefcase(briefcaseId).getResult().getRowCount(), 0);
+            assertEquals(new SqlQueryBuilder().filterBriefcase(briefcaseId).getResult().getRowCount(), 0);
         } finally {
             be.remove(briefcaseId);
         }
     }
 
+    @Test
+    public void moveBriefcaseItems() throws FxApplicationException {
+        final BriefcaseEngine be = EJBLookup.getBriefcaseEngine();
+        final long briefcase1 = be.create("move items briefcase 1", "test", null);
+        final long briefcase2 = be.create("move items briefcase 2", "test", null);
+        try {
+            final List<Long> ids = new ArrayList<Long>();
+            for (FxPK pk : new SqlQueryBuilder().select("@pk").filterType("FOLDER").getResult().<FxPK>collectColumn(1)) {
+                ids.add(pk.getId());
+            }
+            final long[] idArray = ArrayUtils.toPrimitive(ids.toArray(new Long[ids.size()]));
+            be.addItems(briefcase1, idArray);
+            assertEquals(be.load(briefcase1).getSize(), ids.size());
+
+            // move to second briefcase
+            assertEquals(be.load(briefcase2).getSize(), 0);
+            be.moveItems(briefcase1, briefcase2, idArray);
+            
+            assertEquals(be.load(briefcase1).getSize(), 0);
+            assertEquals(be.load(briefcase2).getSize(), ids.size());
+        } finally {
+            be.remove(briefcase1);
+            be.remove(briefcase2);
+        }
+    }
+
     private void testSingleItemBriefcase(BriefcaseEngine be, long briefcaseId, long itemId) throws FxApplicationException {
         final FxResultSet oneResult = new SqlQueryBuilder().filterBriefcase(briefcaseId).select("@pk").getResult();
-        Assert.assertEquals(oneResult.getRowCount(), 1, "Briefcase should contain only one item");
-        Assert.assertEquals(be.getItems(briefcaseId).length, 1, "Briefcase should contain only one item");
-        Assert.assertEquals(be.getItems(briefcaseId)[0], itemId, "Briefcase should contain item " + itemId);
-        Assert.assertEquals(oneResult.getResultRow(0).getPk(1).getId(), itemId, "Briefcase item ID should be " + itemId);
+        assertEquals(oneResult.getRowCount(), 1, "Briefcase should contain only one item");
+        assertEquals(be.getItems(briefcaseId).length, 1, "Briefcase should contain only one item");
+        assertEquals(be.getItems(briefcaseId)[0], itemId, "Briefcase should contain item " + itemId);
+        assertEquals(oneResult.getResultRow(0).getPk(1).getId(), itemId, "Briefcase item ID should be " + itemId);
     }
 }

@@ -44,8 +44,13 @@
                 "SearchResult.button.action.deleteFromBriefcase": "#{fxMessageBean['SearchResult.button.action.deleteFromBriefcase']}",
                 "SearchResult.button.action.more": "#{fxMessageBean['SearchResult.button.action.more']}",
                 "SearchResult.status.selected": "#{fxMessageBean['SearchResult.status.selected']}",
-                "SearchResult.status.column.reordered": "#{fxMessageBean['SearchResult.status.column.reordered']}"
-            }
+                "SearchResult.status.column.reordered": "#{fxMessageBean['SearchResult.status.column.reordered']}",
+                "Briefcase.status.addedSelection": "#{fxMessageBean['Briefcase.status.addedSelection']}",
+                "Briefcase.status.movedSelection": "#{fxMessageBean['Briefcase.status.movedSelection']}",
+                "Briefcase.dialog.prompt.briefcaseName": "#{fxMessageBean['Briefcase.dialog.prompt.briefcaseName']}",
+                "Briefcase.dialog.prompt.briefcaseName.default": "#{fxMessageBean['Briefcase.dialog.prompt.briefcaseName.default']}"
+            };
+
         //-->
         </script>
     </ui:define>
@@ -106,7 +111,31 @@
 
                     <fx:menuItemGroup>
                         <fx:menuItem id="copy" labelKey="SearchResult.menu.copy" icon="copy"/>
+                        <fx:menuItem id="copy_briefcases" labelKey="SearchResult.menu.copy.briefcase">
+                            <fx:menuItemGroup>
+                                <fx:menuItem id="copy_newbriefcase" labelKey="SearchResult.menu.copy.briefcase.new"
+                                        clickHandler="function(name, event, menuItem) { copyToBriefcase(-1, menuItem) }"/>
+                            </fx:menuItemGroup>
+                            <fx:menuItemGroup>
+                                <c:forEach var="briefcase" items="#{briefcaseBean.list}">
+                                    <fx:menuItem id="copy_briefcase_${briefcase.id}" label="#{briefcase.name} (#{briefcase.size})"
+                                                 clickHandler="function(name, event, menuItem) { copyToBriefcase(#{briefcase.id}, menuItem); }"/>
+                                </c:forEach>
+                            </fx:menuItemGroup>
+                        </fx:menuItem>
                         <c:if test="#{fxSearchResultBean.briefcaseId != -1}">
+                            <fx:menuItem id="move_briefcases" labelKey="SearchResult.menu.move.briefcase">
+                                <fx:menuItemGroup>
+                                    <fx:menuItem id="move_newbriefcase" labelKey="SearchResult.menu.move.briefcase.new"
+                                            clickHandler="function(name, event, menuItem) { moveToBriefcase(-1, menuItem) }"/>
+                                </fx:menuItemGroup>
+                                <fx:menuItemGroup>
+                                    <c:forEach var="briefcase" items="#{briefcaseBean.list}">
+                                        <fx:menuItem id="move_briefcase_${briefcase.id}" label="#{briefcase.name} (#{briefcase.size})"
+                                                     clickHandler="function(name, event, menuItem) { moveToBriefcase(#{briefcase.id}, menuItem); }"/>
+                                    </c:forEach>
+                                </fx:menuItemGroup>
+                            </fx:menuItem>
                             <fx:menuItem id="deleteBriefcase" labelKey="SearchResult.menu.deleteBriefcase" icon="removeBriefcaseItems"/>
                         </c:if>
                         <fx:menuItem id="delete" labelKey="SearchResult.menu.delete" icon="remove"/>

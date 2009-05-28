@@ -370,8 +370,8 @@
                 <adm:treeContextMenuItem icon="new" treeActions="createContent" labelKey="ContentTree.menu.create">
                     <c:forEach var="type" items="#{fxSystemBean.environment.types}">
                         <c:if test="#{type.id > 0}">
-                            <adm:treeContextMenuItem label="#{type.label.defaultTranslation}"
-                                                     icon="#{type.icon.isEmpty ? null : fx:concat('thumbnail/w16/h16/pk', type.icon.defaultTranslation)}"
+                            <adm:treeContextMenuItem label="#{type.label}"
+                                                     icon="#{type.icon.isEmpty ? null : fx:concat('thumbnail/w16/h16/pk', type.icon)}"
                                                      clickHandler="function(menuItem) { createContent(menuItem, #{type.id}); }"
                             />
                         </c:if>
@@ -411,8 +411,8 @@
             <fx:dojoMenuItem labelKey="Content.menu.new.content">
                 <c:forEach var="type" items="#{fxSystemBean.environment.types}">
                     <c:if test="#{type.id > 0}">
-                        <adm:treeContextMenuItem label="#{type.label.defaultTranslation}"
-                                                 icon="#{type.icon.isEmpty ? null : fx:concat('thumbnail/pk', type.icon.defaultTranslation)}"
+                        <adm:treeContextMenuItem label="#{type.label}"
+                                                 icon="#{type.icon.isEmpty ? null : fx:concat('thumbnail/pk', type.icon)}"
                                                  clickHandler="function(menuItem) { createContent(menuItem, #{type.id}); }"
                         />
                     </c:if>

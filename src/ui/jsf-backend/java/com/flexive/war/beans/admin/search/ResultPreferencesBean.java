@@ -68,6 +68,7 @@ import javax.faces.model.DataModel;
 import javax.faces.model.SelectItem;
 import javax.faces.model.SelectItemGroup;
 import java.util.*;
+import java.io.Serializable;
 
 /**
  * Bean for creating and updating result preferences.
@@ -75,7 +76,8 @@ import java.util.*;
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-public class ResultPreferencesBean {
+public class ResultPreferencesBean implements Serializable {
+    private static final long serialVersionUID = 7084947975179682271L;
     private static final Log LOG = LogFactory.getLog(ResultPreferencesBean.class);
 
     /**

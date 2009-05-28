@@ -57,6 +57,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.io.Serializable;
 
 /**
  * Bean behind typeEditor.xhtml to
@@ -65,8 +66,9 @@ import java.util.Map;
  * @author Gerhard Glos (gerhard.glos@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 
-public class TypeEditorBean {
-
+public class TypeEditorBean implements Serializable {
+    private static final long serialVersionUID = 8135993708769879811L;
+   
     private static final Log LOG = LogFactory.getLog(TypeEditorBean.class);
     private FxTypeEdit type = null;
     private List<WrappedRelation> wrappedRelations = null;

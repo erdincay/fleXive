@@ -1,12 +1,16 @@
 package com.flexive.war.beans.admin.test;
 
+import java.io.Serializable;
+
 /**
  * Test methods for the navigationTest input page
  *
  * @author Daniel Lichtenberger, UCS
  * @version $Rev$
  */
-public class FxNavigationTestBean {
+public class FxNavigationTestBean implements Serializable {
+    private static final long serialVersionUID = 5804872222426010712L;
+
     private long selectedNodeId1;
     private long selectedNodeId2;
     private long selectedNodeId3;

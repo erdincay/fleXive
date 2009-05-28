@@ -56,6 +56,7 @@ import java.sql.SQLException;
 import java.util.*;
 import java.io.StringWriter;
 import java.io.PrintWriter;
+import java.io.Serializable;
 
 import groovy.lang.GroovyShell;
 import org.apache.commons.lang.StringUtils;
@@ -66,7 +67,8 @@ import org.apache.commons.lang.StringUtils;
  * @author Johannes Wernig-Pichler (johannes.wernig-pichler@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-public class ScriptBean {
+public class ScriptBean implements Serializable {
+    private static final long serialVersionUID = -3764559730042052584L;
 
     private long id = -1;
     private String name;

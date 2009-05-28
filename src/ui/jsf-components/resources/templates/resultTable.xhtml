@@ -59,7 +59,8 @@ Parameters:
                         { paginator: new YAHOO.widget.Paginator({
                             template : "#{fxMessageBean['ResultTable.label.rowSelect']}",
                             rowsPerPage : view.rowsPerPage,
-                            rowsPerPageOptions : isThumbnails ? [5, 10, 25, 50] : [10,25,50,100]
+                            rowsPerPageOptions : isThumbnails ? [5, 10, 25, 50] : [10,25,50,100],
+                            alwaysVisible: false
                           }),
                           draggableColumns: true
                         }

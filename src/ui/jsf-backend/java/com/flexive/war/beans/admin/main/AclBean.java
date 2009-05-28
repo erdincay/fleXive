@@ -55,7 +55,8 @@ import java.util.List;
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-public class AclBean {
+public class AclBean implements Serializable {
+    private static final long serialVersionUID = -3767461611278032535L;
 
     private long id;
     private Mandator mandator;

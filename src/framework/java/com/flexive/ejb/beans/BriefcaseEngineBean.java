@@ -384,6 +384,15 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void moveItems(long fromId, long toId, long[] objectIds) throws FxApplicationException {
+        removeItems(fromId, objectIds);
+        addItems(toId, objectIds);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long[] getItems(long id) throws FxApplicationException {
         Connection con = null;
         PreparedStatement stmt = null;

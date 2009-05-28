@@ -46,7 +46,9 @@ import java.io.Serializable;
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-public class UserConfigurationBean {
+public class UserConfigurationBean implements Serializable {
+    private static final long serialVersionUID = 5973908397483613677L;
+
     protected final ParameterMap cachedParameters = new ParameterMap();
     private long inputLanguageId = -1;
 

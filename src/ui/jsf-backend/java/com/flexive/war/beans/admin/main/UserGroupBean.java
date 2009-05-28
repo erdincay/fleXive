@@ -52,6 +52,7 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.io.Serializable;
 
 /**
  * Bean providing access the the userGroup functionality.
@@ -59,7 +60,8 @@ import java.util.Map;
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-public class UserGroupBean {
+public class UserGroupBean implements Serializable {
+    private static final long serialVersionUID = -5545259367431927116L;
 
     private String name = null;
     private String color = null;

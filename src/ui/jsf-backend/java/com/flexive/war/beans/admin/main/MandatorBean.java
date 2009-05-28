@@ -43,6 +43,7 @@ import com.flexive.shared.interfaces.MandatorEngine;
 import com.flexive.shared.security.Mandator;
 
 import java.util.*;
+import java.io.Serializable;
 
 /**
  * This Bean provides access to the mandator functionality.
@@ -50,7 +51,8 @@ import java.util.*;
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-public class MandatorBean {
+public class MandatorBean implements Serializable {
+    private static final long serialVersionUID = -8016888491495699646L;
 
     private Hashtable<Long, Mandator> mandatorsById = null;
 

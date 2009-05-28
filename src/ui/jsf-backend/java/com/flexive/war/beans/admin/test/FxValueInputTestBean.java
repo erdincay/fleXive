@@ -52,6 +52,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.ArrayList;
+import java.io.Serializable;
 
 /**
  * Miscellanous test methods for the fxValueInput test page (/adm/test/fxvalueinput.xhtml).
@@ -59,7 +60,9 @@ import java.util.ArrayList;
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-public class FxValueInputTestBean {
+public class FxValueInputTestBean implements Serializable {
+    private static final long serialVersionUID = -4832646489836422606L;
+
     /**
      * ui:repeat update workaround
      */

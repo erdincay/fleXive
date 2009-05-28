@@ -27,6 +27,10 @@ BriefcasePanel.prototype = {
         }
     },
 
+    flash: function(briefcaseId) {
+        return flash("bc_i" + briefcaseId, "#c9ff8c", "#F9FCF1");
+    },
+
     render: function() {
         var out = [];
         for (var i in this.items) {

@@ -58,6 +58,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.io.Serializable;
 
 /**
  * Bean behind propertyAssignmentEditor.xhtml, propertyEditor.xhtml and propertyOptionEditor to
@@ -67,7 +68,8 @@ import java.util.Map;
  */
 
 
-public class PropertyEditorBean implements ActionBean {
+public class PropertyEditorBean implements ActionBean, Serializable {
+    private static final long serialVersionUID = 7853783961770884278L;
     private static final Log LOG = LogFactory.getLog(PropertyEditorBean.class);
     //private String gotoPropertyAssignment = null;
     private long propertyId = -1;

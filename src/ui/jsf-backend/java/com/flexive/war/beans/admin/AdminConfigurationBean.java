@@ -39,13 +39,17 @@ import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.war.filter.VersionUrlFilter;
 
+import java.io.Serializable;
+
 /**
  * Provides access to miscellaneous backend configuration settings.
  *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-public class AdminConfigurationBean {
+public class AdminConfigurationBean implements Serializable {
+    private static final long serialVersionUID = 5407293253771169788L;
+
     private Boolean treeLiveEnabled;
     private Boolean binaryTransitDB;
     private String binaryTransitPath;

@@ -45,12 +45,15 @@ import com.flexive.shared.workflow.StepDefinitionEdit;
 import javax.faces.model.SelectItem;
 import java.util.List;
 import java.util.ArrayList;
+import java.io.Serializable;
 
 /**
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-public class StepDefinitionBean {
+public class StepDefinitionBean implements Serializable {
+    private static final long serialVersionUID = -3654298727780108311L;
+
     private long stepDefinitionId = -1;
     private StepDefinitionEdit stepDefinition;
     private boolean uniqueTargetSelected;

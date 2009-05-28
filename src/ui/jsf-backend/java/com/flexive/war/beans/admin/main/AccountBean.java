@@ -55,6 +55,7 @@ import javax.faces.component.UISelectBoolean;
 import javax.faces.model.SelectItem;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.io.Serializable;
 
 /**
  * Management of accounts.
@@ -62,7 +63,8 @@ import java.util.*;
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-public class AccountBean {
+public class AccountBean implements Serializable {
+    private static final long serialVersionUID = -5857559146644805299L;
     private static final Log LOG = LogFactory.getLog(AccountBean.class);
 
     private UISelectBoolean activeFilterCheckbox;

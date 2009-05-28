@@ -40,6 +40,7 @@ import com.flexive.shared.structure.FxPropertyAssignment;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
 import java.util.Map;
+import java.io.Serializable;
 
 /**
  * Provides getters and setters for boolean flags that
@@ -48,7 +49,9 @@ import java.util.Map;
  * @author Gerhard Glos (gerhard.glos@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 
-public class StructureTreeControllerBean {
+public class StructureTreeControllerBean implements Serializable {
+    private static final long serialVersionUID = 3582296146516237821L;
+
     public static final String ACTION_RENAME_TYPE = "RENAME_TYPE";
     public static final String ACTION_RENAME_ASSIGNMENT = "RENAME_ASSIGNMENT";
     public static final String ACTION_RELOAD_SELECT_TYPE = "RELOAD_SELECT_TYPE";

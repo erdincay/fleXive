@@ -53,13 +53,16 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.io.Serializable;
+
 /**
  * Provides a simple reference browser, currently without pagination.
  *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-public class BrowseReferencesBean implements ActionBean {
+public class BrowseReferencesBean implements ActionBean, Serializable {
+    private static final long serialVersionUID = -28763368417197965L;
     private static final Log LOG = LogFactory.getLog(BrowseReferencesBean.class);
     private String xPath;
     private String inputName;

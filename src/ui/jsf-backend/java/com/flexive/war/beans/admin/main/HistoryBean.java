@@ -46,6 +46,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.io.Serializable;
 
 
 /**
@@ -54,7 +55,8 @@ import java.util.Map;
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-public class HistoryBean {
+public class HistoryBean implements Serializable {
+    private static final long serialVersionUID = 8097761705884319936L;
     private final static SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 
     private Map<Object, String> dateMap;

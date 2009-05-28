@@ -62,7 +62,9 @@ import java.io.Serializable;
  * @author Gerhard Glos (gerhard.glos@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 
-public class SelectListBean {
+public class SelectListBean implements Serializable {
+    private static final long serialVersionUID = -5927666279497485356L;
+
     //used to filter out the select lists with id's 0 up to DELIMITER and prevent them from being edited
     private static final long SYSTEM_INTERNAL_LISTS_DELIMITER = 0;
     private FxSelectListEdit selectList = null;

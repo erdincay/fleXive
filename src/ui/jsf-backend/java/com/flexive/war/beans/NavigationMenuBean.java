@@ -41,6 +41,7 @@ import com.flexive.shared.security.Role;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.io.Serializable;
 
 /**
  * This beans handles the main navigation menu.
@@ -48,7 +49,7 @@ import java.util.List;
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-public class NavigationMenuBean {
+public class NavigationMenuBean implements Serializable {
     private static List<Item> items = new ArrayList<Item>(10);
     private static int adminTabIdx =-1;
 

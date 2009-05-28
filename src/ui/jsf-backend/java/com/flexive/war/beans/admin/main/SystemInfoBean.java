@@ -43,6 +43,7 @@ import org.apache.commons.logging.LogFactory;
 
 import java.util.Date;
 import java.util.Formatter;
+import java.io.Serializable;
 
 /**
  * JSF Bean exposing miscellaneous system/runtime parameters.
@@ -50,7 +51,8 @@ import java.util.Formatter;
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-public class SystemInfoBean {
+public class SystemInfoBean implements Serializable {
+    private static final long serialVersionUID = 7421671438164771880L;
     private static final Log LOG = LogFactory.getLog(SystemInfoBean.class);
 
     /**

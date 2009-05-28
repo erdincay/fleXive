@@ -235,6 +235,20 @@ flexive.yui = new function() {
         }
         item.cfg.setProperty(property, value);
     };
+
+    /**
+     * Updates a property of one or more menu items.
+     *
+     * @param ids    the menu items ID(s)
+     * @param property  the property (e.g. "disabled")
+     * @param value the new value
+     * @since 3.1
+     */
+    this.setMenuItems = function(/* String[] */ ids, /* String */ property, value) {
+        for (var i = 0; i < ids.length; i++) {
+            this.setMenuItem(ids[i], property, value);
+        }
+    };
 };
 
 flexive.yui.datatable = new function() {
@@ -396,15 +410,19 @@ flexive.yui.datatable = new function() {
     this.deleteMatchingRows = function(/* YAHOO.widget.DataTable */ dataTable, predicateFn) {
         var recordSet = dataTable.getRecordSet();
         var records = recordSet.getRecords();
-        var numDeleted = 0;
+        var indices = [];
         for (var i = 0; i < records.length; i++) {
             var record = records[i];
             if (predicateFn(record)) {
-                dataTable.deleteRow(recordSet.getRecordIndex(record));
-                numDeleted++;
+                indices.push(recordSet.getRecordIndex(record));
             }
         }
-        return numDeleted;
+        // delete in reversed row index order
+        indices.sort(function(a, b) { return b-a; });
+        for (i = 0; i < indices.length; i++) {
+            dataTable.deleteRow(indices[i]);
+        }
+        return indices.length;
     };
 
     /**

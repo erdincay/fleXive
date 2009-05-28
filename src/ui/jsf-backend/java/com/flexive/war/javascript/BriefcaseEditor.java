@@ -34,9 +34,11 @@
 package com.flexive.war.javascript;
 
 import com.flexive.shared.EJBLookup;
+import com.flexive.shared.interfaces.BriefcaseEngine;
 import com.flexive.shared.search.Briefcase;
 import com.flexive.war.JsonWriter;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringWriter;
 
@@ -61,12 +63,7 @@ public class BriefcaseEditor implements Serializable {
         final JsonWriter writer = new JsonWriter(out);
         writer.startArray();
         for (Briefcase briefcase : EJBLookup.getBriefcaseEngine().loadAll(true)) {
-            writer.startMap()
-                    .writeAttribute("id", briefcase.getId())
-                    .writeAttribute("name", briefcase.getName())
-                    .writeAttribute("aclId", briefcase.getAcl())
-                    .writeAttribute("size", briefcase.getSize())
-                    .closeMap();
+            writeBriefcaseInfo(writer, briefcase);
         }
         writer.closeArray().finishResponse();
         return out.toString();
@@ -76,12 +73,13 @@ public class BriefcaseEditor implements Serializable {
      * Creates a new private briefcase with the given name.
      *
      * @param name the briefcase name
-     * @return nothing
+     * @return the briefcase information object (id, name, size, aclId)
      * @throws Exception on server-side errors
      */
     public String create(String name) throws Exception {
-        EJBLookup.getBriefcaseEngine().create(name, null, null);
-        return EMPTY;
+        final BriefcaseEngine be = EJBLookup.getBriefcaseEngine();
+        final long id = be.create(name, null, null);
+        return writeBriefcaseInfo(new JsonWriter(), be.load(id)).toString();
     }
 
     /**
@@ -114,12 +112,13 @@ public class BriefcaseEditor implements Serializable {
      *
      * @param id      the briefcase id
      * @param itemIds the item id(s)
-     * @return nothing
+     * @return the briefcase information object (id, name, size, aclId)
      * @throws Exception if the briefcase could not be deleted
      */
     public String add(long id, long[] itemIds) throws Exception {
-        EJBLookup.getBriefcaseEngine().addItems(id, itemIds);
-        return EMPTY;
+        final BriefcaseEngine be = EJBLookup.getBriefcaseEngine();
+        be.addItems(id, itemIds);
+        return writeBriefcaseInfo(new JsonWriter(), be.load(id)).toString();
     }
 
     /**
@@ -136,6 +135,28 @@ public class BriefcaseEditor implements Serializable {
     }
 
     /**
+     * Moves items between two briefcases.
+     *
+     * @param fromId    the source briefcase ID
+     * @param toId      the target briefcase ID
+     * @param itemIds   the ID(s) of the items to be moved
+     * @return  the briefcase information as <em>source<em> and <em>destination</em>
+     * @throws Exception    on errors
+     * @since 3.1
+     */
+    public String move(long fromId, long toId, long[] itemIds) throws Exception {
+        EJBLookup.getBriefcaseEngine().moveItems(fromId, toId, itemIds);
+        
+        final JsonWriter out = new JsonWriter();
+        out.startMap().startAttribute("source");
+        writeBriefcaseInfo(out, EJBLookup.getBriefcaseEngine().load(fromId));
+        out.startAttribute("destination");
+        writeBriefcaseInfo(out, EJBLookup.getBriefcaseEngine().load(toId));
+        out.closeMap();
+        return out.toString();
+    }
+
+    /**
      * Share a briefcase.
      *
      * @param id    the briefcase ID
@@ -146,5 +167,15 @@ public class BriefcaseEditor implements Serializable {
     public String share(long id, long aclId) throws Exception {
         EJBLookup.getBriefcaseEngine().modify(id, null, null, aclId);
         return EMPTY;
+    }
+
+    private JsonWriter writeBriefcaseInfo(JsonWriter writer, Briefcase briefcase) throws IOException {
+        writer.startMap()
+                .writeAttribute("id", briefcase.getId())
+                .writeAttribute("name", briefcase.getName())
+                .writeAttribute("aclId", briefcase.getAcl())
+                .writeAttribute("size", briefcase.getSize())
+                .closeMap();
+        return writer;
     }
 }
