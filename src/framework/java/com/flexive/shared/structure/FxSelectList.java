@@ -362,5 +362,32 @@ public class FxSelectList implements Serializable, ObjectWithLabel {
             throw new FxInvalidParameterException("defaultItem", "ex.structure.list.item.invalidDefaultItem", this.getId(), this.defaultItem.getId()).asRuntimeException();
         this.defaultItem = defaultItem;
     }
+
+    /**
+     * Does a child list item exist for the given list item?
+     *
+     * @param listItemId list item to check for children
+     * @return if child items exist
+     */
+    public boolean getHasChildItems(long listItemId) {
+        for (FxSelectListItem i : items.values())
+            if (i.hasParentItem() && i.getParentItem().getId() == listItemId)
+                return true;
+        return false;
+    }
+
+    /**
+     * Get a list of all children of the given list item
+     *
+     * @param listItemId list item to get children for
+     * @return all children of the given list item
+     */
+    public List<FxSelectListItem> getChildItems(long listItemId) {
+        List<FxSelectListItem> children = new ArrayList<FxSelectListItem>(10);
+        for (FxSelectListItem i : items.values())
+            if (i.hasParentItem() && i.getParentItem().getId() == listItemId)
+                children.add(i);
+        return children;
+    }
 }
 

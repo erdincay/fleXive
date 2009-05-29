@@ -48,6 +48,8 @@
                 </t:selectOneListbox>
             </fx:formRow>
 
+            <c:set var="readonly" value="#{not (fxSystemBean.isInRole['SelectListEditor'] or selectListBean.mayEditItem[item])}"/>
+
             <adm:sortableTable id="table">
                 <table id="table">
                     <thead>
@@ -76,24 +78,28 @@
                         <c:forEach var="item" items="#{selectListBean.items}">
                             <tr value="#{selectListBean.idMap[item.id]}">
                                 <td align="left"><h:inputText id="itemName_#{selectListBean.idMap[item.id]}" value="#{item.name}"
-                                        disabled="#{not (fxSystemBean.isInRole['SelectListEditor'] or selectListBean.mayEditItem[item])}"/></td>
-                                <td align="left"><fx:fxValueInput id="itemLabel_#{selectListBean.idMap[item.id]}" value="#{item.label}" readOnly="#{not (fxSystemBean.isInRole['SelectListEditor'] or selectListBean.mayEditItem[item])}"/></td>
-                                <td align="left"><h:inputText id="itemData_#{selectListBean.idMap[item.id]}" value="#{item.data}" disabled="#{not (fxSystemBean.isInRole['SelectListEditor'] or selectListBean.mayEditItem[item])}"/></td>
+                                        disabled="#{readonly}"/></td>
+                                <td align="left"><fx:fxValueInput id="itemLabel_#{selectListBean.idMap[item.id]}" value="#{item.label}" readOnly="#{readonly}"/></td>
+                                <td align="left"><h:inputText id="itemData_#{selectListBean.idMap[item.id]}" value="#{item.data}" disabled="#{readonly}"/></td>
                                 <td align="left">
-                                    <t:selectOneListbox size="1" id="itemACL_#{selectListBean.idMap[item.id]}" value="#{item.acl}" converter="SelectableConverter"  disabled="#{not (fxSystemBean.isInRole['SelectListEditor'] or selectListBean.mayEditItem[item])}">
+                                    <t:selectOneListbox size="1" id="itemACL_#{selectListBean.idMap[item.id]}" value="#{item.acl}" converter="SelectableConverter"  disabled="#{readonly}">
                                         <f:selectItems value="#{selectListBean.selectListItemACLs}"/>
                                     </t:selectOneListbox>
                                 </td>
                                 <td align="left" nowrap="nowrap">
                                     <h:inputText size="7" id="itemColor_#{selectListBean.idMap[item.id]}" value="#{item.color}"
-                                        disabled="#{not (fxSystemBean.isInRole['SelectListEditor'] or selectListBean.mayEditItem[item])}"/>
+                                        disabled="#{readonly}">
+                                        <fx:colorPicker/>
+                                    </h:inputText>
                                 </td>
                                 <td align="left">
                                     <c:if test="#{selectListBean.mayDeleteItems}">
-                                        <adm:commandButton labelKey="SelectList.button.delete" location="content"
-                                                        icon="delete"  bean="#{selectListBean}" action="deleteListItem" id="deleteButton_#{selectListBean.idMap[item.id]}">
+                                        <adm:commandIcon labelKey="SelectList.button.delete" location="content"
+                                                        icon="delete" bean="#{selectListBean}" action="deleteListItem"
+                                                        id="deleteButton_#{selectListBean.idMap[item.id]}"
+                                                >
                                             <f:setPropertyActionListener target="#{selectListBean.listItemId}" value="#{item.id}"/>
-                                        </adm:commandButton>
+                                        </adm:commandIcon>
                                     </c:if>
                                 </td>
                             </tr>
@@ -109,15 +115,15 @@
                                         <f:selectItems value="#{selectListBean.selectListItemACLs}" />
                                     </t:selectOneListbox>
                                 </td>
-                                <td align="left">
+                                <td align="left" nowrap="nowrap">
                                     <h:inputText size="7" id="newItemColor" value="#{selectListBean.itemColor}">
                                         <fx:colorPicker/>
                                     </h:inputText>
                                 </td>
                                 <td align="left">
-                                    <adm:commandButton labelKey="SelectList.button.add" location="content"
+                                    <adm:commandIcon labelKey="SelectList.button.add" location="content"
                                                     icon="new"  bean="#{selectListBean}" action="addListItem" id="addButton">
-                                    </adm:commandButton>
+                                    </adm:commandIcon>
                                 </td>
                             </tr>
                         </c:if>

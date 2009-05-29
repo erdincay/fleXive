@@ -38,6 +38,7 @@ import com.flexive.shared.security.LifeCycleInfo;
 import com.flexive.shared.value.FxString;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * Items for select lists
@@ -203,6 +204,24 @@ public class FxSelectListItem implements Serializable, SelectableObjectWithLabel
      */
     public FxSelectListItem getParentItem() {
         return parentItem;
+    }
+
+    /**
+     * Are child items available for this list item?
+     *
+     * @return if child items exist
+     */
+    public boolean getHasChildren() {
+        return list.getHasChildItems(this.getId());
+    }
+
+    /**
+     * Return all child items for this list item
+     *
+     * @return all child items for this list item
+     */
+    public List<FxSelectListItem> getChildren() {
+        return list.getChildItems(this.getId());
     }
 
     /**
