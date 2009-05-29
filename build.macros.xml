@@ -203,7 +203,8 @@
         <attribute name="jettydir"/>
         <sequential >
             <java dir="@{jettydir}" fork="true" jar="@{jettydir}/start.jar">
-                <jvmarg value="-server"/>
+                <!-- Don't force -server because default Java installations may not have the server VM -->
+                <!--<jvmarg value="-server"/>-->
                 <jvmarg value="-Xmx128m"/>
                 <jvmarg value="-Dopenejb.configuration=openejb.conf.xml"/>
             </java>
