@@ -91,20 +91,14 @@ def long typeId = type.save(FxTypeEdit.createNew(ARTICLE_TYPE, new FxString(FxLa
 
 ass.save(FxPropertyAssignmentEdit.createNew(CacheAdmin.getEnvironment().getAssignment((Long) EJBLookup.configurationEngine.get(SystemParameters.TREE_CAPTION_ROOTASSIGNMENT)),
         CacheAdmin.getEnvironment().getType(ARTICLE_TYPE),
-        "CAPTION", "/").setEnabled(true), false);
+        "TITLE", "/").setLabel(new FxString(FxLanguage.ENGLISH, "Title").setTranslation(FxLanguage.GERMAN, "Titel")).setEnabled(true), false);
 
 
 def FxPropertyEdit pe = FxPropertyEdit.createNew("Title", new FxString("Title"), new FxString(""),
         true, FxMultiplicity.MULT_1_1,
         true, typeACL, FxDataType.String1024, new FxString(FxString.EMPTY),
-        true, null, null, null).setAutoUniquePropertyName(true);
-pe.setMultiLang(false);
-pe.setMultiLine(false);
-pe.setOverrideMultiLine(true);
-pe.setMultiplicity(FxMultiplicity.MULT_1_1);
-ass.createProperty(typeId, pe, "/");
-ass.save(((FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(ARTICLE_TYPE + "/Title")).asEditable().setDefaultMultiplicity(1), false)
-
+        true, null, null, null)
+pe.setAutoUniquePropertyName(true);
 
 pe.setDataType(FxDataType.Text);
 pe.setName("Abstract");

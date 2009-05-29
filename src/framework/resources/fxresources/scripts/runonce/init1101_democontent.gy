@@ -43,11 +43,19 @@ import com.flexive.shared.tree.FxTreeNodeEdit
 import com.flexive.shared.content.FxContent
 import com.flexive.shared.value.FxString
 import com.flexive.shared.value.FxHTML
+import com.flexive.shared.search.query.QueryRootNode
+import com.flexive.shared.search.query.AssignmentValueNode
+import com.flexive.shared.search.query.PropertyValueComparator
+import com.flexive.shared.search.query.PropertyValueNode
+import com.flexive.shared.value.FxLargeNumber
+import com.flexive.shared.search.AdminResultLocations
+import com.flexive.shared.value.FxDateTime
+import com.flexive.shared.search.query.QueryOperatorNode
+import com.flexive.shared.search.query.QueryOperatorNode.Operator
 
 // add a article to the tree
 final FxContent article = EJBLookup.contentEngine.initialize("article")
-article.setValue("/caption", new FxString(FxLanguage.ENGLISH, "Welcome to [fleXive] 3.1").setTranslation(FxLanguage.GERMAN, "Willkommen bei [fleXive] 3.1"))
-article.setValue("/title", new FxString(false, "Welcome to [flexive] 3.1"))
+article.setValue("/title", new FxString(FxLanguage.ENGLISH, "Welcome to [fleXive] 3.1").setTranslation(FxLanguage.GERMAN, "Willkommen bei [fleXive] 3.1"))
 article.setValue("/longtexthtml", new FxHTML(false,
 """<p>Welcome to your installation of [fleXive] 3.1.</p><h3>What is [fleXive]?</h3><p>[fleXive] is a <strong>Java EE 5 open-source (LGPL) framework</strong> for the development of complex and evolving (web-)applications. It <strong>speeds up development</strong> as it handles numerous important application issues and keeps your application flexible over the development-cycle.</p>"""))
 def pk = article.save().pk
@@ -56,3 +64,19 @@ EJBLookup.treeEngine.save(FxTreeNodeEdit.createNew("Welcome to [flexive] 3.1").s
 // create demo briefcase
 def bcId = EJBLookup.briefcaseEngine.create("Demo Briefcase", "Briefcases are collections of objects. You can add and remove objects to a briefcase, and also share them with other users.", null)
 EJBLookup.briefcaseEngine.addItems(bcId, pk.id)
+
+// create demo query
+final QueryRootNode root = new QueryRootNode(QueryRootNode.Type.CONTENTSEARCH, AdminResultLocations.ADMIN);
+root.setName("Demo query")
+
+final PropertyValueNode node = new PropertyValueNode(1, CacheAdmin.environment.getProperty("typedef").id)
+node.setComparator(PropertyValueComparator.EQ)
+node.setValue(new FxLargeNumber(false, CacheAdmin.environment.getType("ARTICLE").id))
+root.addChild(node)
+
+final AssignmentValueNode node2 = new AssignmentValueNode(2, CacheAdmin.environment.getAssignment("article/title").id)
+node2.setComparator(PropertyValueComparator.LIKE)
+node2.setValue(new FxString(false, "Welcome*"))
+root.addChild(node2)
+
+EJBLookup.searchEngine.save(root)

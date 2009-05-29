@@ -50,6 +50,8 @@ import java.io.Serializable;
  * @version $Rev$
  */
 public class NavigationMenuBean implements Serializable {
+    private static final long serialVersionUID = -6121812208084408559L;
+
     private static List<Item> items = new ArrayList<Item>(10);
     private static int adminTabIdx =-1;
 

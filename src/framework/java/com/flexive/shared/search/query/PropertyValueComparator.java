@@ -72,7 +72,13 @@ public enum PropertyValueComparator implements ValueComparator {
 		}
 		
 	},
-	LIKE("LIKE");
+	LIKE("LIKE") {
+        @Override
+        protected String getSql(String leftHandSide, String rightHandSide) {
+            checkParameterNull(rightHandSide, "rightHandSide");
+            return super.getSql(leftHandSide, rightHandSide.replaceAll("\\*", "%"));
+        }
+    };
 
     private static final List<PropertyValueComparator> NUMERIC_OPERATORS = Collections.unmodifiableList(Arrays.asList(
             EQ, NE, LT, LE, GT, GE

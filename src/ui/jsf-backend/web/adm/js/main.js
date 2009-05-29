@@ -686,7 +686,7 @@ function fadeOut(elementId, /* seconds */ duration, /* function */ onComplete) {
 }
 
 function animateOpacity(elementId, /* seconds */ duration, /* function */ onComplete, opacityFrom, opacityTo) {
-    var anim = new YAHOO.util.Anim(elementId, { opacity: { from: opacityFrom, to: opacityTo} }, duration);
+    var anim = new YAHOO.util.Anim(elementId, { opacity: { from: opacityFrom, to: opacityTo} }, duration, YAHOO.util.Easing.easeInStrong);
     if (onComplete) {
         anim.onComplete.subscribe(onComplete);
     }

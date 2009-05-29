@@ -126,7 +126,7 @@
                 This example selects all properties of the article type, since only articles
                 (with a caption) will be returned:
                 <programlisting language="sql"><![CDATA[SELECT *
-WHERE #article/caption IS NOT NULL]]></programlisting>
+WHERE #article/title IS NOT NULL]]></programlisting>
             </para>
         </section>
 
