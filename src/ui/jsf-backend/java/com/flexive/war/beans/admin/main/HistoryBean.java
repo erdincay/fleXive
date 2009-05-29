@@ -32,17 +32,13 @@
 package com.flexive.war.beans.admin.main;
 
 import com.flexive.faces.messages.FxFacesMsgErr;
-import com.flexive.shared.EJBLookup;
-import com.flexive.shared.FxHistory;
-import com.flexive.shared.FxLanguage;
-import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.*;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.value.FxDateTime;
 import com.flexive.shared.value.FxString;
 import org.apache.commons.lang.StringUtils;
 
 import javax.faces.model.SelectItem;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -57,7 +53,6 @@ import java.io.Serializable;
  */
 public class HistoryBean implements Serializable {
     private static final long serialVersionUID = 8097761705884319936L;
-    private final static SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
 
     private Map<Object, String> dateMap;
 
@@ -167,7 +162,7 @@ public class HistoryBean implements Serializable {
             dateMap = FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<Object, String>() {
                 public String get(Object key) {
                     try {
-                        return SDF.format(key);
+                        return FxFormatUtils.getUniversalDateTimeFormat().format(key);
                     } catch (Exception e) {
                         return "unknown";
                     }
