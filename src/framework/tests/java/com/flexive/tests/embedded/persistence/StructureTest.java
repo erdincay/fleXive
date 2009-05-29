@@ -1354,6 +1354,38 @@ public class StructureTest {
     }
 
     /**
+     * AssignmentEngineBean: test creating props / groups with immedately assigned aliases
+     *
+     * @throws FxApplicationException on errors
+     */
+    @Test(groups = {"ejb", "structure"})
+    public void createAliasedElementsTest() throws FxApplicationException{
+        long typeId = createTestTypeAndProp("ALIASASSIGN", "", false);
+        // add a prop and groups
+        ae.createProperty(typeId, FxPropertyEdit.createNew("PROP1", new FxString(true, "PROP1"), new FxString(true, ""), new FxMultiplicity(0, 5),
+                env().getACL("Default Structure ACL"), FxDataType.String1024), "/", "prop1alias");
+        ae.createGroup(typeId, FxGroupEdit.createNew("GROUP1", new FxString(true, "GROUP1"), new FxString(true, ""), true, new FxMultiplicity(0, 2)),
+                "/", "group1alias");
+
+        try {
+            Assert.assertTrue(env().assignmentExists("ALIASASSIGN/PROP1ALIAS"));
+            Assert.assertFalse(env().assignmentExists("ALIASASSIGN/PROP1"));
+            Assert.assertTrue(env().assignmentExists("ALIASASSIGN/GROUP1ALIAS"));
+            Assert.assertFalse(env().assignmentExists("ALIASASSIGN/GROUP1"));
+
+            // create aliased sub-group
+            ae.createGroup(typeId, FxGroupEdit.createNew("GROUP2", new FxString(true, "group2"), new FxString(true, ""), true, new FxMultiplicity(0, 2)),
+                "/group1alias", "group2alias");
+
+            Assert.assertTrue(env().assignmentExists("ALIASASSIGN/GROUP1ALIAS/GROUP2ALIAS"));
+            Assert.assertFalse(env().assignmentExists("ALIASASSIGN/GROUP1ALIAS/GROUP2"));
+
+        } finally {
+            te.remove(typeId);
+        }
+    }
+
+    /**
      * Helper method to find the alias in a list of property assignments
      *
      * @param list the list of FxPropertyAssignments

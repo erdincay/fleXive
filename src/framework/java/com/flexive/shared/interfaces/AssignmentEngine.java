@@ -121,6 +121,23 @@ public interface AssignmentEngine {
     long createGroup(long typeId, FxGroupEdit group, String parentXPath) throws FxApplicationException;
 
     /**
+     * Create a new group and assign it at the given parentXPath to the given type using assignmentAlias instead of the
+     * group's given name
+     *
+     * @param typeId      id of the type to assign this group to
+     * @param group       the group to create
+     * @param parentXPath optional parent xpath of the group
+     * @param assignmentAlias alias to use for the assignment to the type
+     * @return <b>assignment id</b> of the group
+     * @throws FxApplicationException      on errors
+     * @throws FxCreateException           for create errors
+     * @throws FxInvalidParameterException if the given parentXPath is not valid
+     * @throws FxEntryExistsException      if a group with this name already exists at the requested parentXPath
+     * @throws FxNoAccessException         if the calling user is not permitted to call this method
+     */
+    long createGroup(long typeId, FxGroupEdit group, String parentXPath, String assignmentAlias) throws FxApplicationException;
+
+    /**
      * Save an existing or create a new assignment.
      *
      * @param assignment           instance of FxPropertyAssignmentEdit or FxGroupAssignmentEdit

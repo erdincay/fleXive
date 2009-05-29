@@ -610,6 +610,14 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long createGroup(long typeId, FxGroupEdit group, String parentXPath) throws FxApplicationException {
+        return createGroup(typeId, group, parentXPath, group.getName());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public long createGroup(long typeId, FxGroupEdit group, String parentXPath, String assignmentAlias) throws FxApplicationException {
         FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.StructureManagement);
         Connection con = null;
         PreparedStatement ps = null;
@@ -618,6 +626,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
         long newAssignmentId;
         try {
             parentXPath = parentXPath.toUpperCase();
+            assignmentAlias = assignmentAlias.toUpperCase();
             FxType type = CacheAdmin.getEnvironment().getType(typeId);
             FxAssignment tmp = type.getAssignment(parentXPath);
             if (tmp != null && tmp instanceof FxPropertyAssignment)
@@ -683,8 +692,8 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             ps.setLong(8, pos);
             if (parentXPath == null || "/".equals(parentXPath))
                 parentXPath = "";
-            ps.setString(9, type.getName() + XPathElement.stripType(parentXPath) + "/" + group.getName());
-            ps.setString(10, group.getName());
+            ps.setString(9, type.getName() + XPathElement.stripType(parentXPath) + "/" + assignmentAlias);
+            ps.setString(10, assignmentAlias);
             ps.setNull(11, java.sql.Types.NUMERIC);
             ps.setLong(12, (tmp == null ? FxAssignment.NO_PARENT : tmp.getId()));
             ps.setLong(13, newGroupId);
