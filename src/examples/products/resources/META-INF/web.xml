@@ -19,6 +19,12 @@
         <param-value>/WEB-INF/products.taglib.xml</param-value>
     </context-param>
 
+    <!-- Use a classpath resource resolver for plugins -->
+    <context-param>
+        <param-name>facelets.RESOURCE_RESOLVER</param-name>
+        <param-value>com.flexive.faces.ClasspathResourceResolver</param-value>
+    </context-param>
+
     <!-- Configure FxFilter -->
     <filter>
         <filter-name>FxFilter</filter-name>
