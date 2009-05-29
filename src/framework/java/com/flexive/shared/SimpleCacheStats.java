@@ -39,7 +39,7 @@ import org.apache.commons.lang.StringUtils;
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public class SimpleCacheStats {
-	private String description;
+	private final String description;
 	private int hits = 0;
 	private int misses = 0;
 	
@@ -65,10 +65,6 @@ public class SimpleCacheStats {
 
 	public String getDescription() {
 		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
 	}
 
 	/** {@inheritDoc} */

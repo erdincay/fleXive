@@ -33,14 +33,17 @@ package com.flexive.ejb.beans.configuration;
 
 import com.flexive.core.Database;
 import static com.flexive.core.DatabaseConst.TBL_GLOBAL_CONFIG;
-import com.flexive.ejb.beans.configuration.GenericConfigurationImpl;
 import com.flexive.ejb.mbeans.FxCache;
-import com.flexive.shared.*;
+import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.FxContext;
+import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.SimpleCacheStats;
 import com.flexive.shared.cache.FxCacheException;
 import com.flexive.shared.configuration.DBVendor;
 import com.flexive.shared.configuration.DivisionData;
 import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.exceptions.FxLoadException;
 import com.flexive.shared.exceptions.FxNoAccessException;
 import com.flexive.shared.interfaces.GlobalConfigurationEngine;
 import com.flexive.shared.interfaces.GlobalConfigurationEngineLocal;
@@ -60,7 +63,14 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Global configuration MBean.
@@ -91,21 +101,29 @@ public class GlobalConfigurationEngineBean extends GenericConfigurationImpl impl
      * Cache path suffix for storing division data
      */
     private static final String CACHE_DIVISIONS = "divisionData";
+    /**
+     * Cache key for the timestamp of the last change in the division mapping tables.
+     */
+    private static final String CACHE_TIMESTAMP = "timestamp";
 
     private static final Log LOG = LogFactory.getLog(GlobalConfigurationEngineBean.class);
 
     /**
      * Cached local copy of divisions, must be cleared if the cache is cleared
      */
-    private DivisionData[] divisions = null;
+    private static final List<DivisionData> divisions = new CopyOnWriteArrayList<DivisionData>();
+    private static final AtomicLong divisionsTimestamp = new AtomicLong(-1);
+
     /**
      * Cache for mapping domain names to division IDs. Cleared when the division cache is cleared.
      */
-    private final HashMap<String, Integer> domainCache = new HashMap<String, Integer>(MAX_CACHED_DOMAINS);
+    private static final ConcurrentMap<String, Integer> domainCache = new ConcurrentHashMap<String, Integer>(MAX_CACHED_DOMAINS);
+    private static final AtomicLong domainCacheTimestamp = new AtomicLong(-1);
+
     /**
      * Simple cache stats (displayed on shutdown)
      */
-    private SimpleCacheStats cacheStats = new SimpleCacheStats("Global get");
+    private static final SimpleCacheStats cacheStats = new SimpleCacheStats("Global get");
 
     /**
      * {@inheritDoc}
@@ -255,24 +273,25 @@ public class GlobalConfigurationEngineBean extends GenericConfigurationImpl impl
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public DivisionData[] getDivisions() throws FxApplicationException {
-        synchronized (this) {
-            if (divisions != null) {
-                return divisions.clone();
+        final long timestamp = getTimestamp();
+        if (divisions.isEmpty() || divisionsTimestamp.get() < timestamp) {
+            synchronized(divisions) {
+                if (divisions.isEmpty()) {
+                    divisionsTimestamp.set(timestamp);
+                    final int[] divisionIds = getDivisionIds();
+                    final List<DivisionData> divisionList = new ArrayList<DivisionData>(divisionIds.length);
+                    for (int divisionId : divisionIds) {
+                        try {
+                            divisionList.add(getDivisionData(divisionId));
+                        } catch (Exception e) {
+                            LOG.error("Invalid division data (ignored): " + e.getMessage());
+                        }
+                    }
+                    divisions.addAll(divisionList);
+                }
             }
         }
-        int[] divisionIds = getDivisionIds();
-        ArrayList<DivisionData> divisionList = new ArrayList<DivisionData>(divisionIds.length);
-        for (int divisionId : divisionIds) {
-            try {
-                divisionList.add(getDivisionData(divisionId));
-            } catch (Exception e) {
-                LOG.error("Invalid division data (ignored): " + e.getMessage());
-            }
-        }
-        synchronized (this) {
-            divisions = divisionList.toArray(new DivisionData[divisionList.size()]);
-            return divisions;
-        }
+        return divisions.toArray(new DivisionData[divisions.size()]);
     }
 
     /**
@@ -330,9 +349,17 @@ public class GlobalConfigurationEngineBean extends GenericConfigurationImpl impl
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public int getDivisionId(String serverName) throws FxApplicationException {
-        Integer cachedDivisionId = domainCache.get(serverName);
-        if (cachedDivisionId != null) {
-            return cachedDivisionId;
+        final long timestamp = getTimestamp();
+        if (domainCacheTimestamp.get() >= timestamp) {
+            Integer cachedDivisionId = domainCache.get(serverName);
+            if (cachedDivisionId != null) {
+                return cachedDivisionId;
+            }
+        } else {
+            synchronized (domainCache) {
+                domainCache.clear();
+                domainCacheTimestamp.set(timestamp);
+            }
         }
         DivisionData[] divisionIds = getDivisions();
         int divisionId = -1;
@@ -342,7 +369,7 @@ public class GlobalConfigurationEngineBean extends GenericConfigurationImpl impl
                 break;
             }
         }
-        synchronized (this) {
+        synchronized (domainCache) {
             if (domainCache.size() > MAX_CACHED_DOMAINS) {
                 domainCache.clear();
             }
@@ -366,6 +393,7 @@ public class GlobalConfigurationEngineBean extends GenericConfigurationImpl impl
             put(SystemParameters.GLOBAL_DATASOURCES, String.valueOf(division.getId()), storedDataSource);
             put(SystemParameters.GLOBAL_DIVISIONS_DOMAINS, String.valueOf(division.getId()), division.getDomainRegEx());
         }
+        updateTimestamp();
     }
 
     /**
@@ -416,13 +444,15 @@ public class GlobalConfigurationEngineBean extends GenericConfigurationImpl impl
     public void clearDivisionCache() {
         FxCacheMBean cache = CacheAdmin.getInstance();
         try {
-            // clear local cache
-            synchronized(this) {
-                divisions = null;
-                domainCache.clear();
-                // clear tree cache
-                cache.globalRemove(getBeanPath(CACHE_DIVISIONS));
+            // clear local caches
+            synchronized(divisions) {
+                divisions.clear();
             }
+            synchronized(domainCache) {
+                domainCache.clear();
+            }
+            // clear shared cache
+            cache.globalRemove(getBeanPath(CACHE_DIVISIONS));
         } catch (FxCacheException e) {
             LOG.error("Failed to clear cache: " + e.getMessage(), e);
         }
@@ -508,6 +538,32 @@ public class GlobalConfigurationEngineBean extends GenericConfigurationImpl impl
     @Override
     protected void logCacheMiss(String path, String key) {
         cacheStats.addMiss();
+    }
+
+    /**
+     * Return the timestamp of the last modification on the division data table.
+     *
+     * @return  the timestamp of the last modification on the division data table.
+     */
+    private long getTimestamp() {
+        Long timestamp;
+        try {
+            timestamp = (Long) getCache(getBeanPath(""), CACHE_TIMESTAMP);
+        } catch (FxCacheException e) {
+            throw new FxLoadException(e).asRuntimeException();
+        }
+        if (timestamp == null) {
+            timestamp = System.currentTimeMillis();
+            putCache(getBeanPath(""), CACHE_TIMESTAMP, timestamp);
+        }
+        return timestamp;
+    }
+
+    /**
+     * Update the division data table timestamp.
+     */
+    private void updateTimestamp() {
+        putCache(getBeanPath(""), CACHE_TIMESTAMP, System.currentTimeMillis());
     }
 
     /**
