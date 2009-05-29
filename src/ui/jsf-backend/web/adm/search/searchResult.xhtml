@@ -180,7 +180,7 @@
             <a4j:outputPanel id="emptyPanel">
             </a4j:outputPanel>
             <a4j:commandButton id="invalidateCacheButton" reRender="emptyPanel" style="display: none">
-                <f:setPropertyActionListener value="true" target="#{fxSearchResultBean.clearCache}"/>
+                <f:setPropertyActionListener value="#{true}" target="#{fxSearchResultBean.clearCache}"/>
             </a4j:commandButton>
 
             <adm:toolbarPluginButtons/>

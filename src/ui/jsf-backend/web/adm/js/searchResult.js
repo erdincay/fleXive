@@ -158,7 +158,6 @@ function onContextMenu(type, args) {
             } else {
                 deleteContent(pk);
             }
-            invalidateSessionCache();
             break;
         case "deleteBriefcase":
             if (getSelectedIds().length > 0) {
@@ -178,7 +177,6 @@ function onContextMenu(type, args) {
             } else {
                 deleteFromBriefcase(pk);
             }
-            invalidateSessionCache();
             break;
         case "selectAll":
             flexive.yui.datatable.selectAllRows(resultTable);
@@ -302,7 +300,7 @@ function moveToBriefcase(briefcaseId, menuItem) {
 }
 
 function briefcaseMenuText(briefcaseInfo) {
-    return briefcaseInfo.name + " (" + briefcaseInfo.size + ")"
+    return briefcaseInfo.name + " (" + briefcaseInfo.size + ")";
 }
 
 function flashBriefcase(briefcaseId) {
@@ -349,6 +347,7 @@ function deleteRowsForPks(pks) {
             function(record) { return pkStrings[record.getData("pk")] != null; }
     );
     modifyTypeCount(-rowsDeleted);
+    invalidateSessionCache();
 }
 
 function deleteRowsForIds(ids) {
@@ -361,6 +360,7 @@ function deleteRowsForIds(ids) {
             function(record) { return lookup[flexive.util.parsePk(record.getData("pk")).id] != null; }
     );
     modifyTypeCount(-rowsDeleted);
+    invalidateSessionCache();
 }
 
 function deleteContent(/* PK */ pk) {
