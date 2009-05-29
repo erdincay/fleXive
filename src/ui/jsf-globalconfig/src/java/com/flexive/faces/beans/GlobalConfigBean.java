@@ -99,6 +99,10 @@ public class GlobalConfigBean {
         return "login";
     }
 
+    public boolean isAuthenticated() {
+        return authenticated;
+    }
+
     /**
      * Add a division to the division table.
      *

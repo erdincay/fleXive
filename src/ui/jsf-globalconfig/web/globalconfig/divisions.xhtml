@@ -10,15 +10,18 @@
       xmlns:weblet="http://weblets.dev.java.net/tags_jsp2">
 <head>
     <title>#{fxMessageBean['GlobalConfig.title']}</title>
+    <c:if test="#{not globalConfigBean.authenticated}">
+        <meta HTTP-EQUIV="REFRESH" content="0; url=index.xhtml"/>
+    </c:if>
     <fx:includes/>
     <link rel="stylesheet" type="text/css" href="#{fx:webletUrl('divisions_plugin','/css/divisions.css')}"/>
 </head>
 
 <body>
-
+<c:if test="#{globalConfigBean.authenticated}">
 <h:form>
     <h:messages/>
-    
+
     <h4>#{fxMessageBean['GlobalConfig.label.legend.divisions']}</h4>
 
     <p>
@@ -135,5 +138,6 @@
     </h:panelGrid>
 
 </h:form>
+</c:if>
 </body>
 </html>
