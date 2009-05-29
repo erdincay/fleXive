@@ -1048,7 +1048,7 @@ public class PropertyEditorBean implements ActionBean, Serializable {
 
         if (!isSystemInternal()
                 || FxJsfUtils.getRequest().getUserTicket().isInRole(Role.GlobalSupervisor)) {
-            if (getProperty().mayOverrideBaseMultiplicity()) {
+            if (isOverrideMultiplicity() && getProperty().mayOverrideBaseMultiplicity()) {
                 FxJsfUtils.checkMultiplicity(min, max);
                 assignment.setMultiplicity(new FxMultiplicity(min, max));
             }

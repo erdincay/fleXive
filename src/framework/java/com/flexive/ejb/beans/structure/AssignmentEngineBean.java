@@ -1235,7 +1235,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             if (!org.isSystemInternal() || FxContext.getUserTicket().isGlobalSupervisor()) {
                 // change the multiplicity override prop
                 if (org.mayOverrideBaseMultiplicity() != prop.mayOverrideBaseMultiplicity()) {
-                    if (!prop.mayOverrideBaseMultiplicity()) {
+                    if (!prop.mayOverrideBaseMultiplicity() && getPropertyInstanceCount(prop.getId()) > 0) {
                         if (getPropertyInstanceMultiplicity(con, org.getId(), true) < prop.getMultiplicity().getMin())
                             throw new FxUpdateException("ex.structure.modification.contentExists", "minimumMultiplicity");
                         if (getPropertyInstanceMultiplicity(con, org.getId(), false) > prop.getMultiplicity().getMax())
@@ -1588,10 +1588,13 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 if (original.getMultiplicity().getMin() != modified.getMultiplicity().getMin() ||
                         original.getMultiplicity().getMax() != modified.getMultiplicity().getMax()) {
                     if (original.getProperty().mayOverrideBaseMultiplicity()) {
-                        if (getPropertyInstanceMultiplicity(con, original.getProperty().getId(), true) < modified.getMultiplicity().getMin())
-                            throw new FxUpdateException("ex.structure.modification.contentExists", "minimumMultiplicity");
-                        if (getPropertyInstanceMultiplicity(con, original.getProperty().getId(), false) > modified.getMultiplicity().getMax())
-                            throw new FxUpdateException("ex.structure.modification.contentExists", "maximumMultiplicity");
+                        if (getAssignmentInstanceCount(original.getId()) > 0) {
+                            //only check if instances using this assignment exist
+                            if (getPropertyInstanceMultiplicity(con, original.getProperty().getId(), true) < modified.getMultiplicity().getMin())
+                                throw new FxUpdateException("ex.structure.modification.contentExists", "minimumMultiplicity");
+                            if (getPropertyInstanceMultiplicity(con, original.getProperty().getId(), false) > modified.getMultiplicity().getMax())
+                                throw new FxUpdateException("ex.structure.modification.contentExists", "maximumMultiplicity");
+                        }
                     } else {
                         throw new FxUpdateException("ex.structure.property.assignment.overrideBaseMultiplicityNotEnabled", original.getProperty().getId());
                     }
