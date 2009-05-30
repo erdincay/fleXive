@@ -26,16 +26,13 @@ Parameters:
  icon - [optional] the name of the icon to be displayed. the icon name is mapped to the url "adm/images/commandButton/${icon}.png"
  iconUrl - [optional] the url (aboslute, including the context path)
                       of the icon to be displayed (i.e. /flexive/images/myIcon.png)
+ eventsQueue - ajax events queue
  rendered - [optional] flag to supress rendering of the whole component
  buttonDisabled - [optional] renders the button, but disables its functionality
 
 <ui:composition>
 
-    <c:if test="#{empty rendered}">
-        <c:set var="rendered" value="#{true}"/>
-    </c:if>
-
-    <ui:fragment rendered="#{rendered}">
+    <ui:fragment rendered="#{rendered!=false}">
         <c:if test="#{!empty labelKey}">
             <c:set var="label" value="#{fxMessageBean[labelKey]}"/>
         </c:if>
@@ -99,7 +96,7 @@ Parameters:
         </c:if>
 
         <c:if test="#{buttonDisabled == null or !buttonDisabled}">
-        <a4j:commandLink rendered="#{rendered}" id="#{id}" reRender="#{reRender}" onclick="#{onclick}" actionListener="#{bean[actionListener]}"
+        <a4j:commandLink rendered="#{rendered}" id="#{id}" eventsQueue="#{eventsQueue}" reRender="#{reRender}" onclick="#{onclick}" actionListener="#{bean[actionListener]}"
                          immediate="#{immediate}">
             <ui:insert/>
             <div id="commandButton_#{id}" class="#{commandButtonStyle}" title="#{title}">

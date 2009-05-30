@@ -59,16 +59,10 @@
                                 </h:selectOneListbox>
                             </td>
                             <td width="100%">
-                                <a4j:commandLink reRender="stepAdd, stepList, routeAdd"
-                                                 actionListener="#{workflowBean.addStep}"
-                                                 onmouseover='ignoreEvent(event)'
-                                                 eventsQueue="stepQ"
-                                        >
-                                    <t:graphicImage alt="add"
-                                                    url="/adm/images/commandButton/new.png"
-                                                    style="#{wfBtnStyle}"
-                                            />
-                                </a4j:commandLink>
+                                <adm:ajaxCommandIcon id="addStep" reRender="stepAdd, stepList, routeAdd" bean="#{workflowBean}"
+                                         actionListener="addStep"
+                                         icon="new" titleKey="Workflow.button.step.add" eventsQueue="stepQ">
+                                </adm:ajaxCommandIcon>
                             </td>
                         </tr>
                     </table>
@@ -111,18 +105,11 @@
                     <f:facet name="header">
                         #{fxMessageBean['Workflow.field.step.actions']}
                     </f:facet>
-                    <a4j:commandLink reRender="stepAdd, stepList, routeAdd"
-                                     actionListener="#{workflowBean.removeStep}"
-                                     onmouseover='ignoreEvent(event)'
-                                     eventsQueue="stepQ"
-                                     rendered="#{workflowBean.canRemoveStep[step]}"
-                            >
+                    <adm:ajaxCommandIcon id="removeStep" reRender="stepAdd, stepList, routeAdd" bean="#{workflowBean}"
+                                         actionListener="removeStep" rendered="#{workflowBean.canRemoveStep[step]}"
+                                         icon="delete" titleKey="Workflow.button.step.remove" eventsQueue="stepQ">
                         <f:setPropertyActionListener target="#{workflowBean.stepIndex}" value="#{rowIndex}"/>
-                        <t:graphicImage alt="delete"
-                                        url="/adm/images/commandButton/delete.png"
-                                        style="#{wfBtnStyle}"
-                                />
-                    </a4j:commandLink>
+                    </adm:ajaxCommandIcon>
                 </h:column>
             </t:dataTable>
 
@@ -166,16 +153,10 @@
 							</h:selectOneListbox>
 						</td>
 						<td width="100%">
-                            <a4j:commandLink reRender="routeList, routeAdd, stepList"
-                                             actionListener="#{workflowBean.addRoute}"
-                                             onmouseover='ignoreEvent(event)'
-                                             eventsQueue="stepQ"
-                                    >
-                                <t:graphicImage alt="add"
-                                                url="/adm/images/commandButton/new.png"
-                                                style="#{wfBtnStyle}"
-                                        />
-                            </a4j:commandLink>
+                            <adm:ajaxCommandIcon id="addRoute" reRender="routeAdd, routeList, stepList" bean="#{workflowBean}"
+                                         actionListener="addRoute"
+                                         icon="new" titleKey="Workflow.button.route.add" eventsQueue="stepQ">
+                            </adm:ajaxCommandIcon>
                         </td>
 					</tr>
 				</table>
@@ -214,17 +195,11 @@
                     <f:facet name="header">
                         #{fxMessageBean['Workflow.field.route.actions']}
                     </f:facet>
-                    <a4j:commandLink reRender="routeAdd, routeList, stepList"
-                                     actionListener="#{workflowBean.removeRoute}"
-                                     onmouseover='ignoreEvent(event)'
-                                     eventsQueue="stepQ"
-                            >
+                    <adm:ajaxCommandIcon id="removeRoute" reRender="routeAdd, routeList, stepList" bean="#{workflowBean}"
+                                         actionListener="removeRoute"
+                                         icon="delete" titleKey="Workflow.button.route.remove" eventsQueue="stepQ">
                         <f:setPropertyActionListener target="#{workflowBean.routeIndex}" value="#{rowIndex}"/>
-                        <t:graphicImage alt="delete"
-                                        url="/adm/images/commandButton/delete.png"
-                                        style="#{wfBtnStyle}"
-                                />
-                    </a4j:commandLink>
+                    </adm:ajaxCommandIcon>
                 </h:column>
 			</t:dataTable>
             </a4j:outputPanel>
