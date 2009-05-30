@@ -791,7 +791,7 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                 lists.add(new FxSelectList(id, parent, rs.getString(3),
                         getTranslation(translations, id, 0),
                         getTranslation(translations, id, 1),
-                        rs.getBoolean(5), environment.getACL(rs.getLong(5)), environment.getACL(rs.getLong(6)),
+                        rs.getBoolean(4), environment.getACL(rs.getLong(5)), environment.getACL(rs.getLong(6)),
                         rs.getLong(7)));
             }
             ps.close();

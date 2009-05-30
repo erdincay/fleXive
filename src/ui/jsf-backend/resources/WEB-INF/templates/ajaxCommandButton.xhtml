@@ -1,0 +1,125 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+      xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+      xmlns:t="http://myfaces.apache.org/tomahawk">
+
+Backend a4j command button.
+
+Parameters:
+ id - element id
+ reRender - the region to re-render
+ label - the button label
+ labelKey - message key for the button label (overrides label when specified)
+ title - [optional] the button title (used by browsers to display tooltip on mouseover)
+ titleKey - [optional]  message key for the button title (overrides title when specified).
+                        if not specified and labelKey is set, it defaults to #{labelKey}.title
+ bean - the bean that the action belongs to
+ actionListener - the actionListener to call
+ immediate - [optional] the jsf immediate flag
+ onclick - [optional] the onClick event of the action link
+ icon - [optional] the name of the icon to be displayed. the icon name is mapped to the url "adm/images/commandButton/${icon}.png"
+ iconUrl - [optional] the url (aboslute, including the context path)
+                      of the icon to be displayed (i.e. /flexive/images/myIcon.png)
+ rendered - [optional] flag to supress rendering of the whole component
+ buttonDisabled - [optional] renders the button, but disables its functionality
+
+<ui:composition>
+
+    <c:if test="#{empty rendered}">
+        <c:set var="rendered" value="#{true}"/>
+    </c:if>
+
+    <ui:fragment rendered="#{rendered}">
+        <c:if test="#{!empty labelKey}">
+            <c:set var="label" value="#{fxMessageBean[labelKey]}"/>
+        </c:if>
+        <c:if test="${empty label}">
+            <c:set var="label" value="CommandButton.err.missingLabel" />
+        </c:if>
+
+        <c:if test="#{!empty titleKey}">
+            <c:set var="title" value="#{fxMessageBean[titleKey]}"/>
+        </c:if>
+
+        <c:if test="#{empty title and empty titleKey and not empty labelKey}">
+            <c:set var="titleKey" value="#{labelKey}.title"/>
+        </c:if>
+
+        <c:if test="#{!empty titleKey and fxSystemBean.messageExists[titleKey]}">
+            <c:set var="title" value="#{fxMessageBean[titleKey]}"/>
+        </c:if>
+
+        <c:if test="#{empty title}">
+            <c:set var="title" value="#{label}"/>
+        </c:if>
+
+        <c:if test="#{empty iconUrl}">
+            <c:set var="iconUrl" value="/adm/images/commandButton/#{icon}.png"/>
+        </c:if>
+
+        <c:if test="#{immediate == null}">
+            <c:set var="immediate" value="false"/>
+        </c:if>
+
+        <c:if test="#{not empty icon}">
+            <c:set var="iconUrl" value="#{fxSystemBean.contextPath}/adm/images/commandButton/#{icon}.png"/>
+        </c:if>
+
+
+
+        <c:set var="commandButtonStyle" value="commandButton"/>
+        <c:set var="commandButtonIconStyle" value="commandButtonIcon"/>
+        <c:set var="commandButtonLabelStyle" value="commandButtonLabel"/>
+        <c:set var="commandButtonRightStyle" value="commandButtonRight"/>
+
+        <c:if test="#{buttonDisabled}">
+            <c:set var="commandButtonIconStyle" value="commandButtonIconDisabled"/>
+            <c:set var="commandButtonLabelStyle" value="commandButtonLabelDisabled"/>
+            <c:set var="commandButtonRightStyle" value="commandButtonRightDisabled"/>
+            <div id="commandButton_#{id}" class="#{commandButtonStyle}" title="#{title}">
+                <div style="display:table-row; height:22px; float:left">
+                    <div class="#{commandButtonIconStyle}">
+                        <img alt="#{id}_icon" id="#{id}_icon" src="#{iconUrl}" border="0"/>
+                    </div>
+                    <div class="#{commandButtonLabelStyle}">
+                        <div class="commandButtonLabelText">
+                            #{label}
+                        </div>
+                    </div>
+                    <div class="#{commandButtonRightStyle}">
+                    </div>
+                </div>
+            </div>
+        </c:if>
+
+        <c:if test="#{buttonDisabled == null or !buttonDisabled}">
+        <a4j:commandLink rendered="#{rendered}" id="#{id}" reRender="#{reRender}" onclick="#{onclick}" actionListener="#{bean[actionListener]}"
+                         immediate="#{immediate}">
+            <ui:insert/>
+            <div id="commandButton_#{id}" class="#{commandButtonStyle}" title="#{title}">
+                <div style="display:table-row; height:22px; float:left">
+                    <div class="#{commandButtonIconStyle}">
+                        <img alt="#{id}_icon" id="#{id}_icon" src="#{iconUrl}" border="0"/>
+                    </div>
+                    <div class="#{commandButtonLabelStyle}">
+                        <div class="commandButtonLabelText">
+                            #{label}
+                        </div>
+                    </div>
+                    <div class="#{commandButtonRightStyle}">
+                    </div>
+                </div>
+            </div>
+        </a4j:commandLink>
+        </c:if>
+    </ui:fragment>
+
+</ui:composition>
+
+</html>

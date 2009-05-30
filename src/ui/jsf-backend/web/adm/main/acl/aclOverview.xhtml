@@ -56,6 +56,9 @@
                         <th class="tblHeader" field="label" dataType="html" align="left">
                             #{fxMessageBean['ACL.field.label']}
                         </th>
+                        <th class="tblHeader" field="color" dataType="html" align="left">
+                            #{fxMessageBean['ACL.field.color']}
+                        </th>
                         <th class="tblHeader" dataType="html" align="left" noSort="true">
                             #{fxMessageBean['ACL.field.actions']}
                         </th>
@@ -75,7 +78,13 @@
                                 </td>
                             </c:if>
                             <td><h:outputText value="#{item.category.label}"/></td>
-                            <td><!--#{item.label}--><span style="color:#{item.color}"><h:outputText value="#{item.label}"/></span></td>
+                            <td><h:outputText value="#{item.label}"/></td>
+                            <td><!--#{item.color}-->
+                                <div style="display: inline; border:1px solid; background-color:#{item.color}">
+                                    <img src="#{fx:webletUrl('com.flexive.faces.weblets', '/images/empty.gif')}"
+                                         width="12" height="12"/>
+                                </div>
+                            </td>
                             <td>
                                 <adm:commandIcon labelKey="ACL.button.edit" location="content"
                                                 icon="edit"  action="edit"  bean="#{aclBean}"

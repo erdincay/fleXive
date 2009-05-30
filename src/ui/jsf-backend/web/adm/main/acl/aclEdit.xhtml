@@ -83,18 +83,19 @@
                 </h:column>
                 <h:column>
                     <f:facet name="header">#{fxMessageBean['ACL.label.action']}</f:facet>
-                    <a4j:commandLink id="removeAssignmentButton" reRender="assignmentTbl"
-                                     actionListener="#{aclBean.removeAssignment}">
+                    <adm:ajaxCommandIcon id="removeAssignmentButton" reRender="assignmentTbl"
+                                         icon="delete" titleKey="ACL.button.delete"
+                                         bean="#{aclBean}" actionListener="removeAssignment">
                         <f:setPropertyActionListener target="#{aclBean.assignmentId}" value="#{row.id}"/>
-                        <t:graphicImage alt="remove" url="/adm/images/commandButton/delete.png" border="0"/>
-                    </a4j:commandLink>
+                    </adm:ajaxCommandIcon>
                 </h:column>
             </t:dataTable>
 
             <div style="margin:3px;padding-bottom:5px;">
-                <a4j:commandButton id="addValueRowButton" reRender="assignmentTbl"
-                                   actionListener="#{aclBean.addAssignment}"
-                                   value="#{fxMessageBean['ACL.button.addRow']}"/>
+                <adm:ajaxCommandButton id="addValueRowButton" reRender="assignmentTbl"
+                                   bean="#{aclBean}" icon="new"
+                                   actionListener="addAssignment"
+                                   labelKey="ACL.button.addRow"/>
             </div>
 
         </fx:fieldSet>

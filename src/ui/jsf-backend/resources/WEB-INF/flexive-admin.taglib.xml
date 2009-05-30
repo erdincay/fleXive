@@ -14,6 +14,14 @@
         <source>templates/commandIcon.xhtml</source>
     </tag>
     <tag>
+        <tag-name>ajaxCommandButton</tag-name>
+        <source>templates/ajaxCommandButton.xhtml</source>
+    </tag>
+    <tag>
+        <tag-name>ajaxCommandIcon</tag-name>
+        <source>templates/ajaxCommandIcon.xhtml</source>
+    </tag>
+    <tag>
         <tag-name>mandatorSelect</tag-name>
         <source>templates/mandatorSelect.xhtml</source>
     </tag>
