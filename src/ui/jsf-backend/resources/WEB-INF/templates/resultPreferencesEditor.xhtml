@@ -8,7 +8,8 @@
       xmlns:fn="http://java.sun.com/jsp/jstl/functions"
       xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
       xmlns:fx="http://www.flexive.com/jsf/core"
-      xmlns:t="http://myfaces.apache.org/tomahawk">
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:adm="http://www.flexive.com/jsf/admin">
 
 Renders the body content in a info box.
 
@@ -54,39 +55,47 @@ Renders the body content in a info box.
                     </f:facet>
                     #{resultPreferencesBean.propertyLabelMap[info.propertyName]}
                 </t:column>
-                <t:column width="100">
+                <t:column width="120">
                     <!-- Move column to the top -->
-                    <a4j:commandLink reRender="preferencesPanel" actionListener="#{resultPreferencesBean.moveColumnPropertyTop}">
-                        <f:setPropertyActionListener target="#{resultPreferencesBean.editColumnIndex}" value="#{rowIndex}"/>
-                        <t:graphicImage alt="#{fxMessageBean['ResultPreferences.button.info.top']}"
-                                        url="/adm/images/commandButton/top.png" border="0"/>
-                    </a4j:commandLink>
+                    <adm:ajaxCommandIcon id="moveColumnPropertyTop" reRender="selectedColumns" bean="#{resultPreferencesBean}"
+                                         actionListener="moveColumnPropertyTop"
+                                         titleKey="ResultPreferences.button.info.top"
+                                         icon="top">
+                        <f:setPropertyActionListener target="#{resultPreferencesBean.editColumnIndex}"
+                                                     value="#{rowIndex}"/>
+                    </adm:ajaxCommandIcon>
                     <!-- Move column up -->
-                    <a4j:commandLink reRender="preferencesPanel" actionListener="#{resultPreferencesBean.moveColumnPropertyUp}">
-                        <f:setPropertyActionListener target="#{resultPreferencesBean.editColumnIndex}" value="#{rowIndex}"/>
-                        <t:graphicImage alt="#{fxMessageBean['ResultPreferences.button.info.up']}"
-                                        url="/adm/images/commandButton/up.png" border="0"/>
-                    </a4j:commandLink>
+                    <adm:ajaxCommandIcon id="moveColumnPropertyUp" reRender="selectedColumns" bean="#{resultPreferencesBean}"
+                                         actionListener="moveColumnPropertyUp"
+                                         titleKey="ResultPreferences.button.info.up"
+                                         icon="up">
+                        <f:setPropertyActionListener target="#{resultPreferencesBean.editColumnIndex}"
+                                                     value="#{rowIndex}"/>
+                    </adm:ajaxCommandIcon>
                     <!-- Move column down -->
-                    <a4j:commandLink reRender="preferencesPanel"
-                                     actionListener="#{resultPreferencesBean.moveColumnPropertyDown}">
-                        <f:setPropertyActionListener target="#{resultPreferencesBean.editColumnIndex}" value="#{rowIndex}"/>
-                        <t:graphicImage alt="#{fxMessageBean['ResultPreferences.button.info.down']}"
-                                        url="/adm/images/commandButton/down.png" border="0"/>
-                    </a4j:commandLink>
+                    <adm:ajaxCommandIcon id="moveColumnPropertyDown" reRender="selectedColumns" bean="#{resultPreferencesBean}"
+                                         actionListener="moveColumnPropertyDown"
+                                         titleKey="ResultPreferences.button.info.down"
+                                         icon="down">
+                        <f:setPropertyActionListener target="#{resultPreferencesBean.editColumnIndex}"
+                                                     value="#{rowIndex}"/>
+                    </adm:ajaxCommandIcon>
                     <!-- Move column to the bottom -->
-                    <a4j:commandLink reRender="preferencesPanel"
-                                     actionListener="#{resultPreferencesBean.moveColumnPropertyBottom}">
-                        <f:setPropertyActionListener target="#{resultPreferencesBean.editColumnIndex}" value="#{rowIndex}"/>
-                        <t:graphicImage alt="#{fxMessageBean['ResultPreferences.button.info.bottom']}"
-                                        url="/adm/images/commandButton/bottom.png" border="0"/>
-                    </a4j:commandLink>
+                    <adm:ajaxCommandIcon id="moveColumnPropertyBottom" reRender="selectedColumns" bean="#{resultPreferencesBean}"
+                                         actionListener="moveColumnPropertyBottom"
+                                         titleKey="ResultPreferences.button.info.bottom"
+                                         icon="bottom">
+                        <f:setPropertyActionListener target="#{resultPreferencesBean.editColumnIndex}"
+                                                     value="#{rowIndex}"/>
+                    </adm:ajaxCommandIcon>
                     <!-- Delete column -->
-                    <a4j:commandLink reRender="preferencesPanel" actionListener="#{resultPreferencesBean.removeColumnProperty}">
-                        <f:setPropertyActionListener target="#{resultPreferencesBean.editColumnIndex}" value="#{rowIndex}"/>
-                        <t:graphicImage alt="#{fxMessageBean['ResultPreferences.button.info.delete']}"
-                                        url="/adm/images/commandButton/delete.png" border="0"/>
-                    </a4j:commandLink>
+                    <adm:ajaxCommandIcon id="removeColumnProperty" reRender="selectedColumns" bean="#{resultPreferencesBean}"
+                                         actionListener="removeColumnProperty"
+                                         titleKey="ResultPreferences.button.info.delete"
+                                         icon="delete">
+                        <f:setPropertyActionListener target="#{resultPreferencesBean.editColumnIndex}"
+                                                     value="#{rowIndex}"/>
+                    </adm:ajaxCommandIcon>
                 </t:column>
             </t:dataTable>
 
@@ -99,9 +108,12 @@ Renders the body content in a info box.
                         </h:selectOneListbox>
                     </td>
                     <td>
-                        <a4j:commandButton id="addColumnButton" actionListener="#{resultPreferencesBean.addColumnProperty}"
-                                           reRender="preferencesPanel"
-                                           value="#{fxMessageBean['ResultPreferences.button.info.add']}"/>
+                        <adm:ajaxCommandButton id="addColumnButton"
+                                           bean="#{resultPreferencesBean}"
+                                           actionListener="addColumnProperty"
+                                           reRender="selectedColumns,addPropertyNameSelect"
+                                           icon="add"
+                                           labelKey="ResultPreferences.button.info.add"/>
                     </td>
                 </tr>
             </table>
@@ -109,6 +121,7 @@ Renders the body content in a info box.
         <br/>
         <fx:fieldSet legend="#{fxMessageBean['ResultPreferences.legend.orderBy']}">
             <t:dataTable
+                    id="propertyTable"
                     value="#{resultPreferencesBean.resultPreferences.orderByColumns}"
                     var="info" rowIndexVar="rowIndex" preserveDataModel="true"
                     headerClass="tblHeader" rowClasses="tblRowEven, tblRowOdd" width="100%">
@@ -126,25 +139,28 @@ Renders the body content in a info box.
                 </t:column>
                 <t:column width="70">
                     <!-- Move column up -->
-                    <a4j:commandLink reRender="preferencesPanel"
-                                     actionListener="#{resultPreferencesBean.moveOrderByPropertyUp}">
-                        <f:setPropertyActionListener target="#{resultPreferencesBean.editColumnIndex}" value="#{rowIndex}"/>
-                        <t:graphicImage alt="#{fxMessageBean['ResultPreferences.button.info.up']}"
-                                        url="/adm/images/commandButton/up.png" border="0"/>
-                    </a4j:commandLink>
+                    <adm:ajaxCommandIcon id="moveOrderByPropertyUp" reRender="propertyTable" bean="#{resultPreferencesBean}"
+                                         actionListener="moveOrderByPropertyUp"
+                                         titleKey="ResultPreferences.button.info.up"
+                                         icon="up">
+                        <f:setPropertyActionListener target="#{resultPreferencesBean.editColumnIndex}"
+                                                     value="#{rowIndex}"/>
+                    </adm:ajaxCommandIcon>
                     <!-- Move column down -->
-                    <a4j:commandLink reRender="preferencesPanel"
-                                     actionListener="#{resultPreferencesBean.moveOrderByPropertyDown}">
-                        <f:setPropertyActionListener target="#{resultPreferencesBean.editColumnIndex}" value="#{rowIndex}"/>
-                        <t:graphicImage alt="#{fxMessageBean['ResultPreferences.button.info.down']}"
-                                        url="/adm/images/commandButton/down.png" border="0"/>
-                    </a4j:commandLink>
-                    <a4j:commandLink reRender="preferencesPanel"
-                                     actionListener="#{resultPreferencesBean.removeOrderByProperty}">
-                        <f:setPropertyActionListener target="#{resultPreferencesBean.editColumnIndex}" value="#{rowIndex}"/>
-                        <t:graphicImage alt="#{fxMessageBean['ResultPreferences.button.info.delete']}"
-                                        url="/adm/images/commandButton/delete.png" border="0"/>
-                    </a4j:commandLink>
+                    <adm:ajaxCommandIcon id="moveOrderByPropertyDown" reRender="propertyTable" bean="#{resultPreferencesBean}"
+                                         actionListener="moveOrderByPropertyDown"
+                                         titleKey="ResultPreferences.button.info.down"
+                                         icon="down">
+                        <f:setPropertyActionListener target="#{resultPreferencesBean.editColumnIndex}"
+                                                     value="#{rowIndex}"/>
+                    </adm:ajaxCommandIcon>
+                    <adm:ajaxCommandIcon id="removeOrderByProperty" reRender="propertyTable" bean="#{resultPreferencesBean}"
+                                         actionListener="removeOrderByProperty"
+                                         titleKey="ResultPreferences.button.info.delete"
+                                         icon="delete">
+                        <f:setPropertyActionListener target="#{resultPreferencesBean.editColumnIndex}"
+                                                     value="#{rowIndex}"/>
+                    </adm:ajaxCommandIcon>
                 </t:column>
             </t:dataTable>
 
@@ -152,7 +168,8 @@ Renders the body content in a info box.
                 <table>
                     <tr>
                         <td>
-                            <h:selectOneListbox id="addOrderByName" value="#{resultPreferencesBean.addOrderByName}" size="1">
+                            <h:selectOneListbox id="addOrderByName" value="#{resultPreferencesBean.addOrderByName}"
+                                                size="1">
                                 <f:selectItems value="#{resultPreferencesBean.selectedProperties}"/>
                             </h:selectOneListbox>
                         </td>
@@ -162,10 +179,12 @@ Renders the body content in a info box.
                             </h:selectOneListbox>
                         </td>
                         <td>
-                            <a4j:commandButton id="addOrderByButton"
-                                               actionListener="#{resultPreferencesBean.addOrderByProperty}"
-                                               reRender="preferencesPanel"
-                                               value="#{fxMessageBean['ResultPreferences.button.info.add']}"/>
+                            <adm:ajaxCommandButton id="addOrderByButton"
+                                               bean="#{resultPreferencesBean}"
+                                               actionListener="addOrderByProperty"
+                                               reRender="propertyTable"
+                                               icon="add"
+                                               labelKey="ResultPreferences.button.info.add"/>
                         </td>
                     </tr>
                 </table>
@@ -173,9 +192,10 @@ Renders the body content in a info box.
         </fx:fieldSet>
 
         <div style="display:none">
-            <a4j:commandButton id="reloadButton" actionListener="#{resultPreferencesBean.reloadPreferences}" reRender="preferencesPanel"/>
+            <a4j:commandButton id="reloadButton" actionListener="#{resultPreferencesBean.reloadPreferences}"
+                               reRender="preferencesPanel"/>
         </div>
-    
+
     </a4j:outputPanel>
 </ui:composition>
 </html>

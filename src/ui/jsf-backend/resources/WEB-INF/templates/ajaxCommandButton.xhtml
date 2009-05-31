@@ -31,7 +31,6 @@ Parameters:
  buttonDisabled - [optional] renders the button, but disables its functionality
 
 <ui:composition>
-
     <ui:fragment rendered="#{rendered!=false}">
         <c:if test="#{!empty labelKey}">
             <c:set var="label" value="#{fxMessageBean[labelKey]}"/>
@@ -79,7 +78,7 @@ Parameters:
             <c:set var="commandButtonIconStyle" value="commandButtonIconDisabled"/>
             <c:set var="commandButtonLabelStyle" value="commandButtonLabelDisabled"/>
             <c:set var="commandButtonRightStyle" value="commandButtonRightDisabled"/>
-            <div id="commandButton_#{id}" class="#{commandButtonStyle}" title="#{title}">
+            <div id="commandButton_#{id}" onclick="#{onclick}" class="#{commandButtonStyle}" title="#{title}">
                 <div style="display:table-row; height:22px; float:left">
                     <div class="#{commandButtonIconStyle}">
                         <img alt="#{id}_icon" id="#{id}_icon" src="#{iconUrl}" border="0"/>
@@ -96,10 +95,10 @@ Parameters:
         </c:if>
 
         <c:if test="#{buttonDisabled == null or !buttonDisabled}">
-        <a4j:commandLink rendered="#{rendered}" id="#{id}" eventsQueue="#{eventsQueue}" reRender="#{reRender}" onclick="#{onclick}" actionListener="#{bean[actionListener]}"
+        <a4j:commandLink id="#{id}" eventsQueue="#{eventsQueue}" reRender="#{reRender}" actionListener="#{bean[actionListener]}"
                          immediate="#{immediate}">
             <ui:insert/>
-            <div id="commandButton_#{id}" class="#{commandButtonStyle}" title="#{title}">
+            <div id="commandButton_#{id}" onclick="#{onclick}" class="#{commandButtonStyle}" title="#{title}">
                 <div style="display:table-row; height:22px; float:left">
                     <div class="#{commandButtonIconStyle}">
                         <img alt="#{id}_icon" id="#{id}_icon" src="#{iconUrl}" border="0"/>
