@@ -106,8 +106,10 @@ FxSelectListItem buildSelectOneSearchProp(int counter) {
 SelectMany buildSelectManySearchProp(int counter) {
     FxSelectList list = CacheAdmin.environment.getSelectList("SearchTest SelectList")
     SelectMany sm = new SelectMany(list)
-    sm.select(list.items[0].id)
-    sm.select(list.items[counter % list.items.size()].id)
+    // select up to 5 items
+    5.times {
+      sm.select(list.items[new Random().nextInt(list.items.size())].id)
+    }
     return sm
 }
 
