@@ -35,11 +35,7 @@ buttonDisabled - [optional] renders the commandElement, but disables its functio
 
 <ui:composition>
 
-    <c:if test="#{empty rendered}">
-        <c:set var="rendered" value="#{true}"/>
-    </c:if>
-
-    <ui:fragment rendered="#{rendered}">
+    <ui:fragment rendered="#{rendered != false}">
         <c:if test="#{!empty labelKey}">
             <c:set var="label" value="#{fxMessageBean[labelKey]}"/>
         </c:if>
