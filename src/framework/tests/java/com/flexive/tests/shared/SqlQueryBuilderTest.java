@@ -48,6 +48,7 @@ import org.testng.Assert;
 
 import java.util.Date;
 import java.util.Formatter;
+import java.util.Arrays;
 
 /**
  * Tests for the SqlQueryBuilder class.
@@ -302,4 +303,16 @@ public class SqlQueryBuilderTest {
             Assert.assertTrue(query.toUpperCase().contains(fun.toUpperCase()), "Expected query to contain " + fun + ", got: " + query);
         }
     }
+
+    @Test
+    public void inConditionTest() {
+        checkInCondition(new SqlQueryBuilder().condition("title", PropertyValueComparator.IN, new String[]{"Hello", "World"}));
+        checkInCondition(new SqlQueryBuilder().condition("title", PropertyValueComparator.IN, Arrays.asList("Hello", "World")));
+    }
+
+    private void checkInCondition(SqlQueryBuilder sqlQueryBuilder) {
+        final String query = sqlQueryBuilder.getQuery();
+        Assert.assertTrue(query.toUpperCase().contains("TITLE IN ('HELLO','WORLD')"), "Invalid 'in' condition: " + query);
+    }
+
 }

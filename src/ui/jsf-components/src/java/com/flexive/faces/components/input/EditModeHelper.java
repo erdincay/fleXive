@@ -282,25 +282,15 @@ class EditModeHelper extends RenderHelper {
         for (int i = 0; i < selected.length; i++) {
             selected[i] = sm.getSelected().get(i).getId();
         }
-        if (component.isForceLineInput()) {
-            // render a single line dropdown
-            final HtmlSelectOneListbox listbox = (HtmlSelectOneListbox) createUISelect(parent, inputId, HtmlSelectOneListbox.COMPONENT_TYPE);
-            listbox.setSize(1);
-            listbox.setStyleClass(CSS_VALUE_INPUT_FIELD + " " + FxValueInputRenderer.CSS_INPUTELEMENTWIDTH + singleLanguageStyle(language));
-            if (selected.length > 0) {
-                // choose first selected element - other selections get discarded
-                listbox.setValue(selected[0]);
-            }
-            storeSelectItems(listbox, selectValue.getSelectList());
-        } else {
-            // render a "multiple" select list
-            final HtmlSelectManyListbox listbox = (HtmlSelectManyListbox) createUISelect(parent, inputId, HtmlSelectManyListbox.COMPONENT_TYPE);
-            listbox.setStyleClass(CSS_VALUE_INPUT_FIELD + " " + FxValueInputRenderer.CSS_INPUTELEMENTWIDTH + singleLanguageStyle(language));
-            listbox.setSelectedValues(selected);
-            storeSelectItems(listbox, selectValue.getSelectList());
-            // automatically limit select list rows for very long lists
-            listbox.setSize(Math.min(selectValue.getSelectList().getItems().size(), 7));
-        }
+        // render a "multiple" select list
+        final HtmlSelectManyListbox listbox = (HtmlSelectManyListbox) createUISelect(parent, inputId, HtmlSelectManyListbox.COMPONENT_TYPE);
+        listbox.setStyleClass(CSS_VALUE_INPUT_FIELD + " " + FxValueInputRenderer.CSS_INPUTELEMENTWIDTH + singleLanguageStyle(language));
+        listbox.setSelectedValues(selected);
+        storeSelectItems(listbox, selectValue.getSelectList());
+        // automatically limit select list rows for very long lists. "Real" single-line input is not possible with a
+        // standard listbox widget if multiple selection should still be possible,
+        // so we're only restraining the height a bit stronger 
+        listbox.setSize(Math.min(selectValue.getSelectList().getItems().size(), component.isForceLineInput() ? 3 : 7));
     }
 
     private static void addHtmlAttributes(FxValueInput component, UIComponent target) {

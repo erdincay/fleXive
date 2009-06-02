@@ -196,25 +196,30 @@ public class SqlParserTest {
                 final Brace root = stmt.getRootBrace();
                 Assert.assertTrue(root.isAnd(), "Root expression should be AND");
                 Assert.assertTrue(root.getElements().length == 2, "Root should have two children, has: " + Arrays.asList(root.getElements()));
-                checkStatementCondition(root.getElementAt(0), comp, "co.p1", "1");
+                final boolean inComp = comp == PropertyValueComparator.IN || comp == PropertyValueComparator.NOT_IN;
+                checkStatementCondition(root.getElementAt(0), comp, "co.p1", makeTuple("1", inComp));
 
                 // check first nested level
                 final Brace level1 = (Brace) root.getElementAt(1);
                 Assert.assertTrue(level1.isOr(), "Level 1 expression should be 'or'");
                 Assert.assertTrue(level1.getElements().length == 2, "Level1 should have two children, has: " + Arrays.asList(level1.getElements()));
-                checkStatementCondition(level1.getElementAt(0), comp, "co.p2", FxFormatUtils.escapeForSql("stringval"));
+                checkStatementCondition(level1.getElementAt(0), comp, "co.p2", makeTuple(FxFormatUtils.escapeForSql("stringval"), inComp));
 
                 // check innermost level
                 final Brace level2 = (Brace) level1.getElementAt(1);
                 Assert.assertTrue(level2.isAnd(), "Level 2 expression should be 'and'");
                 Assert.assertTrue(level2.getElements().length == 2, "Level2 should have two children, has: " + Arrays.asList(level2.getElements()));
-                checkStatementCondition(level2.getElementAt(0), comp, "co.p3", "2");
-                checkStatementCondition(level2.getElementAt(1), comp, "co.p4", FxFormatUtils.escapeForSql(date));
+                checkStatementCondition(level2.getElementAt(0), comp, "co.p3", makeTuple("2", inComp));
+                checkStatementCondition(level2.getElementAt(1), comp, "co.p4", makeTuple(FxFormatUtils.escapeForSql(date), inComp));
             } catch (Exception e) {
                 Assert.fail("Failed to submit query with comparator " + comp + ":\n"
                         + query + "\n\nError message: " + e.getMessage());
             }
         }
+    }
+
+    private String makeTuple(String input, boolean enabled) {
+        return enabled ? "(" + input + ")" : input;
     }
 
     @Test(groups = {"shared", "search"})

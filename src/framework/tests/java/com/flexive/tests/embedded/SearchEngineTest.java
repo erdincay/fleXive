@@ -57,6 +57,7 @@ import static com.flexive.tests.embedded.FxTestUtils.login;
 import static com.flexive.tests.embedded.FxTestUtils.logout;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.testng.Assert;
 import static org.testng.Assert.*;
 import org.testng.annotations.AfterClass;
@@ -299,6 +300,9 @@ public class SearchEngineTest {
 
     @Test(dataProvider = "testProperties")
     public void orderByTest(String name, FxDataType dataType) throws FxApplicationException {
+        if (dataType == FxDataType.SelectMany) {
+            return; // ordering for selectmany is not defined
+        }
         final FxResultSet result = new SqlQueryBuilder().select("@pk", getTestPropertyName(name)).type(TEST_TYPE)
                 .orderBy(2, SortDirection.ASCENDING).getResult();
         assertTrue(result.getRowCount() > 0);
@@ -513,6 +517,67 @@ public class SearchEngineTest {
         }
     }
 
+    @Test
+    public void selectManyInTest() throws FxApplicationException {
+        final String assignmentName = TEST_TYPE + "/" + getTestPropertyName("selectMany");
+        final FxResultSet result = new SqlQueryBuilder().select("@pk", assignmentName).type(TEST_TYPE).getResult();
+        assertTrue(result.getRowCount() > 0);
+
+        // find an object with more than 2 selected options
+        long[] queryIds = null;
+        for (FxResultRow row : result.getResultRows()) {
+            final List<FxSelectListItem> selected = ((FxSelectMany) row.getFxValue(2)).getBestTranslation().getSelected();
+            if (selected.size() > 2) {
+                // select first two
+                queryIds = new long[] { selected.get(0).getId(),  selected.get(1).getId() };
+                break;
+            }
+        }
+        assertTrue(queryIds != null, "Failed to find a suitable selectMany property");
+        //noinspection ConstantConditions
+        assertEquals(queryIds.length, 2);
+
+        // select using IN
+        final FxResultSet conditionResult = new SqlQueryBuilder().select("@pk", assignmentName)
+                .type(TEST_TYPE)
+                .condition(assignmentName, PropertyValueComparator.IN, queryIds)
+                .getResult();
+        assertTrue(conditionResult.getRowCount() > 0, "No rows found for SelectMany using IN");
+
+        // check that each matching row from result is found in conditionResult
+        int found = 0;
+        for (FxResultRow row : result.getResultRows()) {
+            final List<FxSelectListItem> selected = ((FxSelectMany) row.getFxValue(2)).getBestTranslation().getSelected();
+            final List<Long> ids = FxSharedUtils.getSelectableObjectIdList(selected);
+            if (ids.contains(queryIds[0]) && ids.contains(queryIds[1])) {
+                found++;
+                boolean foundInConditionResult = false;
+                for (FxResultRow condRow : conditionResult.getResultRows()) {
+                    if (condRow.getPk(1).equals(row.getPk(1))) {
+                        foundInConditionResult = true;
+                        break;
+                    }
+                }
+                assertTrue(foundInConditionResult, "Object " + row.getPk(1) + " should have been in condition result " +
+                        "for " + Arrays.asList(ArrayUtils.toObject(queryIds)) + ": " + ids);
+            }
+        }
+        assertTrue(found > 0, "Test match failed on all rows");
+
+        // test inverse match using NOT IN
+        final FxResultSet invResult = new SqlQueryBuilder().select("@pk", assignmentName)
+                .type(TEST_TYPE)
+                .condition(assignmentName, PropertyValueComparator.NOT_IN, queryIds)
+                .getResult();
+        assertTrue(invResult.getRowCount() > 0);
+
+        for (FxResultRow invRow : invResult.getResultRows()) {
+            for (FxResultRow row : conditionResult.getResultRows()) {
+                assertFalse(row.getPk(1).equals(invRow.getPk(1)), "Row returned by IN and NOT IN: " + row.getPk(1));
+            }
+        }
+    }
+
     /**
      * Tests relative comparators like &lt; and == for all datatypes that support them.
      *
@@ -574,7 +639,7 @@ public class SearchEngineTest {
      * @throws FxApplicationException on search engine errors
      */
     private FxValue getTestValue(String name, PropertyValueComparator comparator) throws FxApplicationException {
-        final FxResultSet result = new SqlQueryBuilder().select(getTestPropertyName(name)).type(TEST_TYPE).getResult();
+        final FxResultSet result = new SqlQueryBuilder().select(TEST_TYPE + "/" + getTestPropertyName(name)).type(TEST_TYPE).getResult();
         final List<FxValue> values = result.collectColumn(1);
         assertTrue(values.size() == testInstanceCount, "Expected " + testInstanceCount + " rows, got: " + values.size());
         for (FxValue value : values) {
@@ -584,10 +649,10 @@ public class SearchEngineTest {
             int match = 0;  // number of matched values for the given comparator
             int count = 0;  // number of values checked so far
             for (FxValue value2 : values) {
+                count++;
                 if (value2 == null || value2.isEmpty()) {
                     continue;
                 }
-                count++;
                 switch (comparator) {
                     case EQ:
                         if (value.getBestTranslation().equals(value2.getBestTranslation())) {
@@ -617,17 +682,17 @@ public class SearchEngineTest {
                     default:
                         fail("Cannot check relative ordering for comparator " + comparator);
                 }
-                if (match > 0 && count > match) {
-                    // this value is matched by _some_ other row values, so it's suitable as test input
-                    if (value instanceof FxDateRange) {
-                        // daterange checks are performed against an actual date, not another range
-                        return new FxDate(((FxDateRange) value).getBestTranslation().getLower());
-                    } else if (value instanceof FxDateTimeRange) {
-                        // see above
-                        return new FxDateTime(((FxDateTimeRange) value).getBestTranslation().getLower());
-                    }
-                    return value;
+            }
+            if (match > 0 && count > match && match < values.size()) {
+                // this value is matched by _some_ other row values, so it's suitable as test input
+                if (value instanceof FxDateRange) {
+                    // daterange checks are performed against an actual date, not another range
+                    return new FxDate(((FxDateRange) value).getBestTranslation().getLower());
+                } else if (value instanceof FxDateTimeRange) {
+                    // see above
+                    return new FxDateTime(((FxDateTimeRange) value).getBestTranslation().getLower());
                 }
+                return value;
             }
         }
         throw new IllegalArgumentException("Failed to find a suitable test value for property " + getTestPropertyName(name)

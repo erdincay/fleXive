@@ -78,7 +78,19 @@ public enum PropertyValueComparator implements ValueComparator {
             checkParameterNull(rightHandSide, "rightHandSide");
             return super.getSql(leftHandSide, rightHandSide.replaceAll("\\*", "%"));
         }
-    };
+    },
+    /** @since 3.1 */
+    IN("IN") {
+        @Override
+        protected String getSql(String leftHandSide, String rightHandSide) {
+            return super.getSql(leftHandSide, ensureTuple(rightHandSide));
+        }},
+    /** @since 3.1 */
+    NOT_IN("NOT IN") {
+        @Override
+        protected String getSql(String leftHandSide, String rightHandSide) {
+            return super.getSql(leftHandSide, ensureTuple(rightHandSide));
+        }};
 
     private static final List<PropertyValueComparator> NUMERIC_OPERATORS = Collections.unmodifiableList(Arrays.asList(
             EQ, NE, LT, LE, GT, GE
@@ -97,6 +109,9 @@ public enum PropertyValueComparator implements ValueComparator {
     ));
     private static final List<PropertyValueComparator> EMPTY_OPERATORS = Collections.unmodifiableList(Arrays.asList(
             EMPTY, NOT_EMPTY
+    ));
+    private static final List<PropertyValueComparator> SELECT_OPERATORS = Collections.unmodifiableList(Arrays.asList(
+            EQ, NE, IN, NOT_IN
     ));
 
     private String id;
@@ -225,9 +240,16 @@ public enum PropertyValueComparator implements ValueComparator {
             case DateRange:
             case DateTimeRange:
                 return DATERANGE_OPERATORS;
+            case SelectOne:
+            case SelectMany:
+                return SELECT_OPERATORS;
             default:
                 return ORDINAL_OPERATORS;
         }
     }
-    
+
+    private static String ensureTuple(String value) {
+        checkParameterNull(value, "value");
+        return value.startsWith("(") && value.endsWith(")") ? value : "(" + value + ")";
+    }
 }

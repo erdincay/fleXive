@@ -668,8 +668,12 @@ public class PropertyEntry {
                 value = "" + FxFormatUtils.toFloat(constantValue);
                 break;
             case SelectOne:
+            case SelectMany:
                 if (StringUtils.isNumeric(constantValue)) {
                     //list item id, nothing to lookup
+                    value = constantValue;
+                } else if (constantValue.startsWith("(") && constantValue.endsWith(")")) {
+                    // "in" query - pass as-is to SQL backend
                     value = constantValue;
                 } else {
                     //list item data (of first matching item)

@@ -37,14 +37,13 @@ import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxRuntimeException;
 import com.flexive.shared.structure.FxSelectListItem;
 import com.flexive.shared.value.*;
+import static com.flexive.shared.FxSharedUtils.checkParameterNull;
 import org.apache.commons.lang.StringUtils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Formatter;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
+import java.lang.reflect.Array;
 
 /**
  * Miscellaneous formatting utility functions.
@@ -438,11 +437,29 @@ public final class FxFormatUtils {
             } else {
                 return "-1";
             }
+        } else if (value != null && value.getClass().isArray()) {
+            // decode array via reflection to support primitive arrays
+            final List<Object> result = new ArrayList<Object>();
+            final int len = Array.getLength(value);
+            for (int i = 0; i < len; i++) {
+                result.add(Array.get(value, i));
+            }
+            return makeTuple(result);
+        } else if (value instanceof Collection) {
+            return makeTuple((Collection) value);
         } else if (value != null) {
             return value.toString();
         } else {
             return "null";
         }
+    }
+
+    private static String makeTuple(Collection values) {
+        final List<String> result = new ArrayList<String>(values.size());
+        for (Object value : values) {
+            result.add(escapeForSql(value));
+        }
+        return "(" + StringUtils.join(result, ',') + ")";
     }
 
     /**

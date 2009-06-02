@@ -41,6 +41,7 @@ import com.flexive.core.storage.StorageManager;
 import com.flexive.core.storage.genericSQL.GenericTreeStorage;
 import com.flexive.shared.*;
 import com.flexive.shared.structure.FxEnvironment;
+import com.flexive.shared.structure.FxDataType;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxSqlSearchException;
 import com.flexive.shared.search.DateFunction;
@@ -61,6 +62,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+
+import sun.nio.cs.ext.COMPOUND_TEXT;
 
 // NVL --> IFNULL((select sub.id from FX_CONTENT_DATA sub where sub.id=filter.id),1)
 
@@ -528,9 +531,9 @@ public class GenericSQLDataFilter extends DataFilter {
         }
 
         if (entry.getTableName().equals(DatabaseConst.TBL_CONTENT_DATA) &&
-                cond.getComperator().equals(Condition.Comparator.IS) &&
+                cond.getComperator() == Condition.Comparator.IS &&
                 cond.getConstant().isNull()) {
-            // IS NULL is a specical case for the content data table:
+            // IS NULL is a special case for the content data table:
             // a property is null if no entry is present in the table, which means we must
             // find the entries by using a join on the main table
 
@@ -575,15 +578,37 @@ public class GenericSQLDataFilter extends DataFilter {
                     getSubQueryLimit() +
                     ") ");
         } else {
-            return " (SELECT DISTINCT cd.id,cd.ver,cd.lang FROM " + tableContentData + " cd WHERE " +
+            // the FInt column is required for "NOT IN" matches of SelectMany
+            final boolean usesFInt = entry.getProperty().getDataType() == FxDataType.SelectMany && cond.getComperator() == Comparator.NOT_IN;
+            return " (SELECT DISTINCT cd.id,cd.ver,cd.lang" +
+                    (usesFInt ? ",cd.fint" : "") +
+                    " FROM " + tableContentData + " cd WHERE " +
                     column +
                     cond.getSqlComperator() +
                     value +
                     " AND " + filter +
                     getVersionFilter("cd") +
                     getLanguageFilter() +
+                    getGroupByFilter("cd", cond, entry, value) +
                     getSubQueryLimit() +
                     ") ";
+        }
+    }
+
+    private String getGroupByFilter(String tableAlias, Condition cond, PropertyEntry entry, String value) {
+        if (entry.getProperty().getDataType() == FxDataType.SelectMany
+                && (cond.getComperator() == Comparator.IN || cond.getComperator() == Comparator.NOT_IN)) {
+            // IN/NOT IN for SelectMany: ensure that ALL listed options are matched by an object, otherwise
+            // the result would get very noisy when many options are selected
+            return " GROUP BY " + tableAlias + ".id, " + tableAlias + ".ver, " + tableAlias + ".lang " +
+                    "HAVING COUNT(*) = " +
+                    (cond.getComperator() == Comparator.IN
+                            // IN: match number of IDs
+                            ? value.split(",").length
+                            // NOT IN: match results that got no rows removed (FINT stores the number of selected items)
+                            : tableAlias + ".FINT");
+        } else {
+            return "";
         }
     }
 
@@ -592,11 +617,11 @@ public class GenericSQLDataFilter extends DataFilter {
         String value = null;
         switch (entry.getProperty().getDataType()) {
             case SelectMany:
-                if (Comparator.EQUAL.equals(comparator) || Comparator.NOT_EQUAL.equals(comparator)) {
+                if (comparator == Comparator.EQUAL || comparator == Comparator.NOT_EQUAL) {
                     // exact match, so we use the text column that stores the comma-separated list of selected items
                     column = "FTEXT1024";
                     value = "'" + StringUtils.join(constant.iterator(), ',') + "'";
-                } else {
+                } else if (comparator != Comparator.IN && comparator != Comparator.NOT_IN){
                     throw new FxSqlSearchException(LOG, "ex.sqlSearch.reader.type.invalidOperator",
                             entry.getProperty().getDataType(), comparator);
                 }
