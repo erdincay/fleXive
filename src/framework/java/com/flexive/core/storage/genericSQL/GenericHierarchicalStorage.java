@@ -274,9 +274,9 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         detailColumnNameHash.put(FxDataType.SelectOne, array("FSELECT"));
         detailColumnInsertPosHash.put(FxDataType.SelectOne, array(17));
         detailColumnUpdatePosHash.put(FxDataType.SelectOne, array(3));
-        detailColumnNameHash.put(FxDataType.SelectMany, array("FSELECT", "FTEXT1024"/*comma separated list of selected id's*/));
-        detailColumnInsertPosHash.put(FxDataType.SelectMany, array(17, 26/*comma separated list of selected id's*/));
-        detailColumnUpdatePosHash.put(FxDataType.SelectMany, array(3, 12/*comma separated list of selected id's*/));
+        detailColumnNameHash.put(FxDataType.SelectMany, array("FSELECT", "FTEXT1024"/*comma separated list of selected id's*/, "FINT" /*number of selected options*/));
+        detailColumnInsertPosHash.put(FxDataType.SelectMany, array(17, 26/*comma separated list of selected id's*/,24/*number of selected options*/));
+        detailColumnUpdatePosHash.put(FxDataType.SelectMany, array(3, 12/*comma separated list of selected id's*/,10/*number of selected options*/));
 
         mainColumnHash = new HashMap<Long, String[]>(20);
         mainColumnHash.put(0L, array("ID"));
@@ -1103,6 +1103,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                                 ps.executeUpdate();
                             ps.setLong(pos[0], item.getId());
                             ps.setString(pos[1], sm.getSelectedIdsList());
+                            ps.setLong(pos[2], sm.getSelectedIds().size());
                         }
                         if (sm.getSelected().size() == 0)
                             ps.setLong(pos[0], 0); //write the virtual item as a marker to have a valid row
