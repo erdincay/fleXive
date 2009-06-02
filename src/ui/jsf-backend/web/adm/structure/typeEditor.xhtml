@@ -76,19 +76,19 @@
             </ui:fragment>
 
             <fx:formRow labelKey="TypeEditor.label.languageMode" id="languageMode">
-                <t:selectOneListbox size="1" id="languageMode" value="#{typeEditorBean.languageMode}"
+                <h:selectOneListbox size="1" id="languageMode" value="#{typeEditorBean.languageMode}"
                         disabled="#{not typeEditorBean.type.new or not typeEditorBean.editMode}">
                     <f:selectItems value="#{fxSelectBean.languageModes}" />
-                </t:selectOneListbox>
+                </h:selectOneListbox>
             </fx:formRow>
 
             <!-- not to be set via gui anymore, a special context menu entry exists
 
             <fx:formRow labelKey="TypeEditor.label.typeMode" id="typeMode">
-                <t:selectOneListbox size="1" id="typeMode" value="#{typeEditorBean.typeMode}"
+                <h:selectOneListbox size="1" id="typeMode" value="#{typeEditorBean.typeMode}"
                         disabled="#{not typeEditorBean.type.new}" onchange="submit();">
                     <f:selectItems value="#{fxSelectBean.restrictedTypeModes}" />
-                </t:selectOneListbox>
+                </h:selectOneListbox>
             </fx:formRow>
             -->
 
@@ -118,16 +118,16 @@
                             <ui:repeat value="#{typeEditorBean.wrappedRelations}" var="wr">
                                 <tr>
                                     <td align="left">
-                                         <t:selectOneListbox size="1" id="sourceType" value="#{wr.sourceId}"
+                                         <h:selectOneListbox size="1" id="sourceType" value="#{wr.sourceId}"
                                                  disabled="#{not typeEditorBean.editMode}">
                                             <f:selectItems value="#{fxSelectBean.types}" />
-                                        </t:selectOneListbox>
+                                        </h:selectOneListbox>
                                     </td>
                                     <td align="left">
-                                         <t:selectOneListbox size="1" id="destType" value="#{wr.destId}"
+                                         <h:selectOneListbox size="1" id="destType" value="#{wr.destId}"
                                                  disabled="#{not typeEditorBean.editMode}">
                                             <f:selectItems value="#{fxSelectBean.types}" />
-                                        </t:selectOneListbox>
+                                        </h:selectOneListbox>
                                     </td>
                                     <td rowspan="2"><h:selectBooleanCheckbox id="maxSourceUnlimited" value="#{wr.maxSourceUnlimited}"
                                             onchange="submit();" disabled="#{not typeEditorBean.editMode}"/></td>
@@ -159,14 +159,14 @@
                             <ui:fragment rendered="#{typeEditorBean.editMode}">
                                 <tr>
                                     <td align="left">
-                                         <t:selectOneListbox size="1" id="addRelationSourceType" value="#{typeEditorBean.relSourceIdFiler}">
+                                         <h:selectOneListbox size="1" id="addRelationSourceType" value="#{typeEditorBean.relSourceIdFiler}">
                                             <f:selectItems value="#{fxSelectBean.types}" />
-                                        </t:selectOneListbox>
+                                        </h:selectOneListbox>
                                     </td>
                                     <td align="left">
-                                         <t:selectOneListbox size="1" id="addRelationDestType" value="#{typeEditorBean.relDestIdFiler}">
+                                         <h:selectOneListbox size="1" id="addRelationDestType" value="#{typeEditorBean.relDestIdFiler}">
                                             <f:selectItems value="#{fxSelectBean.types}" />
-                                        </t:selectOneListbox>
+                                        </h:selectOneListbox>
                                     </td>
                                     <td rowspan="2">
                                         <h:selectBooleanCheckbox id="addRelationMaxSourceUnlimited" value="#{typeEditorBean.relSourceUnlimitedFiler}"
@@ -233,31 +233,31 @@
 
 
             <fx:formRow labelKey="TypeEditor.label.typeState" id="typeState">
-                <t:selectOneListbox size="1" id="typeState" value="#{typeEditorBean.typeState}"
+                <h:selectOneListbox size="1" id="typeState" value="#{typeEditorBean.typeState}"
                         disabled="#{not typeEditorBean.editMode}">
                     <f:selectItems value="#{fxSelectBean.typeStates}" />
-                </t:selectOneListbox>
+                </h:selectOneListbox>
             </fx:formRow>
 
             <fx:formRow labelKey="TypeEditor.label.workflow" id="workflow">
-                <t:selectOneListbox size="1" id="workflow" value="#{typeEditorBean.workflow}"
+                <h:selectOneListbox size="1" id="workflow" value="#{typeEditorBean.workflow}"
                         disabled="#{not typeEditorBean.editMode}">
                     <f:selectItems value="#{fxSelectBean.workflows}" />
-                </t:selectOneListbox>
+                </h:selectOneListbox>
             </fx:formRow>
 
             <fx:formRow labelKey="TypeEditor.label.category" id="category">
-                <t:selectOneListbox size="1" id="category" value="#{typeEditorBean.category}"
+                <h:selectOneListbox size="1" id="category" value="#{typeEditorBean.category}"
                                     disabled="#{not typeEditorBean.editMode}">
                     <f:selectItems value="#{fxSelectBean.restrictedTypeCategories}" />
-                </t:selectOneListbox>
+                </h:selectOneListbox>
             </fx:formRow>
 
             <fx:formRow labelKey="TypeEditor.label.ACL" id="ACL">
-                <t:selectOneListbox size="1" id="ACL" value="#{typeEditorBean.ACL}"
+                <h:selectOneListbox size="1" id="ACL" value="#{typeEditorBean.ACL}"
                         disabled="#{not typeEditorBean.editMode}">
                     <f:selectItems value="#{fxSelectBean.structureACLs}" />
-                </t:selectOneListbox>
+                </h:selectOneListbox>
             </fx:formRow>
 
             <fx:formRow labelKey="TypeEditor.label.icon" id="icon">
@@ -293,10 +293,10 @@
                                         disabled="#{not typeEditorBean.editMode}">
                                     <f:validateLongRange/>
                                 </h:inputText>
-                                 <t:selectOneListbox size="1" id="timeRangeSelectBox" value="#{typeEditorBean.timeRange}"
+                                 <h:selectOneListbox size="1" id="timeRangeSelectBox" value="#{typeEditorBean.timeRange}"
                                          disabled="#{not typeEditorBean.editMode}">
                                 <f:selectItems value="#{typeEditorBean.timeRanges}" />
-                            </t:selectOneListbox>
+                            </h:selectOneListbox>
                         </fx:formRow>
                    </div>
                 </ui:fragment>

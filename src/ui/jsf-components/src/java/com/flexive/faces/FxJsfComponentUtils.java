@@ -32,11 +32,26 @@
 package com.flexive.faces;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
+import javax.el.ELException;
+import javax.el.ExpressionFactory;
 import javax.el.ValueExpression;
-import javax.faces.component.UIComponent;
-import javax.faces.context.FacesContext;
 import javax.faces.FacesException;
+import javax.faces.application.Application;
+import javax.faces.component.UIComponent;
+import javax.faces.component.UISelectItem;
+import javax.faces.component.UISelectItems;
+import javax.faces.component.ValueHolder;
+import javax.faces.context.FacesContext;
+import javax.faces.convert.Converter;
+import javax.faces.convert.ConverterException;
+import javax.faces.model.SelectItem;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Utility functions for JSF/Facelets components.
@@ -45,6 +60,8 @@ import javax.faces.FacesException;
  * @version $Rev$
  */
 public class FxJsfComponentUtils {
+
+    private static final Log LOG = LogFactory.getLog(FxJsfComponentUtils.class);
 
     /**
      * Private constructor to avoid instantiation.
@@ -151,21 +168,196 @@ public class FxJsfComponentUtils {
         ValueExpression ve = component.getValueExpression(attributeName);
         if (ve != null) {
             return ve.getValue(FacesContext.getCurrentInstance().getELContext());
-		} 
-		return null;
-	}
+        }
+        return null;
+    }
 
     /**
      * Throws a FacesException if the given value is not set.
      *
      * @param attributeName the attribute name, e.g. "var"
      * @param componentName the component name, e.g. "fx:value"
-     * @param value the value set on the component
-     * @throws javax.faces.FacesException   if value is null or a blank string
+     * @param value         the value set on the component
+     * @throws FacesException if value is null or a blank string
      */
     public static void requireAttribute(String componentName, String attributeName, Object value) throws FacesException {
         if (value == null || (value instanceof String && StringUtils.isBlank((String) value))) {
             throw new FacesException("Attribute '" + attributeName + "' of " + componentName + " not set.");
         }
+    }
+
+    /**
+     * <p>Return a List of {@link javax.faces.model.SelectItem}
+     * instances representing the available options for this component,
+     * assembled from the set of {@link javax.faces.component.UISelectItem}
+     * and/or {@link javax.faces.component.UISelectItems} components that are
+     * direct children of this component.  If there are no such children, an
+     * empty <code>Iterator</code> is returned.</p>
+     * <p/>
+     * Portions of the code are taken and adapted from the JSF RI 1.2
+     *
+     * @param context   The {@link javax.faces.context.FacesContext} for the current request.
+     *                  If null, the UISelectItems behavior will not work.
+     * @param component the component
+     * @return a List of the select items for the specified component
+     * @throws IllegalArgumentException if <code>context</code> is <code>null</code>
+     */
+    public static List<SelectItem> getSelectItems(FacesContext context, UIComponent component) {
+        if (context == null)
+            throw new IllegalArgumentException("context was null");
+
+        ArrayList<SelectItem> list = new ArrayList<SelectItem>();
+        for (UIComponent child : component.getChildren()) {
+            if (child instanceof UISelectItem) {
+                UISelectItem item = (UISelectItem) child;
+                Object value = item.getValue();
+                if (value == null) {
+                    list.add(new SelectItem(item.getItemValue(),
+                            item.getItemLabel(),
+                            item.getItemDescription(),
+                            item.isItemDisabled(),
+                            item.isItemEscaped()));
+                } else if (value instanceof SelectItem)
+                    list.add((SelectItem) value);
+                else
+                    throw new IllegalArgumentException("value class can not be converted to SelectItem: " + value.getClass().getName());
+            } else if (child instanceof UISelectItems) {
+                Object value = ((UISelectItems) child).getValue();
+                if (value instanceof SelectItem) {
+                    list.add((SelectItem) value);
+                } else if (value instanceof SelectItem[]) {
+                    SelectItem[] items = (SelectItem[]) value;
+                    // we manually copy the elements so that the list is modifiable.
+                    // Arrays.asList() returns a non-mutable list.
+                    //noinspection ManualArrayToCollectionCopy
+                    for (SelectItem item : items)
+                        list.add(item);
+                } else if (value instanceof Collection) {
+                    for (Object element : ((Collection) value))
+                        if (SelectItem.class.isInstance(element))
+                            list.add((SelectItem) element);
+                        else
+                            throw new IllegalArgumentException("value class can not be converted to SelectItem: " + value.getClass().getName());
+                } else if (value instanceof Map) {
+                    Map optionMap = (Map) value;
+                    for (Object o : optionMap.entrySet()) {
+                        Map.Entry entry = (Map.Entry) o;
+                        Object key = entry.getKey();
+                        Object val = entry.getValue();
+                        if (key == null || val == null)
+                            continue;
+                        list.add(new SelectItem(val, key.toString()));
+                    }
+                } else
+                    throw new IllegalArgumentException("Child is not of expected type UISelectItem/UISelectItems. Family:" +
+                            component.getFamily() + ", id:" + component.getId() + ", value class:" +
+                            value != null ? value.getClass().getName() : "null");
+            }
+        }
+        return (list);
+    }
+
+    /**
+     * Get the converted value of a component making sure that validators are processed.
+     * Portions of the code are taken and adapted from HtmlBasicInputRenderer of the JSF RI 1.2
+     *
+     * @param context        faces context
+     * @param component      the component affected
+     * @param submittedValue the submitted value
+     * @return the converted value
+     * @throws ConverterException on errors
+     */
+    public static Object getConvertedValue(FacesContext context, UIComponent component, Object submittedValue)
+            throws ConverterException {
+        String newValue = (String) submittedValue;
+        // if we have no local value, try to get the valueExpression.
+        ValueExpression valueExpression = component.getValueExpression("value");
+        Converter converter = null;
+
+        // If there is a converter attribute, use it to to ask application
+        // instance for a converter with this identifer.
+        if (component instanceof ValueHolder) {
+            converter = ((ValueHolder) component).getConverter();
+        }
+
+        if (null == converter && null != valueExpression) {
+            Class converterType = valueExpression.getType(context.getELContext());
+            // if converterType is null, assume the modelType is "String".
+            if (converterType == null || converterType == Object.class) {
+                //no conversion necessary
+                return newValue;
+            }
+
+            // If the converterType is a String, and we don't have a
+            // converter-for-class for java.lang.String, assume the type is "String".
+            if (converterType == String.class && !(null != context.getApplication().createConverter(String.class))) {
+                //no conversion necessary
+                return newValue;
+            }
+            // if getType returns a type for which we support a default
+
+            try {
+                Application application = context.getApplication();
+                converter = application.createConverter(converterType);
+            } catch (Exception e) {
+                LOG.error("Could not instantiate converter for type " + converterType + ": " + e.toString());
+                return (null);
+            }
+        } else if (converter == null) {
+            // if there is no valueExpression and converter attribute set,
+            // assume the modelType as "String" since we have no way of
+            // figuring out the type. So for the selectOne and
+            // selectMany, converter has to be set if there is no
+            // valueExpression attribute set on the component.
+
+            return newValue;
+        }
+        if (converter != null) {
+            // If the conversion eventually falls to needing to use EL type coercion,
+            // make sure our special ConverterPropertyEditor knows about this value.
+            return converter.getAsObject(context, component, newValue);
+        } else {
+            // throw converter exception.
+            throw new ConverterException("No converter for " + newValue + " available!");
+        }
+    }
+
+    /**
+     * Get a converter for the given class
+     *
+     * @param converterClass class to get a converter for
+     * @param context        faces context
+     * @return converter
+     */
+    public static Converter getConverterForClass(Class converterClass, FacesContext context) {
+        if (converterClass == null)
+            return null;
+        try {
+            Application application = context.getApplication();
+            return (application.createConverter(converterClass));
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * Coerce a value to its type
+     *
+     * @param context       faces context
+     * @param value         value to coerce
+     * @param itemValueType value class
+     * @return coerced value
+     */
+    public static Object coerceToModelType(FacesContext context, Object value, Class itemValueType) {
+        Object newValue;
+        try {
+            ExpressionFactory ef = context.getApplication().getExpressionFactory();
+            newValue = ef.coerceToType(value, itemValueType);
+        } catch (ELException ele) {
+            newValue = value;
+        } catch (IllegalArgumentException iae) {
+            newValue = value;
+        }
+        return newValue;
     }
 }

@@ -79,27 +79,27 @@
                 </h:selectBooleanCheckbox>
             </fx:formRow>
             <fx:formRow labelKey="PropertyEditor.label.dataType" id="dataType">
-                <t:selectOneListbox size="1" id="dataType" value="#{propertyEditorBean.propertyDataType}"
+                <h:selectOneListbox size="1" id="dataType" value="#{propertyEditorBean.propertyDataType}"
                      disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"
                      onchange="submit();">
                     <f:selectItems value="#{fxSelectBean.dataTypes}" />
-                </t:selectOneListbox>
+                </h:selectOneListbox>
             </fx:formRow>
             <div style="padding-left:17px">
                 <ui:fragment rendered="#{propertyEditorBean.propertyReference}">
                     <fx:formRow labelKey="PropertyEditor.label.referencedType" id="referencedType">
-                        <t:selectOneListbox size="1" id="referencedType" value="#{propertyEditorBean.propertyReferencedType}"
+                        <h:selectOneListbox size="1" id="referencedType" value="#{propertyEditorBean.propertyReferencedType}"
                              disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}">
                             <f:selectItems value="#{propertyEditorBean.types}" />
-                        </t:selectOneListbox>
+                        </h:selectOneListbox>
                     </fx:formRow>
                 </ui:fragment>
                 <ui:fragment rendered="#{propertyEditorBean.propertySelectList}">
                     <fx:formRow labelKey="PropertyEditor.label.referencedList" id="referencedList">
-                        <t:selectOneListbox size="1" id="referencedList" value="#{propertyEditorBean.propertyReferencedList}"
+                        <h:selectOneListbox size="1" id="referencedList" value="#{propertyEditorBean.propertyReferencedList}"
                                  disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}">
                             <f:selectItems value="#{fxSelectBean.selectListsWithEmpty}" />
-                        </t:selectOneListbox>
+                        </h:selectOneListbox>
                     </fx:formRow>
                 </ui:fragment>
             </div>
@@ -131,10 +131,10 @@
                                 required="true" style="width:40px"/>
             </fx:formRow>
             <fx:formRow labelKey="PropertyEditor.label.acl" id="acl">
-                <t:selectOneListbox size="1" id="acl" value="#{propertyEditorBean.propertyAcl}"
+                <h:selectOneListbox size="1" id="acl" value="#{propertyEditorBean.propertyAcl}"
                         disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}">
                     <f:selectItems value="#{fxSelectBean.structureACLs}" />
-                </t:selectOneListbox>
+                </h:selectOneListbox>
             </fx:formRow>
             <fx:fieldSet legend="#{fxMessageBean['PropertyEditor.label.propertyOverrideOptions']}">
                 <fx:formRow labelKey="PropertyEditor.label.mayOverrideMultiLang" id="propertyMayOverrideMultiLang">
@@ -155,11 +155,11 @@
                          disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"/>
             </fx:formRow>
             <fx:formRow labelKey="PropertyEditor.label.uniqueMode" id="uniqueMode">
-                <t:selectOneListbox size="1" id="uniqueMode" value="#{propertyEditorBean.propertyUniqueMode}"
+                <h:selectOneListbox size="1" id="uniqueMode" value="#{propertyEditorBean.propertyUniqueMode}"
                      disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor']) or
                      propertyEditorBean.propertyUsedInInstance}">
                     <f:selectItems value="#{fxSelectBean.uniqueModes}" />
-                </t:selectOneListbox>
+                </h:selectOneListbox>
             </fx:formRow>
 
            <fx:fieldSet legend="#{fxMessageBean['PropertyEditor.label.referencingPropertyAssignments']}">

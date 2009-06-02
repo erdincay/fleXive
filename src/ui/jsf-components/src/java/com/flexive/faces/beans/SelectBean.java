@@ -32,6 +32,7 @@
 package com.flexive.faces.beans;
 
 import com.flexive.faces.FxJsfUtils;
+import com.flexive.faces.model.FxJSFSelectItem;
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.shared.*;
 import com.flexive.shared.exceptions.FxApplicationException;
@@ -177,7 +178,7 @@ public class SelectBean implements Serializable {
             for (UserGroup group : groups) {
                 if (group.isSystem())
                     continue;
-                userGroupsNonSystem.add(new SelectItem(group, group.getName()));
+                userGroupsNonSystem.add(new FxJSFSelectItem(group));
             }
         }
         return userGroupsNonSystem;
@@ -196,7 +197,7 @@ public class SelectBean implements Serializable {
             globalUserGroups = new ArrayList<SelectItem>(groups.size());
             long mandator = FxContext.getUserTicket().getMandatorId();
             for (UserGroup group : groups) {
-                globalUserGroups.add(new SelectItem(
+                globalUserGroups.add(new FxJSFSelectItem(
                         group,
                         group.isSystem()
                                 ? group.getName()
@@ -223,7 +224,7 @@ public class SelectBean implements Serializable {
                 if (group.isSystem())
                     continue;
                 globalUserGroupsNonSystem.add(
-                        new SelectItem(group, formatSelectItem(mandator, group.getMandatorId(), group.getName())));
+                        new FxJSFSelectItem(group, formatSelectItem(mandator, group.getMandatorId(), group.getName())));
             }
         }
         return globalUserGroupsNonSystem;
@@ -330,10 +331,9 @@ public class SelectBean implements Serializable {
         UserTicket ticket = FxJsfUtils.getRequest().getUserTicket();
         List<FxSelectList> selectLists = CacheAdmin.getFilteredEnvironment().getSelectLists();
         ArrayList<SelectItem> result = new ArrayList<SelectItem>(selectLists.size() + 1);
-        result.add(new SelectItem(-1L, ""));
+        result.add(new FxJSFSelectItem());
         for (FxSelectList list : selectLists) {
-            result.add(new SelectItem(list.getId(), list.getLabel().getBestTranslation(ticket),
-                    list.getDescription().getBestTranslation(ticket)));
+            result.add(new FxJSFSelectItem(list, ticket));
         }
         return result;
     }

@@ -108,11 +108,11 @@
             <a4j:outputPanel id="defaultLangSelect">
                 <fx:formRow labelKey="PropertyEditor.label.defaultLanguage" id="defaultLanguage">
                     <ui:fragment rendered="#{propertyEditorBean.multiLang}">
-                        <t:selectOneListbox size="1" id="defaultLanguage" value="#{propertyEditorBean.defaultLanguage}"
+                        <h:selectOneListbox size="1" id="defaultLanguage" value="#{propertyEditorBean.defaultLanguage}"
                             converter="FxLanguageConverter"
                             disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}">
                             <f:selectItems value="#{fxSelectBean.languages}" />
-                        </t:selectOneListbox>
+                        </h:selectOneListbox>
                     </ui:fragment>
                     <ui:fragment rendered="#{not propertyEditorBean.multiLang}">
                         <h:outputText value="#{fxMessageBean['PropertyEditor.label.multilang.disabled']}"/>
@@ -193,10 +193,10 @@
                     <ui:fragment rendered="#{propertyEditorBean.overrideACL}">
                          <div style="padding-left:17px">
                             <fx:formRow labelKey="PropertyEditor.label.acl" id="acl">
-                                <t:selectOneListbox size="1" id="acl" value="#{propertyEditorBean.acl}"
+                                <h:selectOneListbox size="1" id="acl" value="#{propertyEditorBean.acl}"
                                         disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}">
                                     <f:selectItems value="#{fxSelectBean.structureACLs}" />
-                                </t:selectOneListbox>
+                                </h:selectOneListbox>
                             </fx:formRow>
                         </div>
                     </ui:fragment>

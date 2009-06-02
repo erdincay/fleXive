@@ -21,9 +21,9 @@
             <!-- Content select screen -->
             <ui:fragment rendered="#{srcEditor.initialized==false}">
                 <adm:tab label="#{fxMessageBean['Content.tabtitle.chooseType']}" active="true" id="tabChoose"/>
-                <t:selectOneListbox size="1" id="type" value="#{srcEditor.type}">
+                <h:selectOneListbox size="1" id="type" value="#{srcEditor.type}">
                     <f:selectItems value="#{srcEditor.editableTypes}" />
-                </t:selectOneListbox>
+                </h:selectOneListbox>
                 <br/><br/>
                 <adm:commandButton labelKey="Content.button.create" location="both"
                                   bean="#{srcEditor}"
@@ -295,19 +295,19 @@
                                 </ui:fragment>
                                 <ui:fragment rendered="#{srcEditor.supportSecurity}">
                                     <fx:formRow labelKey="Content.field.ACL" id="acl">
-                                         <t:selectOneListbox size="1" id="acl" value="#{srcEditor.acl}"
+                                         <h:selectOneListbox size="1" id="acl" value="#{srcEditor.acl}"
                                                             converter="SelectableConverter" disabled="#{srcEditor.readOnly==true}">
                                             <f:selectItems value="#{fxSelectBean.contentACLs}"/>
-                                        </t:selectOneListbox>
+                                        </h:selectOneListbox>
                                     </fx:formRow>
                                 </ui:fragment>
 
                                 <!-- wf step -->
                                 <fx:formRow labelKey="Content.field.step" id="step">
-                                     <t:selectOneListbox size="1" id="step" value="#{srcEditor.step}"
+                                     <h:selectOneListbox size="1" id="step" value="#{srcEditor.step}"
                                                          disabled="#{srcEditor.readOnly==true}">
                                         <f:selectItems value="#{srcEditor.possibleWorkflowSteps}"/>
-                                    </t:selectOneListbox>
+                                    </h:selectOneListbox>
                                 </fx:formRow>
                             </div>
                             <!-- Preview Image -->

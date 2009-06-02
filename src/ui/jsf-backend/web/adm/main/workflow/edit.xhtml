@@ -186,10 +186,12 @@
 					<f:facet name="header">
 						#{fxMessageBean["Workflow.field.route.group"]}
 					</f:facet>
+                    <div style="color:#{fxMapBean.userGroups[route.groupId].color}; white-space:nowrap;">
                     <ui:fragment rendered="#{!fxMapBean.userGroups[route.groupId].system}">
                     #{fxMapBean.mandators[fxMapBean.userGroups[route.groupId].mandatorId].name}:
                     </ui:fragment>
                     #{fxMapBean.userGroups[route.groupId].name}
+                    </div>
 				</h:column>
 				<h:column>
                     <f:facet name="header">

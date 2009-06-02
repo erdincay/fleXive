@@ -35,6 +35,7 @@ import com.flexive.faces.beans.MessageBean;
 import com.flexive.faces.messages.FxFacesMessage;
 import com.flexive.faces.messages.FxFacesMessages;
 import com.flexive.faces.components.Thumbnail;
+import com.flexive.faces.model.FxJSFSelectItem;
 import com.flexive.shared.*;
 import com.flexive.shared.search.FxPaths;
 import com.flexive.shared.content.FxPK;
@@ -71,7 +72,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponseWrapper;
 import javax.servlet.http.HttpSession;
-import java.io.Serializable;
 import java.io.Writer;
 import java.io.IOException;
 import java.text.Collator;
@@ -123,16 +123,23 @@ public class FxJsfUtils {
      *
      * @param out   the output writer
      * @param value the value to be formatted
+     * @param linkFormatter link formatter
+     * @param linkFormat link format
+     * @param itemLinkFormat item link format
      * @throws java.io.IOException if the value could not be written
+     * @deprecated
      */
     public static void writeResultValue(Writer out, Object value, ContentLinkFormatter linkFormatter, String linkFormat, String itemLinkFormat) throws IOException {
-        out.write(formatResultValue(value, linkFormatter, linkFormat, itemLinkFormat));
+        out.write(formatResultValue(null, value, linkFormatter, linkFormat, itemLinkFormat));
     }
 
     /**
      * Formats the value as returned from a flexive search query.
      *
      * @param value the value to be formatted
+     * @param linkFormatter link formatter
+     * @param linkFormat link format
+     * @param itemLinkFormat item link format
      * @return the formatted string value
      * @deprecated
      */
@@ -145,6 +152,9 @@ public class FxJsfUtils {
      *
      * @param propertyName the (optional) property name for the given value
      * @param value the value to be formatted
+     * @param linkFormatter link formatter
+     * @param linkFormat link format
+     * @param itemLinkFormat item link format
      * @return the formatted string value
      * @since 3.1
      */
@@ -220,22 +230,6 @@ public class FxJsfUtils {
     public static String getWebletURL(String packageName, String path) {
         return FacesWebletUtils.getURL(getCurrentInstance(), packageName, path)
             .substring(getRequest().getContextPath().length());
-    }
-
-    private static class EmptySelectableObjectWithName extends AbstractSelectableObjectWithName implements Serializable {
-        private static final long serialVersionUID = 7808775494956188839L;
-
-        public EmptySelectableObjectWithName() {
-            // nothing
-        }
-
-        public long getId() {
-            return -1;
-        }
-
-        public String getName() {
-            return "";
-        }
     }
 
     /**
@@ -801,7 +795,7 @@ public class FxJsfUtils {
     public static List<SelectItem> asIdSelectList(List<? extends SelectableObjectWithName> items) {
         final List<SelectItem> result = new ArrayList<SelectItem>(items.size());
         for (SelectableObjectWithName item : items) {
-            result.add(new SelectItem(item.getId(), item.getName()));
+            result.add(new FxJSFSelectItem(item));
         }
         return result;
     }
@@ -815,7 +809,7 @@ public class FxJsfUtils {
     public static List<SelectItem> asIdSelectListWithLabel(List<? extends SelectableObjectWithLabel> items) {
         final List<SelectItem> result = new ArrayList<SelectItem>(items.size());
         for (SelectableObjectWithLabel item : items) {
-            result.add(new SelectItem(item.getId(), item.getLabel().getBestTranslation()));
+            result.add(new FxJSFSelectItem(item));
         }
         return result;
     }
@@ -829,12 +823,10 @@ public class FxJsfUtils {
      */
     public static List<SelectItem> asSelectList(List<? extends SelectableObjectWithName> items, boolean addEmptyElement) {
         final List<SelectItem> result = new ArrayList<SelectItem>(items.size() + (addEmptyElement ? 1 : 0));
-        if (addEmptyElement) {
-            result.add(new SelectItem(new EmptySelectableObjectWithName(), ""));
-        }
-        for (SelectableObjectWithName item : items) {
-            result.add(new SelectItem(item, item.getName()));
-        }
+        if (addEmptyElement)
+            result.add(new FxJSFSelectItem());
+        for (SelectableObjectWithName item : items)
+            result.add(new FxJSFSelectItem(item));
         return result;
     }
 
@@ -847,11 +839,8 @@ public class FxJsfUtils {
 
     public static <T extends Enum> List<SelectItem> enumsAsSelectList(T[] values) {
         final ArrayList<SelectItem> result = new ArrayList<SelectItem>(values.length);
-        for (Enum value : values) {
-            final String label = value instanceof ObjectWithLabel
-                    ? ((ObjectWithLabel) value).getLabel().getBestTranslation() : value.name();
-            result.add(new SelectItem(value, label));
-        }
+        for (Enum value : values)
+            result.add(new FxJSFSelectItem(value));
         return result;
     }
 
@@ -875,12 +864,10 @@ public class FxJsfUtils {
     public static List<SelectItem> asSelectListWithLabel(List<? extends SelectableObjectWithLabel> items, boolean addEmptyElement) {
         final List<SelectItem> result = new ArrayList<SelectItem>(items.size());
         final UserTicket ticket = FxContext.getUserTicket();
-        if (addEmptyElement) {
-            result.add(new SelectItem(-1L, ""));
-        }
-        for (SelectableObjectWithLabel item : items) {
-            result.add(new SelectItem(item.getId(), item.getLabel().getBestTranslation(ticket)));
-        }
+        if (addEmptyElement)
+            result.add(new FxJSFSelectItem());
+        for (SelectableObjectWithLabel item : items)
+            result.add(new FxJSFSelectItem(item, ticket));
         Collections.sort(result, new SelectItemSorter());
         return result;
     }
@@ -893,9 +880,8 @@ public class FxJsfUtils {
      */
     public static List<SelectItem> asSelectList(FxSelectList list) {
         final List<SelectItem> result = new ArrayList<SelectItem>(list.getItems().size());
-        for (FxSelectListItem item : list.getItems()) {
-            result.add(new SelectItem(item.getId(), item.getLabel().getBestTranslation()));
-        }
+        for (FxSelectListItem item : list.getItems())
+            result.add(new FxJSFSelectItem(item));
         Collections.sort(result, new SelectItemSorter());
         return result;
     }
@@ -911,7 +897,7 @@ public class FxJsfUtils {
         for (String[] item : list) {
             if (item == null || item.length != 2)
                 continue;
-            result.add(new SelectItem(item[0], item[1]));
+            result.add(new FxJSFSelectItem(item[0], item[1]));
         }
         Collections.sort(result, new SelectItemSorter());
         return result;

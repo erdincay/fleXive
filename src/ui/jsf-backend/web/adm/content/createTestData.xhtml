@@ -18,9 +18,9 @@
             <adm:tab label="#{fxMessageBean['Content.tabtitle.createTestData']}" active="true" id="tabChoose"/>
             <c:if test="#{empty contentGeneratorBean.parseRequestParameters}"/>
 			<fx:formRow id="type">
-	            <t:selectOneListbox size="1" id="type" value="#{contentGeneratorBean.type}">
+	            <h:selectOneListbox size="1" id="type" value="#{contentGeneratorBean.type}">
 	                <f:selectItems value="#{fxSelectBean.types}" />
-	            </t:selectOneListbox>
+	            </h:selectOneListbox>
             </fx:formRow>
             <fx:formRow id="count" label="#{fxMessageBean['Content.field.testData.count']}">
             	<h:inputText id="count" value="#{contentGeneratorBean.count}"/>

@@ -72,10 +72,10 @@
             </fx:formRow>
 
             <fx:formRow labelKey="GroupEditor.label.mode" id="mode">
-                <t:selectOneListbox size="1" id="mode" value="#{groupEditorBean.assignmentMode}"
+                <h:selectOneListbox size="1" id="mode" value="#{groupEditorBean.assignmentMode}"
                         disabled="#{not groupEditorBean.editMode or not groupEditorBean.mayChangeGroupMode or (groupEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}">
                     <f:selectItems value="#{fxSelectBean.groupModes}" />
-                </t:selectOneListbox>
+                </h:selectOneListbox>
             </fx:formRow>
 
             <fx:formRow labelKey="GroupEditor.label.defaultMultiplicity" id="defaultMultiplicity">
