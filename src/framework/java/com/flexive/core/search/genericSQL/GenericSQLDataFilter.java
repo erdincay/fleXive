@@ -63,8 +63,6 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-import sun.nio.cs.ext.COMPOUND_TEXT;
-
 // NVL --> IFNULL((select sub.id from FX_CONTENT_DATA sub where sub.id=filter.id),1)
 
 /**
