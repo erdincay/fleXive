@@ -603,7 +603,7 @@ public class FxSelectRenderer extends Renderer {
         Object val = select.getValue();
         if (val != null)
             return new Object[]{val};
-        return null;
+        return new Object[0];
     }
 
     /**
