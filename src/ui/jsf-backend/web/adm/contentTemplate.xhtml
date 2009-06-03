@@ -11,11 +11,11 @@
 <t:documentHead>
     <base href="#{fxSystemBean.documentBase}"/>
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+    <fx:includes yui="true" jsonRpc="true"/>
     <t:stylesheet path="#{adm:versionedUrl('/adm/css/content.css')}"/>
     <c:if test="#{fxSystemBean.browserAsString=='IE'}">
         <t:stylesheet path="#{adm:versionedUrl('/adm/css/contentIE.css')}"/>
     </c:if>
-    <fx:includes yui="true" jsonRpc="true"/>
 
     <script type="text/javascript" src="#{fxSystemBean.contextPath}/pub/js/#{adm:versionedUrl('shared.js')}"/>
     <script type="text/javascript" src="#{fxSystemBean.contextPath}/adm/js/#{adm:versionedUrl('admin.js')}"/>
@@ -33,7 +33,7 @@
 
 <t:documentBody onload="document.body.className='yui-skin-sam'">
 <div id="fxMessages" style="display:none;"></div>
-<div class="yui-skin-sam">
+<div class="yui-skin-sam">                            
     <ui:insert name="body">Default Body</ui:insert>
 </div>
 <div id="fxMessagesTmp" style="display:none"><ui:insert name="messages"><a4j:outputPanel ajaxRendered="true"><adm:messages/></a4j:outputPanel></ui:insert></div>
