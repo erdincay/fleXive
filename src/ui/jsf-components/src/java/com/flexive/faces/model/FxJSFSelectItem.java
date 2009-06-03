@@ -100,12 +100,34 @@ public class FxJSFSelectItem extends SelectItem implements java.io.Serializable 
     }
 
     /**
+     * Ctor for SelectableObjectWithLabel, optionally as id instead of the item
+     *
+     * @param item SelectableObjectWithLabel
+     * @param asId use the id of the item or the item itself?
+     */
+    public FxJSFSelectItem(SelectableObjectWithName item, boolean asId) {
+        super(asId ? item.getId() : item, item.getName());
+        applyStyle(item);
+    }
+
+    /**
      * Ctor for SelectableObjectWithLabel
      *
      * @param item SelectableObjectWithLabel
      */
     public FxJSFSelectItem(SelectableObjectWithLabel item) {
-        super(item.getId(), item.getLabel().getBestTranslation());
+        super(item, item.getLabel().getBestTranslation());
+        applyStyle(item);
+    }
+
+    /**
+     * Ctor for SelectableObjectWithLabel, optionally as id instead of the item
+     *
+     * @param item SelectableObjectWithLabel
+     * @param asId use the id of the item or the item itself?
+     */
+    public FxJSFSelectItem(SelectableObjectWithLabel item, boolean asId) {
+        super(asId ? item.getId() : item, item.getLabel().getBestTranslation());
         applyStyle(item);
     }
 
@@ -116,7 +138,7 @@ public class FxJSFSelectItem extends SelectItem implements java.io.Serializable 
      * @param ticket current users ticket to choose the language
      */
     public FxJSFSelectItem(SelectableObjectWithLabel item, UserTicket ticket) {
-        super(item.getId(), item.getLabel().getBestTranslation(ticket));
+        super(item, item.getLabel().getBestTranslation(ticket));
         applyStyle(item);
     }
 

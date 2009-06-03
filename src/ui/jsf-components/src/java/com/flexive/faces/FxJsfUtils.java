@@ -795,7 +795,7 @@ public class FxJsfUtils {
     public static List<SelectItem> asIdSelectList(List<? extends SelectableObjectWithName> items) {
         final List<SelectItem> result = new ArrayList<SelectItem>(items.size());
         for (SelectableObjectWithName item : items) {
-            result.add(new FxJSFSelectItem(item));
+            result.add(new FxJSFSelectItem(item, true));
         }
         return result;
     }
@@ -809,7 +809,7 @@ public class FxJsfUtils {
     public static List<SelectItem> asIdSelectListWithLabel(List<? extends SelectableObjectWithLabel> items) {
         final List<SelectItem> result = new ArrayList<SelectItem>(items.size());
         for (SelectableObjectWithLabel item : items) {
-            result.add(new FxJSFSelectItem(item));
+            result.add(new FxJSFSelectItem(item, true));
         }
         return result;
     }
