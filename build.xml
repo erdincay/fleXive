@@ -27,6 +27,7 @@
 
     <property name="web.ui.dojo.baseName" value="dojo-flexive"/>
     <property name="web.ui.yui.version" value="2.7.0"/>
+    <property name="flexive.dist" value="flexive-${flexive.version}"/>
 
 	<property name="invalid.path" value="${flexive.base.build.dir}/temp"/>
 

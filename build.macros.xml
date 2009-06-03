@@ -140,9 +140,16 @@
         <sequential>
             <makeMessages srcdir="@{srcdir}/resources/messages" dest="@{builddir}/PluginMessages"/>
             <buildScriptIndex dir="@{srcdir}/resources/scripts"/>
-            <jar jarfile="@{jarfile}">
+            <delete dir="@{builddir}/component-config"/>
+            <copy todir="@{builddir}/component-config">
                 <fileset dir="@{srcdir}/resources" includes="META-INF/**/*,templates/**/*"/>
                 <fileset dir="@{builddir}" includes="*.properties"/>
+                <filterset >
+                    <filter token="FLEXIVE_VERSION" value="${flexive.version}"/>
+                </filterset>
+            </copy>
+            <jar jarfile="@{jarfile}">
+                <fileset dir="@{builddir}/component-config" includes="**/*"/>
                 <fileset dir="@{builddir}/classes"/>
                 <fileset dir="@{srcdir}/resources/weblets" includes="**/*"/>
                 <fileset dir="@{srcdir}/web" includes="**/*"/>
