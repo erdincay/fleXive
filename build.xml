@@ -202,6 +202,16 @@
                 <attribute name="Main-Class" value="com.flexive.tools.OpenUrl"/>
             </manifest>
         </jar>
+        <jar jarfile="${flexive.build.framework.jar.dir}/flatStorageCreator.jar">
+            <fileset dir="${build.framework.classes.dir}">
+                <include name="com/flexive/tools/FlatStorageCreator*"/>
+            </fileset>
+            <fileset dir="${flexive.resources.framework.dir}/tools/flatstorage" includes="**/*"/>
+            <manifest >
+                <attribute name="Main-Class" value="com.flexive.tools.FlatStorageCreator"/>
+                <attribute name="Class-Path" value="extlib/commons-cli-1.1.jar extlib/mysql-connector-java-5.0.8-bin.jar extlib/commons-io-1.1.jar extlib/h2.jar"/>
+            </manifest>
+        </jar>
         <taskdef name="applicationDescriptorBuilder"
                  classname="com.flexive.tools.ant.ApplicationDescriptorBuilderTask"
                  classpath="${flexive.build.framework.jar.dir}/flexive-ant.jar"/>
@@ -602,6 +612,19 @@
     <target name="db.update.test" description="Update test database" depends="init" unless="db.noupdate">
         <echo taskname="flexive">[fleXive] is using ${database.vendor} database settings... (this can be changed in build.properties)</echo>
         <division-setup database="flexiveTest"/>
+    </target>
+
+    <target name="db.flatstorage.create" depends="prepare">
+        <input taskname="flexive" addproperty="flatstorage.url" defaultValue="${database.url.base}flexive"
+                message="Connection URL:"/>
+        <input taskname="flexive" addproperty="flatstorage.tableName" defaultValue="FX_CONTENT_DATA_FLAT"
+               message="Table name:"/>
+        <createFlatStorage jar="${flexive.build.framework.jar.dir}/flatStorageCreator.jar"
+                           extlib="lib"
+                           connectionurl="${flatstorage.url}"
+                           tablename="${flatstorage.tableName}"
+                           user="${database.username}"
+                           password="${database.password}"/>
     </target>
 
     <target name="examples">

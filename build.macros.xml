@@ -218,4 +218,26 @@
         </sequential>
     </macrodef>
 
+    <macrodef name="createFlatStorage" description="Create a new flat storage table">
+        <attribute name="jar" description="Path to flatStorageCreator.jar"/>
+        <attribute name="extlib" description="Path to external library directory containing the dependencies for FlatStorageCreator.java"/>
+        <attribute name="connectionUrl" description="The database connection URL"/>
+        <attribute name="tableName" description="Name of the table to be created"/>
+        <attribute name="overwrite" default="false" description="If an existing table should be overwritten (true or false)"/>
+        <attribute name="user" description="The database user"/>
+        <attribute name="password" description="The database password"/>
+        <sequential >
+            <path id="createFlatStorage.classpath">
+                <fileset file="@{jar}"/>
+                <fileset dir="@{extlib}" includes="*.jar"/>
+            </path>
+            <java fork="true" classpathref="createFlatStorage.classpath" classname="com.flexive.tools.FlatStorageCreator">
+                <arg line="-u @{user}"/>
+                <arg line="-p @{password}"/>
+                <arg value="-o"/>
+                <arg value="@{connectionUrl}"/>
+                <arg value="@{tableName}"/>
+            </java>
+        </sequential>
+    </macrodef>
 </project>
