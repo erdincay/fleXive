@@ -46,7 +46,6 @@ import com.flexive.shared.value.renderer.FxValueRendererFactory;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.scripting.FxScriptInfo;
-import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.security.Account;
 import com.flexive.shared.structure.FxSelectList;
 import com.flexive.shared.structure.FxSelectListItem;
@@ -790,13 +789,15 @@ public class FxJsfUtils {
      * Convert a list of SelectableObjects to JSF SelectItems.
      *
      * @param items the items to be converted
+     * @param addEmptyElement if set to true a empty element is added
      * @return the given list converted to JSF SelectItems
      */
-    public static List<SelectItem> asIdSelectList(List<? extends SelectableObjectWithName> items) {
-        final List<SelectItem> result = new ArrayList<SelectItem>(items.size());
-        for (SelectableObjectWithName item : items) {
-            result.add(new FxJSFSelectItem(item, true));
-        }
+    public static List<SelectItem> asSelectListWithName(List<? extends SelectableObjectWithName> items, boolean addEmptyElement) {
+        final List<SelectItem> result = new ArrayList<SelectItem>(items.size()+ (addEmptyElement ? 1 : 0));
+        if (addEmptyElement)
+            result.add(new FxJSFSelectItem());
+        for (SelectableObjectWithName item : items)
+            result.add(new FxJSFSelectItem(item));
         return result;
     }
 
@@ -804,29 +805,16 @@ public class FxJsfUtils {
      * Convert a list of SelectableObjectWithLabels to JSF SelectItems.
      *
      * @param items the items to be converted
-     * @return the given list converted to JSF SelectItems
-     */
-    public static List<SelectItem> asIdSelectListWithLabel(List<? extends SelectableObjectWithLabel> items) {
-        final List<SelectItem> result = new ArrayList<SelectItem>(items.size());
-        for (SelectableObjectWithLabel item : items) {
-            result.add(new FxJSFSelectItem(item, true));
-        }
-        return result;
-    }
-
-    /**
-     * Convert a list of SelectableObjects to JSF SelectItems.
-     *
-     * @param items           the items to be converted
      * @param addEmptyElement if set to true a empty element is added
      * @return the given list converted to JSF SelectItems
      */
-    public static List<SelectItem> asSelectList(List<? extends SelectableObjectWithName> items, boolean addEmptyElement) {
-        final List<SelectItem> result = new ArrayList<SelectItem>(items.size() + (addEmptyElement ? 1 : 0));
+    public static List<SelectItem> asSelectListWithLabel(List<? extends SelectableObjectWithLabel> items, boolean addEmptyElement) {
+        final List<SelectItem> result = new ArrayList<SelectItem>(items.size()+ (addEmptyElement ? 1 : 0));
         if (addEmptyElement)
             result.add(new FxJSFSelectItem());
-        for (SelectableObjectWithName item : items)
+        for (SelectableObjectWithLabel item : items) {
             result.add(new FxJSFSelectItem(item));
+        }
         return result;
     }
 
@@ -855,22 +843,15 @@ public class FxJsfUtils {
     }
 
     /**
-     * Convert a list of SelectableObjectsWithLabel to JSF SelectItems.
+     * Convert a list of SelectableObjectsWithName to JSF SelectItems.
      *
-     * @param items           the items to be converted
-     * @param addEmptyElement true if an empty first element with id=-1 should be added
+     * @param items the items to be converted
      * @return the given list converted to JSF SelectItems
      */
-    public static List<SelectItem> asSelectListWithLabel(List<? extends SelectableObjectWithLabel> items, boolean addEmptyElement) {
-        final List<SelectItem> result = new ArrayList<SelectItem>(items.size());
-        final UserTicket ticket = FxContext.getUserTicket();
-        if (addEmptyElement)
-            result.add(new FxJSFSelectItem());
-        for (SelectableObjectWithLabel item : items)
-            result.add(new FxJSFSelectItem(item, ticket));
-        Collections.sort(result, new SelectItemSorter());
-        return result;
+    public static List<SelectItem> asSelectListWithName(List<? extends SelectableObjectWithName> items) {
+        return asSelectListWithName(items, false);
     }
+
 
     /**
      * Converts the given flexive select list to a list of JSF SelectItems.

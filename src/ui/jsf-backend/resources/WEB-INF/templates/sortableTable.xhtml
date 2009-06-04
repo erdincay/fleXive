@@ -16,6 +16,8 @@ Dojo table with this widget.
 
 Parameters:
     id - table ID (ID of the contained table element)
+    startPage - page number that should be rendered if available
+    onPageChange - javascript function to be called if the page changed
 
 <ui:composition>
 
@@ -26,13 +28,28 @@ Parameters:
         <ui:insert/>
     </div>
 
+    <c:set var="pageChangeEvent" value=""/>
+    <c:if test="#{!empty onPageChange}">
+        <c:set var="pageChangeEvent" value="dataTable.configs.paginator.subscribe('pageChange', #{onPageChange});"/>
+    </c:if>
+
+    <c:set var="initPage" value=""/>
+    <c:if test="#{!empty startPage}">
+        <c:set var="initPage" value="dataTable.configs.paginator.setPage(#{startPage});"/>
+    </c:if>
+
+    <c:set var="initRowsPerPage" value=""/>
+    <c:if test="#{!empty rowsPerPage}">
+        <c:set var="initRowsPerPage" value="dataTable.configs.paginator.setRowsPerPage(#{rowsPerPage});"/>
+    </c:if>
+
     <script type="text/javascript">
     <!--
         flexive.yui.require("datatable");
         flexive.yui.onYahooLoaded(function() {
             var htmlTable = YAHOO.util.Dom.get("#{id}");
             var columns = [];
-            var dsColumns = []
+            var dsColumns = [];
             for (var i = 0; i < htmlTable.tHead.rows[0].cells.length; i++) {
                 var th = htmlTable.tHead.rows[0].cells[i];
                 columns.push({
@@ -55,6 +72,9 @@ Parameters:
                     rowsPerPageOptions : [10, 25, 50, 100]
                   })
             });
+            #{pageChangeEvent}
+            #{initRowsPerPage}
+            #{initPage}
             dataTable.subscribe("rowMouseoverEvent", dataTable.onEventHighlightRow);
             dataTable.subscribe("rowMouseoutEvent", dataTable.onEventUnhighlightRow);
             document.getElementById("#{id}_loading").style.display = "none";

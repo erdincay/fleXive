@@ -35,6 +35,7 @@ import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.value.BinaryDescriptor;
 import com.flexive.shared.value.FxString;
+import com.flexive.shared.CacheAdmin;
 
 import java.io.Serializable;
 
@@ -105,7 +106,7 @@ public class FxSelectListItemEdit extends FxSelectListItem implements Serializab
      */
     private static synchronized long calcId(FxSelectList list) {
         int curr = -1;
-        while (list.containsItem(curr))
+        while (list != null && list.containsItem(curr))
             curr--;
         return curr;
     }
@@ -160,6 +161,14 @@ public class FxSelectListItemEdit extends FxSelectListItem implements Serializab
      */
     public void setAcl(ACL acl) {
         this.acl = acl;
+    }
+
+    public void setAclId(long aclId) {
+        this.acl = CacheAdmin.getEnvironment().getACL(aclId);
+    }
+
+    public long getAclId() {
+        return this.acl.getId();
     }
 
     /**
@@ -229,6 +238,21 @@ public class FxSelectListItemEdit extends FxSelectListItem implements Serializab
      */
     public static FxSelectListItemEdit createNew(String name, ACL acl, FxSelectList list, FxString label, String data, String color) {
         return new FxSelectListItemEdit(name, acl, list, label, data, color);
+    }
+
+    /**
+     * Clone an FxSelectListItem for editing
+     *
+     * @param item      the item to clone
+     * @param markNew   mark this item as new?
+     * @param applyList apply the item to the list of the original item?
+     * @return FxSelectListItemEdit
+     */
+    public static FxSelectListItemEdit cloneItem(FxSelectListItem item, boolean markNew, boolean applyList) {
+        FxSelectListItemEdit res = new FxSelectListItemEdit(item.getName(), item.getAcl(), applyList ? item.getList() : null,
+                item.getLabel().copy(), item.getData(), item.getColor());
+        res.isNew = markNew;
+        return res;
     }
 
     /**

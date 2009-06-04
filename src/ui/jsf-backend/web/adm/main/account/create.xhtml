@@ -21,8 +21,7 @@
         <!-- ============================================ -->
         <fx:formRow label="#{fxMessageBean['Account.field.mandator']}" id="mandator"  newLine="false">
             <c:if test="${fxSystemBean.userTicket.globalSupervisor}">
-                <h:selectOneListbox id="mandator" value="#{accountBean.mandator}" size="1"
-                                    converter="SelectableConverter" required="true">
+                <h:selectOneListbox id="mandator" value="#{accountBean.mandatorId}" size="1" required="true">
                     <f:selectItems value="#{fxSelectBean.mandatorsForEditNoEmpty}" />
                     <a4j:support ajaxSingle="true" event="onchange" reRender="groups" eventsQueue="updateResults"/>
                 </h:selectOneListbox>
@@ -85,13 +84,13 @@
 
         <!-- ============================================ -->
         <fx:formRow label="#{fxMessageBean['Account.field.groups']}" id="groups" height="95"  newLine="false">
-                <h:selectManyListbox id="groups" value="#{accountBean.groups}" size="6" converter="SelectableConverter">
+                <h:selectManyListbox id="groups" value="#{accountBean.groups}" size="6">
                     <f:selectItems value="#{accountBean.filteredUserGroups}"/>
                     <a4j:support event="onchange" reRender="rolesGroups" eventsQueue="updateResults"/>
                 </h:selectManyListbox>
         </fx:formRow>
         <fx:formRow label="#{fxMessageBean['Account.field.roles']}" id="roles" height="95">
-            <h:selectManyListbox id="roles" value="#{accountBean.roles}" size="6" converter="SelectableConverter">
+            <h:selectManyListbox id="roles" value="#{accountBean.rolesIds}" size="6">
                 <f:selectItems value="#{fxSelectBean.roles}" />
             </h:selectManyListbox>
         </fx:formRow>

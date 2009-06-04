@@ -59,7 +59,7 @@ public class AclBean implements Serializable {
     private static final long serialVersionUID = -3767461611278032535L;
 
     private long id;
-    private Mandator mandator;
+    private long mandator;
     private ACL acl = null;
     private ACLEngine aclEngine;
     private UserGroupEngine groupEngine;
@@ -114,17 +114,13 @@ public class AclBean implements Serializable {
     }
 
 
-    public Mandator getMandator() {
-        if (mandator == null) {
-            return CacheAdmin.getEnvironment().getMandator(FxContext.getUserTicket().getMandatorId());
-        }
+    public long getMandator() {
         return mandator;
     }
 
-    public void setMandator(Mandator mandator) {
+    public void setMandator(long mandator) {
         this.mandator = mandator;
     }
-
 
     public long getId() {
         return id;
@@ -167,7 +163,7 @@ public class AclBean implements Serializable {
     public List<ACL> getList() {
         try {
             final UserTicket ticket = FxContext.getUserTicket();
-            long mandatorId = (ticket.isGlobalSupervisor()) ? getMandator().getId() : ticket.getMandatorId();
+            long mandatorId = (ticket.isGlobalSupervisor()) ? getMandator() : ticket.getMandatorId();
             return CacheAdmin.getFilteredEnvironment().getACLs(mandatorId, false);
         } catch (Exception exc) {
             new FxFacesMsgErr(exc).addToContext();
@@ -227,8 +223,7 @@ public class AclBean implements Serializable {
         try {
             // create the acl
             final UserTicket ticket = FxContext.getUserTicket();
-            long mandatorId = (ticket.isGlobalSupervisor()) ?
-                    (mandator == null ? -1 : mandator.getId()) : ticket.getMandatorId();
+            long mandatorId = (ticket.isGlobalSupervisor()) ? getMandator() : ticket.getMandatorId();
             setId(aclEngine.create(acl.getName(), acl.getLabel(), mandatorId,
                     acl.getColor(), acl.getDescription(), acl.getCategory()));
             new FxFacesMsgInfo("ACL.nfo.created", acl.getName()).addToContext();
@@ -309,7 +304,7 @@ public class AclBean implements Serializable {
     public static class ACLAssignmentEdit extends ACLAssignment implements Serializable {
         private static long ID_GEN;
         private long id;
-        private UserGroup group;
+        private long group;
 
         public ACLAssignmentEdit(ACLAssignment ass) {
             super(ass.getAclId(), ass.getGroupId(), ass.getMayRead(), ass.getMayEdit(), ass.getMayRelate(), ass.getMayDelete(),
@@ -333,21 +328,13 @@ public class AclBean implements Serializable {
             return id;
         }
 
-        public UserGroup getGroup() {
-            if (this.getGroupId() < 0) return null;
-            if (group == null) {
-                try {
-                    group = getGroupEngine().load(this.getGroupId());
-                } catch (Throwable t) {
-                    new FxFacesMsgErr(t).addToContext();
-                }
-            }
+        public long getGroup() {
             return group;
         }
 
-        public void setGroup(UserGroup group) {
+        public void setGroup(long group) {
             this.group = group;
-            this.setGroupId(group.getId());
+            this.setGroupId(group);
         }
 
         /**

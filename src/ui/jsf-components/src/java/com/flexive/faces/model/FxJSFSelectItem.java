@@ -32,13 +32,10 @@
 package com.flexive.faces.model;
 
 import com.flexive.shared.*;
-import com.flexive.shared.security.UserGroup;
-import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.structure.FxSelectList;
 import org.apache.commons.lang.StringUtils;
 
 import javax.faces.model.SelectItem;
-import java.io.Serializable;
 
 /**
  * An extended SelectItem class that provides constructors for selectable [fleXive] items and
@@ -52,29 +49,10 @@ public class FxJSFSelectItem extends SelectItem implements java.io.Serializable 
     private String style = null;
 
     /**
-     * Default empty element
-     */
-    private static class EmptySelectableObjectWithName extends AbstractSelectableObjectWithName implements Serializable {
-        private static final long serialVersionUID = 7808775494956188839L;
-
-        public EmptySelectableObjectWithName() {
-            // nothing
-        }
-
-        public long getId() {
-            return -1;
-        }
-
-        public String getName() {
-            return "";
-        }
-    }
-
-    /**
      * Empty constructor to create an empty element
      */
     public FxJSFSelectItem() {
-        super(new EmptySelectableObjectWithName(), "");
+        super(-1L, "");
         this.style = "";
     }
 
@@ -95,18 +73,7 @@ public class FxJSFSelectItem extends SelectItem implements java.io.Serializable 
      * @param item SelectableObjectWithName
      */
     public FxJSFSelectItem(SelectableObjectWithName item) {
-        super(item, item.getName());
-        applyStyle(item);
-    }
-
-    /**
-     * Ctor for SelectableObjectWithLabel, optionally as id instead of the item
-     *
-     * @param item SelectableObjectWithLabel
-     * @param asId use the id of the item or the item itself?
-     */
-    public FxJSFSelectItem(SelectableObjectWithName item, boolean asId) {
-        super(asId ? item.getId() : item, item.getName());
+        super(item.getId(), item.getName());
         applyStyle(item);
     }
 
@@ -116,29 +83,7 @@ public class FxJSFSelectItem extends SelectItem implements java.io.Serializable 
      * @param item SelectableObjectWithLabel
      */
     public FxJSFSelectItem(SelectableObjectWithLabel item) {
-        super(item, item.getLabel().getBestTranslation());
-        applyStyle(item);
-    }
-
-    /**
-     * Ctor for SelectableObjectWithLabel, optionally as id instead of the item
-     *
-     * @param item SelectableObjectWithLabel
-     * @param asId use the id of the item or the item itself?
-     */
-    public FxJSFSelectItem(SelectableObjectWithLabel item, boolean asId) {
-        super(asId ? item.getId() : item, item.getLabel().getBestTranslation());
-        applyStyle(item);
-    }
-
-    /**
-     * Ctor for SelectableObjectWithLabel, translation if chosen based on the users preferred language
-     *
-     * @param item   SelectableObjectWithLabel
-     * @param ticket current users ticket to choose the language
-     */
-    public FxJSFSelectItem(SelectableObjectWithLabel item, UserTicket ticket) {
-        super(item, item.getLabel().getBestTranslation(ticket));
+        super(item.getId(), item.getLabel().getBestTranslation());
         applyStyle(item);
     }
 
@@ -154,24 +99,23 @@ public class FxJSFSelectItem extends SelectItem implements java.io.Serializable 
 
 
     /**
-     * Ctor for user group with a special preformatted display name
+     * Ctor for SelectableObjectWithName with a special preformatted display name
      *
-     * @param group       user group
+     * @param item        SelectableObjectWithName
      * @param displayName display name
      */
-    public FxJSFSelectItem(UserGroup group, String displayName) {
-        super(group, displayName);
-        applyStyle(group);
+    public FxJSFSelectItem(SelectableObjectWithName item, String displayName) {
+        super(item.getId(), displayName);
+        applyStyle(item);
     }
 
     /**
-     * Ctor for FxSelectList, translation if chosen based on the users preferred language
+     * Ctor for FxSelectList, translation is chosen based on the users preferred language
      *
-     * @param item   FxSelectList
-     * @param ticket current users ticket to choose the language
+     * @param item FxSelectList
      */
-    public FxJSFSelectItem(FxSelectList item, UserTicket ticket) {
-        super(item.getId(), item.getLabel().getBestTranslation(ticket), item.getDescription().getBestTranslation(ticket));
+    public FxJSFSelectItem(FxSelectList item) {
+        super(item.getId(), item.getLabel().getBestTranslation(), item.getDescription().getBestTranslation());
         this.style = "";
     }
 

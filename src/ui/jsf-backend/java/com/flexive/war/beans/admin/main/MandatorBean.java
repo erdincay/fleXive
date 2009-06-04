@@ -205,10 +205,11 @@ public class MandatorBean implements Serializable {
         ensureMandatorIdSet();
 
         try {
+            String name = CacheAdmin.getEnvironment().getMandator(id).getName();
             mandatorInterface.remove(id);
             // make sure the variable holding the mandator data will be updated by setting it to null
             updateMandatorList();
-            new FxFacesMsgInfo("Mandator.nfo.deleted").addToContext();
+            new FxFacesMsgInfo("Mandator.nfo.deleted", name).addToContext();
         } catch (FxApplicationException e) {
             new FxFacesMsgErr(e).addToContext();
         }
@@ -243,7 +244,7 @@ public class MandatorBean implements Serializable {
             }
             // make sure the variable holding the mandator data will be updated by setting it to null
             updateMandatorList();
-            new FxFacesMsgInfo("Mandator.nfo.updated").addToContext();
+            new FxFacesMsgInfo("Mandator.nfo.updated", mandator.getName()).addToContext();
             return null;
         } catch (FxApplicationException e) {
             new FxFacesMsgErr(e).addToContext();

@@ -22,13 +22,12 @@
 
             <!-- Mandator select is only shown for global supervisors -->
             <c:if test="${fxSystemBean.userTicket.globalSupervisor}">
-                <t:saveState value="#{accountBean.mandator}"/>
+                <t:saveState value="#{accountBean.mandatorFilter}"/>
                 <t:saveState value="#{accountBean.activeFilterCheckbox}"/>
                 <t:saveState value="#{accountBean.validatedFilterCheckbox}"/>
                 <h:panelGrid columns="2">
                     #{fxMessageBean['Account.field.mandator']}:&nbsp;
-                    <h:selectOneListbox id="acct_mandator" value="#{accountBean.mandator}" size="1"
-                                        converter="SelectableConverter" onchange="document.listForm.submit();">
+                    <h:selectOneListbox id="acct_mandator" value="#{accountBean.mandatorFilter}" size="1" onchange="document.listForm.submit();">
                         <f:selectItems value="#{fxSelectBean.mandatorsForEdit}" />
                     </h:selectOneListbox>
                 </h:panelGrid>

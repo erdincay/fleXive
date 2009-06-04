@@ -295,8 +295,7 @@
                                 </ui:fragment>
                                 <ui:fragment rendered="#{srcEditor.supportSecurity}">
                                     <fx:formRow labelKey="Content.field.ACL" id="acl">
-                                         <h:selectOneListbox size="1" id="acl" value="#{srcEditor.acl}"
-                                                            converter="SelectableConverter" disabled="#{srcEditor.readOnly==true}">
+                                         <h:selectOneListbox size="1" id="acl" value="#{srcEditor.aclId}" disabled="#{srcEditor.readOnly==true}">
                                             <f:selectItems value="#{fxSelectBean.contentACLs}"/>
                                         </h:selectOneListbox>
                                     </fx:formRow>

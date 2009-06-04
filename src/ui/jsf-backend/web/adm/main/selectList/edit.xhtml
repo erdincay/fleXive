@@ -37,25 +37,46 @@
                 <h:selectBooleanCheckbox id="allowDynamicCreation" value="#{selectListBean.selectListAllowDynamicCreation}" disabled="true"/>
             </fx:formRow>
             <fx:formRow labelKey="SelectList.label.selectList.createItemACL" id="createItemACL">
-                <t:selectOneListbox size="1" id="createItemACL" value="#{selectListBean.selectListCreateItemACLId}" disabled="true">
+                <h:selectOneListbox size="1" id="createItemACL" value="#{selectListBean.selectListCreateItemACL}">
                     <f:selectItems value="#{fxSelectBean.selectListACLs}" />
-                </t:selectOneListbox>
+                </h:selectOneListbox>
             </fx:formRow>
             <fx:formRow labelKey="SelectList.label.selectList.defaultItemACL" id="defaultItemACL">
-                <t:selectOneListbox size="1" id="defaultItemACL" value="#{selectListBean.selectListDefaultItemACL}"
-                                    onchange="submit();" converter="SelectableConverter" disabled="true">
+                <h:selectOneListbox size="1" id="defaultItemACL" value="#{selectListBean.selectListDefaultItemACL}">
                     <f:selectItems value="#{selectListBean.selectListItemACLs}" />
-                </t:selectOneListbox>
+                </h:selectOneListbox>
             </fx:formRow>
+            <a4j:outputPanel id="itemCount">
+            <fx:formRow labelKey="SelectList.label.count" id="elementCount">
+                <h:outputText value="#{selectListBean.selectList.itemCount}"/>
+            </fx:formRow>
+            </a4j:outputPanel>
 
             <c:set var="readonly" value="#{not (fxSystemBean.isInRole['SelectListEditor'] or selectListBean.mayEditItem[item])}"/>
 
-            <adm:sortableTable id="table">
-                <table id="table">
-                    <thead>
+            <script type="text/javascript">
+            var currentPage = 1;
+            var rowsPerPage = 10;
+            <!--
+            var pageChange = function(event) {
+//                alert('page changed to '+event.newValue+' rpp:'+event.newState.rowsPerPage+' total:'+event.newState.totalRecords);
+                rowsPerPage = event.newState.rowsPerPage;
+                currentPage = event.newValue;
+            };
+            //-->
+            </script>
+
+            <a4j:outputPanel id="itemTable">
+                <adm:sortableTable id="table" onPageChange="pageChange" startPage="#{selectListBean.currentPage}"
+                                   rowsPerPage="#{selectListBean.rowsPerPage}">
+                    <table id="table">
+                        <thead>
                         <tr>
                             <th class="tblHeader" dataType="String" field="name" align="left">
                                 #{fxMessageBean["SelectList.table.name"]}
+                            </th>
+                            <th class="tblHeader" dataType="String" field="color" align="left">
+                                #{fxMessageBean["SelectList.table.color"]}
                             </th>
                             <th class="tblHeader" dataType="String" field="label" align="left">
                                 #{fxMessageBean["SelectList.table.label"]}
@@ -66,70 +87,111 @@
                             <th class="tblHeader" dataType="html" field="acl" align="left" noSort="true">
                                 #{fxMessageBean["SelectList.table.acl"]}
                             </th>
-                            <th class="tblHeader" dataType="String" field="color" align="left">
-                                #{fxMessageBean["SelectList.table.color"]}
-                            </th>
                             <th class="tblHeader" dataType="html" field="actions" align="left" noSort="true">
                                 #{fxMessageBean["SelectList.table.actions"]}
                             </th>
                         </tr>
-                    </thead>
-                    <tbody>
-                        <c:forEach var="item" items="#{selectListBean.items}">
+                        </thead>
+                        <tbody>
+                        <ui:repeat var="item" value="#{selectListBean.items}">
                             <tr value="#{selectListBean.idMap[item.id]}">
-                                <td align="left"><h:inputText id="itemName_#{selectListBean.idMap[item.id]}" value="#{item.name}"
-                                        disabled="#{readonly}"/></td>
-                                <td align="left"><fx:fxValueInput id="itemLabel_#{selectListBean.idMap[item.id]}" value="#{item.label}" readOnly="#{readonly}"/></td>
-                                <td align="left"><h:inputText id="itemData_#{selectListBean.idMap[item.id]}" value="#{item.data}" disabled="#{readonly}"/></td>
+                                <td align="left">#{item.name}</td>
+                                <td align="left"><!--#{item.color}-->
+                                    <div style="display: inline; border:1px solid; background-color:#{item.color}">
+                                        <img src="#{fx:webletUrl('com.flexive.faces.weblets', '/images/empty.gif')}"
+                                             width="12" height="12"/>
+                                    </div>
+                                </td>
+                                <td align="left"><fx:fxValueInput value="#{item.label}" readOnly="true"/></td>
+                                <td align="left">#{item.data}</td>
+                                <td align="left"><fx:fxValueInput value="#{item.acl.label}" readOnly="true"/></td>
                                 <td align="left">
-                                    <t:selectOneListbox size="1" id="itemACL_#{selectListBean.idMap[item.id]}" value="#{item.acl}" converter="SelectableConverter"  disabled="#{readonly}">
-                                        <f:selectItems value="#{selectListBean.selectListItemACLs}"/>
-                                    </t:selectOneListbox>
-                                </td>
-                                <td align="left" nowrap="nowrap">
-                                    <h:inputText size="7" id="itemColor_#{selectListBean.idMap[item.id]}" value="#{item.color}"
-                                        disabled="#{readonly}">
-                                        <fx:colorPicker/>
-                                    </h:inputText>
-                                </td>
-                                <td align="left">
-                                    <c:if test="#{selectListBean.mayDeleteItems}">
-                                        <adm:commandIcon labelKey="SelectList.button.delete" location="content"
-                                                        icon="delete" bean="#{selectListBean}" action="deleteListItem"
-                                                        id="deleteButton_#{selectListBean.idMap[item.id]}"
-                                                >
-                                            <f:setPropertyActionListener target="#{selectListBean.listItemId}" value="#{item.id}"/>
-                                        </adm:commandIcon>
-                                    </c:if>
-                                </td>
-                            </tr>
-                        </c:forEach>
-                        <c:if test="#{selectListBean.mayCreateItems[selectListBean.selectListId]}">
-                            <tr>
-                                <td align="left"><h:inputText id="newItemName" value="#{selectListBean.itemName}"/> </td>
-                                <td align="left"><fx:fxValueInput id="newItemLabel" value="#{selectListBean.itemLabel}"/></td>
-                                <td align="left"><h:inputText id="newItemData" value="#{selectListBean.itemData}"/></td>
-                                <td align="left">
-                                    <t:selectOneListbox size="1" id="newItemACL" value="#{selectListBean.itemACL}"
-                                                        converter="SelectableConverter">
-                                        <f:selectItems value="#{selectListBean.selectListItemACLs}" />
-                                    </t:selectOneListbox>
-                                </td>
-                                <td align="left" nowrap="nowrap">
-                                    <h:inputText size="7" id="newItemColor" value="#{selectListBean.itemColor}">
-                                        <fx:colorPicker/>
-                                    </h:inputText>
-                                </td>
-                                <td align="left">
-                                    <adm:commandIcon labelKey="SelectList.button.add" location="content"
-                                                    icon="new"  bean="#{selectListBean}" action="addListItem" id="addButton">
+                                    <!-- edit -->
+                                    <adm:ajaxCommandIcon titleKey="SelectList.button.edit"
+                                                         icon="edit" bean="#{selectListBean}"
+                                                         actionListener="editListItem"
+                                                         id="editButton_#{selectListBean.idMap[item.id]}"
+                                                         rendered="#{selectListBean.mayEditItem[item.id]}"
+                                                         reRender="editItemArea,createItemArea">
+                                        <f:setPropertyActionListener target="#{selectListBean.editListItemId}"
+                                                                     value="#{item.id}"/>
+                                        <a4j:actionparam noEscape="true" name="rowsPerPage_" value="rowsPerPage"
+                                                         assignTo="#{selectListBean.rowsPerPage}"/>
+                                        <a4j:actionparam noEscape="true" name="currentPage_" value="currentPage"
+                                                         assignTo="#{selectListBean.currentPage}"/>
+                                    </adm:ajaxCommandIcon>
+                                    <!-- delete -->
+                                    <adm:commandIcon labelKey="SelectList.button.delete" location="content"
+                                                     icon="delete" bean="#{selectListBean}" action="deleteListItem"
+                                                     id="deleteButton_#{selectListBean.idMap[item.id]}"
+                                                     rendered="#{selectListBean.mayDeleteItems}">
+                                        <f:setPropertyActionListener target="#{selectListBean.listItemId}"
+                                                                     value="#{item.id}"/>
                                     </adm:commandIcon>
                                 </td>
                             </tr>
-                        </c:if>
-                    </tbody>
-                </table>
-            </adm:sortableTable>
+                        </ui:repeat>
+                        </tbody>
+                    </table>
+                </adm:sortableTable>
+                <fx:yuiSetup/>
+            </a4j:outputPanel>
+
+            <a4j:outputPanel id="editItemArea">
+                <ui:fragment rendered="#{selectListBean.editListItemId != -1}">
+                    <fx:fieldSet width="500" legend="#{fxMessageBean['SelectList.label.editItem']}">
+                        <fx:formRow labelKey="SelectList.label.item.name">
+                            <h:inputText id="editName_#{selectListBean.editListItemId}"
+                                         value="#{selectListBean.editListItem.name}"/>
+                        </fx:formRow>
+                        <fx:formRow labelKey="SelectList.label.item.label">
+                            <fx:fxValueInput id="editLabel_#{selectListBean.editListItemId}"
+                                             value="#{selectListBean.editListItem.label}"/>
+                        </fx:formRow>
+                        <fx:formRow labelKey="SelectList.label.item.data">
+                            <h:inputText id="editData_#{selectListBean.editListItemId}"
+                                         value="#{selectListBean.editListItem.data}"/>
+                        </fx:formRow>
+                        <fx:formRow labelKey="SelectList.label.item.acl">
+                            <h:selectOneListbox size="1" id="editACL_#{selectListBean.editListItemId}"
+                                                value="#{selectListBean.editListItem.aclId}">
+                                <f:selectItems value="#{selectListBean.selectListItemACLs}"/>
+                            </h:selectOneListbox>
+                        </fx:formRow>
+                        <fx:formRow labelKey="SelectList.label.item.color">
+                            <h:inputText id="editColor_#{selectListBean.editListItemId}"
+                                         value="#{selectListBean.editListItem.color}">
+                                <fx:colorPicker/>
+                            </h:inputText>
+                        </fx:formRow>
+                        <br/>
+
+                        <adm:ajaxCommandButton labelKey="SelectList.button.commit"
+                                               icon="ok" bean="#{selectListBean}" actionListener="commitItemEditing"
+                                               id="commitButton_#{selectListBean.idMap[item.id]}"
+                                               rendered="#{selectListBean.mayEditItem[item.id]}"
+                                               reRender="editItemArea,itemTable,createItemArea,itemCount">
+                        </adm:ajaxCommandButton>
+
+                        <adm:ajaxCommandButton labelKey="SelectList.button.cancel"
+                                               icon="cancel" bean="#{selectListBean}" actionListener="cancelItemEditing"
+                                               id="cancelButton_#{selectListBean.idMap[item.id]}"
+                                               rendered="#{selectListBean.mayEditItem[item.id]}"
+                                               reRender="editItemArea,itemTable,createItemArea">
+                        </adm:ajaxCommandButton>
+                    </fx:fieldSet>
+                    <fx:yuiSetup/>
+                </ui:fragment>
+            </a4j:outputPanel>
+
+            <a4j:outputPanel id="createItemArea">
+                <ui:fragment rendered="#{selectListBean.editListItemId == -1}">
+                    <adm:ajaxCommandButton id="createItemButton" labelKey="SelectList.label.createItem" icon="new"
+                                           actionListener="createListItem" bean="#{selectListBean}"
+                                           reRender="editItemArea,createItemArea"/>
+                    <br/><br/>
+                </ui:fragment>
+            </a4j:outputPanel>
 
             <adm:commandButton labelKey="SelectList.button.selectList.save" location="both"
                 icon="save"  action="saveSelectList"  bean="#{selectListBean}" id="saveButton">

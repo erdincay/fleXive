@@ -95,24 +95,25 @@ Parameters:
         </c:if>
 
         <c:if test="#{buttonDisabled == null or !buttonDisabled}">
-        <a4j:commandLink id="#{id}" eventsQueue="#{eventsQueue}" reRender="#{reRender}" actionListener="#{bean[actionListener]}"
-                         immediate="#{immediate}">
-            <ui:insert/>
             <div id="commandButton_#{id}" onclick="#{onclick}" class="#{commandButtonStyle}" title="#{title}">
                 <div style="display:table-row; height:22px; float:left">
                     <div class="#{commandButtonIconStyle}">
-                        <img alt="#{id}_icon" id="#{id}_icon" src="#{iconUrl}" border="0"/>
+                        <a4j:commandLink id="#{id}_icon" styleClass="commandButtonIconStyle" eventsQueue="#{eventsQueue}" reRender="#{reRender}" actionListener="#{bean[actionListener]}" immediate="#{immediate}">
+                            <img alt="#{id}_icon" id="#{id}_icon" src="#{iconUrl}" border="0"/>
+                        </a4j:commandLink>
                     </div>
                     <div class="#{commandButtonLabelStyle}">
                         <div class="commandButtonLabelText">
+                            <a4j:commandLink id="#{id}_label" styleClass="commandButtonLabelText" eventsQueue="#{eventsQueue}" reRender="#{reRender}" actionListener="#{bean[actionListener]}" immediate="#{immediate}">
                             #{label}
+                            </a4j:commandLink>
                         </div>
                     </div>
                     <div class="#{commandButtonRightStyle}">
                     </div>
                 </div>
             </div>
-        </a4j:commandLink>
+
         </c:if>
     </ui:fragment>
 

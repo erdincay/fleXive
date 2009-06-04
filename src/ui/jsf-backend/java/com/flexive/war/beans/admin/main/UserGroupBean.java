@@ -36,23 +36,22 @@ package com.flexive.war.beans.admin.main;
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.faces.messages.FxFacesMsgInfo;
-import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
+import com.flexive.shared.FxArrayUtils;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.interfaces.AccountEngine;
 import com.flexive.shared.interfaces.UserGroupEngine;
-import com.flexive.shared.security.Mandator;
 import com.flexive.shared.security.Role;
 import com.flexive.shared.security.UserGroup;
 import com.flexive.shared.security.UserTicket;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
-import java.io.Serializable;
 
 /**
  * Bean providing access the the userGroup functionality.
@@ -65,21 +64,21 @@ public class UserGroupBean implements Serializable {
 
     private String name = null;
     private String color = null;
-    private Mandator mandator = null;
+    private long mandator = -1;
     private long id = -1;
     private AccountEngine accountEngine;
     private UserGroupEngine groupEngine;
-    private List<Role> roles;
+    private Long[] roles = new Long[0];
     private Hashtable<Long, List<UserGroup>> groupLists;
     private long createdGroupId = -1;
     private static final String ID_CACHE_KEY = UserGroupBean.class + "_id";
 
 
-    public List<Role> getRoles() {
-        return (this.roles == null) ? new ArrayList<Role>(0) : this.roles;
+    public Long[] getRoles() {
+        return this.roles;
     }
 
-    public void setRoles(List<Role> roles) {
+    public void setRoles(Long[] roles) {
         this.roles = roles;
     }
 
@@ -99,11 +98,11 @@ public class UserGroupBean implements Serializable {
         this.color = sColor;
     }
 
-    public Mandator getMandator() {
+    public long getMandator() {
         return mandator;
     }
 
-    public void setMandator(Mandator mandator) {
+    public void setMandator(long mandator) {
         this.mandator = mandator;
     }
 
@@ -141,7 +140,7 @@ public class UserGroupBean implements Serializable {
             long mandatorId;
             if (ticket.isGlobalSupervisor()) {
                 // Drop down list enabled -> handle it
-                mandatorId = mandator == null ? -1 : mandator.getId();
+                mandatorId = getMandator();
             } else {
                 // Only show the groups of the mandator the user belongs to
                 mandatorId = ticket.getMandatorId();
@@ -187,7 +186,7 @@ public class UserGroupBean implements Serializable {
     public String create() {
         try {
             final UserTicket ticket = FxContext.getUserTicket();
-            long mandatorId = mandator == null ? -1 : mandator.getId();
+            long mandatorId = getMandator();
             if (!ticket.isGlobalSupervisor()) {
                 mandatorId = ticket.getMandatorId();
             }
@@ -197,7 +196,7 @@ public class UserGroupBean implements Serializable {
 
             // Assign the given roles to the group
             try {
-                groupEngine.setRoles(this.id, getRoles());
+                groupEngine.setRoles(this.id, FxArrayUtils.toPrimitiveLongArray(roles));
             } catch (Exception exc) {
                 new FxFacesMsgErr(exc).addToContext();
                 color = groupEngine.load(id).getColor();
@@ -237,11 +236,11 @@ public class UserGroupBean implements Serializable {
     public String edit() {
         try {
             ensureIdSet();
-            UserGroup aGroup = groupEngine.load(id);
-            this.color = aGroup.getColor();
-            this.name = aGroup.getName();
-            this.mandator = CacheAdmin.getEnvironment().getMandator(aGroup.getMandatorId());
-            this.roles = groupEngine.getRoles(aGroup.getId());
+            UserGroup grp = groupEngine.load(id);
+            this.color = grp.getColor();
+            this.name = grp.getName();
+            this.mandator = grp.getMandatorId();
+            this.roles = Role.toIdArray(groupEngine.getRoles(grp.getId()));
         } catch (Exception exc) {
             new FxFacesMsgErr(exc).addToContext();
         }
@@ -266,7 +265,7 @@ public class UserGroupBean implements Serializable {
             groupEngine.update(id, name, color);
             // Update the role assignments
             try {
-                groupEngine.setRoles(this.id, getRoles());
+                groupEngine.setRoles(this.id, FxArrayUtils.toPrimitiveLongArray(getRoles()));
             } catch (Exception exc) {
                 new FxFacesMsgErr(exc).addToContext();
             }

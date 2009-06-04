@@ -129,6 +129,10 @@ public class MessageBean extends HashMap {
      * Resource bundle name for web applications.
      */
     public static final String BUNDLE_APPLICATIONS = "ApplicationMessages";
+    /**
+     * Resource bundle name for exceptions.
+     */
+    public static final String BUNDLE_EXCEPTIONS = "FxExceptionMessages";
 
     private static final Log LOG = LogFactory.getLog(MessageBean.class);
     private static final List<BundleReference> resourceBundles = new CopyOnWriteArrayList<BundleReference>();
@@ -288,6 +292,7 @@ public class MessageBean extends HashMap {
         try {
             addResources(BUNDLE_APPLICATIONS);
             addResources(BUNDLE_PLUGINS);
+            addResources(BUNDLE_EXCEPTIONS);
         } catch (IOException e) {
             LOG.error("Failed to initialize plugin message resources: " + e.getMessage(), e);
         } finally {

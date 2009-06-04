@@ -22,7 +22,7 @@
                 <h:panelGrid columns="2">
                     #{fxMessageBean['UserGroup.field.mandator']}&nbsp;
                     <h:selectOneListbox id="mandatorFilter" value="#{userGroupBean.mandator}" size="1"
-                                        onchange="document.frm.submit();"  converter="SelectableConverter">
+                                        onchange="document.frm.submit();">
                         <f:selectItems value="#{fxSelectBean.mandatorsForEdit}" />
                     </h:selectOneListbox>
                 </h:panelGrid>

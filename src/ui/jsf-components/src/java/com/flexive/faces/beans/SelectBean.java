@@ -32,8 +32,8 @@
 package com.flexive.faces.beans;
 
 import com.flexive.faces.FxJsfUtils;
-import com.flexive.faces.model.FxJSFSelectItem;
 import com.flexive.faces.messages.FxFacesMsgErr;
+import com.flexive.faces.model.FxJSFSelectItem;
 import com.flexive.shared.*;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.interfaces.UserGroupEngine;
@@ -49,6 +49,7 @@ import com.flexive.shared.search.query.QueryOperatorNode;
 import com.flexive.shared.security.*;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.BinaryDescriptor;
+
 import javax.faces.model.SelectItem;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -128,7 +129,7 @@ public class SelectBean implements Serializable {
      * @param item         item name
      * @return formatted item
      */
-    private String formatSelectItem(long userMandator, long itemMandator, String item) {
+    private String formatMandatorSelectItem(long userMandator, long itemMandator, String item) {
         if (userMandator == itemMandator)
             return item;
         return environment.getMandator(itemMandator).getName() + ": " + item;
@@ -141,7 +142,7 @@ public class SelectBean implements Serializable {
      */
     public List<SelectItem> getWorkflows() {
         if (workflows == null) {
-            workflows = FxJsfUtils.asIdSelectList(environment.getWorkflows());
+            workflows = FxJsfUtils.asSelectListWithName(environment.getWorkflows());
         }
         return workflows;
     }
@@ -157,7 +158,7 @@ public class SelectBean implements Serializable {
             UserGroupEngine groupEngine = EJBLookup.getUserGroupEngine();
             long mandatorId = FxContext.getUserTicket().getMandatorId();
             List<UserGroup> groups = groupEngine.loadAll(mandatorId);
-            userGroups = FxJsfUtils.asSelectList(groups, false);
+            userGroups = FxJsfUtils.asSelectListWithName(groups);
         }
         return userGroups;
     }
@@ -201,7 +202,7 @@ public class SelectBean implements Serializable {
                         group,
                         group.isSystem()
                                 ? group.getName()
-                                : formatSelectItem(mandator, group.getMandatorId(), group.getName()))
+                                : formatMandatorSelectItem(mandator, group.getMandatorId(), group.getName()))
                 );
             }
         }
@@ -224,7 +225,7 @@ public class SelectBean implements Serializable {
                 if (group.isSystem())
                     continue;
                 globalUserGroupsNonSystem.add(
-                        new FxJSFSelectItem(group, formatSelectItem(mandator, group.getMandatorId(), group.getName())));
+                        new FxJSFSelectItem(group, formatMandatorSelectItem(mandator, group.getMandatorId(), group.getName())));
             }
         }
         return globalUserGroupsNonSystem;
@@ -249,7 +250,7 @@ public class SelectBean implements Serializable {
      */
     public List<SelectItem> getTypesWithEmpty() throws FxApplicationException {
         List<FxType> typesList = CacheAdmin.getFilteredEnvironment().getTypes(true, true, true, false);
-        return  FxJsfUtils.asSelectListWithLabel(typesList, true);
+        return FxJsfUtils.asSelectListWithLabel(typesList, true);
     }
 
     /**
@@ -260,7 +261,7 @@ public class SelectBean implements Serializable {
      */
     public List<SelectItem> getRoles() throws FxApplicationException {
         if (roles == null) {
-            roles = FxJsfUtils.asSelectList(Role.getList(), false);
+            roles = FxJsfUtils.asSelectListWithLabel(Role.getList());
         }
         return roles;
     }
@@ -272,7 +273,7 @@ public class SelectBean implements Serializable {
      */
     public List<SelectItem> getMandatorsForEdit() {
         if (mandatorsForEdit == null) {
-            mandatorsForEdit = FxJsfUtils.asSelectList(_getMandatorsForEdit(), true);
+            mandatorsForEdit = FxJsfUtils.asSelectListWithName(_getMandatorsForEdit(), true);
         }
         return mandatorsForEdit;
     }
@@ -284,7 +285,7 @@ public class SelectBean implements Serializable {
      */
     public List<SelectItem> getMandatorsForEditNoEmpty() {
         if (mandatorsForEditNoEmpty == null) {
-            mandatorsForEditNoEmpty = FxJsfUtils.asSelectList(_getMandatorsForEdit(), false);
+            mandatorsForEditNoEmpty = FxJsfUtils.asSelectListWithName(_getMandatorsForEdit());
         }
         return mandatorsForEditNoEmpty;
     }
@@ -316,7 +317,7 @@ public class SelectBean implements Serializable {
     public List<SelectItem> getMandators() {
         if (mandators == null) {
             List<Mandator> list = CacheAdmin.getFilteredEnvironment().getMandators(true, false);
-            mandators = FxJsfUtils.asSelectList(list, false);
+            mandators = FxJsfUtils.asSelectListWithName(list, false);
         }
         return mandators;
     }
@@ -333,7 +334,7 @@ public class SelectBean implements Serializable {
         ArrayList<SelectItem> result = new ArrayList<SelectItem>(selectLists.size() + 1);
         result.add(new FxJSFSelectItem());
         for (FxSelectList list : selectLists) {
-            result.add(new FxJSFSelectItem(list, ticket));
+            result.add(new FxJSFSelectItem(list));
         }
         return result;
     }
@@ -365,7 +366,7 @@ public class SelectBean implements Serializable {
     public List<SelectItem> getLanguagesById() {
         if (languagesById == null) {
             try {
-                languagesById = FxJsfUtils.asIdSelectListWithLabel(EJBLookup.getLanguageEngine().loadAvailable());
+                languagesById = FxJsfUtils.asSelectListWithLabel(EJBLookup.getLanguageEngine().loadAvailable());
             } catch (FxApplicationException e) {
                 new FxFacesMsgErr(e).addToContext();
                 languagesById = new ArrayList<SelectItem>(0);
@@ -381,7 +382,7 @@ public class SelectBean implements Serializable {
      */
     public List<SelectItem> getContentACLs() {
         if (contentACLs == null) {
-            contentACLs = FxJsfUtils.asSelectList(environment.getACLs(ACLCategory.INSTANCE), false);
+            contentACLs = FxJsfUtils.asSelectListWithLabel(environment.getACLs(ACLCategory.INSTANCE));
         }
         return contentACLs;
     }
@@ -393,7 +394,7 @@ public class SelectBean implements Serializable {
      */
     public List<SelectItem> getACLs() {
         if (acls == null) {
-            acls = FxJsfUtils.asSelectList(environment.getACLs(), false);
+            acls = FxJsfUtils.asSelectListWithLabel(environment.getACLs());
         }
         return acls;
     }
@@ -453,7 +454,7 @@ public class SelectBean implements Serializable {
      * @return all defined properties.
      */
     public List<SelectItem> getProperties() {
-        return FxJsfUtils.asIdSelectList(environment.getProperties(true, true));
+        return FxJsfUtils.asSelectListWithLabel(environment.getProperties(true, true));
     }
 
     /**
@@ -722,7 +723,7 @@ public class SelectBean implements Serializable {
                     scriptList.add(s);
             }
             Collections.sort(scriptList, new FxJsfUtils.ScriptInfoSorter());
-            assignmentScripts = FxJsfUtils.asSelectList(scriptList, false);
+            assignmentScripts = FxJsfUtils.asSelectListWithName(scriptList);
         }
         return assignmentScripts;
     }
@@ -750,7 +751,7 @@ public class SelectBean implements Serializable {
      */
     public List<SelectItem> getAllScripts() {
         if (allScripts == null) {
-            allScripts = FxJsfUtils.asSelectList(CacheAdmin.getFilteredEnvironment().getScripts(), false);
+            allScripts = FxJsfUtils.asSelectListWithName(CacheAdmin.getFilteredEnvironment().getScripts());
         }
         return allScripts;
     }
@@ -768,7 +769,7 @@ public class SelectBean implements Serializable {
                     scriptList.add(s);
             }
             Collections.sort(scriptList, new FxJsfUtils.ScriptInfoSorter());
-            typeScripts = FxJsfUtils.asSelectList(scriptList, false);
+            typeScripts = FxJsfUtils.asSelectListWithName(scriptList);
         }
         return typeScripts;
     }

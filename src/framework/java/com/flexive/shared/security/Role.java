@@ -32,8 +32,8 @@
 package com.flexive.shared.security;
 
 import com.flexive.shared.ObjectWithColor;
-import com.flexive.shared.SelectableObjectWithName;
 import com.flexive.shared.SelectableObjectWithLabel;
+import com.flexive.shared.SelectableObjectWithName;
 import com.flexive.shared.value.FxString;
 
 import java.io.Serializable;
@@ -144,6 +144,20 @@ public enum Role implements SelectableObjectWithName, SelectableObjectWithLabel,
         return result;
     }
 
+    public static List<Long> toIdList(List<Role> roles) {
+        List<Long> result = new ArrayList<Long>(roles.size());
+        for (Role role : roles)
+            result.add(role.getId());
+        return result;
+    }
+
+    public static List<Role> fromIdList(List<Long> list) {
+        List<Role> result = new ArrayList<Role>(list.size());
+        for (Long id : list)
+            result.add(Role.getById(id));
+        return result;
+    }
+
     /**
      * Returns a role identified by its unique id.
      *
@@ -202,12 +216,12 @@ public enum Role implements SelectableObjectWithName, SelectableObjectWithLabel,
     }
 
     /**
-     * Convert a Role array to an id array
+     * Convert a Role array to a long id array
      *
      * @param roles roles
      * @return id's
      */
-    public static long[] toIdArray(Role[] roles) {
+    public static long[] toPrimitiveIdArray(Role[] roles) {
         if (roles == null || roles.length == 0)
             return new long[0];
         long[] res = new long[roles.length];
@@ -215,4 +229,36 @@ public enum Role implements SelectableObjectWithName, SelectableObjectWithLabel,
             res[i] = roles[i].getId();
         return res;
     }
+
+    /**
+     * Convert a Role array to a Long id array
+     *
+     * @param roles roles
+     * @return id's
+     */
+    public static Long[] toIdArray(Role[] roles) {
+        if (roles == null || roles.length == 0)
+            return new Long[0];
+        Long[] res = new Long[roles.length];
+        for (int i = 0; i < roles.length; i++)
+            res[i] = roles[i].getId();
+        return res;
+    }
+
+    /**
+     * Convert a Role List to a Long id array
+     *
+     * @param roles roles
+     * @return id's
+     */
+    public static Long[] toIdArray(List<Role> roles) {
+        if (roles == null || roles.size() == 0)
+            return new Long[0];
+        Long[] res = new Long[roles.size()];
+        for (int i = 0; i < roles.size(); i++)
+            res[i] = roles.get(i).getId();
+        return res;
+    }
+
+
 }

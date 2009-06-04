@@ -37,6 +37,7 @@ import com.flexive.faces.model.FxJSFSelectItem;
 import com.flexive.shared.ObjectWithColor;
 import com.flexive.shared.SelectableObjectWithLabel;
 import com.flexive.shared.SelectableObjectWithName;
+import com.flexive.shared.SelectableObject;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -370,6 +371,12 @@ public class FxSelectRenderer extends Renderer {
             writer.startElement("div", component);
             for (SelectItem currItem : selectedItems) {
                 if (currItem.getValue().equals(item)) {
+                    item = currItem;
+                    break;
+                } else if (currItem instanceof FxJSFSelectItem &&
+                        item instanceof Long &&
+                        currItem.getValue() instanceof SelectableObject &&
+                        ((SelectableObject)currItem.getValue()).getId() == (Long) item) {
                     item = currItem;
                     break;
                 }

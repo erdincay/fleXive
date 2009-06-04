@@ -285,6 +285,15 @@ public class FxSelectList implements Serializable, ObjectWithLabel {
     }
 
     /**
+     * Get the number of items in this SelectList
+     *
+     * @return number of items in this SelectList
+     */
+    public int getItemCount() {
+        return items.size();
+    }
+
+    /**
      * Get this FxSelectList as editable
      *
      * @return FxSelectListEdit

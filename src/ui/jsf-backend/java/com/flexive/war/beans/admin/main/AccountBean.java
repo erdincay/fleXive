@@ -35,6 +35,7 @@ package com.flexive.war.beans.admin.main;
 
 
 import com.flexive.faces.FxJsfUtils;
+import com.flexive.faces.model.FxJSFSelectItem;
 import com.flexive.faces.beans.SelectBean;
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.faces.messages.FxFacesMsgInfo;
@@ -79,9 +80,10 @@ public class AccountBean implements Serializable {
     private String passwordConfirm;
     private AccountEditBean account;
     private final SimpleDateFormat SDF = new SimpleDateFormat("dd-MM-yyyy");
-    private List<UserGroup> groups;
-    private List<Role> roles;
+    private Long[] groups;
+    private Long[] roles;
     private Mandator mandator;
+    private long mandatorFilter = -1;
     private Hashtable<String, List<Account>> listCache;
     private static final String ID_CACHE_KEY = AccountBean.class + "_id";
     private FxContent contactData;
@@ -89,6 +91,13 @@ public class AccountBean implements Serializable {
 
     // user preferences fields
     private FxLanguage defaultInputLanguage;
+
+    public List<Role> getRoles() {
+        List<Role> res = new ArrayList<Role>(roles.length);
+        for( long r: roles)
+            res.add(Role.getById(r));
+        return res;
+    }
 
 
     public static class AccountEditBean extends Account {
@@ -166,9 +175,14 @@ public class AccountBean implements Serializable {
         }
     }
 
-    public List<Role> getRoles() {
-        return roles == null ? new ArrayList<Role>(0) : roles;
+    public Long[] getRolesIds() {
+        return roles;
     }
+
+    public void setRolesIds(Long[] roles) {
+        this.roles = roles;
+    }
+
 
     /**
      * Has the language setting changed?
@@ -200,23 +214,19 @@ public class AccountBean implements Serializable {
         if (groups == null)
             return new ArrayList<Role>(0);
         List<Role> result = new ArrayList<Role>(Role.values().length);
-        for (UserGroup grp : groups) {
-            List<Role> tmp = EJBLookup.getUserGroupEngine().getRoles(grp.getId());
+        for (long groupId : groups) {
+            List<Role> tmp = EJBLookup.getUserGroupEngine().getRoles(groupId);
             result.removeAll(tmp);
             result.addAll(tmp);
         }
         return result;
     }
 
-    public void setRoles(List<Role> roles) {
-        this.roles = roles;
+    public Long[] getGroups() {
+        return groups == null ? new Long[0] : groups;
     }
 
-    public List<UserGroup> getGroups() {
-        return groups == null ? new ArrayList<UserGroup>(0) : groups;
-    }
-
-    public void setGroups(List<UserGroup> groups) {
+    public void setGroups(Long[] groups) {
         this.groups = groups;
     }
 
@@ -288,11 +298,19 @@ public class AccountBean implements Serializable {
         this.validatedFilter = validatedFilter;
     }
 
+    public long getMandatorFilter() {
+        return mandatorFilter;
+    }
+
+    public void setMandatorFilter(long mandatorFilter) {
+        this.mandatorFilter = mandatorFilter;
+    }
+
     public Mandator getMandator() {
         if (this.mandator == null) {
             List<SelectItem> mandators = FxJsfUtils.getManagedBean(SelectBean.class).getMandatorsForEditNoEmpty();
             if (mandators.size() >0)
-            setMandator((Mandator)mandators.get(0).getValue());
+            setMandator(CacheAdmin.getEnvironment().getMandator((Long)mandators.get(0).getValue()));
         }
         return mandator;
     }
@@ -300,6 +318,18 @@ public class AccountBean implements Serializable {
     public void setMandator(Mandator mandator) {
         this.mandator = mandator;
         this.account.setMandatorId(mandator == null ? -1 : mandator.getId());
+    }
+
+    public long getMandatorId() {
+        return getMandator().getId();
+    }
+
+    public void setMandatorId(long mandatorId) {
+        if( mandatorId == -1)
+            this.mandator = null;
+        else
+            this.mandator = CacheAdmin.getEnvironment().getMandator(mandatorId);
+        this.account.setMandatorId(mandatorId);
     }
 
     public long getGroupFilter() {
@@ -383,7 +413,7 @@ public class AccountBean implements Serializable {
         for (UserGroup group : groups) {
             if (group.isSystem())
                 continue;
-            userGroupsNonSystem.add(new SelectItem(group, group.getName()));
+            userGroupsNonSystem.add(new FxJSFSelectItem(group));
         }
         return userGroupsNonSystem;
     }
@@ -466,8 +496,15 @@ public class AccountBean implements Serializable {
         try {
             ensureAccountIdSet();
             this.account = new AccountEditBean(accountInterface.load(this.accountIdFilter));
-            this.roles = accountInterface.getRoles(this.accountIdFilter, RoleLoadMode.FROM_USER_ONLY);
-            this.groups = accountInterface.getGroups(this.accountIdFilter);
+
+            List<Role> r = accountInterface.getRoles(this.accountIdFilter, RoleLoadMode.FROM_USER_ONLY);
+            this.roles = new Long[r.size()];
+            for(int i=0; i<this.roles.length; i++)
+                this.roles[i] = r.get(i).getId();
+            List<UserGroup> g = accountInterface.getGroups(this.accountIdFilter);
+            this.groups = new Long[g.size()];
+            for( int i=0; i<this.groups.length; i++ )
+                this.groups[i] = g.get(i).getId();
             return "accountEdit";
         } catch (Throwable t) {
             new FxFacesMsgErr(t).addToContext();
@@ -484,8 +521,14 @@ public class AccountBean implements Serializable {
         try {
             this.account = new AccountEditBean(accountInterface.load(FxContext.getUserTicket().getUserId()));
             setAccountIdFilter(this.account.getId());
-            this.roles = accountInterface.getRoles(this.accountIdFilter, RoleLoadMode.ALL);
-            this.groups = accountInterface.getGroups(this.accountIdFilter);
+            List<Role> r = accountInterface.getRoles(this.accountIdFilter, RoleLoadMode.ALL);
+            this.roles = new Long[r.size()];
+            for(int i=0; i<roles.length; i++)
+                roles[i] = r.get(i).getId();
+            List<UserGroup> g = accountInterface.getGroups(this.accountIdFilter);
+            this.groups = new Long[g.size()];
+            for( int i=0; i<this.groups.length; i++ )
+                this.groups[i] = g.get(i).getId();
             this.contactData = null;
             this.contactData = EJBLookup.getContentEngine().load(this.account.getContactData());
             // load configuration parameters
@@ -570,7 +613,7 @@ public class AccountBean implements Serializable {
             new FxFacesMsgInfo("User.nfo.saved").addToContext();
             // Assign the given groups to the account
             try {
-                accountInterface.setGroups(this.accountIdFilter, groups);
+                accountInterface.setGroups(this.accountIdFilter, FxArrayUtils.toPrimitiveLongArray(this.groups));
             } catch (Exception exc) {
                 new FxFacesMsgErr(exc).addToContext();
             }
@@ -636,7 +679,7 @@ public class AccountBean implements Serializable {
 
         // Assign the given groups to the account
         try {
-            accountInterface.setGroups(this.accountIdFilter, groups);
+            accountInterface.setGroups(this.accountIdFilter,  FxArrayUtils.toPrimitiveLongArray(this.groups));
         } catch (Exception exc) {
             new FxFacesMsgErr(exc).addToContext();
         }
@@ -662,7 +705,7 @@ public class AccountBean implements Serializable {
     public List<Account> getList() {
         final UserTicket ticket = FxContext.getUserTicket();
         try {
-            long _mandatorFilter = mandator == null ? -1 : mandator.getId();
+            long _mandatorFilter = getMandatorFilter();
 
             // If not supervisor fallback to the own mandator
             if (!ticket.isGlobalSupervisor()) {

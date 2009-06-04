@@ -29,8 +29,7 @@ Parameters:
     <!-- MODE AUTO: Display a dropdown list or a readonly view depending on the users permissions -->
     <c:if test="${mode=='auto'}">
         <c:if test="${fxSystemBean.userTicket.globalSupervisor}">
-            <h:selectOneListbox id="mandator" value="#{bean[property]}" size="1"
-                                converter="SelectableConverter" required="true">
+            <h:selectOneListbox id="mandator" value="#{bean[property]}" size="1" required="true">
                 <f:selectItems value="#{fxSelectBean.mandatorsForEdit}" />
             </h:selectOneListbox>
         </c:if>
@@ -51,8 +50,7 @@ Parameters:
     <!-- MODE DROPDOWN: Always display all mandators as a dropdwn list -->
     <c:if test="${mode=='dropdown'}">
         <c:if test="${fxSystemBean.userTicket.globalSupervisor}">
-            <h:selectOneListbox id="mandator" value="#{bean[property]}" size="1"
-                                converter="SelectableConverter" required="true">
+            <h:selectOneListbox id="mandator" value="#{bean[property]}" size="1" required="true">
                 <f:selectItems value="#{fxSelectBean.mandatorsForEdit}" />
             </h:selectOneListbox>
         </c:if>

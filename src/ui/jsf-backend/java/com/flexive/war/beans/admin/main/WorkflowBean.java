@@ -41,7 +41,6 @@ import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.exceptions.FxApplicationException;
-import com.flexive.shared.security.UserGroup;
 import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.workflow.*;
 
@@ -53,6 +52,9 @@ import java.util.List;
 import java.util.Map;
 import java.io.Serializable;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 /**
  * Workflow service beans.
  *
@@ -61,6 +63,9 @@ import java.io.Serializable;
  */
 public class WorkflowBean implements Serializable {
     private static final long serialVersionUID = 4771311329266251588L;
+
+    private static final Log LOG = LogFactory.getLog(WorkflowBean.class);
+
     /**
      * Session key to store the last inserted step id (for validation purposes)
      */
@@ -76,7 +81,7 @@ public class WorkflowBean implements Serializable {
     private int routeIndex = -1;
     private long fromStepId = -1;
     private long toStepId = -1;
-    private UserGroup userGroup = null;
+    private long userGroup = -1;
 
     /**
      * Default constructor
@@ -300,7 +305,7 @@ public class WorkflowBean implements Serializable {
             new FxFacesMsgErr("Workflow.err.route.create.steps.identical").addToContext();
             return "workflowEdit";
         }
-        RouteEdit route = new RouteEdit(new Route(-1, userGroup.getId(), fromStepId, toStepId));
+        RouteEdit route = new RouteEdit(new Route(-1, userGroup, fromStepId, toStepId));
         if (routes.contains(route)) {
             new FxFacesMsgWarn("Workflow.wng.route.exists").addToContext();
         } else {
@@ -310,7 +315,13 @@ public class WorkflowBean implements Serializable {
                     getStep(route.getFromStepId()).getStepDefinitionId()).getLabel().getBestTranslation();
             String toStepName = env.getStepDefinition(
                     getStep(route.getToStepId()).getStepDefinitionId()).getLabel().getBestTranslation();
-            new FxFacesMsgInfo("Workflow.nfo.route.added", fromStepName, toStepName, userGroup.getName()).addToContext();
+            String groupName = String.valueOf(userGroup);
+            try {
+                groupName = EJBLookup.getUserGroupEngine().load(userGroup).getName();
+            } catch (FxApplicationException e) {
+                LOG.error(e);
+            }
+            new FxFacesMsgInfo("Workflow.nfo.route.added", fromStepName, toStepName, groupName).addToContext();
         }
         return "workflowEdit";
     }
@@ -559,11 +570,11 @@ public class WorkflowBean implements Serializable {
         this.toStepId = toStepId;
     }
 
-    public UserGroup getUserGroup() {
+    public long getUserGroup() {
         return userGroup;
     }
 
-    public void setUserGroup(UserGroup userGroup) {
+    public void setUserGroup(long userGroup) {
         this.userGroup = userGroup;
     }
 

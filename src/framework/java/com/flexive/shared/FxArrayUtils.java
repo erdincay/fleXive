@@ -32,12 +32,13 @@
 package com.flexive.shared;
 
 import com.flexive.shared.exceptions.FxInvalidParameterException;
+import org.apache.commons.lang.StringUtils;
 
 import java.lang.reflect.Array;
-import java.util.*;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.ArrayUtils;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.List;
 
 /**
  * Utility functions for arrays.
@@ -99,6 +100,18 @@ public class FxArrayUtils {
         return iInts;
     }
 
+    /**
+     * Convert a Long list to a primitive long array
+     *
+     * @param groups List<Long>
+     * @return long[]
+     */
+    public static long[] toLongArray(List<Long> groups) {
+        long[] res = new long[groups.size()];
+        for (int i = 0; i < res.length; i++)
+            res[i] = groups.get(i);
+        return res;
+    }
 
     /**
      * Removes dupicated entries from the list.
@@ -110,14 +123,14 @@ public class FxArrayUtils {
         if (list == null || list.length == 0) {
             return new int[0];
         }
-        Hashtable<Integer, Boolean>tbl = new Hashtable<Integer, Boolean>(list.length);
-        for (int ele:list) {
+        Hashtable<Integer, Boolean> tbl = new Hashtable<Integer, Boolean>(list.length);
+        for (int ele : list) {
             tbl.put(ele, Boolean.FALSE);
         }
         int[] result = new int[tbl.size()];
         int pos = 0;
         for (Enumeration e = tbl.keys(); e.hasMoreElements();) {
-            result[pos++] = (Integer)e.nextElement();
+            result[pos++] = (Integer) e.nextElement();
         }
         return result;
     }
@@ -132,13 +145,13 @@ public class FxArrayUtils {
         if (list == null || list.length == 0) {
             return new long[0];
         }
-        Hashtable<Long, Boolean>tbl = new Hashtable<Long, Boolean>(list.length);
-        for (long ele:list) {
+        Hashtable<Long, Boolean> tbl = new Hashtable<Long, Boolean>(list.length);
+        for (long ele : list) {
             tbl.put(ele, Boolean.FALSE);
         }
         long[] result = new long[tbl.size()];
         int pos = 0;
-        for (long element: Collections.list(tbl.keys())) {
+        for (long element : Collections.list(tbl.keys())) {
             result[pos++] = element;
         }
         return result;
@@ -147,7 +160,7 @@ public class FxArrayUtils {
     /**
      * Adds a element to the end of the array, if it is not already contained.
      *
-     * @param list original list
+     * @param list    original list
      * @param element the element to add
      * @return the new list
      */
@@ -170,7 +183,7 @@ public class FxArrayUtils {
     /**
      * Adds a element to the end of the array, if it is not already contained.
      *
-     * @param list original list
+     * @param list    original list
      * @param element the element to add
      * @return the new list
      */
@@ -193,19 +206,19 @@ public class FxArrayUtils {
     /**
      * Adds a element to the end of the array.
      *
-     * @param list original list
+     * @param list    original list
      * @param element the element to add
-     * @param unique    true if the element should only be added if it is not already contained
+     * @param unique  true if the element should only be added if it is not already contained
      * @return the new list
      */
     @SuppressWarnings("unchecked")
     public static <T> T[] addElement(T[] list, T element, boolean unique) {
         // Avoid null pointer exception
         if (list == null) {
-            if( element == null ) {
+            if (element == null) {
                 return null;
             }
-            list = (T[])Array.newInstance(element.getClass(), 1);
+            list = (T[]) Array.newInstance(element.getClass(), 1);
             list[0] = element;
             return list;
         }
@@ -218,7 +231,7 @@ public class FxArrayUtils {
         }
 
         // Add the element to the end of the list
-        T[] result = (T[])Array.newInstance(element.getClass(), list.length + 1);
+        T[] result = (T[]) Array.newInstance(element.getClass(), list.length + 1);
         System.arraycopy(list, 0, result, 0, list.length);
         result[result.length - 1] = element;
         return result;
@@ -257,7 +270,7 @@ public class FxArrayUtils {
      */
     public static int indexOf(String[] list, String element, boolean ignoreCase) {
         if (list == null) return -1;
-        int pos =0;
+        int pos = 0;
         for (String aList : list) {
             if (aList == null && element == null) return pos;
             if (aList == null) return -1;
@@ -272,6 +285,11 @@ public class FxArrayUtils {
         return -1;
     }
 
-
+    public static long[] toPrimitiveLongArray(Long[] array) {
+        long[] res = new long[array.length];
+        for(int i=0;i<array.length;i++)
+            res[i] = array[i];
+        return res;
+    }
 }
 

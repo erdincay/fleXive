@@ -924,6 +924,15 @@ public class ContentEditorBean implements ActionBean, Serializable {
         this.acl = acl;
     }
 
+    public long getAclId() {
+        return acl.getId();
+    }
+
+    public void setAclId(long aclId) {
+        setAcl(CacheAdmin.getEnvironment().getACL(aclId));
+
+    }
+
     public CeIdGenerator getIdGenerator() {
         return idGenerator;
     }

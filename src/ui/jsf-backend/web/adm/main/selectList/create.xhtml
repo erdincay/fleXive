@@ -32,15 +32,14 @@
                 <h:selectBooleanCheckbox id="allowDynamicCreation" value="#{selectListBean.selectListAllowDynamicCreation}"/>
             </fx:formRow>
             <fx:formRow labelKey="SelectList.label.selectList.createItemACL" id="createItemACL">
-                <t:selectOneListbox size="1" id="createItemACL" value="#{selectListBean.selectListCreateItemACLId}">
+                <h:selectOneListbox size="1" id="createItemACL" value="#{selectListBean.newCreateItemACL}">
                     <f:selectItems value="#{fxSelectBean.selectListACLs}" />
-                </t:selectOneListbox>
+                </h:selectOneListbox>
             </fx:formRow>
             <fx:formRow labelKey="SelectList.label.selectList.defaultItemACL" id="defaultItemACL">
-                <t:selectOneListbox size="1" id="defaultItemACL" value="#{selectListBean.selectListDefaultItemACL}"
-                                    converter="SelectableConverter">
+                <h:selectOneListbox size="1" id="defaultItemACL" value="#{selectListBean.newDefaultItemACL}">
                     <f:selectItems value="#{selectListBean.selectListItemACLs}" />
-                </t:selectOneListbox>
+                </h:selectOneListbox>
             </fx:formRow>
 
             <ui:fragment rendered="#{fxSystemBean.isInRole['SelectListEditor']}">

@@ -148,7 +148,7 @@
 							</h:selectOneListbox>
 						</td>
 						<td>
-							<h:selectOneListbox id="userGroup" value="#{workflowBean.userGroup}" size="1" converter="SelectableConverter">
+							<h:selectOneListbox id="userGroup" value="#{workflowBean.userGroup}" size="1">
 								<f:selectItems value="#{fxSystemBean.userTicket.globalSupervisor ? fxSelectBean.globalUserGroups : fxSelectBean.userGroups}"/>
 							</h:selectOneListbox>
 						</td>

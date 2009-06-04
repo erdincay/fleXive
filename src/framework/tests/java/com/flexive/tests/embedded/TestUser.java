@@ -38,8 +38,6 @@ import com.flexive.shared.security.Role;
 import com.flexive.shared.security.AccountEdit;
 import org.apache.commons.lang.RandomStringUtils;
 
-import java.util.Date;
-
 /**
  * Interface for test user management.
  *
@@ -89,7 +87,7 @@ public class TestUser {
         userId = accounts.create(account, password);
         if (roles != null) {
             // set user-defined roles
-            accounts.setRoles(userId, Role.toIdArray(roles));
+            accounts.setRoles(userId, Role.toPrimitiveIdArray(roles));
         }
         this.userGroupId = EJBLookup.getUserGroupEngine().create(this.userGroup, "#112233", mandatorId);
         accounts.setGroups(this.userId, this.userGroupId);

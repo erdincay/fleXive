@@ -17,7 +17,7 @@
             <adm:tab label="#{fxMessageBean['UserGroup.tabtitle.edit,#{userGroupBean.name}']}" active="true" id="createGroupTable"/>
 
             <fx:formRow label="#{fxMessageBean['UserGroup.field.mandator']}" id="mandator">
-                <h:inputText id="mandator" value="#{userGroupBean.mandator.name}" readonly="true"/>
+                <h:inputText readonly="true" value="#{fxMapBean.mandators[userGroupBean.mandator].name}"/>
                 <h:inputHidden value="#{userGroupBean.id}"/>
             </fx:formRow>
 
@@ -37,7 +37,7 @@
             </fx:formRow>
 
             <fx:formRow label="#{fxMessageBean['UserGroup.field.roles']}" id="roles" height="95">
-                <h:selectManyListbox id="roles" value="#{userGroupBean.roles}" size="6" converter="SelectableConverter">
+                <h:selectManyListbox id="roles" value="#{userGroupBean.roles}" size="6">
                     <f:selectItems value="#{fxSelectBean.roles}" />
                 </h:selectManyListbox>
             </fx:formRow>

@@ -150,6 +150,24 @@ public class FxSelectListEdit extends FxSelectList implements Serializable {
     }
 
     /**
+     * Set the create item ACL
+     *
+     * @param createItemACL create item ACL
+     */
+    public void setCreateItemACL(ACL createItemACL) {
+        this.createItemACL = createItemACL;
+    }
+
+    /**
+     * Set the new item ACL
+     *
+     * @param newItemACL new item ACL
+     */
+    public void setNewItemACL(ACL newItemACL) {
+        this.newItemACL = newItemACL;
+    }
+
+    /**
      * Set a new default item, setting <code>null</code> will clear the default item
      *
      * @param defaultItem a new default item, setting <code>null</code> will clear the default item
