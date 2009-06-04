@@ -136,8 +136,8 @@
                      <tbody>
                         <tr>
                             <td>
-                                <h:selectOneListbox size="1" id="selectedScriptInfo" value="#{propertyEditorBean.selectedScriptInfo}"
-                                        converter="SelectableConverter" disabled="#{not propertyEditorBean.editMode}">
+                                <h:selectOneListbox size="1" id="selectedScriptInfo" value="#{propertyEditorBean.selectedScriptInfoId}"
+                                        disabled="#{not propertyEditorBean.editMode}">
                                     <f:selectItems value="#{fxSelectBean.assignmentScripts}"/>
                                     <a4j:support event="onchange" reRender="selectedScriptEvent" />
                                 </h:selectOneListbox>

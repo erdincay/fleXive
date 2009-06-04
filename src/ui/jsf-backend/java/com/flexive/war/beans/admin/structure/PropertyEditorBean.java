@@ -1172,11 +1172,19 @@ public class PropertyEditorBean implements ActionBean, Serializable {
         scriptWrapper.remove(scriptListFiler);
     }
 
+    public long getSelectedScriptInfoId() {
+        return getSelectedScriptInfo().getId();
+    }
+
+    public void setSelectedScriptInfoId(long selectedScriptInfoId) {
+        setSelectedScriptInfo(CacheAdmin.getEnvironment().getScript(selectedScriptInfoId));
+    }
+
     public FxScriptInfo getSelectedScriptInfo() {
         if (selectedScriptInfo == null) {
             SelectBean b= new SelectBean();
             if (b.getAssignmentScripts().size()>0)
-                selectedScriptInfo = (FxScriptInfo)b.getAssignmentScripts().get(0).getValue();
+                selectedScriptInfo = CacheAdmin.getEnvironment().getScript((Long)b.getAssignmentScripts().get(0).getValue());
         }
         return selectedScriptInfo;
     }

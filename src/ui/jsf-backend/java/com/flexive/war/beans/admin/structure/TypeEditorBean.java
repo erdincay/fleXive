@@ -797,11 +797,19 @@ public class TypeEditorBean implements Serializable {
         scriptWrapper.remove(scriptListFiler);
     }
 
+    public long getSelectedScriptInfoId() {
+        return getSelectedScriptInfo().getId();
+    }
+
+    public void setSelectedScriptInfoId(long selectedScriptInfoId) {
+        setSelectedScriptInfo(CacheAdmin.getEnvironment().getScript(selectedScriptInfoId));
+    }
+
     public FxScriptInfo getSelectedScriptInfo() {
         if (selectedScriptInfo == null) {
             SelectBean b= new SelectBean();
             if (b.getTypeScripts().size()>0)
-                selectedScriptInfo = (FxScriptInfo)b.getTypeScripts().get(0).getValue();
+                selectedScriptInfo = CacheAdmin.getEnvironment().getScript((Long)b.getTypeScripts().get(0).getValue());
         }
         return selectedScriptInfo;
     }

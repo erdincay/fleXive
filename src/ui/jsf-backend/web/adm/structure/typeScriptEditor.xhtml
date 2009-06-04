@@ -123,8 +123,7 @@
                         <tbody>
                             <tr>
                                 <td>
-                                    <h:selectOneListbox size="1" id="selectedScriptInfo" value="#{typeEditorBean.selectedScriptInfo}"
-                                            converter="SelectableConverter" disabled="#{not typeEditorBean.editMode}">
+                                    <h:selectOneListbox size="1" id="selectedScriptInfo" value="#{typeEditorBean.selectedScriptInfoId}" disabled="#{not typeEditorBean.editMode}">
                                         <f:selectItems value="#{fxSelectBean.typeScripts}"/>
                                         <a4j:support event="onchange" reRender="selectedScriptEvent" />
                                     </h:selectOneListbox>
