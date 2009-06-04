@@ -138,7 +138,7 @@ public class WorkflowBeanTest {
             // add route between inserted steps
             workflowBean.setFromStepId(workflowBean.getSteps().get(0).getId());
             workflowBean.setToStepId(workflowBean.getSteps().get(1).getId());
-            workflowBean.setUserGroup(new UserGroup(UserGroup.GROUP_EVERYONE, "everyone", Mandator.MANDATOR_FLEXIVE, "#FFFFFF"));
+            workflowBean.setUserGroup(1);
             workflowBean.addRoute();
             // persist to database
             workflowBean.save();
