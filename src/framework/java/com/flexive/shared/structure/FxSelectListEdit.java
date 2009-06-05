@@ -32,8 +32,8 @@
 package com.flexive.shared.structure;
 
 import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.SelectableObjectWithName;
 import com.flexive.shared.SelectableObjectWithLabel;
+import com.flexive.shared.SelectableObjectWithName;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.value.FxString;
 
@@ -68,7 +68,7 @@ public class FxSelectListEdit extends FxSelectList implements Serializable {
         this.isNew = false;
         this.original = list;
         this.parentList = list.parentList;
-        for (FxSelectListItem i: list.getItems()) {
+        for (FxSelectListItem i : list.getItems()) {
             new FxSelectListItemEdit(i, this);
         }
     }
@@ -113,6 +113,9 @@ public class FxSelectListEdit extends FxSelectList implements Serializable {
     public boolean changes() {
         return isNew || original == null || !original.name.equals(this.name) ||
                 original.parentListId != this.parentListId || !original.label.equals(this.label) ||
+                original.createItemACL.getId() != this.createItemACL.getId() ||
+                original.newItemACL.getId() != this.newItemACL.getId() ||
+                original.allowDynamicItemCreation != this.allowDynamicItemCreation ||
                 !original.description.equals(this.description);
     }
 
@@ -179,16 +182,25 @@ public class FxSelectListEdit extends FxSelectList implements Serializable {
     }
 
     /**
+     * Set if items may be created dynamically (in UI's other than backends!)
+     *
+     * @param allowDynamicItemCreation items may be created dynamically
+     */
+    public void setAllowDynamicItemCreation(boolean allowDynamicItemCreation) {
+        this.allowDynamicItemCreation = allowDynamicItemCreation;
+    }
+
+    /**
      * returns all list items as editable list items.
      *
-     * @return  a list of editable list items.
+     * @return a list of editable list items.
      */
     public List<FxSelectListItemEdit> getEditableItems() {
-        List <FxSelectListItemEdit> editableItems= new ArrayList<FxSelectListItemEdit>();
+        List<FxSelectListItemEdit> editableItems = new ArrayList<FxSelectListItemEdit>();
         for (Long l : items.keySet()) {
-            FxSelectListItem i= items.get(l);
+            FxSelectListItem i = items.get(l);
             if (i instanceof FxSelectListItemEdit)
-                editableItems.add((FxSelectListItemEdit)i);
+                editableItems.add((FxSelectListItemEdit) i);
             else
                 editableItems.add(new FxSelectListItemEdit(i));
         }
@@ -198,7 +210,7 @@ public class FxSelectListEdit extends FxSelectList implements Serializable {
     /**
      * adds a new item to the select list.
      *
-     * @param item    the item to add to the select list
+     * @param item the item to add to the select list
      */
 
     public void addItem(FxSelectListItem item) {
@@ -208,11 +220,11 @@ public class FxSelectListEdit extends FxSelectList implements Serializable {
     /**
      * Removes the item with Id from the items map.
      *
-     * @param id    id of the item to remove
+     * @param id id of the item to remove
      */
 
     public void removeItem(Long id) {
-        this.items.remove(id);    
+        this.items.remove(id);
     }
 
     /**

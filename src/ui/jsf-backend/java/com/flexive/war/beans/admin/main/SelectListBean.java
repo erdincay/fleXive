@@ -558,6 +558,7 @@ public class SelectListBean implements Serializable {
                 selectList.setName(selectListName);
                 selectList.setLabel(selectListLabel);
                 selectList.setDescription(selectListDescription);
+                selectList.setAllowDynamicItemCreation(selectListAllowDynamicCreation);
             }
             EJBLookup.getSelectListEngine().save(selectList);
             reset();

@@ -17,6 +17,7 @@
     </ui:define>
 
     <ui:define name="body">
+        <c:set var="readonlyList" value="#{not fxSystemBean.isInRole['SelectListEditor']}"/>
         <h:form id="frm" enctype="multipart/form-data">
             <adm:tab label="#{fxMessageBean['SelectList.tab.editSelectList,#{selectListBean.selectListName}']}" active="true" id="tab1"/>
 
@@ -25,24 +26,24 @@
             </div>
             
             <fx:formRow labelKey="SelectList.label.selectList.name" id="name">
-                <h:inputText id="name" value="#{selectListBean.selectListName}" disabled="#{not fxSystemBean.isInRole['SelectListEditor']}"/>
+                <h:inputText id="name" value="#{selectListBean.selectListName}" disabled="#{readonlyList}"/>
             </fx:formRow>
              <fx:formRow labelKey="SelectList.label.selectList.label" id="label">
-                <fx:fxValueInput id="label" value="#{selectListBean.selectListLabel}" readOnly="#{not fxSystemBean.isInRole['SelectListEditor']}"/>
+                <fx:fxValueInput id="label" value="#{selectListBean.selectListLabel}" readOnly="#{readonlyList}"/>
 			</fx:formRow>
             <fx:formRow labelKey="SelectList.label.selectList.description" id="description">
-                <fx:fxValueInput id="description" value="#{selectListBean.selectListDescription}" readOnly="#{not fxSystemBean.isInRole['SelectListEditor']}"/>
+                <fx:fxValueInput id="description" value="#{selectListBean.selectListDescription}" readOnly="#{readonlyList}"/>
 			</fx:formRow>
             <fx:formRow labelKey="SelectList.label.selectList.allowDynamicCreation" id="allowDynamicCreation">
-                <h:selectBooleanCheckbox id="allowDynamicCreation" value="#{selectListBean.selectListAllowDynamicCreation}" disabled="true"/>
+                <h:selectBooleanCheckbox id="allowDynamicCreation" value="#{selectListBean.selectListAllowDynamicCreation}" disabled="#{readonlyList}"/>
             </fx:formRow>
             <fx:formRow labelKey="SelectList.label.selectList.createItemACL" id="createItemACL">
-                <h:selectOneListbox size="1" id="createItemACL" value="#{selectListBean.selectListCreateItemACL}">
+                <h:selectOneListbox size="1" id="createItemACL" value="#{selectListBean.selectListCreateItemACL}" readonly="#{readonlyList}">
                     <f:selectItems value="#{fxSelectBean.selectListACLs}" />
                 </h:selectOneListbox>
             </fx:formRow>
             <fx:formRow labelKey="SelectList.label.selectList.defaultItemACL" id="defaultItemACL">
-                <h:selectOneListbox size="1" id="defaultItemACL" value="#{selectListBean.selectListDefaultItemACL}">
+                <h:selectOneListbox size="1" id="defaultItemACL" value="#{selectListBean.selectListDefaultItemACL}" readonly="#{readonlyList}">
                     <f:selectItems value="#{selectListBean.selectListItemACLs}" />
                 </h:selectOneListbox>
             </fx:formRow>
