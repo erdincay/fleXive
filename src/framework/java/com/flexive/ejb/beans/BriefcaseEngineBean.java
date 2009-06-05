@@ -423,7 +423,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
      * @param perms             the permissions that are needed
      * @return a sql filter, eg '([briefcaseTblAlias.]CREATED_BY=12 OR ACL IS NOT NULL)'
      */
-    public static String getSqlAccessFilter(String briefcaseTblAlias, boolean includeShared, ACLPermission... perms) {
+    private String getSqlAccessFilter(String briefcaseTblAlias, boolean includeShared, ACLPermission... perms) {
         final UserTicket ticket = FxContext.getUserTicket();
         StringBuffer filter = new StringBuffer(1024);
         if (briefcaseTblAlias == null) {
@@ -442,13 +442,13 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
                 filter.append(" OR ").append(colACL).append(" IS NOT null");
             } else if (ticket.isMandatorSupervisor()) {
                 // add all shared(match by ACL or mandator)
-                String acls = ticket.getACLsCSV(0/*owner is irrelevant here*/, ACLCategory.INSTANCE, perms);
+                String acls = ticket.getACLsCSV(0/*owner is irrelevant here*/, ACLCategory.BRIEFCASE, perms);
                 filter.append((acls.length() > 0) ? (" OR " + colACL + " IN (" + acls + ") ") : "").
                         append(" OR (").append(colACL).append(" IS NOT null AND ").
                         append(colMANDATOR).append("=").append(ticket.getMandatorId()).append(")");
             } else {
                 // add all shared(match by ACL)
-                String acls = ticket.getACLsCSV(0/*owner is irrelevant here*/, ACLCategory.INSTANCE, perms);
+                String acls = ticket.getACLsCSV(0/*owner is irrelevant here*/, ACLCategory.BRIEFCASE, perms);
                 if (acls.length() > 0) {
                     filter.append(" OR ").append(colACL).append(" IN (").append(acls).append(") ");
                 }
