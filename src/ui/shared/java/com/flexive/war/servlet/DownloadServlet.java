@@ -33,6 +33,10 @@ package com.flexive.war.servlet;
 
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.structure.FxType;
+import com.flexive.shared.structure.FxPropertyAssignment;
+import com.flexive.shared.structure.FxDataType;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
@@ -51,6 +55,9 @@ import java.net.URLEncoder;
  * The requested value is identified by its XPath.</p>
  * <p>Link format:</p>
  * <pre>/download/pk{n.m}/xpath/filename.ext</pre>
+ * <p>
+ * When no XPath is provided, the first mandatory binary property of the instance's type is chosen.
+ * </p>
  *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
@@ -102,12 +109,22 @@ public class DownloadServlet implements Servlet {
             return;
         }
         // extract xpath
-        final String xpath;
+        String xpath = null;
         try {
             xpath = FxSharedUtils.decodeXPath(uri.substring(uri.indexOf('/') + 1, uri.lastIndexOf('/')));
         } catch (IndexOutOfBoundsException e) {
-            FxServletUtils.sendErrorMessage(response, "Invalid xpath/filename in getResult: " + uri);
-            return;
+            // no XPath provided, check if a mandatory binary property exists
+            final FxType type = CacheAdmin.getEnvironment().getType(content.getTypeId());
+            for (FxPropertyAssignment assignment : type.getAllProperties()) {
+                if (assignment.getProperty().getDataType() == FxDataType.Binary && assignment.getMultiplicity().getMin() >= 1) {
+                    xpath = assignment.getXPath();
+                    break;
+                }
+            }
+            if (xpath == null) {
+                FxServletUtils.sendErrorMessage(response, "Invalid xpath/filename in getResult: " + uri);
+                return;
+            }
         }
         // get binary descriptor
         final BinaryDescriptor descriptor;

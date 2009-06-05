@@ -18,6 +18,7 @@ function onShowContextMenu() {
             var perms = flexive.yui.datatable.getPermissions(resultTable, this.contextEventTarget);
             var selectedIds = getSelectedIds();
             var pk = tryGetPk(this.contextEventTarget);
+            var hasBinary = flexive.yui.datatable.getRecordValue(resultTable, this.contextEventTarget, "hasBinary") == "true";
             contextMenuPK = pk;
             var noItemUnderCursor = pk == null;
             var noSelection = selectedIds.length == 0;
@@ -25,6 +26,7 @@ function onShowContextMenu() {
             flexive.yui.setMenuItems(["copy", "copy_briefcases"], "disabled", noSelection && noItemUnderCursor);
             flexive.yui.setMenuItem("edit", "disabled", !perms["edit"]);
             flexive.yui.setMenuItem("delete", "disabled", !perms["delete"]);
+            flexive.yui.setMenuItem("download", "disabled", !hasBinary);
             if (getBriefcaseId() != -1) {
                 flexive.yui.setMenuItem("deleteBriefcase", "disabled", noItemUnderCursor);
                 flexive.yui.setMenuItem("move_briefcases", "disabled", noSelection && noItemUnderCursor);
@@ -189,6 +191,9 @@ function onContextMenu(type, args) {
                 flexive.yui.datatable.selectAllPageCells(resultTable);
             }
             parent.showStatusMessage(MESSAGES["SearchResult.status.selected"].replace("{0}", getSelectedIds().length));
+            break;
+        case "download":
+            window.location = getBase() + "download/pk" + pk.toString() + "/binary";
             break;
         default:
             // ignore, since a custom click handler could have been specified

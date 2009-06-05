@@ -31,7 +31,10 @@
  ***************************************************************/
 package com.flexive.shared.structure;
 
-import com.flexive.shared.*;
+import com.flexive.shared.AbstractSelectableObjectWithLabel;
+import com.flexive.shared.FxContext;
+import com.flexive.shared.SelectableObjectWithLabel;
+import com.flexive.shared.XPathElement;
 import com.flexive.shared.content.FxGroupData;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.content.FxPermissionUtils;
@@ -44,11 +47,11 @@ import com.flexive.shared.scripting.FxScriptMappingEntry;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.LifeCycleInfo;
 import com.flexive.shared.security.UserTicket;
-import com.flexive.shared.value.FxString;
 import com.flexive.shared.value.FxReference;
+import com.flexive.shared.value.FxString;
 import com.flexive.shared.workflow.Workflow;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
 
 import java.io.Serializable;
 import java.util.*;
@@ -486,6 +489,22 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      */
     public List<FxPropertyAssignment> getAssignedProperties() {
         return Collections.unmodifiableList(assignedProperties);
+    }
+
+    /**
+     * Get all property assignments that are attached to the type's root or to a group
+     * attached to the type.
+     *
+     * @return  all property assignments for the type
+     * @since 3.1
+     */
+    public List<FxPropertyAssignment> getAllProperties() {
+        final List<FxPropertyAssignment> result = new ArrayList<FxPropertyAssignment>();
+        result.addAll(assignedProperties);
+        for (FxGroupAssignment groupAssignment : getAssignedGroups()) {
+            result.addAll(groupAssignment.getAllProperties());
+        }
+        return result;
     }
 
     /**

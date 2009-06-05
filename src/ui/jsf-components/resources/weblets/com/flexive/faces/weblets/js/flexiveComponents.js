@@ -556,7 +556,7 @@ flexive.yui.datatable.ThumbnailView.prototype = {
     getRows: function() {
         // transpose the linear result rows according to the grid size
         var grid = [];
-        var currentRow = { "pk" : [], "permissions": [] };    // the columns of the current row
+        var currentRow = { "pk" : [], "permissions": [], "hasBinary": [] };    // the columns of the current row
         var currentColumn = 0;
         var textColumnKey = this.result.columns.length > 0 ? this.result.columns[0].key : null;
         for (var i = 0; i < this.result.rowCount; i++) {
@@ -582,13 +582,14 @@ flexive.yui.datatable.ThumbnailView.prototype = {
             if (currentColumn >= this.gridColumns) {
                 // grid row completed
                 grid.push(currentRow);
-                currentRow = { "pk" : [], "permissions": [] };
+                currentRow = { "pk" : [], "permissions": [], "hasBinary": [] };
                 currentColumn = 0;
             }
             // store column
             currentRow["c" + currentColumn] = data;
             currentRow.pk.push(resultRow.pk);
             currentRow.permissions.push(resultRow.permissions);
+            currentRow.hasBinary.push(resultRow.hasBinary);
             currentColumn++;
         }
         if (currentColumn > 0) {
@@ -598,7 +599,7 @@ flexive.yui.datatable.ThumbnailView.prototype = {
     },
 
     getResponseSchema: function() {
-        var fields = ["pk", "permissions"];
+        var fields = ["pk", "permissions", "hasBinary"];
         for (var i = 0; i < this.gridColumns; i++) {
             fields.push("c" + i);
         }

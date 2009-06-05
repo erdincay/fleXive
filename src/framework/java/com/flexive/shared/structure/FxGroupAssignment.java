@@ -31,14 +31,14 @@
  ***************************************************************/
 package com.flexive.shared.structure;
 
-import com.flexive.shared.XPathElement;
 import com.flexive.shared.FxContext;
-import com.flexive.shared.security.UserTicket;
+import com.flexive.shared.XPathElement;
 import com.flexive.shared.content.FxData;
 import com.flexive.shared.content.FxGroupData;
 import com.flexive.shared.exceptions.FxCreateException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxNotFoundException;
+import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.value.FxString;
 
 import java.io.Serializable;
@@ -149,6 +149,23 @@ public class FxGroupAssignment extends FxAssignment implements Serializable {
      */
     public List<FxPropertyAssignment> getAssignedProperties() {
         return Collections.unmodifiableList(propertyAssignments);
+    }
+
+    /**
+     * Return all property assignments that are assigned to this group or any subgroup.
+     *
+     * @return  all property assignments that are assigned to this group or any subgroup.
+     */
+    public List<FxPropertyAssignment> getAllProperties() {
+        if (groupAssignments.isEmpty()) {
+            return Collections.unmodifiableList(propertyAssignments);
+        }
+        final List<FxPropertyAssignment> result = new ArrayList<FxPropertyAssignment>();
+        result.addAll(propertyAssignments);
+        for (FxGroupAssignment childGroup : groupAssignments) {
+            result.addAll(childGroup.getAllProperties());
+        }
+        return result;
     }
 
     /**

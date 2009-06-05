@@ -217,7 +217,7 @@ public class SearchResultBean implements ActionBean, Serializable {
                 }
 
                 final FxResultSet result = getQueryBuilder()
-                        .select("@pk", "@permissions", "@*")
+                        .select("@pk", "@permissions", "typedef", "@*")
                         .startRow(0)
                         .maxRows(Integer.MAX_VALUE)
                         .getResult();

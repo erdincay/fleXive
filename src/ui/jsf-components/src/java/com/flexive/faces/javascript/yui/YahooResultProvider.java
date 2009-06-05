@@ -43,8 +43,7 @@ import com.flexive.shared.exceptions.FxRuntimeException;
 import com.flexive.shared.exceptions.FxUpdateException;
 import com.flexive.shared.search.*;
 import com.flexive.shared.security.PermissionSet;
-import com.flexive.shared.structure.FxEnvironment;
-import com.flexive.shared.structure.FxProperty;
+import com.flexive.shared.structure.*;
 import com.flexive.shared.value.*;
 import com.flexive.shared.value.renderer.FxValueRendererFactory;
 import com.flexive.war.JsonWriter;
@@ -57,9 +56,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Arrays;
+import java.util.*;
 
 /**
  * Provides map interfaces for generating JSON row and column information
@@ -184,6 +181,11 @@ public class YahooResultProvider implements Serializable {
         writer.startArray();
         final SimpleDateFormat sortableDateFormat = new SimpleDateFormat("yyyyMMdd");
         final FxEnvironment environment = CacheAdmin.getEnvironment();
+
+        final int pkColumnIndex = result.getColumnIndex("@pk");
+        final int permissionsColumnIndex = result.getColumnIndex("@permissions");
+        final int typeColumnIndex = result.getColumnIndex("typedef");
+        final Map<Long, Boolean> typeHasBinary = new HashMap<Long, Boolean>();  // type ID --> has binary property?
         for (FxResultRow row : result.getResultRows()) {
             writer.startMap();
             for (int i = firstColumn; i <= result.getColumnCount(); i++) {
@@ -205,13 +207,29 @@ public class YahooResultProvider implements Serializable {
                 }
                 writer.writeAttribute(getColumnKey(result, i), output);
             }
-            if (result.getColumnIndex("@pk") != -1) {
+            if (pkColumnIndex != -1) {
                 // add special PK column
-                writer.writeAttribute("pk", row.getPk("@pk"));
+                writer.writeAttribute("pk", row.getPk(pkColumnIndex));
             }
-            if (result.getColumnIndex("@permissions") != -1) {
+            if (typeColumnIndex != -1) {
+                // check if the type has at least one binary property
+                final Long typeId = row.getLong(typeColumnIndex);
+                if (!typeHasBinary.containsKey(typeId)) {
+                    final FxType type = environment.getType(typeId);
+                    boolean hasBinary = false;
+                    for (FxPropertyAssignment pa : type.getAllProperties()) {
+                        if (pa.getProperty().getDataType() == FxDataType.Binary && pa.getMultiplicity().getMin() >= 1) {
+                            hasBinary = true;
+                            break;
+                        }
+                    }
+                    typeHasBinary.put(typeId, hasBinary);
+                }
+                writer.writeAttribute("hasBinary", typeHasBinary.get(typeId));
+            }
+            if (permissionsColumnIndex != -1) {
                 // add permissions object
-                final PermissionSet permissions = row.getPermissions(result.getColumnIndex("@permissions"));
+                final PermissionSet permissions = row.getPermissions(permissionsColumnIndex);
                 int perms = 0;
                 perms |= (permissions.isMayRead() ? 1 : 0);         // read
                 perms |= (permissions.isMayCreate() ? 1 : 0) << 1;  // create
@@ -280,6 +298,9 @@ public class YahooResultProvider implements Serializable {
         }
         if (result.getColumnIndex("@permissions") != -1) {
             writer.startMap().writeAttribute("key", "permissions").closeMap();
+        }
+        if (result.getColumnIndex("typedef") != -1) {
+            writer.startMap().writeAttribute("key", "hasBinary").closeMap();
         }
         writer.closeArray();
         writer.closeMap();
