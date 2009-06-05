@@ -18,6 +18,8 @@ Ajax4JSF: place this component in the page region that will be re-rendered (e.g.
 Parameters:
     var      - name of the javascript variable that exposes the Yahoo DataTable widget (default: resultTable)
     value    - the result set to be rendered, or a plain text FxSQL query
+    previewSize - name of the preview size to be used for thumbnails 
+            (see com.flexive.shared.value.BinaryDescriptor#PreviewSizes).
 
 <ui:composition>
 
@@ -31,7 +33,7 @@ Parameters:
                 // refresh only if datatable is already available - also prevents refresh during initial load
                 #{var}.deleteRows(0, 9999999);
                 var result = #{fxSystemBean.ajaxRequest ? fx:getJsonResult(value, null) : '{}'};
-                #{var}._reset(result);
+                #{var}._reset(result, '#{empty previewSize ? 'PREVIEW2' : previewSize}');
             }
         //-->
     </script>

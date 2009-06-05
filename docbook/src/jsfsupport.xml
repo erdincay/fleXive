@@ -1301,7 +1301,7 @@
 
                     <para>
                         <programlisting language="xhtml"><![CDATA[<fx:resultTable var="name" value="query" [viewType="list|thumbnails"]
-    [clickHandler="clickHandler"]/>
+    [clickHandler="clickHandler"] [actionColumnHandler="handler"] [previewSize="previewSize"]/>
 ]]></programlisting>
                     </para>
                 </section>
@@ -1402,6 +1402,18 @@
                                 </para>
                             </listitem>
                         </varlistentry>
+                        <varlistentry>
+                            <term>previewSize</term>
+                            <listitem>
+                                <para>
+                                    name of the preview size to be used for thumbnails
+                                    (see
+                                    <link xlink:href="&flexiveJavadocBase;shared/com/flexive/shared/value/BinaryDescriptor.PreviewSizes.html">
+                                        BinaryDescriptor#PreviewSizes
+                                    </link>).
+                                </para>
+                            </listitem>
+                        </varlistentry>
                     </variablelist>
                 </section>
 
@@ -1461,6 +1473,18 @@
                                 <para>The result set to be rendered, or a plain text FxSQL query - see
                                     <link linkend="jcl_fx_resulttable">&lt;fx:resultTable></link>
                                     documentation.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>previewSize</term>
+                            <listitem>
+                                <para>
+                                    name of the preview size to be used for thumbnails
+                                    (see
+                                    <link xlink:href="&flexiveJavadocBase;shared/com/flexive/shared/value/BinaryDescriptor.PreviewSizes.html">
+                                        BinaryDescriptor#PreviewSizes
+                                    </link>).
                                 </para>
                             </listitem>
                         </varlistentry>

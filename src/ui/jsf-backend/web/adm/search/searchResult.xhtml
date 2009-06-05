@@ -92,14 +92,27 @@
                                  eventsQueue="updateResults"
                             />
                 </h:selectOneListbox>
+                <h:selectOneListbox id="previewSize" value="#{fxSearchResultBean.previewSize}" size="1" rendered="#{fxSearchResultBean.viewType == 'THUMBNAILS'}">
+                    <f:selectItems value="#{fxSelectBean.previewSizes}"/>
+                    <a4j:support event="onchange" actionListener="#{fxSearchResultBean.resetTableView}"
+                                 onsubmit="setBusyCursor();"
+                                 oncomplete="setDefaultCursor();"
+                                 reRender="refreshResults"
+                                 eventsQueue="updateResults"
+                            />
+                </h:selectOneListbox>
+
 
                 <a4j:outputPanel id="refreshResults">
-                    <fx:resultTableUpdater var="resultTable" value="#{fxSearchResultBean.result}"/>
+                    <fx:resultTableUpdater var="resultTable" previewSize="#{fxSearchResultBean.previewSize}"
+                                           value="#{fxSearchResultBean.result}"/>
                 </a4j:outputPanel>
 
 
                 <div id="resultTableContainer">
-                    <fx:resultTable var="resultTable" value="#{fxSearchResultBean.result}" actionColumnHandler="_actionColumnHandler"/>
+                    <fx:resultTable var="resultTable" value="#{fxSearchResultBean.result}"
+                                    previewSize="#{fxSearchResultBean.previewSize}"
+                                    actionColumnHandler="_actionColumnHandler"/>
                 </div>
 
                 <fx:menu name="resultsMenu" beforeShow="onShowContextMenu" clickHandler="onContextMenu" trigger="'resultTableContainer'">

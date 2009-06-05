@@ -531,13 +531,38 @@ flexiveResultList > table {
 
 .flexiveResultThumbnails .yui-dt-liner {
     position: relative;
+}
+
+.PREVIEW1 .yui-dt-liner {
+    height: 57px;  /* 42px thumbnail + 15px footer */
+}
+
+.PREVIEW1 .thumbnailContainer {
+    display: table-cell;
+    height: 42px;
+    width: 42px;
+    vertical-align: middle;
+}
+
+.PREVIEW2 .yui-dt-liner {
     height: 100px;  /* 85px thumbnail + 15px footer */
 }
 
-.flexiveResultThumbnails .thumbnailContainer {
+.PREVIEW2 .thumbnailContainer {
     display: table-cell;
     height: 85px;
     width: 85px;
+    vertical-align: middle;
+}
+
+.PREVIEW3 .yui-dt-liner {
+    height: 247px;  /* 232px thumbnail + 15px footer */
+}
+
+.PREVIEW3 .thumbnailContainer {
+    display: table-cell;
+    height: 232px;
+    width: 232px;
     vertical-align: middle;
 }
 

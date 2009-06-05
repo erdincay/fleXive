@@ -44,6 +44,7 @@ import com.flexive.shared.search.query.PropertyValueComparator;
 import com.flexive.shared.search.query.SqlQueryBuilder;
 import com.flexive.shared.search.query.VersionFilter;
 import com.flexive.shared.value.BinaryDescriptor;
+import static com.flexive.shared.value.BinaryDescriptor.PreviewSizes;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -63,7 +64,6 @@ public class SearchResultBean implements ActionBean, Serializable {
     private ResultLocation location = AdminResultLocations.ADMIN;
     private ResultSessionData sessionData = null;
     private Briefcase briefcase = null; // cached briefcase object for briefcase queries
-    private VersionFilter versionFilter = VersionFilter.MAX;
 
     // cache settings
     private FxSQLSearchParams.CacheMode cacheMode = FxSQLSearchParams.CacheMode.ON;

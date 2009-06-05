@@ -155,8 +155,6 @@ flexive.yui = new function() {
 
     /**
      * Loads the required Yahoo components of the current page.
-     *
-     * @param loaderPath    the path to yuiloader-min.js
      */
     this.load = function() {
         if (this.requiredComponents.length > 0) {
@@ -257,9 +255,13 @@ flexive.yui.datatable = new function() {
      *
      * @param result    the search result object as returned by fxSearchResultBean.jsonResult
      */
-    this.getViewWrapper = function(result, actionColumnHandler) {
+    this.getViewWrapper = function(result, actionColumnHandler, previewSizeName) {
+        var previewSize = flexive.PreviewSizes[previewSizeName];
+        if (previewSize == null) {
+            previewSize = flexive.PreviewSizes.PREVIEW2;
+        }
         return result.viewType == "THUMBNAILS"
-                ? new flexive.yui.datatable.ThumbnailView(result, actionColumnHandler)
+                ? new flexive.yui.datatable.ThumbnailView(result, actionColumnHandler, previewSize)
                 : new flexive.yui.datatable.ListView(result, actionColumnHandler);
     };
 
@@ -476,6 +478,7 @@ flexive.yui.datatable = new function() {
 /**
  * List result view - returns the linear result list of the search result
  * @param result    the search result object as returned by fxSearchResultBean.jsonResult
+ * @param actionColumnHandler    - an optional handler for generating the action column
  */
 flexive.yui.datatable.ListView = function(result, actionColumnHandler) {
     this.result = result;
@@ -526,10 +529,12 @@ flexive.yui.datatable.ListView.prototype = {
 /**
  * Thumbnail view - projects the linear result list to a thumbnail grid
  * @param result    the search result object as returned by fxSearchResultBean.jsonResult
+ * @param actionColumnHandler    - an optional handler for generating the action column
+ * @param previewSize           - the preview size to be used for thumbnails (see flexive.PreviewSizes)
  */
-flexive.yui.datatable.ThumbnailView = function(result, actionColumnHandler) {
+flexive.yui.datatable.ThumbnailView = function(result, actionColumnHandler, previewSize) {
     this.result = result;
-    this.previewSize = flexive.PreviewSizes.PREVIEW2;
+    this.previewSize = previewSize;
     this.gridColumns = Math.min(
             Math.max(1, Math.round(YAHOO.util.Dom.getViewportWidth() / (this.previewSize.size * 1.4))),
             result.rows.length
