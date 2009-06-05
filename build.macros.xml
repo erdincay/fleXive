@@ -226,6 +226,11 @@
         <attribute name="overwrite" default="false" description="If an existing table should be overwritten (true or false)"/>
         <attribute name="user" description="The database user"/>
         <attribute name="password" description="The database password"/>
+        <attribute name="nstring" default="20" description="Number of STRING columns"/>
+        <attribute name="ntext" default="10" description="Number of TEXT columns"/>
+        <attribute name="nbigint" default="10" description="Number of BIGINT columns"/>
+        <attribute name="ndouble" default="10" description="Number of DOUBLE columns"/>
+        <attribute name="nselect" default="10" description="Number of SELECT columns"/>
         <sequential >
             <path id="createFlatStorage.classpath">
                 <fileset file="@{jar}"/>
@@ -235,6 +240,11 @@
                 <arg line="-u @{user}"/>
                 <arg line="-p @{password}"/>
                 <arg value="-o"/>
+                <arg line="-nstring @{nstring}"/>
+                <arg line="-ntext @{ntext}"/>
+                <arg line="-nbigint @{nbigint}"/>
+                <arg line="-ndouble @{ndouble}"/>
+                <arg line="-nselect @{nselect}"/>
                 <arg value="@{connectionUrl}"/>
                 <arg value="@{tableName}"/>
             </java>

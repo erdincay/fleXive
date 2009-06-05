@@ -202,7 +202,7 @@
                 <attribute name="Main-Class" value="com.flexive.tools.OpenUrl"/>
             </manifest>
         </jar>
-        <jar jarfile="${flexive.build.framework.jar.dir}/flatStorageCreator.jar">
+        <jar jarfile="${flexive.build.framework.jar.dir}/flexive-flatstorage.jar">
             <fileset dir="${build.framework.classes.dir}">
                 <include name="com/flexive/tools/FlatStorageCreator*"/>
             </fileset>
@@ -619,12 +619,28 @@
                 message="Connection URL:"/>
         <input taskname="flexive" addproperty="flatstorage.tableName" defaultValue="FX_CONTENT_DATA_FLAT"
                message="Table name:"/>
-        <createFlatStorage jar="${flexive.build.framework.jar.dir}/flatStorageCreator.jar"
+        <input taskname="flexive" addproperty="flatstorage.nstring" defaultValue="20"
+               message="STRING columns:"/>
+        <input taskname="flexive" addproperty="flatstorage.ntext" defaultValue="10"
+               message="TEXT columns:"/>
+        <input taskname="flexive" addproperty="flatstorage.nbigint" defaultValue="10"
+               message="BIGINT columns:"/>
+        <input taskname="flexive" addproperty="flatstorage.ndouble" defaultValue="10"
+               message="DOUBLE columns:"/>
+        <input taskname="flexive" addproperty="flatstorage.nselect" defaultValue="10"
+               message="SELECT columns:"/>
+        <createFlatStorage jar="${flexive.build.framework.jar.dir}/flexive-flatstorage.jar"
                            extlib="lib"
                            connectionurl="${flatstorage.url}"
                            tablename="${flatstorage.tableName}"
                            user="${database.username}"
-                           password="${database.password}"/>
+                           password="${database.password}"
+                           nstring="${flatstorage.nstring}"
+                           ntext="${flatstorage.ntext}"
+                           nbigint="${flatstorage.nbigint}"
+                           ndouble="${flatstorage.ndouble}"
+                           nselect="${flatstorage.nselect}"
+                />
     </target>
 
     <target name="examples">
@@ -661,6 +677,7 @@
             <fileset dir="${build.ui.jar.dir}" includes="*.jar" excludes="flexive-backend.jar,flexive-plugin-*.jar"/>
         </copy>
         <copy file="${flexive.build.framework.jar.dir}/flexive-ejb.jar" tofile="${flexive.dist.lib.dir}/flexive-ejb.jar"/>
+        <copy file="${flexive.build.framework.jar.dir}/flexive-flatstorage.jar" tofile="${flexive.dist.lib.dir}/flexive-flatstorage.jar"/>
 
         <!-- Copy backend administration to applications folder -->
         <copy file="${flexive.base.build.dir}/ui/flexive.war" todir="${flexive.dist.apps.dir}/flexive-backend"/>

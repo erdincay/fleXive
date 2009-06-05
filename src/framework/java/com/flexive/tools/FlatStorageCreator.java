@@ -158,6 +158,11 @@ public class FlatStorageCreator {
         options.addOption("o", "overwrite", false, "overwrite existing table");
         options.addOption("u", "user", true, "the database user name");
         options.addOption("p", "password", true, "the database user password");
+        options.addOption("ns", "nstring", true, "number of STRING columns");
+        options.addOption("nt", "ntext", true, "number of TEXT columns");
+        options.addOption("ni", "nbigint", true, "number of BIGINT columns");
+        options.addOption("nd", "ndouble", true, "number of DOUBLE columns");
+        options.addOption("nsel", "nselect", true, "number of SELECT columns");
         final CommandLine commandLine;
         try {
             commandLine = new PosixParser().parse(options, args);
@@ -185,6 +190,18 @@ public class FlatStorageCreator {
 
         Connection con = null;
         try {
+            final Map<ColumnType, Integer> overrides = new HashMap<ColumnType, Integer>();
+            for (ColumnType type : ColumnType.values()) {
+                final String argName = "n" + type.name().toLowerCase();
+                if (commandLine.hasOption(argName)) {
+                    try {
+                        overrides.put(type, Integer.valueOf(commandLine.getOptionValue(argName)));
+                    } catch (NumberFormatException e) {
+                        System.err.println("Invalid value for argument " + argName + ": " + commandLine.getOptionValue(argName));
+                        return;
+                    }
+                }
+            }
             con = DriverManager.getConnection(
                             url,
                             commandLine.getOptionValue("user"),
@@ -194,7 +211,7 @@ public class FlatStorageCreator {
                     con,
                     tableName,
                     commandLine.hasOption("overwrite"),
-                    null
+                    overrides
             );
             fsc.createTable();
         } catch (SQLException e) {

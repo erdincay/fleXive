@@ -824,12 +824,10 @@ public final class FxSharedUtils {
         } catch (IOException e) {
             LOG.error(e.getMessage(), e);
         } finally {
-            if (in != null) {
-                try {
-                    in.close();
-                } catch (IOException e) {
-                    // ignore
-                }
+            try {
+                in.close();
+            } catch (IOException e) {
+                // ignore
             }
         }
         return sb.toString();
