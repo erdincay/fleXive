@@ -536,7 +536,7 @@ flexive.yui.datatable.ThumbnailView = function(result, actionColumnHandler, prev
     this.result = result;
     this.previewSize = previewSize;
     this.gridColumns = Math.min(
-            Math.max(1, Math.round(YAHOO.util.Dom.getViewportWidth() / (this.previewSize.size * 1.4))),
+            Math.max(1, parseInt((YAHOO.util.Dom.getViewportWidth() - 50) / (this.previewSize.size + 20))),
             result.rows.length
     );
     this.rowsPerPage = 5;

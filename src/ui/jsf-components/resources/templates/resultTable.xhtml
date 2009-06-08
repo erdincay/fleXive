@@ -28,6 +28,8 @@ Parameters:
                 @pk or @permissions properties.
     previewSize - name of the preview size to be used for thumbnails 
                 (see com.flexive.shared.value.BinaryDescriptor#PreviewSizes).
+    rowsPerPage - current value for the paginator (optional)
+    initialPage - current page index for the paginator (optional)
 <ui:composition>
 
     <c:if test="#{empty var}">
@@ -35,6 +37,7 @@ Parameters:
     </c:if>
 
     <c:if test="#{!empty var}">
+        
         <div id="#{var}_datatable"> </div>
 
         <script type="text/javascript">
@@ -43,7 +46,7 @@ Parameters:
             flexive.yui.require("datatable");
             flexive.yui.onYahooLoaded(function() {
                 var containerElName = "#{var}_datatable";
-                var createFun = function(result, previewSize) {
+                var createFun = function(result, previewSize, updateRowsPerPage) {
                     if (result == null) {
                         // no result available, return dummy object
                         return null;
@@ -53,17 +56,25 @@ Parameters:
                     var view = flexive.yui.datatable.getViewWrapper(result, actionColumnHandler, previewSize);
                     var isThumbnails = result.viewType == "THUMBNAILS";
 
-                    var dataSource = new YAHOO.util.DataSource(view.getRows());
+                    var viewRows = view.getRows();
+                    var dataSource = new YAHOO.util.DataSource(viewRows);
                     dataSource.responseType = YAHOO.util.DataSource.TYPE_JSARRAY;
                     dataSource.responseSchema = view.getResponseSchema();
+                    var paginatorCfg = {
+                        template : "#{fxMessageBean['ResultTable.label.rowSelect']}",
+                        totalRecords : viewRows.length,
+                        rowsPerPage : updateRowsPerPage,
+                        rowsPerPageOptions : isThumbnails ? [2, 5, 10, 25, 50] : [10,25,50,100],
+                        alwaysVisible: false
+                    };
+                    if (updateRowsPerPage == null) {
+                        // set initial configuration
+                        paginatorCfg.rowsPerPage = #{empty rowsPerPage or rowsPerPage lt 0 ? 'view.rowsPerPage' : rowsPerPage};
+                        paginatorCfg.initialPage = #{empty initialPage or initialPage lt 0 ? '1' : initialPage};
+                    }
                     var dataTable = new YAHOO.widget.DataTable(containerElName,
                         view.getColumns(), dataSource,
-                        { paginator: new YAHOO.widget.Paginator({
-                            template : "#{fxMessageBean['ResultTable.label.rowSelect']}",
-                            rowsPerPage : view.rowsPerPage,
-                            rowsPerPageOptions : isThumbnails ? [2, 5, 10, 25, 50] : [10,25,50,100],
-                            alwaysVisible: false
-                          }),
+                        { paginator: new YAHOO.widget.Paginator(paginatorCfg),
                           draggableColumns: true
                         }
                     );
@@ -74,6 +85,7 @@ Parameters:
                             __clickHandlerFn(args.target, pk);
                         };
                     var selectionEnabled = __clickHandler == null;
+                            var containerEl = document.getElementById(containerElName);
                     if (isThumbnails) {
                         // enable cell selection
                         if (selectionEnabled) {
@@ -86,7 +98,13 @@ Parameters:
                         // enable cell highlighting
                         dataTable.subscribe("cellMouseoverEvent", dataTable.onEventHighlightCell);
                         dataTable.subscribe("cellMouseoutEvent", dataTable.onEventUnhighlightCell);
-                        document.getElementById(containerElName).className += " flexiveResultThumbnails " + previewSize;
+
+                        // set container class
+                        if (containerEl.className.indexOf("flexiveResultThumbnails") == -1) {
+                            containerEl.className += " flexiveResultThumbnails " + previewSize;
+                        } else {
+                            containerEl.className = containerEl.className.replace(/PREVIEW[0-9]/, previewSize);
+                        }
                     } else {
                         // enable row selection
                         if (selectionEnabled) {
@@ -98,7 +116,11 @@ Parameters:
                         // enable row highlighting
                         dataTable.subscribe("rowMouseoverEvent", dataTable.onEventHighlightRow);
                         dataTable.subscribe("rowMouseoutEvent", dataTable.onEventUnhighlightRow);
-                        document.getElementById(containerElName).className += " flexiveResultList";
+
+                        // set container class
+                        if (containerEl.className.indexOf("flexiveResultList") == -1) {
+                            containerEl.className += " flexiveResultList";
+                        }
                     }
                     return dataTable;
                 }
@@ -108,13 +130,14 @@ Parameters:
                 elContainer.style.MozUserSelect = "none";
 
 
-                #{var} = createFun(#{fx:getJsonResult(value, viewType)}, '#{empty previewSize ? 'PREVIEW2' : previewSize}');
+                #{var} = createFun(#{fx:getJsonResult(value, viewType)}, '#{empty previewSize ? 'PREVIEW2' : previewSize}', null);
                 if (#{var} != null) {
                     #{var}._reset = function(result, previewSize) {
                         var reset = #{var}._reset;  // keep old method
                         // wipe out the entire datatable and create a new one
+                        var rowsPerPage = #{var}.get("paginator").getRowsPerPage();
                         #{var}.destroy();
-                        #{var} = createFun(result, previewSize);
+                        #{var} = createFun(result, previewSize, rowsPerPage);
                         #{var}._reset = reset;
                     }
                 }

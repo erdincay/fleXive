@@ -48,15 +48,18 @@ import com.flexive.shared.value.*;
 import com.flexive.shared.value.renderer.FxValueRendererFactory;
 import com.flexive.war.JsonWriter;
 import com.google.common.collect.Lists;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.commons.lang.ArrayUtils;
 
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Provides map interfaces for generating JSON row and column information
@@ -117,7 +120,7 @@ public class YahooResultProvider implements Serializable {
      * @param encodedLocation the location, encoded using fx:encodeEnum
      * @param encodedViewType the view type, encoded using fx:encodeEnum
      * @param columnKey       the column key (i.e. the property/assignment name)
-     * @param index           the new index (0-based)
+     * @param index           the new index (0-based), taking into account that the column was previously removed from the list
      * @return nothing
      * @since 3.1
      */
@@ -144,15 +147,8 @@ public class YahooResultProvider implements Serializable {
         }
 
         // move column to new position
-        final int oldIndex = columns.indexOf(column);
-        columns.remove(oldIndex);
-        columns.add(
-                Math.min(
-                        columns.size() - 1,
-                        index > oldIndex ? index - 1 : index
-                ),
-                column
-        );
+        columns.remove(columns.indexOf(column));
+        columns.add(index, column);
 
         // store new result preferences
         getResultPreferencesEngine().saveInSource(

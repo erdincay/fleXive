@@ -36,7 +36,6 @@ import com.flexive.faces.javascript.yui.YahooResultProvider;
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.faces.messages.FxFacesMsgInfo;
 import com.flexive.shared.EJBLookup;
-import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.search.*;
@@ -44,13 +43,12 @@ import com.flexive.shared.search.query.PropertyValueComparator;
 import com.flexive.shared.search.query.SqlQueryBuilder;
 import com.flexive.shared.search.query.VersionFilter;
 import com.flexive.shared.value.BinaryDescriptor;
-import static com.flexive.shared.value.BinaryDescriptor.PreviewSizes;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import javax.faces.model.SelectItem;
 import javax.faces.event.ActionEvent;
+import javax.faces.model.SelectItem;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -515,8 +513,9 @@ public class SearchResultBean implements ActionBean, Serializable {
      * @param event the change event
      * @since 3.1
      */
+    @SuppressWarnings({"UnusedDeclaration"})
     public void resetTableView(ActionEvent event) {
-        setSortColumnKey(null);
+//        setSortColumnKey(null);   // remember sort column, if the column disappeared it has no effect on the result table
         setPaginatorPage(1);
     }
 

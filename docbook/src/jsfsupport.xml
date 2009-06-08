@@ -1301,7 +1301,8 @@
 
                     <para>
                         <programlisting language="xhtml"><![CDATA[<fx:resultTable var="name" value="query" [viewType="list|thumbnails"]
-    [clickHandler="clickHandler"] [actionColumnHandler="handler"] [previewSize="previewSize"]/>
+    [clickHandler="clickHandler"] [actionColumnHandler="handler"] [previewSize="previewSize"]
+    [rowsPerPage="rowsPerPage"] [initialPage="initialPage"]/>
 ]]></programlisting>
                     </para>
                 </section>
@@ -1411,6 +1412,22 @@
                                     <link xlink:href="&flexiveJavadocBase;shared/com/flexive/shared/value/BinaryDescriptor.PreviewSizes.html">
                                         BinaryDescriptor#PreviewSizes
                                     </link>).
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>rowsPerPage</term>
+                            <listitem>
+                                <para>
+                                    current value for the paginator (optional).
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>initialPage</term>
+                            <listitem>
+                                <para>
+                                    current page index for the paginator (optional).
                                 </para>
                             </listitem>
                         </varlistentry>

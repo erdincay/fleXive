@@ -453,3 +453,68 @@ _actionColumnHandler.getActionColumn = function(pk, permissions) {
     out.push("<a id='" + id + "' href='javascript:openContextMenuAt(\"" + id + "\")'>" + moreContent + "</a>");
     return out.join(" | ");
 }
+
+
+function subscribeResultTableEvents(/* YAHOO.widget.DataTable */ resultTable, sortColumnKey, sortDirection) {
+    // store sort information in form variables
+    resultTable.subscribe("columnSortEvent", function(args) {
+        document.getElementById("frm:sortColumnKey").value = args.column.key;
+        document.getElementById("frm:sortDirection").value = args.dir;
+    });
+    // store new column order in result preferences
+    resultTable.subscribe("columnReorderEvent", function(args) {
+        if (args.column.getKey() == "__actions") {
+            return; // reordered the actions column, do nothing
+        }
+        // skip actions column
+        var index = args.column.getKeyIndex();
+        for (var i = 0; i < index; i++) {
+            if (resultTable.getColumnSet().getColumn(i).getKey() == "__actions") {
+                // skip actions column for the result preferences index
+                index -= 1;
+                break;
+            }
+        }
+        flexive.util.getJsonRpc().YahooResultProvider.reorderResultColumn(
+                function(result, exception) {
+                    if (exception != null) {
+                        alertDialog(exception.message);
+                        return;
+                    }
+                    parent.showStatusMessage(
+                            MESSAGES["SearchResult.status.column.reordered"]
+                                    .replace("{0}", args.column.label)
+                                    .replace("{1}", (index + 1))
+                    );
+                    invalidateSessionCache();
+                },
+                getSelectedOptionValue(getTypeIdSelect()),
+                getEncodedViewType(),
+                getEncodedLocation(),
+                args.column.getKey(),
+                index
+        );
+    });
+    // fetch old sort information, apply it if the column still exists
+    var paginator = resultTable.get("paginator");
+    if (sortColumnKey != "null" && sortColumnKey.length > 0) {
+        var col = resultTable.getColumn(sortColumnKey);
+        if (col != null) {
+            var page = paginator.getCurrentPage();  // remember current page
+            resultTable.sortColumn(col, sortDirection);
+            paginator.setPage(page, false);
+        } else {
+            // reset sort information
+            document.getElementById("frm:sortColumnKey").value = "";
+        }
+    }
+    // subscribe to paginator changes
+    paginator.subscribe("pageChange", function(event) {
+        document.getElementById("frm:paginatorPage").value = event.newValue;
+        window.scrollTo(0, 0);
+    });
+    paginator.subscribe("rowsPerPageChange", function(event) {
+        document.getElementById("frm:fetchRows").value = event.newValue;
+        window.scrollTo(0, 0);
+    });
+}

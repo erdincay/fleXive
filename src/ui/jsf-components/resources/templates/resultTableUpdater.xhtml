@@ -31,9 +31,13 @@ Parameters:
         <!--
             if (window.#{var} != null) {
                 // refresh only if datatable is already available - also prevents refresh during initial load
-                #{var}.deleteRows(0, 9999999);
-                var result = #{fxSystemBean.ajaxRequest ? fx:getJsonResult(value, null) : '{}'};
-                #{var}._reset(result, '#{empty previewSize ? 'PREVIEW2' : previewSize}');
+                try {
+                    #{var}.deleteRows(0, 9999999);
+                    var result = #{fxSystemBean.ajaxRequest ? fx:getJsonResult(value, null) : '{}'};
+                    #{var}._reset(result, '#{empty previewSize ? 'PREVIEW2' : previewSize}');
+                } catch (e) {
+                    alert("Failed to update result table: " + e);
+                }
             }
         //-->
     </script>
