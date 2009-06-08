@@ -42,6 +42,7 @@ import com.flexive.shared.cache.FxCacheException;
 import com.flexive.shared.configuration.DBVendor;
 import com.flexive.shared.configuration.DivisionData;
 import com.flexive.shared.configuration.SystemParameters;
+import com.flexive.shared.configuration.ParameterScope;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxLoadException;
 import com.flexive.shared.exceptions.FxNoAccessException;
@@ -143,6 +144,10 @@ public class GlobalConfigurationEngineBean extends GenericConfigurationImpl impl
 
     // implement Configuration methods
 
+    @Override
+    protected ParameterScope getDefaultScope() {
+        return ParameterScope.GLOBAL;
+    }
 
     /**
      * {@inheritDoc}
@@ -175,16 +180,21 @@ public class GlobalConfigurationEngineBean extends GenericConfigurationImpl impl
         return stmt;
     }
 
+    @Override
+    protected PreparedStatement getSelectStatement(Connection conn) throws SQLException {
+        throw new UnsupportedOperationException("Select of ALL parameters not supported in global configuration.");
+    }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    protected PreparedStatement getUpdateStatement(Connection conn, String path, String key, String value)
+    protected PreparedStatement getUpdateStatement(Connection conn, String path, String key, String value, String className)
             throws SQLException, FxNoAccessException {
         if (!isAuthorized()) {
             throw new FxNoAccessException("ex.configuration.update.perm.global");
         }
+        // TODO: support className/getAll() in global configuration?
         String sql = "UPDATE " + TBL_GLOBAL_CONFIG + " SET cvalue=? WHERE cpath=? AND ckey=?";
         PreparedStatement stmt = conn.prepareStatement(sql);
         stmt.setString(1, value);
@@ -197,11 +207,12 @@ public class GlobalConfigurationEngineBean extends GenericConfigurationImpl impl
      * {@inheritDoc}
      */
     @Override
-    protected PreparedStatement getInsertStatement(Connection conn, String path, String key, String value)
+    protected PreparedStatement getInsertStatement(Connection conn, String path, String key, String value, String className)
             throws SQLException, FxNoAccessException {
         if (!isAuthorized()) {
             throw new FxNoAccessException("ex.configuration.update.perm.global");
         }
+        // TODO: support className/getAll() in global configuration?
         String sql = "INSERT INTO " + TBL_GLOBAL_CONFIG + "(cpath, ckey, cvalue) VALUES (?, ?, ?)";
         PreparedStatement stmt = conn.prepareStatement(sql);
         stmt.setString(1, path);

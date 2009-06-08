@@ -33,6 +33,7 @@ package com.flexive.ejb.beans.configuration;
 
 import com.flexive.core.DatabaseConst;
 import com.flexive.shared.FxContext;
+import com.flexive.shared.configuration.ParameterScope;
 import com.flexive.shared.interfaces.UserConfigurationEngine;
 import com.flexive.shared.interfaces.UserConfigurationEngineLocal;
 
@@ -43,7 +44,7 @@ import java.sql.SQLException;
 /**
  * User configuration. Currently no security checks are included - a user
  * may always update/delete own parameters (and never modify parameters of other users).
- *  
+ *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 @TransactionManagement(TransactionManagementType.CONTAINER)
@@ -53,6 +54,11 @@ public class UserConfigurationEngineBean extends CustomDomainConfigurationImpl<L
 
     public UserConfigurationEngineBean() {
         super("user", DatabaseConst.TBL_USER_CONFIG, "user_id", true);
+    }
+
+    @Override
+    protected ParameterScope getDefaultScope() {
+        return ParameterScope.USER;
     }
 
     @Override

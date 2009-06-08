@@ -32,6 +32,7 @@
 package com.flexive.shared.interfaces;
 
 import com.flexive.shared.configuration.Parameter;
+import com.flexive.shared.configuration.ParameterData;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.Pair;
 
@@ -142,8 +143,19 @@ public abstract interface GenericConfigurationEngine {
      */
     <T extends Serializable> Pair<Boolean, T> tryGet(Parameter<T> parameter, String key, boolean ignoreDefault);
 
+    /**
+     * Return all parameters that are visible to the current user.
+     *
+     * @return  all parameters that are visible to the current user.
+     */
+    Map<ParameterData, Serializable> getAll() throws FxApplicationException;
+
 	/**
 	 * Retrieves all key/value pairs stored under the path of the given parameter.
+     * <p>
+     * <strong>Note:</strong> the values stored under the parameter's path must be of the same type,
+     * i.e. they must be of type {@code T}.
+     * </p>
 	 * 
 	 * @param <T>		value type of the parameter
 	 * @param parameter	parameter data containing the path
@@ -155,6 +167,10 @@ public abstract interface GenericConfigurationEngine {
 
     /**
      * Retrieves all keys stored under the path of the given parameter.
+     * <p>
+     * <strong>Note:</strong> the values stored under the parameter's path must be of the same type,
+     * i.e. they must be of type {@code T}.
+     * </p>
      *
      * @param <T>		value type of the parameter
      * @param parameter parameter containing the path

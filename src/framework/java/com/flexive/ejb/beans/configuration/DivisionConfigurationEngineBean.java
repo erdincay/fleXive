@@ -42,6 +42,7 @@ import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.configuration.DBVendor;
 import com.flexive.shared.configuration.DivisionData;
 import com.flexive.shared.configuration.SystemParameters;
+import com.flexive.shared.configuration.ParameterScope;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxDbException;
 import com.flexive.shared.exceptions.FxNoAccessException;
@@ -79,6 +80,11 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
      */
     private static final String CACHE_ROOT = "/divisionConfig";
 
+    @Override
+    protected ParameterScope getDefaultScope() {
+        return ParameterScope.DIVISION;
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -91,16 +97,17 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
      * {@inheritDoc}
      */
     @Override
-    protected PreparedStatement getInsertStatement(Connection conn, String path, String key, String value)
+    protected PreparedStatement getInsertStatement(Connection conn, String path, String key, String value, String className)
             throws SQLException, FxNoAccessException {
         if (!FxContext.getUserTicket().isGlobalSupervisor()) {
             throw new FxNoAccessException("ex.configuration.update.perm.division");
         }
-        String sql = "INSERT INTO " + TBL_DIVISION_CONFIG + " (cpath, ckey, cvalue) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO " + TBL_DIVISION_CONFIG + " (cpath, ckey, cvalue, className) VALUES (?, ?, ?, ?)";
         PreparedStatement stmt = conn.prepareStatement(sql);
         stmt.setString(1, path);
         stmt.setString(2, key);
         stmt.setString(3, value);
+        stmt.setString(4, className);
         return stmt;
     }
 
@@ -109,7 +116,7 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
      */
     @Override
     protected PreparedStatement getSelectStatement(Connection conn, String path, String key) throws SQLException {
-        String sql = "SELECT cvalue FROM " + TBL_DIVISION_CONFIG + " WHERE cpath=? AND ckey=?";
+        final String sql = "SELECT cvalue FROM " + TBL_DIVISION_CONFIG + " WHERE cpath=? AND ckey=?";
         PreparedStatement stmt = conn.prepareStatement(sql);
         stmt.setString(1, path);
         stmt.setString(2, key);
@@ -121,7 +128,7 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
      */
     @Override
     protected PreparedStatement getSelectStatement(Connection conn, String path) throws SQLException {
-        String sql = "SELECT ckey, cvalue FROM " + TBL_DIVISION_CONFIG + " WHERE cpath=?";
+        final String sql = "SELECT ckey, cvalue FROM " + TBL_DIVISION_CONFIG + " WHERE cpath=?";
         PreparedStatement stmt = conn.prepareStatement(sql);
         stmt.setString(1, path);
         return stmt;
@@ -131,16 +138,26 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
      * {@inheritDoc}
      */
     @Override
-    protected PreparedStatement getUpdateStatement(Connection conn, String path, String key, String value)
+    protected PreparedStatement getSelectStatement(Connection conn) throws SQLException {
+        final String sql = "SELECT cpath, ckey, cvalue, className FROM " + TBL_DIVISION_CONFIG;
+        return conn.prepareStatement(sql);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected PreparedStatement getUpdateStatement(Connection conn, String path, String key, String value, String className)
             throws SQLException, FxNoAccessException {
         if (!FxContext.getUserTicket().isGlobalSupervisor()) {
             throw new FxNoAccessException("ex.configuration.update.perm.division");
         }
-        String sql = "UPDATE " + TBL_DIVISION_CONFIG + " SET cvalue=? WHERE cpath=? AND ckey=?";
+        final String sql = "UPDATE " + TBL_DIVISION_CONFIG + " SET cvalue=? WHERE cpath=? AND ckey=? AND className=?";
         PreparedStatement stmt = conn.prepareStatement(sql);
         stmt.setString(1, value);
         stmt.setString(2, path);
         stmt.setString(3, key);
+        stmt.setString(4, className);
         return stmt;
     }
 
@@ -153,7 +170,7 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
         if (!FxContext.getUserTicket().isGlobalSupervisor()) {
             throw new FxNoAccessException("ex.configuration.delete.perm.division");
         }
-        String sql = "DELETE FROM " + TBL_DIVISION_CONFIG + " WHERE cpath=? "
+        final String sql = "DELETE FROM " + TBL_DIVISION_CONFIG + " WHERE cpath=? "
                 + (key != null ? " AND ckey=?" : "");
         PreparedStatement stmt = conn.prepareStatement(sql);
         stmt.setString(1, path);

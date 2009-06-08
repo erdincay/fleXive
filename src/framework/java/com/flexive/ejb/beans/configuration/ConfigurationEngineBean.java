@@ -33,6 +33,7 @@ package com.flexive.ejb.beans.configuration;
 
 import com.flexive.shared.configuration.Parameter;
 import com.flexive.shared.configuration.ParameterScope;
+import com.flexive.shared.configuration.ParameterData;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.*;
 import com.flexive.shared.Pair;
@@ -151,6 +152,18 @@ public class ConfigurationEngineBean implements ConfigurationEngine, Configurati
             return availableConfigurations.get(availableConfigurations.size() - 1);
         }
         throw new FxNotFoundException("ex.configuration.parameter.notfound", parameter.getPath().getValue(), key);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public Map<ParameterData, Serializable> getAll() throws FxApplicationException {
+        final Map<ParameterData, Serializable> results = new HashMap<ParameterData, Serializable>();
+        for (GenericConfigurationEngine config : getAllConfigurations()) {
+            results.putAll(config.getAll());
+        }
+        return results;
     }
 
     /**
@@ -289,6 +302,15 @@ public class ConfigurationEngineBean implements ConfigurationEngine, Configurati
         } else {
             throw new FxInvalidParameterException("SCOPE", "ex.configuration.parameter.scope.invalid", scope);
         }
+    }
+
+    private List<GenericConfigurationEngine> getAllConfigurations () {
+        return Arrays.asList(
+                divisionConfiguration,
+                nodeConfiguration,
+                applicationConfiguration,
+                userConfiguration
+        );
     }
 }
 

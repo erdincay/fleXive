@@ -145,6 +145,24 @@ public final class ParameterFactory {
         return newInstance(cls, new ParameterPathBean(path, scope), "", defaultValue);
     }
 
+    /**
+     * Return a generic parameter using a fully qualified class name.
+     *
+     * @param className the class name for the value type of the parameter
+     * @param data      the parameter data bean
+     * @return
+     */
+    @SuppressWarnings({"unchecked"})
+    public static Parameter newInstance(String className, ParameterData data) {
+        Class cls = null;
+        try {
+            cls = Class.forName(className);
+        } catch (ClassNotFoundException e) {
+            cls = Object.class; // ignore, use object converter
+        }
+        return getImpl(cls).setData(data);
+    }
+
     private static <T> Parameter<T> getImpl(Class<T> cls) {
         if (INSTANCES.containsKey(cls)) {
             try {

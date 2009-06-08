@@ -136,30 +136,40 @@ public abstract class CustomDomainConfigurationImpl<T extends Serializable> exte
     }
 
     @Override
-    protected final PreparedStatement getUpdateStatement(Connection conn, String path, String key, String value) throws SQLException, FxNoAccessException {
+    protected final PreparedStatement getSelectStatement(Connection conn) throws SQLException {
+        final String sql = "SELECT cpath, ckey, cvalue, classname FROM " + tableName + " WHERE " + idColumn + "=?";
+        final PreparedStatement stmt = conn.prepareStatement(sql);
+        setDomain(stmt, 1);
+        return stmt;
+    }
+
+    @Override
+    protected final PreparedStatement getUpdateStatement(Connection conn, String path, String key, String value, String className) throws SQLException, FxNoAccessException {
         if (!mayUpdate()) {
             throw new FxNoAccessException("ex.configuration.update.perm", configurationName);
         }
-        final String sql = "UPDATE " + tableName + " SET cvalue=? WHERE " + idColumn + "=? AND cpath=? AND ckey=?";
+        final String sql = "UPDATE " + tableName + " SET cvalue=? WHERE " + idColumn + "=? AND cpath=? AND ckey=? AND className=?";
         final PreparedStatement stmt = conn.prepareStatement(sql);
         stmt.setString(1, value);
         setDomain(stmt, 2);
         stmt.setString(3, path);
         stmt.setString(4, key);
+        stmt.setString(5, className);
         return stmt;
     }
 
     @Override
-    protected final PreparedStatement getInsertStatement(Connection conn, String path, String key, String value) throws SQLException, FxNoAccessException {
+    protected final PreparedStatement getInsertStatement(Connection conn, String path, String key, String value, String className) throws SQLException, FxNoAccessException {
         if (!mayUpdate()) {
             throw new FxNoAccessException("ex.configuration.update.perm", configurationName);
         }
-        final String sql = "INSERT INTO " + tableName + "(" + idColumn + ", cpath, ckey, cvalue) VALUES (?, ?, ?, ?)";
+        final String sql = "INSERT INTO " + tableName + "(" + idColumn + ", cpath, ckey, cvalue, className) VALUES (?, ?, ?, ?, ?)";
         final PreparedStatement stmt = conn.prepareStatement(sql);
         setDomain(stmt, 1);
         stmt.setString(2, path);
         stmt.setString(3, key);
         stmt.setString(4, value);
+        stmt.setString(5, className);
         return stmt;
     }
 

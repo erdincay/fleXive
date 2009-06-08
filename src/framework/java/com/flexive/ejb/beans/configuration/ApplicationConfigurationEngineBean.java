@@ -3,6 +3,7 @@ package com.flexive.ejb.beans.configuration;
 import com.flexive.shared.interfaces.ApplicationConfigurationEngine;
 import com.flexive.shared.interfaces.ApplicationConfigurationEngineLocal;
 import com.flexive.shared.FxContext;
+import com.flexive.shared.configuration.ParameterScope;
 import com.flexive.core.DatabaseConst;
 
 import javax.ejb.*;
@@ -23,6 +24,11 @@ public class ApplicationConfigurationEngineBean
 
     public ApplicationConfigurationEngineBean() {
         super("application", DatabaseConst.TBL_APPLICATION_CONFIG, "application_id", true);
+    }
+
+    @Override
+    protected ParameterScope getDefaultScope() {
+        return ParameterScope.APPLICATION;
     }
 
     @Override

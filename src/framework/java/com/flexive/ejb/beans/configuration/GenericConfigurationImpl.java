@@ -36,10 +36,10 @@ import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.Pair;
 import com.flexive.shared.cache.FxCacheException;
-import com.flexive.shared.configuration.Parameter;
-import com.flexive.shared.configuration.ParameterData;
+import com.flexive.shared.configuration.*;
 import com.flexive.shared.configuration.parameters.NullParameter;
 import com.flexive.shared.configuration.parameters.UnsetParameter;
+import com.flexive.shared.configuration.parameters.ParameterFactory;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.GenericConfigurationEngine;
 import org.apache.commons.lang.SerializationUtils;
@@ -80,6 +80,13 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
     protected abstract Connection getConnection() throws SQLException;
 
     /**
+     * Return the default scope to be used for parameters.
+     *
+     * @return  the default scope to be used for parameters.
+     */
+    protected abstract ParameterScope getDefaultScope();
+
+    /**
      * Return a select statement that selects the given path and key
      * and returns the stored value.
      * <p>
@@ -116,6 +123,24 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
     protected abstract PreparedStatement getSelectStatement(Connection conn, String path) throws SQLException;
 
     /**
+     * Return a select statement that selects all keys and values of the configuration.
+     * <p>
+     * Required SELECT arguments:
+     * <ol>
+     * <li>path</li>
+     * <li>key</li>
+     * <li>value</li>
+     * <li>className</li>
+     * </ol>
+     * </p>
+     *
+     * @param conn the current connection
+     * @return a PreparedStatement selecting all keys and values for the given path
+     * @throws SQLException if a database error occurs
+     */
+    protected abstract PreparedStatement getSelectStatement(Connection conn) throws SQLException;
+
+    /**
      * Return an update statement that updates the value for the given
      * path/key combination.
      *
@@ -123,11 +148,12 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
      * @param path  path of the parameter
      * @param key   key to be updated
      * @param value the new value to be stored
+     * @param className the value's class (before it was serialized to a String)
      * @return a PreparedStatement updating the given row
      * @throws SQLException        if a database error occurs
      * @throws FxNoAccessException if the caller is not permitted to update the given parameter
      */
-    protected abstract PreparedStatement getUpdateStatement(Connection conn, String path, String key, String value)
+    protected abstract PreparedStatement getUpdateStatement(Connection conn, String path, String key, String value, String className)
             throws SQLException, FxNoAccessException;
 
     /**
@@ -138,11 +164,12 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
      * @param path  path of the new row
      * @param key   key of the new row
      * @param value value of the new row
+     * @param className the value's class (before it was serialized to a String)
      * @return a PreparedStatement for inserting the given path/key/value
      * @throws SQLException        if a database error occurs
      * @throws FxNoAccessException if the caller is not permitted to create the given parameter
      */
-    protected abstract PreparedStatement getInsertStatement(Connection conn, String path, String key, String value)
+    protected abstract PreparedStatement getInsertStatement(Connection conn, String path, String key, String value, String className)
             throws SQLException, FxNoAccessException;
 
     /**
@@ -224,11 +251,13 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
             if (valueExists) {
                 // update existing record
                 stmt = getUpdateStatement(conn, data.getPath().getValue(), key,
-                        value != null ? parameter.getDatabaseValue(value) : null);
+                        value != null ? parameter.getDatabaseValue(value) : null,
+                        value != null ? value.getClass().getName() : null);
             } else {
                 // create new record
                 stmt = getInsertStatement(conn, data.getPath().getValue(), key,
-                        value != null ? parameter.getDatabaseValue(value) : null);
+                        value != null ? parameter.getDatabaseValue(value) : null,
+                        value != null ? value.getClass().getName() : null);
             }
             stmt.executeUpdate();
 
@@ -355,6 +384,53 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
         }
     }
 
+
+    /**
+     * {@inheritDoc}
+     */
+    public Map<ParameterData, Serializable> getAll() throws FxApplicationException {
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        try {
+            conn = getConnection();
+            stmt = getSelectStatement(conn);
+            final ResultSet rs = stmt.executeQuery();
+            final Map<ParameterData, Serializable> result = new HashMap<ParameterData, Serializable>();
+            while (rs.next()) {
+                final String key = rs.getString(2);
+                final String dbValue = rs.getString(3);
+                final String className = rs.getString(4);
+                final ParameterPathBean path = new ParameterPathBean(rs.getString(1), getDefaultScope());
+
+                final Parameter parameter;
+                if (className != null) {
+                    parameter = ParameterFactory.newInstance(className, new ParameterDataBean<Serializable>(
+                            path,
+                            key,
+                            null
+                    ));
+                } else if ("true".equals(dbValue) || "false".equals(dbValue)) { // fallback for old configurations: try to determine the data type
+                    parameter = ParameterFactory.newInstance(Boolean.class, path, key, null);
+                } else if (StringUtils.isNumeric(dbValue)) {
+                    parameter = ParameterFactory.newInstance(Integer.class, path, key, null);
+                } else if (dbValue != null && dbValue.startsWith("<") && dbValue.endsWith(">")) {
+                    // assume that it's an objects serialized to XML
+                    parameter = ParameterFactory.newInstance(Object.class, path, key, null);
+                } else {
+                    parameter = ParameterFactory.newInstance(String.class, path, key, null);
+                }
+                result.put(
+                        parameter.getData(),
+                        (Serializable) parameter.getValue(dbValue)
+                );
+            }
+            return result;
+        } catch (SQLException e) {
+            throw new FxLoadException(LOG, e, "ex.db.sqlError", e.getMessage());
+        } finally {
+            Database.closeObjects(GenericConfigurationImpl.class, conn, stmt);
+        }
+    }
 
     /**
      * {@inheritDoc}

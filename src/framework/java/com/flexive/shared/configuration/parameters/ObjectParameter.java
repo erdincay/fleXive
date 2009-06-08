@@ -119,7 +119,11 @@ class ObjectParameter<T> extends ParameterImpl<T> {
     /** {@inheritDoc} */
     public T getValue(Object dbValue) {
         return dbValue != null
-                ? cls.cast(cls.isAssignableFrom(dbValue.getClass()) ? dbValue : getXStream().fromXML(dbValue.toString()))
+                ? cls.cast(
+                (cls != Object.class && cls.isAssignableFrom(dbValue.getClass()))
+                        ? dbValue
+                        : getXStream().fromXML(dbValue.toString()
+                ))
                 : null;
     }
 

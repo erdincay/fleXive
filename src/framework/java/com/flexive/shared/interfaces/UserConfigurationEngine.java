@@ -35,8 +35,10 @@ import javax.ejb.Remote;
 
 
 /**
- * User configuration interface.
- * 
+ * User configuration interface. Use this for direct manipulation
+ * of parameters in the user configuration, use the {@link com.flexive.shared.interfaces.ConfigurationEngine}
+ * for everything else.
+ *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 @Remote

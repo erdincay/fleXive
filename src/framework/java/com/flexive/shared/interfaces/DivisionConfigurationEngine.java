@@ -37,7 +37,9 @@ import javax.ejb.Remote;
 
 
 /**
- * Division configuration interface
+ * Division configuration interface. Use this for division-specific operations and for direct manipulation
+ * of parameters in the division configuration, use the {@link com.flexive.shared.interfaces.ConfigurationEngine}
+ * for everything else.
  *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */

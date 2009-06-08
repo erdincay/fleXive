@@ -273,6 +273,11 @@ public class ConfigurationTest {
                     fail("Should not be permitted to set parameter " + parameter
                             + " in " + configuration);
 
+                if (!(configuration instanceof GlobalConfigurationEngine)) {
+                    final Map<ParameterData, Serializable> allParameters = configuration.getAll();
+                    assertTrue(allParameters.size() > 0);
+                }
+
                 Map<String, T> params = configuration.getAll(parameter);
                 assertTrue(4 == params.entrySet().size(), "Should have retrieved four parameters.");
                 int ctr = 1;

@@ -36,6 +36,7 @@ package com.flexive.ejb.beans.configuration;
 import com.flexive.core.DatabaseConst;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.configuration.ParameterScope;
 import com.flexive.shared.interfaces.NodeConfigurationEngine;
 import com.flexive.shared.interfaces.NodeConfigurationEngineLocal;
 import org.apache.commons.lang.StringUtils;
@@ -72,6 +73,11 @@ public class NodeConfigurationEngineBean extends CustomDomainConfigurationImpl<S
         super("node", DatabaseConst.TBL_NODE_CONFIG, "node_id", true);
     }
 
+
+    @Override
+    protected ParameterScope getDefaultScope() {
+        return ParameterScope.NODE;
+    }
 
     @Override
     public String getCurrentDomain() {
