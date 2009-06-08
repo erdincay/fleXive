@@ -212,7 +212,7 @@ public class FxPropertyData extends FxData {
     }
 
     public void checkMaxLength() throws FxInvalidParameterException {
-        if (!this.getMaxLength().isSet() || value ==null || value.isEmpty())
+        if (!this.getMaxLength().isSet() || value ==null || value.isEmpty() || this.getMaxLength().getIntValue() == -1)
             return;
         //check for max-length compatible data types
         if (this.getValue() instanceof FxHTML || !(this.getValue() instanceof FxString || this.getValue() instanceof FxNumber ||this.getValue() instanceof FxLargeNumber)) {

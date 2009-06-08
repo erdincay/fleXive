@@ -1359,7 +1359,7 @@ public class StructureTest {
      * @throws FxApplicationException on errors
      */
     @Test(groups = {"ejb", "structure"})
-    public void createAliasedElementsTest() throws FxApplicationException{
+    public void createAliasedElementsTest() throws FxApplicationException {
         long typeId = createTestTypeAndProp("ALIASASSIGN", "", false);
         // add a prop and groups
         ae.createProperty(typeId, FxPropertyEdit.createNew("PROP1", new FxString(true, "PROP1"), new FxString(true, ""), new FxMultiplicity(0, 5),
@@ -1375,7 +1375,7 @@ public class StructureTest {
 
             // create aliased sub-group
             ae.createGroup(typeId, FxGroupEdit.createNew("GROUP2", new FxString(true, "group2"), new FxString(true, ""), true, new FxMultiplicity(0, 2)),
-                "/group1alias", "group2alias");
+                    "/group1alias", "group2alias");
 
             Assert.assertTrue(env().assignmentExists("ALIASASSIGN/GROUP1ALIAS/GROUP2ALIAS"));
             Assert.assertFalse(env().assignmentExists("ALIASASSIGN/GROUP1ALIAS/GROUP2"));
@@ -1383,6 +1383,59 @@ public class StructureTest {
         } finally {
             te.remove(typeId);
         }
+    }
+
+    /**
+     * Tests setting generic structure options for groups / properties
+     *
+     * @throws FxApplicationException on errors
+     */
+    @Test(groups = {"ejb", "structure"})
+    public void testGenericStructureOptions() throws FxApplicationException {
+        long typeId = createTestTypeAndProp("OPTTEST", "", false);
+        FxPropertyEdit pEd = FxPropertyEdit.createNew("PROP1OPTTEST", new FxString(true, "PROP1"), new FxString(true, ""), new FxMultiplicity(0, 5),
+                env().getACL("Default Structure ACL"), FxDataType.String1024);
+        pEd.setOption("OPT.1P", false, "OPT 1 value");
+        pEd.setOption("OPT.2P", true, false);
+        ae.createProperty(typeId, pEd, "/");
+
+        FxGroupEdit gEd = FxGroupEdit.createNew("GROUP1OPTTEST", new FxString(true, "GROUP1"), new FxString(true, ""), true, new FxMultiplicity(0, 2));
+        gEd.setOption("OPT.1G", false, "OPT 1 value");
+        gEd.setOption("OPT.2G", true, false);
+        ae.createGroup(typeId, gEd, "/");
+
+        try {
+            FxProperty p = env().getProperty("PROP1OPTTEST");
+            FxGroup g = env().getGroup("GROUP1OPTTEST");
+
+            Assert.assertEquals(p.getOption("OPT.1P").getValue(), "OPT 1 value");
+            Assert.assertEquals(p.getOption("OPT.2P").getIntValue(), 0);
+            Assert.assertFalse(p.getOption("OPT.1P").isOverrideable());
+            Assert.assertTrue(p.getOption("OPT.2P").isOverrideable());
+
+            Assert.assertEquals(g.getOption("OPT.1G").getValue(), "OPT 1 value");
+            Assert.assertEquals(g.getOption("OPT.2G").getIntValue(), 0);
+            Assert.assertFalse(g.getOption("OPT.1G").isOverrideable());
+            Assert.assertTrue(g.getOption("OPT.2G").isOverrideable());
+
+            // create an assignment and check whether the group options are "passed along"
+            FxGroupAssignmentEdit ga = FxGroupAssignmentEdit.createNew((FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment("OPTTEST/GROUP1OPTTEST"),
+                    CacheAdmin.getEnvironment().getType("OPTTEST"), "GROUP1OPTTESTDER", "/");
+
+            long aId = ae.save(ga, false);
+
+            FxGroupAssignment gass = (FxGroupAssignment)CacheAdmin.getEnvironment().getAssignment("OPTTEST/GROUP1OPTTESTDER");
+
+            Assert.assertEquals(gass.getOption("OPT.1G").getValue(), "OPT 1 value");
+            Assert.assertEquals(gass.getOption("OPT.2G").getIntValue(), 0);
+            Assert.assertFalse(gass.getOption("OPT.1G").isOverrideable());
+            Assert.assertTrue(gass.getOption("OPT.2G").isOverrideable());
+
+            ae.removeAssignment(aId);
+        } finally {
+            te.remove(typeId);
+        }
+
     }
 
     /**

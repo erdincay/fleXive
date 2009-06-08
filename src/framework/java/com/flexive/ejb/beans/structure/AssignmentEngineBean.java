@@ -669,6 +669,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     pos = rs.getLong(1);
             }
             ps.close();
+            storeOptions(con, TBL_GROUP_OPTIONS, "ID", newGroupId, null, group.getOptions());
             sql.setLength(0);
             //create root assignment
             sql.append("INSERT INTO ").append(TBL_STRUCT_ASSIGNMENTS).
@@ -1179,6 +1180,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             }
             htracker.track(group.getAssignedType(), "history.assignment.createGroupAssignment", XPath, group.getAssignedType().getId(), group.getAssignedType().getName(),
                     group.getGroup().getId(), group.getGroup().getName());
+            storeOptions(con, TBL_GROUP_OPTIONS, "ID", group.getGroup().getId(), newAssignmentId, group.getOptions()); // TODO: TEST NEW
             if (group.getBaseAssignmentId() > 0 && createSubAssignments) {
                 FxGroupAssignment baseGroup = (FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment(group.getBaseAssignmentId());
                 for (FxGroupAssignment ga : baseGroup.getAssignedGroups()) {

@@ -456,7 +456,7 @@ public class ContentEngineTest {
         pk = co.save(test);
         FxContent testLoad = co.load(pk);
         final String transIt = ((FxString) testLoad.getPropertyData("/TestGroup1[2]/TestProperty1_3").getValue()).getTranslation(FxLanguage.ITALIAN);
-        Assert.assertTrue(TEST_IT.equals(transIt), "Expected italian translation '" + TEST_IT + "', got: '" + transIt + "' for pk "+pk);
+        Assert.assertTrue(TEST_IT.equals(transIt), "Expected italian translation '" + TEST_IT + "', got: '" + transIt + "' for pk " + pk);
         co.remove(pk);
         pk = co.save(test);
         FxContent testLoad2 = co.load(pk);
@@ -500,14 +500,14 @@ public class ContentEngineTest {
             //should throw unchecked exception since multiplicity 3 is out of range
             testLoad3.getValue("/TestNumberSL[3]");
             Assert.fail("Accessing an invalid XPath should have failed. Multiplicity out of range.");
-        } catch(FxRuntimeException re) {
+        } catch (FxRuntimeException re) {
             //expected
         }
         try {
             //should throw unchecked exception since multiplicity 3 is out of range
             testLoad3.getValue("/TestNumberSLXXX[1]");
             Assert.fail("Accessing an invalid XPath should have failed.");
-        } catch(FxRuntimeException re) {
+        } catch (FxRuntimeException re) {
             //expected
         }
         co.initialize(testType.getId()).randomize();
@@ -520,17 +520,17 @@ public class ContentEngineTest {
         FxContent test = co.initialize(testType.getId());
         final String XP = "/TestProperty3";
         Assert.assertEquals(test.getValues(XP).size(), 1); //initialized with 1 empty entry
-        test.setValue(XP+"[1]", new FxString(true, "1"));
+        test.setValue(XP + "[1]", new FxString(true, "1"));
         Assert.assertEquals(test.getValues(XP).size(), 1);
-        test.setValue(XP+"[2]", new FxString(true, "2"));
+        test.setValue(XP + "[2]", new FxString(true, "2"));
         Assert.assertEquals(test.getValues(XP).size(), 2);
-        test.setValue(XP+"[3]", new FxString(true, "3"));
+        test.setValue(XP + "[3]", new FxString(true, "3"));
         Assert.assertEquals(test.getValues(XP).size(), 3);
         List<FxValue> values = test.getValues(XP);
         Assert.assertEquals(values.get(0).getBestTranslation(), "1");
         Assert.assertEquals(values.get(1).getBestTranslation(), "2");
         Assert.assertEquals(values.get(2).getBestTranslation(), "3");
-        test.getPropertyData(XP+"[2]").setPos(3); //1,2,3 -> 1,3,2
+        test.getPropertyData(XP + "[2]").setPos(3); //1,2,3 -> 1,3,2
         values = test.getValues(XP);
         //positions should be sorted
         Assert.assertEquals(values.get(0).getBestTranslation(), "1");
@@ -830,16 +830,16 @@ public class ContentEngineTest {
             test = co.load(test.getPk());
             Assert.assertFalse(test.containsValue(defaultXPath), "Default value should have been removed (after save with a default multiplicity of 1)");
 
-            FxPropertyAssignment pa = (FxPropertyAssignment)CacheAdmin.getEnvironment().getAssignment(TEST_TYPE + defaultXPath);
+            FxPropertyAssignment pa = (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(TEST_TYPE + defaultXPath);
             ass.save(pa.asEditable().setDefaultMultiplicity(0), false);
-            pa = (FxPropertyAssignment)CacheAdmin.getEnvironment().getAssignment(TEST_TYPE + defaultXPath);
+            pa = (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(TEST_TYPE + defaultXPath);
             Assert.assertEquals(pa.getDefaultMultiplicity(), 0);
             test = co.load(test.getPk());
             Assert.assertFalse(test.containsValue(defaultXPath), "Default value should have been removed (after save with a default multiplicity of 0)");
         } finally {
             if (pk != null)
                 co.remove(pk);
-            FxPropertyAssignment pa = (FxPropertyAssignment)CacheAdmin.getEnvironment().getAssignment(TEST_TYPE + defaultXPath);
+            FxPropertyAssignment pa = (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(TEST_TYPE + defaultXPath);
             //reset the def. multiplicity to 1
             ass.save(pa.asEditable().setDefaultMultiplicity(1), false);
         }
@@ -871,5 +871,50 @@ public class ContentEngineTest {
         Assert.assertEquals(test.getValue("/TestGroup1/TestGroup1_2[2]/TestProperty1_2_1[1]"), testValue3, "Group gap should have been closed and [3] is now [2]");
         test.remove("/TestGroup1/TestGroup1_2");
         Assert.assertFalse(test.containsValue("/TestGroup1/TestGroup1_2[1]/TestProperty1_2_1[1]"));
+    }
+
+    /**
+     * Test the maxLength property f. contents
+     *
+     * @throws FxApplicationException on errors
+     */
+    @Test
+    public void maxLengthTest() throws FxApplicationException {
+
+        long typeId = type.save(FxTypeEdit.createNew("MAXLENGTHTEST"));
+        FxPropertyEdit ped = FxPropertyEdit.createNew("LENGTHPROP1", new FxString(true, "LENGTHPROP1"), new FxString(true, ""), FxMultiplicity.MULT_0_1,
+                CacheAdmin.getEnvironment().getACL("Default Structure ACL"), FxDataType.String1024);
+        ped.setMaxLength(3);
+        ass.createProperty(typeId, ped, "/");
+        ped = FxPropertyEdit.createNew("LENGTHPROP2", new FxString(true, "LENGTHPROP2"), new FxString(true, ""), FxMultiplicity.MULT_0_1,
+                CacheAdmin.getEnvironment().getACL("Default Structure ACL"), FxDataType.String1024);
+        ped.setOverrideMaxLength(true);
+        ass.createProperty(typeId, ped, "/");
+
+        Assert.assertEquals(CacheAdmin.getEnvironment().getProperty("LENGTHPROP2").getMaxLength(), -1); // "no" length restriction
+
+        try {
+            FxContent c = co.initialize(typeId);
+            c.setValue("/LENGTHPROP1", new FxString(false, "1234"));
+            try {
+                co.save(c);
+                Assert.fail("Setting a content String with length = 4 for a property w/ maxLength = 3 should have failed");
+            } catch (FxApplicationException e) {
+                // expected
+            }
+
+            ped = (CacheAdmin.getEnvironment().getProperty("LENGTHPROP1")).asEditable();
+            ped.setMaxLength(-1);
+            ass.save(ped);
+
+            c.setValue("/LENGTHPROP1", new FxString(false, "1234"));
+            Assert.assertEquals(c.getValue("/LENGTHPROP1").toString(), "1234");
+
+            c.setValue("/LENGTHPROP2", new FxString(false, "1234"));
+            Assert.assertEquals(c.getValue("/LENGTHPROP2").toString(), "1234");
+
+        } finally {
+            type.remove(typeId);
+        }
     }
 }

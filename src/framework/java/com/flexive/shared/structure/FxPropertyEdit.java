@@ -301,7 +301,7 @@ public class FxPropertyEdit extends FxProperty {
      * @return the property itself, useful for chained calls
      */
     public FxPropertyEdit setDataType(FxDataType dataType) {
-        if( this.dataType == dataType)
+        if (this.dataType == dataType)
             return this; //no changes
 
         this.dataType = dataType;
@@ -384,6 +384,13 @@ public class FxPropertyEdit extends FxProperty {
      * @return the property itself, useful for chained calls
      */
     public FxPropertyEdit setOverrideMaxLength(boolean overrideMaxLEngth) {
+        if (!getOption(FxStructureOption.OPTION_MAXLENGTH).isSet()) {
+            try {
+                setMaxLength(-1);
+            } catch (FxInvalidParameterException e) {
+                throw new FxInvalidParameterException("MAXLENGTH", "ex.general.parameter.format", "-1").asRuntimeException();
+            }
+        }
         FxStructureOption.setOption(options, FxStructureOption.OPTION_MAXLENGTH, overrideMaxLEngth, String.valueOf(getMaxLength()));
         return this;
     }
@@ -554,8 +561,8 @@ public class FxPropertyEdit extends FxProperty {
      * @return the property itself, useful for chained calls
      */
     public FxPropertyEdit setDefaultValue(FxValue value) {
-        if( value != null && value.isMultiLanguage() != this.isMultiLang() ) {
-            if( value.isMultiLanguage() )
+        if (value != null && value.isMultiLanguage() != this.isMultiLang()) {
+            if (value.isMultiLanguage())
                 throw new FxInvalidParameterException("value", "ex.content.value.invalid.multilanguage.prop.single", getName()).asRuntimeException();
             else
                 throw new FxInvalidParameterException("value", "ex.content.value.invalid.multilanguage.prop.multi", getName()).asRuntimeException();
