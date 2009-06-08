@@ -61,7 +61,7 @@ public abstract class DataSelector {
      */
     protected static final List<String> BINARY_COLUMNS = Collections.unmodifiableList(
             Arrays.asList(
-                    "ID", "NAME", "BLOBSIZE", "XMLMETA", "CREATED_AT", "MIMETYPE",
+                    "ID", "NAME", "BLOBSIZE", "CREATED_AT", "MIMETYPE",
                     "ISIMAGE", "RESOLUTION", "WIDTH", "HEIGHT"
             )
     );

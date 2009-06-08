@@ -507,7 +507,7 @@ public class PropertyEntry {
                 parseLong(getBinaryValue(values, "CREATED_AT")),
                 getBinaryValue(values, "NAME"),
                 parseLong(getBinaryValue(values, "BLOBSIZE")),
-                getBinaryValue(values, "XMLMETA"),
+                null,
                 getBinaryValue(values, "MIMETYPE"),
                 "1".equals(getBinaryValue(values, "ISIMAGE")),
                 Double.parseDouble(getBinaryValue(values, "RESOLUTION")),
