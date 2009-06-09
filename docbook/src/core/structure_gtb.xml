@@ -1,0 +1,1740 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE section [
+        <!ENTITY % global_entities SYSTEM "../global.ent">
+        %global_entities;
+        ]>
+<section xml:id="core_structure_gtb" xmlns="http://docbook.org/ns/docbook"
+         xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude">
+    <title>The GroovyTypeBuilder</title>
+
+    <xi:include href="../includes/author_cblasnik.xml"/>
+
+    <para>The
+        <classname>GroovyTypeBuilder</classname>
+        (&quot;GTB&quot;)
+        provides a simple means for structure creation in &flexive; using the Groovy scripting language.
+        The GTB is based on Groovy's builder support, enabling us to easily create and manipulate &flexive;'s
+        hierarchical structures.
+        Here is what the GTB can do (for you):
+        <itemizedlist>
+            <listitem>
+                Create a structure: types, derived types, properties &amp; groups and their respective assignments
+            </listitem>
+            <listitem>
+                Change a structure (1): Assignment attribute changes (if allowed or overridable)
+            </listitem>
+            <listitem>
+                Change a structure (2): Create additional assignments within a given type, &quot;walk through&quot; an
+                existing structure
+            </listitem>
+        </itemizedlist>
+        Structural or assignment changes pertain to any element within an existing type, with the exception
+        of types themselves (please refer to the examples in
+        <xref linkend="core_structure_gtb_examples"/>
+        for further reference).
+    </para>
+    <para>
+        A simple example of the GTB can be seen below. We create the type &quot;PERSON&quot; having one attribute
+        &quot;NAME&quot;:
+    </para>
+    <para>
+        <example xml:id="core_structure_gtb_ex01">
+            <title>Creating a simple type with one attribute</title>
+            <xi:include href="../listings/core_structure_gtb_ex01.xml"/>
+
+            <calloutlist>
+                <callout arearefs="cst_gtb_ex01_1">
+                    <para>
+                        Call the GTB and create the new type &quot;PERSON&quot;
+                    </para>
+                </callout>
+                <callout arearefs="cst_gtb_ex01_2">
+                    <para>
+                        Create the property &quot;NAME&quot;
+                    </para>
+                </callout>
+            </calloutlist>
+
+            The type and its attribute were created using the default settings for both types and properties
+            (i.e. for the &quot;NAME&quot; this means the
+            <classname>FxDataType</classname>
+            &quot;String&quot;)
+            More on default settings and all available attributes can seen in
+            <xref linkend="core_structure_gtb_attributes"/>
+            and in
+            <xref linkend="core_structure_gtb_defaultvalues"/>.
+            If you would like to get right into the thick of it, please check out the example section
+            <xref linkend="core_structure_gtb_examples"/>.
+        </example>
+    </para>
+
+    <section xml:id="core_structure_gtb_syntax">
+        <title>GroovyTypeBuilder Syntax</title>
+        <para>
+            Based on Groovy, a familiarity with its syntax is an asset, but not a requirement to understand the very
+            simple syntax rules for the GTB.
+            <para>
+                General rules:
+                <itemizedlist>
+                    <listitem>
+                        Properties have to start with a lower-case letter
+                    </listitem>
+                    <listitem>
+                        Groups have to start with an upper-case letter
+                    </listitem>
+                    <listitem>
+                        (Empty) Groups can either be denoted w/o parentheses (incl. curly braces), as in
+                        <programlisting><![CDATA[
+Groupname {
+}
+                    ]]></programlisting>
+                        or have parentheses w/o curly braces, as in
+                        <programlisting><![CDATA[
+Groupname ()
+                    ]]></programlisting>
+                    </listitem>
+                    <listitem>
+                        Attributes for types, properties, groups and their respective assignments have to be inside the
+                        parentheses
+                        following the element's name. Attributes are separated by commas &quot;,&quot;.
+                        <programlisting><![CDATA[
+propertyname (label: new FxString("Property label"), multilang: false)
+                    ]]></programlisting>
+                    </listitem>
+                </itemizedlist>
+            </para>
+            <para>
+                Creation and change of structural elements
+                <para>
+                    <itemizedlist>
+                        <listitem>
+                            Creating a new type: A type is created via a call to the<classname>
+                            GroovyTypeBuilder</classname>'s constructor,
+                            giving the type's name as the build parameter (e.g.: type name = &quot;BLOG&quot;
+                            <programlisting><![CDATA[
+new GroovyTypeBuilder().blog {
+}
+                        ]]></programlisting>
+                            or
+                            <programlisting><![CDATA[
+new GroovyTypeBuilder().blog()
+                        ]]></programlisting>
+                            or by assigning a builder variable:
+                            <programlisting><![CDATA[
+def builder = new GroovyTypeBuilder()
+
+builder.blog {
+}
+                        ]]></programlisting>
+                        </listitem>
+                        <listitem>
+                            Creating a new type with attributes
+                            <programlisting><![CDATA[
+new GroovyTypeBuilder().blog(label: new FxString(true, "A Blog Type"),
+                            trackHistory: true,
+                            historyAge: 10L) {
+}
+                        ]]></programlisting>
+                            or
+                            <programlisting><![CDATA[
+def builder = new GroovyTypeBuilder()
+builder.blog(label: new FxString(true, "A Blog Type"),
+    trackHistory: true,
+    historyAge: 10L) {
+    // ... properties & groups here ...    
+}
+                        ]]></programlisting>
+                        </listitem>
+                        <listitem>
+                            Creating a new type having two properties and one group
+                            <programlisting><![CDATA[
+new GroovyTypeBuilder().blog {
+    title()
+    Entry {
+        text()
+    }
+}
+                        ]]></programlisting>
+                        </listitem>
+                        <listitem>
+                            Loading a type, e.g. loading the type &quot;BLOG&quot; (more on this in
+                            <xref linkend="core_structure_gtb_examples"/>:
+                            <programlisting><![CDATA[
+def builder = new GroovyTypeBuilder("BLOG")
+builder {
+    // do something with "BLOG"
+}
+                        ]]></programlisting>
+                        </listitem>
+                        <listitem>
+                            When creating an element / structure name which constitutes a Java/Groovy keyword,
+                            the element name must be quoted (single or double quotes):
+                            <programlisting><![CDATA[
+def builder = new GroovyTypeBuilder("BLOG")
+builder {
+    'abstract'(label: new FxString(true, "Abstract Prop"),
+                dataType: FxDataType.Text)
+}
+                        ]]></programlisting>
+                        </listitem>
+                    </itemizedlist>
+                </para>
+            </para>
+        </para>
+    </section>
+
+    <section xml:id="core_structure_gtb_attributes">
+        <title>GroovyTypeBuilder Attributes</title>
+        <para>
+            The following is a list of all available attributes for the
+            <classname>GroovyTypeBuilder</classname>.
+            The parameters correspond to the type/property/group parameters mentioned in
+            <xref linkend="core_structure"/>
+
+            Parameters / attributes are split up into the following categories:
+            <itemizedlist>
+                <listitem>
+                    Type attributes: these apply to types only
+                </listitem>
+                <listitem>
+                    Property &amp; group common attributes: these apply both to the creation of new properties and to groups
+                </listitem>
+                <listitem>
+                    Property attributes: these apply to the creation of new properties
+                </listitem>
+                <listitem>
+                    Group attributes: these apply to the creation of new groups
+                </listitem>
+                <listitem>
+                    Property &amp; group assignment common attributes: these apply to property group assignments and changes thereof
+                </listitem>
+                <listitem>
+                    Property assignment attributes: these apply to property assignments or changes thereof
+                </listitem>
+                <listitem>
+                    Group assignment attributes: these apply to group assignments or changes thereof
+                </listitem>
+            </itemizedlist>
+
+            As mentioned in <xref linkend="core_structure_gtb_syntax"/>,
+            all attributes are called via the following syntax:
+            <para>
+                <code>[STRUCTURENAME] ([attribute]: [value] [, ..])</code>
+            </para>
+            E.g:
+            <code>firstname(multiLang: false,
+                label: new FxString(true, &quot;First name&quot;))
+            </code>
+
+            <para>
+                <warning>
+                    Attributes are CASE-SENSITIVE.
+                    <para>
+                        Attributes in the wrong case will be
+                        ignored, misspelled attributes *might* be interpreted as generic structure options.
+                    </para>
+                </warning>
+            </para>
+            <para>
+                Guarantee: The GTB guarantees that changes to assignments will only affect the attributes
+                parameterised in the call to the GTB. (i.e. a change to the &quot;label&quot; has no effect on
+                any other attributes, an &quot;empty&quot; call to an existing assignment does not affect the
+                assignment at all).
+            </para>
+            <para>
+                Hint: Examples might omit part of the code.
+            </para>
+        </para>
+        <section xml:id="core_structure_gtb_type_attribs">
+            <title>GTB Type Attributes</title>
+            <table xml:id="gtb_type_attribs" class="flexive">
+                <caption>Type Attributes</caption>
+                <thead>
+                    <tr>
+                        <th>Attribute</th>
+                        <th>Input</th>
+                        <th>Example</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            label
+                        </td>
+                        <td>
+                            <classname>FxString</classname>
+                        </td>
+                        <td>
+                            <code>testtype(label: new FxString(true, &quot;Property 01&quot;))</code>
+                        </td>
+                        <td>Sets the type's label. If not given, the element's name is used (code example: &quot;testtype&quot;
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>acl</td>
+                        <td>
+                            <classname>String</classname>
+                            or
+                            <classname>ACL</classname>
+                        </td>
+                        <td>
+                            <code>testtype(acl: &quot;Default Structure ACL&quot;)</code>
+                            or
+                            <code>testtype(acl:
+                                CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId())
+                            </code>
+                        </td>
+                        <td>
+                            Sets the access control list for the given type. If not given, the &quot;Default Structure
+                            ACL&quot; is used
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>parentTypeName</td>
+                        <td>
+                            <classname>String</classname>
+                        </td>
+                        <td>
+                            <code>testtype(parentTypeName: &quot;ROOT&quot;)</code>
+                        </td>
+                        <td>
+                            Creates a derived type from the given parentTypeName.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>languageMode</td>
+                        <td>
+                            <classname>LanguageMode</classname>
+                        </td>
+                        <td>
+                            <code>testtype(languageMode: LanguageMode.Single</code>
+                        </td>
+                        <td>
+                            Determines how the type handles languages
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>typeMode</td>
+                        <td>
+                            <classname>TypeMode</classname>
+                        </td>
+                        <td>
+                            <code>testtype(typeMode: TypeMode.Relation)</code>
+                        </td>
+                        <td>
+                            Sets the mode of an FxType
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>trackHistory</td>
+                        <td>
+                            <classname>Boolean</classname>
+                        </td>
+                        <td>
+                            <code>testtype(trackHistory: true)</code>
+                        </td>
+                        <td>
+                            Enables history tracking for a type.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>historyAge</td>
+                        <td>
+                            Long
+                        </td>
+                        <td>
+                            <code>testtype(trackHistory: true, historyAge: 10L)</code>
+                        </td>
+                        <td>
+                            Sets the number of history entries. Only used in conjunction with &quot;trackHistory&quot;
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>maxVersions</td>
+                        <td>
+                            Long
+                        </td>
+                        <td>
+                            <code>testtype(maxVersions: 5L)</code>
+                        </td>
+                        <td>
+                            Sets the number of versions to keep.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>useInstancePermissions</td>
+                        <td>
+                            <classname>Boolean</classname>
+                        </td>
+                        <td>
+                            <code>testtype(useInstancePermissions: true)</code>
+                        </td>
+                        <td>
+                            Use instance permissions
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>usePropertyPermissions</td>
+                        <td>
+                            <classname>Boolean</classname>
+                        </td>
+                        <td>
+                            <code>testtype(usePropertyPermissions: true)</code>
+                        </td>
+                        <td>
+                            Use property permissions
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>useStepPermissions</td>
+                        <td>
+                            <classname>Boolean</classname>
+                        </td>
+                        <td>
+                            <code>testtype(useStepPermissions: true)</code>
+                        </td>
+                        <td>
+                            Use step permissions
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>useTypePermissions</td>
+                        <td>
+                            <classname>Boolean</classname>
+                        </td>
+                        <td>
+                            <code>testtype(useTypePermissions: true)</code>
+                        </td>
+                        <td>
+                            Use type permissions
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>usePermissions</td>
+                        <td>
+                            <classname>Boolean</classname>
+                        </td>
+                        <td>
+                            <code>testtype(usePermissions: true)</code>
+                        </td>
+                        <td>
+                            Use all permissions if set to &quot;true&quot;
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>icon</td>
+                        <td>
+                            <classname>FxReference</classname>
+                        </td>
+                        <td>
+                            <code>testtype(icon: new FxReference([example omitted for brevity]...))</code>
+                        </td>
+                        <td>
+                            Set an icon for the given type
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section xml:id="core_structure_gtb_propgroup_common_attribs">
+            <title>Properties and Groups - Common Attributes</title>
+
+
+            <table xml:id="gtb_propgroup_common_attribs" class="flexive">
+                <caption>Properties and Groups - Common Attributes (Property / Group Creation)</caption>
+                <thead>
+                    <tr>
+                        <th>Attribute</th>
+                        <th>Input</th>
+                        <th>Example</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>label</td>
+                        <td>
+                            <classname>FxString</classname>
+                        </td>
+                        <td>
+                            <code>prop(label: new FxString(true, &quot;Property 01&quot;))</code>
+                        </td>
+                        <td>
+                            Sets the property's label. If not given, the element's name is used (code example: &quot;prop&quot;)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            name
+                        </td>
+                        <td>
+                            <classname>String</classname>
+                        </td>
+                        <td>
+                            <code>testprop(name: &quot;myprop&quot;)</code>
+                            Will create a property named &quot;MYPROP&quot;.
+                            W/o the &quot;name&quot; attribute, the property's name would be &quot;TESTPROP&quot;
+                        </td>
+                        <td>
+                            Set the property's or group's name. The name attribute will override any name given during
+                            structure creation.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            alias
+                        </td>
+                        <td>
+                            <classname>String</classname>
+                        </td>
+                        <td>
+                            <code>address(alias: &quot;address_a&quot;)</code>
+                            (will create the XPath assignment &quot;TYPENAME/ADDRESS_A&quot;
+                        </td>
+                        <td>
+                            Set the alias for a given property or group. Will affect the XPath!
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            hint
+                        </td>
+                        <td>
+                            <classname>FxString</classname>
+                        </td>
+                        <td>
+                            <code>Address(hint: new FxString(true, &quot;Contains address properties&quot;))</code>
+                        </td>
+                        <td>
+                            Set the property's or group's hint attribute
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            multiplicity
+                        </td>
+                        <td>
+                            <classname>FxMultiplicity</classname>
+                            or
+                            <classname>String</classname>
+                        </td>
+                        <td>
+                            <code>phonenumber(multiplicity: &quot;0,3&quot;)</code>
+                        </td>
+                        <td>
+                            Set the property's or group's multiplicity (cardinality). A default of 0..1 is assumed
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            defaultMultiplicity
+                        </td>
+                        <td>
+                            <classname>Integer</classname>
+                        </td>
+                        <td>
+                            <code>Address(defaultMultiplicity: 0)</code>
+                        </td>
+                        <td>
+                            Set a property's or group's default multiplicity. A default of 1 is assumed
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            overrideMultiplicity
+                        </td>
+                        <td>
+                            <classname>Boolean</classname>
+                        </td>
+                        <td>
+                            <code>street(overrideMultiplicity: false)</code>
+                        </td>
+                        <td>
+                            Set whether the property's or group's assignment may override the base multiplicity. A
+                            default of &quot;true&quot; is
+                            assumed for properties, &quot;false&quot; for groups.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            [GENERIC STRUCTURE OPTION]
+                        </td>
+                        <td>
+                            <classname>String</classname>
+                        </td>
+                        <td>
+                            <code>Address(label: new FxString(&quot;Address Group&quot;)
+                                &quot;BUSINESS&quot;: true)
+                            </code>
+                            or
+                            <code>
+                                Address(label: new FxString(&quot; Address Group&quot;)
+                                BUSINESS: &quot;Telecom provider&quot;)
+                            </code>
+                        </td>
+                        <td>
+                            Set a generic option for the given property
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section xml:id="core_structure_gtb_prop_attribs">
+            <title>Property Attributes</title>
+            <table xml:id="gtb_prop_attribs" class="flexive">
+                <caption>Exclusive property attributes (property creation)</caption>
+                <thead>
+                    <tr>
+                        <th>Attribute</th>
+                        <th>Input</th>
+                        <th>Example</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>acl</td>
+                        <td>
+                            <classname>String</classname>
+                            or
+                            <classname>ACL</classname>
+                        </td>
+                        <td>
+                            <code>street(acl: &quot;Default Structure ACL&quot;)</code>
+                            or
+                            <code>street(acl:
+                                CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId())
+                            </code>
+                        </td>
+                        <td>
+                            Sets the ACL for the given property. By default the &quot;Default Structure ACL&quot; is
+                            used.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>overrideACL</td>
+                        <td>
+                            <classname>Boolean</classname>
+                        </td>
+                        <td>
+                            <code>street(acl: &quot;Default Structure ACL&quot;,
+                                overrideACL: true)
+                            </code>
+                        </td>
+                        <td>
+                            The property's assignments may override the property's ACL
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            dataType
+                        </td>
+                        <td>
+                            <classname>FxDataType</classname>
+                        </td>
+                        <td>
+                            <code>htmlEdit(dataType: FxDataType.HTML)</code>
+                        </td>
+                        <td>
+                            Set the datatype for the given property. If not given,
+                            <classname>FxDataType.String1024</classname>
+                            is assumed
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            autoUniquePropertyName
+                        </td>
+                        <td>
+                            <classname>Boolean</classname>
+                        </td>
+                        <td>
+                            <code>name(autoUniquePropertyName: false)</code>
+                        </td>
+                        <td>
+                            Automatically creates a unique property name should the same property (name) exist already.
+                            By default
+                            the attribute is &quot;true&quot;
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            fullTextIndexed
+                        </td>
+                        <td>
+                            <classname>Boolean</classname>
+                        </td>
+                        <td>
+                            <code>note(dataType: FxDataType.Text, fullTextIndexed: false)</code>
+                        </td>
+                        <td>
+                            Sets the full text search attribute for properties
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            multilang
+                        </td>
+                        <td>
+                            <classname>Boolean</classname>
+                        </td>
+                        <td>
+                            <code>title(dataType: FxDataType.String1024, multilang: true)</code>
+                        </td>
+                        <td>
+                            Sets the property's multilanguage attribute
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            overrideMultilang
+                        </td>
+                        <td>
+                            <classname>Boolean</classname>
+                        </td>
+                        <td>
+                            <code>title(multilang: false, overrideMultilang: true)</code>
+                        </td>
+                        <td>
+                            Determines if the multilang option may be overriden in assignments
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            overrideInOverview
+                        </td>
+                        <td>
+                            <classname>Boolean</classname>
+                        </td>
+                        <td>
+                            <code>title(overrideInOverview: false)</code>
+                        </td>
+                        <td>
+                            Assignments may override the &quot;INOVERVIEW&quot; option
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            maxLength
+                        </td>
+                        <td>
+                            <classname>Integer</classname>
+                        </td>
+                        <td>
+                            <code>phonenumber(maxLength: 25, dataType: FxDataType.Text)</code>
+                        </td>
+                        <td>
+                            Restrict the maximum length of input values. Works in conjunction with
+                            <classname>FxDataType.String1024</classname>
+                            and
+                            <classname>FxDataType.Text</classname>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            overrideMaxLength
+                        </td>
+                        <td>
+                            <classname>Boolean</classname>
+                        </td>
+                        <td>
+                            <code>title(overrideMaxLength: false)</code>
+                        </td>
+                        <td>
+                            Assignments may override the &quot;MAXLENGTH&quot; option.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            overrideMultiline
+                        </td>
+                        <td>
+                            <classname>Boolean</classname>
+                        </td>
+                        <td>
+                            <code>title(overrideMultiline: false)</code>
+                        </td>
+                        <td>
+                            Assignments may override the &quot;MULTILINE&quot; option
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            overrideSearchable
+                        </td>
+                        <td>
+                            <classname>Boolean</classname>
+                        </td>
+                        <td>
+                            <code>title(overrideSearchable: false)</code>
+                        </td>
+                        <td>
+                            Assignments may override the &quot;SEARCHABLE&quot; option
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            overrideUseHtmlEditor
+                        </td>
+                        <td>
+                            <classname>Boolean</classname>
+                        </td>
+                        <td>
+                            <code>htmledit(overrideUseHtmlEditor: false)</code>
+                        </td>
+                        <td>
+                            Assignments may override the html editor option
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            searchable
+                        </td>
+                        <td>
+                            <classname>Boolean</classname>
+                        </td>
+                        <td>
+                            <code>htmledit(searchable: false)</code>
+                        </td>
+                        <td>
+                            Property can be searched
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            inOverview
+                        </td>
+                        <td>
+                            <classname>Boolean</classname>
+                        </td>
+                        <td>
+                            <code>htmledit(inOverview: true)</code>
+                        </td>
+                        <td>
+                            Property is in overview
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            useHtmlEditor
+                        </td>
+                        <td>
+                            <classname>Boolean</classname>
+                        </td>
+                        <td>
+                            <code>numberarea(useHtmlEditor: true, dataType: FxDataType.Number)</code>
+                        </td>
+                        <td>
+                            Property uses the html editor
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            multiline
+                        </td>
+                        <td>
+                            <classname>Boolean</classname>
+                        </td>
+                        <td>
+                            <code>numberarea(multiline: true, dataType: FxDataType.HTML)</code>
+                        </td>
+                        <td>
+                            Use a multiline input field for entering values
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            defaultValue
+                        </td>
+                        <td>
+                            <classname>FxValue</classname>
+                        </td>
+                        <td>
+                            <code>title(dataType: FxDataType.String1024,
+                                defaultValue: new FxString(false, &quot;Dr.&quot;))
+                            </code>
+                        </td>
+                        <td>
+                            Sets the default FxValue for the given property.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            uniqueMode
+                        </td>
+                        <td>
+                            <classname>UniqueMode</classname>
+                        </td>
+                        <td>
+                            <code>note(FxDataType.HTML,
+                                uniqueMode: UniqueMode.Global)
+                            </code>
+                        </td>
+                        <td>
+                            Set the uniqueness of a property
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            referencedType
+                        </td>
+                        <td>
+                            <classname>FxType</classname>
+                            or
+                            <classname>String</classname>
+                        </td>
+                        <td>
+                            <code>imageref(dataType: FxDataType.Reference,
+                                referencedType: &quot;IMAGE&quot;)
+                            </code>
+                            or
+                            <code>imageref(dataType: FxDataType.Reference,
+                                referencedType: CacheAdmin.getEnvironment().getType(&quot;IMAGE&quot;)
+                            </code>
+                        </td>
+                        <td>
+                            Sets the referenced FxType for a property
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            referencedList
+                        </td>
+                        <td>
+                            <classname>FxSelectList</classname>
+                            or
+                            <classname>String</classname>
+                        </td>
+                        <td>
+                            <code>country(dataType: FxDataType.SelectOne,
+                                referencedList: &quot;COUNTRIES&quot;</code>
+                            or
+                            <code>country(dataType: FxDataType.SelectOne,
+                                referencedList: CacheAdmin.getEnvironment().getSelectList(&quot;COUNTRIES&quot;)
+                            </code>
+                        </td>
+                        <td>
+                            Sets the FxSelectList for a FxDataType.SelectOne / .SelectMany property
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section xml:id="core_structure_gtb_group_attribs">
+            <title>Group Attributes</title>
+            <table xml:id="gtb_group_attribs" class="flexive">
+                <caption>Exclusive group attributes (group creation)</caption>
+                <thead>
+                    <tr>
+                        <th>Attribute</th>
+                        <th>Input</th>
+                        <th>Example</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            groupMode
+                        </td>
+                        <td>
+                            <classname>GroupMode</classname>
+                            or
+                            <classname>String</classname>
+                        </td>
+                        <td>
+                            <code>Address(label: new FxString(true, &quot;Home Address&quot;),
+                                groupMode: GroupMode.OneOf)
+                            </code>
+                            or
+                            <code>Address(label: new FxString(true, &quot;Home Address&quot;),
+                                groupMode: &quot;AnyOf&quot;)
+                            </code>
+                        </td>
+                        <td>
+                            Sets the GroupMode for the given group.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section xml:id="core_structure_gtb_propgroupass_common_attribs">
+            <title>Property and Group Assignments - Common Attributes</title>
+            <para>
+                As is the case with all assignments, the attribute settings are taken from the base assignment,
+                any attributes listed here can be used to change them (e.g. the &quot;label&quot;) if applicable (or
+                if overridable)
+            </para>
+            <table xml:id="gtb_propgroupass_common_attribs" class="flexive">
+                <caption>Property and Group Assignments - common attributes (property / group assignments and
+                    changes
+                    thereof)
+                </caption>
+                <thead>
+                    <tr>
+                        <th>Attribute</th>
+                        <th>Input</th>
+                        <th>Example</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>label</td>
+                        <td>
+                            <classname>FxString</classname>
+                        </td>
+                        <td>
+                            <code>property(label: new FxString(true, &quot;Property 01&quot;))</code>
+                        </td>
+                        <td>
+                            Set or change the assignment's label
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            defaultMultiplicity
+                        </td>
+                        <td>
+                            <classname>Integer</classname>
+                        </td>
+                        <td>
+                            <code>Address(defaultMultiplicity: 0)</code>
+                        </td>
+                        <td>
+                            Set a property's or group's default multiplicity IFF overrideBaseMultiplicity = &quot;true&quot;
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            alias
+                        </td>
+                        <td>
+                            <classname>String</classname>
+                        </td>
+                        <td>
+                            <code>address(assignment: &quot;CONTACTDATA/ADDRESS&quot;, alias: &quot;address_a&quot;)
+                            </code>
+                        </td>
+                        <td>
+                            Set the alias for a given property or group. Will also change the XPath.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            hint
+                        </td>
+                        <td>
+                            <classname>FxString</classname>
+                        </td>
+                        <td>
+                            <code>Address(hint: new FxString(true, &quot;Contains address properties&quot;))</code>
+                        </td>
+                        <td>
+                            Set the property or group assignment's hint attribute
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            multiplicity
+                        </td>
+                        <td>
+                            <classname>FxMultiplicity</classname>
+                            or
+                            <classname>String</classname>
+                        </td>
+                        <td>
+                            <code>phonenumber(multiplicity: &quot;0,3&quot;)</code>
+                        </td>
+                        <td>
+                            Set the propertys or groups assignment's multiplicity
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            enabled
+                        </td>
+                        <td>
+                            <classname>Boolean</classname>
+                        </td>
+                        <td>
+                            <code>alternatePhone(assignment: &quot;CONTACTDATA/ADDRESS/PHONENUMBER&quot;, enabled:
+                                false)
+                            </code>
+                        </td>
+                        <td>
+                            Disable an assignment
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            [GENERIC STRUCTURE OPTION]
+                        </td>
+                        <td>
+                            <classname>String</classname>
+                        </td>
+                        <td>
+                            <code>Address(label: new FxString(&quot;Address Group&quot;)
+                                &quot;BUSINESS&quot;: true)
+                            </code>
+                            or
+                            <code>
+                                Address(label: new FxString(&quot; Address Group&quot;)
+                                BUSINESS: &quot;Telecom provider&quot;)
+                            </code>
+                        </td>
+                        <td>
+                            Set a generic option for the given assignment
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section xml:id="core_structure_gtb_propass_attribs">
+            <title>Property Assignment Attributes</title>
+            <table xml:id="gtb_propass_attribs" class="flexive">
+                <caption>Exclusive property assignment attributes (assignments and changes thereof)</caption>
+                <thead>
+                    <tr>
+                        <th>Attribute</th>
+                        <th>Input</th>
+                        <th>Example</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            multilang
+                        </td>
+                        <td>
+                            <classname>Boolean</classname>
+                        </td>
+                        <td>
+                            <code>title(assinment: &quot;CONTACTDATA/TITLE&quot;, multilang: true)</code>
+                        </td>
+                        <td>
+                            Sets the property assignment's multilanguage attribute if overridable
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            defaultValue
+                        </td>
+                        <td>
+                            <classname>FxValue</classname>
+                        </td>
+                        <td>
+                            <code>author(assignment: &quot;MYBOOK/AUTHOR&quot;,
+                                defaultValue: new FxString(false, &quot;Dr.&quot;))
+                            </code>
+                        </td>
+                        <td>
+                            Sets the default FxValue for the given assignment.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>acl</td>
+                        <td>
+                            <classname>String</classname>
+                            or
+                            <classname>ACL</classname>
+                        </td>
+                        <td>
+                            <code>
+                                street(assignment: &quot;CONTACTDATA/ADDRESS/STREET&quot;, acl: &quot;Default Structure
+                                ACL&quot;)
+                            </code>
+                            or
+                            <code>
+                                street(assignment: &quot;CONTACTDATA/ADDRESS/STREET&quot;, acl:
+                                CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId())
+                            </code>
+                        </td>
+                        <td>
+                            Sets the ACL for the given assignment.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>defaultLanguage</td>
+                        <td>
+                            <classname>Long</classname>
+                        </td>
+                        <td>
+                            <code>text(defaultLanguage: FxLanguage.GERMAN</code>
+                        </td>
+                        <td>
+                            Set the assignment's default language
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            multiline
+                        </td>
+                        <td>
+                            <classname>Boolean</classname>
+                        </td>
+                        <td>
+                            <code>text(multiline: true, dataType: FxDataType.HTML)</code>
+                        </td>
+                        <td>
+                            Use a multiline input field for entering values
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            inOverview
+                        </td>
+                        <td>
+                            <classname>Boolean</classname>
+                        </td>
+                        <td>
+                            <code>htmledit(inOverview: true)</code>
+                        </td>
+                        <td>
+                            Property assignment is in overview
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            useHtmlEditor
+                        </td>
+                        <td>
+                            <classname>Boolean</classname>
+                        </td>
+                        <td>
+                            <code>numberarea(useHtmlEditor: true, dataType: FxDataType.Number)</code>
+                        </td>
+                        <td>
+                            Property assignment uses the html editor
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            maxLength
+                        </td>
+                        <td>
+                            <classname>Integer</classname>
+                        </td>
+                        <td>
+                            <code>textarea(multiline: true, maxLength: 100)</code>
+                        </td>
+                        <td>
+                            Restrict the maximum length of input values.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section xml:id="core_structure_gtb_groupass_attribs">
+            <title>Group Assignment Attributes</title>
+            <table xml:id="gtb_groupass_attribs" class="flexive">
+                <caption>Exclusive group assignment attributes (assignments and changes thereof)</caption>
+                <thead>
+                    <tr>
+                        <th>Attribute</th>
+                        <th>Input</th>
+                        <th>Example</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            groupMode
+                        </td>
+                        <td>
+                            <classname>GroupMode</classname>
+                            or
+                            <classname>String</classname>
+                        </td>
+                        <td>
+                            <code>Address(label: new FxString(true, &quot;Home Address&quot;),
+                                groupMode: GroupMode.OneOf
+                            </code>
+                            or
+                            <code>Address(label: new FxString(true, &quot;Home Address&quot;),
+                                groupMode: &quot;AnyOf&quot;
+                            </code>
+                        </td>
+                        <td>
+                            Sets the GroupMode for the given group.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+    </section>
+
+    <section xml:id="core_structure_gtb_defaultvalues">
+        <title>Property and Group Creation - Default Values</title>
+        <para>
+            A property created w/o any attributes as arguments, e.g.:
+            <programlisting><![CDATA[
+new GroovyTypeBuilder {
+    prop1()
+}
+        ]]></programlisting>
+            has the following characteristics (incl. assignment attributes):
+            <itemizedlist>
+                <listitem>
+                    multilang: false
+                </listitem>
+                <listitem>
+                    overrideMultilang: false
+                </listitem>
+                <listitem>
+                    acl: &quot;Default Structure ACL&quot;
+                </listitem>
+                <listitem>
+                    overrideACL: true
+                </listitem>
+                <listitem>
+                    dataType: FxDataType.String1024
+                </listitem>
+                <listitem>
+                    multiLine: false
+                </listitem>
+                <listitem>
+                    overrideMultiline: false
+                </listitem>
+                <listitem>
+                    inOverview: false
+                </listitem>
+                <listitem>
+                    overrideInOverview: false
+                </listitem>
+                <listitem>
+                    label: &quot;Prop1&quot; (created automatically from the element's name)
+                </listitem>
+                <listitem>
+                    multiplicity: &quot;0,1&quot;
+                </listitem>
+                <listitem>
+                    overrideMultiplicity: true
+                </listitem>
+                <listitem>
+                    name: &quot;PROP1&quot; (created automatically from the element's name)
+                </listitem>
+                <listitem>
+                    uniqueMode: UniqueMode.None
+                </listitem>
+                <listitem>
+                    fullTextIndexed: true
+                </listitem>
+                <listitem>
+                    searchable: true
+                </listitem>
+                <listitem>
+                    defaultMultiplicity: 1
+                </listitem>
+                <listitem>
+                    FxStructureOptions:
+                    <itemizedlist>
+                        KEY | VALUE | OVERRIDABLE
+                        <listitem>
+                            SEARCHABLE | 1 | TRUE
+                        </listitem>
+                        <listitem>
+                            HTML.EDITOR | 0 | TRUE
+                        </listitem>
+                        <listitem>
+                            MULTILINE | 0 | TRUE
+                        </listitem>
+                        <listitem>
+                            SHOW.OVERVIEW | 0 | TRUE
+                        </listitem>
+                    </itemizedlist>
+                </listitem>
+            </itemizedlist>
+        </para>
+        <para>
+            A group created w/o any attributes as arguments, e.g.:
+            <programlisting><![CDATA[
+new GroovyTypeBuilder {
+    Group1()
+}
+        ]]></programlisting>
+            has the following characteristics:
+            <itemizedlist>
+                <listitem>
+                    label: *the element's name, capitalised start letter, e.g. &quot;Group1&quot;*
+                </listitem>
+                <listitem>
+                    multiplicity: &quot;0,1&quot;
+                </listitem>
+                <listitem>
+                    overrideMultiplicity: false
+                </listitem>
+                <listitem>
+                    name: *the element's name, e.g. &quot;GROUP1&quot;*
+                </listitem>
+                <listitem>
+                    groupMode: GroupMode.AnyOf
+                </listitem>
+                <listitem>
+                    searchable: true
+                </listitem>
+            </itemizedlist>
+        </para>
+    </section>
+
+    <section xml:id="core_structure_gtb_examples">
+        <title>GroovyTypeBuilder Usage Examples</title>
+        <para>
+            Several examples of using the GTB can be found throughout the reference documentation.
+            This section further illustrates the various uses the GTB can be put to when creating
+            or updating structural information in &flexive;.
+        </para>
+
+        <section xml:id="core_structure_gtb_examples_ex1_1">
+            <title>Creating a simple type</title>
+            <para>
+                This example creates a type named &quot;COMPANY&quot;, comprised of a &quot;name&quot; attribute
+                (derived from
+                &quot;ROOT/CAPTION&quot; and a &quot;People&quot; group also having a property &quot;Name&quot;.
+            </para>
+
+            <para>
+                Hint: the &quot;Default [fleXive] imports for Groovy&quot; are taken directly from &flexive;'s
+                script console.
+                It is assumed that they are present for any further examples in this section.
+            </para>
+            <para>
+                <programlisting><![CDATA[
+/* Default [fleXive] imports for Groovy */
+import com.flexive.shared.*
+import com.flexive.shared.interfaces.*
+import com.flexive.shared.value.*
+import com.flexive.shared.content.*
+import com.flexive.shared.search.*
+import com.flexive.shared.tree.*
+import com.flexive.shared.workflow.*
+import com.flexive.shared.media.*
+import com.flexive.shared.scripting.groovy.*
+import com.flexive.shared.structure.*
+import com.flexive.shared.security.*
+
+new GroovyTypeBuilder().company {
+    name(assignment: "ROOT/CAPTION")
+    People {
+        name(overrideMultiplicity: true)
+    }
+}
+            ]]></programlisting>
+            </para>
+        </section>
+
+        <section xml:id="core_structure_gtb_examples_ex1_2">
+            <title>Calling and altering an existing type</title>
+            <para>
+                The GTB can load an existing type and perform a walk through its structure.
+            </para>
+            <para>
+                A walk through the above structure w/o any arguments will not change any of the given assignments, e.g.:
+                <programlisting><![CDATA[
+def builder = new GroovyTypeBuilder("COMPANY")
+builder {
+    name()
+    People {
+        name()
+    }
+}
+            ]]></programlisting>
+            </para>
+            <para>
+                Changing any of a type's assignments is simply a matter of adding the relevant attributes and their
+                respective values
+                t.b. changed. In the following example, we change
+                <itemizedlist>
+                    <listitem>
+                        the name property in the root of &quot;COMPANY&quot; to bear the label &quot;Company name&quot;.
+                    </listitem>
+                    <listitem>
+                        the name of the name property in the &quot;People&quot; group to bear the label &quot;Staff
+                        member name&quot;.
+                    </listitem>
+                </itemizedlist>
+            </para>
+            <para>
+                <programlisting><![CDATA[
+def builder = new GroovyTypeBuilder("COMPANY")
+builder {
+    name(label: new FxString("Company name"))
+    People {
+        name(label: new FxString("Staff member name"))
+    }
+}
+            ]]></programlisting>
+            </para>
+            <para>
+                If a single assignment must be changed, there is no need to call all existing properties within a
+                type. However, any parent groups must be called in order to perform the structure walk-through and to
+                point the
+                GTB to the correct element.
+            </para>
+            <para>
+                Example: change the label from &quot;Staff member name&quot; back to &quot;Staff member&quot;.
+                <programlisting><![CDATA[
+def builder = new GroovyTypeBuilder("COMPANY")
+builder {
+    People {
+        name(label: new FxString("Staff member"))
+    }
+}
+            ]]></programlisting>
+            </para>
+        </section>
+
+        <section xml:id="core_structure_gtb_examples_ex1_3">
+            <title>Adding elements to an existing type</title>
+            <para>
+                Types can also be called to add new elements (properties, groups) to an existing structure.
+            </para>
+            <para>
+                In this example we create a new group &quot;Departments&quot; in our &quot;COMPANY&quot; type, having a
+                child &quot;name&quot; property.
+                <programlisting><![CDATA[
+def builder = new GroovyTypeBuilder("COMPANY")
+builder {
+    Departments(multiplicity: "0,10") {
+        name(label: new FxString("Dept. name"))
+    }
+}
+            ]]></programlisting>
+            </para>
+            <para>
+                Creating subgroups is also quite easy:
+                <programlisting><![CDATA[
+def builder = new GroovyTypeBuilder("COMPANY")
+builder {
+    Departments {
+        DepartmentHeads {
+            name(assignment: "COMPANY/PEOPLE/NAME")
+        }
+    }
+}
+                ]]></programlisting>
+            </para>
+        </section>
+
+        <section xml:id="core_structure_gtb_examples_ex2_1">
+            <title>&quot;Special&quot; GTB operations</title>
+            <itemizedlist>
+                <listitem>
+                    <para>Aliases</para>
+                    <para>
+                        Aliases can be assigned during element creation and can also be changed for existing
+                        assignments.
+                        However, it is not necessary to perform subsequent structure walk-throughs by calling the aliased name (albeit
+                        possible).
+                    </para>
+                    <para>
+                        Example: Create a type &quot;TEST&quot; having a property &quot;NAME&quot; with the aliased name
+                        &quot;firstname&quot;.
+                        This will lead to an XPATH assignment of "TEST/FIRSTNAME" for the given property assignment.
+                        <programlisting><![CDATA[
+new GroovyTypeBuilder().test {
+    name(alias: "firstname")
+}
+                ]]></programlisting>
+                        The label can then be changed by employing
+                        <programlisting><![CDATA[
+def builder = new GroovyTypeBuilder("TEST")
+builder {
+    name(label: new FxString("First name"))
+}
+                ]]></programlisting>
+                        Any derived assignments MUST consider the aliased name (or its XPath, respectively):
+                        <programlisting><![CDATA[
+def builder = new GroovyTypeBuilder("TEST")
+builder {
+    lastname(assignment: "TEST/FIRSTNAME")
+}
+                ]]></programlisting>
+                        As mentioned above, an alias can also be changed for existing elements:
+                        <programlisting><![CDATA[
+def builder = new GroovyTypeBuilder("TEST")
+builder {
+    name(alias: "name")
+}
+                ]]></programlisting>
+                        .. which would alter the XPath of the above property assignment to &quot;TEST/NAME&quot;
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        Aliased assignments from other types
+                    </para>
+                    <para>
+                        A word of caution: Calling aliased assignments from other types will not work (this mainly has
+                        to do
+                        with the way the GTB has to &quot;guess&quot; where it is within a structure and what it is
+                        looking for &amp;
+                        also due to the way that structure traversal works).
+                    </para>
+                    <para>
+                        Example: A structure with an aliased assignment from &quot;ROOT/CAPTION&quot;
+                        <programlisting><![CDATA[
+new GroovyTypeBuilder().test {
+    caption(assignment: "ROOT/CAPTION", alias: "caption_alias")
+}
+                ]]></programlisting>
+                        Now we try to call the same structure again:
+                        <programlisting><![CDATA[
+def builder = new GroovyTypeBuilder("TEST")
+builder {
+    caption()
+}
+                ]]></programlisting>
+                        This yields a NEW property within &quot;TEST&quot; by the name of &quot;CAPTION&quot;
+                        <para>
+                            Q: How can I go about changing an aliased assignmnent (from another type)?
+                        </para>
+                        <para>
+                            A: Use the alias instead of the property's name! Example:
+                            <programlisting><![CDATA[
+def builder = new GroovyTypeBuilder("TEST")
+builder {
+    caption_alias(label: new FxString("My derived caption"))
+}
+                ]]></programlisting>
+                        </para>
+                    </para>
+                </listitem>
+            </itemizedlist>
+        </section>
+
+        <section xml:id="core_structure_gtb_examples_ex3_1">
+            <title>Comprehensive Example Pt1: Creating a Person Structure</title>
+            <para>
+                Create a basic structure with the following layout:
+                <itemizedlist>
+                    <listitem>
+                        TYPE:
+                        <para>
+                            The type's name is &quot;PERSON&quot;, the label will be &quot;Person Type&quot;
+                        </para>
+                    </listitem>
+                    <listitem>
+                        PROPERTIES / GROUPS:
+                        <para>
+                            <para>
+                                first name property:
+                                name: firstname
+                                label: &quot;First name&quot;
+                            </para>
+                            <para>
+                                last name property:
+                                name lastname
+                                label: &quot;Last name&quot;
+                            </para>
+                            <para>
+                                middle name property: derived from first name
+                            </para>
+                            <para>
+                                note property:
+                                text area, multiple languages
+                            </para>
+                        </para>
+                        <para>
+                            address group: contains &quot;postcode&quot;, &quot;streetname&quot;
+                        </para>
+                    </listitem>
+                </itemizedlist>
+            </para>
+            <para>
+                <programlisting><![CDATA[
+new GroovyTypeBuilder().person(label: new FxString(true, "Person Type")) {
+    firstname(label: new FxString(true, "First name"))
+    lastname(label: new FxString(true, "Last name"))
+    middlename(assignment: "PERSON/FIRSTNAME",
+                label: new FxString(true, "Middle name"),
+                multiplicity: "0,3",
+                defaultMultiplicity: 0)
+    note(dataType: FxDataType.Text,
+            multilang: true,
+            overrideMultilang: true,
+            multiline: true,
+            overrideMultiline: false,
+            label: new FxString(true, "Note"),
+            overrideMultiplicity: true,
+            multiplicity: FxMultiplicity.MULT_0_1)
+
+    Address {
+        postcode(label: new FxString(true, "Post code"))
+        streetname(label: new FxString(true, "Street"))
+    }
+}
+             ]]></programlisting>
+            </para>
+        </section>
+
+
+        <section xml:id="core_structure_gtb_examples_ex3_2">
+            <title>Comprehensive Example Pt2: Changing the Person Structure</title>
+            <para>
+                Alter the above structure by..
+                <itemizedlist>
+                    <listitem>
+                        disabling the &quot;Middle name&quot;
+                    </listitem>
+                    <listitem>
+                        adding a birthdate property to the &quot;PERSON&quot; type.
+                    </listitem>
+                    <listitem>
+                        creating a &quot;Note&quot; field in the &quot;Address&quot; group which is derived from the
+                        &quot;NOTE&quot; property in the root and is not a multilanguage assignment.
+                    </listitem>
+                    <listitem>
+                        complimenting the &quot;Address&quot; group by specifying a country property which is a
+                        Selectlist
+                        with one country to choose from (using the built-in &flexive; &quot;COUNTRIES&quot; select list)
+                        <classname>FxSelectList</classname>
+                    </listitem>
+                    <listitem>
+                        adding a phonenumber property to the &quot;Address&quot; group with a length an unoverridable
+                        maximum length of 15 digits alphanumeric characters
+                    </listitem>
+                    <listitem>
+                        adding a town property to the &quot;Address&quot; group.
+                    </listitem>
+                </itemizedlist>
+            </para>
+            <para>
+                <programlisting><![CDATA[
+def builder = new GroovyTypeBuilder("PERSON")
+builder {
+    middlename(enable: false)
+    birthdate(dataType: FxDataType.Date,
+                label: new FxString(true, "Birth date"))
+    Address {
+        note(assignment:"PERSON/NOTE",
+                multilang: false,
+                label: new FxString(true, "Note for Address"),
+                defaultMultiplicity: 0)
+        country(dataType: FxDataType.SelectOne,
+                    referencedList: "COUNTRIES",
+                    label: new FxString(true, "Country"))
+        phoneno(label: new FxString("Phone number"),
+                    maxLength: 15,
+                    overrideMaxLength: false)
+        town()
+    }
+}
+             ]]></programlisting>
+            </para>
+        </section>
+    </section>
+    <para>
+        
+    </para>
+</section>

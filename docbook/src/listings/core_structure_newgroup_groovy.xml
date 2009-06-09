@@ -41,5 +41,3 @@
          }
 <co xml:id="cst_newgroup_groovy_14"/>       EJBLookup.getContentEngine().save(builder.getContent())
 </programlisting>
-
-

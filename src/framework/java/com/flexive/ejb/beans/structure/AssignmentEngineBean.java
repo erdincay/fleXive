@@ -1180,7 +1180,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             }
             htracker.track(group.getAssignedType(), "history.assignment.createGroupAssignment", XPath, group.getAssignedType().getId(), group.getAssignedType().getName(),
                     group.getGroup().getId(), group.getGroup().getName());
-            storeOptions(con, TBL_GROUP_OPTIONS, "ID", group.getGroup().getId(), newAssignmentId, group.getOptions()); // TODO: TEST NEW
+            storeOptions(con, TBL_GROUP_OPTIONS, "ID", group.getGroup().getId(), newAssignmentId, group.getOptions());
             if (group.getBaseAssignmentId() > 0 && createSubAssignments) {
                 FxGroupAssignment baseGroup = (FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment(group.getBaseAssignmentId());
                 for (FxGroupAssignment ga : baseGroup.getAssignedGroups()) {

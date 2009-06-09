@@ -1355,4 +1355,6 @@
         </para>
     </section>
 
+    <xi:include href="structure_gtb.xml"/>
+
 </section>
