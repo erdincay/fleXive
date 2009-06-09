@@ -1,14 +1,13 @@
 import com.flexive.shared.*
 import com.flexive.shared.configuration.SystemParameters
 import com.flexive.shared.exceptions.FxRuntimeException
-import com.flexive.shared.interfaces.*
 import com.flexive.shared.search.*
-import com.flexive.shared.security.*
 import com.flexive.shared.structure.*
 import com.flexive.shared.value.FxString
-import com.flexive.shared.search.*
+import com.flexive.shared.scripting.groovy.GroovyTypeBuilder
+//import com.flexive.shared.security.*
 
-/***************************************************************
+/** *************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
  *  Copyright (c) 1999-2008
@@ -38,8 +37,7 @@ import com.flexive.shared.search.*
  *
  *
  *  This copyright notice MUST APPEAR in all copies of the file!
- ***************************************************************/
-
+ ************************************************************** */
 //file: init0011_article.gy
 //description: Create the "Article" FxType needed for all flexive installations
 //expected bindings:
@@ -51,12 +49,6 @@ import com.flexive.shared.search.*
 //def String CONTENT_ACL = "Article Content ACL";
 //def String WF_ACL = "Article Workflow ACL";
 def String ARTICLE_TYPE = "Article";
-
-def ContentEngine co = EJBLookup.getContentEngine();
-def ACLEngine acl = EJBLookup.getAclEngine();
-def TypeEngine type = EJBLookup.getTypeEngine();
-def AssignmentEngine ass = EJBLookup.getAssignmentEngine();
-def ScriptingEngine se = EJBLookup.getScriptingEngine();
 
 try {
     if (CacheAdmin.getEnvironment().getType(ARTICLE_TYPE) != null) {
@@ -86,160 +78,112 @@ try {
 //}
 
 //def ACL typeACL = CacheAdmin.getEnvironment().getACL(TYPE_ACL);
-def ACL typeACL = CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.defaultId)
-def long typeId = type.save(FxTypeEdit.createNew(ARTICLE_TYPE, new FxString(FxLanguage.ENGLISH, "Article").setTranslation(FxLanguage.GERMAN, "Artikel"), typeACL, null));
 
-ass.save(FxPropertyAssignmentEdit.createNew(CacheAdmin.getEnvironment().getAssignment((Long) EJBLookup.configurationEngine.get(SystemParameters.TREE_CAPTION_ROOTASSIGNMENT)),
-        CacheAdmin.getEnvironment().getType(ARTICLE_TYPE),
-        "TITLE", "/").setLabel(new FxString(FxLanguage.ENGLISH, "Title").setTranslation(FxLanguage.GERMAN, "Titel")).setEnabled(true), false);
+new GroovyTypeBuilder().Article(
+        label: new FxString(FxLanguage.ENGLISH, "Article").setTranslation(FxLanguage.GERMAN, "Artikel")) {
 
+    title(assignment: CacheAdmin.getEnvironment().getAssignment((Long) EJBLookup.configurationEngine.get(SystemParameters.TREE_CAPTION_ROOTASSIGNMENT)),
+            label: new FxString(FxLanguage.ENGLISH, "Title").setTranslation(FxLanguage.GERMAN, "Titel"),
+            createSubAssignments: false)
+    
+    'abstract'(label: new FxString("Abstract"),
+            dataType: FxDataType.Text,
+            defaultValue: new FxString(false, FxString.EMPTY),
+            multiline: true,
+            overrideMultiline: true)
 
-def FxPropertyEdit pe = FxPropertyEdit.createNew("Title", new FxString("Title"), new FxString(""),
-        true, FxMultiplicity.MULT_1_1,
-        true, typeACL, FxDataType.String1024, new FxString(FxString.EMPTY),
-        true, null, null, null)
-pe.setAutoUniquePropertyName(true);
+    longtexthtml(label: new FxString("HTML"),
+            dataType: FxDataType.HTML,
+            multiline: true,
+            overrideMultiline: true,
+            defaultMultiplicity: 0)
 
-pe.setDataType(FxDataType.Text);
-pe.setName("Abstract");
-pe.setLabel(new FxString("Abstract"));
-pe.setMultiLang(false);
-pe.setMultiLine(true);
-pe.setOverrideMultiLine(true);
-pe.setMultiplicity(FxMultiplicity.MULT_0_1);
-ass.createProperty(typeId, pe, "/");
-ass.save(((FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(ARTICLE_TYPE + "/Abstract")).asEditable().setDefaultMultiplicity(1), false)
+    longtext(label: new FxString("Text"),
+            dataType: FxDataType.Text,
+            multiline: true,
+            overrideMultiline: true)
 
-pe.setDataType(FxDataType.HTML);
-pe.setName("LongtextHtml");
-pe.setLabel(new FxString("HTML"));
-pe.setMultiLang(false);
-pe.setMultiplicity(FxMultiplicity.MULT_0_1);
-ass.createProperty(typeId, pe, "/");
-ass.save(((FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(ARTICLE_TYPE + "/LongtextHtml")).asEditable().setDefaultMultiplicity(0), false)
+    image(label: new FxString("Image"),
+            multiplicity: FxMultiplicity.MULT_0_N,
+            dataType: FxDataType.Binary,
+            defaultMultiplicity: 0)
 
-pe.setDataType(FxDataType.Text);
-pe.setUseHTMLEditor(false);
-pe.setName("Longtext");
-pe.setLabel(new FxString("Text"));
-pe.setMultiLang(false);
-pe.setMultiplicity(FxMultiplicity.MULT_0_1);
-ass.createProperty(typeId, pe, "/");
-ass.save(((FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(ARTICLE_TYPE + "/Longtext")).asEditable().setDefaultMultiplicity(1), false)
+    listitem(label: new FxString("Listitem"),
+            multiplicity: FxMultiplicity.MULT_0_N,
+            defaultMultiplicity: 0)
 
-pe.setDataType(FxDataType.Binary);
-pe.setName("Image");
-pe.setLabel(new FxString("Image"));
-pe.setMultiLang(false);
-pe.setMultiplicity(FxMultiplicity.MULT_0_N);
-pe.setMultiLine(false);
-pe.setOverrideMultiLine(false);
-ass.createProperty(typeId, pe, "/");
-ass.save(((FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(ARTICLE_TYPE + "/Image")).asEditable().setDefaultMultiplicity(0), false)
+    imagelink(label: new FxString("Linked Image"),
+            multiplicity: FxMultiplicity.MULT_0_N,
+            dataType: FxDataType.Reference,
+            defaultMultiplicity: 0,
+            referencedType: "IMAGE")
+    // xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    // xx ARTICLE TEASER GROUP
+    // xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    Teaser(label: new FxString("Teaser"),
+            overrideMultiplicity: true) {
 
-pe.setDataType(FxDataType.String1024);
-pe.setName("Listitem");
-pe.setLabel(new FxString("Listitem"));
-pe.setMultiLang(false);
-pe.setMultiplicity(FxMultiplicity.MULT_0_N);
-pe.setMultiLine(false);
-pe.setOverrideMultiLine(false);
-ass.createProperty(typeId, pe, "/");
-ass.save(((FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(ARTICLE_TYPE + "/Listitem")).asEditable().setDefaultMultiplicity(0), false)
+        teaser_title(label: new FxString("Title"),
+                multiplicity: FxMultiplicity.MULT_1_1,
+                multiline: true,
+                overrideMultiline: true,
+                fullTextIndexed: false,
+                defaultMultiplicity: 0)
 
-// property for testing reference input fields
-pe.setDataType(FxDataType.Reference).setName("ImageLink").setLabel(new FxString("Linked Image")).setMultiLang(false).setMultiplicity(FxMultiplicity.MULT_0_N).setReferencedType(CacheAdmin.environment.getType("IMAGE"))
-pe.setMultiLine(false);
-pe.setOverrideMultiLine(false);
-ass.createProperty(typeId, pe, "/")
-ass.save(((FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(ARTICLE_TYPE + "/ImageLink")).asEditable().setDefaultMultiplicity(0), false)
+        teaser_text(label: new FxString("Text"),
+                dataType: FxDataType.Text,
+                multiline: true,
+                overrideMultiline: true,
+                fullTextIndexed: false,
+                defaultMultiplicity: 0)
 
-// xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-// xx ARTICLE TEASER GROUP
-// xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-def FxGroupEdit ge = FxGroupEdit.createNew("Teaser", new FxString("Teaser"),
-        new FxString(""), true, FxMultiplicity.MULT_0_1);
-ass.createGroup(typeId, ge, "/");
-ass.save(((FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment(ARTICLE_TYPE + "/Teaser")).asEditable().setDefaultMultiplicity(0), false)
+        teaser_image(label: new FxString("Linked Image"),
+                dataType: FxDataType.Reference,
+                referencedType: CacheAdmin.environment.getType("IMAGE"),
+                fullTextIndexed: false,
+                defaultMultiplicity: 0)
+    }
 
-pe.setName("TEASER_TITLE");
-pe.setMultiLang(false);
-pe.setLabel(new FxString("Title"));
-pe.setMultiplicity(FxMultiplicity.MULT_1_1);
-pe.setDataType(FxDataType.String1024);
-pe.setMultiLine(true);
-pe.setOverrideMultiLine(true);
-ass.createProperty(typeId, pe, "/Teaser");
+    // xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    // xx ARTICLE "BOX" GROUP
+    // xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    Box(label: new FxString("Box"),
+            multiplicity: FxMultiplicity.MULT_0_N,
+            defaultMultiplicity: 0) {
 
-pe.setName("TEASER_TEXT");
-pe.setMultiLang(false);
-pe.setLabel(new FxString("Text"));
-pe.setMultiplicity(FxMultiplicity.MULT_0_1);
-pe.setDataType(FxDataType.Text);
-pe.setMultiLine(true);
-pe.setOverrideMultiLine(true);
-ass.createProperty(typeId, pe, "/Teaser");
+        box_title(label: new FxString("Title"),
+                multiplicity: FxMultiplicity.MULT_1_1,
+                fullTextIndexed: false,
+                defaultMultiplicity: 0)
 
+        box_text(label: new FxString("Text"),
+                dataType: FxDataType.Text,
+                multiline: true,
+                overrideMultiline: true,
+                fullTextIndexed: false,
+                defaultMultiplicity: 0)
 
-pe.setName("TEASER_IMAGE");
-pe.setMultiLang(false);
-pe.setLabel(new FxString("Linked Image"));
-pe.setMultiplicity(FxMultiplicity.MULT_0_1);
-pe.setDataType(FxDataType.Reference);
-pe.setReferencedType(CacheAdmin.environment.getType("IMAGE"))
-pe.setMultiLine(false);
-pe.setOverrideMultiLine(false);
-ass.createProperty(typeId, pe, "/Teaser");
-
-
-// xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-// xx ARTICLE "BOX" GROUP
-// xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-ge = FxGroupEdit.createNew("Box", new FxString("Box"),
-        new FxString(""), true, FxMultiplicity.MULT_0_N);
-ass.createGroup(typeId, ge, "/");
-ass.save(((FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment(ARTICLE_TYPE + "/Box")).asEditable().setDefaultMultiplicity(0), false)
-
-pe.setName("BOX_TITLE");
-pe.setMultiLang(false);
-pe.setLabel(new FxString("Title"));
-pe.setMultiplicity(FxMultiplicity.MULT_1_1);
-pe.setDataType(FxDataType.String1024);
-pe.setMultiLine(false);
-pe.setOverrideMultiLine(false);
-ass.createProperty(typeId, pe, "/Box");
-
-pe.setName("BOX_TEXT");
-pe.setMultiLang(false);
-pe.setLabel(new FxString("Text"));
-pe.setMultiplicity(FxMultiplicity.MULT_0_1);
-pe.setDataType(FxDataType.Text);
-pe.setMultiLine(true);
-pe.setOverrideMultiLine(true);
-ass.createProperty(typeId, pe, "/Box");
-
-
-pe.setName("BOX_IMAGE");
-pe.setMultiLang(false);
-pe.setLabel(new FxString("Linked Image"));
-pe.setMultiplicity(FxMultiplicity.MULT_0_1);
-pe.setDataType(FxDataType.Reference);
-pe.setReferencedType(CacheAdmin.environment.getType("IMAGE"))
-pe.setMultiLine(false);
-pe.setOverrideMultiLine(false);
-ass.createProperty(typeId, pe, "/Box");
+        box_image(label: new FxString("Linked Image"),
+                dataType: FxDataType.Reference,
+                referencedType: CacheAdmin.environment.getType("IMAGE"),
+                multiline: true,
+                overrideMultiline: true,
+                fullTextIndexed: false,
+                defaultMultiplicity: 0)
+    }
+}
 
 // create default result columns for the backend application
 EJBLookup.resultPreferencesEngine.saveSystemDefault(
         new ResultPreferences(
                 [new ResultColumnInfo("@pk"),
-                 new ResultColumnInfo("#article/title"),
-                 new ResultColumnInfo("created_at"),
-                 new ResultColumnInfo("#article/abstract")],
+                        new ResultColumnInfo("#article/title"),
+                        new ResultColumnInfo("created_at"),
+                        new ResultColumnInfo("#article/abstract")],
                 [new ResultOrderByInfo("created_at", SortDirection.DESCENDING)],
                 25, 0
         ),
-        CacheAdmin.environment.getType(ARTICLE_TYPE).id,
+        CacheAdmin.environment.getType("ARTICLE").id,
         ResultViewType.LIST,
         AdminResultLocations.values()
 )
