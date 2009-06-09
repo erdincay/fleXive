@@ -25,7 +25,7 @@ Parameters:
     <img id="show#{inputId}" src="#{fx:webletUrl('com.flexive.faces.weblets', '/images/pickColor.png')}" class="button"
             alt="#{fxMessageBean['ColorPicker.button.open']}" title="#{fxMessageBean['ColorPicker.button.open']}"/>
 
-    <div id="colorpickerpanel_#{inputId}" class="yui-picker-panel">
+    <div id="colorpickerpanel_#{inputId}" class="yui-picker-panel" style="display:none">
         <div class="hd">#{fxMessageBean['ColorPicker.dialog.title']}</div>
         <div class="bd">
             <div id="colorpicker_#{inputId}" class="yui-picker"> </div>
@@ -93,6 +93,7 @@ Parameters:
                 }
             });
             dialog.render();
+            document.getElementById(panelId).style.display = "";
             YAHOO.util.Event.on(buttonId, "click", function() { dialog.show(); return false }, dialog, true);
             if (colorInput.value.length > 0) {
                 // initialize color preview
