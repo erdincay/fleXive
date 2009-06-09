@@ -26,6 +26,8 @@
                 <h:inputText id="exportURLprefix" value="#{adminConfigurationBean.exportURLprefix}" size="50"/>
             </fx:formRow>
 
+            <br/>
+
             <fx:formRow id="binaryTransitDB" labelKey="SystemConfiguration.label.binaryTransitDB">
                 <h:selectBooleanCheckbox id="binaryTransitDB" value="#{adminConfigurationBean.binaryTransitDB}"/>
             </fx:formRow>
@@ -34,6 +36,17 @@
                 <h:inputText id="binaryTransitPath" value="#{adminConfigurationBean.binaryTransitPath}" size="127"/>
             </fx:formRow>
 
+            <fx:formRow id="binaryTrashold" labelKey="SystemConfiguration.label.binaryTrashold">
+                <h:inputText id="binaryTrashold" value="#{adminConfigurationBean.binaryTrashold}"/>
+            </fx:formRow>
+
+            <fx:formRow id="binaryPreviewTrashold" labelKey="SystemConfiguration.label.binaryPreviewTrashold">
+                <h:inputText id="binaryPreviewTrashold" value="#{adminConfigurationBean.binaryPreviewTrashold}"/>
+            </fx:formRow>
+
+            <fx:formRow id="binaryStoragePath" labelKey="SystemConfiguration.label.binaryStoragePath">
+                <h:inputText id="binaryStoragePath" value="#{adminConfigurationBean.binaryStoragePath}" size="127"/>
+            </fx:formRow>
             <br/>
             
             <adm:commandButton labelKey="SystemConfiguration.button.save" location="both" bean="#{adminConfigurationBean}"

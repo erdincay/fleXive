@@ -44,6 +44,7 @@ import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxDbException;
 import com.flexive.shared.exceptions.FxUpdateException;
+import com.flexive.shared.interfaces.DivisionConfigurationEngine;
 import com.flexive.shared.interfaces.ScriptingEngine;
 import com.flexive.shared.media.FxMediaEngine;
 import com.flexive.shared.scripting.FxScriptBinding;
@@ -52,6 +53,8 @@ import com.flexive.shared.scripting.FxScriptResult;
 import com.flexive.shared.stream.BinaryUploadPayload;
 import com.flexive.shared.stream.FxStreamUtils;
 import com.flexive.shared.value.BinaryDescriptor;
+import static com.flexive.shared.value.BinaryDescriptor.PreviewSizes;
+import static com.flexive.shared.value.BinaryDescriptor.SYS_UNKNOWN;
 import com.flexive.shared.value.FxBinary;
 import com.flexive.stream.ServerLocation;
 import org.apache.commons.lang.StringUtils;
@@ -85,16 +88,17 @@ public class GenericBinarySQLStorage implements BinaryStorage {
 
     //    select into xx () select  FBLOB1,FBLOB2,?,?,?
     protected static final String BINARY_TRANSIT_HEADER = "SELECT FBLOB FROM " + TBL_BINARY_TRANSIT + " WHERE BKEY=?";
+    //                                                                   1           2         3         4
+    protected static final String BINARY_TRANSIT_PREVIEW_SIZES = "SELECT PREVIEW_REF,PREV1SIZE,PREV2SIZE,PREV3SIZE FROM " + TBL_BINARY_TRANSIT + " WHERE BKEY=?";
 
-    //                                                                                     1  2   3             4(handle)5    6                  7                    8                    9       10         11    12
-    protected static final String BINARY_TRANSIT = "INSERT INTO " + TBL_CONTENT_BINARY + "(ID,VER,QUALITY,FBLOB,NAME,BLOBSIZE,XMLMETA,CREATED_AT,MIMETYPE,PREVIEW_REF,ISIMAGE,RESOLUTION,WIDTH,HEIGHT,PREV1,PREV1_WIDTH,PREV1_HEIGHT,PREV2,PREV2_WIDTH,PREV2_HEIGHT,PREV3,PREV3_WIDTH,PREV3_HEIGHT,PREV1SIZE,PREV2SIZE,PREV3SIZE) " +
-            //      1 2 3       4 5 6       7                                 8 9 10 11
-            "SELECT ?,?,?,FBLOB,?,?,?," + Database.getTimestampFunction() + ",?,PREVIEW_REF,?,?,?,?,PREV1,PREV1_WIDTH,PREV1_HEIGHT,PREV2,PREV2_WIDTH,PREV2_HEIGHT,PREV3,PREV3_WIDTH,PREV3_HEIGHT,PREV1SIZE,PREV2SIZE,PREV3SIZE FROM " + TBL_BINARY_TRANSIT + " WHERE BKEY=?";
-    //                                                                                                1  2   3             4(handle)5    6                  7                    8                    9       10         11    12
-    protected static final String BINARY_TRANSIT_FILESYSTEM = "INSERT INTO " + TBL_CONTENT_BINARY + "(ID,VER,QUALITY,FBLOB,NAME,BLOBSIZE,XMLMETA,CREATED_AT,MIMETYPE,PREVIEW_REF,ISIMAGE,RESOLUTION,WIDTH,HEIGHT,PREV1,PREV1_WIDTH,PREV1_HEIGHT,PREV2,PREV2_WIDTH,PREV2_HEIGHT,PREV3,PREV3_WIDTH,PREV3_HEIGHT,PREV1SIZE,PREV2SIZE,PREV3SIZE) " +
+    protected static final String BINARY_TRANSIT = "INSERT INTO " + TBL_CONTENT_BINARY + "(ID,VER,QUALITY,FBLOB,NAME,BLOBSIZE,XMLMETA,CREATED_AT,MIMETYPE,PREVIEW_REF,ISIMAGE,RESOLUTION,WIDTH,HEIGHT,PREV1_WIDTH,PREV1_HEIGHT,PREV2_WIDTH,PREV2_HEIGHT,PREV3_WIDTH,PREV3_HEIGHT,PREV1SIZE,PREV2SIZE,PREV3SIZE,PREV1,PREV2,PREV3) " +
+            //      1 2 3       4 5 6       7                                 8             9 0 1 2
+            "SELECT ?,?,?,FBLOB,?,?,?," + Database.getTimestampFunction() + ",?,PREVIEW_REF,?,?,?,?,PREV1_WIDTH,PREV1_HEIGHT,PREV2_WIDTH,PREV2_HEIGHT,PREV3_WIDTH,PREV3_HEIGHT,PREV1SIZE,PREV2SIZE,PREV3SIZE"; //",PREV1,PREV2,PREV3 FROM " + TBL_BINARY_TRANSIT + " WHERE BKEY=?";
+    protected static final String BINARY_TRANSIT_FILESYSTEM = "INSERT INTO " + TBL_CONTENT_BINARY + "(ID,VER,QUALITY,FBLOB,NAME,BLOBSIZE,XMLMETA,CREATED_AT,MIMETYPE,PREVIEW_REF,ISIMAGE,RESOLUTION,WIDTH,HEIGHT,PREV1_WIDTH,PREV1_HEIGHT,PREV2_WIDTH,PREV2_HEIGHT,PREV3_WIDTH,PREV3_HEIGHT,PREV1SIZE,PREV2SIZE,PREV3SIZE,PREV1,PREV2,PREV3) " +
             //      1 2 3 4 5 6 7     8                                   9             0 1 2 3                                                                                                                                                                      14
-            "SELECT ?,?,?,?,?,?,?," + Database.getTimestampFunction() + ",?,PREVIEW_REF,?,?,?,?,PREV1,PREV1_WIDTH,PREV1_HEIGHT,PREV2,PREV2_WIDTH,PREV2_HEIGHT,PREV3,PREV3_WIDTH,PREV3_HEIGHT,PREV1SIZE,PREV2SIZE,PREV3SIZE FROM " + TBL_BINARY_TRANSIT + " WHERE BKEY=?";
+            "SELECT ?,?,?,?,?,?,?," + Database.getTimestampFunction() + ",?,PREVIEW_REF,?,?,?,?,PREV1_WIDTH,PREV1_HEIGHT,PREV2_WIDTH,PREV2_HEIGHT,PREV3_WIDTH,PREV3_HEIGHT,PREV1SIZE,PREV2SIZE,PREV3SIZE"; //",PREV1,PREV2,PREV3 FROM " + TBL_BINARY_TRANSIT + " WHERE BKEY=?";
 
+    protected static final String BINARY_TRANSIT_PREVIEW_WHERE = " FROM " + TBL_BINARY_TRANSIT + " WHERE BKEY=?";
     //                                                                                                   1              2               3        4              5               6        7              8               9            10           11           12           13
     protected static final String BINARY_TRANSIT_PREVIEWS = "UPDATE " + TBL_BINARY_TRANSIT + " SET PREV1=?, PREV1_WIDTH=?, PREV1_HEIGHT=?, PREV2=?, PREV2_WIDTH=?, PREV2_HEIGHT=?, PREV3=?, PREV3_WIDTH=?, PREV3_HEIGHT=?, PREV1SIZE=?, PREV2SIZE=?, PREV3SIZE=? WHERE BKEY=?";
     protected static final String BINARY_TRANSIT_PREVIEWS_REF = "UPDATE " + TBL_BINARY_TRANSIT + " SET PREVIEW_REF=? WHERE BKEY=?";
@@ -195,6 +199,24 @@ public class GenericBinarySQLStorage implements BinaryStorage {
                 return new GenericBinarySQLInputStream(false);
             }
             InputStream bin = rs.getBinaryStream(1);
+            if (rs.wasNull()) {
+                //try from filesystem
+                File fsBinary = FxBinaryUtils.getBinaryFile(divisionId, binaryId, binaryVersion, binaryQuality, size.getBlobIndex());
+
+                try {
+                    if (fsBinary != null)
+                        bin = new FileInputStream(fsBinary);
+                    else {
+                        LOG.error("Binary file #" + binaryId + "["+size.name()+"] was not found!");
+                        Database.closeObjects(GenericBinarySQLInputStream.class, con, ps);
+                        return new GenericBinarySQLInputStream(false);
+                    }
+                } catch (FileNotFoundException e) {
+                    LOG.error("Binary not found on filesystem! Id=" + binaryId + ", version=" + binaryVersion + ", quality=" + binaryQuality + ", size=" + size.name());
+                    Database.closeObjects(GenericBinarySQLInputStream.class, con, ps);
+                    return new GenericBinarySQLInputStream(false);
+                }
+            }
             mimeType = rs.getString(2);
             datasize = rs.getInt(3);
             return new GenericBinarySQLInputStream(con, ps, true, bin, mimeType, datasize);
@@ -278,13 +300,20 @@ public class GenericBinarySQLStorage implements BinaryStorage {
      * @throws FxDbException on errors looking up the sequencer
      */
     private BinaryDescriptor binaryTransit(Connection con, BinaryDescriptor binary, long id, int version, int quality) throws FxDbException {
-//        System.out.println("Binary transit: " + binary.getName() + "/" + binary.getHandle());
         PreparedStatement ps = null;
         BinaryDescriptor created;
         FileInputStream fis = null;
-        boolean inDB;
+        boolean dbTransit;
+        boolean dbStorage;
+        final long dbTrashold;
+        final long dbPreviewTrashold;
+        final int divisionId = FxContext.get().getDivisionId();
         try {
-            inDB = EJBLookup.getConfigurationEngine().get(SystemParameters.BINARY_TRANSIT_DB);
+            final DivisionConfigurationEngine divisionConfig = EJBLookup.getDivisionConfigurationEngine();
+            dbTransit = divisionConfig.get(SystemParameters.BINARY_TRANSIT_DB);
+            dbTrashold = divisionConfig.get(SystemParameters.BINARY_DB_TRASHOLD);
+            dbPreviewTrashold = divisionConfig.get(SystemParameters.BINARY_DB_PREVIEW_TRASHOLD);
+            dbStorage = dbTrashold < 0 || binary.getSize() < dbTrashold;
         } catch (FxApplicationException e) {
             throw e.asRuntimeException();
         }
@@ -305,18 +334,76 @@ public class GenericBinarySQLStorage implements BinaryStorage {
             }
             created = new BinaryDescriptor(CacheAdmin.getStreamServers(), id, version, quality, java.lang.System.currentTimeMillis(),
                     binary.getName(), binary.getSize(), binary.getMetadata(), binary.getMimeType(), isImage, resolution, width, height);
-            ps = con.prepareStatement(inDB ? BINARY_TRANSIT : BINARY_TRANSIT_FILESYSTEM);
+            //we can copy the blob directly into the binary table if the database is used for transit and the final binary is
+            //stored in the filesystem
+            final boolean copyBlob = dbTransit && dbStorage;
+            boolean storePrev1FS = false, storePrev2FS = false, storePrev3FS = false;
+            long prev1Length = -1, prev2Length = -1, prev3Length = -1;
+            if (dbPreviewTrashold >= 0) {
+                //we have to check if preview should be stored on the filesystem
+                ps = con.prepareStatement(BINARY_TRANSIT_PREVIEW_SIZES);
+                ps.setString(1, binary.getHandle());
+                ResultSet rs = ps.executeQuery();
+                if (!rs.next())
+                    throw new FxDbException("ex.content.binary.transitNotFound", binary.getHandle());
+                long previewRef = rs.getLong(1);
+                if (!(!rs.wasNull() && previewRef >= 0)) {
+                    //if previews are not referenced, check trasholds
+                    storePrev1FS = (prev1Length = rs.getLong(2)) >= dbPreviewTrashold;
+                    storePrev2FS = (prev2Length = rs.getLong(3)) >= dbPreviewTrashold;
+                    storePrev3FS = (prev3Length = rs.getLong(4)) >= dbPreviewTrashold;
+                }
+            }
+            if (ps != null)
+                ps.close();
+            String previewSelect = (storePrev1FS ? ",NULL" : ",PREV1") + (storePrev2FS ? ",NULL" : ",PREV2") + (storePrev3FS ? ",NULL" : ",PREV3");
+            ps = con.prepareStatement((copyBlob ? BINARY_TRANSIT : BINARY_TRANSIT_FILESYSTEM) + previewSelect + BINARY_TRANSIT_PREVIEW_WHERE);
             ps.setLong(1, created.getId());
             ps.setInt(2, created.getVersion()); //version
             ps.setInt(3, created.getQuality()); //quality
-            if (!inDB) {
-                File binaryTransit = FxBinaryUtils.getTransitFile(FxContext.get().getDivisionId(), binary.getHandle());
+            File binaryTransit = null;
+            boolean removeTransitFile = false;
+            if (dbTransit) {
+                //transit is handled in the database
+                try {
+                    if (!dbStorage) {
+                        //binaries are stored on the filesystem
+                        binaryTransit = getBinaryTransitFileInfo(con, binary).getBinaryTransitFile();
+                        removeTransitFile = true; //have to clean up afterwards since its a temporary file we get
+                    }
+                } catch (FxApplicationException e) {
+                    if (e instanceof FxDbException)
+                        throw (FxDbException) e;
+                    throw new FxDbException(e);
+                }
+            } else {
+                //transit file resides on the local file system
+                binaryTransit = FxBinaryUtils.getTransitFile(divisionId, binary.getHandle());
                 if (binaryTransit == null)
                     throw new FxDbException("ex.content.binary.transitNotFound", binary.getHandle());
-                fis = new FileInputStream(binaryTransit);
-                ps.setBinaryStream(4, fis, (int) binaryTransit.length());
             }
-            int cnt = inDB ? 4 : 5;
+
+            if (!copyBlob) {
+                //we do not perform a simple blob copy operation in the database
+                if (dbStorage) {
+                    //binary is stored in database -> copy it from the transit file (might be a temp. file)
+                    fis = new FileInputStream(binaryTransit);
+                    ps.setBinaryStream(4, fis, (int) binaryTransit.length());
+                } else {
+                    //binary is stored on the filesystem -> copy transit file to binary storage file
+                    try {
+                        if (!FxFileUtils.copyFile(binaryTransit,
+                                FxBinaryUtils.createBinaryFile(divisionId, created.getId(), created.getVersion(), created.getQuality(),
+                                        PreviewSizes.ORIGINAL.getBlobIndex())))
+                            throw new FxDbException(LOG, "ex.content.binary.fsCopyFailed", created.getId());
+                    } catch (IOException e) {
+                        throw new FxDbException(LOG, "ex.content.binary.fsCopyFailedError", created.getId(), e.getMessage());
+                    }
+                    ps.setNull(4, java.sql.Types.BINARY);
+                }
+            }
+
+            int cnt = copyBlob ? 4 : 5;
             ps.setString(cnt++, created.getName());
             ps.setLong(cnt++, created.getSize());
             ps.setString(cnt++, created.getMetadata());
@@ -327,6 +414,45 @@ public class GenericBinarySQLStorage implements BinaryStorage {
             ps.setInt(cnt++, created.getHeight());
             ps.setString(cnt, binary.getHandle());
             ps.executeUpdate();
+            if (removeTransitFile && binaryTransit != null) {
+                //transit file was a temp. file -> got to clean up
+                FxFileUtils.removeFile(binaryTransit);
+            }
+
+            //finally fetch the preview blobs from transit and store them on the filesystem if required
+            if (storePrev1FS || storePrev2FS || storePrev3FS) {
+                ps.close();
+                previewSelect = (!storePrev1FS ? ",NULL" : ",PREV1") + (!storePrev2FS ? ",NULL" : ",PREV2") + (!storePrev3FS ? ",NULL" : ",PREV3");
+                ps = con.prepareStatement("SELECT " + previewSelect.substring(1) + BINARY_TRANSIT_PREVIEW_WHERE);
+                ps.setString(1, binary.getHandle());
+                ResultSet rs = ps.executeQuery();
+                if (!rs.next())
+                    throw new FxDbException("ex.content.binary.transitNotFound", binary.getHandle());
+                if (storePrev1FS)
+                    try {
+                        if (!FxFileUtils.copyStream2File(prev1Length, rs.getBinaryStream(1), FxBinaryUtils.createBinaryFile(divisionId, created.getId(), created.getVersion(), created.getQuality(),
+                                PreviewSizes.PREVIEW1.getBlobIndex())))
+                            throw new FxDbException(LOG, "ex.content.binary.fsCopyFailed", created.getId() + "[" + PreviewSizes.PREVIEW1.getBlobIndex() + "]");
+                    } catch (IOException e) {
+                        throw new FxDbException(LOG, "ex.content.binary.fsCopyFailedError", created.getId() + "[" + PreviewSizes.PREVIEW1.getBlobIndex() + "]", e.getMessage());
+                    }
+                if (storePrev2FS)
+                    try {
+                        if (!FxFileUtils.copyStream2File(prev2Length, rs.getBinaryStream(2), FxBinaryUtils.createBinaryFile(divisionId, created.getId(), created.getVersion(), created.getQuality(),
+                                PreviewSizes.PREVIEW2.getBlobIndex())))
+                            throw new FxDbException(LOG, "ex.content.binary.fsCopyFailed", created.getId() + "[" + PreviewSizes.PREVIEW2.getBlobIndex() + "]");
+                    } catch (IOException e) {
+                        throw new FxDbException(LOG, "ex.content.binary.fsCopyFailedError", created.getId() + "[" + PreviewSizes.PREVIEW2.getBlobIndex() + "]", e.getMessage());
+                    }
+                if (storePrev3FS)
+                    try {
+                        if (!FxFileUtils.copyStream2File(prev3Length, rs.getBinaryStream(3), FxBinaryUtils.createBinaryFile(divisionId, created.getId(), created.getVersion(), created.getQuality(),
+                                PreviewSizes.PREVIEW3.getBlobIndex())))
+                            throw new FxDbException(LOG, "ex.content.binary.fsCopyFailed", created.getId() + "[" + PreviewSizes.PREVIEW3.getBlobIndex() + "]");
+                    } catch (IOException e) {
+                        throw new FxDbException(LOG, "ex.content.binary.fsCopyFailedError", created.getId() + "[" + PreviewSizes.PREVIEW3.getBlobIndex() + "]", e.getMessage());
+                    }
+            }
         } catch (SQLException e) {
             throw new FxDbException(e, "ex.db.sqlError", e.getMessage());
         } catch (FileNotFoundException e) {
@@ -401,7 +527,7 @@ public class GenericBinarySQLStorage implements BinaryStorage {
             binaryTransitFileInfo = getBinaryTransitFileInfo(con, binary);
             boolean processed = false;
             boolean useDefaultPreview = true;
-            int defaultId = BinaryDescriptor.SYS_UNKNOWN;
+            int defaultId = SYS_UNKNOWN;
 
             FxScriptBinding binding;
             ScriptingEngine scripting = EJBLookup.getScriptingEngine();
@@ -449,12 +575,12 @@ public class GenericBinarySQLStorage implements BinaryStorage {
                         dimensionsPreview1 == null || dimensionsPreview3.length != 2 || dimensionsPreview3[0] < 0 || dimensionsPreview3[1] < 0) {
                     LOG.warn("Invalid preview parameters! Setting to default/unknown!");
                     useDefaultPreview = true;
-                    defaultId = BinaryDescriptor.SYS_UNKNOWN;
+                    defaultId = SYS_UNKNOWN;
                 }
             } else {
                 //only negative values are allowed
                 if (defaultId >= 0) {
-                    defaultId = BinaryDescriptor.SYS_UNKNOWN;
+                    defaultId = SYS_UNKNOWN;
                     LOG.warn("Only default preview id's that are negative and defined in BinaryDescriptor as constants are allowed!");
                 }
             }
@@ -499,16 +625,11 @@ public class GenericBinarySQLStorage implements BinaryStorage {
             } catch (IOException e) {
                 LOG.error("Stream closing failed: " + e.getMessage(), e);
             }
-            if (binaryTransitFileInfo != null && binaryTransitFileInfo.isDBStorage()) {
-                if (!binaryTransitFileInfo.getBinaryTransitFile().delete())
-                    binaryTransitFileInfo.getBinaryTransitFile().deleteOnExit();
-            }
-            if (previewFile1 != null && !previewFile1.delete())
-                previewFile1.deleteOnExit();
-            if (previewFile2 != null && !previewFile2.delete())
-                previewFile2.deleteOnExit();
-            if (previewFile3 != null && !previewFile3.delete())
-                previewFile3.deleteOnExit();
+            if (binaryTransitFileInfo != null && binaryTransitFileInfo.isDBStorage())
+                FxFileUtils.removeFile(binaryTransitFileInfo.getBinaryTransitFile());
+            FxFileUtils.removeFile(previewFile1);
+            FxFileUtils.removeFile(previewFile2);
+            FxFileUtils.removeFile(previewFile3);
             try {
                 if (rs != null) rs.close();
                 if (ps != null) ps.close();
@@ -667,6 +788,9 @@ public class GenericBinarySQLStorage implements BinaryStorage {
                     }
                 }
                 ps.close();
+                int divisionId = FxContext.get().getDivisionId();
+                for (Long id : binaries)
+                    FxBinaryUtils.removeBinary(divisionId, id);
             }
         } catch (SQLException e) {
             throw new FxDbException(e, "ex.db.sqlError", e.getMessage());
@@ -714,6 +838,9 @@ public class GenericBinarySQLStorage implements BinaryStorage {
                     }
                 }
                 ps.close();
+                int divisionId = FxContext.get().getDivisionId();
+                for (Long id : binaries)
+                    FxBinaryUtils.removeBinary(divisionId, id);
             }
         } catch (SQLException e) {
             throw new FxDbException(e, "ex.db.sqlError", e.getMessage());
@@ -759,6 +886,9 @@ public class GenericBinarySQLStorage implements BinaryStorage {
                     }
                 }
                 ps.close();
+                int divisionId = FxContext.get().getDivisionId();
+                for (Long id : binaries)
+                    FxBinaryUtils.removeBinary(divisionId, id);
             }
         } catch (SQLException e) {
             throw new FxDbException(e, "ex.db.sqlError", e.getMessage());

@@ -36,6 +36,7 @@ import com.flexive.core.LifeCycleInfoImpl;
 import com.flexive.core.conversion.ConversionEngine;
 import com.flexive.core.storage.ContentStorage;
 import com.flexive.core.storage.StorageManager;
+import com.flexive.core.storage.binary.FxBinaryUtils;
 import com.flexive.shared.*;
 import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.content.*;
@@ -43,9 +44,9 @@ import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.*;
 import com.flexive.shared.scripting.FxScriptBinding;
 import com.flexive.shared.scripting.FxScriptEvent;
-import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.security.ACLPermission;
+import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.structure.FxAssignment;
 import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.structure.FxType;
@@ -71,7 +72,7 @@ import java.util.List;
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-@Stateless(name = "ContentEngine", mappedName="ContentEngine")
+@Stateless(name = "ContentEngine", mappedName = "ContentEngine")
 @TransactionAttribute(TransactionAttributeType.SUPPORTS)
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
@@ -379,12 +380,16 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             throw e;
         } catch (Throwable t) {
             ctx.setRollbackOnly();
-            if( t instanceof FxApplicationException )
+            if (t instanceof FxApplicationException)
                 throw new FxCreateException(t); //no logging
             else
                 throw new FxCreateException(LOG, t);
         } finally {
             Database.closeObjects(ContentEngineBean.class, con, ps);
+            if (ctx.getRollbackOnly()) {
+                FxBinaryUtils.removeTXFiles();
+            } else
+                FxBinaryUtils.resetTXFiles();
             if (!ctx.getRollbackOnly())
                 CacheAdmin.expireCachedContent(content.getId());
         }
@@ -809,12 +814,12 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             FxPropertyData pd = co.getPropertyData(xpath);
             if (!pd.getValue().isEmpty() && pd.getValue() instanceof FxBinary) {
                 final FxBinary bin = (FxBinary) pd.getValue();
-                if( language == null )
+                if (language == null)
                     return bin.getBestTranslation(ticket.getLanguage()).getId();
-                if( fallbackToDefault )
+                if (fallbackToDefault)
                     return bin.getBestTranslation(language).getId();
-                if( !bin.translationExists(language.getId()))
-                    throw new FxInvalidParameterException("language", "ex.content.value.notTranslated", language);    
+                if (!bin.translationExists(language.getId()))
+                    throw new FxInvalidParameterException("language", "ex.content.value.notTranslated", language);
                 return bin.getTranslation(language).getId();
             }
             throw new FxInvalidParameterException("XPATH", "ex.content.binary.xpath.invalid", xpath);

@@ -108,7 +108,15 @@ public class SystemParameters {
     /**
      * Wether to store binary transit files in the database or filesystem
      */
-    public static final Parameter<Boolean> BINARY_TRANSIT_DB = ParameterFactory.newInstance(Boolean.class, DIVISION_TREE, "binaryTransitDB", true);
+    public static final Parameter<Boolean> BINARY_TRANSIT_DB = ParameterFactory.newInstance(Boolean.class, DIVISION_CONFIG, "binaryTransitDB", true);
+    /**
+     * Size a binary has to exceed to be stored on the filesystem (<0 == always store in database, 0=always store in FS)
+     */
+    public static final Parameter<Long> BINARY_DB_TRASHOLD = ParameterFactory.newInstance(Long.class, DIVISION_CONFIG, "binaryDBTrashold", -1L);
+    /**
+     * Size a preview of a binary has to exceed to be stored on the filesystem (<0 == always store in database, 0=always store in FS)
+     */
+    public static final Parameter<Long> BINARY_DB_PREVIEW_TRASHOLD = ParameterFactory.newInstance(Long.class, DIVISION_CONFIG, "binaryDBPreviewTrashold", -1L);
     /**
      * Path on the current nodes filesystem for binary transit files
      */
@@ -116,7 +124,7 @@ public class SystemParameters {
     /**
      * Path on the current nodes filesystem for binary files
      */
-    public static final Parameter<String> NODE_BINARY_PATH = ParameterFactory.newInstance(String.class, NODE_CONFIG, "nodeTransitPath", "~/flexive/binaries");
+    public static final Parameter<String> NODE_BINARY_PATH = ParameterFactory.newInstance(String.class, NODE_CONFIG, "nodeBinaryPath", "~/flexive/binaries");
     /**
      * Download URL for exports
      */

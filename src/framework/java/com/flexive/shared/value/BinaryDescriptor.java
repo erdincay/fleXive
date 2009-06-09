@@ -350,6 +350,18 @@ public class BinaryDescriptor implements Serializable {
     }
 
     /**
+     * Downloads the binary in the requested size (original or preview images if available) to the given stream.
+     * The stream won't be flushed or closed!
+     *
+     * @param stream stream used for download
+     * @param size   requested size (original or preview images if available)
+     * @throws FxStreamException on errors
+     */
+    public void download(OutputStream stream, PreviewSizes size) throws FxStreamException {
+        FxStreamUtils.downloadBinary(server, stream, this, size);
+    }
+
+    /**
      * Is this BinaryDescriptor empty?
      *
      * @return BinaryDescriptor is empty

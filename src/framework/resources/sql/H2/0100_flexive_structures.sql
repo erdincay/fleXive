@@ -1,8 +1,3 @@
--- DROP SCHEMA IF EXISTS flexive;
--- CREATE SCHEMA flexive;
--- TODO: replace schema name from ant macro
---SET SCHEMA flexive;
-
 -- register stored procedures needed for this script
 CREATE ALIAS IF NOT EXISTS TIMEMILLIS FOR "com.flexive.h2.StoredProcedures.getTimeMillis";
 
@@ -439,7 +434,7 @@ CREATE TABLE FX_BINARY (
   ID BIGINT NOT NULL,
   VER INTEGER NOT NULL,
   QUALITY INTEGER NOT NULL,
-  FBLOB LONGBLOB NOT NULL,
+  FBLOB LONGBLOB,
   NAME VARCHAR(1025) NOT NULL,
   BLOBSIZE BIGINT NOT NULL,
   XMLMETA LONGTEXT COMMENT 'XML Meta Data like IPTC',

@@ -32,6 +32,7 @@
 package com.flexive.shared.stream;
 
 import com.flexive.shared.FxContext;
+import com.flexive.shared.value.BinaryDescriptor;
 
 import java.io.Serializable;
 
@@ -64,7 +65,7 @@ public class BinaryDownloadPayload implements Serializable {
     }
 
     public BinaryDownloadPayload(long id, int version, int quality) {
-        this(id, version, quality, 0);
+        this(id, version, quality, BinaryDescriptor.PreviewSizes.ORIGINAL.getBlobIndex());
     }
 
     public BinaryDownloadPayload(boolean serverError, String errorMessage) {

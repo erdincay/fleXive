@@ -33,18 +33,18 @@ package com.flexive.shared.stream;
 
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.exceptions.FxStreamException;
 import com.flexive.shared.media.FxMediaEngine;
 import com.flexive.shared.media.FxMediaSelector;
-import com.flexive.shared.exceptions.FxStreamException;
-import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.value.BinaryDescriptor;
 import com.flexive.stream.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.ByteArrayOutputStream;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -216,11 +216,11 @@ public class FxStreamUtils {
     /**
      * Download a binary
      *
-     * @param callback   callback handler to set mimetype and size for downloads
-     * @param server     (optional) list of remote stream servers
-     * @param stream     the output stream to send the binary to
-     * @param binaryId   id of the binary
-     * @param selector   selector of binary to use and for optional manipulations to perform
+     * @param callback callback handler to set mimetype and size for downloads
+     * @param server   (optional) list of remote stream servers
+     * @param stream   the output stream to send the binary to
+     * @param binaryId id of the binary
+     * @param selector selector of binary to use and for optional manipulations to perform
      * @throws FxStreamException on errors
      */
     @SuppressWarnings({"UnusedAssignment"})
@@ -277,14 +277,26 @@ public class FxStreamUtils {
      * @throws FxStreamException on errors
      */
     public static void downloadBinary(List<ServerLocation> server, OutputStream stream, BinaryDescriptor descriptor) throws FxStreamException {
+        downloadBinary(server, stream, descriptor, BinaryDescriptor.PreviewSizes.ORIGINAL);
+    }
+
+    /**
+     * Download a binary with given size (Original, Preview 1..3)
+     *
+     * @param server     (optional) list of remote stream servers
+     * @param stream     the output stream to send the binary to
+     * @param descriptor binary descriptor
+     * @param size       preview size
+     * @throws FxStreamException on errors
+     */
+    public static void downloadBinary(List<ServerLocation> server, OutputStream stream, BinaryDescriptor descriptor, BinaryDescriptor.PreviewSizes size) throws FxStreamException {
         if (descriptor.getSize() <= 0 || stream == null)
             throw new FxStreamException("ex.stream.download.param.missing");
         StreamClient client = null;
         try {
             client = getClient(server);
-//            client = StreamClientFactory.getRemoteClient(servers.get(0).getAddress(), servers.get(0).getPort());
             DataPacket<BinaryDownloadPayload> req = new DataPacket<BinaryDownloadPayload>(
-                    new BinaryDownloadPayload(descriptor.getId(), descriptor.getVersion(), descriptor.getQuality()), true, true);
+                    new BinaryDownloadPayload(descriptor.getId(), descriptor.getVersion(), descriptor.getQuality(), size.getBlobIndex()), true, true);
             DataPacket<BinaryDownloadPayload> resp = client.connect(req);
             if (resp.getPayload().isServerError())
                 throw new FxStreamException("ex.stream.serverError", resp.getPayload().getErrorMessage());

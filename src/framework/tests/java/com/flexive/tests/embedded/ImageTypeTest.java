@@ -43,6 +43,7 @@ import com.flexive.shared.value.FxBinary;
 import com.flexive.shared.value.FxString;
 import static com.flexive.tests.embedded.FxTestUtils.login;
 import static com.flexive.tests.embedded.FxTestUtils.logout;
+import com.flexive.tests.embedded.TestUsers;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -170,49 +171,4 @@ public class ImageTypeTest {
         }
     }
 
-    @Test
-    public void binaryTestLength() throws Exception {
-        binaryTest(true);
-    }
-
-    @Test
-    public void binaryTestNoLength() throws Exception {
-        binaryTest(false);
-    }
-
-    private void binaryTest(boolean sendLength) throws Exception {
-        File testFile = new File("src/framework/testresources/image/Exif.JPG");
-        if (!testFile.exists())
-            return;
-
-        FxType type = CacheAdmin.getEnvironment().getType(IMAGE_TYPE);
-
-        FileInputStream fis = new FileInputStream(testFile);
-        BinaryDescriptor binary;
-        if( sendLength )
-            binary = new BinaryDescriptor(testFile.getName(), testFile.length(), fis);
-        else
-            binary = new BinaryDescriptor(testFile.getName(), fis);
-
-        FxContent img = co.initialize(type.getId());
-        img.setValue("/ImageBinary", new FxBinary(false, binary));
-        img.setValue("/Filename", new FxString(false, "Exif.JPG"));
-        FxPK pk = null;
-        try {
-            pk = co.save(img);
-
-            FxContent loaded = co.load(pk);
-            FxBinary bin = (FxBinary) loaded.getValue("/ImageBinary");
-            File comp = File.createTempFile("Exif", "JPG");
-            FileOutputStream fos = new FileOutputStream(comp);
-            bin.getBestTranslation().download(fos);
-            fos.close();
-            Assert.assertTrue(comp.length() == testFile.length(), "Files differ in length");
-            if (!comp.delete())
-                comp.deleteOnExit();
-        } finally {
-            if( pk != null )
-                co.remove(pk);
-        }
-    }
 }

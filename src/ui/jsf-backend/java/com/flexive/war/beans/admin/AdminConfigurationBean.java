@@ -53,6 +53,9 @@ public class AdminConfigurationBean implements Serializable {
     private Boolean treeLiveEnabled;
     private Boolean binaryTransitDB;
     private String binaryTransitPath;
+    private Long binaryTrashold;
+    private Long binaryPreviewTrashold;
+    private String binaryStoragePath;
     private String exportURLprefix;
 
     /**
@@ -61,10 +64,13 @@ public class AdminConfigurationBean implements Serializable {
      */
     public void updateConfiguration() {
         try {
-            EJBLookup.getConfigurationEngine().putInSource(SystemParameters.TREE_LIVE_ENABLED, isTreeLiveEnabled());
-            EJBLookup.getConfigurationEngine().putInSource(SystemParameters.BINARY_TRANSIT_DB, isBinaryTransitDB());
-            EJBLookup.getDivisionConfigurationEngine().put(SystemParameters.EXPORT_DOWNLOAD_URL, getExportURLprefix());
-            EJBLookup.getNodeConfigurationEngine().put(SystemParameters.NODE_TRANSIT_PATH, getBinaryTransitPath());
+            EJBLookup.getConfigurationEngine().put(SystemParameters.TREE_LIVE_ENABLED, isTreeLiveEnabled());
+            EJBLookup.getConfigurationEngine().put(SystemParameters.EXPORT_DOWNLOAD_URL, getExportURLprefix());
+            EJBLookup.getConfigurationEngine().put(SystemParameters.BINARY_TRANSIT_DB, isBinaryTransitDB());
+            EJBLookup.getConfigurationEngine().put(SystemParameters.NODE_TRANSIT_PATH, getBinaryTransitPath());
+            EJBLookup.getConfigurationEngine().put(SystemParameters.NODE_BINARY_PATH, getBinaryStoragePath());
+            EJBLookup.getConfigurationEngine().put(SystemParameters.BINARY_DB_TRASHOLD, getBinaryTrashold());
+            EJBLookup.getConfigurationEngine().put(SystemParameters.BINARY_DB_PREVIEW_TRASHOLD, getBinaryPreviewTrashold());
         } catch (FxApplicationException e) {
             new FxFacesMsgErr(e).addToContext();
         }
@@ -109,7 +115,7 @@ public class AdminConfigurationBean implements Serializable {
      */
     public String getBinaryTransitPath() throws FxApplicationException {
         if (binaryTransitPath == null)
-            binaryTransitPath = EJBLookup.getNodeConfigurationEngine().get(SystemParameters.NODE_TRANSIT_PATH);
+            binaryTransitPath = EJBLookup.getConfigurationEngine().get(SystemParameters.NODE_TRANSIT_PATH);
         return binaryTransitPath;
     }
 
@@ -121,9 +127,60 @@ public class AdminConfigurationBean implements Serializable {
         this.binaryTransitPath = binaryTransitPath;
     }
 
+    /**
+     * Returns the trashold for binaries to be stored on the filesystem
+     *
+     * @return trashold for binaries to be stored on the filesystem
+     * @throws FxApplicationException on system errors
+     * @see SystemParameters#BINARY_DB_TRASHOLD
+     */
+    public long getBinaryTrashold() throws FxApplicationException {
+        if( binaryTrashold == null )
+            binaryTrashold = EJBLookup.getConfigurationEngine().get(SystemParameters.BINARY_DB_TRASHOLD);
+        return binaryTrashold;
+    }
+
+    public void setBinaryTrashold(long binaryTrashold) {
+        this.binaryTrashold = binaryTrashold;
+    }
+
+    /**
+     * Returns the trashold for binary previews to be stored on the filesystem
+     *
+     * @return trashold for binary previews to be stored on the filesystem
+     * @throws FxApplicationException on system errors
+     * @see SystemParameters#BINARY_DB_PREVIEW_TRASHOLD
+     */
+    public long getBinaryPreviewTrashold() throws FxApplicationException {
+        if( binaryPreviewTrashold == null )
+            binaryPreviewTrashold = EJBLookup.getConfigurationEngine().get(SystemParameters.BINARY_DB_PREVIEW_TRASHOLD);
+        return binaryPreviewTrashold;
+    }
+
+    public void setBinaryPreviewTrashold(long binaryPreviewTrashold) {
+        this.binaryPreviewTrashold = binaryPreviewTrashold;
+    }
+
+    /**
+     * Returns the path on the local filesystem for binary files
+     *
+     * @return the path on the local filesystem for binary files
+     * @throws FxApplicationException on system errors
+     * @see SystemParameters#NODE_BINARY_PATH
+     */
+    public String getBinaryStoragePath() throws FxApplicationException {
+        if( binaryStoragePath == null )
+            binaryStoragePath = EJBLookup.getConfigurationEngine().get(SystemParameters.NODE_BINARY_PATH);
+        return binaryStoragePath;
+    }
+
+    public void setBinaryStoragePath(String binaryStoragePath) {
+        this.binaryStoragePath = binaryStoragePath;
+    }
+
     public String getExportURLprefix() throws FxApplicationException {
         if (exportURLprefix == null)
-            exportURLprefix = EJBLookup.getDivisionConfigurationEngine().get(SystemParameters.EXPORT_DOWNLOAD_URL);
+            exportURLprefix = EJBLookup.getConfigurationEngine().get(SystemParameters.EXPORT_DOWNLOAD_URL);
         return exportURLprefix;
     }
 
