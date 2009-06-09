@@ -79,6 +79,7 @@ public class Filter {
             if (type.equalsIgnoreCase(String.valueOf(TYPE.BRIEFCASE))) {
                 try {
                     stmt.setBriefcaseFilter(FxArrayUtils.toLongArray(value,','));
+                    stmt.setMaxResultRows(Integer.MAX_VALUE);
                 } catch(Throwable t) {
                     throw new SqlParserException("ex.sqlSearch.filter.invalidNumber",
                             type,String.valueOf(TYPE.MAX_RESULTROWS));
@@ -92,7 +93,9 @@ public class Filter {
                     if (maxResultRows < 0) {
                         throw new SqlParserException("ex.sqlSearch.filter.negativeNumber", TYPE.MAX_RESULTROWS);
                     }
-                    stmt.setMaxResultRows(maxResultRows);
+                    if (stmt.getBriefcaseFilter().length == 0) {
+                        stmt.setMaxResultRows(maxResultRows);
+                    }
                 } catch(Exception exc) {
                     throw new SqlParserException("ex.sqlSearch.filter.invalidNumber",
                             type,String.valueOf(TYPE.MAX_RESULTROWS));

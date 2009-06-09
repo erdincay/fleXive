@@ -596,7 +596,7 @@ flexiveResultList > table {
     padding-right: 0.5em;
 }
 
-/* fx:resizeable container */
+/* fx:resizable container */
 .fxResizeable {
     padding: 0 9px 8px 0;   /* create room for resizable textarea handles */
 }

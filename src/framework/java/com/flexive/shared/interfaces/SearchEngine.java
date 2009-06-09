@@ -47,7 +47,6 @@ public interface SearchEngine {
      * The wildcard character selects all properties of the result content type.
      */
     String PROP_WILDCARD = "*";
-
     /**
      * The user wildcard selects the properties predefined by the user through the
      * {@link com.flexive.shared.interfaces.ResultPreferencesEngine}.
@@ -58,7 +57,12 @@ public interface SearchEngine {
      * The default query timeout in seconds.
      * @since 3.1
      */
-    int DEFAULT_QUERY_TIMEOUT = 30; 
+    int DEFAULT_QUERY_TIMEOUT = 30;
+    /**
+     * The default size of a search query result.
+     * @since 3.1
+     */
+    int DEFAULT_MAX_ROWS = 2000;
 
     /**
      * Executes a query.

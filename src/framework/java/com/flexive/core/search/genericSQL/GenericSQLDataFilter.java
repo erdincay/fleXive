@@ -155,7 +155,7 @@ public class GenericSQLDataFilter extends DataFilter {
     @Override
     public void build() throws FxSqlSearchException {
         final UserTicket ticket = FxContext.getUserTicket();
-        final long maxRows = search.getFxStatement().getMaxResultRows() + 1;
+        final long maxRows = search.getFxStatement().getMaxResultRows();
         Statement stmt = null;
         String sql = null;
         try {

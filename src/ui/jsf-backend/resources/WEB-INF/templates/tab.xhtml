@@ -12,6 +12,15 @@ Adds a TAB to the [fleXive] backend tab-bar.
 This is done by creating a invisible jsf command link, and then copying and usingthe the onclick even of this command
 link on the tab bar.
 
+Parameters:
+label       - the tab label
+labelKey    - the message key for the tab label (overrides label)
+bean        - JSF bean for invoking the action
+action      - name of the action to be invoked
+lockscreen  - if false, the screen will not be locked when clicking on this tab
+immediate   - if clicking on the tab should skip JSF validation and update model phases
+rendered    - if the tab should be rendered
+
 <ui:composition>
     <c:if test="#{rendered != false}">
         <c:if test="#{empty active}">
@@ -20,8 +29,14 @@ link on the tab bar.
         <c:if test="#{!empty labelKey}">
             <c:set var="label" value="#{fxMessageBean[labelKey]}"/>
         </c:if>
+        <c:if test="#{immediate == null}">
+            <c:set var="immediate" value="false"/>
+        </c:if>
+        <c:if test="#{lockscreen == null}">
+            <c:set var="lockscreen" value="#{not immediate}"/>
+        </c:if>
 
-        <h:commandLink style="display:none" id="#{id}" action="#{bean[action]}" onclick="parent.lockScreen();">
+        <h:commandLink style="display:none" id="#{id}" action="#{bean[action]}" immediate="#{immediate}" onclick="#{lockscreen ? 'parent.lockScreen();' : ''}">
            #{label}
         </h:commandLink>
 

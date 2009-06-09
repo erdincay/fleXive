@@ -34,6 +34,7 @@ package com.flexive.sqlParser;
 import com.flexive.shared.exceptions.FxSqlSearchException;
 import com.flexive.shared.search.query.VersionFilter;
 import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.interfaces.SearchEngine;
 
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
@@ -130,7 +131,7 @@ public class FxStatement {
      * @return the maximum rows returned by the search
      */
     public int getMaxResultRows() {
-        return maxResultRows == -1 ? 2000 : maxResultRows; // TODO
+        return maxResultRows == -1 ? SearchEngine.DEFAULT_MAX_ROWS : maxResultRows;
     }
 
     /**

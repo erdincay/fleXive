@@ -44,7 +44,8 @@
                                 <td  align="left">
                                     <ui:fragment rendered="#{fxSystemBean.isInRole['SelectListEditor'] or selectListBean.mayCreateItems[list.id]}">
                                         <adm:commandIcon labelKey="SelectList.button.edit" location="content"
-                                                            icon="edit"  bean="#{selectListBean}" action="initEditing" id="editButton_#{list.id}">
+                                                            icon="edit"  bean="#{selectListBean}" action="initEditing" immediate="true" 
+                                                            id="editButton_#{list.id}">
                                                 <f:setPropertyActionListener target="#{selectListBean.selectListId}" value="#{list.id}"/>
                                         </adm:commandIcon>
                                     </ui:fragment>

@@ -193,7 +193,7 @@
 
             <ui:fragment rendered="#{not propertyEditorBean.property.new and not propertyEditorBean.editMode and propertyEditorBean.structureManagement}">
                 <adm:commandButton labelKey="PropertyEditor.button.editMode" location="both"
-                icon="edit"  action="toggleEditMode"  bean="#{propertyEditorBean}" id="editModeButton"/>
+                icon="edit"  action="toggleEditMode"  bean="#{propertyEditorBean}" immediate="true" id="editModeButton"/>
             </ui:fragment>
 
             <ui:fragment rendered="#{propertyEditorBean.editMode}">

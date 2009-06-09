@@ -59,7 +59,7 @@
                                 <td align="left"><h:selectBooleanCheckbox value="#{item.active}" disabled="true"/></td>
                                 <td align="left">
                                     <adm:commandIcon labelKey="Script.button.edit" location="content"
-                                                     icon="edit"  action="editScript"  bean="#{scriptBean}"
+                                                     icon="edit"  action="editScript"  bean="#{scriptBean}" immediate="true"
                                                      id="editButton_#{item.id}">
                                         <f:setPropertyActionListener target="#{scriptBean.id}" value="#{item.id}"/>
                                     </adm:commandIcon>

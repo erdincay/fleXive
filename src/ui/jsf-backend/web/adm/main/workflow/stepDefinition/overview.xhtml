@@ -48,7 +48,8 @@
                                 </td>
                                 <td class="tblColumn">
                                     <adm:commandIcon labelKey="StepDefinition.button.edit" location="content"
-                                                    icon="edit"  bean="#{stepDefinitionBean}" action="edit" id="editButton_#{stepDefinition.id}">
+                                                    icon="edit"  bean="#{stepDefinitionBean}" action="edit" immediate="true" 
+                                                    id="editButton_#{stepDefinition.id}">
                                         <f:setPropertyActionListener target="#{stepDefinitionBean.stepDefinitionId}" value="#{stepDefinition.id}"/>
                                     </adm:commandIcon>
                                     <adm:commandIcon labelKey="StepDefinition.button.delete" location="content"

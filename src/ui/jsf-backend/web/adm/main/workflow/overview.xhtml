@@ -43,11 +43,13 @@
                                 <td class="tblColumn">#{workflow.description}</td>
                                 <td class="tblColumn">
                                     <adm:commandIcon labelKey="Workflow.button.edit" location="content"
-                                                    icon="edit"  bean="#{workflowBean}" action="edit" id="editButton_#{workflow.id}">
+                                                    icon="edit"  bean="#{workflowBean}" action="edit" immediate="true" 
+                                                    id="editButton_#{workflow.id}">
                                         <f:setPropertyActionListener target="#{workflowBean.workflowId}" value="#{workflow.id}"/>
                                     </adm:commandIcon>
                                     <adm:commandIcon labelKey="Workflow.button.delete" location="content"
-                                                    icon="delete"  bean="#{workflowBean}" action="delete" id="deleteButton_#{workflow.id}">
+                                                    icon="delete"  bean="#{workflowBean}" action="delete" immediate="true"
+                                                    id="deleteButton_#{workflow.id}">
                                         <f:setPropertyActionListener target="#{workflowBean.workflowId}" value="#{workflow.id}"/>
                                     </adm:commandIcon>
                                 </td>

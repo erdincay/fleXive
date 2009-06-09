@@ -74,7 +74,7 @@ buttonDisabled - [optional] renders the commandElement, but disables its functio
         </c:if>
 
         <c:if test="#{lockscreen == null}">
-            <c:set var="lockscreen" value="true"/>
+            <c:set var="lockscreen" value="#{not immediate}"/>
         </c:if>
 
         <c:if test="#{not empty icon}">

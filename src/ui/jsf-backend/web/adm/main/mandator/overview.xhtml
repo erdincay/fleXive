@@ -42,6 +42,7 @@
                                 <td align="left">
                                     <adm:commandIcon labelKey="Mandator.button.edit" location="content"
                                                      icon="edit"  action="editMandator"  bean="#{mandatorBean}"
+                                                     lockscreen="false"
                                                      id="editButton_#{item.id}">
                                         <f:setPropertyActionListener target="#{mandatorBean.id}" value="#{item.id}"/>
                                     </adm:commandIcon>

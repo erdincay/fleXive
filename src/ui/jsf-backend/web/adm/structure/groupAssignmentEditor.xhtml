@@ -109,7 +109,7 @@
 
             <ui:fragment rendered="#{not groupEditorBean.editMode and groupEditorBean.structureManagement}">
                <adm:commandButton labelKey="GroupEditor.button.editMode" location="both"
-                        icon="edit"  action="toggleEditMode"  bean="#{groupEditorBean}" id="editModeButton"/>
+                        icon="edit"  action="toggleEditMode"  bean="#{groupEditorBean}" immediate="true" id="editModeButton"/>
             </ui:fragment>
 
            <ui:fragment rendered="#{groupEditorBean.editMode}">

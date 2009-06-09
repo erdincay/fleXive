@@ -306,16 +306,20 @@ a > img {
 .tabText {
     color: #AFAFAC;
     padding: 2px 8px 0 5px;
-    letter-spacing: 0.7mm;
+    letter-spacing: 0.5mm;
     white-space: nowrap;
     background-image:url('../images/layout/tabs/TabBG.gif');
     cursor:pointer;
 }
 
+.tabText:hover {
+    color: black;
+}
+
 .tabTextActive {
     color: #3D3D3D;
     padding: 2px 8px 0 5px;
-    letter-spacing: 0.7mm;
+    letter-spacing: 0.5mm;
     white-space: nowrap;
     background-image:url('../images/layout/tabs/TabBGActive.gif');
 }

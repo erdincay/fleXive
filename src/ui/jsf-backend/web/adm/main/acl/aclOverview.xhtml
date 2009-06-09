@@ -86,7 +86,7 @@
                             </td>
                             <td>
                                 <adm:commandIcon labelKey="ACL.button.edit" location="content"
-                                                icon="edit"  action="edit"  bean="#{aclBean}"
+                                                icon="edit"  action="edit"  bean="#{aclBean}" immediate="true"
                                                 id="editButton_#{item.id}">
                                     <f:setPropertyActionListener target="#{aclBean.id}" value="#{item.id}"/>
                                 </adm:commandIcon>

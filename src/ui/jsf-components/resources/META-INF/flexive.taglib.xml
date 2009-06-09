@@ -59,8 +59,8 @@
         <source>../templates/linearizeFxValueInputs.xhtml</source>
     </tag>
     <tag>
-        <tag-name>resizeable</tag-name>
-        <source>../templates/resizeable.xhtml</source>
+        <tag-name>resizable</tag-name>
+        <source>../templates/resizable.xhtml</source>
     </tag>
     <tag>
         <tag-name>colorPicker</tag-name>

@@ -72,9 +72,6 @@
                 <adm:commandButton id="saveButton" labelKey="Script.button.create"
                                    icon="save" bean="#{scriptBean}" action="createScript"/>
 
-                <adm:commandButton id="cancelButton" labelKey="Script.button.cancel"
-                                   icon="cancel" action="scriptOverview"/>
-
                 <a4j:outputPanel id="importPanel" layout="block">
                     <adm:commandButton id="defaultImports" labelKey="Script.button.defaultImports"
                                        icon="compact" bean="#{scriptBean}" action="addDefaultImports"
@@ -94,6 +91,9 @@
                                        action="checkScriptSyntax" icon="check" toolbarPosition="4"
                                        rendered="#{scriptBean.verifyButtonEnabled}" ajax="true" separator="after"/>
                 </a4j:outputPanel>
+
+                <adm:commandButton id="cancelButton" labelKey="Script.button.cancel"
+                                   icon="cancel" action="scriptOverview" immediate="true"/>
 
                 <br/><br/>
 

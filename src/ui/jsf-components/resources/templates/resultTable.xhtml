@@ -65,7 +65,7 @@ Parameters:
                         totalRecords : viewRows.length,
                         rowsPerPage : updateRowsPerPage,
                         rowsPerPageOptions : isThumbnails ? [2, 5, 10, 25, 50] : [10,25,50,100],
-                        alwaysVisible: false
+                        alwaysVisible: isThumbnails
                     };
                     if (updateRowsPerPage == null) {
                         // set initial configuration

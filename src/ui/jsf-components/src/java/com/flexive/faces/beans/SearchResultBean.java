@@ -106,7 +106,7 @@ public class SearchResultBean implements ActionBean, Serializable {
                 final long id = FxJsfUtils.getLongParameter("nodeId");
                 final boolean liveTree = FxJsfUtils.getBooleanParameter("liveMode", false);
                 setVersionFilter(liveTree ? VersionFilter.LIVE : VersionFilter.MAX);
-                setQueryBuilder(createSqlQueryBuilder().isChild(id));
+                setQueryBuilder(createSqlQueryBuilder().isChild(id).maxRows(Integer.MAX_VALUE));
                 show();
             } else if ("typeSearch".equals(action)) {
                 // search for contents of a type
@@ -116,7 +116,7 @@ public class SearchResultBean implements ActionBean, Serializable {
                 }
                 resetFilters();
                 final long id = FxJsfUtils.getLongParameter("typeId");
-                setQueryBuilder(createSqlQueryBuilder().type(id));
+                setQueryBuilder(createSqlQueryBuilder().type(id).maxRows(Integer.MAX_VALUE));
                 show();
             } else if ("openBriefcase".equals(action) || "openBriefcaseDetails".equals(action)) {
                 if (StringUtils.isBlank(FxJsfUtils.getParameter("briefcaseId"))) {
@@ -217,7 +217,6 @@ public class SearchResultBean implements ActionBean, Serializable {
                 final FxResultSet result = getQueryBuilder()
                         .select("@pk", "@permissions", "typedef", "@*")
                         .startRow(0)
-                        .maxRows(Integer.MAX_VALUE)
                         .getResult();
                 if (getTypeId() != -1) {
                     // check if type ID is still available

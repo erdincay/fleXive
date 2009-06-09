@@ -80,6 +80,7 @@ public class SqlQueryBuilder implements Serializable {
     private final Stack<Integer> expressionCounter;
 
     private int startRow;
+    private int fetchRows = -1;
     private int maxRows = -1;
     private FxSQLSearchParams params;
 
@@ -696,8 +697,37 @@ public class SqlQueryBuilder implements Serializable {
         return maxRows;
     }
 
+    /**
+     * Set the maximum number of rows that the query should return. This determines the size of the entire
+     * result set. If not specified, this defaults to You can then specify a window of rows using
+     * {@link #startRow(int)} and {@link #fetchRows(int)} to return a subset of the search result.
+     * <p>
+     * This value defaults to {@link SearchEngine#DEFAULT_MAX_ROWS}.
+     * </p>
+     *
+     * @param maxRows   the maximum number of rows in the query result
+     * @return          this
+     */
     public SqlQueryBuilder maxRows(int maxRows) {
+        uniqueFilter("MAX_RESULTROWS", maxRows);
         this.maxRows = maxRows;
+        return this;
+    }
+
+    public int getFetchRows() {
+        return fetchRows;
+    }
+
+    /**
+     * Set the maximum number of rows to be returned to the caller when using {@link #getResult()}.
+     * Unless specified, all rows will be returned.
+     *
+     * @param fetchRows the number of rows to be returned
+     * @return  this
+     * @since 3.1
+     */
+    public SqlQueryBuilder fetchRows(int fetchRows) {
+        this.fetchRows = fetchRows;
         return this;
     }
 
@@ -746,7 +776,7 @@ public class SqlQueryBuilder implements Serializable {
      * @throws FxApplicationException   if the search failed
      */
     public FxResultSet getResult() throws FxApplicationException {
-        return EJBLookup.getSearchEngine().search(getQuery(), startRow, maxRows,
+        return EJBLookup.getSearchEngine().search(getQuery(), startRow, fetchRows,
                 params, location, viewType);
     }
 

@@ -28,9 +28,9 @@ a > img {
     height: 22px;
     color: black;
     float: left;
-    margin-right: 5px;
     overflow: hidden;
     cursor: pointer;
+    margin: 0 6px 1px 0; /* for :active push effect */
 }
 
 .commandButtonRight, .commandButtonRightDisabled {
@@ -99,6 +99,14 @@ a > img {
 
 .commandButton:hover .commandButtonRight {
     background-image: url("../images/commandButton/buttonRight_hover.gif");
+}
+
+.commandButton:active {
+    margin: 1px 5px 0 1px;
+}
+
+.commandButtonLabelText:active {
+    color: black;
 }
 
 .commandIcon {

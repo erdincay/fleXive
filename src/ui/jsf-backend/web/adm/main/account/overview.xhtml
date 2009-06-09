@@ -93,6 +93,7 @@
                                 <td align="left">
                                     <adm:commandIcon labelKey="User.button.edit" location="content"
                                                     icon="edit"  action="editUser"  bean="#{accountBean}"
+                                                    lockscreen="false"
                                                     id="editButton_#{item.id}">
                                         <f:setPropertyActionListener target="#{accountBean.accountIdFilter}" value="#{item.id}"/>
                                     </adm:commandIcon>

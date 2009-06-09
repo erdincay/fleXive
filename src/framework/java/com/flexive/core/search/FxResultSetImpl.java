@@ -122,7 +122,7 @@ public class FxResultSetImpl implements Serializable, FxResultSet {
         this.viewType = viewType;
         this.contentTypes = types == null ? new ArrayList<FxFoundType>(0) : types;
         this.createdBriefcaseId = createdBriefcaseId;
-        this.rows = new ArrayList<Object[]>(fx_stmt.getMaxResultRows());
+        this.rows = new ArrayList<Object[]>();
         this.columnNames = new String[fx_stmt.getSelectedValues().size()];
         int pos = 0;
         for (SelectedValue v : fx_stmt.getSelectedValues()) {

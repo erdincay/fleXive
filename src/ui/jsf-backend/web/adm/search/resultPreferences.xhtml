@@ -21,7 +21,8 @@
                 <adm:resultPreferencesEditor/>
 
                 <adm:commandButton id="saveButton" icon="save" labelKey="ResultPreferences.button.save" bean="#{resultPreferencesBean}" action="save" location="both"/>
-                <adm:commandButton id="cancelButton" icon="cancel" labelKey="ResultPreferences.button.cancel" bean="#{resultPreferencesBean}" action="cancel" location="both"/>
+                <adm:commandButton id="cancelButton" icon="cancel" labelKey="ResultPreferences.button.cancel" bean="#{resultPreferencesBean}" action="cancel"
+                                   immediate="true" location="both"/>
                 <adm:commandButton id="removeButton" icon="delete" labelKey="ResultPreferences.button.remove" confirmKey="ResultPreferences.button.remove.confirm" 
                                    bean="#{resultPreferencesBean}" action="remove" location="both"/>
 

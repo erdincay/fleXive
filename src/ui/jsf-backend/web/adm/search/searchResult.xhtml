@@ -172,10 +172,10 @@
                 </fx:menu>
 
                 <div style="display:none">
-                    <h:commandLink id="showButton" action="#{contentEditorBean.load}" onclick="parent.lockScreen()">
+                    <h:commandLink id="showButton" action="#{contentEditorBean.load}">
                         <f:setPropertyActionListener value="#{true}" target="#{contentEditorBean.readOnly}"/>
                     </h:commandLink>
-                    <h:commandLink id="editButton" action="#{contentEditorBean.load}" onclick="parent.lockScreen()">
+                    <h:commandLink id="editButton" action="#{contentEditorBean.load}">
                         <f:setPropertyActionListener value="#{false}" target="#{contentEditorBean.readOnly}"/>
                     </h:commandLink>
                 </div>
@@ -190,10 +190,10 @@
                                icon="view_list#{fxSearchResultBean.viewType == 'LIST' ? '_active' : ''}" location="toolbar"  lockscreen="false"/>
             <adm:commandButton id="refreshButton" labelKey="SearchResult.button.view.refresh"
                                bean="#{fxSearchResultBean}" action="refresh"
-                               icon="reload" location="toolbar"  lockscreen="true" separator="after"/>
+                               icon="reload" location="toolbar" lockscreen="false" separator="after"/>
             <adm:commandButton id="preferencesButton" labelKey="ResultPreferences.button.open"
                                bean="#{resultPreferencesBean}" action="show"
-                               icon="configure" location="both">
+                               icon="configure" lockscreen="false" location="both">
                 <f:setPropertyActionListener value="#{fxSearchResultBean.typeId}" target="#{resultPreferencesBean.type}"/>
                 <f:setPropertyActionListener value="#{fxSearchResultBean.viewType}" target="#{resultPreferencesBean.viewType}"/>
             </adm:commandButton>

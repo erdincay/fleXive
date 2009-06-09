@@ -154,7 +154,7 @@
 
         <ui:fragment rendered="#{not typeEditorBean.type.new and not typeEditorBean.editMode and (typeEditorBean.structureManagement or fxSystemBean.isInRole['ScriptManagement'])}">
                 <adm:commandButton labelKey="TypeEditor.button.editMode" location="both"
-                        icon="edit"  action="toggleEditMode"  bean="#{typeEditorBean}" id="editModeButton"/>
+                        icon="edit"  action="toggleEditMode"  bean="#{typeEditorBean}" immediate="true" id="editModeButton"/>
         </ui:fragment>
 
         <ui:fragment rendered="#{not typeEditorBean.type.new and (typeEditorBean.structureManagement or fxSystemBean.isInRole['ScriptManagement']) and typeEditorBean.editMode}">

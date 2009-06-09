@@ -73,6 +73,7 @@ public class QueryEditorBean implements Serializable {
     private static final long serialVersionUID = -7734399826904382438L;
     private static final String SESSION_QUERY = "query";
     private static final String SESSION_TIMEOUT = "timeout";
+    private static final String SESSION_MAXRESULTS = "maxResults";
 
     /**
      * JSF root component containing the query editor
@@ -88,6 +89,7 @@ public class QueryEditorBean implements Serializable {
     private String nodeSelection = null;
     private boolean reloadSearchPanel = false;
     private int queryTimeout = SearchEngine.DEFAULT_QUERY_TIMEOUT;
+    private int maxResults = 2000;
 
     private SqlQueryBuilder queryBuilder;
     private ResultLocation location = AdminResultLocations.ADMIN;
@@ -201,6 +203,7 @@ public class QueryEditorBean implements Serializable {
             return false;
         }
         builder.timeout(queryTimeout);
+        builder.maxRows(maxResults);
         return true;
     }
 
@@ -448,7 +451,9 @@ public class QueryEditorBean implements Serializable {
      * Stores the current query in the user session.
      */
     private void updateQueryStore() {
-        sessionPut(SESSION_QUERY, rootNode);
+        if (rootNode != null) {
+            sessionPut(SESSION_QUERY, rootNode);
+        }
     }
 
     public ResultLocation getLocation() {
@@ -499,6 +504,19 @@ public class QueryEditorBean implements Serializable {
         sessionPut(SESSION_TIMEOUT, queryTimeout);
     }
 
+    public int getMaxResults() {
+        final Object sessionMaxResults = sessionGet(SESSION_MAXRESULTS);
+        if (sessionMaxResults != null) {
+            maxResults = (Integer) sessionMaxResults;
+        }
+        return maxResults;
+    }
+
+    public void setMaxResults(int maxResults) {
+        this.maxResults = maxResults;
+        sessionPut(SESSION_MAXRESULTS, maxResults);
+    }
+
     /**
      * Return the current tab title of the query tab.
      *
@@ -510,6 +528,7 @@ public class QueryEditorBean implements Serializable {
         }
         return MessageBean.getInstance().getMessage("QueryEditor.tabtitle.loadedQuery", getRootNode().getName());
     }
+    
     /**
      * Returns the session attribute key for storing the current query
      *
@@ -517,8 +536,7 @@ public class QueryEditorBean implements Serializable {
      */
     private String getQueryTreeStore(String key) {
         return "FlexiveSearchQueryTree/" + location + "/" + QueryRootNode.Type.CONTENTSEARCH
-                + "/" + key
-                + FacesContext.getCurrentInstance().getViewRoot().getViewId();
+                + "/" + key;
     }
 
     private Object sessionGet(String key) {

@@ -350,7 +350,7 @@
 
             <ui:fragment rendered="#{not typeEditorBean.type.new and not typeEditorBean.editMode and typeEditorBean.structureManagement}">
                 <adm:commandButton labelKey="TypeEditor.button.editMode" location="both"
-                        icon="edit"  action="toggleEditMode"  bean="#{typeEditorBean}" id="editModeButton"/>
+                        icon="edit"  action="toggleEditMode"  bean="#{typeEditorBean}" immediate="true" id="editModeButton"/>
             </ui:fragment>
 
             <ui:fragment rendered="#{not typeEditorBean.type.new and typeEditorBean.structureManagement and typeEditorBean.editMode}">
@@ -371,7 +371,7 @@
             </ui:fragment>
 
             <ui:fragment rendered="#{not typeEditorBean.type.new and typeEditorBean.editMode}">
-                <adm:commandButton labelKey="TypeEditor.button.cancel" location="both" lockscreen="false"
+                <adm:commandButton labelKey="TypeEditor.button.cancel" location="both" immediate="true"
                         icon="cancel" id="cancelButton"
                         onclick="parent.getStructureNavFrame().openNode(#{typeEditorBean.type.id}, true);return false;"/>
             </ui:fragment>

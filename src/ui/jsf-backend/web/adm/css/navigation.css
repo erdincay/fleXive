@@ -104,6 +104,10 @@ h5 a {
     background-color: #fff;
 }
 
+.briefcaseItem:active, .searchQueryItem:active {
+    border: 1px solid #aaa;
+}
+
 .briefcaseItem {
     width: 80px;
     height: 65px;

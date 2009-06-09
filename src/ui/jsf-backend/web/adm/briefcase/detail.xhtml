@@ -33,8 +33,10 @@
                 <t:inputText id="briefcaseName" value="#{briefcaseBean.briefcase.name}"/>
             </fx:formRow>
             <fx:formRow label="Description" id="briefcaseDescription" width="500">
-                <h:inputTextarea id="briefcaseDescription" value="#{briefcaseBean.briefcase.description}"
-                             style="width:350px" rows="5"/>
+                <fx:resizable>
+                    <h:inputTextarea id="briefcaseDescription" value="#{briefcaseBean.briefcase.description}"
+                                 style="width:100%;height:100%" rows="5"/>
+                </fx:resizable>
             </fx:formRow>
             <fx:formRow label="Shared" id="briefcaseACL" width="500">
                 <h:selectOneListbox id="briefcaseACL" value="#{briefcaseBean.aclId}" size="1">
