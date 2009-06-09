@@ -194,7 +194,7 @@ public class FxSelectListItem implements Serializable, SelectableObjectWithLabel
      * @return parent item exists
      */
     public boolean hasParentItem() {
-        return parentItemId >= 0;
+        return parentItemId >= 0 && parentItem != null;
     }
 
     /**
@@ -222,6 +222,17 @@ public class FxSelectListItem implements Serializable, SelectableObjectWithLabel
      */
     public List<FxSelectListItem> getChildren() {
         return list.getChildItems(this.getId());
+    }
+
+    /**
+     * Get the number of children of this item
+     *
+     * @return number of children of this item
+     */
+    public int getChildCount() {
+        if (!getHasChildren())
+            return 0;
+        return getChildren().size();
     }
 
     /**

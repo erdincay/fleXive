@@ -31,13 +31,14 @@
  ***************************************************************/
 package com.flexive.shared.structure;
 
+import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.value.BinaryDescriptor;
 import com.flexive.shared.value.FxString;
-import com.flexive.shared.CacheAdmin;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * Editable select list item
@@ -263,13 +264,64 @@ public class FxSelectListItemEdit extends FxSelectListItem implements Serializab
      * @throws FxInvalidParameterException if the parent item is not valid for this item
      */
     public FxSelectListItemEdit setParentItem(FxSelectListItem item) throws FxInvalidParameterException {
-        if (item == null)
+        if (item == null) {
+            this.parentItem = null;
+            this.parentItemId = -1L;
             return this;
-        if (!this.getList().hasParentList())
-            throw new FxInvalidParameterException("item", "ex.structure.list.item.noParentList", this.getLabel().getBestTranslation());
+        }
+//        if (!this.getList().hasParentList())
+//            throw new FxInvalidParameterException("item", "ex.structure.list.item.noParentList", this.getLabel().getBestTranslation());
         if (item.getList().getId() != this.getList().getId())
             throw new FxInvalidParameterException("item", "ex.structure.list.item.invalidParent", this.getList().getId(), item.getList().getId());
         this.parentItem = item;
+        this.parentItemId = item.getId();
         return this;
+    }
+
+    /**
+     * Check if the given list item is assignable as child (and not already assigned).
+     * An item is assignable if it has no parent already, is different from this item and is assigned to the same list
+     *
+     * @param item item to check
+     * @return assignable
+     */
+    public boolean isAssignable(FxSelectListItem item) {
+        if( item.getParentItem() != null && this.getId() == item.getParentItem().getId())
+            return true; //already assigned
+        if( this.getList().getId() == item.getList().getId() && this.getId() != item.getId() && !item.hasParentItem() ) {
+            //check if this item is not already a child of the item to check
+            return !isChildOf(item);
+        }
+        return false;
+    }
+
+    /**
+     * Check if this item is a child of the requested
+     *
+     * @param item item to check if this one is a child of
+     * @return child of item
+     */
+    public boolean isChildOf(FxSelectListItem item) {
+        if( this.getParentItem() == null )
+            return false;
+        for(FxSelectListItem check: item.getChildren())
+            if( this.getId() == check.getId())
+                return true;
+            else if(isChildOf(check))
+                return true;
+        return false;
+    }
+
+    public void resetChanges() {
+        if( original == null )
+            return;
+        this.name = original.name;
+        this.label = original.label.copy();
+        this.acl = original.acl;
+        this.data = original.data;
+        this.color = original.color;
+        this.parentItem = original.parentItem;
+        this.parentItemId = original.parentItemId;
+        this.isNew = false;
     }
 }

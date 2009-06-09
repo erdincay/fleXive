@@ -123,11 +123,9 @@ public class FxSelectList implements Serializable, ObjectWithLabel {
         try {
             if (this.parentListId >= 0) {
                 this.parentList = env.getSelectList(this.parentListId);
-            } else
-                return;
+            }
         } catch (Exception e) {
             this.parentListId = -1;
-            return;
         }
         for (FxSelectListItem item : this.getItems())
             item._synchronize(env);

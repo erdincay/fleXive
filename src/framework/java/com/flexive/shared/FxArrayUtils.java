@@ -101,15 +101,15 @@ public class FxArrayUtils {
     }
 
     /**
-     * Convert a Long list to a primitive long array
+     * Convert a Long list to a Long array
      *
-     * @param groups List<Long>
-     * @return long[]
+     * @param items List<Long>
+     * @return Long[]
      */
-    public static long[] toLongArray(List<Long> groups) {
-        long[] res = new long[groups.size()];
+    public static Long[] toLongArray(List<Long> items) {
+        Long[] res = new Long[items.size()];
         for (int i = 0; i < res.length; i++)
-            res[i] = groups.get(i);
+            res[i] = items.get(i);
         return res;
     }
 

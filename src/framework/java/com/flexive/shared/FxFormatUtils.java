@@ -37,7 +37,6 @@ import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxRuntimeException;
 import com.flexive.shared.structure.FxSelectListItem;
 import com.flexive.shared.value.*;
-import static com.flexive.shared.FxSharedUtils.checkParameterNull;
 import org.apache.commons.lang.StringUtils;
 
 import java.text.ParseException;
@@ -54,6 +53,7 @@ import java.lang.reflect.Array;
 public final class FxFormatUtils {
     public final static String DEFAULT_COLOR = "#000000";
     public final static String UNIVERSAL_TIMEFORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
+    public static final String CONTRAST_BACKGROUND_COLOR = "#6D6D6D";
 
     /**
      * Private constructor to avoid instantiation
@@ -117,6 +117,19 @@ public final class FxFormatUtils {
             }
         }
         return colorCode;
+    }
+
+    /**
+     * Is there a lack of contrast in the given color string?
+     *
+     * @param color color to check
+     * @return contrast lacking compared to white
+     */
+    public static boolean lackOfContrast(String color) {
+        if (StringUtils.isEmpty(color) || color.trim().length() != 7)
+            return false;
+        String check = color.trim();
+        return check.charAt(0) == '#' && check.charAt(1) >= 'C' && check.charAt(3) >= 'C' && check.charAt(5) >= 'C';
     }
 
     /**

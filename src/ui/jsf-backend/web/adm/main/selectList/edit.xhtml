@@ -10,6 +10,10 @@
       xmlns:fx="http://www.flexive.com/jsf/core">
 <body>
 
+<!--@elvariable id="selectListBean" type="com.flexive.war.beans.admin.main.SelectListBean"-->
+<!--@elvariable id="fxSelectBean" type="com.flexive.faces.beans.SelectBean"-->
+<!--@elvariable id="fxSystemBean" type="com.flexive.faces.beans.SystemBean"-->
+<!--@elvariable id="fxMessageBean" type="java.util.Map"-->
 <ui:composition template="/adm/contentTemplate.xhtml">
 
     <ui:define name="head">
@@ -85,8 +89,11 @@
                             <th class="tblHeader" dataType="String" field="data" align="left">
                                 #{fxMessageBean["SelectList.table.data"]}
                             </th>
-                            <th class="tblHeader" dataType="html" field="acl" align="left" noSort="true">
+                            <th class="tblHeader" dataType="html" field="acl" align="left">
                                 #{fxMessageBean["SelectList.table.acl"]}
+                            </th>
+                            <th class="tblHeader" dataType="html" field="acl" align="left">
+                                #{fxMessageBean["SelectList.table.children"]}
                             </th>
                             <th class="tblHeader" dataType="html" field="actions" align="left" noSort="true">
                                 #{fxMessageBean["SelectList.table.actions"]}
@@ -106,6 +113,7 @@
                                 <td align="left"><fx:fxValueInput value="#{item.label}" readOnly="true"/></td>
                                 <td align="left">#{item.data}</td>
                                 <td align="left"><fx:fxValueInput value="#{item.acl.label}" readOnly="true"/></td>
+                                <td align="left">#{item.childCount}</td>
                                 <td align="left">
                                     <!-- edit -->
                                     <adm:ajaxCommandIcon titleKey="SelectList.button.edit"
@@ -139,7 +147,7 @@
             </a4j:outputPanel>
 
             <a4j:outputPanel id="editItemArea">
-                <ui:fragment rendered="#{selectListBean.editListItemId != -1}">
+                <ui:fragment rendered="#{selectListBean.editListItemId != selectListBean.unselectedId}">
                     <fx:fieldSet width="500" legend="#{fxMessageBean['SelectList.label.editItem']}">
                         <fx:formRow labelKey="SelectList.label.item.name">
                             <h:inputText id="editName_#{selectListBean.editListItemId}"
@@ -165,6 +173,13 @@
                                 <fx:colorPicker/>
                             </h:inputText>
                         </fx:formRow>
+                        <fx:formRow labelKey="SelectList.label.item.children">
+                            <h:selectManyListbox size="5" id="editChildren_#{selectListBean.editListItemId}"
+                                                value="#{selectListBean.editListItemChildren}">
+                                <f:selectItems value="#{selectListBean.assignableEditListItemChildren}"/>
+                            </h:selectManyListbox>
+                        </fx:formRow>
+                        <fx:linearizeFxValueInputs/>
                         <br/>
 
                         <adm:ajaxCommandButton labelKey="SelectList.button.commit"
@@ -177,7 +192,6 @@
                         <adm:ajaxCommandButton labelKey="SelectList.button.cancel"
                                                icon="cancel" bean="#{selectListBean}" actionListener="cancelItemEditing"
                                                id="cancelButton_#{selectListBean.idMap[item.id]}"
-                                               rendered="#{selectListBean.mayEditItem[item.id]}"
                                                reRender="editItemArea,itemTable,createItemArea">
                         </adm:ajaxCommandButton>
                     </fx:fieldSet>
@@ -186,7 +200,7 @@
             </a4j:outputPanel>
 
             <a4j:outputPanel id="createItemArea">
-                <ui:fragment rendered="#{selectListBean.editListItemId == -1}">
+                <ui:fragment rendered="#{selectListBean.editListItemId == selectListBean.unselectedId}">
                     <adm:ajaxCommandButton id="createItemButton" labelKey="SelectList.label.createItem" icon="new"
                                            actionListener="createListItem" bean="#{selectListBean}"
                                            reRender="editItemArea,createItemArea"/>

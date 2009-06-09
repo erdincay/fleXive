@@ -53,24 +53,24 @@ void createSelectLists() {
     ACL aclItem = CacheAdmin.getEnvironment().getDefaultACL(ACLCategory.SELECTLISTITEM);
     FxSelectListEdit compressionList = FxSelectListEdit.createNew("Image Compression", new FxString("Image Compression"), new FxString("Compression algorithm used for images like JPEG"),
             false, aclList, aclItem);
-    new FxSelectListItemEdit("UNKNOWN", aclItem, compressionList, new FxString("Unknown"), "UNKNOWN", "#FFFFFF");
-    new FxSelectListItemEdit("NONE", aclItem, compressionList, new FxString("None"), "NONE", "#FFFFFF");
-    new FxSelectListItemEdit("LZW", aclItem, compressionList, new FxString("LZW"), "LZW", "#FFFFFF");
-    new FxSelectListItemEdit("JPEG", aclItem, compressionList, new FxString("JPEG"), "JPEG", "#FFFFFF");
-    new FxSelectListItemEdit("RLE", aclItem, compressionList, new FxString("RLE: Run-Length Encoding"), "RLE", "#FFFFFF");
-    new FxSelectListItemEdit("PS", aclItem, compressionList, new FxString("Photoshop"), "PHOTOSHOP", "#FFFFFF");
-    new FxSelectListItemEdit("PNG", aclItem, compressionList, new FxString("PNG Filter"), "PNG", "#FFFFFF");
-    new FxSelectListItemEdit("CCITT3", aclItem, compressionList, new FxString("CCITT Group 3 1-Dimensional Modified Huffman run-length encoding."), "CCITT_GROUP_3", "#FFFFFF");
-    new FxSelectListItemEdit("CCITT4", aclItem, compressionList, new FxString("CCITT Group 4"), "CCITT_GROUP_4", "#FFFFFF");
-    new FxSelectListItemEdit("CCITT1", aclItem, compressionList, new FxString("CCITT 1D"), "CCITT_1D", "#FFFFFF");
+    new FxSelectListItemEdit("UNKNOWN", aclItem, compressionList, new FxString("Unknown"), "UNKNOWN", "#000000");
+    new FxSelectListItemEdit("NONE", aclItem, compressionList, new FxString("None"), "NONE", "#000000");
+    new FxSelectListItemEdit("LZW", aclItem, compressionList, new FxString("LZW"), "LZW", "#000000");
+    new FxSelectListItemEdit("JPEG", aclItem, compressionList, new FxString("JPEG"), "JPEG", "#000000");
+    new FxSelectListItemEdit("RLE", aclItem, compressionList, new FxString("RLE: Run-Length Encoding"), "RLE", "#000000");
+    new FxSelectListItemEdit("PS", aclItem, compressionList, new FxString("Photoshop"), "PHOTOSHOP", "#000000");
+    new FxSelectListItemEdit("PNG", aclItem, compressionList, new FxString("PNG Filter"), "PNG", "#000000");
+    new FxSelectListItemEdit("CCITT3", aclItem, compressionList, new FxString("CCITT Group 3 1-Dimensional Modified Huffman run-length encoding."), "CCITT_GROUP_3", "#000000");
+    new FxSelectListItemEdit("CCITT4", aclItem, compressionList, new FxString("CCITT Group 4"), "CCITT_GROUP_4", "#000000");
+    new FxSelectListItemEdit("CCITT1", aclItem, compressionList, new FxString("CCITT 1D"), "CCITT_1D", "#000000");
 
     EJBLookup.getSelectListEngine().save(compressionList);
 
     FxSelectListEdit orientationList = FxSelectListEdit.createNew("Image Orientation", new FxString("Image Orientation"), new FxString("Image orientation like portrait or landscape"),
             false, aclList, aclItem);
-    new FxSelectListItemEdit("UNKNOWN", aclItem, orientationList, new FxString("Unknown"), "UNKNOWN", "#FFFFFF");
-    new FxSelectListItemEdit("Portrait", aclItem, orientationList, new FxString("Portrait"), "0", "#FFFFFF");
-    new FxSelectListItemEdit("Landscape", aclItem, orientationList, new FxString("Landscape"), "1", "#FFFFFF");
+    new FxSelectListItemEdit("UNKNOWN", aclItem, orientationList, new FxString("Unknown"), "UNKNOWN", "#000000");
+    new FxSelectListItemEdit("Portrait", aclItem, orientationList, new FxString("Portrait"), "0", "#000000");
+    new FxSelectListItemEdit("Landscape", aclItem, orientationList, new FxString("Landscape"), "1", "#000000");
     EJBLookup.getSelectListEngine().save(orientationList);
 }
 

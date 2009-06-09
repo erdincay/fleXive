@@ -34,10 +34,7 @@ package com.flexive.faces.components.input;
 import com.flexive.faces.FxJsfComponentUtils;
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.model.FxJSFSelectItem;
-import com.flexive.shared.ObjectWithColor;
-import com.flexive.shared.SelectableObjectWithLabel;
-import com.flexive.shared.SelectableObjectWithName;
-import com.flexive.shared.SelectableObject;
+import com.flexive.shared.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -396,8 +393,12 @@ public class FxSelectRenderer extends Renderer {
                         color = oc.getColor();
                 }
             }
-            if (color != null)
+            if (color != null) {
+                //if no styleClass is explicitly set, apply contrast background color if too light
+                if( null == component.getAttributes().get("styleClass") && FxFormatUtils.lackOfContrast(color))
+                        color += ";background-color:"+ FxFormatUtils.CONTRAST_BACKGROUND_COLOR;
                 writer.writeAttribute("style", "color:" + color, "style");
+            }
 
             if (item instanceof SelectableObjectWithLabel)
                 writer.write(((SelectableObjectWithLabel) item).getLabel().getBestTranslation());

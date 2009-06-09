@@ -127,9 +127,13 @@ public class FxJSFSelectItem extends SelectItem implements java.io.Serializable 
     private void applyStyle(Object item) {
         if (item instanceof ObjectWithColor) {
             String color = ((ObjectWithColor) item).getColor();
-            if (!StringUtils.isEmpty(color))
+            if (!StringUtils.isEmpty(color)) {
                 this.style = "color:" + color;
-            else
+                //check if no contrast to background
+                if (FxFormatUtils.lackOfContrast(color)) {
+                    this.style += ";background-color:" + FxFormatUtils.CONTRAST_BACKGROUND_COLOR;
+                }
+            } else
                 this.style = "";
         } else
             this.style = "";

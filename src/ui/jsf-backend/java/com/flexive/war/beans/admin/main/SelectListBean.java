@@ -36,10 +36,8 @@ package com.flexive.war.beans.admin.main;
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.faces.messages.FxFacesMsgInfo;
-import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.EJBLookup;
-import com.flexive.shared.FxFormatUtils;
-import com.flexive.shared.FxSharedUtils;
+import com.flexive.faces.model.FxJSFSelectItem;
+import com.flexive.shared.*;
 import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.FxEntryInUseException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
@@ -49,6 +47,7 @@ import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.security.Role;
 import com.flexive.shared.structure.FxSelectList;
 import com.flexive.shared.structure.FxSelectListEdit;
+import com.flexive.shared.structure.FxSelectListItem;
 import com.flexive.shared.structure.FxSelectListItemEdit;
 import com.flexive.shared.value.FxString;
 
@@ -56,6 +55,9 @@ import javax.faces.event.ActionEvent;
 import javax.faces.model.SelectItem;
 import java.io.Serializable;
 import java.util.*;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * Bean to display and edit FxSelectList objects and FxSelectListItem objects
@@ -66,16 +68,19 @@ import java.util.*;
 public class SelectListBean implements Serializable {
     private static final long serialVersionUID = -5927666279497485356L;
 
+    private static final Log LOG = LogFactory.getLog(SelectListBean.class);
+
     //used to filter out the select lists with id's 0 up to DELIMITER and prevent them from being edited
     private static final long SYSTEM_INTERNAL_LISTS_DELIMITER = 0;
+    private final static long UNSELECTED_ID = -100000L;
     private FxSelectListEdit selectList = null;
-    private long selectListId = -1;
+    private long selectListId = UNSELECTED_ID;
     private String selectListName = null;
     private FxString selectListLabel = new FxString("");
     private FxString selectListDescription = new FxString("");
     private boolean selectListAllowDynamicCreation = true;
 
-    private long listItemId = -1;
+    private long listItemId = UNSELECTED_ID;
     private String itemName = null;
     private FxString itemLabel = new FxString("");
     private ACL itemACL = null;
@@ -84,7 +89,9 @@ public class SelectListBean implements Serializable {
 
     private int rowsPerPage = 10;
     private int currentPage = 1;
-    private long editListItemId = -1;
+    private long editListItemId = UNSELECTED_ID;
+    private boolean editNew = false;
+    Map<Long, Long> originalParents = null;
     private FxSelectListItemEdit editListItem = null;
 
     private ItemIdSorter sorter = new ItemIdSorter();
@@ -137,14 +144,9 @@ public class SelectListBean implements Serializable {
         });
     }
 
-    /*public Map<Long, FxSelectListItem> getChildren() {
-        return FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<Long, FxSelectListItem>() {
-            public FxSelectListItem get(Object key) {
-                long id = (Long) key;
-
-            }
-        });
-    }*/
+    public long getUnselectedId() {
+        return UNSELECTED_ID;
+    }
 
     public FxString getItemLabel() {
         return itemLabel;
@@ -280,40 +282,84 @@ public class SelectListBean implements Serializable {
 
     public void editListItem(ActionEvent event) {
         System.out.println("editListItem event called: id=" + editListItemId);
-        editListItem = FxSelectListItemEdit.cloneItem(selectList.getItem(editListItemId), false, false);
+        editListItem = selectList.getItem(editListItemId).asEditable();
+        originalParents = new HashMap<Long, Long>(editListItem.getChildCount());
+        editNew = false;
+        for (FxSelectListItem child : editListItem.getChildren())
+            originalParents.put(child.getId(), child.getParentItem().getId());
     }
 
     public void createListItem(ActionEvent event) {
         System.out.println("Creating a new item");
-        editListItemId = -2L;
-        editListItem = FxSelectListItemEdit.createNew(null, selectList.getNewItemACL(), null, new FxString(true, ""), null, FxFormatUtils.DEFAULT_COLOR);
+        editListItem = FxSelectListItemEdit.createNew(null, selectList.getNewItemACL(), selectList, new FxString(true, ""), null, FxFormatUtils.DEFAULT_COLOR);
+        editListItemId = editListItem.getId();
+        editNew = true;
     }
 
     public void commitItemEditing(ActionEvent event) {
         System.out.println("Commit editing");
-        if (editListItem.isNew()) {
-            FxSelectListItemEdit.createNew(editListItem.getName(), editListItem.getAcl(), selectList, editListItem.getLabel(),
-                    editListItem.getData(), editListItem.getColor());
-        } else {
-            FxSelectListItemEdit selected = selectList.getItem(editListItemId).asEditable();
-            selected.setName(editListItem.getName());
-            selected.setAcl(editListItem.getAcl());
-            selected.setLabel(editListItem.getLabel());
-            selected.setData(editListItem.getData());
-            selected.setColor(editListItem.getColor());
-        }
-        editListItemId = -1L;
+        editListItemId = UNSELECTED_ID;
         editListItem = null;
+        originalParents = null;
+        editNew = false;
     }
 
-    public void cancelItemEditing(ActionEvent event) {
+    public void cancelItemEditing(ActionEvent event) throws FxInvalidParameterException {
         System.out.println("Cancel editing");
-        editListItemId = -1L;
+        if( editNew ) {
+            selectList.removeItem(editListItemId);
+            editNew = false;
+        }
+        if (!editListItem.isNew()) {
+            if (editListItem.getHasChildren()) {
+                for (FxSelectListItem child : editListItem.getChildren())
+                    child.asEditable().setParentItem(null);
+            }
+            editListItem.resetChanges();
+            selectList.replaceItem(editListItem.getId(), editListItem);
+            //restore child items
+            if (originalParents != null) {
+                for (Long itemId : originalParents.keySet())
+                    selectList.getItem(itemId).asEditable().setParentItem(selectList.getItem(originalParents.get(itemId)));
+                originalParents = null;
+            }
+        }
+        editListItemId = UNSELECTED_ID;
         editListItem = null;
+        originalParents = null;
     }
 
     public FxSelectListItemEdit getEditListItem() {
         return editListItem;
+    }
+
+    public Long[] getEditListItemChildren() {
+        if (editListItem == null)
+            return new Long[0];
+        List<Long> result = new ArrayList<Long>(20);
+        for (FxSelectListItem assigned : editListItem.getChildren())
+            result.add(assigned.getId());
+        return FxArrayUtils.toLongArray(result);
+    }
+
+    public void setEditListItemChildren(Long[] children) throws FxInvalidParameterException {
+        for(FxSelectListItem child: selectList.getChildItems(editListItem.getId()))
+            child.asEditable().setParentItem(null);
+        for (Long id : children) {
+            FxSelectListItem child = selectList.getItem(id);
+            System.out.println("Assigning: " + child.getId() + " -> " + child.getLabel().getBestTranslation());
+            child.asEditable().setParentItem(editListItem);
+        }
+    }
+
+    public List<SelectItem> getAssignableEditListItemChildren() {
+        if (editListItem == null)
+            return new ArrayList<SelectItem>(0);
+        List<SelectItem> result = new ArrayList<SelectItem>(20);
+        for (FxSelectListItem assignable : editListItem.getList().getItems())
+            if (editListItem.isAssignable(assignable))
+                result.add(new FxJSFSelectItem(assignable));
+        return result;
     }
 
     /**
@@ -363,9 +409,14 @@ public class SelectListBean implements Serializable {
     public Map<FxSelectListItemEdit, Boolean> getMayEditItem() {
         return new HashMap<FxSelectListItemEdit, Boolean>() {
             public Boolean get(Object key) {
-                return FxJsfUtils.getRequest().getUserTicket().isInRole(Role.SelectListEditor) ||
-                        FxJsfUtils.getRequest().getUserTicket().
-                                mayEditACL(((FxSelectListItemEdit) key).getAcl().getId(), FxJsfUtils.getRequest().getUserTicket().getUserId());
+                try {
+                    return FxJsfUtils.getRequest().getUserTicket().isInRole(Role.SelectListEditor) ||
+                            FxJsfUtils.getRequest().getUserTicket().
+                                    mayEditACL(((FxSelectListItemEdit) key).getAcl().getId(), FxJsfUtils.getRequest().getUserTicket().getUserId());
+                } catch (Exception e) {
+                    LOG.error(e);
+                    return false;
+                }
             }
         };
     }
@@ -432,7 +483,7 @@ public class SelectListBean implements Serializable {
         itemACL = CacheAdmin.getEnvironment().getACL(ACLCategory.SELECTLISTITEM.getDefaultId());
         itemData = null;
         itemColor = FxFormatUtils.DEFAULT_COLOR;
-        editListItemId = -1L;
+        editListItemId = UNSELECTED_ID;
         editListItem = null;
     }
 
@@ -468,7 +519,7 @@ public class SelectListBean implements Serializable {
         itemData = null;
         itemColor = FxFormatUtils.DEFAULT_COLOR;
 
-        editListItemId = -1L;
+        editListItemId = UNSELECTED_ID;
         editListItem = null;
 
         return showEditSelectList();

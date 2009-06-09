@@ -263,6 +263,18 @@ public class FxSelectListEdit extends FxSelectList implements Serializable {
     }
 
     /**
+     * Replace an item contained in this lists items with the passed item
+     *
+     * @param itemId item id to reset
+     * @param item   the item to set
+     */
+    public void replaceItem(Long itemId, FxSelectListItem item) {
+        if (!this.items.containsKey(itemId))
+            return;
+        this.items.put(itemId, item);
+    }
+
+    /**
      * Helper method to create a new FxSelectListEdit instance
      *
      * @param name                     name - has to be unique!

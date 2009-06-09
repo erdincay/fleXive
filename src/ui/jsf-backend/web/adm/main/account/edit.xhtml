@@ -96,8 +96,7 @@
         <a4j:outputPanel id="rolesGroups">
             <fx:formRow label="#{fxMessageBean['Account.field.rolesGroups']}" id="rolesGroups" >
                 <ui:repeat value="#{accountBean.rolesGroups}" var="role">
-                    <font color="#{role.color}"><h:outputText value="#{role.name}"/></font>
-                    <br/>
+                    <div style="color:#{role.color}"><h:outputText value="#{role.name}"/></div>
                 </ui:repeat>
             </fx:formRow>
         </a4j:outputPanel>
