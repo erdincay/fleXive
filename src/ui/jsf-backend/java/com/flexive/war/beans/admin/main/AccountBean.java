@@ -93,6 +93,9 @@ public class AccountBean implements Serializable {
     private FxLanguage defaultInputLanguage;
 
     public List<Role> getRoles() {
+        if (roles == null) {
+            return new ArrayList<Role>(0);
+        }
         List<Role> res = new ArrayList<Role>(roles.length);
         for( long r: roles)
             res.add(Role.getById(r));

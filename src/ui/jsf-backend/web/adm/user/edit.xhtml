@@ -67,7 +67,7 @@
 
         <fx:formRow labelKey="Account.field.groups" id="groups" height="85"  newLine="false">
             <ui:repeat value="#{accountBean.groups}" var="group">
-                <h:outputText value="#{group.name}"/>
+                <h:outputText value="#{fxMapBean.userGroups[group].name}"/>
                 <br/>
             </ui:repeat>    
         </fx:formRow>

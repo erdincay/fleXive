@@ -10,9 +10,10 @@ body {
 }
 
 a {
-  color:#83af00;
-  text-decoration:none;
-  font-weight:bold;  
+    color: #83af00;
+    text-decoration: none;
+    font-weight: bold;
+    outline: none;
 }
 
 a > img {
@@ -25,12 +26,17 @@ a > img {
 
 .commandButton {
     border: 0;
+    outline: none;
     height: 22px;
     color: black;
     float: left;
     overflow: hidden;
     cursor: pointer;
     margin: 0 6px 1px 0; /* for :active push effect */
+}
+
+.commandButton a {
+    outline: none;
 }
 
 .commandButtonRight, .commandButtonRightDisabled {
@@ -105,7 +111,7 @@ a > img {
     margin: 1px 5px 0 1px;
 }
 
-.commandButtonLabelText:active {
+.commandButton:active .commandButtonLabelText {
     color: black;
 }
 
