@@ -176,7 +176,7 @@ public class AccountBean implements Serializable {
     }
 
     public Long[] getRolesIds() {
-        return roles;
+        return this.roles;
     }
 
     public void setRolesIds(Long[] roles) {

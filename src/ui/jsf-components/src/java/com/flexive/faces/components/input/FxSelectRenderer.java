@@ -35,6 +35,12 @@ import com.flexive.faces.FxJsfComponentUtils;
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.model.FxJSFSelectItem;
 import com.flexive.shared.*;
+import com.flexive.shared.scripting.FxScriptInfo;
+import com.flexive.shared.structure.FxEnvironment;
+import com.flexive.shared.structure.FxSelectList;
+import com.flexive.shared.structure.FxSelectListItem;
+import groovy.lang.GroovyShell;
+import groovy.lang.Script;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -51,7 +57,6 @@ import javax.faces.render.Renderer;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -73,32 +78,11 @@ public class FxSelectRenderer extends Renderer {
     public static final Object NO_VALUE = "";
 
     /**
-     * Attributed to be passed through
+     * Scripting support (debugging)
      */
-    private final static String[] ATTRIBUTES = {
-            "disabled",
-            "readonly",
-            "accesskey",
-            "dir",
-            "lang",
-            "onblur",
-            "onchange",
-            "onclick",
-            "ondblclick",
-            "onfocus",
-            "onkeydown",
-            "onkeypress",
-            "onkeyup",
-            "onmousedown",
-            "onmousemove",
-            "onmouseout",
-            "onmouseover",
-            "onmouseup",
-            "onselect",
-            "style",
-            "tabindex",
-            "title"
-    };
+    private static final boolean ALLOW_SCRIPTING = false;
+    private static final String readOnlyScript = "renderSelectReadOnly.groovy";
+    private static final String editScript = "renderSelectEdit.groovy";
 
     /**
      * {@inheritDoc}
@@ -164,10 +148,47 @@ public class FxSelectRenderer extends Renderer {
      */
     @Override
     public void encodeEnd(FacesContext context, UIComponent component) throws IOException {
-        if (isEditable(component))
+        if (isEditable(component)) {
+            if (ALLOW_SCRIPTING) {
+                if (CacheAdmin.getEnvironment().scriptExists(editScript)) {
+                    try {
+                        LOG.info("Rendering using script " + editScript);
+                        FxScriptInfo scriptInfo = CacheAdmin.getEnvironment().getScript(editScript);
+                        GroovyShell shell = new GroovyShell();
+                        Script script = shell.parse(scriptInfo.getCode());
+                        script.setProperty("context", context);
+                        script.setProperty("component", component);
+                        script.run();
+                        LOG.info("Finished " + editScript);
+                    } catch (Exception e) {
+                        LOG.error("Error executing render script " + editScript + ": " + e.getMessage(), e);
+                        renderSelect(context, component);
+                    }
+                    return;
+                }
+            }
             renderSelect(context, component);
-        else
+        } else {
+            if (ALLOW_SCRIPTING) {
+                if (CacheAdmin.getEnvironment().scriptExists(readOnlyScript)) {
+                    try {
+                        LOG.info("Rendering using script " + readOnlyScript);
+                        FxScriptInfo scriptInfo = CacheAdmin.getEnvironment().getScript(readOnlyScript);
+                        GroovyShell shell = new GroovyShell();
+                        Script script = shell.parse(scriptInfo.getCode());
+                        script.setProperty("context", context);
+                        script.setProperty("component", component);
+                        script.run();
+                        LOG.info("Finished " + readOnlyScript);
+                    } catch (Exception e) {
+                        LOG.error("Error executing render script " + readOnlyScript + ": " + e.getMessage(), e);
+                        renderText(context, component);
+                    }
+                    return;
+                }
+            }
             renderText(context, component);
+        }
     }
 
     /**
@@ -187,9 +208,10 @@ public class FxSelectRenderer extends Renderer {
 
     /**
      * Convert SelectManys value to the correct value classes
-     * @param context faces context
+     *
+     * @param context      faces context
      * @param uiSelectMany the select many component
-     * @param newValues the new values to convert
+     * @param newValues    the new values to convert
      * @return converted values
      * @throws ConverterException on errors
      */
@@ -260,10 +282,11 @@ public class FxSelectRenderer extends Renderer {
 
     /**
      * Convert select many values to given array class
-     * @param context faces context
+     *
+     * @param context      faces context
      * @param uiSelectMany select many component
-     * @param arrayClass the array class
-     * @param newValues new values to convert
+     * @param arrayClass   the array class
+     * @param newValues    new values to convert
      * @return converted values
      * @throws ConverterException on errors
      */
@@ -362,7 +385,7 @@ public class FxSelectRenderer extends Renderer {
      */
     protected void renderText(FacesContext context, UIComponent component) throws IOException {
         ResponseWriter writer = context.getResponseWriter();
-        Object[] items = getCurrentSelectedValues(component);
+        Object[] items = FxJsfComponentUtils.getCurrentSelectedValues(component);
         List<SelectItem> selectedItems = FxJsfComponentUtils.getSelectItems(context, component);
         for (Object item : items) {
             writer.startElement("div", component);
@@ -373,7 +396,7 @@ public class FxSelectRenderer extends Renderer {
                 } else if (currItem instanceof FxJSFSelectItem &&
                         item instanceof Long &&
                         currItem.getValue() instanceof SelectableObject &&
-                        ((SelectableObject)currItem.getValue()).getId() == (Long) item) {
+                        ((SelectableObject) currItem.getValue()).getId() == (Long) item) {
                     item = currItem;
                     break;
                 }
@@ -395,8 +418,8 @@ public class FxSelectRenderer extends Renderer {
             }
             if (color != null) {
                 //if no styleClass is explicitly set, apply contrast background color if too light
-                if( null == component.getAttributes().get("styleClass") && FxFormatUtils.lackOfContrast(color))
-                        color += ";background-color:"+ FxFormatUtils.CONTRAST_BACKGROUND_COLOR;
+                if (null == component.getAttributes().get("styleClass") && FxFormatUtils.lackOfContrast(color))
+                    color += ";background-color:" + FxFormatUtils.CONTRAST_BACKGROUND_COLOR;
                 writer.writeAttribute("style", "color:" + color, "style");
             }
 
@@ -440,6 +463,26 @@ public class FxSelectRenderer extends Renderer {
 
         List<SelectItem> items = FxJsfComponentUtils.getSelectItems(context, component);
 
+        if (component instanceof UISelectOne &&
+                items.size() > 0 &&
+                items.get(0) instanceof FxJSFSelectItem &&
+                ((FxJSFSelectItem) items.get(0)).isFxSelectListItem()) {
+            //we have an FxSelectListItem in a SelectOne -> check if cascaded
+            final FxEnvironment env = CacheAdmin.getEnvironment();
+            FxSelectList list = env.getSelectListItem((Long) items.get(0).getValue()).getList();
+            if (list.isCascaded()) {
+                List<SelectItem> converted = new ArrayList<SelectItem>(items.size());
+                for (SelectItem check : items) {
+                    final FxSelectListItem listItem = list.getItem((Long) check.getValue());
+                    if (!listItem.getHasChildren()) {
+                        check.setLabel(listItem.getLabelBreadcrumbPath(" > "));
+                        converted.add(check);
+                    }
+                }
+                items = converted;
+            }
+        }
+
         // If "size" is *not* set explicitly, we have to default it correctly
         Integer size = (Integer) component.getAttributes().get("size");
         if (size == null || size == Integer.MIN_VALUE) {
@@ -450,14 +493,14 @@ public class FxSelectRenderer extends Renderer {
             if ("javax.faces.Listbox".equals(component.getRendererType()))
                 itemCount = 1; //only 1 item if we are a listbox
             else
-                itemCount = getOptionNumber(items);
+                itemCount = FxJsfComponentUtils.getSelectlistOptionCount(items);
             size = itemCount;
         }
         writer.writeAttribute("size", size, "size");
 
         //render the components default attributes if present
         Map attrMap = component.getAttributes();
-        for (String att : ATTRIBUTES)
+        for (String att : FxJsfComponentUtils.SELECTLIST_ATTRIBUTES)
             if (attrMap.get(att) != null)
                 writer.writeAttribute(att, attrMap.get(att), att);
 
@@ -484,8 +527,8 @@ public class FxSelectRenderer extends Renderer {
             converter = ((ValueHolder) component).getConverter();
 
         if (!items.isEmpty()) {
-            Object currentSelections = getCurrentSelectedValues(component);
-            Object[] submittedValues = getSubmittedSelectedValues(component);
+            Object currentSelections = FxJsfComponentUtils.getCurrentSelectedValues(component);
+            Object[] submittedValues = FxJsfComponentUtils.getSubmittedSelectedValues(component);
             for (SelectItem item : items) {
                 if (item instanceof SelectItemGroup) {
                     // render OPTGROUP
@@ -543,7 +586,7 @@ public class FxSelectRenderer extends Renderer {
         Object itemValue;
         boolean containsValue;
         if (submittedValues != null) {
-            containsValue = containsaValue(submittedValues);
+            containsValue = FxJsfComponentUtils.containsaValue(submittedValues);
             if (containsValue) {
                 valuesArray = submittedValues;
                 itemValue = valueString;
@@ -556,7 +599,7 @@ public class FxSelectRenderer extends Renderer {
             itemValue = curItem.getValue();
         }
 
-        if (isSelected(context, component, itemValue, valuesArray, converter)) {
+        if (FxJsfComponentUtils.isSelectItemSelected(context, component, itemValue, valuesArray, converter)) {
             writer.writeAttribute("selected", true, "selected");
         }
 
@@ -587,69 +630,6 @@ public class FxSelectRenderer extends Renderer {
 
         writer.endElement("option");
         writer.writeText("\n", component, null);
-    }
-
-    /**
-     * Get the values currently selected
-     *
-     * @param component the component
-     * @return selected values
-     */
-    protected Object[] getCurrentSelectedValues(UIComponent component) {
-        if (component instanceof UISelectMany) {
-            UISelectMany select = (UISelectMany) component;
-            Object value = select.getValue();
-            if (value instanceof Collection)
-                return ((Collection) value).toArray();
-            else if (value != null && !value.getClass().isArray())
-                LOG.warn("The UISelectMany value should be an array or a collection type, the actual type is " + value.getClass().getName());
-
-            return (Object[]) value;
-        }
-        //select one
-        UISelectOne select = (UISelectOne) component;
-        Object val = select.getValue();
-        if (val != null)
-            return new Object[]{val};
-        return new Object[0];
-    }
-
-    /**
-     * Get the submitted values that are selected
-     *
-     * @param component the component
-     * @return submitted values that are selected
-     */
-    protected Object[] getSubmittedSelectedValues(UIComponent component) {
-        if (component instanceof UISelectMany) {
-            UISelectMany select = (UISelectMany) component;
-            return (Object[]) select.getSubmittedValue();
-        }
-
-        UISelectOne select = (UISelectOne) component;
-        Object val = select.getSubmittedValue();
-        if (val != null)
-            return new Object[]{val};
-        return null;
-    }
-
-    /**
-     * Get the number of options to render depending on the type of the items (eg item groups require more items to be rendered)
-     *
-     * @param selectItems the select items to inspect
-     * @return number of options to be rendered
-     */
-    protected int getOptionNumber(List<SelectItem> selectItems) {
-        int itemCount = 0;
-        if (!selectItems.isEmpty()) {
-            for (Object selectItem : selectItems) {
-                itemCount++;
-                if (selectItem instanceof SelectItemGroup)
-                    itemCount += ((SelectItemGroup) selectItem).getSelectItems().length;
-            }
-        }
-        return itemCount;
-
     }
 
     /**
@@ -718,71 +698,5 @@ public class FxSelectRenderer extends Renderer {
             }
         }
         return converter.getAsString(context, component, currentValue);
-    }
-
-    /**
-     * Check if the given array contains an actual value
-     *
-     * @param valueArray value array
-     * @return if an actual value is set in the array
-     */
-    protected boolean containsaValue(Object valueArray) {
-        if (null != valueArray) {
-            int len = Array.getLength(valueArray);
-            for (int i = 0; i < len; i++) {
-                Object value = Array.get(valueArray, i);
-                if (value != null && !(value.equals(NO_VALUE))) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Check if an item is selected
-     *
-     * @param context    faces context
-     * @param component  our component
-     * @param itemValue  the value to check for selection
-     * @param valueArray all values to compare against
-     * @param converter  the converter
-     * @return selected
-     */
-    protected boolean isSelected(FacesContext context, UIComponent component, Object itemValue, Object valueArray, Converter converter) {
-        if (itemValue == null && valueArray == null)
-            return true;
-        if (null != valueArray) {
-            if (!valueArray.getClass().isArray()) {
-                LOG.warn("valueArray is not an array, the actual type is " + valueArray.getClass());
-                return valueArray.equals(itemValue);
-            }
-            int len = Array.getLength(valueArray);
-            for (int i = 0; i < len; i++) {
-                Object value = Array.get(valueArray, i);
-                if (value == null && itemValue == null) {
-                    return true;
-                } else {
-                    if ((value == null) ^ (itemValue == null))
-                        continue;
-
-                    Object compareValue;
-                    if (converter == null) {
-                        compareValue = FxJsfComponentUtils.coerceToModelType(context, itemValue, value.getClass());
-                    } else {
-                        compareValue = itemValue;
-                        if (compareValue instanceof String && !(value instanceof String)) {
-                            // type mismatch between the time and the value we're
-                            // comparing.  Invoke the Converter.
-                            compareValue = converter.getAsObject(context, component, (String) compareValue);
-                        }
-                    }
-
-                    if (value.equals(compareValue))
-                        return true; //selected
-                }
-            }
-        }
-        return false;
     }
 }

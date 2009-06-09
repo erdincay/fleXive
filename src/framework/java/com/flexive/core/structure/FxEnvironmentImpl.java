@@ -1004,6 +1004,16 @@ public final class FxEnvironmentImpl implements FxEnvironment {
     /**
      * {@inheritDoc}
      */
+    public boolean scriptExists(String name) {
+        for (FxScriptInfo si : this.scripts)
+            if (si.getName().equals(name))
+                return true;
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public List<FxScriptMapping> getScriptMappings() {
         return scriptMappings;
     }

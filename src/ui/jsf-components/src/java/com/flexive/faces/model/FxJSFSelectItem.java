@@ -33,6 +33,7 @@ package com.flexive.faces.model;
 
 import com.flexive.shared.*;
 import com.flexive.shared.structure.FxSelectList;
+import com.flexive.shared.structure.FxSelectListItem;
 import org.apache.commons.lang.StringUtils;
 
 import javax.faces.model.SelectItem;
@@ -47,6 +48,7 @@ import javax.faces.model.SelectItem;
 public class FxJSFSelectItem extends SelectItem implements java.io.Serializable {
     private static final long serialVersionUID = 676788316415654999L;
     private String style = null;
+    private boolean fxSelectListItem = false;
 
     /**
      * Empty constructor to create an empty element
@@ -84,6 +86,8 @@ public class FxJSFSelectItem extends SelectItem implements java.io.Serializable 
      */
     public FxJSFSelectItem(SelectableObjectWithLabel item) {
         super(item.getId(), item.getLabel().getBestTranslation());
+        if( item instanceof FxSelectListItem )
+            fxSelectListItem = true;
         applyStyle(item);
     }
 
@@ -112,10 +116,10 @@ public class FxJSFSelectItem extends SelectItem implements java.io.Serializable 
     /**
      * Ctor for FxSelectList, translation is chosen based on the users preferred language
      *
-     * @param item FxSelectList
+     * @param list FxSelectList
      */
-    public FxJSFSelectItem(FxSelectList item) {
-        super(item.getId(), item.getLabel().getBestTranslation(), item.getDescription().getBestTranslation());
+    public FxJSFSelectItem(FxSelectList list) {
+        super(list.getId(), list.getLabel().getBestTranslation(), list.getDescription().getBestTranslation());
         this.style = "";
     }
 
@@ -146,5 +150,14 @@ public class FxJSFSelectItem extends SelectItem implements java.io.Serializable 
      */
     public String getStyle() {
         return style;
+    }
+
+    /**
+     * Is this item a FxSelectListItem?
+     *
+     * @return item is a FxSelectListItem
+     */
+    public boolean isFxSelectListItem() {
+        return fxSelectListItem;
     }
 }

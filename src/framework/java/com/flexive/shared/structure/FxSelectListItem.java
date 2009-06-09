@@ -31,10 +31,12 @@
  ***************************************************************/
 package com.flexive.shared.structure;
 
+import com.flexive.shared.FxContext;
 import com.flexive.shared.ObjectWithColor;
 import com.flexive.shared.SelectableObjectWithLabel;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.LifeCycleInfo;
+import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.value.FxString;
 
 import java.io.Serializable;
@@ -330,5 +332,24 @@ public class FxSelectListItem implements Serializable, SelectableObjectWithLabel
      */
     public boolean equals(Object obj) {
         return obj instanceof FxSelectListItem && this.id == ((FxSelectListItem) obj).id;
+    }
+
+    /**
+     * If this item is cascaded, get the label path up to the root element
+     *
+     * @param separator label separator
+     * @return label path
+     */
+    public String getLabelBreadcrumbPath(String separator) {
+        StringBuilder sb = new StringBuilder(100);
+        final UserTicket ticket = FxContext.getUserTicket();
+        FxSelectListItem curr = this;
+        while (curr != null) {
+            if (curr != this)
+                sb.insert(0, separator);
+            sb.insert(0, curr.getLabel().getBestTranslation(ticket));
+            curr = curr.getParentItem();
+        }
+        return sb.toString();
     }
 }

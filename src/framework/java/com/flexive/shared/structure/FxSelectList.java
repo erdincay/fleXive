@@ -396,5 +396,17 @@ public class FxSelectList implements Serializable, ObjectWithLabel {
                 children.add(i);
         return children;
     }
+
+    /**
+     * Does this list contain cascaded items?
+     *
+     * @return list contains cascaded items
+     */
+    public boolean isCascaded() {
+        for (FxSelectListItem curr : items.values())
+            if (curr.hasParentItem())
+                return true;
+        return false;
+    }
 }
 

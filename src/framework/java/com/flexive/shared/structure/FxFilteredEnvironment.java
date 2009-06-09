@@ -525,6 +525,13 @@ public final class FxFilteredEnvironment implements FxEnvironment {
     /**
      * {@inheritDoc}
      */
+    public boolean scriptExists(String name) {
+        return environment.scriptExists(name);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public List<FxScriptMapping> getScriptMappings() {
         return environment.getScriptMappings();
     }

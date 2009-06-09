@@ -34,8 +34,8 @@ package com.flexive.shared.structure;
 import com.flexive.shared.scripting.FxScriptInfo;
 import com.flexive.shared.scripting.FxScriptMapping;
 import com.flexive.shared.security.ACL;
-import com.flexive.shared.security.Mandator;
 import com.flexive.shared.security.ACLCategory;
+import com.flexive.shared.security.Mandator;
 import com.flexive.shared.workflow.Route;
 import com.flexive.shared.workflow.Step;
 import com.flexive.shared.workflow.StepDefinition;
@@ -249,7 +249,7 @@ public interface FxEnvironment extends Serializable {
     /**
      * Check if a property exists within the given type
      *
-     * @param typeName the type's name
+     * @param typeName     the type's name
      * @param propertyName the property's name
      * @return exists
      */
@@ -258,7 +258,7 @@ public interface FxEnvironment extends Serializable {
     /**
      * Check if a group exists within the given type
      *
-     * @param typeName the type's name
+     * @param typeName  the type's name
      * @param groupName the group's name
      * @return exists
      */
@@ -306,7 +306,7 @@ public interface FxEnvironment extends Serializable {
     /**
      * Get the property assignments for a given property.
      *
-     * @param propertyId    the property ID
+     * @param propertyId      the property ID
      * @param includeDisabled include disabled assignments?
      * @return property all assignments of the given property
      */
@@ -330,7 +330,7 @@ public interface FxEnvironment extends Serializable {
     /**
      * Get all group assignments for a given id, optionally including disabled assignments
      *
-     * @param groupId the group's id for which to get the assignments
+     * @param groupId         the group's id for which to get the assignments
      * @param includeDisabled include disabled assignments?
      * @return group assignments, optionally including disabled
      */
@@ -348,7 +348,7 @@ public interface FxEnvironment extends Serializable {
      * Return the property assignment that matches the given XPath (has to include the type/relation name as root)
      *
      * @param xpath requested xpath
-     * @return  the property assignment that matches the given XPath
+     * @return the property assignment that matches the given XPath
      * @since 3.1
      */
     FxPropertyAssignment getPropertyAssignment(String xpath);
@@ -397,7 +397,7 @@ public interface FxEnvironment extends Serializable {
     /**
      * Returns all defined types.
      *
-     * @return  all defined types.
+     * @return all defined types.
      */
     List<FxType> getTypes();
 
@@ -587,6 +587,14 @@ public interface FxEnvironment extends Serializable {
      * @return the script info object
      */
     FxScriptInfo getScript(String name);
+
+    /**
+     * Check if a script with the given name exists
+     *
+     * @param name script name to check
+     * @return exists
+     */
+    boolean scriptExists(String name);
 
     /**
      * Get the timestamp when this environment was loaded

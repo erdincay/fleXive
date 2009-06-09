@@ -40,18 +40,19 @@ import javax.el.ExpressionFactory;
 import javax.el.ValueExpression;
 import javax.faces.FacesException;
 import javax.faces.application.Application;
-import javax.faces.component.UIComponent;
-import javax.faces.component.UISelectItem;
-import javax.faces.component.UISelectItems;
-import javax.faces.component.ValueHolder;
+import javax.faces.component.*;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
 import javax.faces.convert.ConverterException;
 import javax.faces.model.SelectItem;
+import javax.faces.model.SelectItemGroup;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.lang.reflect.Array;
+
+import com.flexive.faces.components.input.FxSelectRenderer;
 
 /**
  * Utility functions for JSF/Facelets components.
@@ -62,6 +63,33 @@ import java.util.Map;
 public class FxJsfComponentUtils {
 
     private static final Log LOG = LogFactory.getLog(FxJsfComponentUtils.class);
+    /**
+     * Attributed to be passed through
+     */
+    public final static String[] SELECTLIST_ATTRIBUTES = {
+            "disabled",
+            "readonly",
+            "accesskey",
+            "dir",
+            "lang",
+            "onblur",
+            "onchange",
+            "onclick",
+            "ondblclick",
+            "onfocus",
+            "onkeydown",
+            "onkeypress",
+            "onkeyup",
+            "onmousedown",
+            "onmousemove",
+            "onmouseout",
+            "onmouseover",
+            "onmouseup",
+            "onselect",
+            "style",
+            "tabindex",
+            "title"
+    };
 
     /**
      * Private constructor to avoid instantiation.
@@ -359,5 +387,134 @@ public class FxJsfComponentUtils {
             newValue = value;
         }
         return newValue;
+    }
+
+    /**
+     * Get the values currently selected in a Select[Many|One]Listbox
+     *
+     * @param component the component
+     * @return selected values as Object array
+     */
+    public static Object[] getCurrentSelectedValues(UIComponent component) {
+        if (component instanceof UISelectMany) {
+            UISelectMany select = (UISelectMany) component;
+            Object value = select.getValue();
+            if (value instanceof Collection)
+                return ((Collection) value).toArray();
+            else if (value != null && !value.getClass().isArray())
+                LOG.warn("The UISelectMany value should be an array or a collection type, the actual type is " + value.getClass().getName());
+            return (Object[]) value;
+        } else if (component instanceof UISelectOne) {
+            //select one
+            UISelectOne select = (UISelectOne) component;
+            Object val = select.getValue();
+            if (val != null)
+                return new Object[]{val};
+        }
+        return new Object[0];
+    }
+
+    /**
+     * Get the submitted values that are selected
+     *
+     * @param component the component
+     * @return submitted values that are selected
+     */
+    public static Object[] getSubmittedSelectedValues(UIComponent component) {
+        if (component instanceof UISelectMany) {
+            UISelectMany select = (UISelectMany) component;
+            return (Object[]) select.getSubmittedValue();
+        }
+
+        UISelectOne select = (UISelectOne) component;
+        Object val = select.getSubmittedValue();
+        if (val != null)
+            return new Object[]{val};
+        return null;
+    }
+
+    /**
+     * Get the number of options to render depending on the type of the items (eg item groups require more items to be rendered)
+     *
+     * @param selectItems the select items to inspect
+     * @return number of options to be rendered
+     */
+    public static int getSelectlistOptionCount(List<SelectItem> selectItems) {
+        int itemCount = 0;
+        if (!selectItems.isEmpty()) {
+            for (Object selectItem : selectItems) {
+                itemCount++;
+                if (selectItem instanceof SelectItemGroup)
+                    itemCount += ((SelectItemGroup) selectItem).getSelectItems().length;
+            }
+        }
+        return itemCount;
+
+    }
+
+    /**
+     * Check if an item is selected
+     *
+     * @param context    faces context
+     * @param component  our component
+     * @param itemValue  the value to check for selection
+     * @param valueArray all values to compare against
+     * @param converter  the converter
+     * @return selected
+     */
+    public static boolean isSelectItemSelected(FacesContext context, UIComponent component, Object itemValue, Object valueArray, Converter converter) {
+        if (itemValue == null && valueArray == null)
+            return true;
+        if (null != valueArray) {
+            if (!valueArray.getClass().isArray()) {
+                LOG.warn("valueArray is not an array, the actual type is " + valueArray.getClass());
+                return valueArray.equals(itemValue);
+            }
+            int len = Array.getLength(valueArray);
+            for (int i = 0; i < len; i++) {
+                Object value = Array.get(valueArray, i);
+                if (value == null && itemValue == null) {
+                    return true;
+                } else {
+                    if ((value == null) ^ (itemValue == null))
+                        continue;
+
+                    Object compareValue;
+                    if (converter == null) {
+                        compareValue = coerceToModelType(context, itemValue, value.getClass());
+                    } else {
+                        compareValue = itemValue;
+                        if (compareValue instanceof String && !(value instanceof String)) {
+                            // type mismatch between the time and the value we're
+                            // comparing.  Invoke the Converter.
+                            compareValue = converter.getAsObject(context, component, (String) compareValue);
+                        }
+                    }
+
+                    if (value.equals(compareValue))
+                        return true; //selected
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Check if the given array contains an actual value
+     *
+     * @param valueArray value array
+     * @return if an actual value is set in the array
+     */
+    public static boolean containsaValue(Object valueArray) {
+        if (null != valueArray) {
+            int len = Array.getLength(valueArray);
+            for (int i = 0; i < len; i++) {
+                Object value = Array.get(valueArray, i);
+                if (value != null && !(value.equals(FxSelectRenderer.NO_VALUE))) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }
