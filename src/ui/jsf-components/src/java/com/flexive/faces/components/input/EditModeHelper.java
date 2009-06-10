@@ -315,7 +315,6 @@ class EditModeHelper extends RenderHelper {
         // store available items in select component
         final UISelectItems selectItems = (UISelectItems) FxJsfUtils.createComponent(UISelectItems.COMPONENT_TYPE);
         final List<SelectItem> items = FxJsfUtils.asSelectList(selectList);
-        Collections.sort(items, new FxJsfUtils.SelectItemSorter());
         selectItems.setValue(items);
         listbox.setConverter(FxJsfUtils.getApplication().createConverter(Long.class));
         listbox.getChildren().add(selectItems);

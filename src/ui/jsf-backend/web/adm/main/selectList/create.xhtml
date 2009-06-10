@@ -41,6 +41,12 @@
                     <f:selectItems value="#{selectListBean.selectListItemACLs}" />
                 </h:selectOneListbox>
             </fx:formRow>
+            <fx:formRow labelKey="SelectList.label.selectList.breadcrumbSeparator" id="breadcrumbSeparator">
+                <h:inputText id="breadcrumbSeparator" value="#{selectListBean.selectListBreadcrumbSeparator}" disabled="#{readonlyList}" styleClass="fxValueTextInput"/>
+			</fx:formRow>
+            <fx:formRow labelKey="SelectList.label.selectList.onlySameLevelSelect" id="onlySameLevelSelect">
+                <h:selectBooleanCheckbox id="onlySameLevelSelect" value="#{selectListBean.selectListOnlySameLevelSelect}" disabled="#{readonlyList}"/>
+            </fx:formRow>
 
             <ui:fragment rendered="#{fxSystemBean.isInRole['SelectListEditor']}">
                 <adm:commandButton labelKey="SelectList.button.selectList.createNew" location="both"

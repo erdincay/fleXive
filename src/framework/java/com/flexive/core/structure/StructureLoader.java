@@ -138,6 +138,7 @@ public final class StructureLoader {
                 environment.setProperties(loader.loadProperties(con, environment));
                 environment.setAssignments(loader.loadAssignments(con, environment));
                 FxEnvironmentUtils.cachePut(divisionId, CacheAdmin.ENVIRONMENT_BASE, CacheAdmin.ENVIRONMENT_RUNTIME, environment);
+                CacheAdmin.expireCachedContents();
             }
         } catch (FxNotFoundException e) {
             throw new FxLoadException(LOG, e);

@@ -150,6 +150,7 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
                     throw new FxNoAccessException("ex.role.notInRole", Role.SelectListEditor.getName());
             }
         }
+        updatePositions(list.getItems());
         updateDefaultItem(id, defaultItemId);
         if (!changes) {
             FxSelectListItem orgDef = CacheAdmin.getEnvironment().getSelectList(id).getDefaultItem();
@@ -326,8 +327,8 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
             con = Database.getDbConnection();
             //                                                            1  2        3    4
             ps = con.prepareStatement("INSERT INTO " + TBL_SELECTLIST + "(ID,PARENTID,NAME,ALLOW_ITEM_CREATE," +
-                    //5              6            7
-                    "ACL_CREATE_ITEM,ACL_ITEM_NEW,DEFAULT_ITEM)VALUES(?,?,?,?,?,?,?)");
+                    //5              6            7            8     9
+                    "ACL_CREATE_ITEM,ACL_ITEM_NEW,DEFAULT_ITEM,BCSEP,SAMELVLSELECT)VALUES(?,?,?,?,?,?,?,?,?)");
             ps.setLong(1, newId);
             if (list.hasParentList())
                 ps.setLong(2, list.getParentList().getId());
@@ -338,6 +339,8 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
             ps.setLong(5, list.getCreateItemACL().getId());
             ps.setLong(6, list.getNewItemACL().getId());
             ps.setNull(7, java.sql.Types.INTEGER);
+            ps.setString(8, list.getBreadcrumbSeparator());
+            ps.setBoolean(9, list.isOnlySameLevelSelect());
             ps.executeUpdate();
             Database.storeFxString(new FxString[]{list.getLabel(), list.getDescription()},
                     con, TBL_SELECTLIST, new String[]{"LABEL", "DESCRIPTION"}, "ID", newId);
@@ -378,6 +381,34 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
         }
     }
 
+    /**
+     * Update the positions of all items
+     *
+     * @param items select list items
+     * @throws FxApplicationException on errors
+     */
+    private void updatePositions(List<FxSelectListItem> items) throws FxApplicationException {
+        Connection con = null;
+        PreparedStatement ps = null;
+        int pos = 0;
+        try {
+            con = Database.getDbConnection();
+            //                                                                    1          2
+            ps = con.prepareStatement("UPDATE " + TBL_SELECTLIST_ITEM + " SET POS=? WHERE ID=?");
+            for (FxSelectListItem item : items) {
+                ps.setInt(1, pos++);
+                ps.setLong(2, item.getId());
+                ps.addBatch();
+            }
+            ps.executeBatch();
+        } catch (SQLException e) {
+            ctx.setRollbackOnly();
+            throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
+        } finally {
+            Database.closeObjects(TypeEngineBean.class, con, ps);
+        }
+    }
+
     private void updateList(FxSelectListEdit list) throws FxApplicationException {
         if (!list.changes())
             return;
@@ -390,8 +421,8 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
             con = Database.getDbConnection();
             //                                                                    1      2                   3
             ps = con.prepareStatement("UPDATE " + TBL_SELECTLIST + " SET PARENTID=?,NAME=?,ALLOW_ITEM_CREATE=?," +
-                    //               4                  5          6
-                    "ACL_CREATE_ITEM=?,ACL_ITEM_NEW=? WHERE ID=?");
+                    //               4              5       6               7          8
+                    "ACL_CREATE_ITEM=?,ACL_ITEM_NEW=?,BCSEP=?,SAMELVLSELECT=? WHERE ID=?");
             if (list.hasParentList())
                 ps.setLong(1, list.getParentList().getId());
             else
@@ -400,7 +431,9 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
             ps.setBoolean(3, list.isAllowDynamicItemCreation());
             ps.setLong(4, list.getCreateItemACL().getId());
             ps.setLong(5, list.getNewItemACL().getId());
-            ps.setLong(6, list.getId());
+            ps.setString(6, list.getBreadcrumbSeparator());
+            ps.setBoolean(7, list.isOnlySameLevelSelect());
+            ps.setLong(8, list.getId());
             ps.executeUpdate();
             Database.storeFxString(new FxString[]{list.getLabel(), list.getDescription()},
                     con, TBL_SELECTLIST, new String[]{"LABEL", "DESCRIPTION"}, "ID", list.getId());
@@ -449,7 +482,7 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
             ps.setString(2, item.getName());
             ps.setLong(3, item.getAcl().getId());
             if (item.hasParentItem()) {
-                if( idMap != null && idMap.containsKey(item.getParentItem().getId()))
+                if (idMap != null && idMap.containsKey(item.getParentItem().getId()))
                     ps.setLong(4, idMap.get(item.getParentItem().getId()));
                 else
                     ps.setLong(4, item.getParentItem().getId());

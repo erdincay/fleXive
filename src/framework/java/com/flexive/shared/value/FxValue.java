@@ -956,28 +956,6 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
     public String toString() {
         // format value in the current user's locale - also used in the JSF UI
         return FxValueRendererFactory.getInstance().format(this);
-        /*if (isEmpty()) {
-            return "";
-        }
-        if (!multiLanguage)
-            return singleValue == null ? "" : singleValue.toString();
-
-        String ret = null;
-        try {
-            if (translations != null && translations.size() > 0) {
-                final UserTicket ticket = FxContext.get().getUserTicket();
-                if (ticket != null) {
-                    ret = getBestTranslation(ticket.getLanguage().getId()).toString();
-                } else {
-                    ret = getTranslation(FxLanguage.DEFAULT_ID).toString();
-                    if (ret == null)
-                        ret = translations.values().iterator().next().toString();
-                }
-            }
-        } catch (Exception e) {
-            ret = null;
-        }
-        return ret != null ? ret : "";*/
     }
 
     /**

@@ -243,7 +243,7 @@ public class SelectMany implements Serializable {
     }
 
     private void sortSelected() {
-        Collections.sort(selected, new FxSharedUtils.SelectableObjectSorter());
+        Collections.sort(selected, new FxSharedUtils.ItemPositionSorter());
     }
 
     @Override

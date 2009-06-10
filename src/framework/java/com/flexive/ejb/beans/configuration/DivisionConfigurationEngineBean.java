@@ -328,7 +328,6 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
                     }
                     return currentVersion;
                 } finally {
-                    con.commit();
                     Database.closeObjects(DivisionConfigurationEngineBean.class, con, stmt);
                 }
             } catch (IOException e) {

@@ -49,6 +49,7 @@ public class FxJSFSelectItem extends SelectItem implements java.io.Serializable 
     private static final long serialVersionUID = 676788316415654999L;
     private String style = null;
     private boolean fxSelectListItem = false;
+    private boolean forceDisplay = false;
 
     /**
      * Empty constructor to create an empty element
@@ -86,7 +87,7 @@ public class FxJSFSelectItem extends SelectItem implements java.io.Serializable 
      */
     public FxJSFSelectItem(SelectableObjectWithLabel item) {
         super(item.getId(), item.getLabel().getBestTranslation());
-        if( item instanceof FxSelectListItem )
+        if (item instanceof FxSelectListItem)
             fxSelectListItem = true;
         applyStyle(item);
     }
@@ -159,5 +160,31 @@ public class FxJSFSelectItem extends SelectItem implements java.io.Serializable 
      */
     public boolean isFxSelectListItem() {
         return fxSelectListItem;
+    }
+
+    /**
+     * Force display of this item (with the label provided)?
+     * Items can be suppressed in multiselect mode if they have children. Setting this flag to <code>true</code> will
+     * force them to be displayed anyways as separate entries.
+     *
+     * @param forceDisplay force display of this item
+     * @return this
+     */
+    public FxJSFSelectItem forceDisplay(boolean forceDisplay) {
+        this.forceDisplay = forceDisplay;
+        return this;
+    }
+
+    /**
+     * Force display of this item (as is)?
+     * <p/>
+     * If forced this item will be displayed regardless of any children that might be attached to it (which would
+     * normally cause this item to be rendered with breadcrumbs) and using the label provided
+     * (no lookups for selectlist item labels will be made).
+     *
+     * @return force display
+     */
+    public boolean isForceDisplay() {
+        return forceDisplay;
     }
 }

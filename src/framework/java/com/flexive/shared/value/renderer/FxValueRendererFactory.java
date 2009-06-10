@@ -37,17 +37,16 @@ import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.structure.FxSelectListItem;
 import com.flexive.shared.value.*;
+import org.apache.commons.lang.StringUtils;
 
 import java.text.DateFormat;
 import java.text.NumberFormat;
-import java.util.Date;
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-
-import org.apache.commons.lang.StringUtils;
 
 /**
  * Factory for FxValueRenderer. A FxValueRenderer provides a transparent way of formatting
@@ -59,7 +58,9 @@ import org.apache.commons.lang.StringUtils;
 public class FxValueRendererFactory {
 
     private static final ConcurrentMap<FxLanguage, FxValueRendererImpl> renderers = new ConcurrentHashMap<FxLanguage, FxValueRendererImpl>();
-    /** Internal fallback default language for locale-agnostic formatters */
+    /**
+     * Internal fallback default language for locale-agnostic formatters
+     */
     static final FxLanguage DEFAULT = new FxLanguage(-1, FxLanguage.DEFAULT.getIso2digit(),
             new FxString("Default fallback formatter"), true);
 
@@ -144,7 +145,7 @@ public class FxValueRendererFactory {
     private static class FxSelectOneFormatter implements FxValueFormatter<FxSelectListItem, FxSelectOne> {
         public String format(FxSelectOne value, FxSelectListItem translation, FxLanguage outputLanguage) {
             return translation != null
-                    ? translation.getLabel().getBestTranslation(outputLanguage)
+                    ? translation.getLabelBreadcrumbPath(outputLanguage)
                     : getEmptyMessage(outputLanguage);
         }
     }
@@ -158,10 +159,9 @@ public class FxValueRendererFactory {
                 return getEmptyMessage(outputLanguage);
             }
             final List<String> out = new ArrayList<String>(translation.getSelected().size());
-            for (FxSelectListItem item: translation.getSelected()) {
-                out.add(item.getLabel().getBestTranslation(outputLanguage));
+            for (FxSelectListItem item : translation.getSelected()) {
+                out.add(item.getLabelBreadcrumbPath(outputLanguage));
             }
-            Collections.sort(out);  // sort by label
             return StringUtils.join(out.iterator(), ", ");
         }
     }
@@ -178,7 +178,7 @@ public class FxValueRendererFactory {
         }
     }
 
-    private static class FxNoAccessFormatter implements FxValueFormatter<Object,FxNoAccess> {
+    private static class FxNoAccessFormatter implements FxValueFormatter<Object, FxNoAccess> {
         public String format(FxNoAccess container, Object value, FxLanguage outputLanguage) {
             final UserTicket ticket = FxContext.getUserTicket();
             return FxSharedUtils.getLocalizedMessage(FxSharedUtils.SHARED_BUNDLE, ticket.getLanguage().getId(),
@@ -225,9 +225,9 @@ public class FxValueRendererFactory {
      * Returns a <code>FxValueRenderer</code> instance for the given language.
      * If <code>language</code> is null, the default renderer is returned.
      *
-     * @param language  the target language. Both the output formatting and the value to be
-     * rendered may depend on the renderer's language.
-     * @return  a <code>FxValueRenderer</code> instance for the given language.
+     * @param language the target language. Both the output formatting and the value to be
+     *                 rendered may depend on the renderer's language.
+     * @return a <code>FxValueRenderer</code> instance for the given language.
      */
     public static FxValueRenderer getInstance(FxLanguage language) {
         if (language == null) {
@@ -244,7 +244,7 @@ public class FxValueRendererFactory {
      * Return the default FxValue formatter for the given FxValue subclass.
      *
      * @param valueType class of the value to be formatted
-     * @return  the default FxValue formatter for the given FxValue subclass.
+     * @return the default FxValue formatter for the given FxValue subclass.
      */
     public static FxValueFormatter getDefaultFormatter(Class valueType) {
         // this works because the addRenderer methods are bounded

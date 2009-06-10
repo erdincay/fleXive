@@ -288,8 +288,8 @@ abstract class RenderHelper {
         /**
          * Build a binary description
          *
-         * @param input input component
-         * @param value FxValue
+         * @param input      input component
+         * @param value      FxValue
          * @param descriptor BinaryDescriptor
          * @return description
          */

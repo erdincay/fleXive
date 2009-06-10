@@ -32,15 +32,13 @@
 package com.flexive.faces.components.input;
 
 import com.flexive.faces.FxJsfUtils;
-import com.flexive.faces.components.Thumbnail;
 import com.flexive.shared.*;
 import com.flexive.shared.content.FxPK;
-import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxRuntimeException;
 import com.flexive.shared.media.FxMediaSelector;
+import com.flexive.shared.structure.FxProperty;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.structure.FxStructureOption;
-import com.flexive.shared.structure.FxProperty;
 import com.flexive.shared.value.*;
 import com.flexive.shared.value.renderer.FxValueRendererFactory;
 import com.flexive.war.servlet.ThumbnailServlet;
@@ -145,6 +143,8 @@ class ReadOnlyModeHelper extends RenderHelper {
             parent = container;
         }
         final HtmlOutputText output = (HtmlOutputText) FxJsfUtils.addChildComponent(parent, HtmlOutputText.COMPONENT_TYPE);
+        if (this.value instanceof FxSelectOne)
+            output.setStyle("color:" + ((FxSelectOne) this.value).getDefaultTranslation().getColor());
         output.setEscape(false);
         output.setValue(value);
     }

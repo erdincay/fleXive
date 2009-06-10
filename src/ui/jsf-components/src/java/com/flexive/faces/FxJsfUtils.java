@@ -863,7 +863,6 @@ public class FxJsfUtils {
         final List<SelectItem> result = new ArrayList<SelectItem>(list.getItems().size());
         for (FxSelectListItem item : list.getItems())
             result.add(new FxJSFSelectItem(item));
-        Collections.sort(result, new SelectItemSorter());
         return result;
     }
 

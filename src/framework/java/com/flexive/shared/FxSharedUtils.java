@@ -35,6 +35,8 @@ import com.flexive.shared.exceptions.FxCreateException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.structure.FxAssignment;
+import com.flexive.shared.structure.FxSelectListItemEdit;
+import com.flexive.shared.structure.FxSelectListItem;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.value.FxValue;
 import com.flexive.shared.workflow.Step;
@@ -1411,6 +1413,17 @@ public final class FxSharedUtils {
             return o1.getId() > o2.getId()
                     ? 1 : o1.getId() < o2.getId()
                     ? -1 : 0;
+        }
+    }
+
+    /**
+     * Item sorter by position
+     */
+    public static class ItemPositionSorter implements Comparator<FxSelectListItem>, Serializable {
+        private static final long serialVersionUID = 3366660003069358959L;
+
+        public int compare(FxSelectListItem i1, FxSelectListItem i2) {
+            return Integer.valueOf(i1.getPosition()).compareTo(i2.getPosition());
         }
     }
 }

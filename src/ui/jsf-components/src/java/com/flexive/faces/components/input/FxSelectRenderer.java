@@ -423,9 +423,18 @@ public class FxSelectRenderer extends Renderer {
                 writer.writeAttribute("style", "color:" + color, "style");
             }
 
-            if (item instanceof SelectableObjectWithLabel)
-                writer.write(((SelectableObjectWithLabel) item).getLabel().getBestTranslation());
-            else if (item instanceof SelectableObjectWithName)
+            if (item instanceof SelectableObjectWithLabel) {
+                if (item instanceof FxJSFSelectItem && ((FxJSFSelectItem) item).isFxSelectListItem()) {
+                    //we have an FxSelectListItem -> check if cascaded
+                    final FxEnvironment env = CacheAdmin.getEnvironment();
+                    final Long itemId = (Long) ((FxJSFSelectItem) item).getValue();
+                    FxSelectList list = env.getSelectListItem(itemId).getList();
+
+                    writer.write(list.getItem(itemId).getLabelBreadcrumbPath());
+                } else
+                    writer.write(((SelectableObjectWithLabel) item).getLabel().getBestTranslation());
+
+            } else if (item instanceof SelectableObjectWithName)
                 writer.write(((SelectableObjectWithName) item).getName());
             else if (item instanceof SelectItem)
                 writer.write(((SelectItem) item).getLabel());
@@ -463,23 +472,32 @@ public class FxSelectRenderer extends Renderer {
 
         List<SelectItem> items = FxJsfComponentUtils.getSelectItems(context, component);
 
-        if (component instanceof UISelectOne &&
+        if ((component instanceof UISelectOne || component instanceof UISelectMany) &&
                 items.size() > 0 &&
                 items.get(0) instanceof FxJSFSelectItem &&
                 ((FxJSFSelectItem) items.get(0)).isFxSelectListItem()) {
             //we have an FxSelectListItem in a SelectOne -> check if cascaded
-            final FxEnvironment env = CacheAdmin.getEnvironment();
-            FxSelectList list = env.getSelectListItem((Long) items.get(0).getValue()).getList();
-            if (list.isCascaded()) {
-                List<SelectItem> converted = new ArrayList<SelectItem>(items.size());
-                for (SelectItem check : items) {
-                    final FxSelectListItem listItem = list.getItem((Long) check.getValue());
-                    if (!listItem.getHasChildren()) {
-                        check.setLabel(listItem.getLabelBreadcrumbPath(" > "));
-                        converted.add(check);
+            final long itemId = (Long) items.get(0).getValue();
+            if (itemId >= 0) {
+                FxSelectList list = CacheAdmin.getEnvironment().getSelectListItem(itemId).getList();
+                if (list.isCascaded()) {
+                    List<SelectItem> converted = new ArrayList<SelectItem>(items.size());
+                    for (SelectItem check : items) {
+                        final Long currentItemId = (Long) check.getValue();
+                        if (currentItemId < 0) {
+                            converted.add(check);
+                            continue;
+                        }
+                        final FxSelectListItem listItem = list.getItem(currentItemId);
+                        final boolean forceDisplay = ((FxJSFSelectItem) check).isForceDisplay();
+                        if (!listItem.getHasChildren() || forceDisplay) {
+                            if (!forceDisplay)
+                                check.setLabel(listItem.getLabelBreadcrumbPath());
+                            converted.add(check);
+                        }
                     }
+                    items = converted;
                 }
-                items = converted;
             }
         }
 

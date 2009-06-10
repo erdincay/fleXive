@@ -32,6 +32,7 @@
 package com.flexive.shared.structure;
 
 import com.flexive.shared.FxContext;
+import com.flexive.shared.FxLanguage;
 import com.flexive.shared.ObjectWithColor;
 import com.flexive.shared.SelectableObjectWithLabel;
 import com.flexive.shared.security.ACL;
@@ -62,9 +63,10 @@ public class FxSelectListItem implements Serializable, SelectableObjectWithLabel
     protected long iconId;
     protected int iconVer;
     protected int iconQuality;
+    protected int position;
     protected LifeCycleInfo lifeCycleInfo;
 
-    public static final FxSelectListItem EMPTY = new FxSelectListItem(-1, "-", null, null, -1, new FxString("-"), "", "", -11, 1, 1, null);
+    public static final FxSelectListItem EMPTY = new FxSelectListItem(-1, "-", null, null, -1, new FxString("-"), "", "", -11, 1, 1, null, -1);
 
     /**
      * Internal(!) Constructor to be used while loading from storage
@@ -81,9 +83,10 @@ public class FxSelectListItem implements Serializable, SelectableObjectWithLabel
      * @param iconVer       version of icon (binary reference)
      * @param iconQuality   quality of icon (binary reference)
      * @param lifeCycleInfo life cycle
+     * @param position      position within list
      */
     public FxSelectListItem(long id, String name, ACL acl, FxSelectList list, long parentItemId, FxString label, String data, String color, long iconId,
-                            int iconVer, int iconQuality, LifeCycleInfo lifeCycleInfo) {
+                            int iconVer, int iconQuality, LifeCycleInfo lifeCycleInfo, int position) {
         this.id = id;
         this.name = name;
         this.acl = acl;
@@ -99,8 +102,11 @@ public class FxSelectListItem implements Serializable, SelectableObjectWithLabel
         this.iconVer = iconVer;
         this.iconQuality = iconQuality;
         this.lifeCycleInfo = lifeCycleInfo;
-        if (list != null)
+        this.position = position;
+        if (list != null) {
             list.getItemMap().put(this.id, this);
+            this.position = list.items.size();
+        }
     }
 
     /**
@@ -114,7 +120,7 @@ public class FxSelectListItem implements Serializable, SelectableObjectWithLabel
      * @param label        the select item label
      */
     public FxSelectListItem(long id, String name, FxSelectList list, long parentItemId, FxString label) {
-        this(id, name, null, list, parentItemId, label, null, null, -1, -1, -1, null);
+        this(id, name, null, list, parentItemId, label, null, null, -1, -1, -1, null, -1);
     }
 
     /**
@@ -302,6 +308,25 @@ public class FxSelectListItem implements Serializable, SelectableObjectWithLabel
     }
 
     /**
+     * Get the position within the list
+     *
+     * @return position within the list
+     */
+    public int getPosition() {
+        return position;
+    }
+
+    /**
+     * Set the position within the list
+     * Only to be called from the list itself
+     *
+     * @param position new position
+     */
+    protected void setPosition(int position) {
+        this.position = position;
+    }
+
+    /**
      * Get this FxSelectListItem as editable
      *
      * @return FxSelectListItemEdit
@@ -340,17 +365,38 @@ public class FxSelectListItem implements Serializable, SelectableObjectWithLabel
     /**
      * If this item is cascaded, get the label path up to the root element
      *
-     * @param separator label separator
      * @return label path
      */
-    public String getLabelBreadcrumbPath(String separator) {
-        StringBuilder sb = new StringBuilder(100);
+    public String getLabelBreadcrumbPath() {
         final UserTicket ticket = FxContext.getUserTicket();
+        if (!hasParentItem())
+            return getLabel().getBestTranslation(ticket);
+        StringBuilder sb = new StringBuilder(100);
         FxSelectListItem curr = this;
         while (curr != null) {
             if (curr != this)
-                sb.insert(0, separator);
+                sb.insert(0, getList().getBreadcrumbSeparator());
             sb.insert(0, curr.getLabel().getBestTranslation(ticket));
+            curr = curr.getParentItem();
+        }
+        return sb.toString();
+    }
+
+    /**
+     * If this item is cascaded, get the label path up to the root element
+     *
+     * @param outputLanguage desired output language
+     * @return label path
+     */
+    public String getLabelBreadcrumbPath(FxLanguage outputLanguage) {
+        if (!hasParentItem())
+            return getLabel().getBestTranslation(outputLanguage);
+        StringBuilder sb = new StringBuilder(100);
+        FxSelectListItem curr = this;
+        while (curr != null) {
+            if (curr != this)
+                sb.insert(0, getList().getBreadcrumbSeparator());
+            sb.insert(0, curr.getLabel().getBestTranslation(outputLanguage));
             curr = curr.getParentItem();
         }
         return sb.toString();

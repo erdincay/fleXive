@@ -64,7 +64,8 @@ public class FxSelectListEdit extends FxSelectList implements Serializable {
     public FxSelectListEdit(FxSelectList list) {
         super(list.id, list.parentListId, "" + list.name, list.label.copy(), list.description.copy(),
                 list.allowDynamicItemCreation, list.createItemACL, list.newItemACL,
-                list.hasDefaultItem() ? list.getDefaultItem().getId() : 0);
+                list.hasDefaultItem() ? list.getDefaultItem().getId() : 0, list.getBreadcrumbSeparator(),
+                list.isOnlySameLevelSelect());
         this.isNew = false;
         this.original = list;
         this.parentList = list.parentList;
@@ -90,7 +91,7 @@ public class FxSelectListEdit extends FxSelectList implements Serializable {
                             FxSelectListItem defaultItem) {
         super(-1, parent != null ? parent.getId() : -1, name, label, description,
                 allowDynamicItemCreation, createItemACL, newItemACL,
-                defaultItem != null ? defaultItem.getId() : 0);
+                defaultItem != null ? defaultItem.getId() : 0, " > ", false);
         if (parent != null || defaultItem != null)
             super._synchronize(CacheAdmin.getEnvironment());
         this.isNew = true;
@@ -116,7 +117,9 @@ public class FxSelectListEdit extends FxSelectList implements Serializable {
                 original.createItemACL.getId() != this.createItemACL.getId() ||
                 original.newItemACL.getId() != this.newItemACL.getId() ||
                 original.allowDynamicItemCreation != this.allowDynamicItemCreation ||
-                !original.description.equals(this.description);
+                !original.description.equals(this.description) ||
+                !original.getBreadcrumbSeparator().equals(this.breadcrumbSeparator) ||
+                original.onlySameLevelSelect != this.onlySameLevelSelect;
     }
 
     /**
@@ -191,6 +194,24 @@ public class FxSelectListEdit extends FxSelectList implements Serializable {
     }
 
     /**
+     * Set the breadcrumb separator
+     *
+     * @param breadcrumbSeparator breadcrumb separator
+     */
+    public void setBreadcrumbSeparator(String breadcrumbSeparator) {
+        this.breadcrumbSeparator = breadcrumbSeparator != null ? breadcrumbSeparator : "";
+    }
+
+    /**
+     * Set if only selections within the same level are allowed (applies only to multi selectlists)
+     *
+     * @param onlySameLevelSelect only selections within the same level are allowed
+     */
+    public void setOnlySameLevelSelect(boolean onlySameLevelSelect) {
+        this.onlySameLevelSelect = onlySameLevelSelect;
+    }
+
+    /**
      * returns all list items as editable list items.
      *
      * @return a list of editable list items.
@@ -215,6 +236,7 @@ public class FxSelectListEdit extends FxSelectList implements Serializable {
 
     public void addItem(FxSelectListItem item) {
         new FxSelectListItemEdit(item.name, item.acl, this, item.label, item.data, item.color);
+        recalcPositions();
     }
 
     /**
@@ -225,6 +247,7 @@ public class FxSelectListEdit extends FxSelectList implements Serializable {
 
     public void removeItem(Long id) {
         this.items.remove(id);
+        recalcPositions();
     }
 
     /**
@@ -236,6 +259,16 @@ public class FxSelectListEdit extends FxSelectList implements Serializable {
         for (SelectableObjectWithLabel item : items) {
             new FxSelectListItem(item.getId(), item.getLabel().getDefaultTranslation(), this, -1, item.getLabel());
         }
+        recalcPositions();
+    }
+
+    /**
+     * Recalculate positions after changes to close gaps
+     */
+    private void recalcPositions() {
+        int pos = 0;
+        for(FxSelectListItem item: getItems())
+            item.setPosition(pos++);
     }
 
     /**
@@ -307,5 +340,29 @@ public class FxSelectListEdit extends FxSelectList implements Serializable {
                                              boolean allowDynamicItemCreation, ACL createItemACL, ACL defaultItemACL) {
         return new FxSelectListEdit(parent, name, label, description, allowDynamicItemCreation, createItemACL,
                 defaultItemACL, null);
+    }
+
+    public void moveItemUp(long itemId) {
+        int currPos = getItem(itemId).getPosition();
+        for (FxSelectListItem check : items.values()) {
+            if (check.getPosition() == currPos - 1) {
+                check.setPosition(currPos);
+                getItem(itemId).setPosition(currPos - 1);
+                return;
+            }
+        }
+        System.out.println("not found!");
+    }
+
+    public void moveItemDown(long itemId) {
+        int currPos = getItem(itemId).getPosition();
+        for (FxSelectListItem check : items.values()) {
+            if (check.getPosition() == currPos + 1) {
+                check.setPosition(currPos);
+                getItem(itemId).setPosition(currPos + 1);
+                return;
+            }
+        }
+        System.out.println("not found!");
     }
 }

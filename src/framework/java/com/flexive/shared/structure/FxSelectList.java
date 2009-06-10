@@ -31,6 +31,7 @@
  ***************************************************************/
 package com.flexive.shared.structure;
 
+import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.ObjectWithLabel;
 import com.flexive.shared.SelectableObjectWithLabel;
 import com.flexive.shared.SelectableObjectWithName;
@@ -40,10 +41,7 @@ import com.flexive.shared.security.ACL;
 import com.flexive.shared.value.FxString;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Select list
@@ -70,6 +68,8 @@ public class FxSelectList implements Serializable, ObjectWithLabel {
     protected Map<Long, FxSelectListItem> items;
     protected FxSelectListItem defaultItem;
     protected long defaultItemId;
+    protected String breadcrumbSeparator;
+    protected boolean onlySameLevelSelect;
 
     /**
      * Internal(!) Constructor to be used while loading from storage
@@ -83,10 +83,12 @@ public class FxSelectList implements Serializable, ObjectWithLabel {
      * @param createItemACL            ACL whose create flag is checked against for creating new list items
      * @param newItemACL               ACL assigned to new items
      * @param defaultItemId            the id of the default selected item, optional, can be <code>null</code>
+     * @param breadcrumbSeparator      separator for breadcrumbs
+     * @param onlySameLevelSelect      only selections within the same level are allowed (applies only to multi select lists)
      */
     public FxSelectList(long id, long parentListId, String name, FxString label, FxString description,
                         boolean allowDynamicItemCreation, ACL createItemACL, ACL newItemACL,
-                        long defaultItemId) {
+                        long defaultItemId, String breadcrumbSeparator, boolean onlySameLevelSelect) {
         this.id = id;
         this.parentListId = parentListId;
         this.parentList = null;
@@ -98,6 +100,8 @@ public class FxSelectList implements Serializable, ObjectWithLabel {
         this.newItemACL = newItemACL;
         this.defaultItemId = defaultItemId;
         this.defaultItem = null;
+        this.breadcrumbSeparator = breadcrumbSeparator;
+        this.onlySameLevelSelect = onlySameLevelSelect;
         this.items = new HashMap<Long, FxSelectListItem>(10);
     }
 
@@ -108,7 +112,7 @@ public class FxSelectList implements Serializable, ObjectWithLabel {
      * @param name the select list name
      */
     public FxSelectList(String name) {
-        this(-1, -1, name, new FxString(name), new FxString(name), true, null, null, 0);
+        this(-1, -1, name, new FxString(name), new FxString(name), true, null, null, 0, " > ", false);
     }
 
     /**
@@ -279,7 +283,9 @@ public class FxSelectList implements Serializable, ObjectWithLabel {
     }
 
     public final List<FxSelectListItem> getItems() {
-        return new ArrayList<FxSelectListItem>(items.values());
+        List<FxSelectListItem> sorted = new ArrayList<FxSelectListItem>(items.values());
+        Collections.sort(sorted, new FxSharedUtils.ItemPositionSorter());
+        return sorted;
     }
 
     /**
@@ -407,6 +413,24 @@ public class FxSelectList implements Serializable, ObjectWithLabel {
             if (curr.hasParentItem())
                 return true;
         return false;
+    }
+
+    /**
+     * Get the separator for breadcrumbs
+     *
+     * @return separator for breadcrumbs
+     */
+    public String getBreadcrumbSeparator() {
+        return (breadcrumbSeparator != null ? breadcrumbSeparator : "");
+    }
+
+    /**
+     * For multi selects: is only a multi selection within the same hierarchy level allowed?
+     *
+     * @return only selections within the same level allowed
+     */
+    public boolean isOnlySameLevelSelect() {
+        return onlySameLevelSelect;
     }
 }
 

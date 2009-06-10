@@ -52,6 +52,12 @@
                     <f:selectItems value="#{selectListBean.selectListItemACLs}" />
                 </h:selectOneListbox>
             </fx:formRow>
+            <fx:formRow labelKey="SelectList.label.selectList.breadcrumbSeparator" id="breadcrumbSeparator">
+                <h:inputText id="breadcrumbSeparator" value="#{selectListBean.selectListBreadcrumbSeparator}" disabled="#{readonlyList}" styleClass="fxValueTextInput"/>
+			</fx:formRow>
+            <fx:formRow labelKey="SelectList.label.selectList.onlySameLevelSelect" id="onlySameLevelSelect">
+                <h:selectBooleanCheckbox id="onlySameLevelSelect" value="#{selectListBean.selectListOnlySameLevelSelect}" disabled="#{readonlyList}"/>
+            </fx:formRow>
             <a4j:outputPanel id="itemCount">
             <fx:formRow labelKey="SelectList.label.count" id="elementCount">
                 <h:outputText value="#{selectListBean.selectList.itemCount}"/>
@@ -116,7 +122,35 @@
                                 <td align="left"><fx:fxValueInput value="#{item.acl.label}" readOnly="true"/></td>
                                 <td align="left">#{item.childCount}</td>
                                 <td align="left">
-                                    <div style="width:60px">
+                                    <div style="width:100px">
+                                        <!-- move up -->
+                                        <adm:ajaxCommandIcon titleKey="SelectList.button.moveUp"
+                                                             icon="up" bean="#{selectListBean}"
+                                                             actionListener="moveItemUp"
+                                                             id="upButton"
+                                                             rendered="#{selectListBean.mayEditItem[item.id]}"
+                                                             reRender="itemTable">
+                                            <f:setPropertyActionListener target="#{selectListBean.moveListItemId}"
+                                                                         value="#{item.id}"/>
+                                            <a4j:actionparam noEscape="true" name="rowsPerPage_" value="rowsPerPage"
+                                                             assignTo="#{selectListBean.rowsPerPage}"/>
+                                            <a4j:actionparam noEscape="true" name="currentPage_" value="currentPage"
+                                                             assignTo="#{selectListBean.currentPage}"/>
+                                        </adm:ajaxCommandIcon>
+                                        <!-- move down -->
+                                        <adm:ajaxCommandIcon titleKey="SelectList.button.moveDown"
+                                                             icon="down" bean="#{selectListBean}"
+                                                             actionListener="moveItemDown"
+                                                             id="downButton"
+                                                             rendered="#{selectListBean.mayEditItem[item.id]}"
+                                                             reRender="itemTable">
+                                            <f:setPropertyActionListener target="#{selectListBean.moveListItemId}"
+                                                                         value="#{item.id}"/>
+                                            <a4j:actionparam noEscape="true" name="rowsPerPage_" value="rowsPerPage"
+                                                             assignTo="#{selectListBean.rowsPerPage}"/>
+                                            <a4j:actionparam noEscape="true" name="currentPage_" value="currentPage"
+                                                             assignTo="#{selectListBean.currentPage}"/>
+                                        </adm:ajaxCommandIcon>
                                         <!-- edit -->
                                         <adm:ajaxCommandIcon titleKey="SelectList.button.edit"
                                                              icon="edit" bean="#{selectListBean}"

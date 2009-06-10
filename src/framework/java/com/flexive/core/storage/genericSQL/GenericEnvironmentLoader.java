@@ -39,9 +39,9 @@ import com.flexive.core.storage.EnvironmentLoader;
 import com.flexive.core.structure.FxEnvironmentImpl;
 import com.flexive.core.structure.FxPreloadGroupAssignment;
 import com.flexive.core.structure.FxPreloadType;
+import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxLanguage;
 import com.flexive.shared.FxSharedUtils;
-import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxLoadException;
 import com.flexive.shared.exceptions.FxNotFoundException;
@@ -50,10 +50,12 @@ import com.flexive.shared.scripting.FxScriptInfo;
 import com.flexive.shared.scripting.FxScriptMapping;
 import com.flexive.shared.scripting.FxScriptMappingEntry;
 import com.flexive.shared.security.ACL;
-import com.flexive.shared.security.Mandator;
 import com.flexive.shared.security.ACLCategory;
+import com.flexive.shared.security.Mandator;
 import com.flexive.shared.structure.*;
-import com.flexive.shared.value.*;
+import com.flexive.shared.value.FxString;
+import com.flexive.shared.value.FxValue;
+import com.flexive.shared.value.ReferencedContent;
 import com.flexive.shared.workflow.Route;
 import com.flexive.shared.workflow.Step;
 import com.flexive.shared.workflow.StepDefinition;
@@ -64,7 +66,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.sql.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * generic sql environment loader implementation
@@ -309,9 +314,9 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                     if (!StringUtils.isEmpty(_def) && CacheAdmin.isEnvironmentLoaded()) {
                         try {
                             defaultValue = (FxValue) xStream.fromXML(_def);
-                            if( defaultValue != null && defaultValue.isEmpty() )
+                            if (defaultValue != null && defaultValue.isEmpty())
                                 defaultValue = null;
-                            if( defaultValue != null ) {
+                            if (defaultValue != null) {
                                 defaultValue.setXPath(name);
                             }
                         } catch (Exception e) {
@@ -435,7 +440,7 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                             rs.getBoolean(10), rs.getLong(11), rs.getLong(12), rs.getInt(13), rs.getInt(14),
                             LifeCycleInfoImpl.load(rs, 15, 16, 17, 18), new ArrayList<FxType>(5), alRelations);
                     long iconId = rs.getLong(21);
-                    if( !rs.wasNull())
+                    if (!rs.wasNull())
                         _type.getIcon().setValue(new ReferencedContent(iconId));
                     result.add(_type);
                 } catch (FxNotFoundException e) {
@@ -502,7 +507,7 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                         if (!StringUtils.isEmpty(_def) && CacheAdmin.isEnvironmentLoaded()) {
                             try {
                                 defaultValue = (FxValue) xStream.fromXML(_def);
-                                if( defaultValue != null && defaultValue.isEmpty() )
+                                if (defaultValue != null && defaultValue.isEmpty())
                                     defaultValue = null;
                             } catch (Throwable e) {
                                 defaultValue = null;
@@ -742,9 +747,9 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                                 derivedList.add(t.getId());
                         }
                         derived = new long[derivedList.size()];
-                        int i=0;
+                        int i = 0;
                         for (long l : derivedList)
-                            derived[i++]=l;
+                            derived[i++] = l;
                     }
                     e_types.add(new FxScriptMappingEntry(FxScriptEvent.getById(rs.getLong(4)), si.getId(), rs.getBoolean(3), rs.getBoolean(2), rs.getLong(1), derived));
                 }
@@ -778,8 +783,8 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
             final Map<Long, FxString[]> translations = Database.loadFxStrings(con, TBL_SELECTLIST, "LABEL", "DESCRIPTION");
             final Map<Long, FxString[]> itemTranslations = Database.loadFxStrings(con, TBL_SELECTLIST_ITEM, "LABEL");
 
-            //            1  2        3    4                 5               6            7
-            sql = "SELECT ID,PARENTID,NAME,ALLOW_ITEM_CREATE,ACL_CREATE_ITEM,ACL_ITEM_NEW,DEFAULT_ITEM FROM " +
+            //            1  2        3    4                 5               6            7            8     9
+            sql = "SELECT ID,PARENTID,NAME,ALLOW_ITEM_CREATE,ACL_CREATE_ITEM,ACL_ITEM_NEW,DEFAULT_ITEM,BCSEP,SAMELVLSELECT FROM " +
                     TBL_SELECTLIST + " ORDER BY NAME";
             ps = con.prepareStatement(sql);
             ResultSet rs = ps.executeQuery();
@@ -788,20 +793,27 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                 long parent = rs.getLong(2);
                 if (rs.wasNull())
                     parent = -1;
+                String bcSep = rs.getString(8);
+                if (rs.wasNull())
+                    bcSep = " > ";
+                boolean sameLvl = rs.getBoolean(9);
+                if( rs.wasNull() )
+                    sameLvl = false;
                 lists.add(new FxSelectList(id, parent, rs.getString(3),
                         getTranslation(translations, id, 0),
                         getTranslation(translations, id, 1),
                         rs.getBoolean(4), environment.getACL(rs.getLong(5)), environment.getACL(rs.getLong(6)),
-                        rs.getLong(7)));
+                        rs.getLong(7), bcSep, sameLvl));
             }
             ps.close();
             //            1  2    3   4        5    6     7          8          9           10          11      12       13
             sql = "SELECT ID,NAME,ACL,PARENTID,DATA,COLOR,CREATED_BY,CREATED_AT,MODIFIED_BY,MODIFIED_AT,DBIN_ID,DBIN_VER,DBIN_QUALITY FROM " +
-                    TBL_SELECTLIST_ITEM + " WHERE LISTID=? ORDER BY ID";
+                    TBL_SELECTLIST_ITEM + " WHERE LISTID=? ORDER BY POS,ID";
             ps = con.prepareStatement(sql);
             for (FxSelectList list : lists) {
                 ps.setLong(1, list.getId());
                 rs = ps.executeQuery();
+                int pos = 0;
                 while (rs != null && rs.next()) {
                     final long id = rs.getLong(1);
                     long parent = rs.getLong(4);
@@ -810,7 +822,7 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                     new FxSelectListItem(id, rs.getString(2), environment.getACL(rs.getLong(3)), list, parent,
                             getTranslation(itemTranslations, id, 0),
                             rs.getString(5), rs.getString(6), rs.getLong(11), rs.getInt(12), rs.getInt(13),
-                            LifeCycleInfoImpl.load(rs, 7, 8, 9, 10));
+                            LifeCycleInfoImpl.load(rs, 7, 8, 9, 10), pos++);
                 }
             }
         } catch (SQLException exc) {

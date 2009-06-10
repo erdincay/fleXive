@@ -38,7 +38,6 @@ import com.flexive.shared.value.BinaryDescriptor;
 import com.flexive.shared.value.FxString;
 
 import java.io.Serializable;
-import java.util.List;
 
 /**
  * Editable select list item
@@ -64,7 +63,7 @@ public class FxSelectListItemEdit extends FxSelectListItem implements Serializab
      * @param item the item to make editable
      */
     public FxSelectListItemEdit(FxSelectListItem item) {
-        super(item.id, item.name, item.acl, item.list, item.parentItemId, item.label, item.data, item.color, item.iconId, item.iconVer, item.iconQuality, item.lifeCycleInfo);
+        super(item.id, item.name, item.acl, item.list, item.parentItemId, item.label, item.data, item.color, item.iconId, item.iconVer, item.iconQuality, item.lifeCycleInfo, item.position);
         this.isNew = false;
         this.original = item;
         this.parentItem = item.parentItem;
@@ -77,7 +76,7 @@ public class FxSelectListItemEdit extends FxSelectListItem implements Serializab
      * @param list the new list to add the item to
      */
     FxSelectListItemEdit(FxSelectListItem item, FxSelectListEdit list) {
-        super(item.id, item.name, item.acl, list, item.parentItemId, item.label, item.data, item.color, item.iconId, item.iconVer, item.iconQuality, item.lifeCycleInfo);
+        super(item.id, item.name, item.acl, list, item.parentItemId, item.label, item.data, item.color, item.iconId, item.iconVer, item.iconQuality, item.lifeCycleInfo, item.position);
         this.isNew = false;
         this.original = item;
         this.parentItem = item.parentItem;
@@ -94,7 +93,7 @@ public class FxSelectListItemEdit extends FxSelectListItem implements Serializab
      * @param color color for display
      */
     public FxSelectListItemEdit(String name, ACL acl, FxSelectList list, FxString label, String data, String color) {
-        super(calcId(list), name, acl, list, -1, label, data, color, BinaryDescriptor.SYS_SELECTLIST_DEFAULT, 1, 1, null);
+        super(calcId(list), name, acl, list, -1, label, data, color, BinaryDescriptor.SYS_SELECTLIST_DEFAULT, 1, 1, null, -1);
         this.isNew = true;
         this.original = null;
     }
@@ -130,7 +129,8 @@ public class FxSelectListItemEdit extends FxSelectListItem implements Serializab
         return isNew || original == null || !this.name.equals(original.name) || !this.data.equals(original.data) || !this.color.equals(original.color) ||
                 this.iconId != original.iconId || this.iconVer != original.iconVer ||
                 this.iconQuality != original.iconQuality || !this.label.equals(original.label) ||
-                this.parentItemId != original.parentItemId || this.acl.getId() != original.acl.getId();
+                this.parentItemId != original.parentItemId || this.acl.getId() != original.acl.getId() ||
+                this.position != original.position;
     }
 
     /**
@@ -302,7 +302,7 @@ public class FxSelectListItemEdit extends FxSelectListItem implements Serializab
      * @return child of item
      */
     public boolean isChildOf(FxSelectListItem item) {
-        if( this.getParentItem() == null )
+        if( item.getParentItem() == null )
             return false;
         for(FxSelectListItem check: item.getChildren())
             if( this.getId() == check.getId())
