@@ -281,7 +281,6 @@ public class SelectListBean implements Serializable {
     }
 
     public void editListItem(ActionEvent event) {
-        System.out.println("editListItem event called: id=" + editListItemId);
         editListItem = selectList.getItem(editListItemId).asEditable();
         originalParents = new HashMap<Long, Long>(editListItem.getChildCount());
         editNew = false;
@@ -290,14 +289,12 @@ public class SelectListBean implements Serializable {
     }
 
     public void createListItem(ActionEvent event) {
-        System.out.println("Creating a new item");
         editListItem = FxSelectListItemEdit.createNew(null, selectList.getNewItemACL(), selectList, new FxString(true, ""), null, FxFormatUtils.DEFAULT_COLOR);
         editListItemId = editListItem.getId();
         editNew = true;
     }
 
     public void commitItemEditing(ActionEvent event) {
-        System.out.println("Commit editing");
         editListItemId = UNSELECTED_ID;
         editListItem = null;
         originalParents = null;
@@ -305,7 +302,6 @@ public class SelectListBean implements Serializable {
     }
 
     public void cancelItemEditing(ActionEvent event) throws FxInvalidParameterException {
-        System.out.println("Cancel editing");
         if( editNew ) {
             selectList.removeItem(editListItemId);
             editNew = false;
@@ -347,7 +343,6 @@ public class SelectListBean implements Serializable {
             child.asEditable().setParentItem(null);
         for (Long id : children) {
             FxSelectListItem child = selectList.getItem(id);
-            System.out.println("Assigning: " + child.getId() + " -> " + child.getLabel().getBestTranslation());
             child.asEditable().setParentItem(editListItem);
         }
     }

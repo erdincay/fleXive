@@ -312,6 +312,9 @@ public class FxSelectListItemEdit extends FxSelectListItem implements Serializab
         return false;
     }
 
+    /**
+     * Reset all changes to this item
+     */
     public void resetChanges() {
         if( original == null )
             return;

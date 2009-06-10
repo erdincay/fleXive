@@ -128,6 +128,7 @@ public class FxSelectListItem implements Serializable, SelectableObjectWithLabel
                 this.parentItem = env.getSelectListItem(this.parentItemId);
         } catch (Exception e) {
             this.parentItemId = -1;
+            this.parentItem = null;
         }
     }
 
@@ -196,7 +197,7 @@ public class FxSelectListItem implements Serializable, SelectableObjectWithLabel
      * @return parent item exists
      */
     public boolean hasParentItem() {
-        return parentItemId >= 0 && parentItem != null;
+        return parentItem != null;
     }
 
     /**
@@ -306,6 +307,8 @@ public class FxSelectListItem implements Serializable, SelectableObjectWithLabel
      * @return FxSelectListItemEdit
      */
     public FxSelectListItemEdit asEditable() {
+        if (this instanceof FxSelectListItemEdit)
+            return (FxSelectListItemEdit) this;
         return new FxSelectListItemEdit(this);
     }
 

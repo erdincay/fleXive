@@ -61,14 +61,16 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * SelectListEngine implementation
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-@Stateless(name = "SelectListEngine", mappedName="SelectListEngine")
+@Stateless(name = "SelectListEngine", mappedName = "SelectListEngine")
 @TransactionAttribute(TransactionAttributeType.SUPPORTS)
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class SelectListEngineBean implements SelectListEngine, SelectListEngineLocal {
@@ -120,15 +122,24 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
         long currentItemId;
         if (list.hasDefaultItem())
             defaultItemId = list.getDefaultItem().getId();
+        Map<Long, Long> idMap = null;
+        for (FxSelectListItem item : list.getItems()) {
+            e = (item instanceof FxSelectListItemEdit ? (FxSelectListItemEdit) item : item.asEditable());
+            if (!e.isNew())
+                continue;
+            if (idMap == null)
+                idMap = new HashMap<Long, Long>(10);
+            idMap.put(e.getId(), seq.getId(FxSystemSequencer.SELECTLIST_ITEM));
+        }
         for (FxSelectListItem item : list.getItems()) {
             e = (item instanceof FxSelectListItemEdit ? (FxSelectListItemEdit) item : item.asEditable());
             if (newList) {
-                currentItemId = createItem(e);
+                currentItemId = createItem(e, idMap);
                 //get the new created default item id
                 if (defaultItemId < 0 && e.getId() == defaultItemId)
                     defaultItemId = currentItemId;
             } else if (e.isNew()) {
-                createItem(e);
+                createItem(e, idMap);
                 changes = true;
             } else if (e.changes()) {
                 //check if the user is permitted to edit this specific item
@@ -163,7 +174,7 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
     public long save(FxSelectListItemEdit item) throws FxApplicationException {
         long id = item.getId();
         if (item.isNew())
-            id = createItem(item);
+            id = createItem(item, null);
         else if (item.changes()) {
             FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.SelectListEditor);
             updateItem(item);
@@ -223,7 +234,7 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
                 case MySQL:
                 default:
                     sb.append("UPDATE ").append(TBL_SELECTLIST_ITEM).append(" i1, ").append(TBL_SELECTLIST_ITEM).
-                    append(" i2 SET i1.PARENTID=? WHERE i1.PARENTID=i2.ID AND i2.LISTID=?");
+                            append(" i2 SET i1.PARENTID=? WHERE i1.PARENTID=i2.ID AND i2.LISTID=?");
                     break;
             }
 
@@ -405,11 +416,12 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
     /**
      * Create a new item
      *
-     * @param item the item to create
+     * @param item  the item to create
+     * @param idMap map of temp. id to final db id
      * @return id
      * @throws FxApplicationException on errors
      */
-    private long createItem(FxSelectListItemEdit item) throws FxApplicationException {
+    private long createItem(FxSelectListItemEdit item, Map<Long, Long> idMap) throws FxApplicationException {
         checkValidItemParameters(item);
         UserTicket ticket = FxContext.getUserTicket();
         if (!ticket.isInRole(Role.SelectListEditor)) {
@@ -418,7 +430,11 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
                 throw new FxNoAccessException("ex.selectlist.item.create.noPerm", item.getList().getLabel(),
                         item.getList().getCreateItemACL().getLabel());
         }
-        long newId = seq.getId(FxSystemSequencer.SELECTLIST_ITEM);
+        long newId;
+        if (idMap == null || !idMap.containsKey(item.getId()))
+            newId = seq.getId(FxSystemSequencer.SELECTLIST_ITEM);
+        else
+            newId = idMap.get(item.getId());
 //        System.out.println("Creating item " + item.getLabel() + " for list with id " + item.getList().getId());
         Connection con = null;
         PreparedStatement ps = null;
@@ -432,9 +448,12 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
             ps.setLong(1, newId);
             ps.setString(2, item.getName());
             ps.setLong(3, item.getAcl().getId());
-            if (item.hasParentItem())
-                ps.setLong(4, item.getParentItem().getId());
-            else
+            if (item.hasParentItem()) {
+                if( idMap != null && idMap.containsKey(item.getParentItem().getId()))
+                    ps.setLong(4, idMap.get(item.getParentItem().getId()));
+                else
+                    ps.setLong(4, item.getParentItem().getId());
+            } else
                 ps.setNull(4, java.sql.Types.INTEGER);
             ps.setLong(5, item.getList().getId());
             ps.setString(6, item.getData());
