@@ -38,7 +38,6 @@ import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.configuration.DivisionData;
 import com.flexive.war.webdav.FxWebDavUtils;
 import com.metaparadigm.jsonrpc.JSONRPCBridge;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -47,6 +46,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * The main [fleXive] servlet filter. Its main responsibility is to provide the
@@ -66,7 +67,7 @@ public class FxFilter implements Filter {
     private static final String SESSION_JSON_BRIDGE = "JSONRPCBridge";
     private static final String SESSION_JSON_JSF = "FxFilter_JSON_JSF";
 
-    private static volatile boolean installedTimerService = false;
+    private static final ConcurrentMap<Integer, Boolean> DIVISION_SERVICES = new ConcurrentHashMap<Integer, Boolean>();
 
     private String FILESYSTEM_WAR_ROOT = null;
     private FilterConfig config = null;
@@ -118,7 +119,7 @@ public class FxFilter implements Filter {
             // create thread-local FxContext variable for the current user
             FxContext.storeInfos(request, request.isDynamicContent(), divisionId, isWebdav);
 
-            initializeTimerService();
+            performDivisionServices();
             initializeJsonRpc(request.getSession());
 
             if (!isWebdav && FxWebDavUtils.isWebDavPropertyMethod((HttpServletRequest) servletRequest)) {
@@ -197,16 +198,31 @@ public class FxFilter implements Filter {
         response.writeToUnderlyingResponse(error);
     }
 
-    private void initializeTimerService() {
-        if (!installedTimerService) {
+    private void performDivisionServices() {
+        if (!isDivisionServicesPerformed()) {
             synchronized(FxFilter.class) {
-                installedTimerService = EJBLookup.getTimerService().isInstalled();
-                if (!installedTimerService) {
+                // install timer service
+                if (!EJBLookup.getTimerService().isInstalled()) {
                     EJBLookup.getTimerService().install(true);
-                    installedTimerService = true;
                 }
+                // patch database
+                try {
+                    EJBLookup.getDivisionConfigurationEngine().patchDatabase();
+                } catch (FxApplicationException e) {
+                    throw e.asRuntimeException();
+                }
+                setDivisionServicesPerformed();
             }
         }
+    }
+
+    private boolean isDivisionServicesPerformed() {
+        final int divisionId = FxContext.get().getDivisionId();
+        return DIVISION_SERVICES.containsKey(divisionId) && DIVISION_SERVICES.get(divisionId);
+    }
+
+    private void setDivisionServicesPerformed() {
+        DIVISION_SERVICES.put(FxContext.get().getDivisionId(), true);
     }
 
     private void initializeJsonRpc(HttpSession session) {

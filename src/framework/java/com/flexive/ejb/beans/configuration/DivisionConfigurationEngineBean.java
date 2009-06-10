@@ -33,16 +33,14 @@ package com.flexive.ejb.beans.configuration;
 
 import com.flexive.core.Database;
 import static com.flexive.core.DatabaseConst.TBL_DIVISION_CONFIG;
-import com.flexive.ejb.beans.configuration.GenericConfigurationImpl;
 import com.flexive.core.storage.ContentStorage;
 import com.flexive.core.storage.StorageManager;
-import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.configuration.DBVendor;
 import com.flexive.shared.configuration.DivisionData;
-import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.configuration.ParameterScope;
+import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxDbException;
 import com.flexive.shared.exceptions.FxNoAccessException;
@@ -152,12 +150,12 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
         if (!FxContext.getUserTicket().isGlobalSupervisor()) {
             throw new FxNoAccessException("ex.configuration.update.perm.division");
         }
-        final String sql = "UPDATE " + TBL_DIVISION_CONFIG + " SET cvalue=? WHERE cpath=? AND ckey=? AND className=?";
+        final String sql = "UPDATE " + TBL_DIVISION_CONFIG + " SET cvalue=?, className=? WHERE cpath=? AND ckey=?";
         PreparedStatement stmt = conn.prepareStatement(sql);
         stmt.setString(1, value);
-        stmt.setString(2, path);
-        stmt.setString(3, key);
-        stmt.setString(4, className);
+        stmt.setString(2, className);
+        stmt.setString(3, path);
+        stmt.setString(4, key);
         return stmt;
     }
 
@@ -244,19 +242,29 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void patchDatabase() throws FxApplicationException {
+        final long oldVersion = get(SystemParameters.DB_VERSION);
+        final long patchedVersion = performPatching();
+        if (patchedVersion != oldVersion) {
+            modifyDatabaseVersion(patchedVersion);
+        }
+    }
+
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    private long performPatching() throws FxApplicationException {
         FxContext.get().runAsSystem();
         try {
-            long dbVersion = EJBLookup.getDivisionConfigurationEngine().get(SystemParameters.DB_VERSION);
+            long dbVersion = get(SystemParameters.DB_VERSION);
+            long currentVersion = dbVersion;
             if (dbVersion == -1) {
-                EJBLookup.getDivisionConfigurationEngine().put(SystemParameters.DB_VERSION, FxSharedUtils.getDBVersion());
-                return; //no need to patch
+                put(SystemParameters.DB_VERSION, FxSharedUtils.getDBVersion());
+                return dbVersion; //no need to patch
             } else if (dbVersion == FxSharedUtils.getDBVersion()) {
                 //nothing to do
-                return;
+                return dbVersion;
             } else if (dbVersion > FxSharedUtils.getDBVersion()) {
                 //the database is more current than the EAR!
                 LOG.warn("This [fleXive] build is intended for database schema version #" + FxSharedUtils.getDBVersion() + " but the database reports a higher schema version! (database schema version: " + dbVersion + ")");
-                return;
+                return dbVersion;
             }
             //lets see if we have a patch we can apply
             try {
@@ -267,7 +275,7 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
                 final InputStream scriptIndex = cl.getResourceAsStream(idxFile);
                 if (scriptIndex == null) {
                     LOG.info("No patches available for " + dbVendor);
-                    return;
+                    return dbVersion;
                 }
                 String[] files = FxSharedUtils.loadFromInputStream(scriptIndex, -1).replaceAll("\r", "").split("\n");
                 Connection con = null;
@@ -300,7 +308,6 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
 //                LOG.info("Patch available from version " + fromVersion + " to " + toVersion);
 //                    stmt.executeUpdate(code);
                     boolean patching = true;
-                    long currentVersion = dbVersion;
                     long maxVersion = currentVersion;
                     while (patching) {
                         patching = false;
@@ -316,19 +323,31 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
                             }
                         }
                     }
-                    if (currentVersion != dbVersion) {
-                        EJBLookup.getDivisionConfigurationEngine().put(SystemParameters.DB_VERSION, currentVersion);
-                        if (currentVersion < maxVersion)
-                            LOG.warn("Failed to patch to maximum available database schema version (" + maxVersion + "). Current database schema version: " + currentVersion);
+                    if (currentVersion < maxVersion) {
+                        LOG.warn("Failed to patch to maximum available database schema version (" + maxVersion + "). Current database schema version: " + currentVersion);
                     }
+                    return currentVersion;
                 } finally {
+                    con.commit();
                     Database.closeObjects(DivisionConfigurationEngineBean.class, con, stmt);
                 }
             } catch (IOException e) {
                 LOG.fatal(e);
+                return currentVersion;
             } catch (SQLException e) {
                 LOG.fatal(e);
+                return currentVersion;
             }
+        } finally {
+            FxContext.get().stopRunAsSystem();
+        }
+    }
+
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    private void modifyDatabaseVersion(long currentVersion) throws FxApplicationException {
+        FxContext.get().runAsSystem();
+        try {
+            put(SystemParameters.DB_VERSION, currentVersion);
         } finally {
             FxContext.get().stopRunAsSystem();
         }

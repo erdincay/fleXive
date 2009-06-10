@@ -38,8 +38,8 @@ import com.flexive.shared.Pair;
 import com.flexive.shared.cache.FxCacheException;
 import com.flexive.shared.configuration.*;
 import com.flexive.shared.configuration.parameters.NullParameter;
-import com.flexive.shared.configuration.parameters.UnsetParameter;
 import com.flexive.shared.configuration.parameters.ParameterFactory;
+import com.flexive.shared.configuration.parameters.UnsetParameter;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.GenericConfigurationEngine;
 import org.apache.commons.lang.SerializationUtils;
@@ -47,8 +47,13 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import java.io.Serializable;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -224,6 +229,7 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
     /**
      * {@inheritDoc}
      */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public <T extends Serializable> void put(Parameter<T> parameter, String key, T value)
             throws FxApplicationException {
 
@@ -247,19 +253,18 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
                     return; //no changes
             }
             stmt.close();
-            stmt = null;
-            if (valueExists) {
-                // update existing record
-                stmt = getUpdateStatement(conn, data.getPath().getValue(), key,
-                        value != null ? parameter.getDatabaseValue(value) : null,
-                        value != null ? value.getClass().getName() : null);
-            } else {
-                // create new record
-                stmt = getInsertStatement(conn, data.getPath().getValue(), key,
-                        value != null ? parameter.getDatabaseValue(value) : null,
-                        value != null ? value.getClass().getName() : null);
+
+            try {
+                writeParameter(conn, parameter, key, value, data, valueExists);
+            } catch (SQLException e) {
+                if (!valueExists && Database.isUniqueConstraintViolation(e)) {
+                    // tried to insert record, but record exists - workaround for strange
+                    // bug on MySQL, where an ALTER TABLE on the configuration table messes up
+                    // subsequent SELECTs (DB schema version 1353)
+                    writeParameter(conn, parameter, key, value, data, true);
+                }
             }
-            stmt.executeUpdate();
+
 
             // update cache?
             String cachePath = getCachePath(data.getPath().getValue());
@@ -287,9 +292,30 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
         }
     }
 
+    private <T extends Serializable> void writeParameter(Connection conn, Parameter<T> parameter, String key, T value, ParameterData<T> data, boolean valueExists) throws SQLException, FxNoAccessException {
+        PreparedStatement stmt = null;
+        try {
+            if (valueExists) {
+                // update existing record
+                stmt = getUpdateStatement(conn, data.getPath().getValue(), key,
+                        value != null ? parameter.getDatabaseValue(value) : null,
+                        value != null ? value.getClass().getName() : null);
+            } else {
+                // create new record
+                stmt = getInsertStatement(conn, data.getPath().getValue(), key,
+                        value != null ? parameter.getDatabaseValue(value) : null,
+                        value != null ? value.getClass().getName() : null);
+            }
+            stmt.executeUpdate();
+        } finally {
+            Database.closeObjects(GenericConfigurationImpl.class, null, stmt);
+        }
+    }
+
     /**
      * {@inheritDoc}
      */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public <T extends Serializable> void put(Parameter<T> parameter, T value) throws FxApplicationException {
         put(parameter, parameter.getData().getKey(), value);
     }
@@ -340,6 +366,7 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
     /**
      * {@inheritDoc}
      */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public <T extends Serializable> T get(Parameter<T> parameter) throws FxApplicationException {
         return get(parameter, parameter.getData().getKey());
     }
@@ -347,6 +374,7 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
     /**
      * {@inheritDoc}
      */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public <T extends Serializable> T get(Parameter<T> parameter, String key)
             throws FxApplicationException {
         return get(parameter, key, false);
@@ -355,6 +383,7 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
     /**
      * {@inheritDoc}
      */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public <T extends Serializable> T get(Parameter<T> parameter, String key, boolean ignoreDefault)
             throws FxApplicationException {
         final Pair<Boolean, T> result = tryGet(parameter, key, ignoreDefault);
@@ -367,6 +396,7 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
     /**
      * {@inheritDoc}
      */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public <T extends Serializable> Pair<Boolean, T> tryGet(Parameter<T> parameter, String key, boolean ignoreDefault) {
         try {
             final T value = parameter.getValue(
@@ -388,6 +418,7 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
     /**
      * {@inheritDoc}
      */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public Map<ParameterData, Serializable> getAll() throws FxApplicationException {
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -435,6 +466,7 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
     /**
      * {@inheritDoc}
      */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public <T extends Serializable> Map<String, T> getAll(Parameter<T> parameter) throws FxApplicationException {
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -459,6 +491,7 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
     /**
      * {@inheritDoc}
      */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public <T extends Serializable> Collection<String> getKeys(Parameter<T> parameter) throws FxApplicationException {
         return getAll(parameter).keySet();
     }
@@ -466,6 +499,7 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
     /**
      * {@inheritDoc}
      */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public <T extends Serializable> void remove(Parameter<T> parameter, String key)
             throws FxApplicationException {
         Connection conn = null;
@@ -501,6 +535,7 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
     /**
      * {@inheritDoc}
      */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public <T extends Serializable> void remove(Parameter<T> parameter)
             throws FxApplicationException {
         remove(parameter, parameter.getKey());
@@ -509,6 +544,7 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
     /**
      * {@inheritDoc}
      */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public <T extends Serializable> void removeAll(Parameter<T> parameter)
             throws FxApplicationException {
         remove(parameter, null);

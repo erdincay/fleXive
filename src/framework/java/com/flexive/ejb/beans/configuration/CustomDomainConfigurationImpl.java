@@ -148,13 +148,13 @@ public abstract class CustomDomainConfigurationImpl<T extends Serializable> exte
         if (!mayUpdate()) {
             throw new FxNoAccessException("ex.configuration.update.perm", configurationName);
         }
-        final String sql = "UPDATE " + tableName + " SET cvalue=? WHERE " + idColumn + "=? AND cpath=? AND ckey=? AND className=?";
+        final String sql = "UPDATE " + tableName + " SET cvalue=?, className=? WHERE " + idColumn + "=? AND cpath=? AND ckey=?";
         final PreparedStatement stmt = conn.prepareStatement(sql);
         stmt.setString(1, value);
-        setDomain(stmt, 2);
-        stmt.setString(3, path);
-        stmt.setString(4, key);
-        stmt.setString(5, className);
+        stmt.setString(2, className);
+        setDomain(stmt, 3);
+        stmt.setString(4, path);
+        stmt.setString(5, key);
         return stmt;
     }
 
