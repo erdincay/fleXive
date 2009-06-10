@@ -49,6 +49,7 @@ public class BinaryDownloadPayload implements Serializable {
     private int quality;
     private int division;
     private int size;
+    private boolean forceImage;
 
     private boolean serverError;
     private String errorMessage;
@@ -56,16 +57,17 @@ public class BinaryDownloadPayload implements Serializable {
     private int datasize;
 
 
-    public BinaryDownloadPayload(long id, int version, int quality, int size) {
+    public BinaryDownloadPayload(long id, int version, int quality, int size, boolean forceImage) {
         this.id = id;
         this.version = version;
         this.quality = quality;
         this.size = size;
+        this.forceImage = forceImage;
         this.division = FxContext.get().getDivisionId();
     }
 
     public BinaryDownloadPayload(long id, int version, int quality) {
-        this(id, version, quality, BinaryDescriptor.PreviewSizes.ORIGINAL.getBlobIndex());
+        this(id, version, quality, BinaryDescriptor.PreviewSizes.ORIGINAL.getBlobIndex(), false);
     }
 
     public BinaryDownloadPayload(boolean serverError, String errorMessage) {
@@ -113,5 +115,9 @@ public class BinaryDownloadPayload implements Serializable {
 
     public int getDatasize() {
         return datasize;
+    }
+
+    public boolean isForceImage() {
+        return forceImage;
     }
 }

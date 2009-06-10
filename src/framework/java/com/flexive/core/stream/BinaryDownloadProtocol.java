@@ -92,13 +92,16 @@ public class BinaryDownloadProtocol extends StreamProtocol<BinaryDownloadPayload
             String mimeType;
             int datasize;
 
+            final BinaryDescriptor.PreviewSizes previewSize = BinaryDescriptor.PreviewSizes.fromSize(dataPacket.getPayload().getSize());
             try {
-                bin = StorageManager.getContentStorage(TypeStorageMode.Hierarchical).fetchBinary(
-                        dataPacket.getPayload().getDivision(),
-                        BinaryDescriptor.PreviewSizes.fromSize(dataPacket.getPayload().getSize()),
-                        dataPacket.getPayload().getId(),
-                        dataPacket.getPayload().getVersion(),
-                        dataPacket.getPayload().getQuality());
+                bin = loadBinaryDescriptor(dataPacket, previewSize);
+
+                if (dataPacket.getPayload().isForceImage()
+                        && previewSize == BinaryDescriptor.PreviewSizes.ORIGINAL
+                        && !bin.getMimeType().startsWith("image")) {
+                    // choose biggest preview size if an image is required, but the binary is no image
+                    bin = loadBinaryDescriptor(dataPacket, BinaryDescriptor.PreviewSizes.PREVIEW3);
+                }
             } catch (FxNotFoundException e) {
                 LOG.error("Failed to lookup content storage for division #" + dataPacket.getPayload().getDivision() + ": " + e.getLocalizedMessage());
             }
@@ -121,6 +124,15 @@ public class BinaryDownloadProtocol extends StreamProtocol<BinaryDownloadPayload
             return new DataPacket<BinaryDownloadPayload>(new BinaryDownloadPayload(mimeType, datasize), false);
         }
         return null;
+    }
+
+    private BinaryInputStream loadBinaryDescriptor(DataPacket<BinaryDownloadPayload> dataPacket, BinaryDescriptor.PreviewSizes previewSize) throws FxNotFoundException {
+        return StorageManager.getContentStorage(TypeStorageMode.Hierarchical).fetchBinary(
+                        dataPacket.getPayload().getDivision(),
+                        previewSize,
+                        dataPacket.getPayload().getId(),
+                        dataPacket.getPayload().getVersion(),
+                        dataPacket.getPayload().getQuality());
     }
 
     /**

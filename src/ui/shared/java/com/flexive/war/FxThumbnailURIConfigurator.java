@@ -74,6 +74,7 @@ public class FxThumbnailURIConfigurator extends FxMediaSelector {
     public FxThumbnailURIConfigurator(String URI) {
         this.URI = URI;
         parse();
+        setForceImage(true);
     }
 
     /**

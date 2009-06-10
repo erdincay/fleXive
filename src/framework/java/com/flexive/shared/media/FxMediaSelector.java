@@ -48,12 +48,15 @@ import java.io.Serializable;
  * @version $Rev
  */
 public class FxMediaSelector implements Serializable {
+    private static final long serialVersionUID = -968784502929662771L;
+
     private FxPK pk = null;
     private Boolean useType = null;
     private String xp = null;
     private String lang = null;
     private Boolean langFallback = null;
     private BinaryDescriptor.PreviewSizes size = BinaryDescriptor.PreviewSizes.ORIGINAL;
+    private boolean forceImage;
     private int scaleWidth = -1, scaleHeight = -1;
     private int rotationAngle = 0;
     private Boolean flipHorizontal = null, flipVertical = null;
@@ -444,5 +447,19 @@ public class FxMediaSelector implements Serializable {
 
     public boolean isApplyManipulations() {
         return applyManipulations;
+    }
+
+    /**
+     * If the binary does not represent an image and the "original" preview size was chosen,
+     * the biggest thumbnail is returned instead.
+     *
+     * @return  if the returned binary must be an image
+     */
+    public boolean isForceImage() {
+        return forceImage;
+    }
+
+    public void setForceImage(boolean forceImage) {
+        this.forceImage = forceImage;
     }
 }
