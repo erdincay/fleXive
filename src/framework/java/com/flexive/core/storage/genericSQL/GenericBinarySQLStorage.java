@@ -305,15 +305,15 @@ public class GenericBinarySQLStorage implements BinaryStorage {
         FileInputStream fis = null;
         boolean dbTransit;
         boolean dbStorage;
-        final long dbTrashold;
-        final long dbPreviewTrashold;
+        final long dbThreshold;
+        final long dbPreviewThreshold;
         final int divisionId = FxContext.get().getDivisionId();
         try {
             final DivisionConfigurationEngine divisionConfig = EJBLookup.getDivisionConfigurationEngine();
             dbTransit = divisionConfig.get(SystemParameters.BINARY_TRANSIT_DB);
-            dbTrashold = divisionConfig.get(SystemParameters.BINARY_DB_TRASHOLD);
-            dbPreviewTrashold = divisionConfig.get(SystemParameters.BINARY_DB_PREVIEW_TRASHOLD);
-            dbStorage = dbTrashold < 0 || binary.getSize() < dbTrashold;
+            dbThreshold = divisionConfig.get(SystemParameters.BINARY_DB_THRESHOLD);
+            dbPreviewThreshold = divisionConfig.get(SystemParameters.BINARY_DB_PREVIEW_THRESHOLD);
+            dbStorage = dbThreshold < 0 || binary.getSize() < dbThreshold;
         } catch (FxApplicationException e) {
             throw e.asRuntimeException();
         }
@@ -339,7 +339,7 @@ public class GenericBinarySQLStorage implements BinaryStorage {
             final boolean copyBlob = dbTransit && dbStorage;
             boolean storePrev1FS = false, storePrev2FS = false, storePrev3FS = false;
             long prev1Length = -1, prev2Length = -1, prev3Length = -1;
-            if (dbPreviewTrashold >= 0) {
+            if (dbPreviewThreshold >= 0) {
                 //we have to check if preview should be stored on the filesystem
                 ps = con.prepareStatement(BINARY_TRANSIT_PREVIEW_SIZES);
                 ps.setString(1, binary.getHandle());
@@ -348,10 +348,10 @@ public class GenericBinarySQLStorage implements BinaryStorage {
                     throw new FxDbException("ex.content.binary.transitNotFound", binary.getHandle());
                 long previewRef = rs.getLong(1);
                 if (!(!rs.wasNull() && previewRef >= 0)) {
-                    //if previews are not referenced, check trasholds
-                    storePrev1FS = (prev1Length = rs.getLong(2)) >= dbPreviewTrashold;
-                    storePrev2FS = (prev2Length = rs.getLong(3)) >= dbPreviewTrashold;
-                    storePrev3FS = (prev3Length = rs.getLong(4)) >= dbPreviewTrashold;
+                    //if previews are not referenced, check thresholds
+                    storePrev1FS = (prev1Length = rs.getLong(2)) >= dbPreviewThreshold;
+                    storePrev2FS = (prev2Length = rs.getLong(3)) >= dbPreviewThreshold;
+                    storePrev3FS = (prev3Length = rs.getLong(4)) >= dbPreviewThreshold;
                 }
             }
             if (ps != null)

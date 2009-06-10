@@ -87,8 +87,8 @@ public class BinaryTest {
 
     @AfterClass
     public void afterClass() throws FxLogoutFailedException, FxApplicationException {
-        EJBLookup.getConfigurationEngine().put(SystemParameters.BINARY_DB_TRASHOLD, -1L);
-        EJBLookup.getConfigurationEngine().put(SystemParameters.BINARY_DB_PREVIEW_TRASHOLD, -1L);
+        EJBLookup.getConfigurationEngine().put(SystemParameters.BINARY_DB_THRESHOLD, -1L);
+        EJBLookup.getConfigurationEngine().put(SystemParameters.BINARY_DB_PREVIEW_THRESHOLD, -1L);
         EJBLookup.getConfigurationEngine().put(SystemParameters.BINARY_TRANSIT_DB, true);
         FxFileUtils.removeDirectory(BASE_STORAGE);
         logout();
@@ -143,14 +143,14 @@ public class BinaryTest {
         binaryTest(true, true, 0L, 1000L);
     }
 
-    private void binaryTest(boolean sendLength, boolean transitFS, long binTrashold, long prevTrashold) throws Exception {
+    private void binaryTest(boolean sendLength, boolean transitFS, long binThreshold, long prevThreshold) throws Exception {
         File testFile = new File(TEST_BINARY);
         if (!testFile.exists())
             Assert.fail("Test binary [" + testFile.getAbsolutePath() + "] not found!");
 
         EJBLookup.getConfigurationEngine().put(SystemParameters.BINARY_TRANSIT_DB, !transitFS);
-        EJBLookup.getConfigurationEngine().put(SystemParameters.BINARY_DB_TRASHOLD, binTrashold);
-        EJBLookup.getConfigurationEngine().put(SystemParameters.BINARY_DB_PREVIEW_TRASHOLD, prevTrashold);
+        EJBLookup.getConfigurationEngine().put(SystemParameters.BINARY_DB_THRESHOLD, binThreshold);
+        EJBLookup.getConfigurationEngine().put(SystemParameters.BINARY_DB_PREVIEW_THRESHOLD, prevThreshold);
 
         FxType type = CacheAdmin.getEnvironment().getType(IMAGE_TYPE);
 
@@ -190,16 +190,16 @@ public class BinaryTest {
             fos.close();
             Assert.assertTrue(FxFileUtils.fileCompare(comp, testFile), "Files do not match!");
             final BinaryDescriptor desc = ((BinaryDescriptor) img.getValue("/ImageBinary").getBestTranslation());
-            if (binTrashold > testFile.length()) {
+            if (binThreshold > testFile.length()) {
                 //binary is expected to be stored on the filesystem
                 File binFile = FxBinaryUtils.getBinaryFile(divisionId, desc.getId(), desc.getVersion(), desc.getQuality(), PreviewSizes.ORIGINAL.getBlobIndex());
                 Assert.assertTrue(binFile != null && binFile.exists(), "Binary file for binary id [" + desc.getId() + "] does not exist!");
                 Assert.assertTrue(FxFileUtils.fileCompare(testFile, binFile), "Binary file does not match test file!");
             }
-            if (prevTrashold >= 0) {
-                checkPreviewFile(prevTrashold, desc, bin, PreviewSizes.PREVIEW1);
-                checkPreviewFile(prevTrashold, desc, bin, PreviewSizes.PREVIEW2);
-                checkPreviewFile(prevTrashold, desc, bin, PreviewSizes.PREVIEW3);
+            if (prevThreshold >= 0) {
+                checkPreviewFile(prevThreshold, desc, bin, PreviewSizes.PREVIEW1);
+                checkPreviewFile(prevThreshold, desc, bin, PreviewSizes.PREVIEW2);
+                checkPreviewFile(prevThreshold, desc, bin, PreviewSizes.PREVIEW3);
             }
             FxFileUtils.removeFile(comp);
         } finally {
@@ -211,14 +211,14 @@ public class BinaryTest {
     /**
      * Check if a preview file is handled correctly
      *
-     * @param prevTrashold trashold
+     * @param prevThreshold threshold
      * @param desc         descriptor
      * @param bin          binary
      * @param previewSize  evaluated size
      * @throws IOException       on errors
      * @throws FxStreamException on errors
      */
-    private void checkPreviewFile(long prevTrashold, BinaryDescriptor desc, FxBinary bin, PreviewSizes previewSize) throws IOException, FxStreamException {
+    private void checkPreviewFile(long prevThreshold, BinaryDescriptor desc, FxBinary bin, PreviewSizes previewSize) throws IOException, FxStreamException {
         File prev = File.createTempFile("PrevExif", "JPG");
         try {
             FileOutputStream fos = new FileOutputStream(prev);
@@ -226,7 +226,7 @@ public class BinaryTest {
             fos.close();
             Assert.assertTrue(prev.exists() && prev.length() > 0, "No preview file was generated or found for size [" + previewSize.name() + "]!");
             File prevStorageFile = FxBinaryUtils.getBinaryFile(divisionId, desc.getId(), desc.getVersion(), desc.getQuality(), previewSize.getBlobIndex());
-            if (prevTrashold < prev.length()) {
+            if (prevThreshold < prev.length()) {
                 //has to be stored on filesystem
                 Assert.assertTrue(prevStorageFile != null && prevStorageFile.exists(),
                         "Preview file for binary id [" + desc.getId() + "], preview size [" + previewSize.name() + "] does not exist!");

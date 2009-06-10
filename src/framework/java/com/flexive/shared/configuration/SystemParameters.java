@@ -112,11 +112,11 @@ public class SystemParameters {
     /**
      * Size a binary has to exceed to be stored on the filesystem (<0 == always store in database, 0=always store in FS)
      */
-    public static final Parameter<Long> BINARY_DB_TRASHOLD = ParameterFactory.newInstance(Long.class, DIVISION_CONFIG, "binaryDBTrashold", -1L);
+    public static final Parameter<Long> BINARY_DB_THRESHOLD = ParameterFactory.newInstance(Long.class, DIVISION_CONFIG, "binaryDBThreshold", -1L);
     /**
      * Size a preview of a binary has to exceed to be stored on the filesystem (<0 == always store in database, 0=always store in FS)
      */
-    public static final Parameter<Long> BINARY_DB_PREVIEW_TRASHOLD = ParameterFactory.newInstance(Long.class, DIVISION_CONFIG, "binaryDBPreviewTrashold", -1L);
+    public static final Parameter<Long> BINARY_DB_PREVIEW_THRESHOLD = ParameterFactory.newInstance(Long.class, DIVISION_CONFIG, "binaryDBPreviewThreshold", -1L);
     /**
      * Path on the current nodes filesystem for binary transit files
      */

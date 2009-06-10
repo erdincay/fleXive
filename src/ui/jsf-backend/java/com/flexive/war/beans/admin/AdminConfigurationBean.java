@@ -53,8 +53,8 @@ public class AdminConfigurationBean implements Serializable {
     private Boolean treeLiveEnabled;
     private Boolean binaryTransitDB;
     private String binaryTransitPath;
-    private Long binaryTrashold;
-    private Long binaryPreviewTrashold;
+    private Long binaryThreshold;
+    private Long binaryPreviewThreshold;
     private String binaryStoragePath;
     private String exportURLprefix;
 
@@ -69,8 +69,8 @@ public class AdminConfigurationBean implements Serializable {
             EJBLookup.getConfigurationEngine().put(SystemParameters.BINARY_TRANSIT_DB, isBinaryTransitDB());
             EJBLookup.getConfigurationEngine().put(SystemParameters.NODE_TRANSIT_PATH, getBinaryTransitPath());
             EJBLookup.getConfigurationEngine().put(SystemParameters.NODE_BINARY_PATH, getBinaryStoragePath());
-            EJBLookup.getConfigurationEngine().put(SystemParameters.BINARY_DB_TRASHOLD, getBinaryTrashold());
-            EJBLookup.getConfigurationEngine().put(SystemParameters.BINARY_DB_PREVIEW_TRASHOLD, getBinaryPreviewTrashold());
+            EJBLookup.getConfigurationEngine().put(SystemParameters.BINARY_DB_THRESHOLD, getBinaryThreshold());
+            EJBLookup.getConfigurationEngine().put(SystemParameters.BINARY_DB_PREVIEW_THRESHOLD, getBinaryPreviewThreshold());
         } catch (FxApplicationException e) {
             new FxFacesMsgErr(e).addToContext();
         }
@@ -128,37 +128,37 @@ public class AdminConfigurationBean implements Serializable {
     }
 
     /**
-     * Returns the trashold for binaries to be stored on the filesystem
+     * Returns the threshold for binaries to be stored on the filesystem
      *
-     * @return trashold for binaries to be stored on the filesystem
+     * @return threshold for binaries to be stored on the filesystem
      * @throws FxApplicationException on system errors
-     * @see SystemParameters#BINARY_DB_TRASHOLD
+     * @see SystemParameters#BINARY_DB_THRESHOLD
      */
-    public long getBinaryTrashold() throws FxApplicationException {
-        if( binaryTrashold == null )
-            binaryTrashold = EJBLookup.getConfigurationEngine().get(SystemParameters.BINARY_DB_TRASHOLD);
-        return binaryTrashold;
+    public long getBinaryThreshold() throws FxApplicationException {
+        if( binaryThreshold == null )
+            binaryThreshold = EJBLookup.getConfigurationEngine().get(SystemParameters.BINARY_DB_THRESHOLD);
+        return binaryThreshold;
     }
 
-    public void setBinaryTrashold(long binaryTrashold) {
-        this.binaryTrashold = binaryTrashold;
+    public void setBinaryThreshold(long binaryThreshold) {
+        this.binaryThreshold = binaryThreshold;
     }
 
     /**
-     * Returns the trashold for binary previews to be stored on the filesystem
+     * Returns the threshold for binary previews to be stored on the filesystem
      *
-     * @return trashold for binary previews to be stored on the filesystem
+     * @return threshold for binary previews to be stored on the filesystem
      * @throws FxApplicationException on system errors
-     * @see SystemParameters#BINARY_DB_PREVIEW_TRASHOLD
+     * @see SystemParameters#BINARY_DB_PREVIEW_THRESHOLD
      */
-    public long getBinaryPreviewTrashold() throws FxApplicationException {
-        if( binaryPreviewTrashold == null )
-            binaryPreviewTrashold = EJBLookup.getConfigurationEngine().get(SystemParameters.BINARY_DB_PREVIEW_TRASHOLD);
-        return binaryPreviewTrashold;
+    public long getBinaryPreviewThreshold() throws FxApplicationException {
+        if( binaryPreviewThreshold == null )
+            binaryPreviewThreshold = EJBLookup.getConfigurationEngine().get(SystemParameters.BINARY_DB_PREVIEW_THRESHOLD);
+        return binaryPreviewThreshold;
     }
 
-    public void setBinaryPreviewTrashold(long binaryPreviewTrashold) {
-        this.binaryPreviewTrashold = binaryPreviewTrashold;
+    public void setBinaryPreviewThreshold(long binaryPreviewThreshold) {
+        this.binaryPreviewThreshold = binaryPreviewThreshold;
     }
 
     /**
