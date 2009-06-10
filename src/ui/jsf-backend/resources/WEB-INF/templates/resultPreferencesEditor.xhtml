@@ -89,7 +89,7 @@ Renders the body content in a info box.
                                                      value="#{rowIndex}"/>
                     </adm:ajaxCommandIcon>
                     <!-- Delete column -->
-                    <adm:ajaxCommandIcon id="removeColumnProperty" reRender="selectedColumns" bean="#{resultPreferencesBean}"
+                    <adm:ajaxCommandIcon id="removeColumnProperty" reRender="preferencesPanel" bean="#{resultPreferencesBean}"
                                          actionListener="removeColumnProperty"
                                          titleKey="ResultPreferences.button.info.delete"
                                          icon="delete">
@@ -111,7 +111,7 @@ Renders the body content in a info box.
                         <adm:ajaxCommandButton id="addColumnButton"
                                            bean="#{resultPreferencesBean}"
                                            actionListener="addColumnProperty"
-                                           reRender="selectedColumns,addPropertyNameSelect"
+                                           reRender="preferencesPanel"
                                            icon="add"
                                            labelKey="ResultPreferences.button.info.add"/>
                     </td>
