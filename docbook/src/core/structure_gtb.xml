@@ -39,7 +39,7 @@
         &quot;NAME&quot;:
     </para>
     <para>
-        <example xml:id="core_structure_gtb_ex01">
+        <example xml:id="core_structure_gtb_example01">
             <title>Creating a simple type with one attribute</title>
             <xi:include href="../listings/core_structure_gtb_ex01.xml"/>
 
