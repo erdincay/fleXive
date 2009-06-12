@@ -623,3 +623,20 @@ function flash(elementId, flashColor, backgroundColor) {
     anim.animate();
     return anim2;
 }
+
+/**
+ * This function is used in conjunction with the ajaxCommandButton and enables
+ * the clickable area over the whole commandButton div
+ *
+ * @param id the id of the commandElement div containing the link
+ * @param onClickAction an additional onClickAction passed to the ajaxCommandButton
+ */
+function getOnClick(id, onClickAction) {
+    var contentFrame = window.parent.document.getElementById('contentFrame');
+    var callerWindow = contentFrame.contentWindow;
+    var linkElement = getFirstLinkElement(callerWindow.document, id);
+    if(onClickAction == 'null')
+        onClickAction = "";
+    onClickAction = eval(onClickAction + "document.getElementById('" + linkElement.getAttribute("id") + "').onclick();");
+    return onClickAction;
+}

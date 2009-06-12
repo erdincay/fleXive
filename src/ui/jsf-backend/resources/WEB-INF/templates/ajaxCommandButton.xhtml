@@ -22,7 +22,7 @@ Parameters:
  bean - the bean that the action belongs to
  actionListener - the actionListener to call
  immediate - [optional] the jsf immediate flag
- onclick - [optional] the onClick event of the action link
+ onclick - [optional] the onClick event of the action link (Hint: Use single quotes only for the String parameters in the supplied function)
  icon - [optional] the name of the icon to be displayed. the icon name is mapped to the url "adm/images/commandButton/${icon}.png"
  iconUrl - [optional] the url (aboslute, including the context path)
                       of the icon to be displayed (i.e. /flexive/images/myIcon.png)
@@ -67,8 +67,6 @@ Parameters:
             <c:set var="iconUrl" value="#{fxSystemBean.contextPath}/adm/images/commandButton/#{icon}.png"/>
         </c:if>
 
-
-
         <c:set var="commandButtonStyle" value="commandButton"/>
         <c:set var="commandButtonIconStyle" value="commandButtonIcon"/>
         <c:set var="commandButtonLabelStyle" value="commandButtonLabel"/>
@@ -78,7 +76,7 @@ Parameters:
             <c:set var="commandButtonIconStyle" value="commandButtonIconDisabled"/>
             <c:set var="commandButtonLabelStyle" value="commandButtonLabelDisabled"/>
             <c:set var="commandButtonRightStyle" value="commandButtonRightDisabled"/>
-            <div id="commandButton_#{id}" onclick="#{onclick}" class="#{commandButtonStyle}" title="#{title}">
+            <div id="commandButton_#{id}" class="#{commandButtonStyle}" title="#{title}">
                 <div style="display:table-row; height:22px; float:left">
                     <div class="#{commandButtonIconStyle}">
                         <img alt="#{id}_icon" id="#{id}_icon" src="#{iconUrl}" border="0"/>
@@ -95,25 +93,31 @@ Parameters:
         </c:if>
 
         <c:if test="#{buttonDisabled == null or !buttonDisabled}">
-            <div id="commandButton_#{id}" onclick="#{onclick}" class="#{commandButtonStyle}" title="#{title}">
+            <div id="commandElement_#{id}" style="display:none">
+                <a4j:commandLink id="#{id}_submissionlink" eventsQueue="#{eventsQueue}"
+                                 reRender="#{reRender}" actionListener="#{bean[actionListener]}"
+                                 immediate="#{immediate}"/>
+            </div>
+
+            <c:if test="#{empty onclick}">
+                <c:set var="onclick" value="null"/>
+            </c:if>
+
+            <div id="commandButton_#{id}" onclick="getOnClick('commandElement_#{id}', &quot;#{onclick}&quot;);" class="#{commandButtonStyle}"
+                 title="#{title}">
                 <div style="display:table-row; height:22px; float:left">
                     <div class="#{commandButtonIconStyle}">
-                        <a4j:commandLink id="#{id}_icon" styleClass="commandButtonIconStyle" eventsQueue="#{eventsQueue}" reRender="#{reRender}" actionListener="#{bean[actionListener]}" immediate="#{immediate}">
-                            <img alt="#{id}_icon" id="#{id}_icon" src="#{iconUrl}" border="0"/>
-                        </a4j:commandLink>
+                        <img alt="#{id}_icon" id="#{id}_icon" src="#{iconUrl}" border="0"/>
                     </div>
                     <div class="#{commandButtonLabelStyle}">
                         <div class="commandButtonLabelText">
-                            <a4j:commandLink id="#{id}_label" styleClass="commandButtonLabelText" eventsQueue="#{eventsQueue}" reRender="#{reRender}" actionListener="#{bean[actionListener]}" immediate="#{immediate}">
                             #{label}
-                            </a4j:commandLink>
                         </div>
                     </div>
                     <div class="#{commandButtonRightStyle}">
                     </div>
                 </div>
             </div>
-
         </c:if>
     </ui:fragment>
 
