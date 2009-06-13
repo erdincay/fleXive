@@ -150,7 +150,7 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
                     throw new FxNoAccessException("ex.role.notInRole", Role.SelectListEditor.getName());
             }
         }
-        updatePositions(list.getItems());
+        updatePositions(list.getItems(), idMap);
         updateDefaultItem(id, defaultItemId);
         if (!changes) {
             FxSelectListItem orgDef = CacheAdmin.getEnvironment().getSelectList(id).getDefaultItem();
@@ -385,9 +385,10 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
      * Update the positions of all items
      *
      * @param items select list items
+     * @param idMap map of ids for new created items
      * @throws FxApplicationException on errors
      */
-    private void updatePositions(List<FxSelectListItem> items) throws FxApplicationException {
+    private void updatePositions(List<FxSelectListItem> items, Map<Long, Long> idMap) throws FxApplicationException {
         Connection con = null;
         PreparedStatement ps = null;
         int pos = 0;
@@ -397,7 +398,7 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
             ps = con.prepareStatement("UPDATE " + TBL_SELECTLIST_ITEM + " SET POS=? WHERE ID=?");
             for (FxSelectListItem item : items) {
                 ps.setInt(1, pos++);
-                ps.setLong(2, item.getId());
+                ps.setLong(2, item.getId() < 0 ? (idMap.containsKey(item.getId()) ? idMap.get(item.getId()) : -1) : item.getId());
                 ps.addBatch();
             }
             ps.executeBatch();

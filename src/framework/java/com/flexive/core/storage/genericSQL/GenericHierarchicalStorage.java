@@ -1097,6 +1097,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                     case SelectMany:
                         checkDataType(FxSelectMany.class, value, data.getXPathFull());
                         SelectMany sm = (SelectMany) translatedValue;
+
                         for (int i1 = 0; i1 < sm.getSelected().size(); i1++) {
                             FxSelectListItem item = sm.getSelected().get(i1);
                             if (i1 > 0)

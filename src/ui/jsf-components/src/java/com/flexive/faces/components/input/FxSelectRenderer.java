@@ -453,8 +453,106 @@ public class FxSelectRenderer extends Renderer {
      * @throws IOException on errors
      */
     protected void renderSelect(FacesContext context, UIComponent component) throws IOException {
+        List<SelectItem> items = FxJsfComponentUtils.getSelectItems(context, component);
+
+        boolean restrictToGroups = false;
+        if ((component instanceof UISelectOne || component instanceof UISelectMany) &&
+                items.size() > 0 &&
+                items.get(0) instanceof FxJSFSelectItem &&
+                ((FxJSFSelectItem) items.get(0)).isFxSelectListItem()) {
+            //we have an FxSelectListItem in a SelectOne -> check if cascaded
+            final long itemId = (Long) items.get(0).getValue();
+            if (itemId >= 0) {
+                FxSelectList list = CacheAdmin.getEnvironment().getSelectListItem(itemId).getList();
+                restrictToGroups = list.isOnlySameLevelSelect();
+                if (list.isCascaded()) {
+                    List<SelectItem> converted = new ArrayList<SelectItem>(items.size());
+                    for (SelectItem check : items) {
+                        final Long currentItemId = (Long) check.getValue();
+                        if (currentItemId < 0) {
+                            converted.add(check);
+                            continue;
+                        }
+                        final FxSelectListItem listItem = list.getItem(currentItemId);
+                        final boolean forceDisplay = ((FxJSFSelectItem) check).isForceDisplay();
+                        if (!listItem.getHasChildren() || forceDisplay) {
+                            if (!forceDisplay)
+                                check.setLabel(listItem.getLabelBreadcrumbPath());
+                            else
+                                restrictToGroups = false; //if forceDisplay is enabled, do not restrict to group!
+                            check.setDescription(listItem.hasParentItem() ? String.valueOf(listItem.getParentItem().getId()) : "0");
+                            converted.add(check);
+                        }
+                    }
+                    items = converted;
+                }
+            }
+        }
+
         ResponseWriter writer = context.getResponseWriter();
+        Map attrMap = component.getAttributes();
+
+        if( component instanceof UISelectMany && restrictToGroups) {
+/*
+full js code:
+    var grpData_xx = [["1", 1],["2",1],["3",2],["4",2],["5",3],["6",1]];
+
+    function processChange() {
+        var s = document.getElementById('xx');
+        function gg(v) {
+            for(var x in grpData_xx)
+                if(grpData_xx[x][0]==v)
+                    return grpData_xx[x][1];
+            return 0;
+        }
+        var g = -1;
+        for(var o in s.childNodes) {
+            if(!s.childNodes[o])
+                continue;
+            if(s.childNodes[o].selected) {
+                g = gg(s.childNodes[o].value);
+                break;
+            }
+        }
+        if (g == -1)
+            return;
+        for(var c in s.childNodes) {
+            if(!s.childNodes[c])
+                continue;
+            if(gg(s.childNodes[c].value)!=g && s.childNodes[c].selected!=undefined)
+                s.childNodes[c].selected = false;
+            }
+        }
+    }
+*/            
+          StringBuilder sb = new StringBuilder(750);
+          sb.append("<script type=\"text/javascript\" language=\"JavaScript\">");
+          sb.append("var msGrpData_").append(component.getId()).append("=[");
+          if( items.size() > 0 ) {
+            for(SelectItem check: items) {
+              String grp = check.getDescription() == null ? "0" : check.getDescription();
+              sb.append("[\"").append(check.getValue()).append("\",").append(Long.valueOf(grp)).append("],");
+            }
+            sb.deleteCharAt(sb.length()-1);
+          }
+          sb.append("];");
+          sb.append("function pc_").append(component.getId()).append("(){");
+          sb.append("var s=document.getElementById('").append(component.getClientId(context));
+          sb.append("');function gg(v){for(var x in msGrpData_").append(component.getId()).append(")if(msGrpData_");
+          sb.append(component.getId()).append("[x][0]==v)return msGrpData_").append(component.getId()).append("[x][1];return 0;}");
+          sb.append("var g=-1;for(var o in s.childNodes){if(!s.childNodes[o])continue;if(s.childNodes[o].selected){g=gg(s.childNodes[o].value);break;}}");
+          sb.append("if(g==-1)return;for(var c in s.childNodes){if(!s.childNodes[c])continue;if(gg(s.childNodes[c].value)!=g&&s.childNodes[c].selected!=undefined){s.childNodes[c].selected=false;}}");
+          if (!StringUtils.isEmpty(String.valueOf(attrMap.get("onchange")))) {
+            //execute the original onchange event
+            sb.append(String.valueOf(attrMap.get("onchange"))).append(";");
+          }  
+          sb.append("}</script>\n");
+          writer.write(sb.toString());
+        }
+
         writer.startElement("select", component);
+        if(restrictToGroups)
+          writer.writeAttribute("onchange", "pc_"+component.getId()+"();", null);
         String id;
         if (null != (id = component.getId()) && !id.startsWith(UIViewRoot.UNIQUE_ID_PREFIX))
             //noinspection UnusedAssignment
@@ -469,37 +567,6 @@ public class FxSelectRenderer extends Renderer {
 
         if (component instanceof UISelectMany)
             writer.writeAttribute("multiple", true, "multiple");
-
-        List<SelectItem> items = FxJsfComponentUtils.getSelectItems(context, component);
-
-        if ((component instanceof UISelectOne || component instanceof UISelectMany) &&
-                items.size() > 0 &&
-                items.get(0) instanceof FxJSFSelectItem &&
-                ((FxJSFSelectItem) items.get(0)).isFxSelectListItem()) {
-            //we have an FxSelectListItem in a SelectOne -> check if cascaded
-            final long itemId = (Long) items.get(0).getValue();
-            if (itemId >= 0) {
-                FxSelectList list = CacheAdmin.getEnvironment().getSelectListItem(itemId).getList();
-                if (list.isCascaded()) {
-                    List<SelectItem> converted = new ArrayList<SelectItem>(items.size());
-                    for (SelectItem check : items) {
-                        final Long currentItemId = (Long) check.getValue();
-                        if (currentItemId < 0) {
-                            converted.add(check);
-                            continue;
-                        }
-                        final FxSelectListItem listItem = list.getItem(currentItemId);
-                        final boolean forceDisplay = ((FxJSFSelectItem) check).isForceDisplay();
-                        if (!listItem.getHasChildren() || forceDisplay) {
-                            if (!forceDisplay)
-                                check.setLabel(listItem.getLabelBreadcrumbPath());
-                            converted.add(check);
-                        }
-                    }
-                    items = converted;
-                }
-            }
-        }
 
         // If "size" is *not* set explicitly, we have to default it correctly
         Integer size = (Integer) component.getAttributes().get("size");
@@ -517,15 +584,16 @@ public class FxSelectRenderer extends Renderer {
         writer.writeAttribute("size", size, "size");
 
         //render the components default attributes if present
-        Map attrMap = component.getAttributes();
-        for (String att : FxJsfComponentUtils.SELECTLIST_ATTRIBUTES)
+        for (String att : FxJsfComponentUtils.SELECTLIST_ATTRIBUTES) {
+            if (restrictToGroups && "onchange".equals(att))
+                continue;
             if (attrMap.get(att) != null)
                 writer.writeAttribute(att, attrMap.get(att), att);
+        }
 
         //render each option
         renderOptions(context, component, items);
         writer.endElement("select");
-
     }
 
     /**

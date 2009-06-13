@@ -149,6 +149,13 @@ public class SelectMany implements Serializable {
             throw new FxNotFoundException("ex.content.value.selectMany.select", item.getId(), list.getId(),
                     list.getItems()).asRuntimeException();
         }
+        //check if the item may be selected depending on list setting
+        if(this.getSelectList().isOnlySameLevelSelect() && this.selected.size() > 0 ) {
+            long firstParent = this.selected.get(0).getParentItem() == null ? 0 : this.selected.get(0).getParentItem().getId();
+            long itemParent = item.getParentItem() == null ? 0 : item.getParentItem().getId();
+            if(firstParent != itemParent)
+                throw new FxInvalidParameterException(item.getLabelBreadcrumbPath(), "ex.selectlist.item.wrongParent", item.getLabelBreadcrumbPath()).asRuntimeException();
+        }
         if( available.contains(item))
             available.remove(item);
         if( !selected.contains(item)) {

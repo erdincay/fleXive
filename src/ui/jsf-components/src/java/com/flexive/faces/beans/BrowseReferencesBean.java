@@ -34,14 +34,11 @@
 package com.flexive.faces.beans;
 
 import com.flexive.faces.FxJsfUtils;
-import com.flexive.faces.beans.ActionBean;
-import com.flexive.faces.model.FxResultSetDataModel;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.XPathElement;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.search.FxResultSet;
-import com.flexive.shared.search.SortDirection;
 import com.flexive.shared.search.AdminResultLocations;
 import com.flexive.shared.search.ResultViewType;
 import com.flexive.shared.search.query.PropertyValueComparator;
@@ -96,11 +93,11 @@ public class BrowseReferencesBean implements ActionBean, Serializable {
             if (CacheAdmin.getEnvironment().propertyExists(xPath)) {
                 return CacheAdmin.getEnvironment().getProperty(xPath).getReferencedType();
             } else
-                throw new FxInvalidParameterException("xPath", "ex.browseReferences.xpath.invalid", LOG, xPath).asRuntimeException();
+                throw new FxInvalidParameterException("xPath", LOG, "ex.browseReferences.xpath.invalid", xPath).asRuntimeException();
         }
         final FxAssignment fxAssignment = CacheAdmin.getEnvironment().getAssignment(xPath);
         if (!(fxAssignment instanceof FxPropertyAssignment)) {
-            throw new FxInvalidParameterException("xPath", "ex.browseReferences.assignment.type", LOG,
+            throw new FxInvalidParameterException("xPath", LOG, "ex.browseReferences.assignment.type",
                     xPath, fxAssignment).asRuntimeException();
         }
         return ((FxPropertyAssignment) fxAssignment).getProperty().getReferencedType();
@@ -123,7 +120,10 @@ public class BrowseReferencesBean implements ActionBean, Serializable {
     }
 
     public void setXPath(String xPath) {
-        this.xPath = xPath;
+        if(!StringUtils.isEmpty(xPath))
+            this.xPath = xPath.trim().toUpperCase();
+        else
+            this.xPath = xPath; //just accept it
     }
 
     public String getInputName() {

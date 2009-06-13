@@ -682,7 +682,6 @@ public final class FxEnvironmentImpl implements FxEnvironment {
     /**
      * {@inheritDoc}
      */
-
     public boolean assignmentExists(String xPath) {
         if (xPath != null && xPath.trim().length() > 0) {
             try {
