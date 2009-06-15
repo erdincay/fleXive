@@ -398,7 +398,9 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
             ps = con.prepareStatement("UPDATE " + TBL_SELECTLIST_ITEM + " SET POS=? WHERE ID=?");
             for (FxSelectListItem item : items) {
                 ps.setInt(1, pos++);
-                ps.setLong(2, item.getId() < 0 ? (idMap.containsKey(item.getId()) ? idMap.get(item.getId()) : -1) : item.getId());
+                ps.setLong(2, item.getId() < 0 && idMap != null
+                        ? (idMap.containsKey(item.getId()) ? idMap.get(item.getId()) : -1)
+                        : item.getId());
                 ps.addBatch();
             }
             ps.executeBatch();
