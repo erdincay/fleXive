@@ -184,22 +184,22 @@
                 <fx:yuiSetup/>
             </a4j:outputPanel>
 
-            <a4j:outputPanel id="createItemArea">
+            <a4j:outputPanel id="createItemArea" layout="block">
                 <ui:fragment rendered="#{selectListBean.editListItemId == selectListBean.unselectedId}">
                     <adm:ajaxCommandButton id="createItemButton" labelKey="SelectList.label.createItem" icon="new"
                                            actionListener="createListItem" bean="#{selectListBean}"
                                            onclick="#{rich:component('editPanel')}.show();"
                                            reRender="editItemArea,createItemArea"/>
-                    <br/><br/>
                 </ui:fragment>
             </a4j:outputPanel>
 
             <adm:commandButton labelKey="SelectList.button.selectList.save" location="both"
-                icon="save"  action="saveSelectList"  bean="#{selectListBean}" id="saveButton">
+                               icon="save" action="saveSelectList" bean="#{selectListBean}" id="saveButton">
             </adm:commandButton>
-            
+
             <adm:commandButton labelKey="SelectList.button.cancel" location="both"
-                icon="cancel"  action="showSelectListOverview"  bean="#{selectListBean}" id="cancelButton">
+                               icon="cancel" action="showSelectListOverview" bean="#{selectListBean}"
+                               id="cancelButton">
             </adm:commandButton>
             <adm:toolbarPluginButtons/>
         </h:form>
