@@ -46,12 +46,11 @@ import com.flexive.shared.interfaces.UserGroupEngine;
 import com.flexive.shared.security.Role;
 import com.flexive.shared.security.UserGroup;
 import com.flexive.shared.security.UserTicket;
+import com.flexive.shared.security.Account;
+import com.google.common.collect.Lists;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Bean providing access the the userGroup functionality.
@@ -71,6 +70,7 @@ public class UserGroupBean implements Serializable {
     private Long[] roles = new Long[0];
     private Hashtable<Long, List<UserGroup>> groupLists;
     private long createdGroupId = -1;
+    private List<Account> members;
     private static final String ID_CACHE_KEY = UserGroupBean.class + "_id";
 
 
@@ -108,6 +108,17 @@ public class UserGroupBean implements Serializable {
 
     public long getId() {
         return id;
+    }
+
+    public List<Account> getMembers() throws FxApplicationException {
+        if ((members == null || members.isEmpty()) && id != -1) {
+            members = Lists.newArrayList(EJBLookup.getAccountEngine().getAssignedUsers(id, 0, -1));
+            Collections.sort(members, new FxSharedUtils.SelectableObjectSorter());
+        }
+        if (members == null) {
+            members = new ArrayList<Account>();
+        }
+        return members;
     }
 
     public void setId(long id) {

@@ -13,16 +13,18 @@
 
     <ui:define name="body">
 
+        <t:saveState value="#{userGroupBean.id}"/>
+        
         <h:form id="frm">
             <adm:tab label="#{fxMessageBean['UserGroup.tabtitle.edit,#{userGroupBean.name}']}" active="true" id="createGroupTable"/>
 
             <fx:formRow label="#{fxMessageBean['UserGroup.field.mandator']}" id="mandator">
-                <h:inputText readonly="true" value="#{fxMapBean.mandators[userGroupBean.mandator].name}"/>
+                <h:inputText readonly="true" value="#{fxMapBean.mandators[userGroupBean.mandator].name}" styleClass="fxValueTextInput"/>
                 <h:inputHidden value="#{userGroupBean.id}"/>
             </fx:formRow>
 
             <fx:formRow label="#{fxMessageBean['UserGroup.field.name']}" id="groupname">
-                <h:inputText id="groupname" value="#{userGroupBean.name}" required="true"/>
+                <h:inputText id="groupname" value="#{userGroupBean.name}" required="true" styleClass="fxValueTextInput"/>
             </fx:formRow>
 
             <ui:fragment rendered="#{userGroupBean.id!=2}">
@@ -36,12 +38,23 @@
                 </h:inputText>
             </fx:formRow>
 
-            <fx:formRow label="#{fxMessageBean['UserGroup.field.roles']}" id="roles" height="95">
-                <h:selectManyListbox id="roles" value="#{userGroupBean.roles}" size="6">
+            <fx:formRow label="#{fxMessageBean['UserGroup.field.roles']}" id="roles">
+                <h:selectManyListbox id="roles" value="#{userGroupBean.roles}" size="6" styleClass="fxValueSelectInput">
                     <f:selectItems value="#{fxSelectBean.roles}" />
                 </h:selectManyListbox>
             </fx:formRow>
 
+            <fx:formRow label="#{fxMessageBean['UserGroup.field.users']}">
+                <ui:repeat var="account" value="#{userGroupBean.members}">
+                    <h:commandLink action="#{accountBean.editUser}" immediate="true">
+                        <f:setPropertyActionListener value="#{account.id}" target="#{accountBean.accountIdFilter}"/>
+                        #{account.name}
+                    </h:commandLink>
+                    <br/>
+                </ui:repeat>
+            </fx:formRow>
+
+            <br/>
             <adm:commandButton id="saveButton" labelKey="UserGroup.button.save"
                               icon="save"  bean="#{userGroupBean}" action="update"/>
             <adm:commandButton id="refreshButton" labelKey="UserGroup.button.refresh"
