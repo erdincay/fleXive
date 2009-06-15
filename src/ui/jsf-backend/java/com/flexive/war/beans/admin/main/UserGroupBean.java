@@ -43,11 +43,8 @@ import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.interfaces.AccountEngine;
 import com.flexive.shared.interfaces.UserGroupEngine;
-import com.flexive.shared.security.Role;
-import com.flexive.shared.security.UserGroup;
-import com.flexive.shared.security.UserTicket;
-import com.flexive.shared.security.Account;
-import com.google.common.collect.Lists;
+import com.flexive.shared.security.*;
+import static com.google.common.collect.Lists.newArrayList;
 
 import java.io.Serializable;
 import java.util.*;
@@ -60,6 +57,7 @@ import java.util.*;
  */
 public class UserGroupBean implements Serializable {
     private static final long serialVersionUID = -5545259367431927116L;
+    private static final String ID_CACHE_KEY = UserGroupBean.class + "_id";
 
     private String name = null;
     private String color = null;
@@ -71,7 +69,7 @@ public class UserGroupBean implements Serializable {
     private Hashtable<Long, List<UserGroup>> groupLists;
     private long createdGroupId = -1;
     private List<Account> members;
-    private static final String ID_CACHE_KEY = UserGroupBean.class + "_id";
+    private List<ACLAssignment> aclAssignments;
 
 
     public Long[] getRoles() {
@@ -112,13 +110,23 @@ public class UserGroupBean implements Serializable {
 
     public List<Account> getMembers() throws FxApplicationException {
         if ((members == null || members.isEmpty()) && id != -1) {
-            members = Lists.newArrayList(EJBLookup.getAccountEngine().getAssignedUsers(id, 0, -1));
+            members = newArrayList(EJBLookup.getAccountEngine().getAssignedUsers(id, 0, -1));
             Collections.sort(members, new FxSharedUtils.SelectableObjectSorter());
         }
         if (members == null) {
             members = new ArrayList<Account>();
         }
         return members;
+    }
+
+    public List<ACLAssignment> getAclAssignments() throws FxApplicationException {
+        if ((aclAssignments == null || aclAssignments.isEmpty()) && id != -1) {
+            aclAssignments = newArrayList(EJBLookup.getAclEngine().loadGroupAssignments(id));
+        }
+        if (aclAssignments == null) {
+            aclAssignments = newArrayList();
+        }
+        return aclAssignments;
     }
 
     public void setId(long id) {

@@ -75,7 +75,7 @@
                                 </td>
                                 <td>
                                     <adm:commandIcon labelKey="User.button.edit" location="content"
-                                                    icon="edit"  action="edit"  bean="#{userGroupBean}"
+                                                    icon="edit"  action="edit"  bean="#{userGroupBean}" immediate="true"
                                                     id="editButton_#{group.id}">
                                         <f:setPropertyActionListener target="#{userGroupBean.id}" value="#{group.id}"/>
                                     </adm:commandIcon>

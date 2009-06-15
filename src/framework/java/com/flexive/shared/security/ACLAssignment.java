@@ -35,6 +35,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.Serializable;
+import java.util.List;
+import java.util.ArrayList;
+
+import com.google.common.collect.Lists;
 
 /**
  * A concrete assignment of an ACL to a user group
@@ -255,6 +259,28 @@ public class ACLAssignment implements Serializable, Cloneable {
      */
     public boolean isOwnerGroupAssignment() {
         return groupId == UserGroup.GROUP_OWNER;
+    }
+
+    /**
+     * Returns the list of assigned permissions for this ACL assignment.
+     *
+     * @return  the list of assigned permissions for this ACL assignment.
+     */
+    public List<ACLPermission> getPermissions() {
+        final List<ACLPermission> result = Lists.newArrayList();
+        addPermission(result, ACLPermission.READ, mayRead);
+        addPermission(result, ACLPermission.CREATE, mayCreate);
+        addPermission(result, ACLPermission.EDIT, mayEdit);
+        addPermission(result, ACLPermission.DELETE, mayDelete);
+        addPermission(result, ACLPermission.EXPORT, mayExport);
+        addPermission(result, ACLPermission.RELATE, mayRelate);
+        return result;
+    }
+
+    private void addPermission(List<ACLPermission> list, ACLPermission permission, boolean enabled) {
+        if (enabled) {
+            list.add(permission);
+        }
     }
 
     /**

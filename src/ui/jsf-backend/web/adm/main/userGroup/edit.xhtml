@@ -54,6 +54,22 @@
                 </ui:repeat>
             </fx:formRow>
 
+            <fx:formRow label="#{fxMessageBean['UserGroup.field.acls']}">
+                <h:dataTable var="assignment" value="#{userGroupBean.aclAssignments}" styleClass="plain">
+                    <h:column>
+                        <h:commandLink action="#{aclBean.edit}" immediate="true">
+                            <f:setPropertyActionListener value="#{assignment.aclId}" target="#{aclBean.id}"/>
+                            #{fxMapBean.acls[assignment.aclId].label}
+                        </h:commandLink>
+                    </h:column>
+                    <h:column>
+                        <t:dataList var="permission" value="#{assignment.permissions}" layout="unorderedList" styleClass="commaList">
+                            #{permission.label}
+                        </t:dataList>
+                    </h:column>
+                </h:dataTable>
+            </fx:formRow>
+
             <br/>
             <adm:commandButton id="saveButton" labelKey="UserGroup.button.save"
                               icon="save"  bean="#{userGroupBean}" action="update"/>

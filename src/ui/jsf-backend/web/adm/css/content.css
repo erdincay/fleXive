@@ -376,6 +376,34 @@ table.welcomeweb td {
     padding: 5px;
 }
 
+ul.commaList {
+    padding: 0;
+    margin: 0;
+}
+
+ul.commaList li {
+    display: inline;
+    list-style: none;
+}
+
+ul.commaList li:after {
+    content: ',';
+}
+
+ul.commaList li:last-child:after {
+    content: '';
+}
+
+table.plain {
+    border-collapse: collapse;
+}
+
+table.plain td {
+    padding: 0 5px 3px 0;
+    border: 0;
+    white-space: nowrap;
+}
+
 /** YUI styles */
 
 li.yuimenuitem {
