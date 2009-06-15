@@ -35,23 +35,23 @@
 
         <!-- ============================================ -->
         <fx:formRow label="#{fxMessageBean['Account.field.loginName']}" id="loginName" newLine="false">
-            <h:inputText id="loginName" value="#{accountBean.account.loginName}" readonly="true"/>
+            <h:inputText id="loginName" value="#{accountBean.account.loginName}" readonly="true" styleClass="fxValueTextInput"/>
         </fx:formRow>
         <fx:formRow label="#{fxMessageBean['Account.field.userName']}" id="name">
-            <h:inputText id="name" value="#{accountBean.account.name}" readonly="true"/>
+            <h:inputText id="name" value="#{accountBean.account.name}" readonly="true" styleClass="fxValueTextInput"/>
         </fx:formRow>
 
         <!-- ============================================ -->
         <fx:formRow label="#{fxMessageBean['Account.field.password']}" id="userPassword" newLine="false">
-            <h:inputSecret id="userPassword" value="#{accountBean.password}"/>
+            <h:inputSecret id="userPassword" value="#{accountBean.password}" styleClass="fxValueTextInput"/>
         </fx:formRow>
         <fx:formRow label="#{fxMessageBean['Account.field.retypePassword']}" id="userPasswordConfirm">
-            <h:inputSecret id="userPasswordConfirm" value="#{accountBean.passwordConfirm}"/>
+            <h:inputSecret id="userPasswordConfirm" value="#{accountBean.passwordConfirm}" styleClass="fxValueTextInput"/>
         </fx:formRow>
 
         <!-- ============================================ -->
         <fx:formRow label="#{fxMessageBean['Account.field.email']}" id="email">
-            <h:inputText id="email" value="#{accountBean.account.email}"/>
+            <h:inputText id="email" value="#{accountBean.account.email}" styleClass="fxValueTextInput"/>
         </fx:formRow>
 
         <!-- ============================================ -->
@@ -74,20 +74,20 @@
         </fx:formRow>
         <fx:formRow label="#{fxMessageBean['Account.field.language']}" id="language">
             <h:selectOneListbox id="language" value="#{accountBean.account.language}" size="1"
-                                converter="FxLanguageConverter">
+                                converter="FxLanguageConverter" styleClass="fxValueSelectInput">
                 <f:selectItems value="#{fxSelectBean.languages}" />
             </h:selectOneListbox>
         </fx:formRow>
 
 
         <fx:formRow label="#{fxMessageBean['Account.field.groups']}" id="groups" height="85" newLine="false">
-            <h:selectManyListbox id="groups" value="#{accountBean.groups}" size="6">
+            <h:selectManyListbox id="groups" value="#{accountBean.groups}" size="6" styleClass="fxValueSelectInput">
                 <f:selectItems value="#{accountBean.filteredUserGroups}" />
                 <a4j:support ajaxSingle="true" event="onchange" reRender="rolesGroups" eventsQueue="updateResults"/>
             </h:selectManyListbox>
         </fx:formRow>
         <fx:formRow label="#{fxMessageBean['Account.field.roles']}" id="roles" height="85">
-            <h:selectManyListbox id="roles" value="#{accountBean.rolesIds}" size="6">
+            <h:selectManyListbox id="roles" value="#{accountBean.rolesIds}" size="6" styleClass="fxValueSelectInput">
                 <f:selectItems value="#{fxSelectBean.roles}" />
             </h:selectManyListbox>
         </fx:formRow>

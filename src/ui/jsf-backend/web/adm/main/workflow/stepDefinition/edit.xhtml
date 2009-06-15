@@ -30,7 +30,7 @@
                 </ui:fragment>
 
                 <fx:formRow label="#{fxMessageBean['StepDefinition.field.name']}" id="name">
-                    <h:inputText id="stepDescription" value="#{stepDefinitionBean.stepDefinition.name}"/>
+                    <h:inputText id="stepDescription" value="#{stepDefinitionBean.stepDefinition.name}" styleClass="fxValueTextInput"/>
                 </fx:formRow>
 
                 <fx:formRow label="#{fxMessageBean['StepDefinition.field.label']}" id="label">
@@ -53,6 +53,8 @@
                     </c:if>
                 </a4j:outputPanel>
             </a4j:region>
+
+            <br/>
 
             <c:if test="#{stepDefinitionBean.stepDefinition.id == -1}">
                 <adm:commandButton id="createButton" labelKey="StepDefinition.button.create" icon="new"  bean="#{stepDefinitionBean}" action="create"/>

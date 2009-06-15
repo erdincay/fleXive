@@ -26,6 +26,8 @@
             <fx:formRow label="#{fxMessageBean['Workflow.field.description']}" id="workflowDescription">
                 <h:inputText id="workflowDescription" value="#{workflowBean.workflow.description}"/>
             </fx:formRow>
+
+            <br/>
             
             <adm:commandButton id="createButton" labelKey="Workflow.button.create" icon="new"  bean="#{workflowBean}" action="create"/>
 

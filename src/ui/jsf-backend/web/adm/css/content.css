@@ -20,8 +20,9 @@ a > img {
     border: 0;
 }
 
-.formFields {
+fieldset.formFields {
     width: 600px;   /* standard width for all input fields */
+    margin-bottom: 20px;
 }
 
 .commandButton {
@@ -187,8 +188,13 @@ input[type="checkbox"]   {
 input[type="radio"]   {
     border:0;
 }
+
 input[readonly="readonly"]   {
     background-color:#EEEEEE;
+}
+
+.stretched input[type="text"] {
+    width: 100%;
 }
 
 select {
