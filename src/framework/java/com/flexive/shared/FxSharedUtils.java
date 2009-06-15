@@ -1417,6 +1417,17 @@ public final class FxSharedUtils {
     }
 
     /**
+     * Comparator for sorting {@link SelectableObjectWithName} instances by name.
+     */
+    public static class SelectableObjectWithNameSorter implements Comparator<SelectableObjectWithName>, Serializable {
+        private static final long serialVersionUID = -1786371691872260074L;
+
+        public int compare(SelectableObjectWithName o1, SelectableObjectWithName o2) {
+            return o1.getName().toLowerCase().compareTo(o2.getName().toLowerCase());
+        }
+    }
+
+    /**
      * Item sorter by position
      */
     public static class ItemPositionSorter implements Comparator<FxSelectListItem>, Serializable {

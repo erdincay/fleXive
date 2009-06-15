@@ -310,6 +310,7 @@ public class AclBean implements Serializable {
             super(ass.getAclId(), ass.getGroupId(), ass.getMayRead(), ass.getMayEdit(), ass.getMayRelate(), ass.getMayDelete(),
                     ass.getMayExport(), ass.getMayCreate(), ass.getACLCategory(), ass.getLifeCycleInfo());
             id = generateId();
+            this.group = ass.getGroupId();
         }
 
         public ACLAssignmentEdit(ACL acl) {

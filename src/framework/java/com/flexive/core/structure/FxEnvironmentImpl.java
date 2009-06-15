@@ -34,6 +34,7 @@ package com.flexive.core.structure;
 import com.flexive.shared.FxArrayUtils;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.XPathElement;
+import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.exceptions.FxRuntimeException;
@@ -461,6 +462,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
                 result.add(acl);
             }
         }
+        Collections.sort(result, new FxSharedUtils.SelectableObjectWithNameSorter());
         return Collections.unmodifiableList(result);
     }
 
