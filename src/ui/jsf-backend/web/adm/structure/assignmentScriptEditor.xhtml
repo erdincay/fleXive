@@ -123,45 +123,50 @@
     <ui:fragment rendered="#{propertyEditorBean.editMode and fxSystemBean.isInRole['ScriptManagement']}">
         <div class="scriptTable">
             <fx:fieldSet legend="#{fxMessageBean['ScriptEditor.label.assignScript']}">
-                 <table>
-                    <thead>
-                        <tr>
-                            <th>#{fxMessageBean['ScriptEditor.label.name']}</th>
-                            <th>#{fxMessageBean['ScriptEditor.label.event']}</th>
-                            <th>#{fxMessageBean['ScriptEditor.label.active']}</th>
-                            <th>#{fxMessageBean['ScriptEditor.label.derivedUsage']}</th>
-                            <th>#{fxMessageBean['ScriptEditor.label.actions']}</th>
-                        </tr>
-                    </thead>
-                     <tbody>
-                        <tr>
-                            <td>
-                                <h:selectOneListbox size="1" id="selectedScriptInfo" value="#{propertyEditorBean.selectedScriptInfoId}"
-                                        disabled="#{not propertyEditorBean.editMode}">
-                                    <f:selectItems value="#{fxSelectBean.assignmentScripts}"/>
-                                    <a4j:support event="onchange" reRender="selectedScriptEvent" />
-                                </h:selectOneListbox>
-                            </td>
-                            <td style="padding-left:15px">
-                                 <h:selectOneListbox size="1" id="selectedScriptEvent" value="#{propertyEditorBean.selectedScriptEventId}"
-                                         disabled="#{not propertyEditorBean.editMode}">
-                                    <f:selectItems value="#{fxSelectBean.assignmentScriptEvents}"/>
-                                </h:selectOneListbox>
-                            </td>
-                            <td style="padding-left:15px">
-                                <h:selectBooleanCheckbox id="selectedActive" value="#{propertyEditorBean.selectedActive}"/>
-                            </td>
-                            <td style="padding-left:15px">
-                                <h:selectBooleanCheckbox id="selectedDerivedUsage" value="#{propertyEditorBean.selectedDerivedUsage}"/>
-                            </td>
-                            <td style="padding-left:15px">
-                                <a4j:commandButton id="addScript" action="#{propertyEditorBean.addScript}" reRender="scripts, tab2"
-                                                   image="/adm/images/commandButton/add.png">
-                                </a4j:commandButton>
-                            </td>
-                        </tr>
-                     </tbody>
-                </table>
+                <c:if test="#{propertyEditorBean.selectedScriptInfoId ne -1}">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#{fxMessageBean['ScriptEditor.label.name']}</th>
+                                <th>#{fxMessageBean['ScriptEditor.label.event']}</th>
+                                <th>#{fxMessageBean['ScriptEditor.label.active']}</th>
+                                <th>#{fxMessageBean['ScriptEditor.label.derivedUsage']}</th>
+                                <th>#{fxMessageBean['ScriptEditor.label.actions']}</th>
+                            </tr>
+                        </thead>
+                         <tbody>
+                            <tr>
+                                <td>
+                                    <h:selectOneListbox size="1" id="selectedScriptInfo" value="#{propertyEditorBean.selectedScriptInfoId}"
+                                            disabled="#{not propertyEditorBean.editMode}">
+                                        <f:selectItems value="#{fxSelectBean.assignmentScripts}"/>
+                                        <a4j:support event="onchange" reRender="selectedScriptEvent" />
+                                    </h:selectOneListbox>
+                                </td>
+                                <td style="padding-left:15px">
+                                     <h:selectOneListbox size="1" id="selectedScriptEvent" value="#{propertyEditorBean.selectedScriptEventId}"
+                                             disabled="#{not propertyEditorBean.editMode}">
+                                        <f:selectItems value="#{fxSelectBean.assignmentScriptEvents}"/>
+                                    </h:selectOneListbox>
+                                </td>
+                                <td style="padding-left:15px">
+                                    <h:selectBooleanCheckbox id="selectedActive" value="#{propertyEditorBean.selectedActive}"/>
+                                </td>
+                                <td style="padding-left:15px">
+                                    <h:selectBooleanCheckbox id="selectedDerivedUsage" value="#{propertyEditorBean.selectedDerivedUsage}"/>
+                                </td>
+                                <td style="padding-left:15px">
+                                    <a4j:commandButton id="addScript" action="#{propertyEditorBean.addScript}" reRender="scripts, tab2"
+                                                       image="/adm/images/commandButton/add.png">
+                                    </a4j:commandButton>
+                                </td>
+                            </tr>
+                         </tbody>
+                    </table>
+                </c:if>
+                <c:if test="#{propertyEditorBean.selectedScriptInfoId eq -1}">
+                   #{fxMessageBean['ScriptEditor.msg.noAssignmentScript']}
+               </c:if>
             </fx:fieldSet>
         </div>
     </ui:fragment>

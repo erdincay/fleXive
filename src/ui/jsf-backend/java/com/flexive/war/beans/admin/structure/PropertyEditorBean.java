@@ -882,6 +882,8 @@ public class PropertyEditorBean implements ActionBean, Serializable {
      * property assignment is possible via the webinterface
      */
     private void initEditing() {
+        // reset selected script
+        this.selectedScriptInfo=null;
         structureManagement = FxJsfUtils.getRequest().getUserTicket().isInRole(Role.StructureManagement);
         if (!assignment.isNew())
             scriptWrapper = new ScriptListWrapper(assignment.getId(), false);
@@ -1173,11 +1175,14 @@ public class PropertyEditorBean implements ActionBean, Serializable {
     }
 
     public long getSelectedScriptInfoId() {
+        if (getSelectedScriptInfo() == null)
+            return -1;
         return getSelectedScriptInfo().getId();
     }
 
     public void setSelectedScriptInfoId(long selectedScriptInfoId) {
-        setSelectedScriptInfo(CacheAdmin.getEnvironment().getScript(selectedScriptInfoId));
+        if (selectedScriptInfoId != -1)
+            setSelectedScriptInfo(CacheAdmin.getEnvironment().getScript(selectedScriptInfoId));
     }
 
     public FxScriptInfo getSelectedScriptInfo() {
