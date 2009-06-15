@@ -417,6 +417,16 @@ public final class FxEnvironmentImpl implements FxEnvironment {
     /**
      * {@inheritDoc}
      */
+    public boolean aclExists(String name) {
+        for (ACL acl : acls)
+            if (acl.getName().equals(name))
+                return true;
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public List<ACL> getACLs() {
         return Collections.unmodifiableList(acls);
     }
@@ -1218,6 +1228,16 @@ public final class FxEnvironmentImpl implements FxEnvironment {
             if (list.getName().equals(name))
                 return list;
         throw new FxNotFoundException("ex.structure.list.notFound", name).asRuntimeException();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean selectListExists(String name) {
+        for (FxSelectList list : this.selectLists)
+            if (list.getName().equals(name))
+                return true;
+        return false;
     }
 
     /**

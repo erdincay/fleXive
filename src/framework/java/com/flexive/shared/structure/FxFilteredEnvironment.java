@@ -167,6 +167,13 @@ public final class FxFilteredEnvironment implements FxEnvironment {
     /**
      * {@inheritDoc}
      */
+    public boolean aclExists(String name) {
+        return environment.aclExists(name);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public List<ACL> getACLs() {
         return environment.getACLs();
     }
@@ -569,6 +576,13 @@ public final class FxFilteredEnvironment implements FxEnvironment {
      */
     public FxSelectList getSelectList(String name) {
         return environment.getSelectList(name);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean selectListExists(String name) {
+        return environment.selectListExists(name);
     }
 
     /**

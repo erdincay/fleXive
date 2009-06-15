@@ -84,6 +84,14 @@ public interface FxEnvironment extends Serializable {
     ACL getACL(String name);
 
     /**
+     * Check if an ACL of the given name exists
+     *
+     * @param name name of the ACL
+     * @return exists
+     */
+    boolean aclExists(String name);
+
+    /**
      * Get all ACL's
      *
      * @return ACL's
@@ -532,6 +540,14 @@ public interface FxEnvironment extends Serializable {
      * @return select list
      */
     FxSelectList getSelectList(String name);
+
+    /**
+     * Check if a FxSelectList with the given name exists
+     *
+     * @param name name of the select list
+     * @return exists
+     */
+    boolean selectListExists(String name);
 
     /**
      * Get the selectlist item with the given id
