@@ -115,7 +115,7 @@ a > img {
     color: black;
 }
 
-.commandIcon {
+.commandIcon, .commandIconDisabled {
     cursor: pointer;
     padding: 3px;
     border: 0;
@@ -124,6 +124,14 @@ a > img {
 .commandIcon:hover {
     opacity: 1;
     background-image:url('../images/toolbar/background-hl.png');
+}
+
+.commandIconDisabled {
+    opacity:0.50;
+}
+
+.commandIconDisabled:hover {
+    opacity:0.30;
 }
 
 .errorMessage {

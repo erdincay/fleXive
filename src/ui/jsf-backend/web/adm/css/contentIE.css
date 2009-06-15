@@ -2,6 +2,10 @@
     padding-top:4px;
 }
 
-.commandButtonRightDisabled, .commandButtonLabelDisabled, .commandButtonIconDisabled {
+.commandButtonRightDisabled, .commandButtonLabelDisabled, .commandButtonIconDisabled, .commandIconDisabled {
     filter: alpha(opacity = 50);
+}
+
+.commandIconDisabled:hover {
+    filter: alpha(opacity = 30);
 }

@@ -387,7 +387,13 @@
         <required>false</required>
         <rtexprvalue>false</rtexprvalue>
         <description>[optional] flag to supress rendering of the whole component</description>
-      </attribute>
+      </attrbute>
+      <attribute>
+        <name>iconDisabled</name>
+        <required>false</required>
+        <rtexprvalue>false</rtexprvalue>
+        <description>[optional] flag to disable the component</description>
+      </attrbute>
     </tag>
     <tag>
       <name>mandatorSelect</name>
