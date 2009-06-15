@@ -51,7 +51,8 @@
                                     </ui:fragment>
                                     <ui:fragment rendered="#{fxSystemBean.isInRole['SelectListEditor']}">
                                         <adm:commandIcon labelKey="SelectList.button.delete" location="content"
-                                                            icon="delete"  bean="#{selectListBean}" action="deleteSelectList" id="deleteButton_#{list.id}">
+                                                            icon="delete"  bean="#{selectListBean}" action="deleteSelectList"
+                                                            confirmKey="SelectList.confirm.delete" id="deleteButton_#{list.id}">
                                                 <f:setPropertyActionListener target="#{selectListBean.selectListId}" value="#{list.id}"/>
                                         </adm:commandIcon>
                                     </ui:fragment>

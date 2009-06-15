@@ -61,7 +61,6 @@ public class GroovySelectListBuilder extends BuilderSupport implements Serializa
         if (parent instanceof FxSelectListItemEdit && child instanceof FxSelectListItemEdit) {
             try {
                 ((FxSelectListItemEdit) child).setParentItem((FxSelectListItemEdit) parent);
-                System.out.println("Set parent: " + parent + " -> " + child);
             } catch (FxInvalidParameterException e) {
                 throw e.asRuntimeException();
             }
@@ -97,10 +96,12 @@ public class GroovySelectListBuilder extends BuilderSupport implements Serializa
                     (ACL) getMapValue(map, "createItemACL", false, CacheAdmin.getEnvironment().getDefaultACL(ACLCategory.SELECTLISTITEM)),
                     (ACL) getMapValue(map, "newItemACL", false, CacheAdmin.getEnvironment().getDefaultACL(ACLCategory.SELECTLISTITEM)),
                     null);
+            list.setOnlySameLevelSelect(Boolean.valueOf(String.valueOf(getMapValue(map, "selectOnlySameLevel", false, false))));
+            list.setBreadcrumbSeparator((String) getMapValue(map, "breadcrumbSeparator", false, " > "));
             return list;
         } else {
             return FxSelectListItemEdit.createNew(
-                    (String) getMapValue(map, "name", true, null),
+                    (String) getMapValue(map, "name", false, String.valueOf(node)),
                     (ACL) getMapValue(map, "acl", false, CacheAdmin.getEnvironment().getDefaultACL(ACLCategory.SELECTLISTITEM)),
                     list,
                     (FxString) getMapValue(map, "label", true, null),
@@ -140,7 +141,6 @@ public class GroovySelectListBuilder extends BuilderSupport implements Serializa
      */
     @Override
     protected Object createNode(Object node, Map map, Object value) {
-        System.out.println("createNode4 " + node + " -> " + map + " -> " + value);
         return null;
     }
 }
