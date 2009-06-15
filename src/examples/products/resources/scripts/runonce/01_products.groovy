@@ -30,13 +30,13 @@ final FxSelectListEdit colorsEdit = FxSelectListEdit.createNew("ARTICLE_COLORS",
         new FxString(true, FxLanguage.ENGLISH, "Article Colors").setTranslation(FxLanguage.GERMAN, "Farben f\u00FCr Artikel"),
         new FxString(true, FxLanguage.ENGLISH, "Article Colors").setTranslation(FxLanguage.GERMAN, "Farben f\u00FCr Artikel"),
         true, itemAcl, itemAcl)
-[["black", "schwarz"],
- ["white", "weiss"],
- ["red", "rot"],
- ["green", "gr\u00FCn"],
- ["blue", "blau"]].each { trans ->
+[["black", "Schwarz", "#000000"],
+ ["white", "Weiss", "#FFFFFF"],
+ ["red", "Rot", "#FF0000"],
+ ["green", "Gr\u00FCn", "#00FF00"],
+ ["blue", "Blau", "#0000FF"]].each { trans ->
     new FxSelectListItemEdit(trans[0], itemAcl, colorsEdit,
-            new FxString(FxLanguage.ENGLISH, trans[0]).setTranslation(FxLanguage.GERMAN, trans[1]), trans[0], "")
+            new FxString(FxLanguage.ENGLISH, trans[0]).setTranslation(FxLanguage.GERMAN, trans[1]), trans[0], trans[2])
 }
 final long colorsId = EJBLookup.selectListEngine.save(colorsEdit)
 final FxSelectList colors = CacheAdmin.environment.getSelectList(colorsId)  
