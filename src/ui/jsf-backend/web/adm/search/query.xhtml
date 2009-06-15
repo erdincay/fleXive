@@ -18,6 +18,9 @@
 	
     <ui:define name="body">
         <a4j:form id="frm">
+            <!-- save content editor state -->
+            <adm:saveContentEditorState/>
+
             <adm:resultTabs activeTab="query"/>
 
             <script type="text/javascript" src="#{adm:versionedUrl('pub/js/queryEditor.js')}"/>

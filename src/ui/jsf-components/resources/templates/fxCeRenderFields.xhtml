@@ -1,0 +1,95 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+      xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+      xmlns:fx="http://www.flexive.com/jsf/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:weblet="http://weblets.dev.java.net/tags_jsp2"
+      xmlns:rich="http://richfaces.org/rich">
+
+<ui:composition>
+    <c:forEach var="element" items="#{data}">
+        <c:if test="#{not element.systemInternal}">
+            <c:if test="#{element.group}">
+                <a4j:outputPanel>
+                    <div class="fxContentEditor_group" onmouseover='flexive.contentEditor.closeMenu(event,false)'>
+                        <div class="header">
+                            <fx:fxCeRenderFieldsMenu element="#{element}" icon="group"/>
+                            <span class="display">#{fxMapBean.assignments[element.assignmentId].displayName}</span>
+                        </div>
+                        <fx:fxCeRenderFields data="#{element.children}" icon="group"/>
+
+                        <div class="end">&nbsp;</div>
+                    </div>
+                </a4j:outputPanel>
+            </c:if>
+
+            <c:if test="#{element.property}">
+                <a4j:outputPanel>
+                    <div class="fxContentEditor_property">
+                        <fx:fxCeRenderFieldsMenu element="#{element}" icon="property"/>
+
+                        <div class="display">
+                            #{fxMapBean.assignments[element.assignmentId].displayName}
+                        </div>
+                        <fx:fxValueInput value="#{_ceContent.data[element.XPathFull]}"
+                                         readOnly="#{not _ceContent.guiSettings.editMode or
+                                            _ceContent.data[element.XPathFull].readOnly or
+                                            not empty _ceContent.guiSettings.openedReferenceId}"
+                                         readOnlyShowTranslations="true"
+                                         containerDivClass="fxContentEditor_value"
+                                         onchange="#{element.value.class eq 'class com.flexive.shared.value.FxBinary' ? 'flexive.contentEditor.fileInputChanged()' : ''}"
+                                         valueFormatter="#{_ceContent.guiSettings.valueFormatter}"/>
+                        <ui:fragment rendered="#{element.value.class eq 'class com.flexive.shared.value.FxReference' and _ceContent.guiSettings.editMode}">
+                            <ui:insert name="editReferenceButton">
+                                <a4j:commandLink reRender="#{__ce_reRender}" action="#{__ceBean.editReference}"
+                                                 eventsQueue="ceQueue" onclick="flexive.contentEditor.preSubmit();"
+                                                 title="#{fxMessageBean['ContentEditor.button.editReference.title']}"
+                                                 styleClass="fxContentEditor_editReferenceIcon"
+                                                 oncomplete="flexive.yui.load()"
+                                                 rendered="#{empty _ceContent.guiSettings.openedReferenceId and not _ceContent.data[element.XPathFull].isEmpty}">
+                                        <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
+                                        <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
+                                        <f:setPropertyActionListener value="#{element}" target="#{__ceBean.element}"/>
+                               </a4j:commandLink>
+                            </ui:insert>
+
+                            <ui:insert name="newReferenceButton">
+                                <a4j:commandLink reRender="#{__ce_reRender}" action="#{__ceBean.createReference}"
+                                                 eventsQueue="ceQueue" onclick="flexive.contentEditor.preSubmit();"
+                                                 title="#{fxMessageBean['ContentEditor.button.newReference.title']}"
+                                                 styleClass="fxContentEditor_newReferenceIcon"
+                                                 oncomplete="flexive.yui.load()"
+                                                 rendered="#{empty _ceContent.guiSettings.openedReferenceId}">
+                                        <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
+                                        <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
+                                        <f:setPropertyActionListener value="#{element}" target="#{__ceBean.element}"/>
+                               </a4j:commandLink>
+                            </ui:insert>
+                        </ui:fragment>
+                            <c:if test="#{_ceContent.idGenerator[element] eq _ceContent.guiSettings.openedReferenceId}">
+                                <div class="fxContentEditor_referenceContainer">
+                                <!-- retrieve referenced content -->
+                                <c:set var="__refEditorId" value="#{__ceBean.editorReferencePrefix}#{_ceContent.editorId}"/>
+                                <c:set var="__refContent" value="#{__ceBean.contentStorage[__refEditorId]}"/>
+
+                                <!-- un-set parameters from outer content editor-->
+                                    <fx:contentEditor editorId="#{__refContent.editorId}" formPrefix="#{__refContent.guiSettings.formPrefix}"
+                                                      typeId="#{null}" editMode="#{null}"
+                                                      content="#{null}" pk="#{null}" type="#{null}" contentId="#{null}">
+                                    </fx:contentEditor>
+                                </div>
+                            </c:if>
+                    </div>
+                    <br clear="all"/>
+                </a4j:outputPanel>
+            </c:if>
+        </c:if>
+    </c:forEach>
+</ui:composition>
+</html>

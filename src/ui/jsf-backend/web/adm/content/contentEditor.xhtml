@@ -20,20 +20,35 @@
     </ui:define>
 
     <ui:define name="body">
-
-        <a4j:form id="frm" onmouseover='closeMenu(event,false)' enctype="multipart/form-data">
+        <h:form id="#{beContentEditorBean.formId}" onmouseover='flexive.contentEditor.closeMenu(event,false)' enctype="multipart/form-data">
             <adm:resultTabs activeTab="content"/>
+
             <script type="text/javascript">
-                var isContentEditor = true; // flag for other frames/JS utility methods
+                // to identify the content editor from other frames
+                // for other frames/JS utility methods
+                var isContentEditor = true;
             </script>
-            
-            <!-- Include the content editor -->
-            <adm:contentEditor srcEditor="#{contentEditorBean}"/>
+
+            <c:if test="#{empty beContentEditorBean.parseRequestParameters}"/>
+            <adm:saveContentEditorState/>
+
+            <!-- Content select screen -->
+            <c:if test="#{not beContentEditorBean.initialized}">
+                <t:selectOneListbox size="1" id="type" value="#{beContentEditorBean.newTypeId}">
+                    <f:selectItems value="#{beContentEditorBean.editableTypes}" />
+                </t:selectOneListbox>
+                <br/><br/>
+                <adm:commandButton labelKey="Content.button.create" location="both"
+                                  bean="#{beContentEditorBean}"
+                                  icon="save" action="createNewContent" id="createContentForTypeButton"/>
+            </c:if>
+
+            <c:if test="#{beContentEditorBean.initialized}" disableTab="true">
+                <adm:contentEditor />
+            </c:if>
             <adm:toolbarPluginButtons/>
-        </a4j:form>
-
+        </h:form>
     </ui:define>
-
 </ui:composition>
 
 </body>

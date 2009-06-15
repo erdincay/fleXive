@@ -1,0 +1,17 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:t="http://myfaces.apache.org/tomahawk">
+<body>
+    Save state of the backend content editor
+<ui:composition>
+    <t:saveState value="#{beContentEditorBean.pk}"/>
+    <t:saveState value="#{beContentEditorBean.typeId}"/>
+    <t:saveState value="#{beContentEditorBean.content}"/>
+    <t:saveState value="#{beContentEditorBean.editMode}"/>
+    <t:saveState value="#{beContentEditorBean.infoPanelState}"/>
+    <t:saveState value="#{beContentEditorBean.treeNodes}"/>
+    <t:saveState value="#{fxContentEditorBean.contentStorage}"/>
+</ui:composition>
+</body>
+</html>

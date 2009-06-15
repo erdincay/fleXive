@@ -33,10 +33,9 @@
  ***************************************************************/
 package com.flexive.war.servlet;
 
-import com.flexive.shared.content.FxContent;
 import com.flexive.shared.value.BinaryDescriptor;
 import com.flexive.shared.value.FxBinary;
-import com.flexive.war.beans.admin.content.ContentEditorBean;
+import com.flexive.war.beans.admin.content.BeContentEditorBean;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
@@ -67,7 +66,7 @@ public class CeFileUpload implements Servlet {
         try {
 
             final HttpServletRequest request = (HttpServletRequest) servletRequest;
-            final ContentEditorBean ceb = ContentEditorBean.getSingleton().getInstance(request);
+            final BeContentEditorBean ceb = null; // = ContentEditorBean.getSingleton().getInstance(request);
 
             if (ceb == null) {
                 renderContent = "No Content Editor Bean is active";
@@ -109,10 +108,10 @@ public class CeFileUpload implements Servlet {
                 }
 
 
-                FxContent co = ceb.getContent();
+                //FxContent co = ceb.getContent();
                 FxBinary binProperty = new FxBinary(binary);
-                co.setValue(xpath, binProperty);
-                ceb.getContentEngine().prepareSave(co);
+                //co.setValue(xpath, binProperty);
+                //ceb.getContentEngine().prepareSave(co);
             }
         } catch (Throwable t) {
             System.err.println(t.getMessage());

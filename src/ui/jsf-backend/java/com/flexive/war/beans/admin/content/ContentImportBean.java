@@ -129,13 +129,12 @@ public class ContentImportBean implements ActionBean, Serializable {
             return "";
         }
         if (content != null) {
-            ContentEditorBean ce = (ContentEditorBean) FxJsfUtils.getManagedBean("contentEditorBean");
-            ce.init(content);
-            ce.compact();
+            BeContentEditorBean ce = (BeContentEditorBean) FxJsfUtils.getManagedBean("beContentEditorBean");
+            ce.initEditor(content, true);
             if (nodeId >= 0)
                 ce.addTreeNode(nodeId);
             new FxFacesMsgInfo("Content.nfo.imported").addToContext();
-            return "contentEditor";
+            return ce.getEditorPage();
         }
         return "";
     }

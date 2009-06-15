@@ -104,7 +104,7 @@
     <component>
         <component-type>flexive.TreeNavigation</component-type>
         <component-class>com.flexive.faces.components.tree.TreeNavigation</component-class>
-    </component>
+    </component>               
 
     <render-kit>
         <renderer>
@@ -248,6 +248,14 @@
     <managed-bean>
         <managed-bean-name>fxBrowseReferencesBean</managed-bean-name>
         <managed-bean-class>com.flexive.faces.beans.BrowseReferencesBean</managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean>
+
+   <managed-bean>
+        <managed-bean-name>fxContentEditorBean</managed-bean-name>
+        <managed-bean-class>
+            com.flexive.faces.beans.FxContentEditorBean
+        </managed-bean-class>
         <managed-bean-scope>request</managed-bean-scope>
     </managed-bean>
 

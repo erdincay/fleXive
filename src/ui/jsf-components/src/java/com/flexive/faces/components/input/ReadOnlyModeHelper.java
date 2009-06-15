@@ -105,8 +105,9 @@ class ReadOnlyModeHelper extends RenderHelper {
         }
 
         final FxLanguage outputLanguage = FxContext.getUserTicket().getLanguage();
-        if (component.getValueFormatter() != null) {
-            // use custom formatter
+        if (component.getValueFormatter() != null &&
+                component.getValueFormatter().format(value, value.getBestTranslation(language), outputLanguage) !=null) {
+            // use custom formatter if retuned value != null, otherwise use default
             addOutputComponent(component.getValueFormatter().format(value, value.getBestTranslation(language), outputLanguage), language);
         } else if (value instanceof FxBinary && !value.isEmpty()) {
             // render preview image

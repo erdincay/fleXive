@@ -35,11 +35,11 @@
     </managed-bean>
 
     <managed-bean>
-        <managed-bean-name>contentEditorBean</managed-bean-name>
+        <managed-bean-name>beContentEditorBean</managed-bean-name>
         <managed-bean-class>
-            com.flexive.war.beans.admin.content.ContentEditorBean
+            com.flexive.war.beans.admin.content.BeContentEditorBean
         </managed-bean-class>
-        <managed-bean-scope>session</managed-bean-scope>
+        <managed-bean-scope>request</managed-bean-scope>
     </managed-bean>
 
     <managed-bean>
@@ -88,14 +88,6 @@
                 com.flexive.war.beans.admin.structure.StructureTreeControllerBean
             </managed-bean-class>
             <managed-bean-scope>request</managed-bean-scope>
-    </managed-bean>
-
-    <managed-bean>
-        <managed-bean-name>inlineContentEditorBean</managed-bean-name>
-        <managed-bean-class>
-            com.flexive.war.beans.admin.content.InlineContentEditorBean
-        </managed-bean-class>
-        <managed-bean-scope>session</managed-bean-scope>
     </managed-bean>
 
     <managed-bean>
@@ -304,21 +296,6 @@
         <navigation-case>
             <from-outcome>showContentEditor</from-outcome>
             <to-view-id>/adm/user/showContentEditor.xhtml</to-view-id>
-        </navigation-case>
-
-        <navigation-case>
-            <from-outcome>inlineContentEditor</from-outcome>
-            <to-view-id>/adm/content/inlineContentEditor.xhtml</to-view-id>
-        </navigation-case>
-
-        <navigation-case>
-            <from-outcome>iceCutCopyPaste</from-outcome>
-            <to-view-id>/adm/content/iceCutCopyPaste.xhtml</to-view-id>
-        </navigation-case>
-
-          <navigation-case>
-            <from-outcome>iceClose</from-outcome>
-            <to-view-id>/adm/content/iceClose.xhtml</to-view-id>
         </navigation-case>
 
         <navigation-case>

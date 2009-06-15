@@ -29,15 +29,20 @@ Parameters:
         document.getElementById("#{jsVar}_dialogContainer").style.display = "none"; // hide until Yahoo is available
         flexive.yui.require("container");
         flexive.yui.onYahooLoaded(function() {
-            var dialog = new YAHOO.widget.Panel('#{jsVar}_dialogContainer',
-            {
-                fixedcenter: true,
-                visible: false,
-                constraintoviewport: true
-            });
-            dialog.render();
-            #{jsVar} = dialog;
-            document.getElementById("#{jsVar}_dialogContainer").style.display = "block";
+            try {
+                var dialog = new YAHOO.widget.Panel('#{jsVar}_dialogContainer',
+                {
+                    fixedcenter: true,
+                    visible: false,
+                    constraintoviewport: true
+                });
+                dialog.render();
+                #{jsVar} = dialog;
+                document.getElementById("#{jsVar}_dialogContainer").style.display = "block";
+            }
+            catch (e) {
+                alert(e);
+            }
         });
 	//-->
 	</script>

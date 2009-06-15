@@ -42,11 +42,13 @@ import com.flexive.faces.messages.FxFacesMsgInfo;
 import com.flexive.shared.*;
 import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.content.FxContent;
+import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.interfaces.AccountEngine;
 import com.flexive.shared.interfaces.UserGroupEngine;
 import com.flexive.shared.security.*;
 import com.flexive.war.FxRequest;
+import com.flexive.war.beans.admin.content.BeContentEditorBean;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.logging.Log;
@@ -454,14 +456,8 @@ public class AccountBean implements Serializable {
     }
 
     public String showContactData(){
-        FxRequest request = FxJsfUtils.getRequest();        
-        if(this.account.getContactData() != null){
-            request.setAttribute("cdId", this.account.getContactData().getId());
-            request.setAttribute("vers", this.account.getContactData().getVersion());
-        } else {
-            request.setAttribute("cdId", -1);
-            request.setAttribute("vers", -1);
-        }
+        BeContentEditorBean ceb = (BeContentEditorBean) FxJsfUtils.getManagedBean("beContentEditorBean");
+        ceb.initEditor(this.account.getContactData() ,true);
         return "showContentEditor";
     }
 
@@ -542,7 +538,7 @@ public class AccountBean implements Serializable {
             return "userEdit";
         } catch (Throwable t) {
             new FxFacesMsgErr(t).addToContext();
-            return "contentPage";
+            return null;
         }
     }
 

@@ -1,0 +1,255 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+      xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:fx="http://www.flexive.com/jsf/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:jstl="http://java.sun.com/jsp/jstl/functions"
+      xmlns:weblet="http://weblets.dev.java.net/tags_jsp2">
+
+<ui:composition>
+    <fx:wrappedContentProvider contentId="#{contentId}" editorId="#{editorId}"
+        editMode="#{editMode}" pk="#{pk}" content="#{content}" formPrefix="#{formPrefix}"
+        typeId="#{typeId}" type="#{type}" var="#{var}" valueFormatter="#{valueFormatter}"
+        disableAcl="#{disableAcl}" disableWorkflow="#{disableWorkflow}" disableEdit="#{disableEdit}"
+        disableDelete="#{disableDelete}" disableVersion="#{disableVersion}" disableCompact="#{disableCompact}"
+        disableSave="#{disableSave}" disableCancel="#{disableCancel}" disableButtons="#{disableButtons}"
+        disableAddAssignment="#{disableAddAssignment}" disableRemoveAssignment="#{disableRemoveAssignment}"
+        disablePositionAssignment="#{disablePositionAssignment}" disableMessages="#{disableMessages}"
+        reRender="#{reRender}" reset="#{reset}">
+
+        <c:if test="#{not _ceContent.guiSettings.disableMessages and __ceError}">
+                <!-- error messages outside of container output panel
+                if a tag error happens -->
+                <h:messages id="#{_ceContent.editorId}_#{__ceBean.messagesId}"/>
+        </c:if>
+
+        <c:if test="#{not __ceError}">
+            <c:if test="#{not empty _ceContent.guiSettings.reRender}">
+                <c:set var="__ce_reRender" value="#{_ceContent.guiSettings.reRender}"/>
+            </c:if>
+
+            <c:if test="#{not __ceRenderedBoxed and empty _ceContent.guiSettings.reRender}">
+                <c:set var="__ce_reRender" value="#{_ceContent.editorId}"/>
+            </c:if>
+
+            <!--hidden input elements for saving state only needed once per content editor form-->
+            <c:set var="__ceAlreadyRendered" value="#{_ceContent.guiSettings.formPrefix}__ceRendered"/>
+            <c:if test="#{not __ceRenderedBoxed and not requestScope[__ceAlreadyRendered]}">
+                <!-- preserve stored contents -->
+                <t:saveState value="#{__ceBean.contentStorage}"/>
+                <!-- store selected elements from popup menu -->
+                <t:inputHidden value="#{__ceBean.childrenToAdd}" id="__ceElements"/>
+                <!-- binary input hack -->
+                <t:inputHidden value="#{__ceBean.storageKey}" id="__ceStorageKey"/>
+                <t:inputHidden value="#{__ceBean.nextA4jAction}" id="__ceNextA4jAction"/>
+                <t:inputHidden value="#{__ceBean.actionXpath}" id="__ceActionXpath"/>
+                <h:commandButton action="#{__ceBean.resolveA4jAction}" id="__ceResolveA4jAction"
+                                 style="display:none;"/>
+             </c:if>
+
+            <c:set var="__ceRenderedBoxed" value="true"/>
+
+            <a4j:outputPanel id="#{_ceContent.editorId}" display="block"
+                             styleClass="#{empty _ceContent.guiSettings.openedReferenceId ?
+                             'fxContentEditor_base' :'fxContentEditor_locked'}">
+
+                <c:if test="#{not _ceContent.guiSettings.disableMessages}">
+                    <!-- error messages inside the container output panel
+                    so that they update after an ajax reRender-->
+                    <h:messages id="#{_ceContent.editorId}_#{__ceBean.messagesId}"/>
+                </c:if>
+
+                <ui:insert name="insertTop"/>
+
+                <ui:insert name="contentSettings">
+                    <a4j:outputPanel id="#{_ceContent.editorId}_settings">
+                        <c:if test="#{not _ceContent.guiSettings.disableAcl}">
+                             <!-- ACL -->
+                            <ui:fragment rendered="#{not _ceContent.supportSecurity}">
+                                <em>#{fxMessageBean['ContentEditor.msg.noSecurity']}</em>
+                            </ui:fragment>
+                            <ui:fragment rendered="#{_ceContent.supportSecurity}">
+                                <fx:formRow labelKey="ContentEditor.field.ACL" id="#{_ceContent.editorId}_acl">
+                                     <h:selectOneListbox id="#{_ceContent.editorId}_acl" size="1" value="#{_ceContent.content.aclId}"
+                                                        disabled="#{not _ceContent.guiSettings.editMode or not empty _ceContent.guiSettings.openedReferenceId}">
+                                        <f:selectItems value="#{fxSelectBean.contentACLs}"/>
+                                    </h:selectOneListbox>
+                                </fx:formRow>
+                            </ui:fragment>
+                        </c:if>
+                        <c:if test="#{not _ceContent.guiSettings.disableWorkflow}">
+                            <!-- wf step -->
+                            <fx:formRow labelKey="ContentEditor.field.step" id="#{_ceContent.editorId}_step">
+                                 <h:selectOneListbox id="#{_ceContent.editorId}_step" size="1" value="#{_ceContent.step}"
+                                                     disabled="#{not _ceContent.guiSettings.editMode or not empty _ceContent.guiSettings.openedReferenceId}">
+                                    <f:selectItems value="#{_ceContent.possibleWorkflowSteps}"/>
+                                </h:selectOneListbox>
+                            </fx:formRow>
+                        </c:if>
+                    </a4j:outputPanel>
+                </ui:insert>
+
+                <ui:insert name="insertMiddle"/>
+
+                <!-- generated id of the content editor root element -->
+                <!-- doesn't work with a4j:reRendered attribute unfortunately
+                <c:set var="editor_root" value="#{__ceBean.contentStorage[_ceContent.editorId].idGenerator[__ceBean.contentStorage[_ceContent.editorId].content.rootGroup]}"/-->
+                <c:set var="editor_root" value="#{_ceContent.editorId}_editor"/>
+                <!-- Content editor screen -->
+                <a4j:outputPanel id="#{editor_root}">
+                    <!-- input language switch -->
+                    <div class="fxContentEditor_languageSwitch">
+                        <div style="#{not _ceContent.guiSettings.editMode or not empty _ceContent.guiSettings.openedReferenceId ? 'display:none' : ''}">
+                            <fx:formRow labelKey="ContentEditor.field.language" id="#{_ceContent.editorId}_updateLanguage">
+                                <fx:fxValueInputLanguageSelect id="#{_ceContent.editorId}_updateLanguage"/>
+                            </fx:formRow>
+                        </div>
+                    </div>
+
+                    <!-- Properties and Groups -->
+                    <div style="position:relative;left:-10px">
+                        <div style="padding-top: 3px; padding-left: 8px; width: 30px; float: left;">
+                            <fx:fxCeRenderFieldsMenu element="#{_ceContent.content.rootGroup}" icon="group"/>
+                        </div>
+                        <br clear="all"/>
+                        <fx:fxCeRenderFields data="#{_ceContent.content.rootGroup.children}"/>
+
+                    </div>
+                </a4j:outputPanel>
+
+                <div style="clear:both;height:20px"><!-- __ --></div>
+
+                <a4j:outputPanel id="#{_ceContent.editorId}_buttons" rendered="#{not _ceContent.guiSettings.disableButtons}" layout="block">
+                    <ui:insert name="buttons">
+                        <ui:fragment rendered="#{not _ceContent.guiSettings.editMode and _ceContent.editAble
+                        and empty _ceContent.guiSettings.openedReferenceId}">
+                            <ui:fragment rendered="#{not _ceContent.guiSettings.disableEdit}">
+                                <ui:insert name="editButton">
+                                    <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.edit']}"
+                                                       title="#{fxMessageBean['ContentEditor.button.edit.title']}"
+                                                   action="#{__ceBean.enableEdit}" reRender="#{__ce_reRender}">
+                                        <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
+                                        <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
+                                    </a4j:commandButton>
+                                </ui:insert>
+                            </ui:fragment>
+                        </ui:fragment>
+
+                        <ui:fragment rendered="#{_ceContent.guiSettings.editMode}">
+                            <ui:fragment rendered="#{_ceContent.new}">
+                                <ui:fragment rendered="#{not _ceContent.guiSettings.disableSave
+                                and empty _ceContent.guiSettings.openedReferenceId and _ceContent.guiSettings.editMode}">
+                                    <ui:insert name="createButton">
+                                        <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.create']}"
+                                                           title="#{fxMessageBean['ContentEditor.button.create.title']}"
+                                                   action="#{__ceBean.save}" onclick="flexive.contentEditor.preSubmit();"
+                                                reRender="#{__ce_reRender}">
+                                             <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
+                                             <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
+                                        </a4j:commandButton>
+                                    </ui:insert>
+                                </ui:fragment>
+                            </ui:fragment>
+
+                            <ui:fragment rendered="#{not _ceContent.new}">
+                                <ui:fragment rendered="#{not _ceContent.guiSettings.disableSave
+                                and empty _ceContent.guiSettings.openedReferenceId and _ceContent.guiSettings.editMode}">
+                                    <ui:insert name="saveButton">
+                                        <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.save']}"
+                                                           title="#{fxMessageBean['ContentEditor.button.save']}"
+                                                   action="#{__ceBean.save}" onclick="flexive.contentEditor.preSubmit();"
+                                                reRender="#{__ce_reRender}">
+                                            <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
+                                            <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
+                                        </a4j:commandButton>
+                                    </ui:insert>
+                                </ui:fragment>
+
+                                <ui:fragment rendered="#{not _ceContent.guiSettings.disableVersion and not _ceContent.guiSettings.disableSave
+                                and empty _ceContent.guiSettings.openedReferenceId and _ceContent.guiSettings.editMode}">
+                                    <ui:insert name="saveInNewVersionButton">
+                                        <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.saveInNewVersion']}"
+                                                           title="#{fxMessageBean['ContentEditor.button.saveInNewVersion.title']}"
+                                                action="#{__ceBean.saveInNewVersion}" onclick="flexive.contentEditor.preSubmit();"
+                                                reRender="#{__ce_reRender}">
+                                            <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
+                                            <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
+                                        </a4j:commandButton>
+                                    </ui:insert>
+                                </ui:fragment>
+
+                                <ui:fragment rendered="#{_ceContent.deleteAble
+                                and not _ceContent.guiSettings.disableDelete and empty _ceContent.guiSettings.openedReferenceId
+                                and _ceContent.guiSettings.editMode}">
+                                    <ui:insert name="deleteButton">
+                                        <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.delete']}"
+                                                           title="#{fxMessageBean['ContentEditor.button.delete.title']}"
+                                               action="#{__ceBean.delete}" onclick="flexive.contentEditor.preSubmit();"
+                                                reRender="#{__ce_reRender}">
+                                             <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
+                                             <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
+                                       </a4j:commandButton>
+                                    </ui:insert>
+                                </ui:fragment>
+
+                               <ui:fragment rendered="#{_ceContent.versionDeleteAble and
+                               not _ceContent.guiSettings.disableDelete and not _ceContent.guiSettings.disableVersion
+                               and empty _ceContent.guiSettings.openedReferenceId and _ceContent.guiSettings.editMode}">
+                                   <ui:insert name="deleteVersionButton">
+                                       <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.deleteVersion']}"
+                                                          title="#{fxMessageBean['ContentEditor.button.deleteVersion.title']}"
+                                               action="#{__ceBean.deleteCurrentVersion}" onclick="flexive.contentEditor.preSubmit();"
+                                               reRender="#{__ce_reRender}">
+                                            <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
+                                            <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
+                                       </a4j:commandButton>
+                                   </ui:insert>
+                               </ui:fragment>
+                            </ui:fragment>
+
+                            <ui:fragment rendered="#{not _ceContent.guiSettings.disableCompact
+                                                     and empty _ceContent.guiSettings.openedReferenceId
+                                                     and _ceContent.guiSettings.editMode}">
+                                <ui:insert name="compactButton">
+                                    <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.compact']}"
+                                                       title="#{fxMessageBean['ContentEditor.button.compact.title']}"
+                                                   action="#{__ceBean.compact}" onclick="flexive.contentEditor.preSubmit();"
+                                            reRender="#{__ce_reRender}">
+                                         <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
+                                         <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
+                                    </a4j:commandButton>
+                                </ui:insert>
+                            </ui:fragment>
+
+                            <ui:fragment rendered="#{not _ceContent.guiSettings.disableCancel
+                                                    and empty _ceContent.guiSettings.openedReferenceId
+                                                    and _ceContent.guiSettings.editMode}">
+                                <ui:insert name="cancelButton">
+                                    <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.cancel']}"
+                                               action="#{__ceBean.cancel}" onclick="flexive.contentEditor.preSubmit();"
+                                               title="#{fxMessageBean['ContentEditor.button.cancel']}"
+                                               reRender="#{__ce_reRender}">
+                                        <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
+                                        <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
+                                    </a4j:commandButton>
+                                </ui:insert>
+                            </ui:fragment>
+                        </ui:fragment>
+                        <ui:insert name="additionalButtons"/>
+                    </ui:insert>
+                </a4j:outputPanel>
+                <ui:insert name="insertBottom"/>
+            </a4j:outputPanel>
+        </c:if>
+    </fx:wrappedContentProvider>
+</ui:composition>
+
+
+</html>

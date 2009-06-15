@@ -12,29 +12,32 @@
       xmlns:fx="http://www.flexive.com/jsf/core"
       xmlns:adm="http://www.flexive.com/jsf/admin"
       xmlns:t="http://myfaces.apache.org/tomahawk"
-      xml:lang="en" lang="en">
-<head>
-    <title>Version Information tag</title>
-</head>
-<body>
+      xml:lang="en" lang="en"
+      xmlns:rich="http://richfaces.org/rich">
+Content editor version Information
 
 Parameters:
-* versionInfo ... FxContentVersionInfo instance
+* srcEditor... backing bean (in this case BeContentEditorBean)
+* wrappedContent... value binding to wrapped content object provided by fxConentEditor
 
 this template has to use ui:repeat to make the el expression available in fxMessageBean
 see http://www.nabble.com/How-to-get-the-ui%3Aparam-value-in-Javabean--td12120387.html
 or http://forum.java.sun.com/thread.jspa?threadID=5218131&amp;messageID=9886363
 for more info
 
-<ui:composition xmlns:rich="http://richfaces.org/rich">
-    <c:if test="#{srcEditor.new}">
-        <c:set var="lbl1" value="#{srcEditor.typeDisplay} #{fxMessageBean['Content.flag.new']}"/>
+<ui:composition>
+    <c:set var="versionInfo" value="#{wrappedContent.versionInfo}"/>
+    <c:set var="typeLabel" value="#{not empty fxMapBean.types[myContent.content.typeId].label ?
+                                            fxMapBean.types[myContent.content.typeId].label :
+                                            fxMapBean.types[myContent.content.typeId].name}"/>
+    <c:if test="#{wrappedContent.new}">
+        <c:set var="lbl1" value="#{typeLabel} #{fxMessageBean['Content.flag.new']}"/>
     </c:if>
-    <c:if test="#{!srcEditor.new and versionInfo.versionCount > 1}">
-        <c:set var="lbl1" value="#{srcEditor.typeDisplay} [Id: #{srcEditor.id}, version: #{srcEditor.version}] - #{versionInfo.versionCount} versions"/>
+    <c:if test="#{not wrappedContent.new and versionInfo.versionCount > 1}">
+        <c:set var="lbl1" value="#{typeLabel} [Id: #{wrappedContent.content.pk.id}, version: #{wrappedContent.content.pk.version}] - #{versionInfo.versionCount} versions"/>
     </c:if>
-    <c:if test="#{!srcEditor.new and versionInfo.versionCount == 1}">
-        <c:set var="lbl1" value="#{srcEditor.typeDisplay} [Id: #{srcEditor.id}]"/>
+    <c:if test="#{not wrappedContent.new and versionInfo.versionCount == 1}">
+        <c:set var="lbl1" value="#{typeLabel} [Id: #{wrappedContent.content.pk.id}]"/>
     </c:if>
 
         <ui:repeat var="vi" value="#{versionInfo}">
@@ -53,17 +56,20 @@ for more info
                 <b>#{fxMessageBean['Content.field.versionInfo.version,#{ver}']}</b>
                 #{fxMessageBean['Content.field.versionInfo.step,#{fxMapBean.step[vi.versionSelector[ver].step]}']}
                 <br/>
-                <ui:fragment rendered="#{ver!=srcEditor.version and srcEditor.readOnly}">
+                <ui:fragment rendered="#{ver!=wrappedContent.content.pk.version and
+                                        empty wrappedContent.guiSettings.openedReferenceId}">
                     <adm:commandIcon labelKey="Content.button.loadVersion" location="content"
-                                     icon="load" action="reload" bean="#{srcEditor}"
+                                     icon="load" action="loadVersion" bean="#{srcEditor}"
                                      id="loadVersion_#{ver}">
                         <f:setPropertyActionListener target="#{srcEditor.version}" value="#{ver}"/>
+                        <f:setPropertyActionListener target="#{srcEditor.wrappedContent}" value="#{wrappedContent}"/>
                     </adm:commandIcon>
-                    <ui:fragment rendered="#{srcEditor.versionDeleteAble}">
+                    <ui:fragment rendered="#{wrappedContent.versionDeleteAble and wrappedContent.guiSettings.editMode}">
                         <adm:commandIcon labelKey="Content.button.deleteVersion" location="content"
                                          icon="deleteVersion" action="deleteVersion" bean="#{srcEditor}"
                                          id="removeVersion_#{ver}">
                             <f:setPropertyActionListener target="#{srcEditor.version}" value="#{ver}"/>
+                            <f:setPropertyActionListener target="#{srcEditor.wrappedContent}" value="#{wrappedContent}"/>
                         </adm:commandIcon>
                     </ui:fragment>
                     <br/>
@@ -73,8 +79,4 @@ for more info
             </ui:repeat>
         </ui:repeat>
 </ui:composition>
-
-
-
-</body>
 </html>

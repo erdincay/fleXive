@@ -14,6 +14,9 @@
 
     <ui:define name="body">
         <a4j:form id="frm">
+            <!-- save content editor state -->
+            <adm:saveContentEditorState/>
+            
             <adm:resultTabs activeTab=""/>
             <adm:tab label="#{fxMessageBean['ResultPreferences.tabtitle.edit']}" active="true" id="resultPreferences"/>
 

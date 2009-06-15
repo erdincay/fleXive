@@ -37,28 +37,28 @@
     </tag>
 
     <tag>
-        <tag-name>ceRenderFields</tag-name>
-        <source>templates/ceRenderFields.xhtml</source>
+        <tag-name>versionInfo</tag-name>
+        <source>templates/beVersionInfo.xhtml</source>
     </tag>
 
     <tag>
-        <tag-name>ceVersionInfo</tag-name>
-        <source>templates/ceVersionInfo.xhtml</source>
+        <tag-name>contentInfoPanel</tag-name>
+        <source>templates/beContentInfoPanel.xhtml</source>
+    </tag>
+
+    <tag>
+        <tag-name>saveContentEditorState</tag-name>
+        <source>templates/saveContentEditorState.xhtml</source>
     </tag>
 
     <tag>
         <tag-name>contentEditor</tag-name>
-        <source>templates/ceContentEditor.xhtml</source>
+        <source>templates/beContentEditor.xhtml</source>
     </tag>
 
     <tag>
-        <tag-name>ceRenderFieldMenu</tag-name>
-        <source>templates/ceRenderFieldMenu.xhtml</source>
-    </tag>
-
-    <tag>
-        <tag-name>ceRenderTreeNodes</tag-name>
-        <source>templates/ceRenderTreeNodes.xhtml</source>
+        <tag-name>renderTreeNodes</tag-name>
+        <source>templates/beRenderTreeNodes.xhtml</source>
     </tag>
 
     <tag>

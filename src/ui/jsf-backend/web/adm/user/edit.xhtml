@@ -22,12 +22,12 @@
         </script>
     </c:if>
     <h:form id="frm">
-
         <adm:tab label="#{fxMessageBean['User.pref.show,#{accountBean.account.name}']}" active="true" id="tab1"/>
       <!--  <c:if test="#{not empty accountBean.contactData}"> -->
             <adm:tab labelKey="User.pref.contactData" active="false" id="tab2"
             	bean="#{accountBean}" action="showContactData"/>
       <!--  </c:if>  -->
+        <adm:saveContentEditorState/>
         <fx:formRow labelKey="Account.field.userName" id="name" newLine="false">
             <h:inputText id="name" value="#{accountBean.account.name}" readonly="true"/>
             <h:inputHidden value="#{accountBean.accountIdFilter}"/>

@@ -884,3 +884,119 @@ flexive.dojo = new function() {
         return menu2;
     };
 };
+
+flexive.contentEditor = new function() {
+    var activeMenu = null;
+    var activationTime = -1;
+
+    this.ignoreEvent=function(e) {
+        if (!e) return;
+        if (e == null) return;
+        try {
+            e.cancelBubble = true;
+            return;
+        } catch(e) {
+            /* ignore, bubble is IE specific */
+        }
+        e.stopPropagation();
+    };
+
+    this.closeMenu =function(e,force) {
+        flexive.contentEditor.ignoreEvent(e);
+        var delta = ((new Date().getTime())-activationTime);
+        if (activeMenu!=null) {
+            if (force || delta>200) {
+                activeMenu.style.display='none';
+                activeMenu=null;
+                activationTime=-1;
+            }
+        }
+    };
+
+    this.showMenu = function(e,caller,menuId) {
+        flexive.contentEditor.ignoreEvent(e);
+        this.closeMenu(e,true);
+        try {
+            activeMenu = document.getElementById(menuId);
+        } catch(e) {
+            activeMenu = null;
+        }
+        if (activeMenu==null) {
+            //TODO:migrate alertDialog
+            alertDialog("Menu is missing for id:"+menuId);
+            return;
+        }
+
+        activeMenu.style.top=caller.offsetTop+"px";
+        activeMenu.style.left=caller.offsetLeft+"px";
+        activeMenu.style.display='inline';
+        activationTime = new Date().getTime();
+    };
+
+    this.prepareAdd =function(formPrefix, listBox) {
+        if (formPrefix == null)
+            formPrefix ="";
+
+        var ele = document.getElementById(formPrefix+":"+listBox);
+        var value = "";
+        for (var i = 0; i < ele.length; i++) {
+            if (ele.options[i].selected) {
+                value+=((value=="")?"":",")+ele.options[i].value;
+            }
+        }
+        document.getElementById(formPrefix +":"+"__ceElements").value=value;
+        return true;
+    };
+
+    var dirtyFileInputs = false;
+    this.fileInputChanged =function() {
+        dirtyFileInputs = true;
+    };
+
+    this.saveHtmlEditors =function() {
+        tinyMCE.triggerSave();
+        for (var i = 0; i < tinyMCE.editors.length; i++) {
+        var editor = tinyMCE.editors[i];
+            try {
+                editor.remove();
+            } catch (e) {
+                alert("Failed to remove editor: " + e);
+            }
+        }
+    };
+
+    this.preSubmit =function() {
+        this.saveHtmlEditors();
+    };
+
+    this.preA4jAction =function(formPrefix,storageKey,xpath,action) {
+        //try {
+            this.preSubmit();
+        //}
+        /*
+        catch (e) {
+            alert("saveHtmlEditors() Error: "+e+
+                  "\nHint: most likey flexive.contentEditor.saveHtmlEditors() " +
+                  "was not called before sending an Ajax Request " +
+                  "\nor <fx:includes htmlEditor='true'> is missing in document head");
+        }
+        */
+        if (formPrefix == null)
+            formPrefix ="";
+
+        if (dirtyFileInputs) {
+            // If a file input was changed we need to submit the whole form, since a4j XhtmlHttpRequests
+            // are not able to process binaries. The intended a4j action is stored in form variables
+            document.getElementById(formPrefix+":"+"__ceStorageKey").value=storageKey;
+            document.getElementById(formPrefix+":"+"__ceNextA4jAction").value=action;
+            document.getElementById(formPrefix+":"+"__ceActionXpath").value=xpath;
+            // To submit the whole form a hidden command button is pressed
+            document.getElementById(formPrefix+":"+"__ceResolveA4jAction").click();
+            return false;
+        } else {
+            // If no file input was changed we can use the a4j XhtmlHttpRequest for submiting the
+            // action and data.
+            return true;
+        }
+    };
+};

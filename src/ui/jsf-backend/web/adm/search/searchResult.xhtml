@@ -58,6 +58,8 @@
     <ui:define name="body">
         <c:if test="#{empty fxSearchResultBean.parseRequestParameters}"> </c:if>
         <a4j:form id="frm">
+            <!-- save content editor state -->
+            <adm:saveContentEditorState/>
             <h:inputHidden value="#{fxSearchResultBean.viewType}"/>
 
             <adm:resultTabs activeTab="results"/>
@@ -70,8 +72,6 @@
                 <h:inputHidden id="sortDirection" value="#{fxSearchResultBean.sortDirection}"/>
                 <h:inputHidden id="paginatorPage" value="#{fxSearchResultBean.paginatorPage}"/>
                 <h:inputHidden id="clearCache" value="#{fxSearchResultBean.clearCache}"/>
-                <h:inputHidden id="contentEditorId" value="#{contentEditorBean.id}"/>
-                <h:inputHidden id="contentEditorVersion" value="#{contentEditorBean.version}"/>
 
                 <h:selectOneListbox id="typeId" value="#{fxSearchResultBean.typeId}" size="1">
                     <f:selectItems value="#{fxSearchResultBean.contentTypeItems}"/>
@@ -213,7 +213,7 @@
             if (parent.reloadBriefcases) {
                 parent.reloadBriefcases();
             }
-            
+
             flexive.yui.onYahooLoaded(function() {
                 if (window.resultTable != null) {
                     subscribeResultTableEvents(resultTable, "#{fxSearchResultBean.sortColumnKey}", "#{fxSearchResultBean.sortDirection}");

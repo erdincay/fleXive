@@ -1,0 +1,58 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+      xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+      xmlns:fx="http://www.flexive.com/jsf/core"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:t="http://myfaces.apache.org/tomahawk">
+
+Parameters:
+* srcEditor... backing bean (in this case BeContentEditorBean)
+* readOnly... read only mode
+
+<ui:composition>
+    <c:if test="#{readOnly}">
+        <c:set var="nodeStyle" value=""/>
+    </c:if>
+    <c:if test="#{readOnly}">
+        <c:set var="nodeStyle" value="editableNodes"/>
+    </c:if>
+
+    <a4j:outputPanel id="treeNodes">
+        <h:inputHidden id="treeNodeParent" value="#{srcEditor.treeNodeParent}" />
+        <table border="0" cellpadding="0" cellspacing="2" class="#{nodeStyle}">
+            <c:forEach items="#{srcEditor.treeNodes}" var="node">
+                <c:if test="#{node.markForDelete==false}">
+                    <tr>
+
+                        <td>
+                            <c:if test="#{not readOnly}">
+                                <a4j:commandLink reRender="treeNodes" eventsQueue="ceQueue" actionListener="#{srcEditor.removeTreeNode}">
+                                    <f:setPropertyActionListener target="#{srcEditor.treeNode}" value="#{node}"/>
+                                    <t:graphicImage style="border:0;margin-right:5px;" alt="#{fxMessageBean['Content.button.remove.treeNode']}"
+                                                    title="#{fxMessageBean['Content.button.remove.treeNode.title']}"
+                                                    url="/adm/images/contentEditor/remove.png"/>
+                                </a4j:commandLink>
+                            </c:if>
+                        </td>
+
+                        <td nowrap="true" style="padding-right:5px">
+                            <a href="javascript:expandNode(#{node.id}, #{node.parentNodeId});">#{srcEditor.treeLabelPath[node.id]}</a>
+                        </td>
+                    </tr>
+                </c:if>
+            </c:forEach>
+        </table>
+        <div style="display:none">
+            <a4j:commandButton id="addTreeNodeButton" reRender="treeNodes" eventsQueue="ceQueue" actionListener="#{srcEditor.addTreeNode}"/>
+        </div>
+    </a4j:outputPanel>
+
+</ui:composition>
+
+</html>

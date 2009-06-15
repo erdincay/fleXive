@@ -63,6 +63,7 @@ import javax.faces.application.Application;
 import javax.faces.application.FacesMessage;
 import javax.faces.component.UIComponent;
 import javax.faces.component.UIViewRoot;
+import javax.faces.component.NamingContainer;
 import javax.faces.context.FacesContext;
 import static javax.faces.context.FacesContext.getCurrentInstance;
 import javax.faces.model.SelectItem;
@@ -703,6 +704,48 @@ public class FxJsfUtils {
             }
         } catch (IllegalArgumentException e) {
             // RI throws IAE when the component isn't found - do nothing
+        }
+    }
+
+    /**
+     * Workaround for facelets component tree update problems - deletes
+     * the given components and its children so they can be recreated
+     * when the component tree is rendered again
+     *
+     * @param componentIds comma separated component ids, e.g. frm:queryEditor, frm:contentEditor
+     */
+    public static void resetFaceletsComponents(String componentIds) {
+        if (StringUtils.isBlank(componentIds)) {
+            return;
+        }
+        String[] ids = StringUtils.split(componentIds,",");
+        for (String id : ids) {
+            resetFaceletsComponent(id.trim());
+        }
+    }
+
+    /**
+     * Workaround for facelets component tree update problems - deletes
+     * the given components and its children so they can be recreated
+     * when the component tree is rendered again.
+     * Prefixes component ids with the given form prefix.
+     * (e.g prefix "frm" and componentId "queryEditor" result in "frm:queryEditor")
+     *
+     * @param formPrefix the form prefix, e.g. frm
+     * @param componentIds comma separated component ids, e.g. queryEditor, contentEditor
+     */
+    public static void resetFaceletsComponents(String formPrefix, String componentIds) {
+        if (StringUtils.isBlank(componentIds)) {
+            return;
+        }
+        if (StringUtils.isEmpty(formPrefix)) {
+            resetFaceletsComponents(componentIds);
+        }
+        else {
+            String[] ids = StringUtils.split(componentIds,",");
+            for (String id : ids) {
+                resetFaceletsComponent(formPrefix.trim() + NamingContainer.SEPARATOR_CHAR+id.trim());
+            }
         }
     }
 

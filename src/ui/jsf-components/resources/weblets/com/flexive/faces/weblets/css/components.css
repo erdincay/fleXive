@@ -64,7 +64,7 @@ textarea.fxValueTextArea, textarea.fxValueTextAreaHtml {
 }
 
 .FxReferenceInput input[type=text].singleLanguage {
-    width: 80% !important;     /* leave room for the browse references button, overrides yui-skin-sam autocomplete width */
+    width: 92% !important;     /* leave room for the browse references button, overrides yui-skin-sam autocomplete width */
 }
 
 .fxValueInput input,
@@ -599,4 +599,323 @@ flexiveResultList > table {
 /* fx:resizable container */
 .fxResizeable {
     padding: 0 9px 8px 0;   /* create room for resizable textarea handles */
+}
+
+/* Content Editor */
+
+.fxContentEditor_languageSwitch .formLabel{
+    font-weight:bold;
+}
+
+.fxContentEditor_languageSwitch .formLabelContainer{
+    width:100px;
+}
+
+.fxContentEditor_moveUpIcon {
+  cursor: pointer;
+  background-image: url( weblet:url( "com.flexive.faces.weblets" , "/images/contentEditor/up.png"));
+  background-repeat:no-repeat;
+  border:0;
+  float:left;
+  margin-left:3px;
+  display:block;
+  height:17px;
+  width:17px;
+}
+
+.fxContentEditor_moveDownIcon {
+  cursor: pointer;
+  background-image: url( weblet:url( "com.flexive.faces.weblets" , "/images/contentEditor/down.png"));
+  background-repeat:no-repeat;
+  border:0;
+  float:left;
+  display:block;
+  height:17px;
+  width:17px;
+}
+
+.fxContentEditor_addIcon {
+  cursor: pointer;
+  background-image: url( weblet:url( "com.flexive.faces.weblets" , "/images/contentEditor/add.png"));
+  background-repeat:no-repeat;
+  border:0;
+  float:left;
+  margin-left:3px;
+  display:block;
+  height:17px;
+  width:17px;
+}
+
+.fxContentEditor_addIcon_disabled {
+  background-image: url( weblet:url( "com.flexive.faces.weblets" , "/images/contentEditor/add.png"));
+  background-repeat:no-repeat;
+  border:0;
+  float:left;
+  margin-left:3px;
+  display:block;
+  height:17px;
+  width:17px;
+  -moz-opacity:.25;
+  opacity:.25;
+}
+
+.fxContentEditor_removeIcon {
+  cursor: pointer;
+  background-image: url( weblet:url( "com.flexive.faces.weblets" , "/images/contentEditor/remove.png"));
+  background-repeat:no-repeat;
+  border:0;
+  float:left;
+  display:block;
+  height:17px;
+  width:17px;
+  margin-left:3px;
+}
+
+.fxContentEditor_removeIcon_disabled {
+  background-image: url( weblet:url( "com.flexive.faces.weblets" , "/images/contentEditor/remove.png"));
+  background-repeat:no-repeat;
+  border:0;
+  float:left;
+  display:block;
+  height:17px;
+  width:17px;
+  filter:alpha(opacity=25);
+  -moz-opacity:.25;
+  opacity:.25;
+}
+
+.fxContentEditor_insertIntoGroup {
+  cursor: pointer;
+  background-image: url( weblet:url( "com.flexive.faces.weblets" , "/images/contentEditor/group.png"));
+  background-repeat:no-repeat;
+  border:0;
+  float:left;
+  display:block;
+  height:17px;
+  width:17px;
+}
+
+.fxContentEditor_insertIntoRootGroup {
+  cursor: pointer;
+  background-image: url( weblet:url( "com.flexive.faces.weblets" , "/images/contentEditor/group.png"));
+  background-repeat:no-repeat;
+  border:0;
+  float:left;
+  display:block;
+  height:17px;
+  width:17px;
+}
+
+.fxContentEditor_insertBelowProperty {
+  cursor: pointer;
+  background-image: url( weblet:url( "com.flexive.faces.weblets" , "/images/contentEditor/property.png"));
+  background-repeat:no-repeat;
+  border:0;
+  float:left;
+  display:block;
+  height:17px;
+  width:17px;
+}
+
+.fxContentEditor_insertAssignment {
+  cursor: pointer;
+  background-image: url( weblet:url( "com.flexive.faces.weblets" , "/images/contentEditor/add.png"));
+  background-repeat:no-repeat;
+  border:0;
+  float:left;
+  display:block;
+  height:17px;
+  width:17px;
+  margin-right:5px;
+}
+
+.fxContentEditor_newReferenceIcon {
+  cursor: pointer;
+  background-image: url( weblet:url( "com.flexive.faces.weblets" , "/images/contentEditor/new.png"));
+  background-repeat:no-repeat;
+  border:0;
+  float:left;
+  display:block;
+  height:16px;
+  width:16px;
+  margin-right:5px;
+}
+
+.fxContentEditor_editReferenceIcon {
+  cursor: pointer;
+  background-image: url( weblet:url( "com.flexive.faces.weblets" , "/images/contentEditor/edit.png"));
+  background-repeat:no-repeat;
+  border:0;
+  float:left;
+  display:block;
+  height:16px;
+  width:16px;
+  margin-right:5px;
+}
+
+.fxContentEditor_group {
+    margin-right:15px;
+    border-left:1px solid #d3dcb7;
+    border-right:1px solid #d3dcb7;
+    margin-top:8px;
+    margin-bottom:8px;
+    margin-left:8px;
+    background-color:#f9fcf1
+}
+
+.fxContentEditor_group .header {
+    background: #bdbdbd url( weblet:url( "com.flexive.faces.weblets" , "/images/contentEditor/groupHeader.gif" ));
+    border-bottom:1px solid #d3dcb7;
+    color:black;
+    padding:2px;
+    margin-bottom:8px;
+    height:16px;
+    vertical-align:middle;
+}
+
+.fxContentEditor_group .header .display {
+    position:relative;
+    padding-left:5px;
+    font-style:italic;
+}
+
+.fxContentEditor_group .header .icon {
+    height:16px;
+    width:16px;
+    border:0;
+    float:left;
+    margin-left:2px;
+    clear: both;
+}
+
+.fxContentEditor_group .end {
+    border-bottom:1px solid #bdbdbd;
+    margin-bottom:5px
+}
+
+.fxContentEditor_property {
+    margin-left:8px;
+    margin-top:4px;
+    margin-bottom:4px;
+}
+
+.fxContentEditor_property .display {
+    padding-left:5px;
+    float:left;
+    width:130px;
+    overflow:hidden;
+}
+
+.fxContentEditor_property .fxContentEditor_value[readonly='true'] {
+    /*width:400px; */
+    float:left;
+    margin-bottom:4px;
+    padding-left:2px;
+    padding-right:2px;
+    padding-bottom: 2px;
+    border:1px solid #bdbdbd;
+    background-color:#f9fcf1
+}
+
+.fxContentEditor_property .fxContentEditor_value[readonly='false'] {
+    /*width:400px;*/
+    float:left;
+    margin-bottom:4px
+}
+
+.fxContentEditor_popupMenu {
+    position:absolute;
+    background-color:#ebf5cc;
+    border:1px dotted black;
+    display:none;z-index:998;
+    text-decoration:none;
+    color:black;
+    padding-top:10px;
+    padding-bottom:15px;
+    padding-left:10px;
+    padding-right:10px;
+    font-weight:bold;
+    width:250px;
+}
+
+.fxContentEditor_popupMenu .icon {
+    border:0;
+    margin-right:5px;
+}
+
+.fxContentEditor_popupMenu .elementSelectListbox {
+    margin-top:8px;
+    width:250px;
+    margin-bottom:5px;
+}
+
+.fxContentEditor_popupMenu .txt {
+    color:black;
+    position:relative;
+    top:-4px;
+}
+
+.fxContentEditor_popupMenu a {
+    text-decoration:none;
+    color:black;
+}
+
+.fxContentEditor_referenceContainer {
+    padding: 5px;
+    border: 2px solid #CCCCCC;
+    background-attachment:scroll;
+    background-color:white;
+    background-image:none;
+    background-position:0 0;
+    background-repeat:repeat;
+    display:inline;
+    left:40px;
+    position:absolute;
+}
+
+
+/* Content editor input styles */
+.fxContentEditor_property .fxValueTextInput, .property .fxValueInputElementWidth, .property .fxValueTextArea, .property .fxValueTextAreaHtml {
+    width: 275px;
+}
+
+.fxContentEditor_property div.fxValueInputRow {
+    width: 325px;
+}
+
+.fxContentEditor_property div.fxValueInput {
+    width: 400px;
+}
+
+/* Container in ContentEditor used to show readonly properties */
+.fxContentEditor_property div.fxValueInputReadOnly {
+    border: 1px dashed #A0A0A0;
+    padding: 2px;
+    width: 394px !important;
+}
+
+.fxContentEditor_value .binaryDescription {
+    padding-left:3px;
+    border:1px solid #d3dcb7;
+    background-color:white;
+}
+
+.fxContentEditor_value .binaryDownloadIcon {
+    padding:0;
+    margin-left:5px;
+    border:0;
+    height:16px;
+    width:16px;
+    vertical-align:middle;
+}
+
+.fxContentEditor_locked {
+    background: url( weblet:url( "com.flexive.faces.weblets" , "/images/contentEditor/screenLockBg.gif" ));
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background-color:#CCCCCC;
+    z-index:999;
 }

@@ -23,6 +23,9 @@
 
     <ui:define name="body">
         <h:form>
+            <!-- save content editor state -->
+            <adm:saveContentEditorState/>
+
             <adm:tab label="Briefcase" active="true" id="tab1"/>
             #{fxMessageBean['Briefcase.nfo.notLoaded']}
             <adm:toolbarPluginButtons/>

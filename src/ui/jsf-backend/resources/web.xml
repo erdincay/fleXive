@@ -194,12 +194,6 @@
     </servlet>
 
     <servlet>
-        <servlet-name>CeFileDownload</servlet-name>
-        <servlet-class>com.flexive.war.servlet.CeFileDownload</servlet-class>
-        <load-on-startup>1</load-on-startup>
-    </servlet>
-
-    <servlet>
         <servlet-name>Thumbnail</servlet-name>
         <servlet-class>com.flexive.war.servlet.ThumbnailServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
@@ -257,10 +251,6 @@
     <servlet-mapping>
         <servlet-name>CeFileUpload</servlet-name>
         <url-pattern>/cefileupload/*</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>CeFileDownload</servlet-name>
-        <url-pattern>/cefiledownload/*</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>Thumbnail</servlet-name>

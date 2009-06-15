@@ -33,8 +33,13 @@ Parameters:
     <adm:tab active="#{activeTab == 'briefcase'}" label="#{fxMessageBean['SearchResult.tabtitle.briefcase.details']}" id="tab3"
             bean="#{briefcaseBean}" action="load" immediate="true" rendered="#{isBriefcase}"/>
     <!-- Content editor tab -->
-    <adm:tab  active="#{activeTab == 'content'}" label="#{fxMessageBean['Content.tabtitle.editor,#{contentEditorBean.id},#{contentEditorBean.version}']}" id="tab4"
-            bean="#{contentEditorBean}" action="load" immediate="true" rendered="#{contentEditorBean.id != -1 and activeTab != 'content'}"/>
+    <adm:tab  active="#{activeTab == 'content'}" id="tab4"
+              label="#{not beContentEditorBean.initialized ? fxMessageBean['Content.tabtitle.chooseType'] :
+                      fxContentEditorBean.contentStorage[beContentEditorBean.editorId].new ? fxMessageBean['Content.tabtitle.new'] :
+                      fxContentEditorBean.contentStorage[beContentEditorBean.editorId].guiSettings.editMode ?
+                      fxMessageBean['Content.tabtitle.edit,#{fxContentEditorBean.contentStorage[beContentEditorBean.editorId].content.pk.id},#{fxContentEditorBean.contentStorage[beContentEditorBean.editorId].content.pk.version}'] :
+                      fxMessageBean['Content.tabtitle.readonly,#{fxContentEditorBean.contentStorage[beContentEditorBean.editorId].content.pk.id},#{fxContentEditorBean.contentStorage[beContentEditorBean.editorId].content.pk.version}']}"
+              bean="#{beContentEditorBean}" action="getEditorPage" immediate="true"/>
 </ui:composition>
 
 

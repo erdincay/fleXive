@@ -37,6 +37,7 @@ import com.flexive.shared.FxLanguage;
 import com.flexive.shared.value.BinaryDescriptor;
 import com.flexive.shared.value.FxBinary;
 import com.flexive.shared.value.FxValue;
+import com.flexive.war.servlet.DownloadServlet;
 import org.apache.commons.lang.StringUtils;
 
 import javax.faces.component.UIComponent;
@@ -46,6 +47,8 @@ import javax.faces.component.html.HtmlOutputLink;
 import javax.faces.context.FacesContext;
 import javax.faces.context.ResponseWriter;
 import java.io.IOException;
+
+import net.java.dev.weblets.WebletUtils;
 
 /**
  * Renders the given FxValue.
@@ -231,6 +234,7 @@ abstract class RenderHelper {
     public static class ImageDescription extends UIOutput {
         private FxLanguage language = FxLanguage.DEFAULT;
         private boolean downloadLink = true;
+        private String downloadServletPath;
 
         public void setDownloadLink(boolean downloadLink) {
             this.downloadLink = downloadLink;
@@ -238,6 +242,10 @@ abstract class RenderHelper {
 
         public void setLanguage(FxLanguage language) {
             this.language = language;
+        }
+
+        public void setDownloadServletPath(String downloadServletPath) {
+            this.downloadServletPath=downloadServletPath;
         }
 
         protected FxValueInput getInputComponent() {
@@ -267,15 +275,12 @@ abstract class RenderHelper {
                 if (!descriptor.isNewBinary() && downloadLink) {
                     final HtmlOutputLink link = (HtmlOutputLink) FxJsfUtils.createComponent(HtmlOutputLink.COMPONENT_TYPE);
                     link.setId(facesContext.getViewRoot().createUniqueId());
-                    final String downloadURL = FxJsfUtils.getServletContext().getContextPath() +
-                            "/cefiledownload/" +
-                            (value.isMultiLanguage() ? "lang:" + language.getIso2digit() : "") +
-                            "/xpath:" + value.getXPath().replaceAll("\\/", "|") + "/" + descriptor.getName();
-                    link.setValue(downloadURL);
+                    final String downloadURL = DownloadServlet.getLink(downloadServletPath, value.getXPath(), descriptor.getName());
+                    link.setValue(FxJsfUtils.getServletContext().getContextPath() +downloadURL);
 
                     final HtmlGraphicImage image = (HtmlGraphicImage) FxJsfUtils.addChildComponent(link, HtmlGraphicImage.COMPONENT_TYPE);
                     image.setId(facesContext.getViewRoot().createUniqueId());
-                    image.setUrl("/adm/images/contentEditor/download.png");
+                    image.setUrl(FxJsfUtils.getWebletURL("com.flexive.faces.weblets", "/images/download.png"));
                     image.setStyleClass("binaryDownloadIcon");
                     link.encodeAll(facesContext);
                 }
@@ -307,6 +312,7 @@ abstract class RenderHelper {
     protected UIComponent addImageDescriptionComponent(UIComponent parent, FxLanguage language) {
         RenderHelper.ImageDescription desc = new ImageDescription();
         desc.setLanguage(language);
+        desc.setDownloadServletPath(component.getDownloadServletPath());
         parent.getChildren().add(desc);
         return desc;
     }

@@ -1,0 +1,252 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+The backend content editor
+
+Params:
+disableTab... false if the <adm:tab/> component should be rendered, true otherwise
+
+<ui:composition>
+    <c:set var="srcEditor" value="#{beContentEditorBean}"/>
+    <fx:contentEditor typeId="#{srcEditor.typeId == -1 ? null : srcEditor.typeId}"
+                      pk="#{srcEditor.pk}"
+                      var="myContent"
+                      content="#{srcEditor.content}"
+                      editorId="#{srcEditor.editorId}" formPrefix="#{srcEditor.formId}"
+                      editMode="#{srcEditor.editMode}" disableMessages="true"
+                      valueFormatter="#{srcEditor.valueFormatter}"
+                      reRender="#{srcEditor.editorId}"
+                      reset="#{srcEditor.reset}">
+        <!-- replace default content settings -->
+        <ui:define name="contentSettings">
+            <!-- Content editor tabs -->
+            <c:if test="#{not myContent.referenced}">
+                <adm:tab active="true" id="tabContentEditor"
+                    label="#{myContent.new ? fxMessageBean['Content.tabtitle.new'] :
+                        myContent.guiSettings.editMode ?
+                        fxMessageBean['Content.tabtitle.edit,#{myContent.content.pk.id},#{myContent.content.pk.version}'] :
+                        fxMessageBean['Content.tabtitle.readonly,#{myContent.content.pk.id},#{myContent.content.pk.version}']}"
+                    rendered="#{not disableTab}"/>
+             </c:if>
+
+                <ui:fragment rendered="#{not myContent.new}">
+                    <!-- export functionality -->
+                    <div style="display:none;"><iframe id="exportFrame" ><!--empty--></iframe></div>
+                    <c:if test="#{not myContent.referenced}">
+                        <!-- info panel -->
+                        <adm:contentInfoPanel srcEditor="#{srcEditor}" wrappedContent="#{myContent}"/>
+                    </c:if>
+                </ui:fragment>
+                <!-- content settings -->
+                <div class="contentSettings">
+                    <div style="float:left;padding-right:50px">
+                        <!-- Type name and small type icon -->
+                        <fx:formRow labelKey="Content.field.type">
+                            <ui:fragment rendered="#{not empty myContent.typeIcon}">
+                                <fx:thumbnail pk="#{myContent.typeIcon}" previewSize="original" width="16" height="16"/>
+                            </ui:fragment>
+                            #{not empty fxMapBean.types[myContent.content.typeId].label ?
+                                fxMapBean.types[myContent.content.typeId].label :
+                                fxMapBean.types[myContent.content.typeId].name}
+                        </fx:formRow>
+
+                        <!-- ACL -->
+                        <ui:fragment rendered="#{not myContent.supportSecurity}">
+                            <em>#{fxMessageBean['Content.msg.noSecurity']}</em>
+                        </ui:fragment>
+                        <ui:fragment rendered="#{myContent.supportSecurity}">
+                            <fx:formRow labelKey="Content.field.ACL" id="#{myContent.editorId}_acl">
+                                 <t:selectOneListbox size="1" id="#{myContent.editorId}_acl" value="#{myContent.content.aclId}"
+                                                    disabled="#{not myContent.guiSettings.editMode or
+                                                    not empty myContent.guiSettings.openedReferenceId}">
+                                    <f:selectItems value="#{fxSelectBean.contentACLs}"/>
+                                </t:selectOneListbox>
+                            </fx:formRow>
+                        </ui:fragment>
+
+                        <!-- wf step -->
+                        <fx:formRow labelKey="Content.field.step" id="#{myContent.editorId}_step">
+                             <t:selectOneListbox size="1" id="#{myContent.editorId}_step" value="#{myContent.step}"
+                                                 disabled="#{not myContent.guiSettings.editMode or
+                                                 not empty myContent.guiSettings.openedReferenceId}">
+                                <f:selectItems value="#{myContent.possibleWorkflowSteps}"/>
+                            </t:selectOneListbox>
+                        </fx:formRow>
+                    </div>
+
+                    <!-- Preview Image -->
+                    <ui:fragment rendered="#{myContent.content.previewAvailable}">
+                        <div class="previewImage">
+                            <div style="padding-top:6px">
+                                <strong>#{fxMessageBean['Content.field.previewImage']}</strong>
+                            </div>
+                            <img src="thumbnail/pk#{myContent.content.pk.id}.#{myContent.content.pk.version}/s2/ts#{fxSystemBean.currentTimeMillis}"
+                                 alt="#{fxMessageBean['Content.preview.title']}" title="#{fxMessageBean['Content.preview.title']}"/>
+                        </div>
+                    </ui:fragment>
+                    <br clear="all"/>
+
+                    <c:if test="#{not myContent.referenced}">
+                        <fx:formRow labelKey="Content.field.nodes">
+                            <adm:renderTreeNodes srcEditor="#{srcEditor}" readOnly="#{not srcEditor.editMode}"/>
+                        </fx:formRow>
+                    </c:if>
+                        <!--ie surrounding div height fix-->
+                     <div style="clear:both;height:0"><!-- __ --></div>
+                </div>
+        </ui:define>
+
+        <!-- replace default buttons -->
+        <ui:define name="editButton">
+            <adm:commandButton id="#{editorId}_editButton"
+                  labelKey="Content.button.edit" location="#{not myContent.referenced ? 'both' : 'content'}"
+                  bean="#{srcEditor}" icon="edit" action="enableEdit" ajax="true">
+                <f:setPropertyActionListener value="#{myContent}" target="#{srcEditor.wrappedContent}"/>
+                <!-- set properties for fxContentEditorBean -->
+                <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
+                <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
+            </adm:commandButton>
+        </ui:define>
+
+        <ui:define name="createButton">
+            <adm:commandButton id="#{editorId}_createButton" labelKey="Content.button.create"
+                      location="#{empty myContent.guiSettings.openedReferenceId
+                      and not myContent.referenced ? 'both' : 'content'}"
+                      bean="#{srcEditor}"
+                      icon="new" action="save" ajax="true">
+                <f:setPropertyActionListener value="#{myContent}" target="#{srcEditor.wrappedContent}"/>
+                <!-- set properties for fxContentEditorBean -->
+                <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
+                <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
+            </adm:commandButton>
+        </ui:define>
+
+        <ui:define name="saveButton">
+            <adm:commandButton id="#{editorId}_saveButton"
+                               labelKey="Content.button.save"
+                               location="#{empty myContent.guiSettings.openedReferenceId
+                               and not myContent.referenced ? 'both' : 'content'}"
+                               bean="#{srcEditor}"
+                               icon="save" action="save" ajax="true">
+                <f:setPropertyActionListener value="#{myContent}" target="#{srcEditor.wrappedContent}"/>
+                <!-- set properties for fxContentEditorBean -->
+                <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
+                <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
+            </adm:commandButton>
+        </ui:define>
+
+        <ui:define name="saveInNewVersionButton">
+            <adm:commandButton id="#{editorId}_saveInNewVersionButton"
+                    labelKey="Content.button.saveInNewVersion"
+                              location="#{empty myContent.guiSettings.openedReferenceId
+                              and not myContent.referenced ? 'both' : 'content'}"
+                              bean="#{srcEditor}"
+                              icon="newVersion" action="saveInNewVersion" ajax="true">
+                <f:setPropertyActionListener value="#{myContent}" target="#{srcEditor.wrappedContent}"/>
+                <!-- set properties for fxContentEditorBean -->
+                <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
+                <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
+            </adm:commandButton>
+        </ui:define>
+
+        <ui:define name="deleteButton">
+            <adm:commandButton id="#{editorId}_deleteButton" labelKey="Content.button.delete"
+                               location="#{empty myContent.guiSettings.openedReferenceId
+                                         and not myContent.referenced ? 'both' : 'content'}"
+                       bean="#{srcEditor}" confirmKey="Content.confirm.delete"
+                       icon="delete" action="delete" ajax="true">
+                 <f:setPropertyActionListener value="#{myContent}" target="#{srcEditor.wrappedContent}"/>
+                <!-- set properties for fxContentEditorBean -->
+                <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
+                <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
+            </adm:commandButton>
+        </ui:define>
+
+        <ui:define name="deleteVersionButton">
+            <adm:commandButton id="#{editorId}_deleteVersionButton" labelKey="Content.button.deleteVersion"
+                               location="#{empty myContent.guiSettings.openedReferenceId
+                                         and not myContent.referenced ? 'both' : 'content'}"
+                       bean="#{srcEditor}" confirmKey="Content.confirm.deleteVersion"
+                       icon="deleteVersion" action="deleteCurrentVersion" ajax="true">
+                 <f:setPropertyActionListener value="#{myContent}" target="#{srcEditor.wrappedContent}"/>
+                <!-- set properties for fxContentEditorBean -->
+                <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
+                <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
+            </adm:commandButton>
+        </ui:define>
+
+        <ui:define name="compactButton">
+            <adm:commandButton id="#{editorId}_compactButton" labelKey="Content.button.compact"
+                          location="#{empty myContent.guiSettings.openedReferenceId
+                                         and not myContent.referenced ? 'both' : 'content'}"
+                          bean="#{srcEditor}" separator="before"
+                          icon="compact" action="compact" ajax="true">
+                <f:setPropertyActionListener value="#{myContent}" target="#{srcEditor.wrappedContent}"/>
+                <!-- set properties for fxContentEditorBean -->
+                <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
+                <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
+            </adm:commandButton>
+        </ui:define>
+
+        <ui:define name="cancelButton">
+            <adm:commandButton id="#{editorId}_cancelButton" labelKey="Content.button.cancel"
+                          location="#{empty myContent.guiSettings.openedReferenceId
+                                         and not myContent.referenced ? 'both' : 'content'}"
+                          bean="#{srcEditor}" confirmKey="Content.confirm.abort"
+                          icon="cancel" action="cancel" ajax="true">
+                 <f:setPropertyActionListener value="#{myContent}" target="#{srcEditor.wrappedContent}"/>
+                 <!-- set properties for fxContentEditorBean -->
+                <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
+                <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
+            </adm:commandButton>
+        </ui:define>
+
+        <ui:define name="additionalButtons">
+            <ui:fragment rendered="#{not myContent.new and myContent.mayExport
+                and empty myContent.guiSettings.openedReferenceId}">
+                <adm:commandButton id="#{editorId}_exportButton" labelKey="Content.button.export"
+                                    lockscreen="false" location="#{empty myContent.guiSettings.openedReferenceId
+                                         and not myContent.referenced ? 'both' : 'content'}"
+                               icon="export" separator="#{not myContent.referenced ? 'before' : ''}"
+                               onclick="exportContent('#{myContent.content.pk}');return false;"
+                               ajax="true">
+                </adm:commandButton>
+            </ui:fragment>
+        </ui:define>
+
+        <!-- replace ajax open and edit reference command links
+        to submit whole form, so that action bar buttons are (re-)rendered correctly -->
+        <ui:define name="editReferenceButton">
+            <h:commandLink action="#{__ceBean.editReference}"
+                             title="#{fxMessageBean['ContentEditor.button.editReference.title']}"
+                             styleClass="fxContentEditor_editReferenceIcon"
+                             rendered="#{empty _ceContent.guiSettings.openedReferenceId and not _ceContent.data[element.XPathFull].isEmpty}">
+                    <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
+                    <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
+                    <f:setPropertyActionListener value="#{element}" target="#{__ceBean.element}"/>
+           </h:commandLink>
+        </ui:define>
+
+        <ui:define name="newReferenceButton">
+            <ui:fragment rendered="#{empty _ceContent.guiSettings.openedReferenceId}">
+                <h:commandLink action="#{__ceBean.createReference}"
+                        title="#{fxMessageBean['ContentEditor.button.newReference.title']}"
+                        styleClass="fxContentEditor_newReferenceIcon">
+                    <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
+                    <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
+                    <f:setPropertyActionListener value="#{element}" target="#{__ceBean.element}"/>
+                </h:commandLink>
+            </ui:fragment>
+        </ui:define>
+
+    </fx:contentEditor>
+</ui:composition>
+
+</html>

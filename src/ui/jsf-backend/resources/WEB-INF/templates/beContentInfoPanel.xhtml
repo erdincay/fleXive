@@ -1,0 +1,199 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+      xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:fx="http://www.flexive.com/jsf/core"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:weblet="http://weblets.dev.java.net/tags_jsp2"
+      >
+Parameters:
+srcEditor... backing bean (in this case BeContentEditorBean)
+wrappedContent... value binding to wrapped content object provided by fxConentEditor
+
+<ui:composition>
+    <a4j:outputPanel id="infoPanel" layout="block">
+        <a4j:commandLink reRender="infoPanel" eventsQueue="ceQueue">
+            <f:setPropertyActionListener value="#{srcEditor.infoPanelState=='version'?'':'version'}" target="#{srcEditor.infoPanelState}"/>
+            <span class="infoPanelButton">#{fxMessageBean['Content.field.info']}</span>
+        </a4j:commandLink>&nbsp;
+        <a4j:commandLink reRender="infoPanel" eventsQueue="ceQueue" rendered="#{wrappedContent.versionInfo.versionCount > 1}">
+            <f:setPropertyActionListener value="#{srcEditor.infoPanelState=='compare'?'':'compare'}" target="#{srcEditor.infoPanelState}"/>
+            <span class="infoPanelButton">#{fxMessageBean['Content.field.versionCompare']}</span>
+        </a4j:commandLink>
+        <a4j:commandLink reRender="infoPanel" eventsQueue="ceQueue" rendered="#{fxMapBean.types[wrappedContent.content.typeId].trackHistory}">
+            <f:setPropertyActionListener value="#{srcEditor.infoPanelState=='history'?'':'history'}" target="#{srcEditor.infoPanelState}"/>
+            <span class="infoPanelButton">#{fxMessageBean['Content.field.history']}</span>
+        </a4j:commandLink>
+        <a4j:commandLink reRender="infoPanel" eventsQueue="ceQueue" rendered="#{wrappedContent.mayImport}">
+            <f:setPropertyActionListener value="#{srcEditor.infoPanelState=='import'?'':'import'}" target="#{srcEditor.infoPanelState}"/>
+            <span class="infoPanelButton">#{fxMessageBean['Content.field.import']}</span>
+        </a4j:commandLink>
+        <a4j:commandLink reRender="infoPanel" eventsQueue="ceQueue" rendered="#{wrappedContent.mayExport}">
+            <f:setPropertyActionListener value="#{srcEditor.infoPanelState=='export'?'':'export'}" target="#{srcEditor.infoPanelState}"/>
+            <f:setPropertyActionListener value="#{wrappedContent}" target="#{srcEditor.wrappedContent}"/>
+            <span class="infoPanelButton">#{fxMessageBean['Content.field.export']}</span>
+        </a4j:commandLink>
+        <ui:fragment rendered="#{srcEditor.infoPanelState=='import'}">
+            <div class="infoPanel">
+                <h:panelGrid columns="2" columnClasses="top">
+                    #{fxMessageBean['Content.field.importUpload']}
+                    <t:inputFileUpload id="importUpload"
+                            value="#{srcEditor.importUpload}"
+                            onchange="fileInputChanged();"/>
+                    #{fxMessageBean['Content.field.importPaste']}
+                    <h:inputTextarea id="importPaste" rows="6" cols="50" value="#{srcEditor.importPasted}" readonly="false"/>
+                    #{fxMessageBean['Content.field.importSave']}
+                    <h:selectBooleanCheckbox id="importSave" value="#{srcEditor.importSave}"/>
+                    <ui:fragment rendered="#{empty wrappedContent.guiSettings.openedReferenceId}">
+                        <h:commandLink action="#{srcEditor.doImport}">
+                            <f:setPropertyActionListener value="#{wrappedContent}" target="#{srcEditor.wrappedContent}"/>
+                            <div class="infoPanelButton" style="display: block; float: left;">#{fxMessageBean['Content.button.import']}</div>
+                        </h:commandLink>
+                    </ui:fragment>
+                </h:panelGrid>
+                <br clear="all"/>
+            </div>
+        </ui:fragment>
+        <ui:fragment rendered="#{srcEditor.infoPanelState=='export'}">
+            <div class="infoPanel">
+                <div class="infoPanelButton" style="margin: 12px; display: block; float: left;" onclick="copy2clipboard(getPreElementContent('exportArea'),'#{fxMessageBean['Global.clipboard.error']}','#{fxMessageBean['Global.clipboard.success']}')">#{fxMessageBean['Content.button.copyToClipboard']}</div>
+                <br clear="all"/>
+                <pre id="exportArea">#{srcEditor.exportData[wrappedContent]}</pre>
+            </div>
+        </ui:fragment>
+        <ui:fragment rendered="#{srcEditor.infoPanelState=='version'}">
+            <div class="infoPanel">
+                <adm:versionInfo srcEditor="#{srcEditor}" wrappedContent="#{wrappedContent}"/>
+            </div>
+        </ui:fragment>
+        <ui:fragment rendered="#{srcEditor.infoPanelState=='history'}">
+            <div class="infoPanel">
+                #{fxMessageBean['Content.label.history.info']}
+                <table class="historyTable">
+                    <tr>
+                        <th>#{fxMessageBean['Content.field.history.dateTime']}</th>
+                        <th>#{fxMessageBean['Content.field.history.version']}</th>
+                        <th>#{fxMessageBean['Content.field.history.account']}</th>
+                        <th>#{fxMessageBean['Content.field.history.host']}</th>
+                        <th>#{fxMessageBean['Content.field.history.application']}</th>
+                    </tr>
+                    <tr>
+                        <th>&nbsp;</th>
+                        <th class="action" colspan="4">#{fxMessageBean['Content.field.history.action']}</th>
+                    </tr>
+                    <ui:repeat var="entry" value="#{wrappedContent.historyEntries}">
+                        <tr>
+                            <td nowrap="nowrap">
+                                #{fxMapBean.dateTime[entry.timestp]}
+                            </td>
+                            <td>
+                                #{entry.contentVersion}
+                            </td>
+                            <td>
+                                #{entry.loginName}
+                            </td>
+                            <td>
+                                #{entry.host}
+                            </td>
+                            <td>
+                                #{entry.application}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>&nbsp;</td>
+                            <td class="action" colspan="4">#{entry.message}</td>
+                        </tr>
+                    </ui:repeat>
+                </table>
+            </div>
+        </ui:fragment>
+        <ui:fragment rendered="#{srcEditor.infoPanelState=='compare'}">
+            <div class="infoPanel">
+                <table>
+                    <tr>
+                        <td>
+                            #{fxMessageBean['Content.field.compare.source']}
+                        </td>
+                        <td>
+                            <h:selectOneListbox id="srcComp" value="#{srcEditor.compareSourceVersion}"
+                                                size="1" required="true">
+                                <f:selectItems value="#{srcEditor.compareVersions}"/>
+                                <a4j:support event="onchange" onsubmit="flexive.contentEditor.saveHtmlEditors();" reRender="infoPanel" eventsQueue="ceQueue"/>
+                            </h:selectOneListbox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            #{fxMessageBean['Content.field.compare.destination']}
+                        </td>
+                        <td>
+                            <h:selectOneListbox id="dstComp" value="#{srcEditor.compareDestinationVersion}"
+                                                size="1"
+                                                required="true">
+                                <f:selectItems value="#{srcEditor.compareVersions}"/>
+                                <a4j:support event="onchange" onsubmit="flexive.contentEditor.saveHtmlEditors();" reRender="infoPanel" eventsQueue="ceQueue"/>
+                            </h:selectOneListbox>
+                        </td>
+                    </tr>
+                </table>
+
+                <a4j:outputPanel id="comparePanel">
+                    <c:set var="compEntries" value="#{srcEditor.compareEntries}"/>
+                    #{fxMessageBean['Content.field.compare.changeCount']} #{fn:length(compEntries)}
+                    <ui:fragment rendered="#{fn:length(compEntries) > 0}">
+                        <table class="changesTable">
+                            <tr>
+                                <th><!-- empty --></th>
+                                <th>#{fxMessageBean['Content.field.compare.xpath']}</th>
+                                <th>#{fxMessageBean['Content.field.compare.source.changes']}</th>
+                                <th>#{fxMessageBean['Content.field.compare.destination.changes']}</th>
+                            </tr>
+                            <ui:repeat var="change" value="#{compEntries}">
+                                <ui:fragment>
+                                    <tr>
+                                        <td class="changeInfo">
+                                            <ui:fragment
+                                                    rendered="#{change.positionChange and change.changeType == 'Update'}">
+                                                <t:graphicImage
+                                                        title="Position #{change.originalData.pos} -> #{change.newData.pos}"
+                                                        alt="position changed"
+                                                        url="/adm/images/contentEditor/change_position.png"/>
+                                            </ui:fragment>
+                                        </td>
+                                        <td class="changeLeft change#{change.changeType}">#{change.XPath}</td>
+                                        <td class="changeMiddle change#{change.changeType}">
+                                            <ui:fragment
+                                                    rendered="#{(change.changeType == 'Update' and change.dataChange) or change.changeType == 'Remove'}">
+                                                <div class="changeData">
+                                                    <fx:fxValueInput value="#{change.originalData.value}"
+                                                                     readOnly="true"/>
+                                                </div>
+                                            </ui:fragment>
+                                        </td>
+                                        <td class="changeRight change#{change.changeType}">
+                                            <ui:fragment
+                                                    rendered="#{(change.changeType == 'Update' and change.dataChange) or change.changeType == 'Add'}">
+                                                <div class="changeData">
+                                                    <fx:fxValueInput value="#{change.newData.value}"
+                                                                     readOnly="true"/>
+                                                </div>
+                                            </ui:fragment>
+                                        </td>
+                                    </tr>
+                                </ui:fragment>
+                            </ui:repeat>
+                        </table>
+                    </ui:fragment>
+                </a4j:outputPanel>
+            </div>
+        </ui:fragment>
+    </a4j:outputPanel>
+</ui:composition>
+</html>

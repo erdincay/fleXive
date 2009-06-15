@@ -7,6 +7,18 @@
     <namespace>http://www.flexive.com/jsf/core</namespace>
 
     <tag>
+        <tag-name>contentEditor</tag-name>
+        <source>../templates/contentEditor.xhtml</source>
+    </tag>
+    <tag>
+        <tag-name>fxCeRenderFields</tag-name>
+        <source>../templates/fxCeRenderFields.xhtml</source>
+    </tag>
+    <tag>
+        <tag-name>fxCeRenderFieldsMenu</tag-name>
+        <source>../templates/fxCeRenderFieldsMenu.xhtml</source>
+    </tag>
+    <tag>
         <tag-name>formRow</tag-name>
         <source>../templates/formRow.xhtml</source>
     </tag>
@@ -156,6 +168,10 @@
         <validator>
             <validator-id>flexive.regularExpressionValidator</validator-id>
         </validator>
+    </tag>
+    <tag>
+        <tag-name>wrappedContentProvider</tag-name>
+         <handler-class>com.flexive.faces.components.content.FxProvideContent</handler-class>
     </tag>
 
     <function>

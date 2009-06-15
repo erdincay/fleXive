@@ -34,6 +34,7 @@ package com.flexive.war.servlet;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.XPathElement;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.structure.FxDataType;
@@ -50,6 +51,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 
+import org.apache.commons.lang.StringUtils;
+
 /**
  * <p>Provides streaming downloads for all binary objects ({@link com.flexive.shared.value.FxBinary FxBinary}).
  * The requested value is identified by its XPath.</p>
@@ -63,7 +66,7 @@ import java.net.URLEncoder;
  * @version $Rev$
  */
 public class DownloadServlet implements Servlet {
-    private final static String BASEURL = "/download/";
+    public final static String BASEURL = "/download/";
     private ServletConfig servletConfig;
 
     public void init(ServletConfig servletConfig) throws ServletException {
@@ -160,11 +163,46 @@ public class DownloadServlet implements Servlet {
      * @return a link (absolute to the server context) to download the given binary
      */
     public static String getLink(FxPK pk, String xpath, String fileName) {
+        return getLink(null, pk, xpath, fileName);
+    }
+
+    /**
+     * Returns a link (absolute to the server context) to download the binary stored under
+     * the given XPath for the given object. <code>fileName</code> is the filename visible to
+     * the browser, the actual name of the downloaded file is determined by the stored filename.
+     *
+     * @param downloadServletPath   a custom download servlet path
+     * @param pk       the object pk
+     * @param xpath    the XPath of the binary property to be downloaded
+     * @param fileName the filename visible to the browser
+     * @return a link (absolute to the server context) to download the given binary
+     */
+    public static String getLink(String downloadServletPath, FxPK pk, String xpath, String fileName) {
         try {
-            return BASEURL + "pk" + pk + "/" + URLEncoder.encode(FxSharedUtils.escapeXPath(xpath), "UTF-8") + "/" + fileName;
+            if (StringUtils.isEmpty(downloadServletPath)) {
+                downloadServletPath = BASEURL;
+            }
+            return downloadServletPath + "pk" + pk + "/" + URLEncoder.encode(FxSharedUtils.escapeXPath(xpath), "UTF-8") + "/" + fileName;
         } catch (UnsupportedEncodingException e) {
             // shouldn't happen with UTF-8
             throw new IllegalArgumentException(e);
         }
+    }
+
+    /**
+     * Returns a link (absolute to the server context) to download the binary stored under
+     * the given XPath. <code>fileName</code> is the filename visible to
+     * the browser, the actual name of the downloaded file is determined by the stored filename.
+     * Note: XPath must contain pk.
+     *
+     * @param downloadServletPath   a custom download servlet path. If not set the default
+     *                              {@link com.flexive.war.servlet.DownloadServlet#BASEURL} will be used.
+     * @param fullXPath             a full XPath (i.e. including the pk of a stored content instance)
+     * @param filename              the filename visible to the browser
+     * @return a link (absolute to the server context) to download the binary stored under
+     * the given XPath.
+     */
+    public static String getLink(String downloadServletPath, String fullXPath, String filename) {
+        return getLink(downloadServletPath, XPathElement.getPK(fullXPath), XPathElement.stripType(fullXPath), filename);
     }
 }

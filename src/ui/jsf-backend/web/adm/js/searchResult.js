@@ -118,8 +118,6 @@ function addBriefcaseMenuItem(menu, itemIdPrefix, briefcase) {
 function onContextMenu(type, args) {
     // extract PK
     var pk = tryGetPk(this.contextEventTarget);
-    storePk(pk);
-
     var selectedIds = getSelectedIds();
     var briefcaseId = getBriefcaseId();
     var menuItem = args[1];
@@ -325,21 +323,12 @@ function reload() {
     document.forms["frm"].submit();
 }
 
-function storePk(/* PK */ pk) {
-    if (pk != null) {
-        document.getElementById("frm:contentEditorId").value = pk.id;
-        document.getElementById("frm:contentEditorVersion").value = pk.version;
-    }
-}
-
 function openContent(/* PK */ pk) {
-    storePk(pk);
-    document.getElementById("frm:showButton").onclick();
+    invokeContentAction("adm/content/contentEditor.jsf", "editInstance", {editMode: false, pk: pk});
 }
 
 function editContent(/* PK */ pk) {
-    storePk(pk);
-    document.getElementById("frm:editButton").onclick();
+    invokeContentAction("adm/content/contentEditor.jsf", "editInstance", {editMode: true, pk: pk});
 }
 
 function deleteRowsForPks(pks) {

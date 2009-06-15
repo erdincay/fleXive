@@ -110,10 +110,10 @@
                             <td>
                                 #{fxMessageBean['Welcome.label.createContent']}<br/>
                                 <div style="margin-top:3px;">
-                                    <h:selectOneListbox size="1" style="width:150px" id="type" value="#{contentEditorBean.type}">
-                                        <f:selectItems value="#{contentEditorBean.editableTypes}"/>
-                                    </h:selectOneListbox>
-                                    <h:commandLink action="#{contentEditorBean.createNewContent}">
+                                    <t:selectOneListbox size="1" style="width:150px" id="type" value="#{beContentEditorBean.newTypeId}">
+                                        <f:selectItems value="#{beContentEditorBean.editableTypes}"/>
+                                    </t:selectOneListbox>
+                                    <h:commandLink action="#{beContentEditorBean.createNewContent}">
                                         <t:graphicImage id="createContentButton"
                                                     style="position:relative;top:3px;cursor:pointer;border:none;left:5px;" alt="search"
                                                     url="/adm/images/toolbar/new.png"/>

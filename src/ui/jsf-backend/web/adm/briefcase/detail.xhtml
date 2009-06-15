@@ -26,6 +26,9 @@
     <ui:define name="body">
         <c:if test="#{empty fxSearchResultBean.parseRequestParameters}"> </c:if>
         <a4j:form id="frm">
+            <!-- save content editor state -->
+            <adm:saveContentEditorState/>
+
             <adm:resultTabs activeTab="briefcase"/>
 
             <t:inputHidden id="briefcaseId" value="#{briefcaseBean.id}"/>
