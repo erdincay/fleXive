@@ -955,8 +955,8 @@ flexive.contentEditor = new function() {
 
     this.saveHtmlEditors =function() {
         tinyMCE.triggerSave();
-        for (var i = 0; i < tinyMCE.editors.length; i++) {
-        var editor = tinyMCE.editors[i];
+        for (var i in tinyMCE.editors) {
+            var editor = tinyMCE.editors[i];
             try {
                 editor.remove();
             } catch (e) {

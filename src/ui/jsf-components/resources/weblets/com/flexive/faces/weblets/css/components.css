@@ -679,6 +679,7 @@ flexiveResultList > table {
   display:block;
   height:17px;
   width:17px;
+  margin-left:3px;
   filter:alpha(opacity=25);
   -moz-opacity:.25;
   opacity:.25;

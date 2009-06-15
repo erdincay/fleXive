@@ -63,21 +63,21 @@ disableTab... false if the <adm:tab/> component should be rendered, true otherwi
                         </ui:fragment>
                         <ui:fragment rendered="#{myContent.supportSecurity}">
                             <fx:formRow labelKey="Content.field.ACL" id="#{myContent.editorId}_acl">
-                                 <t:selectOneListbox size="1" id="#{myContent.editorId}_acl" value="#{myContent.content.aclId}"
+                                 <h:selectOneListbox size="1" id="#{myContent.editorId}_acl" value="#{myContent.content.aclId}"
                                                     disabled="#{not myContent.guiSettings.editMode or
                                                     not empty myContent.guiSettings.openedReferenceId}">
                                     <f:selectItems value="#{fxSelectBean.contentACLs}"/>
-                                </t:selectOneListbox>
+                                </h:selectOneListbox>
                             </fx:formRow>
                         </ui:fragment>
 
                         <!-- wf step -->
                         <fx:formRow labelKey="Content.field.step" id="#{myContent.editorId}_step">
-                             <t:selectOneListbox size="1" id="#{myContent.editorId}_step" value="#{myContent.step}"
+                             <h:selectOneListbox size="1" id="#{myContent.editorId}_step" value="#{myContent.step}"
                                                  disabled="#{not myContent.guiSettings.editMode or
                                                  not empty myContent.guiSettings.openedReferenceId}">
                                 <f:selectItems value="#{myContent.possibleWorkflowSteps}"/>
-                            </t:selectOneListbox>
+                            </h:selectOneListbox>
                         </fx:formRow>
                     </div>
 
@@ -95,7 +95,7 @@ disableTab... false if the <adm:tab/> component should be rendered, true otherwi
 
                     <c:if test="#{not myContent.referenced}">
                         <fx:formRow labelKey="Content.field.nodes">
-                            <adm:renderTreeNodes srcEditor="#{srcEditor}" readOnly="#{not srcEditor.editMode}"/>
+                            <adm:renderTreeNodes srcEditor="#{srcEditor}" readOnly="#{not myContent.guiSettings.editMode}"/>
                         </fx:formRow>
                     </c:if>
                         <!--ie surrounding div height fix-->

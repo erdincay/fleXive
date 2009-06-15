@@ -34,9 +34,9 @@
 
             <!-- Content select screen -->
             <c:if test="#{not beContentEditorBean.initialized}">
-                <t:selectOneListbox size="1" id="type" value="#{beContentEditorBean.newTypeId}">
+                <h:selectOneListbox size="1" id="type" value="#{beContentEditorBean.newTypeId}">
                     <f:selectItems value="#{beContentEditorBean.editableTypes}" />
-                </t:selectOneListbox>
+                </h:selectOneListbox>
                 <br/><br/>
                 <adm:commandButton labelKey="Content.button.create" location="both"
                                   bean="#{beContentEditorBean}"
