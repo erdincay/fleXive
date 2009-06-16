@@ -79,7 +79,7 @@ public class StructureTreeWriter implements Serializable {
      * @param request the current request
      * @param typeId  the type to be rendered (or -1 for all structures)
      * @param isViewFlat if the tree is rendered flat or hierarchically
-     * @param isShowLabels     true if labels should be shown, false if the Alias should be shown
+     * @param isShowLabels true if labels should be shown, false if the Alias should be shown
      * @return nothing
      */
     public String renderStructureTree(HttpServletRequest request, long typeId, boolean isViewFlat, boolean isShowLabels) {
@@ -120,7 +120,13 @@ public class StructureTreeWriter implements Serializable {
             // print whole tree
 
             // print root types
-            for (FxType type : environment.getTypes(true, isViewFlat, true, true)) {
+            List<FxType> types = new ArrayList<FxType>();
+            // addAll() is used as environment.getTypes returns an unmodifiable list
+            types.addAll(environment.getTypes(true, isViewFlat, true, true));
+            // if show labels is true, order types by label
+            if (isShowLabels)
+                Collections.sort(types, new FxSharedUtils.SelectableObjectWithLabelSorter());
+            for (FxType type : types) {
                 writeType(writer, nodeProperties, type, isViewFlat, isShowLabels);
             }
             // print root properties
@@ -169,7 +175,13 @@ public class StructureTreeWriter implements Serializable {
         // write derived types
         //if the view is not flat, add derived types as child nodes
         if (!isViewFlat) {
-            for (FxType child : type.getDerivedTypes()) {
+            List<FxType> children = new ArrayList<FxType>();
+            // addAll() is used as type.getDerivedTypes returns an unmodifiable list
+            children.addAll(type.getDerivedTypes());
+             // if show labels is true, order types by label
+            if (isShowLabels)
+                Collections.sort(children, new FxSharedUtils.SelectableObjectWithLabelSorter());
+            for (FxType child : children) {
                 writeType(writer, nodeProperties, child, isViewFlat, isShowLabels);
             }
         }

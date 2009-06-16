@@ -1427,6 +1427,15 @@ public final class FxSharedUtils {
         }
     }
 
+     /**
+     * Comparator for sorting {@link SelectableObjectWithLabel} instances by label.
+     */
+    public static class SelectableObjectWithLabelSorter implements Comparator<SelectableObjectWithLabel>, Serializable {
+        public int compare(SelectableObjectWithLabel o1, SelectableObjectWithLabel o2) {
+            return o1.getLabel().getBestTranslation().toLowerCase().compareTo(o2.getLabel().getBestTranslation().toLowerCase());
+        }
+    }
+
     /**
      * Item sorter by position
      */
