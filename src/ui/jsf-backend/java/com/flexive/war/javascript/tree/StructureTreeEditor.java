@@ -313,12 +313,12 @@ public class StructureTreeEditor implements Serializable {
     }
 
     /**
-     * Returns if an FxPropertyAssignment has set OPTION_SEARCHABLE to true
+     * Returns if an FxPropertyAssignment (or its property repsectively) has set OPTION_SEARCHABLE to true
      *
      * @param assId assignment id
      * @return if an assignment is searchable
      */
-    public boolean isSearchable(long assId) {
+    public boolean isAssignmentSearchable(long assId) {
         return ((FxPropertyAssignment) CacheAdmin.getFilteredEnvironment().getAssignment(assId)).isSearchable();
     }
 

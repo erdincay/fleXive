@@ -226,18 +226,20 @@
 
             //should be invoked by the click handler when normally clicking on tree nodes
             function doContentAction(node, defaultAction, doubleClick) {
-                var propertyId = node["assignmentId"] != null ? node["assignmentId"] : node["typeId"];
-                if (!doubleClick && propertyId != null && propertyId != -1 && parent.frames["contentFrame"].addQueryNode) {
+                var nodeId = getNodeId(node);
+                var nodeType = node.nodeType;
+                if (!doubleClick && nodeId != null && nodeId != -1 && parent.frames["contentFrame"].addQueryNode) {
                     // add to search query
-                    if (node.nodeType=="AssignmentSystemInternal" || node.nodeType=="Assignment") {
-                        if (flexive.util.getJsonRpc().StructureTreeEditor.isSearchable(propertyId))
-                            parent.frames["contentFrame"].addQueryNode(propertyId, node.nodeType);
+                    if (isAssignment(nodeType)) {
+                        // check if assignment is searchable and add to query
+                        if (flexive.util.getJsonRpc().StructureTreeEditor.isAssignmentSearchable(nodeId))
+                            parent.frames["contentFrame"].addQueryNode(nodeId, nodeType);
                         else
                             alertDialog("#{fxMessageBean['StructureTree.message.property.notSearchable']}");
                     }
                     else
-                        parent.frames["contentFrame"].addQueryNode(propertyId, node.nodeType);
-                    //alertDialog("sturctureTreeClickHandler, addProperty branch");
+                        // types are unchecked
+                        parent.frames["contentFrame"].addQueryNode(nodeId, nodeType);
                 }
                 else if (defaultAction == "openInstance") {
                     if (doubleClick)
@@ -562,9 +564,8 @@
                 var menu = dojo.widget.byId("structureTreeMenu");
                 var nodeId = getNodeId(menu.getTreeNode());
                 var nodeType = menu.getTreeNode().nodeType;
-                var propertyId = menu.getTreeNode().propertyId;
 
-                if (propertyId != null && !flexive.util.getJsonRpc().StructureTreeEditor.isSearchable(propertyId)) {
+                if (isAssignment(nodeType) && !flexive.util.getJsonRpc().StructureTreeEditor.isAssignmentSearchable(nodeId)) {
                     alertDialog("#{fxMessageBean['StructureTree.message.property.notSearchable']}");
                     return;
                 }
@@ -593,15 +594,16 @@
 
             function searchContentsByProperty(menuItem) {
                 var menu = dojo.widget.byId("structureTreeMenu");
-                var nodeId = menu.getTreeNode().propertyId;
-                if (!flexive.util.getJsonRpc().StructureTreeEditor.isSearchable(nodeId)) {
+                var assignmentId = getNodeId(menu.getTreeNode());
+                var propertyId = menu.getTreeNode().propertyId;
+                if (!flexive.util.getJsonRpc().StructureTreeEditor.isAssignmentSearchable(assignmentId)) {
                     alertDialog("#{fxMessageBean['StructureTree.message.property.notSearchable']}");
                     return;
                 };
                 if (parent.frames["contentFrame"].isQueryEditor) {
-                    parent.frames["contentFrame"].addPropertyQueryNode(nodeId);
+                    parent.frames["contentFrame"].addPropertyQueryNode(propertyId);
                 } else {
-                    invokeContentAction("adm/search/query.jsf", "propertySearch", {propertyId: nodeId});
+                    invokeContentAction("adm/search/query.jsf", "propertySearch", {propertyId: propertyId});
                 }
             }
 
