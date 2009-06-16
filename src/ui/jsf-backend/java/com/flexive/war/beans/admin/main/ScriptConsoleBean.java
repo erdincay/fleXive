@@ -43,6 +43,7 @@ import groovy.lang.GroovyShell;
 import groovy.lang.Script;
 import org.apache.commons.lang.StringUtils;
 
+import javax.faces.event.ActionEvent;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Serializable;
@@ -107,18 +108,20 @@ public class ScriptConsoleBean implements Serializable {
 
     /**
      * Runs the given script code
+     *
+     * @param e JSF ActionEvent
      */
-    public void runScript() {
+    public void runScript(ActionEvent e) {
         if (StringUtils.isBlank(code))
             new FxFacesMsgErr("Script.err.noCodeProvided").addToContext();
         else {
             long start = System.currentTimeMillis();
             try {
                 result = runScript(code, "console." + language, web);
-            } catch (Exception e) {
+            } catch (Exception ex) {
                 final StringWriter writer = new StringWriter();
-                e.printStackTrace(new PrintWriter(writer));
-                final String msg = e.getCause() != null ? e.getCause().getMessage() : e.getMessage();
+                ex.printStackTrace(new PrintWriter(writer));
+                final String msg = ex.getCause() != null ? ex.getCause().getMessage() : ex.getMessage();
                 result = new Formatter().format("Exception caught: %s%n%s", msg, writer.getBuffer());
             } finally {
                 executionTime = System.currentTimeMillis() - start;
@@ -167,8 +170,10 @@ public class ScriptConsoleBean implements Serializable {
 
     /**
      * Verifies the syntax of a given groovy script
+     *
+     * @param e JSF ActionEvent
      */
-    public void checkScriptSyntax() {
+    public void checkScriptSyntax(ActionEvent e) {
         ScriptBean.checkScriptSyntax("dummyName.groovy", getCode());
     }
 
@@ -176,8 +181,10 @@ public class ScriptConsoleBean implements Serializable {
      * Adds the default [fleXive] imports for a given script
      * (Configured in Script.properties and Script_de.properties: Script.defaultImports.[script extension],
      * e.g. "Script.defaultImports.groovy")
+     *
+     * @param e JSF ActionEvent
      */
-    public void addDefaultImports() {
+    public void addDefaultImports(ActionEvent e) {
         if (code == null)
             code = "";
         code = ScriptBean.getClassImports(language) + code;

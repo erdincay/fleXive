@@ -29,6 +29,7 @@ Parameters:
  eventsQueue - ajax events queue
  rendered - [optional] flag to supress rendering of the whole component
  buttonDisabled - [optional] renders the button, but disables its functionality
+ oncomplete - [optional] the oncomplete event of the action link
 
 <ui:composition>
     <ui:fragment rendered="#{rendered!=false}">
@@ -96,7 +97,7 @@ Parameters:
             <div id="commandElement_#{id}" style="display:none">
                 <a4j:commandLink id="#{id}_submissionlink" eventsQueue="#{eventsQueue}"
                                  reRender="#{reRender}" actionListener="#{bean[actionListener]}"
-                                 immediate="#{immediate}"/>
+                                 immediate="#{immediate}" oncomplete="#{oncomplete}"/>
             </div>
 
             <c:if test="#{empty onclick}">

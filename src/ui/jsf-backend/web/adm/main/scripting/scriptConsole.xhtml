@@ -30,56 +30,53 @@
             <a4j:outputPanel id="systemInfos">
                 <fieldset class="formFields">
                     <legend>#{fxMessageBean['ScriptConsole.group.code']}</legend>
-                    <a4j:outputPanel ajaxRendered="true" layout="block" style="width: 700px;">
-                        <h:inputTextarea id="codeArea" value="#{scriptConsoleBean.code}" cols="100" rows="25"
-                                         style="width: 100%"/>
+                    <a4j:outputPanel id="codePanel" layout="block" style="width: 700px;">
+                        <h:inputTextarea id="codeArea" value="#{scriptConsoleBean.code}" rows="25" style="width:100%"/>
                     </a4j:outputPanel>
                     <br/>
                     #{fxMessageBean['ScriptConsole.label.Language']}&nbsp;
                     <h:selectOneListbox label="XXX" size="1" value="#{scriptConsoleBean.language}">
                         <f:selectItems value="#{fxSelectBean.scriptingEngines}"/>
-                        <a4j:support event="onchange" reRender="verifyPanel"
-                                     oncomplete="ajaxButtonRequest();
-                                     activateEditArea('frm:codeArea', true, '#{scriptConsoleBean.userLang}',
-                                     '#{scriptConsoleBean.language}');"/>
+                        <a4j:support event="onchange" reRender="verifyPanel"/>
                     </h:selectOneListbox>
                     <br/>
                     <h:selectBooleanCheckbox title="#{fxMessageBean['ScriptConsole.label.runAtWeb']}"
                                              value="#{scriptConsoleBean.web}"/>
                     #{fxMessageBean['ScriptConsole.label.runAtWeb']}<br/><br/>
 
-                    <adm:commandButton id="executeButton" labelKey="ScriptConsole.button.execute" icon="run"
-                                       location="both" lockscreen="false" bean="#{scriptConsoleBean}"
-                                       action="runScript"/>
+                    <adm:ajaxCommandButton id="executeButton" labelKey="ScriptConsole.button.execute" icon="run"
+                                           bean="#{scriptConsoleBean}" actionListener="runScript"
+                                           reRender="resultPanel"/>
                     <adm:shortcut elementId="commandButton_executeButton"/>
 
-                    <adm:commandButton id="defaultImports" labelKey="Script.button.defaultImports" icon="compact"
-                                       bean="#{scriptConsoleBean}" action="addDefaultImports" location="both"
-                                       lockscreen="false"/>
+                    <adm:ajaxCommandButton id="defaultImports" labelKey="Script.button.defaultImports"
+                                           icon="compact" bean="#{scriptConsoleBean}" actionListener="addDefaultImports"
+                                           reRender="codePanel"
+                                           oncomplete="activateEditArea('frm:codeArea', true, '#{scriptConsoleBean.userLang}',
+                                     '#{scriptConsoleBean.language}');"/>
 
                     <a4j:outputPanel id="verifyPanel" layout="block">
-                        <adm:commandButton id="verifyButton" labelKey="Script.button.verify" icon="check"
-                                           bean="#{scriptConsoleBean}" action="checkScriptSyntax"
-                                           rendered="#{scriptConsoleBean.verifyButtonEnabled}"
-                                           lockscreen="false" ajax="true" toolbarPosition="2"/>
+                        <adm:ajaxCommandButton id="verifyButton" labelKey="Script.button.verify"
+                                               icon="check" bean="#{scriptConsoleBean}"
+                                               rendered="#{scriptConsoleBean.verifyButtonEnabled}"
+                                               actionListener="checkScriptSyntax"/>
                     </a4j:outputPanel>
                 </fieldset>
                 <br/><br/>
-                <a4j:outputPanel id="resultPanel" rendered="#{scriptConsoleBean.result != null}">
+                <a4j:outputPanel id="resultPanel" layout="block">
                     <pre>#{scriptConsoleBean.result}</pre>
                     <span style="color:gray;font-style:italic;">
-                        #{fxMessageBean['ScriptConsole.label.executionTime, #{scriptConsoleBean.executionTime}']}
+                        <a4j:outputPanel id="executionTime" layout="block" rendered="#{scriptConsoleBean.result != null}">
+                            #{fxMessageBean['ScriptConsole.label.executionTime, #{scriptConsoleBean.executionTime}']}
+                        </a4j:outputPanel>
                     </span>
                 </a4j:outputPanel>
             </a4j:outputPanel>
-
             <adm:toolbarPluginButtons/>
         </a4j:form>
     </ui:define>
 
-
     </body>
-
+    
 </ui:composition>
-
 </html>
