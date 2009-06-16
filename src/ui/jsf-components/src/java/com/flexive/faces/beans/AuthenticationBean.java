@@ -34,12 +34,24 @@ package com.flexive.faces.beans;
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.shared.FxContext;
-import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.security.UserTicket;
 import com.flexive.war.FxRequest;
 
 import java.io.Serializable;
 
+/**
+ * Provides basic authentication for [fleXive] applications. Simply map your username/password inputs
+ * to {@code #{fxAuthenticationBean.username}} and {@code #{fxAuthenticationBean.password}} and invoke
+ * {@code #{fxAuthenticationBean.login}}.
+ * <p>
+ * For logout, bind your command element to {@code #{fxAuthenticationBean.logout}}. Note that since the current
+ * session is invalidated by this method, you have to perform a redirect after calling this action. Otherwise
+ * JSF will not be able to restore the view state and throw an exception.
+ * </p>
+ *
+ * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+ * @version $Rev$
+ */
 public class AuthenticationBean implements Serializable {
     private static final long serialVersionUID = -8245131162897398694L;
 
@@ -56,6 +68,37 @@ public class AuthenticationBean implements Serializable {
         return !FxContext.getUserTicket().isGuest();
     }
 
+    /**
+     * Login using the credentials stored in {@code username} and {@code password}.
+     *
+     * @return "loginSuccess" after a successful login, null otherwise
+     */
+    public String login() {
+        try {
+            FxRequest request = FxJsfUtils.getRequest();
+            FxContext.get().login(username, password, takeover);
+            request.getUserTicket();
+            return "loginSuccess";
+        } catch (Exception exc) {
+            new FxFacesMsgErr(exc).addToContext();
+        }
+        return null;
+    }
+
+    /**
+     * Logout the current user.
+     *
+     * @return  "login"
+     */
+    public String logout() {
+        try {
+            FxContext.get().logout();
+            FxJsfUtils.getSession().invalidate();
+        } catch (Exception exc) {
+            new FxFacesMsgErr(exc).addToContext();
+        }
+        return "login";
+    }
 
     public String getUsername() {
         return username;
@@ -81,25 +124,4 @@ public class AuthenticationBean implements Serializable {
         this.takeover = takeover;
     }
 
-    public String login() {
-        try {
-            FxRequest request = FxJsfUtils.getRequest();
-            FxContext.get().login(username, password, takeover);
-            request.getUserTicket();
-            return "loginSuccess";
-        } catch (Exception exc) {
-            new FxFacesMsgErr(exc).addToContext();
-        }
-        return null;
-    }
-
-    public String logout() {
-        try {
-            FxContext.get().logout();
-            FxJsfUtils.getSession().invalidate();
-        } catch (Exception exc) {
-            new FxFacesMsgErr(exc).addToContext();
-        }
-        return "login";
-    }
 }
