@@ -192,6 +192,7 @@ public class TypeEditorBean implements Serializable {
         maxRelDestUnlimited = type.getMaxRelDestination() == 0;
         icon = type.getIcon();
         timeRange = initTimeRange();
+        selectedScriptInfo = null;
     }
 
     public boolean isMaxRelSourceUnlimited() {
@@ -798,11 +799,14 @@ public class TypeEditorBean implements Serializable {
     }
 
     public long getSelectedScriptInfoId() {
+        if (getSelectedScriptInfo() == null)
+            return -1;
         return getSelectedScriptInfo().getId();
     }
 
     public void setSelectedScriptInfoId(long selectedScriptInfoId) {
-        setSelectedScriptInfo(CacheAdmin.getEnvironment().getScript(selectedScriptInfoId));
+        if (selectedScriptInfoId != -1)
+            setSelectedScriptInfo(CacheAdmin.getEnvironment().getScript(selectedScriptInfoId));
     }
 
     public FxScriptInfo getSelectedScriptInfo() {

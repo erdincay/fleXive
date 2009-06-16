@@ -110,6 +110,7 @@
         <ui:fragment rendered="#{typeEditorBean.editMode and fxSystemBean.isInRole['ScriptManagement']}">
             <div class="scriptTable">
                 <fx:fieldSet legend="#{fxMessageBean['ScriptEditor.label.assignScript']}">
+                    <c:if test="#{typeEditorBean.selectedScriptInfoId ne -1}">
                      <table>
                         <thead>
                             <tr>
@@ -148,6 +149,10 @@
                             </tr>
                         </tbody>
                     </table>
+                    </c:if>
+                    <c:if test="#{typeEditorBean.selectedScriptInfoId eq -1}">
+                        #{fxMessageBean['ScriptEditor.msg.noTypeScript']}
+                    </c:if>
                 </fx:fieldSet>
             </div>
         </ui:fragment>

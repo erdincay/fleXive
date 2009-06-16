@@ -17,7 +17,7 @@
             <fx:formRow label="#{fxMessageBean['UserGroup.field.mandator']}" id="mandator">
                 <c:if test="${fxSystemBean.userTicket.globalSupervisor}">
                     <h:selectOneListbox id="mandator" value="#{userGroupBean.mandator}" size="1" required="true">
-                    <f:selectItems value="#{fxSelectBean.mandatorsForEdit}" />
+                    <f:selectItems value="#{fxSelectBean.mandatorsForEditNoEmpty}" />
                     </h:selectOneListbox>
                 </c:if>
                 <c:if test="${fxSystemBean.userTicket.globalSupervisor==false}">
