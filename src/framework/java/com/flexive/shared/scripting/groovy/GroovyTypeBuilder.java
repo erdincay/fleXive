@@ -475,7 +475,7 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
         // name starts lowercase --> create property or property assignment
         if (Character.isLowerCase(structureName.charAt(0))) {
             if (am.assignment != null) { // create a new property assignment
-                final FxAssignment fxAssignment = CacheAdmin.getEnvironment().getAssignment(am.assignment);
+                final FxAssignment fxAssignment = CacheAdmin.getEnvironment().getAssignment(am.assignment.startsWith("/") ? type.getName() + am.assignment : am.assignment);
                 try {
                     return createNewPropertyAssignmentNode(fxAssignment, am);
                 } catch (FxApplicationException e) {

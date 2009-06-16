@@ -280,9 +280,22 @@ public enum FxDataType implements Serializable, SelectableObjectWithName {
             case SelectMany:
                 final SelectMany many = new SelectMany(assignment.getProperty().getReferencedList());
                 final List<FxSelectListItem> available = new ArrayList<FxSelectListItem>(many.getAvailable());
+                boolean sameLvl = many.getSelectList().isOnlySameLevelSelect();
+                long parentMatch = -1;
                 for (FxSelectListItem item : available) {
                     if (rnd.nextInt() % 2 == 0) {
-                        many.selectItem(item);
+                        if(sameLvl) {
+                            if(!item.hasParentItem())
+                                continue;
+                            if( parentMatch == -1) {
+                                many.selectItem(item);
+                                parentMatch = item.getParentItem().getId();
+                            } else {
+                                if(parentMatch == item.getParentItem().getId())
+                                    many.selectItem(item);
+                            }
+                        } else
+                            many.selectItem(item);
                     }
                 }
                 return new FxSelectMany(assignment.isMultiLang(), many);
