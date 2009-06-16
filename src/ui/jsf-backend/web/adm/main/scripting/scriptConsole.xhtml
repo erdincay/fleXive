@@ -27,7 +27,6 @@
         <a4j:form id="frm">
             <adm:tab label="#{fxMessageBean['ScriptConsole.tabtitle.main']}" active="true" id="tab1"/>
 
-            <a4j:outputPanel id="systemInfos">
                 <fieldset class="formFields">
                     <legend>#{fxMessageBean['ScriptConsole.group.code']}</legend>
                     <a4j:outputPanel id="codePanel" layout="block" style="width: 700px;">
@@ -62,6 +61,7 @@
                                                actionListener="checkScriptSyntax"/>
                     </a4j:outputPanel>
                 </fieldset>
+
                 <br/><br/>
                 <a4j:outputPanel id="resultPanel" layout="block">
                     <pre>#{scriptConsoleBean.result}</pre>
@@ -71,8 +71,8 @@
                         </a4j:outputPanel>
                     </span>
                 </a4j:outputPanel>
-            </a4j:outputPanel>
-            <adm:toolbarPluginButtons/>
+            
+                <adm:toolbarPluginButtons/>
         </a4j:form>
     </ui:define>
 
