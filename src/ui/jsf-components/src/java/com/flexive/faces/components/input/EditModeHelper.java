@@ -980,10 +980,14 @@ class EditModeHelper extends RenderHelper {
                             + "    var input = document.getElementById('" + inputClientId + "');\n"
                             + "    var date = " + (date != null ? "'" + new SimpleDateFormat("M/d/yyyy").format(date) + "'" : "''") + ";\n"
                             + "    var pdate = " + (date != null ? "'" + new SimpleDateFormat("M/yyyy").format(date) + "'" : "''") + ";\n"
+                            + "    var navConfig={"+MessageBean.getInstance().getResource("FxValueInput.datepicker.navigatorConfig")+"};\n"
                             + "    var cal = new YAHOO.widget.Calendar('" + containerId + "', '" + containerId + "', \n"
-                            + "                  { navigator: true, close: true, title: '"
+                            + "                  { navigator: navConfig, close: true, title: '"
                             + MessageBean.getInstance().getResource("FxValueInput.datepicker.title")
                             + "', selected: date, pagedate: pdate });\n"
+                            + "    cal.cfg.setProperty(\"WEEKDAYS_SHORT\", "+MessageBean.getInstance().getResource("FxValueInput.datepicker.weekdaysShort")+");\n"
+                            + "    cal.cfg.setProperty(\"MONTHS_SHORT\", "+MessageBean.getInstance().getResource("FxValueInput.datepicker.monthsShort")+");\n"
+                            + "    cal.cfg.setProperty(\"MONTHS_LONG\", "+MessageBean.getInstance().getResource("FxValueInput.datepicker.monthsLong")+");\n"
                             + "    cal.selectEvent.subscribe(function(type, args, obj) {\n"
                             + "             var date = args[0][0];\n"
                             // YYYY/MM/DD
