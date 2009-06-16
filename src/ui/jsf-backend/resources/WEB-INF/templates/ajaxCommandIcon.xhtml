@@ -12,21 +12,21 @@
 Backend a4j command icon.
 
 Parameters:
- id - element id
- reRender - the region to re-render
- title - [optional] the button title (used by browsers to display tooltip on mouseover)
- titleKey - [optional]  message key for the button title (overrides title when specified).
-                        if not specified and labelKey is set, it defaults to #{labelKey}.title
- bean - the bean that the action belongs to
- actionListener - the actionListener to call
- immediate - [optional] the jsf immediate flag
- onclick - [optional] the onClick event of the action link
- icon - [optional] the name of the icon to be displayed. the icon name is mapped to the url "adm/images/commandButton/${icon}.png"
- iconUrl - [optional] the url (aboslute, including the context path)
-                      of the icon to be displayed (i.e. /flexive/images/myIcon.png)
- eventsQueue - ajax events queue
- rendered - [optional] flag to supress rendering of the whole component
- iconDisabled - [optional] flag to disable the component
+id - element id
+reRender - the region to re-render
+title - [optional] the button title (used by browsers to display tooltip on mouseover)
+titleKey - [optional] message key for the button title (overrides title when specified).
+if not specified and labelKey is set, it defaults to #{labelKey}.title
+bean - the bean that the action belongs to
+actionListener - the actionListener to call
+immediate - [optional] the jsf immediate flag
+onclick - [optional] the onClick event of the action link
+icon - [optional] the name of the icon to be displayed. the icon name is mapped to the url "adm/images/commandButton/${icon}.png"
+iconUrl - [optional] the url (aboslute, including the context path)
+of the icon to be displayed (i.e. /flexive/images/myIcon.png)
+eventsQueue - ajax events queue
+rendered - [optional] flag to supress rendering of the whole component
+iconDisabled - [optional] flag to disable the component
 
 <ui:composition>
 
@@ -59,21 +59,19 @@ Parameters:
             <c:set var="iconUrl" value="#{fxSystemBean.contextPath}/adm/images/commandButton/#{icon}.png"/>
         </c:if>
 
-        <c:if test="#{empty iconDisabled or iconDisabled == null}">
-            <c:set var="iconDisabled" value="false"/>
-        </c:if>
-
-        <c:set var="ajaxCommandIconStyle" value="commandIcon"/>
-
-        <c:if test="#{iconDisabled}">
-            <c:set var="ajaxCommandIconStyle" value="commandIconDisabled"/>
-        </c:if>
-
         <a4j:commandLink id="#{id}" reRender="#{reRender}" eventsQueue="#{eventsQueue}" onclick="#{onclick}"
-                         actionListener="#{bean[actionListener]}" immediate="#{immediate}" disabled="#{iconDisabled}">
+                         actionListener="#{bean[actionListener]}" immediate="#{immediate}"
+                         disabled="#{iconDisabled}">
             <ui:insert/>
-            <img alt="#{id}_icon" src="#{iconUrl}" class="#{ajaxCommandIconStyle}" title="#{title}"/>
+
+            <ui:fragment rendered="#{!iconDisabled or empty iconDisabled or iconDisabled == null}">
+                <img alt="#{id}_icon" src="#{iconUrl}" class="commandIcon" title="#{title}"/>
+            </ui:fragment>
+            <ui:fragment rendered="#{iconDisabled}">
+                <img alt="#{id}_icon" src="#{iconUrl}" class="commandIconDisabled" title="#{title}"/>
+            </ui:fragment>
         </a4j:commandLink>
+
 
     </ui:fragment>
 
