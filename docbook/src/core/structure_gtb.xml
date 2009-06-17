@@ -198,7 +198,8 @@ builder {
                     Type attributes: these apply to types only
                 </listitem>
                 <listitem>
-                    Property &amp; group common attributes: these apply both to the creation of new properties and to groups
+                    Property &amp; group common attributes: these apply both to the creation of new properties and to
+                    groups
                 </listitem>
                 <listitem>
                     Property attributes: these apply to the creation of new properties
@@ -207,7 +208,8 @@ builder {
                     Group attributes: these apply to the creation of new groups
                 </listitem>
                 <listitem>
-                    Property &amp; group assignment common attributes: these apply to property group assignments and changes thereof
+                    Property &amp; group assignment common attributes: these apply to property group assignments and
+                    changes thereof
                 </listitem>
                 <listitem>
                     Property assignment attributes: these apply to property assignments or changes thereof
@@ -217,7 +219,7 @@ builder {
                 </listitem>
             </itemizedlist>
 
-            As mentioned in <xref linkend="core_structure_gtb_syntax"/>,
+            As mentioned in<xref linkend="core_structure_gtb_syntax"/>,
             all attributes are called via the following syntax:
             <para>
                 <code>[STRUCTURENAME] ([attribute]: [value] [, ..])</code>
@@ -1272,15 +1274,33 @@ builder {
                         </td>
                         <td>
                             <code>Address(label: new FxString(true, &quot;Home Address&quot;),
-                                groupMode: GroupMode.OneOf
+                                groupMode: GroupMode.OneOf)
                             </code>
                             or
                             <code>Address(label: new FxString(true, &quot;Home Address&quot;),
-                                groupMode: &quot;AnyOf&quot;
+                                groupMode: &quot;AnyOf&quot;)
                             </code>
                         </td>
                         <td>
                             Sets the GroupMode for the given group.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            createSubAssignments
+                        </td>
+                        <td>
+                            <classname>Boolean</classname>
+                        </td>
+                        <td>
+                            <code>Address(assignment: "CONTACTDATA/ADDRESS", label: new FxString(true, &quot;Home
+                                Address&quot;),
+                                createSubAssignments: true)
+                            </code>
+                        </td>
+                        <td>
+                            Automatically creates all subassignments for the new GroupAssignment from the given base
+                            assignment
                         </td>
                     </tr>
                 </tbody>
@@ -1548,7 +1568,8 @@ builder {
                     <para>
                         Aliases can be assigned during element creation and can also be changed for existing
                         assignments.
-                        However, it is not necessary to perform subsequent structure walk-throughs by calling the aliased name (albeit
+                        However, it is not necessary to perform subsequent structure walk-throughs by calling the
+                        aliased name (albeit
                         possible).
                     </para>
                     <para>
@@ -1622,6 +1643,98 @@ builder {
 }
                 ]]></programlisting>
                         </para>
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        AutoUniquePropertyName / Alias Caveats
+                    </para>
+                    <para>
+                        Due to the inherent &quot;update-feature&quot; of the GTB,
+                        it is of utmost importance to understand how the Builder handles the creation of
+                        properties having the SAME name within a given structure. This is best explained by the
+                        following
+                        examples.
+                    </para>
+                    <para>
+                        <programlisting><![CDATA[
+def builder = new GroovyTypeBuilder().test {
+    prop1()
+    prop1()
+}
+                    ]]></programlisting>
+                        The above example will create "Prop1" having the default attribute values, the second call to
+                        prop1()
+                        will NEITHER create a new property (unique name: "PROP_1") NOR update the existing one.
+                    </para>
+                    <para>
+                        <programlisting><![CDATA[
+def builder = new GroovyTypeBuilder().test {
+    prop1()
+    prop1(dataType: FxDataType.Text)
+}
+                        ]]></programlisting>
+                        In the above example, an attempt is made to create a second property with the
+                        autoUniquePropertyName "PROP1_1"
+                        This, however, will fail since the generated XPATH for the respective property assignment will
+                        be equal to
+                        the XPath of the original "PROP1" assignment (XPaths provide a UNIQUE way to address
+                        assignments, therefore
+                        no equal XPaths can exist within the same hierarchical level).
+                    </para>
+                    <para>
+                        Hence the correct way to go about this is to use an alias (which will also set the XPath
+                        accordingly):
+                        <programlisting><![CDATA[
+def builder = new GroovyTypeBuilder().test {
+    prop1()
+    prop1(dataType: FxDataType.Text, alias: "prop1alias")
+}
+                        ]]></programlisting>
+                    </para>
+                    <para>
+                        If, on the other hand, the new property (having the same name as an existing one) resides within
+                        a different
+                        hierarchical level of the given structure, the alias attribute (i.e. setting a different XPath) can be omitted:
+                        <programlisting><![CDATA[
+def builder = new GroovyTypeBuilder().test {
+    prop1()
+    Group1 {
+        prop1()
+    }
+}
+                        ]]></programlisting>
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        Assignment Paths
+                    </para>
+                    <para>
+                        When creating assignments from properties / groups, either the full XPath or a relative XPath can be used
+                        to denote the base assignment. Where &quot;relative&quot; implies, that type names can be omitted.
+                    </para>
+                    <para>
+                        Example 1: full XPath (capitalising the XPath is not necessary)
+                        <programlisting><![CDATA[
+def builder = new GroovyTypeBuilder().test {
+    prop1()
+    Group1 {
+        prop1(assignment: "TEST/PROP1")
+    }
+}
+                        ]]></programlisting>
+                    </para>
+                    <para>
+                        Example 2: &quot;relative&quot; XPath
+                        <programlisting><![CDATA[
+def builder = new GroovyTypeBuilder().test {
+    prop1()
+    Group1 {
+        prop1(assignment: "/prop1")
+    }
+}
+                        ]]></programlisting>
                     </para>
                 </listitem>
             </itemizedlist>
@@ -1749,6 +1862,6 @@ builder {
         </section>
     </section>
     <para>
-        
+
     </para>
 </section>
