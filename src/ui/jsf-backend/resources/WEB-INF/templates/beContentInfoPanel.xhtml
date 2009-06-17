@@ -51,12 +51,10 @@ wrappedContent... value binding to wrapped content object provided by fxConentEd
                     <h:inputTextarea id="importPaste" rows="6" cols="50" value="#{srcEditor.importPasted}" readonly="false"/>
                     #{fxMessageBean['Content.field.importSave']}
                     <h:selectBooleanCheckbox id="importSave" value="#{srcEditor.importSave}"/>
-                    <ui:fragment rendered="#{empty wrappedContent.guiSettings.openedReferenceId}">
-                        <h:commandLink action="#{srcEditor.doImport}">
-                            <f:setPropertyActionListener value="#{wrappedContent}" target="#{srcEditor.wrappedContent}"/>
-                            <div class="infoPanelButton" style="display: block; float: left;">#{fxMessageBean['Content.button.import']}</div>
-                        </h:commandLink>
-                    </ui:fragment>
+                    <h:commandLink action="#{srcEditor.doImport}" rendered="#{wrappedContent.guiSettings.editMode and empty wrappedContent.guiSettings.openedReferenceId}">
+                        <f:setPropertyActionListener value="#{wrappedContent}" target="#{srcEditor.wrappedContent}"/>
+                        <span class="infoPanelButton" style="display: block; float: left;">#{fxMessageBean['Content.button.import']}</span>
+                    </h:commandLink>
                 </h:panelGrid>
                 <br clear="all"/>
             </div>
@@ -125,7 +123,8 @@ wrappedContent... value binding to wrapped content object provided by fxConentEd
                             <h:selectOneListbox id="srcComp" value="#{srcEditor.compareSourceVersion}"
                                                 size="1" required="true">
                                 <f:selectItems value="#{srcEditor.compareVersions}"/>
-                                <a4j:support event="onchange" onsubmit="flexive.contentEditor.saveHtmlEditors();" reRender="infoPanel" eventsQueue="ceQueue"/>
+                                <a4j:support event="onchange"
+                                             reRender="infoPanel" eventsQueue="ceQueue" oncomplete="flexive.yui.load();"/>
                             </h:selectOneListbox>
                         </td>
                     </tr>
@@ -138,7 +137,8 @@ wrappedContent... value binding to wrapped content object provided by fxConentEd
                                                 size="1"
                                                 required="true">
                                 <f:selectItems value="#{srcEditor.compareVersions}"/>
-                                <a4j:support event="onchange" onsubmit="flexive.contentEditor.saveHtmlEditors();" reRender="infoPanel" eventsQueue="ceQueue"/>
+                                <a4j:support event="onchange"
+                                             reRender="infoPanel" eventsQueue="ceQueue" oncomplete="flexive.yui.load();"/>
                             </h:selectOneListbox>
                         </td>
                     </tr>

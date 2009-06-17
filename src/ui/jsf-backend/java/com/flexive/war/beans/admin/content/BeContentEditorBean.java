@@ -278,6 +278,7 @@ public class BeContentEditorBean implements ActionBean, Serializable {
             this.infoPanelState = "";
             try {
                 wrappedContent.getContent().replaceData(_con);
+                ((FxContentEditorBean) FxJsfUtils.getManagedBean("fxContentEditorBean")).setEditorId(wrappedContent.getEditorId());
                 compact();
                 if (importSave) {
                     wrappedContent.getGuiSettings().setEditMode(false);
@@ -563,6 +564,7 @@ public class BeContentEditorBean implements ActionBean, Serializable {
     public void loadVersion() {
         reload();
         this.pk = new FxPK(wrappedContent.getContent().getId(), version);
+        this.editMode = wrappedContent.getGuiSettings().isEditMode();
     }
 
     public long getId() {
@@ -798,6 +800,7 @@ public class BeContentEditorBean implements ActionBean, Serializable {
                         }
                     }
                     // Reload changes
+                    this.treeNodes=null;
                     // TODO: only call when tree node labels need to be manually updated
                     // (i.e. after an existing content is edited and caption changed)
                     FxContext.get().setTreeWasModified();
