@@ -907,6 +907,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
 
         if (change.isGroup()) {
             ps.setInt(UPDATE_ID_POS + 2, (int) FxLanguage.SYSTEM_ID);
+            ps.setBoolean(UPDATE_MLDEF_POS, true);
             ps.addBatch();
             return;
         }

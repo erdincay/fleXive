@@ -96,12 +96,13 @@ public class GenericBinarySQLOutputStream extends PipedOutputStream implements R
         PreparedStatement ps = null;
         Connection con = null;
         try {
-            con = Database.getDbConnection(divisionId);
+            con = Database.getNonTXDataSource(divisionId).getConnection();
             ps = con.prepareStatement("UPDATE " + DatabaseConst.TBL_BINARY_TRANSIT + " SET TFER_DONE=?, BLOBSIZE=? WHERE BKEY=?");
             ps.setBoolean(1, true);
             ps.setLong(2, count);
             ps.setString(3, handle);
-            ps.executeUpdate();
+            if (ps.executeUpdate() != 1)
+                LOG.error("Failed to update binary transit for handle " + handle);
         } catch (SQLException e) {
             LOG.error("SQL error marking binary as finished: " + e.getMessage(), e);
         } finally {
@@ -125,7 +126,7 @@ public class GenericBinarySQLOutputStream extends PipedOutputStream implements R
         PreparedStatement ps = null;
         Connection con = null;
         try {
-            con = Database.getDbConnection(divisionId);
+            con = Database.getNonTXDataSource(divisionId).getConnection();
             ps = con.prepareStatement("INSERT INTO " + DatabaseConst.TBL_BINARY_TRANSIT + " (BKEY,FBLOB,TFER_DONE,EXPIRE) VALUES(?,?,FALSE,?)");
             ps.setString(1, handle);
             ps.setBinaryStream(2, pipe, (int) expectedSize);

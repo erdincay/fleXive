@@ -154,6 +154,7 @@ public class BinaryUploadProtocol extends StreamProtocol<BinaryUploadPayload> {
             return;
         }
         try {
+            pout.flush();
             pout.close();
             pout = null;
         } catch (IOException e) {

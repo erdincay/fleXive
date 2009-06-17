@@ -311,8 +311,14 @@ public class GenericBinarySQLStorage implements BinaryStorage {
         try {
             final DivisionConfigurationEngine divisionConfig = EJBLookup.getDivisionConfigurationEngine();
             dbTransit = divisionConfig.get(SystemParameters.BINARY_TRANSIT_DB);
-            dbThreshold = divisionConfig.get(SystemParameters.BINARY_DB_THRESHOLD);
-            dbPreviewThreshold = divisionConfig.get(SystemParameters.BINARY_DB_PREVIEW_THRESHOLD);
+            if (id >= 0) {
+                dbThreshold = divisionConfig.get(SystemParameters.BINARY_DB_THRESHOLD);
+                dbPreviewThreshold = divisionConfig.get(SystemParameters.BINARY_DB_PREVIEW_THRESHOLD);
+            } else {
+                //force storage of system binaries in the database
+                dbThreshold = -1;
+                dbPreviewThreshold = -1;
+            }
             dbStorage = dbThreshold < 0 || binary.getSize() < dbThreshold;
         } catch (FxApplicationException e) {
             throw e.asRuntimeException();
@@ -368,7 +374,7 @@ public class GenericBinarySQLStorage implements BinaryStorage {
                 try {
                     if (!dbStorage) {
                         //binaries are stored on the filesystem
-                        binaryTransit = getBinaryTransitFileInfo(con, binary).getBinaryTransitFile();
+                        binaryTransit = getBinaryTransitFileInfo(binary).getBinaryTransitFile();
                         removeTransitFile = true; //have to clean up afterwards since its a temporary file we get
                     }
                 } catch (FxApplicationException e) {
@@ -524,7 +530,7 @@ public class GenericBinarySQLStorage implements BinaryStorage {
         String metaData = "<empty/>";
         ResultSet rs = null;
         try {
-            binaryTransitFileInfo = getBinaryTransitFileInfo(con, binary);
+            binaryTransitFileInfo = getBinaryTransitFileInfo(binary);
             boolean processed = false;
             boolean useDefaultPreview = true;
             int defaultId = SYS_UNKNOWN;
@@ -645,13 +651,12 @@ public class GenericBinarySQLStorage implements BinaryStorage {
     /**
      * Retrieve a File handle and mime type for a binary transit entry
      *
-     * @param con    an open and valid connection
      * @param binary binary descriptor
      * @return BinaryTransitFileInfo containing a File handle and the detected mime type
      * @throws FxApplicationException on errors
      */
     @SuppressWarnings({"ThrowFromFinallyBlock"})
-    protected BinaryTransitFileInfo getBinaryTransitFileInfo(Connection con, BinaryDescriptor binary) throws FxApplicationException {
+    protected BinaryTransitFileInfo getBinaryTransitFileInfo(BinaryDescriptor binary) throws FxApplicationException {
         PreparedStatement ps = null;
         ResultSet rs = null;
         File binaryTransitFile = null;
@@ -666,7 +671,9 @@ public class GenericBinarySQLStorage implements BinaryStorage {
             throw e.asRuntimeException();
         }
         if (inDB) {
+            Connection con = null;
             try {
+                con = Database.getNonTXDataSource().getConnection();
                 ps = con.prepareStatement(BINARY_TRANSIT_HEADER);
                 ps.setString(1, binary.getHandle());
 
@@ -675,9 +682,10 @@ public class GenericBinarySQLStorage implements BinaryStorage {
                     try {
                         header = rs.getBlob(1).getBytes(1, 48);
                     } catch (Throwable t) {
-                        // ignore, header migth be smaller than 48
+                        // ignore, header might be smaller than 48
                     }
-                }
+                } else
+                    throw new FxApplicationException("ex.content.binary.transitNotFound", binary.getHandle());
 
                 binaryTransitFile = File.createTempFile("FXBIN_", "_TEMP");
                 in = rs.getBlob(1).getBinaryStream();
@@ -706,11 +714,11 @@ public class GenericBinarySQLStorage implements BinaryStorage {
                 }
                 try {
                     if (rs != null) rs.close();
-                    if (ps != null) ps.close();
                 } catch (SQLException e) {
                     //noinspection ThrowFromFinallyBlock
                     throw new FxDbException(e, "ex.db.sqlError", e.getMessage());
                 }
+                Database.closeObjects(GenericBinarySQLStorage.class, con, ps);
             }
         } else {
             binaryTransitFile = FxBinaryUtils.getTransitFile(FxContext.get().getDivisionId(), binary.getHandle());
