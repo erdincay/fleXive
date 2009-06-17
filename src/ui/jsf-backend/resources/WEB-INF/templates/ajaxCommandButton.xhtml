@@ -30,6 +30,7 @@ Parameters:
  rendered - [optional] flag to supress rendering of the whole component
  buttonDisabled - [optional] renders the button, but disables its functionality
  oncomplete - [optional] the oncomplete event of the action link
+ lockscreen - [optional] if true, the screen will be locked when clicking the button
 
 <ui:composition>
     <ui:fragment rendered="#{rendered!=false}">
@@ -94,17 +95,31 @@ Parameters:
         </c:if>
 
         <c:if test="#{buttonDisabled == null or !buttonDisabled}">
+
+            <c:if test="#{empty onclick}">
+                <c:set var="onclick" value="null"/>
+            </c:if>
+
+            <c:if test="#{empty lockscreen or lockscreen == null}">
+                <c:set var="lockscreen" value="false"/>
+            </c:if>
+
+            <c:if test="#{lockscreen}">
+                <c:if test="#{!empty oncomplete or oncomplete != null}">
+                    <c:set var="oncomplete" value="#{oncomplete};parent.unlockScreen();"/>
+                </c:if>
+                <c:if test="#{empty oncomplete or oncomplete == null}">
+                    <c:set var="oncomplete" value="parent.unlockScreen();"/>
+                </c:if>
+            </c:if>
+
             <div id="commandElement_#{id}" style="display:none">
                 <a4j:commandLink id="#{id}_submissionlink" eventsQueue="#{eventsQueue}"
                                  reRender="#{reRender}" actionListener="#{bean[actionListener]}"
                                  immediate="#{immediate}" oncomplete="#{oncomplete}"/>
             </div>
 
-            <c:if test="#{empty onclick}">
-                <c:set var="onclick" value="null"/>
-            </c:if>
-
-            <div id="commandButton_#{id}" onclick="getOnClick('commandElement_#{id}', &quot;#{onclick}&quot;);" class="#{commandButtonStyle}"
+            <div id="commandButton_#{id}" onclick="getOnClick('commandElement_#{id}', &quot;#{onclick}&quot;, #{lockscreen});" class="#{commandButtonStyle}"
                  title="#{title}">
                 <div style="display:table-row; height:22px; float:left">
                     <div class="#{commandButtonIconStyle}">

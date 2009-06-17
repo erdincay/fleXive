@@ -45,7 +45,7 @@
 
                     <adm:ajaxCommandButton id="executeButton" labelKey="ScriptConsole.button.execute" icon="run"
                                            bean="#{scriptConsoleBean}" actionListener="runScript"
-                                           reRender="resultPanel"/>
+                                           reRender="resultPanel" lockscreen="true"/>
                     <adm:shortcut elementId="commandButton_executeButton"/>
 
                     <adm:ajaxCommandButton id="defaultImports" labelKey="Script.button.defaultImports"

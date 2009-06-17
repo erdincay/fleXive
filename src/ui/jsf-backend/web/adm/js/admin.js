@@ -631,12 +631,14 @@ function flash(elementId, flashColor, backgroundColor) {
  * @param id the id of the commandElement div containing the link
  * @param onClickAction an additional onClickAction passed to the ajaxCommandButton
  */
-function getOnClick(id, onClickAction) {
+function getOnClick(id, onClickAction, lockscreen) {
     var contentFrame = window.parent.document.getElementById('contentFrame');
     var callerWindow = contentFrame.contentWindow;
     var linkElement = getFirstLinkElement(callerWindow.document, id);
     if(onClickAction == 'null')
         onClickAction = "";
-    onClickAction = eval(onClickAction + "document.getElementById('" + linkElement.getAttribute("id") + "').onclick();");
-    return onClickAction;
+    if(lockscreen)
+        onClickAction = onClickAction + "parent.lockScreen();";
+    onClickAction = onClickAction + "document.getElementById('" + linkElement.getAttribute("id") + "').onclick();";
+    return eval(onClickAction);
 }

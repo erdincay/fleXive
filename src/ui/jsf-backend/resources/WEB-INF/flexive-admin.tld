@@ -323,6 +323,12 @@
         <rtexprvalue>false</rtexprvalue>
         <description>[optional] the oncomplete event of the action link</description>
       </attribute>
+      <attribute>
+        <name>lockscreen</name>
+        <required>false</required>
+        <rtexprvalue>false</rtexprvalue>
+        <description>[optional] if true, the screen will be locked when clicking the button</description>
+      </attribute>
     </tag>
     <tag>
       <name>ajaxCommandIcon</name>
