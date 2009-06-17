@@ -34,6 +34,7 @@ package com.flexive.shared.scripting.groovy;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.FxLanguage;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxNotFoundException;
@@ -874,12 +875,23 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
             }
             // elementName will be reassigned to "alias" if no alias is given
             elementName = (String) FxSharedUtils.get(attributes, "name", StringUtils.capitalize(structureName));
-            label = (FxString) FxSharedUtils.get(attributes, "label", new FxString(elementName));
+
+            // LABEL
+            if(!attributes.containsKey("label") && !attributes.containsKey("description")) // use the elementName
+                label = (FxString) FxSharedUtils.get(attributes, "label", new FxString(elementName));
 
             if (attributes.containsKey("description") && !attributes.containsKey("label")) // overwrite the label if given
                 label = (FxString) FxSharedUtils.get(attributes, "description", new FxString(elementName));
+            else if(attributes.containsKey("label"))
+                label = (FxString) FxSharedUtils.get(attributes, "label", new FxString(elementName));
+            // DEFAULT translation for label if != the default lang
+            if(!label.translationExists(FxLanguage.DEFAULT_ID))
+                label.setTranslation(FxLanguage.DEFAULT_ID, label.getBestTranslation());
 
-            hint = (FxString) FxSharedUtils.get(attributes, "hint", new FxString(""));
+            // HINT
+            hint = (FxString) FxSharedUtils.get(attributes, "hint", new FxString(label.getDefaultLanguage(), true)); // default: a "real" empty FxString
+            if(!hint.translationExists(FxLanguage.DEFAULT_ID))
+                hint.setTranslation(FxLanguage.DEFAULT_ID, hint.getBestTranslation());
 
             acl = CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()); // default
             if (attributes.get("acl") instanceof ACL) {
@@ -956,7 +968,7 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
          * @throws FxApplicationException on errors
          */
         void setPropertyAssignmentAttributes(FxPropertyAssignmentEdit pa) throws FxApplicationException {
-            if (attributes.containsKey("label"))
+            if (attributes.containsKey("label") || attributes.containsKey("description"))
                 pa.setLabel(label);
             if (attributes.containsKey("defaultMultiplicity"))
                 pa.setDefaultMultiplicity(defaultMultiplicity);
@@ -1010,7 +1022,7 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
          */
         void setGroupAssignmentAttributes(FxGroupAssignmentEdit ga) throws FxApplicationException {
             ga.setDefaultMultiplicity(defaultMultiplicity);
-            if (attributes.containsKey("label"))
+            if (attributes.containsKey("label") || attributes.containsKey("description"))
                 ga.setLabel(label);
             if (attributes.containsKey("hint"))
                 ga.setHint(hint);

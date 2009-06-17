@@ -51,7 +51,7 @@ import com.flexive.shared.security.ACLCategory
 import com.flexive.shared.FxLanguage
 
 /**
- * Tests for the                       {@link com.flexive.shared.scripting.groovy.GroovyTypeBuilder GroovyTypeBuilder}                       class.
+ * Tests for the                         {@link com.flexive.shared.scripting.groovy.GroovyTypeBuilder GroovyTypeBuilder}                         class.
  *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
@@ -240,8 +240,8 @@ class GroovyTypeBuilderTest {
             }
             assert false: "Successfully created a property assignment referencing to a group"
         } catch (FxRuntimeException e) {
-            if (!(e.converted != null && e.converted instanceof FxInvalidParameterException                        \
-                                       && ("assignment".equalsIgnoreCase(((FxInvalidParameterException) e.converted).parameter)))) {
+            if (!(e.converted != null && e.converted instanceof FxInvalidParameterException                          \
+                                         && ("assignment".equalsIgnoreCase(((FxInvalidParameterException) e.converted).parameter)))) {
                 throw e;
             }
             // else: success
@@ -259,8 +259,8 @@ class GroovyTypeBuilderTest {
             }
             assert false: "Successfully created a group assignment referencing to a property"
         } catch (FxRuntimeException e) {
-            if (!(e.converted != null && e.converted instanceof FxInvalidParameterException                        \
-                                       && ("assignment".equalsIgnoreCase(((FxInvalidParameterException) e.converted).parameter)))) {
+            if (!(e.converted != null && e.converted instanceof FxInvalidParameterException                          \
+                                         && ("assignment".equalsIgnoreCase(((FxInvalidParameterException) e.converted).parameter)))) {
                 throw e;
             }
             // else: success
@@ -729,7 +729,7 @@ class GroovyTypeBuilderTest {
                 }
             }
 
-        } catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         } finally {
             removeTestType()
@@ -1185,6 +1185,31 @@ class GroovyTypeBuilderTest {
             } catch (Exception e) {
                 // shouldn't happen
             }
+        } finally {
+            removeTestType()
+        }
+    }
+
+
+
+    /**
+     * Tests the automatic setting of a translation to the default FxLanguage in case it is not present
+     * (for "label" and "hint")
+     */
+    @Test (groups = ["ejb", "scripting", "structure"])
+    def defaultTranslationTest() {
+        new GroovyTypeBuilder().builderTest {
+            prop1(label: new FxString(true, FxLanguage.GERMAN, "Ein Label"))
+            prop2(label: new FxString(true, "A label"))
+        }
+
+        try {
+            def p1 = environment().getProperty("PROP1")
+            def p2 = environment().getProperty("PROP2")
+            Assert.assertEquals(p1.getLabel().getTranslation(FxLanguage.GERMAN).toString(), "Ein Label")
+            Assert.assertEquals(p1.getLabel().getTranslation(FxLanguage.DEFAULT_ID).toString(), "Ein Label")
+            Assert.assertEquals(p1.getLabel().getTranslation(FxLanguage.ENGLISH).toString(), "Ein Label")
+            Assert.assertEquals(p2.getLabel().getDefaultLanguage(), FxLanguage.DEFAULT_ID);
         } finally {
             removeTestType()
         }
