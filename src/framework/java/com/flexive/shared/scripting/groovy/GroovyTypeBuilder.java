@@ -569,7 +569,7 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
             }
         } else { // name starts uppercase --> group
             if (am.assignment != null) { // create a new group assignment
-                final FxAssignment fxAssignment = CacheAdmin.getEnvironment().getAssignment(am.assignment);
+                final FxAssignment fxAssignment = CacheAdmin.getEnvironment().getAssignment(am.assignment.startsWith("/") ? type.getName() + am.assignment : am.assignment);
                 try {
                     return createNewGroupAssignmentNode(fxAssignment, am);
                 } catch (FxApplicationException e) {
