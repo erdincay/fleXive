@@ -37,7 +37,6 @@ import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.FxLanguage;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
-import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.structure.*;
@@ -147,6 +146,22 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
     };
 
     /**
+     * List of keys which are unique to creating a property
+     */
+    private final static String[] PROP_CREATION_UNIQUE_KEYS = {
+            "NAME", "OVERRIDEMULTIPLICITY", "OVERRIDEACL", "DATATYPE", "AUTOUNIQUEPROPERTYNAME", "FULLTEXTINDEXED",
+            "OVERRIDEMULTILANG", "OVERRIDEINOVERVIEW", "OVERRIDEMAXLENGTH", "OVERRIDEMULTILINE", "OVERRIDESEARCHABLE",
+            "OVERRIDEUSEHTMLEDITOR", "UNIQUEMODE", "REFERENCEDTYPE", "REFERENCEDLIST"
+    };
+
+    /**
+     * List of keys which are unique to creating a group
+     */
+    private final static String[] GROUP_CREATION_UNIQUE_KEYS = {
+            "NAME", "OVERRIDEMULTIPLICITY"
+    };
+
+    /**
      * Check if the given key is a non-property-option key (=not used for property options)
      *
      * @param key the key to check
@@ -171,6 +186,31 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
         for (String check : ASSIGNMENT_NONOPTION_KEYS)
             if (check.equals(uKey))
                 return true;
+        return false;
+    }
+
+    /**
+     * Check if the given set of element attributes contains a keyword which is unique to
+     * property / group creation
+     *
+     * @param attributeKeys the set of attributes passed to the current element
+     * @param isGroup set to "true" if the current element is a group
+     * @return true if a match was found, false if no match can be found
+     */
+    private static boolean hasCreateUniqueOptions(Set<String> attributeKeys, boolean isGroup) {
+        for (String key : attributeKeys) {
+            if (isGroup) {
+                for (String option : GROUP_CREATION_UNIQUE_KEYS) {
+                    if (option.equals(key.toUpperCase()))
+                        return true;
+                }
+            } else {
+                for (String option : PROP_CREATION_UNIQUE_KEYS) {
+                    if (option.equals(key.toUpperCase()))
+                        return true;
+                }
+            }
+        }
         return false;
     }
 
@@ -450,9 +490,10 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
     @Override
     protected Object createNode(Object name, Map attributes, Object value) {
         final String structureName = (String) name;
+        final AttributeMapper am = new AttributeMapper(attributes, value, structureName);
         if (this.type == null) {
             // AttributeMapper
-            final AttributeMapper am = new AttributeMapper(attributes, value, structureName).setStructureAttributes();
+            am.setStructureAttributes();
             // root node, create type
             try {
                 final FxTypeEdit type = FxTypeEdit.createNew(structureName, am.label, am.acl,
@@ -467,7 +508,7 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
             }
         }
 
-        final AttributeMapper am = new AttributeMapper(attributes, value, structureName).setElementAttributes();
+        am.setElementAttributes();
         boolean hasParent = this.getCurrent() instanceof GroupAssignmentNode || this.getCurrent() instanceof GroupNode;
         if (hasParent) {// set the parent xPath immed. for assignments and reload the type from the cache
             am.parentXPath = getXPathFromStructureName(structureName, true);
@@ -488,6 +529,10 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
                     if (CacheAdmin.getEnvironment().propertyExistsInType(type.getName(), am.structureName)
                             || structureAssignmentIsInType(structureName, hasParent, false)) {
                         final FxAssignment fxAssignment;
+
+                        if(hasCreateUniqueOptions(attributes.keySet(), false))
+                            return createNewPropertyNode(am);
+
                         am.isNew = false;
                         am.assignmentChanges = attributes.size() > 0;
                         final String xPath;
@@ -504,8 +549,9 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
                                 xPath = getXPathFromAlias(am.structureName, false, false);
                         }
 
-                        if (xPath == null)
-                            throw new FxNotFoundException("ex.scripting.builder.structure.notFound", structureName, type.getName()).asRuntimeException();
+                        if (xPath == null) // IF THE XPATH REMAINS NULL, WE ASSUME THAT A NEW PROPERTY HAVING THE SAME NAME MUST BE CREATED
+                            return createNewPropertyNode(am);
+
                         // retrieve the fxAssignment and set the correct alias if applicable
                         fxAssignment = CacheAdmin.getEnvironment().getAssignment(xPath);
                         // also set the correct alias in the attributesmapper
@@ -515,16 +561,7 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
                         return createNewPropertyAssignmentNode(fxAssignment, am);
                     }
                     // create a new property
-                    final FxPropertyEdit property = FxPropertyEdit.createNew(StringUtils.capitalize(am.elementName),
-                            am.label, am.hint, am.multiplicity, am.acl, am.dataType);
-                    am.setPropertyAttributes(property); // set property attributes
-
-                    if (this.getCurrent() instanceof GroupAssignmentNode) {
-                        final GroupAssignmentNode node = (GroupAssignmentNode) getCurrent(); // retrieve the parent
-                        return new PropertyNode(property, am.alias, type.getId(), node.getElement().getXPath());
-
-                    } else
-                        return new PropertyNode(property, am.alias, type.getId());
+                    return createNewPropertyNode(am);
 
                 } catch (FxApplicationException e) {
                     throw e.asRuntimeException();
@@ -544,6 +581,10 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
                     if (CacheAdmin.getEnvironment().groupExistsInType(type.getName(), am.structureName)
                             || structureAssignmentIsInType(structureName, hasParent, true)) {
                         final FxAssignment fxAssignment;
+
+                        if(hasCreateUniqueOptions(attributes.keySet(), true))
+                            return createNewGroupNode(am);
+
                         am.isNew = false;
                         am.assignmentChanges = attributes.size() > 0;
                         final String xPath;
@@ -561,7 +602,8 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
                         }
 
                         if (xPath == null)
-                            throw new FxNotFoundException("ex.scripting.builder.structure.notFound", structureName, type.getName()).asRuntimeException();
+                            return createNewGroupNode(am);
+
                         // retrieve the fxAssignment and set the correct alias if applicable
                         fxAssignment = CacheAdmin.getEnvironment().getAssignment(xPath);
                         // also set the correct alias in the attributesmapper
@@ -570,17 +612,8 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
                         }
                         return createNewGroupAssignmentNode(fxAssignment, am);
                     }
-
-                    FxGroupEdit ge = FxGroupEdit.createNew(am.elementName, am.label, am.hint, am.overrideMultiplicity, // false,
-                            am.multiplicity);
-                    am.setGroupAttributes(ge); // set group attributes
-
-                    if (this.getCurrent() instanceof GroupAssignmentNode) {
-                        final GroupAssignmentNode node = (GroupAssignmentNode) getCurrent(); // retrieve the parent
-                        return new GroupNode(ge, am.alias, type.getId(), node.getElement().getXPath());
-
-                    } else
-                        return new GroupNode(ge, am.alias, type.getId());
+                    // create a new group
+                    return createNewGroupNode(am);
 
                 } catch (FxApplicationException e) {
                     throw e.asRuntimeException();
@@ -617,6 +650,26 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
     }
 
     /**
+     * Refactorisation of GroupNode creation
+     *
+     * @param am the AttributeMapper
+     * @return returns a new GroupNode
+     * @throws FxApplicationException on errors
+     */
+    private Object createNewGroupNode(AttributeMapper am) throws FxApplicationException {
+        FxGroupEdit ge = FxGroupEdit.createNew(am.elementName, am.label, am.hint, am.overrideMultiplicity, // false,
+                am.multiplicity);
+        am.setGroupAttributes(ge); // set group attributes
+
+        if (this.getCurrent() instanceof GroupAssignmentNode) {
+            final GroupAssignmentNode node = (GroupAssignmentNode) getCurrent(); // retrieve the parent
+            return new GroupNode(ge, am.alias, type.getId(), node.getElement().getXPath());
+
+        } else
+            return new GroupNode(ge, am.alias, type.getId());
+    }
+
+    /**
      * Refactoring of common call to "new PropertyAssignmentNode"
      *
      * @param fxAssignment the FxAssignment for which the call will be made
@@ -641,6 +694,26 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
 
         return new PropertyAssignmentNode(pa, am);
 
+    }
+
+    /**
+     * Refactorisation of PropertyNode creation
+     *
+     * @param am the ATtributeMapper
+     * @return returns a new PropertyNode
+     * @throws FxApplicationException on errors
+     */
+    private Object createNewPropertyNode(AttributeMapper am) throws FxApplicationException {
+        final FxPropertyEdit property = FxPropertyEdit.createNew(StringUtils.capitalize(am.elementName),
+                am.label, am.hint, am.multiplicity, am.acl, am.dataType);
+        am.setPropertyAttributes(property); // set property attributes
+
+        if (this.getCurrent() instanceof GroupAssignmentNode) {
+            final GroupAssignmentNode node = (GroupAssignmentNode) getCurrent(); // retrieve the parent
+            return new PropertyNode(property, am.alias, type.getId(), node.getElement().getXPath());
+
+        } else
+            return new PropertyNode(property, am.alias, type.getId());
     }
 
     /**
@@ -877,20 +950,20 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
             elementName = (String) FxSharedUtils.get(attributes, "name", StringUtils.capitalize(structureName));
 
             // LABEL
-            if(!attributes.containsKey("label") && !attributes.containsKey("description")) // use the elementName
+            if (!attributes.containsKey("label") && !attributes.containsKey("description")) // use the elementName
                 label = (FxString) FxSharedUtils.get(attributes, "label", new FxString(elementName));
 
             if (attributes.containsKey("description") && !attributes.containsKey("label")) // overwrite the label if given
                 label = (FxString) FxSharedUtils.get(attributes, "description", new FxString(elementName));
-            else if(attributes.containsKey("label"))
+            else if (attributes.containsKey("label"))
                 label = (FxString) FxSharedUtils.get(attributes, "label", new FxString(elementName));
             // DEFAULT translation for label if != the default lang
-            if(!label.translationExists(FxLanguage.DEFAULT_ID))
+            if (!label.translationExists(FxLanguage.DEFAULT_ID))
                 label.setTranslation(FxLanguage.DEFAULT_ID, label.getBestTranslation());
 
             // HINT
             hint = (FxString) FxSharedUtils.get(attributes, "hint", new FxString(label.getDefaultLanguage(), true)); // default: a "real" empty FxString
-            if(!hint.translationExists(FxLanguage.DEFAULT_ID))
+            if (!hint.translationExists(FxLanguage.DEFAULT_ID))
                 hint.setTranslation(FxLanguage.DEFAULT_ID, hint.getBestTranslation());
 
             acl = CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()); // default
@@ -996,6 +1069,8 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
                 pa.setMaxLength(maxLength);
             if (attributes.containsKey("multilang"))
                 pa.setMultiLang(multilang);
+            if (attributes.containsKey("searchable"))
+                pa.setSearchable(searchable);
 
             // set non-generic property-assignment options
             for (Object oEntry : attributes.entrySet()) {

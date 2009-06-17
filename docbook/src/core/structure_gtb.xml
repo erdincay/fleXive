@@ -1230,6 +1230,20 @@ builder {
                             Restrict the maximum length of input values.
                         </td>
                     </tr>
+                    <tr>
+                        <td>
+                            searchable
+                        </td>
+                        <td>
+                            <classname>Boolean</classname>
+                        </td>
+                        <td>
+                            <code>htmledit(searchable: false)</code>
+                        </td>
+                        <td>
+                            Property assignment can be searched
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </section>

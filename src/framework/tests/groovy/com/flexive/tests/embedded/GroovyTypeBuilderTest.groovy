@@ -51,7 +51,7 @@ import com.flexive.shared.security.ACLCategory
 import com.flexive.shared.FxLanguage
 
 /**
- * Tests for the                         {@link com.flexive.shared.scripting.groovy.GroovyTypeBuilder GroovyTypeBuilder}                         class.
+ * Tests for the                           {@link com.flexive.shared.scripting.groovy.GroovyTypeBuilder GroovyTypeBuilder}                           class.
  *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
@@ -240,8 +240,8 @@ class GroovyTypeBuilderTest {
             }
             assert false: "Successfully created a property assignment referencing to a group"
         } catch (FxRuntimeException e) {
-            if (!(e.converted != null && e.converted instanceof FxInvalidParameterException                          \
-                                         && ("assignment".equalsIgnoreCase(((FxInvalidParameterException) e.converted).parameter)))) {
+            if (!(e.converted != null && e.converted instanceof FxInvalidParameterException                            \
+                                           && ("assignment".equalsIgnoreCase(((FxInvalidParameterException) e.converted).parameter)))) {
                 throw e;
             }
             // else: success
@@ -259,8 +259,8 @@ class GroovyTypeBuilderTest {
             }
             assert false: "Successfully created a group assignment referencing to a property"
         } catch (FxRuntimeException e) {
-            if (!(e.converted != null && e.converted instanceof FxInvalidParameterException                          \
-                                         && ("assignment".equalsIgnoreCase(((FxInvalidParameterException) e.converted).parameter)))) {
+            if (!(e.converted != null && e.converted instanceof FxInvalidParameterException                            \
+                                           && ("assignment".equalsIgnoreCase(((FxInvalidParameterException) e.converted).parameter)))) {
                 throw e;
             }
             // else: success
@@ -1207,9 +1207,53 @@ class GroovyTypeBuilderTest {
             def p1 = environment().getProperty("PROP1")
             def p2 = environment().getProperty("PROP2")
             Assert.assertEquals(p1.getLabel().getTranslation(FxLanguage.GERMAN).toString(), "Ein Label")
+            // Assert.assertEquals(p1.getLabel().getDefaultLanguage(), 2) // commented until fixed
             Assert.assertEquals(p1.getLabel().getTranslation(FxLanguage.DEFAULT_ID).toString(), "Ein Label")
             Assert.assertEquals(p1.getLabel().getTranslation(FxLanguage.ENGLISH).toString(), "Ein Label")
             Assert.assertEquals(p2.getLabel().getDefaultLanguage(), FxLanguage.DEFAULT_ID);
+        } finally {
+            removeTestType()
+        }
+    }
+
+    /**
+     * Test the creation of properties having the same name within the same type (on various
+     * hierarchical levels)
+     */
+    @Test (groups = ["ejb", "scripting", "structure"])
+    def createUniquePropsTest() {
+        new GroovyTypeBuilder().builderTest {
+            prop1()
+            prop1(dataType: FxDataType.Number, alias: "prop1alias")
+        }
+
+        try {
+            Assert.assertTrue(environment().propertyExists("PROP1"))
+            Assert.assertTrue(environment().propertyExists("PROP1_1"))
+
+            Assert.assertTrue(environment().assignmentExists("BUILDERTEST/PROP1"))
+            Assert.assertTrue(environment().assignmentExists("BUILDERTEST/PROP1ALIAS"))
+
+            // this will fail
+            def builder = new GroovyTypeBuilder("BUILDERTEST")
+            try {
+                builder {
+                    prop1(overrideMultilang: false)
+                }
+            } catch(e) {
+                // expected
+            }
+
+            builder = new GroovyTypeBuilder("BUILDERTEST")
+            builder {
+                Group1 {
+                    prop1() // this should work w/o setting an alias
+                }
+            }
+
+            Assert.assertTrue(environment().propertyExists("PROP1_2"))
+            Assert.assertTrue(environment().assignmentExists("BUILDERTEST/GROUP1/PROP1"))
+
         } finally {
             removeTestType()
         }
