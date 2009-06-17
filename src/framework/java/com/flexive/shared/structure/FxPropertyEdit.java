@@ -100,7 +100,7 @@ public class FxPropertyEdit extends FxProperty {
      * Constructor
      *
      * @param name                     (mandator wide unique) name of the property
-     * @param description              description
+     * @param label                    label
      * @param hint                     hint message
      * @param overrideBaseMultiplicity are assignments allowed to override this properties multiplicity?
      * @param multiplicity             multiplicity
@@ -113,10 +113,10 @@ public class FxPropertyEdit extends FxProperty {
      * @param referencedList           if dataType is (multi) select list this is the referenced list
      * @param options                  this properties options
      */
-    private FxPropertyEdit(String name, FxString description, FxString hint, boolean overrideBaseMultiplicity,
+    private FxPropertyEdit(String name, FxString label, FxString hint, boolean overrideBaseMultiplicity,
                            FxMultiplicity multiplicity, boolean overrideACL, ACL ACL, FxDataType dataType, FxValue defaultValue,
                            boolean fulltextIndexed, FxType referencedType, FxSelectList referencedList, List<FxStructureOption> options) {
-        super(-1, name, description, hint, false, overrideBaseMultiplicity, multiplicity, overrideACL, ACL, dataType, defaultValue,
+        super(-1, name, label, hint, false, overrideBaseMultiplicity, multiplicity, overrideACL, ACL, dataType, defaultValue,
                 fulltextIndexed, referencedType, referencedList, UniqueMode.None, options);
         setName(name);
         setSearchable(true); //default is searchable
@@ -166,16 +166,16 @@ public class FxPropertyEdit extends FxProperty {
      * Create a new FxPropertyEdit instance - simplified with many defaults (everything set to true except useHTMLEditor)
      *
      * @param name         (mandator wide unique) name of the property
-     * @param description  description
+     * @param label        label
      * @param hint         hint message
      * @param multiplicity multiplicity
      * @param acl          ACL
      * @param dataType     FxDataType
      * @return FxPropertyEdit instance
      */
-    public static FxPropertyEdit createNew(String name, FxString description, FxString hint,
+    public static FxPropertyEdit createNew(String name, FxString label, FxString hint,
                                            FxMultiplicity multiplicity, ACL acl, FxDataType dataType) {
-        return new FxPropertyEdit(name, description, hint, true, multiplicity, true, acl,
+        return new FxPropertyEdit(name, label, hint, true, multiplicity, true, acl,
                 dataType, null, dataType.isTextType(), null, null, FxStructureOption.getEmptyOptionList(5));
     }
 

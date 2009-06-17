@@ -148,8 +148,8 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
         Statement stmt = null;
         ArrayList<FxDataType> alRet = new ArrayList<FxDataType>(20);
         try {
-            String sql = "SELECT d.TYPECODE, d.NAME, t.LANG, t.DESCRIPTION FROM " + TBL_STRUCT_DATATYPES + " d, " +
-                    TBL_STRUCT_DATATYPES + ML + " t WHERE t.ID=d.TYPECODE ORDER BY d.TYPECODE, t.LANG ASC";
+            String sql = "SELECT d.TYPECODE, d.NAME, t.LANG, t.DESCRIPTION FROM " + TBL_STRUCT_DATATYPES + " d LEFT JOIN " +
+                    TBL_STRUCT_DATATYPES + ML + " t ON t.ID=d.TYPECODE ORDER BY d.TYPECODE, t.LANG ASC";
             stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
             FxDataType dtCurr = null;
@@ -197,7 +197,7 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
             //final List<FxStructureOption> emptyGroupOptions = new ArrayList<FxStructureOption>(0);
             //                     1     2       3             4             5                  6       7              8
             final String sql = "SELECT g.ID, g.NAME, g.DEFMINMULT, g.DEFMAXMULT, g.MAYOVERRIDEMULT, t.LANG, t.DESCRIPTION, t.HINT FROM " +
-                    TBL_STRUCT_GROUPS + " g, " + TBL_STRUCT_GROUPS + ML + " t WHERE t.ID=g.ID ORDER BY g.ID, t.LANG ASC";
+                    TBL_STRUCT_GROUPS + " g LEFT JOIN " + TBL_STRUCT_GROUPS + ML + " t ON t.ID=g.ID ORDER BY g.ID, t.LANG ASC";
             stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
             Map<Long, String> hmDesc = new HashMap<Long, String>(5);
@@ -256,7 +256,7 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                     "p.ISFULLTEXTINDEXED, p.DEFAULT_VALUE, t.HINT, p.SYSINTERNAL, " +
                     //16          17
                     "p.REFLIST, p.UNIQUEMODE FROM " +
-                    TBL_STRUCT_PROPERTIES + " p, " + TBL_STRUCT_PROPERTIES + ML + " t WHERE t.ID=p.ID ORDER BY p.ID, t.LANG ASC";
+                    TBL_STRUCT_PROPERTIES + " p LEFT JOIN " + TBL_STRUCT_PROPERTIES + ML + " t ON t.ID=p.ID ORDER BY p.ID, t.LANG ASC";
             stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
             Map<Long, String> hmDesc = new HashMap<Long, String>(5);

@@ -251,8 +251,8 @@ public final class Database {
             try {
                 dataSource = (DataSource) o.getClass().getMethod("$getResource").invoke(o);
             } catch (NoSuchMethodException e) {
-                if( o instanceof DataSource )
-                    return (DataSource)o;
+                if (o instanceof DataSource)
+                    return (DataSource) o;
                 String sErr = "Unable to retrieve Connection to [" + dataSourceName
                         + "]: JNDI resource is no DataSource and method $getResource not found!";
                 LOG.error(sErr);
@@ -482,7 +482,7 @@ public final class Database {
      * Returns true if the given exception was caused by a query timeout.
      *
      * @param e the exception to be examined
-     * @return  true if the given exception was caused by a query timeout
+     * @return true if the given exception was caused by a query timeout
      * @since 3.1
      */
     public static boolean isQueryTimeout(Exception e) {
@@ -504,7 +504,7 @@ public final class Database {
      * Returns the error code if the given exception is an SQLException, or -1 otherwise.
      *
      * @param e the exception to be examined
-     * @return  the error code if the given exception is an SQLException, or -1 otherwise.
+     * @return the error code if the given exception is an SQLException, or -1 otherwise.
      */
     private static int getSqlErrorCode(Exception e) {
         if (!(e instanceof SQLException)) {
@@ -619,7 +619,7 @@ public final class Database {
                 }
                 for (int i = 0; i < columns.length; i++) {
                     final String translation = rs.getString(startIndex + i);
-                    if( entry[i] == null )
+                    if (entry[i] == null)
                         entry[i] = new FxString(true, lang, translation);
                     else
                         entry[i].setTranslation(lang, translation);
@@ -723,17 +723,21 @@ public final class Database {
                 sql.append(')');
                 ps.close();
                 ps = con.prepareStatement(sql.toString());
-
+                boolean hasData;
                 for (long lang : langs) {
+                    hasData = false;
                     ps.setLong(1, id);
                     ps.setInt(2, (int) lang);
                     for (int i = 0; i < string.length; i++) {
                         if (FxString.EMPTY.equals(string[i].getTranslation(lang)))
                             ps.setNull(3 + i, java.sql.Types.VARCHAR);
-                        else
+                        else {
                             ps.setString(3 + i, string[i].getTranslation(lang)); //get translation or empty string
+                            hasData = true;
+                        }
                     }
-                    ps.executeUpdate();
+                    if (hasData)
+                        ps.executeUpdate();
                 }
             }
         } finally {
