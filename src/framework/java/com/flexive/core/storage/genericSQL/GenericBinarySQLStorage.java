@@ -684,8 +684,9 @@ public class GenericBinarySQLStorage implements BinaryStorage {
                     } catch (Throwable t) {
                         // ignore, header might be smaller than 48
                     }
-                } else
-                    throw new FxApplicationException("ex.content.binary.transitNotFound", binary.getHandle());
+                } else {
+                    throw new FxApplicationException(LOG, "ex.content.binary.transitNotFound", binary.getHandle());
+                }
 
                 binaryTransitFile = File.createTempFile("FXBIN_", "_TEMP");
                 in = rs.getBlob(1).getBinaryStream();

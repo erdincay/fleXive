@@ -38,6 +38,10 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import static com.flexive.core.DatabaseConst.*;
+import static com.flexive.core.DatabaseConst.TBL_PROPERTY_OPTIONS;
+import static com.flexive.core.DatabaseConst.TBL_STRUCT_ASSIGNMENTS;
+
 /**
  * Server side utility methods for structures
  *
@@ -57,9 +61,9 @@ class FxStructureUtils {
         Statement stmt = null;
         try {
             stmt = con.createStatement();
-            stmt.executeUpdate("DELETE FROM " + com.flexive.core.DatabaseConst.TBL_STRUCT_PROPERTIES + com.flexive.core.DatabaseConst.ML + " WHERE ID NOT IN(SELECT DISTINCT APROPERTY FROM " + com.flexive.core.DatabaseConst.TBL_STRUCT_ASSIGNMENTS + " WHERE APROPERTY IS NOT NULL)");
-            stmt.executeUpdate("DELETE FROM " + com.flexive.core.DatabaseConst.TBL_PROPERTY_OPTIONS + " WHERE ID NOT IN(SELECT DISTINCT APROPERTY FROM " + com.flexive.core.DatabaseConst.TBL_STRUCT_ASSIGNMENTS + " WHERE APROPERTY IS NOT NULL)");
-            int removed = stmt.executeUpdate("DELETE FROM " + com.flexive.core.DatabaseConst.TBL_STRUCT_PROPERTIES + " WHERE ID NOT IN(SELECT DISTINCT APROPERTY FROM " + com.flexive.core.DatabaseConst.TBL_STRUCT_ASSIGNMENTS + " WHERE APROPERTY IS NOT NULL)");
+            stmt.executeUpdate("DELETE FROM " + TBL_STRUCT_PROPERTIES + ML + " WHERE ID NOT IN(SELECT DISTINCT APROPERTY FROM " + TBL_STRUCT_ASSIGNMENTS + " WHERE APROPERTY IS NOT NULL)");
+            stmt.executeUpdate("DELETE FROM " + TBL_PROPERTY_OPTIONS + " WHERE ID NOT IN(SELECT DISTINCT APROPERTY FROM " + TBL_STRUCT_ASSIGNMENTS + " WHERE APROPERTY IS NOT NULL)");
+            int removed = stmt.executeUpdate("DELETE FROM " + TBL_STRUCT_PROPERTIES + " WHERE ID NOT IN(SELECT DISTINCT APROPERTY FROM " + TBL_STRUCT_ASSIGNMENTS + " WHERE APROPERTY IS NOT NULL)");
             if (removed > 0)
                 LOG.info(removed + " orphaned properties removed.");
         } finally {
@@ -78,9 +82,9 @@ class FxStructureUtils {
         Statement stmt = null;
         try {
             stmt = con.createStatement();
-            stmt.executeUpdate("DELETE FROM " + com.flexive.core.DatabaseConst.TBL_STRUCT_GROUPS + com.flexive.core.DatabaseConst.ML + " WHERE ID NOT IN(SELECT DISTINCT AGROUP FROM " + com.flexive.core.DatabaseConst.TBL_STRUCT_ASSIGNMENTS + " WHERE AGROUP IS NOT NULL)");
-            stmt.executeUpdate("DELETE FROM " + com.flexive.core.DatabaseConst.TBL_GROUP_OPTIONS + " WHERE ID NOT IN(SELECT DISTINCT AGROUP FROM " + com.flexive.core.DatabaseConst.TBL_STRUCT_ASSIGNMENTS + " WHERE AGROUP IS NOT NULL)");
-            int removed = stmt.executeUpdate("DELETE FROM " + com.flexive.core.DatabaseConst.TBL_STRUCT_GROUPS + " WHERE ID NOT IN(SELECT DISTINCT AGROUP FROM " + com.flexive.core.DatabaseConst.TBL_STRUCT_ASSIGNMENTS + " WHERE AGROUP IS NOT NULL)");
+            stmt.executeUpdate("DELETE FROM " + TBL_STRUCT_GROUPS + ML + " WHERE ID NOT IN(SELECT DISTINCT AGROUP FROM " + TBL_STRUCT_ASSIGNMENTS + " WHERE AGROUP IS NOT NULL)");
+            stmt.executeUpdate("DELETE FROM " + TBL_GROUP_OPTIONS + " WHERE ID NOT IN(SELECT DISTINCT AGROUP FROM " + TBL_STRUCT_ASSIGNMENTS + " WHERE AGROUP IS NOT NULL)");
+            int removed = stmt.executeUpdate("DELETE FROM " + TBL_STRUCT_GROUPS + " WHERE ID NOT IN(SELECT DISTINCT AGROUP FROM " + TBL_STRUCT_ASSIGNMENTS + " WHERE AGROUP IS NOT NULL)");
             if (removed > 0)
                 LOG.info(removed + " orphaned groups removed.");
         } finally {

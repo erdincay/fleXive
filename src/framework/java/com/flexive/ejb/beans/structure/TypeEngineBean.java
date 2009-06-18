@@ -45,9 +45,9 @@ import com.flexive.shared.content.FxPK;
 import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.*;
+import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.security.Role;
 import com.flexive.shared.security.UserTicket;
-import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.structure.*;
 import com.thoughtworks.xstream.converters.ConversionException;
 import org.apache.commons.lang.StringUtils;
@@ -67,7 +67,7 @@ import java.util.List;
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-@Stateless(name = "TypeEngine", mappedName="TypeEngine")
+@Stateless(name = "TypeEngine", mappedName = "TypeEngine")
 @TransactionAttribute(TransactionAttributeType.SUPPORTS)
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
@@ -162,7 +162,7 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
             ps.setLong(18, NOW);
             ps.setLong(19, type.getACL().getId());
             ps.setLong(20, type.getWorkflow().getId());
-            if( type.getIcon().isEmpty() )
+            if (type.getIcon().isEmpty())
                 ps.setNull(21, java.sql.Types.INTEGER);
             else
                 ps.setLong(21, type.getIcon().getDefaultTranslation().getId());
@@ -808,10 +808,6 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
             ps.executeBatch();
             ps.close();
 
-            //remove eventually orphaned properties and groups
-            FxStructureUtils.removeOrphanedProperties(con);
-            FxStructureUtils.removeOrphanedGroups(con);
-
             sql.setLength(0);
             sql.append("DELETE FROM ").append(TBL_STRUCT_TYPERELATIONS).append(" WHERE TYPEDEF=? OR TYPESRC=? OR TYPEDST=?");
             ps = con.prepareStatement(sql.toString());
@@ -831,8 +827,11 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
             ps = con.prepareStatement(sql.toString());
             ps.setLong(1, type.getId());
             ps.executeUpdate();
-            FxStructureUtils.removeOrphanedGroups(con);
+
+            //remove eventually orphaned properties and groups
             FxStructureUtils.removeOrphanedProperties(con);
+            FxStructureUtils.removeOrphanedGroups(con);
+
             StructureLoader.reload(con);
             htracker.track(type, "history.type.remove", type.getName(), type.getId());
         } catch (SQLException e) {
