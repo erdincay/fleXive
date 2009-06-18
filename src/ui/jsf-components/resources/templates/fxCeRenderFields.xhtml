@@ -26,7 +26,9 @@
                     <div class="fxContentEditor_group" onmouseover='flexive.contentEditor.closeMenu(event,false)'>
                         <div class="header" onclick="flexive.contentEditor.toggleGroup('#{_ceContent.editorId}','#{_ceContent.idGenerator[element]}');">
                             <fx:fxCeRenderFieldsMenu element="#{element}" icon="group"/>
-                            <span class="display">#{fxMapBean.assignments[element.assignmentId].displayName}</span>
+                            <div class="display" title="#{_ceContent.propertyHint[element]}">
+                                #{fxMapBean.assignments[element.assignmentId].displayName}
+                            </div>
                         </div>
                         <div id="#{_ceContent.idGenerator[element]}" class="fxContentEditor_group_content">
                             <fx:fxCeRenderFields data="#{element.children}" icon="group"/>
@@ -41,7 +43,7 @@
                     <div class="fxContentEditor_property">
                         <fx:fxCeRenderFieldsMenu element="#{element}" icon="property"/>
 
-                        <div class="display">
+                        <div class="display" title="#{_ceContent.propertyHint[element]}" style="#{_ceContent.isCaptionProperty[element] ? 'color:DarkBlue':''}">
                             #{fxMapBean.assignments[element.assignmentId].displayName}
                         </div>
                         <fx:fxValueInput value="#{_ceContent.data[element.XPathFull]}"

@@ -622,7 +622,7 @@ flexiveResultList > table {
   background-repeat:no-repeat;
   border:0;
   float:left;
-  margin-left:3px;
+  margin-right:1px;
   display:block;
   height:17px;
   width:17px;
@@ -637,6 +637,7 @@ flexiveResultList > table {
   display:block;
   height:17px;
   width:17px;
+  margin-right:3px;
 }
 
 .fxContentEditor_addIcon {
@@ -645,10 +646,10 @@ flexiveResultList > table {
   background-repeat:no-repeat;
   border:0;
   float:left;
-  margin-left:3px;
   display:block;
   height:17px;
   width:17px;
+  margin-right:3px;
 }
 
 .fxContentEditor_addIcon_disabled {
@@ -656,7 +657,7 @@ flexiveResultList > table {
   background-repeat:no-repeat;
   border:0;
   float:left;
-  margin-left:3px;
+  margin-right:3px;
   display:block;
   height:17px;
   width:17px;
@@ -673,7 +674,7 @@ flexiveResultList > table {
   display:block;
   height:17px;
   width:17px;
-  margin-left:3px;
+  margin-right:5px;
 }
 
 .fxContentEditor_removeIcon_disabled {
@@ -682,9 +683,9 @@ flexiveResultList > table {
   border:0;
   float:left;
   display:block;
+  margin-right:5px;
   height:17px;
   width:17px;
-  margin-left:3px;
   filter:alpha(opacity=25);
   -moz-opacity:.25;
   opacity:.25;
@@ -699,6 +700,7 @@ flexiveResultList > table {
   display:block;
   height:17px;
   width:17px;
+  margin-right:3px;
 }
 
 .fxContentEditor_insertIntoRootGroup {
@@ -710,6 +712,7 @@ flexiveResultList > table {
   display:block;
   height:17px;
   width:17px;
+  margin-right:3px;
 }
 
 .fxContentEditor_insertBelowProperty {
@@ -721,6 +724,7 @@ flexiveResultList > table {
   display:block;
   height:17px;
   width:17px;
+  margin-right:3px;
 }
 
 .fxContentEditor_insertAssignment {
@@ -732,7 +736,7 @@ flexiveResultList > table {
   display:block;
   height:17px;
   width:17px;
-  margin-right:5px;
+  margin-right:3px;
 }
 
 .fxContentEditor_newReferenceIcon {
@@ -744,7 +748,7 @@ flexiveResultList > table {
   display:block;
   height:16px;
   width:16px;
-  margin-right:5px;
+  margin-right:3px;
 }
 
 .fxContentEditor_editReferenceIcon {
@@ -756,7 +760,7 @@ flexiveResultList > table {
   display:block;
   height:16px;
   width:16px;
-  margin-right:5px;
+  margin-right:3px;
 }
 
 .fxContentEditor_group {

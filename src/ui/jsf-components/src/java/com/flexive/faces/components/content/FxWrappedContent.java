@@ -45,9 +45,7 @@ import com.flexive.shared.exceptions.FxNoAccessException;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.ACLPermission;
 import com.flexive.shared.security.UserTicket;
-import com.flexive.shared.structure.FxAssignment;
-import com.flexive.shared.structure.FxEnvironment;
-import com.flexive.shared.structure.FxType;
+import com.flexive.shared.structure.*;
 import com.flexive.shared.value.FxReference;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.value.FxValue;
@@ -56,6 +54,7 @@ import com.flexive.shared.workflow.Step;
 import com.flexive.shared.workflow.StepDefinition;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.lang.StringUtils;
 
 import javax.faces.model.SelectItem;
 import java.io.Serializable;
@@ -92,9 +91,18 @@ public class FxWrappedContent implements Serializable {
      */
     private FxCeIdGenerator parentIdGenerator;
      /**
-     * HashMap used to access the referenced type id of FxPropertyData.
+     * HashMap used to access the hint of a group or property,
+     * or if not set the hint of their assignment.
+     */
+    private PropertyHint propertyHint;
+    /**
+     * HashMap used to access the referenced type id of FxData.
      */
     private FxReferencedTypeId referencedTypeId;
+     /**
+     * HashMap returning if this FxData's assignment remesmbles the possibly reused caption property.
+     */
+    private IsCaptionProperty isCaptionProperty;
 
     private boolean reset = false;
     // GUI relevant settings
@@ -112,6 +120,8 @@ public class FxWrappedContent implements Serializable {
         this.parentIdGenerator = new FxCeParentIdGenerator(this);
         this.referencedTypeId = new FxReferencedTypeId();
         this.referenced = referenced;
+        this.propertyHint = new PropertyHint();
+        this.isCaptionProperty = new IsCaptionProperty();
     }
 
     /**
@@ -419,6 +429,24 @@ public class FxWrappedContent implements Serializable {
      */
     public FxReferencedTypeId getReferencedTypeId() {
         return referencedTypeId;
+    }
+
+    /**
+     * Returns the {@link com.flexive.faces.components.content.FxWrappedContent.PropertyHint} Map.
+     *
+     * @return the {@link FxWrappedContent.PropertyHint} Map.
+     */
+    public PropertyHint getPropertyHint() {
+        return propertyHint;
+    }
+
+     /**
+     * Returns the {@link com.flexive.faces.components.content.FxWrappedContent.IsCaptionProperty} Map.
+     *
+     * @return the {@link FxWrappedContent.IsCaptionProperty} Map.
+     */
+    public IsCaptionProperty getIsCaptionProperty() {
+        return isCaptionProperty;     
     }
 
     /**
@@ -830,6 +858,84 @@ public class FxWrappedContent implements Serializable {
             } catch (Throwable t) {
                 new FxFacesMsgErr(t).addToContext();
                 return null;
+            }
+        }
+    }
+
+     /**
+     * HashMap used to access the hint of a group or property,
+     * or if not set the hint of their assignment.
+     */
+    private static class PropertyHint extends HashMap<FxPropertyData, String> {
+        /**
+         * HashMap used to access the hint of a group or property,
+         * or if not set the hint of their assignment.
+         *
+         * @param object FxData
+         * @return  hint of a group or property, or if not set the hint of their assignment.
+         */
+        public String get(Object object) {
+            try {
+                FxString hint=null;
+                if (object instanceof FxPropertyData) {
+                    hint = CacheAdmin.getFilteredEnvironment().getProperty(((FxPropertyData)object).getPropertyId()).getHint();
+                    if (hint == null || hint.isEmpty()) {
+                        hint = ((FxPropertyData)object).getAssignment().getHint();
+                    }
+                }
+                else if (object instanceof FxGroupData) {
+                    FxGroupAssignment ga = (FxGroupAssignment)((FxGroupData)object).getAssignment();
+                    hint = ga.getGroup().getHint();
+                    if (hint == null || hint.isEmpty()) {
+                        hint = ga.getHint();
+                    }
+                }
+                if (hint != null) {
+                    return hint.getBestTranslation();
+                }
+                return null;
+            } catch (Throwable t) {
+                new FxFacesMsgErr(t).addToContext();
+                return null;
+            }
+        }
+    }
+
+     /**
+     * HashMap returning if this FxData's assignment remesmbles the possibly reused caption property.
+     */
+    private static class IsCaptionProperty extends HashMap<FxPropertyData, Boolean> {
+        private static List<FxAssignment> derivedAssignments;
+
+        private IsCaptionProperty() {
+            try {
+                derivedAssignments = CacheAdmin.getEnvironment().getDerivedAssignments(CacheAdmin.getEnvironment().getAssignment("ROOT/CAPTION").getId());
+            }
+            catch(Throwable t) {
+                derivedAssignments=new ArrayList<FxAssignment>(0);
+            }
+        }
+
+        /**
+         * HashMap returning if this FxData's assignment remesmbles the possibly reused caption property.
+         *
+         * @param object FxData
+         * @return true if this FxData's assignment remesmbles the possibly reused caption property.
+         */
+        public Boolean get(Object object) {
+            try {
+                if (object instanceof FxData) {
+                    List<FxAssignment> derivedAssignments = CacheAdmin.getEnvironment().getDerivedAssignments(CacheAdmin.getEnvironment().getAssignment("ROOT/CAPTION").getId());
+                    long assId= ((FxData)object).getAssignmentId();
+                    for (FxAssignment b : derivedAssignments) {
+                        if (b.getId() == assId)
+                            return true;
+                    }
+                }
+                return false;
+            } catch (Throwable t) {
+                new FxFacesMsgErr(t).addToContext();
+                return false;
             }
         }
     }
