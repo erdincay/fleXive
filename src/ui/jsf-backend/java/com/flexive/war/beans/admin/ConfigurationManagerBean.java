@@ -119,7 +119,7 @@ public class ConfigurationManagerBean {
 
     static {
         SelectItem[] curSelects = new SelectItem[]{
-                new SelectItem(0, mb.getMessage("SysParamConfig.selectType"), "", true),   // if removed, watch out for the index
+//                new SelectItem(0, mb.getMessage("SysParamConfig.selectType"), "", true),   // if removed, watch out for the index
                 new SelectItem(BOOLEAN_VALUE, BOOLEAN_KEY),
                 new SelectItem(INTEGER_VALUE, INTEGER_KEY),
                 new SelectItem(LONG_VALUE, LONG_KEY),
@@ -140,7 +140,7 @@ public class ConfigurationManagerBean {
         initHeader();
         init(true);
 
-        selectedType = 0;
+        selectedType = STRING_VALUE;
     }
 
     /**
@@ -630,8 +630,8 @@ public class ConfigurationManagerBean {
         curPanel = NO_PANEL;
     }
 
-    public SelectItemGroup getTypeSelectList() {
-        return typeSelectList;
+    public SelectItem [] getTypeSelectList() {
+        return typeSelectList.getSelectItems();
     }
 
     /**
@@ -686,12 +686,12 @@ public class ConfigurationManagerBean {
     }
 
     /**
-     * shows the create-new-panel and set the name and the value to an empty string, and the type to "not choosen"
+     * shows the create-new-panel and set the name and the value to an empty string, and the type to String
      */
     public void showNew() {
         curPanel = NEW_PANEL;
 
-        selectedType = 0;
+        selectedType = STRING_VALUE;
         newName = "";
         curEdit_STR_Value = "";
         curEdit_Bool_Value = false;
