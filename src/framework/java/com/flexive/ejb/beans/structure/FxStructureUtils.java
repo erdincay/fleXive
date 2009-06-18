@@ -66,6 +66,8 @@ class FxStructureUtils {
             int removed = stmt.executeUpdate("DELETE FROM " + TBL_STRUCT_PROPERTIES + " WHERE ID NOT IN(SELECT DISTINCT APROPERTY FROM " + TBL_STRUCT_ASSIGNMENTS + " WHERE APROPERTY IS NOT NULL)");
             if (removed > 0)
                 LOG.info(removed + " orphaned properties removed.");
+        } catch (SQLException e) {
+            LOG.warn("Some orphaned properties could not be removed yet.");
         } finally {
             if (stmt != null)
                 stmt.close();
@@ -87,6 +89,8 @@ class FxStructureUtils {
             int removed = stmt.executeUpdate("DELETE FROM " + TBL_STRUCT_GROUPS + " WHERE ID NOT IN(SELECT DISTINCT AGROUP FROM " + TBL_STRUCT_ASSIGNMENTS + " WHERE AGROUP IS NOT NULL)");
             if (removed > 0)
                 LOG.info(removed + " orphaned groups removed.");
+        } catch (SQLException e) {
+            LOG.warn("Some orphaned groups could not be removed yet.");
         } finally {
             if (stmt != null)
                 stmt.close();
