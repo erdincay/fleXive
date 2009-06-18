@@ -36,6 +36,7 @@ import com.flexive.shared.structure.FxType;
 import com.flexive.shared.structure.FxTypeEdit;
 
 import javax.ejb.Remote;
+import java.sql.SQLException;
 
 /**
  * FxType management
@@ -80,4 +81,12 @@ public interface TypeEngine {
      * @throws FxApplicationException on errors
      */
     FxType importType(String typeXML) throws FxApplicationException;
+
+    /**
+     * Get the number of instances of a given type
+     *
+     * @param typeId requested type
+     * @return number of instances
+      */
+    public long getInstanceCount(long typeId);
 }

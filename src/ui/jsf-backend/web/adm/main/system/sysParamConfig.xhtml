@@ -1,0 +1,441 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+        PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+<body class="yui-skin-sam">
+
+
+<!--@elvariable id="configManager" type="com.flexive.war.beans.admin.ConfigurationManagerBean"-->
+<!--@elvariable id="fxMessageBean" type="java.util.Map"-->
+<ui:composition template="/adm/contentTemplate.xhtml">
+<ui:define name="head">
+    <t:stylesheet path="#{adm:versionedUrl('/adm/css/content.css')}"/>
+    <t:stylesheet path="css/components.css"/>
+    <STYLE type="text/css">
+        .visible { visibility:visible; }
+        .hidden { display:none; }
+        .red {color:red; }
+    </STYLE>
+</ui:define>
+<ui:define name="body">
+
+<h:messages/>
+
+<script type="text/javascript">
+    function ajSubmit(submitB) {
+        document.getElementById(submitB).onclick();
+    }
+
+    var curKey = 0;
+    var curIndex;
+    var lastSelected = -1;
+    var firstLoad = true;
+    function changeTable() {
+        if (firstLoad) {
+            firstLoad = false;
+            parent.lockScreen();
+            self.setTimeout("changeTable()", 20);
+        } else {
+            parent.unlockScreen();
+        }
+
+        window.parent.document.getElementById("fxToolbar").firstChild.onclick = eval(document.getElementById("commandButton_createNew_H").onclick);
+        var curSL = document.getElementById("configForm:selectedKey");
+        curIndex = curSL.selectedIndex;
+        var curSpan;
+        var curButton;
+        var visibles = 0;
+        for (var i = 0; i &lt; curSL.options.length; i++) {
+            curSpan = document.getElementById("sp_" + i);
+            if (curSL.options[i].selected) {
+                if (visibles == 0) {
+                    curSpan.style.display = "block";
+                    curKey = i;
+                }
+                visibles++;
+            } else {
+                curSpan.style.display = "none";
+            }
+        }
+        if (visibles != 1) {
+            self.setTimeout("changeTable()", 20);
+        }
+        if (curIndex != lastSelected) {
+            lastSelected = curIndex;
+            ajSubmit('configForm:ajSubmitScopeButton');
+        }
+    }
+
+    function checkVis(id) {
+        if (id == 0) {
+            return "visible";
+        }
+        return "hidden";
+    }
+
+    function triggerAjaxButton() {
+        document.getElementById("commandButton_createNew_H").onclick();
+        return false;
+    }
+
+</script>
+
+<h:form id="configForm">
+    <adm:tab id="tab" active="true" label="#{fxMessageBean['SysParamConfig.tab.label']}"/>
+    <a4j:outputPanel id="overviewTable">
+        <table>
+            <tr>
+                <td>#{fxMessageBean['SysParamConfig.scope']}</td>
+                <td>
+                    <!--scope select-->
+                    <h:selectOneListbox id="selectedKey" value="#{configManager.selectedKey}" onchange="changeTable();">
+                        <f:selectItems value="#{configManager.allKeys}"/>
+                    </h:selectOneListbox>
+                    <a4j:commandLink style="display:none;" id="ajSubmitScopeButton" eventsQueue="cfgQueue"
+                                     action="#{configManager.changeTable}"
+                                     reRender="confirmPanel" value="show AJAX"/>
+                </td>
+            </tr>
+        </table>
+
+        #{fxMessageBean['SysParamConfig.show.no.basic.types']}
+        <a4j:commandLink style="display:none;" id="ajShowValuesButton" eventsQueue="cfgQueue"
+                         action="#{configManager.changeShowValues}" reRender="overviewTable" value="change"/>
+        <h:selectBooleanCheckbox value="#{configManager.showValues}" onclick="ajSubmit('configForm:ajShowValuesButton');"/>
+
+        <ui:repeat var="curTable" value="#{configManager.allTables}">
+            <div id="sp_#{curTable.TID}" class="">
+                <adm:sortableTable id="table#{curTable.TID}">
+                    <table id="table#{curTable.TID}">
+                        <thead>
+                        <tr>
+                            <ui:repeat var="curTH" value="#{curTable.tableHeader}">
+                                <th class="tblHeader" field="#{curTH}_" dataType="html" align="left">#{curTH}</th>
+                            </ui:repeat>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <ui:repeat var="curTR" value="#{curTable.tableBody}">
+                            <tr>
+                                <ui:repeat var="curTD" value="#{curTR.tabValues}">
+                                    <td> #{curTD} </td>
+                                </ui:repeat>
+                                <ui:fragment rendered="#{curTR.multi}">
+                                    <td>
+                                        <ul>
+                                            <ui:repeat var="curV" value="#{curTR.curValue}">
+                                                <li>#{curV}</li>
+                                            </ui:repeat>
+                                        </ul>
+                                    </td>
+                                </ui:fragment>
+                                <ui:fragment rendered="#{curTR.multi == false}">
+                                    <td>
+                                        <ui:repeat var="curV" value="#{curTR.curValue}">
+                                            #{curV}
+                                        </ui:repeat>
+                                    </td>
+                                </ui:fragment>
+
+                                <td>
+                                    <!--Edit Icon-->
+                                    <adm:ajaxCommandIcon iconDisabled="#{!curTR.editable}" id="edit"
+                                                         reRender="editPanel, newPanel, confirmPanel"
+                                                         bean="#{configManager}" actionListener="editCurItem"
+                                                         onclick="#{rich:component('editMPanel')}.show();"
+                                                         titleKey="SysParamConfig.button.edit" icon="edit">
+                                        <f:setPropertyActionListener target="#{configManager.curEditName}"
+                                                                     value="#{curTR.key}"/>
+                                    </adm:ajaxCommandIcon>
+                                    <!--Delete Icon-->
+                                    <adm:ajaxCommandIcon id="deleteButton" reRender="editPanel, newPanel, confirmPanel"
+                                                         bean="#{configManager}" actionListener="showConfirm"
+                                                         titleKey="SysParamConfig.button.delete"
+                                                         onclick="#{rich:component('confirmMPanel')}.show();"
+                                                         icon="delete">
+                                        <f:setPropertyActionListener target="#{configManager.curEditName}"
+                                                                     value="#{curTR.key}"/>
+
+                                    </adm:ajaxCommandIcon>
+                                </td>
+                            </tr>
+                        </ui:repeat>
+                        </tbody>
+                    </table>
+                </adm:sortableTable>
+            </div>
+        </ui:repeat>
+        <table>
+            <tr>
+                <td>
+                    <!--New Button-->
+                    <adm:ajaxCommandButton labelKey="SysParamConfig.button.create.new" icon="new"
+                                           bean="#{configManager}" actionListener="showNew"
+                                           onclick="#{rich:component('newMPanel')}.show();"
+                                           id="createNew_H"
+                                           reRender="newPanel, editPanel, confirmPanel">
+                        <a4j:actionparam value="curKey" assignTo="#{configManager.selectedKey}"/>
+                    </adm:ajaxCommandButton>
+                    <!--New Button (toolbar)-->
+                    <!--onclick is overwritten!-->
+                    <adm:commandButton id="createNew" lockscreen="false" labelKey="SysParamConfig.button.create.new"
+                                       icon="new" location="toolbar"/>
+                </td>
+            </tr>
+        </table>
+        <adm:toolbarPluginButtons/>
+        <fx:yuiSetup/>
+        <script type="text/javascript">
+            firstLoad = true;
+            changeTable();
+            //            to be sure
+            self.setTimeout("changeTable()", 200);
+        </script>
+    </a4j:outputPanel>
+
+</h:form>
+
+
+<rich:modalPanel id="newMPanel" width="10" height="10" autosized="true">
+    <f:facet name="header">
+        <h:panelGroup>
+            #{fxMessageBean['SysParamConfig.panel.new']}
+        </h:panelGroup>
+    </f:facet>
+    <f:facet name="controls">
+        <h:panelGroup>
+            <h:form>
+                <!--Cancle Icon-->
+                <adm:ajaxCommandIcon titleKey="SysParamConfig.button.cancel" icon="cancel"
+                                     bean="#{configManager}"
+                                     actionListener="cancelItemEditing"
+                                     onclick="#{rich:component('newMPanel')}.hide();"
+                                     id="cancel_new_M" reRender="editPanel"/>
+            </h:form>
+        </h:panelGroup>
+    </f:facet>
+
+    <a4j:outputPanel id="newPanel">
+        <h:form id="newForm">
+            <h:inputHidden value="#{configManager.selectedKey}"/>
+            <table>
+                <tr>
+                    <td nowrap="nowrap">#{fxMessageBean['SysParamConfig.path']}</td>
+                    <td>
+                        <h:selectOneListbox id="selectedPath" value="#{configManager.selectedPath}"
+                                            onchange="ajSubmit('newForm:ajSubmitPathButton');">
+                            <f:selectItems value="#{configManager.pathSelectList}"/>
+                        </h:selectOneListbox>
+                        <a4j:commandLink style="visibility:hidden;" id="ajSubmitPathButton" eventsQueue="cfgQueue"
+                                         action="#{configManager.changePath}" reRender="newPanel" value="change"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td nowrap="nowrap">#{fxMessageBean['SysParamConfig.custon.path']}</td>
+                    <td>
+                        <h:inputText id="curPath" value="#{configManager.currentPathStr}" size="40"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="#{configManager.colorStyle}">
+                        #{fxMessageBean['SysParamConfig.type']}
+                    </td>
+                    <td>
+                        <h:selectOneListbox id="selectedType" value="#{configManager.selectedType}"
+                                            onchange="ajSubmit('newForm:ajSubmitTypeButton');">
+                            <f:selectItems value="#{configManager.typeSelectList}"/>
+                        </h:selectOneListbox>
+                        <a4j:commandLink style="visibility:hidden;" id="ajSubmitTypeButton" eventsQueue="cfgQueue"
+                                         action="#{configManager.changeType}" reRender="newPanel" value="change"/>
+                    </td>
+                </tr>
+                <tr>
+                    <td>#{fxMessageBean['SysParamConfig.name']}</td>
+                    <td><h:inputText value="#{configManager.newName}"/></td>
+                </tr>
+                <tr>
+                    <td>#{fxMessageBean['SysParamConfig.value']}</td>
+                    <td>
+                        <!--Input Fields (can be set invisible)-->
+                        <span class="#{configManager.boolVisibleType}">
+                            <h:selectBooleanCheckbox value="#{configManager.curEdit_Bool_Value}"/>
+                        </span>
+                        <span class="#{configManager.stringVisibleType}">
+                            <h:inputText value="#{configManager.curEdit_STR_Value}" size="#{configManager.strLen}"/>
+                        </span>
+                        <span class="#{configManager.errorClass}">
+                            #{fxMessageBean['SysParamConfig.err.noType']}
+                        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="3" align="center">
+                        <table>
+                            <tr>
+                                <td align="right">
+                                    <!--OK button-->
+                                    <adm:ajaxCommandButton labelKey="SysParamConfig.button.save" icon="ok" bean="#{configManager}"
+                                                           actionListener="createNewItem"
+                                                           id="save_new" buttonDisabled="#{configManager.invalidType}"
+                                                           onclick="#{rich:component('newMPanel')}.hide();"
+                                                           reRender="overviewTable"/>
+                                </td>
+                                <td width="20"/>
+                                <td align="left">
+                                    <!--Cancel button-->
+                                    <adm:ajaxCommandButton labelKey="SysParamConfig.button.cancel" icon="cancel"
+                                                           bean="#{configManager}" actionListener="cancelItemEditing"
+                                                           id="cancel_new" onclick="#{rich:component('newMPanel')}.hide();"/>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </h:form>
+    </a4j:outputPanel>
+</rich:modalPanel>
+
+
+<rich:modalPanel id="editMPanel" width="250" height="10" autosized="true">
+    <f:facet name="header">
+        <h:panelGroup>
+            #{fxMessageBean['SysParamConfig.panel.edit']}
+        </h:panelGroup>
+    </f:facet>
+    <f:facet name="controls">
+        <h:panelGroup>
+            <h:form>
+                <!--cancel icon-->
+                <adm:ajaxCommandIcon titleKey="SysParamConfig.button.cancel" icon="cancel"
+                                     bean="#{configManager}" actionListener="cancelItemEditing"
+                                     onclick="#{rich:component('editMPanel')}.hide();"
+                                     id="cancel_edit_M" reRender="editPanel"/>
+            </h:form>
+        </h:panelGroup>
+    </f:facet>
+
+    <a4j:outputPanel id="editPanel">
+        <h:form id="editForm">
+            <h:inputHidden value="#{configManager.selectedKey}"/>
+            <table>
+                <tr>
+                    <td nowrap="nowrap">
+                        #{configManager.curEditName}
+                        <h:inputHidden value="#{configManager.curEditName}"/>
+                    </td>
+                    <td width="20"/>
+                    <td>
+                        <!--a hidden field to let the server know what the String was bevore (only the length count)-->
+                        <h:inputHidden value="#{configManager.curEdit_STR_Backup_Value}"/>
+                        <!--STR and TA value are mapped to the same String in the bean -->
+                        <span class="#{configManager.boolVisible}">
+                            <h:selectBooleanCheckbox value="#{configManager.curEdit_Bool_Value}"/>
+                        </span>
+                        <span class="#{configManager.stringVisible}">
+                            <h:inputText value="#{configManager.curEdit_STR_Value}" size="#{configManager.strLen}"/>
+                        </span>
+                        <span class="#{configManager.TAVisible}">
+                            <h:inputTextarea value="#{configManager.curEdit_TA_Value}" rows="4" cols="50"/>
+                        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="3" align="center">
+                        <table>
+                            <tr>
+                                <td align="right">
+                                    <!--save button-->
+                                    <adm:ajaxCommandButton labelKey="SysParamConfig.button.save" icon="ok"
+                                                           bean="#{configManager}" actionListener="commitItemEditing"
+                                                           onclick="#{rich:component('editMPanel')}.hide();"
+                                                           id="save_edit"
+                                                           reRender=" overviewTable"/>
+                                </td>
+                                <td width="20"/>
+                                <td align="left">
+                                    <!--cancel button-->
+                                    <adm:ajaxCommandButton labelKey="SysParamConfig.button.cancel" icon="cancel"
+                                                           bean="#{configManager}" actionListener="cancelItemEditing"
+                                                           onclick="#{rich:component('editMPanel')}.hide();"
+                                                           id="cancel_edit" reRender="editPanel"/>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </h:form>
+    </a4j:outputPanel>
+</rich:modalPanel>
+
+<rich:modalPanel id="confirmMPanel" width="250" height="10" autosized="true">
+    <f:facet name="header">
+        <h:panelGroup>
+            #{fxMessageBean['SysParamConfig.panel.delete']}
+        </h:panelGroup>
+    </f:facet>
+    <f:facet name="controls">
+        <h:panelGroup>
+            <h:form>
+                <!--cancel icon-->
+                <adm:ajaxCommandIcon titleKey="SysParamConfig.button.cancel" icon="cancel"
+                                     bean="#{configManager}" actionListener="cancelItemEditing"
+                                     onclick="#{rich:component('confirmMPanel')}.hide();"
+                                     id="cancel_confirm_M" reRender="confirmPanel"/>
+            </h:form>
+        </h:panelGroup>
+    </f:facet>
+
+    <a4j:outputPanel id="confirmPanel">
+        <h:form id="confirmForm">
+            <h:inputHidden value="#{configManager.selectedKey}"/>
+            <table>
+                <tr>
+                    <td style="color:red;">
+                        #{fxMessageBean['SysParamConfig.confirm.delete, #{configManager.curEditName}']}
+                        <h:inputHidden value="#{configManager.curEditName}"/>
+                    </td>
+
+                </tr>
+                <tr>
+                    <td colspan="3">
+                        <table>
+                            <tr>
+                                <td align="right">
+                                    <!--delete button-->
+                                    <adm:ajaxCommandButton labelKey="SysParamConfig.button.delete" icon="delete"
+                                                           bean="#{configManager}" actionListener="deleteItem" id="delete_confirm"
+                                                           onclick="#{rich:component('confirmMPanel')}.hide();"
+                                                           reRender=" overviewTable"/>
+                                </td>
+                                <td width="20"/>
+                                <td align="left">
+                                    <!--cancel button-->
+                                    <adm:ajaxCommandButton labelKey="SysParamConfig.button.cancel" icon="cancel"
+                                                           bean="#{configManager}" actionListener="cancelItemEditing"
+                                                           onclick="#{rich:component('confirmMPanel')}.hide();" id="cancel_confirm"
+                                                           reRender="confirmPanel"/>
+                                </td>
+                            </tr>
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </h:form>
+    </a4j:outputPanel>
+</rich:modalPanel>
+</ui:define>
+</ui:composition>
+</body>
+</html>

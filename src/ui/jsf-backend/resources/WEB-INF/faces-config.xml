@@ -34,6 +34,13 @@
         </managed-property>
     </managed-bean>
 
+    <!-- config bean -->
+    <managed-bean>
+        <managed-bean-name>configManager</managed-bean-name>
+        <managed-bean-class>com.flexive.war.beans.admin.ConfigurationManagerBean</managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean>
+
     <managed-bean>
         <managed-bean-name>beContentEditorBean</managed-bean-name>
         <managed-bean-class>

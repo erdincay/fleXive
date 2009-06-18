@@ -247,6 +247,28 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
     /**
      * Get the number of instances of a given type
      *
+     * @param typeId requested type
+     * @return number of instances
+     */
+    public long getInstanceCount(long typeId) {
+        Connection con = null;
+        long rc = -1;
+
+        try {
+            con = Database.getDbConnection();
+            rc = getInstanceCount(con, typeId);
+        } catch (SQLException e) {
+            //noinspection ThrowableInstanceNeverThrown
+            throw new FxApplicationException(LOG, e, "ex.db.sqlError", e.getMessage()).asRuntimeException();
+        } finally {
+            Database.closeObjects(TypeEngineBean.class, con, null);
+        }
+        return rc;
+    }
+
+    /**
+     * Get the number of instances of a given type
+     *
      * @param con    an open and valid Connection
      * @param typeId requested type
      * @return number of instances

@@ -420,6 +420,19 @@ public class SystemBean implements Serializable {
     }
 
     /**
+     * Get the instance count of the given ID
+     * 
+     * @return the instance count
+     */
+    public Map<Long, Long> getInstanceCount() {
+        return FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<Long, Long>() {
+            public Long get(Object key) {
+                return EJBLookup.getTypeEngine().getInstanceCount(Long.valueOf(key.toString()));
+            }
+        });
+    }
+
+    /**
      * Escape a String for usage in java script (remove characters like ')
      *
      * @return escaped String

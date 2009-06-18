@@ -53,6 +53,11 @@
                     <fx:formRow labelKey="SystemInfo.field.im.available">
                         #{systemInfoBean.IMAvailable}
                     </fx:formRow>
+                    <c:if test="false">
+                    <fx:formRow labelKey="SystemInfo.field.user.name">
+                        <b>#{systemInfoBean.userName}</b>
+                    </fx:formRow>
+                    </c:if>
                     <ui:fragment rendered="#{systemInfoBean.IMAvailable}">
                         <fx:formRow labelKey="SystemInfo.field.im.version">
                             #{systemInfoBean.IMVersion}
