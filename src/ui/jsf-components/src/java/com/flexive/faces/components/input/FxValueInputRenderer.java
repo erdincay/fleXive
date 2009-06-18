@@ -86,6 +86,7 @@ public class FxValueInputRenderer extends Renderer {
     protected static final String CSS_SINGLE_LANG = "singleLanguage";
     protected static final String CSS_FIND_REFERENCES = "findReferencesIcon";
     protected static final String CSS_RESIZEABLE = "fxResizeable";
+    protected static final String CSS_EMPTY = "fxValueEmpty";
     private static final String DBG = "fxValueInput: ";
 
     /**
@@ -166,12 +167,12 @@ public class FxValueInputRenderer extends Renderer {
      * @param component the component to be rendered
      * @return FxValue items posted for this component.
      */
-    @SuppressWarnings({"unchecked"})
     private FxValue decodeFxValue(FacesContext context, UIComponent component) {
         final FxValueInput input = (FxValueInput) component;
         final Map parameters = context.getExternalContext().getRequestParameterMap();
         final Map parameterValues = context.getExternalContext().getRequestParameterValuesMap();
         final String clientId = component.getClientId(context);
+        @SuppressWarnings({"unchecked"})
         final FxValue value = input.getInputMapper().encode(getFxValue(context, input).copy());
 
         if (LOG.isDebugEnabled()) {
@@ -194,10 +195,12 @@ public class FxValueInputRenderer extends Renderer {
         } else {
             updateTranslation(context, input, value, clientId + FxValueInputRenderer.INPUT, value.getDefaultLanguage(), parameters, parameterValues);
         }
+        @SuppressWarnings({"unchecked"})
+        final FxValue mappedValue = input.getInputMapper().decode(value);
         if (LOG.isDebugEnabled()) {
-            LOG.debug(DBG + "Decoded value for " + clientId + ": " + value);
+            LOG.debug(DBG + "Decoded value for " + clientId + ": " + value + ", mapped value: " + mappedValue);
         }
-        return input.getInputMapper().decode(value);
+        return mappedValue;
     }
 
     @SuppressWarnings({"unchecked"})
@@ -230,7 +233,12 @@ public class FxValueInputRenderer extends Renderer {
                 }
             }
         } else if (value instanceof FxBoolean) {
-            value.setTranslation(languageId, isNotBlank((String) parameters.get(inputId)));
+            if ("true".equals(parameters.get(inputId + "_empty"))) {
+                // empty flag of tristate checkbox set
+                value.removeLanguage(languageId);
+            } else {
+                value.setTranslation(languageId, isNotBlank((String) parameters.get(inputId)));
+            }
         } else if (value instanceof FxDateRange || value instanceof FxDateTimeRange) {
             final boolean withTime = value instanceof FxDateTimeRange;
             final String postedLower = (String) parameters.get(inputId + "_1");

@@ -32,6 +32,7 @@
 package com.flexive.shared.value;
 
 import com.flexive.shared.FxFormatUtils;
+import com.flexive.shared.FxLanguage;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -49,11 +50,10 @@ public class FxBoolean extends FxValue<Boolean, FxBoolean> implements Serializab
     /**
      * Constructor
      *
-     * @param multiLanguage   multilanguage value?
      * @param defaultLanguage the default language
      */
-    public FxBoolean(long defaultLanguage, boolean multiLanguage) {
-        super(defaultLanguage, multiLanguage);
+    public FxBoolean(long defaultLanguage) {
+        super(defaultLanguage, defaultLanguage > FxLanguage.SYSTEM_ID);
     }
 
     /**

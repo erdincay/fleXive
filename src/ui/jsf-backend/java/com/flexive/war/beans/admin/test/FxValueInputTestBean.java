@@ -126,6 +126,8 @@ public class FxValueInputTestBean implements Serializable {
         return Arrays.asList(new FxValue[]{
                 new FxString(false, "string singlelanguage"),
                 new FxString(ENGLISH, "english").setTranslation(GERMAN, "deutsch"),
+                new FxBoolean(false, false),
+                new FxBoolean(ENGLISH, true).setTranslation(GERMAN, false),
                 new FxNumber(false, 21),
                 new FxNumber(ENGLISH, 1).setTranslation(GERMAN, 2),
                 new FxLargeNumber(false, 22L),

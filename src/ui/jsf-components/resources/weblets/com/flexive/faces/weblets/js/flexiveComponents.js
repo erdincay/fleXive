@@ -737,7 +737,6 @@ flexive.input = new function() {
         }
     };
 
-    // TODO: implement for usage outside the backend
     this.openReferenceQueryPopup = function(xpath, updateInputId, formName) {
         var win = window.open(flexive.baseUrl + "jsf-components/browseReferencesPopup.jsf?xPath=" + xpath + "&inputName="
                 + updateInputId + "&formName=" + formName,
@@ -745,6 +744,32 @@ flexive.input = new function() {
         win.focus();
     };
 
+    /**
+     * Implement a tristate checkbox for FxValueInputRenderer.
+     * The third state means "empty" and alters the checkbox visibility with the CSS style "fxValueEmpty".
+     *
+     * @param inputId   the checkbox input ID
+     */
+    this.onTristateCheckboxChanged = function(inputId)  {
+        // get checkbox
+        var checkbox = document.getElementById(inputId);
+        // get hidden input for setting the empty state
+        var hidden = document.getElementById(inputId + "_empty");
+        var empty = hidden.value == "true";
+        
+        if (checkbox.checked && !empty) {
+            // user toggled checkbox from "false", but empty not set - goto empty state
+            hidden.value = "true";
+            checkbox.checked = false;
+            if (checkbox.className.indexOf("fxValueEmpty") == -1) {
+                checkbox.className += " fxValueEmpty";
+            }
+        } else {
+            // normal state
+            hidden.value = "false";
+            checkbox.className = checkbox.className.replace("fxValueEmpty", ""); 
+        }
+    };
 };
 
 /**

@@ -77,6 +77,11 @@ textarea.fxValueTextArea, textarea.fxValueTextAreaHtml {
     margin: 0 0.3em 0 0;    /* don't use vertical margins to ensure the checkbox isn't higher than the main input (FF Windows) */
 }
 
+.fxValueInput input[type="checkbox"].fxValueEmpty {
+    opacity: 0.3;
+    filter: alpha(opacity = 30);
+}
+
 .fxValueTextAreaContainer {
     height: 150px;
 }

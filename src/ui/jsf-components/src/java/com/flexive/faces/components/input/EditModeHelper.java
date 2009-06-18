@@ -478,7 +478,15 @@ class EditModeHelper extends RenderHelper {
         checkbox.setId(stripForm(inputId));
         checkbox.setValue(value.getTranslation(language));
         addHtmlAttributes(component, checkbox);
-        checkbox.setStyleClass(CSS_VALUE_INPUT_FIELD);
+        checkbox.setStyleClass(
+                CSS_VALUE_INPUT_FIELD
+                + (value.isTranslationEmpty(language) ? " " + CSS_EMPTY : "")
+        );
+        checkbox.setOnclick("flexive.input.onTristateCheckboxChanged('" + inputId + "')");
+        // render hidden input to represent "empty"
+        final HtmlInputHidden hidden = (HtmlInputHidden) FxJsfUtils.addChildComponent(parent, HtmlInputHidden.COMPONENT_TYPE);
+        hidden.setId(stripForm(inputId) + "_empty");
+        hidden.setValue(value.isTranslationEmpty(language));
     }
 
     private HtmlOutputText renderLiteral(UIComponent parent, String value) {

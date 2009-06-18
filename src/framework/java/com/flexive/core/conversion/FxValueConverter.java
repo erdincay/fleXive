@@ -243,14 +243,18 @@ public class FxValueConverter implements Converter {
      */
     @SuppressWarnings("unchecked")
     public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext ctx) {
-        FxValue v;
+        final FxValue v;
         final LanguageEngine le = EJBLookup.getLanguageEngine();
         final String type = reader.getAttribute("t");
         try {
             boolean multiLanguage = Boolean.valueOf(reader.getAttribute("ml"));
             long defaultLanguage = ConversionEngine.getLang(le, reader.getAttribute("dl"));
-            v = (FxValue) Class.forName("com.flexive.shared.value." + type).
-                    getConstructor(long.class, boolean.class).newInstance(defaultLanguage, multiLanguage);
+            if ("FxBoolean".equals(type)) {
+                v = new FxBoolean(defaultLanguage);
+            } else {
+                v = (FxValue) Class.forName("com.flexive.shared.value." + type).
+                        getConstructor(long.class, boolean.class).newInstance(defaultLanguage, multiLanguage);
+            }
             v.setXPath(reader.getAttribute("xpath"));
             if (reader.getAttribute("empty") != null && Boolean.valueOf(reader.getAttribute("empty")))
                 v.setEmpty();
