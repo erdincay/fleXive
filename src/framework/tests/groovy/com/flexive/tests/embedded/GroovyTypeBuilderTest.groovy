@@ -51,7 +51,7 @@ import com.flexive.shared.security.ACLCategory
 import com.flexive.shared.FxLanguage
 
 /**
- * Tests for the                           {@link com.flexive.shared.scripting.groovy.GroovyTypeBuilder GroovyTypeBuilder}                           class.
+ * Tests for the                                 {@link com.flexive.shared.scripting.groovy.GroovyTypeBuilder GroovyTypeBuilder}                                 class.
  *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
@@ -240,8 +240,8 @@ class GroovyTypeBuilderTest {
             }
             assert false: "Successfully created a property assignment referencing to a group"
         } catch (FxRuntimeException e) {
-            if (!(e.converted != null && e.converted instanceof FxInvalidParameterException                            \
-                                           && ("assignment".equalsIgnoreCase(((FxInvalidParameterException) e.converted).parameter)))) {
+            if (!(e.converted != null && e.converted instanceof FxInvalidParameterException                                  \
+                                                 && ("assignment".equalsIgnoreCase(((FxInvalidParameterException) e.converted).parameter)))) {
                 throw e;
             }
             // else: success
@@ -259,8 +259,8 @@ class GroovyTypeBuilderTest {
             }
             assert false: "Successfully created a group assignment referencing to a property"
         } catch (FxRuntimeException e) {
-            if (!(e.converted != null && e.converted instanceof FxInvalidParameterException                            \
-                                           && ("assignment".equalsIgnoreCase(((FxInvalidParameterException) e.converted).parameter)))) {
+            if (!(e.converted != null && e.converted instanceof FxInvalidParameterException                                  \
+                                                 && ("assignment".equalsIgnoreCase(((FxInvalidParameterException) e.converted).parameter)))) {
                 throw e;
             }
             // else: success
@@ -456,7 +456,7 @@ class GroovyTypeBuilderTest {
                                 label: new FxString(true, "Group1 derived"))
                     }
                 }
-                prop3(overrideACL: true)
+                prop3(overrideACL: true, acl: "Default Structure ACL")
                 Group4() {
                     prop3(assignment: "BUILDERTEST/PROP3",
                             label: new FxString(true, "Prop3 derived"),
@@ -1240,7 +1240,7 @@ class GroovyTypeBuilderTest {
                 builder {
                     prop1(overrideMultilang: false)
                 }
-            } catch(e) {
+            } catch (e) {
                 // expected
             }
 
@@ -1257,5 +1257,285 @@ class GroovyTypeBuilderTest {
         } finally {
             removeTestType()
         }
+    }
+
+
+
+    /**
+     * This test assures the default values provided upon structure creation as given by the
+     * reference documentation's chapter "GroovyTypeBuilder: Property and Group Creation - Default Values"
+     */
+    @Test (groups = ["ejb", "scripting", "structure"])
+    def defaultValueTest() {
+        new GroovyTypeBuilder().defValueTest {
+            defprop1()
+            defGroup1()
+        }
+
+        try {
+            def FxProperty p = environment().getProperty("DEFPROP1")
+            def pa = (FxPropertyAssignment) environment().getAssignment("DEFVALUETEST/DEFPROP1")
+            // overrides
+            Assert.assertFalse(p.mayOverrideMultiLang())
+            Assert.assertTrue(p.mayOverrideACL())
+            Assert.assertFalse(p.mayOverrideMultiLine())
+            Assert.assertFalse(p.mayOverrideInOverview())
+            Assert.assertTrue(p.mayOverrideBaseMultiplicity())
+            Assert.assertFalse(p.mayOverrideMaxLength())
+            Assert.assertTrue(p.mayOverrideSearchable())
+            Assert.assertFalse(p.mayOverrideUseHTMLEditor())
+
+            // attributes (assignment & base prop)
+            Assert.assertFalse(p.isMultiLang())
+            Assert.assertEquals(p.getDataType(), FxDataType.String1024)
+            Assert.assertFalse(pa.isMultiLine())
+            Assert.assertTrue(p.isFulltextIndexed())
+            Assert.assertFalse(p.isInOverview())
+            Assert.assertEquals(p.getLabel().getBestTranslation(), "Defprop1")
+            Assert.assertEquals(p.getMultiplicity(), FxMultiplicity.MULT_0_1)
+            Assert.assertEquals(p.getName(), "DEFPROP1")
+            Assert.assertEquals(p.getUniqueMode(), UniqueMode.None)
+            Assert.assertTrue(p.isSearchable())
+            Assert.assertEquals(pa.getDefaultMultiplicity(), 1)
+            Assert.assertFalse(p.isUseHTMLEditor())
+
+        } finally {
+            EJBLookup.getTypeEngine().remove(environment().getType("DEFVALUETEST").getId())
+        }
+    }
+
+    /**
+     * Tests the default overrides in prop assignments
+     * (i.e. only throw exceptions IFF the given overridable attribute != the base property's attribute
+     */
+    @Test (groups = ["ejb", "scripting", "structure"])
+    def assignmentOverrideTest() {
+        // default values (actual attrib values in () )
+        /*
+        Properties:
+
+        # overrideACL: true (acl: "Default Structure ACL")
+        # overrideMultiplicity: true (multiplicity: FxMultiplicity.MULT_0_1)
+        # overrideMultilang: false (multilang: false)
+        # overrideMultiline: false (multiline: false)
+        # overrideInOverview: false (inOverview: false)
+        # overrideMaxLength: false (maxLength / not set))
+        # overrideSearchable: true  (searchable: true)
+        # overrideUseHtmlEditor: false (useHtmlEditor: false)
+
+        Groups:
+
+        #overrideMultiplicity: false (multiplicity: FxMultiplicity.MULT_0_1)
+        */
+
+        new GroovyTypeBuilder().builderTest {
+            prop1(overrideMultiplicity: false, overrideACL: false, overrideSearchable: false)
+            prop2(dataType: FxDataType.Text, overrideMultiplicity: true, overrideACL: true,
+                    overrideMultilang: true, overrideMultiline: true, overrideInOverview: true)
+            Group1()
+        }
+
+        def aclId = EJBLookup.getAclEngine().create("Testicus ACL", new FxString(true, "TESTICUS"), TestUsers.getTestMandator(), "#000000", "Testicus ACL Description", ACLCategory.STRUCTURE);
+
+        try {
+            // multiplicity /////////////////////////////////////////
+            def builder = new GroovyTypeBuilder("BUILDERTEST")
+            builder {
+                prop1der(assignment: "BUILDERTEST/PROP1", multiplicity: FxMultiplicity.MULT_0_1)
+
+            }
+            Assert.assertTrue(removeAssignment("BUILDERTEST/PROP1DER"))
+
+            try {
+                builder = new GroovyTypeBuilder("BUILDERTEST")
+                builder {
+                    prop1der(assignment: "BUILDERTEST/PROP1", multiplicity: FxMultiplicity.MULT_1_1)
+                }
+                Assert.fail("Assigning an unoverridable value where current != orig should have failed.")
+            } catch (e) { }
+            Assert.assertFalse(removeAssignment("BUILDERTEST/PROP1DER"))
+
+            // ACL /////////////////////////////////////////
+            builder = new GroovyTypeBuilder("BUILDERTEST")
+            builder {
+                prop1der(assignment: "BUILDERTEST/PROP1", acl: "Default Structure ACL")
+            }
+            Assert.assertTrue(removeAssignment("BUILDERTEST/PROP1DER"))
+
+            try {
+                builder = new GroovyTypeBuilder("BUILDERTEST")
+                builder {
+                    prop1der(assignment: "BUILDERTEST/PROP1", acl: "Testicus ACL")
+                }
+                Assert.fail("Assigning an unoverridable value where current != orig should have failed.")
+            } catch (e) { }
+            Assert.assertFalse(removeAssignment("BUILDERTEST/PROP1DER"))
+
+            // multiline /////////////////////////////////////////
+            builder = new GroovyTypeBuilder("BUILDERTEST")
+            builder {
+                prop1der(assignment: "BUILDERTEST/PROP1", multiline: false)
+            }
+            Assert.assertTrue(removeAssignment("BUILDERTEST/PROP1DER"))
+
+            try {
+                builder = new GroovyTypeBuilder("BUILDERTEST")
+                builder {
+                    prop1der(assignment: "BUILDERTEST/PROP1", multiline: true)
+                }
+                Assert.fail("Assigning an unoverridable value where current != orig should have failed.")
+            } catch (Exception e) { }
+            Assert.assertFalse(removeAssignment("BUILDERTEST/PROP1DER"))
+
+            // inOverview /////////////////////////////////////////
+            builder = new GroovyTypeBuilder("BUILDERTEST")
+            builder {
+                prop1der(assignment: "BUILDERTEST/PROP1", inOverview: false)
+            }
+            Assert.assertTrue(removeAssignment("BUILDERTEST/PROP1DER"))
+
+            try {
+                builder = new GroovyTypeBuilder("BUILDERTEST")
+                builder {
+                    prop1der(assignment: "BUILDERTEST/PROP1", inOverview: true)
+                }
+                Assert.fail("Assigning an unoverridable value where current != orig should have failed.")
+            } catch (e) { }
+            Assert.assertFalse(removeAssignment("BUILDERTEST/PROP1DER"))
+
+            // multilang /////////////////////////////////////////
+            builder = new GroovyTypeBuilder("BUILDERTEST")
+            builder {
+                prop1der(assignment: "BUILDERTEST/PROP1", multilang: false)
+            }
+            Assert.assertTrue(removeAssignment("BUILDERTEST/PROP1DER"))
+
+            try {
+                builder = new GroovyTypeBuilder("BUILDERTEST")
+                builder {
+                    prop1der(assignment: "BUILDERTEST/PROP1", multilang: true)
+                }
+                Assert.fail("Assigning an unoverridable value where current != orig should have failed.")
+            } catch (e) { }
+            Assert.assertFalse(removeAssignment("BUILDERTEST/PROP1DER"))
+
+            // searchable /////////////////////////////////////////
+            builder = new GroovyTypeBuilder("BUILDERTEST")
+            builder {
+                prop1der(assignment: "BUILDERTEST/PROP1", searchable: true)
+
+            }
+            Assert.assertTrue(removeAssignment("BUILDERTEST/PROP1DER"))
+
+            try {
+                builder = new GroovyTypeBuilder("BUILDERTEST")
+                builder {
+                    prop1der(assignment: "BUILDERTEST/PROP1", searchable: false)
+                }
+                Assert.fail("Assigning an unoverridable value where current != orig should have failed.")
+            } catch (e) { }
+            Assert.assertFalse(removeAssignment("BUILDERTEST/PROP1DER"))
+
+            // maxLength /////////////////////////////////////////
+            builder = new GroovyTypeBuilder("BUILDERTEST")
+            builder {
+                prop1der(assignment: "BUILDERTEST/PROP1", maxLength: 0)
+                // 0 is the default setting upon property initialisation
+            }
+            Assert.assertTrue(removeAssignment("BUILDERTEST/PROP1DER"))
+
+            try {
+                builder = new GroovyTypeBuilder("BUILDERTEST")
+                builder {
+                    prop1der(assignment: "BUILDERTEST/PROP1", maxLength: 50)
+                }
+                Assert.fail("Assigning an unoverridable value where current != orig should have failed.")
+            } catch (e) { }
+            Assert.assertFalse(removeAssignment("BUILDERTEST/PROP1DER"))
+
+            // useHtmlEditor /////////////////////////////////////////
+            builder = new GroovyTypeBuilder("BUILDERTEST")
+            builder {
+                prop1der(assignment: "BUILDERTEST/PROP1", useHtmlEditor: false)
+
+            }
+            Assert.assertTrue(removeAssignment("BUILDERTEST/PROP1DER"))
+
+            try {
+                builder = new GroovyTypeBuilder("BUILDERTEST")
+                builder {
+                    prop1der(assignment: "BUILDERTEST/PROP1", useHtmlEditor: true)
+                }
+                Assert.fail("Assigning an unoverridable value where current != orig should have failed.")
+            } catch (e) { }
+            Assert.assertFalse(removeAssignment("BUILDERTEST/PROP1DER"))
+
+            // GROUP // multiplicity /////////////////////////////////
+            builder = new GroovyTypeBuilder("BUILDERTEST")
+            builder {
+                Group1der(assignment: "BUILDERTEST/GROUP1", multiplicity: FxMultiplicity.MULT_0_1)
+
+            }
+            Assert.assertTrue(removeAssignment("BUILDERTEST/GROUP1DER"))
+
+            try {
+                builder = new GroovyTypeBuilder("BUILDERTEST")
+                builder {
+                    Group1der(assignment: "BUILDERTEST/GROUP1", multiplicity: FxMultiplicity.MULT_0_N)
+                }
+                Assert.fail("Assigning an unoverridable value where current != orig should have failed.")
+            } catch (e) { }
+            Assert.assertFalse(removeAssignment("BUILDERTEST/GROUP1DER"))
+
+            // quick override test
+            def p = environment().getProperty("PROP2")
+            Assert.assertTrue(p.mayOverrideMultiLang())
+            Assert.assertTrue(p.mayOverrideBaseMultiplicity())
+            Assert.assertTrue(p.mayOverrideACL())
+            Assert.assertTrue(p.mayOverrideInOverview())
+            Assert.assertTrue(p.mayOverrideMultiLine())
+
+            try {
+                builder = new GroovyTypeBuilder("BUILDERTEST")
+                builder {
+                    prop2der(assignment: "BUILDERTEST/PROP2", multilang: true,
+                            multiplicity: "0,2",
+                            acl: "Testicus ACL",
+                            inOverview: true,
+                            multiline: true)
+                }
+
+            } catch (ex) {
+                Assert.fail("Overriding the (overridable) attributes should not have failed")
+            }
+
+            def pa = (FxPropertyAssignment) environment().getAssignment("BUILDERTEST/PROP2DER")
+
+            Assert.assertTrue(pa.isMultiLang())
+            Assert.assertTrue(pa.isInOverview())
+            Assert.assertTrue(pa.isMultiLine())
+            Assert.assertEquals(pa.getACL().getName(), "Testicus ACL")
+            Assert.assertEquals(pa.getMultiplicity().getMin(), 0)
+            Assert.assertEquals(pa.getMultiplicity().getMax(), 2)
+
+        } finally {
+            removeTestType()
+            EJBLookup.getAclEngine().remove(aclId);
+        }
+    }
+
+    /**
+     * Helper method to remove an assignment for a given XPath
+     *
+     * @param xPath the assignment's xpath (to be removed)
+     * @return returns true if the assignment was found and removed, false otherwise
+     */
+    def boolean removeAssignment(xPath) {
+        if (environment().assignmentExists(xPath)) {
+            def id = environment().getAssignment(xPath).getId()
+            EJBLookup.getAssignmentEngine().removeAssignment(id)
+            return true;
+        }
+        return false;
     }
 }

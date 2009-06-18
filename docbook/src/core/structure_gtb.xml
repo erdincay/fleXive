@@ -1368,7 +1368,22 @@ new GroovyTypeBuilder {
                     searchable: true
                 </listitem>
                 <listitem>
+                    overrideSearchable: true
+                </listitem>
+                <listitem>
+                    maxLength: 0 (~ not set)
+                </listitem>
+                <listitem>
+                    overrideMaxLength: false
+                </listitem>
+                <listitem>
                     defaultMultiplicity: 1
+                </listitem>
+                <listitem>
+                    useHtmlEditor: false (except for FxDataType.HTML)
+                </listitem>
+                <listitem>
+                    overrideUseHtmlEditor: false (except for FxDataType.HTML)
                 </listitem>
                 <listitem>
                     FxStructureOptions:
@@ -1378,13 +1393,13 @@ new GroovyTypeBuilder {
                             SEARCHABLE | 1 | TRUE
                         </listitem>
                         <listitem>
-                            HTML.EDITOR | 0 | TRUE
+                            HTML.EDITOR | 0 | FALSE
                         </listitem>
                         <listitem>
-                            MULTILINE | 0 | TRUE
+                            MULTILINE | 0 | FALSE
                         </listitem>
                         <listitem>
-                            SHOW.OVERVIEW | 0 | TRUE
+                            SHOW.OVERVIEW | 0 | FALSE
                         </listitem>
                     </itemizedlist>
                 </listitem>
@@ -1409,13 +1424,10 @@ new GroovyTypeBuilder {
                     overrideMultiplicity: false
                 </listitem>
                 <listitem>
-                    name: *the element's name, e.g. &quot;GROUP1&quot;*
+                    name: &quot;GROUP1&quot;
                 </listitem>
                 <listitem>
                     groupMode: GroupMode.AnyOf
-                </listitem>
-                <listitem>
-                    searchable: true
                 </listitem>
             </itemizedlist>
         </para>

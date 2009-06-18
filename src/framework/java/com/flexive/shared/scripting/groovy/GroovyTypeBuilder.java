@@ -127,8 +127,8 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
             "DATATYPE", "MULTIPLICITY", "NAME", "DESCRIPTION", "LABEL", "HINT", "ACL", "ASSIGNMENT",
             "ALIAS", "DEFAULTMULTIPLICITY", "DEFAULTVALUE", "OVERRIDEMULTILANG", "MULTILANG",
             "OVERRIDEACL", "OVERRIDEMULTIPLICITY", "OVERRIDEINOVERVIEW", "OVERRIDEMAXLENGTH",
-            "OVERRIDEMULTILINE", "OVERRIDESEARCHABLE", "OVERRIDEUSEHTMLEDITOR",
-            "DEFAULTLANGUAGE", "PARENTGROUPASSIGNMENT", "ENABLED", "USEHTMLEDITOR",
+            "OVERRIDEMULTILINE", "OVERRIDESEARCHABLE", "OVERRIDEUSEHTMLEDITOR", "SEARCHABLE",
+            "DEFAULTLANGUAGE", "PARENTGROUPASSIGNMENT", "ENABLED", "USEHTMLEDITOR", "MAXLENGTH",
             "FULLTEXTINDEXED", "UNIQUEMODE", "AUTOUNIQUEPROPERTYNAME", "REFERENCEDLIST", "REFERENCEDTYPE"
     };
 
@@ -140,8 +140,8 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
             "DATATYPE", "MULTIPLICITY", "NAME", "DESCRIPTION", "LABEL", "HINT", "ACL", "ASSIGNMENT",
             "ALIAS", "DEFAULTMULTIPLICITY", "DEFAULTVALUE", "OVERRIDEMULTILANG", "MULTILANG",
             "OVERRIDEACL", "OVERRIDEMULTIPLICITY", "OVERRIDEINOVERVIEW", "OVERRIDEMAXLENGTH",
-            "OVERRIDEMULTILINE", "OVERRIDESEARCHABLE", "OVERRIDEUSEHTMLEDITOR",
-            "DEFAULTLANGUAGE", "PARENTGROUPASSIGNMENT", "ENABLED", "USEHTMLEDITOR",
+            "OVERRIDEMULTILINE", "OVERRIDESEARCHABLE", "OVERRIDEUSEHTMLEDITOR", "SEARCHABLE",
+            "DEFAULTLANGUAGE", "PARENTGROUPASSIGNMENT", "ENABLED", "USEHTMLEDITOR", "MAXLENGTH",
             "FULLTEXTINDEXED", "UNIQUEMODE", "AUTOUNIQUEPROPERTYNAME", "REFERENCEDLIST", "REFERENCEDTYPE"
     };
 
@@ -194,7 +194,7 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
      * property / group creation
      *
      * @param attributeKeys the set of attributes passed to the current element
-     * @param isGroup set to "true" if the current element is a group
+     * @param isGroup       set to "true" if the current element is a group
      * @return true if a match was found, false if no match can be found
      */
     private static boolean hasCreateUniqueOptions(Set<String> attributeKeys, boolean isGroup) {
@@ -530,7 +530,7 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
                             || structureAssignmentIsInType(structureName, hasParent, false)) {
                         final FxAssignment fxAssignment;
 
-                        if(hasCreateUniqueOptions(attributes.keySet(), false))
+                        if (hasCreateUniqueOptions(attributes.keySet(), false))
                             return createNewPropertyNode(am);
 
                         am.isNew = false;
@@ -582,7 +582,7 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
                             || structureAssignmentIsInType(structureName, hasParent, true)) {
                         final FxAssignment fxAssignment;
 
-                        if(hasCreateUniqueOptions(attributes.keySet(), true))
+                        if (hasCreateUniqueOptions(attributes.keySet(), true))
                             return createNewGroupNode(am);
 
                         am.isNew = false;
@@ -836,7 +836,7 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
         Boolean useInstancePermissions, useStepPermissions, useTypePermissions, usePropertyPermissions,
                 usePermissions, overrideMultilang, multilang, overrideACL, overrideMultiplicity, overrideInOverview,
                 overrideMaxLength, overrideMultiline, overrideSearchable, overrideHTMLEditor, searchable,
-                inOverview, useHTMLEditor, multiLine, enabled, trackHistory, fullTextIndexed, autoUniquePropertyName;
+                inOverview, useHTMLEditor, multiline, enabled, trackHistory, fullTextIndexed, autoUniquePropertyName;
         Integer maxLength;
         FxType referencedType;
         FxSelectList referencedList;
@@ -1023,7 +1023,7 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
             searchable = (Boolean) FxSharedUtils.get(attributes, "searchable", true);
             inOverview = (Boolean) FxSharedUtils.get(attributes, "inOverview", false);
             useHTMLEditor = (Boolean) FxSharedUtils.get(attributes, "useHtmlEditor", false);
-            multiLine = (Boolean) FxSharedUtils.get(attributes, "multiline", false);
+            multiline = (Boolean) FxSharedUtils.get(attributes, "multiline", false);
             defaultLanguage = (Long) FxSharedUtils.get(attributes, "defaultLanguage", 1L);
             enabled = (Boolean) FxSharedUtils.get(attributes, "enabled", true);
 
@@ -1043,34 +1043,62 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
         void setPropertyAssignmentAttributes(FxPropertyAssignmentEdit pa) throws FxApplicationException {
             if (attributes.containsKey("label") || attributes.containsKey("description"))
                 pa.setLabel(label);
+
             if (attributes.containsKey("defaultMultiplicity"))
                 pa.setDefaultMultiplicity(defaultMultiplicity);
+
             if (attributes.containsKey("alias"))
                 pa.setAlias(alias);
             if (attributes.containsKey("hint"))
                 pa.setHint(hint);
-            if (attributes.containsKey("acl"))
-                pa.setACL(acl);
+
+            if (attributes.containsKey("acl")) {
+                if (!acl.equals(pa.getACL()))
+                    pa.setACL(acl);
+            }
+
             if (attributes.containsKey("defaultValue"))
                 pa.setDefaultValue(defaultValue);
-            if (attributes.containsKey("multiplicity"))
-                pa.setMultiplicity(multiplicity);
+
+            if (attributes.containsKey("multiplicity")) {
+                if (!multiplicity.equals(pa.getMultiplicity()))
+                    pa.setMultiplicity(multiplicity);
+            }
+
             if (attributes.containsKey("defaultLanguage"))
                 pa.setDefaultLanguage(defaultLanguage);
             if (attributes.containsKey("enabled"))
                 pa.setEnabled(enabled);
-            if (attributes.containsKey("multiline)"))
-                pa.setMultiLine(multiLine);
-            if (attributes.containsKey("inOverview"))
-                pa.setInOverview(inOverview);
-            if (attributes.containsKey("useHtmlEditor"))
-                pa.setUseHTMLEditor(useHTMLEditor);
-            if (attributes.containsKey("maxLength"))
-                pa.setMaxLength(maxLength);
-            if (attributes.containsKey("multilang"))
-                pa.setMultiLang(multilang);
-            if (attributes.containsKey("searchable"))
-                pa.setSearchable(searchable);
+
+            if (attributes.containsKey("multiline")) {
+                if (multiline != pa.isMultiLine())
+                    pa.setMultiLine(multiline);
+            }
+
+            if (attributes.containsKey("inOverview")) {
+                if (inOverview != pa.isInOverview())
+                    pa.setInOverview(inOverview);
+            }
+
+            if (attributes.containsKey("useHtmlEditor")) {
+                if (useHTMLEditor != pa.isUseHTMLEditor())
+                    pa.setUseHTMLEditor(useHTMLEditor);
+            }
+
+            if (attributes.containsKey("maxLength")) {
+                if (maxLength != pa.getMaxLength())
+                    pa.setMaxLength(maxLength);
+            }
+
+            if (attributes.containsKey("multilang")) {
+                if (multilang != pa.isMultiLang())
+                    pa.setMultiLang(multilang);
+            }
+
+            if (attributes.containsKey("searchable")) {
+                if (searchable != pa.isSearchable())
+                    pa.setSearchable(searchable);
+            }
 
             // set non-generic property-assignment options
             for (Object oEntry : attributes.entrySet()) {
@@ -1095,6 +1123,7 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
          * @param ga the FxGroupAssignmentEdit instance t.b. changed
          * @throws FxApplicationException on errors
          */
+
         void setGroupAssignmentAttributes(FxGroupAssignmentEdit ga) throws FxApplicationException {
             ga.setDefaultMultiplicity(defaultMultiplicity);
             if (attributes.containsKey("label") || attributes.containsKey("description"))
@@ -1103,8 +1132,12 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
                 ga.setHint(hint);
             if (attributes.containsKey("alias"))
                 ga.setAlias(alias);
-            if (attributes.containsKey("multiplicity"))
-                ga.setMultiplicity(multiplicity);
+
+            if (attributes.containsKey("multiplicity")) {
+                if (!multiplicity.equals(ga.getMultiplicity()))
+                    ga.setMultiplicity(multiplicity);
+            }
+
             if (attributes.containsKey("enabled"))
                 ga.setEnabled(enabled);
             if (attributes.containsKey("groupMode"))
@@ -1162,7 +1195,7 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
             if (attributes.containsKey("useHtmlEditor"))
                 property.setUseHTMLEditor(useHTMLEditor);
             if (attributes.containsKey("multiline"))
-                property.setMultiLine(multiLine);
+                property.setMultiLine(multiline);
             if (attributes.containsKey("maxLength")) {
                 try {
                     property.setMaxLength(maxLength);
