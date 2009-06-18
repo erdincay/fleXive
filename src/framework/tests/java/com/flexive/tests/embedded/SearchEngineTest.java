@@ -55,9 +55,11 @@ import com.flexive.shared.workflow.Step;
 import com.flexive.shared.workflow.StepDefinition;
 import static com.flexive.tests.embedded.FxTestUtils.login;
 import static com.flexive.tests.embedded.FxTestUtils.logout;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.ArrayUtils;
 import org.testng.Assert;
 import static org.testng.Assert.*;
 import org.testng.annotations.AfterClass;
@@ -65,11 +67,11 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 
 /**
  * FxSQL search query engine tests.
@@ -524,58 +526,65 @@ public class SearchEngineTest {
         assertTrue(result.getRowCount() > 0);
 
         // find an object with more than 2 selected options
-        long[] queryIds = null;
+        List<FxSelectListItem> queryItems = new ArrayList<FxSelectListItem>();
         for (FxResultRow row : result.getResultRows()) {
             final List<FxSelectListItem> selected = ((FxSelectMany) row.getFxValue(2)).getBestTranslation().getSelected();
             if (selected.size() > 2) {
                 // select first two
-                queryIds = new long[] { selected.get(0).getId(),  selected.get(1).getId() };
-                break;
+                queryItems.add(selected.get(0));
+                queryItems.add(selected.get(1));
+                if (getExpectedMatchRows(result, queryItems) == result.getRowCount()
+                        || getExpectedPartialMatches(result, queryItems) == result.getRowCount()) {
+                    // exact or partial match for this selection would match all rows - not suitable for a query test
+                    queryItems.clear();
+                } else {
+                    break;
+                }
             }
         }
-        assertTrue(queryIds != null, "Failed to find a suitable selectMany property");
-        //noinspection ConstantConditions
-        assertEquals(queryIds.length, 2);
+        assertFalse(queryItems.isEmpty(), "Failed to find a suitable selectMany property");
+        assertEquals(queryItems.size(), 2);
+
+        final int matchingRows = getExpectedMatchRows(result, queryItems);
+        final int partialMatchingRows = getExpectedPartialMatches(result, queryItems);
 
         // select using IN
         final FxResultSet conditionResult = new SqlQueryBuilder().select("@pk", assignmentName)
                 .type(TEST_TYPE)
-                .condition(assignmentName, PropertyValueComparator.IN, queryIds)
+                .condition(assignmentName, PropertyValueComparator.IN, FxSharedUtils.getSelectableObjectIdList(queryItems))
                 .getResult();
-        assertTrue(conditionResult.getRowCount() > 0, "No rows found for SelectMany using IN");
-
-        // check that each matching row from result is found in conditionResult
-        int found = 0;
-        for (FxResultRow row : result.getResultRows()) {
-            final List<FxSelectListItem> selected = ((FxSelectMany) row.getFxValue(2)).getBestTranslation().getSelected();
-            final List<Long> ids = FxSharedUtils.getSelectableObjectIdList(selected);
-            if (ids.contains(queryIds[0]) && ids.contains(queryIds[1])) {
-                found++;
-                boolean foundInConditionResult = false;
-                for (FxResultRow condRow : conditionResult.getResultRows()) {
-                    if (condRow.getPk(1).equals(row.getPk(1))) {
-                        foundInConditionResult = true;
-                        break;
-                    }
-                }
-                assertTrue(foundInConditionResult, "Object " + row.getPk(1) + " should have been in condition result " +
-                        "for " + Arrays.asList(ArrayUtils.toObject(queryIds)) + ": " + ids);
-            }
-        }
-        assertTrue(found > 0, "Test match failed on all rows");
+        assertEquals(conditionResult.getRowCount(), matchingRows, "Wrong result row count for IN query.");
 
         // test inverse match using NOT IN
         final FxResultSet invResult = new SqlQueryBuilder().select("@pk", assignmentName)
                 .type(TEST_TYPE)
-                .condition(assignmentName, PropertyValueComparator.NOT_IN, queryIds)
+                .condition(assignmentName, PropertyValueComparator.NOT_IN, queryItems)
                 .getResult();
-        assertTrue(invResult.getRowCount() > 0);
+        assertEquals(invResult.getRowCount(), result.getRowCount() - partialMatchingRows, "Wrong result row count for NOT IN query.");
 
         for (FxResultRow invRow : invResult.getResultRows()) {
             for (FxResultRow row : conditionResult.getResultRows()) {
                 assertFalse(row.getPk(1).equals(invRow.getPk(1)), "Row returned by IN and NOT IN: " + row.getPk(1));
             }
         }
+    }
+
+    private int getExpectedPartialMatches(FxResultSet result, final List<FxSelectListItem> queryItems) {
+        return Iterables.size(Iterables.filter(result.getResultRows(), new Predicate<FxResultRow>() {
+            public boolean apply(FxResultRow row) {
+                final SelectMany selectMany = ((FxSelectMany) row.getValue(2)).getBestTranslation();
+                return !Collections.disjoint(queryItems, selectMany.getSelected());
+            }
+        }));
+    }
+
+    private int getExpectedMatchRows(FxResultSet result, final List<FxSelectListItem> queryItems) {
+        return Iterables.size(Iterables.filter(result.getResultRows(), new Predicate<FxResultRow>() {
+            public boolean apply(FxResultRow row) {
+                final SelectMany selectMany = ((FxSelectMany) row.getValue(2)).getBestTranslation();
+                return selectMany.getSelected().containsAll(queryItems);
+            }
+        }));
     }
 
     /**
