@@ -20,11 +20,16 @@ Parameters:
     value    - the result set to be rendered, or a plain text FxSQL query
     previewSize - name of the preview size to be used for thumbnails 
             (see com.flexive.shared.value.BinaryDescriptor#PreviewSizes).
+    firstColumn - index of the first column to be included in the table (1-based, optional).
+
 
 <ui:composition>
 
     <c:if test="#{empty var}">
         <c:set var="var" value="resultTable"/>
+    </c:if>
+    <c:if test="#{empty firstColumn}">
+        <c:set var="firstColumn" value="-1"/>
     </c:if>
 
     <script type="text/javascript">
@@ -33,7 +38,7 @@ Parameters:
                 // refresh only if datatable is already available - also prevents refresh during initial load
                 try {
                     #{var}.deleteRows(0, 9999999);
-                    var result = #{fxSystemBean.ajaxRequest ? fx:getJsonResult(value, null) : '{}'};
+                    var result = #{fxSystemBean.ajaxRequest ? fx:getJsonResultFromColumn(value, null, firstColumn) : '{}'};
                     #{var}._reset(result, '#{empty previewSize ? 'PREVIEW2' : previewSize}');
                 } catch (e) {
                     alert("Failed to update result table: " + e);

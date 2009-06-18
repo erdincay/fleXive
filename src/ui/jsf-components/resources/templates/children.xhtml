@@ -19,9 +19,10 @@ var      - name of the variable where the current value will be exposed in the t
            Note: due to its implementation, if a fx:children component is nested in another
            fx:children component that has a var attribute, the inner fx:children component also
            must specify the var attribute.
+includeEmpty    - if true, empty elements will be included (default: false)
 
 <ui:composition>
-    <c:set var="xpath" value="#{property}$list"/>
+    <c:set var="xpath" value="#{property}$list#{includeEmpty ? 'All' : ''}"/>
     <c:set var="outvar" value="#{empty var ? fxContentViewBean.propertyName[property] : var}"/>
 
     <ui:repeat var="__value_iterator" value="#{value[xpath]}">

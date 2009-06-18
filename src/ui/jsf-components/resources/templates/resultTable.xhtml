@@ -30,10 +30,14 @@ Parameters:
                 (see com.flexive.shared.value.BinaryDescriptor#PreviewSizes).
     rowsPerPage - current value for the paginator (optional)
     initialPage - current page index for the paginator (optional)
+    firstColumn - index of the first column to be included in the table (1-based, optional).
 <ui:composition>
 
     <c:if test="#{empty var}">
         Required attribute "var" missing for fx:resultTable.
+    </c:if>
+    <c:if test="#{empty firstColumn}">
+        <c:set var="firstColumn" value="-1"/>
     </c:if>
 
     <c:if test="#{!empty var}">
@@ -130,7 +134,7 @@ Parameters:
                 elContainer.style.MozUserSelect = "none";
 
 
-                #{var} = createFun(#{fx:getJsonResult(value, viewType)}, '#{empty previewSize ? 'PREVIEW2' : previewSize}', null);
+                #{var} = createFun(#{fx:getJsonResultFromColumn(value, viewType, firstColumn)}, '#{empty previewSize ? 'PREVIEW2' : previewSize}', null);
                 if (#{var} != null) {
                     #{var}._reset = function(result, previewSize) {
                         var reset = #{var}._reset;  // keep old method

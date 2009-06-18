@@ -534,6 +534,27 @@ public class SearchResultBean implements ActionBean, Serializable {
      * @throws java.io.IOException  if the JSON output could not be written
      */
     public static String getJsonResult(Object key, String viewType) throws IOException {
+        return getJsonResult(key, viewType, -1);
+    }
+
+    /**
+     * Returns the JSON representation of the given result set. Currently the column and row format is determined
+     * by the Yahoo DataTable widget.
+     *
+     * @param key can be one of the following:
+     * <ul>
+     * <li>A {@link FxResultSet} instance</li>
+     * <li>A FxSQL query, e.g. <code>SELECT id, caption</code></li>
+     * <li>A {@link SqlQueryBuilder} instance</li>
+     * </ul>
+     * @param viewType "THUMBNAILS" or "LIST" (only relevant when a FxSQL query is passed)
+     * @param startColumn   index of the start column (1-based, if set to -1 the index of "@*" will be used)
+     *
+     * @return  the JSON representation of the search result
+     * @throws java.io.IOException  if the JSON output could not be written
+     * @since 3.1
+     */
+    public static String getJsonResult(Object key, String viewType, int startColumn) throws IOException {
         if (key == null) {
             return null;
         }
@@ -542,7 +563,10 @@ public class SearchResultBean implements ActionBean, Serializable {
                 : ResultViewType.LIST;
         final FxResultSet result = getResultSet(key, AdminResultLocations.DEFAULT, resultViewType);
         return YahooResultProvider.getSearchResultJSON(result,
-                result.getUserWildcardIndex() != -1 ? result.getUserWildcardIndex() : 1);
+                startColumn != -1 ? startColumn
+                        : result.getUserWildcardIndex() != -1 ? result.getUserWildcardIndex()
+                        : 1
+        );
     }
 
     /**

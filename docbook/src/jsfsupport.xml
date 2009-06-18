@@ -484,6 +484,14 @@
                                     </para>
                                 </listitem>
                             </varlistentry>
+                            <varlistentry>
+                                <term>includeEmpty</term>
+                                <listitem>
+                                    <para>
+                                        If empty elements should be included (default: false).
+                                    </para>
+                                </listitem>
+                            </varlistentry>
                         </variablelist>
                     </para>
                 </section>
@@ -1431,6 +1439,14 @@
                                 </para>
                             </listitem>
                         </varlistentry>
+                        <varlistentry>
+                            <term>firstColumn</term>
+                            <listitem>
+                                <para>
+                                    index of the first column to be included in the table (1-based, optional).
+                                </para>
+                            </listitem>
+                        </varlistentry>
                     </variablelist>
                 </section>
 
@@ -1502,6 +1518,14 @@
                                     <link xlink:href="&flexiveJavadocBase;shared/com/flexive/shared/value/BinaryDescriptor.PreviewSizes.html">
                                         BinaryDescriptor#PreviewSizes
                                     </link>).
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>firstColumn</term>
+                            <listitem>
+                                <para>
+                                    index of the first column to be included in the table (1-based, optional).
                                 </para>
                             </listitem>
                         </varlistentry>
