@@ -346,7 +346,7 @@ public class FxContentEditorBean implements Serializable {
      * JSF-Action to compact the given content.
      */
     public void compact() {
-        contentStorage.get(editorId).getContent().getRootGroup().removeEmptyEntries(true);
+        contentStorage.get(editorId).getContent().getRootGroup().removeEmptyEntries();
         resetForm(contentStorage.get(editorId).getGuiSettings().getFormPrefix());
     }
 

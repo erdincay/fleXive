@@ -144,6 +144,14 @@ public abstract class FxData implements Serializable {
     public abstract boolean isEmpty();
 
     /**
+     * Are there any required properties (empty or non-empty) present?
+     *
+     * @return true if there any required properties (empty or non-empty) present
+     * @since 3.1
+     */
+    public abstract boolean isRequiredPropertiesPresent();
+
+    /**
      * Is this a system internal property or group?
      *
      * @return system internal

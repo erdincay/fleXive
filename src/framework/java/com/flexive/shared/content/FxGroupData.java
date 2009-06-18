@@ -100,6 +100,19 @@ public class FxGroupData extends FxData {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isRequiredPropertiesPresent() {
+        for (FxData curr : this.getChildren()) {
+            if (curr.isRequiredPropertiesPresent()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Helper to create a virtual root group
      *
      * @param xpPrefix XPath prefix like "FxType name[@pk=..]"
@@ -321,12 +334,14 @@ public class FxGroupData extends FxData {
     /**
      * Remove all empty entries of this group
      *
-     * @param includeRequired include entries that are required?
+     * @param includeRequired include entries that are required (but empty)?
      */
     public void removeEmptyEntries(boolean includeRequired) {
-        for (FxData curr : data)
+        for (FxData curr : data) {
             if ((curr.isEmpty() || (curr.isProperty() && ((FxPropertyData) curr).isContainsDefaultValue()))
-                    && (curr.isGroup() || includeRequired || curr.isRemoveable()) && !curr.isSystemInternal()) {
+                    // for groups, don't remove them when they contain required properties
+                    && ((curr.isGroup() && !curr.isRequiredPropertiesPresent())
+                    || includeRequired || curr.isRemoveable()) && !curr.isSystemInternal()) {
                 data.remove(curr);
                 for (FxData com : data) {
                     if (com.getAssignmentId() == curr.getAssignmentId()) {
@@ -339,6 +354,7 @@ public class FxGroupData extends FxData {
             } else if (curr instanceof FxGroupData) {
                 ((FxGroupData) curr).removeEmptyEntries(includeRequired);
             }
+        }
     }
 
     /**

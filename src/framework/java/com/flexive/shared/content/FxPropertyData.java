@@ -160,6 +160,14 @@ public class FxPropertyData extends FxData {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isRequiredPropertiesPresent() {
+        return this.getAssignmentMultiplicity().isRequired();
+    }
+
+    /**
      * Is the value contained created from a default value?
      *
      * @return value contained created from a default value

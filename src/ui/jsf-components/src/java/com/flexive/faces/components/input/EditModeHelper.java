@@ -272,7 +272,7 @@ class EditModeHelper extends RenderHelper {
         if (selectValue.getTranslation(language) != null) {
             listbox.setValue(selectValue.getTranslation(language).getId());
         }
-        storeSelectItems(listbox, selectValue.getSelectList());
+        storeSelectItems(listbox, selectValue.getSelectList(), true);
     }
 
     private void renderSelectMany(UIComponent parent, String inputId, FxLanguage language) {
@@ -286,7 +286,7 @@ class EditModeHelper extends RenderHelper {
         final HtmlSelectManyListbox listbox = (HtmlSelectManyListbox) createUISelect(parent, inputId, HtmlSelectManyListbox.COMPONENT_TYPE);
         listbox.setStyleClass(CSS_VALUE_INPUT_FIELD + " " + FxValueInputRenderer.CSS_INPUTELEMENTWIDTH + singleLanguageStyle(language));
         listbox.setSelectedValues(selected);
-        storeSelectItems(listbox, selectValue.getSelectList());
+        storeSelectItems(listbox, selectValue.getSelectList(), false);
         // automatically limit select list rows for very long lists. "Real" single-line input is not possible with a
         // standard listbox widget if multiple selection should still be possible,
         // so we're only restraining the height a bit stronger 
@@ -307,7 +307,7 @@ class EditModeHelper extends RenderHelper {
         return listbox;
     }
 
-    private void storeSelectItems(UIInput listbox, FxSelectList selectList) {
+    private void storeSelectItems(UIInput listbox, FxSelectList selectList, boolean includeEmptyElement) {
         if (selectList == null) {
             throw new FxInvalidParameterException("selectList", "ex.jsf.valueInput.select.emptyList",
                     component.getClientId(FacesContext.getCurrentInstance())).asRuntimeException();
@@ -315,6 +315,9 @@ class EditModeHelper extends RenderHelper {
         // store available items in select component
         final UISelectItems selectItems = (UISelectItems) FxJsfUtils.createComponent(UISelectItems.COMPONENT_TYPE);
         final List<SelectItem> items = FxJsfUtils.asSelectList(selectList);
+        if (includeEmptyElement) {
+            items.add(0, new SelectItem(-1L, ""));
+        }
         selectItems.setValue(items);
         listbox.setConverter(FxJsfUtils.getApplication().createConverter(Long.class));
         listbox.getChildren().add(selectItems);

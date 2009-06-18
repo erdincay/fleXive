@@ -254,16 +254,17 @@ public class FxValueInputRenderer extends Renderer {
         } else {
             // use FxValue string representation
             final String postedValue = (String) parameters.get(inputId);
-            if (isNotBlank(postedValue)) {
+            
+            if (isBlank(postedValue) || (value instanceof FxSelectOne && "-1".equals(postedValue))) {
+                value.removeLanguage(languageId);
+            } else if (isNotBlank(postedValue)) {
                 value.setTranslation(languageId, postedValue);
                 if (value instanceof FxReference && value.isValid()) {
                     // store translation
                     final ReferencedContent reference = ((FxReference) value).getTranslation(languageId);
                     value.setTranslation(languageId, new ReferencedContent(reference, (String) parameters.get(inputId + "_caption"), null, null));
                 }
-            } else {
-                value.removeLanguage(languageId);
-            }
+            } 
 
             if (value instanceof FxDateTime && !value.isTranslationEmpty(languageId) && value.isValid()) {
                 value.setTranslation(languageId, addTimeFields(parameters, inputId, ((FxDateTime) value).getTranslation(languageId)));
