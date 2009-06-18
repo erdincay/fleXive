@@ -50,6 +50,8 @@
                 <t:inputHidden value="#{__ceBean.storageKey}" id="__ceStorageKey"/>
                 <t:inputHidden value="#{__ceBean.nextA4jAction}" id="__ceNextA4jAction"/>
                 <t:inputHidden value="#{__ceBean.actionXpath}" id="__ceActionXpath"/>
+                <t:inputHidden id="__foldedGroups_toggledGroups" value="#{__ceBean.toggledGroups}"/>
+                <t:inputHidden id="__foldedGroups_allOpened" value="#{__ceBean.allOpened}"/>
                 <h:commandButton action="#{__ceBean.resolveA4jAction}" id="__ceResolveA4jAction"
                                  style="display:none;"/>
              </c:if>
@@ -103,7 +105,15 @@
                 <c:set var="editor_root" value="#{__ceBean.contentStorage[_ceContent.editorId].idGenerator[__ceBean.contentStorage[_ceContent.editorId].content.rootGroup]}"/-->
                 <c:set var="editor_root" value="#{_ceContent.editorId}_editor"/>
                 <!-- Content editor screen -->
-                <a4j:outputPanel id="#{editor_root}">
+                <a4j:outputPanel id="#{editor_root}" styleClass="fxContentEditor_editorContent">
+                    <!-- open and fold groups -->
+                    <div title="#{fxMessageBean['ContentEditor.button.openGroups.title']}"
+                       class="fxContentEditor_openGroups"
+                       onclick="flexive.contentEditor.toggleGroups('#{_ceContent.editorId}',true);"/>
+                    <div title="#{fxMessageBean['ContentEditor.button.foldGroups.title']}"
+                       class="fxContentEditor_foldGroups"
+                       onclick="flexive.contentEditor.toggleGroups('#{_ceContent.editorId}',false);"/>
+
                     <!-- input language switch -->
                     <div class="fxContentEditor_languageSwitch">
                         <div style="#{not _ceContent.guiSettings.editMode or not empty _ceContent.guiSettings.openedReferenceId ? 'display:none' : ''}">
@@ -114,14 +124,26 @@
                     </div>
 
                     <!-- Properties and Groups -->
-                    <div style="position:relative;left:-10px">
-                        <div style="padding-top: 3px; padding-left: 8px; width: 30px; float: left;">
+                    <!-- clear group ids from last request -->
+                     <script type="text/javascript">
+                        <!--
+                            flexive.contentEditor.clearGroupIds("#{_ceContent.editorId}");
+                        //-->
+                    </script>
+                    <div>
+                        <div>
                             <fx:fxCeRenderFieldsMenu element="#{_ceContent.content.rootGroup}" icon="group"/>
                         </div>
                         <br clear="all"/>
                         <fx:fxCeRenderFields data="#{_ceContent.content.rootGroup.children}"/>
 
                     </div>
+                    <!-- apply folding -->
+                     <script type="text/javascript">
+                        <!--
+                            flexive.contentEditor.applyGroupFolding("#{_ceContent.guiSettings.formPrefix}","#{_ceContent.editorId}");
+                        //-->
+                    </script>
                 </a4j:outputPanel>
 
                 <div style="clear:both;height:20px"><!-- __ --></div>

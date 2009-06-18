@@ -107,7 +107,7 @@ disableTab... false if the <adm:tab/> component should be rendered, true otherwi
         <ui:define name="editButton">
             <adm:commandButton id="#{editorId}_editButton"
                   labelKey="Content.button.edit" location="#{not myContent.referenced ? 'both' : 'content'}"
-                  bean="#{srcEditor}" icon="edit" action="enableEdit" ajax="true">
+                  bean="#{srcEditor}" icon="edit" action="enableEdit" onclick="flexive.contentEditor.saveGroupFolding('#{srcEditor.formId}');">
                 <f:setPropertyActionListener value="#{myContent}" target="#{srcEditor.wrappedContent}"/>
                 <!-- set properties for fxContentEditorBean -->
                 <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
@@ -120,7 +120,7 @@ disableTab... false if the <adm:tab/> component should be rendered, true otherwi
                       location="#{empty myContent.guiSettings.openedReferenceId
                       and not myContent.referenced ? 'both' : 'content'}"
                       bean="#{srcEditor}"
-                      icon="new" action="save" ajax="true">
+                      icon="new" action="save" onclick="flexive.contentEditor.saveGroupFolding('#{srcEditor.formId}');">
                 <f:setPropertyActionListener value="#{myContent}" target="#{srcEditor.wrappedContent}"/>
                 <!-- set properties for fxContentEditorBean -->
                 <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
@@ -134,7 +134,7 @@ disableTab... false if the <adm:tab/> component should be rendered, true otherwi
                                location="#{empty myContent.guiSettings.openedReferenceId
                                and not myContent.referenced ? 'both' : 'content'}"
                                bean="#{srcEditor}"
-                               icon="save" action="save" ajax="true">
+                               icon="save" action="save" onclick="flexive.contentEditor.saveGroupFolding('#{srcEditor.formId}');">
                 <f:setPropertyActionListener value="#{myContent}" target="#{srcEditor.wrappedContent}"/>
                 <!-- set properties for fxContentEditorBean -->
                 <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
@@ -148,7 +148,7 @@ disableTab... false if the <adm:tab/> component should be rendered, true otherwi
                               location="#{empty myContent.guiSettings.openedReferenceId
                               and not myContent.referenced ? 'both' : 'content'}"
                               bean="#{srcEditor}"
-                              icon="newVersion" action="saveInNewVersion" ajax="true">
+                              icon="newVersion" action="saveInNewVersion" onclick="flexive.contentEditor.saveGroupFolding('#{srcEditor.formId}');">
                 <f:setPropertyActionListener value="#{myContent}" target="#{srcEditor.wrappedContent}"/>
                 <!-- set properties for fxContentEditorBean -->
                 <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
@@ -200,7 +200,7 @@ disableTab... false if the <adm:tab/> component should be rendered, true otherwi
                           location="#{empty myContent.guiSettings.openedReferenceId
                                          and not myContent.referenced ? 'both' : 'content'}"
                           bean="#{srcEditor}" confirmKey="Content.confirm.abort"
-                          icon="cancel" action="cancel" ajax="true">
+                          icon="cancel" action="cancel" onclick="flexive.contentEditor.saveGroupFolding('#{srcEditor.formId}');">
                  <f:setPropertyActionListener value="#{myContent}" target="#{srcEditor.wrappedContent}"/>
                  <!-- set properties for fxContentEditorBean -->
                 <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
@@ -227,7 +227,8 @@ disableTab... false if the <adm:tab/> component should be rendered, true otherwi
             <h:commandLink action="#{__ceBean.editReference}"
                              title="#{fxMessageBean['ContentEditor.button.editReference.title']}"
                              styleClass="fxContentEditor_editReferenceIcon"
-                             rendered="#{empty _ceContent.guiSettings.openedReferenceId and not _ceContent.data[element.XPathFull].isEmpty}">
+                             rendered="#{empty _ceContent.guiSettings.openedReferenceId and not _ceContent.data[element.XPathFull].isEmpty}"
+                             onclick="flexive.contentEditor.saveGroupFolding('#{srcEditor.formId}');">
                     <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
                     <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
                     <f:setPropertyActionListener value="#{element}" target="#{__ceBean.element}"/>
@@ -238,7 +239,8 @@ disableTab... false if the <adm:tab/> component should be rendered, true otherwi
             <ui:fragment rendered="#{empty _ceContent.guiSettings.openedReferenceId}">
                 <h:commandLink action="#{__ceBean.createReference}"
                         title="#{fxMessageBean['ContentEditor.button.newReference.title']}"
-                        styleClass="fxContentEditor_newReferenceIcon">
+                        styleClass="fxContentEditor_newReferenceIcon"
+                        onclick="flexive.contentEditor.saveGroupFolding('#{srcEditor.formId}');">
                     <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
                     <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
                     <f:setPropertyActionListener value="#{element}" target="#{__ceBean.element}"/>

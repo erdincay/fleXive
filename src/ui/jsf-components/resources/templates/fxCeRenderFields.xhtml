@@ -17,13 +17,20 @@
         <c:if test="#{not element.systemInternal}">
             <c:if test="#{element.group}">
                 <a4j:outputPanel>
+                    <!-- register group -->
+                    <script type="text/javascript">
+                        <!--
+                            flexive.contentEditor.registerGroupId("#{_ceContent.editorId}","#{_ceContent.idGenerator[element]}");
+                        //-->
+                    </script>
                     <div class="fxContentEditor_group" onmouseover='flexive.contentEditor.closeMenu(event,false)'>
-                        <div class="header">
+                        <div class="header" onclick="flexive.contentEditor.toggleGroup('#{_ceContent.editorId}','#{_ceContent.idGenerator[element]}');">
                             <fx:fxCeRenderFieldsMenu element="#{element}" icon="group"/>
                             <span class="display">#{fxMapBean.assignments[element.assignmentId].displayName}</span>
                         </div>
-                        <fx:fxCeRenderFields data="#{element.children}" icon="group"/>
-
+                        <div id="#{_ceContent.idGenerator[element]}" class="fxContentEditor_group_content">
+                            <fx:fxCeRenderFields data="#{element.children}" icon="group"/>
+                        </div>
                         <div class="end">&nbsp;</div>
                     </div>
                 </a4j:outputPanel>

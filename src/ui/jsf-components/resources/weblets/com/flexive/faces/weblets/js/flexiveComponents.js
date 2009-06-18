@@ -913,6 +913,182 @@ flexive.dojo = new function() {
 flexive.contentEditor = new function() {
     var activeMenu = null;
     var activationTime = -1;
+    var toggledGroups = null;
+    var allOpened = null;
+    var groupIds = null;
+    var editorIds=null;
+
+    /** save variables relavant for group folding **/
+    this.saveGroupFolding=function(formPrefix) {
+        var tgString ="";
+        var rowArray = new Array();
+        if (toggledGroups != null) {
+            for (var i=0; i<editorIds.length;i++) {
+                if (toggledGroups[editorIds[i]] != null)
+                    rowArray.push(editorIds[i] + ":"+toggledGroups[editorIds[i]]);
+            }
+        }
+        tgString=rowArray.join(";");
+
+        var aoString ="";
+        rowArray = new Array();
+        if (aoString != null) {
+            for (var i=0; i<editorIds.length;i++) {
+                 if (allOpened[editorIds[i]] != null)
+                    rowArray.push(editorIds[i] + ":"+allOpened[editorIds[i]]);
+            }
+        }
+        aoString=rowArray.join(";");
+        document.getElementById(formPrefix+":"+"__foldedGroups_toggledGroups").value=tgString;
+        document.getElementById(formPrefix+":"+"__foldedGroups_allOpened").value=aoString;
+    };
+
+     /** restore saved group folding **/
+    this.restoreGroupFolding=function(formPrefix) {
+        if (allOpened == null && toggledGroups == null) {
+            var tgString = document.getElementById(formPrefix+":"+"__foldedGroups_toggledGroups").value;
+            if (tgString != "") {
+                var editorRowArray=tgString.split(';');
+                for (var i=0;i<editorRowArray.length;i++) {
+                    var keyVal=editorRowArray[i].split(':');
+                    if (keyVal.length == 2) {
+                        var values = keyVal[1].split(',');
+                        if (toggledGroups == null) {
+                            toggledGroups=new Array();
+                        }
+                        if (values.length>0) {
+                            toggledGroups[keyVal[0]]=new Array();
+                        }
+                        for (var j=0;j<values.length;j++) {
+                            if (values[j] !="") {
+                                toggledGroups[keyVal[0]].push(values[j]);
+                            }
+                        }
+                    }
+                }
+            }
+            var aoString=document.getElementById(formPrefix+":"+"__foldedGroups_allOpened").value;
+            if (aoString != "") {
+                var editorRowArray=aoString.split(';');
+                for (var i=0;i<editorRowArray.length;i++) {
+                    var keyVal=editorRowArray[i].split(':');
+                    if (keyVal.length == 2) {
+                        var values = keyVal[1].split(',');
+                        if (allOpened == null) {
+                            allOpened=new Array();
+                        }
+                        if (values.length>0) {
+                            allOpened[keyVal[0]]=new Array();
+                        }
+                        for (var j=0;j<values.length;j++) {
+                            if (values[j] !="") {
+                                allOpened[keyVal[0]].push(values[j]);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    };   
+
+    this.applyGroupFolding=function(formPrefix, editorId) {
+        flexive.contentEditor.restoreGroupFolding(formPrefix);
+        if (groupIds != null && groupIds[editorId] != null) {
+            for (var i=0;  i<groupIds[editorId].length;i++) {
+                if (flexive.contentEditor.isGroupFolded(editorId,groupIds[editorId][i]))
+                    var ele = document.getElementById(groupIds[editorId][i]);
+                    if (ele != null) {
+                        ele.style.display= "none";
+                    }
+            }
+        }
+    };
+
+    this.registerEditorIds=function(editorId) {
+        if (editorIds == null)
+            editorIds=new Array();
+        editorIds.push(editorId);
+    };
+
+    this.clearGroupIds=function(editorId) {
+        flexive.contentEditor.registerEditorIds(editorId);
+        if (groupIds != null && groupIds[editorId] != null)
+            groupIds[editorId] = null;
+    };
+
+    this.registerGroupId=function(editorId, groupId) {
+        if (groupIds == null)
+            groupIds = new Array();
+        if (groupIds[editorId] == null)
+            groupIds[editorId] = new Array();
+        groupIds[editorId].push(groupId);
+    };
+
+    this.isGroupFolded=function(editorId, groupId) {
+        if (allOpened == null)
+            allOpened = new Array();
+        if (allOpened[editorId]==null)
+            allOpened[editorId]=true;
+        if (allOpened[editorId])
+            return flexive.contentEditor.isGroupToggled(editorId, groupId);
+        else
+            return !flexive.contentEditor.isGroupToggled(editorId, groupId);
+    };
+
+    this.isGroupToggled=function(editorId, groupId) {
+        if (toggledGroups == null)
+            return false;
+        if (toggledGroups[editorId] != null) {
+            for (var i=0; i<toggledGroups[editorId].length;i++) {
+                if (toggledGroups[editorId][i] == groupId)
+                    return true;
+            }
+        }
+        return false;
+    };
+
+    this.toggleGroups=function(editorId, open) {
+        if (allOpened == null)
+            allOpened = new Array();
+        allOpened[editorId]=open;
+
+        if (toggledGroups != null && toggledGroups[editorId]!=null)
+            toggledGroups[editorId]=null;
+
+        if (groupIds != null && groupIds[editorId] != null) {
+            for (var i=0; i<groupIds[editorId].length;i++) {
+                var ele = document.getElementById(groupIds[editorId][i]);
+                if (ele != null) {
+                    ele.style.display= open ? "block" :"none";
+                }
+            }
+        }
+    };
+
+    this.toggleGroup=function(editorId, groupId) {
+        var wasToggled=flexive.contentEditor.isGroupToggled(editorId, groupId);
+        if (toggledGroups == null) {
+            toggledGroups = new Array();
+        }
+        if (toggledGroups[editorId] == null) {
+            toggledGroups[editorId] = new Array();
+        }
+        if (!wasToggled) {
+            toggledGroups[editorId].push(groupId);
+        }
+        else {
+            for (var i=0; i<toggledGroups[editorId].length;i++) {
+                if (toggledGroups[editorId][i] == groupId) {
+                    toggledGroups[editorId].splice(i,1);
+                    break;
+                }
+            }
+        }
+        var ele = document.getElementById(groupId);
+        if (ele != null) {
+            ele.style.display= flexive.contentEditor.isGroupFolded(editorId,groupId) ? "none" : "block";
+        }
+    };
 
     this.ignoreEvent=function(e) {
         if (!e) return;
@@ -1015,6 +1191,7 @@ flexive.contentEditor = new function() {
             document.getElementById(formPrefix+":"+"__ceStorageKey").value=storageKey;
             document.getElementById(formPrefix+":"+"__ceNextA4jAction").value=action;
             document.getElementById(formPrefix+":"+"__ceActionXpath").value=xpath;
+            flexive.contentEditor.saveGroupFolding(formPrefix);
             // To submit the whole form a hidden command button is pressed
             document.getElementById(formPrefix+":"+"__ceResolveA4jAction").click();
             return false;

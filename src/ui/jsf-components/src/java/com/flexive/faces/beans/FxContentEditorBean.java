@@ -83,6 +83,10 @@ public class FxContentEditorBean implements Serializable {
     private String storageKey;
     private String nextA4jAction;
     private String actionXpath;
+    // used by javascript to store folded groups
+    // when the whole form is submitted
+    private String toggledGroups;
+    private String allOpened;
     // messages id
     public static final String MESSAGES_ID = "ceMessages";
 
@@ -622,5 +626,21 @@ public class FxContentEditorBean implements Serializable {
                 result.add(wc);
         }
         return result;
+    }
+
+    public String getToggledGroups() {
+        return toggledGroups;
+    }
+
+    public void setToggledGroups(String toggledGroups) {
+        this.toggledGroups = toggledGroups;
+    }
+
+    public String getAllOpened() {
+        return allOpened;
+    }
+
+    public void setAllOpened(String allOpened) {
+        this.allOpened = allOpened;
     }
 }

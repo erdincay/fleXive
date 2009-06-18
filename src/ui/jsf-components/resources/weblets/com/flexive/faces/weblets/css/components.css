@@ -765,7 +765,7 @@ flexiveResultList > table {
     border-right:1px solid #d3dcb7;
     margin-top:8px;
     margin-bottom:8px;
-    margin-left:8px;
+    margin-left:0px;
     background-color:#f9fcf1
 }
 
@@ -774,15 +774,20 @@ flexiveResultList > table {
     border-bottom:1px solid #d3dcb7;
     color:black;
     padding:2px;
-    margin-bottom:8px;
     height:16px;
     vertical-align:middle;
 }
 
+.fxContentEditor_group_content {
+    margin-top:8px;
+    padding-left:6px;
+}
+
 .fxContentEditor_group .header .display {
     position:relative;
-    padding-left:5px;
+    /*padding-left:5px;*/
     font-style:italic;
+    font-weight:bold;
 }
 
 .fxContentEditor_group .header .icon {
@@ -800,13 +805,13 @@ flexiveResultList > table {
 }
 
 .fxContentEditor_property {
-    margin-left:8px;
+    /*margin-left:8px;*/
     margin-top:4px;
     margin-bottom:4px;
 }
 
 .fxContentEditor_property .display {
-    padding-left:5px;
+    /*padding-left:5px;*/
     float:left;
     width:130px;
     overflow:hidden;
@@ -924,4 +929,35 @@ flexiveResultList > table {
     height:100%;
     background-color:#CCCCCC;
     z-index:999;
+}
+
+.fxContentEditor_openGroups {
+  cursor: pointer;
+  background-image: url( weblet:url( "com.flexive.faces.weblets" , "/images/contentEditor/openGroups.png"));
+  background-repeat:no-repeat;
+  border:0;
+  float:left;
+  display:block;
+  height:16px;
+  width:16px;
+  margin-right:5px;
+}
+
+.fxContentEditor_foldGroups {
+  cursor: pointer;
+  background-image: url( weblet:url( "com.flexive.faces.weblets" , "/images/contentEditor/foldGroups.png"));
+  background-repeat:no-repeat;
+  border:0;
+  float:left;
+  display:block;
+  height:16px;
+  width:16px;
+  margin-right:5px;
+}
+
+.fxContentEditor_editorContent {
+    postion:relative;
+    left:-10px;
+    display:block;
+    padding-top:4px;
 }
