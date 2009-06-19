@@ -152,6 +152,8 @@ public class SelectListBean implements Serializable {
     }
 
     public void setItemName(String itemName) {
+        if (itemName != null)
+            itemName = itemName.trim();
         this.itemName = itemName;
     }
 
@@ -511,7 +513,7 @@ public class SelectListBean implements Serializable {
     public String createSelectList() {
         try {
             FxPermissionUtils.checkRole(FxJsfUtils.getRequest().getUserTicket(), Role.SelectListEditor);
-            FxSelectListEdit list = FxSelectListEdit.createNew(selectListName, selectListLabel,
+            FxSelectListEdit list = FxSelectListEdit.createNew(selectListName.trim(), selectListLabel,
                     selectListDescription, selectListAllowDynamicCreation,
                     CacheAdmin.getEnvironment().getACL(newCreateItemACL),
                     CacheAdmin.getEnvironment().getACL(newDefaultItemACL));

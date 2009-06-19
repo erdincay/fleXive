@@ -703,6 +703,8 @@ public class ConfigurationManagerBean {
     }
 
     public void setNewName(String newName) {
+        if (newName != null)
+            newName = newName.trim();
         this.newName = newName;
     }
 
