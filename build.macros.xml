@@ -222,6 +222,7 @@
         <attribute name="jar" description="Path to flatStorageCreator.jar"/>
         <attribute name="extlib" description="Path to external library directory containing the dependencies for FlatStorageCreator.java"/>
         <attribute name="connectionUrl" description="The database connection URL"/>
+        <attribute name="schema" description="Database schema (not applicable to all DB vendors)"/>
         <attribute name="tableName" description="Name of the table to be created"/>
         <attribute name="overwrite" default="false" description="If an existing table should be overwritten (true or false)"/>
         <attribute name="user" description="The database user"/>
@@ -238,7 +239,7 @@
             </path>
             <java fork="true" classpathref="createFlatStorage.classpath" classname="com.flexive.tools.FlatStorageCreator">
                 <arg line="-u @{user}"/>
-                <arg line="-p @{password}"/>
+                <arg line="--password=@{password}"/>
                 <arg value="-o"/>
                 <arg line="-nstring @{nstring}"/>
                 <arg line="-ntext @{ntext}"/>
@@ -246,6 +247,7 @@
                 <arg line="-ndouble @{ndouble}"/>
                 <arg line="-nselect @{nselect}"/>
                 <arg value="@{connectionUrl}"/>
+                <arg value="@{schema}"/>
                 <arg value="@{tableName}"/>
             </java>
         </sequential>

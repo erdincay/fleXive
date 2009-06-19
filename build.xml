@@ -617,6 +617,8 @@
     <target name="db.flatstorage.create" depends="prepare">
         <input taskname="flexive" addproperty="flatstorage.url" defaultValue="${database.url.base}flexive"
                 message="Connection URL:"/>
+        <input taskname="flexive" addproperty="flatstorage.schema" defaultValue="FLEXIVE"
+               message="Database schema:"/>
         <input taskname="flexive" addproperty="flatstorage.tableName" defaultValue="FX_CONTENT_DATA_FLAT"
                message="Table name:"/>
         <input taskname="flexive" addproperty="flatstorage.nstring" defaultValue="20"
@@ -632,6 +634,7 @@
         <createFlatStorage jar="${flexive.build.framework.jar.dir}/flexive-flatstorage.jar"
                            extlib="lib"
                            connectionurl="${flatstorage.url}"
+                           schema="${flatstorage.schema}"
                            tablename="${flatstorage.tableName}"
                            user="${database.username}"
                            password="${database.password}"

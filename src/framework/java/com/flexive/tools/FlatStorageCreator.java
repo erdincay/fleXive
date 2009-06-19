@@ -5,7 +5,10 @@ import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,6 +25,7 @@ public class FlatStorageCreator {
     public static enum ColumnType {
         STRING, TEXT, BIGINT, DOUBLE, SELECT
     }
+
     private static final class ParseTemplateException extends Exception {
         private static final long serialVersionUID = 458498439976430343L;
 
@@ -44,12 +48,14 @@ public class FlatStorageCreator {
 
     private final Connection connection;
     private final String tableName;
+    private final String schema;
     private final boolean overwrite;
     private final Map<ColumnType, Integer> columnCounts;
 
-    public FlatStorageCreator(Connection connection, String tableName, boolean overwrite, Map<ColumnType, Integer> overrideColumnCounts) {
+    public FlatStorageCreator(Connection connection, String tableName, String schema, boolean overwrite, Map<ColumnType, Integer> overrideColumnCounts) {
         this.connection = connection;
         this.tableName = tableName.toUpperCase();
+        this.schema = schema.toUpperCase();
         this.overwrite = overwrite;
         this.columnCounts = new HashMap<ColumnType, Integer>(DEFAULT_CONFIGURATION);
         // override default column counts
@@ -107,7 +113,7 @@ public class FlatStorageCreator {
         final Pattern timesPattern = Pattern.compile("\\$\\{([A-Z]+)_TIMES\\} *");
         final StringBuilder expanded = new StringBuilder();
         final String overwriteSwitch = "${OVERWRITE}";
-        for (String line: template.split("\n")) {
+        for (String line : template.split("\n")) {
             final Matcher matcher = timesPattern.matcher(line);
             if (matcher.find()) {
                 // ${..._TIMES} matched, get column name
@@ -142,7 +148,7 @@ public class FlatStorageCreator {
         }
 
         // replace global vars
-        return expanded.toString().replace("${TABLE_NAME}", tableName);
+        return expanded.toString().replace("${TABLE_NAME}", tableName).replace("${SCHEMA}", schema);
     }
 
     private String getTemplate(String filename) throws SQLException, IOException {
@@ -150,7 +156,7 @@ public class FlatStorageCreator {
         final InputStream is = Thread.currentThread().getContextClassLoader()
                 .getResource(dbVendor + "/" + filename)
                 .openStream();
-       return IOUtils.toString(is); 
+        return IOUtils.toString(is);
     }
 
     public static void main(String[] args) {
@@ -171,13 +177,14 @@ public class FlatStorageCreator {
             usage(options);
             return;
         }
-        if (commandLine.getArgs().length != 2 || !commandLine.hasOption("user")) {
+        if (commandLine.getArgs().length != 3 || !commandLine.hasOption("user")) {
             usage(options);
             return;
         }
 
         final String url = commandLine.getArgs()[0];
-        final String tableName = commandLine.getArgs()[1];
+        final String schema = commandLine.getArgs()[1];
+        final String tableName = commandLine.getArgs()[2];
 
         try {
             // load supported database drivers
@@ -203,19 +210,21 @@ public class FlatStorageCreator {
                 }
             }
             con = DriverManager.getConnection(
-                            url,
-                            commandLine.getOptionValue("user"),
-                            commandLine.getOptionValue("password")
-                    );
+                    url,
+                    commandLine.getOptionValue("user"),
+                    commandLine.getOptionValue("password")
+            );
             final FlatStorageCreator fsc = new FlatStorageCreator(
                     con,
                     tableName,
+                    schema,
                     commandLine.hasOption("overwrite"),
                     overrides
             );
             fsc.createTable();
         } catch (SQLException e) {
-            System.err.println("Database error:" + e.getMessage());
+            System.err.println("Database error:" + e.getMessage() + "(" + e.getClass().getCanonicalName() + ")");
+            e.printStackTrace();
         } catch (IOException e) {
             System.err.println("Failed to load template: " + e.getMessage());
             e.printStackTrace(System.err);
@@ -233,7 +242,7 @@ public class FlatStorageCreator {
 
     private static void usage(Options options) {
         new HelpFormatter().printHelp(
-                "java -jar flatStorageCreator.jar [options] jdbc-connection-url tableName\n",
+                "java -jar flatStorageCreator.jar [options] jdbc-connection-url schema tableName\n",
                 options
         );
     }
