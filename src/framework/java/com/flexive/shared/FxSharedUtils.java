@@ -339,9 +339,7 @@ public final class FxSharedUtils {
             }
         }
 
-        if (jarContents.isEmpty())
-                jarContents = null;
-        return jarContents;
+        return jarContents.isEmpty() ? null : jarContents;
     }
 
     /**

@@ -1025,7 +1025,9 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
                 jarStream = dropApplication.getResourceJarStream();
                 Map<String, String> jarContents = FxSharedUtils.getContentsFromJarStream(jarStream, "scripts/" + folder + "/", false);
                 if (jarContents != null) {
-                    for (String scriptName : jarContents.keySet()) {
+                    final List<String> filenames = Lists.newArrayList(jarContents.keySet());
+                    Collections.sort(filenames);
+                    for (String scriptName : filenames) {
                         scriptExecutor.runScript(scriptName, jarContents.get(scriptName));
                     }
                 } else {
