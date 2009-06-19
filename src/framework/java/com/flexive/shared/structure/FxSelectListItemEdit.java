@@ -290,6 +290,14 @@ public class FxSelectListItemEdit extends FxSelectListItem implements Serializab
             return true; //already assigned
         if( this.getList().getId() == item.getList().getId() && this.getId() != item.getId() && !item.hasParentItem() ) {
             //check if this item is not already a child of the item to check
+            FxSelectListItem tmp = this.getParentItem();
+            while (tmp != null) {
+                if (tmp.getId() == item.getId()) {
+                    return false;
+                }
+                tmp = tmp.getParentItem();
+            }
+
             return !isChildOf(item);
         }
         return false;
