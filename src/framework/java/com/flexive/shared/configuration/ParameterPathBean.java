@@ -55,6 +55,26 @@ public class ParameterPathBean implements ParameterPath {
     public ParameterScope getScope() {
         return scope;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ParameterPathBean that = (ParameterPathBean) o;
+
+        if (scope != that.scope) return false;
+        if (!value.equals(that.value)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = value.hashCode();
+        result = 31 * result + scope.hashCode();
+        return result;
+    }
 }
 
 

@@ -92,4 +92,26 @@ public class ParameterDataBean<T> implements ParameterData<T> {
     public String toString() {
         return path.toString() + "/" + key;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        ParameterDataBean that = (ParameterDataBean) o;
+
+        if (defaultValue != null ? !defaultValue.equals(that.defaultValue) : that.defaultValue != null) return false;
+        if (!key.equals(that.key)) return false;
+        if (!path.equals(that.path)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = path.hashCode();
+        result = 31 * result + key.hashCode();
+        result = 31 * result + (defaultValue != null ? defaultValue.hashCode() : 0);
+        return result;
+    }
 }
