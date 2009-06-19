@@ -36,13 +36,11 @@ package com.flexive.war.filter;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.security.Role;
 import com.flexive.shared.security.UserTicket;
+import org.apache.commons.lang.StringUtils;
 
 import javax.servlet.*;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-
-import org.apache.commons.lang.StringUtils;
 
 /**
  * Handles security checks for the backend administration - checks if the calling user has the role
@@ -53,10 +51,9 @@ import org.apache.commons.lang.StringUtils;
  * @version $Rev$
  */
 public class BackendAuthorizationFilter implements Filter {
-    private FilterConfig config;
 
     public void init(FilterConfig filterConfig) throws ServletException {
-        this.config = filterConfig;
+        // nop
     }
 
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {

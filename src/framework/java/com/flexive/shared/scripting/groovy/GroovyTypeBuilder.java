@@ -821,7 +821,7 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
      * and provides setters for types, properties (and assignments) and groups (and assignments),
      * and getters for all available type / property / group (and their assignments) attributes
      */
-    private class AttributeMapper {
+    private static class AttributeMapper {
 
         // type and prop/group attributes
         final Map<String, Object> attributes;

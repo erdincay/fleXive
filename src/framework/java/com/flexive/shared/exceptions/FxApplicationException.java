@@ -323,16 +323,16 @@ public class FxApplicationException extends Exception implements FxLocalizedExce
      * @return the localized messages of any chained exceptions that are derived from FxException
      */
     private String evaluateCause(long langCode) {
+        final StringBuilder msg = new StringBuilder();
         Throwable org = this.getCause();
-        String msg = "";
         while (org != null) {
             if (org instanceof FxApplicationException) {
                 if( !this.message.equals(((FxApplicationException) org).message))
-                    msg += ((FxApplicationException) org).message.getLocalizedMessage(langCode);
+                    msg.append(((FxApplicationException) org).message.getLocalizedMessage(langCode));
             }
             org = org.getCause();
         }
-        return msg;
+        return msg.toString();
     }
 
     /**

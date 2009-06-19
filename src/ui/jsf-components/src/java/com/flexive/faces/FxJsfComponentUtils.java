@@ -46,10 +46,7 @@ import javax.faces.convert.Converter;
 import javax.faces.convert.ConverterException;
 import javax.faces.model.SelectItem;
 import javax.faces.model.SelectItemGroup;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.lang.reflect.Array;
 
 import com.flexive.faces.components.input.FxSelectRenderer;
@@ -66,7 +63,7 @@ public class FxJsfComponentUtils {
     /**
      * Attributed to be passed through
      */
-    public final static String[] SELECTLIST_ATTRIBUTES = {
+    public final static List<String> SELECTLIST_ATTRIBUTES = Collections.unmodifiableList(Arrays.asList(
             "disabled",
             "readonly",
             "accesskey",
@@ -89,7 +86,7 @@ public class FxJsfComponentUtils {
             "style",
             "tabindex",
             "title"
-    };
+    ));
 
     /**
      * Private constructor to avoid instantiation.

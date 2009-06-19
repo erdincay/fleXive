@@ -33,7 +33,10 @@
         <!-- Premature optimization is the root of all evil -->
         <exclude name="AvoidInstantiatingObjectsInLoops"/>
     </rule>
-    <rule ref="rulesets/strings.xml"/>
+    <rule ref="rulesets/strings.xml">
+        <!-- Causes XML errors -->
+        <exclude name="AvoidDuplicateLiterals"/>
+    </rule>
     <rule ref="rulesets/unusedcode.xml"/>
     <rule ref="rulesets/sunsecure.xml"/>
     <rule ref="rulesets/strictexception.xml"/>

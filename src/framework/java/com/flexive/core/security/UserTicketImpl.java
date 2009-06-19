@@ -605,12 +605,12 @@ public class UserTicketImpl implements UserTicket, Serializable {
      * {@inheritDoc}
      */
     public String getACLsCSV(long ownerId, ACLCategory category, ACLPermission... perms) {
-        String result = "";
+        final StringBuilder result = new StringBuilder();
         Long ACLs[] = getACLsId(ownerId, category, perms);
         for (long acl : ACLs) {
-            result += ((result.length() > 0) ? "," : "") + acl;
+            result.append((result.length() > 0) ? "," : "").append(acl);
         }
-        return result;
+        return result.toString();
     }
 
     /**

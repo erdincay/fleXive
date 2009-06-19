@@ -307,7 +307,7 @@ public abstract class QueryNode implements Serializable {
     	if (parent == null) {
     		return String.valueOf(id);
     	} else {
-    		return parent.getPath() + "-" + String.valueOf(id);
+    		return parent.getPath() + "-" + id;
     	}
     }
 

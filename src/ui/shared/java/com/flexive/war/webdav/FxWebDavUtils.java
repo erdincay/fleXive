@@ -56,7 +56,6 @@ public class FxWebDavUtils {
     private static final String WEBDAV_METHOD_OPTIONS = "OPTIONS";
     private static final String HTTP_HEADER_LAST_MODIFIED = "Last-Modified";
     private static final String HTTP_MODIFIED_AT_FORMATER_TXT = "EEE, dd MMM yyyy HH:mm:ss z";
-    private static SimpleDateFormat HTTP_MODIFIED_AT_FORMATER = new SimpleDateFormat(HTTP_MODIFIED_AT_FORMATER_TXT);
 
     /**
      * Determine if the given request is supposed to be a WebDav request by inspecting the context path (=/webdav)
@@ -491,6 +490,6 @@ public class FxWebDavUtils {
     public static String buildModifiedAtDate(Date date) {
         // HTTP standard time format: "Sat, 07 Apr 2001 00:58:08 GMT"
         // Apache server SSI format: Saturday, 08-Sep-2001 21:46:40 EDT
-        return HTTP_MODIFIED_AT_FORMATER.format(date);
+        return new SimpleDateFormat(HTTP_MODIFIED_AT_FORMATER_TXT).format(date);
     }
 }
