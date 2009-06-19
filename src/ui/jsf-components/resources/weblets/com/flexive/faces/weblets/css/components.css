@@ -792,6 +792,7 @@ flexiveResultList > table {
     /*padding-left:5px;*/
     font-style:italic;
     font-weight:bold;
+    float:left;
 }
 
 .fxContentEditor_group .header .icon {

@@ -920,27 +920,29 @@ flexive.contentEditor = new function() {
 
     /** save variables relavant for group folding **/
     this.saveGroupFolding=function(formPrefix) {
-        var tgString ="";
-        var rowArray = new Array();
-        if (toggledGroups != null) {
-            for (var i=0; i<editorIds.length;i++) {
-                if (toggledGroups[editorIds[i]] != null)
-                    rowArray.push(editorIds[i] + ":"+toggledGroups[editorIds[i]]);
+        if (editorIds != null) {
+            var tgString ="";
+            var rowArray = new Array();
+            if (toggledGroups != null) {
+                for (var i=0; i<editorIds.length;i++) {
+                    if (toggledGroups[editorIds[i]] != null)
+                        rowArray.push(editorIds[i] + ":"+toggledGroups[editorIds[i]]);
+                }
             }
-        }
-        tgString=rowArray.join(";");
+            tgString=rowArray.join(";");
 
-        var aoString ="";
-        rowArray = new Array();
-        if (aoString != null) {
-            for (var i=0; i<editorIds.length;i++) {
-                 if (allOpened[editorIds[i]] != null)
-                    rowArray.push(editorIds[i] + ":"+allOpened[editorIds[i]]);
+            var aoString ="";
+            rowArray = new Array();
+            if (allOpened != null) {
+                for (var i=0; i<editorIds.length;i++) {
+                     if (allOpened[editorIds[i]] != null)
+                        rowArray.push(editorIds[i] + ":"+allOpened[editorIds[i]]);
+                }
             }
+            aoString=rowArray.join(";");
+            document.getElementById(formPrefix+":"+"__foldedGroups_toggledGroups").value=tgString;
+            document.getElementById(formPrefix+":"+"__foldedGroups_allOpened").value=aoString;
         }
-        aoString=rowArray.join(";");
-        document.getElementById(formPrefix+":"+"__foldedGroups_toggledGroups").value=tgString;
-        document.getElementById(formPrefix+":"+"__foldedGroups_allOpened").value=aoString;
     };
 
      /** restore saved group folding **/
