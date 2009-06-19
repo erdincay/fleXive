@@ -492,6 +492,12 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
         final String structureName = (String) name;
         final AttributeMapper am = new AttributeMapper(attributes, value, structureName);
         if (this.type == null) {
+            // check if called for an existing type
+            if(CacheAdmin.getEnvironment().typeExists(structureName)) {
+                this.type = CacheAdmin.getEnvironment().getType(structureName);
+                return new Node();
+            }
+
             // AttributeMapper
             am.setStructureAttributes();
             // root node, create type

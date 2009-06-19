@@ -158,14 +158,39 @@ new GroovyTypeBuilder().blog {
                         ]]></programlisting>
                         </listitem>
                         <listitem>
-                            Loading a type, e.g. loading the type &quot;BLOG&quot; (more on this in
-                            <xref linkend="core_structure_gtb_examples"/>:
-                            <programlisting><![CDATA[
+                            <para>
+                                Loading a type (more on this in
+                                <xref linkend="core_structure_gtb_examples"/>.
+                            </para>
+                            <para>
+                                Types can either be loaded by passing the type's name to the GTB as in the following
+                                example,
+                                e.g. loading the type &quot;BLOG&quot;
+                            </para>
+                            <para>
+                                <programlisting><![CDATA[
 def builder = new GroovyTypeBuilder("BLOG")
 builder {
     // do something with "BLOG"
 }
                         ]]></programlisting>
+                            </para>
+                            <para>
+                                Alternatively (and quite useful if you do a lot of &quot;copy-and-paste&quot; with your
+                                script
+                                code),
+                                the type can also be loaded using the already presented constructor: When called, the
+                                type will be loaded
+                                if it already exists, otherwise a new type bearing the given name will be created.
+                            </para>
+                            <para>
+                                <programlisting><![CDATA[
+// "BLOG" already exists
+def builder = new GroovyTypeBuilder().blog {
+    // do something with "BLOG"
+}
+                                ]]></programlisting>
+                            </para>
                         </listitem>
                         <listitem>
                             When creating an element / structure name which constitutes a Java/Groovy keyword,
@@ -988,6 +1013,22 @@ builder {
                 </thead>
                 <tbody>
                     <tr>
+                        <td>assignment</td>
+                        <td>
+                            <classname>String</classname>
+                        </td>
+                        <td>
+                            <code>
+                                property(assignment: "ROOT/CAPTION")
+                            </code>
+                        </td>
+                        <td>
+                            Create an assignment from an existing property or group assignment by specifying the XPath.
+                            When creating group assignments, also consider using &quot;createSubAssignments&quot;
+                            (see the <xref linkend="core_structure_gtb_groupass_attribs"/> for further information on this attribute).
+                        </td>
+                    </tr>
+                    <tr>
                         <td>label</td>
                         <td>
                             <classname>FxString</classname>
@@ -1707,7 +1748,8 @@ def builder = new GroovyTypeBuilder().test {
                     <para>
                         If, on the other hand, the new property (having the same name as an existing one) resides within
                         a different
-                        hierarchical level of the given structure, the alias attribute (i.e. setting a different XPath) can be omitted:
+                        hierarchical level of the given structure, the alias attribute (i.e. setting a different XPath)
+                        can be omitted:
                         <programlisting><![CDATA[
 def builder = new GroovyTypeBuilder().test {
     prop1()
@@ -1723,8 +1765,10 @@ def builder = new GroovyTypeBuilder().test {
                         Assignment Paths
                     </para>
                     <para>
-                        When creating assignments from properties / groups, either the full XPath or a relative XPath can be used
-                        to denote the base assignment. Where &quot;relative&quot; implies, that type names can be omitted.
+                        When creating assignments from properties / groups, either the full XPath or a relative XPath
+                        can be used
+                        to denote the base assignment. Where &quot;relative&quot; implies, that type names can be
+                        omitted.
                     </para>
                     <para>
                         Example 1: full XPath (capitalising the XPath is not necessary)

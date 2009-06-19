@@ -51,7 +51,7 @@ import com.flexive.shared.security.ACLCategory
 import com.flexive.shared.FxLanguage
 
 /**
- * Tests for the                                 {@link com.flexive.shared.scripting.groovy.GroovyTypeBuilder GroovyTypeBuilder}                                 class.
+ * Tests for the                                  {@link com.flexive.shared.scripting.groovy.GroovyTypeBuilder GroovyTypeBuilder}                                  class.
  *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
@@ -240,8 +240,8 @@ class GroovyTypeBuilderTest {
             }
             assert false: "Successfully created a property assignment referencing to a group"
         } catch (FxRuntimeException e) {
-            if (!(e.converted != null && e.converted instanceof FxInvalidParameterException                                  \
-                                                 && ("assignment".equalsIgnoreCase(((FxInvalidParameterException) e.converted).parameter)))) {
+            if (!(e.converted != null && e.converted instanceof FxInvalidParameterException                                   \
+                                                  && ("assignment".equalsIgnoreCase(((FxInvalidParameterException) e.converted).parameter)))) {
                 throw e;
             }
             // else: success
@@ -259,8 +259,8 @@ class GroovyTypeBuilderTest {
             }
             assert false: "Successfully created a group assignment referencing to a property"
         } catch (FxRuntimeException e) {
-            if (!(e.converted != null && e.converted instanceof FxInvalidParameterException                                  \
-                                                 && ("assignment".equalsIgnoreCase(((FxInvalidParameterException) e.converted).parameter)))) {
+            if (!(e.converted != null && e.converted instanceof FxInvalidParameterException                                   \
+                                                  && ("assignment".equalsIgnoreCase(((FxInvalidParameterException) e.converted).parameter)))) {
                 throw e;
             }
             // else: success
@@ -1537,5 +1537,40 @@ class GroovyTypeBuilderTest {
             return true;
         }
         return false;
+    }
+
+
+
+    /**
+     * Tests the fact that the GTB can be called for an existing type
+     * as if creating a new one
+     */
+    @Test (groups = ["ejb", "scripting", "structure"])
+    def constructorCallTest() {
+        new GroovyTypeBuilder().builderTest {
+            p1()
+        }
+
+        try {
+            Assert.assertTrue(environment().assignmentExists("BUILDERTEST/P1"))
+
+            new GroovyTypeBuilder().builderTest {
+                p1(label: new FxString(true, "P1 label"))
+                p2()
+            }
+
+            Assert.assertTrue(environment().assignmentExists("BUILDERTEST/P2"))
+            Assert.assertEquals(environment().getAssignment("BUILDERTEST/P1").getLabel().toString(), "P1 label")
+
+            // now call it the "ordinary way" when loading a type
+            def builder = new GroovyTypeBuilder("BUILDERTEST")
+            builder {
+                p3()
+            }
+
+            Assert.assertTrue(environment().assignmentExists("BUILDERTEST/P3"))
+        } finally {
+            removeTestType()
+        }
     }
 }
