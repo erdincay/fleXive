@@ -287,19 +287,6 @@ builder {
                 </thead>
                 <tbody>
                     <tr>
-                        <td>
-                            label
-                        </td>
-                        <td>
-                            <classname>FxString</classname>
-                        </td>
-                        <td>
-                            <code>testtype(label: new FxString(true, &quot;Property 01&quot;))</code>
-                        </td>
-                        <td>Sets the type's label. If not given, the element's name is used (code example: &quot;testtype&quot;
-                        </td>
-                    </tr>
-                    <tr>
                         <td>acl</td>
                         <td>
                             <classname>String</classname>
@@ -316,6 +303,40 @@ builder {
                         <td>
                             Sets the access control list for the given type. If not given, the &quot;Default Structure
                             ACL&quot; is used
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            generalACL
+                        </td>
+                        <td>
+                            <classname>String</classname>
+                            or
+                            <classname>ACL</classname>
+                        </td>
+                        <td>
+                            <code>new GroovyTypeBuilder().testtype(acl: "Default Structure ACL", generalACL: "Custom ACL") {
+                                        prop1()
+                                        prop2(acl: "Default Structure ACL")
+                                  }
+                            </code>
+                        </td>
+                        <td>
+                            Sets a general ACL which is valid for all (newly) created property assignments within the type.
+                            A given &quot;acl&quot; will override the &quot;generalACL&quot;
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            label
+                        </td>
+                        <td>
+                            <classname>FxString</classname>
+                        </td>
+                        <td>
+                            <code>testtype(label: new FxString(true, &quot;Property 01&quot;))</code>
+                        </td>
+                        <td>Sets the type's label. If not given, the element's name is used (code example: &quot;testtype&quot;
                         </td>
                     </tr>
                     <tr>

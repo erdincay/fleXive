@@ -51,7 +51,7 @@ import com.flexive.shared.security.ACLCategory
 import com.flexive.shared.FxLanguage
 
 /**
- * Tests for the                                  {@link com.flexive.shared.scripting.groovy.GroovyTypeBuilder GroovyTypeBuilder}                                  class.
+ * Tests for the                                   {@link com.flexive.shared.scripting.groovy.GroovyTypeBuilder GroovyTypeBuilder}                                   class.
  *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
@@ -240,8 +240,8 @@ class GroovyTypeBuilderTest {
             }
             assert false: "Successfully created a property assignment referencing to a group"
         } catch (FxRuntimeException e) {
-            if (!(e.converted != null && e.converted instanceof FxInvalidParameterException                                   \
-                                                  && ("assignment".equalsIgnoreCase(((FxInvalidParameterException) e.converted).parameter)))) {
+            if (!(e.converted != null && e.converted instanceof FxInvalidParameterException                                    \
+                                                   && ("assignment".equalsIgnoreCase(((FxInvalidParameterException) e.converted).parameter)))) {
                 throw e;
             }
             // else: success
@@ -259,8 +259,8 @@ class GroovyTypeBuilderTest {
             }
             assert false: "Successfully created a group assignment referencing to a property"
         } catch (FxRuntimeException e) {
-            if (!(e.converted != null && e.converted instanceof FxInvalidParameterException                                   \
-                                                  && ("assignment".equalsIgnoreCase(((FxInvalidParameterException) e.converted).parameter)))) {
+            if (!(e.converted != null && e.converted instanceof FxInvalidParameterException                                    \
+                                                   && ("assignment".equalsIgnoreCase(((FxInvalidParameterException) e.converted).parameter)))) {
                 throw e;
             }
             // else: success
@@ -1571,6 +1571,66 @@ class GroovyTypeBuilderTest {
             Assert.assertTrue(environment().assignmentExists("BUILDERTEST/P3"))
         } finally {
             removeTestType()
+        }
+    }
+
+
+
+    /**
+     * Test the "generalACL" type attribute - it sets the given ACL for every given element,
+     * except when "acl" is present as well.
+     */
+    @Test (groups = ["ejb", "scripting", "structure"])
+    def generalAclSettingTest() {
+        // create custom ACL
+        def aclEngine = EJBLookup.getAclEngine()
+        def aclId = aclEngine.create("Testicus ACL", new FxString(true, "TESTICUS"), TestUsers.getTestMandator(), "#000000", "Testicus ACL Description", ACLCategory.STRUCTURE);
+        def acl = environment().getACL(aclId);
+
+
+
+        try {
+            new GroovyTypeBuilder().builderTest(generalACL: acl) {
+
+            }
+            def t = environment().getType("BUILDERTEST")
+            Assert.assertEquals(t.getACL(), environment().getACL("Testicus ACL"))
+            removeTestType()
+
+            new GroovyTypeBuilder().builderTest(generalACL: acl, acl: "Default Structure ACL") {
+            }
+            t = environment().getType("BUILDERTEST")
+            Assert.assertEquals(t.getACL(), environment().getACL("Default Structure ACL"))
+            removeTestType()
+
+            new GroovyTypeBuilder().builderTest(generalACL: acl) {
+                p1(acl: "Default Structure ACL")
+                p2()
+            }
+            t = environment().getType("BUILDERTEST")
+            Assert.assertEquals(t.getACL(), environment().getACL("Testicus ACL"))
+            Assert.assertEquals(getPropertyAssignment(t, "BUILDERTEST/P1").getACL().getName(), "Default Structure ACL")
+            Assert.assertEquals(getPropertyAssignment(t, "BUILDERTEST/P2").getACL(), acl)
+            removeTestType()
+
+            new GroovyTypeBuilder().builderTest(generalACL: acl, acl: "Default Structure ACL") {
+                p1()
+                p2(acl: "Default Structure ACL")
+                G1 {
+                    p3()
+                    p4(acl: "Default Structure ACL")
+                }
+            }
+
+            t = environment().getType("BUILDERTEST")
+            Assert.assertEquals(t.getACL(), environment().getACL("Default Structure ACL"))
+            Assert.assertEquals(getPropertyAssignment(t, "BUILDERTEST/P1").getACL(), acl)
+            Assert.assertEquals(getPropertyAssignment(t, "BUILDERTEST/P2").getACL().getName(), "Default Structure ACL")
+            Assert.assertEquals(getPropertyAssignment(t, "BUILDERTEST/G1/P3").getACL(), acl)
+            Assert.assertEquals(getPropertyAssignment(t, "BUILDERTEST/G1/P4").getACL().getName(), "Default Structure ACL")
+        } finally {
+            removeTestType()
+            aclEngine.remove(aclId);
         }
     }
 }

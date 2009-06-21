@@ -215,6 +215,7 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
     }
 
     private FxType type;
+    private ACL acl;
 
     private static class Node<TElement> implements Serializable {
         private static final long serialVersionUID = 4721651554653493085L;
@@ -437,14 +438,17 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
 
     public GroovyTypeBuilder(FxType type) {
         this.type = type;
+        this.acl = null;
     }
 
     public GroovyTypeBuilder(String typeName) {
         this.type = CacheAdmin.getEnvironment().getType(typeName);
+        this.acl = null;
     }
 
     public GroovyTypeBuilder(long typeId) {
         this.type = CacheAdmin.getEnvironment().getType(typeId);
+        this.acl = null;
     }
 
     @Override
@@ -492,16 +496,18 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
         final String structureName = (String) name;
         final AttributeMapper am = new AttributeMapper(attributes, value, structureName);
         if (this.type == null) {
+            // setGeneralACL if passed as param
+            setGeneralAcl(attributes);
             // check if called for an existing type
-            if(CacheAdmin.getEnvironment().typeExists(structureName)) {
+            if (CacheAdmin.getEnvironment().typeExists(structureName)) {
                 this.type = CacheAdmin.getEnvironment().getType(structureName);
                 return new Node();
             }
 
             // AttributeMapper
-            am.setStructureAttributes();
-            // root node, create type
-            try {
+            am.setStructureAttributes(acl);
+            
+            try { // root node, create type
                 final FxTypeEdit type = FxTypeEdit.createNew(structureName, am.label, am.acl,
                         am.parentTypeName != null ? CacheAdmin.getEnvironment().getType(am.parentTypeName) : null);
                 am.setTypeAttributes(type); // set type attributes
@@ -514,7 +520,7 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
             }
         }
 
-        am.setElementAttributes();
+        am.setElementAttributes(acl);
         boolean hasParent = this.getCurrent() instanceof GroupAssignmentNode || this.getCurrent() instanceof GroupNode;
         if (hasParent) {// set the parent xPath immed. for assignments and reload the type from the cache
             am.parentXPath = getXPathFromStructureName(structureName, true);
@@ -817,6 +823,22 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
     }
 
     /**
+     * Sets the general ACL which will be used throughout the type / element creation
+     *
+     * @param attributes the map of structure attributes
+     */
+    private void setGeneralAcl(Map attributes) {
+        if (attributes.containsKey("generalACL")) {
+            if (attributes.get("generalACL") instanceof String) {
+                final String aclString = (String) attributes.get("generalACL");
+                acl = CacheAdmin.getEnvironment().getACL(aclString);
+            } else if (attributes.get("generalACL") instanceof ACL) {
+                acl = (ACL) attributes.get("generalACL");
+            }
+        }
+    }
+
+    /**
      * This class Maps the given Attributes for the GroovyTypeBuilder to their respective Object representations
      * and provides setters for types, properties (and assignments) and groups (and assignments),
      * and getters for all available type / property / group (and their assignments) attributes
@@ -869,17 +891,23 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
         /**
          * Retrieves a type's attributes from the attribute map
          *
+         * @param generalACL a general ACL valid for all elements (exception: "acl" is present in the map)
          * @return Returns the AttributeMapper itself (for chained calls)
          */
-        AttributeMapper setStructureAttributes() {
+        AttributeMapper setStructureAttributes(ACL generalACL) {
+            // set acl if generalACL != null
+            if(generalACL != null)
+                acl = generalACL;
+
             if (attributes.get("acl") instanceof ACL) {
                 acl = (ACL) FxSharedUtils.get(attributes, "acl", CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()));
             } else if (attributes.get("acl") instanceof String) {
                 final String aclString = (String) FxSharedUtils.get(attributes, "acl", "Default Structure ACL");
                 acl = CacheAdmin.getEnvironment().getACL(aclString);
-            } else if (!attributes.containsKey("acl")) { // default
+            } else if (!attributes.containsKey("acl") && generalACL == null) { // default
                 acl = CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId());
             }
+
             if (attributes.containsKey("description")) {
                 label = (FxString) FxSharedUtils.get(attributes, "description", new FxString(structureName));
             } else {
@@ -938,9 +966,10 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
         /**
          * Retrieve the attributes of elements (FxGroups / FxProperties and their assignments)
          *
+         * @param generalACL a general ACL valid for all elements (exception: "acl" is present in the map)
          * @return returns the AttributeMapper itself (for chained calls)
          */
-        AttributeMapper setElementAttributes() {
+        AttributeMapper setElementAttributes(ACL generalACL) {
             dataType = value != null ? (FxDataType) value : (FxDataType) FxSharedUtils.get(attributes, "dataType", FxDataType.String1024);
 
             multiplicity = FxMultiplicity.MULT_0_1; // default
@@ -972,12 +1001,17 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
             if (!hint.translationExists(FxLanguage.DEFAULT_ID))
                 hint.setTranslation(FxLanguage.DEFAULT_ID, hint.getBestTranslation());
 
-            acl = CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()); // default
+            // set the acl if generalACL != null
+            if(generalACL != null)
+                acl = generalACL;
+
             if (attributes.get("acl") instanceof ACL) {
                 acl = (ACL) FxSharedUtils.get(attributes, "acl", CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()));
             } else if (attributes.get("acl") instanceof String) {
                 final String aclString = (String) FxSharedUtils.get(attributes, "acl", "Default Structure ACL");
                 acl = CacheAdmin.getEnvironment().getACL(aclString);
+            } else if(!attributes.containsKey("acl") && generalACL == null) {
+                acl = CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()); // default
             }
 
             if (attributes.get("assignment") instanceof String)
@@ -1264,7 +1298,6 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
                     ge.setOption(optionKey, true, optionValue.toString());
                 }
             }
-
         }
     }
 }
