@@ -52,6 +52,13 @@
         </dependency>
 
         <dependency>
+            <groupId>com.flexive</groupId>
+            <artifactId>flexive-flatstorage</artifactId>
+            <version>@FLEXIVE_VERSION@</version>
+            <optional>false</optional>
+        </dependency>
+
+        <dependency>
             <groupId>org.opensymphony.quartz</groupId>
             <artifactId>quartz</artifactId>
             <version>1.6.5</version>
