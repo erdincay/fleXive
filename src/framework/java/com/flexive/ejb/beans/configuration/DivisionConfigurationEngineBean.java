@@ -33,6 +33,8 @@ package com.flexive.ejb.beans.configuration;
 
 import com.flexive.core.Database;
 import static com.flexive.core.DatabaseConst.TBL_DIVISION_CONFIG;
+import com.flexive.core.flatstorage.FxFlatStorageInfo;
+import com.flexive.core.flatstorage.FxFlatStorageManager;
 import com.flexive.core.storage.ContentStorage;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.shared.FxContext;
@@ -70,7 +72,7 @@ import java.util.List;
 
 @TransactionManagement(TransactionManagementType.CONTAINER)
 @TransactionAttribute(TransactionAttributeType.REQUIRED)
-@Stateless(name = "DivisionConfigurationEngine", mappedName="DivisionConfigurationEngine")
+@Stateless(name = "DivisionConfigurationEngine", mappedName = "DivisionConfigurationEngine")
 public class DivisionConfigurationEngineBean extends GenericConfigurationImpl implements DivisionConfigurationEngine, DivisionConfigurationEngineLocal {
     private static final Log LOG = LogFactory.getLog(DivisionConfigurationEngineBean.class);
     /**
@@ -431,5 +433,45 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
     public String getDatabaseInfo() {
         final DivisionData divisionData = FxContext.get().getDivisionData();
         return "Division #" + divisionData.getId() + " - " + divisionData.getDbVendor().name() + " " + divisionData.getDbVersion();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean isFlatStorageEnabled() {
+        return FxFlatStorageManager.getInstance().isEnabled();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public List<FxFlatStorageInfo> getFlatStorageInfos() throws FxApplicationException {
+        try {
+            return FxFlatStorageManager.getInstance().getFlatStorageInfos();
+        } catch (SQLException e) {
+            throw new FxDbException(e, "ex.db.sqlError", e.getMessage());
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void createFlatStorage(String name, String description, int stringColumns, int textColumns, int bigIntColumns, int doubleColumns, int selectColumns) throws FxApplicationException {
+        try {
+            FxFlatStorageManager.getInstance().createFlatStorage(name, description, stringColumns, textColumns, bigIntColumns, doubleColumns, selectColumns);
+        } catch (SQLException e) {
+            throw new FxDbException(e, "ex.db.sqlError", e.getMessage());
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void removeFlatStorage(String name) throws FxApplicationException {
+        try {
+            FxFlatStorageManager.getInstance().removeFlatStorage(name);
+        } catch (SQLException e) {
+            throw new FxDbException(e, "ex.db.sqlError", e.getMessage());
+        }
     }
 }

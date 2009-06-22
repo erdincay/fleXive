@@ -65,7 +65,8 @@ public class FxPropertyAssignmentEdit extends FxPropertyAssignment {
                 pa.getPosition(), new FxMultiplicity(pa.getMultiplicity()), pa.getDefaultMultiplicity(),
                 pa.getParentGroupAssignment(), pa.getBaseAssignmentId(), pa.getLabel() == null ? null : pa.getLabel().copy(),
                 pa.getHint() == null ? null : pa.getHint().copy(), pa.hasAssignmentDefaultValue() ? pa.getDefaultValue().copy() : null,
-                pa.getProperty().asEditable(), new ACL(pa.getACL()), pa.getDefaultLanguage(), FxStructureOption.cloneOptions(pa.options));
+                pa.getProperty().asEditable(), new ACL(pa.getACL()), pa.getDefaultLanguage(),
+                FxStructureOption.cloneOptions(pa.options), pa.getFlatstoreMapping());
         if (pa.isSystemInternal())
             _setSystemInternal();
         this.isNew = false;
@@ -88,7 +89,8 @@ public class FxPropertyAssignmentEdit extends FxPropertyAssignment {
         super(-1, pa.isEnabled(), type, alias, XPathElement.buildXPath(false, parentXPath, alias), pa.getPosition(),
                 new FxMultiplicity(pa.getMultiplicity()), pa.getDefaultMultiplicity(), pa.getParentGroupAssignment(), pa.getId(), pa.getLabel().copy(),
                 pa.getHint().copy(), pa.hasAssignmentDefaultValue() ? pa.getDefaultValue().copy() : null,
-                pa.getProperty().asEditable(), new ACL(pa.getACL()), pa.getDefaultLanguage(), FxStructureOption.cloneOptions(pa.options));
+                pa.getProperty().asEditable(), new ACL(pa.getACL()), pa.getDefaultLanguage(),
+                FxStructureOption.cloneOptions(pa.options), pa.getFlatstoreMapping());
         if (pa.isSystemInternal())
             _setSystemInternal();
         if (parent == null) {
@@ -117,7 +119,7 @@ public class FxPropertyAssignmentEdit extends FxPropertyAssignment {
     public FxPropertyAssignmentEdit(FxProperty property, FxType type, String alias, String parentXPath) {
         super(-1, true, type, alias, XPathElement.buildXPath(false, parentXPath, alias), 0, property.getMultiplicity(), 1,
                 null, FxAssignment.NO_BASE, property.getLabel(), property.getHint(), null, property, property.getACL(),
-                property.getLabel().getDefaultLanguage(), FxStructureOption.cloneOptions(property.options));
+                property.getLabel().getDefaultLanguage(), FxStructureOption.cloneOptions(property.options), null);
         isNew = true;
     }
 
@@ -145,6 +147,7 @@ public class FxPropertyAssignmentEdit extends FxPropertyAssignment {
      * @param defaultValue default value
      * @return this
      */
+    @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     public FxPropertyAssignmentEdit setDefaultValue(FxValue defaultValue) {
         if (defaultValue != null && defaultValue.isMultiLanguage() != this.isMultiLang()) {
             if (defaultValue.isMultiLanguage())
@@ -218,7 +221,7 @@ public class FxPropertyAssignmentEdit extends FxPropertyAssignment {
      * @throws FxInvalidParameterException on errors
      */
     public FxPropertyAssignmentEdit setMultiLang(boolean multiLang) throws FxInvalidParameterException {
-        if(!getProperty().mayOverrideMultiLang())
+        if (!getProperty().mayOverrideMultiLang())
             throw new FxInvalidParameterException("MULTILANG", "ex.structure.override.property.forbidden", "MULTILANG", getProperty().getName());
 
         return setOption(FxStructureOption.OPTION_MULTILANG, multiLang);
@@ -255,7 +258,7 @@ public class FxPropertyAssignmentEdit extends FxPropertyAssignment {
      * @throws FxInvalidParameterException if overriding is not allowed
      */
     public FxPropertyAssignmentEdit setSearchable(boolean searchable) throws FxInvalidParameterException {
-        if(!getProperty().mayOverrideSearchable())
+        if (!getProperty().mayOverrideSearchable())
             throw new FxInvalidParameterException("SEARCHABLE", "ex.structure.override.property.forbidden", "SEARCHABLE", getProperty().getName());
         return setOption(FxStructureOption.OPTION_SEARCHABLE, searchable);
     }
@@ -268,7 +271,7 @@ public class FxPropertyAssignmentEdit extends FxPropertyAssignment {
      * @throws FxInvalidParameterException if not allowed to override
      */
     public FxPropertyAssignmentEdit setInOverview(boolean inOverview) throws FxInvalidParameterException {
-        if(!getProperty().mayOverrideInOverview())
+        if (!getProperty().mayOverrideInOverview())
             throw new FxInvalidParameterException("INOVERVIEW", "ex.structure.override.property.forbidden", "INOVERVIEW", getProperty().getName());
         return setOption(FxStructureOption.OPTION_SHOW_OVERVIEW, inOverview);
     }
@@ -281,7 +284,7 @@ public class FxPropertyAssignmentEdit extends FxPropertyAssignment {
      * @throws FxInvalidParameterException if not allowed to override
      */
     public FxPropertyAssignmentEdit setUseHTMLEditor(boolean useHTMLEditor) throws FxInvalidParameterException {
-        if(!getProperty().mayOverrideUseHTMLEditor())
+        if (!getProperty().mayOverrideUseHTMLEditor())
             throw new FxInvalidParameterException("USEHTMLEDITOR", "ex.structure.override.property.forbidden", "USEHTMLEDITOR", getProperty().getName());
         return setOption(FxStructureOption.OPTION_HTML_EDITOR, useHTMLEditor);
     }
@@ -294,7 +297,7 @@ public class FxPropertyAssignmentEdit extends FxPropertyAssignment {
      * @throws FxInvalidParameterException on errors
      */
     public FxPropertyAssignmentEdit setMultiLine(boolean multiLine) throws FxInvalidParameterException {
-        if(!getProperty().mayOverrideMultiLine())
+        if (!getProperty().mayOverrideMultiLine())
             throw new FxInvalidParameterException("MULTILINE", "ex.structure.override.property.forbidden", "MULTILINE", getProperty().getName());
         return setOption(FxStructureOption.OPTION_MULTILINE, multiLine);
     }
@@ -307,7 +310,7 @@ public class FxPropertyAssignmentEdit extends FxPropertyAssignment {
      * @throws FxInvalidParameterException on errors
      */
     public FxPropertyAssignmentEdit setMaxLength(int maxLength) throws FxInvalidParameterException {
-        if(!getProperty().mayOverrideMaxLength())
+        if (!getProperty().mayOverrideMaxLength())
             throw new FxInvalidParameterException("MAXLENGTH", "ex.structure.override.property.forbidden", "MAXLENGTH", getProperty().getName());
         return setOption(FxStructureOption.OPTION_MAXLENGTH, String.valueOf(maxLength));
     }
@@ -537,6 +540,7 @@ public class FxPropertyAssignmentEdit extends FxPropertyAssignment {
      */
     public FxPropertyEdit getPropertyEdit() {
         if (!(property instanceof FxPropertyEdit))
+            //noinspection ThrowableInstanceNeverThrown
             throw new FxApplicationException("ex.structure.noEditableProperty").asRuntimeException();
         else return (FxPropertyEdit) property;
     }

@@ -249,6 +249,8 @@
                 <arg value="@{connectionUrl}"/>
                 <arg value="@{schema}"/>
                 <arg value="@{tableName}"/>
+                <jvmarg value="-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"/>
+                <jvmarg value="-Dlog4j.configuration=flatstorelog4j.xml"/>
             </java>
         </sequential>
     </macrodef>

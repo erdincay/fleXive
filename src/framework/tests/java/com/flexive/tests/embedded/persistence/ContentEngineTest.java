@@ -41,8 +41,8 @@ import com.flexive.shared.interfaces.AssignmentEngine;
 import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.interfaces.TypeEngine;
 import com.flexive.shared.security.ACL;
-import com.flexive.shared.security.Mandator;
 import com.flexive.shared.security.ACLCategory;
+import com.flexive.shared.security.Mandator;
 import com.flexive.shared.stream.FxStreamUtils;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.*;
@@ -58,6 +58,7 @@ import org.testng.annotations.Test;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Tests for the ContentEngine
@@ -295,6 +296,25 @@ public class ContentEngineTest {
         } catch (FxRuntimeException e) {
             acl.create("Article ACL", new FxString("ACL for articles"), Mandator.MANDATOR_FLEXIVE, "#00CC00", "", ACLCategory.INSTANCE);
         }
+    }
+
+    @Test
+    public void flatAnalyze() throws Exception {
+        if (!EJBLookup.getDivisionConfigurationEngine().isFlatStorageEnabled()) {
+            System.out.println("Flat storage is not enabled - skipping flat storage analyze test!");
+            return;
+        }
+        Map<String, List<FxPropertyAssignment>> pot = ass.getPotentialFlatAssignments(CacheAdmin.getEnvironment().getType(TEST_TYPE));
+        Assert.assertEquals(pot.size(), 5, "Expected 5 flat mappings");
+        Assert.assertEquals(pot.get("STRING").size(), 3);
+        Assert.assertEquals(pot.get("TEXT").size(), 0);
+        Assert.assertEquals(pot.get("BIGINT").size(), 0);
+        Assert.assertEquals(pot.get("DOUBLE").size(), 0);
+        Assert.assertEquals(pot.get("SELECT").size(), 0);
+        //2 should be boosted since its required
+        Assert.assertEquals(pot.get("STRING").get(0), CacheAdmin.getEnvironment().getAssignment(TEST_TYPE+"/TESTPROPERTY2"));
+        Assert.assertEquals(pot.get("STRING").get(1), CacheAdmin.getEnvironment().getAssignment(TEST_TYPE+"/TESTPROPERTY1"));
+        Assert.assertEquals(pot.get("STRING").get(2), CacheAdmin.getEnvironment().getAssignment(TEST_TYPE+"/TESTPROPERTY5"));
     }
 
     @Test

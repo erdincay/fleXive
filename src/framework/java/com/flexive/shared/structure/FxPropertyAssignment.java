@@ -68,6 +68,8 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
 
     protected long defaultLang;
 
+    protected FxFlatstoreMapping flatstoreMapping;
+
     /**
      * Constructor
      *
@@ -88,11 +90,12 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
      * @param ACL                   the embedded property's ACL (will only be used if the embedded property allows overriding)
      * @param defaultLang           default language if multilingual (if 0==SYSTEM then not set)
      * @param options               options
+     * @param flatstoreMapping      flatstore mapping for this property assignment or <code>null</code>
      */
     public FxPropertyAssignment(long assignmentId, boolean enabled, FxType assignedType, String alias, String xpath, int position,
                                 FxMultiplicity multiplicity, int defaultMultiplicity, FxGroupAssignment parentGroupAssignment,
                                 long baseAssignment, FxString label, FxString hint, FxValue defaultValue,
-                                FxProperty property, ACL ACL, long defaultLang, List<FxStructureOption> options) {
+                                FxProperty property, ACL ACL, long defaultLang, List<FxStructureOption> options, FxFlatstoreMapping flatstoreMapping) {
         super(assignmentId, enabled, assignedType, alias, xpath, position, multiplicity, defaultMultiplicity, parentGroupAssignment,
                 baseAssignment, label, hint, options);
         this.defaultValue = defaultValue;
@@ -101,6 +104,7 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
             this.alias = property.getName();
         this.defaultLang = defaultLang;
         this.ACL = ACL;
+        this.flatstoreMapping = flatstoreMapping;
     }
 
 
@@ -111,6 +115,24 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
      */
     public FxProperty getProperty() {
         return property;
+    }
+
+    /**
+     * Is this property assignment stored in the flatstore?
+     *
+     * @return property assignment stored in the flatstore?
+     */
+    public boolean isFlatstoreEntry() {
+        return this.flatstoreMapping != null;
+    }
+
+    /**
+     * Get the flatstore mapping for this property assignment
+     *
+     * @return flatstore mapping or <code>null</code> if not located in the flatstore
+     */
+    public FxFlatstoreMapping getFlatstoreMapping() {
+        return flatstoreMapping;
     }
 
     /**
@@ -268,8 +290,7 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
                 copy.setXPath(this.getXPath());
                 property.updateEnvironmentData(copy);
                 return copy;
-            }
-            else
+            } else
                 return null;
         }
         final FxValue copy = defaultValue.copy();
@@ -310,6 +331,7 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
         String XPath = (this.hasParentGroupAssignment() && parent != null ? parent.getXPath() : "") + "/" + this.getAlias();
         try {
             if (!this.getMultiplicity().isValid(index))
+                //noinspection ThrowableInstanceNeverThrown
                 throw new FxCreateException("ex.content.xpath.index.invalid", index, this.getMultiplicity(), this.getXPath()).
                         setAffectedXPath(parent != null ? parent.getXPathFull() : this.getXPath());
             final FxPropertyData data = new FxPropertyData(parent == null ? "" : parent.getXPathPrefix(), this.getAlias(), index, XPath, XPathElement.toXPathMult(XPathFull),
@@ -332,6 +354,7 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
         String XPath = (this.hasParentGroupAssignment() && parent != null ? parent.getXPath() : "") + "/" + this.getAlias();
         try {
             if (!this.getMultiplicity().isValid(index))
+                //noinspection ThrowableInstanceNeverThrown
                 throw new FxCreateException("ex.content.xpath.index.invalid", index, this.getMultiplicity(), this.getXPath()).
                         setAffectedXPath(parent != null ? parent.getXPathFull() : this.getXPath());
             return new FxPropertyData(parent == null ? "" : parent.getXPathPrefix(), this.getAlias(), index, XPath, XPathElement.toXPathMult(XPathFull),

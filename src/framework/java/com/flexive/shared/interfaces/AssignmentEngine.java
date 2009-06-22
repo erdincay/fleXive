@@ -32,11 +32,11 @@
 package com.flexive.shared.interfaces;
 
 import com.flexive.shared.exceptions.*;
-import com.flexive.shared.structure.FxAssignment;
-import com.flexive.shared.structure.FxGroupEdit;
-import com.flexive.shared.structure.FxPropertyEdit;
+import com.flexive.shared.structure.*;
 
 import javax.ejb.Remote;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Structure Assignment management
@@ -242,4 +242,12 @@ public interface AssignmentEngine {
      * @throws com.flexive.shared.exceptions.FxApplicationException on errors
      */
     void removeGroup(long groupId) throws FxApplicationException;
+
+    /**
+     * Analyze a FxType and find potential property assignments that would be suitable for storage in a flat storage
+     *
+     * @param type the FxType to analyze
+     * @return List containing potential property assignments that would be suitable for storage in a flat storage, key=Storage type/column
+     */
+    public Map<String, List<FxPropertyAssignment>> getPotentialFlatAssignments(FxType type);
 }

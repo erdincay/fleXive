@@ -32,6 +32,7 @@
 package com.flexive.ejb.beans.structure;
 
 import com.flexive.core.Database;
+import com.flexive.core.flatstorage.FxFlatStorageManager;
 import static com.flexive.core.DatabaseConst.*;
 import com.flexive.core.conversion.ConversionEngine;
 import com.flexive.core.storage.ContentStorage;
@@ -59,6 +60,7 @@ import javax.ejb.*;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Structure Assignment management
@@ -2427,5 +2429,13 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             Database.closeObjects(AssignmentEngineBean.class, null, ps);
         }
         return count;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.SUPPORTS)
+    public Map<String, List<FxPropertyAssignment>> getPotentialFlatAssignments(FxType type) {
+        return FxFlatStorageManager.getInstance().getPotentialFlatAssignments(type);
     }
 }

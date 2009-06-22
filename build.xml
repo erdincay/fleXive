@@ -36,6 +36,7 @@
 	<property name="sqlparser.jar" value="flexive-sqlParser.jar"/>
 	<property name="extractor.jar" value="flexive-extractor.jar"/>
 	<property name="extractor-documents.jar" value="flexive-extractor-documents.jar"/>
+    <property name="flatstorage.jar" value="flexive-flatstorage.jar"/>
 
     <!-- check if sqlParser has been run -->
 	<available file="${flexive.lib.dir}/${sqlparser.jar}" property="missing.parsers"/>
@@ -200,16 +201,6 @@
             <manifest>
                 <attribute name="Class-Path" value="extlib/h2.jar"/>
                 <attribute name="Main-Class" value="com.flexive.tools.OpenUrl"/>
-            </manifest>
-        </jar>
-        <jar jarfile="${flexive.build.framework.jar.dir}/flexive-flatstorage.jar">
-            <fileset dir="${build.framework.classes.dir}">
-                <include name="com/flexive/tools/FlatStorageCreator*"/>
-            </fileset>
-            <fileset dir="${flexive.resources.framework.dir}/tools/flatstorage" includes="**/*"/>
-            <manifest >
-                <attribute name="Main-Class" value="com.flexive.tools.FlatStorageCreator"/>
-                <attribute name="Class-Path" value="extlib/commons-cli-1.1.jar extlib/mysql-connector-java-5.0.8-bin.jar extlib/commons-io-1.1.jar extlib/h2.jar"/>
             </manifest>
         </jar>
         <taskdef name="applicationDescriptorBuilder"
@@ -539,7 +530,7 @@
             <fileset dir="${flexive.drop.dir}" includes="*.jar" excludes="*-ejb.jar,*.war,*.par"/>
 
             <!-- Shared libraries -->
-            <fileset dir="${flexive.lib.dir}" includes="${sqlparser.jar},${extractor.jar},${extractor-documents.jar},cglib*.jar,fxStream.jar,commons-io-1.1.jar,sanselan.jar,quartz*.jar,PDFRenderer.jar,commons-*.jar,jbosscache-core.jar,jgroups.jar,jboss-common-core-42-compat.jar,urlrewrite-*.jar,google-collect*.jar,jsr173_1.0_api.jar,jtidy.jar"/>
+            <fileset dir="${flexive.lib.dir}" includes="${sqlparser.jar},${extractor.jar},${extractor-documents.jar},${flatstorage.jar},cglib*.jar,fxStream.jar,commons-io-1.1.jar,sanselan.jar,quartz*.jar,PDFRenderer.jar,commons-*.jar,jbosscache-core.jar,jgroups.jar,jboss-common-core-42-compat.jar,urlrewrite-*.jar,google-collect*.jar,jsr173_1.0_api.jar,jtidy.jar"/>
             <fileset dir="${flexive.lib.dir}/groovy" includes="*.jar"/>
             <fileset dir="${build.ui.jar.dir}" includes="*.jar" excludes="flexive-plugin-jsf-testrunner.jar"/>
             <fileset dir="${build.ui.jar.dir}">
@@ -614,7 +605,7 @@
         <division-setup database="flexiveTest"/>
     </target>
 
-    <target name="db.flatstorage.create" depends="prepare">
+    <target name="db.flatstorage.create" depends="init">
         <input taskname="flexive" addproperty="flatstorage.url" defaultValue="${database.url.base}flexive"
                 message="Connection URL:"/>
         <input taskname="flexive" addproperty="flatstorage.schema" defaultValue="FLEXIVE"
@@ -630,8 +621,8 @@
         <input taskname="flexive" addproperty="flatstorage.ndouble" defaultValue="10"
                message="DOUBLE columns:"/>
         <input taskname="flexive" addproperty="flatstorage.nselect" defaultValue="10"
-               message="SELECT columns:"/>
-        <createFlatStorage jar="${flexive.build.framework.jar.dir}/flexive-flatstorage.jar"
+               message="SELECT/BOOLEAN columns:"/>
+        <createFlatStorage jar="${flexive.lib.dir}/flexive-flatstorage.jar"
                            extlib="lib"
                            connectionurl="${flatstorage.url}"
                            schema="${flatstorage.schema}"
@@ -673,6 +664,7 @@
         <!-- Create flexive distribution -->
         <copy file="${flexive.lib.dir}/${sqlparser.jar}" tofile="${flexive.dist.lib.dir}/${sqlparser.jar}"/>
 		<copy file="${flexive.lib.dir}/${extractor.jar}" tofile="${flexive.dist.lib.dir}/${extractor.jar}"/>
+        <copy file="${flexive.lib.dir}/${flatstorage.jar}" tofile="${flexive.dist.lib.dir}/${flatstorage.jar}"/>
 		<copy file="${flexive.lib.dir}/${extractor-documents.jar}" tofile="${flexive.dist.lib.dir}/${extractor-documents.jar}"/>
 		<copy file="${flexive.build.framework.jar.dir}/flexive-ant.jar" tofile="${flexive.dist.lib.dir}/flexive-ant.jar"/>
         <copy file="${flexive.build.framework.jar.dir}/flexive-shared.jar" tofile="${flexive.dist.lib.dir}/flexive-shared.jar"/>
@@ -680,7 +672,7 @@
             <fileset dir="${build.ui.jar.dir}" includes="*.jar" excludes="flexive-backend.jar,flexive-plugin-*.jar"/>
         </copy>
         <copy file="${flexive.build.framework.jar.dir}/flexive-ejb.jar" tofile="${flexive.dist.lib.dir}/flexive-ejb.jar"/>
-        <copy file="${flexive.build.framework.jar.dir}/flexive-flatstorage.jar" tofile="${flexive.dist.lib.dir}/flexive-flatstorage.jar"/>
+        <copy file="${flexive.lib.dir}/flexive-flatstorage.jar" tofile="${flexive.dist.lib.dir}/flexive-flatstorage.jar"/>
 
         <!-- Copy backend administration to applications folder -->
         <copy file="${flexive.base.build.dir}/ui/flexive.war" todir="${flexive.dist.apps.dir}/flexive-backend"/>
@@ -862,6 +854,7 @@ database.vendor=MySQL
         <maven-deploy file="${flexive.lib.dir}/${extractor-documents.jar}" pom="flexive-extractor-documents.pom"/>
         <maven-deploy-with-sources path="${flexive.lib.dir}" name="flexive-sqlParser"/>
         <maven-deploy file="${flexive.lib.dir}/fxStream.jar" pom="fxStream.pom"/>
+        <maven-deploy file="${flexive.lib.dir}/flexive-flatstorage.jar" pom="flexive-flatstorage.pom"/>
         <maven-deploy-with-sources path="${flexive.lib.dir}" name="flexive-h2"/>
 
         <maven-deploy file="${flexive.base.build.dir}/ui/flexive.war" pom="flexive-backend-war.pom"/>

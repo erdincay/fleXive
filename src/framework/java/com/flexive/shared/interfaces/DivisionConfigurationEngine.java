@@ -32,8 +32,10 @@
 package com.flexive.shared.interfaces;
 
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.core.flatstorage.FxFlatStorageInfo;
 
 import javax.ejb.Remote;
+import java.util.List;
 
 
 /**
@@ -51,7 +53,7 @@ public interface DivisionConfigurationEngine extends GenericConfigurationEngine 
      * If an entry with the given id already exists it will be overwritten.
      * This functionality is intended to be used by runone or startup scripts!
      *
-     * @param binaryId requested binary id
+     * @param binaryId     requested binary id
      * @param resourceName name of the resource file relative to fxresources/binaries
      * @throws FxApplicationException on errors
      */
@@ -70,4 +72,42 @@ public interface DivisionConfigurationEngine extends GenericConfigurationEngine 
      * @return information about the used database (name and version)
      */
     String getDatabaseInfo();
+
+    /**
+     * Is the a flat storage engine enabled for this division?
+     *
+     * @return if a flat storage engine is enabled for this division
+     */
+    boolean isFlatStorageEnabled();
+
+    /**
+     * Get information about existing flat storages
+     *
+     * @return List containing information about existing flat storages
+     * @throws FxApplicationException on errors
+     */
+    List<FxFlatStorageInfo> getFlatStorageInfos() throws FxApplicationException;
+
+    /**
+     * Create a flat storage
+     *
+     * @param name          name of the flat storage (table name)
+     * @param description   flat storage description
+     * @param stringColumns number of String columns
+     * @param textColumns   number of Text columns
+     * @param bigIntColumns number of BigInt columns
+     * @param doubleColumns number of Double columns
+     * @param selectColumns number of Select/Boolean columns
+     * @throws FxApplicationException on errors
+     */
+    public void createFlatStorage(String name, String description, int stringColumns, int textColumns, int bigIntColumns,
+                                  int doubleColumns, int selectColumns) throws FxApplicationException;
+
+    /**
+     * Remove a flat storage, only possible if no entries exist!
+     *
+     * @param name name of the flat storage
+     * @throws FxApplicationException on errors
+     */
+    public void removeFlatStorage(String name) throws FxApplicationException;
 }

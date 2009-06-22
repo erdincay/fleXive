@@ -188,6 +188,14 @@ public final class DatabaseConst {
      */
     public static final String TBL_STRUCT_TYPERELATIONS = "FXS_TYPERELS";
     /**
+     * Structure flatstore mapping table
+     */
+    public static final String TBL_STRUCT_FLATSTORE_MAPPING = "FXS_FLAT_MAPPING";
+    /**
+     * Structure flatstore info table
+     */
+    public static final String TBL_STRUCT_FLATSTORE_INFO = "FXS_FLAT_STORAGES";
+    /**
      * Main content table
      */
     public static final String TBL_CONTENT = "FX_CONTENT";
