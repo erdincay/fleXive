@@ -823,7 +823,7 @@ flexiveResultList > table {
 }
 
 .fxContentEditor_property .fxContentEditor_value[readonly='true'] {
-    /*width:400px; */
+    width:400px; 
     float:left;
     margin-bottom:4px;
     padding-left:2px;
@@ -834,7 +834,7 @@ flexiveResultList > table {
 }
 
 .fxContentEditor_property .fxContentEditor_value[readonly='false'] {
-    /*width:400px;*/
+    width:400px;
     float:left;
     margin-bottom:4px
 }
@@ -977,4 +977,8 @@ flexiveResultList > table {
     border:0;
     height:67px;
     width:67px;
+}
+
+.fxContentEditor_xpathError {
+    background-color:#FF9999;
 }

@@ -1203,4 +1203,22 @@ flexive.contentEditor = new function() {
             return true;
         }
     };
+
+    this.highlightAffectedXpath=function(formPrefix,editorId) {
+        var encXpath = document.getElementById(formPrefix+":"+"__affectedXPath").value;
+        if (encXpath != null && encXpath !="") {
+            var xpelements=encXpath.split(":");
+            if (xpelements.length ==2) {
+               var eId=xpelements[0];
+               var xpath=xpelements[1];
+               if (eId == editorId) {
+                   var affectedDiv = document.getElementById(formPrefix+":"+editorId+"_"+xpath);
+                    if (affectedDiv != null) {
+                        affectedDiv.className= "fxContentEditor_xpathError";
+                    }
+                   //document.getElementById(formPrefix+":"+"__affectedXPath").value=null;
+               }
+            }
+        }
+    };
 };

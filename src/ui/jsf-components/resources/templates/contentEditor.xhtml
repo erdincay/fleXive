@@ -52,6 +52,7 @@
                 <t:inputHidden value="#{__ceBean.actionXpath}" id="__ceActionXpath"/>
                 <t:inputHidden id="__foldedGroups_toggledGroups" value="#{__ceBean.toggledGroups}"/>
                 <t:inputHidden id="__foldedGroups_allOpened" value="#{__ceBean.allOpened}"/>
+                <t:inputHidden id="__affectedXPath" value="#{__ceBean.affectedXPath}"/>
                 <h:commandButton action="#{__ceBean.resolveA4jAction}" id="__ceResolveA4jAction"
                                  style="display:none;"/>
              </c:if>
@@ -144,10 +145,12 @@
                         <fx:fxCeRenderFields data="#{_ceContent.content.rootGroup.children}"/>
 
                     </div>
-                    <!-- apply folding -->
                      <script type="text/javascript">
                         <!--
+                            // apply folding
                             flexive.contentEditor.applyGroupFolding("#{_ceContent.guiSettings.formPrefix}","#{_ceContent.editorId}");
+                            // highlight affected xpath
+                            flexive.contentEditor.highlightAffectedXpath("#{_ceContent.guiSettings.formPrefix}","#{_ceContent.editorId}");
                         //-->
                     </script>
                 </a4j:outputPanel>

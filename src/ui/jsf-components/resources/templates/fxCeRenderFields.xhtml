@@ -16,21 +16,21 @@
     <c:forEach var="element" items="#{data}">
         <c:if test="#{not element.systemInternal}">
             <c:if test="#{element.group}">
-                <a4j:outputPanel>
+                <a4j:outputPanel id="#{_ceContent.idGenerator[element]}" layout="block">
                     <!-- register group -->
                     <script type="text/javascript">
                         <!--
-                            flexive.contentEditor.registerGroupId("#{_ceContent.editorId}","#{_ceContent.idGenerator[element]}");
+                            flexive.contentEditor.registerGroupId("#{_ceContent.editorId}","GroupContent_#{_ceContent.idGenerator[element]}");
                         //-->
                     </script>
                     <div class="fxContentEditor_group" onmouseover='flexive.contentEditor.closeMenu(event,false)'>
-                        <div class="header" onclick="flexive.contentEditor.toggleGroup('#{_ceContent.editorId}','#{_ceContent.idGenerator[element]}');">
+                        <div class="header" onclick="flexive.contentEditor.toggleGroup('#{_ceContent.editorId}','GroupContent_#{_ceContent.idGenerator[element]}');">
                             <fx:fxCeRenderFieldsMenu element="#{element}" icon="group"/>
                             <div class="display" title="#{_ceContent.propertyHint[element]}">
                                 #{fxMapBean.assignments[element.assignmentId].displayName}
                             </div>
                         </div>
-                        <div id="#{_ceContent.idGenerator[element]}" class="fxContentEditor_group_content">
+                        <div id="GroupContent_#{_ceContent.idGenerator[element]}" class="fxContentEditor_group_content">
                             <fx:fxCeRenderFields data="#{element.children}" icon="group"/>
                         </div>
                         <div class="end">&nbsp;</div>
@@ -39,7 +39,7 @@
             </c:if>
 
             <c:if test="#{element.property}">
-                <a4j:outputPanel>
+                <a4j:outputPanel id="#{_ceContent.idGenerator[element]}" layout="block">
                     <div class="fxContentEditor_property">
                         <fx:fxCeRenderFieldsMenu element="#{element}" icon="property"/>
 

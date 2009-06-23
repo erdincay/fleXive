@@ -31,7 +31,7 @@ wrappedContent... value binding to wrapped content object provided by fxConentEd
             <f:setPropertyActionListener value="#{srcEditor.infoPanelState=='history'?'':'history'}" target="#{srcEditor.infoPanelState}"/>
             <span class="infoPanelButton">#{fxMessageBean['Content.field.history']}</span>
         </a4j:commandLink>
-        <a4j:commandLink reRender="infoPanel" eventsQueue="ceQueue" rendered="#{wrappedContent.mayImport}">
+        <a4j:commandLink reRender="infoPanel" eventsQueue="ceQueue" rendered="#{wrappedContent.mayImport and wrappedContent.guiSettings.editMode}">
             <f:setPropertyActionListener value="#{srcEditor.infoPanelState=='import'?'':'import'}" target="#{srcEditor.infoPanelState}"/>
             <span class="infoPanelButton">#{fxMessageBean['Content.field.import']}</span>
         </a4j:commandLink>

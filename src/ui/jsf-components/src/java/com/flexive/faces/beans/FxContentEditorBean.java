@@ -89,6 +89,8 @@ public class FxContentEditorBean implements Serializable {
     private String allOpened;
     // messages id
     public static final String MESSAGES_ID = "ceMessages";
+    // affected xpath for error messages
+    private String affectedXPath;
 
     public String getMessagesId() {
         return MESSAGES_ID;
@@ -220,32 +222,38 @@ public class FxContentEditorBean implements Serializable {
      * @return returns the new pk, or null on errors
      */
     public FxPK _save(boolean newVersion) throws FxApplicationException {
-        FxPK pk=null;
-        String formPrefix = "";
-        FxWrappedContent parent;
-        FxWrappedContent oldContent = contentStorage.get(editorId);
-        formPrefix = oldContent.getGuiSettings().getFormPrefix();
-        String msg = oldContent.getContent().getPk().isNew() ? "ContentEditor.nfo.created" : "ContentEditor.nfo.updated";
-        //Store the content
-        ContentEngine co = EJBLookup.getContentEngine();
-        co.prepareSave(oldContent.getContent());
-        pk = newVersion ? co.createNewVersion(oldContent.getContent()) : co.save(oldContent.getContent());
-        new FxFacesMsgInfo(msg, pk.getId()).addToContext(formPrefix + ":" + editorId + "_" + MESSAGES_ID);
-        parent = getParentContent(editorId);
-        //if content is not referenced put modified content into storage
-        if (parent == null) {
-            contentStorage.put(editorId, new FxWrappedContent(co.load(pk), editorId, oldContent.getGuiSettings(), false));
+        try {
+            FxPK pk=null;
+            String formPrefix = "";
+            FxWrappedContent parent;
+            FxWrappedContent oldContent = contentStorage.get(editorId);
+            formPrefix = oldContent.getGuiSettings().getFormPrefix();
+            String msg = oldContent.getContent().getPk().isNew() ? "ContentEditor.nfo.created" : "ContentEditor.nfo.updated";
+            //Store the content
+            ContentEngine co = EJBLookup.getContentEngine();
+            co.prepareSave(oldContent.getContent());
+            pk = newVersion ? co.createNewVersion(oldContent.getContent()) : co.save(oldContent.getContent());
+            new FxFacesMsgInfo(msg, pk.getId()).addToContext(formPrefix + ":" + editorId + "_" + MESSAGES_ID);
+            parent = getParentContent(editorId);
+            //if content is not referenced put modified content into storage
+            if (parent == null) {
+                contentStorage.put(editorId, new FxWrappedContent(co.load(pk), editorId, oldContent.getGuiSettings(), false));
+            }
+            else {
+                // if content was referenced, update reference and remove from storage
+                FxPropertyData propData = parent.getContent().getPropertyData(parent.getIdGenerator().decode(parent.getGuiSettings().getOpenedReferenceId()));
+                propData.setValue(new FxReference(false, new ReferencedContent(pk)));
+                // remove from storage
+                contentStorage.remove(editorId);
+                // close reference
+                parent.getGuiSettings().setOpenedReferenceId(null);
+            }
+            return pk;
         }
-        else {
-            // if content was referenced, update reference and remove from storage
-            FxPropertyData propData = parent.getContent().getPropertyData(parent.getIdGenerator().decode(parent.getGuiSettings().getOpenedReferenceId()));
-            propData.setValue(new FxReference(false, new ReferencedContent(pk)));
-            // remove from storage
-            contentStorage.remove(editorId);
-            // close reference
-            parent.getGuiSettings().setOpenedReferenceId(null);
+        catch (FxApplicationException e) {
+            setAffectedXPath(e);
+            throw e;
         }
-        return pk;
     }
 
     /**
@@ -578,6 +586,11 @@ public class FxContentEditorBean implements Serializable {
             new FxFacesMsgErr(t).addToContext(formPrefix + ":" + editorId + "_" + MESSAGES_ID);
     }
 
+    private void setAffectedXPath(FxApplicationException e) {
+         if (!StringUtils.isEmpty(e.getAffectedXPath()))
+            this.affectedXPath = editorId+":"+FxJsfUtils.encodeJSFIdentifier(e.getAffectedXPath());
+    }
+
     /**
      * Returns the managed bean name, as must be set in faces-config.xml.
      *
@@ -642,5 +655,13 @@ public class FxContentEditorBean implements Serializable {
 
     public void setAllOpened(String allOpened) {
         this.allOpened = allOpened;
+    }
+
+    public String getAffectedXPath() {
+        return affectedXPath;
+    }
+
+    public void setAffectedXPath(String affectedXPath) {
+        this.affectedXPath = null;
     }
 }

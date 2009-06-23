@@ -643,6 +643,8 @@ public class BeContentEditorBean implements ActionBean, Serializable {
      */
 
     public String cancel() {
+        if ("import".equals(infoPanelState))
+            infoPanelState=null;
         boolean isReferenced = wrappedContent.isReferenced();
         ((FxContentEditorBean) FxJsfUtils.getManagedBean("fxContentEditorBean")).cancel();
         if (!isReferenced) {
