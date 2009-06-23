@@ -40,6 +40,8 @@ import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxHistory;
+import com.flexive.shared.configuration.SystemParameters;
+import static com.flexive.shared.configuration.SystemParameters.TREE_CAPTION_PROPERTY;
 import com.flexive.shared.content.*;
 import com.flexive.shared.exceptions.FxNoAccessException;
 import com.flexive.shared.security.ACL;
@@ -905,16 +907,17 @@ public class FxWrappedContent implements Serializable {
      * HashMap returning if this FxData's assignment remesmbles the possibly reused caption property.
      */
     private static class IsCaptionProperty extends HashMap<FxPropertyData, Boolean> {
-        private static List<FxAssignment> derivedAssignments;
-
-        private IsCaptionProperty() {
-            try {
-                derivedAssignments = CacheAdmin.getEnvironment().getDerivedAssignments(CacheAdmin.getEnvironment().getAssignment("ROOT/CAPTION").getId());
-            }
-            catch(Throwable t) {
-                derivedAssignments=new ArrayList<FxAssignment>(0);
-            }
-        }
+         private final static long captionId;
+         static {
+             long cId=-1;
+             try {
+                cId = EJBLookup.getConfigurationEngine().get(TREE_CAPTION_PROPERTY);
+             }
+             catch (Throwable t) {
+                 LOG.error("failed to look up caption assignment",t);
+             }
+             captionId=cId;
+         }
 
         /**
          * HashMap returning if this FxData's assignment remesmbles the possibly reused caption property.
@@ -924,13 +927,10 @@ public class FxWrappedContent implements Serializable {
          */
         public Boolean get(Object object) {
             try {
-                if (object instanceof FxData) {
-                    List<FxAssignment> derivedAssignments = CacheAdmin.getEnvironment().getDerivedAssignments(CacheAdmin.getEnvironment().getAssignment("ROOT/CAPTION").getId());
-                    long assId= ((FxData)object).getAssignmentId();
-                    for (FxAssignment b : derivedAssignments) {
-                        if (b.getId() == assId)
-                            return true;
-                    }
+                if (object instanceof FxPropertyData) {
+                    if(((FxPropertyAssignment)((FxPropertyData)object).getAssignment()).getProperty().getId() ==
+                           captionId)
+                        return true;
                 }
                 return false;
             } catch (Throwable t) {

@@ -48,7 +48,7 @@
                                      styleClass="fxContentEditor_insertAssignment"
                                      oncomplete="flexive.yui.load();"
                                      rendered="#{empty _ceContent.guiSettings.openedReferenceId}"
-                                     >
+                                     status="#{_ceContent.editorId}_status">
                         <f:setPropertyActionListener target="#{__ceBean.element}" value="#{element}"/>
                         <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
                         <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
@@ -73,6 +73,7 @@
                                  styleClass="fxContentEditor_moveUpIcon"
                                  oncomplete="flexive.yui.load();"
                                  rendered="#{empty _ceContent.guiSettings.openedReferenceId}"
+                                 status="#{_ceContent.editorId}_status"
                                  >
                     <f:setPropertyActionListener target="#{__ceBean.element}" value="#{element}"/>
                     <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
@@ -84,8 +85,9 @@
                                  onclick="if (!flexive.contentEditor.preA4jAction('#{_ceContent.guiSettings.formPrefix}','#{_ceContent.editorId}','#{element.XPathFull}','moveElementDown')) return false;flexive.contentEditor.ignoreEvent(event);"
                                  rendered="#{not _ceContent.guiSettings.disablePositionAssignment and empty _ceContent.guiSettings.openedReferenceId}"
                                  title="#{fxMessageBean['ContentEditor.button.down.title']}"
-                                 styleClass="fxContentEditor_moveDownIcon"
-                                 oncomplete="flexive.yui.load();">
+                                 styleClass="fxContentEditor_moveDownIcon" 
+                                 oncomplete="flexive.yui.load();"
+                                 status="#{_ceContent.editorId}_status">
                     <f:setPropertyActionListener target="#{__ceBean.element}" value="#{element}"/>
                     <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
                     <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
@@ -102,6 +104,7 @@
                                          title="#{fxMessageBean['ContentEditor.button.add.title']} #{fxMapBean.assignments[element.assignmentId].label}"
                                          styleClass="fxContentEditor_addIcon"
                                          oncomplete="flexive.yui.load();"
+                                         status="#{_ceContent.editorId}_status"
                                          >
                         <f:setPropertyActionListener target="#{__ceBean.element}" value="#{element}"/>
                         <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
@@ -123,7 +126,8 @@
                                      title="#{fxMessageBean['ContentEditor.button.remove.title']} #{fxMapBean.assignments[element.assignmentId].label}"
                                      styleClass="fxContentEditor_removeIcon"
                                      oncomplete="flexive.yui.load();"
-                                     rendered="#{empty _ceContent.guiSettings.openedReferenceId}">
+                                     rendered="#{empty _ceContent.guiSettings.openedReferenceId}"
+                                     status="#{_ceContent.editorId}_status">
                         <f:setPropertyActionListener target="#{__ceBean.element}" value="#{element}"/>
                         <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
                         <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>

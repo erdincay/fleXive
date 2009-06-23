@@ -843,7 +843,7 @@ flexiveResultList > table {
     position:absolute;
     background-color:#ebf5cc;
     border:1px dotted black;
-    display:none;z-index:998;
+    display:none;z-index:997;
     text-decoration:none;
     color:black;
     padding-top:10px;
@@ -965,4 +965,16 @@ flexiveResultList > table {
     left:-10px;
     display:block;
     padding-top:4px;
+}
+
+.fxContentEditor_statusStart {
+    position:fixed;
+    left:50%;
+    top:50%;
+    z-index:999;
+    background-image: url( weblet:url( "com.flexive.faces.weblets" , "/images/contentEditor/busy.gif"));
+    background-repeat:no-repeat;
+    border:0;
+    height:67px;
+    width:67px;
 }
