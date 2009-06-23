@@ -130,14 +130,10 @@ public class FlatStorageTest {
     }
 
     @AfterClass
-    public void tearDownStructures() throws Exception {
+    public void afterClass() throws FxLogoutFailedException, FxApplicationException {
         long typeId = CacheAdmin.getEnvironment().getType(TEST_TYPE).getId();
         co.removeForType(typeId);
         type.remove(typeId);
-    }
-
-    @AfterClass(dependsOnMethods = {"tearDownStructures"})
-    public void afterClass() throws FxLogoutFailedException, FxApplicationException {
         if (testsEnabled)
             dce.removeFlatStorage(TEST_STORAGE);
         logout();
