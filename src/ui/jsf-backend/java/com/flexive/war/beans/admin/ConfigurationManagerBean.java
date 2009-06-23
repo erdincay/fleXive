@@ -334,7 +334,7 @@ public class ConfigurationManagerBean {
     }
 
     /**
-     * creates a new value
+     * creates a new value and validiates the input
      */
     public void createNew() {
         Class<? extends Serializable> curClass = null;
@@ -343,6 +343,15 @@ public class ConfigurationManagerBean {
         // to show all errors at once
         boolean isNOT_OK = false;
         try {
+            currentPathStr = currentPathStr.trim();
+            if (!currentPathStr.startsWith("/")) {
+                new FxFacesMsgErr("SysParamConfig.err.bad.path.start").addToContext();
+                isNOT_OK = true;
+            }
+            if (currentPathStr.indexOf(' ') > 0) {
+                new FxFacesMsgErr("SysParamConfig.err.bad.path.space").addToContext();
+                isNOT_OK = true;
+            }
             curPath = new ParameterPathBean(currentPathStr, allScopes.get(selectedKey));
 
         } catch (Throwable e) {
@@ -350,7 +359,7 @@ public class ConfigurationManagerBean {
             new FxFacesMsgErr("SysParamConfig.err.unknown", currentPathStr).addToContext();
             isNOT_OK = true;
         }
-        new FxFacesMsgInfo("SysParamConfig.info.path", currentPathStr).addToContext();
+//        new FxFacesMsgInfo("SysParamConfig.info.path", currentPathStr).addToContext();
         if (newName.length() <= 0) {
             new FxFacesMsgErr("SysParamConfig.err.noName").addToContext();
             isNOT_OK = true;

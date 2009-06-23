@@ -228,6 +228,7 @@
     <a4j:outputPanel id="newPanel">
         <h:form id="newForm">
             <h:inputHidden value="#{configManager.selectedKey}"/>
+            <h:inputHidden value="#{configManager.showValues}"/>
             <table>
                 <tr>
                     <td nowrap="nowrap">#{fxMessageBean['SysParamConfig.path']}</td>
@@ -328,6 +329,7 @@
     <a4j:outputPanel id="editPanel">
         <h:form id="editForm">
             <h:inputHidden value="#{configManager.selectedKey}"/>
+            <h:inputHidden value="#{configManager.showValues}"/>
             <table>
                 <tr>
                     <td nowrap="nowrap">
@@ -400,6 +402,7 @@
     <a4j:outputPanel id="confirmPanel">
         <h:form id="confirmForm">
             <h:inputHidden value="#{configManager.selectedKey}"/>
+            <h:inputHidden value="#{configManager.showValues}"/>
             <table>
                 <tr>
                     <td style="color:red;">
