@@ -56,6 +56,7 @@ public class ParameterPathBean implements ParameterPath {
         return scope;
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -69,11 +70,21 @@ public class ParameterPathBean implements ParameterPath {
         return true;
     }
 
+    /** {@inheritDoc} */
     @Override
     public int hashCode() {
         int result = value.hashCode();
         result = 31 * result + scope.hashCode();
         return result;
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public String toString() {
+        return "ParameterPathBean{" +
+                "value='" + value + '\'' +
+                ", scope=" + scope +
+                '}';
     }
 }
 
