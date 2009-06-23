@@ -167,13 +167,17 @@
                                                              assignTo="#{selectListBean.currentPage}"/>
                                         </adm:ajaxCommandIcon>
                                         <!-- delete -->
-                                        <adm:commandIcon labelKey="SelectList.button.delete" location="content"
-                                                         icon="delete" bean="#{selectListBean}" action="deleteListItem"
+                                        <adm:ajaxCommandIcon titleKey="SelectList.button.delete"
+                                                         icon="delete" bean="#{selectListBean}" actionListener="deleteListItem"
                                                          id="deleteButton"
-                                                         rendered="#{selectListBean.mayDeleteItems}">
+                                                         rendered="#{selectListBean.mayDeleteItems}" reRender="itemTable">
                                             <f:setPropertyActionListener target="#{selectListBean.listItemId}"
                                                                          value="#{item.id}"/>
-                                        </adm:commandIcon>
+                                            <a4j:actionparam noEscape="true" name="rowsPerPage_" value="rowsPerPage"
+                                                             assignTo="#{selectListBean.rowsPerPage}"/>
+                                            <a4j:actionparam noEscape="true" name="currentPage_" value="currentPage"
+                                                             assignTo="#{selectListBean.currentPage}"/>
+                                        </adm:ajaxCommandIcon>
                                     </div>
                                 </td>
                             </tr>

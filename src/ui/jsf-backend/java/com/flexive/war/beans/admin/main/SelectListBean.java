@@ -561,7 +561,7 @@ public class SelectListBean implements Serializable {
         }
     }
 
-    public void deleteListItem() {
+    public void deleteListItem(ActionEvent event) {
         try {
             //check if the user has permission
             if (getMayDeleteItems()) {
@@ -570,7 +570,6 @@ public class SelectListBean implements Serializable {
                     throw new FxEntryInUseException("ex.selectlist.item.itemInUse", selectList.getItem(listItemId).getLabel());
 
                 selectList.removeItem(listItemId);
-                FxJsfUtils.resetFaceletsComponent("frm");
             } else
                 throw new FxNoAccessException("ex.selectlist.item.remove.noPerm", selectList.getLabel(), selectList.getCreateItemACL().getLabel());
         }
