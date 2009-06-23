@@ -49,6 +49,8 @@ import static com.google.common.collect.Lists.newArrayList;
 import java.io.Serializable;
 import java.util.*;
 
+import org.apache.commons.lang.ArrayUtils;
+
 /**
  * Bean providing access the the userGroup functionality.
  *
@@ -215,7 +217,7 @@ public class UserGroupBean implements Serializable {
 
             // Assign the given roles to the group
             try {
-                groupEngine.setRoles(this.id, FxArrayUtils.toPrimitiveLongArray(roles));
+                groupEngine.setRoles(this.id, ArrayUtils.toPrimitive(roles));
             } catch (Exception exc) {
                 new FxFacesMsgErr(exc).addToContext();
                 color = groupEngine.load(id).getColor();
@@ -284,7 +286,7 @@ public class UserGroupBean implements Serializable {
             groupEngine.update(id, name, color);
             // Update the role assignments
             try {
-                groupEngine.setRoles(this.id, FxArrayUtils.toPrimitiveLongArray(getRoles()));
+                groupEngine.setRoles(this.id, ArrayUtils.toPrimitive(getRoles()));
             } catch (Exception exc) {
                 new FxFacesMsgErr(exc).addToContext();
             }

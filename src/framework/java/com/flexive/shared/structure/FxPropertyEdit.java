@@ -140,7 +140,7 @@ public class FxPropertyEdit extends FxProperty {
      * Create a new FxPropertyEdit instance
      *
      * @param name                     (mandator wide unique) name of the property
-     * @param description              description
+     * @param label                    label
      * @param hint                     hint message
      * @param overrideBaseMultiplicity are assignments allowed to override this properties multiplicity?
      * @param multiplicity             multiplicity
@@ -154,11 +154,11 @@ public class FxPropertyEdit extends FxProperty {
      * @param options                  this properties options
      * @return FxPropertyEdit instance
      */
-    public static FxPropertyEdit createNew(String name, FxString description, FxString hint,
+    public static FxPropertyEdit createNew(String name, FxString label, FxString hint,
                                            boolean overrideBaseMultiplicity, FxMultiplicity multiplicity, boolean overrideACL,
                                            ACL acl, FxDataType dataType, FxString defaultValue, boolean fulltextIndexed,
                                            FxType referencedType, FxSelectList referencedList, List<FxStructureOption> options) {
-        return new FxPropertyEdit(name, description, hint, overrideBaseMultiplicity, multiplicity, overrideACL, acl,
+        return new FxPropertyEdit(name, label, hint, overrideBaseMultiplicity, multiplicity, overrideACL, acl,
                 dataType, defaultValue, fulltextIndexed, referencedType, referencedList, options);
     }
 

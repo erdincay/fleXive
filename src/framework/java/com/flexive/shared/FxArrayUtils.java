@@ -285,11 +285,65 @@ public class FxArrayUtils {
         return -1;
     }
 
-    public static long[] toPrimitiveLongArray(Long[] array) {
-        long[] res = new long[array.length];
-        for(int i=0;i<array.length;i++)
-            res[i] = array[i];
-        return res;
+    /**
+     * Convert an object array to a string array with the given separator
+     *
+     * @param elements  elements to convert to a String
+     * @param separator separator for the resulting String
+     * @return String representation of the array
+     */
+    public static String toStringArray(Object[] elements, String separator) {
+        StringBuilder sb = new StringBuilder((elements.length + separator.length()) * 20);
+        for (Object element : elements) {
+            sb.append(String.valueOf(element));
+            sb.append(separator);
+        }
+        return sb.substring(0, sb.length() - separator.length());
+    }
+
+    /**
+     * Replace an array element
+     *
+     * @param array     array containing elements
+     * @param separator separator
+     * @param index     index of the element to replace
+     * @param newValue  replacement value
+     * @return array with the replaced value
+     */
+    public static String replaceElement(String array, char separator, int index, String newValue) {
+        StringBuilder sb = new StringBuilder(array.length()+newValue.length());
+        int cur = 0;
+        boolean inrep = false;
+        for(char c: array.toCharArray()) {
+            if(cur == index && !inrep) {
+                sb.append(newValue);
+                sb.append(separator);
+                inrep = true;
+            }
+            if( c == separator ) {
+                cur++;
+                inrep = false;
+            }
+            if(inrep)
+                continue;
+            sb.append(c);
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Create an empty array string containing only separators
+     *
+     * @param length    desired length
+     * @param separator separator to use
+     * @return String containing <code>length</code> separators
+     */
+    public static String createEmptyStringArray(int length, String separator) {
+        StringBuilder sb = new StringBuilder(separator.length() * length);
+        for (int i = 0; i < length; i++) {
+            sb.append(separator);
+        }
+        return sb.toString();
     }
 }
 

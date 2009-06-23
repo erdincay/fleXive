@@ -34,6 +34,7 @@ package com.flexive.ejb.beans.structure;
 import com.flexive.core.Database;
 import static com.flexive.core.DatabaseConst.*;
 import com.flexive.core.LifeCycleInfoImpl;
+import com.flexive.core.flatstorage.FxFlatStorageManager;
 import com.flexive.core.conversion.ConversionEngine;
 import com.flexive.core.structure.FxPreloadType;
 import com.flexive.core.structure.StructureLoader;
@@ -809,6 +810,9 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
                 ps.executeUpdate();
                 ps.close();
             }
+
+            //remove all flatstore assignments for this type
+            FxFlatStorageManager.getInstance().removeTypeMappings(con, type.getId());
 
             //remove the assignments
             sql.setLength(0);

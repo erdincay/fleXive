@@ -2094,6 +2094,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                         psML.addBatch();
                     }
                     if (ml instanceof FxPropertyAssignment) {
+                        FxFlatStorageManager.getInstance().removeAssignmentMappings(con, ml.getId());
                         psData.setLong(1, ml.getId());
                         psData.addBatch();
                         psDataFT.setLong(1, ml.getId());
@@ -2437,5 +2438,27 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public Map<String, List<FxPropertyAssignment>> getPotentialFlatAssignments(FxType type) {
         return FxFlatStorageManager.getInstance().getPotentialFlatAssignments(type);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void flattenAssignment(String storage, FxPropertyAssignment assignment) throws FxApplicationException {
+        FxFlatStorageManager.getInstance().flatten(storage, assignment);
+        try {
+            StructureLoader.reload(null);
+        } catch (FxCacheException e) {
+            ctx.setRollbackOnly();
+            throw new FxUpdateException(e, "ex.cache", e.getMessage());
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void unflattenAssignment(FxPropertyAssignment assignment) throws FxApplicationException {
+        FxFlatStorageManager.getInstance().unflatten(assignment);
     }
 }

@@ -299,25 +299,6 @@ public class ContentEngineTest {
     }
 
     @Test
-    public void flatAnalyze() throws Exception {
-        if (!EJBLookup.getDivisionConfigurationEngine().isFlatStorageEnabled()) {
-            System.out.println("Flat storage is not enabled - skipping flat storage analyze test!");
-            return;
-        }
-        Map<String, List<FxPropertyAssignment>> pot = ass.getPotentialFlatAssignments(CacheAdmin.getEnvironment().getType(TEST_TYPE));
-        Assert.assertEquals(pot.size(), 5, "Expected 5 flat mappings");
-        Assert.assertEquals(pot.get("STRING").size(), 3);
-        Assert.assertEquals(pot.get("TEXT").size(), 0);
-        Assert.assertEquals(pot.get("BIGINT").size(), 0);
-        Assert.assertEquals(pot.get("DOUBLE").size(), 0);
-        Assert.assertEquals(pot.get("SELECT").size(), 0);
-        //2 should be boosted since its required
-        Assert.assertEquals(pot.get("STRING").get(0), CacheAdmin.getEnvironment().getAssignment(TEST_TYPE+"/TESTPROPERTY2"));
-        Assert.assertEquals(pot.get("STRING").get(1), CacheAdmin.getEnvironment().getAssignment(TEST_TYPE+"/TESTPROPERTY1"));
-        Assert.assertEquals(pot.get("STRING").get(2), CacheAdmin.getEnvironment().getAssignment(TEST_TYPE+"/TESTPROPERTY5"));
-    }
-
-    @Test
     public void removeAddData() throws Exception {
         FxType testType = CacheAdmin.getEnvironment().getType(TEST_TYPE);
         Assert.assertTrue(testType != null);

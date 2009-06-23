@@ -250,4 +250,21 @@ public interface AssignmentEngine {
      * @return List containing potential property assignments that would be suitable for storage in a flat storage, key=Storage type/column
      */
     public Map<String, List<FxPropertyAssignment>> getPotentialFlatAssignments(FxType type);
+
+    /**
+     * Flatten an assignment
+     *
+     * @param storage the storage to use
+     * @param assignment the property assignment to flatten
+     * @throws FxApplicationException on errors
+     */
+    public void flattenAssignment(String storage, FxPropertyAssignment assignment) throws FxApplicationException;
+    
+    /**
+     * Unflatten an assignment
+     *
+     * @param assignment the property assignment to unflatten
+     * @throws FxApplicationException on errors
+     */
+    public void unflattenAssignment(FxPropertyAssignment assignment) throws FxApplicationException;
 }

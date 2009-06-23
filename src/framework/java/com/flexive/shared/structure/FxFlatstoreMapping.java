@@ -10,7 +10,7 @@ import java.io.Serializable;
 public class FxFlatstoreMapping implements Serializable {
     private static final long serialVersionUID = -4876287678910187513L;
     private long assignmentId;
-    private String table;
+    private String storage;
     private String column;
     private int level;
 
@@ -18,13 +18,13 @@ public class FxFlatstoreMapping implements Serializable {
      * Ctor
      *
      * @param assignmentId id of the assignment
-     * @param table        table name
+     * @param storage      storage name
      * @param column       column name
      * @param level        nesting level
      */
-    public FxFlatstoreMapping(long assignmentId, String table, String column, int level) {
+    public FxFlatstoreMapping(long assignmentId, String storage, String column, int level) {
         this.assignmentId = assignmentId;
-        this.table = table;
+        this.storage = storage;
         this.column = column;
         this.level = level;
     }
@@ -39,12 +39,12 @@ public class FxFlatstoreMapping implements Serializable {
     }
 
     /**
-     * Get the table name
+     * Get the storage name
      *
-     * @return table name
+     * @return storage name
      */
-    public String getTable() {
-        return table;
+    public String getStorage() {
+        return storage;
     }
 
     /**

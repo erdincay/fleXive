@@ -76,13 +76,13 @@ public class FxGroupEdit extends FxGroup {
      * Constructor
      *
      * @param name                     group name
-     * @param description              description
+     * @param label                    label
      * @param hint                     hint message
      * @param overrideBaseMultiplicity allow base multiplicity override?
      * @param multiplicity             multiplicity
      */
-    private FxGroupEdit(String name, FxString description, FxString hint, boolean overrideBaseMultiplicity, FxMultiplicity multiplicity) {
-        super(-1, name, description, hint, overrideBaseMultiplicity, multiplicity, FxStructureOption.getEmptyOptionList(2));
+    private FxGroupEdit(String name, FxString label, FxString hint, boolean overrideBaseMultiplicity, FxMultiplicity multiplicity) {
+        super(-1, name, label, hint, overrideBaseMultiplicity, multiplicity, FxStructureOption.getEmptyOptionList(2));
         setName(name);
         isNew = true;
     }
@@ -91,14 +91,14 @@ public class FxGroupEdit extends FxGroup {
      * Create a new FxGroupEdit instance
      *
      * @param name                     group name
-     * @param description              description
+     * @param label                    label
      * @param hint                     hint message
      * @param overrideBaseMultiplicity allow base multiplicity override?
      * @param multiplicity             multiplicity
      * @return FxGroupEdit
      */
-    public static FxGroupEdit createNew(String name, FxString description, FxString hint, boolean overrideBaseMultiplicity, FxMultiplicity multiplicity) {
-        return new FxGroupEdit(name, description, hint, overrideBaseMultiplicity, multiplicity).setName(name);
+    public static FxGroupEdit createNew(String name, FxString label, FxString hint, boolean overrideBaseMultiplicity, FxMultiplicity multiplicity) {
+        return new FxGroupEdit(name, label, hint, overrideBaseMultiplicity, multiplicity).setName(name);
     }
 
     /**

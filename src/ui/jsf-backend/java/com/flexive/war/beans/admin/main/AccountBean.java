@@ -612,7 +612,7 @@ public class AccountBean implements Serializable {
             new FxFacesMsgInfo("User.nfo.saved").addToContext();
             // Assign the given groups to the account
             try {
-                accountInterface.setGroups(this.accountIdFilter, FxArrayUtils.toPrimitiveLongArray(this.groups));
+                accountInterface.setGroups(this.accountIdFilter, ArrayUtils.toPrimitive(this.groups));
             } catch (Exception exc) {
                 new FxFacesMsgErr(exc).addToContext();
             }
@@ -678,7 +678,7 @@ public class AccountBean implements Serializable {
 
         // Assign the given groups to the account
         try {
-            accountInterface.setGroups(this.accountIdFilter,  FxArrayUtils.toPrimitiveLongArray(this.groups));
+            accountInterface.setGroups(this.accountIdFilter,  ArrayUtils.toPrimitive(this.groups));
         } catch (Exception exc) {
             new FxFacesMsgErr(exc).addToContext();
         }
