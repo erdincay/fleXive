@@ -343,11 +343,15 @@ public class PropertyEntry {
             this.property = environment.getProperty(searchProperty.getPropertyName());
         }
         this.readColumns = getReadColumns(storage, property);
-        String fcol = ignoreCase ? storage.getQueryUppercaseColumn(this.property) : this.readColumns[0];
-        if (fcol == null) {
-            fcol = this.readColumns == null ? null : this.readColumns[0];
+        if (this.assignment != null && this.assignment.isFlatstoreEntry()) {
+            this.filterColumn = assignment.getFlatstoreMapping().getColumn();
+        } else {
+            String fcol = ignoreCase ? storage.getQueryUppercaseColumn(this.property) : this.readColumns[0];
+            if (fcol == null) {
+                fcol = this.readColumns == null ? null : this.readColumns[0];
+            }
+            this.filterColumn = fcol;
         }
-        this.filterColumn = fcol;
 
         if (this.filterColumn == null) {
             throw new FxSqlSearchException(LOG, "ex.sqlSearch.init.propertyDoesNotHaveColumnMapping",
@@ -399,7 +403,7 @@ public class PropertyEntry {
         this.multilanguage = multilanguage;
         this.overrideDataType = overrideDataType;
         this.property = property;
-        this.tableName = tbl != null ? tbl.getTableName() : null;
+        this.tableName = tbl != null && tbl != PropertyResolver.Table.T_CONTENT_DATA_FLAT ? tbl.getTableName() : null;
     }
 
     public static String[] getReadColumns(ContentStorage storage, FxProperty property) {

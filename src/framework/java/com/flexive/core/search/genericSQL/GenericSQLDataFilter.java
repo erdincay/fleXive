@@ -36,6 +36,7 @@ import com.flexive.core.DatabaseConst;
 import com.flexive.core.search.DataFilter;
 import com.flexive.core.search.PropertyEntry;
 import com.flexive.core.search.SqlSearch;
+import com.flexive.core.search.PropertyResolver;
 import com.flexive.core.storage.FxTreeNodeInfo;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.core.storage.genericSQL.GenericTreeStorage;
@@ -529,7 +530,7 @@ public class GenericSQLDataFilter extends DataFilter {
             throw new FxSqlSearchException("ex.sqlSearch.filter.condition.structure", prop.getPropertyName());
         }
 
-        if (entry.getTableName().equals(DatabaseConst.TBL_CONTENT_DATA) &&
+        if (entry.getTableType() == PropertyResolver.Table.T_CONTENT_DATA &&
                 cond.getComperator() == Condition.Comparator.IS &&
                 cond.getConstant().isNull()) {
             // IS NULL is a special case for the content data table:
@@ -597,6 +598,7 @@ public class GenericSQLDataFilter extends DataFilter {
                 return " (SELECT DISTINCT cd.id, cd.ver, cd.lang " +
                         "FROM " + mapping.getStorage() + " cd " +
                         "WHERE " +
+                        "lvl=" + mapping.getLevel() + " AND " +
                         mapping.getColumn() + cond.getSqlComperator() + value +
                         getVersionFilter("cd") +
                         getLanguageFilter() +
