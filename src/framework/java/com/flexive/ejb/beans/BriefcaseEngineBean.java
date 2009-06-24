@@ -32,14 +32,22 @@
 package com.flexive.ejb.beans;
 
 import com.flexive.core.Database;
+import static com.flexive.core.Database.closeObjects;
 import com.flexive.core.DatabaseConst;
+import static com.flexive.core.DatabaseConst.TBL_BRIEFCASE_DATA;
 import com.flexive.core.LifeCycleInfoImpl;
 import com.flexive.shared.FxContext;
+import com.flexive.shared.FxReferenceMetaData;
 import com.flexive.shared.FxSystemSequencer;
+import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.*;
-import com.flexive.shared.interfaces.*;
+import com.flexive.shared.interfaces.ACLEngineLocal;
+import com.flexive.shared.interfaces.BriefcaseEngine;
+import com.flexive.shared.interfaces.BriefcaseEngineLocal;
+import com.flexive.shared.interfaces.SequencerEngineLocal;
 import com.flexive.shared.search.Briefcase;
 import com.flexive.shared.security.*;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -48,10 +56,7 @@ import org.apache.commons.logging.LogFactory;
 import javax.annotation.Resource;
 import javax.ejb.*;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Bean handling Briefcases.
@@ -60,13 +65,15 @@ import java.util.Set;
  * or the API provided by this beans.
  *
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+ * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 @Stateless(name = "BriefcaseEngine", mappedName="BriefcaseEngine")
 @TransactionAttribute(TransactionAttributeType.REQUIRED)
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLocal {
-
     private static final Log LOG = LogFactory.getLog(BriefcaseEngineBean.class);
+    private static final int MAX_METADATA_LENGTH = 4096;
+
     @Resource
     javax.ejb.SessionContext ctx;
     @EJB
@@ -149,7 +156,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
                 throw new FxCreateException(LOG, exc, "ex.briefcase.createFailed");
             }
         } finally {
-            Database.closeObjects(BriefcaseEngineBean.class, con, ps);
+            closeObjects(BriefcaseEngineBean.class, con, ps);
         }
     }
 
@@ -202,7 +209,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
             ctx.setRollbackOnly();
             throw new FxLoadException(LOG, exc, "ex.briefcase.modifyFailed", br.getName());
         } finally {
-            Database.closeObjects(BriefcaseEngineBean.class, con, ps);
+            closeObjects(BriefcaseEngineBean.class, con, ps);
         }
     }
 
@@ -239,13 +246,13 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
             // Obtain a database connection
             con = Database.getDbConnection();
             stmt = con.createStatement();
-            stmt.addBatch("delete from " + DatabaseConst.TBL_BRIEFCASE_DATA + " where briefcase_id=" + id);
+            stmt.addBatch("delete from " + TBL_BRIEFCASE_DATA + " where briefcase_id=" + id);
             stmt.addBatch("delete from " + DatabaseConst.TBL_BRIEFCASE + " where id=" + id);
             stmt.executeBatch();
         } catch (SQLException exc) {
             throw new FxLoadException(LOG, exc, "ex.briefcase.deleteFailed", br.getName());
         } finally {
-            Database.closeObjects(BriefcaseEngineBean.class, con, stmt);
+            closeObjects(BriefcaseEngineBean.class, con, stmt);
         }
     }
 
@@ -281,14 +288,14 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
         checkEditBriefcase(br);
         try {
             con = Database.getDbConnection();
-            stmt = con.prepareStatement("DELETE FROM " + DatabaseConst.TBL_BRIEFCASE_DATA + " WHERE briefcase_id=?");
+            stmt = con.prepareStatement("DELETE FROM " + TBL_BRIEFCASE_DATA + " WHERE briefcase_id=?");
             stmt.setLong(1, id);
             stmt.executeUpdate();
         } catch (Exception e) {
             ctx.setRollbackOnly();
             throw new FxUpdateException(LOG, e, "ex.briefcase.clear", br.getName(), e);
         } finally {
-            Database.closeObjects(BriefcaseEngineBean.class, con, stmt);
+            closeObjects(BriefcaseEngineBean.class, con, stmt);
         }
     }
 
@@ -296,7 +303,16 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    @Deprecated
     public void addItems(long id, long[] objectIds) throws FxApplicationException {
+        addItems(id, toPKList(objectIds));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void addItems(long id, Collection<FxPK> contents) throws FxApplicationException {
         Connection con = null;
         PreparedStatement stmt = null;
         final Briefcase br = load(id);
@@ -311,20 +327,20 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
                 existingItems.add(item);
             }
 
-            stmt = con.prepareStatement("SELECT MAX(pos) FROM " + DatabaseConst.TBL_BRIEFCASE_DATA + " WHERE briefcase_id=?");
+            stmt = con.prepareStatement("SELECT MAX(pos) FROM " + TBL_BRIEFCASE_DATA + " WHERE briefcase_id=?");
             stmt.setLong(1, id);
             final ResultSet rs = stmt.executeQuery();
             int pos = rs.next() ? rs.getInt(1) : 0;
             stmt.close();
-            stmt = con.prepareStatement("INSERT INTO " + DatabaseConst.TBL_BRIEFCASE_DATA
+            stmt = con.prepareStatement("INSERT INTO " + TBL_BRIEFCASE_DATA
                     + "(briefcase_id, id, pos, amount) VALUES (?, ?, ?, 1)");
             stmt.setLong(1, id);
-            for (long objectId : objectIds) {
-                if (!existingItems.contains(objectId)) {
-                    stmt.setLong(2, objectId);
+            for (FxPK pk : contents) {
+                if (!existingItems.contains(pk.getId())) {
+                    stmt.setLong(2, pk.getId());
                     stmt.setLong(3, ++pos);
                     stmt.addBatch();
-                    existingItems.add(objectId);
+                    existingItems.add(pk.getId());
                 }
             }
             stmt.executeBatch();
@@ -332,7 +348,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
             ctx.setRollbackOnly();
             throw new FxUpdateException(LOG, e, "ex.briefcase.addItems", br.getName(), e);
         } finally {
-            Database.closeObjects(BriefcaseEngineBean.class, con, stmt);
+            closeObjects(BriefcaseEngineBean.class, con, stmt);
         }
     }
 
@@ -340,8 +356,17 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    @Deprecated
     public void removeItems(long id, long[] objectIds) throws FxApplicationException {
-        if (objectIds == null || objectIds.length == 0) {
+        removeItems(id, toPKList(objectIds));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void removeItems(long id, Collection<FxPK> contents) throws FxApplicationException {
+        if (contents == null || contents.isEmpty()) {
             return;
         }
         Connection con = null;
@@ -350,15 +375,15 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
         checkEditBriefcase(br);
         try {
             con = Database.getDbConnection();
-            stmt = con.prepareStatement("DELETE FROM " + DatabaseConst.TBL_BRIEFCASE_DATA + " WHERE briefcase_id=?" +
-                    " AND id IN (" + StringUtils.join(ArrayUtils.toObject(objectIds), ',') + ")");
+            stmt = con.prepareStatement("DELETE FROM " + TBL_BRIEFCASE_DATA + " WHERE briefcase_id=?" +
+                    " AND id IN (" + StringUtils.join(FxPK.getIds(contents), ',') + ")");
             stmt.setLong(1, id);
             stmt.executeUpdate();
         } catch (Exception e) {
             ctx.setRollbackOnly();
             throw new FxUpdateException(LOG, e, "ex.briefcase.removeItems", br.getName(), e);
         } finally {
-            Database.closeObjects(BriefcaseEngineBean.class, con, stmt);
+            closeObjects(BriefcaseEngineBean.class, con, stmt);
         }
     }
 
@@ -366,16 +391,34 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    @Deprecated
     public void updateItems(long id, long[] addObjectIds, long[] removeObjectIds) throws FxApplicationException {
-        removeItems(id, removeObjectIds);
-        addItems(id, addObjectIds);
+        updateItems(id, toPKList(addObjectIds), toPKList(removeObjectIds));
     }
 
     /**
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void updateItems(long id, Collection<FxPK> addContents, Collection<FxPK> removeContents) throws FxApplicationException {
+        removeItems(id, removeContents);
+        addItems(id, addContents);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    @Deprecated
     public void setItems(long id, long[] objectIds) throws FxApplicationException {
+        setItems(id, toPKList(objectIds));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void setItems(long id, Collection<FxPK> objectIds) throws FxApplicationException {
         clear(id);
         addItems(id, objectIds);
     }
@@ -384,7 +427,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void moveItems(long fromId, long toId, long[] objectIds) throws FxApplicationException {
+    public void moveItems(long fromId, long toId, Collection<FxPK> objectIds) throws FxApplicationException {
         removeItems(fromId, objectIds);
         addItems(toId, objectIds);
     }
@@ -399,7 +442,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
         final Briefcase br = load(id);
         try {
             con = Database.getDbConnection();
-            stmt = con.prepareStatement("SELECT id FROM " + DatabaseConst.TBL_BRIEFCASE_DATA + " WHERE briefcase_id=?");
+            stmt = con.prepareStatement("SELECT id FROM " + TBL_BRIEFCASE_DATA + " WHERE briefcase_id=?");
             stmt.setLong(1, id);
             final ResultSet rs = stmt.executeQuery();
             final List<Long> result = new ArrayList<Long>();
@@ -411,7 +454,140 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
             ctx.setRollbackOnly();
             throw new FxUpdateException(LOG, e, "ex.briefcase.getItems", br.getName(), e);
         } finally {
-            Database.closeObjects(BriefcaseEngineBean.class, con, stmt);
+            closeObjects(BriefcaseEngineBean.class, con, stmt);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void replaceMetaData(long id, Collection<FxReferenceMetaData<FxPK>> metadata) throws FxApplicationException {
+        checkEditBriefcase(load(id));
+        Connection con = null;
+        
+        try {
+            con = Database.getDbConnection();
+            replaceMetaData(con, id, metadata);
+        } catch (SQLException e) {
+            ctx.setRollbackOnly();
+            throw new FxUpdateException(LOG, e);
+        } finally {
+            closeObjects(BriefcaseEngineBean.class, con, null);
+        }
+    }
+
+    private void replaceMetaData(Connection con, long id, Collection<FxReferenceMetaData<FxPK>> metadata) throws FxUpdateException {
+        PreparedStatement stmt = null;
+        boolean success = false;
+        try {
+            stmt = con.prepareStatement("UPDATE " + TBL_BRIEFCASE_DATA + " SET metadata=? WHERE briefcase_id=? AND id=?");
+            stmt.setLong(2, id);
+
+            for (FxReferenceMetaData<FxPK> metaData : metadata) {
+                final String meta = metaData.getSerializedForm();
+                if (meta.length() > MAX_METADATA_LENGTH) {
+                    throw new FxUpdateException("ex.briefcase.metadata.size", MAX_METADATA_LENGTH);
+                }
+                stmt.setString(1, meta);
+                stmt.setLong(3, metaData.getReference().getId());
+                stmt.addBatch();
+            }
+
+            stmt.executeBatch();
+            success = true;
+        } catch (SQLException e) {
+            throw new FxUpdateException(LOG, e);
+        } finally {
+            if (!success) {
+                ctx.setRollbackOnly();
+            }
+            closeObjects(BriefcaseEngineBean.class, null, stmt);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void mergeMetaData(long id, Collection<FxReferenceMetaData<FxPK>> metaData) throws FxApplicationException {
+        checkEditBriefcase(load(id));
+        PreparedStatement stmt = null;
+        Connection con = null;
+        boolean success = false;
+        try {
+            con = Database.getDbConnection();
+
+            // merge changes into existing metadata
+            final List<FxReferenceMetaData<FxPK>> currentMeta = loadMetaData(con, id, true);
+            for (FxReferenceMetaData<FxPK> update : metaData) {
+                if (update.getReference() == null) {
+                    throw new FxUpdateException(LOG, "ex.briefcase.metadata.update.reference");
+                }
+                // find existing metadata to apply changes to
+                final FxReferenceMetaData<FxPK> oldMeta = FxReferenceMetaData.findByContent(currentMeta, update.getReference());
+                if (oldMeta == null) {
+                    if (LOG.isInfoEnabled()) {
+                        LOG.info("No matching row found for briefcase item " + update.getReference() + ", ignoring.");
+                    }
+                } else {
+                    // merge changes
+                    oldMeta.merge(update);
+                }
+            }
+
+            // write back changes
+            replaceMetaData(con, id, currentMeta);
+
+            success = true;
+        } catch (SQLException e) {
+            throw new FxUpdateException(LOG, e);
+        } finally {
+            if (!success) {
+                ctx.setRollbackOnly();
+            }
+            closeObjects(BriefcaseEngineBean.class, con, stmt);
+        }
+
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public List<FxReferenceMetaData<FxPK>> loadMetaData(long id) throws FxApplicationException {
+        load(id);   // check read permissions
+        Connection con = null;
+
+        try {
+            con = Database.getDbConnection();
+            return loadMetaData(con, id, false);
+        } catch (SQLException e) {
+            throw new FxLoadException(LOG, e);
+        } finally {
+            Database.closeObjects(BriefcaseEngineBean.class, con, null);
+        }
+    }
+
+    private List<FxReferenceMetaData<FxPK>> loadMetaData(Connection con, long id, boolean forUpdate) throws FxApplicationException {
+        PreparedStatement stmt = null;
+        try {
+            final List<FxReferenceMetaData<FxPK>> result = Lists.newArrayList();
+            stmt = con.prepareStatement("SELECT id, metadata FROM " + TBL_BRIEFCASE_DATA
+                    + " WHERE briefcase_id=?"
+                    + (forUpdate ? " FOR UPDATE" : ""));
+            stmt.setLong(1, id);
+            final ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                result.add(
+                        FxReferenceMetaData.fromSerializedForm(new FxPK(rs.getLong(1)), rs.getString(2))
+                );
+            }
+            return result;
+        } catch (SQLException e) {
+            throw new FxApplicationException(LOG, e);
+        } finally {
+            Database.closeObjects(BriefcaseEngineBean.class, null, stmt);
         }
     }
 
@@ -479,7 +655,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
                     //1,   2,  3        ,  4         , 5 ,    6        7         8              9      ,  10    , 11
                     "ID,NAME,DESCRIPTION,SOURCE_QUERY,ACL,CREATED_BY,CREATED_AT,MODIFIED_BY,MODIFIED_AT,MANDATOR,ICON_ID, " +
                     // 12
-                    "(SELECT COUNT(*) FROM " + DatabaseConst.TBL_BRIEFCASE_DATA + " bd WHERE bd.briefcase_id=b.id) AS size " +
+                    "(SELECT COUNT(*) FROM " + TBL_BRIEFCASE_DATA + " bd WHERE bd.briefcase_id=b.id) AS size " +
                     "from " + DatabaseConst.TBL_BRIEFCASE + " b where ";
             sql += getSqlAccessFilter(null, includeShared, ACLPermission.READ);
             if (idFilter != null) {
@@ -508,8 +684,15 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
         } catch (SQLException exc) {
             throw new FxLoadException(LOG, exc, "ex.briefcase.failedToLoadList", exc.getMessage());
         } finally {
-            Database.closeObjects(BriefcaseEngineBean.class, con, stmt);
+            closeObjects(BriefcaseEngineBean.class, con, stmt);
         }
     }
 
+    private List<FxPK> toPKList(long[] objectIds) {
+        final List<FxPK> result = new ArrayList<FxPK>(objectIds.length);
+        for (long id : objectIds) {
+            result.add(new FxPK(id));
+        }
+        return result;
+    }
 }

@@ -186,8 +186,28 @@ WHERE #ARTICLE/TITLE LIKE 'Earthquake%']]></programlisting>
                 <programlisting language="sql"><![CDATA[SELECT @pk, @permissions]]></programlisting>
 
                 The column returns instances of
-                <link xlink:href="http://www.flexive.org/docs/javadoc/shared/com/flexive/shared/security/PermissionSet.html">
+                <link xlink:href="&flexiveJavadocBase;shared/com/flexive/shared/security/PermissionSet.html">
                     <classname>com.flexive.shared.security.PermissionSet</classname>.
+                </link>
+            </para>
+        </section>
+
+        <section xml:id="css_metadata">
+            <title>Metadata</title>
+            <para>
+                When performing a search on a content collection that supports metadata such as
+                <link linkend="core_briefcases">briefcases</link>,
+                you can select the metadata of an item using the
+                <glossterm>virtual property</glossterm>
+                <code>@metadata</code>.
+
+                <programlisting language="sql"><![CDATA[SELECT @pk, @metadata FILTER briefcase=21]]></programlisting>
+
+                The
+                <code>@metadata</code>
+                column returns instances of type
+                <link xlink:href="&flexiveJavadocBase;shared/com/flexive/shared/FxReferenceMetaData.html">
+                    <classname>com.flexive.shared.FxReferenceMetaData&lt;FxPK></classname>.
                 </link>
             </para>
         </section>
@@ -595,7 +615,9 @@ ORDER BY 2]]></programlisting>
                         </term>
                         <listitem>
                             <para>
-                                Results have to be contained in the briefcases
+                                Perform search in one or more briefcases. When exactly one briefcase is specified,
+                                the metadata associated with the items can be selected with the column
+                                <code>@metadata</code>.
                             </para>
                         </listitem>
                     </varlistentry>

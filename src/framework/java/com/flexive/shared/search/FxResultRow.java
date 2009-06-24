@@ -36,10 +36,13 @@ import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.value.*;
 import com.flexive.shared.security.PermissionSet;
+import com.flexive.shared.FxReferenceMetaData;
+import com.flexive.shared.media.FxMetadata;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Date;
+import java.io.Serializable;
 
 /**
  * Provides a thin wrapper for a result row of a SQL search
@@ -48,7 +51,9 @@ import java.util.Date;
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-public class FxResultRow {
+public class FxResultRow implements Serializable {
+    private static final long serialVersionUID = 6933822124878364228L;
+
     private final FxResultSet resultSet;
     private final int index;
 
@@ -203,5 +208,20 @@ public class FxResultRow {
 
     public PermissionSet getPermissions(String columnName) {
         return getPermissions(getColumnIndex(columnName));
+    }
+
+    /**
+     * @since 3.1
+     */
+    @SuppressWarnings({"unchecked"})
+    public FxReferenceMetaData<FxPK> getMetaData(int column) {
+        return (FxReferenceMetaData<FxPK>) getValue(column);
+    }
+
+    /**
+     * @since 3.1
+     */
+    public FxReferenceMetaData<FxPK> getMetaData(String columnName) {
+        return getMetaData(getColumnIndex(columnName));
     }
 }

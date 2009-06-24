@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Arrays;
 
 public class SearchResultBean implements ActionBean, Serializable {
     private static final long serialVersionUID = -3167186971609121457L;
@@ -213,9 +214,14 @@ public class SearchResultBean implements ActionBean, Serializable {
                     getQueryBuilder().saveInBriefcase(briefcaseName, briefcaseDescription, briefcaseAclId);
                     new FxFacesMsgInfo("Briefcase.nfo.created", briefcaseName).addToContext();
                 }
-
+                final List<String> columns = new ArrayList<String>();
+                columns.addAll(Arrays.asList("@pk", "@permissions", "typedef"));
+                if (getBriefcaseId() != -1) {
+                    columns.add("@metadata");
+                }
+                columns.add("@*");
                 final FxResultSet result = getQueryBuilder()
-                        .select("@pk", "@permissions", "typedef", "@*")
+                        .select(columns)
                         .startRow(0)
                         .getResult();
                 if (getTypeId() != -1) {

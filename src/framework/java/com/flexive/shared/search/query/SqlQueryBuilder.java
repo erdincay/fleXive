@@ -437,6 +437,17 @@ public class SqlQueryBuilder implements Serializable {
     }
 
     /**
+     * Select one or more columns.
+     *
+     * @param columns   columns to be selected
+     * @return  this
+     * @since 3.1
+     */
+    public SqlQueryBuilder select(List<String> columns) {
+        return select(columns.toArray(new String[columns.size()]));
+    }
+
+    /**
      * Return only objects of the given briefcase.
      *
      * @param briefcaseId   the briefcase ID

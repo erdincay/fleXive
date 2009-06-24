@@ -37,10 +37,7 @@ import com.flexive.shared.exceptions.FxRuntimeException;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.exceptions.FxNoAccessException;
 import com.flexive.shared.value.*;
-import com.flexive.shared.FxLanguage;
-import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.Pair;
-import com.flexive.shared.FxFormatUtils;
+import com.flexive.shared.*;
 import com.flexive.shared.search.FxPaths;
 import com.flexive.shared.search.FxSQLFunction;
 import com.flexive.shared.content.FxPK;
@@ -114,7 +111,13 @@ public class PropertyEntry {
         /**
          * A property permission (@permissions) column.
          */
-        PERMISSIONS("@permissions");
+        PERMISSIONS("@permissions"),
+
+        /**
+         * Metadata of a briefcase item.
+         * @since 3.1
+         */
+        METADATA("@metadata");
 
         private final String propertyName;
 
@@ -160,6 +163,8 @@ public class PropertyEntry {
                     return new PathEntry();
                 case PERMISSIONS:
                     return new PermissionsEntry();
+                case METADATA:
+                    return new MetadataEntry();
                 case PROPERTY_REF:
                     throw new FxSqlSearchException(LOG, "ex.sqlSearch.entry.virtual").asRuntimeException();
                 default:
@@ -226,6 +231,30 @@ public class PropertyEntry {
         public Object getResultValue(ResultSet rs, long languageId, boolean xpathAvailable) throws FxSqlSearchException {
             try {
                 return rs.getLong(positionInResultSet);
+            } catch (SQLException e) {
+                throw new FxSqlSearchException(LOG, e);
+            }
+        }
+    }
+
+    private static class MetadataEntry extends PropertyEntry {
+        private MetadataEntry() {
+            super(Type.METADATA, PropertyResolver.Table.T_CONTENT,
+                    new String[] { "" },    // select one column (function will be inserted by DB adapter)
+                    null, false, FxDataType.String1024, null);
+        }
+
+        @Override
+        public Object getResultValue(ResultSet rs, long languageId, boolean xpathAvailable) throws FxSqlSearchException {
+            try {
+                final String column = rs.getString(positionInResultSet);
+                final int sep = column.indexOf(' ');    // separates ID and metadata
+                return FxReferenceMetaData.fromSerializedForm(
+                        // extract ID for column value
+                        new FxPK(Long.valueOf(column.substring(0, sep))),
+                        // extract metadata after the space
+                        column.substring(Math.min(column.length() - 1, sep + 1))
+                );
             } catch (SQLException e) {
                 throw new FxSqlSearchException(LOG, e);
             }

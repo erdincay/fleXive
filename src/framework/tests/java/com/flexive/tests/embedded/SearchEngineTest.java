@@ -33,6 +33,7 @@ package com.flexive.tests.embedded;
 
 import com.flexive.shared.*;
 import static com.flexive.shared.EJBLookup.*;
+import static com.flexive.shared.EJBLookup.getBriefcaseEngine;
 import static com.flexive.shared.FxLanguage.ENGLISH;
 import static com.flexive.shared.FxLanguage.GERMAN;
 import com.flexive.shared.content.FxContent;
@@ -197,20 +198,39 @@ public class SearchEngineTest {
     @Test
     public void briefcaseQueryTest() throws FxApplicationException {
         // create briefcase
-        final String selectFolders = new SqlQueryBuilder().type("FOLDER").getQuery();
+        final String selectFolders = new SqlQueryBuilder().select("@pk").type("FOLDER").getQuery();
         final FxSQLSearchParams params = new FxSQLSearchParams().saveResultInBriefcase("test briefcase", "description", (Long) null);
         final FxResultSet result = getSearchEngine().search(selectFolders, 0, Integer.MAX_VALUE, params);
         long bcId = result.getCreatedBriefcaseId();
         try {
-            assertTrue(result.getRowCount() > 0);
+            assertTrue(result.getRowCount() > 1);
             assertTrue(result.getCreatedBriefcaseId() != -1, "Briefcase should have been created, but no ID returned.");
 
+            // store some metadata
+            final FxReferenceMetaData<FxPK> meta1 = FxReferenceMetaData.createNew(result.getResultRow(0).getPk(1));
+            meta1.put("firstkey", "somevalue");
+            final FxReferenceMetaData<FxPK> meta2 = FxReferenceMetaData.createNew(result.getResultRow(1).getPk(1));
+            meta2.put("secondkey", "anothervalue");
+            getBriefcaseEngine().mergeMetaData(bcId, Arrays.asList(meta1, meta2));
+
+            final List<FxReferenceMetaData<FxPK>> dbMeta = getBriefcaseEngine().loadMetaData(bcId);
+            assertEquals(FxReferenceMetaData.findByContent(dbMeta, meta1.getReference()).get("firstkey"), "somevalue");
+            assertEquals(FxReferenceMetaData.findByContent(dbMeta, meta2.getReference()).get("secondkey"), "anothervalue");
+
             // select briefcase
-            final FxResultSet briefcase = new SqlQueryBuilder().filterBriefcase(result.getCreatedBriefcaseId()).getResult();
+            final FxResultSet briefcase = new SqlQueryBuilder()
+                    .select("@pk", "caption", "@metadata")
+                    .filterBriefcase(result.getCreatedBriefcaseId())
+                    .getResult();
             Assert.assertEquals(briefcase.getTotalRowCount(), result.getTotalRowCount(),
                     "Briefcase returned " + briefcase.getTotalRowCount() + " rows, but getResult returned " + result.getTotalRowCount() + " rows.");
+
+            // check metadata
+            final List<FxReferenceMetaData<FxPK>> meta = briefcase.collectColumn(3);
+            assertEquals(FxReferenceMetaData.findByContent(meta, meta1.getReference()).get("firstkey"), "somevalue");
+            assertEquals(FxReferenceMetaData.findByContent(meta, meta2.getReference()).get("secondkey"), "anothervalue");
         } finally {
-            EJBLookup.getBriefcaseEngine().remove(bcId);
+            getBriefcaseEngine().remove(bcId);
         }
     }
 
@@ -222,12 +242,12 @@ public class SearchEngineTest {
             final FxResultSet result = new SqlQueryBuilder().saveInBriefcase("SqlQueryBuilderTest").getResult();
             assertTrue(result.getRowCount() > 0);
             briefcaseId = result.getCreatedBriefcaseId();
-            final Briefcase briefcase = EJBLookup.getBriefcaseEngine().load(briefcaseId);
+            final Briefcase briefcase = getBriefcaseEngine().load(briefcaseId);
             Assert.assertEquals(briefcase.getSize(), result.getTotalRowCount(),
                     "Invalid briefcase size: " + briefcase.getSize() + ", expected: " + result.getTotalRowCount());
         } finally {
             if (briefcaseId != -1) {
-                EJBLookup.getBriefcaseEngine().remove(briefcaseId);
+                getBriefcaseEngine().remove(briefcaseId);
             }
         }
     }

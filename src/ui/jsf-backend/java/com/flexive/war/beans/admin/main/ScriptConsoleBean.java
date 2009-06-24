@@ -118,10 +118,10 @@ public class ScriptConsoleBean implements Serializable {
             long start = System.currentTimeMillis();
             try {
                 result = runScript(code, "console." + language, web);
-            } catch (Exception ex) {
+            } catch (Throwable t) {
                 final StringWriter writer = new StringWriter();
-                ex.printStackTrace(new PrintWriter(writer));
-                final String msg = ex.getCause() != null ? ex.getCause().getMessage() : ex.getMessage();
+                t.printStackTrace(new PrintWriter(writer));
+                final String msg = t.getCause() != null ? t.getCause().getMessage() : t.getMessage();
                 result = new Formatter().format("Exception caught: %s%n%s", msg, writer.getBuffer());
             } finally {
                 executionTime = System.currentTimeMillis() - start;

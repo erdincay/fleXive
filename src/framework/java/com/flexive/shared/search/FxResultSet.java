@@ -269,4 +269,12 @@ public interface FxResultSet {
      * if no such wildcard was present in the original statement.
      */
     int getUserWildcardIndex();
+
+    /**
+     * Return the index of the @pk column if it was selected, or -1 otherwise.
+     *
+     * @return  the index of the @pk column if it was selected, or -1 otherwise.
+     * @since   3.1
+     */
+    int getPrimaryKeyIndex();
 }

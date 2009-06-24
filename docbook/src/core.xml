@@ -27,6 +27,7 @@
     <xi:include href="core/structure.xml"/>
     <xi:include href="core/contents.xml"/>
     <xi:include href="core/search.xml"/>
+    <xi:include href="core/briefcases.xml"/>
     <xi:include href="core/tree.xml"/>
     <xi:include href="core/scripting.xml"/>
     <xi:include href="core/workflow.xml"/>

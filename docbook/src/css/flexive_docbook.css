@@ -84,6 +84,13 @@ div.example {
     -webkit-border-radius: 5px;
 }
 
+div.example .programlisting {
+    padding: 1em 0 0 0;
+    margin: 0;
+    border: none;
+    background-color: transparent;
+}
+
 div.example p.title {
     background-color: #ebf5cc;
     margin: -0.5em -0.5em 0 -0.5em;

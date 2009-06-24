@@ -272,6 +272,22 @@ public class GenericSQLDataSelector extends DataSelector {
             final String sel = "(select tree_FTEXT1024_Paths(" + FILTER_ALIAS + ".id," +
                     search.getLanguage().getId() + "," + propertyId + ",false))"; // TODO: LIVE/EDIT
             result.addItem(sel, resultPos, false);
+        } else if (entry.getType() == PropertyEntry.Type.METADATA) {
+            // TODO: support for tree node metadata?
+
+            // check if the metadata can be selected unambiguously
+            final long[] briefcaseFilter = search.getFxStatement().getBriefcaseFilter();
+            if (briefcaseFilter.length == 0) {
+                throw new FxSqlSearchException("ex.sqlSearch.briefcase.metadata.empty");
+            } else if (briefcaseFilter.length > 1) {
+                throw new FxSqlSearchException("ex.sqlSearch.briefcase.metadata.ambiguous");
+            }
+            // result column: "id metadata"
+            final String sel = "concat(" + FILTER_ALIAS + ".id," +
+                    " concat(' '," +
+                    " (select coalesce(metadata, '') FROM " + DatabaseConst.TBL_BRIEFCASE_DATA
+                    + " WHERE briefcase_id=" + briefcaseFilter[0] + " AND id=" + FILTER_ALIAS + ".id)))";
+            result.addItem(sel, resultPos, false);
         } else {
             switch (entry.getTableType()) {
                 case T_CONTENT:

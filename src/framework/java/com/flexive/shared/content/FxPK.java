@@ -40,6 +40,9 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.Serializable;
+import java.util.List;
+import java.util.Collection;
+import java.util.ArrayList;
 
 /**
  * Primary key for FxContents
@@ -270,5 +273,20 @@ public class FxPK implements Serializable, Comparable<FxPK> {
 
     public int compareTo(FxPK o) {
         return id > o.id ? 1 : id < o.id ? -1 : 0;
+    }
+
+    /**
+     * Extracts the IDs of the given PK collection.
+     *
+     * @param pks   the PKs to be processed
+     * @return      the IDs of the given PK collection.
+     * @since 3.1
+     */
+    public static List<Long> getIds(Collection<FxPK> pks) {
+        final List<Long> result = new ArrayList<Long>(pks.size());
+        for (FxPK pk : pks) {
+            result.add(pk.getId());
+        }
+        return result;
     }
 }

@@ -50,6 +50,7 @@ import java.util.Map;
  * FxResultSet implementation
  *
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+ * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
 public class FxResultSetImpl implements Serializable, FxResultSet {
@@ -75,6 +76,8 @@ public class FxResultSetImpl implements Serializable, FxResultSet {
     private Map<String, Integer> columnIndexMap;
     private int userWildcardIndex = -1;
 
+    private transient int pkIndex = -2;
+
     // cached properties
     private transient String[] columnLabels;
 
@@ -92,23 +95,6 @@ public class FxResultSetImpl implements Serializable, FxResultSet {
         public void remove() {
             throw new UnsupportedOperationException("Removing rows not supported");
         }
-    }
-
-    protected FxResultSetImpl(ResultLocation location, ResultViewType viewType) {
-        this.rows = new ArrayList<Object[]>(0);
-        this.columnNames = new String[0];
-        this.contentTypes = new ArrayList<FxFoundType>(0);
-        this.parserExecutionTime = 0;
-        this.dbSearchTime = 0;
-        this.totalRowCount = 0;
-        this.truncated = false;
-        this.startIndex = 0;
-        this.maxFetchRows = 0;
-        this.location = location;
-        this.viewType = viewType;
-        this.creationTime = System.currentTimeMillis();
-        this.typeId = -1;
-        this.createdBriefcaseId = -1;
     }
 
     protected FxResultSetImpl(final FxStatement fx_stmt, final int parserExecutionTime, int dbSearchTime,
@@ -432,6 +418,26 @@ public class FxResultSetImpl implements Serializable, FxResultSet {
      */
     public int getUserWildcardIndex() {
         return userWildcardIndex;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public int getPrimaryKeyIndex() {
+        if (pkIndex == -2) {
+            int index = 1;
+            for (String columnName : columnNames) {
+                if ("@pk".equalsIgnoreCase(columnName)) {
+                    pkIndex = index;
+                    break;
+                }
+                index++;
+            }
+            if (pkIndex == -2) {
+                pkIndex = -1;
+            }
+        }
+        return pkIndex;
     }
 
     public void setUserWildcardIndex(int userWildcardIndex) {

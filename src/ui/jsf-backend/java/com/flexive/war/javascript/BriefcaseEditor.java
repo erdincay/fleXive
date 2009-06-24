@@ -34,6 +34,7 @@
 package com.flexive.war.javascript;
 
 import com.flexive.shared.EJBLookup;
+import com.flexive.shared.content.FxPK;
 import com.flexive.shared.interfaces.BriefcaseEngine;
 import com.flexive.shared.search.Briefcase;
 import com.flexive.war.JsonWriter;
@@ -41,6 +42,11 @@ import com.flexive.war.JsonWriter;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringWriter;
+import java.util.Arrays;
+import java.util.List;
+import java.util.ArrayList;
+
+import org.apache.commons.lang.ArrayUtils;
 
 /**
  * JSON/RPC beans for the briefcase navigation page.
@@ -145,7 +151,11 @@ public class BriefcaseEditor implements Serializable {
      * @since 3.1
      */
     public String move(long fromId, long toId, long[] itemIds) throws Exception {
-        EJBLookup.getBriefcaseEngine().moveItems(fromId, toId, itemIds);
+        final List<FxPK> items = new ArrayList<FxPK>(itemIds.length);
+        for (long id : itemIds) {
+            items.add(new FxPK(id));
+        }
+        EJBLookup.getBriefcaseEngine().moveItems(fromId, toId, items);
         
         final JsonWriter out = new JsonWriter();
         out.startMap().startAttribute("source");

@@ -33,9 +33,13 @@ package com.flexive.shared.interfaces;
 
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.search.Briefcase;
+import com.flexive.shared.FxReferenceMetaData;
+import com.flexive.shared.content.FxPK;
 
 import javax.ejb.Remote;
 import java.util.List;
+import java.util.Map;
+import java.util.Collection;
 
 /**
  * Bean handling Briefcases.
@@ -44,6 +48,7 @@ import java.util.List;
  * or the API provided by this beans.
  *
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+ * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 @Remote
 public interface BriefcaseEngine {
@@ -122,8 +127,20 @@ public interface BriefcaseEngine {
      * @param id    the briefcase ID
      * @param objectIds the object IDs to be added
      * @throws FxApplicationException   if the items could not be added
+     * @deprecated use {@link #addItems(long, java.util.Collection)}
      */
+    @Deprecated
     void addItems(long id, long[] objectIds) throws FxApplicationException;
+
+    /**
+     * Add the given items to the briefcase.
+     *
+     * @param id    the briefcase ID
+     * @param contents the content instances to be added
+     * @throws FxApplicationException   if the items could not be added
+     * @since 3.1
+     */
+    void addItems(long id, Collection<FxPK> contents) throws FxApplicationException;
 
     /**
      * Replace the current briefcase content with the given objects (i.e. clear the
@@ -132,8 +149,21 @@ public interface BriefcaseEngine {
      * @param id    the briefcase ID
      * @param objectIds the new briefcase content
      * @throws FxApplicationException   if the content could not be replaced
+     * @deprecated use {@link #setItems(long, java.util.Collection)}
      */
+    @Deprecated
     void setItems(long id, long[] objectIds) throws FxApplicationException;
+
+    /**
+     * Replace the current briefcase content with the given objects (i.e. clear the
+     * briefcase, then add the given objects).
+     *
+     * @param id    the briefcase ID
+     * @param contents the new briefcase content
+     * @throws FxApplicationException   if the content could not be replaced
+     * @since 3.1
+     */
+    void setItems(long id, Collection<FxPK> contents) throws FxApplicationException;
 
     /**
      * Adds/removes the given items for the briefcase.
@@ -142,8 +172,63 @@ public interface BriefcaseEngine {
      * @param addObjectIds  items to be added
      * @param removeObjectIds   items to be removed
      * @throws FxApplicationException if the briefcase could not be updated
+     * @deprecated use {@link #updateItems(long, java.util.Collection, java.util.Collection)}
      */
+    @Deprecated
     void updateItems(long id, long[] addObjectIds, long[] removeObjectIds) throws FxApplicationException;
+
+    /**
+     * Adds/removes the given items for the briefcase.
+     *
+     * @param id    the briefcase ID
+     * @param addContents  items to be added
+     * @param removeContents   items to be removed
+     * @throws FxApplicationException if the briefcase could not be updated
+     * @since 3.1
+     */
+    void updateItems(long id, Collection<FxPK> addContents, Collection<FxPK> removeContents) throws FxApplicationException;
+
+    /**
+     * Replaces the current metadata for the given items.
+     * <p>
+     * Since metadata on a briefcase is typically shared by more than one application (or plugin),
+     * this method should be used carefully. For everyday purposes, {@link #mergeMetaData(long, java.util.Collection)}
+     * is considered to be a better alternative.
+     * </p>
+     *
+     * @param id    the briefcase ID
+     * @param metaData  the metadata updates (item IDs are stored in the metadata instances themselves)
+     * @throws FxApplicationException   if the metadata could not be updated
+     * @since 3.1
+     */
+    void replaceMetaData(long id, Collection<FxReferenceMetaData<FxPK>> metaData) throws FxApplicationException;
+
+    /**
+     * Merges the given metadata fields into the existing metadata stored in the items. Existing
+     * values get overwritten. To remove a value, specify its key with a null or empty string.
+     * <p>
+     * This method should be used whenever it is not necessary to control the entire metadata associated to
+     * a briefcase item, since it provides transactional safety for concurrent modifications of briefcase
+     * items.
+     * </p>
+     *
+     * @param id    the briefcase ID
+     * @param metaData  the metadata updates (item IDs are stored in the metadata instances themselves)
+     * @throws FxApplicationException   if the metadata could not be updated
+     * @since 3.1
+     */
+    void mergeMetaData(long id, Collection<FxReferenceMetaData<FxPK>> metaData) throws FxApplicationException;
+
+    /**
+     * Loads the metadata instance(s) associated to the briefcase items. If an item has no metadata
+     * stored, it is not returned by this method.
+     *
+     * @param id    the briefcase ID
+     * @return      the metadata instances
+     * @throws FxApplicationException   if the metadata could not be retrieved
+     * @since 3.1
+     */
+    List<FxReferenceMetaData<FxPK>> loadMetaData(long id) throws FxApplicationException;
 
     /**
      * Removes the given items from the briefcase.
@@ -151,8 +236,20 @@ public interface BriefcaseEngine {
      * @param id    the briefcase ID
      * @param objectIds the objects to be removed
      * @throws FxApplicationException   if the items could not be removed
+     * @deprecated use {@link #removeItems(long, java.util.Collection)}
      */
+    @Deprecated
     void removeItems(long id, long[] objectIds) throws FxApplicationException;
+
+    /**
+     * Removes the given items from the briefcase.
+     *
+     * @param id    the briefcase ID
+     * @param contents the objects to be removed
+     * @throws FxApplicationException   if the items could not be removed
+     * @since 3.1
+     */
+    void removeItems(long id, Collection<FxPK> contents) throws FxApplicationException;
 
     /**
      * Load all item IDs stored in the given briefcase.
@@ -168,8 +265,8 @@ public interface BriefcaseEngine {
      *
      * @param fromId    the source briefcase ID
      * @param toId      the target briefcase ID
-     * @param objectIds the ID(s) of the items to be moved
+     * @param contents  the items to be moved
      * @since 3.1
      */
-    void moveItems(long fromId, long toId, long[] objectIds) throws FxApplicationException;
+    void moveItems(long fromId, long toId, Collection<FxPK> contents) throws FxApplicationException;
 }

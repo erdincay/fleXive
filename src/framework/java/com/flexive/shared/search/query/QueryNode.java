@@ -119,7 +119,7 @@ public abstract class QueryNode implements Serializable {
         }
         this.parent = parent;
         if (parent != null) {
-            if (parent.getChildren().indexOf(this) == -1) {
+            if (!parent.getChildren().contains(this)) {
                 // add as child to new parent
                 parent.addChild(this);
             }

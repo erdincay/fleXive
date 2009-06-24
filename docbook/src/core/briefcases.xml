@@ -1,0 +1,124 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE section [
+        <!ENTITY % global_entities SYSTEM "../global.ent">
+        %global_entities;
+        ]>
+<section xml:id="core_briefcases" xmlns="http://docbook.org/ns/docbook" xmlns:xlink="http://www.w3.org/1999/xlink"
+         xmlns:xi="http://www.w3.org/2001/XInclude">
+
+    <title>Briefcase Engine</title>
+
+    <xi:include href="../includes/author_dlichtenberger.xml"/>
+
+    <para>
+        The
+        <link xlink:href="&flexiveJavadocBase;shared/com/flexive/shared/interfaces/BriefcaseEngine.html">
+            Briefcase Engine
+        </link>
+        offers collections of content instances that can be shared among
+        multiple users. Briefcase contents can also be queried using the
+        <link linkend="core_search">search engine</link>,
+        using a custom
+        <link linkend="css_filters">filter</link>.
+    </para>
+
+    <para>
+        The basic workflow when working with briefcases is as follows:
+
+        <itemizedlist>
+            <listitem>
+                <para>
+                    Create a new briefcase using
+                    <link xlink:href="&flexiveJavadocBase;shared/com/flexive/shared/interfaces/BriefcaseEngine.html#create(java.lang.String,%20java.lang.String,%20java.lang.Long)">
+                        BriefcaseEngine#create
+                    </link>.
+                    When the ACL parameter is
+                    <code>null</code>,
+                    the briefcase can only be seen by the user that created it. Otherwise the
+                    <link linkend="core_security_acl">ACL</link>
+                    determines the user groups who can see and edit the briefcase.
+                </para>
+            </listitem>
+            <listitem>
+                <para>
+                    Use the briefcase ID returned in the previous step to populate the briefcase with
+                    content instances using
+                    <link xlink:href="&flexiveJavadocBase;shared/com/flexive/shared/interfaces/BriefcaseEngine.html#addItems(long,%20java.util.Collection)">
+                        BriefcaseEngine#addItems
+                    </link>.
+                </para>
+            </listitem>
+            <listitem>
+                <para>
+                    You can associate metadata with briefcase items (for example, a flag to indicate some
+                    kind of action performed on the briefcase item) in the form of key-value pairs. This information
+                    is specific to the briefcase item and does not affect the content instance at all.
+                </para>
+                <para>
+                    Metadata can be selected from a briefcase in a &fxsql; query with the
+                    <code>@metadata</code>
+                    column.
+                    Metadata cannot, however, be queried, i.e. it cannot be part of the
+                    <code>WHERE</code>
+                    clause. If you need queryable metadata, you should think about using
+                    some kind of relation type (i.e. an intermediary type with a reference to the actual content).
+                </para>
+            </listitem>
+            <listitem>
+                <para>
+                    To access values of the content instances of a briefcase, use the &fxsql; interface.
+                    For example, this statement selects the primary key and the caption of the items of the briefcase
+                    with ID 21:
+
+                    <programlisting language="sql">SELECT @pk, caption FILTER briefcase=21</programlisting>
+
+                    Note that you can also query the content instances inside a briefcase, i.e. you
+                    can specify a
+                    <code>WHERE</code>
+                    clause and further restrict the result set.
+                </para>
+            </listitem>
+        </itemizedlist>
+    </para>
+
+    <example xml:id="cb_complete_ex">
+        <title>Working with briefcases and metadata</title>
+
+        <programlisting language="java"><![CDATA[final BriefcaseEngine be = EJBLookup.getBriefcaseEngine();
+
+// create a new briefcase
+final int briefcaseId = be.create("test", "description", /* ACL */ null);
+
+// get PKs of all visible folders
+final FxResultSet result = new SqlQueryBuilder().select("@pk").type("FOLDER").getResult();
+final List<FxPK> folders = result.collectColumn(1);
+assert !folders.isEmpty();
+
+// add to briefcase
+be.addItems(briefcaseId, folders);
+assert be.load(briefcaseId).getSize() == folders.size();
+
+// add some metadata for this briefcase for the first folder
+final FxReferenceMetaData<FxPK> meta = FxReferenceMetaData.createNew(folders.get(0));
+meta.put("processed", "false");
+be.mergeMetaData(briefcaseId, Arrays.asList(meta));
+
+// select briefcase contents
+final FxResultSet items = new SqlQueryBuilder().select("@pk", "caption", "@metadata")
+	.filterBriefcase(briefcaseId)
+	.getResult();
+assert items.getRowCount() == folders.size();
+
+// get metadata from FxSQL result set
+final List<FxReferenceMetaData<FxPK>> resultMeta = items.collectColumn(3);
+// check if our "processed" flag set above was preserved
+assert false == FxReferenceMetaData.findByContent(
+			resultMeta,
+			meta.getReference()
+		).getBoolean(
+			"processed",
+			/* default */ true
+		);]]></programlisting>
+    </example>
+
+</section>

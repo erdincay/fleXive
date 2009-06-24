@@ -280,4 +280,11 @@ public final class FxEmptyResultSet implements FxResultSet, Serializable {
     public int getUserWildcardIndex() {
         return -1;
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public int getPrimaryKeyIndex() {
+        return -1;
+    }
 }
