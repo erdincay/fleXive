@@ -32,10 +32,7 @@
 package com.flexive.core.search;
 
 import com.flexive.shared.structure.*;
-import com.flexive.shared.exceptions.FxSqlSearchException;
-import com.flexive.shared.exceptions.FxRuntimeException;
-import com.flexive.shared.exceptions.FxNotFoundException;
-import com.flexive.shared.exceptions.FxNoAccessException;
+import com.flexive.shared.exceptions.*;
 import com.flexive.shared.value.*;
 import com.flexive.shared.*;
 import com.flexive.shared.search.FxPaths;
@@ -57,6 +54,7 @@ import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Locale;
 import static java.lang.Long.parseLong;
 import static java.lang.Integer.parseInt;
 
@@ -317,14 +315,15 @@ public class PropertyEntry {
     public PropertyEntry(Property searchProperty, ContentStorage storage, boolean ignoreCase) throws FxSqlSearchException {
         this.type = Type.PROPERTY_REF;
 
+        final FxEnvironment environment = CacheAdmin.getEnvironment();
         if (searchProperty.isAssignment()) {
             try {
                 if (StringUtils.isNumeric(searchProperty.getPropertyName())) {
                     //#<id>
-                    this.assignment = (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(Long.valueOf(searchProperty.getPropertyName()));
+                    this.assignment = (FxPropertyAssignment) environment.getAssignment(Long.valueOf(searchProperty.getPropertyName()));
                 } else {
                     //XPath
-                    this.assignment = (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(searchProperty.getPropertyName());
+                    this.assignment = (FxPropertyAssignment) environment.getAssignment(searchProperty.getPropertyName());
                 }
             } catch (ClassCastException ce) {
                 throw new FxSqlSearchException(LOG, ce, "ex.sqlSearch.query.unknownAssignment",
@@ -341,7 +340,7 @@ public class PropertyEntry {
             this.property = assignment.getProperty();
         } else {
             this.assignment = null;
-            this.property = CacheAdmin.getEnvironment().getProperty(searchProperty.getPropertyName());
+            this.property = environment.getProperty(searchProperty.getPropertyName());
         }
         this.readColumns = getReadColumns(storage, property);
         String fcol = ignoreCase ? storage.getQueryUppercaseColumn(this.property) : this.readColumns[0];
@@ -355,13 +354,30 @@ public class PropertyEntry {
                     searchProperty.getPropertyName());
         }
 
-        this.tableName = storage.getTableName(this.property);
-        if (this.tableName.equalsIgnoreCase(DatabaseConst.TBL_CONTENT)) {
-            this.tbl = PropertyResolver.Table.T_CONTENT;
-        } else if (this.tableName.equalsIgnoreCase(DatabaseConst.TBL_CONTENT_DATA)) {
-            this.tbl = PropertyResolver.Table.T_CONTENT_DATA;
+        if (this.assignment != null && this.assignment.isFlatstoreEntry()) {
+            this.tableName = assignment.getFlatstoreMapping().getStorage();
+            this.tbl = PropertyResolver.Table.T_CONTENT_DATA_FLAT;
         } else {
-            throw new FxSqlSearchException(LOG, "ex.sqlSearch.err.unknownPropertyTable", searchProperty, this.tableName);
+            if (this.assignment == null) {
+                // check if all assignments of the property are NOT in the flat storage, otherwise
+                // property selection is not possible
+                for (FxPropertyAssignment pa : environment.getPropertyAssignments(this.property.getId(), false)) {
+                    if (pa.isFlatstoreEntry() && LOG.isWarnEnabled()) {
+                        // only write warning to log for now
+                        LOG.warn(new FxExceptionMessage("ex.sqlSearch.err.select.propertyWithFlat", this.property.getName(), pa.getXPath())
+                                .getLocalizedMessage(Locale.getDefault().getLanguage())
+                        );
+                    }
+                }
+            }
+            this.tableName = storage.getTableName(this.property);
+            if (this.tableName.equalsIgnoreCase(DatabaseConst.TBL_CONTENT)) {
+                this.tbl = PropertyResolver.Table.T_CONTENT;
+            } else if (this.tableName.equalsIgnoreCase(DatabaseConst.TBL_CONTENT_DATA)) {
+                this.tbl = PropertyResolver.Table.T_CONTENT_DATA;
+            } else {
+                throw new FxSqlSearchException(LOG, "ex.sqlSearch.err.unknownPropertyTable", searchProperty, this.tableName);
+            }
         }
         this.multilanguage = this.property.isMultiLang();
         this.functions.addAll(searchProperty.getFunctions());

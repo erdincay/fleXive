@@ -37,6 +37,7 @@ import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxArrayUtils;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.structure.FxDataType;
+import com.flexive.shared.structure.FxFlatstoreMapping;
 import com.flexive.shared.search.SortDirection;
 import com.flexive.shared.exceptions.FxSqlSearchException;
 import com.flexive.shared.tree.FxTreeNode;
@@ -316,6 +317,22 @@ public class GenericSQLDataSelector extends DataSelector {
                     }
                     String xpath = "concat(filter.xpathPref," + getContentDataSubselect("XPATHMULT", entry, true) + ")";
                     result.addItem(xpath, resultPos, true);
+                    break;
+                case T_CONTENT_DATA_FLAT:
+                    final FxFlatstoreMapping mapping = entry.getAssignment().getFlatstoreMapping();
+                    final String sel =
+                            "(SELECT " + mapping.getColumn() + " FROM " + mapping.getStorage()
+                            + " WHERE id=" + FILTER_ALIAS + ".id AND ver=" + FILTER_ALIAS + ".ver"
+                            + " AND lvl=" + mapping.getLevel()
+                            + (entry.getAssignment().isMultiLang()
+                                    ? " AND " + mapping.getColumn() + " IS NOT NULL"
+                                    + " AND (lang=" + search.getLanguage().getId()
+                                    + " OR " + mapping.getColumn() + "_mld=true)"
+                                    + " ORDER BY " + mapping.getColumn() + "_mld"
+                            : "")
+                            + " LIMIT 1"
+                            + ")";
+                    result.addItem(sel, resultPos, false);
                     break;
                 default:
                     throw new FxSqlSearchException(LOG, "ex.sqlSearch.table.typeNotSupported", entry.getTableName());

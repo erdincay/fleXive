@@ -59,7 +59,8 @@ import java.util.*;
 public class PropertyResolver {
     public static enum Table {
         T_CONTENT(DatabaseConst.TBL_CONTENT),
-        T_CONTENT_DATA(DatabaseConst.TBL_CONTENT_DATA);
+        T_CONTENT_DATA(DatabaseConst.TBL_CONTENT_DATA),
+        T_CONTENT_DATA_FLAT(null);
 
         private final String tableName;
 

@@ -42,6 +42,7 @@ import com.flexive.core.storage.genericSQL.GenericTreeStorage;
 import com.flexive.shared.*;
 import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.structure.FxDataType;
+import com.flexive.shared.structure.FxFlatstoreMapping;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxSqlSearchException;
 import com.flexive.shared.search.DateFunction;
@@ -565,31 +566,44 @@ public class GenericSQLDataFilter extends DataFilter {
                 + constant.getFunctionsEnd();
 
         // Build the final filter statement
-        if (entry.getTableName().equals(DatabaseConst.TBL_CONTENT)) {
-            return (" (SELECT DISTINCT cd.id,cd.ver,null lang FROM " + tableMain + " cd WHERE " +
-                    column +
-                    cond.getSqlComperator() +
-                    value +
-                    getVersionFilter("cd") +
-                    getDeactivatedTypesFilter("cd") +
-                    getInactiveMandatorsFilter("cd") +
-                    getSubQueryLimit() +
-                    ") ");
-        } else {
-            // the FInt column is required for "NOT IN" matches of SelectMany
-            final boolean usesFInt = entry.getProperty().getDataType() == FxDataType.SelectMany && cond.getComperator() == Comparator.NOT_IN;
-            return " (SELECT DISTINCT cd.id,cd.ver,cd.lang" +
-                    (usesFInt ? ",cd.fint" : "") +
-                    " FROM " + tableContentData + " cd WHERE " +
-                    column +
-                    cond.getSqlComperator() +
-                    value +
-                    " AND " + filter +
-                    getVersionFilter("cd") +
-                    getLanguageFilter() +
-                    getGroupByFilter("cd", cond, entry, value) +
-                    getSubQueryLimit() +
-                    ") ";
+        switch(entry.getTableType()) {
+            case T_CONTENT:
+                return (" (SELECT DISTINCT cd.id,cd.ver,null lang FROM " + tableMain + " cd WHERE " +
+                        column +
+                        cond.getSqlComperator() +
+                        value +
+                        getVersionFilter("cd") +
+                        getDeactivatedTypesFilter("cd") +
+                        getInactiveMandatorsFilter("cd") +
+                        getSubQueryLimit() +
+                        ") ");
+            case T_CONTENT_DATA:
+                // the FInt column is required for "NOT IN" matches of SelectMany
+                final boolean usesFInt = entry.getProperty().getDataType() == FxDataType.SelectMany && cond.getComperator() == Comparator.NOT_IN;
+                return " (SELECT DISTINCT cd.id,cd.ver,cd.lang" +
+                        (usesFInt ? ",cd.fint" : "") +
+                        " FROM " + tableContentData + " cd WHERE " +
+                        column +
+                        cond.getSqlComperator() +
+                        value +
+                        " AND " + filter +
+                        getVersionFilter("cd") +
+                        getLanguageFilter() +
+                        getGroupByFilter("cd", cond, entry, value) +
+                        getSubQueryLimit() +
+                        ") ";
+            case T_CONTENT_DATA_FLAT:
+                final FxFlatstoreMapping mapping = entry.getAssignment().getFlatstoreMapping();
+                return " (SELECT DISTINCT cd.id, cd.ver, cd.lang " +
+                        "FROM " + mapping.getStorage() + " cd " +
+                        "WHERE " +
+                        mapping.getColumn() + cond.getSqlComperator() + value +
+                        getVersionFilter("cd") +
+                        getLanguageFilter() +
+                        getSubQueryLimit() +
+                        ")";
+            default:
+                throw new FxSqlSearchException(LOG, "ex.sqlSearch.err.unknownPropertyTable", entry.getProperty().getName(), entry.getTableName());
         }
     }
 

@@ -71,27 +71,27 @@ final ACL instanceACL = CacheAdmin.environment.getACL(instanceAclId);
 
 new GroovyTypeBuilder().SearchTest(acl: instanceACL, useTypePermissions: true, useStepPermissions: true,
                                    useInstancePermissions: true, usePropertyPermissions: false) {
-    stringSearchProp(FxDataType.String1024, multiplicity: FxMultiplicity.MULT_0_N)
-    stringSearchPropML(multilang: true, FxDataType.String1024, multiplicity: FxMultiplicity.MULT_0_N)
-    textSearchProp(FxDataType.Text, multiplicity: FxMultiplicity.MULT_0_N)
-    htmlSearchProp(FxDataType.HTML, multiplicity: FxMultiplicity.MULT_0_N)
-    numberSearchProp(FxDataType.Number, multiplicity: FxMultiplicity.MULT_0_N)
-    largeNumberSearchProp(FxDataType.LargeNumber, multiplicity: FxMultiplicity.MULT_0_N)
-    floatSearchProp(FxDataType.Float, multiplicity: FxMultiplicity.MULT_0_N)
-    doubleSearchProp(FxDataType.Double, multiplicity: FxMultiplicity.MULT_0_N)
-    dateSearchProp(FxDataType.Date, multiplicity: FxMultiplicity.MULT_0_N)
-    dateTimeSearchProp(FxDataType.DateTime, multiplicity: FxMultiplicity.MULT_0_N)
-    dateRangeSearchProp(FxDataType.DateRange, multiplicity: FxMultiplicity.MULT_0_N)
-    dateTimeRangeSearchProp(FxDataType.DateTimeRange, multiplicity: FxMultiplicity.MULT_0_N)
-    booleanSearchProp(FxDataType.Boolean, multiplicity: FxMultiplicity.MULT_0_N)
-    binarySearchProp(FxDataType.Binary, multiplicity: FxMultiplicity.MULT_0_N)
-    referenceSearchProp(FxDataType.Reference, multiplicity: FxMultiplicity.MULT_0_N, referencedType: CacheAdmin.environment.getType("FOLDER"))
-//    inlineReferenceSearchProp(FxDataType.InlineReference, multiplicity: FxMultiplicity.MULT_0_N, referencedType: CacheAdmin.environment.getType("FOLDER"))
-    selectOneSearchProp(FxDataType.SelectOne, multiplicity: FxMultiplicity.MULT_0_N, referencedList: CacheAdmin.environment.getSelectList("SearchTest SelectList"))
+    stringSearchProp(FxDataType.String1024)
+    stringSearchPropML(multilang: true, FxDataType.String1024)
+    textSearchProp(FxDataType.Text)
+    htmlSearchProp(FxDataType.HTML)
+    numberSearchProp(FxDataType.Number)
+    largeNumberSearchProp(FxDataType.LargeNumber)
+    floatSearchProp(FxDataType.Float)
+    doubleSearchProp(FxDataType.Double)
+    dateSearchProp(FxDataType.Date)
+    dateTimeSearchProp(FxDataType.DateTime)
+    dateRangeSearchProp(FxDataType.DateRange)
+    dateTimeRangeSearchProp(FxDataType.DateTimeRange)
+    booleanSearchProp(FxDataType.Boolean)
+    binarySearchProp(FxDataType.Binary)
+    referenceSearchProp(FxDataType.Reference, referencedType: CacheAdmin.environment.getType("FOLDER"))
+//    inlineReferenceSearchProp(FxDataType.InlineReference, referencedType: CacheAdmin.environment.getType("FOLDER"))
+    selectOneSearchProp(FxDataType.SelectOne, referencedList: CacheAdmin.environment.getSelectList("SearchTest SelectList"))
     selectManySearchProp(FxDataType.SelectMany, multiplicity: FxMultiplicity.MULT_0_1, referencedList: CacheAdmin.environment.getSelectList("SearchTest SelectList"))
 
     // create a new group
-    GroupTop(description: new FxString("Group at top level"), multiplicity: FxMultiplicity.MULT_0_N) {
+    GroupTop(description: new FxString("Group at top level")) {
         stringSearchProp(assignment: "SearchTest/stringSearchProp")
         stringSearchPropML(assignment: "SearchTest/stringSearchPropML")
         textSearchProp(assignment: "SearchTest/textSearchProp")
@@ -111,7 +111,7 @@ new GroovyTypeBuilder().SearchTest(acl: instanceACL, useTypePermissions: true, u
         selectOneSearchProp(assignment: "SearchTest/selectOneSearchProp")
         selectManySearchProp(assignment: "SearchTest/selectManySearchProp")
 
-        GroupNested(description: new FxString("Nested group"), multiplicity: FxMultiplicity.MULT_0_N) {
+        GroupNested(description: new FxString("Nested group")) {
             stringSearchProp(assignment: "SearchTest/stringSearchProp")
             stringSearchPropML(assignment: "SearchTest/stringSearchPropML")
             textSearchProp(assignment: "SearchTest/textSearchProp")
