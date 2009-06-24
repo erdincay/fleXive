@@ -36,7 +36,6 @@ import com.flexive.shared.structure.FxType;
 import com.flexive.shared.structure.FxTypeEdit;
 
 import javax.ejb.Remote;
-import java.sql.SQLException;
 
 /**
  * FxType management
@@ -87,6 +86,17 @@ public interface TypeEngine {
      *
      * @param typeId requested type
      * @return number of instances
-      */
+     * @since 3.1
+     */
     public long getInstanceCount(long typeId);
+
+    /**
+     * Migrate all assignments of the given type that can be stored in a flat storage
+     *
+     * @param storage name of the storage
+     * @param typeId  id of the type
+     * @throws FxApplicationException on errors
+     * @since 3.1
+     */
+    public void flatten(String storage, long typeId) throws FxApplicationException;
 }

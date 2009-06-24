@@ -29,12 +29,11 @@ import java.util.Map;
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-@Test(groups = {"ejb", "content", "flatstorage"})
+@Test(groups = {"ejb", "flatstorage"}, sequential = true)
 public class FlatStorageTest {
     private boolean testsEnabled = false;
 
     private ContentEngine co;
-    private ACLEngine acl;
     private TypeEngine type;
     private AssignmentEngine ass;
     private DivisionConfigurationEngine dce;
@@ -50,16 +49,28 @@ public class FlatStorageTest {
      * @throws Exception on errors
      */
     @BeforeClass
-    public void beforeClass() throws Exception {
+    public void beforeFlat() throws Exception {
         co = EJBLookup.getContentEngine();
-        acl = EJBLookup.getAclEngine();
         type = EJBLookup.getTypeEngine();
         ass = EJBLookup.getAssignmentEngine();
         dce = EJBLookup.getDivisionConfigurationEngine();
         login(TestUsers.SUPERVISOR);
         testsEnabled = dce.isFlatStorageEnabled();
-        if (testsEnabled)
+        if (testsEnabled) {
             setupStorage();
+            setupStructures();
+        }
+    }
+
+    @AfterClass
+    public void afterFlat() throws FxLogoutFailedException, FxApplicationException {
+        if (testsEnabled) {
+            long typeId = CacheAdmin.getEnvironment().getType(TEST_TYPE).getId();
+            co.removeForType(typeId);
+            type.remove(typeId);
+            dce.removeFlatStorage(TEST_STORAGE);
+        }
+        logout();
     }
 
     /**
@@ -81,7 +92,6 @@ public class FlatStorageTest {
      *
      * @throws Exception on errors
      */
-    @BeforeClass(dependsOnMethods = {"beforeClass"})
     private void setupStructures() throws Exception {
         try {
             if (CacheAdmin.getEnvironment().getType(TEST_TYPE) != null)
@@ -129,34 +139,24 @@ public class FlatStorageTest {
 
     }
 
-    @AfterClass
-    public void afterClass() throws FxLogoutFailedException, FxApplicationException {
-        long typeId = CacheAdmin.getEnvironment().getType(TEST_TYPE).getId();
-        co.removeForType(typeId);
-        type.remove(typeId);
-        if (testsEnabled)
-            dce.removeFlatStorage(TEST_STORAGE);
-        logout();
-    }
-
     private void setupStorage() throws FxApplicationException {
         if (!testsEnabled) return;
-        dce.createFlatStorage(TEST_STORAGE, TEST_STORAGE_DESCRIPTION, 20, 20, 10, 10, 10);
+        dce.createFlatStorage(TEST_STORAGE, TEST_STORAGE_DESCRIPTION, 20, 10, 10, 10, 10);
     }
 
     @Test
     public void storageCreateRemove() throws Exception {
         if (!testsEnabled) return;
-        dce.createFlatStorage(TEST_STORAGE + "_CR", TEST_STORAGE_DESCRIPTION, 10, 20, 30, 40, 50);
+        dce.createFlatStorage(TEST_STORAGE + "_CR", TEST_STORAGE_DESCRIPTION, 10, 11, 12, 13, 14);
         boolean found = false;
         for (FxFlatStorageInfo info : dce.getFlatStorageInfos()) {
             if (info.getName().equals(TEST_STORAGE + "_CR")) {
                 found = true;
                 Assert.assertEquals(info.getColumnsString(), 10);
-                Assert.assertEquals(info.getColumnsText(), 20);
-                Assert.assertEquals(info.getColumnsBigInt(), 30);
-                Assert.assertEquals(info.getColumnsDouble(), 40);
-                Assert.assertEquals(info.getColumnsSelect(), 50);
+                Assert.assertEquals(info.getColumnsText(), 11);
+                Assert.assertEquals(info.getColumnsBigInt(), 12);
+                Assert.assertEquals(info.getColumnsDouble(), 13);
+                Assert.assertEquals(info.getColumnsSelect(), 14);
             }
         }
         Assert.assertTrue(found, "Test storage not found!");

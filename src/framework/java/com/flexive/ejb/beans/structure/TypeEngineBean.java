@@ -34,8 +34,8 @@ package com.flexive.ejb.beans.structure;
 import com.flexive.core.Database;
 import static com.flexive.core.DatabaseConst.*;
 import com.flexive.core.LifeCycleInfoImpl;
-import com.flexive.core.flatstorage.FxFlatStorageManager;
 import com.flexive.core.conversion.ConversionEngine;
+import com.flexive.core.flatstorage.FxFlatStorageManager;
 import com.flexive.core.structure.FxPreloadType;
 import com.flexive.core.structure.StructureLoader;
 import com.flexive.shared.CacheAdmin;
@@ -246,11 +246,9 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
     }
 
     /**
-     * Get the number of instances of a given type
-     *
-     * @param typeId requested type
-     * @return number of instances
+     * {@inheritDoc}
      */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long getInstanceCount(long typeId) {
         Connection con = null;
         long rc = -1;
@@ -265,6 +263,20 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
             Database.closeObjects(TypeEngineBean.class, con, null);
         }
         return rc;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void flatten(String storage, long typeId) throws FxApplicationException {
+        FxFlatStorageManager.getInstance().flattenType(storage, CacheAdmin.getEnvironment().getType(typeId));
+        try {
+            StructureLoader.reload(null);
+        } catch (FxCacheException e) {
+            ctx.setRollbackOnly();
+            throw new FxUpdateException(e, "ex.cache", e.getMessage());
+        }
     }
 
     /**
@@ -960,6 +972,7 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public String export(long id) throws FxApplicationException {
         return ConversionEngine.getXStream().toXML(CacheAdmin.getEnvironment().getType(id));
     }
@@ -967,6 +980,7 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public FxType importType(String typeXML) throws FxApplicationException {
         try {
             return (FxType) ConversionEngine.getXStream().fromXML(typeXML);
