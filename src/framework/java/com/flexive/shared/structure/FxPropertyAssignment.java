@@ -235,7 +235,7 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
     /**
      * Shortcut to get the maximum input length
      *
-     * @return maximum input length
+     * @return maximum input length. If not set, 0 is returned.
      */
     public int getMaxLength() {
         return getOption(FxStructureOption.OPTION_MAXLENGTH).getIntValue();

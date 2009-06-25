@@ -245,11 +245,11 @@ public enum FxDataType implements Serializable, SelectableObjectWithName {
     public FxValue getRandomValue(Random rnd, FxPropertyAssignment assignment) {
         switch (this) {
             case HTML:
-                return new FxHTML(getRandomString(assignment.isMultiLang(), rnd, 2048));
+                return new FxHTML(getRandomString(assignment.isMultiLang(), rnd, assignment.hasMaxLength() ? assignment.getMaxLength() : 2048));
             case String1024:
-                return new FxString(getRandomString(assignment.isMultiLang(), rnd, 1024));
+                return new FxString(getRandomString(assignment.isMultiLang(), rnd, assignment.hasMaxLength() ? assignment.getMaxLength() : 1024));
             case Text:
-                return new FxString(getRandomString(assignment.isMultiLang(), rnd, 4096));
+                return new FxString(getRandomString(assignment.isMultiLang(), rnd, assignment.hasMaxLength() ? assignment.getMaxLength() : 4096));
             case Number:
                 return new FxNumber(assignment.isMultiLang(), rnd.nextInt());
             case LargeNumber:
