@@ -107,6 +107,16 @@ public class FxPropertyData extends FxData {
     }
 
     /**
+     * Get the assignment cast to FxProperyAssignment
+     *
+     * @return property assignment
+     * @since 3.1
+     */
+    public FxPropertyAssignment getPropertyAssignment() {
+        return (FxPropertyAssignment)getAssignment();
+    }
+
+    /**
      * Set a new value for this property data
      *
      * @param value the value to set

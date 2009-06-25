@@ -39,10 +39,10 @@ import com.flexive.shared.structure.FxSelectListItem;
 import com.flexive.shared.value.*;
 import org.apache.commons.lang.StringUtils;
 
+import java.lang.reflect.Array;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.lang.reflect.Array;
 
 /**
  * Miscellaneous formatting utility functions.
@@ -627,11 +627,26 @@ public final class FxFormatUtils {
     /**
      * Remove special command characters (such as newlines) from the given string.
      *
-     * @param text  the string to be filtered
-     * @return      the string without command characters
-     * @since       3.1
+     * @param text the string to be filtered
+     * @return the string without command characters
+     * @since 3.1
      */
     public static String removeCommandChars(String text) {
-        return text.replaceAll("[\\x00-\\x09\\x0B-\\x1F]","");
+        return text.replaceAll("[\\x00-\\x09\\x0B-\\x1F]", "");
+    }
+
+    /**
+     * Get an int as String with at least 3 digits, padded by "0" if needed
+     *
+     * @param value int value
+     * @return padded String
+     */
+    public static String getPaddedIntString3(int value) {
+        if (value < 10)
+            return "00" + String.valueOf(value);
+        else if (value < 100)
+            return "0" + String.valueOf(value);
+        else
+            return String.valueOf(value);
     }
 }

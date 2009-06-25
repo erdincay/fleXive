@@ -484,10 +484,9 @@ public class FxContent implements Serializable {
         FxSharedUtils.checkParameterEmpty(XPath, "XPATH");
         XPath = XPathElement.stripType(XPathElement.toXPathMult(XPath.toUpperCase()));
         //this is a slightly modified version of getData() but since groups may not contain children its safer
-        List<FxData> base = data.getChildren();
         if (StringUtils.isEmpty(XPath) || "/".equals(XPath))
             return getRootGroup();
-        List<FxData> currChildren = base;
+        List<FxData> currChildren = data.getChildren();
         FxGroupData group = null;
         boolean found;
         for (XPathElement xpe : XPathElement.split(XPath.toUpperCase())) {

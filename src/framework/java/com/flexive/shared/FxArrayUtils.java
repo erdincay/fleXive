@@ -311,22 +311,24 @@ public class FxArrayUtils {
      * @return array with the replaced value
      */
     public static String replaceElement(String array, char separator, int index, String newValue) {
-        StringBuilder sb = new StringBuilder(array.length()+newValue.length());
+        StringBuilder sb = new StringBuilder(array.length() + newValue.length());
         int cur = 0;
-        boolean inrep = false;
-        for(char c: array.toCharArray()) {
-            if(cur == index && !inrep) {
-                sb.append(newValue);
-                sb.append(separator);
-                inrep = true;
-            }
-            if( c == separator ) {
+        boolean inrep = index == 0;
+        if (index == 0)
+            sb.append(newValue);
+        char[] charArray = array.toCharArray();
+        for (int i = 0, charArrayLength = charArray.length; i < charArrayLength; i++) {
+            char c = charArray[i];
+            if (c == separator) {
+                sb.append(c);
                 cur++;
-                inrep = false;
-            }
-            if(inrep)
-                continue;
-            sb.append(c);
+                if (cur == index) {
+                    sb.append(newValue);
+                    inrep = !(charArrayLength > (i + 1) && charArray[i + 1] == separator);
+                } else
+                    inrep = false;
+            } else if (!inrep)
+                sb.append(c);
         }
         return sb.toString();
     }
@@ -334,13 +336,13 @@ public class FxArrayUtils {
     /**
      * Create an empty array string containing only separators
      *
-     * @param length    desired length
+     * @param length    desired array length
      * @param separator separator to use
-     * @return String containing <code>length</code> separators
+     * @return String containing <code>length-1</code> separators
      */
     public static String createEmptyStringArray(int length, String separator) {
         StringBuilder sb = new StringBuilder(separator.length() * length);
-        for (int i = 0; i < length; i++) {
+        for (int i = 0; i < length - 1; i++) {
             sb.append(separator);
         }
         return sb.toString();

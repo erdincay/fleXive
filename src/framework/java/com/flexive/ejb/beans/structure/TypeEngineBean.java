@@ -270,7 +270,12 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void flatten(String storage, long typeId) throws FxApplicationException {
-        FxFlatStorageManager.getInstance().flattenType(storage, CacheAdmin.getEnvironment().getType(typeId));
+        try {
+            FxFlatStorageManager.getInstance().flattenType(storage, CacheAdmin.getEnvironment().getType(typeId));
+        } catch (FxApplicationException e) {
+            ctx.setRollbackOnly();
+            throw e;
+        }
         try {
             StructureLoader.reload(null);
         } catch (FxCacheException e) {

@@ -468,6 +468,7 @@ public class FxDelta implements Serializable {
     /**
      * Compare <code>original</code> to <code>compare</code> FxContent.
      * Both contents should be compacted and empty entries removed for correct results.
+     * Flatstorage entries will only be added to the remove list.
      *
      * @param original original content
      * @param compare  content that original is compared against
@@ -493,10 +494,13 @@ public class FxDelta implements Serializable {
                         updates = new ArrayList<FxDeltaChange>(10);
                     updates.add(new FxDeltaChange(FxDeltaChange.ChangeType.Update, xp, original.getGroupData(xp), compare.getGroupData(xp)));
                 }
-            } else /*property*/ if (!compare.getData(xp).equals(original.getData(xp))) {
+            } else if (!compare.getData(xp).equals(original.getData(xp))) {
+                //property
                 if (updates == null)
                     updates = new ArrayList<FxDeltaChange>(10);
-                updates.add(new FxDeltaChange(FxDeltaChange.ChangeType.Update, xp, original.getPropertyData(xp), compare.getPropertyData(xp)));
+                final FxPropertyData orgData = original.getPropertyData(xp);
+                if (!orgData.getPropertyAssignment().isFlatstoreEntry())
+                    updates.add(new FxDeltaChange(FxDeltaChange.ChangeType.Update, xp, orgData, compare.getPropertyData(xp)));
             }
         }
 
@@ -506,10 +510,15 @@ public class FxDelta implements Serializable {
             if (adds == null)
                 adds = new ArrayList<FxDeltaChange>(10);
             if (xp.endsWith("/")) {
+                //group
                 xp = xp.substring(0, xp.length() - 1);
                 adds.add(new FxDeltaChange(FxDeltaChange.ChangeType.Add, xp, null, compare.getGroupData(xp)));
-            } else
-                adds.add(new FxDeltaChange(FxDeltaChange.ChangeType.Add, xp, null, compare.getPropertyData(xp)));
+            } else {
+                //property
+                final FxPropertyData pdata = compare.getPropertyData(xp);
+                if (!pdata.getPropertyAssignment().isFlatstoreEntry())
+                    adds.add(new FxDeltaChange(FxDeltaChange.ChangeType.Add, xp, null, pdata));
+            }
 
         }
 

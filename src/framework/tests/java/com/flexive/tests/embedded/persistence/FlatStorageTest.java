@@ -5,6 +5,7 @@ import com.flexive.core.flatstorage.FxFlatStorageInfo;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.content.FxContent;
+import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxLogoutFailedException;
 import com.flexive.shared.exceptions.FxRuntimeException;
@@ -141,7 +142,7 @@ public class FlatStorageTest {
 
     private void setupStorage() throws FxApplicationException {
         if (!testsEnabled) return;
-        dce.createFlatStorage(TEST_STORAGE, TEST_STORAGE_DESCRIPTION, 20, 10, 10, 10, 10);
+        dce.createFlatStorage(TEST_STORAGE, TEST_STORAGE_DESCRIPTION, 3, 3, 3, 3, 3);
     }
 
     @Test
@@ -192,8 +193,6 @@ public class FlatStorageTest {
     @Test(dependsOnMethods = {"flatAnalyze"})
     public void flattenAssignments() throws Exception {
         if (!testsEnabled) return;
-
-
         //create a test instance which will be migrated by the flat storage
         final FxContent test = co.initialize(TEST_TYPE);
         test.randomize();
@@ -208,6 +207,20 @@ public class FlatStorageTest {
                         "Assignment " + pa.getXPath() + " is expected to be a flatstore entry!");
             }
         }
+    }
+
+    @Test(dependsOnMethods = {"flattenAssignments"})
+    public void flatCreateContent() throws Exception {
+        if (!testsEnabled) return;
+        //create a test instance which will be migrated by the flat storage
+        final FxContent test = co.initialize(TEST_TYPE);
+        test.randomize();
+        FxPK pk = co.save(test);
+        co.remove(pk);
+        if( testsEnabled ) {
+            System.out.println("CREATED!!!");
+        }
+
     }
 
 }

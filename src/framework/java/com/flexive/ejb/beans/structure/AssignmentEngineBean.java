@@ -32,28 +32,31 @@
 package com.flexive.ejb.beans.structure;
 
 import com.flexive.core.Database;
-import com.flexive.core.flatstorage.FxFlatStorageManager;
 import static com.flexive.core.DatabaseConst.*;
 import com.flexive.core.conversion.ConversionEngine;
+import com.flexive.core.flatstorage.FxFlatStorageManager;
 import com.flexive.core.storage.ContentStorage;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.core.structure.StructureLoader;
 import com.flexive.shared.*;
 import com.flexive.shared.cache.FxCacheException;
-import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.content.FxPK;
+import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.*;
-import com.flexive.shared.interfaces.*;
+import com.flexive.shared.interfaces.AssignmentEngine;
+import com.flexive.shared.interfaces.AssignmentEngineLocal;
+import com.flexive.shared.interfaces.HistoryTrackerEngineLocal;
+import com.flexive.shared.interfaces.SequencerEngineLocal;
 import com.flexive.shared.security.Role;
 import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.structure.*;
-import com.flexive.shared.value.FxString;
-import com.flexive.shared.value.FxValue;
 import com.flexive.shared.value.FxBinary;
 import com.flexive.shared.value.FxReference;
+import com.flexive.shared.value.FxString;
+import com.flexive.shared.value.FxValue;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.commons.lang.StringUtils;
 
 import javax.annotation.Resource;
 import javax.ejb.*;
@@ -2445,7 +2448,12 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void flattenAssignment(String storage, FxPropertyAssignment assignment) throws FxApplicationException {
-        FxFlatStorageManager.getInstance().flatten(storage, assignment);
+        try {
+            FxFlatStorageManager.getInstance().flatten(storage, assignment);
+        } catch (FxApplicationException e) {
+            ctx.setRollbackOnly();
+            throw e;
+        }
         try {
             StructureLoader.reload(null);
         } catch (FxCacheException e) {
@@ -2459,6 +2467,11 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void unflattenAssignment(FxPropertyAssignment assignment) throws FxApplicationException {
-        FxFlatStorageManager.getInstance().unflatten(assignment);
+        try {
+            FxFlatStorageManager.getInstance().unflatten(assignment);
+        } catch (FxApplicationException e) {
+            ctx.setRollbackOnly();
+            throw e;
+        }
     }
 }

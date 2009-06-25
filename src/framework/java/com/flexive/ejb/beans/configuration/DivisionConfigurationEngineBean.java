@@ -53,6 +53,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.ejb.*;
+import javax.annotation.Resource;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -79,6 +80,9 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
      * Division config cache root.
      */
     private static final String CACHE_ROOT = "/divisionConfig";
+
+    @Resource
+    javax.ejb.SessionContext ctx;
 
     @Override
     protected ParameterScope getDefaultScope() {
@@ -430,6 +434,7 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
     /**
      * {@inheritDoc}
      */
+    @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public String getDatabaseInfo() {
         final DivisionData divisionData = FxContext.get().getDivisionData();
         return "Division #" + divisionData.getId() + " - " + divisionData.getDbVendor().name() + " " + divisionData.getDbVersion();
@@ -438,6 +443,7 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
     /**
      * {@inheritDoc}
      */
+    @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public boolean isFlatStorageEnabled() {
         return FxFlatStorageManager.getInstance().isEnabled();
     }
@@ -445,6 +451,7 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
     /**
      * {@inheritDoc}
      */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public List<FxFlatStorageInfo> getFlatStorageInfos() throws FxApplicationException {
         try {
             return FxFlatStorageManager.getInstance().getFlatStorageInfos();
@@ -456,10 +463,17 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
     /**
      * {@inheritDoc}
      */
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void createFlatStorage(String name, String description, int stringColumns, int textColumns, int bigIntColumns, int doubleColumns, int selectColumns) throws FxApplicationException {
         try {
-            FxFlatStorageManager.getInstance().createFlatStorage(name, description, stringColumns, textColumns, bigIntColumns, doubleColumns, selectColumns);
+            try {
+                FxFlatStorageManager.getInstance().createFlatStorage(name, description, stringColumns, textColumns, bigIntColumns, doubleColumns, selectColumns);
+            } catch (FxApplicationException e) {
+                ctx.setRollbackOnly();
+                throw e;
+            }
         } catch (SQLException e) {
+            ctx.setRollbackOnly();
             throw new FxDbException(e, "ex.db.sqlError", e.getMessage());
         }
     }
@@ -467,9 +481,15 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
     /**
      * {@inheritDoc}
      */
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void removeFlatStorage(String name) throws FxApplicationException {
         try {
-            FxFlatStorageManager.getInstance().removeFlatStorage(name);
+            try {
+                FxFlatStorageManager.getInstance().removeFlatStorage(name);
+            } catch (FxApplicationException e) {
+                ctx.setRollbackOnly();
+                throw e;
+            }
         } catch (SQLException e) {
             throw new FxDbException(e, "ex.db.sqlError", e.getMessage());
         }

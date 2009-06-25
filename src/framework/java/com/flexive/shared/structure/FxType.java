@@ -96,6 +96,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
     protected int maxRelSource;
     protected int maxRelDestination;
     protected LifeCycleInfo lifeCycleInfo;
+    protected boolean containsFlatStorageAssignments;
     protected List<FxType> derivedTypes;
     protected List<FxTypeRelation> relations;
     protected List<FxPropertyAssignment> assignedProperties;
@@ -129,6 +130,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
         this.lifeCycleInfo = lifeCycleInfo;
         this.derivedTypes = derivedTypes;
         this.relations = relations;
+        this.containsFlatStorageAssignments = false;
         this.scriptMapping = new LinkedHashMap<FxScriptEvent, long[]>(10);
         this.icon = new FxReference(false, FxReference.EMPTY).setEmpty();
     }
@@ -652,7 +654,8 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
                 continue;
             if (fxpa.hasScriptMappings() && !scriptedAssignments.contains(fxpa))
                 scriptedAssignments.add(fxpa);
-
+            if(!containsFlatStorageAssignments && fxpa.isFlatstoreEntry())
+                containsFlatStorageAssignments = true;
             if (!fxpa.hasParentGroupAssignment())
                 assignedProperties.add(fxpa);
             if (fxpa.getProperty().getUniqueMode() != UniqueMode.None && !uniqueProperties.contains(fxpa.getProperty()))
@@ -977,6 +980,15 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
             return false;
         }
         return valid;
+    }
+
+    /**
+     * Does this type contain assignments that are stored in a flat storage?
+     *
+     * @return type contains assignments that are stored in a flat storage
+     */
+    public boolean isContainsFlatStorageAssignments() {
+        return containsFlatStorageAssignments;
     }
 
     /**

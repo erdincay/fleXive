@@ -77,6 +77,11 @@ public abstract class FxData implements Serializable {
     private long assignmentId;
 
     /**
+     * Cached assignment
+     */
+    private FxAssignment assignment = null;
+
+    /**
      * Multiplicity of the assignment
      */
     private FxMultiplicity assignmentMultiplicity;
@@ -238,8 +243,10 @@ public abstract class FxData implements Serializable {
      *
      * @return FxAssignment
      */
-    public FxAssignment getAssignment() {
-        return CacheAdmin.getEnvironment().getAssignment(this.getAssignmentId());
+    public synchronized FxAssignment getAssignment() {
+        if (assignment == null)
+            assignment = CacheAdmin.getEnvironment().getAssignment(this.getAssignmentId());
+        return assignment;
     }
 
     /**
@@ -322,7 +329,7 @@ public abstract class FxData implements Serializable {
                 foundOther = true;
             }
         }
-        if(!foundOther && this.getIndex() > 1)
+        if (!foundOther && this.getIndex() > 1)
             this.setIndex(1);
     }
 
