@@ -623,6 +623,7 @@
         <input taskname="flexive" addproperty="flatstorage.nselect" defaultValue="10"
                message="SELECT/BOOLEAN columns:"/>
         <createFlatStorage jar="${flexive.lib.dir}/flexive-flatstorage.jar"
+                           lib="${flexive.build.framework.jar.dir}"
                            extlib="lib"
                            connectionurl="${flatstorage.url}"
                            schema="${flatstorage.schema}"

@@ -220,6 +220,7 @@
 
     <macrodef name="createFlatStorage" description="Create a new flat storage table">
         <attribute name="jar" description="Path to flatStorageCreator.jar"/>
+        <attribute name="lib" description="Path to the folder containing the shared flexive libraries (flexive-shared.jar)"/>
         <attribute name="extlib" description="Path to external library directory containing the dependencies for FlatStorageCreator.java"/>
         <attribute name="connectionUrl" description="The database connection URL"/>
         <attribute name="schema" description="Database schema (not applicable to all DB vendors)"/>
@@ -236,6 +237,7 @@
             <path id="createFlatStorage.classpath">
                 <fileset file="@{jar}"/>
                 <fileset dir="@{extlib}" includes="*.jar"/>
+                <fileset dir="@{lib}" includes="*.jar"/>
             </path>
             <java fork="true" classpathref="createFlatStorage.classpath" classname="com.flexive.tools.FlatStorageCreator">
                 <arg line="-u @{user}"/>
