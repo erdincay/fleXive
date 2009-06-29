@@ -960,7 +960,7 @@ WHERE id > 0    -- conditions]]></programlisting>
             <methodname>SqlQueryBuilder#getQuery()</methodname>
             returns the actual &fxsql; query, for example, the code snippet above built this &fxsql; query:
             <programlisting language="sql"><![CDATA[SELECT @pk, created_at, caption
-WHERE (typedef = 3)
+WHERE (typedef = 'article')
 ORDER BY created_at DESC]]></programlisting>
         </para>
 
@@ -1151,7 +1151,7 @@ ORDER BY created_at DESC]]></programlisting>
 
                 Result:
                 <programlisting language="sql"><![CDATA[SELECT @pk
-WHERE (typedef = 3 AND (caption = 'Test caption' OR caption = 'Another test caption'))]]>
+WHERE (typedef = 'article' AND (caption = 'Test caption' OR caption = 'Another test caption'))]]>
                 </programlisting>
             </example>
         </section>

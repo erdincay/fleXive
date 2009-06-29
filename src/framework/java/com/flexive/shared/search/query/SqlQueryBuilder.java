@@ -322,7 +322,8 @@ public class SqlQueryBuilder implements Serializable {
      */
     public SqlQueryBuilder type(String typeName) {
         checkParameterNull(typeName, "typeName");
-        condition("typedef", PropertyValueComparator.EQ, CacheAdmin.getEnvironment().getType(typeName).getId());
+        // get type from environment to fail early if it doesn't exist
+        condition("typedef", PropertyValueComparator.EQ, CacheAdmin.getEnvironment().getType(typeName).getName());
         return this;
     }
 
@@ -335,7 +336,7 @@ public class SqlQueryBuilder implements Serializable {
      * @return  this
      */
     public SqlQueryBuilder type(long typeId) {
-        condition("typedef", PropertyValueComparator.EQ, typeId);
+        condition("typedef", PropertyValueComparator.EQ, CacheAdmin.getEnvironment().getType(typeId).getName());
         return this;
     }
 
