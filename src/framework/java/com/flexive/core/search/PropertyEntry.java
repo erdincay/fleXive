@@ -705,7 +705,12 @@ public class PropertyEntry {
                     column = "(SELECT sd.stepdef FROM " + DatabaseConst.TBL_STEP + " sd " +
                             " WHERE sd.id=cd." + column + ")";
                 }
-                value = "" + FxFormatUtils.toLong(constantValue);
+                if ("TDEF".equals(column) && FxSharedUtils.isQuoted(constantValue, '\'')) {
+                    // optionally allow to select by type name (FX-613)
+                    value = "" + CacheAdmin.getEnvironment().getType(FxSharedUtils.stripQuotes(constantValue, '\'')).getId();
+                } else {
+                    value = "" + FxFormatUtils.toLong(constantValue);
+                }
                 break;
             case Number:
                 value = "" + FxFormatUtils.toInteger(constantValue);

@@ -297,7 +297,7 @@ public class SearchEngineTest {
     @Test(dataProvider = "testProperties")
     public void genericSelectNullTest(String name, FxDataType dataType) throws FxApplicationException {
         final FxResultSet result = new SqlQueryBuilder().select(getTestPropertyName(name))
-                .condition("typedef", PropertyValueComparator.NE, CacheAdmin.getEnvironment().getType(TEST_TYPE).getId())
+                .condition("typedef", PropertyValueComparator.NE, CacheAdmin.getEnvironment().getType(TEST_TYPE).getName())
                 .getResult();
         assertTrue(result.getRowCount() > 0);
         final int idx = 1;
