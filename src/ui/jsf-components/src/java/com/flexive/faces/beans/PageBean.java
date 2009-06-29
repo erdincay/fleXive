@@ -114,8 +114,8 @@ public class PageBean implements Serializable {
      */
     public String createAbsoluteUrl(String languageCode, String url) {
         // don't include the locale by default, just return an absolute URL
-        return FxJsfUtils.getRequest().getContextPath() + "/"
-                + (url.startsWith("/") ? url.substring(1) : url);
+        return FxJsfUtils.getResponse().encodeURL(FxJsfUtils.getRequest().getContextPath() + "/"
+                + (url.startsWith("/") ? url.substring(1) : url));
     }
 
     /**
