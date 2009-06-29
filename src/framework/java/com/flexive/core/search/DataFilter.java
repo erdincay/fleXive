@@ -45,8 +45,8 @@ import java.util.List;
  * @version $Rev$
  */
 public abstract class DataFilter {
-    protected SqlSearch search;
-    private Connection con;
+    protected final SqlSearch search;
+    private final Connection con;
 
     /**
      * Ctor

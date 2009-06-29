@@ -262,12 +262,9 @@ public class PropertyEntry {
     private static class PermissionsEntry extends PropertyEntry {
         private static final String[] READ_COLUMNS = new String[] { "acl", "created_by", "step", "tdef", "mandator" };
 
-        private final FxEnvironment environment;
-
         private PermissionsEntry() {
             super(Type.PERMISSIONS, PropertyResolver.Table.T_CONTENT, READ_COLUMNS,
                     null, false, null, null);
-            this.environment = CacheAdmin.getEnvironment();
         }
 
         @Override
@@ -278,8 +275,8 @@ public class PropertyEntry {
                 final long stepId = rs.getLong(positionInResultSet + getIndex("step"));
                 final long typeId = rs.getLong(positionInResultSet + getIndex("tdef"));
                 final long mandatorId = rs.getLong(positionInResultSet + getIndex("mandator"));
-                return FxPermissionUtils.getPermissions(aclId, environment.getType(typeId),
-                        environment.getStep(stepId).getAclId(), createdBy, mandatorId);
+                return FxPermissionUtils.getPermissions(aclId, getEnvironment().getType(typeId),
+                        getEnvironment().getStep(stepId).getAclId(), createdBy, mandatorId);
             } catch (SQLException e) {
                 throw new FxSqlSearchException(e);
             } catch (FxNoAccessException e) {
@@ -303,6 +300,7 @@ public class PropertyEntry {
     protected final boolean multilanguage;
     protected final List<FxSQLFunction> functions = new ArrayList<FxSQLFunction>();
     protected int positionInResultSet = -1;
+    private FxEnvironment environment;
 
     /**
      * Create a new instance based on the given (search) property.
@@ -314,8 +312,7 @@ public class PropertyEntry {
      */
     public PropertyEntry(Property searchProperty, ContentStorage storage, boolean ignoreCase) throws FxSqlSearchException {
         this.type = Type.PROPERTY_REF;
-
-        final FxEnvironment environment = CacheAdmin.getEnvironment();
+        this.environment = CacheAdmin.getEnvironment();
         if (searchProperty.isAssignment()) {
             try {
                 if (StringUtils.isNumeric(searchProperty.getPropertyName())) {
@@ -494,11 +491,11 @@ public class PropertyEntry {
                     result = new FxReference(new ReferencedContent(new FxPK(rs.getLong(pos), FxPK.MAX)));  // TODO!!
                     break;
                 case SelectOne:
-                    FxSelectListItem oneItem = CacheAdmin.getEnvironment().getSelectListItem(rs.getLong(pos));
+                    FxSelectListItem oneItem = getEnvironment().getSelectListItem(rs.getLong(pos));
                     result = new FxSelectOne(multilanguage, FxLanguage.SYSTEM_ID, oneItem);
                     break;
                 case SelectMany:
-                    FxSelectListItem manyItem = CacheAdmin.getEnvironment().getSelectListItem(rs.getLong(pos));
+                    FxSelectListItem manyItem = getEnvironment().getSelectListItem(rs.getLong(pos));
                     SelectMany valueMany = new SelectMany(manyItem.getList());
                     valueMany.selectFromList(rs.getString(pos + 1));
                     result = new FxSelectMany(multilanguage, FxLanguage.SYSTEM_ID, valueMany);
@@ -672,6 +669,13 @@ public class PropertyEntry {
                 || "MODIFIED_AT".equalsIgnoreCase(columnName);
     }
 
+    protected final FxEnvironment getEnvironment() {
+        if (environment == null) {
+            environment = CacheAdmin.getEnvironment();
+        }
+        return environment;
+    }
+
     /**
      * Returns a (column, value) pair for a SQL comparison condition against the given constant value.
      *
@@ -707,7 +711,7 @@ public class PropertyEntry {
                 }
                 if ("TDEF".equals(column) && FxSharedUtils.isQuoted(constantValue, '\'')) {
                     // optionally allow to select by type name (FX-613)
-                    value = "" + CacheAdmin.getEnvironment().getType(FxSharedUtils.stripQuotes(constantValue, '\'')).getId();
+                    value = "" + getEnvironment().getType(FxSharedUtils.stripQuotes(constantValue, '\'')).getId();
                 } else {
                     value = "" + FxFormatUtils.toLong(constantValue);
                 }

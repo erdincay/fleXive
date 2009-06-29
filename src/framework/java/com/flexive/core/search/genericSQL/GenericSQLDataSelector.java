@@ -269,7 +269,7 @@ public class GenericSQLDataSelector extends DataSelector {
             final String sel = "(select tree_nodeIndex(" + root + "," + FILTER_ALIAS + ".id,false))";   // TODO: LIVE/EDIT
             result.addItem(sel, resultPos, false);
         } else if (entry.getType() == PropertyEntry.Type.PATH) {
-            final long propertyId = CacheAdmin.getEnvironment().getProperty("CAPTION").getId();
+            final long propertyId = search.getEnvironment().getProperty("CAPTION").getId();
             final String sel = "(select tree_FTEXT1024_Paths(" + FILTER_ALIAS + ".id," +
                     search.getLanguage().getId() + "," + propertyId + ",false))"; // TODO: LIVE/EDIT
             result.addItem(sel, resultPos, false);

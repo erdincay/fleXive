@@ -1,3 +1,33 @@
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: white;
+}
+
+/* Login form */
+
+#LoginTable #title {
+    font-size: 2em;
+    padding-bottom: 1em;
+}
+
+#LoginTable td, #LoginTable th {
+    margin-top: 0.5em;
+}
+
+#LoginTable td {
+    padding: 0.3em;
+}
+
+#LoginTable th {
+    font-weight: normal;
+    text-align: right;
+}
+
+#LoginTable #ucslink {
+    padding-top: 2em;
+}
+/* Main division page */
+
 table.divisions {
     border: 1px solid black;
     border-collapse: collapse;

@@ -100,11 +100,9 @@ public class GenericSQLDataFilter extends DataFilter {
     private int foundEntryCount;
     private boolean truncated;
     private Connection con;
-    private FxEnvironment environment;
 
     public GenericSQLDataFilter(Connection con, SqlSearch search) throws FxSqlSearchException {
         super(con, search);
-        this.environment = CacheAdmin.getEnvironment();
         this.con = con;
         final long[] briefcaseIds = getStatement().getBriefcaseFilter();
         if (briefcaseIds.length == 0) {
@@ -245,7 +243,7 @@ public class GenericSQLDataFilter extends DataFilter {
                     " WHERE search_id=" + search.getSearchId() + " GROUP BY tdef");
             foundEntryCount = 0;
             while (rs != null && rs.next()) {
-                final FxFoundType type = new FxFoundType(environment.getType(rs.getLong(2)), rs.getInt(1));
+                final FxFoundType type = new FxFoundType(search.getEnvironment().getType(rs.getLong(2)), rs.getInt(1));
                 foundEntryCount += type.getFoundEntries();
                 contentTypes.add(type);
             }
@@ -399,13 +397,13 @@ public class GenericSQLDataFilter extends DataFilter {
         } catch (FxApplicationException e) {
             throw new FxSqlSearchException(LOG, e, "ex.sqlSearch.filter.loadTreeNode", parentNode, e.getMessage());
         }
-        String mandators = environment.getInactiveMandatorList();
+        String mandators = search.getEnvironment().getInactiveMandatorList();
         final String mandatorFilter;
         if (mandators.length() > 0)
             mandatorFilter = " AND cd.mandator NOT IN(" + mandators + ")";
         else
             mandatorFilter = mandators; //empty
-        String types = environment.getDeactivatedTypesList();
+        String types = search.getEnvironment().getDeactivatedTypesList();
         final String typeFilter;
         if (types.length() > 0)
             typeFilter = " AND cd.tdef NOT IN(" + types + ")";
@@ -714,7 +712,7 @@ public class GenericSQLDataFilter extends DataFilter {
      */
     private String getInactiveMandatorsFilter(String tblAlias) {
         String tbl = (tblAlias == null || tblAlias.length() == 0) ? "" : tblAlias + ".";
-        String mandators = environment.getInactiveMandatorList();
+        String mandators = search.getEnvironment().getInactiveMandatorList();
         if (mandators.length() > 0)
             return " AND " + tbl + "mandator NOT IN(" + mandators + ")";
         else
@@ -729,7 +727,7 @@ public class GenericSQLDataFilter extends DataFilter {
      */
     private String getDeactivatedTypesFilter(String tblAlias) {
         String tbl = (tblAlias == null || tblAlias.length() == 0) ? "" : tblAlias + ".";
-        String types = environment.getDeactivatedTypesList();
+        String types = search.getEnvironment().getDeactivatedTypesList();
         if (types.length() > 0)
             return " AND " + tbl + "tdef NOT IN(" + types + ")";
         else

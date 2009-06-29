@@ -10,77 +10,57 @@
 <head>
     <title>#{fxMessageBean['GlobalConfig.title']}</title>
     <fx:includes/>
-    <link rel="stylesheet" type="text/css" href="#{fxSystemBean.contextPath}/pub/css/#{adm:versionedUrl('login.css')}"/>
+    <link rel="stylesheet" type="text/css" href="#{fx:webletUrl('divisions_plugin','/css/divisions.css')}"/>
 </head>
 
 <body>
 
-<a href="http://www.ucs.at" target="ucs">
-    <h:graphicImage alt="Login" url="/pub/images/LogoUcs.gif" id="UcsLogo"/>
-</a>
-
-<table cellpadding="0" border="0" cellspacing="0" width="100%" id="LoginTable">
+<table cellpadding="0" border="0" cellspacing="0" width="100%">
     <tr>
         <td align="center" valign="top">
             <h:form id="fxGlobalLoginForm">
                 <h:messages globalOnly="true"/>
-                <table cellspacing="0" cellpadding="0" border="0" class="content">
+                <table cellspacing="0" cellpadding="0" border="0" id="LoginTable">
                     <tr>
-                        <td align="center" id="title">#{fxMessageBean['GlobalConfig.title']}</td>
-                        <td colspan="2" width="241"></td>
+                        <td id="title" colspan="2">#{fxMessageBean['GlobalConfig.title']}</td>
                     </tr>
                     <tr>
-                        <td colspan="3" height="60"></td>
-                    </tr>
-                    <tr>
-                        <td align="right" id="username"><label
-                                for="fxGlobalLoginForm:username">#{fxMessageBean['GlobalConfig.field.username']}</label></td>
-                        <td align="left" colspan="2" width="241">
+                        <th id="username">
+                            <h:outputLabel for="username">#{fxMessageBean['GlobalConfig.field.username']}</h:outputLabel>
+                        </th>
+                        <td width="241">
                             <h:inputText id="username" styleClass="inputs" value="#{globalConfigBean.username}"
                                          required="true"/>
                             <h:message for="username"/>
                         </td>
                     </tr>
                     <tr>
-                        <td colspan="3" height="11"></td>
-                    </tr>
-                    <tr>
-                        <td align="right" id="password"><label
-                                for="fxGlobalLoginForm:password">#{fxMessageBean['GlobalConfig.field.password']}</label></td>
-                        <td align="left" colspan="2">
-                            <h:inputSecret id="password" styleClass="inputs" value="#{globalConfigBean.password}"
-                                           onkeypress="return onReturnEval(event, 'document.getElementById(\'fxGlobalLoginForm:loginButton\').onclick()')"/>
+                        <th id="password">
+                            <h:outputLabel for="password">#{fxMessageBean['GlobalConfig.field.password']}</h:outputLabel>
+                        </th>
+                        <td>
+                            <h:inputSecret id="password" styleClass="inputs" value="#{globalConfigBean.password}"/>
                             <h:message for="password"/>
                         </td>
                     </tr>
                     <tr>
-                        <td colspan="3" height="11"></td>
+                        <td>&nbsp;</td>
+                        <td>
+                            <h:commandButton id="loginButton" action="#{globalConfigBean.login}" value="#{fxMessageBean['GlobalConfig.button.login']}"/>
+                        </td>
                     </tr>
                     <tr>
-                        <td align="right"></td>
-                        <td align="left" colspan="2">
-                            <h:commandLink id="loginButton" action="#{globalConfigBean.login}">
-                                <h:graphicImage id="loginImage" alt="Login" styleClass="button"
-                                                url="/pub/images/LoginButton.gif" style="border:0;"/>
-                            </h:commandLink>
+                        <td>&nbsp;</td>
+                        <td id="ucslink">
+                            <a href="http://www.ucs.at" target="_blank">unique computing solutions</a>
                         </td>
                     </tr>
                 </table>
-
             </h:form>
         </td>
     </tr>
 </table>
-<table cellpadding="0" cellspacing="0" width="100%" border="0">
-    <tr>
-        <td align="center" nowrap="true">
-            <div id="Footer">
-                <a href="http://www.flexive.org" target="flexive.org">
-                    #{fxSystemBean.buildInfoVerbose}
-                </a>
-            </div>
-        </td>
-    </tr>
-</table>
+
+
 </body>
 </html>

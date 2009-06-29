@@ -578,4 +578,8 @@ public class SqlSearch {
     public FxLanguage getSearchLanguage() {
         return searchLanguage;
     }
+
+    public FxEnvironment getEnvironment() {
+        return environment;
+    }
 }
