@@ -42,6 +42,7 @@ import com.flexive.shared.structure.FxType;
 import com.flexive.shared.structure.UniqueMode;
 import com.flexive.shared.value.BinaryDescriptor;
 import com.flexive.shared.value.FxBinary;
+import com.flexive.shared.value.ReferencedContent;
 import com.flexive.core.storage.binary.BinaryInputStream;
 
 import java.io.IOException;
@@ -365,4 +366,15 @@ public interface ContentStorage {
      * @throws SQLException on errors
      */
     long getTypeInstanceCount(Connection con, long typeId) throws SQLException;
+
+    /**
+     * Resolve a reference from <code>pk</code> to <code>referencedId</code>
+     *
+     * @param con            an open and valid connection
+     * @param contentVersion the version of the referencing content
+     * @param referencedId   the referenced id
+     * @return the referenced content
+     * @throws SQLException on errors
+     */
+    ReferencedContent resolveReference(Connection con, int contentVersion, long referencedId) throws SQLException;
 }

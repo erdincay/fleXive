@@ -640,4 +640,14 @@ public interface FxEnvironment extends Serializable {
      * @return comma separated list of deactivated FxTypes
      */
     String getDeactivatedTypesList();
+
+    /**
+     * Get FxFlatStorage Mappings for the requested storage, type and leveĺ
+     *
+     * @param storage flat storage
+     * @param typeId  type id
+     * @param level   level
+     * @return Mappings for the requested storage, type and leveĺ
+     */
+    List<FxFlatstoreMapping> getFlatStorageMappings(String storage, long typeId, int level);
 }

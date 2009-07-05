@@ -37,6 +37,7 @@ import static com.flexive.core.DatabaseConst.*;
 import com.flexive.core.LifeCycleInfoImpl;
 import com.flexive.core.conversion.ConversionEngine;
 import com.flexive.core.flatstorage.FxFlatStorage;
+import com.flexive.core.flatstorage.FxFlatStorageLoadColumn;
 import com.flexive.core.flatstorage.FxFlatStorageManager;
 import com.flexive.core.storage.ContentStorage;
 import com.flexive.core.storage.StorageManager;
@@ -1398,7 +1399,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      * @param type             FxType used
      * @param env              FxEnvironment
      * @param pk               primary key of the content data to load
-     * @param requestedVersion the originally requested version (LIVE, MAX or specific version number, needed to resolve references since the pk's version is resoved already)
+     * @param requestedVersion the originally requested version (LIVE, MAX or specific version number, needed to resolve references since the pk's version is resolved already)
      * @return a (root) group containing all data
      * @throws com.flexive.shared.exceptions.FxLoadException
      *                                     on errors
@@ -1592,6 +1593,10 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 currValue.setDefaultLanguage(defLang);
                 addValue(root, currXPath, currAssignment, currPos, currValue);
             }
+            //load flat columns
+            if (type.isContainsFlatStorageAssignments())
+                for (FxFlatStorageLoadColumn column : FxFlatStorageManager.getInstance().loadContent(this, con, type.getId(), pk, requestedVersion))
+                    addValue(root, column.getXPath(), column.getAssignment(), column.getPos(), column.getValue());
         } catch (FxCreateException e) {
             throw new FxLoadException(e);
         } catch (FxNotFoundException e) {
@@ -1604,15 +1609,9 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     }
 
     /**
-     * Resolve a reference from <code>pk</code> to <code>referencedId</code>
-     *
-     * @param con            an open and valid connection
-     * @param contentVersion the version of the referencing content
-     * @param referencedId   the referenced id
-     * @return the referenced content
-     * @throws SQLException on errors
+     * {@inheritDoc}
      */
-    private ReferencedContent resolveReference(Connection con, int contentVersion, long referencedId) throws SQLException {
+    public ReferencedContent resolveReference(Connection con, int contentVersion, long referencedId) throws SQLException {
         String sql = contentVersion == FxPK.LIVE ? CONTENT_REFERENCE_LIVE : CONTENT_REFERENCE_MAX;
         PreparedStatement ps = null;
         int referencedVersion;

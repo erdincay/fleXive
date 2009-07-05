@@ -14,7 +14,7 @@ import org.testng.annotations.Test;
 public class FxArrayUtilsTest {
     @Test
     public void stringArrayTest() {
-        String a = FxArrayUtils.createEmptyStringArray(6, ",");
+        String a = FxArrayUtils.createEmptyStringArray(6, ',');
         Assert.assertEquals(a, ",,,,,");
         a = FxArrayUtils.replaceElement(a, ',', 0, "10");
         Assert.assertEquals(a, "10,,,,,");
@@ -32,7 +32,17 @@ public class FxArrayUtilsTest {
         Assert.assertEquals(a, "10,11,12,,14,15");
         a = FxArrayUtils.replaceElement(a, ',', 4, "X");
         Assert.assertEquals(a, "10,11,12,,X,15");
-        a = FxArrayUtils.replaceElement(a, ',', 5, "Y");
-        Assert.assertEquals(a, "10,11,12,,X,Y");
+        a = FxArrayUtils.replaceElement(a, ',', 5, "42");
+        Assert.assertEquals(a, "10,11,12,,X,42");
+        Assert.assertEquals(FxArrayUtils.getIntElementAt(a, ',', 0), 10);
+        Assert.assertEquals(FxArrayUtils.getIntElementAt(a, ',', 1), 11);
+        Assert.assertEquals(FxArrayUtils.getIntElementAt(a, ',', 2), 12);
+        Assert.assertEquals(FxArrayUtils.getIntElementAt(a, ',', 5), 42);
+        try {
+            FxArrayUtils.getIntElementAt(a, ',', 6);
+            Assert.fail("Wrong index should throw exception!");
+        } catch (ArrayIndexOutOfBoundsException e) {
+            //expected
+        }
     }
 }

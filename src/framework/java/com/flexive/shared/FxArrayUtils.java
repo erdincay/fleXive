@@ -292,8 +292,24 @@ public class FxArrayUtils {
      * @param separator separator for the resulting String
      * @return String representation of the array
      */
+    public static String toStringArray(Object[] elements, char separator) {
+        StringBuilder sb = new StringBuilder((elements.length + 20));
+        for (Object element : elements) {
+            sb.append(String.valueOf(element));
+            sb.append(separator);
+        }
+        return sb.substring(0, sb.length() - 1);
+    }
+
+    /**
+     * Convert an object array to a string array with the given separator String
+     *
+     * @param elements  elements to convert to a String
+     * @param separator separator for the resulting String
+     * @return String representation of the array
+     */
     public static String toStringArray(Object[] elements, String separator) {
-        StringBuilder sb = new StringBuilder((elements.length + separator.length()) * 20);
+        StringBuilder sb = new StringBuilder((elements.length + separator.length() * 20));
         for (Object element : elements) {
             sb.append(String.valueOf(element));
             sb.append(separator);
@@ -340,12 +356,40 @@ public class FxArrayUtils {
      * @param separator separator to use
      * @return String containing <code>length-1</code> separators
      */
-    public static String createEmptyStringArray(int length, String separator) {
-        StringBuilder sb = new StringBuilder(separator.length() * length);
+    public static String createEmptyStringArray(int length, char separator) {
+        StringBuilder sb = new StringBuilder(length);
         for (int i = 0; i < length - 1; i++) {
             sb.append(separator);
         }
         return sb.toString();
+    }
+
+
+    /**
+     * Get an integer element from a string array
+     *
+     * @param array     the string array
+     * @param separator seperator character
+     * @param index     index to get the element at
+     * @return element
+     */
+    public static int getIntElementAt(String array, char separator, int index) {
+        if (index == 0)
+            return Integer.valueOf(array.substring(0, array.indexOf(separator)));
+        int curr = 0;
+        int start = 0;
+        for (char c : array.toCharArray()) {
+            if (c == separator)
+                curr++;
+            if (curr == index) {
+                int end = array.substring(start + 1).indexOf(',');
+                if (end == -1)
+                    return Integer.valueOf(array.substring(start + 1));
+                return Integer.valueOf(array.substring(start + 1, start + end + 1));
+            }
+            start++;
+        }
+        throw new ArrayIndexOutOfBoundsException("Index " + index + " is out of bounds for [" + array + "]");
     }
 }
 

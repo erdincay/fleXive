@@ -33,8 +33,8 @@ package com.flexive.core.structure;
 
 import com.flexive.shared.FxArrayUtils;
 import com.flexive.shared.FxContext;
-import com.flexive.shared.XPathElement;
 import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.XPathElement;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.exceptions.FxRuntimeException;
@@ -42,9 +42,9 @@ import com.flexive.shared.scripting.FxScriptInfo;
 import com.flexive.shared.scripting.FxScriptMapping;
 import com.flexive.shared.scripting.FxScriptMappingEntry;
 import com.flexive.shared.security.ACL;
+import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.security.Mandator;
 import com.flexive.shared.security.UserTicket;
-import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.workflow.Route;
 import com.flexive.shared.workflow.Step;
@@ -86,7 +86,9 @@ public final class FxEnvironmentImpl implements FxEnvironment {
     private List<FxScriptInfo> scripts;
     private List<FxScriptMapping> scriptMappings;
     private long timeStamp = 0;
-
+    //storage-type-level-mapping
+    private Map<String, Map<Long, Map<Integer, List<FxFlatstoreMapping>>>> flatMappings;
+    private final static List<FxFlatstoreMapping> EMPTY_FLAT_MAPPINGS = Collections.unmodifiableList(new ArrayList<FxFlatstoreMapping>(0));
 
     public FxEnvironmentImpl() {
     }
@@ -1082,6 +1084,24 @@ public final class FxEnvironmentImpl implements FxEnvironment {
         //2nd pass for types (scripting for assignments can only be resolved now)
         for (FxType type : types)
             type.resolveReferences(this);
+        //resolve flat storage mappings and prepare them by storage and level
+        //storage-type-level-mapping
+        this.flatMappings = new HashMap<String, Map<Long, Map<Integer, List<FxFlatstoreMapping>>>>(10);
+        for (FxPropertyAssignment as : this.propertyAssignmentsAll) {
+            if (!as.isFlatstoreEntry())
+                continue;
+            FxFlatstoreMapping mapping = as.getFlatstoreMapping();
+            if (!flatMappings.containsKey(mapping.getStorage()))
+                flatMappings.put(mapping.getStorage(), new HashMap<Long, Map<Integer, List<FxFlatstoreMapping>>>(10));
+            Map<Long, Map<Integer, List<FxFlatstoreMapping>>> typeMap = flatMappings.get(mapping.getStorage());
+            if (!typeMap.containsKey(as.getAssignedType().getId()))
+                typeMap.put(as.getAssignedType().getId(), new HashMap<Integer, List<FxFlatstoreMapping>>(10));
+            Map<Integer, List<FxFlatstoreMapping>> levelMap = typeMap.get(as.getAssignedType().getId());
+            if (!levelMap.containsKey(mapping.getLevel()))
+                levelMap.put(mapping.getLevel(), new ArrayList<FxFlatstoreMapping>(40));
+            List<FxFlatstoreMapping> mapList = levelMap.get(mapping.getLevel());
+            mapList.add(mapping);
+        }
     }
 
     /**
@@ -1292,5 +1312,16 @@ public final class FxEnvironmentImpl implements FxEnvironment {
             }
         deactivatedTypes = sb.toString();
         return deactivatedTypes;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public List<FxFlatstoreMapping> getFlatStorageMappings(String storage, long typeId, int level) {
+        try {
+            return flatMappings.get(storage).get(typeId).get(level);
+        } catch (Exception e) {
+            return EMPTY_FLAT_MAPPINGS;
+        }
     }
 }

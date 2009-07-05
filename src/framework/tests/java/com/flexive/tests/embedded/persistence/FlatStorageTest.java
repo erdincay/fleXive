@@ -5,11 +5,15 @@ import com.flexive.core.flatstorage.FxFlatStorageInfo;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.content.FxContent;
+import com.flexive.shared.content.FxDelta;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxLogoutFailedException;
 import com.flexive.shared.exceptions.FxRuntimeException;
-import com.flexive.shared.interfaces.*;
+import com.flexive.shared.interfaces.AssignmentEngine;
+import com.flexive.shared.interfaces.ContentEngine;
+import com.flexive.shared.interfaces.DivisionConfigurationEngine;
+import com.flexive.shared.interfaces.TypeEngine;
 import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.FxString;
@@ -216,8 +220,11 @@ public class FlatStorageTest {
         final FxContent test = co.initialize(TEST_TYPE);
         test.randomize();
         FxPK pk = co.save(test);
+        FxContent loaded = co.load(pk);
+        FxDelta delta = FxDelta.processDelta(test, loaded);
+        System.out.println("=delta=>\n" + delta.dump());
         co.remove(pk);
-        if( testsEnabled ) {
+        if (testsEnabled) {
             System.out.println("CREATED!!!");
         }
 
