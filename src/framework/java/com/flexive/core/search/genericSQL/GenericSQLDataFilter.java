@@ -41,9 +41,8 @@ import com.flexive.core.storage.FxTreeNodeInfo;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.core.storage.genericSQL.GenericTreeStorage;
 import com.flexive.shared.*;
-import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.structure.FxDataType;
-import com.flexive.shared.structure.FxFlatstoreMapping;
+import com.flexive.shared.structure.FxFlatStorageMapping;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxSqlSearchException;
 import com.flexive.shared.search.DateFunction;
@@ -592,7 +591,7 @@ public class GenericSQLDataFilter extends DataFilter {
                         getSubQueryLimit() +
                         ") ";
             case T_CONTENT_DATA_FLAT:
-                final FxFlatstoreMapping mapping = entry.getAssignment().getFlatstoreMapping();
+                final FxFlatStorageMapping mapping = entry.getAssignment().getFlatStorageMapping();
                 return " (SELECT DISTINCT cd.id, cd.ver, cd.lang " +
                         "FROM " + mapping.getStorage() + " cd " +
                         "WHERE " +

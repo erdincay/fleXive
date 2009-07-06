@@ -649,5 +649,5 @@ public interface FxEnvironment extends Serializable {
      * @param level   level
      * @return Mappings for the requested storage, type and leveĺ
      */
-    List<FxFlatstoreMapping> getFlatStorageMappings(String storage, long typeId, int level);
+    List<FxFlatStorageMapping> getFlatStorageMappings(String storage, long typeId, int level);
 }

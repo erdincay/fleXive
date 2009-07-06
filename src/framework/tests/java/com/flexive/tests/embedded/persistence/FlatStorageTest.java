@@ -205,10 +205,10 @@ public class FlatStorageTest {
         Map<String, List<FxPropertyAssignment>> pot = ass.getPotentialFlatAssignments(CacheAdmin.getEnvironment().getType(TEST_TYPE));
         for (String col : pot.keySet()) {
             for (FxPropertyAssignment pa : pot.get(col)) {
-                Assert.assertFalse(pa.isFlatstoreEntry(), "Assignment " + pa.getXPath() + " is not expected to be a flatstore entry!");
+                Assert.assertFalse(pa.isFlatStorageEntry(), "Assignment " + pa.getXPath() + " is not expected to be a flat storage entry!");
                 ass.flattenAssignment(TEST_STORAGE, pa);
-                Assert.assertTrue(CacheAdmin.getEnvironment().getPropertyAssignment(pa.getXPath()).isFlatstoreEntry(),
-                        "Assignment " + pa.getXPath() + " is expected to be a flatstore entry!");
+                Assert.assertTrue(CacheAdmin.getEnvironment().getPropertyAssignment(pa.getXPath()).isFlatStorageEntry(),
+                        "Assignment " + pa.getXPath() + " is expected to be a flat storage entry!");
             }
         }
     }

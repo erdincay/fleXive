@@ -499,7 +499,7 @@ public class FxDelta implements Serializable {
                 if (updates == null)
                     updates = new ArrayList<FxDeltaChange>(10);
                 final FxPropertyData orgData = original.getPropertyData(xp);
-                if (!orgData.getPropertyAssignment().isFlatstoreEntry())
+                if (!orgData.getPropertyAssignment().isFlatStorageEntry())
                     updates.add(new FxDeltaChange(FxDeltaChange.ChangeType.Update, xp, orgData, compare.getPropertyData(xp)));
             }
         }
@@ -516,7 +516,7 @@ public class FxDelta implements Serializable {
             } else {
                 //property
                 final FxPropertyData pdata = compare.getPropertyData(xp);
-                if (!pdata.getPropertyAssignment().isFlatstoreEntry())
+                if (!pdata.getPropertyAssignment().isFlatStorageEntry())
                     adds.add(new FxDeltaChange(FxDeltaChange.ChangeType.Add, xp, null, pdata));
             }
 

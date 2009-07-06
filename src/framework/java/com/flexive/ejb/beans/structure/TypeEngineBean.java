@@ -828,7 +828,7 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
                 ps.close();
             }
 
-            //remove all flatstore assignments for this type
+            //remove all flat storage assignments for this type
             FxFlatStorageManager.getInstance().removeTypeMappings(con, type.getId());
 
             //remove the assignments

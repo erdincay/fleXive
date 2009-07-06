@@ -654,7 +654,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
                 continue;
             if (fxpa.hasScriptMappings() && !scriptedAssignments.contains(fxpa))
                 scriptedAssignments.add(fxpa);
-            if(!containsFlatStorageAssignments && fxpa.isFlatstoreEntry())
+            if(!containsFlatStorageAssignments && fxpa.isFlatStorageEntry())
                 containsFlatStorageAssignments = true;
             if (!fxpa.hasParentGroupAssignment())
                 assignedProperties.add(fxpa);

@@ -458,9 +458,9 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             ps.executeBatch();
             ps_ft.executeBatch();
             if (CacheAdmin.getEnvironment().getType(content.getTypeId()).isContainsFlatStorageAssignments()) {
-                FxFlatStorage flatstore = FxFlatStorageManager.getInstance();
-                flatstore.setPropertyData(con, pk, content.getTypeId(), content.getStepId(),
-                        content.isMaxVersion(), content.isLiveVersion(), flatstore.getFlatPropertyData(content.getRootGroup()));
+                FxFlatStorage flatStorage = FxFlatStorageManager.getInstance();
+                flatStorage.setPropertyData(con, pk, content.getTypeId(), content.getStepId(),
+                        content.isMaxVersion(), content.isLiveVersion(), flatStorage.getFlatPropertyData(content.getRootGroup()));
             }
             checkUniqueConstraints(con, env, sql, pk, content.getTypeId());
             content.resolveBinaryPreview();
@@ -570,9 +570,9 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             ps.executeBatch();
             ps_ft.executeBatch();
             if (CacheAdmin.getEnvironment().getType(content.getTypeId()).isContainsFlatStorageAssignments()) {
-                FxFlatStorage flatstore = FxFlatStorageManager.getInstance();
-                flatstore.setPropertyData(con, pk, content.getTypeId(), content.getStepId(),
-                        content.isMaxVersion(), content.isLiveVersion(), flatstore.getFlatPropertyData(content.getRootGroup()));
+                FxFlatStorage flatStorage = FxFlatStorageManager.getInstance();
+                flatStorage.setPropertyData(con, pk, content.getTypeId(), content.getStepId(),
+                        content.isMaxVersion(), content.isLiveVersion(), flatStorage.getFlatPropertyData(content.getRootGroup()));
             }
             checkUniqueConstraints(con, env, sql, pk, content.getTypeId());
             binaryStorage.updateContentBinaryEntry(con, pk, content.getBinaryPreviewId(), content.getBinaryPreviewACL());
@@ -856,7 +856,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     protected void insertPropertyData(FxProperty prop, List<FxData> allData, Connection con,
                                       PreparedStatement ps, PreparedStatement ps_ft, FxPK pk,
                                       FxPropertyData data, boolean isMaxVer, boolean isLiveVer) throws SQLException, FxDbException, FxUpdateException, FxNoAccessException {
-        if (data == null || data.isEmpty() || data.getPropertyAssignment().isFlatstoreEntry())
+        if (data == null || data.isEmpty() || data.getPropertyAssignment().isFlatStorageEntry())
             return;
         clearPreparedStatement(ps, INSERT_VALUE_POS, INSERT_END_POS);
         ps.setLong(17, 0); //FSELECT has to be set to 0 and not null
@@ -908,7 +908,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     protected void updatePropertyData(FxDelta.FxDeltaChange change, FxProperty prop, List<FxData> allData,
                                       Connection con, PreparedStatement ps, PreparedStatement ps_ft, FxPK pk, FxPropertyData data)
             throws SQLException, FxDbException, FxUpdateException, FxNoAccessException {
-        if ((change.isProperty() && (data == null || data.isEmpty() || data.getPropertyAssignment().isFlatstoreEntry())) ||
+        if ((change.isProperty() && (data == null || data.isEmpty() || data.getPropertyAssignment().isFlatStorageEntry())) ||
                 !(change.isDataChange() || change.isPositionChange()))
             return;
         clearPreparedStatement(ps, 1, UPDATE_ID_POS);
@@ -1292,7 +1292,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         if (data == null || data.isEmpty())
             return;
         if (data.isProperty())
-            if (((FxPropertyData) data).getPropertyAssignment().isFlatstoreEntry()) {
+            if (((FxPropertyData) data).getPropertyAssignment().isFlatStorageEntry()) {
                 FxFlatStorageManager.getInstance().deletePropertyData(con, pk, ((FxPropertyData) data));
                 return;
             }

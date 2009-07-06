@@ -68,7 +68,7 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
 
     protected long defaultLang;
 
-    protected FxFlatstoreMapping flatstoreMapping;
+    protected FxFlatStorageMapping flatStorageMapping;
 
     /**
      * Constructor
@@ -90,12 +90,12 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
      * @param ACL                   the embedded property's ACL (will only be used if the embedded property allows overriding)
      * @param defaultLang           default language if multilingual (if 0==SYSTEM then not set)
      * @param options               options
-     * @param flatstoreMapping      flatstore mapping for this property assignment or <code>null</code>
+     * @param flatStorageMapping    flat storage mapping for this property assignment or <code>null</code>
      */
     public FxPropertyAssignment(long assignmentId, boolean enabled, FxType assignedType, String alias, String xpath, int position,
                                 FxMultiplicity multiplicity, int defaultMultiplicity, FxGroupAssignment parentGroupAssignment,
                                 long baseAssignment, FxString label, FxString hint, FxValue defaultValue,
-                                FxProperty property, ACL ACL, long defaultLang, List<FxStructureOption> options, FxFlatstoreMapping flatstoreMapping) {
+                                FxProperty property, ACL ACL, long defaultLang, List<FxStructureOption> options, FxFlatStorageMapping flatStorageMapping) {
         super(assignmentId, enabled, assignedType, alias, xpath, position, multiplicity, defaultMultiplicity, parentGroupAssignment,
                 baseAssignment, label, hint, options);
         this.defaultValue = defaultValue;
@@ -104,7 +104,7 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
             this.alias = property.getName();
         this.defaultLang = defaultLang;
         this.ACL = ACL;
-        this.flatstoreMapping = flatstoreMapping;
+        this.flatStorageMapping = flatStorageMapping;
     }
 
 
@@ -118,21 +118,21 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
     }
 
     /**
-     * Is this property assignment stored in the flatstore?
+     * Is this property assignment stored in a flat storage?
      *
-     * @return property assignment stored in the flatstore?
+     * @return property assignment stored in a flat storage?
      */
-    public boolean isFlatstoreEntry() {
-        return this.flatstoreMapping != null;
+    public boolean isFlatStorageEntry() {
+        return this.flatStorageMapping != null;
     }
 
     /**
-     * Get the flatstore mapping for this property assignment
+     * Get the flat storage mapping for this property assignment
      *
-     * @return flatstore mapping or <code>null</code> if not located in the flatstore
+     * @return flat storage mapping or <code>null</code> if not located in the flat storage
      */
-    public FxFlatstoreMapping getFlatstoreMapping() {
-        return flatstoreMapping;
+    public FxFlatStorageMapping getFlatStorageMapping() {
+        return flatStorageMapping;
     }
 
     /**

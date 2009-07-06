@@ -3,11 +3,11 @@ package com.flexive.shared.structure;
 import java.io.Serializable;
 
 /**
- * Storage information about an assignment in a flatstore
+ * Storage information about an assignment in a flat storage
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-public class FxFlatstoreMapping implements Serializable {
+public class FxFlatStorageMapping implements Serializable {
     private static final long serialVersionUID = -4876287678910187513L;
     private long assignmentId;
     private String storage;
@@ -22,7 +22,7 @@ public class FxFlatstoreMapping implements Serializable {
      * @param column       column name
      * @param level        nesting level
      */
-    public FxFlatstoreMapping(long assignmentId, String storage, String column, int level) {
+    public FxFlatStorageMapping(long assignmentId, String storage, String column, int level) {
         this.assignmentId = assignmentId;
         this.storage = storage;
         this.column = column;

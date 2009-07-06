@@ -66,7 +66,7 @@ public class FxPropertyAssignmentEdit extends FxPropertyAssignment {
                 pa.getParentGroupAssignment(), pa.getBaseAssignmentId(), pa.getLabel() == null ? null : pa.getLabel().copy(),
                 pa.getHint() == null ? null : pa.getHint().copy(), pa.hasAssignmentDefaultValue() ? pa.getDefaultValue().copy() : null,
                 pa.getProperty().asEditable(), new ACL(pa.getACL()), pa.getDefaultLanguage(),
-                FxStructureOption.cloneOptions(pa.options), pa.getFlatstoreMapping());
+                FxStructureOption.cloneOptions(pa.options), pa.getFlatStorageMapping());
         if (pa.isSystemInternal())
             _setSystemInternal();
         this.isNew = false;
@@ -90,7 +90,7 @@ public class FxPropertyAssignmentEdit extends FxPropertyAssignment {
                 new FxMultiplicity(pa.getMultiplicity()), pa.getDefaultMultiplicity(), pa.getParentGroupAssignment(), pa.getId(), pa.getLabel().copy(),
                 pa.getHint().copy(), pa.hasAssignmentDefaultValue() ? pa.getDefaultValue().copy() : null,
                 pa.getProperty().asEditable(), new ACL(pa.getACL()), pa.getDefaultLanguage(),
-                FxStructureOption.cloneOptions(pa.options), pa.getFlatstoreMapping());
+                FxStructureOption.cloneOptions(pa.options), pa.getFlatStorageMapping());
         if (pa.isSystemInternal())
             _setSystemInternal();
         if (parent == null) {

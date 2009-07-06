@@ -340,8 +340,8 @@ public class PropertyEntry {
             this.property = environment.getProperty(searchProperty.getPropertyName());
         }
         this.readColumns = getReadColumns(storage, property);
-        if (this.assignment != null && this.assignment.isFlatstoreEntry()) {
-            this.filterColumn = assignment.getFlatstoreMapping().getColumn();
+        if (this.assignment != null && this.assignment.isFlatStorageEntry()) {
+            this.filterColumn = assignment.getFlatStorageMapping().getColumn();
         } else {
             String fcol = ignoreCase ? storage.getQueryUppercaseColumn(this.property) : this.readColumns[0];
             if (fcol == null) {
@@ -355,15 +355,15 @@ public class PropertyEntry {
                     searchProperty.getPropertyName());
         }
 
-        if (this.assignment != null && this.assignment.isFlatstoreEntry()) {
-            this.tableName = assignment.getFlatstoreMapping().getStorage();
+        if (this.assignment != null && this.assignment.isFlatStorageEntry()) {
+            this.tableName = assignment.getFlatStorageMapping().getStorage();
             this.tbl = PropertyResolver.Table.T_CONTENT_DATA_FLAT;
         } else {
             if (this.assignment == null) {
                 // check if all assignments of the property are NOT in the flat storage, otherwise
                 // property selection is not possible
                 for (FxPropertyAssignment pa : environment.getPropertyAssignments(this.property.getId(), false)) {
-                    if (pa.isFlatstoreEntry() && LOG.isWarnEnabled()) {
+                    if (pa.isFlatStorageEntry() && LOG.isWarnEnabled()) {
                         // only write warning to log for now
                         LOG.warn(new FxExceptionMessage("ex.sqlSearch.err.select.propertyWithFlat", this.property.getName(), pa.getXPath())
                                 .getLocalizedMessage(Locale.getDefault().getLanguage())

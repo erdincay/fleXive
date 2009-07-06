@@ -87,8 +87,8 @@ public final class FxEnvironmentImpl implements FxEnvironment {
     private List<FxScriptMapping> scriptMappings;
     private long timeStamp = 0;
     //storage-type-level-mapping
-    private Map<String, Map<Long, Map<Integer, List<FxFlatstoreMapping>>>> flatMappings;
-    private final static List<FxFlatstoreMapping> EMPTY_FLAT_MAPPINGS = Collections.unmodifiableList(new ArrayList<FxFlatstoreMapping>(0));
+    private Map<String, Map<Long, Map<Integer, List<FxFlatStorageMapping>>>> flatMappings;
+    private final static List<FxFlatStorageMapping> EMPTY_FLAT_MAPPINGS = Collections.unmodifiableList(new ArrayList<FxFlatStorageMapping>(0));
 
     public FxEnvironmentImpl() {
     }
@@ -1086,20 +1086,20 @@ public final class FxEnvironmentImpl implements FxEnvironment {
             type.resolveReferences(this);
         //resolve flat storage mappings and prepare them by storage and level
         //storage-type-level-mapping
-        this.flatMappings = new HashMap<String, Map<Long, Map<Integer, List<FxFlatstoreMapping>>>>(10);
+        this.flatMappings = new HashMap<String, Map<Long, Map<Integer, List<FxFlatStorageMapping>>>>(10);
         for (FxPropertyAssignment as : this.propertyAssignmentsAll) {
-            if (!as.isFlatstoreEntry())
+            if (!as.isFlatStorageEntry())
                 continue;
-            FxFlatstoreMapping mapping = as.getFlatstoreMapping();
+            FxFlatStorageMapping mapping = as.getFlatStorageMapping();
             if (!flatMappings.containsKey(mapping.getStorage()))
-                flatMappings.put(mapping.getStorage(), new HashMap<Long, Map<Integer, List<FxFlatstoreMapping>>>(10));
-            Map<Long, Map<Integer, List<FxFlatstoreMapping>>> typeMap = flatMappings.get(mapping.getStorage());
+                flatMappings.put(mapping.getStorage(), new HashMap<Long, Map<Integer, List<FxFlatStorageMapping>>>(10));
+            Map<Long, Map<Integer, List<FxFlatStorageMapping>>> typeMap = flatMappings.get(mapping.getStorage());
             if (!typeMap.containsKey(as.getAssignedType().getId()))
-                typeMap.put(as.getAssignedType().getId(), new HashMap<Integer, List<FxFlatstoreMapping>>(10));
-            Map<Integer, List<FxFlatstoreMapping>> levelMap = typeMap.get(as.getAssignedType().getId());
+                typeMap.put(as.getAssignedType().getId(), new HashMap<Integer, List<FxFlatStorageMapping>>(10));
+            Map<Integer, List<FxFlatStorageMapping>> levelMap = typeMap.get(as.getAssignedType().getId());
             if (!levelMap.containsKey(mapping.getLevel()))
-                levelMap.put(mapping.getLevel(), new ArrayList<FxFlatstoreMapping>(40));
-            List<FxFlatstoreMapping> mapList = levelMap.get(mapping.getLevel());
+                levelMap.put(mapping.getLevel(), new ArrayList<FxFlatStorageMapping>(40));
+            List<FxFlatStorageMapping> mapList = levelMap.get(mapping.getLevel());
             mapList.add(mapping);
         }
     }
@@ -1317,7 +1317,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
     /**
      * {@inheritDoc}
      */
-    public List<FxFlatstoreMapping> getFlatStorageMappings(String storage, long typeId, int level) {
+    public List<FxFlatStorageMapping> getFlatStorageMappings(String storage, long typeId, int level) {
         try {
             return flatMappings.get(storage).get(typeId).get(level);
         } catch (Exception e) {

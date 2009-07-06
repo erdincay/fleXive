@@ -33,11 +33,10 @@ package com.flexive.core.search.genericSQL;
 
 import com.flexive.core.DatabaseConst;
 import com.flexive.core.search.*;
-import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxArrayUtils;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.structure.FxDataType;
-import com.flexive.shared.structure.FxFlatstoreMapping;
+import com.flexive.shared.structure.FxFlatStorageMapping;
 import com.flexive.shared.search.SortDirection;
 import com.flexive.shared.exceptions.FxSqlSearchException;
 import com.flexive.shared.tree.FxTreeNode;
@@ -319,7 +318,7 @@ public class GenericSQLDataSelector extends DataSelector {
                     result.addItem(xpath, resultPos, true);
                     break;
                 case T_CONTENT_DATA_FLAT:
-                    final FxFlatstoreMapping mapping = entry.getAssignment().getFlatstoreMapping();
+                    final FxFlatStorageMapping mapping = entry.getAssignment().getFlatStorageMapping();
                     final String sel =
                             "(SELECT " + mapping.getColumn() + " FROM " + mapping.getStorage()
                             + " WHERE id=" + FILTER_ALIAS + ".id AND ver=" + FILTER_ALIAS + ".ver"

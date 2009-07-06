@@ -623,7 +623,7 @@ public final class FxFilteredEnvironment implements FxEnvironment {
     /**
      * {@inheritDoc}
      */
-    public List<FxFlatstoreMapping> getFlatStorageMappings(String storage, long typeId, int level) {
+    public List<FxFlatStorageMapping> getFlatStorageMappings(String storage, long typeId, int level) {
         return environment.getFlatStorageMappings(storage, typeId, level);
     }
 }

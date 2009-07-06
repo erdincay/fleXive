@@ -43,7 +43,6 @@ import com.flexive.core.structure.FxPreloadType;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxLanguage;
 import com.flexive.shared.FxSharedUtils;
-import com.flexive.shared.FxContext;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxLoadException;
 import com.flexive.shared.exceptions.FxNotFoundException;
@@ -474,7 +473,7 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
             final Map<Long, FxString[]> translations = Database.loadFxStrings(con, TBL_STRUCT_ASSIGNMENTS, "DESCRIPTION", "HINT");
             final Map<Long, List<FxStructureOption>> propertyAssignmentOptions = loadAllPropertyAssignmentOptions(con);
             final Map<Long, List<FxStructureOption>> groupAssignmentOptions = loadAllGroupAssignmentOptions(con);
-            final Map<Long, FxFlatstoreMapping> flatstoreEntries = FxFlatStorageManager.getInstance().loadAllFlatstoreMappings(con);
+            final Map<Long, FxFlatStorageMapping> flatStorageEntries = FxFlatStorageManager.getInstance().loadAllFlatStorageMappings(con);
 
             //               1   2      3        4        5        6        7    8      9
             curSql = "SELECT ID, ATYPE, ENABLED, TYPEDEF, MINMULT, MAXMULT, POS, XPATH, XALIAS, " +
@@ -527,7 +526,7 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                                 environment.getProperty(rs.getLong(12)),
                                 environment.getACL(rs.getInt(13)), rs.getInt(15),
                                 FxSharedUtils.get(propertyAssignmentOptions, rs.getLong(1), new ArrayList<FxStructureOption>(0)),
-                                flatstoreEntries.get(rs.getLong(1)));
+                                flatStorageEntries.get(rs.getLong(1)));
                         if (rs.getBoolean(16))
                             pa._setSystemInternal();
                         result.add(pa);
