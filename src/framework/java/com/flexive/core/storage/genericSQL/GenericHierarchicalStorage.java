@@ -39,6 +39,7 @@ import com.flexive.core.conversion.ConversionEngine;
 import com.flexive.core.flatstorage.FxFlatStorage;
 import com.flexive.core.flatstorage.FxFlatStorageLoadColumn;
 import com.flexive.core.flatstorage.FxFlatStorageManager;
+import com.flexive.core.flatstorage.FxFlatStorageLoadContainer;
 import com.flexive.core.storage.ContentStorage;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.core.storage.binary.BinaryInputStream;
@@ -1382,6 +1383,8 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             throw new FxLoadException(LOG, e, "ex.db.sqlError", e.getMessage());
         } catch (FxDbException e) {
             throw new FxLoadException(e);
+        } catch (FxCreateException e) {
+            throw new FxLoadException(e);
         } finally {
             try {
                 if (ps != null)
@@ -1420,6 +1423,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             ps.setInt(2, pk.getVersion());
             ResultSet rs = ps.executeQuery();
             String currXPath = null;
+            int currXDepth = 0;
             FxAssignment currAssignment = null;
             int currPos = -1;
             long currLang;
@@ -1430,17 +1434,36 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             FxValue currValue = null;
             String[] columns = null;
             List<ServerLocation> server = CacheAdmin.getStreamServers();
+            //load flat columns
+            FxFlatStorageLoadContainer flatContainer = type.isContainsFlatStorageAssignments()
+                    ? FxFlatStorageManager.getInstance().loadContent(this, con, type.getId(), pk, requestedVersion)
+                    : null;
             while (rs != null && rs.next()) {
                 if (currXPath != null && !currXPath.equals(rs.getString(5))) {
                     //add this property
-                    if (!isGroup)
+                    if (!isGroup) {
                         currValue.setDefaultLanguage(defLang);
+                        if (flatContainer != null) {
+                            //add flat entries that are positioned before the current entry
+                            FxFlatStorageLoadColumn flatColumn;
+                            while((flatColumn = flatContainer.pop(currXPath.substring(0, currXPath.lastIndexOf('/')), currXDepth, currPos)) != null ) {
+                                addValue(root, flatColumn.getXPath(), flatColumn.getAssignment(), flatColumn.getPos(),
+                                        flatColumn.getValue());
+                            }
+                        }
+                    }
                     addValue(root, currXPath, currAssignment, currPos, currValue);
                     currValue = null;
                     defLang = FxLanguage.SYSTEM_ID;
                 }
                 //read next row
                 currXPath = rs.getString(5);
+                if(flatContainer != null) {
+                    //calculate xdepth
+                    currXDepth = 1;
+                    for(char c: rs.getString(6).toCharArray())
+                        if(c==',') currXDepth++;
+                }
                 currPos = rs.getInt(1);
                 currLang = rs.getInt(2);
                 isMLDef = rs.getBoolean(8);
@@ -1593,10 +1616,14 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 currValue.setDefaultLanguage(defLang);
                 addValue(root, currXPath, currAssignment, currPos, currValue);
             }
-            //load flat columns
-            if (type.isContainsFlatStorageAssignments())
-                for (FxFlatStorageLoadColumn column : FxFlatStorageManager.getInstance().loadContent(this, con, type.getId(), pk, requestedVersion))
-                    addValue(root, column.getXPath(), column.getAssignment(), column.getPos(), column.getValue());
+            if (flatContainer != null) {
+                //add remaining flat entries
+                FxFlatStorageLoadColumn flatColumn;
+                while ((flatColumn = flatContainer.pop()) != null) {
+                    addValue(root, flatColumn.getXPath(), flatColumn.getAssignment(), flatColumn.getPos(),
+                            flatColumn.getValue());
+                }
+            }
         } catch (FxCreateException e) {
             throw new FxLoadException(e);
         } catch (FxNotFoundException e) {

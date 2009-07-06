@@ -867,7 +867,7 @@ public class FxContent implements Serializable {
         }
     }
 
-    public FxContent initSystemProperties() throws FxNotFoundException, FxInvalidParameterException {
+    public FxContent initSystemProperties() throws FxNotFoundException, FxInvalidParameterException, FxCreateException {
         FxEnvironment env = CacheAdmin.getEnvironment();
         FxType type = env.getType(this.getTypeId());
         FxValue value;
@@ -904,24 +904,22 @@ public class FxContent implements Serializable {
                 value = new FxLargeNumber(false, this.getLifeCycleInfo().getModificatorId());
             else if (sp.getAlias().equals("MODIFIED_AT"))
                 value = new FxDateTime(false, new Date(this.getLifeCycleInfo().getModificationTime()));
-            else if (type.isRelation()) {
-                if (sp.getAlias().equals("RELSRC"))
-                    value = new FxReference(false, new ReferencedContent(this.getRelatedSource()));
-                else if (sp.getAlias().equals("RELDST"))
-                    value = new FxReference(false, new ReferencedContent(this.getRelatedDestination()));
-                else if (sp.getAlias().equals("RELSRC_POS"))
-                    value = new FxNumber(false, this.getRelatedSourcePosition());
-                else if (sp.getAlias().equals("RELDST_POS"))
-                    value = new FxNumber(false, this.getRelatedDestinationPosition());
-                else
-                    value = null;
-            } else
+            else if (sp.getAlias().equals("RELSRC"))
+                value = new FxReference(false, type.isRelation() ? new ReferencedContent(this.getRelatedSource()) : FxReference.EMPTY);
+            else if (sp.getAlias().equals("RELDST"))
+                value = new FxReference(false, type.isRelation() ? new ReferencedContent(this.getRelatedDestination()) : FxReference.EMPTY);
+            else if (sp.getAlias().equals("RELPOS_SRC"))
+                value = new FxNumber(false, type.isRelation() ? this.getRelatedSourcePosition() : FxNumber.EMPTY);
+            else if (sp.getAlias().equals("RELPOS_DST"))
+                value = new FxNumber(false, type.isRelation() ? this.getRelatedDestinationPosition() : FxNumber.EMPTY);
+            else
                 value = null;
             if (value != null) {
                 FxPropertyAssignment thispa = (FxPropertyAssignment) env.getAssignment(type.getName() + "/" + sp.getAlias());
                 this.data.addProperty(XPathElement.toXPathMult("/" + thispa.getAlias()), thispa, value, thispa.getPosition());
             }
         }
+
         return this;
     }
 

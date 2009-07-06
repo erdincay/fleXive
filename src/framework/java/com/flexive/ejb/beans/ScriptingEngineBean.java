@@ -136,15 +136,16 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
                     return (FxScriptResult) Class.forName("com.flexive.core.JDK6Scripting").
                             getMethod("runScript", new Class[]{String.class, FxScriptBinding.class, String.class}).
                             invoke(null, name, binding, code);
-                } catch (Exception e) {
-                    if (e instanceof FxApplicationException)
-                        throw (FxApplicationException) e;
-                    if (e instanceof java.lang.reflect.InvocationTargetException && e.getCause() != null) {
-                        if (e.getCause() instanceof FxApplicationException)
-                            throw (FxApplicationException) e.getCause();
-                        throw new FxInvalidParameterException(name, e.getCause(), "ex.general.scripting.exception", name, e.getCause().getMessage()).asRuntimeException();
+                } catch (Throwable t) {
+                    LOG.error("Exception running script [" + name + "]: " + t.getMessage(), t);
+                    if (t instanceof FxApplicationException)
+                        throw (FxApplicationException) t;
+                    if (t instanceof java.lang.reflect.InvocationTargetException && t.getCause() != null) {
+                        if (t.getCause() instanceof FxApplicationException)
+                            throw (FxApplicationException) t.getCause();
+                        throw new FxInvalidParameterException(name, t.getCause(), "ex.general.scripting.exception", name, t.getCause().getMessage()).asRuntimeException();
                     }
-                    throw new FxInvalidParameterException(name, e, "ex.general.scripting.exception", name, e.getMessage()).asRuntimeException();
+                    throw new FxInvalidParameterException(name, t, "ex.general.scripting.exception", name, t.getMessage()).asRuntimeException();
                 }
             }
             if (binding != null) {
@@ -164,8 +165,10 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
                     Object result = script.run();
                     return new FxScriptResult(binding, result);
                 } catch (Throwable e) {
+                    LOG.error("Exception running script [" + name + "]: " + e.getMessage(), e);
                     if (e instanceof FxApplicationException)
                         throw (FxApplicationException) e;
+                    System.err.println("==> generic thrown");
                     throw new GenericScriptException(name, LOG, e, "ex.general.scripting.exception", name, e.getMessage());
                 }
             }

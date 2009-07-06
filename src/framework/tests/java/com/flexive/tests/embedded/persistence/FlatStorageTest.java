@@ -82,17 +82,17 @@ public class FlatStorageTest {
      * Setup testing structure.
      * <p/>
      * Hierarchy looks like this:
-     * * TestProperty1 (String 1024)[0..1] *
-     * * TestProperty2 (Text) [0..1] *
+     * * TestProperty1 (String 1024)[0..1] * {F}
+     * * TestProperty2 (Text) [0..1] *       {F}
      * * TestProperty3 (String 1024) [0..5]
      * * TestProperty4 (String 1024) [0..N]
-     * * TestProperty5 (Double) [0..1] *
-     * * TestProperty6 (Number) [0..1] *
-     * * TestProperty7 (Text) [1..1] *
+     * * TestProperty5 (Double) [0..1] *     {F}
+     * * TestProperty6 (Number) [0..1] *     {F}
+     * * TestProperty7 (Text) [1..1] *       {F}
      * * TestGroup1[0..2]
      * * * TestProperty1_1 (String 1024) [0..1]
      * * TestGroup2[0..1]
-     * * * TestProperty2_1 (Boolean) [0..1] *
+     * * * TestProperty2_1 (Boolean) [0..1] *   {F}
      * * * TestProperty2_2 (String 1024) [0..2]
      *
      * @throws Exception on errors
@@ -222,12 +222,8 @@ public class FlatStorageTest {
         FxPK pk = co.save(test);
         FxContent loaded = co.load(pk);
         FxDelta delta = FxDelta.processDelta(test, loaded);
-        System.out.println("=delta=>\n" + delta.dump());
+        Assert.assertTrue(delta.isOnlyInternalPropertyChanges(), "Only system internal properties are expected to be changed!");
         co.remove(pk);
-        if (testsEnabled) {
-            System.out.println("CREATED!!!");
-        }
-
     }
 
 }
