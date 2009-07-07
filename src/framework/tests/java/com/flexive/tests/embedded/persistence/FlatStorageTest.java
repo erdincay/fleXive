@@ -109,7 +109,7 @@ public class FlatStorageTest {
         FxString hint = new FxString(true, "hint");
         ass.createProperty(typeId, FxPropertyEdit.createNew("TestProperty1", new FxString(true, "TestProperty1"), hint,
                 FxMultiplicity.MULT_0_1, CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
-                FxDataType.String1024), "/");
+                FxDataType.String1024).setMultiLang(true), "/");
         ass.createProperty(typeId, FxPropertyEdit.createNew("TestProperty2", new FxString(true, "TestProperty2"), hint,
                 FxMultiplicity.MULT_0_1, CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
                 FxDataType.Text), "/");
@@ -222,7 +222,27 @@ public class FlatStorageTest {
         FxPK pk = co.save(test);
         FxContent loaded = co.load(pk);
         FxDelta delta = FxDelta.processDelta(test, loaded);
+//        System.out.println("delta: "+delta.dump());
         Assert.assertTrue(delta.isOnlyInternalPropertyChanges(), "Only system internal properties are expected to be changed!");
+        ass.unflattenAssignment(CacheAdmin.getEnvironment().getPropertyAssignment(TEST_TYPE + "/TestProperty1"));
+        ass.unflattenAssignment(CacheAdmin.getEnvironment().getPropertyAssignment(TEST_TYPE + "/TestProperty2"));
+        ass.unflattenAssignment(CacheAdmin.getEnvironment().getPropertyAssignment(TEST_TYPE + "/TestProperty5"));
+        ass.unflattenAssignment(CacheAdmin.getEnvironment().getPropertyAssignment(TEST_TYPE + "/TestProperty6"));
+        ass.unflattenAssignment(CacheAdmin.getEnvironment().getPropertyAssignment(TEST_TYPE + "/TestProperty7"));
+        ass.unflattenAssignment(CacheAdmin.getEnvironment().getPropertyAssignment(TEST_TYPE + "/TESTGROUP2/TESTPROPERTY2_1"));
+        CacheAdmin.expireCachedContents(); //force a cache expiry
+        /* //optional test code for maintenance:
+        Connection con = null;
+        try {
+            con = Database.getDbConnection();
+            FxFlatStorageManager.getInstance().maintenance(con);
+        } finally {
+            con.close();
+        }*/
+        FxContent loaded2 = co.load(pk);
+        delta = FxDelta.processDelta(loaded, loaded2);
+//        System.out.println("unflatten-delta: "+delta.dump());
+        Assert.assertFalse(delta.changes(), "No changes expected after unflatten!");
         co.remove(pk);
     }
 

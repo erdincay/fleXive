@@ -38,8 +38,8 @@ import com.flexive.core.LifeCycleInfoImpl;
 import com.flexive.core.conversion.ConversionEngine;
 import com.flexive.core.flatstorage.FxFlatStorage;
 import com.flexive.core.flatstorage.FxFlatStorageLoadColumn;
-import com.flexive.core.flatstorage.FxFlatStorageManager;
 import com.flexive.core.flatstorage.FxFlatStorageLoadContainer;
+import com.flexive.core.flatstorage.FxFlatStorageManager;
 import com.flexive.core.storage.ContentStorage;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.core.storage.binary.BinaryInputStream;
@@ -1446,7 +1446,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                         if (flatContainer != null) {
                             //add flat entries that are positioned before the current entry
                             FxFlatStorageLoadColumn flatColumn;
-                            while((flatColumn = flatContainer.pop(currXPath.substring(0, currXPath.lastIndexOf('/')), currXDepth, currPos)) != null ) {
+                            while ((flatColumn = flatContainer.pop(currXPath.substring(0, currXPath.lastIndexOf('/') + 1), currXDepth, currPos)) != null) {
                                 addValue(root, flatColumn.getXPath(), flatColumn.getAssignment(), flatColumn.getPos(),
                                         flatColumn.getValue());
                             }
@@ -1458,11 +1458,11 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 }
                 //read next row
                 currXPath = rs.getString(5);
-                if(flatContainer != null) {
+                if (flatContainer != null) {
                     //calculate xdepth
                     currXDepth = 1;
-                    for(char c: rs.getString(6).toCharArray())
-                        if(c==',') currXDepth++;
+                    for (char c : rs.getString(6).toCharArray())
+                        if (c == ',') currXDepth++;
                 }
                 currPos = rs.getInt(1);
                 currLang = rs.getInt(2);
@@ -1612,8 +1612,17 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 }
             }
             if (currValue != null) {
+                if (flatContainer != null) {
+                    //add flat entries that are positioned before the current entry
+                    FxFlatStorageLoadColumn flatColumn;
+                    while ((flatColumn = flatContainer.pop(currXPath.substring(0, currXPath.lastIndexOf('/') + 1), currXDepth, currPos)) != null) {
+                        addValue(root, flatColumn.getXPath(), flatColumn.getAssignment(), flatColumn.getPos(),
+                                flatColumn.getValue());
+                    }
+                }
                 //add last property
-                currValue.setDefaultLanguage(defLang);
+                if(!isGroup)
+                    currValue.setDefaultLanguage(defLang);
                 addValue(root, currXPath, currAssignment, currPos, currValue);
             }
             if (flatContainer != null) {

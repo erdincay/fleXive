@@ -371,23 +371,27 @@ public class FxArrayUtils {
      * @param array     the string array
      * @param separator seperator character
      * @param index     index to get the element at
-     * @return element
+     * @return element  or <code>Integer.MIN_VALUE</code> if not set
      */
     public static int getIntElementAt(String array, char separator, int index) {
-        if (index == 0)
-            return Integer.valueOf(array.substring(0, array.indexOf(separator)));
-        int curr = 0;
-        int start = 0;
-        for (char c : array.toCharArray()) {
-            if (c == separator)
-                curr++;
-            if (curr == index) {
-                int end = array.substring(start + 1).indexOf(',');
-                if (end == -1)
-                    return Integer.valueOf(array.substring(start + 1));
-                return Integer.valueOf(array.substring(start + 1, start + end + 1));
+        try {
+            if (index == 0)
+                return Integer.valueOf(array.substring(0, array.indexOf(separator)));
+            int curr = 0;
+            int start = 0;
+            for (char c : array.toCharArray()) {
+                if (c == separator)
+                    curr++;
+                if (curr == index) {
+                    int end = array.substring(start + 1).indexOf(',');
+                    if (end == -1)
+                        return Integer.valueOf(array.substring(start + 1));
+                    return Integer.valueOf(array.substring(start + 1, start + end + 1));
+                }
+                start++;
             }
-            start++;
+        } catch (NumberFormatException e) {
+            return Integer.MIN_VALUE;
         }
         throw new ArrayIndexOutOfBoundsException("Index " + index + " is out of bounds for [" + array + "]");
     }

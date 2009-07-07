@@ -202,8 +202,13 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
             for (Entry<Long, T[]> e : translations.entrySet())
                 if (e.getValue()[pos] != null)
                     this.translations.put(e.getKey(), e.getValue()[pos]);
-        } else
+                else
+                    this.emptyTranslations.put(e.getKey(), Boolean.TRUE);
+        } else {
             this.singleValue = (translations == null || translations.isEmpty() ? null : translations.values().iterator().next()[pos]);
+            if( this.singleValue == null )
+                this.singleValueEmpty = true;
+        }
     }
 
     /**
@@ -215,10 +220,17 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      */
     protected FxValue(boolean multiLanguage, long defaultLanguage, T value) {
         this(multiLanguage, defaultLanguage, (Map<Long, T>) null);
-        if (multiLanguage)
-            this.translations.put(defaultLanguage, value);
-        else
-            this.singleValue = value;
+        if (value == null) {
+            if(multiLanguage)
+                this.emptyTranslations.put(defaultLanguage, Boolean.TRUE);
+            else
+                this.singleValueEmpty = true;
+        } else {
+            if (multiLanguage)
+                this.translations.put(defaultLanguage, value);
+            else
+                this.singleValue = value;
+        }
     }
 
     /**
