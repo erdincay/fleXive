@@ -33,6 +33,7 @@ package com.flexive.ejb.beans;
 
 import com.flexive.core.timer.FxQuartz;
 import com.flexive.core.Database;
+import com.flexive.core.flatstorage.FxFlatStorageManager;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.shared.interfaces.FxTimerService;
 import com.flexive.shared.interfaces.FxTimerServiceLocal;
@@ -43,7 +44,6 @@ import com.flexive.shared.structure.TypeStorageMode;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.quartz.SchedulerException;
-import org.quartz.SimpleTrigger;
 
 import javax.annotation.Resource;
 import javax.ejb.*;
@@ -225,6 +225,7 @@ public class FxTimerServiceBean implements FxTimerService, FxTimerServiceLocal {
                         if (!mode.isSupported())
                             continue;
                         StorageManager.getContentStorage(dd, mode).maintenance(con);
+                        FxFlatStorageManager.maintenance(dd.getId(), con);
                     }
                 } catch (Exception e) {
                     LOG.error("Failed to perform maintenance for division #" + dd.getId() + ": " + e.getMessage(), e);
