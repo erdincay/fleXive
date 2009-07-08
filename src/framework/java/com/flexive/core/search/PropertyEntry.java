@@ -179,7 +179,7 @@ public class PropertyEntry {
             super(Type.PK,
                     PropertyResolver.Table.T_CONTENT,
                     new String[]{"ID", "VERSION"},
-                    null, false, null, null);
+                    null, false, null);
         }
 
         @Override
@@ -202,7 +202,7 @@ public class PropertyEntry {
             super(Type.PATH,
                     PropertyResolver.Table.T_CONTENT,
                     new String[]{""},    // select one column (function will be inserted by DB adapter)
-                    null, false, null, null);
+                    null, false, null);
         }
 
         @Override
@@ -222,7 +222,7 @@ public class PropertyEntry {
         private NodePositionEntry() {
             super(Type.NODE_POSITION, PropertyResolver.Table.T_CONTENT,
                     new String[]{""},    // select one column (function will be inserted by DB adapter)
-                    null, false, FxDataType.Number, null);
+                    null, false, FxDataType.Number);
         }
 
         @Override
@@ -239,7 +239,7 @@ public class PropertyEntry {
         private MetadataEntry() {
             super(Type.METADATA, PropertyResolver.Table.T_CONTENT,
                     new String[] { "" },    // select one column (function will be inserted by DB adapter)
-                    null, false, FxDataType.String1024, null);
+                    null, false, FxDataType.String1024);
         }
 
         @Override
@@ -264,7 +264,7 @@ public class PropertyEntry {
 
         private PermissionsEntry() {
             super(Type.PERMISSIONS, PropertyResolver.Table.T_CONTENT, READ_COLUMNS,
-                    null, false, null, null);
+                    null, false, null);
         }
 
         @Override
@@ -392,15 +392,32 @@ public class PropertyEntry {
 
     protected FxDataType overrideDataType;
 
-    public PropertyEntry(Type type, PropertyResolver.Table tbl, String[] readColumns, String filterColumn, boolean multilanguage, FxDataType overrideDataType, FxProperty property) {
+    public PropertyEntry(Type type, PropertyResolver.Table tbl, String[] readColumns, String filterColumn, boolean multilanguage, FxDataType overrideDataType) {
         this.readColumns = readColumns;
         this.filterColumn = filterColumn;
         this.tbl = tbl;
         this.type = type;
         this.multilanguage = multilanguage;
         this.overrideDataType = overrideDataType;
-        this.property = property;
+        this.property = null;
         this.tableName = tbl != null && tbl != PropertyResolver.Table.T_CONTENT_DATA_FLAT ? tbl.getTableName() : null;
+    }
+
+    public PropertyEntry(Type type, PropertyResolver.Table tbl, FxPropertyAssignment assignment, String[] readColumns,
+                         String filterColumn, boolean multilanguage, FxDataType overrideDataType) {
+        this.readColumns = readColumns;
+        this.filterColumn = filterColumn;
+        this.tbl = tbl;
+        this.type = type;
+        this.multilanguage = multilanguage;
+        this.overrideDataType = overrideDataType;
+        this.property = assignment.getProperty();
+        this.assignment = assignment;
+        if (PropertyResolver.Table.T_CONTENT_DATA_FLAT == tbl) {
+            this.tableName = assignment.getFlatStorageMapping().getStorage();
+        } else {
+            this.tableName = tbl != null ? tbl.getTableName() : null;
+        }
     }
 
     public static String[] getReadColumns(ContentStorage storage, FxProperty property) {
@@ -625,7 +642,7 @@ public class PropertyEntry {
      * @return  the database table name to be used for selecting/filtering
      */
     public String getTableName() {
-        return StringUtils.defaultString(tableName, tbl.getTableName());
+        return StringUtils.isBlank(tableName) ? tbl.getTableName() : tableName;
     }
 
     /**
