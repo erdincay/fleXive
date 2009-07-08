@@ -100,21 +100,18 @@ public class FxFilter implements Filter {
      * @throws ServletException
      */
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
+        FxRequestUtils.setCharacterEncoding(servletRequest, servletResponse);
+
         final int divisionId = getDivisionId(servletRequest, servletResponse);
         if (divisionId == FxContext.DIV_UNDEFINED) {
             return;
         }
-        // Check if division could be resolved
-        servletResponse.setCharacterEncoding("UTF-8");
-        servletRequest.setCharacterEncoding("UTF-8");
-
         try {
             final boolean isWebdav = FxWebDavUtils.isWebDavRequest((HttpServletRequest) servletRequest);
             // Generate a FlexRequestWrapper which stores additional informations
             final FxRequestWrapper request = servletRequest instanceof FxRequestWrapper
                     ? (FxRequestWrapper) servletRequest
                     : new FxRequestWrapper((HttpServletRequest) servletRequest, divisionId, isWebdav);
-            request.setCharacterEncoding("UTF-8");
 
             // create thread-local FxContext variable for the current user
             FxContext.storeInfos(request, request.isDynamicContent(), divisionId, isWebdav);

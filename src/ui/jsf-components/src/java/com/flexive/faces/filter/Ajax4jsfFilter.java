@@ -41,19 +41,20 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
+import com.flexive.war.filter.FxRequestUtils;
+
 
 public class Ajax4jsfFilter extends Filter {
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
-        servletRequest.setCharacterEncoding("UTF-8");
-        servletResponse.setCharacterEncoding("UTF-8");
+        FxRequestUtils.setCharacterEncoding(servletRequest, servletResponse);
         super.doFilter(servletRequest, servletResponse, filterChain);
     }
 
     @Override
     protected void setupRequestEncoding(HttpServletRequest httpServletRequest) throws UnsupportedEncodingException {
         super.setupRequestEncoding(httpServletRequest);
-        httpServletRequest.setCharacterEncoding("UTF-8");
+        FxRequestUtils.setCharacterEncoding(httpServletRequest, null);
     }
 }

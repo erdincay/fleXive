@@ -37,9 +37,13 @@ import com.flexive.shared.interfaces.GlobalConfigurationEngine;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.ServletRequest;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import java.io.UnsupportedEncodingException;
 
 public class FxRequestUtils {
     private static final Log LOG = LogFactory.getLog(FxRequestUtils.class);
@@ -112,6 +116,26 @@ public class FxRequestUtils {
                     + (request.getServerPort() == 80 || (request.isSecure() && request.getServerPort() == 443)
                     ? ""
                     : ":" + request.getServerPort());
+        }
+    }
+
+    /**
+     * Set the request and response character encodings to UTF-8 if they are not so already.
+     * Either of the parameters may be set to null, in this case no action is performed.
+     *
+     * @param request   the servlet request
+     * @param response  the servlet response
+     */
+    public static void setCharacterEncoding(ServletRequest request, ServletResponse response) {
+        if (request != null && !"UTF-8".equals(request.getCharacterEncoding())) {
+            try {
+                request.setCharacterEncoding("UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                throw new IllegalArgumentException(e);
+            }
+        }
+        if (response != null && !"UTF-8".equals(response.getCharacterEncoding())) {
+            response.setCharacterEncoding("UTF-8");
         }
     }
 

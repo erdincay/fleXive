@@ -85,7 +85,6 @@
         <!--<param-value>true</param-value>-->
     <!--</context-param>-->
 
-    <!-- Ajax4Jsf Filter (place before all other filters (except the FlexFilter) -->
     <context-param>
         <param-name>org.ajax4jsf.VIEW_HANDLERS</param-name>
         <param-value>com.sun.facelets.FaceletViewHandler</param-value>
@@ -97,28 +96,34 @@
         <param-value>flexive</param-value> 
     </context-param>
 
-    <filter>
-        <filter-name>VersionUrlFilter</filter-name>
-        <filter-class>com.flexive.war.filter.VersionUrlFilter</filter-class>
-    </filter>
-
-    <filter-mapping>
-        <filter-name>VersionUrlFilter</filter-name>
-        <url-pattern>/*</url-pattern>
-        <dispatcher>REQUEST</dispatcher>
-        <dispatcher>INCLUDE</dispatcher>
-    </filter-mapping>
-
+    <!-- Ajax4Jsf Filter (place before all other filters (except the FlexFilter) -->
     <filter>
         <display-name>Ajax4jsf Filter</display-name>
         <filter-name>ajax4jsf</filter-name>
-        <!--filter-class>org.ajax4jsf.Filter</filter-class-->
+        <!--<filter-class>org.ajax4jsf.Filter</filter-class>-->
         <filter-class>com.flexive.faces.filter.Ajax4jsfFilter</filter-class>
         <init-param>
             <param-name>forceparser</param-name>
             <param-value>false</param-value>
         </init-param>
     </filter>
+
+    <filter>
+        <filter-name>FlexFilter</filter-name>
+        <filter-class>com.flexive.war.filter.FxFilter</filter-class>
+    </filter>
+
+    <filter>
+        <filter-name>BackendAuthorizationFilter</filter-name>
+        <filter-class>com.flexive.war.filter.BackendAuthorizationFilter</filter-class>
+    </filter>
+
+    <filter>
+        <filter-name>VersionUrlFilter</filter-name>
+        <filter-class>com.flexive.war.filter.VersionUrlFilter</filter-class>
+    </filter>
+
+
     <filter-mapping>
         <filter-name>ajax4jsf</filter-name>
         <url-pattern>*.jsf</url-pattern>
@@ -132,16 +137,6 @@
         <url-pattern>*.faces</url-pattern>
     </filter-mapping>
 
-    <filter>
-        <filter-name>FlexFilter</filter-name>
-        <filter-class>com.flexive.war.filter.FxFilter</filter-class>
-    </filter>
-
-    <filter>
-        <filter-name>BackendAuthorizationFilter</filter-name>
-        <filter-class>com.flexive.war.filter.BackendAuthorizationFilter</filter-class>
-    </filter>
-
     <filter-mapping>
         <filter-name>FlexFilter</filter-name>
         <url-pattern>/*</url-pattern>
@@ -149,6 +144,14 @@
         <dispatcher>FORWARD</dispatcher>
         <dispatcher>INCLUDE</dispatcher>
     </filter-mapping>
+
+    <filter-mapping>
+        <filter-name>VersionUrlFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+        <dispatcher>INCLUDE</dispatcher>
+    </filter-mapping>
+
 
     <filter-mapping>
         <filter-name>BackendAuthorizationFilter</filter-name>
