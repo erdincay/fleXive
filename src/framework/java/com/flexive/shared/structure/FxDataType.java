@@ -61,8 +61,8 @@ public enum FxDataType implements Serializable, SelectableObjectWithName {
     Binary(13, false, true, true, FxBinary.class),
     Reference(14, false, true, false, FxReference.class),
     InlineReference(15, false, false, false, FxReference.class),
-    SelectOne(16, false, true, true, FxSelectOne.class),
-    SelectMany(17, false, true, true, FxSelectMany.class);
+    SelectOne(16, false, true, false, FxSelectOne.class),
+    SelectMany(17, false, true, false, FxSelectMany.class);
 
     private boolean initialized;
     private final long id;
