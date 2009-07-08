@@ -87,9 +87,12 @@ public class GenericSQLDataFilter extends DataFilter {
 
 //    private static final String NO_MATCH = "(SELECT DISTINCT null id,null ver,null lang FROM dual where 1=2)";
 
-    // The maximum rows returned by a subquery (property or assignement search)
-    // May be -1 to use all found rows (not recommended, since MySQL will be VERY slow in this case).
-    private static final int SUBQUERY_LIMIT = 10000;
+    /** 
+     * The maximum rows returned by a subquery (property or assignement search)
+     * Deliberately set to -1 by default to guarantee correct results - if the query gets too
+     * slow, it will timeout anyway.
+     */
+    private static final int SUBQUERY_LIMIT = -1;
 
     private final String tableMain;
     private final String tableContentData;
@@ -184,12 +187,9 @@ public class GenericSQLDataFilter extends DataFilter {
                         "LIMIT " + maxRows;
             }
             // Find all matching data enties and store them
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("SQL getResult: \n" + dataSelect + "\n");
-            }
             sql = "INSERT INTO " + search.getCacheTable() + " " + dataSelect;
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("Filter SQL: " + sql);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Filter SQL: " + sql);
             }
             stmt = getConnection().createStatement();
             if (isQueryTimeoutSupported())

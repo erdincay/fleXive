@@ -101,8 +101,8 @@ public class GenericSQLDataSelector extends DataSelector {
     public String build(final Connection con) throws FxSqlSearchException {
         StringBuffer select = new StringBuffer();
         buildColumnSelectList(select);
-        if (LOG.isDebugEnabled()) {
-            LOG.debug(search.getFxStatement().printDebug());
+        if (LOG.isTraceEnabled()) {
+            LOG.trace(search.getFxStatement().printDebug());
         }
         return select.toString();
     }

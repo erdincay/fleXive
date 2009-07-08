@@ -222,8 +222,8 @@ public class SqlSearch {
                         statement.addOrderByValue(new OrderByValue(column.getColumnName(),
                                 column.getDirection().equals(SortDirection.ASCENDING)));
                     } catch (SqlParserException e) {
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("Ignoring user preferences column " + column
+                        if (LOG.isTraceEnabled()) {
+                            LOG.trace("Ignoring user preferences column " + column
                                     + " since it was not selected.");
                         }
                     }
@@ -257,8 +257,8 @@ public class SqlSearch {
 
             // Select all desired rows for the resultset
             selectSql = ds.build(con);
-            if (LOG.isTraceEnabled()) {
-                LOG.trace("Select SQL: " + selectSql);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Select SQL: " + selectSql);
             }
 
             stmt = con.createStatement();
