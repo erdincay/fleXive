@@ -33,9 +33,7 @@ package com.flexive.shared.search.query;
 
 import com.flexive.shared.structure.FxDataType;
 import com.flexive.shared.structure.FxProperty;
-import com.flexive.shared.value.FxDate;
-import com.flexive.shared.value.FxDateTime;
-import com.flexive.shared.value.FxValue;
+import com.flexive.shared.value.*;
 import com.flexive.shared.value.mapper.IdentityInputMapper;
 import com.flexive.shared.value.mapper.InputMapper;
 import com.flexive.shared.value.mapper.VoidInputMapper;
@@ -138,7 +136,7 @@ public abstract class QueryValueNode<T extends FxValue, VC extends ValueComparat
     /** {@inheritDoc} */
     @Override
     public boolean isWideInput() {
-        return value instanceof FxDateTime;
+        return value instanceof FxDateTime || value instanceof FxDateRange || value instanceof FxDateTimeRange;
     }
 
     /**
@@ -181,6 +179,18 @@ public abstract class QueryValueNode<T extends FxValue, VC extends ValueComparat
             return VoidInputMapper.getInstance();
         } else {
             return InputMapper.getInstance(property);
+        }
+    }
+
+    protected FxValue getEmptyValue(FxProperty property) {
+        switch (property.getDataType()) {
+            // date/datetime range queries are performed against a single value
+            case DateRange:
+                return new FxDate(false, FxDate.EMPTY).setEmpty();
+            case DateTimeRange:
+                return new FxDateTime(false, FxDateTime.EMPTY).setEmpty();
+            default:
+                return property.getEmptyValue();
         }
     }
 }

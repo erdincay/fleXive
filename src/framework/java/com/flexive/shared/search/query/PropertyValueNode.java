@@ -31,15 +31,16 @@
  ***************************************************************/
 package com.flexive.shared.search.query;
 
+import static com.flexive.shared.CacheAdmin.getEnvironment;
 import com.flexive.shared.exceptions.FxInvalidQueryNodeException;
 import com.flexive.shared.exceptions.FxRuntimeException;
+import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.structure.FxProperty;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.value.FxValue;
+import com.flexive.shared.value.FxVoid;
 import com.flexive.shared.value.mapper.InputMapper;
-import com.flexive.shared.CacheAdmin;
-import static com.flexive.shared.CacheAdmin.getEnvironment;
 
 import java.util.List;
 
@@ -64,14 +65,14 @@ public class PropertyValueNode extends QueryValueNode<FxValue, PropertyValueComp
         this.propertyId = propertyId;
         this.comparator = PropertyValueComparator.EQ;
         if (propertyId != -1) {
-            this.value = getEnvironment().getProperty(propertyId).getEmptyValue();
-
+            final FxEnvironment environment = getEnvironment();
+            this.value = getEmptyValue(environment.getProperty(propertyId));
             // use XPath of first assignment to enable property lookups via FxValue
-            final List<FxPropertyAssignment> assignments = getEnvironment().getPropertyAssignments(propertyId, true);
+            final List<FxPropertyAssignment> assignments = environment.getPropertyAssignments(propertyId, true);
             assert assignments.size() > 0 : "At least one assignment is expected to exist for property " + propertyId;
             this.value.setXPath(assignments.get(0).getXPath());
         } else {
-            setValue(new FxString(""));
+            this.value = new FxString("");
         }
     }
 
@@ -88,8 +89,7 @@ public class PropertyValueNode extends QueryValueNode<FxValue, PropertyValueComp
     public boolean isValid() {
         try {
             this.comparator.getSql(getProperty(), value);
-            // if we can generate a SQL epxression, check additional property constraints
-            return true; // TODO property check //return property.isValid(value);
+            return true;    // we can generate a SQL expression, thus the node is valid
         } catch (RuntimeException e) {
             // if we can't generate a SQL expression, we aren't valid
             return false;

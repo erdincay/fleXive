@@ -155,7 +155,7 @@ public class GenericSQLDataFilter extends DataFilter {
      * @throws FxSqlSearchException if the build failed
      */
     @Override
-    public void build() throws FxSqlSearchException {
+    public void build() throws FxSqlSearchException, SQLException {
         final UserTicket ticket = FxContext.getUserTicket();
         final long maxRows = search.getFxStatement().getMaxResultRows();
         Statement stmt = null;
@@ -196,12 +196,10 @@ public class GenericSQLDataFilter extends DataFilter {
                 stmt.setQueryTimeout(search.getParams().getQueryTimeout());
             stmt.executeUpdate(sql);
             analyzeResult();
-        } catch (FxSqlSearchException exc) {
+        } catch (SQLException exc) {
             throw exc;
-        } catch (SQLException e) {
-            throw new FxSqlSearchException(LOG, e, "ex.sqlSearch.failedToBuildDataFilter.sql", e.getMessage(), search.getQuery(), sql);
-        } catch (Throwable t) {
-            throw new FxSqlSearchException(LOG, t, "ex.sqlSearch.failedToBuildDataFilter", t.getMessage(), search.getQuery());
+        } catch (Exception e) {
+            throw new FxSqlSearchException(LOG, e, "ex.sqlSearch.failedToBuildDataFilter", e.getMessage(), search.getQuery());
         } finally {
             Database.closeObjects(GenericSQLDataFilter.class, null, stmt);
         }

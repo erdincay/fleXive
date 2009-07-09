@@ -36,6 +36,7 @@ import com.flexive.shared.search.FxFoundType;
 import com.flexive.sqlParser.FxStatement;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -91,7 +92,7 @@ public abstract class DataFilter {
      *
      * @throws FxSqlSearchException on errors
      */
-    public abstract void build() throws FxSqlSearchException;
+    public abstract void build() throws FxSqlSearchException, SQLException;
 
 
     /**

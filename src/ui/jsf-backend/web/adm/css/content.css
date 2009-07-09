@@ -36,6 +36,11 @@ fieldset.formFields {
     margin: 0 6px 1px 0; /* for :active push effect */
 }
 
+.commandButton:active {
+    /* Disabled push effect since Firefox 3.5 still chokes on it (one row inside the button becomes unresponsive) */
+    /*margin: 1px 5px 0 1px;*/
+}
+
 .commandButton a {
     outline: none;
 }
@@ -80,6 +85,10 @@ fieldset.formFields {
     float:left;
 }
 
+.commandButton:active .commandButtonLabelText {
+    color: black;
+}
+
 .commandButtonIcon, .commandButtonIconDisabled {
     overflow: hidden;
     border-left: 1px solid #d3d3d2;
@@ -106,14 +115,6 @@ fieldset.formFields {
 
 .commandButton:hover .commandButtonRight {
     background-image: url("../images/commandButton/buttonRight_hover.gif");
-}
-
-.commandButton:active {
-    margin: 1px 5px 0 1px;
-}
-
-.commandButton:active .commandButtonLabelText {
-    color: black;
 }
 
 .commandIcon, .commandIconDisabled {

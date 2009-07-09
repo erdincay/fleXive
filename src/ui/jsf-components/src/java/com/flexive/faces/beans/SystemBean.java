@@ -267,6 +267,8 @@ public class SystemBean implements Serializable {
     }
 
     private static class FacesMessageMap extends HashMap<String, List<FacesMessage>> {
+        private static final long serialVersionUID = -9157142909355611529L;
+
         /**
          * {@inheritDoc}
          */

@@ -31,18 +31,18 @@
  ***************************************************************/
 package com.flexive.shared.search.query;
 
+import static com.flexive.shared.CacheAdmin.getEnvironment;
 import com.flexive.shared.exceptions.FxInvalidQueryNodeException;
 import com.flexive.shared.exceptions.FxRuntimeException;
 import com.flexive.shared.structure.FxAssignment;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.structure.FxType;
+import com.flexive.shared.structure.FxDataType;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.value.FxValue;
 import com.flexive.shared.value.FxVoid;
 import com.flexive.shared.value.mapper.IdentityInputMapper;
 import com.flexive.shared.value.mapper.InputMapper;
-import com.flexive.shared.CacheAdmin;
-import static com.flexive.shared.CacheAdmin.getEnvironment;
 
 import java.util.Arrays;
 import java.util.List;
@@ -53,7 +53,6 @@ import java.util.List;
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public class AssignmentValueNode extends QueryValueNode<FxValue, PropertyValueComparator> {
-
     private static final long serialVersionUID = 4285245221573681218L;
     private long assignmentId;
 
@@ -70,7 +69,7 @@ public class AssignmentValueNode extends QueryValueNode<FxValue, PropertyValueCo
         final FxAssignment assignment = getEnvironment().getAssignment(assignmentId);
         if (assignment instanceof FxPropertyAssignment) {
             // use the property's empty value to avoid using the assignment's default value
-            value = ((FxPropertyAssignment) assignment).getProperty().getEmptyValue();
+            value = getEmptyValue(((FxPropertyAssignment) assignment).getProperty());
             value.setXPath(assignment.getXPath());
         }
         if (this.value == null) {
@@ -90,9 +89,15 @@ public class AssignmentValueNode extends QueryValueNode<FxValue, PropertyValueCo
     @Override
     public boolean isValid() {
         try {
-            this.comparator.getSql(getAssignment(), value);
-            // if we can generate a SQL epxression, check additional assignment constraints
-            return value == null || value instanceof FxVoid || getAssignment().isValid(value);
+            final FxAssignment assignment = getAssignment();
+            final FxDataType type = assignment instanceof FxPropertyAssignment
+                    ? ((FxPropertyAssignment) assignment).getProperty().getDataType() : null;
+            this.comparator.getSql(assignment, value);
+            return value == null || value instanceof FxVoid
+                    // date/datetime ranges are mapped to FxDate values, thus we cannot call assignment.isValid
+                    || (FxDataType.DateRange == type || FxDataType.DateTimeRange == type)
+                    // check additional assignment constraints
+                    || assignment.isValid(value);
         } catch (RuntimeException e) {
             // if we can't generate a SQL expression, we aren't valid
             return false;
