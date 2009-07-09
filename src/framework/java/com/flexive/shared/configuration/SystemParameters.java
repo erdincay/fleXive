@@ -139,4 +139,8 @@ public class SystemParameters {
      */
     public static final Parameter<String> THUMBNAIL_MAPPING
             = ParameterFactory.newInstance(String.class, APPLICATION_CONFIG, "thumbnailMapping", "/thumbnail/");
+    /**
+     * If the flat storage is enabled, automatically flatten matching assignments
+     */
+    public static final Parameter<Boolean> FLATSTORAGE_AUTO = ParameterFactory.newInstance(Boolean.class, DIVISION_CONFIG, "flatStorageAuto", Boolean.FALSE);
 }

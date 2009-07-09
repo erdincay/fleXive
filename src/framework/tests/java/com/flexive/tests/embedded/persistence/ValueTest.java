@@ -290,12 +290,12 @@ public class ValueTest {
                         new FxLargeNumber(true, Long.MIN_VALUE)),
 
                 new TestData<FxFloat>(FxDataType.Float,
-                        new FxFloat(false, Float.MAX_VALUE),
-                        new FxFloat(true, Float.MIN_VALUE)),
+                        new FxFloat(false, 123213213213.2222221f),
+                        new FxFloat(true, 1f)),
 
                 new TestData<FxDouble>(FxDataType.Double,
-                        new FxDouble(false, 1E300),
-                        new FxDouble(true, 1E-300)),
+                        new FxDouble(false, 0.000000000000001d),
+                        new FxDouble(true, 1d)),
 
                 new TestData<FxBoolean>(FxDataType.Boolean,
                         new FxBoolean(false, true),

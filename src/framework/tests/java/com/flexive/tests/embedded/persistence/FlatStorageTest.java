@@ -121,7 +121,7 @@ public class FlatStorageTest {
                 FxDataType.String1024), "/");
         ass.createProperty(typeId, FxPropertyEdit.createNew("TestProperty5", new FxString(true, "TestProperty5"), hint,
                 FxMultiplicity.MULT_0_1, CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
-                FxDataType.Double), "/");
+                FxDataType.Float), "/");
         ass.createProperty(typeId, FxPropertyEdit.createNew("TestProperty6", new FxString(true, "TestProperty6"), hint,
                 FxMultiplicity.MULT_0_1, CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
                 FxDataType.Number), "/");
@@ -222,8 +222,16 @@ public class FlatStorageTest {
         FxPK pk = co.save(test);
         FxContent loaded = co.load(pk);
         FxDelta delta = FxDelta.processDelta(test, loaded);
-//        System.out.println("delta: "+delta.dump());
+        System.out.println("delta: "+delta.dump());
         Assert.assertTrue(delta.isOnlyInternalPropertyChanges(), "Only system internal properties are expected to be changed!");
+
+        loaded.remove("/TestProperty1");
+        loaded.setValue("/TestProperty2", new FxString(false, "TEST123"));
+        co.save(loaded);
+        FxContent loaded2 = co.load(pk);
+        Assert.assertFalse(loaded2.containsValue("/TestProperty1"), "/TestProperty1 should have been removed!");
+        Assert.assertEquals(loaded2.getValue("/TestProperty2").getDefaultTranslation(), "TEST123", "/TestProperty should have been updated!");
+
         ass.unflattenAssignment(CacheAdmin.getEnvironment().getPropertyAssignment(TEST_TYPE + "/TestProperty1"));
         ass.unflattenAssignment(CacheAdmin.getEnvironment().getPropertyAssignment(TEST_TYPE + "/TestProperty2"));
         ass.unflattenAssignment(CacheAdmin.getEnvironment().getPropertyAssignment(TEST_TYPE + "/TestProperty5"));
@@ -239,9 +247,10 @@ public class FlatStorageTest {
         } finally {
             con.close();
         }*/
-        FxContent loaded2 = co.load(pk);
-        delta = FxDelta.processDelta(loaded, loaded2);
-//        System.out.println("unflatten-delta: "+delta.dump());
+
+        FxContent loaded3 = co.load(pk);
+        delta = FxDelta.processDelta(loaded2, loaded3);
+        System.out.println("unflatten-delta: "+delta.dump());
         Assert.assertFalse(delta.changes(), "No changes expected after unflatten!");
         co.remove(pk);
     }

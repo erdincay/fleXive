@@ -497,7 +497,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      * @param id     the id to fix the version statistics for
      * @throws FxUpdateException if a sql error occurs
      */
-    protected void fixContentVersionStats(Connection con, long typeId, long id) throws FxUpdateException {
+    protected void fixContentVersionStats(Connection con, FxType type, long id) throws FxUpdateException {
         PreparedStatement ps = null;
         try {
             ps = con.prepareStatement(CONTENT_VER_CALC);
@@ -527,7 +527,8 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             ps.setInt(2, live_ver);
             ps.setLong(3, id);
             ps.executeUpdate();
-            FxFlatStorageManager.getInstance().syncContentStats(con, typeId, id, max_ver, live_ver);
+            if (type.isContainsFlatStorageAssignments())
+                FxFlatStorageManager.getInstance().syncContentStats(con, type.getId(), id, max_ver, live_ver);
         } catch (SQLException e) {
             throw new FxUpdateException(LOG, e, "ex.db.sqlError", e.getMessage());
         } finally {
@@ -551,6 +552,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         content.getRootGroup().removeEmptyEntries();
         content.getRootGroup().compactPositions(true);
         content.checkValidity();
+        final FxType type = CacheAdmin.getEnvironment().getType(content.getTypeId());
 
         //step dependencies will be updated, need to lock
         lockTables(con, content.getPk().getId(), -1);
@@ -569,7 +571,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             createDetailEntries(con, ps, ps_ft, env, sql, pk, content.isMaxVersion(), content.isLiveVersion(), content.getData("/"));
             ps.executeBatch();
             ps_ft.executeBatch();
-            if (CacheAdmin.getEnvironment().getType(content.getTypeId()).isContainsFlatStorageAssignments()) {
+            if (type.isContainsFlatStorageAssignments()) {
                 FxFlatStorage flatStorage = FxFlatStorageManager.getInstance();
                 flatStorage.setPropertyData(con, pk, content.getTypeId(), content.getStepId(),
                         content.isMaxVersion(), content.isLiveVersion(), flatStorage.getFlatPropertyData(content.getRootGroup()));
@@ -595,12 +597,11 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         }
 
         try {
-            fixContentVersionStats(con, content.getTypeId(), content.getPk().getId());
+            fixContentVersionStats(con, type, content.getPk().getId());
         } catch (FxUpdateException e) {
             throw new FxCreateException(e);
         }
 
-        FxType type = env.getType(content.getTypeId());
         if (type.isTrackHistory()) {
             try {
                 sql.setLength(0);
@@ -1621,11 +1622,13 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                     }
                 }
                 //add last property
-                if(!isGroup)
+                if (!isGroup)
                     currValue.setDefaultLanguage(defLang);
                 addValue(root, currXPath, currAssignment, currPos, currValue);
             }
             if (flatContainer != null) {
+                if (isGroup && currAssignment != null) //if the last value was a group, add it (can only happen when using a flat storage)
+                    addValue(root, currXPath, currAssignment, currPos, currValue);
                 //add remaining flat entries
                 FxFlatStorageLoadColumn flatColumn;
                 while ((flatColumn = flatContainer.pop()) != null) {
@@ -1804,6 +1807,8 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             }
         }
 
+        FxFlatStorage fs = type.isContainsFlatStorageAssignments() ? FxFlatStorageManager.getInstance() : null;
+
         if (type.isUsePropertyPermissions() && !ticket.isGlobalSupervisor())
             FxPermissionUtils.checkPropertyPermissions(content.getLifeCycleInfo().getCreatorId(), delta, ACLPermission.EDIT);
 
@@ -1825,27 +1830,53 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 binding = new FxScriptBinding();
                 binding.setVariable("content", content);
             }
+
+            //before... scripts
+            if (checkScripting) {
+                //delta-deletes:
+                for (FxDelta.FxDeltaChange change : delta.getRemoves()) {
+                    for (long scriptId : change.getOriginalData().getAssignment().
+                            getScriptMapping(FxScriptEvent.BeforeDataChangeDelete)) {
+                        binding.setVariable("change", change);
+                        scripting.runScript(scriptId, binding);
+                    }
+                }
+                //delta-updates:
+                for (FxDelta.FxDeltaChange change : delta.getUpdates()) {
+                    for (long scriptId : change.getOriginalData().getAssignment().
+                            getScriptMapping(FxScriptEvent.BeforeDataChangeUpdate)) {
+                        binding.setVariable("change", change);
+                        scripting.runScript(scriptId, binding);
+                    }
+                }
+                //delta-adds:
+                for (FxDelta.FxDeltaChange change : delta.getAdds()) {
+                    for (long scriptId : change.getNewData().getAssignment().
+                            getScriptMapping(FxScriptEvent.BeforeDataChangeAdd)) {
+                        binding.setVariable("change", change);
+                        scripting.runScript(scriptId, binding);
+                    }
+                }
+            }
+
             //delta-deletes:
             for (FxDelta.FxDeltaChange change : delta.getRemoves()) {
                 if (type.isUsePropertyPermissions()) {
                     if (!ticket.mayDeleteACL(type.getPropertyAssignment(change.getXPath()).getACL().getId(), content.getLifeCycleInfo().getCreatorId()))
                         throw new FxNoAccessException("ex.acl.noAccess.property.delete", change.getXPath());
                 }
-                if (checkScripting)
-                    for (long scriptId : change.getOriginalData().getAssignment().
-                            getScriptMapping(FxScriptEvent.BeforeDataChangeDelete)) {
-                        binding.setVariable("change", change);
-                        scripting.runScript(scriptId, binding);
-                    }
-                if (!change.getOriginalData().isSystemInternal())
+                if (!change.getOriginalData().isSystemInternal()) {
                     deleteDetailData(con, sql, pk, change.getOriginalData());
-                if (checkScripting)
-                    for (long scriptId : change.getOriginalData().getAssignment().
-                            getScriptMapping(FxScriptEvent.AfterDataChangeDelete)) {
-                        binding.setVariable("change", change);
-                        scripting.runScript(scriptId, binding);
+                    if (fs != null && change.isFlatStorageChange()) {
+                        fs.deletePropertyData(con, pk, (FxPropertyData) change.getOriginalData());
                     }
+                }
             }
+
+            //flatstorage adds/updates
+            if (fs != null && delta.getFlatStorageAddsUpdates().size() > 0)
+                fs.setPropertyData(con, pk, type.getId(), content.getStepId(), content.isMaxVersion(),
+                        content.isLiveVersion(), delta.getFlatStorageAddsUpdates());
 
             //delta-updates:
             List<FxDelta.FxDeltaChange> updatesRemaining = new ArrayList<FxDelta.FxDeltaChange>(delta.getUpdates());
@@ -1865,12 +1896,6 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                     FxDelta.FxDeltaChange change = updatesRemaining.get(0);
                     //noinspection CaughtExceptionImmediatelyRethrown
                     try {
-                        if (checkScripting)
-                            for (long scriptId : change.getOriginalData().getAssignment().
-                                    getScriptMapping(FxScriptEvent.BeforeDataChangeUpdate)) {
-                                binding.setVariable("change", change);
-                                scripting.runScript(scriptId, binding);
-                            }
                         if (!change.getOriginalData().isSystemInternal()) {
                             if (change.isGroup()) {
                                 if (change.isPositionChange() && !change.isDataChange()) {
@@ -1896,12 +1921,6 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                                 }
                             }
                         }
-                        if (checkScripting)
-                            for (long scriptId : change.getOriginalData().getAssignment().
-                                    getScriptMapping(FxScriptEvent.AfterDataChangeUpdate)) {
-                                binding.setVariable("change", change);
-                                scripting.runScript(scriptId, binding);
-                            }
                         updatesRemaining.remove(0);
                     } catch (SQLException e) {
                         change._increaseRetries();
@@ -1918,12 +1937,6 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                         if (!ticket.mayCreateACL(type.getPropertyAssignment(change.getXPath()).getACL().getId(), content.getLifeCycleInfo().getCreatorId()))
                             throw new FxNoAccessException("ex.acl.noAccess.property.create", change.getXPath());
                     }
-                    if (checkScripting)
-                        for (long scriptId : change.getNewData().getAssignment().
-                                getScriptMapping(FxScriptEvent.BeforeDataChangeAdd)) {
-                            binding.setVariable("change", change);
-                            scripting.runScript(scriptId, binding);
-                        }
                     if (!change.getNewData().isSystemInternal()) {
                         if (change.isGroup())
                             insertGroupData(con, sql, pk, (FxGroupData) change.getNewData(), content.isMaxVersion(), content.isLiveVersion());
@@ -1932,12 +1945,6 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                                     content.getData("/"), con, ps_insert, ps_ft_insert, pk, ((FxPropertyData) change.getNewData()),
                                     content.isMaxVersion(), content.isLiveVersion());
                     }
-                    if (checkScripting)
-                        for (long scriptId : change.getNewData().getAssignment().
-                                getScriptMapping(FxScriptEvent.AfterDataChangeAdd)) {
-                            binding.setVariable("change", change);
-                            scripting.runScript(scriptId, binding);
-                        }
                 }
                 ps_update.executeBatch();
                 ps_insert.executeBatch();
@@ -1953,7 +1960,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             checkUniqueConstraints(con, env, sql, pk, content.getTypeId());
             if (delta.isInternalPropertyChanged()) {
                 updateStepDependencies(con, content.getPk().getId(), content.getPk().getVersion(), env, type, content.getStepId());
-                fixContentVersionStats(con, content.getTypeId(), content.getPk().getId());
+                fixContentVersionStats(con, type, content.getPk().getId());
             }
             content.resolveBinaryPreview();
             if (original.getBinaryPreviewId() != content.getBinaryPreviewId() ||
@@ -1962,6 +1969,35 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             enableDetailUniqueChecks(con);
             LifeCycleInfoImpl.updateLifeCycleInfo(TBL_CONTENT, "ID", "VER",
                     content.getPk().getId(), content.getPk().getVersion(), false, false);
+
+            //after... scripts
+            if (checkScripting) {
+                //delta-deletes:
+                for (FxDelta.FxDeltaChange change : delta.getRemoves()) {
+                    for (long scriptId : change.getOriginalData().getAssignment().
+                            getScriptMapping(FxScriptEvent.AfterDataChangeDelete)) {
+                        binding.setVariable("change", change);
+                        scripting.runScript(scriptId, binding);
+                    }
+                }
+                //delta-updates:
+                for (FxDelta.FxDeltaChange change : delta.getUpdates()) {
+                    for (long scriptId : change.getOriginalData().getAssignment().
+                            getScriptMapping(FxScriptEvent.AfterDataChangeUpdate)) {
+                        binding.setVariable("change", change);
+                        scripting.runScript(scriptId, binding);
+                    }
+                }
+                //delta-adds:
+                for (FxDelta.FxDeltaChange change : delta.getAdds()) {
+                    for (long scriptId : change.getNewData().getAssignment().
+                            getScriptMapping(FxScriptEvent.AfterDataChangeAdd)) {
+                        binding.setVariable("change", change);
+                        scripting.runScript(scriptId, binding);
+                    }
+                }
+            }
+
 
             if (type.isTrackHistory()) {
                 HistoryTrackerEngine tracker = EJBLookup.getHistoryTrackerEngine();
@@ -2310,7 +2346,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             ps.setLong(1, pk.getId());
             ps.setInt(2, ver);
             if (ps.executeUpdate() > 0)
-                fixContentVersionStats(con, type.getId(), pk.getId());
+                fixContentVersionStats(con, type, pk.getId());
             StorageManager.getTreeStorage().afterContentVersionRemoved(nodes, con, pk.getId(), ver, cvi);
         } catch (SQLException e) {
             throw new FxRemoveException(LOG, e, "ex.db.sqlError", e.getMessage());

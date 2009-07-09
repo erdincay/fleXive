@@ -48,6 +48,7 @@ import java.util.*;
  */
 public class FxDelta implements Serializable {
     private static final long serialVersionUID = -6246822483703676822L;
+    private List<FxPropertyData> flatData;
 
     /**
      * A single delta change
@@ -69,6 +70,7 @@ public class FxDelta implements Serializable {
         private int retryCount;
         private boolean multiColumn;
         private ChangeType changeType;
+        private boolean flatStorageChange;
 
         /**
          * Ctor
@@ -108,6 +110,12 @@ public class FxDelta implements Serializable {
                 }
             } else
                 this.multiColumn = false;
+            if (!isProperty())
+                this.flatStorageChange = false;
+            else {
+                FxData data = (getNewData() != null ? getNewData() : getOriginalData());
+                this.flatStorageChange = data != null && ((FxPropertyData) data).getPropertyAssignment().isFlatStorageEntry();
+            }
         }
 
         /**
@@ -212,6 +220,15 @@ public class FxDelta implements Serializable {
         }
 
         /**
+         * Does this change affect a flat storage entry?
+         *
+         * @return change affects a flat storage entry
+         */
+        public boolean isFlatStorageChange() {
+            return flatStorageChange;
+        }
+
+        /**
          * <b>Internal use only!</b>
          * Is this delta updateable or do we need delete/insert?
          * A property is not updateable if language settings changed or it spans multiple columns like a select-many
@@ -269,6 +286,15 @@ public class FxDelta implements Serializable {
         checkInternal(this.updates);
         if (!internalPropertyChanged) checkInternal(this.adds);
         if (!internalPropertyChanged) checkInternal(this.removes);
+        this.flatData = new ArrayList<FxPropertyData>(20);
+        for (FxDeltaChange up : this.updates) {
+            if (up.isFlatStorageChange())
+                this.flatData.add((FxPropertyData) up.getNewData());
+        }
+        for (FxDeltaChange add : this.adds) {
+            if (add.isFlatStorageChange())
+                this.flatData.add((FxPropertyData) add.getNewData());
+        }
     }
 
     private void checkInternal(List<FxDeltaChange> list) {
@@ -307,6 +333,15 @@ public class FxDelta implements Serializable {
      */
     public List<FxDeltaChange> getRemoves() {
         return removes;
+    }
+
+    /**
+     * Get all adds and updates that affect a flat storage
+     *
+     * @return list of all adds and updates that affect a flat storage
+     */
+    public List<FxPropertyData> getFlatStorageAddsUpdates() {
+        return flatData;
     }
 
     /**
@@ -499,8 +534,7 @@ public class FxDelta implements Serializable {
                 if (updates == null)
                     updates = new ArrayList<FxDeltaChange>(10);
                 final FxPropertyData orgData = original.getPropertyData(xp);
-                if (!orgData.getPropertyAssignment().isFlatStorageEntry())
-                    updates.add(new FxDeltaChange(FxDeltaChange.ChangeType.Update, xp, orgData, compare.getPropertyData(xp)));
+                updates.add(new FxDeltaChange(FxDeltaChange.ChangeType.Update, xp, orgData, compare.getPropertyData(xp)));
             }
         }
 
@@ -516,10 +550,8 @@ public class FxDelta implements Serializable {
             } else {
                 //property
                 final FxPropertyData pdata = compare.getPropertyData(xp);
-                if (!pdata.getPropertyAssignment().isFlatStorageEntry())
-                    adds.add(new FxDeltaChange(FxDeltaChange.ChangeType.Add, xp, null, pdata));
+                adds.add(new FxDeltaChange(FxDeltaChange.ChangeType.Add, xp, null, pdata));
             }
-
         }
 
         List<String> rem = new ArrayList<String>(org);
