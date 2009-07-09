@@ -95,7 +95,7 @@
         <name>icon</name>
         <required>false</required>
         <rtexprvalue>false</rtexprvalue>
-        <description>[optional] the name of the icon to be displayed. the icon name is mapped to the url "adm/images/commandButton/${icon}.png"</description>
+        <description>[optional] the name of the icon to be displayed. the icon name is mapped to the url "pub/images/commandButton/${icon}.png"</description>
       </attribute>
       <attribute>
         <name>iconUrl</name>
@@ -214,7 +214,7 @@
         <name>icon</name>
         <required>false</required>
         <rtexprvalue>false</rtexprvalue>
-        <description>[optional] the name of the icon to be displayed. the icon name is mapped to the url "adm/images/commandButton/${icon}.png"</description>
+        <description>[optional] the name of the icon to be displayed. the icon name is mapped to the url "pub/images/commandButton/${icon}.png"</description>
       </attribute>
       <attribute>
         <name>iconUrl</name>
@@ -297,7 +297,7 @@
         <name>icon</name>
         <required>false</required>
         <rtexprvalue>false</rtexprvalue>
-        <description>[optional] the name of the icon to be displayed. the icon name is mapped to the url "adm/images/commandButton/${icon}.png"</description>
+        <description>[optional] the name of the icon to be displayed. the icon name is mapped to the url "pub/images/commandButton/${icon}.png"</description>
       </attribute>
       <attribute>
         <name>iconUrl</name>
@@ -386,7 +386,7 @@
         <name>icon</name>
         <required>false</required>
         <rtexprvalue>false</rtexprvalue>
-        <description>[optional] the name of the icon to be displayed. the icon name is mapped to the url "adm/images/commandButton/${icon}.png"</description>
+        <description>[optional] the name of the icon to be displayed. the icon name is mapped to the url "pub/images/commandButton/${icon}.png"</description>
       </attribute>
       <attribute>
         <name>iconUrl</name>

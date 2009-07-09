@@ -43,10 +43,10 @@
                                     <a4j:commandLink action="#{typeEditorBean.scriptWrapper.sortByScripts}" reRender="scripts" styleClass="sortArrow">
                                         #{fxMessageBean['ScriptEditor.label.name']}
                                         <ui:fragment rendered="#{typeEditorBean.scriptWrapper.sortStatusScriptInfo == 1}">
-                                            <h:graphicImage value="/adm/images/commandButton/down.png"/>
+                                            <h:graphicImage value="/pub/images/commandButton/down.png"/>
                                         </ui:fragment>
                                         <ui:fragment rendered="#{typeEditorBean.scriptWrapper.sortStatusScriptInfo == 2}">
-                                            <h:graphicImage value="/adm/images/commandButton/up.png"/>
+                                            <h:graphicImage value="/pub/images/commandButton/up.png"/>
                                         </ui:fragment>
                                     </a4j:commandLink>
                                 </th>
@@ -54,10 +54,10 @@
                                     <a4j:commandLink action="#{typeEditorBean.scriptWrapper.sortByEvents}" reRender="scripts" styleClass="sortArrow">
                                         #{fxMessageBean['ScriptEditor.label.event']}
                                         <ui:fragment rendered="#{typeEditorBean.scriptWrapper.sortStatusEvent == 1}">
-                                            <h:graphicImage value="/adm/images/commandButton/down.png"/>
+                                            <h:graphicImage value="/pub/images/commandButton/down.png"/>
                                         </ui:fragment>
                                         <ui:fragment rendered="#{typeEditorBean.scriptWrapper.sortStatusEvent == 2}">
-                                            <h:graphicImage value="/adm/images/commandButton/up.png"/>
+                                            <h:graphicImage value="/pub/images/commandButton/up.png"/>
                                         </ui:fragment>
                                     </a4j:commandLink>
                                 </th>
@@ -87,7 +87,7 @@
                                 <td style="padding-left:15px">
                                     <ui:fragment rendered="#{typeEditorBean.editMode and not listEntry.derived and fxSystemBean.isInRole['ScriptManagement']}">
                                             <a4j:commandButton id="removeScript_#{listEntry.id}" action="#{typeEditorBean.removeScript}" reRender="scripts, tab2"
-                                                               image="/adm/images/commandButton/delete.png">
+                                                               image="/pub/images/commandButton/delete.png">
                                                 <f:setPropertyActionListener target="#{typeEditorBean.scriptListFiler}" value="#{listEntry.id}"/>
                                             </a4j:commandButton>
                                     </ui:fragment>
@@ -143,7 +143,7 @@
                                 </td>
                                 <td style="padding-left:15px">
                                     <a4j:commandButton id="addScript" action="#{typeEditorBean.addScript}" reRender="scripts, tab2"
-                                                       image="/adm/images/commandButton/add.png">
+                                                       image="/pub/images/commandButton/add.png">
                                     </a4j:commandButton>
                                 </td>
                             </tr>

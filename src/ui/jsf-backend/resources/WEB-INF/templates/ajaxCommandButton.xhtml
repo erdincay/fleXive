@@ -23,7 +23,7 @@ Parameters:
  actionListener - the actionListener to call
  immediate - [optional] the jsf immediate flag
  onclick - [optional] the onClick event of the action link (Hint: Use single quotes only for the String parameters in the supplied function)
- icon - [optional] the name of the icon to be displayed. the icon name is mapped to the url "adm/images/commandButton/${icon}.png"
+ icon - [optional] the name of the icon to be displayed. the icon name is mapped to the url "pub/images/commandButton/${icon}.png"
  iconUrl - [optional] the url (aboslute, including the context path)
                       of the icon to be displayed (i.e. /flexive/images/myIcon.png)
  eventsQueue - ajax events queue
@@ -58,7 +58,7 @@ Parameters:
         </c:if>
 
         <c:if test="#{empty iconUrl}">
-            <c:set var="iconUrl" value="/adm/images/commandButton/#{icon}.png"/>
+            <c:set var="iconUrl" value="/pub/images/commandButton/#{icon}.png"/>
         </c:if>
 
         <c:if test="#{immediate == null}">
@@ -66,7 +66,7 @@ Parameters:
         </c:if>
 
         <c:if test="#{not empty icon}">
-            <c:set var="iconUrl" value="#{fxSystemBean.contextPath}/adm/images/commandButton/#{icon}.png"/>
+            <c:set var="iconUrl" value="#{fxSystemBean.contextPath}/pub/images/commandButton/#{icon}.png"/>
         </c:if>
 
         <c:set var="commandButtonStyle" value="commandButton"/>

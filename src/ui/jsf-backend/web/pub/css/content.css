@@ -125,7 +125,7 @@ fieldset.formFields {
 
 .commandIcon:hover {
     opacity: 1;
-    background-image:url('../images/toolbar/background-hl.png');
+    background-image:url('../../adm/images/toolbar/background-hl.png');
 }
 
 .commandIconDisabled {
@@ -248,7 +248,7 @@ table.dojoTable {
 
 table.dojoTable thead td, table.dojoTable thead th,
 table.dojoResultTable thead td, table.dojoResultTable thead th {
-    background-image: url("../../pub/images/filteredTable/header.gif");
+    background-image: url("../images/filteredTable/header.gif");
     background-repeat: no-repeat;
     cursor: pointer;
     white-space:nowrap;
@@ -263,7 +263,7 @@ table.dojoResultTable thead td, table.dojoResultTable thead th {
 
 table.dojoTable thead td.selectedUp, table.dojoTable thead th.selectedUp,
 table.dojoResultTable thead td.selectedUp, table.dojoResultTable thead th.selectedUp {
-    background-image: url("../../pub/images/filteredTable/header_up.gif");
+    background-image: url("../images/filteredTable/header_up.gif");
     background-repeat: no-repeat;
     background-position:top right;
     cursor: pointer;
@@ -276,7 +276,7 @@ table.dojoResultTable thead td.selectedUp, table.dojoResultTable thead th.select
 
 table.dojoTable thead td.selectedDown, table.dojoTable thead th.selectedDown,
 table.dojoResultTable thead td.selectedDown, table.dojoResultTable thead th.selectedDown {
-    background-image: url("../../pub/images/filteredTable/header_down.gif");
+    background-image: url("../images/filteredTable/header_down.gif");
     background-repeat: no-repeat;
     background-position:top right;
     cursor: pointer;
@@ -375,7 +375,7 @@ table.welcometbl tbody tr td {
     vertical-align: top;
 }
 table.welcometbl tbody tr td table.links tbody tr td {
-    background-image: url("../../adm/images/commandButton/flexive_arrow.png");
+    background-image: url("../images/commandButton/flexive_arrow.png");
     background-repeat: no-repeat;
     background-position: 4px 50%;
     padding-left: 26px;

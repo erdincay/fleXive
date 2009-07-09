@@ -22,11 +22,11 @@ bean - the bean that the action belongs to
 action - the action to call
 immediate - [optional] the jsf immediate flag
 page - [optional] the page to render when the button is clicked
-location - [optional] The location where the icon is displayed [content|toolbar|both]. The default is content
+location - [optional] The location where the icon is displayed [content|toolbar|both]. The default is content.
 separator - [optional], [before|after|none] If displayed in the toolbar a separator will be placed before or after the icon.
 onclick - [optional] the onClick event of the action link
 lockscreen - [optional] if false, the screen will not be locked when clicking this button
-icon - [optional] the name of the icon to be displayed. the icon name is mapped to the url "adm/images/commandButton/${icon}.png"
+icon - [optional] the name of the icon to be displayed. the icon name is mapped to the url "pub/images/commandButton/${icon}.png"
 iconUrl - [optional] the url (aboslute, including the context path) of the icon to be displayed (i.e. /flexive/images/myIcon.png)
 rendered - [optional] flag to supress rendering of the whole component
 ajax - [optional] flag to indicate that the button is part of an ajax request causing the toolbar t.b. rendered correctly. This flag has no effect for content-only buttons. If the ajax button is the last of several such buttons, consider using a separator.
@@ -34,103 +34,116 @@ toolbarPosition - [optional] the position in the toolbar (starting at 0) for an 
 buttonDisabled - [optional] renders the commandElement, but disables its functionality
 
 <ui:composition>
-
-    <ui:fragment rendered="#{rendered != false}">
-        <c:if test="#{!empty labelKey}">
-            <c:set var="label" value="#{fxMessageBean[labelKey]}"/>
-        </c:if>
-        <c:if test="${empty label}">
-            <c:set var="label" value="CommandButton.err.missingLabel" />
-        </c:if>
-
-        <c:if test="#{!empty titleKey}">
-            <c:set var="title" value="#{fxMessageBean[titleKey]}"/>
-        </c:if>
-
-        <c:if test="#{empty title and empty titleKey and not empty labelKey}">
-            <c:set var="titleKey" value="#{labelKey}.title"/>
-        </c:if>
-
-        <c:if test="#{!empty titleKey and fxSystemBean.messageExists[titleKey]}">
-            <c:set var="title" value="#{fxMessageBean[titleKey]}"/>
-        </c:if>
-
-        <c:if test="#{empty title}">
-            <c:set var="title" value="#{label}"/>
-        </c:if>
-
-        <c:if test="${empty location}">
-            <c:set var="location" value="both" />
-        </c:if>
-
-        <c:if test="#{bean == null}">
-            <c:set var="page" value="#{action}" />
-            <c:set var="action" value="gotoPage" />
-            <c:set var="bean" value="#{fxSystemBean}" />
-        </c:if>
-
-        <c:if test="#{immediate == null}">
-            <c:set var="immediate" value="false"/>
-        </c:if>
-
-        <c:if test="#{lockscreen == null}">
-            <c:set var="lockscreen" value="#{not immediate}"/>
-        </c:if>
-
-        <c:if test="#{not empty icon}">
-            <c:set var="iconUrl" value="#{fxSystemBean.contextPath}/adm/images/commandButton/#{icon}.png"/>
-        </c:if>
-
-        <c:if test="#{empty ajax or ajax == null}">
-            <c:set var="ajax" value="false"/>
-        </c:if>
-
-        <c:if test="#{empty toolbarPosition or toolbarPosition == null}">
-            <c:set var="toolbarPosition" value="NOTSET"/>
-        </c:if>
-
-        <c:if test="#{empty buttonDisabled or buttonDisabled == null}">
-            <c:set var="buttonDisabled" value="false"/>
-        </c:if>
-
-        <div id="commandElement_#{id}" style="display:none">
-            <h:commandLink id="#{id}" action="#{bean[action]}" onclick="#{onclick}" immediate="#{immediate}"
-                           disabled="#{buttonDisabled}">
-                <c:if test="#{page!=null}"><f:param name="page" value="#{page}"/></c:if>
-                <ui:insert/>
-            </h:commandLink>
-        </div>
-
-        <script type="text/javascript" language="javascript">
-            parent.registerCommandElement(this,'#{id}','#{fxMessageBean[confirmKey]}',#{lockscreen}, #{buttonDisabled});
-            function triggerCommandElement_#{id}() {
-                eval(parent.getCommandElementScript(self,'#{id}'));
-            }
-            parent.registerAjaxToolbarButtons(#{ajax}, '#{location}', '#{id}', '#{toolbarPosition}');
-        </script>
-
-        <c:if test="${location=='both' || location=='content'}">
-            <ui:insert name="content">Content</ui:insert>
-        </c:if>
-
-        <c:if test="${location=='both' || location=='toolbar'}">
-            <c:if test="${separator=='before'}">
-                <script type="text/javascript" language="javascript">
-                    parent.addToolbarSeparator();
-                </script>
+    <c:if test="#{empty id}">
+        [id of command element not set]
+    </c:if>
+    <c:if test="#{not empty id}">
+        <ui:fragment rendered="#{rendered != false}">
+            <c:if test="#{!empty labelKey}">
+                <c:set var="label" value="#{fxMessageBean[labelKey]}"/>
             </c:if>
+            <c:if test="${empty label}">
+                <c:set var="label" value="CommandButton.err.missingLabel" />
+            </c:if>
+
+            <c:if test="#{!empty titleKey}">
+                <c:set var="title" value="#{fxMessageBean[titleKey]}"/>
+            </c:if>
+
+            <c:if test="#{empty title and empty titleKey and not empty labelKey}">
+                <c:set var="titleKey" value="#{labelKey}.title"/>
+            </c:if>
+
+            <c:if test="#{!empty titleKey and fxSystemBean.messageExists[titleKey]}">
+                <c:set var="title" value="#{fxMessageBean[titleKey]}"/>
+            </c:if>
+
+            <c:if test="#{empty title}">
+                <c:set var="title" value="#{label}"/>
+            </c:if>
+
+            <c:if test="${empty location}">
+                <c:set var="location" value="both" />
+            </c:if>
+
+            <c:if test="#{bean == null}">
+                <c:set var="page" value="#{action}" />
+                <c:set var="action" value="gotoPage" />
+                <c:set var="bean" value="#{fxSystemBean}" />
+            </c:if>
+
+            <c:if test="#{immediate == null}">
+                <c:set var="immediate" value="false"/>
+            </c:if>
+
+            <c:if test="#{lockscreen == null}">
+                <c:set var="lockscreen" value="#{not immediate}"/>
+            </c:if>
+
+            <c:if test="#{not empty icon}">
+                <c:set var="iconUrl" value="#{fxSystemBean.contextPath}/pub/images/commandButton/#{icon}.png"/>
+            </c:if>
+
+            <c:if test="#{empty ajax or ajax == null}">
+                <c:set var="ajax" value="false"/>
+            </c:if>
+
+            <c:if test="#{empty toolbarPosition or toolbarPosition == null}">
+                <c:set var="toolbarPosition" value="NOTSET"/>
+            </c:if>
+
+            <c:if test="#{empty buttonDisabled or buttonDisabled == null}">
+                <c:set var="buttonDisabled" value="false"/>
+            </c:if>
+
+            <div id="commandElement_#{id}" style="display:none">
+                <h:commandLink id="#{id}" action="#{bean[action]}" onclick="#{onclick}" immediate="#{immediate}"
+                               disabled="#{buttonDisabled}">
+                    <c:if test="#{page!=null}"><f:param name="page" value="#{page}"/></c:if>
+                    <ui:insert/>
+                </h:commandLink>
+            </div>
 
             <script type="text/javascript" language="javascript">
-                parent.addToolbarItem('#{fxSystemBean.response.id}',this,'#{id}','#{title}','','#{iconUrl}', #{buttonDisabled});
+                if (parent.registerCommandElement) {
+                    parent.registerCommandElement(this,'#{id}','#{fxMessageBean[confirmKey]}',#{lockscreen}, #{buttonDisabled});
+                    function triggerCommandElement_#{id}() {
+                        eval(parent.getCommandElementScript(self,'#{id}'));
+                    }
+                    parent.registerAjaxToolbarButtons(#{ajax}, '#{location}', '#{id}', '#{toolbarPosition}');
+                } else {
+                    flexive.yui.onYahooLoaded(function() {
+                        document.getElementById("commandButton_#{id}").onclick = function() {
+                            getFirstLinkElement(document, "commandElement_#{id}").onclick();
+                        };
+                    });
+                }
             </script>
-            <c:if test="${separator=='after'}">
-                <script type="text/javascript" language="javascript">
-                    parent.addToolbarSeparator();
-                </script>
-            </c:if>
-        </c:if>
-    </ui:fragment>
 
+            <c:if test="${location=='both' || location=='content'}">
+                <ui:insert name="content">Content</ui:insert>
+            </c:if>
+
+            <c:if test="${location=='both' || location=='toolbar'}">
+                <c:if test="${separator=='before'}">
+                    <script type="text/javascript" language="javascript">
+                        parent.addToolbarSeparator();
+                    </script>
+                </c:if>
+
+                <script type="text/javascript" language="javascript">
+                    if (parent.addToolbarItem) {
+                        parent.addToolbarItem('#{fxSystemBean.response.id}',this,'#{id}','#{title}','','#{iconUrl}', #{buttonDisabled});
+                    }
+                </script>
+                <c:if test="${separator=='after'}">
+                    <script type="text/javascript" language="javascript">
+                        parent.addToolbarSeparator();
+                    </script>
+                </c:if>
+            </c:if>
+        </ui:fragment>
+    </c:if>
 </ui:composition>
 
 </html>
