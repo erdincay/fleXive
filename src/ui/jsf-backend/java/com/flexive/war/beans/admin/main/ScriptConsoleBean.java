@@ -43,7 +43,6 @@ import groovy.lang.GroovyShell;
 import groovy.lang.Script;
 import org.apache.commons.lang.StringUtils;
 
-import javax.faces.event.ActionEvent;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Serializable;
@@ -108,10 +107,8 @@ public class ScriptConsoleBean implements Serializable {
 
     /**
      * Runs the given script code
-     *
-     * @param e JSF ActionEvent
      */
-    public void runScript(ActionEvent e) {
+    public void runScript() {
         if (StringUtils.isBlank(code))
             new FxFacesMsgErr("Script.err.noCodeProvided").addToContext();
         else {
@@ -170,10 +167,8 @@ public class ScriptConsoleBean implements Serializable {
 
     /**
      * Verifies the syntax of a given groovy script
-     *
-     * @param e JSF ActionEvent
      */
-    public void checkScriptSyntax(ActionEvent e) {
+    public void checkScriptSyntax() {
         ScriptBean.checkScriptSyntax("dummyName.groovy", getCode());
     }
 
@@ -181,10 +176,8 @@ public class ScriptConsoleBean implements Serializable {
      * Adds the default [fleXive] imports for a given script
      * (Configured in Script.properties and Script_de.properties: Script.defaultImports.[script extension],
      * e.g. "Script.defaultImports.groovy")
-     *
-     * @param e JSF ActionEvent
      */
-    public void addDefaultImports(ActionEvent e) {
+    public void addDefaultImports() {
         if (code == null)
             code = "";
         code = ScriptBean.getClassImports(language) + code;

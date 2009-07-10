@@ -75,7 +75,7 @@
                                                         </ui:fragment>
                                                         <a4j:commandLink reRender="all"
                                                                          rendered="#{languagesBean.first != item.id}"
-                                                                         actionListener="#{languagesBean.moveLanguageUp}"
+                                                                         action="#{languagesBean.moveLanguageUp}"
                                                                          onmouseover='ignoreEvent(event)'
                                                                          eventsQueue="langQ"
                                                                          >
@@ -89,7 +89,7 @@
                                                         </ui:fragment>
                                                         <a4j:commandLink reRender="all"
                                                                          rendered="#{languagesBean.last != item.id}"
-                                                                         actionListener="#{languagesBean.moveLanguageDown}"
+                                                                         action="#{languagesBean.moveLanguageDown}"
                                                                          onmouseover='ignoreEvent(event)'
                                                                          eventsQueue="langQ"
                                                                          >
@@ -100,7 +100,7 @@
                                                                             style="#{upDownStyle};margin-left:3px"/>
                                                         </a4j:commandLink>
                                                         <a4j:commandLink reRender="all"
-                                                                         actionListener="#{languagesBean.removeLanguage}"
+                                                                         action="#{languagesBean.removeLanguage}"
                                                                          onmouseover='ignoreEvent(event)'
                                                                          eventsQueue="langQ"
                                                                          >
@@ -143,7 +143,7 @@
                                                     </td>
                                                     <td>
                                                         <a4j:commandLink reRender="all"
-                                                                         actionListener="#{languagesBean.addLanguage}"
+                                                                         action="#{languagesBean.addLanguage}"
                                                                          onmouseover='ignoreEvent(event)'
                                                                          eventsQueue="langQ"
                                                                          >

@@ -49,7 +49,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import javax.faces.event.ActionEvent;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
@@ -63,6 +62,7 @@ import java.util.ArrayList;
  * by the content editor component.
  */
 public class FxContentEditorBean implements Serializable {
+    private static final long serialVersionUID = 4667553874041738594L;
     private static final Log LOG = LogFactory.getLog(FxContentEditorBean.class);
 
     private static final String BEAN_NAME="fxContentEditorBean";
@@ -397,10 +397,8 @@ public class FxContentEditorBean implements Serializable {
 
     /**
      * Ajax call for removing an assignment or group.
-     *
-     * @param event the event
      */
-    public void removeElement(ActionEvent event) {
+    public void removeElement() {
         String formPrefix = "";
         try {
             formPrefix = contentStorage.get(editorId).getGuiSettings().getFormPrefix();
@@ -415,10 +413,8 @@ public class FxContentEditorBean implements Serializable {
 
     /**
      * Ajax call for adding another assignment or group.
-     *
-     * @param event the event
      */
-    public void addElement(ActionEvent event) {
+    public void addElement() {
         String formPrefix = "";
         try {
             formPrefix = contentStorage.get(editorId).getGuiSettings().getFormPrefix();
@@ -433,10 +429,8 @@ public class FxContentEditorBean implements Serializable {
 
     /**
      * Ajax call for moving an assignment or group up.
-     *
-     * @param event the event
      */
-    public void moveElementUp(ActionEvent event) {
+    public void moveElementUp() {
         String formPrefix = "";
         try {
             formPrefix = contentStorage.get(editorId).getGuiSettings().getFormPrefix();
@@ -451,10 +445,8 @@ public class FxContentEditorBean implements Serializable {
 
     /**
      * Ajax call for moving an assignment or group down.
-     *
-     * @param event the event
      */
-    public void moveElementDown(ActionEvent event) {
+    public void moveElementDown() {
         String formPrefix = "";
         try {
             formPrefix = contentStorage.get(editorId).getGuiSettings().getFormPrefix();
@@ -478,10 +470,8 @@ public class FxContentEditorBean implements Serializable {
     /**
      * Ajax call for inserting an assignments or groups below a given
      * FxData element.
-     *
-     * @param event the event
      */
-    public void addChilds(ActionEvent event) {
+    public void addChilds() {
         String formPrefix = "";
         try {
             formPrefix = contentStorage.get(editorId).getGuiSettings().getFormPrefix();
@@ -541,15 +531,15 @@ public class FxContentEditorBean implements Serializable {
             final List<FxData> data = contentStorage.get(storageKey).getContent().getData(actionXpath);
             setElement(data.get(0));
             if (nextA4jAction.equalsIgnoreCase("addElement")) {
-                addElement(null);
+                addElement();
             } else if (nextA4jAction.equalsIgnoreCase("removeElement")) {
-                removeElement(null);
+                removeElement();
             } else if (nextA4jAction.equalsIgnoreCase("moveElementUp")) {
-                moveElementUp(null);
+                moveElementUp();
             } else if (nextA4jAction.equalsIgnoreCase("moveElementDown")) {
-                moveElementDown(null);
+                moveElementDown();
             } else if (nextA4jAction.equalsIgnoreCase("addChilds")) {
-                addChilds(null);
+                addChilds();
             }
         } catch (Exception e) {
             LOG.warn("Failed to execute content editor action " + nextA4jAction + " for XPath "

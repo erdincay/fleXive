@@ -42,7 +42,7 @@ function getFirstLinkElement(doc,elementName) {
         }
         return null;
     } catch (e) {
-        alertDialog("getFirstLinkElement("+elementName+") failed: "+e);
+        alert("getFirstLinkElement("+elementName+") failed: "+e);
         return null;
     }
 }

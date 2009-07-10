@@ -60,7 +60,7 @@
                             </td>
                             <td width="100%">
                                 <adm:ajaxCommandIcon id="addStep" reRender="stepAdd, stepList, routeAdd" bean="#{workflowBean}"
-                                         actionListener="addStep"
+                                         action="addStep"
                                          icon="new" titleKey="Workflow.button.step.add" eventsQueue="stepQ">
                                 </adm:ajaxCommandIcon>
                             </td>
@@ -106,7 +106,7 @@
                         #{fxMessageBean['Workflow.field.step.actions']}
                     </f:facet>
                     <adm:ajaxCommandIcon id="removeStep" reRender="stepAdd, stepList, routeAdd" bean="#{workflowBean}"
-                                         actionListener="removeStep" rendered="#{workflowBean.canRemoveStep[step]}"
+                                         action="removeStep" rendered="#{workflowBean.canRemoveStep[step]}"
                                          icon="delete" titleKey="Workflow.button.step.remove" eventsQueue="stepQ">
                         <f:setPropertyActionListener target="#{workflowBean.stepIndex}" value="#{rowIndex}"/>
                     </adm:ajaxCommandIcon>
@@ -154,7 +154,7 @@
 						</td>
 						<td width="100%">
                             <adm:ajaxCommandIcon id="addRoute" reRender="routeAdd, routeList, stepList" bean="#{workflowBean}"
-                                         actionListener="addRoute"
+                                         action="addRoute"
                                          icon="new" titleKey="Workflow.button.route.add" eventsQueue="stepQ">
                             </adm:ajaxCommandIcon>
                         </td>
@@ -198,7 +198,7 @@
                         #{fxMessageBean['Workflow.field.route.actions']}
                     </f:facet>
                     <adm:ajaxCommandIcon id="removeRoute" reRender="routeAdd, routeList, stepList" bean="#{workflowBean}"
-                                         actionListener="removeRoute"
+                                         action="removeRoute"
                                          icon="delete" titleKey="Workflow.button.route.remove" eventsQueue="stepQ">
                         <f:setPropertyActionListener target="#{workflowBean.routeIndex}" value="#{rowIndex}"/>
                     </adm:ajaxCommandIcon>

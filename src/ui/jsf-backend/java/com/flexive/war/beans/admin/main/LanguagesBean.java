@@ -39,7 +39,6 @@ import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.interfaces.LanguageEngine;
 import com.flexive.faces.messages.FxFacesMsgErr;
 
-import javax.faces.event.ActionEvent;
 import java.util.List;
 import java.io.Serializable;
 
@@ -99,7 +98,7 @@ public class LanguagesBean implements Serializable {
         this.language = language;
     }
 
-    public synchronized void moveLanguageUp(ActionEvent event) throws FxApplicationException {
+    public synchronized void moveLanguageUp() throws FxApplicationException {
         getAvailable();
         for (int i = 0; i < available.size(); i++) {
             if (available.get(i).getId() == language.getId()) {
@@ -112,7 +111,7 @@ public class LanguagesBean implements Serializable {
         }
     }
 
-    public synchronized void moveLanguageDown(ActionEvent event) throws FxApplicationException {
+    public synchronized void moveLanguageDown() throws FxApplicationException {
         getAvailable();
         for (int i = 0; i < available.size(); i++) {
             if (available.get(i).getId() == language.getId()) {
@@ -139,7 +138,7 @@ public class LanguagesBean implements Serializable {
         return available.get(available.size() - 1).getId();
     }
 
-    public void addLanguage(ActionEvent event) throws FxApplicationException {
+    public void addLanguage() throws FxApplicationException {
         getAvailable();
         getDisabled();
         for (int i = 0; i < disabled.size(); i++) {
@@ -150,7 +149,7 @@ public class LanguagesBean implements Serializable {
         }
     }
 
-    public void removeLanguage(ActionEvent event) throws FxApplicationException {
+    public void removeLanguage() throws FxApplicationException {
         getAvailable();
         getDisabled();
         FxLanguage tmp = null;

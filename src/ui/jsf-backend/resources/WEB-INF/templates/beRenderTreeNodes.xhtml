@@ -32,7 +32,7 @@ Parameters:
 
                         <td>
                             <ui:fragment rendered="#{not readOnly}">
-                                <a4j:commandLink reRender="treeNodes" eventsQueue="ceQueue" actionListener="#{srcEditor.removeTreeNode}">
+                                <a4j:commandLink reRender="treeNodes" eventsQueue="ceQueue" action="#{srcEditor.removeTreeNode}">
                                     <f:setPropertyActionListener target="#{srcEditor.treeNode}" value="#{node}"/>
                                     <t:graphicImage style="border:0;margin-right:5px;" alt="#{fxMessageBean['Content.button.remove.treeNode']}"
                                                     title="#{fxMessageBean['Content.button.remove.treeNode.title']}"
@@ -49,7 +49,7 @@ Parameters:
             </ui:repeat>
         </table>
         <div style="display:none">
-            <a4j:commandButton id="addTreeNodeButton" reRender="treeNodes" eventsQueue="ceQueue" actionListener="#{srcEditor.addTreeNode}"/>
+            <a4j:commandButton id="addTreeNodeButton" reRender="treeNodes" eventsQueue="ceQueue" action="#{srcEditor.addTreeNode}"/>
         </div>
     </a4j:outputPanel>
 

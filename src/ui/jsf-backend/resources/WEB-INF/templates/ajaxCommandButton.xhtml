@@ -20,7 +20,7 @@ Parameters:
  titleKey - [optional]  message key for the button title (overrides title when specified).
                         if not specified and labelKey is set, it defaults to #{labelKey}.title
  bean - the bean that the action belongs to
- actionListener - the actionListener to call
+ action - the action to call
  immediate - [optional] the jsf immediate flag
  onclick - [optional] the onClick event of the action link (Hint: Use single quotes only for the String parameters in the supplied function)
  icon - [optional] the name of the icon to be displayed. the icon name is mapped to the url "pub/images/commandButton/${icon}.png"
@@ -115,8 +115,10 @@ Parameters:
 
             <div id="commandElement_#{id}" style="display:none">
                 <a4j:commandLink id="#{id}_submissionlink" eventsQueue="#{eventsQueue}"
-                                 reRender="#{reRender}" actionListener="#{bean[actionListener]}"
-                                 immediate="#{immediate}" oncomplete="#{oncomplete}"/>
+                                 reRender="#{reRender}" action="#{bean[action]}"
+                                 immediate="#{immediate}" oncomplete="#{oncomplete}">
+                    <ui:insert/>
+                 </a4j:commandLink>
             </div>
 
             <div id="commandButton_#{id}" onclick="getOnClick('commandElement_#{id}', &quot;#{onclick}&quot;, #{lockscreen});" class="#{commandButtonStyle}"

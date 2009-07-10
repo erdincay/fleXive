@@ -142,11 +142,11 @@ public class AclBean implements Serializable {
         this.assignments = assignments;
     }
 
-    public void addAssignment(ActionEvent event) {
+    public void addAssignment() {
         getAssignments().add(new ACLAssignmentEdit(acl));
     }
 
-    public void removeAssignment(ActionEvent event) {
+    public void removeAssignment() {
         for (ACLAssignmentEdit ass : assignments) {
             if (ass.getId() == assignmentId) {
                 assignments.remove(ass);

@@ -62,7 +62,6 @@ import org.apache.myfaces.component.html.ext.HtmlDataTable;
 import javax.faces.component.UIComponent;
 import javax.faces.component.UIViewRoot;
 import javax.faces.context.FacesContext;
-import javax.faces.event.ActionEvent;
 import javax.faces.event.PhaseId;
 import javax.faces.model.DataModel;
 import javax.faces.model.SelectItem;
@@ -182,13 +181,13 @@ public class ResultPreferencesBean implements Serializable {
         return ((SearchResultBean) FxJsfUtils.getManagedBean("fxSearchResultBean")).show();
     }
 
-    public void addColumnProperty(ActionEvent event) {
+    public void addColumnProperty() {
         getResultPreferences().addSelectedColumn(new ResultColumnInfo(Table.CONTENT, addPropertyName, null));
         addPropertyName = null;
         properties = null;  // refresh available properties
     }
 
-    public void removeColumnProperty(ActionEvent event) {
+    public void removeColumnProperty() {
         if (editColumnIndex == -1) {
             return;
         }
@@ -210,19 +209,19 @@ public class ResultPreferencesBean implements Serializable {
         }
     }
 
-    public void moveColumnPropertyUp(ActionEvent event) {
+    public void moveColumnPropertyUp() {
         moveColumnProperty(-1);
     }
 
-    public void moveColumnPropertyDown(ActionEvent event) {
+    public void moveColumnPropertyDown() {
         moveColumnProperty(1);
     }
 
-    public void moveColumnPropertyTop(ActionEvent event) {
+    public void moveColumnPropertyTop() {
         moveColumnProperty(-editColumnIndex);
     }
 
-    public void moveColumnPropertyBottom(ActionEvent event) {
+    public void moveColumnPropertyBottom() {
         moveColumnProperty(getSelectedColumns().size() - editColumnIndex);
     }
     
@@ -238,11 +237,11 @@ public class ResultPreferencesBean implements Serializable {
         }
     }
 
-    public void moveOrderByPropertyUp(ActionEvent event) {
+    public void moveOrderByPropertyUp() {
         moveOrderByProperty(-1);
     }
 
-    public void moveOrderByPropertyDown(ActionEvent event) {
+    public void moveOrderByPropertyDown() {
         moveOrderByProperty(1);
     }
 
@@ -258,12 +257,12 @@ public class ResultPreferencesBean implements Serializable {
         }
     }
 
-    public void addOrderByProperty(ActionEvent event) {
+    public void addOrderByProperty() {
         getResultPreferences().addOrderByColumn(new ResultOrderByInfo(Table.CONTENT, addOrderByName, null,
                 addOrderByDirection));
     }
 
-    public void removeOrderByProperty(ActionEvent event) {
+    public void removeOrderByProperty() {
         if (editColumnIndex == -1) {
             return;
         }
@@ -274,7 +273,7 @@ public class ResultPreferencesBean implements Serializable {
         }
     }
 
-    public void reloadPreferences(ActionEvent event) {
+    public void reloadPreferences() {
         this.resultPreferences = null;
     }
 

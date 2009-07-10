@@ -86,7 +86,7 @@
                     <f:facet name="header">#{fxMessageBean['ACL.label.action']}</f:facet>
                     <adm:ajaxCommandIcon id="removeAssignmentButton" reRender="assignmentTbl"
                                          icon="delete" titleKey="ACL.button.delete"
-                                         bean="#{aclBean}" actionListener="removeAssignment">
+                                         bean="#{aclBean}" action="removeAssignment">
                         <f:setPropertyActionListener target="#{aclBean.assignmentId}" value="#{row.id}"/>
                     </adm:ajaxCommandIcon>
                 </h:column>
@@ -95,7 +95,7 @@
             <div style="margin:3px;padding-bottom:5px;">
                 <adm:ajaxCommandButton id="addValueRowButton" reRender="assignmentTbl"
                                    bean="#{aclBean}" icon="new"
-                                   actionListener="addAssignment"
+                                   action="addAssignment"
                                    labelKey="ACL.button.addRow"/>
             </div>
 

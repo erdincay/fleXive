@@ -129,7 +129,7 @@ public class BeContentEditorBean implements ActionBean, Serializable {
                 this.typeId = typeId;
                 if (nodeId != -1) {
                     setTreeNodeParent(nodeId);
-                    addTreeNode(null);
+                    addTreeNode();
                 }
                 editMode = true;
             } else if ("editInstance".equals(action)) {
@@ -442,10 +442,8 @@ public class BeContentEditorBean implements ActionBean, Serializable {
 
     /**
      * Ajax call to detach content from tree node set via treeNode variable.
-     *
-     * @param event the event
      */
-    public void removeTreeNode(ActionEvent event) {
+    public void removeTreeNode() {
         //FxJsfUtils.resetFaceletsComponent(FORM_ID+":"+EDITOR_ID);
         for (FxTreeNode node : getTreeNodes()) {
             if (node.getId() == treeNode.getId())
@@ -455,10 +453,8 @@ public class BeContentEditorBean implements ActionBean, Serializable {
 
     /**
      * Ajax call to attach content to tree node id set via treeNodeParent variable.
-     *
-     * @param event the event
      */
-    public void addTreeNode(ActionEvent event) {
+    public void addTreeNode() {
         addTreeNode(treeNodeParent);
     }
 

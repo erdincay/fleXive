@@ -44,7 +44,6 @@ import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.workflow.*;
 
-import javax.faces.event.ActionEvent;
 import javax.faces.model.SelectItem;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -202,10 +201,8 @@ public class WorkflowBean implements Serializable {
 
     /**
      * Add a new step definition to the current workflow.
-     *
-     * @return the next page
      */
-    public synchronized String addStep() {
+    public synchronized void addStep() {
         StepEdit step = new StepEdit(new Step(getNewStepId(), stepDefinitionId, workflow.getId(), stepACL));
         getSteps().add(step);
         StepDefinition sd = CacheAdmin.getFilteredEnvironment().getStepDefinition(stepDefinitionId);
@@ -224,7 +221,6 @@ public class WorkflowBean implements Serializable {
             }
         }
         workflow.setSteps(steps);
-        return "workflowEdit";
     }
 
     /**
@@ -232,7 +228,7 @@ public class WorkflowBean implements Serializable {
      *
      * @return the next page
      */
-    public String removeStep() {
+    public void removeStep() {
         if (stepIndex == -1) {
             new FxFacesMsgErr("Workflow.err.step.notSelected").addToContext();
         } else if (stepIndex < 0 || stepIndex > getSteps().size()) {
@@ -249,7 +245,6 @@ public class WorkflowBean implements Serializable {
             getSteps().remove(stepIndex);
         }
         workflow.setSteps(getSteps());
-        return "workflowEdit";
     }
 
     /**
@@ -275,35 +270,17 @@ public class WorkflowBean implements Serializable {
         });
     }
 
-    public String addStep(ActionEvent evt) {
-        return addStep();
-    }
-
-    public String removeStep(ActionEvent evt) {
-        return removeStep();
-    }
-
-    public String addRoute(ActionEvent evt) {
-        return addRoute();
-    }
-
-    public String removeRoute(ActionEvent evt) {
-        return removeRoute();
-    }
-
     /**
      * Add a new route between steps[fromStepIndex] and steps[toStepIndex].
-     *
-     * @return the next page
      */
-    public String addRoute() {
+    public void addRoute() {
         if (getStep(fromStepId) == null || getStep(toStepId) == null) {
             new FxFacesMsgErr("Workflow.err.route.create.steps.notFound").addToContext();
-            return "workflowEdit";
+            return;
         }
         if (fromStepId == toStepId) {
             new FxFacesMsgErr("Workflow.err.route.create.steps.identical").addToContext();
-            return "workflowEdit";
+            return;
         }
         RouteEdit route = new RouteEdit(new Route(-1, userGroup, fromStepId, toStepId));
         if (routes.contains(route)) {
@@ -323,18 +300,15 @@ public class WorkflowBean implements Serializable {
             }
             new FxFacesMsgInfo("Workflow.nfo.route.added", fromStepName, toStepName, groupName).addToContext();
         }
-        return "workflowEdit";
     }
 
     /**
      * Remove an existing route (by index).
-     *
-     * @return the next page
      */
-    public String removeRoute() {
+    public void removeRoute() {
         if (routeIndex < 0 || routeIndex > getRoutes().size()) {
             new FxFacesMsgErr("Workflow.err.route.remove.invalid", routeIndex).addToContext();
-            return "workflowEdit";
+            return;
         }
         Route route = routes.get(routeIndex);
         // TODO add convenience methods for route --> step --> stepdefinitionid --> stepdefinition
@@ -351,7 +325,6 @@ public class WorkflowBean implements Serializable {
             //ignore
         }
         new FxFacesMsgInfo("Workflow.nfo.route.removed", fromStepName, toStepName, grp).addToContext();
-        return "workflowEdit";
     }
 
     /**

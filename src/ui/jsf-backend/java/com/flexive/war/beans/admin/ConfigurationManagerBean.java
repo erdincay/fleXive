@@ -416,22 +416,19 @@ public class ConfigurationManagerBean {
     /**
      * calls the save() method
      *
-     * @param ae not used
      * @see ConfigurationManagerBean#save()
      */
-    @SuppressWarnings({"UnusedDeclaration"})
-    public void commitItemEditing(ActionEvent ae) {
+    public void commitItemEditing() {
         save();
     }
 
     /**
      * calls the cancel method
      *
-     * @param ae not used
      * @see ConfigurationManagerBean#cancel()
      */
     @SuppressWarnings({"UnusedDeclaration"})
-    public void cancelItemEditing(ActionEvent ae) {
+    public void cancelItemEditing() {
         cancel();
     }
 
@@ -524,17 +521,6 @@ public class ConfigurationManagerBean {
 
     public void setCurEdit_STR_Backup_Value(String curEdit_STR_Backup_Value) {
         this.curEdit_STR_Value = curEdit_STR_Backup_Value;
-    }
-
-    /**
-     * calls only the editCurItem method
-     *
-     * @param e not used
-     * @see ConfigurationManagerBean#editCurItem()
-     */
-    @SuppressWarnings({"UnusedDeclaration"})
-    public void editCurItem(ActionEvent e) {
-        editCurItem();
     }
 
     /**
@@ -658,40 +644,17 @@ public class ConfigurationManagerBean {
     }
 
     /**
-     * calls only the showConfirm method
-     *
-     * @param ae not used
-     * @see ConfigurationManagerBean#showConfirm()
-     */
-    @SuppressWarnings({"UnusedDeclaration"})
-    public void showConfirm(ActionEvent ae) {
-        showConfirm();
-    }
-
-    /**
      * calls only the deletKey method
      *
-     * @param ae not used
      * @see ConfigurationManagerBean#deleteKey()
      */
     @SuppressWarnings({"UnusedDeclaration"})
-    public void deleteItem(ActionEvent ae) {
+    public void deleteItem() {
         deleteKey();
     }
 
     public void showConfirm() {
         curPanel = CONFIRM_PANEL;
-    }
-
-    /**
-     * calls only showNew
-     *
-     * @param ae not used
-     * @see ConfigurationManagerBean#showNew()
-     */
-    @SuppressWarnings({"UnusedDeclaration"})
-    public void showNew(ActionEvent ae) {
-        showNew();
     }
 
     /**
@@ -758,11 +721,9 @@ public class ConfigurationManagerBean {
     /**
      * calls only the createNew method
      *
-     * @param ae not used
      * @see ConfigurationManagerBean#createNew()
      */
-    @SuppressWarnings({"UnusedDeclaration"})
-    public void createNewItem(ActionEvent ae) {
+    public void createNewItem() {
         createNew();
     }
 
@@ -837,6 +798,8 @@ public class ConfigurationManagerBean {
      * @see TableRow
      */
     public static class MultiTable implements Serializable {
+        private static final long serialVersionUID = 3438121284458930316L;
+
         private final String name;
         private final int tID;
         private final List<String> tableHeader;
@@ -877,6 +840,8 @@ public class ConfigurationManagerBean {
      * An utility class for a table-row
      */
     public static class TableRow implements Serializable, Comparable {
+        private static final long serialVersionUID = 253428542187527791L;
+
         private final String key;
         private final List<String> tabValues;
         private final boolean editable;

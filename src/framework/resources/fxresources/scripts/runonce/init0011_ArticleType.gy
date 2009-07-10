@@ -166,8 +166,6 @@ new GroovyTypeBuilder().Article(
         box_image(label: new FxString("Linked Image"),
                 dataType: FxDataType.Reference,
                 referencedType: CacheAdmin.environment.getType("IMAGE"),
-                multiline: true,
-                overrideMultiline: true,
                 fullTextIndexed: false,
                 defaultMultiplicity: 0)
     }

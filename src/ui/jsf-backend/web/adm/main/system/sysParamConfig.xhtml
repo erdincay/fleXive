@@ -151,7 +151,7 @@
                                     <!--Edit Icon-->
                                     <adm:ajaxCommandIcon iconDisabled="#{!curTR.editable}" id="edit"
                                                          reRender="editPanel, newPanel, confirmPanel"
-                                                         bean="#{configManager}" actionListener="editCurItem"
+                                                         bean="#{configManager}" action="editCurItem"
                                                          onclick="#{rich:component('editMPanel')}.show();"
                                                          titleKey="SysParamConfig.button.edit" icon="edit">
                                         <f:setPropertyActionListener target="#{configManager.curEditName}"
@@ -159,7 +159,7 @@
                                     </adm:ajaxCommandIcon>
                                     <!--Delete Icon-->
                                     <adm:ajaxCommandIcon id="deleteButton" reRender="editPanel, newPanel, confirmPanel"
-                                                         bean="#{configManager}" actionListener="showConfirm"
+                                                         bean="#{configManager}" action="showConfirm"
                                                          titleKey="SysParamConfig.button.delete"
                                                          onclick="#{rich:component('confirmMPanel')}.show();"
                                                          icon="delete">
@@ -180,7 +180,7 @@
                 <td>
                     <!--New Button-->
                     <adm:ajaxCommandButton labelKey="SysParamConfig.button.create.new" icon="new"
-                                           bean="#{configManager}" actionListener="showNew"
+                                           bean="#{configManager}" action="showNew"
                                            onclick="#{rich:component('newMPanel')}.show();"
                                            id="createNew_H"
                                            reRender="newPanel, editPanel, confirmPanel">
@@ -218,7 +218,7 @@
                 <!--Cancle Icon-->
                 <adm:ajaxCommandIcon titleKey="SysParamConfig.button.cancel" icon="cancel"
                                      bean="#{configManager}"
-                                     actionListener="cancelItemEditing"
+                                     action="cancelItemEditing"
                                      onclick="#{rich:component('newMPanel')}.hide();"
                                      id="cancel_new_M" reRender="editPanel"/>
             </h:form>
@@ -286,7 +286,7 @@
                                 <td align="right">
                                     <!--OK button-->
                                     <adm:ajaxCommandButton labelKey="SysParamConfig.button.save" icon="ok" bean="#{configManager}"
-                                                           actionListener="createNewItem"
+                                                           action="createNewItem"
                                                            id="save_new" buttonDisabled="#{configManager.invalidType}"
                                                            onclick="#{rich:component('newMPanel')}.hide();"
                                                            reRender="overviewTable"/>
@@ -295,7 +295,7 @@
                                 <td align="left">
                                     <!--Cancel button-->
                                     <adm:ajaxCommandButton labelKey="SysParamConfig.button.cancel" icon="cancel"
-                                                           bean="#{configManager}" actionListener="cancelItemEditing"
+                                                           bean="#{configManager}" action="cancelItemEditing"
                                                            id="cancel_new" onclick="#{rich:component('newMPanel')}.hide();"/>
                                 </td>
                             </tr>
@@ -319,7 +319,7 @@
             <h:form>
                 <!--cancel icon-->
                 <adm:ajaxCommandIcon titleKey="SysParamConfig.button.cancel" icon="cancel"
-                                     bean="#{configManager}" actionListener="cancelItemEditing"
+                                     bean="#{configManager}" action="cancelItemEditing"
                                      onclick="#{rich:component('editMPanel')}.hide();"
                                      id="cancel_edit_M" reRender="editPanel"/>
             </h:form>
@@ -359,7 +359,7 @@
                                 <td align="right">
                                     <!--save button-->
                                     <adm:ajaxCommandButton labelKey="SysParamConfig.button.save" icon="ok"
-                                                           bean="#{configManager}" actionListener="commitItemEditing"
+                                                           bean="#{configManager}" action="commitItemEditing"
                                                            onclick="#{rich:component('editMPanel')}.hide();"
                                                            id="save_edit"
                                                            reRender=" overviewTable"/>
@@ -368,7 +368,7 @@
                                 <td align="left">
                                     <!--cancel button-->
                                     <adm:ajaxCommandButton labelKey="SysParamConfig.button.cancel" icon="cancel"
-                                                           bean="#{configManager}" actionListener="cancelItemEditing"
+                                                           bean="#{configManager}" action="cancelItemEditing"
                                                            onclick="#{rich:component('editMPanel')}.hide();"
                                                            id="cancel_edit" reRender="editPanel"/>
                                 </td>
@@ -392,7 +392,7 @@
             <h:form>
                 <!--cancel icon-->
                 <adm:ajaxCommandIcon titleKey="SysParamConfig.button.cancel" icon="cancel"
-                                     bean="#{configManager}" actionListener="cancelItemEditing"
+                                     bean="#{configManager}" action="cancelItemEditing"
                                      onclick="#{rich:component('confirmMPanel')}.hide();"
                                      id="cancel_confirm_M" reRender="confirmPanel"/>
             </h:form>
@@ -418,7 +418,7 @@
                                 <td align="right">
                                     <!--delete button-->
                                     <adm:ajaxCommandButton labelKey="SysParamConfig.button.delete" icon="delete"
-                                                           bean="#{configManager}" actionListener="deleteItem" id="delete_confirm"
+                                                           bean="#{configManager}" action="deleteItem" id="delete_confirm"
                                                            onclick="#{rich:component('confirmMPanel')}.hide();"
                                                            reRender=" overviewTable"/>
                                 </td>
@@ -426,7 +426,7 @@
                                 <td align="left">
                                     <!--cancel button-->
                                     <adm:ajaxCommandButton labelKey="SysParamConfig.button.cancel" icon="cancel"
-                                                           bean="#{configManager}" actionListener="cancelItemEditing"
+                                                           bean="#{configManager}" action="cancelItemEditing"
                                                            onclick="#{rich:component('confirmMPanel')}.hide();" id="cancel_confirm"
                                                            reRender="confirmPanel"/>
                                 </td>

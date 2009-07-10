@@ -298,7 +298,7 @@ public class SelectListBean implements Serializable {
         return editListItemId;
     }
 
-    public void editListItem(ActionEvent event) {
+    public void editListItem() {
         editListItem = selectList.getItem(editListItemId).asEditable();
         originalParents = new HashMap<Long, Long>(editListItem.getChildCount());
         editNew = false;
@@ -306,20 +306,20 @@ public class SelectListBean implements Serializable {
             originalParents.put(child.getId(), child.getParentItem().getId());
     }
 
-    public void createListItem(ActionEvent event) {
+    public void createListItem() {
         editListItem = FxSelectListItemEdit.createNew(null, selectList.getNewItemACL(), selectList, new FxString(true, ""), null, FxFormatUtils.DEFAULT_COLOR);
         editListItemId = editListItem.getId();
         editNew = true;
     }
 
-    public void commitItemEditing(ActionEvent event) {
+    public void commitItemEditing() {
         editListItemId = UNSELECTED_ID;
         editListItem = null;
         originalParents = null;
         editNew = false;
     }
 
-    public void cancelItemEditing(ActionEvent event) throws FxInvalidParameterException {
+    public void cancelItemEditing() throws FxInvalidParameterException {
         if (editNew) {
             selectList.removeItem(editListItemId);
             editNew = false;
@@ -343,11 +343,11 @@ public class SelectListBean implements Serializable {
         originalParents = null;
     }
 
-    public void moveItemUp(ActionEvent event) throws FxInvalidParameterException {
+    public void moveItemUp() throws FxInvalidParameterException {
         selectList.moveItemUp(moveListItemId);
     }
 
-    public void moveItemDown(ActionEvent event) throws FxInvalidParameterException {
+    public void moveItemDown() throws FxInvalidParameterException {
         selectList.moveItemDown(moveListItemId);
     }
 
@@ -561,7 +561,7 @@ public class SelectListBean implements Serializable {
         }
     }
 
-    public void deleteListItem(ActionEvent event) {
+    public void deleteListItem() {
         try {
             //check if the user has permission
             if (getMayDeleteItems()) {

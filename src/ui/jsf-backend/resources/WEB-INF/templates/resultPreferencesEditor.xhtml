@@ -58,7 +58,7 @@ Renders the body content in a info box.
                 <t:column width="120">
                     <!-- Move column to the top -->
                     <adm:ajaxCommandIcon id="moveColumnPropertyTop" reRender="selectedColumns" bean="#{resultPreferencesBean}"
-                                         actionListener="moveColumnPropertyTop"
+                                         action="moveColumnPropertyTop"
                                          titleKey="ResultPreferences.button.info.top"
                                          icon="top">
                         <f:setPropertyActionListener target="#{resultPreferencesBean.editColumnIndex}"
@@ -66,7 +66,7 @@ Renders the body content in a info box.
                     </adm:ajaxCommandIcon>
                     <!-- Move column up -->
                     <adm:ajaxCommandIcon id="moveColumnPropertyUp" reRender="selectedColumns" bean="#{resultPreferencesBean}"
-                                         actionListener="moveColumnPropertyUp"
+                                         action="moveColumnPropertyUp"
                                          titleKey="ResultPreferences.button.info.up"
                                          icon="up">
                         <f:setPropertyActionListener target="#{resultPreferencesBean.editColumnIndex}"
@@ -74,7 +74,7 @@ Renders the body content in a info box.
                     </adm:ajaxCommandIcon>
                     <!-- Move column down -->
                     <adm:ajaxCommandIcon id="moveColumnPropertyDown" reRender="selectedColumns" bean="#{resultPreferencesBean}"
-                                         actionListener="moveColumnPropertyDown"
+                                         action="moveColumnPropertyDown"
                                          titleKey="ResultPreferences.button.info.down"
                                          icon="down">
                         <f:setPropertyActionListener target="#{resultPreferencesBean.editColumnIndex}"
@@ -82,7 +82,7 @@ Renders the body content in a info box.
                     </adm:ajaxCommandIcon>
                     <!-- Move column to the bottom -->
                     <adm:ajaxCommandIcon id="moveColumnPropertyBottom" reRender="selectedColumns" bean="#{resultPreferencesBean}"
-                                         actionListener="moveColumnPropertyBottom"
+                                         action="moveColumnPropertyBottom"
                                          titleKey="ResultPreferences.button.info.bottom"
                                          icon="bottom">
                         <f:setPropertyActionListener target="#{resultPreferencesBean.editColumnIndex}"
@@ -90,7 +90,7 @@ Renders the body content in a info box.
                     </adm:ajaxCommandIcon>
                     <!-- Delete column -->
                     <adm:ajaxCommandIcon id="removeColumnProperty" reRender="preferencesPanel" bean="#{resultPreferencesBean}"
-                                         actionListener="removeColumnProperty"
+                                         action="removeColumnProperty"
                                          titleKey="ResultPreferences.button.info.delete"
                                          icon="delete">
                         <f:setPropertyActionListener target="#{resultPreferencesBean.editColumnIndex}"
@@ -110,7 +110,7 @@ Renders the body content in a info box.
                     <td>
                         <adm:ajaxCommandButton id="addColumnButton"
                                            bean="#{resultPreferencesBean}"
-                                           actionListener="addColumnProperty"
+                                           action="addColumnProperty"
                                            reRender="preferencesPanel"
                                            icon="add"
                                            labelKey="ResultPreferences.button.info.add"/>
@@ -140,7 +140,7 @@ Renders the body content in a info box.
                 <t:column width="70">
                     <!-- Move column up -->
                     <adm:ajaxCommandIcon id="moveOrderByPropertyUp" reRender="propertyTable" bean="#{resultPreferencesBean}"
-                                         actionListener="moveOrderByPropertyUp"
+                                         action="moveOrderByPropertyUp"
                                          titleKey="ResultPreferences.button.info.up"
                                          icon="up">
                         <f:setPropertyActionListener target="#{resultPreferencesBean.editColumnIndex}"
@@ -148,14 +148,14 @@ Renders the body content in a info box.
                     </adm:ajaxCommandIcon>
                     <!-- Move column down -->
                     <adm:ajaxCommandIcon id="moveOrderByPropertyDown" reRender="propertyTable" bean="#{resultPreferencesBean}"
-                                         actionListener="moveOrderByPropertyDown"
+                                         action="moveOrderByPropertyDown"
                                          titleKey="ResultPreferences.button.info.down"
                                          icon="down">
                         <f:setPropertyActionListener target="#{resultPreferencesBean.editColumnIndex}"
                                                      value="#{rowIndex}"/>
                     </adm:ajaxCommandIcon>
                     <adm:ajaxCommandIcon id="removeOrderByProperty" reRender="propertyTable" bean="#{resultPreferencesBean}"
-                                         actionListener="removeOrderByProperty"
+                                         action="removeOrderByProperty"
                                          titleKey="ResultPreferences.button.info.delete"
                                          icon="delete">
                         <f:setPropertyActionListener target="#{resultPreferencesBean.editColumnIndex}"
@@ -181,7 +181,7 @@ Renders the body content in a info box.
                         <td>
                             <adm:ajaxCommandButton id="addOrderByButton"
                                                bean="#{resultPreferencesBean}"
-                                               actionListener="addOrderByProperty"
+                                               action="addOrderByProperty"
                                                reRender="propertyTable"
                                                icon="add"
                                                labelKey="ResultPreferences.button.info.add"/>
@@ -192,7 +192,7 @@ Renders the body content in a info box.
         </fx:fieldSet>
 
         <div style="display:none">
-            <a4j:commandButton id="reloadButton" actionListener="#{resultPreferencesBean.reloadPreferences}"
+            <a4j:commandButton id="reloadButton" action="#{resultPreferencesBean.reloadPreferences}"
                                reRender="preferencesPanel"/>
         </div>
 

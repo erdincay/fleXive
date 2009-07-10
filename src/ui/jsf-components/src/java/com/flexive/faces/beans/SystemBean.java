@@ -49,6 +49,8 @@ import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.war.FxRequest;
 import com.flexive.war.filter.FxResponseWrapper;
 import com.flexive.war.filter.FxRequestUtils;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Iterables;
 
 import javax.faces.application.FacesMessage;
 import javax.faces.component.UIComponent;
@@ -59,10 +61,7 @@ import javax.faces.model.DataModel;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.MissingResourceException;
+import java.util.*;
 
 import net.java.dev.weblets.FacesWebletUtils;
 
@@ -358,6 +357,24 @@ public class SystemBean implements Serializable {
      */
     public List<FxDropApplication> getDropApplications() {
         return FxSharedUtils.getDropApplications();
+    }
+
+    /**
+     * Get a list of all installed and deployed drops that have a web application context.
+     *
+     * @return  a list of all installed and deployed drops that have a web application context.
+     * @since 3.1
+     */
+    public List<FxDropApplication> getDropApplicationsWithContext() {
+        final ArrayList<FxDropApplication> apps = Lists.newArrayList(FxSharedUtils.getDropApplications());
+        final Iterator<FxDropApplication> iter = apps.iterator();
+        while (iter.hasNext()) {
+            final FxDropApplication application = iter.next();
+            if (!application.isWebContextAvailable()) {
+                iter.remove();
+            }
+        }
+        return apps;
     }
 
     /**

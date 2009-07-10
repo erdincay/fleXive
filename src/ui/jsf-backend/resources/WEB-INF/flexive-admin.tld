@@ -276,10 +276,10 @@
         <description>the bean that the action belongs to</description>
       </attribute>
       <attribute>
-        <name>actionListener</name>
+        <name>action</name>
         <required>false</required>
         <rtexprvalue>false</rtexprvalue>
-        <description>the actionListener to call</description>
+        <description>the action to call</description>
       </attribute>
       <attribute>
         <name>immediate</name>
@@ -365,10 +365,10 @@
         <description>the bean that the action belongs to</description>
       </attribute>
       <attribute>
-        <name>actionListener</name>
+        <name>action</name>
         <required>false</required>
         <rtexprvalue>false</rtexprvalue>
-        <description>the actionListener to call</description>
+        <description>the action to call</description>
       </attribute>
       <attribute>
         <name>immediate</name>

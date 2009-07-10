@@ -55,8 +55,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
 
-import javax.faces.event.ActionEvent;
-import javax.faces.context.FacesContext;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -115,24 +113,24 @@ public class QueryEditorBean implements Serializable {
                 setRootNode(new QueryRootNode(QueryRootNode.Type.CONTENTSEARCH, location));
                 addAssignmentId = FxJsfUtils.getLongParameter("nodeId", FxTreeNode.ROOT_NODE);
                 addNodeLive = FxJsfUtils.getBooleanParameter("liveMode", false);
-                addTreeNode(null);
+                addTreeNode();
             } else if ("typeSearch".equals(action)) {
                 setRootNode(new QueryRootNode(QueryRootNode.Type.CONTENTSEARCH, location));
                 addAssignmentId = FxJsfUtils.getLongParameter("typeId", -1);
                 if (addAssignmentId != -1) {
-                    addTypeQuery(null);
+                    addTypeQuery();
                 }
             } else if ("assignmentSearch".equals(action)) {
                 setRootNode(new QueryRootNode(QueryRootNode.Type.CONTENTSEARCH, location));
                 addAssignmentId = FxJsfUtils.getLongParameter("assignmentId", -1);
                 if (addAssignmentId != -1) {
-                    addAssignment(null);
+                    addAssignment();
                 }
             } else if ("propertySearch".equals(action)) {
                 setRootNode(new QueryRootNode(QueryRootNode.Type.CONTENTSEARCH, location));
                 addAssignmentId = FxJsfUtils.getLongParameter("propertyId", -1);
                 if (addAssignmentId != -1) {
-                    addProperty(null);
+                    addProperty();
                 }
             } else if ("new".equals(action)) {
                 // create a new search query
@@ -272,19 +270,16 @@ public class QueryEditorBean implements Serializable {
     /**
      * Add the (property) assignment stored in addAssignmentId
      * to the node identified by addAssignmentNodeId.
-     *
-     * @param event the action event
      */
-    public void addAssignment(ActionEvent event) {
+    public void addAssignment() {
         addQueryNode(new AssignmentValueNode(getRootNode().getNewId(), addAssignmentId));
     }
 
     /**
      * Add the property stored in addAssignmentId to the node identified
      * by addAssignmentNodeId.
-     * @param event the action event
      */
-    public void addProperty(ActionEvent event) {
+    public void addProperty() {
         addQueryNode(new PropertyValueNode(getRootNode().getNewId(), addAssignmentId));
     }
 
@@ -292,10 +287,9 @@ public class QueryEditorBean implements Serializable {
      * Add the tree node stored in addAssignmentId to the node identified by
      * addAssignmentNodeId.
      *
-     * @param event the action event
      * @throws FxApplicationException on errors
      */
-    public void addTreeNode(ActionEvent event) throws FxApplicationException {
+    public void addTreeNode() throws FxApplicationException {
         final FxTreeNode treeNode = EJBLookup.getTreeEngine().getNode(FxTreeMode.Edit, addAssignmentId);
         final TreeValueNode newNode = new TreeValueNode(getRootNode().getNewId(), treeNode.getId(),
                 addNodeLive ? FxTreeMode.Live : FxTreeMode.Edit,
@@ -306,10 +300,8 @@ public class QueryEditorBean implements Serializable {
 
     /**
      * Add a query node that searches only for types of the given type ID.
-     *
-     * @param event the action event
      */
-    public void addTypeQuery(ActionEvent event) {
+    public void addTypeQuery() {
         final FxType type = CacheAdmin.getEnvironment().getType(addAssignmentId);
         final AssignmentValueNode node = new AssignmentValueNode(getRootNode().getNewId(), CacheAdmin.getEnvironment().getAssignment("ROOT/TYPEDEF").getId());
         node.setValue(new FxLargeNumber(false, type.getId()));
@@ -342,10 +334,8 @@ public class QueryEditorBean implements Serializable {
 
     /**
      * Remove the node identified by removeNodeId from the current query.
-     *
-     * @param event the action event
      */
-    public void removeNode(ActionEvent event) {
+    public void removeNode() {
         QueryNode removeNode = getRootNode().findChild(removeNodeId);
         if (removeNode != null && removeNode.getParent() != null) {
             removeNode.getParent().removeChild(removeNode);
@@ -356,19 +346,15 @@ public class QueryEditorBean implements Serializable {
 
     /**
      * Join the selected nodes with 'and'.
-     *
-     * @param event the action event
      */
-    public void createAndSubquery(ActionEvent event) {
+    public void createAndSubquery() {
         joinSelectedNodes(QueryOperatorNode.Operator.AND);
     }
 
     /**
      * Join the selected nodes with 'or'.
-     *
-     * @param event the action event
      */
-    public void createOrSubquery(ActionEvent event) {
+    public void createOrSubquery() {
         joinSelectedNodes(QueryOperatorNode.Operator.OR);
     }
 

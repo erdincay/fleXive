@@ -76,7 +76,7 @@
                 <h:selectOneListbox id="typeId" value="#{fxSearchResultBean.typeId}" size="1">
                     <f:selectItems value="#{fxSearchResultBean.contentTypeItems}"/>
                     <a4j:support event="onchange"
-                                 actionListener="#{fxSearchResultBean.resetTableView}"
+                                 action="#{fxSearchResultBean.resetTableView}"
                                  onsubmit="setBusyCursor();"
                                  oncomplete="setDefaultCursor();"
                                  reRender="refreshResults"
@@ -85,7 +85,7 @@
                 </h:selectOneListbox>
                 <h:selectOneListbox id="version" value="#{fxSearchResultBean.versionFilter}" size="1">
                     <f:selectItems value="#{fxSearchResultBean.versionItems}"/>
-                    <a4j:support event="onchange" actionListener="#{fxSearchResultBean.resetTableView}"
+                    <a4j:support event="onchange" action="#{fxSearchResultBean.resetTableView}"
                                  onsubmit="setBusyCursor();"
                                  oncomplete="setDefaultCursor();"
                                  reRender="refreshResults"
@@ -94,7 +94,7 @@
                 </h:selectOneListbox>
                 <h:selectOneListbox id="previewSize" value="#{fxSearchResultBean.previewSize}" size="1" rendered="#{fxSearchResultBean.viewType == 'THUMBNAILS'}">
                     <f:selectItems value="#{fxSelectBean.previewSizes}"/>
-                    <a4j:support event="onchange" actionListener="#{fxSearchResultBean.resetTableView}"
+                    <a4j:support event="onchange" action="#{fxSearchResultBean.resetTableView}"
                                  onsubmit="setBusyCursor();"
                                  oncomplete="setDefaultCursor();"
                                  reRender="refreshResults"

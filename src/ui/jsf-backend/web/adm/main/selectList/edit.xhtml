@@ -126,7 +126,7 @@
                                         <!-- move up -->
                                         <adm:ajaxCommandIcon titleKey="SelectList.button.moveUp"
                                                              icon="up" bean="#{selectListBean}"
-                                                             actionListener="moveItemUp"
+                                                             action="moveItemUp"
                                                              id="upButton"
                                                              rendered="#{selectListBean.mayEditItem[item.id]}"
                                                              reRender="itemTable">
@@ -140,7 +140,7 @@
                                         <!-- move down -->
                                         <adm:ajaxCommandIcon titleKey="SelectList.button.moveDown"
                                                              icon="down" bean="#{selectListBean}"
-                                                             actionListener="moveItemDown"
+                                                             action="moveItemDown"
                                                              id="downButton"
                                                              rendered="#{selectListBean.mayEditItem[item.id]}"
                                                              reRender="itemTable">
@@ -154,7 +154,7 @@
                                         <!-- edit -->
                                         <adm:ajaxCommandIcon titleKey="SelectList.button.edit"
                                                              icon="edit" bean="#{selectListBean}"
-                                                             actionListener="editListItem"
+                                                             action="editListItem"
                                                              id="editButton"
                                                              onclick="#{rich:component('editPanel')}.show();"
                                                              rendered="#{selectListBean.mayEditItem[item.id]}"
@@ -168,7 +168,7 @@
                                         </adm:ajaxCommandIcon>
                                         <!-- delete -->
                                         <adm:ajaxCommandIcon titleKey="SelectList.button.delete"
-                                                         icon="delete" bean="#{selectListBean}" actionListener="deleteListItem"
+                                                         icon="delete" bean="#{selectListBean}" action="deleteListItem"
                                                          id="deleteButton"
                                                          rendered="#{selectListBean.mayDeleteItems}" reRender="itemTable">
                                             <f:setPropertyActionListener target="#{selectListBean.listItemId}"
@@ -191,7 +191,7 @@
             <a4j:outputPanel id="createItemArea" layout="block">
                 <ui:fragment rendered="#{selectListBean.editListItemId == selectListBean.unselectedId}">
                     <adm:ajaxCommandButton id="createItemButton" labelKey="SelectList.label.createItem" icon="new"
-                                           actionListener="createListItem" bean="#{selectListBean}"
+                                           action="createListItem" bean="#{selectListBean}"
                                            onclick="#{rich:component('editPanel')}.show();"
                                            reRender="editItemArea,createItemArea"/>
                 </ui:fragment>
@@ -219,7 +219,7 @@
                 <h:panelGroup>
                     <h:form>
                         <adm:ajaxCommandIcon titleKey="SelectList.button.cancel"
-                                                   icon="cancel" bean="#{selectListBean}" actionListener="cancelItemEditing"
+                                                   icon="cancel" bean="#{selectListBean}" action="cancelItemEditing"
                                                    id="cancelItemChanges"
                                                    onclick="#{rich:component('editPanel')}.hide();"
                                                    reRender="editItemArea,createItemArea"/>
@@ -264,7 +264,7 @@
                         <br/>
 
                         <adm:ajaxCommandButton labelKey="SelectList.button.commit"
-                                               icon="ok" bean="#{selectListBean}" actionListener="commitItemEditing"
+                                               icon="ok" bean="#{selectListBean}" action="commitItemEditing"
                                                id="commitItemChanges"
                                                onclick="#{rich:component('editPanel')}.hide();"
                                                rendered="#{selectListBean.mayEditItem[item.id]}"
@@ -272,7 +272,7 @@
                         </adm:ajaxCommandButton>
 
                         <adm:ajaxCommandButton labelKey="SelectList.button.cancel"
-                                               icon="cancel" bean="#{selectListBean}" actionListener="cancelItemEditing"
+                                               icon="cancel" bean="#{selectListBean}" action="cancelItemEditing"
                                                id="cancelItemChanges"
                                                onclick="#{rich:component('editPanel')}.hide();"
                                                reRender="editItemArea,createItemArea"/>

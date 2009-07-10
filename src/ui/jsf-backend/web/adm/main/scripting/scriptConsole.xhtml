@@ -44,12 +44,12 @@
                     #{fxMessageBean['ScriptConsole.label.runAtWeb']}<br/><br/>
 
                     <adm:ajaxCommandButton id="executeButton" labelKey="ScriptConsole.button.execute" icon="run"
-                                           bean="#{scriptConsoleBean}" actionListener="runScript"
+                                           bean="#{scriptConsoleBean}" action="runScript"
                                            reRender="resultPanel" lockscreen="true"/>
                     <adm:shortcut elementId="commandButton_executeButton"/>
 
                     <adm:ajaxCommandButton id="defaultImports" labelKey="Script.button.defaultImports"
-                                           icon="compact" bean="#{scriptConsoleBean}" actionListener="addDefaultImports"
+                                           icon="compact" bean="#{scriptConsoleBean}" action="addDefaultImports"
                                            reRender="codePanel"
                                            oncomplete="activateEditArea('frm:codeArea', true, '#{scriptConsoleBean.userLang}',
                                      '#{scriptConsoleBean.language}');"/>
@@ -58,7 +58,7 @@
                         <adm:ajaxCommandButton id="verifyButton" labelKey="Script.button.verify"
                                                icon="check" bean="#{scriptConsoleBean}"
                                                rendered="#{scriptConsoleBean.verifyButtonEnabled}"
-                                               actionListener="checkScriptSyntax"/>
+                                               action="checkScriptSyntax"/>
                     </a4j:outputPanel>
                 </fieldset>
 

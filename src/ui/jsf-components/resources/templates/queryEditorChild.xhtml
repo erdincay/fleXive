@@ -51,7 +51,7 @@ Parameters:
                                                  required="false" externalId="#{node.id}"/>
                             </div>
                         </c:if>
-                        <div class="queryRowElement queryRemoveNode"><a4j:commandLink reRender="queryEditor,sqlPopupPanel" actionListener="#{fxQueryEditorBean.removeNode}" eventsQueue="queryEditor">
+                        <div class="queryRowElement queryRemoveNode"><a4j:commandLink reRender="queryEditor,sqlPopupPanel" action="#{fxQueryEditorBean.removeNode}" eventsQueue="queryEditor">
                                 <f:setPropertyActionListener target="#{fxQueryEditorBean.removeNodeId}"
                                     value="#{node.id}"/><t:graphicImage url="/pub/images/queryEditor/remove.png" border="0" style="border:0"/></a4j:commandLink></div>
                         <c:if test="#{node.wideInput}">

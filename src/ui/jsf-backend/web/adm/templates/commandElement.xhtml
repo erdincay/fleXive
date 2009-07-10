@@ -106,7 +106,7 @@ buttonDisabled - [optional] renders the commandElement, but disables its functio
 
             <script type="text/javascript" language="javascript">
                 if (parent.registerCommandElement) {
-                    parent.registerCommandElement(this,'#{id}','#{fxMessageBean[confirmKey]}',#{lockscreen}, #{buttonDisabled});
+                    parent.registerCommandElement(window,'#{id}','#{fxMessageBean[confirmKey]}',#{lockscreen}, #{buttonDisabled});
                     function triggerCommandElement_#{id}() {
                         eval(parent.getCommandElementScript(self,'#{id}'));
                     }

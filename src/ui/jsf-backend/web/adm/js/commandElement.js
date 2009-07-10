@@ -6,7 +6,6 @@
 //======================================================================================================================
 function registerCommandElement(callerWindow, id, confirmTxt, lockscreen, disabled) {
     try {
-        var doc = callerWindow.document;
         if (disabled)
             onClickAction = "";
         else {

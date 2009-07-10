@@ -101,10 +101,6 @@ public class SqlSearchBean implements Serializable {
         createBriefcase = false;
     }
 
-    public void toggleCreateBriefcase(ActionEvent event) {
-        // nothing to do, this is just the event that the briefcase mode was toggled
-    }
-
     public FxResultSet getQueryResult() {
         return queryResult;
     }

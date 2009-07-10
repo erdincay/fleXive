@@ -177,7 +177,7 @@ public class SearchResultBean implements ActionBean, Serializable {
         setViewType(ResultViewType.LIST);
         setFetchRows(-1);
         setStartRow(0);
-        resetTableView(null);
+        resetTableView();
         return show();
     }
 
@@ -190,7 +190,7 @@ public class SearchResultBean implements ActionBean, Serializable {
         setViewType(ResultViewType.THUMBNAILS);
         setStartRow(0);
         setFetchRows(-1);
-        resetTableView(null);
+        resetTableView();
         return show();
     }
 
@@ -515,11 +515,10 @@ public class SearchResultBean implements ActionBean, Serializable {
      * Reset the client-side table view parameters (sort, page number),
      * called e.g. when the content type filter changed.
      *
-     * @param event the change event
      * @since 3.1
      */
     @SuppressWarnings({"UnusedDeclaration"})
-    public void resetTableView(ActionEvent event) {
+    public void resetTableView() {
 //        setSortColumnKey(null);   // remember sort column, if the column disappeared it has no effect on the result table
         setPaginatorPage(1);
     }
