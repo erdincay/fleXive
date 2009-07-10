@@ -88,7 +88,6 @@ new GroovyTypeBuilder().Article(
     
     'abstract'(label: new FxString("Abstract"),
             dataType: FxDataType.Text,
-            defaultValue: new FxString(false, FxString.EMPTY),
             multiline: true,
             overrideMultiline: true)
 
