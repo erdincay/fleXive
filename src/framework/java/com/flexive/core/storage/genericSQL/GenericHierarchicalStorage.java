@@ -2220,7 +2220,10 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                     co = co.copy();
                     co.getRootGroup().removeEmptyEntries();
                     for (String xp : co.getAllPropertyXPaths()) {
-                        Long propACL = co.getPropertyData(xp).getPropertyAssignment().getACL().getId();
+                        final FxPropertyAssignment pa = co.getPropertyData(xp).getPropertyAssignment();
+                        if (pa.isSystemInternal())
+                            continue;
+                        Long propACL = pa.getACL().getId();
                         if (!alPropACL.contains(propACL))
                             alPropACL.add(propACL);
                     }
