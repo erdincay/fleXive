@@ -210,6 +210,8 @@ public class FxPermissionUtils {
             else if (!ticket.mayEditACL(aclId, securityInfo.getOwnerId()))
                 readOnly.add(aclId);
         }
+        if (noAccess.size() == 0 && readOnly.size() == 0)
+            return; //nothing to do
         for (String xpath : xpaths) {
             pdata = content.getPropertyData(xpath);
             if (pdata.getValue() instanceof FxNoAccess)

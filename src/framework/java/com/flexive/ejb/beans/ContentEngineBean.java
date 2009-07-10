@@ -205,7 +205,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
                 StringBuilder sql = new StringBuilder(2000);
                 con = Database.getDbConnection();
                 FxContent rawContent = storage.contentLoad(con, pk, env, sql).copy();
-                cachedContent = new FxCachedContent(rawContent, storage.getContentSecurityInfo(con, pk));
+                cachedContent = new FxCachedContent(rawContent, storage.getContentSecurityInfo(con, pk, rawContent));
                 CacheAdmin.cacheContent(cachedContent);
 //                System.out.println("=> Cached " + pk);
             } else {
@@ -494,14 +494,14 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
                 FxPK currPK;
                 for (int currVer : cvi.getVersions()) {
                     currPK = new FxPK(pk.getId(), currVer);
-                    FxContentSecurityInfo si = storage.getContentSecurityInfo(con, currPK);
+                    FxContentSecurityInfo si = storage.getContentSecurityInfo(con, currPK, null);
                     FxPermissionUtils.checkPermission(FxContext.getUserTicket(), ACLPermission.DELETE, si, true);
                 }
             }
             //security check end
             FxScriptBinding binding = null;
             long[] scripts;
-            FxContentSecurityInfo securityInfo = storage.getContentSecurityInfo(con, pk);
+            FxContentSecurityInfo securityInfo = storage.getContentSecurityInfo(con, pk, null);
             try {
                 FxPermissionUtils.checkMandatorExistance(securityInfo.getMandatorId());
                 FxPermissionUtils.checkTypeAvailable(securityInfo.getTypeId(), false);
@@ -586,7 +586,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             ContentStorage storage = StorageManager.getContentStorage(pk.getStorageMode());
             con = Database.getDbConnection();
             //security check start
-            FxContentSecurityInfo si = StorageManager.getContentStorage(pk.getStorageMode()).getContentSecurityInfo(con, pk);
+            FxContentSecurityInfo si = StorageManager.getContentStorage(pk.getStorageMode()).getContentSecurityInfo(con, pk, null);
             FxType type = CacheAdmin.getEnvironment().getType(si.getTypeId());
             FxPermissionUtils.checkMandatorExistance(si.getMandatorId());
             FxPermissionUtils.checkTypeAvailable(type.getId(), false);
@@ -634,7 +634,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
                 if (!ticket.isGlobalSupervisor() || scriptsBefore != null) {
                     for (FxPK pk : pks) {
                         //security check start
-                        FxContentSecurityInfo si = storage.getContentSecurityInfo(con, pk);
+                        FxContentSecurityInfo si = storage.getContentSecurityInfo(con, pk, null);
                         if (!ticket.isGlobalSupervisor())
                             FxPermissionUtils.checkPermission(FxContext.getUserTicket(), ACLPermission.DELETE, si, true);
                         //note: instances of deactivated mandators are silently ignored and erased on purposed!
@@ -718,7 +718,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
         try {
             ContentStorage storage = StorageManager.getContentStorage(pk.getStorageMode());
             con = Database.getDbConnection();
-            return storage.getContentSecurityInfo(con, pk);
+            return storage.getContentSecurityInfo(con, pk, null);
         } catch (FxNotFoundException e) {
             throw new FxLoadException(e);
         } catch (SQLException e) {
@@ -805,7 +805,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
                 if (!ticket.isGlobalSupervisor()) {
                     FxType type = CacheAdmin.getEnvironment().getType(co.getTypeId());
                     if (type.isUsePermissions()) {
-                        FxContentSecurityInfo si = storage.getContentSecurityInfo(con, pk);
+                        FxContentSecurityInfo si = storage.getContentSecurityInfo(con, pk, null);
                         FxPermissionUtils.checkPermission(ticket, ACLPermission.READ, si, true);
                     }
                 }

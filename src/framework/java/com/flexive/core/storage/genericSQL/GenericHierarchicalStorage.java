@@ -174,15 +174,6 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     //getContentVersionInfo() statement
     protected static final String CONTENT_VER_INFO = "SELECT ID, VER, MAX_VER, LIVE_VER, CREATED_BY, CREATED_AT, MODIFIED_BY, MODIFIED_AT, STEP FROM " + TBL_CONTENT + " WHERE ID=?";
 
-    //security info property acl query
-    protected static final String SECURITY_INFO_PROP = "SELECT DISTINCT a.ACL FROM " + TBL_STRUCT_ASSIGNMENTS + " a, " +
-            TBL_CONTENT_DATA + " d WHERE d.ID=? AND ";
-    protected static final String SECURITY_INFO_PROP_WHERE = " AND a.ID=d.ASSIGN AND d.ISGROUP=FALSE";
-    protected static final String SECURITY_INFO_PROP_VER = SECURITY_INFO_PROP + "d.VER=?" + SECURITY_INFO_PROP_WHERE;
-    protected static final String SECURITY_INFO_PROP_MAXVER = SECURITY_INFO_PROP + "d.ISMAX_VER=1" + SECURITY_INFO_PROP_WHERE;
-    protected static final String SECURITY_INFO_PROP_LIVEVER = SECURITY_INFO_PROP + "d.ISLIVE_VER=1" + SECURITY_INFO_PROP_WHERE;
-
-
     protected static final String CONTENT_MAIN_REMOVE = "DELETE FROM " + TBL_CONTENT + " WHERE ID=?";
     protected static final String CONTENT_DATA_REMOVE = "DELETE FROM " + TBL_CONTENT_DATA + " WHERE ID=?";
     protected static final String CONTENT_DATA_FT_REMOVE = "DELETE FROM " + TBL_CONTENT_DATA_FT + " WHERE ID=?";
@@ -492,9 +483,9 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     /**
      * Assign correct MAX_VER, LIVE_VER, ISMAX_VER and ISLIVE_VER values for a given content instance
      *
-     * @param con    an open and valid connection
-     * @param typeId id of the contents type
-     * @param id     the id to fix the version statistics for
+     * @param con  an open and valid connection
+     * @param type the contents type
+     * @param id   the id to fix the version statistics for
      * @throws FxUpdateException if a sql error occurs
      */
     protected void fixContentVersionStats(Connection con, FxType type, long id) throws FxUpdateException {
@@ -1725,6 +1716,30 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    public long getContentTypeId(Connection con, FxPK pk) throws FxLoadException {
+        PreparedStatement ps = null;
+        try {
+            ps = con.prepareStatement("SELECT DISTINCT TDEF FROM " + TBL_CONTENT + " WHERE ID=?");
+            ps.setLong(1, pk.getId());
+            ResultSet rs = ps.executeQuery();
+            if (rs != null && rs.next())
+                return rs.getLong(1);
+            throw new FxLoadException("ex.content.notFound", pk);
+        } catch(SQLException e) {
+            throw new FxLoadException(e, "ex.db.sqlError", e.getMessage());
+        } finally {
+            try {
+                if (ps != null)
+                    ps.close();
+            } catch (SQLException e) {
+                LOG.error(e);
+            }
+        }
+    }
+
+    /**
      * Helper method to add a value of a detail entry with a given XPath to the instance being loaded
      *
      * @param root       the root group
@@ -2153,7 +2168,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     /**
      * {@inheritDoc}
      */
-    public FxContentSecurityInfo getContentSecurityInfo(Connection con, FxPK pk) throws FxLoadException, FxNotFoundException {
+    public FxContentSecurityInfo getContentSecurityInfo(Connection con, FxPK pk, FxContent rawContent) throws FxLoadException, FxNotFoundException {
         PreparedStatement ps = null;
         try {
             switch (pk.getVersion()) {
@@ -2188,23 +2203,30 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 throw new FxLoadException("ex.db.resultSet.tooManyRows");
             if ((typePerm & 0x02) == 0x02) {
                 //use property permissions
-                ps.close();
-                switch (pk.getVersion()) {
-                    case FxPK.MAX:
-                        ps = con.prepareStatement(SECURITY_INFO_PROP_MAXVER);
-                        break;
-                    case FxPK.LIVE:
-                        ps = con.prepareStatement(SECURITY_INFO_PROP_LIVEVER);
-                        break;
-                    default:
-                        ps = con.prepareStatement(SECURITY_INFO_PROP_VER);
-                        ps.setInt(2, pk.getVersion());
-                }
-                ps.setLong(1, pk.getId());
+                FxContent co = rawContent;
                 ArrayList<Long> alPropACL = new ArrayList<Long>(10);
-                ResultSet rsProp = ps.executeQuery();
-                while (rsProp != null && rsProp.next())
-                    alPropACL.add(rsProp.getLong(1));
+
+                try {
+                    if (co == null) {
+                        FxCachedContent cachedContent = CacheAdmin.getCachedContent(pk);
+                        if (cachedContent != null)
+                            co = cachedContent.getContent();
+                        else {
+                            ContentStorage storage = StorageManager.getContentStorage(pk.getStorageMode());
+                            StringBuilder sql = new StringBuilder(2000);
+                            co = storage.contentLoad(con, pk, CacheAdmin.getEnvironment(), sql);
+                        }
+                    }
+                    co = co.copy();
+                    co.getRootGroup().removeEmptyEntries();
+                    for (String xp : co.getAllPropertyXPaths()) {
+                        Long propACL = co.getPropertyData(xp).getPropertyAssignment().getACL().getId();
+                        if (!alPropACL.contains(propACL))
+                            alPropACL.add(propACL);
+                    }
+                } catch (FxInvalidParameterException e) {
+                    throw new FxLoadException(e);
+                }
                 propertyPerm = new long[alPropACL.size()];
                 int cnt = 0;
                 for (long acl : alPropACL)
@@ -2229,34 +2251,39 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      * This method handles referential integrity incase the used database does not support it
      *
      * @param con         an open and valid connection
-     * @param type        the contents structure type
+     * @param typeId      the contents structure type
      * @param id          id of the content (optional, used if allForType is <code>false</code>)
      * @param version     version of the content (optional, used if allForType is <code>false</code> and allVersions is <code>false</code>)
      * @param allForType  remove all instances of the given type?
      * @param allVersions remove all versions or only the requested one?
      * @throws FxRemoveException if referential integrity would be violated
      */
-    public void checkContentRemoval(Connection con, long type, long id, int version, boolean allForType, boolean allVersions) throws FxRemoveException {
+    public void checkContentRemoval(Connection con, long typeId, long id, int version, boolean allForType, boolean allVersions) throws FxRemoveException {
         //to be implemented/overwritten for specific database implementations
         if (LOG.isDebugEnabled())
-            LOG.debug("Removing type:" + type + " id:" + id + " ver:" + version + " allForType:" + allForType + " allVersions:" + allVersions);
+            LOG.debug("Removing type:" + typeId + " id:" + id + " ver:" + version + " allForType:" + allForType + " allVersions:" + allVersions);
         if (!allVersions && !allForType)
             return;  //specific version may be removed if not all of the type are removed
         try {
             PreparedStatement ps = null;
+            boolean refuse = false;
             try {
                 if (allForType) {
                     ps = con.prepareStatement(CONTENT_REFERENCE_BYTYPE);
-                    ps.setLong(1, type);
+                    ps.setLong(1, typeId);
                 } else {
                     ps = con.prepareStatement("SELECT COUNT(*) FROM " + TBL_CONTENT_DATA + " WHERE FREF=?");
                     ps.setLong(1, id);
                 }
                 ResultSet rs = ps.executeQuery();
-                if (rs.next() && rs.getLong(1) != 0) {
-                    if (allForType)
-                        throw new FxRemoveException("ex.content.reference.inUse.type", CacheAdmin.getEnvironment().getType(type), rs.getLong(1));
-                    else
+                if (rs.next() && rs.getLong(1) != 0)
+                    refuse = true;
+                if (!refuse)
+                    refuse = FxFlatStorageManager.getInstance().checkContentRemoval(con, typeId, id, allForType);
+                if (refuse) {
+                    if (allForType) {
+                        throw new FxRemoveException("ex.content.reference.inUse.type", CacheAdmin.getEnvironment().getType(typeId), rs.getLong(1));
+                    } else
                         throw new FxRemoveException("ex.content.reference.inUse.instance", id, rs.getLong(1));
                 }
             } finally {

@@ -259,6 +259,19 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             Database.storeFxString(new FxString[]{property.getLabel(), property.getHint()}, con,
                     TBL_STRUCT_ASSIGNMENTS, new String[]{"DESCRIPTION", "HINT"}, "ID", newAssignmentId);
             StructureLoader.reload(con);
+            if (divisionConfig.isFlatStorageEnabled() && divisionConfig.get(SystemParameters.FLATSTORAGE_AUTO)) {
+                final FxFlatStorage fs = FxFlatStorageManager.getInstance();
+                FxPropertyAssignment pa = (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(newAssignmentId);
+                if (fs.isFlattenable(pa)) {
+                    fs.flatten(fs.getDefaultStorage(), pa);
+                    try {
+                        StructureLoader.reload(con);
+                    } catch (FxCacheException e) {
+                        ctx.setRollbackOnly();
+                        throw new FxCreateException(e, "ex.cache", e.getMessage());
+                    }
+                }
+            }
             htracker.track(type, "history.assignment.createProperty", property.getName(), type.getId(), type.getName());
             createInheritedAssignments(CacheAdmin.getEnvironment().getAssignment(newAssignmentId), con, sql, type.getDerivedTypes());
         } catch (FxNotFoundException e) {
@@ -1563,7 +1576,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             FxPK pk = value.getTranslation(lang);
             if (pk.isNew())
                 continue;
-            final long pkRefType = storage.getContentSecurityInfo(con, pk).getTypeId();
+            final long pkRefType = storage.getContentTypeId(con, pk);
             if (pkRefType != type.getId())
                 throw new FxUpdateException(LOG, "ex.content.value.invalid.reftype", type,
                         CacheAdmin.getEnvironment().getType(pkRefType));
@@ -2374,6 +2387,10 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             rs.next();
             count = rs.getLong(1);
             ps.close();
+            if(EJBLookup.getDivisionConfigurationEngine().isFlatStorageEnabled()) {
+                //also examine flat storage entries
+                count += FxFlatStorageManager.getInstance().getPropertyInstanceCount(con, propertyId);
+            }
         }
         catch (SQLException e) {
             throw new FxDbException(LOG, e, "ex.db.sqlError", e.getMessage());
@@ -2400,6 +2417,10 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             rs.next();
             count = rs.getLong(1);
             ps.close();
+            if(EJBLookup.getDivisionConfigurationEngine().isFlatStorageEnabled()) {
+                //also examine flat storage entries
+                count += FxFlatStorageManager.getInstance().getAssignmentInstanceCount(con, assignmentId);
+            }
         }
         catch (SQLException e) {
             throw new FxDbException(LOG, e, "ex.db.sqlError", e.getMessage());

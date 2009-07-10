@@ -248,6 +248,7 @@ public class SelectListTest {
 
         // create a type and the respective property referencing the selectlist
         FxSelectList loadedList = CacheAdmin.getEnvironment().getSelectList(listId);
+        long listItemId = loadedList.getItems().get(0).getId();
         ACL defACL = CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId());
         FxTypeEdit testTypeEd = FxTypeEdit.createNew(TEST_TYPE);
         long typeId = typeEng.save(testTypeEd);
@@ -258,13 +259,13 @@ public class SelectListTest {
 
         // create two content instances for the above property
         FxContent co = ce.initialize(typeId);
-        co.setValue("/" + TEST_PROPERTY, CacheAdmin.getEnvironment().getSelectListItem(listId));
+        co.setValue("/" + TEST_PROPERTY, CacheAdmin.getEnvironment().getSelectListItem(listItemId));
         ce.save(co);
         co = ce.initialize(typeId);
-        co.setValue("/" + TEST_PROPERTY, CacheAdmin.getEnvironment().getSelectListItem(listId));
+        co.setValue("/" + TEST_PROPERTY, CacheAdmin.getEnvironment().getSelectListItem(listItemId));
         ce.save(co);
 
-        assertEquals(le.getSelectListItemInstanceCount(listId), 2);
+        assertEquals(le.getSelectListItemInstanceCount(listItemId), 2);
 
         // clean up
         ce.removeForType(typeId);

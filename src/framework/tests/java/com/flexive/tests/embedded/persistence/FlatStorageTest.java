@@ -4,6 +4,7 @@ import static com.flexive.core.flatstorage.FxFlatStorage.FxFlatColumnType;
 import com.flexive.core.flatstorage.FxFlatStorageInfo;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
+import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxDelta;
 import com.flexive.shared.content.FxPK;
@@ -48,6 +49,8 @@ public class FlatStorageTest {
 
     public static final String TEST_TYPE = "TEST_TYPE_" + RandomStringUtils.random(16, true, true);
 
+    private boolean autoFS_State = false;
+
     /**
      * setup...
      *
@@ -62,6 +65,8 @@ public class FlatStorageTest {
         login(TestUsers.SUPERVISOR);
         testsEnabled = dce.isFlatStorageEnabled();
         if (testsEnabled) {
+            autoFS_State = EJBLookup.getConfigurationEngine().get(SystemParameters.FLATSTORAGE_AUTO);
+            EJBLookup.getConfigurationEngine().put(SystemParameters.FLATSTORAGE_AUTO, false);
             setupStorage();
             setupStructures();
         }
@@ -74,6 +79,7 @@ public class FlatStorageTest {
             co.removeForType(typeId);
             type.remove(typeId);
             dce.removeFlatStorage(TEST_STORAGE);
+            EJBLookup.getConfigurationEngine().put(SystemParameters.FLATSTORAGE_AUTO, autoFS_State);
         }
         logout();
     }

@@ -33,6 +33,7 @@ package com.flexive.ejb.beans.configuration;
 
 import com.flexive.core.DatabaseConst;
 import com.flexive.shared.FxContext;
+import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.configuration.ParameterScope;
 import com.flexive.shared.interfaces.UserConfigurationEngine;
 import com.flexive.shared.interfaces.UserConfigurationEngineLocal;
@@ -73,7 +74,8 @@ public class UserConfigurationEngineBean extends CustomDomainConfigurationImpl<L
 
     @Override
     protected boolean mayUpdate() {
-        return !FxContext.getUserTicket().isGuest();
+        final UserTicket ticket = FxContext.getUserTicket();
+        return !ticket.isGuest() || ticket.isGlobalSupervisor();
     }
 
     @Override

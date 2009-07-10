@@ -31,6 +31,7 @@
  ***************************************************************/
 package com.flexive.core.storage;
 
+import com.flexive.core.storage.binary.BinaryInputStream;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxContentSecurityInfo;
 import com.flexive.shared.content.FxContentVersionInfo;
@@ -43,7 +44,6 @@ import com.flexive.shared.structure.UniqueMode;
 import com.flexive.shared.value.BinaryDescriptor;
 import com.flexive.shared.value.FxBinary;
 import com.flexive.shared.value.ReferencedContent;
-import com.flexive.core.storage.binary.BinaryInputStream;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -99,13 +99,14 @@ public interface ContentStorage {
     /**
      * Get all security relevant information about a content instance identified by its primary key
      *
-     * @param con an open and valid connection
-     * @param pk  primary key to query security information for
+     * @param con        an open and valid connection
+     * @param pk         primary key to query security information for
+     * @param rawContent the content to get used properties to include in permission checks
      * @return FxContentSecurityInfo
      * @throws FxLoadException     on errors
      * @throws FxNotFoundException on errors
      */
-    FxContentSecurityInfo getContentSecurityInfo(Connection con, FxPK pk) throws FxLoadException, FxNotFoundException;
+    FxContentSecurityInfo getContentSecurityInfo(Connection con, FxPK pk, FxContent rawContent) throws FxLoadException, FxNotFoundException;
 
     /**
      * Get information about the versions used for a content id
@@ -377,4 +378,14 @@ public interface ContentStorage {
      * @throws SQLException on errors
      */
     ReferencedContent resolveReference(Connection con, int contentVersion, long referencedId) throws SQLException;
+
+    /**
+     * Get the type id for a given content
+     *
+     * @param con an open and valid connection
+     * @param pk  primary key of the content
+     * @return type id
+     * @throws FxLoadException on errors
+     */
+    long getContentTypeId(Connection con, FxPK pk) throws FxLoadException;
 }

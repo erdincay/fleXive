@@ -34,10 +34,12 @@ package com.flexive.ejb.beans.structure;
 import com.flexive.core.Database;
 import static com.flexive.core.DatabaseConst.*;
 import com.flexive.core.LifeCycleInfoImpl;
+import com.flexive.core.flatstorage.FxFlatStorageManager;
 import com.flexive.core.structure.StructureLoader;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSystemSequencer;
+import com.flexive.shared.EJBLookup;
 import com.flexive.shared.cache.FxCacheException;
 import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.*;
@@ -599,6 +601,10 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
             rs.next();
             count = rs.getLong(1);
             ps.close();
+            if(EJBLookup.getDivisionConfigurationEngine().isFlatStorageEnabled()) {
+                //also examine flat storage entries
+                count += FxFlatStorageManager.getInstance().getSelectListItemInstanceCount(con, selectListItemId);
+            }
         }
         catch (SQLException e) {
             throw new FxDbException(LOG, e, "ex.db.sqlError", e.getMessage());
