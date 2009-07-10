@@ -52,6 +52,8 @@ import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.sqlParser.*;
 import static com.flexive.sqlParser.Condition.Comparator;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Iterables;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -518,7 +520,9 @@ public class GenericSQLDataFilter extends DataFilter {
         final PropertyEntry entry = getPropertyResolver().get(stmt, prop);
         final String filter;
         if (prop.isAssignment()) {
-            filter = "ASSIGN=" + entry.getAssignment().getId();
+            filter = "ASSIGN IN ("
+                    + StringUtils.join(FxSharedUtils.getSelectableObjectIdList(entry.getAssignmentWithDerived()), ',')
+                    + ")";
         } else if (entry.getProperty() != null) {
             filter = "TPROP=" + entry.getProperty().getId();
         } else {

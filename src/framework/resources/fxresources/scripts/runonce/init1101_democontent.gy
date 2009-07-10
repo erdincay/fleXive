@@ -49,9 +49,6 @@ import com.flexive.shared.search.query.PropertyValueComparator
 import com.flexive.shared.search.query.PropertyValueNode
 import com.flexive.shared.value.FxLargeNumber
 import com.flexive.shared.search.AdminResultLocations
-import com.flexive.shared.value.FxDateTime
-import com.flexive.shared.search.query.QueryOperatorNode
-import com.flexive.shared.search.query.QueryOperatorNode.Operator
 
 // add a article to the tree
 final FxContent article = EJBLookup.contentEngine.initialize("article")

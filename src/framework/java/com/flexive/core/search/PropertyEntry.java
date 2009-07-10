@@ -43,6 +43,9 @@ import com.flexive.core.DatabaseConst;
 import static com.flexive.core.search.DataSelector.getBinaryValue;
 import com.flexive.core.storage.ContentStorage;
 import com.flexive.sqlParser.Property;
+import com.google.common.collect.*;
+import static com.google.common.collect.Lists.newArrayList;
+import com.google.common.base.Predicate;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.logging.Log;
@@ -51,10 +54,7 @@ import org.apache.commons.logging.LogFactory;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.sql.SQLException;
-import java.util.Date;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Locale;
+import java.util.*;
 import static java.lang.Long.parseLong;
 import static java.lang.Integer.parseInt;
 
@@ -295,11 +295,13 @@ public class PropertyEntry {
     protected final String filterColumn;
     protected final String tableName;
     protected final FxProperty property;
+    protected final FxPropertyAssignment assignment;
     protected final PropertyResolver.Table tbl;
     protected final Type type;
     protected final boolean multilanguage;
     protected final List<FxSQLFunction> functions = new ArrayList<FxSQLFunction>();
     protected int positionInResultSet = -1;
+    protected FxDataType overrideDataType;
     private FxEnvironment environment;
 
     /**
@@ -317,10 +319,10 @@ public class PropertyEntry {
             try {
                 if (StringUtils.isNumeric(searchProperty.getPropertyName())) {
                     //#<id>
-                    this.assignment = (FxPropertyAssignment) environment.getAssignment(Long.valueOf(searchProperty.getPropertyName()));
+                    assignment = (FxPropertyAssignment) environment.getAssignment(Long.valueOf(searchProperty.getPropertyName()));
                 } else {
                     //XPath
-                    this.assignment = (FxPropertyAssignment) environment.getAssignment(searchProperty.getPropertyName());
+                    assignment = (FxPropertyAssignment) environment.getAssignment(searchProperty.getPropertyName());
                 }
             } catch (ClassCastException ce) {
                 throw new FxSqlSearchException(LOG, ce, "ex.sqlSearch.query.unknownAssignment",
@@ -336,11 +338,87 @@ public class PropertyEntry {
             }
             this.property = assignment.getProperty();
         } else {
-            this.assignment = null;
             this.property = environment.getProperty(searchProperty.getPropertyName());
+
+            // check if all assignments of the property are in the same table
+            final List<FxPropertyAssignment> assignments = environment.getPropertyAssignments(property.getId(), false);
+            final Multimap<String, FxPropertyAssignment> storageCounts = HashMultimap.create();
+            boolean hasFlatStorageAssignments = false;
+            for (FxPropertyAssignment pa : assignments) {
+                if (pa.isFlatStorageEntry()) {
+                    hasFlatStorageAssignments = true;
+                    final FxFlatStorageMapping mapping = pa.getFlatStorageMapping();
+                    // group assignments by table, column, and level
+                    storageCounts.put(
+                            mapping.getStorage() + "." + mapping.getColumn() + "." + mapping.getLevel(),
+                            pa
+                    );
+                } else {
+                    storageCounts.put(
+                            storage.getTableName(property),
+                            pa
+                    );
+                }
+            }
+
+            if (storageCounts.size() > 1 || hasFlatStorageAssignments) {
+                // more than one storage, or only flat storage assignments
+
+                // find the table with most occurances
+                final List<Multiset.Entry<String>> tables = newArrayList(
+                        storageCounts.keys().entrySet()
+                );
+                Collections.sort(tables, new Comparator<Multiset.Entry<String>>() {
+                    public int compare(Multiset.Entry<String> o1, Multiset.Entry<String> o2) {
+                        return Integer.valueOf(o2.getCount()).compareTo(o1.getCount());
+                    }
+                });
+                final String key = tables.get(0).getElement();
+                final FxPropertyAssignment pa = storageCounts.get(key).iterator().next();
+                if (pa.isFlatStorageEntry()) {
+                    // use assignment search. All assignments share the same flat storage table,
+                    // column and level, thus the "normal" assignment search can be used.
+                    assignment = pa;
+                } else {
+                    assignment = null;  // use "real" property search in the CONTENT_DATA table
+                    if (hasFlatStorageAssignments && LOG.isWarnEnabled()) {
+                        // only write warning to log for now
+                        LOG.warn(new FxExceptionMessage(
+                                "ex.sqlSearch.err.select.propertyWithFlat",
+                                this.property.getName(),
+                                Iterables.filter(assignments, new Predicate<FxPropertyAssignment>() {
+                                    public boolean apply(FxPropertyAssignment input) {
+                                        return input.isFlatStorageEntry();
+                                    }
+                                })
+                        ).getLocalizedMessage(Locale.getDefault().getLanguage())
+                        );
+                    }
+                }
+            } else {
+                assignment = null;  // nothing to do, use normal property search
+            }
         }
+
+
+        if (assignment != null && assignment.isFlatStorageEntry()) {
+            // flat storage assignment search
+            this.tableName = assignment.getFlatStorageMapping().getStorage();
+            this.tbl = PropertyResolver.Table.T_CONTENT_DATA_FLAT;
+        } else {
+            // content_data assignment or property search
+            this.tableName = storage.getTableName(property);
+            if (this.tableName.equalsIgnoreCase(DatabaseConst.TBL_CONTENT)) {
+                this.tbl = PropertyResolver.Table.T_CONTENT;
+            } else if (this.tableName.equalsIgnoreCase(DatabaseConst.TBL_CONTENT_DATA)) {
+                this.tbl = PropertyResolver.Table.T_CONTENT_DATA;
+            } else {
+                throw new FxSqlSearchException(LOG, "ex.sqlSearch.err.unknownPropertyTable", searchProperty, this.tableName);
+            }
+        }
+
         this.readColumns = getReadColumns(storage, property);
-        if (this.assignment != null && this.assignment.isFlatStorageEntry()) {
+        if (assignment != null && assignment.isFlatStorageEntry()) {
             this.filterColumn = assignment.getFlatStorageMapping().getColumn();
         } else {
             String fcol = ignoreCase ? storage.getQueryUppercaseColumn(this.property) : this.readColumns[0];
@@ -355,31 +433,6 @@ public class PropertyEntry {
                     searchProperty.getPropertyName());
         }
 
-        if (this.assignment != null && this.assignment.isFlatStorageEntry()) {
-            this.tableName = assignment.getFlatStorageMapping().getStorage();
-            this.tbl = PropertyResolver.Table.T_CONTENT_DATA_FLAT;
-        } else {
-            if (this.assignment == null) {
-                // check if all assignments of the property are NOT in the flat storage, otherwise
-                // property selection is not possible
-                for (FxPropertyAssignment pa : environment.getPropertyAssignments(this.property.getId(), false)) {
-                    if (pa.isFlatStorageEntry() && LOG.isWarnEnabled()) {
-                        // only write warning to log for now
-                        LOG.warn(new FxExceptionMessage("ex.sqlSearch.err.select.propertyWithFlat", this.property.getName(), pa.getXPath())
-                                .getLocalizedMessage(Locale.getDefault().getLanguage())
-                        );
-                    }
-                }
-            }
-            this.tableName = storage.getTableName(this.property);
-            if (this.tableName.equalsIgnoreCase(DatabaseConst.TBL_CONTENT)) {
-                this.tbl = PropertyResolver.Table.T_CONTENT;
-            } else if (this.tableName.equalsIgnoreCase(DatabaseConst.TBL_CONTENT_DATA)) {
-                this.tbl = PropertyResolver.Table.T_CONTENT_DATA;
-            } else {
-                throw new FxSqlSearchException(LOG, "ex.sqlSearch.err.unknownPropertyTable", searchProperty, this.tableName);
-            }
-        }
         this.multilanguage = this.property.isMultiLang();
         this.functions.addAll(searchProperty.getFunctions());
         if (this.functions.size() > 0) {
@@ -387,10 +440,6 @@ public class PropertyEntry {
             this.overrideDataType = this.functions.get(0).getOverrideDataType();
         }
     }
-
-    protected FxPropertyAssignment assignment;
-
-    protected FxDataType overrideDataType;
 
     public PropertyEntry(Type type, PropertyResolver.Table tbl, String[] readColumns, String filterColumn, boolean multilanguage, FxDataType overrideDataType) {
         this.readColumns = readColumns;
@@ -400,6 +449,7 @@ public class PropertyEntry {
         this.multilanguage = multilanguage;
         this.overrideDataType = overrideDataType;
         this.property = null;
+        this.assignment = null;
         this.tableName = tbl != null && tbl != PropertyResolver.Table.T_CONTENT_DATA_FLAT ? tbl.getTableName() : null;
     }
 
@@ -672,6 +722,21 @@ public class PropertyEntry {
      */
     public FxPropertyAssignment getAssignment() {
         return assignment;
+    }
+
+    /**
+     * Return the assignment (if selected), including all of its derived assignments.
+     *
+     * @return  the assignment (if selected), including all of its derived assignments.
+     */
+    public List<FxPropertyAssignment> getAssignmentWithDerived() {
+        if (assignment == null) {
+            return newArrayList();
+        }
+        final List<FxPropertyAssignment> ids = newArrayList();
+        ids.add(assignment);
+        ids.addAll(assignment.getDerivedAssignments(environment));
+        return ids;
     }
 
     /**

@@ -38,6 +38,7 @@ import com.flexive.shared.content.FxGroupData;
 import com.flexive.shared.content.FxPropertyData;
 import com.flexive.shared.exceptions.FxCreateException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
+import com.flexive.shared.exceptions.FxRuntimeException;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.value.FxValue;
@@ -45,6 +46,7 @@ import com.flexive.shared.value.FxValue;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Random;
+import java.util.ArrayList;
 
 /**
  * Assignment of a property to a type or group
@@ -402,4 +404,36 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
         return new FxPropertyAssignmentEdit(this);
     }
 
+    /**
+     * Return a list of all assignments that were derived from this one (i.e. all assignments of
+     * subtypes with the same base assignment ID). An assignment can be inherited at most once in a
+     * type, since changing the (unique) alias breaks the inheritance chain.
+     *
+     * @param environment   the environment
+     * @return              a list of all derived assignments
+     * @since 3.1
+     */
+    public List<FxPropertyAssignment> getDerivedAssignments(FxEnvironment environment) {
+        final List<FxPropertyAssignment> result = new ArrayList<FxPropertyAssignment>();
+
+        // get the base assignment ID, i.e. the assignment ID that will be used for derived types
+        final long baseAssignmentId =
+                baseAssignment != ROOT_BASE
+                        ? baseAssignment
+                        : getId();
+
+        // check for reusage of our assignment
+        for (FxType derivedType : getAssignedType().getDerivedTypes(true)) {
+            try {
+                final FxAssignment derivedAssignment = derivedType.getAssignment("/" + alias);
+                if (derivedAssignment.isDerivedFrom(environment, baseAssignmentId)) {
+                    result.add((FxPropertyAssignment) derivedAssignment);
+                }
+            } catch (FxRuntimeException e) {
+                // assignment not derived
+            }
+        }
+
+        return result;
+    }
 }

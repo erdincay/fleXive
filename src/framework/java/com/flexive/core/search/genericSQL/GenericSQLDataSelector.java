@@ -35,6 +35,7 @@ import com.flexive.core.DatabaseConst;
 import com.flexive.core.search.*;
 import com.flexive.shared.FxArrayUtils;
 import com.flexive.shared.FxContext;
+import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.structure.FxDataType;
 import com.flexive.shared.structure.FxFlatStorageMapping;
 import com.flexive.shared.search.SortDirection;
@@ -384,7 +385,9 @@ public class GenericSQLDataSelector extends DataSelector {
                 SUBSEL_ALIAS + ".ver=" +
                 FILTER_ALIAS + ".ver AND " +
                 (entry.isAssignment()
-                        ? "ASSIGN=" + entry.getAssignment().getId()
+                        ? "ASSIGN IN ("
+                            + StringUtils.join(FxSharedUtils.getSelectableObjectIdList(entry.getAssignmentWithDerived()), ',')
+                            + ")"
                         : "TPROP=" + entry.getProperty().getId()) + " AND " +
                 "(" + SUBSEL_ALIAS + ".lang=" + search.getLanguage().getId() +
                 " OR " + SUBSEL_ALIAS + ".ismldef=true)" +
