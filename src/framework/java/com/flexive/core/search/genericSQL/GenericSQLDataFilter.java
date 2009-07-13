@@ -590,7 +590,7 @@ public class GenericSQLDataFilter extends DataFilter {
                         "WHERE " +
                         SearchUtils.getFlatStorageAssignmentFilter(search.getEnvironment(), "cd", entry.getAssignment())
                         + " AND " +
-                        mapping.getColumn() + cond.getSqlComperator() + value +
+                        entry.getFilterColumn() + cond.getSqlComperator() + value +
                         getVersionFilter("cd") +
                         getLanguageFilter() +
                         getSubQueryLimit() +

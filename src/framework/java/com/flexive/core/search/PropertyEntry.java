@@ -418,7 +418,13 @@ public class PropertyEntry {
 
         this.readColumns = getReadColumns(storage, property);
         if (assignment != null && assignment.isFlatStorageEntry()) {
-            this.filterColumn = assignment.getFlatStorageMapping().getColumn();
+            this.filterColumn = !ignoreCase
+                    || (this.property.getDataType() != FxDataType.String1024
+                    && this.property.getDataType() != FxDataType.Text
+                    && this.property.getDataType() != FxDataType.HTML)
+                    ? assignment.getFlatStorageMapping().getColumn()
+                    // calculate upper-case function for text queries
+                    : "upper(" + assignment.getFlatStorageMapping().getColumn() + ")";
         } else {
             String fcol = ignoreCase ? storage.getQueryUppercaseColumn(this.property) : this.readColumns[0];
             if (fcol == null) {
