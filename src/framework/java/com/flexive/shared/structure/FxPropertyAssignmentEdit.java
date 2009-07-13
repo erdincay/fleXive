@@ -104,6 +104,7 @@ public class FxPropertyAssignmentEdit extends FxPropertyAssignment {
             parentGroupAssignment = null;
         else
             parentGroupAssignment = (FxGroupAssignment) parent;
+        this.flatStorageMapping = null;
         isNew = true;
     }
 
@@ -120,6 +121,7 @@ public class FxPropertyAssignmentEdit extends FxPropertyAssignment {
         super(-1, true, type, alias, XPathElement.buildXPath(false, parentXPath, alias), 0, property.getMultiplicity(), 1,
                 null, FxAssignment.NO_BASE, property.getLabel(), property.getHint(), null, property, property.getACL(),
                 property.getLabel().getDefaultLanguage(), FxStructureOption.cloneOptions(property.options), null);
+        this.flatStorageMapping = null;
         isNew = true;
     }
 
