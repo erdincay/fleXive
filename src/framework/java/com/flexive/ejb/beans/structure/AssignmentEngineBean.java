@@ -2515,6 +2515,34 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
     /**
      * {@inheritDoc}
      */
+    @TransactionAttribute(TransactionAttributeType.SUPPORTS)
+    public boolean isFlattenable(FxPropertyAssignment pa) {
+        return FxFlatStorageManager.getInstance().isFlattenable(pa);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void flattenAssignment(FxPropertyAssignment assignment) throws FxApplicationException {
+        try {
+            final FxFlatStorage fs = FxFlatStorageManager.getInstance();
+            fs.flatten(fs.getDefaultStorage(), assignment);
+        } catch (FxApplicationException e) {
+            ctx.setRollbackOnly();
+            throw e;
+        }
+        try {
+            StructureLoader.reload(null);
+        } catch (FxCacheException e) {
+            ctx.setRollbackOnly();
+            throw new FxUpdateException(e, "ex.cache", e.getMessage());
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void flattenAssignment(String storage, FxPropertyAssignment assignment) throws FxApplicationException {
         try {

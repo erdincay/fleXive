@@ -188,16 +188,16 @@ public class FlatStorageTest {
         Assert.assertEquals(pot.size(), 5, "Expected 5 flat mappings");
         Assert.assertEquals(pot.get(FxFlatColumnType.STRING.name()).size(), 1);
         Assert.assertEquals(pot.get(FxFlatColumnType.TEXT.name()).size(), 2);
-        Assert.assertEquals(pot.get(FxFlatColumnType.BIGINT.name()).size(), 1);
+        Assert.assertEquals(pot.get(FxFlatColumnType.BIGINT.name()).size(), 2);
         Assert.assertEquals(pot.get(FxFlatColumnType.DOUBLE.name()).size(), 1);
-        Assert.assertEquals(pot.get(FxFlatColumnType.SELECT.name()).size(), 1);
+        Assert.assertEquals(pot.get(FxFlatColumnType.SELECT.name()).size(), 0);
         //2 should be boosted since its required
         Assert.assertEquals(pot.get(FxFlatColumnType.TEXT.name()).get(0), CacheAdmin.getEnvironment().getAssignment(TEST_TYPE + "/TESTPROPERTY7"));
         Assert.assertEquals(pot.get(FxFlatColumnType.TEXT.name()).get(1), CacheAdmin.getEnvironment().getAssignment(TEST_TYPE + "/TESTPROPERTY2"));
         Assert.assertEquals(pot.get(FxFlatColumnType.STRING.name()).get(0), CacheAdmin.getEnvironment().getAssignment(TEST_TYPE + "/TESTPROPERTY1"));
         Assert.assertEquals(pot.get(FxFlatColumnType.DOUBLE.name()).get(0), CacheAdmin.getEnvironment().getAssignment(TEST_TYPE + "/TESTPROPERTY5"));
         Assert.assertEquals(pot.get(FxFlatColumnType.BIGINT.name()).get(0), CacheAdmin.getEnvironment().getAssignment(TEST_TYPE + "/TESTPROPERTY6"));
-        Assert.assertEquals(pot.get(FxFlatColumnType.SELECT.name()).get(0), CacheAdmin.getEnvironment().getAssignment(TEST_TYPE + "/TESTGROUP2/TESTPROPERTY2_1"));
+        Assert.assertEquals(pot.get(FxFlatColumnType.BIGINT.name()).get(1), CacheAdmin.getEnvironment().getAssignment(TEST_TYPE + "/TESTGROUP2/TESTPROPERTY2_1"));
     }
 
     @Test(dependsOnMethods = {"flatAnalyze"})

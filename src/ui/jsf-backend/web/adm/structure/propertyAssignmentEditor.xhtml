@@ -10,6 +10,7 @@
       xmlns:fx="http://www.flexive.com/jsf/core">
 <body>
 
+<!--@elvariable id="propertyEditorBean" type="com.flexive.war.beans.admin.structure.PropertyEditorBean"-->
 <ui:composition template="/adm/contentTemplate.xhtml">
       <ui:define name="head">
         <t:stylesheet path="#{adm:versionedUrl('/adm/css/structureEditor.css')}"/>
@@ -203,9 +204,20 @@
                 </a4j:outputPanel>
             </fx:fieldSet>
 
+            <ui:fragment rendered="#{propertyEditorBean.assignment.flatStorageEntry}">
+                <fx:formRow labelKey="PropertyEditor.label.flatStorageSettings">
+                    #{propertyEditorBean.assignment.flatStorageMapping.storage}:#{propertyEditorBean.assignment.flatStorageMapping.column}:#{propertyEditorBean.assignment.flatStorageMapping.level}
+                </fx:formRow>
+                <br/>
+            </ui:fragment>
+
             <ui:fragment rendered="#{propertyEditorBean.structureManagement and not propertyEditorBean.editMode}">
                 <adm:commandButton labelKey="PropertyEditor.button.editMode" location="both"
                         icon="edit"  action="toggleEditMode"  bean="#{propertyEditorBean}" immediate="true" id="editModeButton"/>
+                <adm:commandButton rendered="#{!propertyEditorBean.assignment.flatStorageEntry and propertyEditorBean.flattenable}" labelKey="PropertyEditor.button.flatten" location="both" lockscreen="true"
+                        icon="flatten" action="flatten"  bean="#{propertyEditorBean}" immediate="true" confirmKey="PropertyEditor.info.conversion" id="flattenButton"/>
+                <adm:commandButton rendered="#{propertyEditorBean.assignment.flatStorageEntry}" labelKey="PropertyEditor.button.unflatten" location="both" lockscreen="true"
+                        icon="unflatten" action="unflatten"  bean="#{propertyEditorBean}" immediate="true" confirmKey="PropertyEditor.info.conversion" id="unflattenButton"/>
             </ui:fragment>
 
             <ui:fragment rendered="#{propertyEditorBean.structureManagement and propertyEditorBean.editMode}">

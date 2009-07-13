@@ -42,9 +42,9 @@ import com.flexive.shared.*;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.scripting.FxScriptInfo;
+import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.security.Role;
 import com.flexive.shared.security.UserTicket;
-import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.value.FxValue;
@@ -54,11 +54,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.faces.model.SelectItem;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.io.Serializable;
 
 /**
  * Bean behind propertyAssignmentEditor.xhtml, propertyEditor.xhtml and propertyOptionEditor to
@@ -865,6 +865,27 @@ public class PropertyEditorBean implements ActionBean, Serializable {
         return null;
     }
 
+    /**
+     * Is the assignment flattenable?
+     *
+     * @return flattenable
+     */
+    public boolean isFlattenable() {
+        return EJBLookup.getAssignmentEngine().isFlattenable(assignment);
+    }
+
+    public void flatten() throws FxApplicationException {
+        EJBLookup.getAssignmentEngine().flattenAssignment(assignment);
+        assignment = CacheAdmin.getEnvironment().getPropertyAssignment(assignment.getXPath()).asEditable();
+        new FxFacesMsgInfo("PropertyEditor.message.info.converted", assignment.getLabel()).addToContext();
+    }
+
+    public void unflatten() throws FxApplicationException {
+        EJBLookup.getAssignmentEngine().unflattenAssignment(assignment);
+        assignment = CacheAdmin.getEnvironment().getPropertyAssignment(assignment.getXPath()).asEditable();
+        new FxFacesMsgInfo("PropertyEditor.message.info.converted", assignment.getLabel()).addToContext();
+    }
+
     public void toggleEditMode() {
         editMode = !editMode;
     }
@@ -883,7 +904,7 @@ public class PropertyEditorBean implements ActionBean, Serializable {
      */
     private void initEditing() {
         // reset selected script
-        this.selectedScriptInfo=null;
+        this.selectedScriptInfo = null;
         structureManagement = FxJsfUtils.getRequest().getUserTicket().isInRole(Role.StructureManagement);
         if (!assignment.isNew())
             scriptWrapper = new ScriptListWrapper(assignment.getId(), false);
@@ -1187,9 +1208,9 @@ public class PropertyEditorBean implements ActionBean, Serializable {
 
     public FxScriptInfo getSelectedScriptInfo() {
         if (selectedScriptInfo == null) {
-            SelectBean b= new SelectBean();
-            if (b.getAssignmentScripts().size()>0)
-                selectedScriptInfo = CacheAdmin.getEnvironment().getScript((Long)b.getAssignmentScripts().get(0).getValue());
+            SelectBean b = new SelectBean();
+            if (b.getAssignmentScripts().size() > 0)
+                selectedScriptInfo = CacheAdmin.getEnvironment().getScript((Long) b.getAssignmentScripts().get(0).getValue());
         }
         return selectedScriptInfo;
     }
@@ -1254,7 +1275,7 @@ public class PropertyEditorBean implements ActionBean, Serializable {
         for (ScriptListWrapper.ScriptListEntry e : scriptWrapper.getDelta(assignment.getId())) {
             if (e.getId() == ScriptListWrapper.ID_SCRIPT_ADDED)
                 EJBLookup.getScriptingEngine().createAssignmentScriptMapping(e.getScriptEvent(),
-                        e.getScriptInfo().getId(), e.isDerived() ? e.getDerivedFrom() : assignment.getId(), 
+                        e.getScriptInfo().getId(), e.isDerived() ? e.getDerivedFrom() : assignment.getId(),
                         e.isActive(), e.isDerivedUsage());
             else if (e.getId() == ScriptListWrapper.ID_SCRIPT_REMOVED)
                 EJBLookup.getScriptingEngine().removeAssignmentScriptMappingForEvent(e.getScriptInfo().getId(),
@@ -1263,7 +1284,7 @@ public class PropertyEditorBean implements ActionBean, Serializable {
                 EJBLookup.getScriptingEngine().updateAssignmentScriptMappingForEvent(e.getScriptInfo().getId(),
                         e.isDerived() ? e.getDerivedFrom() : assignment.getId(), e.getScriptEvent(), e.isActive(),
                         e.isDerivedUsage());
-        }                  
+        }
     }
 
     /****script editor tab end*********/

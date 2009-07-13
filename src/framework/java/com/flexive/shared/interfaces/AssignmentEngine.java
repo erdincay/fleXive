@@ -124,9 +124,9 @@ public interface AssignmentEngine {
      * Create a new group and assign it at the given parentXPath to the given type using assignmentAlias instead of the
      * group's given name
      *
-     * @param typeId      id of the type to assign this group to
-     * @param group       the group to create
-     * @param parentXPath optional parent xpath of the group
+     * @param typeId          id of the type to assign this group to
+     * @param group           the group to create
+     * @param parentXPath     optional parent xpath of the group
      * @param assignmentAlias alias to use for the assignment to the type
      * @return <b>assignment id</b> of the group
      * @throws FxApplicationException      on errors
@@ -175,7 +175,7 @@ public interface AssignmentEngine {
      *
      * @param assignmentId the assignment to (completely) remove
      * @throws FxApplicationException on errors
-     * @see #removeAssignment(long, boolean, boolean) 
+     * @see #removeAssignment(long, boolean, boolean)
      */
     void removeAssignment(long assignmentId) throws FxApplicationException;
 
@@ -218,12 +218,13 @@ public interface AssignmentEngine {
      */
     long getAssignmentInstanceCount(long assignmentId) throws FxApplicationException;
 
-     /**
+    /**
      * Get the number of existing content instances using a given property.
      *
      * @param propertyId id of the requested assignment
      * @return number of content instances using the assignment
-     * @throws com.flexive.shared.exceptions.FxDbException on errors
+     * @throws com.flexive.shared.exceptions.FxDbException
+     *          on errors
      */
     long getPropertyInstanceCount(long propertyId) throws FxDbException;
 
@@ -231,15 +232,18 @@ public interface AssignmentEngine {
      * Convenience method to remove a property, all its (derived) assignments and all referenced content
      *
      * @param propertyId the property's id
-     * @throws com.flexive.shared.exceptions.FxApplicationException on errors
+     * @throws com.flexive.shared.exceptions.FxApplicationException
+     *          on errors
      */
     void removeProperty(long propertyId) throws FxApplicationException;
 
     /**
      * Convenience method to remove a group, all its (derived) assignments and all referenced content
      * The group assignment's subassignments are also removed.
+     *
      * @param groupId the group's id
-     * @throws com.flexive.shared.exceptions.FxApplicationException on errors
+     * @throws com.flexive.shared.exceptions.FxApplicationException
+     *          on errors
      */
     void removeGroup(long groupId) throws FxApplicationException;
 
@@ -253,15 +257,33 @@ public interface AssignmentEngine {
     public Map<String, List<FxPropertyAssignment>> getPotentialFlatAssignments(FxType type);
 
     /**
+     * Check if the given assignment can be flattened
+     *
+     * @param pa property assignment to check
+     * @return flattenable
+     * @since 3.1
+     */
+    public boolean isFlattenable(FxPropertyAssignment pa);
+
+    /**
+     * Flatten an assignment in the default storage
+     *
+     * @param assignment the property assignment to flatten
+     * @throws FxApplicationException on errors
+     * @since 3.1
+     */
+    public void flattenAssignment(FxPropertyAssignment assignment) throws FxApplicationException;
+
+    /**
      * Flatten an assignment
      *
-     * @param storage the storage to use
+     * @param storage    the storage to use
      * @param assignment the property assignment to flatten
      * @throws FxApplicationException on errors
      * @since 3.1
      */
     public void flattenAssignment(String storage, FxPropertyAssignment assignment) throws FxApplicationException;
-    
+
     /**
      * Unflatten an assignment
      *
