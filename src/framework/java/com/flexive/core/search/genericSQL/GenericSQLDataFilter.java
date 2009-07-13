@@ -33,27 +33,24 @@ package com.flexive.core.search.genericSQL;
 
 import com.flexive.core.Database;
 import com.flexive.core.DatabaseConst;
-import com.flexive.core.search.DataFilter;
-import com.flexive.core.search.PropertyEntry;
-import com.flexive.core.search.SqlSearch;
-import com.flexive.core.search.PropertyResolver;
+import com.flexive.core.search.*;
 import com.flexive.core.storage.FxTreeNodeInfo;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.core.storage.genericSQL.GenericTreeStorage;
-import com.flexive.shared.*;
-import com.flexive.shared.structure.FxDataType;
-import com.flexive.shared.structure.FxFlatStorageMapping;
+import com.flexive.shared.FxContext;
+import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.Pair;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxSqlSearchException;
 import com.flexive.shared.search.DateFunction;
 import com.flexive.shared.search.FxFoundType;
 import com.flexive.shared.search.query.VersionFilter;
 import com.flexive.shared.security.UserTicket;
+import com.flexive.shared.structure.FxDataType;
+import com.flexive.shared.structure.FxFlatStorageMapping;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.sqlParser.*;
 import static com.flexive.sqlParser.Condition.Comparator;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Iterables;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -529,26 +526,20 @@ public class GenericSQLDataFilter extends DataFilter {
             throw new FxSqlSearchException("ex.sqlSearch.filter.condition.structure", prop.getPropertyName());
         }
 
-        if (entry.getTableType() == PropertyResolver.Table.T_CONTENT_DATA &&
-                cond.getComperator() == Condition.Comparator.IS &&
-                cond.getConstant().isNull()) {
-            // IS NULL is a special case for the content data table:
+        if (cond.getComperator() == Condition.Comparator.IS && cond.getConstant().isNull()) {
+            // IS NULL is a special case for the content data/flat storage table:
             // a property is null if no entry is present in the table, which means we must
             // find the entries by using a join on the main table
 
-            //mp: wrong properties selected for a join/union and braces missing for limit statement
-            //    was:        return "select distinct da.assign,da.tprop,ct.id,ct.ver from "+tableMain+" ct\n" +
-            return "(SELECT DISTINCT ct.id, ct.ver, null AS lang FROM " + tableMain + " ct\n" +
-                    "LEFT JOIN " + tableContentData + " da ON (ct.id=da.id AND ct.ver=da.ver AND da." + filter + ")\n" +
-                    "WHERE da.tprop IS NULL " +
-                    getVersionFilter("ct") +
-                    getDeactivatedTypesFilter("ct") +
-                    getInactiveMandatorsFilter("ct") +
-                    // Assignment search: we are only interrested in the type that the assignment belongs to
-                    (prop.isAssignment()
-                            ? "AND ct.TDEF=" + entry.getAssignment().getAssignedType().getId() + " "
-                            : "") +
-                    getSubQueryLimit() + ")";
+            if (entry.getTableType() == PropertyResolver.Table.T_CONTENT_DATA) {
+                return isNullSelect(entry, prop, tableContentData, filter, "tprop");
+            } else if (entry.getTableType() == PropertyResolver.Table.T_CONTENT_DATA_FLAT) {
+                final FxFlatStorageMapping mapping = entry.getAssignment().getFlatStorageMapping();
+                return isNullSelect(entry, prop, mapping.getStorage(),
+                        SearchUtils.getFlatStorageAssignmentFilter(search.getEnvironment(), "da", entry.getAssignment()),
+                        mapping.getColumn()
+                );
+            }
         }
 
 
@@ -597,7 +588,8 @@ public class GenericSQLDataFilter extends DataFilter {
                 return " (SELECT DISTINCT cd.id, cd.ver, cd.lang " +
                         "FROM " + mapping.getStorage() + " cd " +
                         "WHERE " +
-                        "lvl=" + mapping.getLevel() + " AND " +
+                        SearchUtils.getFlatStorageAssignmentFilter(search.getEnvironment(), "cd", entry.getAssignment())
+                        + " AND " +
                         mapping.getColumn() + cond.getSqlComperator() + value +
                         getVersionFilter("cd") +
                         getLanguageFilter() +
@@ -606,6 +598,20 @@ public class GenericSQLDataFilter extends DataFilter {
             default:
                 throw new FxSqlSearchException(LOG, "ex.sqlSearch.err.unknownPropertyTable", entry.getProperty().getName(), entry.getTableName());
         }
+    }
+
+    private String isNullSelect(PropertyEntry entry, Property prop, String dataTable, String dataFilter, String dataJoinColumn) {
+        return "(SELECT DISTINCT ct.id, ct.ver, null AS lang FROM " + tableMain + " ct\n" +
+                "LEFT JOIN " + dataTable + " da ON (ct.id=da.id AND ct.ver=da.ver AND " + dataFilter + ")\n" +
+                "WHERE da." + dataJoinColumn + " IS NULL " +
+                getVersionFilter("ct") +
+                getDeactivatedTypesFilter("ct") +
+                getInactiveMandatorsFilter("ct") +
+                // Assignment search: we are only interrested in the type that the assignment belongs to
+                (prop.isAssignment()
+                        ? "AND ct.TDEF=" + entry.getAssignment().getAssignedType().getId() + " "
+                        : "") +
+                getSubQueryLimit() + ")";
     }
 
     private String getGroupByFilter(String tableAlias, Condition cond, PropertyEntry entry, String value) {

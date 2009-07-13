@@ -1073,7 +1073,7 @@ public class SearchEngineTest {
             content.setValue("/" + getTestPropertyName("string"), new FxString(false, "te'st"));
             pk = getContentEngine().save(content);
             final FxResultSet result = getSearchEngine().search("SELECT id WHERE "
-                    + getTestPropertyName("string") + " = 'te''st'", 0, 10, null);
+                    + "#searchtest/" + getTestPropertyName("string") + " = 'te''st'", 0, 10, null);
             assertTrue(result.getRowCount() == 1, "Escaped string property not returned");
             assertTrue(result.getResultRow(0).getLong(1) == pk.getId());
         } finally {
@@ -1296,6 +1296,7 @@ public class SearchEngineTest {
             final FxResultSet result = new SqlQueryBuilder()
                     .select("@pk", TEST_TYPE + "/stringSearchPropML")
                     .type(TEST_TYPE)
+                    .condition(TEST_TYPE + "/stringSearchPropML", PropertyValueComparator.NOT_EMPTY, null)
                     .maxRows(maxRows)
                     .getResult();
             assertTrue(result.getRowCount() == maxRows, "Expected " + maxRows + " rows but got " + result.getRowCount());

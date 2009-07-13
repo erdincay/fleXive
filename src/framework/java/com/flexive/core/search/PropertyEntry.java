@@ -586,6 +586,10 @@ public class PropertyEntry {
             } else if (xpathAvailable && getTableType() == PropertyResolver.Table.T_CONTENT && property != null) {
                 // set XPath for system-internal properties
                 result.setXPath("ROOT/" + property.getName());
+            } else if (getTableType() == PropertyResolver.Table.T_CONTENT_DATA_FLAT) {
+                // fill in XPath from assignment
+                // TODO: use correct type!
+                result.setXPath(assignment.getXPath());
             }
             return result;
         } catch (SQLException e) {
