@@ -123,6 +123,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
         }
         this.selectLists = new ArrayList<FxSelectList>(e.selectLists);
         this.timeStamp = e.timeStamp;
+        this.resolveFlatMappings();
     }
 
     /**
@@ -1084,7 +1085,13 @@ public final class FxEnvironmentImpl implements FxEnvironment {
         //2nd pass for types (scripting for assignments can only be resolved now)
         for (FxType type : types)
             type.resolveReferences(this);
-        //resolve flat storage mappings and prepare them by storage and level
+        this.resolveFlatMappings();
+    }
+
+    /**
+     *  resolve flat storage mappings and prepare them by storage and level
+     */
+    private void resolveFlatMappings() {
         //storage-type-level-mapping
         this.flatMappings = new HashMap<String, Map<Long, Map<Integer, List<FxFlatStorageMapping>>>>(10);
         for (FxPropertyAssignment as : this.propertyAssignmentsAll) {

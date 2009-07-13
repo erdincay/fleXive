@@ -323,7 +323,12 @@ public class GenericSQLDataSelector extends DataSelector {
                     final String sel =
                             "(SELECT " + mapping.getColumn() + " FROM " + mapping.getStorage()
                             + " WHERE id=" + FILTER_ALIAS + ".id AND ver=" + FILTER_ALIAS + ".ver"
-                            + " AND lvl=" + mapping.getLevel()
+                            + " AND "
+                            + SearchUtils.getFlatStorageAssignmentFilter(
+                                    search.getEnvironment(),
+                                    "",
+                                    entry.getAssignment()
+                            )
                             + (entry.getAssignment().isMultiLang()
                                     ? " AND " + mapping.getColumn() + " IS NOT NULL"
                                     + " AND (lang=" + search.getLanguage().getId()

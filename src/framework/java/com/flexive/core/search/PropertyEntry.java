@@ -183,7 +183,7 @@ public class PropertyEntry {
         }
 
         @Override
-        public Object getResultValue(ResultSet rs, long languageId, boolean xpathAvailable) throws FxSqlSearchException {
+        public Object getResultValue(ResultSet rs, long languageId, boolean xpathAvailable, long typeId) throws FxSqlSearchException {
             try {
                 final long id = rs.getLong(positionInResultSet);
                 final int ver = rs.getInt(positionInResultSet + 1);
@@ -206,7 +206,7 @@ public class PropertyEntry {
         }
 
         @Override
-        public Object getResultValue(ResultSet rs, long languageId, boolean xpathAvailable) throws FxSqlSearchException {
+        public Object getResultValue(ResultSet rs, long languageId, boolean xpathAvailable, long typeId) throws FxSqlSearchException {
             try {
                 return new FxPaths(rs.getString(positionInResultSet));
             } catch (SQLException e) {
@@ -226,7 +226,7 @@ public class PropertyEntry {
         }
 
         @Override
-        public Object getResultValue(ResultSet rs, long languageId, boolean xpathAvailable) throws FxSqlSearchException {
+        public Object getResultValue(ResultSet rs, long languageId, boolean xpathAvailable, long typeId) throws FxSqlSearchException {
             try {
                 return rs.getLong(positionInResultSet);
             } catch (SQLException e) {
@@ -243,7 +243,7 @@ public class PropertyEntry {
         }
 
         @Override
-        public Object getResultValue(ResultSet rs, long languageId, boolean xpathAvailable) throws FxSqlSearchException {
+        public Object getResultValue(ResultSet rs, long languageId, boolean xpathAvailable, long typeId) throws FxSqlSearchException {
             try {
                 final String column = rs.getString(positionInResultSet);
                 final int sep = column.indexOf(' ');    // separates ID and metadata
@@ -268,12 +268,11 @@ public class PropertyEntry {
         }
 
         @Override
-        public Object getResultValue(ResultSet rs, long languageId, boolean xpathAvailable) throws FxSqlSearchException {
+        public Object getResultValue(ResultSet rs, long languageId, boolean xpathAvailable, long typeId) throws FxSqlSearchException {
             try {
                 final long aclId = rs.getLong(positionInResultSet + getIndex("acl"));
                 final long createdBy = rs.getLong(positionInResultSet + getIndex("created_by"));
                 final long stepId = rs.getLong(positionInResultSet + getIndex("step"));
-                final long typeId = rs.getLong(positionInResultSet + getIndex("tdef"));
                 final long mandatorId = rs.getLong(positionInResultSet + getIndex("mandator"));
                 return FxPermissionUtils.getPermissions(aclId, getEnvironment().getType(typeId),
                         getEnvironment().getStep(stepId).getAclId(), createdBy, mandatorId);
@@ -486,10 +485,11 @@ public class PropertyEntry {
      * @param rs       the SQL result set
      * @param languageId
      * @param xpathAvailable if the XPath was selected as an additional column for content table entries
+     * @param typeId    the result row type ID (if available, otherwise -1)
      * @return the value of this property (column) in the result set
      * @throws FxSqlSearchException if the database cannot read the value
      */
-    public Object getResultValue(ResultSet rs, long languageId, boolean xpathAvailable) throws FxSqlSearchException {
+    public Object getResultValue(ResultSet rs, long languageId, boolean xpathAvailable, long typeId) throws FxSqlSearchException {
         final FxValue result;
         final int pos = positionInResultSet;
         // Handle by type
@@ -587,9 +587,10 @@ public class PropertyEntry {
                 // set XPath for system-internal properties
                 result.setXPath("ROOT/" + property.getName());
             } else if (getTableType() == PropertyResolver.Table.T_CONTENT_DATA_FLAT) {
-                // fill in XPath from assignment
-                // TODO: use correct type!
-                result.setXPath(assignment.getXPath());
+                // fill in XPath from assignment, create XPath with full type information
+                if (typeId != -1) {
+                    result.setXPath(getEnvironment().getType(typeId).getName() + "/" + assignment.getAlias());
+                }
             }
             return result;
         } catch (SQLException e) {

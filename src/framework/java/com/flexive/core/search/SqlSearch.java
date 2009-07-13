@@ -283,8 +283,9 @@ public class SqlSearch {
             while (rs.next()) {
                 Object[] row = new Object[pr.getResultSetColumns().size()];
                 int i = 0;
+                final long typeId = rs.getLong(DataSelector.COL_TYPEID);
                 for (PropertyEntry entry : pr.getResultSetColumns()) {
-                    Object val = entry.getResultValue(rs, language.getId(), true);
+                    Object val = entry.getResultValue(rs, language.getId(), true, typeId);
 
                     //in case we have types with property permissions enabled, inaccessible
                     //properties have to be wrapped with with FxNoAccess objects
