@@ -20,13 +20,10 @@
                 #{fxMessageBean['SqlSearch.defaultPreferences.info']}
             </adm:infoBox>
 
-            <a4j:region>
-                <adm:resultPreferencesEditor/>
+            <adm:resultPreferencesEditor/>
 
-                <adm:commandButton id="saveButton" icon="save" labelKey="SqlSearch.defaultPreferences.save" bean="#{resultPreferencesBean}" action="saveSystemDefault" location="both"/>
-                <adm:commandButton id="loadButton" icon="cancel" labelKey="SqlSearch.defaultPreferences.load" bean="#{resultPreferencesBean}" action="loadSystemDefault" location="both"/>
-
-            </a4j:region>
+            <adm:commandButton id="saveButton" icon="save" labelKey="SqlSearch.defaultPreferences.save" bean="#{resultPreferencesBean}" action="saveSystemDefault" location="both"/>
+            <adm:commandButton id="loadButton" icon="cancel" labelKey="SqlSearch.defaultPreferences.load" bean="#{resultPreferencesBean}" action="loadSystemDefault" location="both"/>
 
             <adm:toolbarPluginButtons/>
         </a4j:form>

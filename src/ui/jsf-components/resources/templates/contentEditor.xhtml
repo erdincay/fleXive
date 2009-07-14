@@ -43,7 +43,7 @@
             <c:set var="__ceAlreadyRendered" value="#{_ceContent.guiSettings.formPrefix}__ceRendered"/>
             <c:if test="#{not __ceRenderedBoxed and not requestScope[__ceAlreadyRendered]}">
                 <!-- preserve stored contents -->
-                <t:saveState value="#{__ceBean.contentStorage}"/>
+                <t:saveState id="ssContentStorage" value="#{__ceBean.contentStorage}"/>
                 <!-- store selected elements from popup menu -->
                 <t:inputHidden value="#{__ceBean.childrenToAdd}" id="__ceElements"/>
                 <!-- binary input hack -->

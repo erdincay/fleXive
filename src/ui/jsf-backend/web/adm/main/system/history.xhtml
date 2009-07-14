@@ -17,7 +17,7 @@
     <ui:define name="body">
         <a4j:region id="historyPanel">
         <h:form id="frm">
-            <t:saveState value="#{historyBean.list}"/>
+            <t:saveState id="ssList" value="#{historyBean.list}"/>
             <script type="text/javascript">
                 <!--
                 var userAcHandler = new flexive.yui.AutoCompleteHandler(function(query) {

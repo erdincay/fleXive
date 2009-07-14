@@ -63,7 +63,14 @@ height = overrides the default height (value in pixel, eg height="80")
                     </c:if>
                 </div>
                 <div class="tooltipContent">
-                    <h:outputText value="#{tooltip}" escape="false"/>
+                    <c:if test="#{!empty tooltip}">
+                        <c:if test="#{!empty id}">
+                            <h:outputText id="#{id}Tooltip" value="#{tooltip}" escape="false"/>
+                        </c:if>
+                        <c:if test="#{empty id}">
+                            <h:outputText id="#{fxSystemBean.uniqueId}" value="#{tooltip}" escape="false"/>
+                        </c:if>
+                    </c:if>
                 </div>
             </div>
         </div>

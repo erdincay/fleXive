@@ -110,6 +110,14 @@ abstract class RenderHelper {
         throw new IllegalStateException("No enclosing fx:fxValueInput component found");
     }
 
+    protected static String stripForm(String inputId) {
+        return inputId.substring(inputId.lastIndexOf(':') + 1);
+    }
+
+    protected static String getForm(String inputId) {
+        return inputId.substring(0, inputId.indexOf(':'));
+    }
+
     /**
      * The base class of all primitive input renderer components.
      * These inputs are not composed of more complex input elements (like date pickers),
@@ -309,8 +317,9 @@ abstract class RenderHelper {
         }
     }
 
-    protected UIComponent addImageDescriptionComponent(UIComponent parent, FxLanguage language) {
+    protected UIComponent addImageDescriptionComponent(UIComponent parent, FxLanguage language, String inputId) {
         RenderHelper.ImageDescription desc = new ImageDescription();
+        desc.setId(stripForm(inputId));
         desc.setLanguage(language);
         desc.setDownloadServletPath(component.getDownloadServletPath());
         parent.getChildren().add(desc);

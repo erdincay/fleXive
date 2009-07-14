@@ -20,7 +20,7 @@
     <h:form id="frm">
 
         <adm:tab label="#{fxMessageBean['ACL.label.overview']}" active="true" id="tab1"/>
-        <t:saveState value="#{aclBean.mandator}"/>
+        <t:saveState id="ssMandator" value="#{aclBean.mandator}"/>
         <!-- Mandator select is only shown for global supervisors -->
         <c:if test="${fxSystemBean.userTicket.globalSupervisor}">
             <h:panelGrid columns="2">

@@ -19,9 +19,9 @@ id - the input ID (required)
     <h:selectOneListbox id="#{id}" size="1" onchange="flexive.input.setLanguageOnAllInputs(this.value)"
             value="#{fxUserConfigurationBean.inputLanguageId}"
             title="#{fxMessageBean['FxValueInput.languageSelect.title']}">
-        <f:selectItem itemValue="-2" itemLabel="#{fxMessageBean['FxValueInput.language.all']}"/>
+        <f:selectItem id="#{id}_all" itemValue="-2" itemLabel="#{fxMessageBean['FxValueInput.language.all']}"/>
         <c:forEach var="item" items="#{fxSelectBean.languages}">
-            <f:selectItem itemValue="#{item.value.id}" itemLabel="#{item.value.iso2digit} (#{item.value.label})"/>
+            <f:selectItem id="#{id}_#{item.value.id}" itemValue="#{item.value.id}" itemLabel="#{item.value.iso2digit} (#{item.value.label})"/>
         </c:forEach>
     </h:selectOneListbox>
 

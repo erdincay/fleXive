@@ -40,7 +40,7 @@
 
 <!-- Because the JSF managed bean is request-scope,
 we have to persist the primary key via MyFaces Tomahawk's <t:saveState/> tag for the next request -->
-<t:saveState value="#{asubmissionBean.instancePk}"/>
+<t:saveState id="submissionPK" value="#{asubmissionBean.instancePk}"/>
 
 <h:form>
     <fx:content pk="#{asubmissionBean.instancePk}" var="entry">

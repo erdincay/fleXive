@@ -18,7 +18,7 @@
 
             <!-- Mandator select is only shown for global supervisors -->
             <c:if test="${fxSystemBean.userTicket.globalSupervisor}">
-                <t:saveState value="#{userGroupBean.mandator}"/>
+                <t:saveState id="ssMandator" value="#{userGroupBean.mandator}"/>
                 <h:panelGrid columns="2">
                     #{fxMessageBean['UserGroup.field.mandator']}&nbsp;
                     <h:selectOneListbox id="mandatorFilter" value="#{userGroupBean.mandator}" size="1"

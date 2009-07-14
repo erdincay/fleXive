@@ -14,8 +14,8 @@
 Renders the body content in a info box.
 
 <ui:composition>
-    <t:saveState value="#{resultPreferencesBean.type}"/>
-    <t:saveState value="#{resultPreferencesBean.forceSystemDefault}"/>
+    <t:saveState id="ssType" value="#{resultPreferencesBean.type}"/>
+    <t:saveState id="ssForceDefault" value="#{resultPreferencesBean.forceSystemDefault}"/>
 
     <h:selectOneListbox value="#{resultPreferencesBean.type}" size="1"
                         onchange="document.getElementById('frm:reloadButton').onclick();">

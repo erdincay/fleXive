@@ -29,8 +29,8 @@
             #{fxMessageBean['Languages.label.ignoreUsage']}<br/><br/>
             <adm:tab label="#{fxMessageBean['Languages.tabtitle.main']}" active="true" id="tab1"/>
                 <a4j:outputPanel id="all">
-                <t:saveState value="#{languagesBean.available}"/>
-                <t:saveState value="#{languagesBean.disabled}"/>
+                <t:saveState id="ssAvailable" value="#{languagesBean.available}"/>
+                <t:saveState id="ssDisabled" value="#{languagesBean.disabled}"/>
                 <!-- General system/runtime information  -->
                     <table>
                         <thead>

@@ -32,9 +32,9 @@
 package com.flexive.faces.components.input;
 
 import com.flexive.faces.FxJsfUtils;
-import static com.flexive.faces.components.input.FxValueInputRenderer.*;
 import com.flexive.faces.beans.MessageBean;
 import com.flexive.faces.beans.UserConfigurationBean;
+import static com.flexive.faces.components.input.FxValueInputRenderer.*;
 import com.flexive.faces.javascript.FxJavascriptUtils;
 import static com.flexive.faces.javascript.FxJavascriptUtils.*;
 import com.flexive.shared.CacheAdmin;
@@ -126,6 +126,7 @@ class EditModeHelper extends RenderHelper {
         final String radioName = clientId + FxValueInputRenderer.DEFAULT_LANGUAGE;
 
         final ContainerWriter container = new ContainerWriter();
+        container.setId(stripForm(clientId) + "_container");
         container.setInputClientId(clientId);
         component.getChildren().add(container);
 
@@ -139,6 +140,7 @@ class EditModeHelper extends RenderHelper {
             rowInfos.put(language.getId(), new LanguageSelectWriter.InputRowInfo(containerId, inputId));
 
             final LanguageContainerWriter languageContainer = new LanguageContainerWriter();
+            languageContainer.setId(stripForm(inputId) + "_langContainer");
             languageContainer.setContainerId(containerId);
             languageContainer.setLanguageId(language.getId());
             languageContainer.setFirstRow(first);
@@ -150,6 +152,7 @@ class EditModeHelper extends RenderHelper {
         }
 
         final LanguageSelectWriter languageSelect = new LanguageSelectWriter();
+        languageSelect.setId(stripForm(clientId) + "_langSelect");
         languageSelect.setInputClientId(clientId);
         languageSelect.setRowInfos(rowInfos);
         languageSelect.setDefaultLanguageId(value.getDefaultLanguage());
@@ -168,6 +171,7 @@ class EditModeHelper extends RenderHelper {
      */
     private void encodeDefaultLanguageRadio(LanguageContainerWriter parent, String clientId, final String radioName, final FxLanguage language) {
         final DefaultLanguageRadioWriter radio = new DefaultLanguageRadioWriter();
+        radio.setId(stripForm(clientId) + "_defaultLanguageRadio_" + language.getId());
         radio.setRadioName(radioName);
         radio.setLanguageId(language.getId());
         radio.setContainerId(parent.getContainerId());
@@ -183,6 +187,7 @@ class EditModeHelper extends RenderHelper {
     protected void encodeField(UIComponent parent, String inputId, FxLanguage language) throws IOException {
         if (language == null) {
             final ContainerWriter container = new ContainerWriter();
+            container.setId(stripForm(clientId) + "_" + "container");
             container.setInputClientId(clientId);
             parent.getChildren().add(container);
             // use container as parent for all subsequent operations
@@ -234,6 +239,7 @@ class EditModeHelper extends RenderHelper {
         // add autocomplete YUI component
         if (StringUtils.isNotBlank(inputComponent.getAutocompleteHandler())) {
             final YuiAutocompleteWriter yuiWriter = new YuiAutocompleteWriter();
+            yuiWriter.setId(stripForm(inputId) + "_autocomplete");
             yuiWriter.setInputClientId(inputId);
             yuiWriter.setAutocompleteHandler(inputComponent.getAutocompleteHandler());
             parent.getChildren().add(parent.getChildren().size() - 1, yuiWriter);
@@ -314,6 +320,7 @@ class EditModeHelper extends RenderHelper {
         }
         // store available items in select component
         final UISelectItems selectItems = (UISelectItems) FxJsfUtils.createComponent(UISelectItems.COMPONENT_TYPE);
+        selectItems.setId(stripForm(listbox.getId()) + "_items");
         final List<SelectItem> items = FxJsfUtils.asSelectList(selectList);
         if (includeEmptyElement) {
             items.add(0, new SelectItem(-1L, ""));
@@ -343,6 +350,7 @@ class EditModeHelper extends RenderHelper {
         img.setStyleClass("button");
 
         final YuiDateInputWriter diw = new YuiDateInputWriter();
+        diw.setId(stripForm(inputId) + "_yuidate");
         diw.setInputClientId(inputId);
         diw.setButtonId(img.getClientId(FacesContext.getCurrentInstance()));
         diw.setDate(date);
@@ -352,7 +360,7 @@ class EditModeHelper extends RenderHelper {
     private void renderDateRangeInput(UIComponent parent, String inputId, FxLanguage language) {
         final DateRange range = value.isTranslationEmpty(language) ? null : (DateRange) value.getTranslation(language);
         createDateInput(parent, inputId + "_1", range != null ? range.getLower() : null);
-        renderLiteral(parent, " - ");
+        renderLiteral(parent, " - ", inputId + "_sep");
         createDateInput(parent, inputId + "_2", range != null ? range.getUpper() : null);
     }
 
@@ -374,9 +382,9 @@ class EditModeHelper extends RenderHelper {
             cal.setTime(date);
         }
         renderTimeInput(parent, inputId, "_hh", cal != null ? cal.get(Calendar.HOUR_OF_DAY) : -1);
-        renderLiteral(parent, ":");
+        renderLiteral(parent, ":", inputId + "_hsep");
         renderTimeInput(parent, inputId, "_mm", cal != null ? cal.get(Calendar.MINUTE) : -1);
-        renderLiteral(parent, ":");
+        renderLiteral(parent, ":", inputId + "_msep");
         renderTimeInput(parent, inputId, "_ss", cal != null ? cal.get(Calendar.SECOND) : -1);
     }
 
@@ -387,14 +395,14 @@ class EditModeHelper extends RenderHelper {
         input.setMaxlength(2);
         input.setStyleClass(CSS_VALUE_INPUT_FIELD);
         if (value != -1) {
-            input.setValue(new Formatter().format("%02d", value));
+            input.setValue(String.format("%02d", value));
         }
     }
 
     private void renderDateTimeRangeInput(UIComponent parent, String inputId, FxLanguage language) {
         final DateRange range = value.isTranslationEmpty(language) ? null : (DateRange) value.getTranslation(language);
         createDateTimeInput(parent, inputId + "_1", range != null ? range.getLower() : null);
-        renderLiteral(parent, " -<br/>").setEscape(false);
+        renderLiteral(parent, " -<br/>", inputId + "_rangesep").setEscape(false);
         createDateTimeInput(parent, inputId + "_2", range != null ? range.getUpper() : null);
     }
 
@@ -465,10 +473,10 @@ class EditModeHelper extends RenderHelper {
                 if (component.isReadOnlyShowTranslations()) {
                     //TODO: might add another attribute to indicate if description should be visible
                     image.setStyle("padding: 5px;");
-                    addImageDescriptionComponent(parent, language);
+                    addImageDescriptionComponent(parent, language, inputId + "_desc");
                 }
             } else
-                addImageDescriptionComponent(parent, language);
+                addImageDescriptionComponent(parent, language, inputId + "_desc");
         }
         final HtmlInputFileUpload upload = (HtmlInputFileUpload) FxJsfUtils.addChildComponent(parent, HtmlInputFileUpload.COMPONENT_TYPE);
         addHtmlAttributes(component, upload);
@@ -492,8 +500,9 @@ class EditModeHelper extends RenderHelper {
         hidden.setValue(value.isTranslationEmpty(language));
     }
 
-    private HtmlOutputText renderLiteral(UIComponent parent, String value) {
+    private HtmlOutputText renderLiteral(UIComponent parent, String value, String inputId) {
         HtmlOutputText output = (HtmlOutputText) FxJsfUtils.addChildComponent(parent, HtmlOutputText.COMPONENT_TYPE);
+        output.setId(stripForm(inputId));
         output.setValue(value);
         return output;
     }
@@ -518,14 +527,6 @@ class EditModeHelper extends RenderHelper {
             writeValue = value.getDefaultTranslation();
         }
         return writeValue;
-    }
-
-    private static String stripForm(String inputId) {
-        return inputId.substring(inputId.lastIndexOf(':') + 1);
-    }
-
-    private static String getForm(String inputId) {
-        return inputId.substring(0, inputId.indexOf(':'));
     }
 
     private static String singleLanguageStyle(long languageId) {

@@ -15,8 +15,8 @@
 <ui:define name="body">
     <a4j:form id="frm" >
         <adm:tab label="#{fxMessageBean['Account.label.create']}" active="true" id="tab1"/>
-        <t:saveState value="#{accountBean.groups}"/>
-        <t:saveState value="#{accountBean.mandator}"/>
+        <t:saveState id="ssGroups" value="#{accountBean.groups}"/>
+        <t:saveState id="ssMandator" value="#{accountBean.mandator}"/>
 
         <!-- ============================================ -->
         <fx:formRow label="#{fxMessageBean['Account.field.mandator']}" id="mandator"  newLine="false">

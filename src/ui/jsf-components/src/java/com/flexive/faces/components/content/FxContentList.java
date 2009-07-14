@@ -254,7 +254,8 @@ public class FxContentList extends UIComponentBase implements NamingContainer {
                 shell.setVariable("builder", queryBuilder);
                 final QueryRootNode result = (QueryRootNode) shell.parse(
                         "new com.flexive.shared.scripting.groovy.GroovyQueryBuilder(builder).select([\"@pk\"]) {"
-                                + queryWriter + "}").run();
+                                + StringUtils.trim(queryWriter.toString()).replace("&quot;", "\"")
+                                + "}").run();
                 result.buildSqlQuery(queryBuilder);
             } finally {
                 context.setResponseWriter(oldWriter);

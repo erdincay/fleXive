@@ -99,13 +99,13 @@ Parameters:
                         nestedTableCounter="#{1 - nestedTableCounter}"/>
             </table>
 
-            <ui:fragment rendered="#{empty nodes}">
+            <ui:fragment id="emptyQueryMessage" rendered="#{empty nodes}">
                 <div class="emptyMessage">
                     #{fxMessageBean[emptyMessageKey]}
                 </div>
             </ui:fragment>
 
-            <ui:fragment rendered="#{not empty nodes}">
+            <ui:fragment id="tableFooter" rendered="#{not empty nodes}">
                 <ui:insert name="tableFooter"/>
             </ui:fragment>
 
@@ -159,7 +159,7 @@ Parameters:
                         value="Join selected nodes with or"/>
     </div>
 
-    <ui:fragment rendered="showSqlButton">
+    <ui:fragment id="showSqlButton" rendered="showSqlButton">
         <a href="javascript:showQueryEditorSql();">#{fxMessageBean['QueryEditor.button.sql']}</a>
     </ui:fragment>
 

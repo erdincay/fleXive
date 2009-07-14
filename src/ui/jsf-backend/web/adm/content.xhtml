@@ -150,12 +150,10 @@
                                     <th>#{fxMessageBean['Welcome.label.drops']}</th>
                                 </tr>
                             </thead>
-                            <c:forEach var="drop" items="#{fxSystemBean.dropApplications}">
-                                <c:if test="#{drop.webContextAvailable and drop.name != 'flexive' and drop.name != 'flexive-backend-war'}">
-                                    <tr>
-                                        <td><a href="#{fxSystemBean.serverBase}/#{drop.contextRoot}" target="#{drop.name}">#{drop.displayName}</a></td>
-                                    </tr>
-                                </c:if>
+                            <c:forEach var="drop" items="#{fxSystemBean.dropApplicationsWithContext}">
+                                <tr>
+                                    <td><a href="#{fxSystemBean.serverBase}/#{drop.contextRoot}" target="#{drop.name}">#{drop.displayName}</a></td>
+                                </tr>
                             </c:forEach>
                         </table>
                     </c:if>

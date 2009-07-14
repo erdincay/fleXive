@@ -29,51 +29,59 @@ rendered - [optional] flag to supress rendering of the whole component
 iconDisabled - [optional] flag to disable the component
 
 <ui:composition>
+    <c:if test="#{empty id}">
+        [id of ajaxCommandIcon not set]
+    </c:if>
+    <c:if test="#{not empty id}">
+        <ui:fragment id="#{id}_container" rendered="#{rendered!=false}">
+            <c:if test="#{!empty titleKey}">
+                <c:set var="title" value="#{fxMessageBean[titleKey]}"/>
+            </c:if>
 
-    <ui:fragment rendered="#{rendered!=false}">
-        <c:if test="#{!empty titleKey}">
-            <c:set var="title" value="#{fxMessageBean[titleKey]}"/>
-        </c:if>
+            <c:if test="#{empty title and empty titleKey and not empty labelKey}">
+                <c:set var="titleKey" value="#{labelKey}.title"/>
+            </c:if>
 
-        <c:if test="#{empty title and empty titleKey and not empty labelKey}">
-            <c:set var="titleKey" value="#{labelKey}.title"/>
-        </c:if>
+            <c:if test="#{!empty titleKey and fxSystemBean.messageExists[titleKey]}">
+                <c:set var="title" value="#{fxMessageBean[titleKey]}"/>
+            </c:if>
 
-        <c:if test="#{!empty titleKey and fxSystemBean.messageExists[titleKey]}">
-            <c:set var="title" value="#{fxMessageBean[titleKey]}"/>
-        </c:if>
+            <c:if test="#{empty title}">
+                <c:set var="title" value="#{label}"/>
+            </c:if>
 
-        <c:if test="#{empty title}">
-            <c:set var="title" value="#{label}"/>
-        </c:if>
+            <c:if test="#{empty iconUrl}">
+                <c:set var="iconUrl" value="/pub/images/commandButton/#{icon}.png"/>
+            </c:if>
 
-        <c:if test="#{empty iconUrl}">
-            <c:set var="iconUrl" value="/pub/images/commandButton/#{icon}.png"/>
-        </c:if>
+            <c:if test="#{immediate == null}">
+                <c:set var="immediate" value="false"/>
+            </c:if>
 
-        <c:if test="#{immediate == null}">
-            <c:set var="immediate" value="false"/>
-        </c:if>
+            <c:if test="#{not empty icon}">
+                <c:set var="iconUrl" value="#{fxSystemBean.contextPath}/pub/images/commandButton/#{icon}.png"/>
+            </c:if>
 
-        <c:if test="#{not empty icon}">
-            <c:set var="iconUrl" value="#{fxSystemBean.contextPath}/pub/images/commandButton/#{icon}.png"/>
-        </c:if>
+            <c:if test="#{empty eventsQueue}">
+                <c:set var="eventsQueue" value="defaultQueue"/>
+            </c:if>
 
-        <a4j:commandLink id="#{id}" reRender="#{reRender}" eventsQueue="#{eventsQueue}" onclick="#{onclick}"
-                         action="#{bean[action]}" immediate="#{immediate}"
-                         disabled="#{iconDisabled}">
-            <ui:insert/>
+            <a4j:commandLink id="#{id}" reRender="#{reRender}" eventsQueue="#{eventsQueue}" onclick="#{onclick}"
+                             action="#{bean[action]}" immediate="#{immediate}"
+                             disabled="#{iconDisabled}">
+                <ui:insert/>
 
-            <ui:fragment rendered="#{!iconDisabled or empty iconDisabled or iconDisabled == null}">
-                <img alt="#{id}_icon" src="#{iconUrl}" class="commandIcon" title="#{title}"/>
-            </ui:fragment>
-            <ui:fragment rendered="#{iconDisabled}">
-                <img alt="#{id}_icon" src="#{iconUrl}" class="commandIconDisabled" title="#{title}"/>
-            </ui:fragment>
-        </a4j:commandLink>
+                <ui:fragment rendered="#{!iconDisabled or empty iconDisabled or iconDisabled == null}">
+                    <img alt="#{id}_icon" src="#{iconUrl}" class="commandIcon" title="#{title}"/>
+                </ui:fragment>
+                <ui:fragment rendered="#{iconDisabled}">
+                    <img alt="#{id}_icon" src="#{iconUrl}" class="commandIconDisabled" title="#{title}"/>
+                </ui:fragment>
+            </a4j:commandLink>
 
 
-    </ui:fragment>
+        </ui:fragment>
+    </c:if>
 
 </ui:composition>
 

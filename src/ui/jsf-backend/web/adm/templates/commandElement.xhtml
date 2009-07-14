@@ -38,7 +38,7 @@ buttonDisabled - [optional] renders the commandElement, but disables its functio
         [id of command element not set]
     </c:if>
     <c:if test="#{not empty id}">
-        <ui:fragment rendered="#{rendered != false}">
+        <ui:fragment id="#{id}_container" rendered="#{rendered != false}">
             <c:if test="#{!empty labelKey}">
                 <c:set var="label" value="#{fxMessageBean[labelKey]}"/>
             </c:if>

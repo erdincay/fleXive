@@ -837,7 +837,9 @@ public class BeContentEditorBean implements ActionBean, Serializable {
      * A custom value formatter for content references. Renders content references as
      * links, that trigger the referenced content to be opened in content editor.
      */
-    private static class ReferenceValueFormatter implements FxValueFormatter {
+    private static class ReferenceValueFormatter implements FxValueFormatter, Serializable {
+        private static final long serialVersionUID = 2283199607456062352L;
+
         public String format(FxValue container, Object value, FxLanguage outputLanguage) {
             if (container instanceof FxReference && value instanceof ReferencedContent) {
                 return "<a href=\"adm/content/contentEditor.jsf?action=editInstance&readOnly=true&id="

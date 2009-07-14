@@ -36,7 +36,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <c:forEach var="list" items="#{selectListBean.selectLists}">
+                        <ui:repeat var="list" value="#{selectListBean.selectLists}">
                             <tr value="#{list.id}">
                                 <td  align="left">#{list.name}</td>
                                 <td  align="left"><fx:fxValueInput readOnly="true" value="#{list.label}"/></td>
@@ -58,7 +58,7 @@
                                     </ui:fragment>
                                 </td>
                             </tr>
-                        </c:forEach>
+                        </ui:repeat>
                     </tbody>
                 </table>
             </adm:sortableTable>

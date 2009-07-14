@@ -13,7 +13,7 @@
 
     <ui:define name="body">
 
-        <t:saveState value="#{userGroupBean.id}"/>
+        <t:saveState id="ssId" value="#{userGroupBean.id}"/>
         
         <h:form id="frm">
             <adm:tab label="#{fxMessageBean['UserGroup.tabtitle.edit,#{userGroupBean.name}']}" active="true" id="createGroupTable"/>

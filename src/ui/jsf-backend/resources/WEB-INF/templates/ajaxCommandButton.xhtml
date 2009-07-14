@@ -33,112 +33,116 @@ Parameters:
  lockscreen - [optional] if true, the screen will be locked when clicking the button
 
 <ui:composition>
-    <ui:fragment rendered="#{rendered!=false}">
-        <c:if test="#{!empty labelKey}">
-            <c:set var="label" value="#{fxMessageBean[labelKey]}"/>
-        </c:if>
-        <c:if test="${empty label}">
-            <c:set var="label" value="CommandButton.err.missingLabel" />
-        </c:if>
+    <c:if test="#{empty id}">
+        [id of ajaxCommandButton not set]
+    </c:if>
+    <c:if test="#{not empty id}">
+        <ui:fragment id="#{id}_container" rendered="#{rendered!=false}">
+            <c:if test="#{!empty labelKey}">
+                <c:set var="label" value="#{fxMessageBean[labelKey]}"/>
+            </c:if>
+            <c:if test="${empty label}">
+                <c:set var="label" value="CommandButton.err.missingLabel" />
+            </c:if>
 
-        <c:if test="#{!empty titleKey}">
-            <c:set var="title" value="#{fxMessageBean[titleKey]}"/>
-        </c:if>
+            <c:if test="#{!empty titleKey}">
+                <c:set var="title" value="#{fxMessageBean[titleKey]}"/>
+            </c:if>
 
-        <c:if test="#{empty title and empty titleKey and not empty labelKey}">
-            <c:set var="titleKey" value="#{labelKey}.title"/>
-        </c:if>
+            <c:if test="#{empty title and empty titleKey and not empty labelKey}">
+                <c:set var="titleKey" value="#{labelKey}.title"/>
+            </c:if>
 
-        <c:if test="#{!empty titleKey and fxSystemBean.messageExists[titleKey]}">
-            <c:set var="title" value="#{fxMessageBean[titleKey]}"/>
-        </c:if>
+            <c:if test="#{!empty titleKey and fxSystemBean.messageExists[titleKey]}">
+                <c:set var="title" value="#{fxMessageBean[titleKey]}"/>
+            </c:if>
 
-        <c:if test="#{empty title}">
-            <c:set var="title" value="#{label}"/>
-        </c:if>
+            <c:if test="#{empty title}">
+                <c:set var="title" value="#{label}"/>
+            </c:if>
 
-        <c:if test="#{empty iconUrl}">
-            <c:set var="iconUrl" value="/pub/images/commandButton/#{icon}.png"/>
-        </c:if>
+            <c:if test="#{empty iconUrl}">
+                <c:set var="iconUrl" value="/pub/images/commandButton/#{icon}.png"/>
+            </c:if>
 
-        <c:if test="#{immediate == null}">
-            <c:set var="immediate" value="false"/>
-        </c:if>
+            <c:if test="#{immediate == null}">
+                <c:set var="immediate" value="false"/>
+            </c:if>
 
-        <c:if test="#{not empty icon}">
-            <c:set var="iconUrl" value="#{fxSystemBean.contextPath}/pub/images/commandButton/#{icon}.png"/>
-        </c:if>
+            <c:if test="#{not empty icon}">
+                <c:set var="iconUrl" value="#{fxSystemBean.contextPath}/pub/images/commandButton/#{icon}.png"/>
+            </c:if>
 
-        <c:set var="commandButtonStyle" value="commandButton"/>
-        <c:set var="commandButtonIconStyle" value="commandButtonIcon"/>
-        <c:set var="commandButtonLabelStyle" value="commandButtonLabel"/>
-        <c:set var="commandButtonRightStyle" value="commandButtonRight"/>
+            <c:set var="commandButtonStyle" value="commandButton"/>
+            <c:set var="commandButtonIconStyle" value="commandButtonIcon"/>
+            <c:set var="commandButtonLabelStyle" value="commandButtonLabel"/>
+            <c:set var="commandButtonRightStyle" value="commandButtonRight"/>
 
-        <c:if test="#{buttonDisabled}">
-            <c:set var="commandButtonIconStyle" value="commandButtonIconDisabled"/>
-            <c:set var="commandButtonLabelStyle" value="commandButtonLabelDisabled"/>
-            <c:set var="commandButtonRightStyle" value="commandButtonRightDisabled"/>
-            <div id="commandButton_#{id}" class="#{commandButtonStyle}" title="#{title}">
-                <div style="display:table-row; height:22px; float:left">
-                    <div class="#{commandButtonIconStyle}">
-                        <img alt="#{id}_icon" id="#{id}_icon" src="#{iconUrl}" border="0"/>
-                    </div>
-                    <div class="#{commandButtonLabelStyle}">
-                        <div class="commandButtonLabelText">
-                            #{label}
+            <c:if test="#{buttonDisabled}">
+                <c:set var="commandButtonIconStyle" value="commandButtonIconDisabled"/>
+                <c:set var="commandButtonLabelStyle" value="commandButtonLabelDisabled"/>
+                <c:set var="commandButtonRightStyle" value="commandButtonRightDisabled"/>
+                <div id="commandButton_#{id}" class="#{commandButtonStyle}" title="#{title}">
+                    <div style="display:table-row; height:22px; float:left">
+                        <div class="#{commandButtonIconStyle}">
+                            <img alt="#{id}_icon" id="#{id}_icon" src="#{iconUrl}" border="0"/>
+                        </div>
+                        <div class="#{commandButtonLabelStyle}">
+                            <div class="commandButtonLabelText">
+                                #{label}
+                            </div>
+                        </div>
+                        <div class="#{commandButtonRightStyle}">
                         </div>
                     </div>
-                    <div class="#{commandButtonRightStyle}">
-                    </div>
                 </div>
-            </div>
-        </c:if>
-
-        <c:if test="#{buttonDisabled == null or !buttonDisabled}">
-
-            <c:if test="#{empty onclick}">
-                <c:set var="onclick" value="null"/>
             </c:if>
 
-            <c:if test="#{empty lockscreen or lockscreen == null}">
-                <c:set var="lockscreen" value="false"/>
-            </c:if>
+            <c:if test="#{buttonDisabled == null or !buttonDisabled}">
 
-            <c:if test="#{lockscreen}">
-                <c:if test="#{!empty oncomplete or oncomplete != null}">
-                    <c:set var="oncomplete" value="#{oncomplete};parent.unlockScreen();"/>
+                <c:if test="#{empty onclick}">
+                    <c:set var="onclick" value="null"/>
                 </c:if>
-                <c:if test="#{empty oncomplete or oncomplete == null}">
-                    <c:set var="oncomplete" value="parent.unlockScreen();"/>
+
+                <c:if test="#{empty lockscreen or lockscreen == null}">
+                    <c:set var="lockscreen" value="false"/>
                 </c:if>
-            </c:if>
 
-            <div id="commandElement_#{id}" style="display:none">
-                <a4j:commandLink id="#{id}_submissionlink" eventsQueue="#{eventsQueue}"
-                                 reRender="#{reRender}" action="#{bean[action]}"
-                                 immediate="#{immediate}" oncomplete="#{oncomplete}">
-                    <ui:insert/>
-                 </a4j:commandLink>
-            </div>
+                <c:if test="#{lockscreen}">
+                    <c:if test="#{!empty oncomplete or oncomplete != null}">
+                        <c:set var="oncomplete" value="#{oncomplete};parent.unlockScreen();"/>
+                    </c:if>
+                    <c:if test="#{empty oncomplete or oncomplete == null}">
+                        <c:set var="oncomplete" value="parent.unlockScreen();"/>
+                    </c:if>
+                </c:if>
 
-            <div id="commandButton_#{id}" onclick="getOnClick('commandElement_#{id}', &quot;#{onclick}&quot;, #{lockscreen});" class="#{commandButtonStyle}"
-                 title="#{title}">
-                <div style="display:table-row; height:22px; float:left">
-                    <div class="#{commandButtonIconStyle}">
-                        <img alt="#{id}_icon" id="#{id}_icon" src="#{iconUrl}" border="0"/>
-                    </div>
-                    <div class="#{commandButtonLabelStyle}">
-                        <div class="commandButtonLabelText">
-                            #{label}
+                <div id="commandElement_#{id}" style="display:none">
+                    <a4j:commandLink id="#{id}_submissionlink" eventsQueue="#{eventsQueue}"
+                                     reRender="#{reRender}" action="#{bean[action]}"
+                                     immediate="#{immediate}" oncomplete="#{oncomplete}">
+                        <ui:insert/>
+                     </a4j:commandLink>
+                </div>
+
+                <div id="commandButton_#{id}" onclick="getOnClick('commandElement_#{id}', &quot;#{onclick}&quot;, #{lockscreen});" class="#{commandButtonStyle}"
+                     title="#{title}">
+                    <div style="display:table-row; height:22px; float:left">
+                        <div class="#{commandButtonIconStyle}">
+                            <img alt="#{id}_icon" id="#{id}_icon" src="#{iconUrl}" border="0"/>
+                        </div>
+                        <div class="#{commandButtonLabelStyle}">
+                            <div class="commandButtonLabelText">
+                                #{label}
+                            </div>
+                        </div>
+                        <div class="#{commandButtonRightStyle}">
                         </div>
                     </div>
-                    <div class="#{commandButtonRightStyle}">
-                    </div>
                 </div>
-            </div>
-        </c:if>
-    </ui:fragment>
-
+            </c:if>
+        </ui:fragment>
+    </c:if>
 </ui:composition>
 
 </html>

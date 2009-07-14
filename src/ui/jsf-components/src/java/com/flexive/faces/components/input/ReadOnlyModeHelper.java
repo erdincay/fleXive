@@ -105,16 +105,18 @@ class ReadOnlyModeHelper extends RenderHelper {
         }
 
         final FxLanguage outputLanguage = FxContext.getUserTicket().getLanguage();
+        final String langInputId = inputId + (language != null ? "_" + language.getId() : "");
         if (component.getValueFormatter() != null &&
                 component.getValueFormatter().format(value, value.getBestTranslation(language), outputLanguage) !=null) {
             // use custom formatter if retuned value != null, otherwise use default
-            addOutputComponent(component.getValueFormatter().format(value, value.getBestTranslation(language), outputLanguage), language);
+            addOutputComponent(component.getValueFormatter().format(value, value.getBestTranslation(language), outputLanguage), language, langInputId);
         } else if (value instanceof FxBinary && !value.isEmpty()) {
             // render preview image
-            renderPreviewImage(language);
+            renderPreviewImage(language, langInputId);
         } else if (value instanceof FxReference && !value.isTranslationEmpty(language)) {
             // render reference preview
             final HtmlGraphicImage image = (HtmlGraphicImage) FxJsfUtils.addChildComponent(parent, HtmlGraphicImage.COMPONENT_TYPE);
+            image.setId(langInputId + "_image");
             image.setUrl(ThumbnailServlet.getLink(
                     new FxMediaSelector(((FxReference) value).getDefaultTranslation()).
                             setSize(BinaryDescriptor.PreviewSizes.PREVIEW1).
@@ -122,20 +124,21 @@ class ReadOnlyModeHelper extends RenderHelper {
                             setScaleWidth(16)
             ));
             // render reference label
-            addOutputComponent(FxValueRendererFactory.getInstance(outputLanguage).format(value, language), language);
+            addOutputComponent(FxValueRendererFactory.getInstance(outputLanguage).format(value, language), language, langInputId);
         } else if (component.isFilter() && !(useHTMLEditor || value instanceof FxHTML)) {
             // escape HTML code and generate <br/> tags for newlines
-            addOutputComponent(FxFormatUtils.escapeForJavaScript(FxValueRendererFactory.getInstance(outputLanguage).format(value, language), true, true), language);
+            addOutputComponent(FxFormatUtils.escapeForJavaScript(FxValueRendererFactory.getInstance(outputLanguage).format(value, language), true, true), language, langInputId);
         } else {
             // write the plain value
-            addOutputComponent(FxValueRendererFactory.getInstance(outputLanguage).format(value, language), language);
+            addOutputComponent(FxValueRendererFactory.getInstance(outputLanguage).format(value, language), language, langInputId);
         }
     }
 
-    private void addOutputComponent(String value, FxLanguage language) {
+    private void addOutputComponent(String value, FxLanguage language, String inputId) {
         UIComponent parent = component;
         if (component.isReadOnlyShowTranslations() && component.getUIValue().isMultiLanguage()) {
             final ContainerWriter container = new ContainerWriter();
+            container.setId(stripForm(inputId) + "_container");
             container.setDisplayLanguage(true);
             container.setLanguage(language);
             container.setInputClientId(clientId);
@@ -144,19 +147,20 @@ class ReadOnlyModeHelper extends RenderHelper {
             parent = container;
         }
         final HtmlOutputText output = (HtmlOutputText) FxJsfUtils.addChildComponent(parent, HtmlOutputText.COMPONENT_TYPE);
+        output.setId(stripForm(inputId));
         if (this.value instanceof FxSelectOne)
             output.setStyle("color:" + ((FxSelectOne) this.value).getDefaultTranslation().getColor());
         output.setEscape(false);
         output.setValue(value);
     }
 
-    private void renderPreviewImage(FxLanguage language) {
+    private void renderPreviewImage(FxLanguage language, String inputId) {
         if (value.isEmpty() || (language != null && !value.translationExists(language.getId()))) {
             return;
         }
         final BinaryDescriptor descriptor = ((FxBinary) value).getTranslation(language);
         if (component.isDisableLytebox()) {
-            addImageComponent(component, descriptor, language);
+            addImageComponent(component, descriptor, language, inputId);
             return;
         }
         final HtmlOutputLink link = (HtmlOutputLink) FxJsfUtils.addChildComponent(component, HtmlOutputLink.COMPONENT_TYPE);
@@ -173,9 +177,9 @@ class ReadOnlyModeHelper extends RenderHelper {
                         value.getXPath(), descriptor.getCreationTime(), language);
         link.setValue(urlOriginal);
         link.setRel("lytebox[ce]");
-        addImageComponent(link, descriptor, language);
+        addImageComponent(link, descriptor, language, inputId);
         if (component.isReadOnlyShowTranslations()) //TODO: might use another attribute to determine if this should be rendered
-            addImageDescriptionComponent(component, language);
+            addImageDescriptionComponent(component, language, inputId + "_desc");
 
         // render lytebox include
         final WebletIncludeWriter includeWriter = new WebletIncludeWriter();
@@ -186,8 +190,9 @@ class ReadOnlyModeHelper extends RenderHelper {
         component.getChildren().add(includeWriter);
     }
 
-    private void addImageComponent(UIComponent parent, BinaryDescriptor descriptor, FxLanguage language) {
+    private void addImageComponent(UIComponent parent, BinaryDescriptor descriptor, FxLanguage language, String inputId) {
         final HtmlGraphicImage image = (HtmlGraphicImage) FxJsfUtils.addChildComponent(parent, HtmlGraphicImage.COMPONENT_TYPE);
+        image.setId(stripForm(inputId));
         FxPK pk;
         try {
             pk = XPathElement.getPK(value.getXPath());

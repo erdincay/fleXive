@@ -26,7 +26,7 @@
             <script type="text/javascript" src="#{adm:versionedUrl('pub/js/queryEditor.js')}"/>
             <script type="text/javascript" src="#{adm:versionedUrl('adm/js/adminQueryEditor.js')}"/>
 
-            <a4j:region>
+            <a4j:region id="queryEditorRegion">
 	            <h:inputHidden id="addAssignmentId" value="#{fxQueryEditorBean.addAssignmentId}"/>
 	            <h:inputHidden id="addAssignmentNodeId" value="#{fxQueryEditorBean.addAssignmentNodeId}"/>
                 <h:inputHidden id="nodeSelection" value="#{fxQueryEditorBean.nodeSelection}"/>
@@ -44,7 +44,7 @@
 
                     <ui:define name="tableFooter">
 
-                        <rich:simpleTogglePanel label="#{fxMessageBean['QueryEditor.label.legend.parameters']}" switchType="client" opened="false"
+                        <rich:simpleTogglePanel id="queryOptionsPanel" label="#{fxMessageBean['QueryEditor.label.legend.parameters']}" switchType="client" opened="false"
                                                 styleClass="queryRoot" style="width: 596px; margin:-1px 0 0 0">
                             <!-- Cache options -->
             <!--                <fx:formRow labelKey="QueryEditor.label.cacheMode" id="cacheMode">
@@ -74,8 +74,8 @@
                                 </fx:formRow>
                                 <fx:formRow labelKey="QueryEditor.label.briefcase.shared" id="briefcaseACL">
                                     <h:selectOneListbox id="briefcaseACL" value="#{fxSearchResultBean.briefcaseAclId}" size="1" styleClass="fxValueSelectInput">
-                                        <f:selectItem itemValue="-1" itemLabel=""/>
-                                        <f:selectItems value="#{fxSelectBean.briefcaseACLs}" />
+                                        <f:selectItem id="emptyBriefcaseAcl" itemValue="-1" itemLabel=""/>
+                                        <f:selectItems id="briefcaseAclItems" value="#{fxSelectBean.briefcaseACLs}" />
                                     </h:selectOneListbox>
                                 </fx:formRow>
                             </h:panelGroup>

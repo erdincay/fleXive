@@ -25,14 +25,14 @@
     <ui:define name="body">
         <h:form id="frm">
             <a4j:region>
-                <t:saveState value="#{scriptBean.inputFieldEnabled}"/>
-                <t:saveState value="#{scriptBean.verifyButtonEnabled}"/>
-                <t:saveState value="#{scriptBean.executeButtonEnabled}"/>
-                <t:saveState value="#{scriptBean.userLang}"/>
-                <t:saveState value="#{scriptBean.language}"/>
-                <t:saveState value="#{scriptBean.sinfo.event}"/>
-                <t:saveState value="#{scriptBean.sinfo.description}"/>
-                <t:saveState value="#{scriptBean.sinfo.code}"/>
+                <t:saveState id="ssInputFieldEnabled" value="#{scriptBean.inputFieldEnabled}"/>
+                <t:saveState id="ssVerifyButtonEnabled" value="#{scriptBean.verifyButtonEnabled}"/>
+                <t:saveState id="ssExecuteButtonEnabled" value="#{scriptBean.executeButtonEnabled}"/>
+                <t:saveState id="ssUserLang" value="#{scriptBean.userLang}"/>
+                <t:saveState id="ssLanguage" value="#{scriptBean.language}"/>
+                <t:saveState id="ssEvent" value="#{scriptBean.sinfo.event}"/>
+                <t:saveState id="ssDescription" value="#{scriptBean.sinfo.description}"/>
+                <t:saveState id="ssCode" value="#{scriptBean.sinfo.code}"/>
 
                 <adm:tab label="#{fxMessageBean['Script.tabtitle.create']}" active="true" id="tab1"/>
                 <fx:formRow labelKey="Script.field.name" id="name" newLine="false" relativeWidth="100">

@@ -360,7 +360,8 @@ public class SystemBean implements Serializable {
     }
 
     /**
-     * Get a list of all installed and deployed drops that have a web application context.
+     * Get a list of all installed and deployed drops that have a web application context, excluding
+     * the flexive backend application.
      *
      * @return  a list of all installed and deployed drops that have a web application context.
      * @since 3.1
@@ -370,7 +371,10 @@ public class SystemBean implements Serializable {
         final Iterator<FxDropApplication> iter = apps.iterator();
         while (iter.hasNext()) {
             final FxDropApplication application = iter.next();
-            if (!application.isWebContextAvailable()) {
+            if (!application.isWebContextAvailable()
+                    // drop flexive backend application form list
+                    || "flexive".equals(application.getName())
+                    || "flexive-backend-war".equals(application.getName())) {
                 iter.remove();
             }
         }
