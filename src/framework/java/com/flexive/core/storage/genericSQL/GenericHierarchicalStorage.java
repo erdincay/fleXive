@@ -41,8 +41,8 @@ import com.flexive.core.flatstorage.FxFlatStorageLoadColumn;
 import com.flexive.core.flatstorage.FxFlatStorageLoadContainer;
 import com.flexive.core.flatstorage.FxFlatStorageManager;
 import com.flexive.core.storage.ContentStorage;
-import com.flexive.core.storage.StorageManager;
 import com.flexive.core.storage.FulltextIndexer;
+import com.flexive.core.storage.StorageManager;
 import com.flexive.core.storage.binary.BinaryInputStream;
 import com.flexive.core.storage.binary.BinaryStorage;
 import com.flexive.extractor.htmlExtractor.HtmlExtractor;
@@ -420,12 +420,13 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
 
     /**
      * Get a new fulltext indexer instance
-     * @param pk primary key
+     *
+     * @param pk  primary key
      * @param con an open and valid connection
      * @return a new fulltext indexer instance
      */
     protected FulltextIndexer getFulltextIndexer(FxPK pk, Connection con) {
-        FulltextIndexer indexer =  new GenericSQLFulltextIndexer();
+        FulltextIndexer indexer = new GenericSQLFulltextIndexer();
         indexer.init(pk, con);
         return indexer;
     }
@@ -836,8 +837,13 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     protected void insertPropertyData(FxProperty prop, List<FxData> allData, Connection con,
                                       PreparedStatement ps, FulltextIndexer ft, FxPK pk,
                                       FxPropertyData data, boolean isMaxVer, boolean isLiveVer) throws SQLException, FxDbException, FxUpdateException, FxNoAccessException {
-        if (data == null || data.isEmpty() || data.getPropertyAssignment().isFlatStorageEntry())
+        if (data == null || data.isEmpty())
             return;
+        if (data.getPropertyAssignment().isFlatStorageEntry()) {
+            if (ft != null)
+                ft.index(data);
+            return;
+        }
         clearPreparedStatement(ps, INSERT_VALUE_POS, INSERT_END_POS);
         ps.setLong(17, 0); //FSELECT has to be set to 0 and not null
 
