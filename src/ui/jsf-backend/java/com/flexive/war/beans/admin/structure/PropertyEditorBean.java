@@ -866,12 +866,12 @@ public class PropertyEditorBean implements ActionBean, Serializable {
     }
 
     /**
-     * Is the assignment flattenable?
+     * Is the assignment flattenable and not already flattened?
      *
      * @return flattenable
      */
     public boolean isFlattenable() {
-        return EJBLookup.getAssignmentEngine().isFlattenable(assignment);
+        return !assignment.isFlatStorageEntry() && EJBLookup.getAssignmentEngine().isFlattenable(assignment);
     }
 
     public void flatten() throws FxApplicationException {

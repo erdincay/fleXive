@@ -42,6 +42,7 @@ import com.flexive.core.flatstorage.FxFlatStorageLoadContainer;
 import com.flexive.core.flatstorage.FxFlatStorageManager;
 import com.flexive.core.storage.ContentStorage;
 import com.flexive.core.storage.StorageManager;
+import com.flexive.core.storage.FulltextIndexer;
 import com.flexive.core.storage.binary.BinaryInputStream;
 import com.flexive.core.storage.binary.BinaryStorage;
 import com.flexive.extractor.htmlExtractor.HtmlExtractor;
@@ -141,7 +142,6 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
 
     //                                                                                                       1         2
     protected static final String CONTENT_DATA_REMOVE_VERSION = "DELETE FROM " + TBL_CONTENT_DATA + " WHERE ID=? AND VER=?";
-    protected static final String CONTENT_DATA_FT_REMOVE_VERSION = "DELETE FROM " + TBL_CONTENT_DATA_FT + " WHERE ID=? AND VER=?";
 
     //security info main query
     protected static final String SECURITY_INFO_MAIN = "SELECT DISTINCT c.ACL, t.ACL, s.ACL, t.SECURITY_MODE, t.ID, c.DBIN_ID, c.DBIN_ACL, c.CREATED_BY, c.MANDATOR FROM " +
@@ -176,23 +176,16 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
 
     protected static final String CONTENT_MAIN_REMOVE = "DELETE FROM " + TBL_CONTENT + " WHERE ID=?";
     protected static final String CONTENT_DATA_REMOVE = "DELETE FROM " + TBL_CONTENT_DATA + " WHERE ID=?";
-    protected static final String CONTENT_DATA_FT_REMOVE = "DELETE FROM " + TBL_CONTENT_DATA_FT + " WHERE ID=?";
     protected static final String SQL_WHERE_VER = " AND VER=?";
     protected static final String CONTENT_MAIN_REMOVE_VER = CONTENT_MAIN_REMOVE + SQL_WHERE_VER;
     protected static final String CONTENT_DATA_REMOVE_VER = CONTENT_DATA_REMOVE + SQL_WHERE_VER;
-    protected static final String CONTENT_DATA_FT_REMOVE_VER = CONTENT_DATA_FT_REMOVE + SQL_WHERE_VER;
 
     protected static final String CONTENT_MAIN_REMOVE_TYPE = "DELETE FROM " + TBL_CONTENT + " WHERE TDEF=?";
     protected static final String CONTENT_DATA_REMOVE_TYPE = "DELETE FROM " + TBL_CONTENT_DATA + " WHERE ID IN (SELECT DISTINCT ID FROM " + TBL_CONTENT + " WHERE TDEF=?)";
-    protected static final String CONTENT_DATA_FT_REMOVE_TYPE = "DELETE FROM " + TBL_CONTENT_DATA_FT + " WHERE ID IN (SELECT DISTINCT ID FROM " + TBL_CONTENT + " WHERE TDEF=?)";
 
     protected static final String CONTENT_TYPE_PK_RETRIEVE_VERSIONS = "SELECT DISTINCT ID,VER FROM " + TBL_CONTENT + " WHERE TDEF=? ORDER BY ID,VER";
     protected static final String CONTENT_TYPE_PK_RETRIEVE_IDS = "SELECT DISTINCT ID FROM " + TBL_CONTENT + " WHERE TDEF=? ORDER BY ID";
     protected static final String CONTENT_GET_TYPE = "SELECT DISTINCT TDEF FROM " + TBL_CONTENT + " WHERE ID=?";
-
-    protected static final String CONTENT_FULLTEXT_INSERT = "INSERT INTO " + TBL_CONTENT_DATA_FT + "(ID,VER,LANG,ASSIGN,XMULT,VALUE) VALUES (?,?,?,?,?,?)";
-    //                                                                                                    1          2         3          4            5           6
-    protected static final String CONTENT_FULLTEXT_UPDATE = "UPDATE " + TBL_CONTENT_DATA_FT + " SET VALUE=? WHERE ID=? AND VER=? AND LANG=? AND ASSIGN=? AND XMULT=?";
 
     //prepared statement positions
     protected final static int INSERT_LANG_POS = 4;
@@ -205,11 +198,6 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     protected final static int UPDATE_ID_POS = 17;
     protected final static int UPDATE_POS_POS = 1;
     protected final static int UPDATE_MLDEF_POS = 2;
-
-    protected final static int FT_LANG_POS_INSERT = 3;
-    protected final static int FT_VALUE_POS_INSERT = 6;
-    protected final static int FT_LANG_POS_UPDATE = 4;
-    protected final static int FT_VALUE_POS_UPDATE = 1;
 
     // propertyId -> column names
     protected static final HashMap<Long, String[]> mainColumnHash;
@@ -431,6 +419,18 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     }
 
     /**
+     * Get a new fulltext indexer instance
+     * @param pk primary key
+     * @param con an open and valid connection
+     * @return a new fulltext indexer instance
+     */
+    protected FulltextIndexer getFulltextIndexer(FxPK pk, Connection con) {
+        FulltextIndexer indexer =  new GenericSQLFulltextIndexer();
+        indexer.init(pk, con);
+        return indexer;
+    }
+
+    /**
      * {@inheritDoc}
      */
     public FxPK contentCreate(Connection con, FxEnvironment env, StringBuilder sql, long newId, FxContent content) throws FxCreateException, FxInvalidParameterException {
@@ -439,15 +439,14 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         content.checkValidity();
         FxPK pk = createMainEntry(con, newId, 1, content);
         PreparedStatement ps;
-        PreparedStatement ps_ft = null;
+        FulltextIndexer ft = getFulltextIndexer(pk, con);
         try {
             if (sql == null)
                 sql = new StringBuilder(2000);
             ps = con.prepareStatement(CONTENT_DATA_INSERT);
-            ps_ft = con.prepareStatement(CONTENT_FULLTEXT_INSERT);
-            createDetailEntries(con, ps, ps_ft, env, sql, pk, content.isMaxVersion(), content.isLiveVersion(), content.getData("/"));
+            createDetailEntries(con, ps, ft, env, sql, pk, content.isMaxVersion(), content.isLiveVersion(), content.getData("/"));
             ps.executeBatch();
-            ps_ft.executeBatch();
+            ft.commitChanges();
             if (CacheAdmin.getEnvironment().getType(content.getTypeId()).isContainsFlatStorageAssignments()) {
                 FxFlatStorage flatStorage = FxFlatStorageManager.getInstance();
                 flatStorage.setPropertyData(con, pk, content.getTypeId(), content.getStepId(),
@@ -469,13 +468,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         } catch (SQLException e) {
             throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
         } finally {
-            if (ps_ft != null)
-                try {
-                    ps_ft.close();
-                } catch (SQLException e) {
-                    //noinspection ThrowFromFinallyBlock
-                    throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
-                }
+            ft.cleanup();
         }
         return pk;
     }
@@ -550,18 +543,17 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
 
         FxPK pk;
         PreparedStatement ps;
-        PreparedStatement ps_ft = null;
+        FulltextIndexer ft = null;
         try {
             int new_version = getContentVersionInfo(con, content.getPk().getId()).getMaxVersion() + 1;
             updateStepDependencies(con, content.getPk().getId(), new_version, env, env.getType(content.getTypeId()), content.getStepId());
             pk = createMainEntry(con, content.getPk().getId(), new_version, content);
+            ft = getFulltextIndexer(pk, con);
             if (sql == null)
                 sql = new StringBuilder(2000);
             ps = con.prepareStatement(CONTENT_DATA_INSERT);
-            ps_ft = con.prepareStatement(CONTENT_FULLTEXT_INSERT);
-            createDetailEntries(con, ps, ps_ft, env, sql, pk, content.isMaxVersion(), content.isLiveVersion(), content.getData("/"));
+            createDetailEntries(con, ps, ft, env, sql, pk, content.isMaxVersion(), content.isLiveVersion(), content.getData("/"));
             ps.executeBatch();
-            ps_ft.executeBatch();
             if (type.isContainsFlatStorageAssignments()) {
                 FxFlatStorage flatStorage = FxFlatStorageManager.getInstance();
                 flatStorage.setPropertyData(con, pk, content.getTypeId(), content.getStepId(),
@@ -569,6 +561,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             }
             checkUniqueConstraints(con, env, sql, pk, content.getTypeId());
             binaryStorage.updateContentBinaryEntry(con, pk, content.getBinaryPreviewId(), content.getBinaryPreviewACL());
+            ft.commitChanges();
         } catch (FxApplicationException e) {
             if (e instanceof FxCreateException)
                 throw (FxCreateException) e;
@@ -578,13 +571,8 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         } catch (SQLException e) {
             throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
         } finally {
-            if (ps_ft != null)
-                try {
-                    ps_ft.close();
-                } catch (SQLException e) {
-                    //noinspection ThrowFromFinallyBlock
-                    throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
-                }
+            if (ft != null)
+                ft.cleanup();
         }
 
         try {
@@ -776,7 +764,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      *
      * @param con         an open and valid connection
      * @param ps          batch prepared statement for detail inserts
-     * @param ps_ft       batch prepared statement for fulltext inserts
+     * @param ft          fulltext indexer
      * @param env         FxEnvironment
      * @param sql         an optional StringBuffer
      * @param pk          primary key of the content
@@ -787,7 +775,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      * @throws FxDbException       on errors
      * @throws FxCreateException   on errors
      */
-    protected void createDetailEntries(Connection con, PreparedStatement ps, PreparedStatement ps_ft, FxEnvironment env,
+    protected void createDetailEntries(Connection con, PreparedStatement ps, FulltextIndexer ft, FxEnvironment env,
                                        StringBuilder sql, FxPK pk,
                                        boolean maxVersion, boolean liveVersion, List<FxData> data)
             throws FxNotFoundException, FxDbException, FxCreateException {
@@ -798,10 +786,10 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                     FxPropertyData pdata = ((FxPropertyData) curr);
                     prop = pdata.getPropertyAssignment().getProperty();
                     if (!prop.isSystemInternal())
-                        insertPropertyData(prop, data, con, ps, ps_ft, pk, pdata, maxVersion, liveVersion);
+                        insertPropertyData(prop, data, con, ps, ft, pk, pdata, maxVersion, liveVersion);
                 } else {
                     insertGroupData(con, sql, pk, ((FxGroupData) curr), maxVersion, liveVersion);
-                    createDetailEntries(con, ps, ps_ft, env, sql, pk, maxVersion, liveVersion, ((FxGroupData) curr).getChildren());
+                    createDetailEntries(con, ps, ft, env, sql, pk, maxVersion, liveVersion, ((FxGroupData) curr).getChildren());
                 }
             }
         } catch (SQLException e) {
@@ -835,7 +823,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      * @param allData   List of all data belonging to this property (for cascaded updates like binaries to avoid duplicates)
      * @param con       an open and valid connection
      * @param ps        batch prepared statement for detail inserts
-     * @param ps_ft     batch prepared statement for fulltext inserts
+     * @param ft        fulltext indexer
      * @param pk        primary key of the content
      * @param data      the value
      * @param isMaxVer  is this content in the max. version?
@@ -846,7 +834,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      * @throws SQLException        on SQL errors
      */
     protected void insertPropertyData(FxProperty prop, List<FxData> allData, Connection con,
-                                      PreparedStatement ps, PreparedStatement ps_ft, FxPK pk,
+                                      PreparedStatement ps, FulltextIndexer ft, FxPK pk,
                                       FxPropertyData data, boolean isMaxVer, boolean isLiveVer) throws SQLException, FxDbException, FxUpdateException, FxNoAccessException {
         if (data == null || data.isEmpty() || data.getPropertyAssignment().isFlatStorageEntry())
             return;
@@ -869,16 +857,11 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         ps.setString(15, XPathElement.stripType(data.getParent().getXPathFull()));
         ps.setInt(16, data.getIndices().length);
 
-        ps_ft.setLong(1, pk.getId());
-        ps_ft.setInt(2, pk.getVersion());
         if (!data.getValue().isMultiLanguage()) {
             ps.setBoolean(INSERT_LANG_POS, true);
-            ps_ft.setInt(FT_LANG_POS_INSERT, (int) FxLanguage.DEFAULT_ID);
         } else
             ps.setBoolean(INSERT_ISDEF_LANG_POS, false);
-        ps_ft.setLong(4, data.getAssignmentId());
-        ps_ft.setString(5, xmult);
-        setPropertyData(true, prop, allData, con, data, ps, ps_ft, getUppercaseColumnPos(prop, true), true);
+        setPropertyData(true, prop, allData, con, data, ps, ft, getUppercaseColumnPos(prop, true), true);
     }
 
     /**
@@ -889,7 +872,6 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      * @param allData all content data unless change is a group change
      * @param con     an open and valid connection
      * @param ps      batch prepared statement for detail updates
-     * @param ps_ft   batch prepared statement for fulltext updates
      * @param pk      primary key
      * @param data    property data unless change is a group change
      * @throws SQLException        on errors
@@ -898,7 +880,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      * @throws FxNoAccessException for FxNoAccess values
      */
     protected void updatePropertyData(FxDelta.FxDeltaChange change, FxProperty prop, List<FxData> allData,
-                                      Connection con, PreparedStatement ps, PreparedStatement ps_ft, FxPK pk, FxPropertyData data)
+                                      Connection con, PreparedStatement ps, FxPK pk, FxPropertyData data)
             throws SQLException, FxDbException, FxUpdateException, FxNoAccessException {
         if ((change.isProperty() && (data == null || data.isEmpty() || data.getPropertyAssignment().isFlatStorageEntry())) ||
                 !(change.isDataChange() || change.isPositionChange()))
@@ -913,7 +895,6 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
 
         ps.setLong(UPDATE_ID_POS, pk.getId());
         ps.setInt(UPDATE_ID_POS + 1, pk.getVersion());
-//            ps.setInt(pos_idx+3, /*lang*/);
         ps.setLong(UPDATE_ID_POS + 3, change.getNewData().getAssignmentId());
         ps.setString(UPDATE_ID_POS + 4, XPathElement.stripType(change.getNewData().getXPathFull()) + (data == null ? "/" : ""));
 
@@ -929,18 +910,11 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             assert data != null;
             for (long lang : data.getValue().getTranslatedLanguages()) {
                 ps.setInt(UPDATE_ID_POS + 2, (int) lang);
-                setPropertyData(false, prop, allData, con, data, ps, ps_ft, getUppercaseColumnPos(prop, false), false);
+                setPropertyData(false, prop, allData, con, data, ps, null, getUppercaseColumnPos(prop, false), false);
             }
             return;
         }
-
-        ps_ft.setLong(2, pk.getId());
-        ps_ft.setInt(3, pk.getVersion());
-        //3==lang
-        assert data != null;
-        ps_ft.setLong(5, data.getAssignmentId());
-        ps_ft.setString(6, StringUtils.join(ArrayUtils.toObject(data.getIndices()), ','));
-        setPropertyData(false, prop, allData, con, data, ps, ps_ft, getUppercaseColumnPos(prop, false), true);
+        setPropertyData(false, prop, allData, con, data, ps, null, getUppercaseColumnPos(prop, false), true);
     }
 
     /**
@@ -952,16 +926,16 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      * @param con             an open and valid connection
      * @param data            current property data
      * @param ps              prepared statement for the data table
-     * @param ps_ft           prepared statement for the fulltext table
+     * @param ft              fulltext indexer
      * @param upperColumnPos  position of the uppercase column (if present, else <code>-1</code>)
-     * @param includeFullText add fulltext table entries? Will be skipped for position only changes
+     * @param includeFullText add fulltext entries? Will be skipped for position only changes
      * @throws SQLException        on errors
      * @throws FxUpdateException   on errors
      * @throws FxDbException       on errors
      * @throws FxNoAccessException for FxNoAccess values
      */
     private void setPropertyData(boolean insert, FxProperty prop, List<FxData> allData,
-                                 Connection con, FxPropertyData data, PreparedStatement ps, PreparedStatement ps_ft,
+                                 Connection con, FxPropertyData data, PreparedStatement ps, FulltextIndexer ft,
                                  int upperColumnPos, boolean includeFullText) throws SQLException, FxUpdateException, FxDbException, FxNoAccessException {
         FxValue value = data.getValue();
         if (value instanceof FxNoAccess)
@@ -990,8 +964,6 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                     ps.setBoolean(pos_isdef_lang, value.isDefaultLanguage(value.getTranslatedLanguages()[i]));
                 if (upperColumnPos != -1)
                     ps.setString(upperColumnPos, translatedValue.toString().toUpperCase());
-                ps_ft.setLong(insert ? FT_LANG_POS_INSERT : FT_LANG_POS_UPDATE, value.getTranslatedLanguages()[i]);
-                ps_ft.setString(insert ? FT_VALUE_POS_INSERT : FT_VALUE_POS_UPDATE, translatedValue.toString());
                 int[] pos = insert ? getColumnPosInsert(prop) : getColumnPosUpdate(prop);
                 switch (prop.getDataType()) {
                     case Double:
@@ -1099,9 +1071,6 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                                 throw new FxDbException(e);
                             }
                         }
-                        String fulltext = FxXMLUtils.getElementData(binary.getMetadata(), "compressed");
-                        if (fulltext != null)
-                            ps_ft.setString(insert ? FT_VALUE_POS_INSERT : FT_VALUE_POS_UPDATE, fulltext);
                         break;
                     case SelectOne:
                         checkDataType(FxSelectOne.class, value, data.getXPathFull());
@@ -1132,8 +1101,6 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                         throw new FxDbException(LOG, "ex.db.notImplemented.store", prop.getDataType().getName());
                 }
                 ps.addBatch();
-                if (prop.isFulltextIndexed() && includeFullText)
-                    ps_ft.addBatch();
             }
         } else {
             switch (prop.getDataType()) {
@@ -1143,6 +1110,8 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             }
 
         }
+        if (ft != null && prop.isFulltextIndexed() && includeFullText)
+            ft.index(data);
     }
 
     /**
@@ -1306,17 +1275,6 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 ps.setString(4, data.getXPathFull());
             ps.executeUpdate();
             String xmult = StringUtils.join(ArrayUtils.toObject(data.getIndices()), ',');
-
-            ps.close();
-            sql.setLength(0);
-            //                                                                       1         2            3           4
-            sql.append("DELETE FROM ").append(TBL_CONTENT_DATA_FT).append(" WHERE ID=? AND VER=? AND ASSIGN=? AND XMULT=?");
-            ps = con.prepareStatement(sql.toString());
-            ps.setLong(1, pk.getId());
-            ps.setInt(2, pk.getVersion());
-            ps.setLong(3, data.getAssignmentId());
-            ps.setString(4, xmult);
-            ps.executeUpdate();
         } finally {
             if (ps != null)
                 ps.close();
@@ -1727,7 +1685,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             if (rs != null && rs.next())
                 return rs.getLong(1);
             throw new FxLoadException("ex.content.notFound", pk);
-        } catch(SQLException e) {
+        } catch (SQLException e) {
             throw new FxLoadException(e, "ex.db.sqlError", e.getMessage());
         } finally {
             try {
@@ -1822,6 +1780,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             }
         }
 
+        FulltextIndexer ft = getFulltextIndexer(pk, con);
         FxFlatStorage fs = type.isContainsFlatStorageAssignments() ? FxFlatStorageManager.getInstance() : null;
 
         if (type.isUsePropertyPermissions() && !ticket.isGlobalSupervisor())
@@ -1882,9 +1841,9 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 }
                 if (!change.getOriginalData().isSystemInternal()) {
                     deleteDetailData(con, sql, pk, change.getOriginalData());
-                    if (fs != null && change.isFlatStorageChange()) {
+                    if (fs != null && change.isFlatStorageChange())
                         fs.deletePropertyData(con, pk, (FxPropertyData) change.getOriginalData());
-                    }
+                    ft.index(change);
                 }
             }
 
@@ -1898,14 +1857,10 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
 
             PreparedStatement ps_insert = null;
             PreparedStatement ps_update = null;
-            PreparedStatement ps_ft_insert = null;
-            PreparedStatement ps_ft_update = null;
 
             try {
                 ps_insert = con.prepareStatement(CONTENT_DATA_INSERT);
                 ps_update = con.prepareStatement(CONTENT_DATA_UPDATE);
-                ps_ft_insert = con.prepareStatement(CONTENT_FULLTEXT_INSERT);
-                ps_ft_update = con.prepareStatement(CONTENT_FULLTEXT_UPDATE);
 
                 while (updatesRemaining.size() > 0) {
                     FxDelta.FxDeltaChange change = updatesRemaining.get(0);
@@ -1915,18 +1870,17 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                             if (change.isGroup()) {
                                 if (change.isPositionChange() && !change.isDataChange()) {
                                     //groups can only change position
-                                    updatePropertyData(change, null, null, con, ps_update, ps_ft_update, pk, null);
+                                    updatePropertyData(change, null, null, con, ps_update, pk, null);
                                 }
                             } else {
                                 FxProperty prop = env.getProperty(((FxPropertyData) change.getNewData()).getPropertyId());
                                 if (!change._isUpdateable()) {
                                     deleteDetailData(con, sql, pk, change.getOriginalData());
-                                    insertPropertyData(prop, content.getData("/"), con, ps_insert, ps_ft_insert, pk,
+                                    insertPropertyData(prop, content.getData("/"), con, ps_insert, null, pk,
                                             ((FxPropertyData) change.getNewData()),
                                             content.isMaxVersion(), content.isLiveVersion());
                                 } else {
-                                    updatePropertyData(change, prop, content.getData("/"), con, ps_update, ps_ft_update, pk,
-                                            ((FxPropertyData) change.getNewData()));
+                                    updatePropertyData(change, prop, content.getData("/"), con, ps_update, pk, ((FxPropertyData) change.getNewData()));
                                 }
                                 //check if the property changed is a FQN
                                 if (prop.getId() == fqnPropertyId) {
@@ -1937,6 +1891,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                             }
                         }
                         updatesRemaining.remove(0);
+                        ft.index(change);
                     } catch (SQLException e) {
                         change._increaseRetries();
                         if (change._getRetryCount() > 100)
@@ -1955,21 +1910,19 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                     if (!change.getNewData().isSystemInternal()) {
                         if (change.isGroup())
                             insertGroupData(con, sql, pk, (FxGroupData) change.getNewData(), content.isMaxVersion(), content.isLiveVersion());
-                        else
+                        else {
                             insertPropertyData(env.getProperty(((FxPropertyData) change.getNewData()).getPropertyId()),
-                                    content.getData("/"), con, ps_insert, ps_ft_insert, pk, ((FxPropertyData) change.getNewData()),
+                                    content.getData("/"), con, ps_insert, null, pk, ((FxPropertyData) change.getNewData()),
                                     content.isMaxVersion(), content.isLiveVersion());
+                            ft.index(change);
+                        }
                     }
                 }
                 ps_update.executeBatch();
                 ps_insert.executeBatch();
-                ps_ft_insert.executeBatch();
-                ps_ft_update.executeBatch();
             } finally {
                 if (ps_update != null) ps_update.close();
                 if (ps_insert != null) ps_insert.close();
-                if (ps_ft_insert != null) ps_ft_insert.close();
-                if (ps_ft_update != null) ps_ft_update.close();
             }
 
             checkUniqueConstraints(con, env, sql, pk, content.getTypeId());
@@ -2013,6 +1966,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 }
             }
 
+            ft.commitChanges();
 
             if (type.isTrackHistory()) {
                 HistoryTrackerEngine tracker = EJBLookup.getHistoryTrackerEngine();
@@ -2055,6 +2009,8 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             throw new FxUpdateException(LOG, e, "ex.db.sqlError", e.getMessage());
         } catch (Exception e) {
             throw new FxUpdateException(LOG, e, "ex.content.save.error", pk, e);
+        } finally {
+            ft.cleanup();
         }
         return content.getPk();
     }
@@ -2121,37 +2077,6 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             long userId = FxContext.getUserTicket().getUserId();
             ps.setLong(16, userId);
             ps.setLong(17, System.currentTimeMillis());
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            throw new FxUpdateException(LOG, e, "ex.db.sqlError", e.getMessage());
-        } finally {
-            if (ps != null)
-                try {
-                    ps.close();
-                } catch (SQLException e) {
-                    //ignore
-                }
-        }
-    }
-
-    /**
-     * Remove all detail entries of a distinct version
-     *
-     * @param con an open and valid connection
-     * @param pk  primary key of the detail data
-     * @throws FxUpdateException on errors
-     */
-    protected void removeDetailEntriesVersion(Connection con, FxPK pk) throws FxUpdateException {
-        PreparedStatement ps = null;
-        try {
-            ps = con.prepareStatement(CONTENT_DATA_FT_REMOVE_VERSION);
-            ps.setLong(1, pk.getId());
-            ps.setInt(2, pk.getVersion());
-            ps.executeUpdate();
-            ps.close();
-            ps = con.prepareStatement(CONTENT_DATA_REMOVE_VERSION);
-            ps.setLong(1, pk.getId());
-            ps.setInt(2, pk.getVersion());
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new FxUpdateException(LOG, e, "ex.db.sqlError", e.getMessage());
@@ -2302,6 +2227,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      */
     public void contentRemove(Connection con, FxType type, FxPK pk) throws FxRemoveException {
         PreparedStatement ps = null;
+        FulltextIndexer ft = getFulltextIndexer(pk, con);
         try {
             checkContentRemoval(con, type.getId(), pk.getId(), -1, false, true);
 
@@ -2309,10 +2235,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
 
             //sync with tree
             StorageManager.getTreeStorage().contentRemoved(con, pk.getId(), false);
-            ps = con.prepareStatement(CONTENT_DATA_FT_REMOVE);
-            ps.setLong(1, pk.getId());
-            ps.executeUpdate();
-            ps.close();
+            ft.removeAllVersions();
             binaryStorage.removeBinariesForPK(con, pk);
             ps = con.prepareStatement(CONTENT_DATA_REMOVE);
             ps.setLong(1, pk.getId());
@@ -2333,6 +2256,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 } catch (SQLException e) {
                     //ignore
                 }
+            ft.cleanup();
         }
         if (type.isTrackHistory())
             EJBLookup.getHistoryTrackerEngine().track(type, pk, null, "history.content.removed");
@@ -2355,15 +2279,12 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         lockTables(con, pk.getId(), pk.getVersion());
 
         PreparedStatement ps = null;
+        FulltextIndexer ft = getFulltextIndexer(new FxPK(pk.getId(), ver), con);
         try {
             //if its the live version - sync with live tree
             if (cvi.hasLiveVersion() && cvi.getLiveVersion() == ver)
                 StorageManager.getTreeStorage().contentRemoved(con, pk.getId(), true);
-            ps = con.prepareStatement(CONTENT_DATA_FT_REMOVE_VER);
-            ps.setLong(1, pk.getId());
-            ps.setInt(2, ver);
-            ps.executeUpdate();
-            ps.close();
+            ft.remove();
             binaryStorage.removeBinariesForVersion(con, new FxPK(pk.getId(), ver));
             ps = con.prepareStatement(CONTENT_DATA_REMOVE_VER);
             ps.setLong(1, pk.getId());
@@ -2383,6 +2304,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         } catch (FxApplicationException e) {
             throw new FxRemoveException(e);
         } finally {
+            ft.cleanup();
             if (ps != null)
                 try {
                     ps.close();
@@ -2399,6 +2321,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      */
     public int contentRemoveForType(Connection con, FxType type) throws FxRemoveException {
         PreparedStatement ps = null;
+        FulltextIndexer ft = getFulltextIndexer(null, con);
         try {
             checkContentRemoval(con, type.getId(), -1, -1, true, true);
             //FX-96 - select all contents that are referenced from the tree
@@ -2411,10 +2334,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 StorageManager.getTreeStorage().contentRemoved(con, rs.getLong(1), false);
             ps.close();
 
-            ps = con.prepareStatement(CONTENT_DATA_FT_REMOVE_TYPE);
-            ps.setLong(1, type.getId());
-            ps.executeUpdate();
-            ps.close();
+            ft.removeType(type.getId());
             binaryStorage.removeBinariesForType(con, type.getId());
             ps = con.prepareStatement(CONTENT_DATA_REMOVE_TYPE);
             ps.setLong(1, type.getId());
@@ -2429,6 +2349,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         } catch (FxApplicationException e) {
             throw new FxRemoveException(e);
         } finally {
+            ft.cleanup();
             if (ps != null)
                 try {
                     ps.close();
@@ -2600,6 +2521,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         if (orgMultiLang == newMultiLang)
             return;
         PreparedStatement ps = null;
+        FulltextIndexer ft = getFulltextIndexer(null, con);
         try {
             if (!orgMultiLang && newMultiLang) {
                 //Single to Multi: lang=default language
@@ -2607,11 +2529,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 ps.setLong(1, defaultLanguage);
                 ps.setLong(2, assignmentId);
                 ps.executeUpdate();
-                ps.close();
-                ps = con.prepareStatement("UPDATE " + TBL_CONTENT_DATA_FT + " SET LANG=? WHERE ASSIGN=?");
-                ps.setLong(1, defaultLanguage);
-                ps.setLong(2, assignmentId);
-                ps.executeUpdate();
+                ft.setLanguage(assignmentId, defaultLanguage);
             } else {
                 //Multi to Single: lang=system, values of the def. lang. are used, if other translations exist an exception will be raised
                 ps = con.prepareStatement("UPDATE " + TBL_CONTENT_DATA + " SET LANG=? WHERE LANG=? AND ASSIGN=?");
@@ -2619,12 +2537,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 ps.setLong(2, defaultLanguage);
                 ps.setLong(3, assignmentId);
                 ps.executeUpdate();
-                ps.close();
-                ps = con.prepareStatement("UPDATE " + TBL_CONTENT_DATA_FT + " SET LANG=? WHERE LANG=? AND ASSIGN=?");
-                ps.setLong(1, FxLanguage.SYSTEM_ID);
-                ps.setLong(2, defaultLanguage);
-                ps.setLong(3, assignmentId);
-                ps.executeUpdate();
+                ft.changeLanguage(assignmentId, defaultLanguage, FxLanguage.SYSTEM_ID);
                 ps.close();
                 ps = con.prepareStatement("SELECT COUNT(*) FROM " + TBL_CONTENT_DATA + " WHERE ASSIGN=? AND LANG<>?");
                 ps.setLong(1, assignmentId);

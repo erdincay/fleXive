@@ -263,7 +263,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 final FxFlatStorage fs = FxFlatStorageManager.getInstance();
                 FxPropertyAssignment pa = (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(newAssignmentId);
                 if (fs.isFlattenable(pa)) {
-                    fs.flatten(fs.getDefaultStorage(), pa);
+                    fs.flatten(con, fs.getDefaultStorage(), pa);
                     try {
                         StructureLoader.reload(con);
                     } catch (FxCacheException e) {
@@ -814,11 +814,11 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     if (divisionConfig.isFlatStorageEnabled()) {
                         //check if flattened assignments now are required to be unflattened
                         final FxFlatStorage fs = FxFlatStorageManager.getInstance();
-                        assignment = CacheAdmin.getEnvironment().getAssignment(assignment.getId()); //make sure we have the updated version
+                        assignment = CacheAdmin.getEnvironment().getAssignment(returnId); //make sure we have the updated version
                         if (assignment instanceof FxPropertyAssignment) {
                             if (((FxPropertyAssignment) assignment).isFlatStorageEntry() &&
-                                    !fs.isFlattenable((FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(assignment.getId()))) {
-                                fs.unflatten((FxPropertyAssignment) assignment);
+                                    !fs.isFlattenable((FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(returnId))) {
+                                fs.unflatten(con, (FxPropertyAssignment) assignment);
                                 StructureLoader.reload(con);
                             }
                         } else if (assignment instanceof FxGroupAssignment) {
@@ -828,7 +828,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                                     continue;
                                 if (((FxPropertyAssignment) as).isFlatStorageEntry() &&
                                         !fs.isFlattenable((FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(as.getId()))) {
-                                    fs.unflatten((FxPropertyAssignment) as);
+                                    fs.unflatten(con, (FxPropertyAssignment) as);
                                     needReload = true;
                                 }
                             }
@@ -837,7 +837,8 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                         }
                         if (divisionConfig.get(SystemParameters.FLATSTORAGE_AUTO)) {
                             //check if some assignments can now be flattened
-                            EJBLookup.getTypeEngine().flatten(fs.getDefaultStorage(), assignment.getAssignedType().getId());
+                            FxFlatStorageManager.getInstance().flattenType(con, fs.getDefaultStorage(), assignment.getAssignedType());
+                            StructureLoader.reload(con);
                         }
                     }
                 }
@@ -1930,7 +1931,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                             ctx.setRollbackOnly();
                             throw new FxCreateException(e, "ex.cache", e.getMessage());
                         }
-                        fs.flatten(fs.getDefaultStorage(), (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(newAssignmentId));
+                        fs.flatten(con, fs.getDefaultStorage(), (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(newAssignmentId));
                     }
                 }
 
@@ -2158,7 +2159,8 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                         psML.addBatch();
                     }
                     if (ml instanceof FxPropertyAssignment) {
-                        FxFlatStorageManager.getInstance().removeAssignmentMappings(con, ml.getId());
+                        if (!disableAssignment)
+                            FxFlatStorageManager.getInstance().removeAssignmentMappings(con, ml.getId());
                         psData.setLong(1, ml.getId());
                         psData.addBatch();
                         psDataFT.setLong(1, ml.getId());
