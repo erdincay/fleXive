@@ -36,6 +36,7 @@ import static com.flexive.core.Database.closeObjects;
 import com.flexive.core.DatabaseConst;
 import static com.flexive.core.DatabaseConst.TBL_BRIEFCASE_DATA;
 import com.flexive.core.LifeCycleInfoImpl;
+import com.flexive.core.storage.StorageManager;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxReferenceMetaData;
 import com.flexive.shared.FxSystemSequencer;
@@ -141,7 +142,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
             ps.executeUpdate();
             return newId;
         } catch (SQLException exc) {
-            final boolean uniqueConstraintViolation = Database.isUniqueConstraintViolation(exc);
+            final boolean uniqueConstraintViolation = StorageManager.isUniqueConstraintViolation(exc);
             if (ctx != null)
                 ctx.setRollbackOnly();
             else

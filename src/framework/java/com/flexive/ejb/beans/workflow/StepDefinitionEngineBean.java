@@ -32,6 +32,7 @@
 package com.flexive.ejb.beans.workflow;
 
 import com.flexive.core.Database;
+import com.flexive.core.storage.StorageManager;
 import static com.flexive.core.DatabaseConst.ML;
 import static com.flexive.core.DatabaseConst.TBL_STEPDEFINITION;
 import com.flexive.core.structure.StructureLoader;
@@ -200,7 +201,7 @@ public class StepDefinitionEngineBean implements StepDefinitionEngine, StepDefin
         } catch (FxInvalidParameterException exc) {
             throw exc;
         } catch (Exception exc) {
-            if (Database.isUniqueConstraintViolation(exc)) {
+            if (StorageManager.isUniqueConstraintViolation(exc)) {
                 FxEntryExistsException ee = new FxEntryExistsException("ex.stepdefinition.name.exists",
                         name);
                 if (LOG.isDebugEnabled()) LOG.debug(ee);
@@ -319,7 +320,7 @@ public class StepDefinitionEngineBean implements StepDefinitionEngine, StepDefin
             }
             success = true;
         } catch (SQLException exc) {
-            if (Database.isUniqueConstraintViolation(exc)) {
+            if (StorageManager.isUniqueConstraintViolation(exc)) {
                 FxEntryExistsException ee = new FxEntryExistsException("ex.stepdefinition.name.exists",
                         stepDefinition.getName());
                 if (LOG.isDebugEnabled()) LOG.debug(ee);

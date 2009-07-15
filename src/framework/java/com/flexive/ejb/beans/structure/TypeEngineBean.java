@@ -34,6 +34,7 @@ package com.flexive.ejb.beans.structure;
 import com.flexive.core.Database;
 import static com.flexive.core.DatabaseConst.*;
 import com.flexive.core.LifeCycleInfoImpl;
+import com.flexive.core.storage.StorageManager;
 import com.flexive.core.conversion.ConversionEngine;
 import com.flexive.core.flatstorage.FxFlatStorageManager;
 import com.flexive.core.structure.FxPreloadType;
@@ -218,7 +219,7 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
             }
             StructureLoader.reload(con);
         } catch (SQLException e) {
-            if (Database.isUniqueConstraintViolation(e)) {
+            if (StorageManager.isUniqueConstraintViolation(e)) {
                 ctx.setRollbackOnly();
                 throw new FxCreateException("ex.structure.type.exists", type.getName());
             }
@@ -878,7 +879,7 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
             StructureLoader.reload(con);
             htracker.track(type, "history.type.remove", type.getName(), type.getId());
         } catch (SQLException e) {
-            if (Database.isForeignKeyViolation(e)) {
+            if (StorageManager.isForeignKeyViolation(e)) {
                 ctx.setRollbackOnly();
                 throw new FxRemoveException(LOG, e, "ex.structure.type.inUse", type.getName());
             }

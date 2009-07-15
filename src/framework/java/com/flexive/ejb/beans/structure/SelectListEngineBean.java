@@ -34,6 +34,7 @@ package com.flexive.ejb.beans.structure;
 import com.flexive.core.Database;
 import static com.flexive.core.DatabaseConst.*;
 import com.flexive.core.LifeCycleInfoImpl;
+import com.flexive.core.storage.StorageManager;
 import com.flexive.core.flatstorage.FxFlatStorageManager;
 import com.flexive.core.structure.StructureLoader;
 import com.flexive.shared.CacheAdmin;
@@ -506,7 +507,7 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
             return newId;
         } catch (SQLException e) {
             try {
-                if (Database.isUniqueConstraintViolation(e))
+                if (StorageManager.isUniqueConstraintViolation(e))
                     throw new FxCreateException(LOG, e, "ex.selectlist.item.name.notUnique", item.getName());
                 throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
             } finally {
@@ -557,7 +558,7 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
                     con, TBL_SELECTLIST_ITEM, "LABEL", "ID", item.getId());
         } catch (SQLException e) {
             try {
-                if (Database.isUniqueConstraintViolation(e))
+                if (StorageManager.isUniqueConstraintViolation(e))
                     throw new FxUpdateException(LOG, e, "ex.selectlist.item.name.notUnique", item.getName());
                 throw new FxUpdateException(LOG, e, "ex.db.sqlError", e.getMessage());
             } finally {

@@ -32,6 +32,7 @@
 package com.flexive.ejb.beans.workflow;
 
 import com.flexive.core.Database;
+import com.flexive.core.storage.StorageManager;
 import static com.flexive.core.DatabaseConst.*;
 import com.flexive.core.structure.StructureLoader;
 import com.flexive.shared.CacheAdmin;
@@ -128,7 +129,7 @@ public class StepEngineBean implements StepEngine, StepEngineLocal {
                 stmt.executeUpdate(sql);
             } catch (SQLException exc) {
                 // Ignore unique constraint.
-                if (!Database.isUniqueConstraintViolation(exc)) {
+                if (!StorageManager.isUniqueConstraintViolation(exc)) {
                     throw exc;
                 }
                 // get existing workflow, return its ID
@@ -326,11 +327,11 @@ public class StepEngineBean implements StepEngine, StepEngineLocal {
             success = true;
         } catch (SQLException exc) {
             if (isWorkflow) {
-                if (Database.isForeignKeyViolation(exc))
+                if (StorageManager.isForeignKeyViolation(exc))
                     throw new FxRemoveException("ex.step.delete.workflow.inUse", env.getWorkflow(objectId).getName());
                 throw new FxRemoveException(LOG, "ex.step.delete.workflow", exc, exc.getMessage());
             } else {
-                if (Database.isForeignKeyViolation(exc)) {
+                if (StorageManager.isForeignKeyViolation(exc)) {
                     String stepName;
                     try {
                         Step step = env.getStep(objectId);

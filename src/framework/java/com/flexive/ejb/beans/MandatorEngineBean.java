@@ -35,6 +35,7 @@ import com.flexive.core.Database;
 import static com.flexive.core.DatabaseConst.TBL_GROUP;
 import static com.flexive.core.DatabaseConst.TBL_MANDATORS;
 import com.flexive.core.LifeCycleInfoImpl;
+import com.flexive.core.storage.StorageManager;
 import com.flexive.core.structure.StructureLoader;
 import com.flexive.shared.*;
 import com.flexive.shared.content.FxPermissionUtils;
@@ -135,7 +136,7 @@ public class MandatorEngineBean implements MandatorEngine, MandatorEngineLocal {
                     new LifeCycleInfoImpl(ticket.getUserId(), NOW, ticket.getUserId(), NOW)));
             return newId;
         } catch (SQLException exc) {
-            final boolean uniqueConstraintViolation = Database.isUniqueConstraintViolation(exc);
+            final boolean uniqueConstraintViolation = StorageManager.isUniqueConstraintViolation(exc);
             ctx.setRollbackOnly();
             if (uniqueConstraintViolation) {
                 throw new FxEntryExistsException(LOG, "ex.mandator.exists", name);
@@ -350,7 +351,7 @@ public class MandatorEngineBean implements MandatorEngine, MandatorEngineLocal {
             ps.executeUpdate();
             StructureLoader.removeMandator(FxContext.get().getDivisionId(), mandatorId);
         } catch (SQLException exc) {
-            final boolean keyViolation = Database.isForeignKeyViolation(exc);
+            final boolean keyViolation = StorageManager.isForeignKeyViolation(exc);
             ctx.setRollbackOnly();
             if (keyViolation)
                 throw new FxEntryInUseException(exc, "ex.mandator.removeFailed.inUse", mand.getName());
@@ -400,7 +401,7 @@ public class MandatorEngineBean implements MandatorEngine, MandatorEngineLocal {
                     mand.getLifeCycleInfo().getCreationTime(), ticket.getUserId(), NOW)));
         } catch (SQLException exc) {
             // check before rollback, because it might need an active transaciton
-            final boolean uniqueConstraintViolation = Database.isUniqueConstraintViolation(exc);
+            final boolean uniqueConstraintViolation = StorageManager.isUniqueConstraintViolation(exc);
             ctx.setRollbackOnly();
             if (uniqueConstraintViolation) {
                 throw new FxUpdateException(LOG, "ex.mandator.update.name.unique", name);

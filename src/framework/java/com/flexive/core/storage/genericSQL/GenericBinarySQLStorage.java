@@ -38,6 +38,7 @@ import com.flexive.core.storage.binary.BinaryInputStream;
 import com.flexive.core.storage.binary.BinaryStorage;
 import com.flexive.core.storage.binary.BinaryTransitFileInfo;
 import com.flexive.core.storage.binary.FxBinaryUtils;
+import com.flexive.core.storage.StorageManager;
 import com.flexive.shared.*;
 import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.content.FxPK;
@@ -93,10 +94,10 @@ public class GenericBinarySQLStorage implements BinaryStorage {
 
     protected static final String BINARY_TRANSIT = "INSERT INTO " + TBL_CONTENT_BINARY + "(ID,VER,QUALITY,FBLOB,NAME,BLOBSIZE,XMLMETA,CREATED_AT,MIMETYPE,PREVIEW_REF,ISIMAGE,RESOLUTION,WIDTH,HEIGHT,PREV1_WIDTH,PREV1_HEIGHT,PREV2_WIDTH,PREV2_HEIGHT,PREV3_WIDTH,PREV3_HEIGHT,PREV1SIZE,PREV2SIZE,PREV3SIZE,PREV1,PREV2,PREV3) " +
             //      1 2 3       4 5 6       7                                 8             9 0 1 2
-            "SELECT ?,?,?,FBLOB,?,?,?," + Database.getTimestampFunction() + ",?,PREVIEW_REF,?,?,?,?,PREV1_WIDTH,PREV1_HEIGHT,PREV2_WIDTH,PREV2_HEIGHT,PREV3_WIDTH,PREV3_HEIGHT,PREV1SIZE,PREV2SIZE,PREV3SIZE"; //",PREV1,PREV2,PREV3 FROM " + TBL_BINARY_TRANSIT + " WHERE BKEY=?";
+            "SELECT ?,?,?,FBLOB,?,?,?," + StorageManager.getTimestampFunction() + ",?,PREVIEW_REF,?,?,?,?,PREV1_WIDTH,PREV1_HEIGHT,PREV2_WIDTH,PREV2_HEIGHT,PREV3_WIDTH,PREV3_HEIGHT,PREV1SIZE,PREV2SIZE,PREV3SIZE"; //",PREV1,PREV2,PREV3 FROM " + TBL_BINARY_TRANSIT + " WHERE BKEY=?";
     protected static final String BINARY_TRANSIT_FILESYSTEM = "INSERT INTO " + TBL_CONTENT_BINARY + "(ID,VER,QUALITY,FBLOB,NAME,BLOBSIZE,XMLMETA,CREATED_AT,MIMETYPE,PREVIEW_REF,ISIMAGE,RESOLUTION,WIDTH,HEIGHT,PREV1_WIDTH,PREV1_HEIGHT,PREV2_WIDTH,PREV2_HEIGHT,PREV3_WIDTH,PREV3_HEIGHT,PREV1SIZE,PREV2SIZE,PREV3SIZE,PREV1,PREV2,PREV3) " +
             //      1 2 3 4 5 6 7     8                                   9             0 1 2 3                                                                                                                                                                      14
-            "SELECT ?,?,?,?,?,?,?," + Database.getTimestampFunction() + ",?,PREVIEW_REF,?,?,?,?,PREV1_WIDTH,PREV1_HEIGHT,PREV2_WIDTH,PREV2_HEIGHT,PREV3_WIDTH,PREV3_HEIGHT,PREV1SIZE,PREV2SIZE,PREV3SIZE"; //",PREV1,PREV2,PREV3 FROM " + TBL_BINARY_TRANSIT + " WHERE BKEY=?";
+            "SELECT ?,?,?,?,?,?,?," + StorageManager.getTimestampFunction() + ",?,PREVIEW_REF,?,?,?,?,PREV1_WIDTH,PREV1_HEIGHT,PREV2_WIDTH,PREV2_HEIGHT,PREV3_WIDTH,PREV3_HEIGHT,PREV1SIZE,PREV2SIZE,PREV3SIZE"; //",PREV1,PREV2,PREV3 FROM " + TBL_BINARY_TRANSIT + " WHERE BKEY=?";
 
     protected static final String BINARY_TRANSIT_PREVIEW_WHERE = " FROM " + TBL_BINARY_TRANSIT + " WHERE BKEY=?";
     //                                                                                                   1              2               3        4              5               6        7              8               9            10           11           12           13

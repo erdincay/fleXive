@@ -33,12 +33,8 @@ package com.flexive.core.search;
 
 import com.flexive.core.Database;
 import com.flexive.core.DatabaseConst;
-import com.flexive.core.search.H2.H2SQLDataFilter;
-import com.flexive.core.search.H2.H2SQLDataSelector;
-import com.flexive.core.search.genericSQL.GenericSQLDataFilter;
-import com.flexive.core.search.genericSQL.GenericSQLDataSelector;
+import com.flexive.core.storage.StorageManager;
 import com.flexive.shared.*;
-import com.flexive.shared.configuration.DBVendor;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxSqlSearchException;
 import com.flexive.shared.interfaces.BriefcaseEngine;
@@ -181,7 +177,7 @@ public class SqlSearch {
         Connection con = null;
         FxResultSetImpl fx_result = null;
         final long startTime = java.lang.System.currentTimeMillis();
-        GenericSQLDataSelector ds = null;
+        DataSelector ds = null;
         DataFilter df = null;
         String selectSql = null;
         try {
@@ -206,8 +202,8 @@ public class SqlSearch {
             pr = new PropertyResolver(con);
 
             //init filter and selector
-            df = getDataFilter(con);
-            ds = getDataSelector();
+            df = StorageManager.getDataFilter(con, this);
+            ds = StorageManager.getDataSelector(this);
 
             // Find all matching objects
             df.build();
@@ -325,7 +321,7 @@ public class SqlSearch {
         } catch (FxSqlSearchException exc) {
             throw exc;
         } catch (SQLException exc) {
-            if (Database.isQueryTimeout(exc)) {
+            if (StorageManager.isQueryTimeout(exc)) {
                 if (LOG.isWarnEnabled()) {
                     LOG.warn("Query timeout after " + params.getQueryTimeout() + " seconds:\n"
                             + query + "\n\nSQL:\n" + selectSql);
@@ -410,44 +406,6 @@ public class SqlSearch {
             Database.closeObjects(SqlSearch.class, null, stmt);
         }
     }
-
-    /**
-     * Get the DataSelector for the sql searchengine based on the used DB
-     *
-     * @return DataSelector the data selecttor implementation
-     * @throws FxSqlSearchException if the function fails
-     */
-    public GenericSQLDataSelector getDataSelector() throws FxSqlSearchException {
-        final DBVendor vendor = FxContext.get().getDivisionData().getDbVendor();
-        switch (vendor) {
-            case H2:
-                return new H2SQLDataSelector(this);
-            case MySQL:
-                return new GenericSQLDataSelector(this);
-            default:
-                throw new FxSqlSearchException(LOG, "ex.db.selector.undefined", vendor);
-        }
-    }
-
-    /**
-     * Get the DataSelector for the sql searchengine based on the used DB
-     *
-     * @param con the connection to use
-     * @return DataSelector the data selecttor implementation
-     * @throws FxSqlSearchException if the function fails
-     */
-    public DataFilter getDataFilter(Connection con) throws FxSqlSearchException {
-        final DBVendor vendor = FxContext.get().getDivisionData().getDbVendor();
-        switch (vendor) {
-            case MySQL:
-                return new GenericSQLDataFilter(con, this);
-            case H2:
-                return new H2SQLDataFilter(con, this);
-            default:
-                throw new FxSqlSearchException(LOG, "ex.db.filter.undefined", vendor);
-        }
-    }
-
 
     public int getStartIndex() {
         return startIndex;

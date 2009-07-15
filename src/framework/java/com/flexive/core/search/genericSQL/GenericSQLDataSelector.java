@@ -36,18 +36,21 @@ import com.flexive.core.search.*;
 import com.flexive.shared.FxArrayUtils;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.exceptions.FxSqlSearchException;
+import com.flexive.shared.search.SortDirection;
 import com.flexive.shared.structure.FxDataType;
 import com.flexive.shared.structure.FxFlatStorageMapping;
-import com.flexive.shared.search.SortDirection;
-import com.flexive.shared.exceptions.FxSqlSearchException;
 import com.flexive.shared.tree.FxTreeNode;
 import com.flexive.sqlParser.*;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.commons.lang.StringUtils;
 
 import java.sql.Connection;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Generic SQL data selector
@@ -99,6 +102,7 @@ public class GenericSQLDataSelector extends DataSelector {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String build(final Connection con) throws FxSqlSearchException {
         StringBuffer select = new StringBuffer();
         buildColumnSelectList(select);
@@ -111,6 +115,7 @@ public class GenericSQLDataSelector extends DataSelector {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void cleanup(Connection con) throws FxSqlSearchException {
         // nothing to do
     }
@@ -150,8 +155,8 @@ public class GenericSQLDataSelector extends DataSelector {
         // Build the final select statement
 
         select.append("SELECT \n")
-              .append(filterProperties((String[]) INTERNAL_RESULTCOLS.toArray(new String[INTERNAL_RESULTCOLS.size()])))
-              .append(' ');
+                .append(filterProperties((String[]) INTERNAL_RESULTCOLS.toArray(new String[INTERNAL_RESULTCOLS.size()])))
+                .append(' ');
         for (SubSelectValues ssv : values) {
             for (SubSelectValues.Item item : ssv.getItems()) {
                 if (ssv.isSorted() && item.isOrderBy()) {
@@ -181,7 +186,7 @@ public class GenericSQLDataSelector extends DataSelector {
         final List<String> columns = new ArrayList<String>();
 
         // create select columns
-        for (String column: INTERNAL_RESULTCOLS) {
+        for (String column : INTERNAL_RESULTCOLS) {
             if ("rownr".equals(column)) {
                 if (supportsCounterAfterOrderBy()) {
                     columns.add(getCounterStatement(column));
@@ -244,7 +249,7 @@ public class GenericSQLDataSelector extends DataSelector {
      * Returns a comma-separated list of the given property names after adding FILTER_ALIAS to every property.
      *
      * @param names the property name(s)
-     * @return  a comma-separated list of the given property names after adding FILTER_ALIAS to every property.
+     * @return a comma-separated list of the given property names after adding FILTER_ALIAS to every property.
      */
     private String filterProperties(String... names) {
         return FILTER_ALIAS + "." + StringUtils.join(names, "," + FILTER_ALIAS + ".");
@@ -302,7 +307,7 @@ public class GenericSQLDataSelector extends DataSelector {
                             if (!prop.getSqlFunctions().isEmpty() && PropertyEntry.isDateMillisColumn(column)) {
                                 // need to convert to date before applying a date function
                                 expr = toDBTime(expr);
-                            } 
+                            }
                             final String val = "(SELECT " + expr + " FROM " + DatabaseConst.TBL_CONTENT +
                                     " " + SUBSEL_ALIAS + " WHERE " + SUBSEL_ALIAS + ".id=" + FILTER_ALIAS + ".id AND " +
                                     SUBSEL_ALIAS + ".ver=" + FILTER_ALIAS + ".ver)";
@@ -322,21 +327,21 @@ public class GenericSQLDataSelector extends DataSelector {
                     final FxFlatStorageMapping mapping = entry.getAssignment().getFlatStorageMapping();
                     final String sel =
                             "(SELECT " + mapping.getColumn() + " FROM " + mapping.getStorage()
-                            + " WHERE id=" + FILTER_ALIAS + ".id AND ver=" + FILTER_ALIAS + ".ver"
-                            + " AND "
-                            + SearchUtils.getFlatStorageAssignmentFilter(
+                                    + " WHERE id=" + FILTER_ALIAS + ".id AND ver=" + FILTER_ALIAS + ".ver"
+                                    + " AND "
+                                    + SearchUtils.getFlatStorageAssignmentFilter(
                                     search.getEnvironment(),
                                     "",
                                     entry.getAssignment()
                             )
-                            + (entry.getAssignment().isMultiLang()
+                                    + (entry.getAssignment().isMultiLang()
                                     ? " AND " + mapping.getColumn() + " IS NOT NULL"
                                     + " AND (lang=" + search.getLanguage().getId()
                                     + " OR " + mapping.getColumn() + "_mld=true)"
                                     + " ORDER BY " + mapping.getColumn() + "_mld"
-                            : "")
-                            + " LIMIT 1"
-                            + ")";
+                                    : "")
+                                    + " LIMIT 1"
+                                    + ")";
                     result.addItem(sel, resultPos, false);
                     break;
                 default:
@@ -391,13 +396,13 @@ public class GenericSQLDataSelector extends DataSelector {
                 FILTER_ALIAS + ".ver AND " +
                 (entry.isAssignment()
                         ? "ASSIGN IN ("
-                            + StringUtils.join(FxSharedUtils.getSelectableObjectIdList(entry.getAssignmentWithDerived()), ',')
-                            + ")"
+                        + StringUtils.join(FxSharedUtils.getSelectableObjectIdList(entry.getAssignmentWithDerived()), ',')
+                        + ")"
                         : "TPROP=" + entry.getProperty().getId()) + " AND " +
                 "(" + SUBSEL_ALIAS + ".lang=" + search.getLanguage().getId() +
                 " OR " + SUBSEL_ALIAS + ".ismldef=true)" +
                 // fetch exact language match before default
-                " ORDER BY " + SUBSEL_ALIAS + ".ismldef " + 
+                " ORDER BY " + SUBSEL_ALIAS + ".ismldef " +
                 " LIMIT 1 " + ")";
         if (!xpath && entry.getProperty().getDataType() == FxDataType.Binary) {
             // select string-coded form of the BLOB properties
@@ -414,14 +419,15 @@ public class GenericSQLDataSelector extends DataSelector {
     /**
      * <p>Indicate whether the database row index returned by {@link #getCounterStatement(String)}
      * is applied before or after an "order by" for the statement.</p>
-     *
+     * <p/>
      * <p>If "true", the row index expression will be included in the select clause of the actual statement. For example:
      * {@code SELECT @rowNum=@rowNum+1, id, caption FROM ... ORDER BY caption}
      * </p>
      * <p>If "false", the row index expression will be added in an outer select clause, for example:
      * {@code SELECT @rowNum=@rowNum+1, * FROM (SELECT id, caption FROM ... ORDER BY caption) }
      * </p>
-     * @return  true if the counter statement is evaluated after the "order by" clause, false otherwise.
+     *
+     * @return true if the counter statement is evaluated after the "order by" clause, false otherwise.
      */
     protected boolean supportsCounterAfterOrderBy() {
         return true;

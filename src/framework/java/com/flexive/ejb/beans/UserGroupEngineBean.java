@@ -32,6 +32,7 @@
 package com.flexive.ejb.beans;
 
 import com.flexive.core.Database;
+import com.flexive.core.storage.StorageManager;
 import static com.flexive.core.DatabaseConst.*;
 import com.flexive.core.security.UserTicketStore;
 import com.flexive.shared.*;
@@ -255,7 +256,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
             return groupId;
 
         } catch (SQLException exc) {
-            final boolean uniqueConstraintViolation = Database.isUniqueConstraintViolation(exc);
+            final boolean uniqueConstraintViolation = StorageManager.isUniqueConstraintViolation(exc);
             ctx.setRollbackOnly();
             if (uniqueConstraintViolation) {
                 FxEntryExistsException eee = new FxEntryExistsException("ex.usergroup.create.groupExists", name);
@@ -325,7 +326,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
             pstmt.close();
 
         } catch (SQLException exc) {
-            final boolean uniqueConstraintViolation = Database.isUniqueConstraintViolation(exc);
+            final boolean uniqueConstraintViolation = StorageManager.isUniqueConstraintViolation(exc);
             ctx.setRollbackOnly();
             if (uniqueConstraintViolation) {
                 FxEntryExistsException eee = new FxEntryExistsException("ex.usergroup.groupExists", name);

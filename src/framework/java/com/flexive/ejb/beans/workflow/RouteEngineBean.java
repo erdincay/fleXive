@@ -32,6 +32,7 @@
 package com.flexive.ejb.beans.workflow;
 
 import com.flexive.core.Database;
+import com.flexive.core.storage.StorageManager;
 import static com.flexive.core.DatabaseConst.TBL_ROUTES;
 import static com.flexive.core.DatabaseConst.TBL_STEP;
 import com.flexive.core.structure.StructureLoader;
@@ -160,7 +161,7 @@ public class RouteEngineBean implements RouteEngine, RouteEngineLocal {
             success = true;
             return routeId;
         } catch (SQLException exc) {
-            if (Database.isUniqueConstraintViolation(exc)) {
+            if (StorageManager.isUniqueConstraintViolation(exc)) {
                 throw new FxEntryExistsException(LOG, "ex.routes.create.exists");
             } else {
                 throw new FxCreateException(LOG, "ex.routes.create", exc, routeString, exc.getMessage());

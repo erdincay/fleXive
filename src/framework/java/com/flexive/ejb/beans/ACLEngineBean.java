@@ -34,6 +34,7 @@ package com.flexive.ejb.beans;
 import com.flexive.core.Database;
 import static com.flexive.core.DatabaseConst.*;
 import com.flexive.core.LifeCycleInfoImpl;
+import com.flexive.core.storage.StorageManager;
 import com.flexive.core.conversion.ConversionEngine;
 import com.flexive.core.security.UserTicketStore;
 import com.flexive.core.structure.StructureLoader;
@@ -196,7 +197,7 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
                     "history.acl.create", created.getName());
             return newId;
         } catch (SQLException exc) {
-            final boolean uniqueConstraintViolation = Database.isUniqueConstraintViolation(exc);
+            final boolean uniqueConstraintViolation = StorageManager.isUniqueConstraintViolation(exc);
             ctx.setRollbackOnly();
             if (uniqueConstraintViolation) {
                 throw new FxEntryExistsException("ex.acl.aclAlreadyExists", name);
@@ -261,8 +262,8 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
             EJBLookup.getHistoryTrackerEngine().trackData(ConversionEngine.getXStream().toXML(theACL),
                     "history.acl.remove", theACL.getName());
         } catch (SQLException exc) {
-            final boolean uniqueConstraintViolation = Database.isUniqueConstraintViolation(exc);
-            final boolean keyViolation = Database.isForeignKeyViolation(exc);
+            final boolean uniqueConstraintViolation = StorageManager.isUniqueConstraintViolation(exc);
+            final boolean keyViolation = StorageManager.isForeignKeyViolation(exc);
             ctx.setRollbackOnly();
             if (uniqueConstraintViolation)
                 throw new FxRemoveException(LOG, exc, "ex.acl.aclAlreadyExists", theACL.getName());
@@ -420,7 +421,7 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
             }
             EJBLookup.getHistoryTrackerEngine().trackData(sbHistory.toString(), "history.acl.update", theACL.getName());
         } catch (SQLException exc) {
-            final boolean uniqueConstraintViolation = Database.isUniqueConstraintViolation(exc);
+            final boolean uniqueConstraintViolation = StorageManager.isUniqueConstraintViolation(exc);
             ctx.setRollbackOnly();
             if (uniqueConstraintViolation)
                 throw new FxEntryExistsException(LOG, "ex.acl.updateFailed.nameTaken",

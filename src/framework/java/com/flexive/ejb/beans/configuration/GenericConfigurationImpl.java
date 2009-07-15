@@ -32,6 +32,7 @@
 package com.flexive.ejb.beans.configuration;
 
 import com.flexive.core.Database;
+import com.flexive.core.storage.StorageManager;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.Pair;
@@ -257,7 +258,7 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
             try {
                 writeParameter(conn, parameter, key, value, data, valueExists);
             } catch (SQLException e) {
-                if (!valueExists && Database.isUniqueConstraintViolation(e)) {
+                if (!valueExists && StorageManager.isUniqueConstraintViolation(e)) {
                     // tried to insert record, but record exists - workaround for strange
                     // bug on MySQL, where an ALTER TABLE on the configuration table messes up
                     // subsequent SELECTs (DB schema version 1353)

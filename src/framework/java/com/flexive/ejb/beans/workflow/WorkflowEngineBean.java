@@ -33,6 +33,7 @@ package com.flexive.ejb.beans.workflow;
 
 
 import com.flexive.core.Database;
+import com.flexive.core.storage.StorageManager;
 import static com.flexive.core.DatabaseConst.TBL_WORKFLOW;
 import com.flexive.core.structure.StructureLoader;
 import com.flexive.shared.CacheAdmin;
@@ -114,7 +115,7 @@ public class WorkflowEngineBean implements WorkflowEngine, WorkflowEngineLocal {
             }
             success = true;
         } catch (SQLException exc) {
-            if (Database.isForeignKeyViolation(exc))
+            if (StorageManager.isForeignKeyViolation(exc))
                 throw new FxRemoveException("ex.workflow.delete.inUse",
                         CacheAdmin.getEnvironment().getWorkflow(workflowId).getName(), workflowId);
             throw new FxRemoveException(LOG, "ex.workflow.delete", exc, workflowId, exc.getMessage());
@@ -319,7 +320,7 @@ public class WorkflowEngineBean implements WorkflowEngine, WorkflowEngineLocal {
 
             success = true;
         } catch (SQLException exc) {
-            if (Database.isUniqueConstraintViolation(exc)) {
+            if (StorageManager.isUniqueConstraintViolation(exc)) {
                 throw new FxEntryExistsException("ex.workflow.exists");
             } else {
                 throw new FxUpdateException(LOG, exc, "ex.workflow.update", workflow.getName(), exc.getMessage());
@@ -408,7 +409,7 @@ public class WorkflowEngineBean implements WorkflowEngine, WorkflowEngineLocal {
             }
             success = true;
         } catch (Exception exc) {
-            if (Database.isUniqueConstraintViolation(exc)) {
+            if (StorageManager.isUniqueConstraintViolation(exc)) {
                 throw new FxEntryExistsException("ex.workflow.exists", workflow.getName());
             } else {
                 throw new FxCreateException(LOG, "ex.workflow.create", exc, exc.getMessage());

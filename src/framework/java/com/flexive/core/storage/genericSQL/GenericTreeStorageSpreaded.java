@@ -31,12 +31,10 @@
  ***************************************************************/
 package com.flexive.core.storage.genericSQL;
 
-import com.flexive.core.Database;
 import com.flexive.core.storage.FxTreeNodeInfo;
 import com.flexive.core.storage.FxTreeNodeInfoSpreaded;
+import com.flexive.core.storage.StorageManager;
 import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.FxContext;
-import com.flexive.shared.configuration.DBVendor;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.FxApplicationException;
@@ -509,7 +507,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
             ps = con.prepareStatement("INSERT INTO " + getTable(mode) + " (ID,PARENT,DEPTH,DIRTY,REF,LFT,RGT," +
                     "TOTAL_CHILDCOUNT,CHILDCOUNT,NAME,MODIFIED_AT,TEMPLATE) VALUES " +
                     "(" + nci.id + "," + parentNodeId + "," + (parentNode.getDepth() + 1) +
-                    ",?," + nci.reference.getId() + ",?,?,0,0,?," + Database.getTimestampFunction() + ",?)");
+                    ",?," + nci.reference.getId() + ",?,?,0,0,?," + StorageManager.getTimestampFunction() + ",?)");
             ps.setBoolean(1, mode != FxTreeMode.Live);
             ps.setBigDecimal(2, left);
             ps.setBigDecimal(3, right);
@@ -740,20 +738,16 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
             try {
                 stmt = con.createStatement();
                 stmt2 = con.createStatement();
-                String using = "";
-                //MySQL needs a USING(ID) whereas H2 must not have this. TODO: better abstraction layer
-                if( FxContext.get().getDivisionData().getDbVendor() == DBVendor.MySQL)
-                    using = "USING (ID)";
                 ResultSet rs = stmt.executeQuery("SELECT DISTINCT a.ID FROM (SELECT ID FROM " + getTable(FxTreeMode.Live) + " WHERE PARENT=" +
                         nodeId + ") a LEFT " +
-                        "JOIN (SELECT ID FROM " + getTable(FxTreeMode.Live) + " WHERE PARENT=" + nodeId + ") b "+using+" WHERE b.ID IS NULL");
+                        "JOIN (SELECT ID FROM " + getTable(FxTreeMode.Live) + " WHERE PARENT=" + nodeId + ") b USING (ID) WHERE b.ID IS NULL");
                 while (rs != null && rs.next()) {
                     long deleteId = rs.getLong(1);
-                    stmt2.addBatch(Database.getReferentialIntegrityChecksStatement(false));
+                    stmt2.addBatch(StorageManager.getReferentialIntegrityChecksStatement(false));
                     try {
                         stmt2.addBatch("DELETE FROM " + getTable(FxTreeMode.Live) + " WHERE ID=" + deleteId);
                     } finally {
-                        stmt2.addBatch(Database.getReferentialIntegrityChecksStatement(true));
+                        stmt2.addBatch(StorageManager.getReferentialIntegrityChecksStatement(true));
                     }
                 }
                 stmt2.addBatch("UPDATE " + getTable(FxTreeMode.Live) + " SET MODIFIED_AT=" + System.currentTimeMillis());
@@ -873,14 +867,14 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
      */
     @Override
     protected void wipeTree(FxTreeMode mode, Statement stmt, FxPK rootPK) throws SQLException {
-        stmt.execute(Database.getReferentialIntegrityChecksStatement(false));
+        stmt.execute(StorageManager.getReferentialIntegrityChecksStatement(false));
         try {
             stmt.executeUpdate("DELETE FROM " + getTable(mode));
             stmt.executeUpdate("INSERT INTO " + getTable(mode) + " (ID,NAME,MODIFIED_AT,DIRTY,PARENT,DEPTH,CHILDCOUNT,TOTAL_CHILDCOUNT,REF,TEMPLATE,LFT,RGT) " +
-                    "VALUES (" + ROOT_NODE + ",'Root'," + Database.getTimestampFunction() + ",FALSE,NULL,1,0,0," + rootPK.getId() +
+                    "VALUES (" + ROOT_NODE + ",'Root'," + StorageManager.getTimestampFunction() + ",FALSE,NULL,1,0,0," + rootPK.getId() +
                     ",NULL,1," + MAX_RIGHT + ")");
         } finally {
-            stmt.executeUpdate(Database.getReferentialIntegrityChecksStatement(true));
+            stmt.executeUpdate(StorageManager.getReferentialIntegrityChecksStatement(true));
         }
     }
 

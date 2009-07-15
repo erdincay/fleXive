@@ -32,6 +32,7 @@
 package com.flexive.ejb.beans;
 
 import com.flexive.core.Database;
+import com.flexive.core.storage.StorageManager;
 import static com.flexive.core.DatabaseConst.*;
 import com.flexive.core.security.UserTicketImpl;
 import com.flexive.core.structure.FxEnvironmentImpl;
@@ -393,7 +394,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
             ps.executeUpdate();
             success = true;
         } catch (SQLException exc) {
-            if (Database.isUniqueConstraintViolation(exc))
+            if (StorageManager.isUniqueConstraintViolation(exc))
                 throw new FxEntryExistsException("ex.scripting.name.notUnique", name);
             throw new FxCreateException(LOG, exc, "ex.scripting.create.failed", name, exc.getMessage());
         } finally {
@@ -604,7 +605,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
             ps.executeUpdate();
             success = true;
         } catch (SQLException exc) {
-            if (Database.isUniqueConstraintViolation(exc))
+            if (StorageManager.isUniqueConstraintViolation(exc))
                 throw new FxEntryExistsException("ex.scripting.mapping.assign.notUnique", scriptId, assignmentId);
             throw new FxCreateException(LOG, exc, "ex.scripting.mapping.assign.create.failed", scriptId, assignmentId, exc.getMessage());
         } finally {
@@ -666,7 +667,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
             ps.executeUpdate();
             success = true;
         } catch (SQLException exc) {
-            if (Database.isUniqueConstraintViolation(exc))
+            if (StorageManager.isUniqueConstraintViolation(exc))
                 throw new FxEntryExistsException("ex.scripting.mapping.type.notUnique", scriptId, typeId);
             throw new FxCreateException(LOG, exc, "ex.scripting.mapping.type.create.failed", scriptId, typeId, exc.getMessage());
         } finally {
@@ -852,7 +853,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
             ps.executeUpdate();
             success = true;
         } catch (SQLException exc) {
-            if (Database.isUniqueConstraintViolation(exc))
+            if (StorageManager.isUniqueConstraintViolation(exc))
                 throw new FxEntryExistsException("ex.scripting.mapping.assign.notUnique", scriptId, assignmentId);
             throw new FxUpdateException(LOG, exc, "ex.scripting.mapping.assign.update.failed", scriptId, assignmentId, exc.getMessage());
         } finally {
@@ -904,7 +905,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
             ps.executeUpdate();
             success = true;
         } catch (SQLException exc) {
-            if (Database.isUniqueConstraintViolation(exc))
+            if (StorageManager.isUniqueConstraintViolation(exc))
                 throw new FxEntryExistsException("ex.scripting.mapping.type.notUnique", scriptId, typeId);
             throw new FxUpdateException(LOG, exc, "ex.scripting.mapping.type.update.failed", scriptId, typeId, exc.getMessage());
         } finally {

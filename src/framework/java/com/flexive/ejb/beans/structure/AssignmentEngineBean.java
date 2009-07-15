@@ -194,7 +194,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                         ps.executeUpdate();
                         isok = true;
                     } catch (SQLException e) {
-                        if (!Database.isUniqueConstraintViolation(e) || counter >= 200)
+                        if (!StorageManager.isUniqueConstraintViolation(e) || counter >= 200)
                             throw e;
                     }
                     counter++;
@@ -281,7 +281,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             ctx.setRollbackOnly();
             throw new FxCreateException(e);
         } catch (SQLException e) {
-            final boolean uniqueConstraintViolation = Database.isUniqueConstraintViolation(e);
+            final boolean uniqueConstraintViolation = StorageManager.isUniqueConstraintViolation(e);
             ctx.setRollbackOnly();
             if (uniqueConstraintViolation)
                 throw new FxEntryExistsException("ex.structure.property.exists", property.getName(), (parentXPath.length() == 0 ? "/" : parentXPath));
@@ -732,7 +732,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             ctx.setRollbackOnly();
             throw new FxCreateException(e);
         } catch (SQLException e) {
-            final boolean uniqueConstraintViolation = Database.isUniqueConstraintViolation(e);
+            final boolean uniqueConstraintViolation = StorageManager.isUniqueConstraintViolation(e);
             ctx.setRollbackOnly();
             if (uniqueConstraintViolation)
                 throw new FxEntryExistsException("ex.structure.group.exists", group.getName(), (parentXPath.length() == 0 ? "/" : parentXPath));
@@ -1046,7 +1046,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
 
             success = true;
         } catch (SQLException e) {
-            final boolean uniqueConstraintViolation = Database.isUniqueConstraintViolation(e);
+            final boolean uniqueConstraintViolation = StorageManager.isUniqueConstraintViolation(e);
             ctx.setRollbackOnly();
             if (uniqueConstraintViolation)
                 throw new FxEntryExistsException("ex.structure.assignment.group.exists", group.getAlias(), group.getXPath());
@@ -1254,7 +1254,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             createInheritedAssignments(CacheAdmin.getEnvironment().getAssignment(newAssignmentId), con, sql,
                     group.getAssignedType().getDerivedTypes());
         } catch (SQLException e) {
-            final boolean uniqueConstraintViolation = Database.isUniqueConstraintViolation(e);
+            final boolean uniqueConstraintViolation = StorageManager.isUniqueConstraintViolation(e);
             ctx.setRollbackOnly();
             if (uniqueConstraintViolation)
                 throw new FxEntryExistsException("ex.structure.assignment.group.exists", group.getAlias(), group.getXPath());
@@ -1836,7 +1836,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             }
             success = true;
         } catch (SQLException e) {
-            final boolean uniqueConstraintViolation = Database.isUniqueConstraintViolation(e);
+            final boolean uniqueConstraintViolation = StorageManager.isUniqueConstraintViolation(e);
             ctx.setRollbackOnly();
             if (uniqueConstraintViolation)
                 throw new FxEntryExistsException("ex.structure.assignment.property.exists", original.getAlias(), original.getXPath());
@@ -1947,7 +1947,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                         pa.getAssignedType().getDerivedTypes());
             }
         } catch (SQLException e) {
-            final boolean uniqueConstraintViolation = Database.isUniqueConstraintViolation(e);
+            final boolean uniqueConstraintViolation = StorageManager.isUniqueConstraintViolation(e);
             if (!ctx.getRollbackOnly())
                 ctx.setRollbackOnly();
             if (uniqueConstraintViolation)
@@ -1985,7 +1985,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 return rs.getInt(1);
             throw new FxCreateException("ex.structure.position.failed", typeId, parentGroupAssignment == null ? FxAssignment.NO_PARENT : parentGroupAssignment.getId(), desiredPos);
         }
-        sql.append("SELECT ").append(Database.getIfFunction()).append("((SELECT COUNT(ID) FROM ").append(TBL_STRUCT_ASSIGNMENTS).
+        sql.append("SELECT ").append(StorageManager.getIfFunction()).append("((SELECT COUNT(ID) FROM ").append(TBL_STRUCT_ASSIGNMENTS).
                 //                             1                 2         3
                         append(" WHERE TYPEDEF=? AND PARENTGROUP=? AND POS=?)>0,(SELECT IFNULL(MAX(POS)+1,0) FROM ").
                 //                                                            4                 5  6

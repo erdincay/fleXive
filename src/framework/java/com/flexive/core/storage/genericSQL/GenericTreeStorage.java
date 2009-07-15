@@ -394,7 +394,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
         PreparedStatement ps = null;
         try {
             //                                                                 1                                                              2
-            ps = con.prepareStatement("UPDATE " + getTable(mode) + " SET DIRTY=?,MODIFIED_AT=" + Database.getTimestampFunction() + " WHERE ID=?");
+            ps = con.prepareStatement("UPDATE " + getTable(mode) + " SET DIRTY=?,MODIFIED_AT=" + StorageManager.getTimestampFunction() + " WHERE ID=?");
             ps.setBoolean(1, false); //live tree is never dirty
             ps.setLong(2, nodeId);
             ps.executeUpdate();
@@ -422,7 +422,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
         PreparedStatement ps = null;
         try {
             //                                                                 1                                                              2
-            ps = con.prepareStatement("UPDATE " + getTable(mode) + " SET DIRTY=?,MODIFIED_AT=" + Database.getTimestampFunction() + " WHERE ID=?");
+            ps = con.prepareStatement("UPDATE " + getTable(mode) + " SET DIRTY=?,MODIFIED_AT=" + StorageManager.getTimestampFunction() + " WHERE ID=?");
             ps.setBoolean(1, mode != FxTreeMode.Live); //live tree is never dirty
             ps.setLong(2, nodeId);
             ps.executeUpdate();
@@ -564,7 +564,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
      * @param ret result list
      * @param id unknown node id
      */
-    private void addUnknownNodeId(List<String> ret, long id) {
+    protected void addUnknownNodeId(List<String> ret, long id) {
         ret.add("/<unknown:" + id + ">");
     }
 
@@ -576,7 +576,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
      * @param path path to strip
      * @return stripped path
      */
-    private String stripNodeInfos(String path) {
+    protected String stripNodeInfos(String path) {
         if (StringUtils.isEmpty(path))
             return "";
         StringBuilder sbRet = new StringBuilder(path.length());
@@ -1023,7 +1023,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
 
             final String INSIDE_NODE = " LFT>=" + nodeInfo.getLeft() + " AND RGT<=" + nodeInfo.getRight() + " ";
             long childNodeDelta;
-            stmt.addBatch(Database.getReferentialIntegrityChecksStatement(false));
+            stmt.addBatch(StorageManager.getReferentialIntegrityChecksStatement(false));
             List<FxPK> references = new ArrayList<FxPK>(50);
             UserTicket ticket = FxContext.getUserTicket();
 
@@ -1085,7 +1085,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
                 stmt.addBatch("UPDATE " + getTable(mode) + " SET DIRTY=TRUE WHERE ID=" + nodeInfo.getParentId());
             }
 
-            stmt.addBatch(Database.getReferentialIntegrityChecksStatement(true));
+            stmt.addBatch(StorageManager.getReferentialIntegrityChecksStatement(true));
             if (mode == FxTreeMode.Live && exists(con, FxTreeMode.Edit, nodeId)) {
                 //check if a node with the same id that has been removed in the live tree exists in the edit tree,
                 //the node and all its children will be flagged as dirty in the edit tree
@@ -1152,7 +1152,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
         // Set the data
         PreparedStatement ps = null;
         try {
-            ps = con.prepareStatement("UPDATE " + getTable(mode) + " SET TEMPLATE=?,DIRTY=TRUE,MODIFIED_AT=" + Database.getTimestampFunction() + " WHERE ID=" + nodeId);
+            ps = con.prepareStatement("UPDATE " + getTable(mode) + " SET TEMPLATE=?,DIRTY=TRUE,MODIFIED_AT=" + StorageManager.getTimestampFunction() + " WHERE ID=" + nodeId);
             if (data == null)
                 ps.setNull(1, java.sql.Types.VARCHAR);
             else
@@ -1176,12 +1176,12 @@ public abstract class GenericTreeStorage implements TreeStorage {
         Statement stmt = null;
         try {
             stmt = con.createStatement();
-            stmt.addBatch(Database.getReferentialIntegrityChecksStatement(false));
+            stmt.addBatch(StorageManager.getReferentialIntegrityChecksStatement(false));
             stmt.addBatch("DELETE FROM " + getTable(FxTreeMode.Live));
             stmt.addBatch("INSERT INTO " + getTable(FxTreeMode.Live) + " SELECT * FROM " + getTable(mode));
             stmt.addBatch("UPDATE " + getTable(mode) + " SET DIRTY=FALSE");
             stmt.addBatch("UPDATE " + getTable(FxTreeMode.Live) + " SET DIRTY=FALSE");
-            stmt.addBatch(Database.getReferentialIntegrityChecksStatement(true));
+            stmt.addBatch(StorageManager.getReferentialIntegrityChecksStatement(true));
             stmt.executeBatch();
         } catch (Throwable t) {
             throw new FxTreeException(LOG, "ex.tree.activate.all.failed", mode.name(), t.getMessage());

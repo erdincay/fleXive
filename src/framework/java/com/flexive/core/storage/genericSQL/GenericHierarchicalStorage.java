@@ -31,7 +31,6 @@
  ***************************************************************/
 package com.flexive.core.storage.genericSQL;
 
-import com.flexive.core.Database;
 import com.flexive.core.DatabaseConst;
 import static com.flexive.core.DatabaseConst.*;
 import com.flexive.core.LifeCycleInfoImpl;
@@ -2025,7 +2024,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         Statement stmt = null;
         try {
             stmt = con.createStatement();
-            stmt.executeUpdate(Database.getReferentialIntegrityChecksStatement(true));
+            stmt.executeUpdate(StorageManager.getReferentialIntegrityChecksStatement(true));
         } finally {
             if (stmt != null)
                 stmt.close();
@@ -2036,7 +2035,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         Statement stmt = null;
         try {
             stmt = con.createStatement();
-            stmt.executeUpdate(Database.getReferentialIntegrityChecksStatement(false));
+            stmt.executeUpdate(StorageManager.getReferentialIntegrityChecksStatement(false));
         } finally {
             if (stmt != null)
                 stmt.close();

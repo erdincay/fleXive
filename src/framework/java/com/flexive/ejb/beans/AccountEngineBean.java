@@ -34,6 +34,7 @@ package com.flexive.ejb.beans;
 import com.flexive.core.Database;
 import static com.flexive.core.DatabaseConst.*;
 import com.flexive.core.LifeCycleInfoImpl;
+import com.flexive.core.storage.StorageManager;
 import com.flexive.core.security.LoginLogoutHandler;
 import com.flexive.core.security.UserTicketImpl;
 import com.flexive.core.security.UserTicketStore;
@@ -517,7 +518,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             // Return the id
             return newId;
         } catch (SQLException exc) {
-            final boolean uniqueConstraintViolation = Database.isUniqueConstraintViolation(exc);
+            final boolean uniqueConstraintViolation = StorageManager.isUniqueConstraintViolation(exc);
             ctx.setRollbackOnly();
             if (uniqueConstraintViolation) {
                 throw new FxEntryExistsException(LOG, exc, "ex.account.userExists", loginName, userName);
@@ -1288,7 +1289,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
                     append("</new>");
             EJBLookup.getHistoryTrackerEngine().trackData(sbHistory.toString(), "history.account.update", account.getLoginName());
         } catch (SQLException exc) {
-            final boolean uniqueConstraintViolation = Database.isUniqueConstraintViolation(exc);
+            final boolean uniqueConstraintViolation = StorageManager.isUniqueConstraintViolation(exc);
             ctx.setRollbackOnly();
             if (uniqueConstraintViolation) {
                 throw new FxEntryExistsException(LOG, "ex.account.userExists", name, loginName);
@@ -1358,7 +1359,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             // Ensure any active ticket of the updated user are refreshed
             UserTicketStore.flagDirtyHavingUserId(account.getId());
         } catch (SQLException exc) {
-            final boolean uniqueConstraintViolation = Database.isUniqueConstraintViolation(exc);
+            final boolean uniqueConstraintViolation = StorageManager.isUniqueConstraintViolation(exc);
             ctx.setRollbackOnly();
             if (uniqueConstraintViolation) {
                 throw new FxEntryExistsException(LOG, "ex.account.userExists", name, loginName);

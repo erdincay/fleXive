@@ -31,15 +31,13 @@
  ***************************************************************/
 package com.flexive.core.search;
 
-import com.flexive.shared.exceptions.FxSqlSearchException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
-import com.flexive.shared.value.BinaryDescriptor;
+import com.flexive.shared.exceptions.FxSqlSearchException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.sql.Connection;
 import java.util.*;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 /**
  * Interface for DB specific DataSelectors
@@ -122,6 +120,23 @@ public abstract class DataSelector {
      * @return database vendor specific statement to increase a counter
      */
     public String getCounterStatement(String counter) {
-        return "@"+counter+":=@"+counter+"+1 "+counter;
+        return "@" + counter + ":=@" + counter + "+1 " + counter;
     }
+
+    /**
+     * Select all desired rows for the resultset
+     *
+     * @param con an open and valid connection
+     * @return SQL statement
+     * @throws FxSqlSearchException on errors
+     */
+    public abstract String build(Connection con) throws FxSqlSearchException;
+
+    /**
+     * Clean up used resources
+     *
+     * @param con an open and valid connection
+     * @throws com.flexive.shared.exceptions.FxSqlSearchException on errors
+     */
+    public abstract void cleanup(Connection con) throws FxSqlSearchException;
 }

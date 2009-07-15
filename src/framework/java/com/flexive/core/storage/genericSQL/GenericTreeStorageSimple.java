@@ -31,9 +31,9 @@
  ***************************************************************/
 package com.flexive.core.storage.genericSQL;
 
-import com.flexive.core.Database;
 import com.flexive.core.storage.FxTreeNodeInfo;
 import com.flexive.core.storage.FxTreeNodeInfoSimple;
+import com.flexive.core.storage.StorageManager;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.content.FxPermissionUtils;
@@ -64,14 +64,14 @@ public class GenericTreeStorageSimple extends GenericTreeStorage {
      */
     @Override
     protected void wipeTree(FxTreeMode mode, Statement stmt, FxPK rootPK) throws SQLException {
-        stmt.execute(Database.getReferentialIntegrityChecksStatement(false));
+        stmt.execute(StorageManager.getReferentialIntegrityChecksStatement(false));
         try {
             stmt.executeUpdate("DELETE FROM " + getTable(mode));
             stmt.executeUpdate("INSERT INTO " + getTable(mode) + " (ID,NAME,MODIFIED_AT,DIRTY,PARENT,DEPTH,CHILDCOUNT,TOTAL_CHILDCOUNT,REF,TEMPLATE,LFT,RGT) " +
-                    "VALUES (" + ROOT_NODE + ",'Root'," + Database.getTimestampFunction() + ",FALSE,NULL,1,0,0," + rootPK.getId() +
+                    "VALUES (" + ROOT_NODE + ",'Root'," + StorageManager.getTimestampFunction() + ",FALSE,NULL,1,0,0," + rootPK.getId() +
                     ",NULL,1,2)");
         } finally {
-            stmt.executeUpdate(Database.getReferentialIntegrityChecksStatement(true));
+            stmt.executeUpdate(StorageManager.getReferentialIntegrityChecksStatement(true));
         }
     }
 
@@ -202,7 +202,7 @@ public class GenericTreeStorageSimple extends GenericTreeStorage {
             ps = con.prepareStatement("INSERT INTO " + getTable(mode) + " (ID,PARENT,DEPTH,DIRTY,REF,LFT,RGT," +
                     "TOTAL_CHILDCOUNT,CHILDCOUNT,NAME,MODIFIED_AT,TEMPLATE) VALUES " +
                     "(" + nci.id + "," + parentNodeId + "," + (parentNode.getDepth() + 1) +
-                    ",?," + nci.reference.getId() + ",?,?,0,0,?," + Database.getTimestampFunction() + ",?)");
+                    ",?," + nci.reference.getId() + ",?,?,0,0,?," + StorageManager.getTimestampFunction() + ",?)");
             ps.setBoolean(1, mode != FxTreeMode.Live);
             ps.setLong(2, left);
             ps.setLong(3, right);

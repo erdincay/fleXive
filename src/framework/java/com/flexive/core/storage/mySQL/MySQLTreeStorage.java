@@ -33,6 +33,20 @@ package com.flexive.core.storage.mySQL;
 
 import com.flexive.core.storage.TreeStorage;
 import com.flexive.core.storage.genericSQL.GenericTreeStorageSpreaded;
+import com.flexive.shared.FxLanguage;
+import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.exceptions.FxLoadException;
+import com.flexive.shared.tree.FxTreeMode;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * MySQL specific tree storage implementation
@@ -40,6 +54,8 @@ import com.flexive.core.storage.genericSQL.GenericTreeStorageSpreaded;
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public class MySQLTreeStorage extends GenericTreeStorageSpreaded {
+    private static final Log LOG = LogFactory.getLog(MySQLTreeStorage.class);
+
     private static final MySQLTreeStorage instance = new MySQLTreeStorage();
 
     /**
@@ -49,5 +65,53 @@ public class MySQLTreeStorage extends GenericTreeStorageSpreaded {
      */
     public static TreeStorage getInstance() {
         return instance;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<String> getLabels(Connection con, FxTreeMode mode, long labelPropertyId, FxLanguage language, boolean stripNodeInfos, long... nodeIds) throws FxApplicationException {
+        List<String> ret = new ArrayList<String>(nodeIds.length);
+        if (nodeIds.length == 0)
+            return ret;
+
+        PreparedStatement ps = null;
+        ResultSet rs;
+        try {
+            ps = con.prepareStatement("SELECT tree_FTEXT1024_Chain(?,?,?,?)");
+            ps.setInt(2, (int) language.getId());
+            ps.setLong(3, labelPropertyId);
+            ps.setBoolean(4, mode == FxTreeMode.Live);
+            for (long id : nodeIds) {
+                ps.setLong(1, id);
+                try {
+                    rs = ps.executeQuery();
+                    if (rs != null && rs.next()) {
+                        final String path = rs.getString(1);
+                        if (!StringUtils.isEmpty(path))
+                            ret.add(stripNodeInfos ? stripNodeInfos(path) : path);
+                        else
+                            addUnknownNodeId(ret, id);
+                    } else
+                        addUnknownNodeId(ret, id);
+                } catch (SQLException e) {
+                    if ("22001".equals(e.getSQLState())) {
+                        //invalid node id in MySQL
+                        addUnknownNodeId(ret, id);
+                    } else
+                        throw e;
+                }
+            }
+            return ret;
+        } catch (SQLException e) {
+            throw new FxLoadException(LOG, e, "ex.db.sqlError", e.getMessage());
+        } finally {
+            try {
+                if (ps != null) ps.close();
+            } catch (Exception e) {
+                //ignore
+            }
+        }
     }
 }
