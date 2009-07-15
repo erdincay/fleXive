@@ -652,7 +652,7 @@ public class PropertyEntry {
 
     /**
      * Overrides the data type this entry represents, e.g. by selectors that load property
-     * fields from an external table like the {@link com.flexive.core.search.genericSQL.GenericSQLACLSelector}.
+     * fields from an external table like the {@link com.flexive.core.search.genericSQL.GenericSQLForeignTableSelector}.
      *
      * @param type  the data type of this entry
      */

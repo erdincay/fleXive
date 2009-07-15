@@ -30,10 +30,9 @@
 
         <!-- Save content using the FxContentViewBean, pass the content instance
              stored in component_content via f:setPropertyActionListener -->
-        <h:commandLink action="#{fxContentViewBean.save}">
+        <h:commandButton action="#{fxContentViewBean.save}" value="Publish">
             <f:setPropertyActionListener target="#{fxContentViewBean.content}" value="#{entry_content}"/>
-            Publish
-        </h:commandLink>
+        </h:commandButton>
 
     </fx:content>
 </h:form>

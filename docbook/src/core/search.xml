@@ -555,6 +555,76 @@ ORDER BY 2]]></programlisting>
                             </variablelist>
                         </td>
                     </tr>
+
+                    <tr>
+                        <td>typedef (FXS_TYPEDEF)</td>
+                        <td>
+                            Selects the type ID of the content instance.
+                            <variablelist>
+                                <varlistentry>
+                                    <term>
+                                        <code>typedef.name</code>
+                                    </term>
+                                    <listitem>
+                                        <para>
+                                            The unique type name.
+                                        </para>
+                                    </listitem>
+                                </varlistentry>
+                                <varlistentry>
+                                    <term>
+                                        <code>typedef.description</code>
+                                    </term>
+                                    <listitem>
+                                        <para>
+                                            The type description in the language selected for the query. 
+                                        </para>
+                                    </listitem>
+                                </varlistentry>
+                                <varlistentry>
+                                    <term>
+                                        <code>typedef.acl</code>
+                                    </term>
+                                    <listitem>
+                                        <para>
+                                            The type ACL.
+                                        </para>
+                                    </listitem>
+                                </varlistentry>
+                                <varlistentry>
+                                    <term>
+                                        <code>typedef.parent</code>
+                                    </term>
+                                    <listitem>
+                                        <para>
+                                            The parent type ID.
+                                        </para>
+                                    </listitem>
+                                </varlistentry>
+                                <varlistentry>
+                                    <term>
+                                        <code>typedef.workflow</code>
+                                    </term>
+                                    <listitem>
+                                        <para>
+                                            Returns 1 if workflows are enabled for this type.
+                                        </para>
+                                    </listitem>
+                                </varlistentry>
+                                <varlistentry>
+                                    <term>
+                                        <code>typedef.trackhistory</code>
+                                    </term>
+                                    <listitem>
+                                        <para>
+                                            Returns 1 if history tracking is enabled for this type.
+                                        </para>
+                                    </listitem>
+                                </varlistentry>
+                            </variablelist>
+                        </td>
+                    </tr>
+
                 </tbody>
             </table>
         </section>

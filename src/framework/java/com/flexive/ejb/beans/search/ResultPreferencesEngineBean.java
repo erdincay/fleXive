@@ -82,7 +82,10 @@ public class ResultPreferencesEngineBean implements ResultPreferencesEngine, Res
                 // if no global default is defined, use hardcoded default settings
                 preferences = new ResultPreferences(Arrays.asList(
                         new ResultColumnInfo(Table.CONTENT, "@pk", null),
-                        new ResultColumnInfo(Table.CONTENT, "caption", null)
+                        new ResultColumnInfo(Table.CONTENT, "typedef", "description"),
+                        new ResultColumnInfo(Table.CONTENT, "caption", null),
+                        new ResultColumnInfo(Table.CONTENT, "modified_at", null),
+                        new ResultColumnInfo(Table.CONTENT, "modified_by", "username")
                 ), Arrays.asList(
                         new ResultOrderByInfo(Table.CONTENT, "@pk", null, SortDirection.ASCENDING)
                 ), 25, 100);
@@ -195,13 +198,13 @@ public class ResultPreferencesEngineBean implements ResultPreferencesEngine, Res
             }
             try {
                 if (info.getPropertyName().startsWith("#")) {
-                    environment.getAssignment(info.getPropertyName().substring(1));
+                    environment.getAssignment(stripTableSelectors(info.getPropertyName().substring(1)));
                 } else {
-                    environment.getProperty(info.getPropertyName());
+                    environment.getProperty(stripTableSelectors(info.getPropertyName()));
                 }
             } catch (FxRuntimeException e) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Removing property " + info.getPropertyName()
+                if (LOG.isInfoEnabled()) {
+                    LOG.info("Removing property " + info.getPropertyName()
                             + " for user " + FxContext.getUserTicket());
                 }
                 rpe.removeSelectedColumn(info);
@@ -215,13 +218,13 @@ public class ResultPreferencesEngineBean implements ResultPreferencesEngine, Res
             }
             try {
                 if (info.getPropertyName().startsWith("#")) {
-                    environment.getAssignment(info.getPropertyName().substring(1));
+                    environment.getAssignment(stripTableSelectors(info.getPropertyName().substring(1)));
                 } else {
-                    environment.getProperty(info.getPropertyName());
+                    environment.getProperty(stripTableSelectors(info.getPropertyName()));
                 }
             } catch (FxRuntimeException e) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Removing property " + info.getPropertyName()
+                if (LOG.isInfoEnabled()) {
+                    LOG.info("Removing property " + info.getPropertyName()
                             + " for user " + FxContext.getUserTicket());
                 }
                 rpe.removeOrderByColumn(info);
@@ -229,6 +232,11 @@ public class ResultPreferencesEngineBean implements ResultPreferencesEngine, Res
         }
         rpe.setLastChecked(System.currentTimeMillis());
         return rpe;
+    }
+
+    private String stripTableSelectors(String name) {
+        final int pos = name.indexOf('.');
+        return pos != -1 ? name.substring(0, pos) : name;
     }
 
     private static class LoadResult {

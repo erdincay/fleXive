@@ -49,6 +49,9 @@ public class SelectedValue
             if (value.hasFunction()) {
                 name = value.getFunctionsStart() + name + value.getFunctionsEnd();
             }
+            if (value instanceof Property && ((Property) value).getField() != null) {
+                name += "." + ((Property) value).getField();
+            }
             return name;
         }
         return alias;

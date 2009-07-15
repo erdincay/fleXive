@@ -182,7 +182,15 @@ public class ResultPreferencesBean implements Serializable {
     }
 
     public void addColumnProperty() {
-        getResultPreferences().addSelectedColumn(new ResultColumnInfo(Table.CONTENT, addPropertyName, null));
+        // split into property name and (optional) suffix
+        final String[] name = StringUtils.split(addPropertyName, ".", 2);
+        getResultPreferences().addSelectedColumn(
+                new ResultColumnInfo(
+                        Table.CONTENT,
+                        name[0],
+                        name.length > 1 ? name[1] : null
+                )
+        );
         addPropertyName = null;
         properties = null;  // refresh available properties
     }
@@ -504,8 +512,24 @@ public class ResultPreferencesBean implements Serializable {
         // add property label
         label.append(assignment.getProperty().getLabel());
 
+        final String value;
+        if ("ROOT/CAPTION".equals(assignment.getXPath())) {
+            // the caption property is often renamed (which breaks assignment inheritance)
+            value = "CAPTION";
+        } else if ("ROOT/TYPEDEF".equals(assignment.getXPath())) {
+            // select the type label instead
+            value = "TYPEDEF.DESCRIPTION";
+        } else if ("ROOT/ACL".equals(assignment.getXPath())) {
+            value = "ACL.LABEL";
+        } else if ("ROOT/STEP".equals(assignment.getXPath())) {
+            value = "STEP.LABEL";
+        } else if ("ROOT/CREATED_BY".equals(assignment.getXPath()) || "ROOT/MODIFIED_BY".equals(assignment.getXPath())) {
+            value = assignment.getProperty().getName() + ".USERNAME";
+        } else {
+            value = "#" + assignment.getXPath();
+        }
         return new SelectItem(
-                assignment.getProperty().getName(),
+                value,
                 label.toString(),
                 null,
                 // disable properties/assignments that are already selected
@@ -565,6 +589,7 @@ public class ResultPreferencesBean implements Serializable {
     public Map<String, String> getPropertyLabelMap() {
         if (propertyLabelMap == null) {
             propertyLabelMap = FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<String, String>() {
+                private static final long serialVersionUID = -1140857482270400036L;
                 private FxEnvironment environment = CacheAdmin.getFilteredEnvironment();
 
                 public String get(Object key) {
@@ -575,13 +600,22 @@ public class ResultPreferencesBean implements Serializable {
                     if (name.charAt(0) == '@') {
                         return MessageBean.getInstance().getMessage("ResultPreferences.label.property." + name.substring(1));
                     } else if (name.charAt(0) == '#') {
-                        return environment.getAssignment(name.substring(1)).getLabel().getBestTranslation();
+                        return environment.getAssignment(
+                                stripTableSelectors(name.substring(1))
+                        ).getDisplayName(true);
                     } else {
-                        return environment.getProperty(name).getLabel().getBestTranslation();
+                        return environment.getProperty(
+                                stripTableSelectors(name)
+                        ).getLabel().getBestTranslation();
                     }
                 }
             });
         }
         return propertyLabelMap;
+    }
+
+    private String stripTableSelectors(String name) {
+        final int pos = name.indexOf('.');
+        return pos != -1 ? name.substring(0, pos) : name;
     }
 }

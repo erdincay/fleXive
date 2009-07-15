@@ -75,7 +75,12 @@ public class FxResultRow implements Serializable {
     }
 
     public int getColumnIndex(String columnName) {
-        return resultSet.getColumnIndex(columnName);
+        final int columnIndex = resultSet.getColumnIndex(columnName);
+        if (columnIndex == -1) {
+            throw new FxNotFoundException("ex.sqlSearch.resultRow.column.notfound",
+                    columnName, Arrays.asList(resultSet.getColumnNames())).asRuntimeException();
+        }
+        return columnIndex;
     }
 
     public Object getValue(int column) {
@@ -100,10 +105,6 @@ public class FxResultRow implements Serializable {
 
     public Object getValue(String columnName) {
         final int columnIndex = getColumnIndex(columnName);
-        if (columnIndex == -1) {
-            throw new FxNotFoundException("ex.sqlSearch.resultRow.column.notfound",
-                    columnName, Arrays.asList(resultSet.getColumnNames())).asRuntimeException();
-        }
         return getData()[columnIndex - 1];
     }
 

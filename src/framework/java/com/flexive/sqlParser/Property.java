@@ -37,6 +37,8 @@ import java.util.StringTokenizer;
 import java.util.List;
 import java.util.Collection;
 
+import org.apache.commons.lang.StringUtils;
+
 /**
  * Property reference class.
  *
@@ -66,7 +68,7 @@ public class Property extends Value {
     }
 
     public Property(FxStatement stmt, String value) {
-        super(value.indexOf('#') == -1 ? value : value.substring(1));
+        super(null);
         // decode value
         assignment = value.charAt(0) == '#';
         final StringTokenizer st = new StringTokenizer(assignment ? value.substring(1) : value, ".", false);
@@ -78,6 +80,7 @@ public class Property extends Value {
             property = tableAlias;
             tableAlias = "co";
         }
+        setValue(property);
     }
 
     public void publishTableAliases(Collection<String> aliases) {
@@ -91,6 +94,7 @@ public class Property extends Value {
             // table --> property, property --> field
             field = property;
             property = tableAlias;
+            setValue(property);
             tableAlias = "co";
         }
         // do nothing if tableAlias, property and field are set - in this case

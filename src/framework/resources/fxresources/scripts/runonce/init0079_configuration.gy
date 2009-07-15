@@ -44,7 +44,8 @@ import com.flexive.shared.search.*;
  * Sets the default result preferences for the backend application.
  */
 void setupResultPreferences() {
-    // default list view
+    // default list view - disabled because the default settings from ResultPreferencesEngine work anyway
+/*
     EJBLookup.getResultPreferencesEngine().saveSystemDefault(
             new ResultPreferences(
                 [new ResultColumnInfo("@pk"),
@@ -53,6 +54,7 @@ void setupResultPreferences() {
                 25, 0
             ), -1,
             ResultViewType.LIST, AdminResultLocations.values());
+  */
     // default thumbnail view
     EJBLookup.getResultPreferencesEngine().saveSystemDefault(
             new ResultPreferences(

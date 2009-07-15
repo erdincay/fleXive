@@ -187,8 +187,8 @@ public class FxResultSetImpl implements Serializable, FxResultSet {
                     name = name.substring(name.lastIndexOf('('), name.indexOf(')'));
                 }
                 if (name.indexOf('.') > 0) {
-                    // strip leading prefix
-                    name = name.substring(name.indexOf('.') + 1);
+                    // strip table column
+                    name = name.substring(0, name.indexOf('.'));
                 }
                 if (name.indexOf('@') != -1) {
                     columnLabels[i] = FxSharedUtils.getMessage(
@@ -196,14 +196,18 @@ public class FxResultSetImpl implements Serializable, FxResultSet {
                             "shared.result.columns." + name
                     ).toString();
                 } else {
-                    FxString label;
+                    String label;
                     try {
-                        label = CacheAdmin.getEnvironment().getAssignment(name).getLabel();
+                        label = CacheAdmin.getEnvironment().getAssignment(name).getLabel().getBestTranslation();
                     } catch (FxRuntimeException e) {
                         // assignment not found, try property
-                        label = CacheAdmin.getEnvironment().getProperty(name).getLabel();
+                        try {
+                            label = CacheAdmin.getEnvironment().getProperty(name).getLabel().getBestTranslation();
+                        } catch (FxRuntimeException e2) {
+                            label = name;
+                        }
                     }
-                    columnLabels[i] = label.getBestTranslation();
+                    columnLabels[i] = label;
                 }
             }
         }

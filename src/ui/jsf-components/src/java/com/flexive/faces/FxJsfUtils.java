@@ -174,19 +174,7 @@ public class FxJsfUtils {
                     + FxFormatUtils.escapeForJavaScript(binary.getBestTranslation().getName())
                     + "\" class=\"" + Thumbnail.CSS_CLASS + "\"/>";
         } else if (value instanceof FxValue) {
-            final FxValue fxValue = (FxValue) value;
-            if (!fxValue.isEmpty() && propertyName != null) {
-                // resolve system-internal properties
-                if ("ACL".equals(propertyName)) {
-                    return CacheAdmin.getEnvironment().getACL((Long) fxValue.getBestTranslation()).getLabel().toString();
-                } else if ("TYPEDEF".equals(propertyName)) {
-                    return CacheAdmin.getEnvironment().getType((Long) fxValue.getBestTranslation()).getLabel().toString();
-                } else if ("CREATED_BY".equals(propertyName) || "MODIFIED_BY".equals(propertyName)) {
-                    return resolveUserId((Long) fxValue.getBestTranslation()); 
-                }
-            }
-            //noinspection unchecked
-            return FxValueRendererFactory.getInstance().format(fxValue);
+            return FxValueRendererFactory.getInstance().format((FxValue) value);
         } else if (value instanceof FxPK) {
             return linkFormatter.format(linkFormat, (FxPK) value);
         } else if (value instanceof FxPaths) {

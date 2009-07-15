@@ -118,6 +118,10 @@ public class Value {
         return value;
     }
 
+    protected void setValue(Object value) {
+        this.value = value;
+    }
+
     /**
      * Returns the FxSQL representaiton of all functions that wrap the value in the correct order.
      *

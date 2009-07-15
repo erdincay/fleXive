@@ -119,10 +119,7 @@ public class AssignmentValueNode extends QueryValueNode<FxValue, PropertyValueCo
     public FxString getLabel() {
         final String typeLabel = getAssignment().getAssignedType().getId() != FxType.ROOT_ID
                 ? getAssignment().getAssignedType().getDisplayName() + "/" : "";
-        return new FxString(typeLabel
-                + (getAssignment().getParentGroupAssignment() != null
-                    ? getAssignment().getParentGroupAssignment().getDisplayName() + "/" : "")
-                + getAssignment().getDisplayName());
+        return new FxString(typeLabel + getAssignment().getDisplayName(true));
     }
 
     /** {@inheritDoc} */

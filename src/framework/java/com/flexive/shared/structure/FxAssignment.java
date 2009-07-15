@@ -374,7 +374,29 @@ public abstract class FxAssignment implements Serializable, Comparable<FxAssignm
      * @return the assignment's name as it should be displayed to the user
      */
     public String getDisplayName() {
-        return getDisplayLabel().getBestTranslation();
+        return getDisplayName(false);
+    }
+
+    /**
+     * Return a human-readable string to present this assignment to the user.
+     *
+     * @param includePath   if the path to the assignment (the parent groups) should be included
+     * @return  a human-readable string to present this assignment to the user.
+     * @since 3.1
+     */
+    public String getDisplayName(boolean includePath) {
+        if (!includePath) {
+            return getDisplayLabel().getBestTranslation(); 
+        }
+        // add parent group labels
+        final StringBuilder out = new StringBuilder();
+        if (parentGroupAssignment != null) {
+            out.append(parentGroupAssignment.getDisplayName(true)).append('/');
+        }
+
+        // add assignment label
+        out.append(getDisplayLabel().getBestTranslation());
+        return out.toString();
     }
 
     /**

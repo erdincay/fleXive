@@ -396,7 +396,7 @@ public class SearchEngineTest {
                 .orderBy(4, SortDirection.DESCENDING)
                 .filterType(TEST_TYPE).getResult(), 4);
         try {
-            new SqlQueryBuilder().select("@pk", "id", "@*").orderBy(5, SortDirection.ASCENDING).getResult();
+            new SqlQueryBuilder().select("@pk", "id", "@*").orderBy(8, SortDirection.ASCENDING).getResult();
             fail("Selected result preference column should not be present in result set");
         } catch (FxApplicationException e) {
             // pass - the exception was thrown by the search engine, so it's a FxApplicationException
@@ -926,7 +926,13 @@ public class SearchEngineTest {
             assertTrue(result.getResultRow(0).getPk(1).getVersion() == pk.getVersion());
         } finally {
             if (folderNodeId != -1) {
-                getTreeEngine().remove(FxTreeNodeEdit.createNew("").setId(folderNodeId), true, true);
+                try {
+                    FxContext.get().runAsSystem();
+                    getTreeEngine().remove(FxTreeNodeEdit.createNew("").setId(folderNodeId), true, true);
+                } finally {
+                    FxContext.get().stopRunAsSystem();
+                }
+
             }
         }
     }
@@ -1192,6 +1198,14 @@ public class SearchEngineTest {
     @Test
     public void orderByAssignmentTest() throws FxApplicationException {
         final FxPropertyAssignment assignment = getTestPropertyAssignment("number");
+        final FxResultSet result = new SqlQueryBuilder().select("id", assignment.getXPath())
+                .orderBy(assignment.getXPath(), SortDirection.ASCENDING).getResult();
+        assertTrue(result.getRowCount() > 0);
+    }
+
+    @Test
+    public void orderByNestedAssignmentTest() throws FxApplicationException {
+        final FxPropertyAssignment assignment = getTestPropertyAssignment("groupTop/number");
         final FxResultSet result = new SqlQueryBuilder().select("id", assignment.getXPath())
                 .orderBy(assignment.getXPath(), SortDirection.ASCENDING).getResult();
         assertTrue(result.getRowCount() > 0);

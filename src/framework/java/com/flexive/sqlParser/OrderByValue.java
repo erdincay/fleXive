@@ -91,10 +91,11 @@ public class OrderByValue extends Constant {
      * @return  true if the given {@link SelectedValue} can be used for sorting.
      */
     public boolean isUsableForSorting(SelectedValue sv) {
-        if (getValue().charAt(0) == '#') {
-            return sv.getAlias().equals(getValue().substring(1));
-        }
-        return sv.getAlias().equals(getValue());
+        final String alias = getValue().charAt(0) == '#' ? getValue().substring(1) : getValue();
+        return sv.getAlias().equalsIgnoreCase(alias)
+                // also try table alias + column alias
+                || (sv.getValue() instanceof Property
+                && (((Property) sv.getValue()).getTableAlias() + "." + sv.getAlias()).equalsIgnoreCase(alias));
     }
 
     @Override

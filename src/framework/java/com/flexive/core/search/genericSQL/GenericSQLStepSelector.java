@@ -44,40 +44,19 @@ import com.flexive.sqlParser.Property;
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-public class GenericSQLStepSelector extends GenericSQLGenericSelector {
-    private static final String ML_SEL = "(SELECT def.name FROM " + DatabaseConst.TBL_CONTENT + " ct," + DatabaseConst.TBL_STEP + " step, " +
+public class GenericSQLStepSelector extends GenericSQLForeignTableSelector {
+    private static final String ML_SEL = "(SELECT deft.name FROM " + DatabaseConst.TBL_CONTENT + " ct," + DatabaseConst.TBL_STEP + " step, " +
             DatabaseConst.TBL_STEPDEFINITION + " def," + DatabaseConst.TBL_STEPDEFINITION + DatabaseConst.ML + " deft" +
             " WHERE \n" +
             "ct.id=filter.id AND ct.ver=filter.ver AND step.id=ct.step AND step.stepdef=def.id AND" +
             " deft.id=def.id AND ";
 
     public GenericSQLStepSelector() {
-        super(DatabaseConst.TBL_STEP, "id");
+        super("step", DatabaseConst.TBL_STEP, "id", true, "label");
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void apply(Property prop, PropertyEntry entry, StringBuffer statement) throws FxSqlSearchException {
-        if ("LABEL".equalsIgnoreCase(prop.getField())) {
-            statement.delete(0, statement.length());
-            final long lang = FxContext.getUserTicket().getLanguage().getId();
-            statement.append(("ifnull(\n" +
-                    ML_SEL + "lang=" + lang + " limit 1) ,\n" +
-                    ML_SEL + "deflang=true limit 1) \n" +
-                    ")"));
-            entry.overrideDataType(FxDataType.String1024);
-            return;
-        }
-        super.apply(prop, entry, statement);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String getAllowedFields() {
-        return super.getAllowedFields() + ",LABEL";
+    protected String getLabelSelect() {
+        return ML_SEL;
     }
 }

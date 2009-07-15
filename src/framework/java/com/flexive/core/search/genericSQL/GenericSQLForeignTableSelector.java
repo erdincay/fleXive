@@ -32,11 +32,13 @@
 package com.flexive.core.search.genericSQL;
 
 import com.flexive.core.Database;
+import com.flexive.core.DatabaseConst;
 import com.flexive.core.search.FieldSelector;
 import com.flexive.core.search.PropertyEntry;
 import com.flexive.shared.exceptions.FxSqlSearchException;
 import com.flexive.shared.structure.FxDataType;
 import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.FxContext;
 import com.flexive.sqlParser.Property;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -55,20 +57,26 @@ import java.util.HashMap;
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-class GenericSQLGenericSelector implements FieldSelector {
-    private static final Log LOG = LogFactory.getLog(GenericSQLGenericSelector.class);
+class GenericSQLForeignTableSelector implements FieldSelector {
+    private static final Log LOG = LogFactory.getLog(GenericSQLForeignTableSelector.class);
 
     private final Map<String, FxDataType> columns = new HashMap<String, FxDataType>();
     private final String tableName;
     private final String linksOn;
+    private final String mainColumn;
+    private final boolean hasTranslationTable;
+    private final String translatedColumn;
 
-    protected GenericSQLGenericSelector(String tableName, String linksOn) {
+    protected GenericSQLForeignTableSelector(String mainColumn, String tableName, String linksOn, boolean hasTranslationTable, String translatedColumn) {
         FxSharedUtils.checkParameterNull(tableName, "tableName");
         FxSharedUtils.checkParameterNull(linksOn, "linksOn");
         Connection con = null;
         Statement stmt = null;
         this.tableName = tableName;
         this.linksOn = linksOn;
+        this.mainColumn = mainColumn;
+        this.hasTranslationTable = hasTranslationTable;
+        this.translatedColumn = translatedColumn != null ? translatedColumn.toUpperCase() : null;
         try {
             con = Database.getDbConnection();
             stmt = con.createStatement();
@@ -123,7 +131,7 @@ class GenericSQLGenericSelector implements FieldSelector {
             LOG.error(ex.getMessage(), ex);
             throw ex.asRuntimeException();
         } finally {
-            Database.closeObjects(GenericSQLGenericSelector.class, con, stmt);
+            Database.closeObjects(GenericSQLForeignTableSelector.class, con, stmt);
         }
     }
 
@@ -131,6 +139,17 @@ class GenericSQLGenericSelector implements FieldSelector {
      * {@inheritDoc}
      */
     public void apply(Property prop, PropertyEntry entry, StringBuffer statement) throws FxSqlSearchException {
+        if (hasTranslationTable && translatedColumn.equalsIgnoreCase(prop.getField())) {
+            // select label from translation table
+            statement.delete(0, statement.length());
+            final long lang = FxContext.getUserTicket().getLanguage().getId();
+            statement.append(("ifnull(\n" +
+                    getLabelSelect() + "lang=" + lang + " limit 1) ,\n" +
+                    getLabelSelect() + "deflang=true limit 1) \n" +
+                    ")"));
+            entry.overrideDataType(FxDataType.String1024);
+            return;
+        }
         FxDataType type = columns.get(prop.getField().toUpperCase());
         if (type == null) {
             // This field does not exist
@@ -142,10 +161,17 @@ class GenericSQLGenericSelector implements FieldSelector {
         }
     }
 
+    protected String getLabelSelect() {
+        return "(select labels." + translatedColumn + " from " + tableName + "_T labels, " + DatabaseConst.TBL_CONTENT + " ct where ct.id=filter.id and " +
+                    "ct.ver=filter.ver and ct." + mainColumn + "=labels.id and ";
+    }
+
+
     /**
      * {@inheritDoc}
      */
     public String getAllowedFields() {
-        return StringUtils.join(columns.keySet(), ',');
+        final String fields = StringUtils.join(columns.keySet(), ',');
+        return hasTranslationTable ? fields + "," + translatedColumn : fields;
     }
 }
