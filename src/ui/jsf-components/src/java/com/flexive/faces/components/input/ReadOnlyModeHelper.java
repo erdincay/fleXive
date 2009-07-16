@@ -116,7 +116,7 @@ class ReadOnlyModeHelper extends RenderHelper {
         } else if (value instanceof FxReference && !value.isTranslationEmpty(language)) {
             // render reference preview
             final HtmlGraphicImage image = (HtmlGraphicImage) FxJsfUtils.addChildComponent(parent, HtmlGraphicImage.COMPONENT_TYPE);
-            image.setId(langInputId + "_image");
+            image.setId(stripForm(langInputId) + "_image");
             image.setUrl(ThumbnailServlet.getLink(
                     new FxMediaSelector(((FxReference) value).getDefaultTranslation()).
                             setSize(BinaryDescriptor.PreviewSizes.PREVIEW1).
