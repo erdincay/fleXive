@@ -145,7 +145,7 @@ public class XPathElement implements Serializable {
      * @return XPathElement array
      * @throws FxInvalidParameterException for invalid elements
      */
-    public static List<XPathElement> split(String XPath) throws FxInvalidParameterException {
+    public static List<XPathElement> split(String XPath) {
         if (StringUtils.isEmpty(XPath))
             return EMPTY;
         if (XPath.charAt(0) != '/' && XPath.indexOf('/') > 0) {
@@ -153,7 +153,7 @@ public class XPathElement implements Serializable {
             XPath = XPath.substring(XPath.indexOf('/'));
         }
         if (!isValidXPath(XPath))
-            throw new FxInvalidParameterException("XPATH", "ex.xpath.invalid", XPath);
+            throw new FxInvalidParameterException("XPATH", "ex.xpath.invalid", XPath).asRuntimeException();
         String[] xp = XPath.substring(1).split("\\/"); //skip first '/' to avoid empty entries
         List<XPathElement> elements = new ArrayList<XPathElement>(xp.length);
         for (String xpcurr : xp) {
@@ -169,9 +169,9 @@ public class XPathElement implements Serializable {
      * @return last (rightmost) element of an XPath
      * @throws FxInvalidParameterException on errors
      */
-    public static XPathElement lastElement(String XPath) throws FxInvalidParameterException {
+    public static XPathElement lastElement(String XPath) {
         if (StringUtils.isEmpty(XPath) || !isValidXPath(XPath))
-            throw new FxInvalidParameterException("XPATH", "ex.xpath.invalid", XPath);
+            throw new FxInvalidParameterException("XPATH", "ex.xpath.invalid", XPath).asRuntimeException();
         return toElement(XPath, XPath.substring(XPath.lastIndexOf('/') + 1));
     }
 
@@ -183,16 +183,16 @@ public class XPathElement implements Serializable {
      * @return XPathElement
      * @throws FxInvalidParameterException on errors
      */
-    public static XPathElement toElement(String XPath, String alias) throws FxInvalidParameterException {
+    public static XPathElement toElement(String XPath, String alias) {
         if (StringUtils.isEmpty(alias) || alias.indexOf('/') >= 0)
-            throw new FxInvalidParameterException("XPATH", "ex.xpath.element.invalid", alias, XPath);
+            throw new FxInvalidParameterException("XPATH", "ex.xpath.element.invalid", alias, XPath).asRuntimeException();
         try {
             if (alias.indexOf('[') > 0)
                 return new XPathElement(alias.substring(0, alias.indexOf('[')).toUpperCase(),
                         Integer.valueOf(alias.substring(alias.indexOf('[') + 1, alias.length() - 1)), true);
             return new XPathElement(alias.toUpperCase(), 1, false);
         } catch (Exception e) {
-            throw new FxInvalidParameterException("XPATH", "ex.xpath.element.invalid", alias, XPath);
+            throw new FxInvalidParameterException("XPATH", "ex.xpath.element.invalid", alias, XPath).asRuntimeException();
         }
     }
 
@@ -247,7 +247,7 @@ public class XPathElement implements Serializable {
      * @return XPath with full multiplicity information
      * @throws FxInvalidParameterException for invalid XPath
      */
-    public static String toXPathMult(String XPath) throws FxInvalidParameterException {
+    public static String toXPathMult(String XPath) {
         if (StringUtils.isEmpty(XPath) || "/".equals(XPath))
             return "/";
         XPath = XPath.toUpperCase();
@@ -258,7 +258,7 @@ public class XPathElement implements Serializable {
             XPath = XPath.substring(XPath.indexOf('/'));
         }
         if (!isValidXPath(XPath))
-            throw new FxInvalidParameterException("XPATH", "ex.xpath.invalid", XPath);
+            throw new FxInvalidParameterException("XPATH", "ex.xpath.invalid", XPath).asRuntimeException();
         String[] xp = XPath.substring(1).split("\\/"); //skip first '/' to avoid empty entries
         StringBuffer xpc = new StringBuffer(XPath.length() + 10);
         for (String xpcurr : xp) {
@@ -280,12 +280,12 @@ public class XPathElement implements Serializable {
      * @return XPath with indices stripped, in upper case
      * @throws FxInvalidParameterException for invalid XPath
      */
-    public static String toXPathNoMult(String XPath) throws FxInvalidParameterException {
+    public static String toXPathNoMult(String XPath) {
         if (StringUtils.isEmpty(XPath) || "/".equals(XPath))
             return "/";
         XPath = XPath.toUpperCase();
         if (!isValidXPath(XPath))
-            throw new FxInvalidParameterException("XPATH", "ex.xpath.invalid", XPath);
+            throw new FxInvalidParameterException("XPATH", "ex.xpath.invalid", XPath).asRuntimeException();
         if (XPath.indexOf('[') == -1) {
             // fast path for the case where we don't have to do anything because the XPath does not contain
             // a type parameter (PK) or multiplicities
@@ -324,7 +324,7 @@ public class XPathElement implements Serializable {
      * @return FQ indices of an XPath as an int array
      * @throws FxInvalidParameterException on errors
      */
-    public static int[] getIndices(String XPath) throws FxInvalidParameterException {
+    public static int[] getIndices(String XPath) {
         List<XPathElement> xpe = split(XPath);
         int[] mult = new int[xpe.size()];
         for (int i = 0; i < mult.length; i++)
@@ -380,11 +380,11 @@ public class XPathElement implements Serializable {
      * @return XPath without the last element
      * @throws FxInvalidParameterException for invalid XPath's
      */
-    public static String stripLastElement(String XPath) throws FxInvalidParameterException {
+    public static String stripLastElement(String XPath) {
         if (XPath != null && ("/".equals(XPath.trim()) || XPath.trim().lastIndexOf('/') == 0))
             return "/";
         if (StringUtils.isEmpty(XPath) || !isValidXPath(XPath.toUpperCase()))
-            throw new FxInvalidParameterException("XPATH", "ex.xpath.invalid", XPath);
+            throw new FxInvalidParameterException("XPATH", "ex.xpath.invalid", XPath).asRuntimeException();
         return XPath.substring(0, XPath.lastIndexOf('/')).toUpperCase();
     }
 

@@ -231,10 +231,33 @@ public class StoredProcedures {
                 " acl.id=ass.acl and" +
                 " ass.usergroup in (select usergroup from FXS_USERGROUPMEMBERS where account=? union select " + GRP_OWNER +
                 " from FXS_USERGROUPMEMBERS) and" +
-                " (ass.acl=dat.acl or ass.acl=dat.typeAcl or ass.acl=dat.stepAcl)");
+                " (ass.acl=dat.acl or ass.acl=dat.typeAcl or ass.acl=dat.stepAcl)" +
+                " UNION " +
+                "select " +
+                "dat.created_by,ass.usergroup,ass.PEDIT,ass.PREMOVE,ass.PEXPORT,ass.PREL,ass.PREAD,ass.PCREATE,acl.cat_type,dat.mandator,dat.securityMode" +
+                " from" +
+                "    (select con.mandator,con.step,con.created_by,con.id,con.ver,con.tdef,con.acl,stp.acl stepAcl,typ.acl typeAcl,typ.security_mode securityMode" +
+                //                                                                   4            5
+                " from FX_CONTENT con,FXS_TYPEDEF typ, FXS_WF_STEPS stp where con.id=? and con.ver=? and " +
+                " con.tdef=typ.id and stp.id=con.step) dat, FXS_ACLASSIGNMENTS ass, FXS_ACL acl, " +
+                //                                                   6      7
+                " (select ca.acl from FX_CONTENT_ACLS ca where ca.id=? and ca.ver=?) contentACLs " +
+                "where" +
+                " acl.id=ass.acl and" +
+                //                                                                      8
+                " ass.usergroup in (select usergroup from FXS_USERGROUPMEMBERS where account=? union select " + GRP_OWNER +
+                " from FXS_USERGROUPMEMBERS) and" +
+                " ass.acl=contentACLs.acl"
+        );
         ps.setLong(1, contentId);
         ps.setLong(2, contentVer);
         ps.setLong(3, userId);
+        ps.setLong(4, contentId);
+        ps.setLong(5, contentVer);
+        ps.setLong(6, contentId);
+        ps.setLong(7, contentVer);
+        ps.setLong(8, userId);
+
         rs = ps.executeQuery();
 
 //  -- Instance

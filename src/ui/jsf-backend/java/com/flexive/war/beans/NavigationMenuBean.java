@@ -73,8 +73,8 @@ public class NavigationMenuBean implements Serializable {
      *
      * @return  if the current user has access to the administration tab.
      */
-    private static boolean hasAdminAccess() {
-        UserTicket ticket = FxContext.getUserTicket();
+    public boolean isHasAdminAccess() {
+        final UserTicket ticket = FxContext.getUserTicket();
         boolean adminAccess=ticket.isInRole(Role.GlobalSupervisor);
         if (!adminAccess) {
             int i=0;
@@ -168,7 +168,7 @@ public class NavigationMenuBean implements Serializable {
 
 
     public List getItems() {
-        if (hasAdminAccess())
+        if (isHasAdminAccess())
             return items;
         else  {
             List<Item> restrictedItems = new ArrayList<Item>(items);

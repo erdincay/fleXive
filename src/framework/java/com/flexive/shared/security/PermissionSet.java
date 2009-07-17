@@ -58,6 +58,32 @@ public final class PermissionSet implements Serializable {
         this.permissions = set;
     }
 
+    private PermissionSet(int permissions) {
+        this.permissions = permissions;
+    }
+
+    /**
+     * Returns this | other (a permission has to be present in one of the sets to be set).
+     *
+     * @param other the other permission set
+     * @return  this | other
+     * @since 3.1
+     */
+    public PermissionSet union(PermissionSet other) {
+        return new PermissionSet(permissions | other.permissions);
+    }
+
+    /**
+     * Returns this & other (a permission has to be pressent in both of the sets).
+     *
+     * @param other the other permission set
+     * @return  this & other
+     * @since 3.1
+     */
+    public PermissionSet intersect(PermissionSet other) {
+        return new PermissionSet(permissions & other.permissions);
+    }
+
     public boolean isPermitted(ACLPermission permission) {
         return (permissions & (1 << permission.ordinal())) > 0;
     }

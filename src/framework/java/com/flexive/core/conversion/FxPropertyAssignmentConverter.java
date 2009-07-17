@@ -127,14 +127,10 @@ public class FxPropertyAssignmentConverter extends FxAssignmentConverter {
         }
         AssignmentData data = (AssignmentData) super.unmarshal(reader, ctx);
         String parentXPath;
-        try {
-            List<XPathElement> xpe = XPathElement.split(data.getXpath());
-            if (xpe.size() > 0)
-                xpe.remove(xpe.size() - 1);
-            parentXPath = XPathElement.toXPathNoMult(xpe);
-        } catch (FxInvalidParameterException e) {
-            throw e.asRuntimeException();
-        }
+        List<XPathElement> xpe = XPathElement.split(data.getXpath());
+        if (xpe.size() > 0)
+            xpe.remove(xpe.size() - 1);
+        parentXPath = XPathElement.toXPathNoMult(xpe);
         FxValue defaultValue = null;//ConversionEngine.getFxValue("defaultValue", this, reader, ctx);
 
         while (reader.hasMoreChildren()) { //optional property and default value as subnodes

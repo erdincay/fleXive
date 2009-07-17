@@ -218,7 +218,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             FxType type = env.getType(cachedContent.getContent().getTypeId());
             FxPermissionUtils.checkPermission(ticket, content.getLifeCycleInfo().getCreatorId(), ACLPermission.READ, type,
                     cachedContent.getSecurityInfo().getStepACL(),
-                    cachedContent.getSecurityInfo().getContentACL(), true);
+                    cachedContent.getSecurityInfo().getContentACLs(), true);
             FxPermissionUtils.checkMandatorExistance(content.getMandatorId());
             FxPermissionUtils.checkTypeAvailable(type.getId(), true);
             if (type.isUsePropertyPermissions() && !ticket.isGlobalSupervisor()) {
@@ -282,11 +282,11 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             Step step = env.getStep(content.getStepId());
             UserTicket ticket = FxContext.getUserTicket();
             if (content.getPk().isNew()) {
-                FxPermissionUtils.checkPermission(ticket, ticket.getUserId(), ACLPermission.CREATE, type, step.getAclId(), content.getAclId(), true);
+                FxPermissionUtils.checkPermission(ticket, ticket.getUserId(), ACLPermission.CREATE, type, step.getAclId(), content.getAclIds(), true);
                 beforeAssignmentScript = FxScriptEvent.BeforeAssignmentDataCreate;
                 afterAssignmentScript = FxScriptEvent.AfterAssignmentDataCreate;
             } else {
-                FxPermissionUtils.checkPermission(ticket, content.getLifeCycleInfo().getCreatorId(), ACLPermission.EDIT, type, step.getAclId(), content.getAclId(), true);
+                FxPermissionUtils.checkPermission(ticket, content.getLifeCycleInfo().getCreatorId(), ACLPermission.EDIT, type, step.getAclId(), content.getAclIds(), true);
                 beforeAssignmentScript = FxScriptEvent.BeforeAssignmentDataSave;
                 afterAssignmentScript = FxScriptEvent.AfterAssignmentDataSave;
             }
@@ -410,7 +410,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             UserTicket ticket = FxContext.getUserTicket();
             FxPermissionUtils.checkMandatorExistance(content.getMandatorId());
             FxPermissionUtils.checkTypeAvailable(type.getId(), false);
-            FxPermissionUtils.checkPermission(ticket, ticket.getUserId(), ACLPermission.CREATE, type, step.getAclId(), content.getAclId(), true);
+            FxPermissionUtils.checkPermission(ticket, ticket.getUserId(), ACLPermission.CREATE, type, step.getAclId(), content.getAclIds(), true);
             //security check end
             ContentStorage storage = StorageManager.getContentStorage(content.getPk().getStorageMode());
             con = Database.getDbConnection();

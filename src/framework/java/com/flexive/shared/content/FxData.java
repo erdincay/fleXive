@@ -112,7 +112,7 @@ public abstract class FxData implements Serializable {
     protected String xpPrefix;
 
     protected FxData(String xpPrefix, String alias, int index, String xPath, String xPathFull, int[] indices, long assignmentId,
-                     FxMultiplicity assignmentMultiplicity, int pos, FxGroupData parent, boolean systemInternal) throws FxInvalidParameterException {
+                     FxMultiplicity assignmentMultiplicity, int pos, FxGroupData parent, boolean systemInternal) {
         this.xpPrefix = xpPrefix;
         this.XPath = XPathElement.stripType(xPath);
         this.XPathFull = XPathElement.stripType(xPathFull);
@@ -307,7 +307,9 @@ public abstract class FxData implements Serializable {
         //gather count of same elements
         int count = 0;
         for (FxData curr : parent.getChildren())
-            if (curr.getAssignmentId() == this.assignmentId && !curr.isSystemInternal())
+            if (curr.getAssignmentId() == this.assignmentId
+                    // don't remove system internal assignments, except superfluous /ACL entries  
+                    && ("ACL".equals(curr.getAssignment().getAlias()) || !curr.isSystemInternal()))
                 count++;
         count -= assignmentMultiplicity.getMin();
         return count > 0 ? count : 0;

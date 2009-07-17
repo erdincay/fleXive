@@ -285,7 +285,7 @@ public class BeContentEditorBean implements ActionBean, Serializable {
                     save();
                 }
                 new FxFacesMsgInfo("Content.nfo.imported").addToContext();
-            } catch (FxApplicationException e) {
+            } catch (Exception e) {
                 new FxFacesMsgErr(e).addToContext();
             }
         }

@@ -99,12 +99,8 @@ public class FxGroupDataConverter implements Converter {
             }
             reader.moveUp();
         }
-        try {
-            if( pos >= 0 )
-                co.getGroupData(xp).setPos(pos);
-        } catch (FxApplicationException e) {
-            throw e.asRuntimeException();
-        }
+        if( pos >= 0 )
+            co.getGroupData(xp).setPos(pos);
         return null;
     }
 

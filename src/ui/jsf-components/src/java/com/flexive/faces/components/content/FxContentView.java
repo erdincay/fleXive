@@ -360,11 +360,7 @@ public class FxContentView extends UIOutput {
         @Override
         public Object put(String key, Object value) {
             final Object oldValue = get(key);
-            try {
-                content.setValue(((FxValue) value).getXPath(), (FxValue) value);
-            } catch (FxApplicationException e) {
-                throw e.asRuntimeException();
-            }
+            content.setValue(((FxValue) value).getXPath(), (FxValue) value);
             return oldValue;
         }
 
@@ -453,11 +449,13 @@ public class FxContentView extends UIOutput {
                     }
                     return rowMaps;
                 }
-            } catch (FxNotFoundException e) {
-                // return null object
-                return new ArrayList<Object>(0);
-            } catch (FxInvalidParameterException e) {
-                throw e.asRuntimeException();
+            } catch (FxRuntimeException e) {
+                if (e.getConverted() instanceof FxNotFoundException) {
+                    // return null object
+                    return new ArrayList<Object>(0);
+                } else {
+                    throw e;
+                }
             }
         }
 
@@ -507,11 +505,13 @@ public class FxContentView extends UIOutput {
                 final FxValue value = ((FxPropertyAssignment) type.getAssignment(path)).getEmptyValue();
                 content.setValue(newPath.toString(), value);
                 return content.getValue(newPath.toString());
-            } catch (FxNotFoundException e) {
-                return new FxString("");
-            } catch (FxApplicationException e) {
-                throw e.asRuntimeException();
-            }
+            } catch (FxRuntimeException e) {
+                if (e.getConverted() instanceof FxNotFoundException) {
+                    return new FxString("");
+                } else {
+                    throw e;
+                }
+            } 
         }
 
         private ContentMap getResolvedReference(String path) {

@@ -45,6 +45,11 @@ public class ACL extends AbstractSelectableObjectWithName implements Serializabl
     private static final long serialVersionUID = -8177665165523382984L;
 
     /**
+     * ID for an empty placeholder ACL.
+     */
+    public static final int NULL_ACL_ID = 0;
+
+    /**
      * Max. id for internal ACL's (needed for internal checks)
      */
     public final static long MAX_INTERNAL_ID = 8;
@@ -186,6 +191,15 @@ public class ACL extends AbstractSelectableObjectWithName implements Serializabl
      */
     public void setName(String name) {
         this.name = name;
+    }
+
+    /**
+     * Return the ACL name as it should be displayed to the user.
+     *
+     * @return  the ACL name as it should be displayed to the user.
+     */
+    public String getDisplayName() {
+        return label != null && !label.isEmpty() ? label.getBestTranslation() : name;
     }
 
     /**

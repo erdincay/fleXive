@@ -45,6 +45,7 @@ import com.flexive.shared.structure.FxMultiplicity;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.value.*;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.Serializable;
@@ -71,7 +72,7 @@ public class FxContent implements Serializable {
     private FxPK pk;
     private long typeId;
     private long mandatorId;
-    private long aclId;
+    private final List<Long> aclIds = Lists.newArrayListWithExpectedSize(5);
     private long stepId;
     private int maxVersion;
     private int liveVersion;
@@ -127,7 +128,9 @@ public class FxContent implements Serializable {
         this.typeId = typeId;
         this.relation = relation;
         this.mandatorId = mandatorId;
-        this.aclId = aclId;
+        if (aclId != -1) {
+            this.aclIds.add(aclId);
+        }
         this.stepId = stepId;
         this.maxVersion = maxVersion;
         this.liveVersion = liveVersion;
@@ -190,22 +193,43 @@ public class FxContent implements Serializable {
     }
 
     /**
-     * Getter for the ACL id
+     * Getter for the first ACL id
      *
      * @return ACL id
+     * @deprecated use {@link #getAclIds()}
      */
     public long getAclId() {
-        return aclId;
+        return aclIds.isEmpty() ? -1 : aclIds.get(0);
     }
 
     /**
-     * Set the ACL id
+     * Set the first ACL id
      *
      * @param aclId the ACL id
+     * @deprecated use {@link #setAclIds(java.util.Collection)}
      */
     public void setAclId(long aclId) {
-        this.aclId = aclId;
+        if (aclIds.isEmpty()) {
+            aclIds.add(aclId);
+        } else {
+            aclIds.set(0, aclId);
+        }
         //TODO: check if ACL is valid!
+        updateSystemInternalProperties();
+    }
+
+    /**
+     * Return all ACLs assigned to this content.
+     *
+     * @return  all ACLs assigned to this content.
+     */
+    public List<Long> getAclIds() {
+        return Collections.unmodifiableList(aclIds);
+    }
+
+    public void setAclIds(Collection<Long> aclIds) {
+        this.aclIds.clear();
+        this.aclIds.addAll(aclIds);
         updateSystemInternalProperties();
     }
 
@@ -414,10 +438,8 @@ public class FxContent implements Serializable {
      *
      * @param XPath requested XPath
      * @return FxData elements for the given XPath
-     * @throws FxInvalidParameterException for invalid XPath provided
-     * @throws FxNotFoundException         if no match was found
      */
-    public List<FxData> getData(String XPath) throws FxInvalidParameterException, FxNotFoundException {
+    public List<FxData> getData(String XPath) {
         List<FxData> base = data.getChildren();
         if (StringUtils.isEmpty(XPath) || "/".equals(XPath))
             return base;
@@ -439,7 +461,7 @@ public class FxContent implements Serializable {
                 }
             }
             if (!found)
-                throw new FxNotFoundException("ex.content.xpath.notFound", XPath);
+                throw new FxNotFoundException("ex.content.xpath.notFound", XPath).asRuntimeException();
         }
         return ret;
     }
@@ -449,15 +471,13 @@ public class FxContent implements Serializable {
      *
      * @param XPath requested XPath
      * @return FxPropertyData entry for the given XPath
-     * @throws FxInvalidParameterException for invalid XPath provided or XPath is no property
-     * @throws FxNotFoundException         if no match was found
      */
-    public FxPropertyData getPropertyData(String XPath) throws FxNotFoundException, FxInvalidParameterException {
+    public FxPropertyData getPropertyData(String XPath) {
         FxSharedUtils.checkParameterEmpty(XPath, "XPATH");
         XPath = XPathElement.stripType(XPath);
         List<FxData> found = getData(XPath);
         if (found.size() != 1 || !(found.get(0) instanceof FxPropertyData))
-            throw new FxInvalidParameterException("XPATH", "ex.xpath.element.noProperty", XPath);
+            throw new FxInvalidParameterException("XPATH", "ex.xpath.element.noProperty", XPath).asRuntimeException();
         return (FxPropertyData) found.get(0);
     }
 
@@ -477,10 +497,8 @@ public class FxContent implements Serializable {
      *
      * @param XPath requested XPath
      * @return FxGroupData entry for the given XPath
-     * @throws FxInvalidParameterException for invalid XPath provided or XPath is no property
-     * @throws FxNotFoundException         if no match was found
      */
-    public FxGroupData getGroupData(String XPath) throws FxNotFoundException, FxInvalidParameterException {
+    public FxGroupData getGroupData(String XPath) {
         FxSharedUtils.checkParameterEmpty(XPath, "XPATH");
         XPath = XPathElement.stripType(XPathElement.toXPathMult(XPath.toUpperCase()));
         //this is a slightly modified version of getData() but since groups may not contain children its safer
@@ -494,7 +512,7 @@ public class FxContent implements Serializable {
             for (FxData curr : currChildren) {
                 if (curr.getXPathElement().equals(xpe)) {
                     if (curr.isProperty()) {
-                        throw new FxInvalidParameterException("XPATH", "ex.xpath.element.noGroup", XPath);
+                        throw new FxInvalidParameterException("XPATH", "ex.xpath.element.noGroup", XPath).asRuntimeException();
                     } else {
                         currChildren = ((FxGroupData) curr).getChildren();
                         group = ((FxGroupData) curr);
@@ -504,7 +522,7 @@ public class FxContent implements Serializable {
                 }
             }
             if (!found)
-                throw new FxNotFoundException("ex.content.xpath.notFound", XPath);
+                throw new FxNotFoundException("ex.content.xpath.notFound", XPath).asRuntimeException();
         }
         return group;
     }
@@ -524,12 +542,8 @@ public class FxContent implements Serializable {
      * @param XPath FQ XPath
      * @param value value to apply
      * @return this FxContent instance to allow chained calls
-     * @throws FxNotFoundException         if the requested XPath does not exist
-     * @throws FxInvalidParameterException if the request XPath is invalid
-     * @throws FxNoAccessException         if the property for this XPath is marked readonly or no access
-     * @throws FxCreateException           if missing XPath entries failed to be created
      */
-    public FxContent setValue(String XPath, FxValue value) throws FxNotFoundException, FxInvalidParameterException, FxNoAccessException, FxCreateException {
+    public FxContent setValue(String XPath, FxValue value) {
         getProperyData(XPath).setValue(value);
         return this;
     }
@@ -540,19 +554,15 @@ public class FxContent implements Serializable {
      *
      * @param XPath requested xpath
      * @return FxPropertyData
-     * @throws FxInvalidParameterException on errors
-     * @throws FxNotFoundException         on errors
-     * @throws FxCreateException           on errors
-     * @throws FxNoAccessException         on errors
      */
-    private FxPropertyData getProperyData(String XPath) throws FxInvalidParameterException, FxNotFoundException, FxCreateException, FxNoAccessException {
+    private FxPropertyData getProperyData(String XPath) {
         XPath = XPathElement.stripType(XPath);
         createXPath(XPath);
         List<FxData> prop = getData(XPath);
         if (prop.size() != 1)
-            throw new FxInvalidParameterException("XPATH", "ex.xpath.element.ambiguous.property", XPath);
+            throw new FxInvalidParameterException("XPATH", "ex.xpath.element.ambiguous.property", XPath).asRuntimeException();
         if (!(prop.get(0) instanceof FxPropertyData))
-            throw new FxInvalidParameterException("XPATH", "ex.xpath.element.noProperty", XPath);
+            throw new FxInvalidParameterException("XPATH", "ex.xpath.element.noProperty", XPath).asRuntimeException();
         return ((FxPropertyData) prop.get(0));
     }
 
@@ -563,14 +573,10 @@ public class FxContent implements Serializable {
      * @param XPath requested XPath
      * @param value the value (has to match the FxValue's data type)
      * @return this FxContent instance to allow chained calls
-     * @throws FxNotFoundException         on errors
-     * @throws FxInvalidParameterException on errors
-     * @throws FxNoAccessException         on errors
-     * @throws FxCreateException           on errors
      * @since 3.0.2
      */
     @SuppressWarnings({"unchecked"})
-    public FxContent setValue(String XPath, Object value) throws FxNotFoundException, FxInvalidParameterException, FxNoAccessException, FxCreateException {
+    public FxContent setValue(String XPath, Object value) {
         if (value instanceof FxValue)
             return this.setValue(XPath, (FxValue) value);
         FxValue val = getPropertyData(XPath).getValue();
@@ -589,14 +595,10 @@ public class FxContent implements Serializable {
      * @param languageId requested language (ignored if single value)
      * @param value      the value (has to match the FxValue's data type)
      * @return this FxContent instance to allow chained calls
-     * @throws FxNotFoundException         on errors
-     * @throws FxInvalidParameterException on errors
-     * @throws FxNoAccessException         on errors
-     * @throws FxCreateException           on errors
      * @since 3.0.2
      */
     @SuppressWarnings({"unchecked"})
-    public FxContent setValue(String XPath, long languageId, Object value) throws FxNotFoundException, FxInvalidParameterException, FxNoAccessException, FxCreateException {
+    public FxContent setValue(String XPath, long languageId, Object value) {
         FxValue val = getPropertyData(XPath).getValue();
         if (val.isMultiLanguage())
             val.setTranslation(languageId, value);
@@ -621,15 +623,11 @@ public class FxContent implements Serializable {
      * Create (if possible and not already exists) the given XPath
      *
      * @param XPath the XPath to create
-     * @throws FxInvalidParameterException wrong XPath
-     * @throws FxNotFoundException         wrong XPath
-     * @throws FxCreateException           on errors creating
-     * @throws FxNoAccessException         if req. XPath is not accessible
      */
-    private void createXPath(String XPath) throws FxInvalidParameterException, FxNotFoundException, FxCreateException, FxNoAccessException {
+    private void createXPath(String XPath)  {
         FxEnvironment env = CacheAdmin.getEnvironment();
         if (!env.getType(this.getTypeId()).isXPathValid(XPath, true))
-            throw new FxInvalidParameterException("XPATH", "ex.content.xpath.set.invalid", XPath, env.getType(getTypeId()).getName());
+            throw new FxInvalidParameterException("XPATH", "ex.content.xpath.set.invalid", XPath, env.getType(getTypeId()).getName()).asRuntimeException();
         XPath = XPath.toUpperCase();
         List<XPathElement> elements = XPathElement.split(XPath);
         FxGroupData currGroup = this.getRootGroup();
@@ -683,10 +681,10 @@ public class FxContent implements Serializable {
     public FxValue getValue(String XPath) {
         try {
             return getPropertyData(XPath).getValue();
-        } catch (FxApplicationException e) {
+        } catch (FxRuntimeException e) {
             if (isXPathValid(XPath, true))
                 return null; //just not set, see FX-473
-            throw e.asRuntimeException();
+            throw e;
         }
     }
 
@@ -702,26 +700,22 @@ public class FxContent implements Serializable {
         if (!isXPathValid(XPath, true))
             //noinspection ThrowableInstanceNeverThrown
             throw new FxInvalidParameterException("XPATH", "ex.xpath.element.noProperty", XPath).asRuntimeException();
-        try {
-            final FxEnvironment env = CacheAdmin.getEnvironment();
-            long assignmentId = env.getType(getTypeId()).getAssignment(XPath).getId();
-            FxGroupData group = getGroupData(XPathElement.stripLastElement(XPath));
-            List<String> paths = new ArrayList<String>(10);
-            for (FxData data : group.getChildren()) {
-                if (data.isGroup())
-                    continue;
-                if (data.getAssignmentId() == assignmentId)
-                    paths.add(data.getXPathFull());
-            }
-            String[] p = paths.toArray(new String[paths.size()]);
-            Arrays.sort(p);
-            List<FxValue> values = new ArrayList<FxValue>(p.length);
-            for (String xp : p)
-                values.add(getValue(xp));
-            return values;
-        } catch (FxApplicationException e) {
-            return new ArrayList<FxValue>(0);
+        final FxEnvironment env = CacheAdmin.getEnvironment();
+        long assignmentId = env.getType(getTypeId()).getAssignment(XPath).getId();
+        FxGroupData group = getGroupData(XPathElement.stripLastElement(XPath));
+        List<String> paths = new ArrayList<String>(10);
+        for (FxData data : group.getChildren()) {
+            if (data.isGroup())
+                continue;
+            if (data.getAssignmentId() == assignmentId)
+                paths.add(data.getXPathFull());
         }
+        String[] p = paths.toArray(new String[paths.size()]);
+        Arrays.sort(p);
+        List<FxValue> values = new ArrayList<FxValue>(p.length);
+        for (String xp : p)
+            values.add(getValue(xp));
+        return values;
     }
 
     /**
@@ -753,11 +747,8 @@ public class FxContent implements Serializable {
      *
      * @param maxMultiplicity the maximum multiplicity for groups
      * @return this
-     * @throws FxCreateException           on errors
-     * @throws FxNotFoundException         on errors
-     * @throws FxInvalidParameterException on errors
      */
-    public FxContent randomize(int maxMultiplicity) throws FxCreateException, FxNotFoundException, FxInvalidParameterException {
+    public FxContent randomize(int maxMultiplicity) {
         Random r = new Random();
         FxEnvironment env = CacheAdmin.getEnvironment();
         this.data = env.getType(this.getTypeId()).createRandomData(pk, env, r, maxMultiplicity);
@@ -802,11 +793,8 @@ public class FxContent implements Serializable {
      * Remove the property or group denoted by XPath
      *
      * @param XPath the XPath to remove
-     * @throws FxInvalidParameterException if the requested XPath is required and can not be removed
-     * @throws FxNotFoundException         if XPath is incorrect
-     * @throws FxNoAccessException         if data that is to be removed is readonly or no access
      */
-    public void remove(String XPath) throws FxInvalidParameterException, FxNotFoundException, FxNoAccessException {
+    public void remove(String XPath) {
         FxSharedUtils.checkParameterEmpty(XPath, "XPATH");
         XPath = XPathElement.stripType(XPath);
         FxData data = null;
@@ -835,7 +823,7 @@ public class FxContent implements Serializable {
         if (data == null && found.get(0).getParent() != null && found.get(0).getParent().getXPathFull().equals(XPath))
             data = found.get(0).getParent(); //group with single or multiple properties->get parent
         if (data == null || data.getParent() == null)
-            throw new FxNoAccessException("ex.content.xpath.remove.invalid", XPath);
+            throw new FxNoAccessException("ex.content.xpath.remove.invalid", XPath).asRuntimeException();
 
         data.getParent().removeChild(data);
     }
@@ -867,7 +855,7 @@ public class FxContent implements Serializable {
         }
     }
 
-    public FxContent initSystemProperties() throws FxNotFoundException, FxInvalidParameterException, FxCreateException {
+    public FxContent initSystemProperties() {
         FxEnvironment env = CacheAdmin.getEnvironment();
         FxType type = env.getType(this.getTypeId());
         FxValue value;
@@ -927,21 +915,27 @@ public class FxContent implements Serializable {
      * Update all system internal properties that provide setters to reflect changes in the FxPropertyData's
      */
     private void updateSystemInternalProperties() {
-        try {
-            FxLargeNumber _long = (FxLargeNumber) getValue("/STEP");
-            _long.setValue(stepId);
-            _long = (FxLargeNumber) getValue("/ACL");
-            _long.setValue(aclId);
+        FxLargeNumber _long = (FxLargeNumber) getValue("/STEP");
+        _long.setValue(stepId);
 
-            FxLargeNumber _langlong = (FxLargeNumber) getValue("/MAINLANG");
-            _langlong.setValue(mainLanguage);
-
-            FxBoolean _bool = (FxBoolean) getValue("/ISACTIVE");
-            _bool.setValue(isActive());
-
-        } catch (Exception e) {
-            //bad luck
+        if (getPropertyData("/ACL").getOccurances() > aclIds.size()) {
+            // remove old ACLs that wouldn't be overwritten otherwise
+            remove("/ACL");
         }
+        int index = 1;
+        for (long aclId : aclIds) {
+            final String xpath = "/ACL[" + (index++) + "]";
+            if (getValue(xpath) == null) {
+                createXPath(xpath);
+            }
+            setValue(xpath, aclId);
+        }
+
+        FxLargeNumber _langlong = (FxLargeNumber) getValue("/MAINLANG");
+        _langlong.setValue(mainLanguage);
+
+        FxBoolean _bool = (FxBoolean) getValue("/ISACTIVE");
+        _bool.setValue(isActive());
     }
 
     /**
@@ -1157,9 +1151,10 @@ public class FxContent implements Serializable {
      */
     public FxContent copy() {
         FxContent clone;
-        clone = new FxContent(pk, typeId, relation, mandatorId, aclId, stepId, maxVersion, liveVersion, active,
+        clone = new FxContent(pk, typeId, relation, mandatorId, -1, stepId, maxVersion, liveVersion, active,
                 mainLanguage, relatedSource, relatedDestination, relatedSourcePosition, relatedDestinationPosition,
                 lifeCycleInfo, data.copy(null), binaryPreviewId, binaryPreviewACL);
+        clone.setAclIds(aclIds);
         return clone;
     }
 
@@ -1170,9 +1165,10 @@ public class FxContent implements Serializable {
      */
     public FxContent copyAsNewInstance() {
         FxContent clone;
-        clone = new FxContent(new FxPK(), typeId, relation, mandatorId, aclId, stepId, maxVersion, liveVersion, active,
+        clone = new FxContent(new FxPK(), typeId, relation, mandatorId, -1, stepId, maxVersion, liveVersion, active,
                 mainLanguage, relatedSource, relatedDestination, relatedSourcePosition, relatedDestinationPosition,
                 lifeCycleInfo, data.copy(null), binaryPreviewId, binaryPreviewACL);
+        clone.setAclIds(aclIds);
         return clone;
     }
 
@@ -1213,9 +1209,16 @@ public class FxContent implements Serializable {
      */
     public PermissionSet getPermissions() {
         try {
-            return FxPermissionUtils.getPermissions(aclId, CacheAdmin.getEnvironment().getType(typeId),
-                    CacheAdmin.getEnvironment().getStep(stepId).getAclId(),
-                    lifeCycleInfo.getCreatorId(), mandatorId);
+            PermissionSet permissions = new PermissionSet(false, false, false, false, false);
+            final FxType type = CacheAdmin.getEnvironment().getType(typeId);
+            final long stepAclId = CacheAdmin.getEnvironment().getStep(stepId).getAclId();
+            for (long aclId : aclIds) {
+                // a permission has to be present in at least one ACL
+                permissions = permissions.union(
+                        FxPermissionUtils.getPermissions(aclId, type, stepAclId, lifeCycleInfo.getCreatorId(), mandatorId)
+                );
+            }
+            return permissions;
         } catch (FxNoAccessException e) {
             // this shouldn't happen since a user must not have access to a content instance without read perms
             throw e.asRuntimeException();
@@ -1257,15 +1260,14 @@ public class FxContent implements Serializable {
      * Replace our data with data from another content
      *
      * @param con other content to take data from
-     * @throws FxApplicationException on errors
      */
-    public void replaceData(FxContent con) throws FxApplicationException {
+    public void replaceData(FxContent con) {
         if (con == null)
-            throw new FxInvalidParameterException("con", "ex.content.import.empty");
+            throw new FxInvalidParameterException("con", "ex.content.import.empty").asRuntimeException();
         if (con.getTypeId() != this.getTypeId()) {
             throw new FxInvalidParameterException("con", "ex.content.import.wrongType",
                     CacheAdmin.getEnvironment().getType(con.getTypeId()).getLabel(),
-                    CacheAdmin.getEnvironment().getType(this.getTypeId()).getLabel());
+                    CacheAdmin.getEnvironment().getType(this.getTypeId()).getLabel()).asRuntimeException();
         }
         removeData();
         for (FxData d : con.data.getChildren()) {

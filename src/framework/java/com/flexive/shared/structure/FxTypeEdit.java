@@ -77,6 +77,7 @@ public class FxTypeEdit extends FxType implements Serializable {
      * @param language                language mode
      * @param state                   type state (active, locked, etc)
      * @param permissions             permissions bit coded
+     * @param multipleContentACLs     if multiple ACLs per content are enabled
      * @param trackHistory            track history
      * @param historyAge              max. age of the history to track
      * @param maxVersions             max. number of versions to keep, if &lt; 0 unlimited
@@ -86,11 +87,11 @@ public class FxTypeEdit extends FxType implements Serializable {
     private FxTypeEdit(String name, FxString label, ACL acl, Workflow workflow, FxType parent,
                        boolean enableParentAssignments,
                        TypeStorageMode storageMode, TypeCategory category, TypeMode mode,
-                       LanguageMode language, TypeState state, byte permissions,
+                       LanguageMode language, TypeState state, byte permissions, boolean multipleContentACLs,
                        boolean trackHistory, long historyAge, long maxVersions, int maxRelSource,
                        int maxRelDestination) {
         super(-1, acl, workflow, name, label, parent, storageMode,
-                category, mode, language, state, permissions, trackHistory, historyAge,
+                category, mode, language, state, permissions, multipleContentACLs, trackHistory, historyAge,
                 maxVersions, maxRelSource, maxRelDestination, null, null, new ArrayList<FxTypeRelation>(5));
         FxSharedUtils.checkParameterMultilang(label, "label");
         this.enableParentAssignments = enableParentAssignments;
@@ -109,7 +110,7 @@ public class FxTypeEdit extends FxType implements Serializable {
     public FxTypeEdit(FxType type) {
         super(type.getId(), type.getACL(), type.getWorkflow(),
                 type.getName(), type.getLabel(), type.getParent(), type.getStorageMode(), type.getCategory(),
-                type.getMode(), type.getLanguage(), type.getState(), type.permissions,
+                type.getMode(), type.getLanguage(), type.getState(), type.permissions, type.isMultipleContentACLs(),
                 type.isTrackHistory(), type.getHistoryAge(), type.getMaxVersions(), type.getMaxRelSource(),
                 type.getMaxRelDestination(), type.getLifeCycleInfo(), type.getDerivedTypes(), type.getRelations());
         FxSharedUtils.checkParameterMultilang(label, "label");
@@ -134,6 +135,18 @@ public class FxTypeEdit extends FxType implements Serializable {
     public static FxTypeEdit createNew(String name) {
         return createNew(name, new FxString(FxLanguage.DEFAULT_ID, name),
                 CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()), null);
+    }
+
+    /**
+     * Create a new FxTypeEdit instance for creating a new FxType
+     *
+     * @param name name of the type
+     * @param parentTypeName parent type name
+     * @return FxTypeEdit instance for creating a new FxType
+     * @since 3.1
+     */
+    public static FxTypeEdit createNew(String name, String parentTypeName) {
+        return createNew(name, CacheAdmin.getEnvironment().getType(parentTypeName));
     }
 
     /**
@@ -232,7 +245,7 @@ public class FxTypeEdit extends FxType implements Serializable {
                                        boolean trackHistory, long historyAge, long maxVersions, int maxRelSource,
                                        int maxRelDestination) {
         return new FxTypeEdit(name, label, acl, workflow, parent, enableParentAssignments,
-                storageMode, category, mode, language, state, permissions, trackHistory, historyAge,
+                storageMode, category, mode, language, state, permissions, parent == null || parent.isMultipleContentACLs(), trackHistory, historyAge,
                 maxVersions, maxRelSource, maxRelDestination);
     }
 
@@ -554,6 +567,17 @@ public class FxTypeEdit extends FxType implements Serializable {
     public FxTypeEdit setMaxRelSource(int maxRelSource) {
         this.maxRelSource = maxRelSource < 0 ? 0 : maxRelSource;
         this.changed = true;
+        return this;
+    }
+
+    /**
+     * Enable or disable multiple ACLs per content instance.
+     *
+     * @param value true to enable multiple ACLs
+     * @return the type itself, useful for chained calls
+     */
+    public FxTypeEdit setMultipleContentACLs(boolean value) {
+        this.multipleContentACLs = value;
         return this;
     }
 

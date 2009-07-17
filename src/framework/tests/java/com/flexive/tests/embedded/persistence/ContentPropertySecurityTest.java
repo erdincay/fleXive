@@ -40,6 +40,7 @@ import com.flexive.shared.content.FxPK;
 import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxNoAccessException;
+import com.flexive.shared.exceptions.FxRuntimeException;
 import com.flexive.shared.interfaces.ACLEngine;
 import com.flexive.shared.interfaces.AssignmentEngine;
 import com.flexive.shared.interfaces.ContentEngine;
@@ -222,7 +223,10 @@ public class ContentPropertySecurityTest {
         try {
             comp.getPropertyData("/" + PROP2_NAME).setValue(PROP1_NEW_VALUE);
             Assert.fail("FxNoAccessException expected!");
-        } catch (FxNoAccessException e) {
+        } catch (FxRuntimeException e) {
+            if (!(e.getConverted() instanceof FxNoAccessException)) {
+                throw e;
+            }
             //ok this was expected
         }
         Assert.assertTrue(!comp.getPropertyData("/" + PROP2_NAME).getValue().equals(PROP2_VALUE));

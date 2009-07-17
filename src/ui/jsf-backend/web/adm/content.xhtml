@@ -97,15 +97,19 @@
                             </tr>
                         </thead>
                         <tbody>
-                        <tr>
-                            <td><a href="javascript:gotoAdmin();">#{fxMessageBean['Welcome.label.administration']}</a></td>
-                        </tr>
+                        <ui:fragment rendered="#{navigationMenuBean.hasAdminAccess}">
+                            <tr>
+                                <td><a href="javascript:gotoAdmin();">#{fxMessageBean['Welcome.label.administration']}</a></td>
+                            </tr>
+                        </ui:fragment>
                         <tr>
                             <td><a href="javascript:createQuery();">#{fxMessageBean['Welcome.label.createQuery']}</a></td>
                         </tr>
-                        <tr>
-                            <td><a href="javascript:createType();">#{fxMessageBean['Welcome.label.newType']}</a></td>
-                        </tr>
+                        <ui:fragment rendered="#{fxSystemBean.isInRole['StructureManagement']}">
+                            <tr>
+                                <td><a href="javascript:createType();">#{fxMessageBean['Welcome.label.newType']}</a></td>
+                            </tr>
+                        </ui:fragment>
                         <tr>
                             <td>
                                 #{fxMessageBean['Welcome.label.createContent']}<br/>

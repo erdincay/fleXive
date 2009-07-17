@@ -14,7 +14,7 @@ co.setValue("/Name", new FxString(false, "John Doe"))
 co.setValue("/Phone", new FxString(false, "+43 1 12345")) //<co xml:id="cc_fxco_2"/>
 co.setValue("/Phone[2]", new FxString(false, "+43 1 800 FLEXIVE")) //<co xml:id="cc_fxco_3"/>
 co.setValue("/Address/Street", new FxString(false, "Private road")) //<co xml:id="cc_fxco_4"/>
-co.setValue("/Address[2]/Street", new FxString(false, "Ofice lane")) //<co xml:id="cc_fxco_5"/>
+co.setValue("/Address[2]/Street", new FxString(false, "Office lane")) //<co xml:id="cc_fxco_5"/>
 FxPK pk = ce.save(co) //<co xml:id="cc_fxco_6"/>
 
 FxContent loaded = ce.load(pk) //<co xml:id="cc_fxco_7"/>

@@ -233,13 +233,13 @@ public class FxGroupAssignment extends FxAssignment implements Serializable {
     /**
      * {@inheritDoc}
      */
-    public FxData createEmptyData(FxGroupData parent, int index) throws FxCreateException {
+    public FxData createEmptyData(FxGroupData parent, int index) {
         ArrayList<FxData> children = new ArrayList<FxData>(5);
         FxGroupData thisGroup;
         try {
             final UserTicket ticket = FxContext.getUserTicket();
             if (!this.getMultiplicity().isValid(index))
-                throw new FxCreateException("ex.content.xpath.index.invalid", index, this.getMultiplicity(), this.getXPath()).setAffectedXPath(parent.getXPathFull());
+                throw new FxCreateException("ex.content.xpath.index.invalid", index, this.getMultiplicity(), this.getXPath()).setAffectedXPath(parent.getXPathFull()).asRuntimeException();
             thisGroup = new FxGroupData(parent == null ? "" : parent.getXPathPrefix(), this.getAlias(), index, this.getXPath(),
                     XPathElement.stripType(XPathElement.toXPathMult(this.getXPath())), XPathElement.getIndices(getXPath()),
                     this.getId(), this.getMultiplicity(), this.getPosition(), parent, children, this.isSystemInternal());
@@ -254,7 +254,7 @@ public class FxGroupAssignment extends FxAssignment implements Serializable {
                     if (as.getMultiplicity().isRequired()) {
                         if (hasRequired)
                             throw new FxCreateException("ex.content.data.create.oneof.multiple",
-                                    thisGroup.getXPathFull()).setAffectedXPath(thisGroup.getXPathFull());
+                                    thisGroup.getXPathFull()).setAffectedXPath(thisGroup.getXPathFull()).asRuntimeException();
                         hasRequired = true;
                         for (int c = 0; c < as.getMultiplicity().getMin(); c++)
                             thisGroup.getChildren().add(as.createEmptyData(thisGroup, c + 1));
@@ -274,7 +274,7 @@ public class FxGroupAssignment extends FxAssignment implements Serializable {
             thisGroup.fixChildIndices();
             return thisGroup;
         } catch (FxInvalidParameterException e) {
-            throw new FxCreateException(e);
+            throw new FxCreateException(e).asRuntimeException();
         }
     }
 
@@ -299,7 +299,7 @@ public class FxGroupAssignment extends FxAssignment implements Serializable {
      * {@inheritDoc}
      */
     @Override
-    public FxData createRandomData(Random rnd, FxEnvironment env, FxGroupData parent, int index, int maxMultiplicity) throws FxCreateException {
+    public FxData createRandomData(Random rnd, FxEnvironment env, FxGroupData parent, int index, int maxMultiplicity) {
         ArrayList<FxData> children = new ArrayList<FxData>(5);
         FxGroupData thisGroup;
         try {
@@ -323,7 +323,7 @@ public class FxGroupAssignment extends FxAssignment implements Serializable {
 //            thisGroup.fixChildIndices();
             return thisGroup;
         } catch (FxInvalidParameterException e) {
-            throw new FxCreateException(e);
+            throw new FxCreateException(e).asRuntimeException();
         }
     }
 

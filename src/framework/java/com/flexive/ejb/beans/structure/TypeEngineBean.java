@@ -102,8 +102,11 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
                     //7          8           9              10            11           12
                     "LANG_MODE,  TYPE_STATE, SECURITY_MODE, TRACKHISTORY, HISTORY_AGE, MAX_VERSIONS, " +
                     //13               14                15          16          17           18           19   20        21
-                    "REL_TOTAL_MAXSRC, REL_TOTAL_MAXDST, CREATED_BY, CREATED_AT, MODIFIED_BY, MODIFIED_AT, ACL, WORKFLOW, ICON_REF) VALUES " +
-                    "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                    "REL_TOTAL_MAXSRC, REL_TOTAL_MAXDST, CREATED_BY, CREATED_AT, MODIFIED_BY, MODIFIED_AT, ACL, WORKFLOW, ICON_REF," +
+                    // 22
+                    "MULTIPLE_CONTENT_ACLS)" +
+                    " VALUES " +
+                    "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
     /**
      * {@inheritDoc}
@@ -168,6 +171,7 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
                 ps.setNull(21, java.sql.Types.INTEGER);
             else
                 ps.setLong(21, type.getIcon().getDefaultTranslation().getId());
+            ps.setBoolean(22, type.isUseInstancePermissions() && type.isMultipleContentACLs());
             ps.executeUpdate();
             Database.storeFxString(type.getLabel(), con, TBL_STRUCT_TYPES, "DESCRIPTION", "ID", newId);
 
@@ -198,7 +202,11 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
 
             if (type.getParent() == null) {
                 for (FxPropertyAssignment spa : environment.getSystemInternalRootPropertyAssignments()) {
-                    assignmentEngine.save(FxPropertyAssignmentEdit.createNew(spa, thisType, spa.getAlias(), "/").setEnabled(true)._setSystemInternal(), false);
+                    final FxPropertyAssignmentEdit derived = FxPropertyAssignmentEdit.createNew(spa, thisType, spa.getAlias(), "/");
+                    assignmentEngine.save(
+                            updateAclAssignmentMultiplicity(type, derived).setEnabled(true)._setSystemInternal(),
+                            false
+                    );
                 }
             } else {
                 //create parent assignments
@@ -208,7 +216,7 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
                         FxPropertyAssignmentEdit pae = FxPropertyAssignmentEdit.
                                 createNew((FxPropertyAssignment) as, thisType, as.getAlias(), "/");
                         pae.setEnabled(type.isEnableParentAssignments());
-                        assignmentEngine.save(pae, false);
+                        assignmentEngine.save(updateAclAssignmentMultiplicity(type, pae), false);
                     } else if (as instanceof FxGroupAssignment) {
                         FxGroupAssignmentEdit pge = FxGroupAssignmentEdit.
                                 createNew((FxGroupAssignment) as, thisType, as.getAlias(), "/");
@@ -244,6 +252,16 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
             Database.closeObjects(TypeEngineBean.class, con, ps);
         }
         return newId;
+    }
+
+    private FxPropertyAssignmentEdit updateAclAssignmentMultiplicity(FxTypeEdit type, FxPropertyAssignmentEdit derived) throws FxInvalidParameterException {
+        if ("ACL".equals(derived.getProperty().getName())) {
+            // set multiplicity based on the FxType#isMultipleContentACLs
+            derived.setMultiplicity(
+                    type.isMultipleContentACLs() ? FxMultiplicity.MULT_1_N : FxMultiplicity.MULT_1_1
+            );
+        }
+        return derived;
     }
 
     /**
@@ -629,6 +647,19 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
             }
             //end permission changes
 
+            //start multiple ACL setting changes
+            if (type.isMultipleContentACLs() != orgType.isMultipleContentACLs()) {
+                sql.setLength(0);
+                sql.append("UPDATE ").append(TBL_STRUCT_TYPES).append(" SET MULTIPLE_CONTENT_ACLS=? WHERE ID=?");
+                if (ps != null) ps.close();
+                ps = con.prepareStatement(sql.toString());
+                ps.setBoolean(1, type.isMultipleContentACLs());
+                ps.setLong(2, type.getId());
+                ps.executeUpdate();
+                htracker.track(type, "history.type.update.multipleContentACLs", orgType.isMultipleContentACLs(), type.isMultipleContentACLs());
+            }
+            //end multiple ACL setting changes
+
             //start history track/age changes
             if (type.isTrackHistory() != orgType.isTrackHistory() ||
                     type.getHistoryAge() != orgType.getHistoryAge()) {
@@ -935,7 +966,9 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
                     //7         8           9              10            11           12
                     "LANG_MODE, TYPE_STATE, SECURITY_MODE, TRACKHISTORY, HISTORY_AGE, MAX_VERSIONS," +
                     //13               14                15          16          17           18           19   20
-                    "REL_TOTAL_MAXSRC, REL_TOTAL_MAXDST, CREATED_BY, CREATED_AT, MODIFIED_BY, MODIFIED_AT, ACL, WORKFLOW " +
+                    "REL_TOTAL_MAXSRC, REL_TOTAL_MAXDST, CREATED_BY, CREATED_AT, MODIFIED_BY, MODIFIED_AT, ACL, WORKFLOW, " +
+                    // 21
+                    "MULTIPLE_CONTENT_ACLS" +
                     " FROM " + TBL_STRUCT_TYPES + " WHERE ID=" + id;
 
             stmt = con.createStatement();
@@ -955,6 +988,7 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
                             new FxPreloadType(rs.getLong(3)), TypeStorageMode.getById(rs.getInt(4)),
                             TypeCategory.getById(rs.getInt(5)), TypeMode.getById(rs.getInt(6)),
                             LanguageMode.getById(rs.getInt(7)), TypeState.getById(rs.getInt(8)), rs.getByte(9),
+                            rs.getBoolean(21),
                             rs.getBoolean(10), rs.getLong(11), rs.getLong(12), rs.getInt(13), rs.getInt(14),
                             LifeCycleInfoImpl.load(rs, 15, 16, 17, 18), new ArrayList<FxType>(5), alRelations);
                 } catch (FxNotFoundException e) {

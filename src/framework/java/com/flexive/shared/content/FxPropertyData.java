@@ -62,7 +62,7 @@ public class FxPropertyData extends FxData {
 
     public FxPropertyData(String xpPrefix, String alias, int index, String xPath, String xPathFull, int[] indices,
                           long assignmentId, long propertyId, FxMultiplicity assignmentMultiplicity, int pos, FxGroupData parent,
-                          FxValue value, boolean systemInternal, FxStructureOption maxLength) throws FxInvalidParameterException {
+                          FxValue value, boolean systemInternal, FxStructureOption maxLength) {
         super(xpPrefix, alias, index, xPath, xPathFull, indices, assignmentId, assignmentMultiplicity, pos, parent, systemInternal);
         this.value = value;
         this.propertyId = propertyId;
@@ -123,28 +123,28 @@ public class FxPropertyData extends FxData {
      * @throws FxInvalidParameterException if the passed value is of an invalid datatype or otherwise invalid
      * @throws FxNoAccessException         if the current value is readonly or not accessible
      */
-    public void setValue(FxValue value) throws FxInvalidParameterException, FxNoAccessException {
+    public void setValue(FxValue value) {
         if (value == null)
             return;
         FxPropertyAssignment pa = (FxPropertyAssignment) this.getAssignment();
         if (value.isMultiLanguage() != pa.isMultiLang()) {
             if (pa.isMultiLang())
-                throw new FxInvalidParameterException("value", "ex.content.value.invalid.multilanguage.ass.multi", this.getXPathFull());
+                throw new FxInvalidParameterException("value", "ex.content.value.invalid.multilanguage.ass.multi", this.getXPathFull()).asRuntimeException();
             else
-                throw new FxInvalidParameterException("value", "ex.content.value.invalid.multilanguage.ass.single", this.getXPathFull());
+                throw new FxInvalidParameterException("value", "ex.content.value.invalid.multilanguage.ass.single", this.getXPathFull()).asRuntimeException();
         }
         if (pa.getProperty().isSystemInternal())
-            throw new FxInvalidParameterException(pa.getAlias(), "ex.content.value.systemInternal").setAffectedXPath(this.getXPathFull());
+            throw new FxInvalidParameterException(pa.getAlias(), "ex.content.value.systemInternal").setAffectedXPath(this.getXPathFull()).asRuntimeException();
         if (!pa.isValid(value))
             throw new FxInvalidParameterException("value", "ex.content.value.invalid",
                     this.getXPathFull(),
                     ((FxPropertyAssignment) this.getAssignment()).getProperty().getDataType(),
-                    value.getValueClass().getCanonicalName()).setAffectedXPath(this.getXPathFull());
+                    value.getValueClass().getCanonicalName()).setAffectedXPath(this.getXPathFull()).asRuntimeException();
         if (pa.hasParentGroupAssignment() && pa.getParentGroupAssignment().getMode() == GroupMode.OneOf) {
             //check if parent group is a one-of and already some other data set
             for (FxData check : this.getParent().getChildren()) {
                 if (!check.isEmpty() && check.getAssignmentId() != this.getAssignmentId())
-                    throw new FxInvalidParameterException("value", "ex.content.xpath.group.oneof", this.getXPathFull(), this.getParent().getXPathFull());
+                    throw new FxInvalidParameterException("value", "ex.content.xpath.group.oneof", this.getXPathFull(), this.getParent().getXPathFull()).asRuntimeException();
             }
         }
         this.containsDefaultValue = false;
@@ -154,9 +154,9 @@ public class FxPropertyData extends FxData {
             return;
         }
         if (this.value instanceof FxNoAccess)
-            throw new FxNoAccessException("ex.content.value.noaccess").setAffectedXPath(this.getXPathFull());
+            throw new FxNoAccessException("ex.content.value.noaccess").setAffectedXPath(this.getXPathFull()).asRuntimeException();
         if (this.value.isReadOnly())
-            throw new FxNoAccessException("ex.content.value.readOnly").setAffectedXPath(this.getXPathFull());
+            throw new FxNoAccessException("ex.content.value.readOnly").setAffectedXPath(this.getXPathFull()).asRuntimeException();
         this.value = value;
         this.value.setXPath(this.xpPrefix + this.getXPathFull());
     }
@@ -200,15 +200,11 @@ public class FxPropertyData extends FxData {
      */
     @Override
     protected void applyIndices() {
-        try {
-            List<XPathElement> elements = XPathElement.split(this.getXPathFull());
-            if (elements.get(elements.size() - 1).getIndex() != this.getIndex()) {
-                elements.get(elements.size() - 1).setIndex(this.getIndex());
-                this.XPathFull = XPathElement.toXPath(elements);
-                this.indices = XPathElement.getIndices(this.XPathFull);
-            }
-        } catch (FxInvalidParameterException e) {
-            throw e.asRuntimeException();
+        final List<XPathElement> elements = XPathElement.split(this.getXPathFull());
+        if (elements.get(elements.size() - 1).getIndex() != this.getIndex()) {
+            elements.get(elements.size() - 1).setIndex(this.getIndex());
+            this.XPathFull = XPathElement.toXPath(elements);
+            this.indices = XPathElement.getIndices(this.XPathFull);
         }
     }
 
@@ -270,10 +266,10 @@ public class FxPropertyData extends FxData {
      */
     @Override
     public boolean isRemoveable() {
-        if (!super.isRemoveable())
-            return false;
-        //only removeable if not null, system internal or not non accessible or readonly
-        return !this.isSystemInternal() &&
+        return super.isRemoveable()
+                &&  // don't remove system internal assignments, except superfluous /ACL entries 
+                ("ACL".equals(getPropertyAssignment().getProperty().getName()) || !this.isSystemInternal())
+                &&  //only removeable if not null, system internal or not non accessible or readonly
                 (!(this.value != null && (this.value instanceof FxNoAccess || this.value.isReadOnly())) || this.value == null);
     }
 
@@ -332,14 +328,8 @@ public class FxPropertyData extends FxData {
      */
     @Override
     FxPropertyData copy(FxGroupData parent) {
-        FxPropertyData clone;
-        try {
-            clone = new FxPropertyData(xpPrefix, getAlias(), getIndex(), getXPath(), getXPathFull(),
-                    ArrayUtils.clone(getIndices()), getAssignmentId(), getPropertyId(), getAssignmentMultiplicity(),
-                    getPos(), parent, value.copy(), isSystemInternal(), maxLength);
-        } catch (FxInvalidParameterException e) {
-            throw e.asRuntimeException();
-        }
-        return clone;
+        return new FxPropertyData(xpPrefix, getAlias(), getIndex(), getXPath(), getXPathFull(),
+                ArrayUtils.clone(getIndices()), getAssignmentId(), getPropertyId(), getAssignmentMultiplicity(),
+                getPos(), parent, value.copy(), isSystemInternal(), maxLength);
     }
 }

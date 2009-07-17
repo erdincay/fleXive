@@ -401,7 +401,7 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
                 if (isComment(currLine))
                     continue;
                 eos = currLine.indexOf(DELIMITER) != -1;
-                sb.append(currLine);
+                sb.append(currLine).append(' ');
                 if (eos) {
                     stmt.addBatch(sb.toString());
                     sb.setLength(0);

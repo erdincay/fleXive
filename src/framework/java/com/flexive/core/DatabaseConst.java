@@ -216,6 +216,11 @@ public final class DatabaseConst {
      */
     public static final String TBL_BINARY_TRANSIT = "FXS_BINARY_TRANSIT";
     /**
+     * ACL table for contents with multiple ACLs.
+     * @since 3.1
+     */
+    public static final String TBL_CONTENT_ACLS = "FX_CONTENT_ACLS";
+    /**
      * Script table
      */
     public static final String TBL_SCRIPTS = "FXS_SCRIPTS";

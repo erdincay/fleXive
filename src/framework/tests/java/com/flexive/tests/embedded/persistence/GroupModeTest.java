@@ -37,6 +37,7 @@ import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxCreateException;
 import com.flexive.shared.exceptions.FxLogoutFailedException;
+import com.flexive.shared.exceptions.FxRuntimeException;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.structure.*;
@@ -149,7 +150,10 @@ public class GroupModeTest extends StructureTestBase {
         try {
             test.setValue("/B/B_P2", testValue);
             Assert.fail("One-Of groups used twice!");
-        } catch (FxCreateException e) {
+        } catch (FxRuntimeException e) {
+            if (!(e.getConverted() instanceof FxCreateException)) {
+                throw e;
+            }
             //ok
         }
         Assert.assertTrue(test.getGroupData("/B").getCreateableChildren(false).size() == 0, "No creatable children should be returned!");
@@ -161,7 +165,10 @@ public class GroupModeTest extends StructureTestBase {
         try {
             loaded.setValue("/B/B_P2", testValue);
             Assert.fail("One-Of groups used twice!");
-        } catch (FxCreateException e) {
+        } catch (FxRuntimeException e) {
+            if (!(e.getConverted() instanceof FxCreateException)) {
+                throw e;
+            }
             //ok
         }
         loaded.remove("/B/B_P1");
@@ -169,7 +176,10 @@ public class GroupModeTest extends StructureTestBase {
         try {
             loaded.setValue("/C/C_G1/C_G1_P1", testValue);
             Assert.fail("One-Of groups used twice!");
-        } catch (FxCreateException e) {
+        } catch (FxRuntimeException e) {
+            if (!(e.getConverted() instanceof FxCreateException)) {
+                throw e;
+            }
             //ok
         }
         loaded.remove("/C/C_P1");
@@ -177,7 +187,10 @@ public class GroupModeTest extends StructureTestBase {
         try {
             loaded.setValue("/C/C_G1/C_G1_P2", testValue);
             Assert.fail("One-Of groups used twice!");
-        } catch (FxCreateException e) {
+        } catch (FxRuntimeException e) {
+            if (!(e.getConverted() instanceof FxCreateException)) {
+                throw e;
+            }
             //ok
         }
         co.save(loaded);

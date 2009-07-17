@@ -1,6 +1,5 @@
 /**
  * This function returns true if the user has read access on the given instance.
- * Same as mayReadInstance(__), but faster since more data has to be specified when calling. 
  *
  * @param _contentId           the content id
  * @param _contentVersion      the content version
@@ -11,7 +10,7 @@
  * @return                     true if read permission is granted
  **/
 drop function if exists mayReadInstance2|
-Create function mayReadInstance2(_contentId INTEGER UNSIGNED,_contentVersion INTEGER UNSIGNED,_userId INTEGER UNSIGNED,
+Create function mayReadInstance2(_contentId BIGINT,_contentVersion INTEGER UNSIGNED,_userId INTEGER UNSIGNED,
   _USER_MANDATOR INTEGER UNSIGNED,MANDATOR_SUPERVISOR BOOLEAN,GLOBAL_SUPERVISOR BOOLEAN)
 returns BOOLEAN deterministic reads sql data
 BEGIN
@@ -32,12 +31,13 @@ BEGIN
   -- Type
   DECLARE TPREAD BOOLEAN DEFAULT FALSE;
 
-  -- Permission cursor
+  -- Permission cursor - type, step and first content ACL
   DECLARE cur CURSOR FOR
+
   select
     dat.created_by,ass.usergroup,ass.PREAD,acl.cat_type,dat.mandator,dat.securityMode
   from
-    (select con.mandator,con.step,con.created_by,con.id,con.ver,con.tdef,con.acl,stp.acl stepAcl,typ.acl typeAcl,typ.security_mode securityMode
+    (select con.mandator,con.created_by,con.acl,stp.acl stepAcl,typ.acl typeAcl,typ.security_mode securityMode
 	from FX_CONTENT con,FXS_TYPEDEF typ, FXS_WF_STEPS stp where con.id=_contentId and con.ver=_contentVersion and
 	con.tdef=typ.id and stp.id=con.step) dat,
     FXS_ACLASSIGNMENTS ass,
@@ -45,7 +45,24 @@ BEGIN
   where
     acl.id=ass.acl and
     ass.usergroup in (select usergroup from FXS_USERGROUPMEMBERS where account=_userId union select GRP_OWNER) and
-    (ass.acl=dat.acl or ass.acl=dat.typeAcl or ass.acl=dat.stepAcl);
+    (ass.acl=dat.acl or ass.acl=dat.typeAcl or ass.acl=dat.stepAcl)
+
+  UNION
+
+  select
+    dat.created_by,ass.usergroup,ass.PREAD,acl.cat_type,dat.mandator,dat.securityMode
+  from
+    (select con.mandator,con.created_by,con.acl,stp.acl stepAcl,typ.acl typeAcl,typ.security_mode securityMode
+	from FX_CONTENT con,FXS_TYPEDEF typ, FXS_WF_STEPS stp where con.id=_contentId and con.ver=_contentVersion and
+	con.tdef=typ.id and stp.id=con.step) dat,
+    (select ca.acl from FX_CONTENT_ACLS ca where ca.id=_contentId and ca.ver=_contentVersion) contentACLs,
+    FXS_ACLASSIGNMENTS ass,
+    FXS_ACL acl
+  where
+    acl.id=ass.acl and
+    ass.usergroup in (select usergroup from FXS_USERGROUPMEMBERS where account=_userId union select GRP_OWNER) and
+    ass.acl=contentACLs.acl;
+
   DECLARE CONTINUE HANDLER FOR SQLSTATE '02000' SET done = TRUE;
 
   -- ------------------------------------------------------------------------------------------

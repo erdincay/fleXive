@@ -318,7 +318,10 @@ public class ContentEngineTest {
         try {
             test.getGroupData("/TestGroup1/TestGroup1_2");
             Assert.fail("/TestGroup1/TestGroup1_2 should no longer exist!");
-        } catch (FxNotFoundException e) {
+        } catch (FxRuntimeException e) {
+            if (!(e.getConverted() instanceof FxNotFoundException)) {
+                throw e;
+            }
             //expected
         }
         List<String> cr = test.getGroupData("/TestGroup1").getCreateableChildren(true);
@@ -344,21 +347,30 @@ public class ContentEngineTest {
         try {
             test.getRootGroup().addEmptyChild("/TESTPROPERTY1[2]", FxData.POSITION_BOTTOM);
             Assert.fail("FxCreateException expected! max. multiplicity reached");
-        } catch (FxInvalidParameterException e) {
+        } catch (FxRuntimeException e) {
+            if (!(e.getConverted() instanceof FxInvalidParameterException)) {
+                throw e;
+            }
             //expected
         }
         test.remove("/TestGroup1");
         try {
             test.getGroupData("/TestGroup1");
             Assert.fail("/TestGroup1 should no longer exist!");
-        } catch (FxNotFoundException e) {
+        } catch (FxRuntimeException e) {
+            if (!(e.getConverted() instanceof FxNotFoundException)) {
+                throw e;
+            }
             //expected
         }
         test.remove("/TestNumber");
         try {
             test.getPropertyData("/TestNumber");
             Assert.fail("/TestNumber should no longer exist!");
-        } catch (FxNotFoundException e) {
+        } catch (FxRuntimeException e) {
+            if (!(e.getConverted() instanceof FxNotFoundException)) {
+                throw e;
+            }
             //expected
         }
     }

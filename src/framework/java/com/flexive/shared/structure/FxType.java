@@ -41,6 +41,7 @@ import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.FxCreateException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxNotFoundException;
+import com.flexive.shared.exceptions.FxRuntimeException;
 import com.flexive.shared.scripting.FxScriptEvent;
 import com.flexive.shared.scripting.FxScriptMapping;
 import com.flexive.shared.scripting.FxScriptMappingEntry;
@@ -95,6 +96,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
     protected long maxVersions;
     protected int maxRelSource;
     protected int maxRelDestination;
+    protected boolean multipleContentACLs;
     protected LifeCycleInfo lifeCycleInfo;
     protected boolean containsFlatStorageAssignments;
     protected List<FxType> derivedTypes;
@@ -108,6 +110,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
 
     public FxType(long id, ACL acl, Workflow workflow, String name, FxString label, FxType parent, TypeStorageMode storageMode,
                   TypeCategory category, TypeMode mode, LanguageMode language, TypeState state, byte permissions,
+                  boolean multipleContentACLs,
                   boolean trackHistory, long historyAge, long maxVersions, int maxRelSource, int maxRelDestination,
                   LifeCycleInfo lifeCycleInfo, List<FxType> derivedTypes, List<FxTypeRelation> relations) {
         this.id = id;
@@ -122,6 +125,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
         this.language = language;
         this.state = state;
         this.permissions = permissions;
+        this.multipleContentACLs = multipleContentACLs;
         this.trackHistory = trackHistory;
         this.historyAge = historyAge;
         this.maxVersions = maxVersions;
@@ -422,6 +426,16 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
     }
 
     /**
+     * Allow multiple ACLs for a content of this type?
+     *
+     * @return  true if multiple content ACLs are allowed
+     * @since   3.1
+     */
+    public boolean isMultipleContentACLs() {
+        return multipleContentACLs;
+    }
+
+    /**
      * Track history of changes?
      *
      * @return if history of changes is tracked
@@ -713,14 +727,13 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      *
      * @param xpPrefix XPath prefix like "FxType name[@pk=..]"
      * @return empty FxData hierarchy
-     * @throws FxCreateException on errors
      */
-    public FxGroupData createEmptyData(String xpPrefix) throws FxCreateException {
+    public FxGroupData createEmptyData(String xpPrefix) {
         FxGroupData base;
         try {
             base = FxGroupData.createVirtualRootGroup(xpPrefix);
         } catch (FxInvalidParameterException e) {
-            throw new FxCreateException(e);
+            throw new FxCreateException(e).asRuntimeException();
         }
         final UserTicket ticket = FxContext.getUserTicket();
         for (FxPropertyAssignment fxpa : assignedProperties) {
@@ -753,14 +766,13 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      * @param rnd             Random to use
      * @param maxMultiplicity the maximum multiplicity for groups
      * @return random data
-     * @throws FxCreateException on errors
      */
-    public FxGroupData createRandomData(FxPK pk, FxEnvironment env, Random rnd, int maxMultiplicity) throws FxCreateException {
+    public FxGroupData createRandomData(FxPK pk, FxEnvironment env, Random rnd, int maxMultiplicity) {
         FxGroupData base;
         try {
             base = FxGroupData.createVirtualRootGroup(buildXPathPrefix(pk));
         } catch (FxInvalidParameterException e) {
-            throw new FxCreateException(e);
+            throw new FxCreateException(e).asRuntimeException();
         }
         int count;
         for (FxPropertyAssignment fxpa : assignedProperties) {
@@ -804,8 +816,6 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
             for (FxPropertyAssignment rpa : getAssignedProperties())
                 if (rpa.getAlias().equals(xpe.get(0).getAlias()))
                     return rpa;
-        } catch (FxInvalidParameterException e) {
-            throw e.asRuntimeException();
         } catch (FxNotFoundException e) {
             throw e.asRuntimeException();
         }
@@ -976,7 +986,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
                 else
                     valid = last instanceof FxGroupAssignment;
             }
-        } catch (FxInvalidParameterException e) {
+        } catch (FxRuntimeException e) {
             return false;
         }
         return valid;

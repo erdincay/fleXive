@@ -299,7 +299,7 @@ public class FxWrappedContent implements Serializable {
             return isNew() ? FxPermissionUtils.checkPermission(FxContext.getUserTicket(),
                     content.getLifeCycleInfo().getCreatorId(), aclPermission,
                     CacheAdmin.getFilteredEnvironment().getType(content.getTypeId()),
-                    CacheAdmin.getFilteredEnvironment().getStep(content.getStepId()).getAclId(), content.getAclId(), false) :
+                    CacheAdmin.getFilteredEnvironment().getStep(content.getStepId()).getAclId(), content.getAclIds(), false) :
                     FxPermissionUtils.checkPermission(FxContext.getUserTicket(), aclPermission,
                             EJBLookup.getContentEngine().getContentSecurityInfo(content.getPk()), false);
         }
@@ -356,7 +356,7 @@ public class FxWrappedContent implements Serializable {
         try {
             return FxPermissionUtils.checkPermission(FxContext.getUserTicket(), content.getLifeCycleInfo().getCreatorId(),
                     ACLPermission.EDIT, CacheAdmin.getFilteredEnvironment().getType(content.getTypeId()),
-                    CacheAdmin.getFilteredEnvironment().getStep(content.getStepId()).getAclId(), content.getAclId(), false);
+                    CacheAdmin.getFilteredEnvironment().getStep(content.getStepId()).getAclId(), content.getAclIds(), false);
         } catch (FxNoAccessException e) {
             LOG.warn(e);
             return false;

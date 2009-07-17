@@ -37,6 +37,7 @@ import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.content.FxPropertyData;
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.exceptions.FxRuntimeException;
 import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.value.FxValue;
@@ -95,7 +96,7 @@ public class GroovyContentBuilder extends BuilderSupport {
                         newIndex--;
                     }
                     path = xpath + "[" + newIndex + "]";
-                } catch (FxApplicationException e) {
+                } catch (FxRuntimeException e) {
                     path = xpath + "[1]";
                 }
                 this.xpath = path;
@@ -169,16 +170,12 @@ public class GroovyContentBuilder extends BuilderSupport {
      */
     @Override
     protected void setParent(Object parent, Object child) {
-        try {
-            // if parent is a node info, use its xpath as prefix
-            final NodeInfo nodeInfo = (NodeInfo) child;
-            // add parent xpath to our node
-            nodeInfo.addParentXPath(parent instanceof NodeInfo ? ((NodeInfo) parent).xpath : "");
-            if (nodeInfo.value != null) {
-                content.setValue(nodeInfo.xpath, nodeInfo.getValue());
-            }
-        } catch (FxApplicationException e) {
-            throw e.asRuntimeException();
+        // if parent is a node info, use its xpath as prefix
+        final NodeInfo nodeInfo = (NodeInfo) child;
+        // add parent xpath to our node
+        nodeInfo.addParentXPath(parent instanceof NodeInfo ? ((NodeInfo) parent).xpath : "");
+        if (nodeInfo.value != null) {
+            content.setValue(nodeInfo.xpath, nodeInfo.getValue());
         }
     }
 

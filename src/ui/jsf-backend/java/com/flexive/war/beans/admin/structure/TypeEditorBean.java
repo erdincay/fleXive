@@ -621,6 +621,14 @@ public class TypeEditorBean implements Serializable {
         return this.type.isUseTypePermissions();
     }
 
+    public boolean isMultipleContentACLs() {
+        return type.isMultipleContentACLs();
+    }
+
+    public void setMultipleContentACLs(boolean value) {
+        type.setMultipleContentACLs(value);
+    }
+
     /*
      *  Simple wrapper class for FxTypeRelation with convenient getters and setters
      * for GUI operations

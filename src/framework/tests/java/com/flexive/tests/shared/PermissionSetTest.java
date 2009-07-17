@@ -33,6 +33,8 @@ package com.flexive.tests.shared;
 
 import org.testng.annotations.Test;
 import org.testng.Assert;
+import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.assertEquals;
 import com.flexive.shared.security.PermissionSet;
 
 /**
@@ -46,11 +48,11 @@ public class PermissionSetTest {
     @Test(groups = "shared")
     public void basicPermissionSet() {
         final PermissionSet set = new PermissionSet(true, false, false, true, true);
-        Assert.assertTrue(set.isMayEdit());
-        Assert.assertTrue(!set.isMayRelate());
-        Assert.assertTrue(!set.isMayDelete());
-        Assert.assertTrue(set.isMayExport());
-        Assert.assertTrue(set.isMayCreate());
+        assertTrue(set.isMayEdit());
+        assertTrue(!set.isMayRelate());
+        assertTrue(!set.isMayDelete());
+        assertTrue(set.isMayExport());
+        assertTrue(set.isMayCreate());
     }
 
     @Test(groups = "shared")
@@ -62,12 +64,27 @@ public class PermissionSetTest {
             final boolean export = (i & 8) > 0;
             final boolean create = (i & 16) > 0;
             final PermissionSet set = new PermissionSet(edit, relate, delete, export, create);
-            Assert.assertTrue(edit == set.isMayEdit());
-            Assert.assertTrue(relate == set.isMayRelate());
-            Assert.assertTrue(delete == set.isMayDelete());
-            Assert.assertTrue(export == set.isMayExport());
-            Assert.assertTrue(create == set.isMayCreate());
+            assertTrue(edit == set.isMayEdit());
+            assertTrue(relate == set.isMayRelate());
+            assertTrue(delete == set.isMayDelete());
+            assertTrue(export == set.isMayExport());
+            assertTrue(create == set.isMayCreate());
         }
     }
 
+    @Test(groups = "shared")
+    public void permissionUnion() {
+        final PermissionSet result =
+                new PermissionSet(true, true, true, false, false)
+                .union(new PermissionSet(false, false, false, false, true));
+        assertEquals(result, new PermissionSet(true, true, true, false, true));
+    }
+
+    @Test(groups = "shared")
+    public void permissionIntersect() {
+        final PermissionSet result =
+                new PermissionSet(true, true, false, true, false)
+                .intersect(new PermissionSet(false, false, true, true, true));
+        assertEquals(result, new PermissionSet(false, false, false, true, false));
+    }
 }

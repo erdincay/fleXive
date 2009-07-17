@@ -31,6 +31,7 @@
  ***************************************************************/
 package com.flexive.core.storage.genericSQL;
 
+import com.flexive.core.Database;
 import com.flexive.core.DatabaseConst;
 import static com.flexive.core.DatabaseConst.*;
 import com.flexive.core.LifeCycleInfoImpl;
@@ -63,6 +64,7 @@ import com.flexive.shared.workflow.Step;
 import com.flexive.shared.workflow.StepDefinition;
 import com.flexive.shared.workflow.Workflow;
 import com.flexive.stream.ServerLocation;
+import com.google.common.collect.Lists;
 import com.thoughtworks.xstream.XStream;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
@@ -97,9 +99,9 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     protected static final String CONTENT_MAIN_UPDATE = "UPDATE " + TBL_CONTENT + " SET " +
             //    1     2      3         4          5           6            7          8          9
             "TDEF=?,ACL=?,STEP=?,MAX_VER=?,LIVE_VER=?,ISMAX_VER=?,ISLIVE_VER=?,ISACTIVE=?,MAINLANG=?," +
-            //         10           11          12           13           14           15            16            17
+            //         10           11          12           13           14           15            16          17
             "RELSRC_ID=?,RELSRC_VER=?,RELDST_ID=?,RELDST_VER=?,RELSRC_POS=?,RELDST_POS=?,MODIFIED_BY=?,MODIFIED_AT=? " +
-            //        18        19
+            //        18    19
             "WHERE ID=? AND VER=?";
     //                                                        1  2   3    4   5    6       7        8         9
     protected static final String CONTENT_MAIN_LOAD = "SELECT ID,VER,TDEF,ACL,STEP,MAX_VER,LIVE_VER,ISMAX_VER,ISLIVE_VER," +
@@ -185,6 +187,11 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     protected static final String CONTENT_TYPE_PK_RETRIEVE_VERSIONS = "SELECT DISTINCT ID,VER FROM " + TBL_CONTENT + " WHERE TDEF=? ORDER BY ID,VER";
     protected static final String CONTENT_TYPE_PK_RETRIEVE_IDS = "SELECT DISTINCT ID FROM " + TBL_CONTENT + " WHERE TDEF=? ORDER BY ID";
     protected static final String CONTENT_GET_TYPE = "SELECT DISTINCT TDEF FROM " + TBL_CONTENT + " WHERE ID=?";
+
+    protected static final String CONTENT_ACLS_LOAD = "SELECT ACL FROM " + TBL_CONTENT_ACLS + " WHERE ID=? AND VER=?";
+    protected static final String CONTENT_ACLS_CLEAR = "DELETE FROM " + TBL_CONTENT_ACLS + " WHERE ID=? AND VER=?";
+    protected static final String CONTENT_ACL_INSERT_BASE = "INSERT INTO " + TBL_CONTENT_ACLS + "(ID, VER, ACL) VALUES ";
+    protected static final String CONTENT_ACL_INSERT_VALUES = "(?, ?, ?)";
 
     //prepared statement positions
     protected final static int INSERT_LANG_POS = 4;
@@ -715,7 +722,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             ps.setLong(1, newId);
             ps.setInt(2, version);
             ps.setLong(3, content.getTypeId());
-            ps.setLong(4, content.getAclId());
+            ps.setLong(4, content.getAclIds().size() > 1 ? ACL.NULL_ACL_ID : content.getAclIds().get(0));
             ps.setLong(5, content.getStepId());
             ps.setInt(6, 1);  //if creating a new version, max_ver will be fixed in a later step
             ps.setInt(7, content.isLiveVersion() ? 1 : 0);
@@ -746,6 +753,9 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             ps.setLong(21, now);
             ps.setLong(22, content.getMandatorId());
             ps.executeUpdate();
+
+            updateACLEntries(con, content, pk, true);
+            
         } catch (SQLException e) {
             throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
         } finally {
@@ -757,6 +767,45 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 }
         }
         return pk;
+    }
+
+    protected void updateACLEntries(Connection con, FxContent content, FxPK pk, boolean newEntry) throws SQLException {
+        PreparedStatement ps = null;
+        try {
+            if (!newEntry) {
+                // first remove all ACLs, then update them (TODO: check if update is necessary)
+                ps = con.prepareStatement(CONTENT_ACLS_CLEAR);
+                ps.setLong(1, pk.getId());
+                ps.setInt(2, pk.getVersion());
+                ps.executeUpdate();
+            }
+            final List<Long> aclIds = content.getAclIds();
+            if (aclIds.size() <= 1) {
+                return; // ACL saved in main table
+            }
+            
+            final StringBuilder sql = new StringBuilder();
+            sql.append(CONTENT_ACL_INSERT_BASE);
+
+            // add a value tuple (?,?,?) for every ACL
+            sql.append(StringUtils.join(
+                    Collections.nCopies(aclIds.size(), CONTENT_ACL_INSERT_VALUES),
+                    ',')
+            );
+
+            // build insert for all ACLs
+            ps = con.prepareStatement(sql.toString());
+            int index = 1;
+            for (long aclId : aclIds) {
+                ps.setLong(index++, pk.getId());
+                ps.setInt(index++, pk.getVersion());
+                ps.setLong(index++, aclId);
+            }
+            ps.executeUpdate();
+
+        } finally {
+            Database.closeObjects(GenericHierarchicalStorage.class, null, ps);
+        }
     }
 
     /**
@@ -1317,7 +1366,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 throw new FxNotFoundException("ex.content.notFound", pk);
             contentPK = new FxPK(rs.getLong(1), rs.getInt(2));
             FxType type = env.getType(rs.getLong(3));
-            ACL acl = env.getACL(rs.getInt(4));
+            final long aclId = rs.getLong(4);
             Step step = env.getStep(rs.getLong(5));
             Mandator mand = env.getMandator(rs.getInt(22));
             FxGroupData root = loadDetails(con, type, env, contentPK, pk.getVersion());
@@ -1328,17 +1377,20 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 srcPos = rs.getInt(16);
                 dstPos = rs.getInt(17);
             }
-            FxContent content = new FxContent(contentPK, type.getId(), type.isRelation(), mand.getId(), acl.getId(), step.getId(), rs.getInt(6),
+            FxContent content = new FxContent(contentPK, type.getId(), type.isRelation(), mand.getId(),
+                    aclId != ACL.NULL_ACL_ID ? aclId : -1,
+                    step.getId(), rs.getInt(6),
                     rs.getInt(7), rs.getBoolean(10), rs.getInt(11), sourcePK, destinationPK, srcPos, dstPos,
                     LifeCycleInfoImpl.load(rs, 18, 19, 20, 21), root, rs.getLong(23), rs.getLong(24)).initSystemProperties();
             if (rs.next())
                 throw new FxLoadException("ex.content.load.notDistinct", pk);
+            if (type.isMultipleContentACLs() && aclId == ACL.NULL_ACL_ID) {
+                content.setAclIds(loadContentAclTable(con, pk));
+            }
             return content;
         } catch (SQLException e) {
             throw new FxLoadException(LOG, e, "ex.db.sqlError", e.getMessage());
         } catch (FxDbException e) {
-            throw new FxLoadException(e);
-        } catch (FxCreateException e) {
             throw new FxLoadException(e);
         } finally {
             try {
@@ -1347,6 +1399,23 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             } catch (SQLException e) {
                 LOG.warn(e, e);
             }
+        }
+    }
+
+    protected List<Long> loadContentAclTable(Connection con, FxPK pk) throws SQLException {
+        PreparedStatement ps = null;
+        try {
+            ps = con.prepareStatement(CONTENT_ACLS_LOAD);
+            ps.setLong(1, pk.getId());
+            ps.setInt(2, pk.getVersion());
+            final ResultSet rs = ps.executeQuery();
+            final List<Long> aclIds = Lists.newArrayList();
+            while (rs.next()) {
+                aclIds.add(rs.getLong(1));
+            }
+            return aclIds;
+        } finally {
+            Database.closeObjects(GenericHierarchicalStorage.class, null, ps);
         }
     }
 
@@ -2056,7 +2125,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             ps.setLong(18, content.getPk().getId());
             ps.setInt(19, content.getPk().getVersion());
             ps.setLong(1, content.getTypeId());
-            ps.setLong(2, content.getAclId());
+            ps.setLong(2, content.getAclIds().size() > 1 ? ACL.NULL_ACL_ID : content.getAclIds().get(0));
             ps.setLong(3, content.getStepId());
             ps.setInt(4, content.getVersion());
             ps.setInt(5, content.isLiveVersion() ? 1 : 0);
@@ -2083,6 +2152,9 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             ps.setLong(16, userId);
             ps.setLong(17, System.currentTimeMillis());
             ps.executeUpdate();
+            
+            updateACLEntries(con, content, content.getPk(), false);
+
         } catch (SQLException e) {
             throw new FxUpdateException(LOG, e, "ex.db.sqlError", e.getMessage());
         } finally {
@@ -2114,19 +2186,19 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             }
             ps.setLong(1, pk.getId());
             byte typePerm;
-            int typeACL, contentACL, stepACL, previewACL;
+            long typeACL, contentACL, stepACL, previewACL;
             long previewId, typeId, ownerId, mandatorId;
-            long[] propertyPerm;
+            final Set<Long> propertyPerms = new HashSet<Long>();
             ResultSet rs = ps.executeQuery();
             if (rs == null || !rs.next())
                 throw new FxNotFoundException("ex.content.notFound", pk);
-            contentACL = rs.getInt(1);
-            typeACL = rs.getInt(2);
-            stepACL = rs.getInt(3);
+            contentACL = rs.getLong(1);
+            typeACL = rs.getLong(2);
+            stepACL = rs.getLong(3);
             typePerm = rs.getByte(4);
             typeId = rs.getLong(5);
             previewId = rs.getLong(6);
-            previewACL = rs.getInt(7);
+            previewACL = rs.getLong(7);
             ownerId = rs.getLong(8);
             mandatorId = rs.getLong(9);
             if (rs.next())
@@ -2134,7 +2206,6 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             if ((typePerm & 0x02) == 0x02) {
                 //use property permissions
                 FxContent co = rawContent;
-                ArrayList<Long> alPropACL = new ArrayList<Long>(10);
 
                 try {
                     if (co == null) {
@@ -2154,19 +2225,15 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                         if (pa.isSystemInternal())
                             continue;
                         Long propACL = pa.getACL().getId();
-                        if (!alPropACL.contains(propACL))
-                            alPropACL.add(propACL);
+                        propertyPerms.add(propACL);
                     }
                 } catch (FxInvalidParameterException e) {
                     throw new FxLoadException(e);
                 }
-                propertyPerm = new long[alPropACL.size()];
-                int cnt = 0;
-                for (long acl : alPropACL)
-                    propertyPerm[cnt++] = acl;
-            } else
-                propertyPerm = new long[0];
-            return new FxContentSecurityInfo(pk, ownerId, previewId, typeId, mandatorId, typePerm, typeACL, stepACL, contentACL, previewACL, propertyPerm);
+            }
+
+            final List<Long> acls = contentACL == ACL.NULL_ACL_ID ? loadContentAclTable(con, pk) : Arrays.asList(contentACL);
+            return new FxContentSecurityInfo(pk, ownerId, previewId, typeId, mandatorId, typePerm, typeACL, stepACL, acls, previewACL, Lists.newArrayList(propertyPerms));
         } catch (SQLException e) {
             throw new FxLoadException(LOG, e, "ex.db.sqlError", e.getMessage());
         } finally {

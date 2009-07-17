@@ -93,14 +93,10 @@ public class FxGroupAssignmentConverter extends FxAssignmentConverter {
         FxEnvironment env = CacheAdmin.getEnvironment();
         boolean isDerived = data.getParentAssignment() != null;
         String parentXPath;
-        try {
-            List<XPathElement> xpe = XPathElement.split(data.getXpath());
-            if (xpe.size() > 0)
-                xpe.remove(xpe.size() - 1);
-            parentXPath = XPathElement.toXPathNoMult(xpe);
-        } catch (FxInvalidParameterException e) {
-            throw e.asRuntimeException();
-        }
+        List<XPathElement> xpe = XPathElement.split(data.getXpath());
+        if (xpe.size() > 0)
+            xpe.remove(xpe.size() - 1);
+        parentXPath = XPathElement.toXPathNoMult(xpe);
 
         final AssignmentEngine assignmentEngine = EJBLookup.getAssignmentEngine();
         FxGroupAssignmentEdit grp = null;

@@ -354,7 +354,7 @@ public class ValueTest {
                         content.setValue("/VTS" + test.dataType.name() + "[1]", new FxReference(new ReferencedContent(new FxPK())));
                         co.save(content); //expected to fail
                         Assert.fail("Invalid PK (new) for a reference should fail!");
-                    } catch (FxApplicationException e) {
+                    } catch (Exception e) {
                         //expected
                     }
                     try {
@@ -362,7 +362,7 @@ public class ValueTest {
                         content.setValue("/VTS" + test.dataType.name() + "[1]", new FxReference(new ReferencedContent(new FxPK(123456))));
                         co.save(content); //expected to fail
                         Assert.fail("Invalid PK (non existant) for a reference should fail!");
-                    } catch (FxApplicationException e) {
+                    } catch (Exception e) {
                         //expected
                     }
                     try {
@@ -370,7 +370,7 @@ public class ValueTest {
                         content.setValue("/VTS" + test.dataType.name() + "[1]", new FxReference(new ReferencedContent(RPK2)));
                         co.save(content); //expected to fail
                         Assert.fail("Invalid PK (wrong type) for a reference should fail!");
-                    } catch (FxApplicationException e) {
+                    } catch (Exception e) {
                         //expected
                     }
                 }

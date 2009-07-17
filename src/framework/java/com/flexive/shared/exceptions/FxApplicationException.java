@@ -34,6 +34,7 @@ package com.flexive.shared.exceptions;
 import com.flexive.shared.FxLanguage;
 import com.flexive.shared.LogLevel;
 import com.flexive.shared.FxContext;
+import com.flexive.shared.EJBLookup;
 import com.flexive.shared.security.UserTicket;
 import org.apache.commons.logging.Log;
 
@@ -311,24 +312,24 @@ public class FxApplicationException extends Exception implements FxLocalizedExce
     /**
      * {@inheritDoc}
      */
+    @Override
     public final String getMessage() {
-        return message.getLocalizedMessage(FxLanguage.DEFAULT_ID, FxLanguage.DEFAULT_ISO) + evaluateCause(FxLanguage.DEFAULT_ID);
+        return message.getLocalizedMessage(FxLanguage.DEFAULT) + evaluateCause(FxLanguage.DEFAULT);
     }
-
 
     /**
      * Return the localized messages of any chained exceptions that are derived from FxException
      *
-     * @param langCode the language code
+     * @param language the language
      * @return the localized messages of any chained exceptions that are derived from FxException
      */
-    private String evaluateCause(long langCode) {
+    private String evaluateCause(FxLanguage language) {
         final StringBuilder msg = new StringBuilder();
         Throwable org = this.getCause();
         while (org != null) {
             if (org instanceof FxApplicationException) {
                 if( !this.message.equals(((FxApplicationException) org).message))
-                    msg.append(((FxApplicationException) org).message.getLocalizedMessage(langCode));
+                    msg.append(((FxApplicationException) org).message.getLocalizedMessage(language));
             }
             org = org.getCause();
         }
@@ -339,14 +340,18 @@ public class FxApplicationException extends Exception implements FxLocalizedExce
      * {@inheritDoc}
      */
     public String getMessage(FxLanguage locale) {
-        return message.getLocalizedMessage(locale) + evaluateCause(locale.getId());
+        return message.getLocalizedMessage(locale) + evaluateCause(locale);
     }
 
     /**
      * {@inheritDoc}
      */
     public String getMessage(long localeId) {
-        return message.getLocalizedMessage(localeId) + evaluateCause(localeId);
+        try {
+            return message.getLocalizedMessage(localeId) + evaluateCause(EJBLookup.getLanguageEngine().load(localeId));
+        } catch (FxApplicationException e) {
+            throw e.asRuntimeException();
+        }
     }
 
     /**
@@ -354,7 +359,7 @@ public class FxApplicationException extends Exception implements FxLocalizedExce
      */
     public String getMessage(UserTicket ticket) {
         if (ticket != null)
-            return message.getLocalizedMessage(ticket.getLanguage()) + evaluateCause(ticket.getLanguage().getId());
+            return message.getLocalizedMessage(ticket.getLanguage()) + evaluateCause(ticket.getLanguage());
         else
             return this.getMessage();
     }

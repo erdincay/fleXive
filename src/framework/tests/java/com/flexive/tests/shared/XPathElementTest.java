@@ -34,6 +34,7 @@ package com.flexive.tests.shared;
 import com.flexive.shared.XPathElement;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
+import com.flexive.shared.exceptions.FxRuntimeException;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -63,14 +64,14 @@ public class XPathElementTest {
         try {
             XPathElement.lastElement("/A/B/C[123]s");
             Assert.fail("expected exception");
-        } catch (FxInvalidParameterException e) {
+        } catch (FxRuntimeException e) {
             //ok
         }
         Assert.assertEquals("C[123]", XPathElement.lastElement("A/B/C[123]").toString());
         try {
             XPathElement.lastElement("/A/B/C[a]");
             Assert.fail("expected exception");
-        } catch (FxInvalidParameterException e) {
+        } catch (FxRuntimeException e) {
             //ok
         }
     }
@@ -80,13 +81,13 @@ public class XPathElementTest {
         try {
             XPathElement.stripLastElement(null);
             Assert.fail("expected exception");
-        } catch (FxInvalidParameterException e) {
+        } catch (FxRuntimeException e) {
             //expected
         }
         try {
             XPathElement.stripLastElement("foobar");
             Assert.fail("expected exception");
-        } catch (FxInvalidParameterException e) {
+        } catch (FxRuntimeException e) {
             //expected
         }
         Assert.assertEquals("/", XPathElement.stripLastElement("/"));

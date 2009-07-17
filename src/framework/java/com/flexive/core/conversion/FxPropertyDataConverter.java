@@ -72,14 +72,10 @@ public class FxPropertyDataConverter implements Converter {
         int pos = Integer.valueOf(reader.getAttribute("pos"));
         FxValue val = (FxValue) ctx.convertAnother(this, FxValue.class);
         FxData data;
-        try {
-            co.setValue(xp, val);
-            data = co.getPropertyData(xp);
-            if (data.getPos() != pos)
-                data.setPos(pos);
-        } catch (FxApplicationException e) {
-            throw e.asRuntimeException();
-        }
+        co.setValue(xp, val);
+        data = co.getPropertyData(xp);
+        if (data.getPos() != pos)
+            data.setPos(pos);
         return data;
     }
 

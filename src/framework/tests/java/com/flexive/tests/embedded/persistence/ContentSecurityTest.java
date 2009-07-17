@@ -34,13 +34,12 @@ package com.flexive.tests.embedded.persistence;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
+import static com.flexive.shared.EJBLookup.getAclEngine;
+import static com.flexive.shared.EJBLookup.getContentEngine;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.content.FxPermissionUtils;
-import com.flexive.shared.exceptions.FxAccountInUseException;
-import com.flexive.shared.exceptions.FxApplicationException;
-import com.flexive.shared.exceptions.FxLoginFailedException;
-import com.flexive.shared.exceptions.FxLogoutFailedException;
+import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.ACLEngine;
 import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.interfaces.UserGroupEngine;
@@ -60,11 +59,14 @@ import com.flexive.tests.embedded.TestUser;
 import com.flexive.tests.embedded.TestUsers;
 import org.apache.commons.lang.RandomStringUtils;
 import org.testng.Assert;
+import static org.testng.Assert.fail;
+import static org.testng.Assert.assertEquals;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Testcase for content related security
@@ -88,7 +90,7 @@ public class ContentSecurityTest {
     public void setup() throws FxApplicationException, FxLoginFailedException, FxAccountInUseException {
         user = TestUsers.createUser("SecurityTestUser", Role.BackendAccess);
         final UserGroupEngine ug = EJBLookup.getUserGroupEngine();
-        final ACLEngine ae = EJBLookup.getAclEngine();
+        final ACLEngine ae = getAclEngine();
         long mandator = TestUsers.getTestMandator();
         FxContext.get().runAsSystem();
         try {
@@ -122,7 +124,7 @@ public class ContentSecurityTest {
             long wf = EJBLookup.getWorkflowEngine().create(wfEdit);
             workflow = CacheAdmin.getEnvironment().getWorkflow(wf);
             Step edit, live;
-            Assert.assertEquals(workflow.getSteps().size(), 2);
+            assertEquals(workflow.getSteps().size(), 2);
             if (workflow.getSteps().get(0).isLiveStep()) {
                 live = workflow.getSteps().get(0);
                 edit = workflow.getSteps().get(1);
@@ -180,14 +182,14 @@ public class ContentSecurityTest {
         FxContext.get().runAsSystem();
         try {
             if (type != null) {
-                EJBLookup.getContentEngine().removeForType(type.getId());
+                getContentEngine().removeForType(type.getId());
                 EJBLookup.getTypeEngine().remove(type.getId());
             }
             if (workflow != null)
                 EJBLookup.getWorkflowEngine().remove(workflow.getId());
             for (int i = 0; i < 26; i++)
                 ug.remove(groups[i].getId());
-            final ACLEngine ae = EJBLookup.getAclEngine();
+            final ACLEngine ae = getAclEngine();
             ae.remove(typeACL.getId());
             ae.remove(instanceACL.getId());
             ae.remove(property1ACL.getId());
@@ -256,7 +258,7 @@ public class ContentSecurityTest {
                 default:
                     Assert.assertFalse(true, "Invalid/unknown matrix: " + matrix);
             }
-            EJBLookup.getAclEngine().update(acl.getId(), null, null, null, null, as);
+            getAclEngine().update(acl.getId(), null, null, null, null, as);
         } finally {
             FxContext.get().stopRunAsSystem();
         }
@@ -304,7 +306,7 @@ public class ContentSecurityTest {
      */
     private FxContent createReferenceContent() throws FxApplicationException {
         FxContent refContent;
-        ContentEngine ce = EJBLookup.getContentEngine();
+        ContentEngine ce = getContentEngine();
         try {
             FxContext.get().runAsSystem();
             refContent = ce.initialize(type.getId());
@@ -343,14 +345,14 @@ public class ContentSecurityTest {
      */
     private void instanceTests() throws FxApplicationException {
         FxContent refContent = createReferenceContent();
-        ContentEngine ce = EJBLookup.getContentEngine();
+        ContentEngine ce = getContentEngine();
         FxContent compare;
         //1..10: Load ref, error expected for 2,4,5
         for (int grp = 1; grp <= 10; grp++) {
             assignGroup(grp);
             try {
                 compare = ce.load(refContent.getPk());
-                Assert.assertEquals(refContent, compare);
+                assertEquals(refContent, compare);
                 Assert.assertFalse(containsGroup(grp, 2, 4, 5), "Test should have failed for group " + grp);
             } catch (FxApplicationException e) {
                 switch (grp) {
@@ -432,8 +434,15 @@ public class ContentSecurityTest {
         assignMatrix(0, editACL);
         assignMatrix(0, liveACL);
 
+        useTypePermissions(false, false, false, true);
+        //run the test series
+        instanceTests();
+    }
+
+    private void useTypePermissions(boolean useInstancePermissions, boolean usePropertyPermissions, boolean useStepPermissions,
+                                             boolean useTypePermissions) throws FxApplicationException {
         FxTypeEdit te = type.asEditable();
-        te.setPermissions(FxPermissionUtils.encodeTypePermissions(false, false, false, true));
+        te.setPermissions(FxPermissionUtils.encodeTypePermissions(useInstancePermissions, usePropertyPermissions, useStepPermissions, useTypePermissions));
         FxContext.get().runAsSystem();
         try {
             EJBLookup.getTypeEngine().save(te);
@@ -441,8 +450,6 @@ public class ContentSecurityTest {
             FxContext.get().stopRunAsSystem();
         }
         type = CacheAdmin.getEnvironment().getType(type.getId());
-        //run the test series
-        instanceTests();
     }
 
     /**
@@ -460,16 +467,7 @@ public class ContentSecurityTest {
         assignMatrix(0, editACL);
         assignMatrix(0, liveACL);
 
-        FxTypeEdit te = type.asEditable();
-        te.setPermissions(FxPermissionUtils.encodeTypePermissions(true, false, false, false));
-        FxContext.get().runAsSystem();
-        try {
-            EJBLookup.getTypeEngine().save(te);
-        } finally {
-            FxContext.get().stopRunAsSystem();
-        }
-        type = CacheAdmin.getEnvironment().getType(type.getId());
-        //run the test series
+        useTypePermissions(true, false, false, false);
         instanceTests();
     }
 
@@ -488,16 +486,7 @@ public class ContentSecurityTest {
         assignMatrix(0, editACL);
         assignMatrix(0, liveACL);
 
-        FxTypeEdit te = type.asEditable();
-        te.setPermissions(FxPermissionUtils.encodeTypePermissions(true, false, false, true));
-        FxContext.get().runAsSystem();
-        try {
-            EJBLookup.getTypeEngine().save(te);
-        } finally {
-            FxContext.get().stopRunAsSystem();
-        }
-        type = CacheAdmin.getEnvironment().getType(type.getId());
-        //run the test series
+        useTypePermissions(true, false, false, true);
         instanceTests();
     }
 
@@ -516,18 +505,11 @@ public class ContentSecurityTest {
         assignMatrix(0, editACL);
         assignMatrix(0, liveACL);
 
-        FxTypeEdit te = type.asEditable();
-        te.setPermissions(FxPermissionUtils.encodeTypePermissions(false, true, false, false));
-        FxContext.get().runAsSystem();
-        try {
-            EJBLookup.getTypeEngine().save(te);
-        } finally {
-            FxContext.get().stopRunAsSystem();
-        }
-        type = CacheAdmin.getEnvironment().getType(type.getId());
+        useTypePermissions(false, true, false, false);
+
         //run the test series
         FxContent refContent = createReferenceContent();
-        ContentEngine ce = EJBLookup.getContentEngine();
+        ContentEngine ce = getContentEngine();
         FxContent compare;
 
         for (int grp = 11; grp <= 17; grp++) {
@@ -538,13 +520,13 @@ public class ContentSecurityTest {
                 Assert.assertTrue(compare.getPropertyData("/P2").getValue() instanceof FxNoAccess, "/P2 expected to be FxNoAccess for group " + grp);
                 Assert.assertNotSame(refContent, compare, "Group: " + grp);
             } else
-                Assert.assertEquals(refContent, compare, "Group: " + grp);
+                assertEquals(refContent, compare, "Group: " + grp);
             queryTest(true, grp, refContent.getPk().getId(), containsGroup(grp, 12, 16));
             //11..17: change value, error expected for 11,16
             try {
                 compare.setValue("/P2", PROP1_VALUE);
                 Assert.assertFalse(containsGroup(grp, 11, 16), "Group " + grp + " should have thrown an exception trying to override a FxNoAccess value");
-            } catch (FxApplicationException e) {
+            } catch (FxRuntimeException e) {
                 if (!containsGroup(grp, 11, 16))
                     Assert.assertTrue(true, "Group " + grp + " should be allowed to modify /P2");
                 else {
@@ -640,18 +622,11 @@ public class ContentSecurityTest {
         assignMatrix(3, editACL);
         assignMatrix(0, liveACL);
 
-        FxTypeEdit te = type.asEditable();
-        te.setPermissions(FxPermissionUtils.encodeTypePermissions(false, false, true, false));
-        FxContext.get().runAsSystem();
-        try {
-            EJBLookup.getTypeEngine().save(te);
-        } finally {
-            FxContext.get().stopRunAsSystem();
-        }
-        type = CacheAdmin.getEnvironment().getType(type.getId());
+        useTypePermissions(false, false, true, false);
+
         //run the test series
         FxContent refContent = createReferenceContent();
-        ContentEngine ce = EJBLookup.getContentEngine();
+        ContentEngine ce = getContentEngine();
         FxContent compare = null;
 
         for (int grp = 18; grp <= 24; grp++) {
@@ -753,17 +728,10 @@ public class ContentSecurityTest {
         //25: Edit->Live
         //26: Live->Edit
 
-        FxTypeEdit te = type.asEditable();
-        te.setPermissions(FxPermissionUtils.encodeTypePermissions(false, false, true, false));
-        FxContext.get().runAsSystem();
-        try {
-            EJBLookup.getTypeEngine().save(te);
-        } finally {
-            FxContext.get().stopRunAsSystem();
-        }
-        type = CacheAdmin.getEnvironment().getType(type.getId());
+        useTypePermissions(false, false, true, false);
+
         //run the test series
-        ContentEngine ce = EJBLookup.getContentEngine();
+        ContentEngine ce = getContentEngine();
         FxContent ref;
         FxContent test;
         long edit = -1, live = -1;
@@ -867,4 +835,105 @@ public class ContentSecurityTest {
         }
     }
 
+    @Test(groups = {"ejb", "content", "security"})
+    public void multipleAclAssignment() throws FxApplicationException {
+        final long acl1;
+        final long acl2;
+        FxPK pk;
+        try {
+            FxContext.get().runAsSystem();
+
+            useTypePermissions(true, false, true, true);
+            
+            acl1 = getAclEngine().create(
+                    "multi_acl_group1",
+                    new FxString(""),
+                    TestUsers.getTestMandator(),
+                    "#000000",
+                    "",
+                    ACLCategory.INSTANCE
+            );
+            acl2 = getAclEngine().create(
+                    "multi_acl_group2",
+                    new FxString(""),
+                    TestUsers.getTestMandator(),
+                    "#000000",
+                    "",
+                    ACLCategory.INSTANCE
+            );
+            getAclEngine().assign(acl1, getGroup(1), ACLPermission.READ, ACLPermission.EDIT);
+            getAclEngine().assign(acl2, getGroup(2), ACLPermission.READ, ACLPermission.DELETE);
+
+            FxContent content = getContentEngine().initialize("SecurityTest");
+            content.setValue("/p1", "Initial value");
+            content.setAclIds(Arrays.asList(acl1, acl2));
+            pk = content.save().getPk();
+        } finally {
+            FxContext.get().stopRunAsSystem();
+        }
+
+        try {
+            assignMatrix(0, typeACL);
+            assignMatrix(0, editACL);
+
+            try {
+                getContentEngine().load(pk);
+                fail("User without groups should not be able to load the content.");
+            } catch (FxNoAccessException e) {
+                // pass
+            }
+
+            assertSearchReturnsPK(pk, 0);
+
+            assignGroup(1);
+
+            // should be able to: read, edit
+            // read
+            FxContent content = getContentEngine().load(pk);
+            assertSearchReturnsPK(pk, 1);
+
+            // update
+            content.setValue("/p1", "A value");
+            content.save();
+
+            try {
+                getContentEngine().remove(pk);
+                fail("User from group 1 should not be able to delete the content.");
+            } catch (FxNoAccessException e) {
+                // pass
+            }
+
+            assignGroup(2);
+
+            content = getContentEngine().load(pk);
+            assertSearchReturnsPK(pk, 1);
+
+            try {
+                content.setValue("/p1", "Another value");
+                content.save();
+                fail("User from group 2 should not be able to edit the content.");
+            } catch (FxCreateException e) {
+                // pass
+            }
+            // removing should work
+            getContentEngine().remove(pk);
+            pk = null;
+        } finally {
+            FxContext.get().runAsSystem();
+            try {
+                if (pk != null) {
+                    getContentEngine().remove(pk);
+                }
+                getAclEngine().remove(acl2);
+                getAclEngine().remove(acl1);
+            } finally {
+                FxContext.get().stopRunAsSystem();
+            }
+        }
+    }
+
+    private void assertSearchReturnsPK(FxPK pk, int expectedRows) throws FxApplicationException {
+        assertEquals(EJBLookup.getSearchEngine().search("SELECT @pk WHERE id=" + pk.getId()).getRowCount(), expectedRows,
+                "Expected " + expectedRows + " result rows.");
+    }
 }

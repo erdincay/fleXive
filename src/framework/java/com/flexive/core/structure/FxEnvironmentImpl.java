@@ -699,13 +699,9 @@ public final class FxEnvironmentImpl implements FxEnvironment {
      */
     public boolean assignmentExists(String xPath) {
         if (xPath != null && xPath.trim().length() > 0) {
-            try {
-                if (!XPathElement.isValidXPath(xPath))
-                    return false; //avoid exceptions on malformed xpath's
-                xPath = XPathElement.toXPathNoMult(xPath);
-            } catch (FxInvalidParameterException e) {
-                throw e.asRuntimeException();
-            }
+            if (!XPathElement.isValidXPath(xPath))
+                return false; //avoid exceptions on malformed xpath's
+            xPath = XPathElement.toXPathNoMult(xPath);
             return assignmentXPathLookup.containsKey(xPath);
         }
         return false;
@@ -854,11 +850,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
      */
     public FxAssignment getAssignment(String xPath) {
         if (xPath != null && xPath.trim().length() > 0) {
-            try {
-                xPath = XPathElement.toXPathNoMult(xPath);
-            } catch (FxInvalidParameterException e) {
-                throw e.asRuntimeException();
-            }
+            xPath = XPathElement.toXPathNoMult(xPath);
             // XPath is already in upper case
             final Long id = assignmentXPathLookup.get(xPath);
             if (id != null) {

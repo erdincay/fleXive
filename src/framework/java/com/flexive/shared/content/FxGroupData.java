@@ -229,7 +229,7 @@ public class FxGroupData extends FxData {
      * @throws FxCreateException           on errors
      */
     @SuppressWarnings({"ThrowableInstanceNeverThrown"})
-    public FxData addEmptyChild(String xPath, int pos) throws FxInvalidParameterException, FxNoAccessException, FxNotFoundException, FxCreateException {
+    public FxData addEmptyChild(String xPath, int pos) {
         FxType type;
         List<FxAssignment> childAssignments;
         if (this.isRootGroup()) {
@@ -252,18 +252,18 @@ public class FxGroupData extends FxData {
                         //check if other assignments exist
                         for (FxData child : this.getChildren()) {
                             if (child.getAssignmentId() != as.getId())
-                                throw new FxCreateException("ex.content.xpath.group.oneof", as.getXPath(), this.getXPathFull()).setAffectedXPath(xPath);
+                                throw new FxCreateException("ex.content.xpath.group.oneof", as.getXPath(), this.getXPathFull()).setAffectedXPath(xPath).asRuntimeException();
                         }
                     }
                     int index = XPathElement.lastElement(xPath).getIndex();
                     if (as.getMultiplicity().isValid(index))
                         return this.addChild(as.createEmptyData(this, index).setPos(pos));
                     else
-                        throw new FxInvalidParameterException("pos", "ex.content.xpath.index.invalid", index, as.getMultiplicity(), this.getXPath()).setAffectedXPath(xPath);
+                        throw new FxInvalidParameterException("pos", "ex.content.xpath.index.invalid", index, as.getMultiplicity(), this.getXPath()).setAffectedXPath(xPath).asRuntimeException();
                 }
             }
         }
-        throw new FxNotFoundException("ex.content.xpath.add.notFound", xPath);
+        throw new FxNotFoundException("ex.content.xpath.add.notFound", xPath).asRuntimeException();
     }
 
 
@@ -400,7 +400,7 @@ public class FxGroupData extends FxData {
      * @throws FxNotFoundException         if no group with this XPath is found
      * @throws FxInvalidParameterException if the XPath is invalid
      */
-    public FxGroupData getGroup(String xPath) throws FxNotFoundException, FxInvalidParameterException {
+    public FxGroupData getGroup(String xPath) {
         FxGroupData root = getRootGroup();
         if ("/".equals(xPath))
             return root;
@@ -418,10 +418,10 @@ public class FxGroupData extends FxData {
                 }
             }
             if (found == null)
-                throw new FxNotFoundException("ex.content.xpath.notFound", xPath);
+                throw new FxNotFoundException("ex.content.xpath.notFound", xPath).asRuntimeException();
         }
         if (found == null)
-            throw new FxNotFoundException("ex.content.xpath.notFound", xPath);
+            throw new FxNotFoundException("ex.content.xpath.notFound", xPath).asRuntimeException();
         return found;
     }
 
@@ -436,7 +436,7 @@ public class FxGroupData extends FxData {
      * @throws FxInvalidParameterException if the XPath is invalid
      * @throws FxNotFoundException         if the parent group does not exist
      */
-    public void addProperty(String xPath, FxPropertyAssignment assignment, FxValue value, int pos) throws FxInvalidParameterException, FxNotFoundException {
+    public void addProperty(String xPath, FxPropertyAssignment assignment, FxValue value, int pos) {
         FxGroupData parentGroup = this;
         List<XPathElement> elements = XPathElement.split(xPath);
         if (elements.size() > 1) {
@@ -535,12 +535,12 @@ public class FxGroupData extends FxData {
      * @throws FxInvalidParameterException on errors
      * @throws FxNoAccessException         on errors
      */
-    public void removeChild(FxData data) throws FxInvalidParameterException, FxNoAccessException {
+    public void removeChild(FxData data) {
         if (!data.isRemoveable())
-            throw new FxNoAccessException("ex.content.xpath.remove.invalid", data.getXPathFull());
+            throw new FxNoAccessException("ex.content.xpath.remove.invalid", data.getXPathFull()).asRuntimeException();
 
         if (!this.data.remove(data)) //was: if (!data.getParent().data.remove(data))
-            throw new FxInvalidParameterException("ex.content.xpath.remove.notFound", data.getXPathFull());
+            throw new FxInvalidParameterException("ex.content.xpath.remove.notFound", data.getXPathFull()).asRuntimeException();
 
         data.compact();
         compactPositions(false);
@@ -553,14 +553,14 @@ public class FxGroupData extends FxData {
      * @throws FxInvalidParameterException on errors
      * @throws FxNoAccessException         on errors
      */
-    public void removeChildren(List<FxData> dataList) throws FxInvalidParameterException, FxNoAccessException {
+    public void removeChildren(List<FxData> dataList) {
         Map<String, FxData> compactCandidates = new HashMap<String, FxData>(dataList.size());
         for (FxData data : dataList) {
             if (!data.isRemoveable())
-                throw new FxNoAccessException("ex.content.xpath.remove.invalid", data.getXPathFull());
+                throw new FxNoAccessException("ex.content.xpath.remove.invalid", data.getXPathFull()).asRuntimeException();
 
             if (!this.data.remove(data))
-                throw new FxInvalidParameterException("ex.content.xpath.remove.notFound", data.getXPathFull());
+                throw new FxInvalidParameterException("ex.content.xpath.remove.notFound", data.getXPathFull()).asRuntimeException();
             if (!compactCandidates.containsKey(data.getXPath()))
                 compactCandidates.put(data.getXPath(), data);
         }
@@ -575,12 +575,9 @@ public class FxGroupData extends FxData {
      * @param explodeChildGroups recursively explode all <i>existing</i> child groups?
      */
     public void explode(boolean explodeChildGroups) {
-        for (String xpath : getCreateableChildren(false))
-            try {
-                addEmptyChild(xpath, POSITION_BOTTOM);
-            } catch (FxApplicationException e) {
-                throw e.asRuntimeException();
-            }
+        for (String xpath : getCreateableChildren(false)) {
+            addEmptyChild(xpath, POSITION_BOTTOM);
+        }
         if (explodeChildGroups) {
             // explode child groups
             for (FxData child : getChildren()) {

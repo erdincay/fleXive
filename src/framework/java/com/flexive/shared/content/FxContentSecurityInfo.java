@@ -32,7 +32,12 @@
 package com.flexive.shared.content;
 
 
+import org.apache.commons.lang.ArrayUtils;
+
 import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Security related information about a content (primary key)
@@ -46,58 +51,58 @@ public class FxContentSecurityInfo implements Serializable {
     /**
      * Primary key this info relates to
      */
-    private FxPK pk;
+    private final FxPK pk;
 
     /**
      * user id of the owner of the content
      */
-    private long ownerId;
+    private final long ownerId;
 
     /**
      * Id of preview image, only relevant for security if &gt; 0
      */
-    private long previewId;
+    private final long previewId;
 
     /**
      * Id of the FxType used
      */
-    private long typeId;
+    private final long typeId;
 
     /**
      * Id of the mandator this content belongs to
      */
-    private long mandatorId;
+    private final long mandatorId;
 
     /**
      * binary encoded type permissions
      */
-    private byte permissions;
+    private final byte permissions;
 
     /**
      * ACL assigned to the type
      */
-    private int typeACL;
+    private final long typeACL;
 
     /**
      * ACL of the used step
      */
-    private int stepACL;
+    private final long stepACL;
 
     /**
      * ACL of the content itself
      */
-    private int contentACL;
+    private final List<Long> contentACLs;
 
     /**
      * Property ACL of the preview, only relevant for security if <code>previewId</code> &gt; 0
      */
-    private int previewACL;
+    private final long previewACL;
 
     /**
      * All used and relevant property ACL's. will be empty if property permissions are disabled for
      * the type
      */
-    private long[] usedPropertyACL;
+    private final List<Long> usedPropertyACLs;
 
     /**
      * Constructor
@@ -113,10 +118,36 @@ public class FxContentSecurityInfo implements Serializable {
      * @param contentACL      ACL of the content instance
      * @param previewACL      Property ACL of the preview, only relevant for security if <code>previewId</code> &gt; 0
      * @param usedPropertyACL relevant property ACL's
+     * @deprecated  use {@link #FxContentSecurityInfo(FxPK, long, long, long, long, byte, long, long, java.util.List, long, java.util.List)}
      */
+    @Deprecated
     public FxContentSecurityInfo(FxPK pk, long ownerId, long previewId, long typeId, long mandatorId, byte typePermissions, int typeACL, int stepACL, int contentACL,
                                  int previewACL,
                                  long[] usedPropertyACL) {
+        this(pk, ownerId, previewId, typeId, mandatorId, typePermissions, typeACL, stepACL,
+                Arrays.asList((long) contentACL), previewACL, Arrays.asList(ArrayUtils.toObject(usedPropertyACL))
+        );
+    }    
+
+    /**
+     * Constructor
+     *
+     * @param pk              the primary key this info relates to
+     * @param ownerId         owner of the content
+     * @param previewId       Id of preview image, only relevant for security if &gt; 0
+     * @param typeId          id of the used type
+     * @param mandatorId      id of the mandator
+     * @param typePermissions byte encoded type permission handling
+     * @param typeACL         ACL of the type
+     * @param stepACL         ACL of the step
+     * @param contentACLs     ACL(s) of the content instance
+     * @param previewACL      Property ACL of the preview, only relevant for security if <code>previewId</code> &gt; 0
+     * @param usedPropertyACLs relevant property ACLs
+     */
+    public FxContentSecurityInfo(FxPK pk, long ownerId, long previewId, long typeId, long mandatorId, byte typePermissions,
+                                 long typeACL, long stepACL, List<Long> contentACLs,
+                                 long previewACL,
+                                 List<Long> usedPropertyACLs) {
         this.pk = pk;
         this.ownerId = ownerId;
         this.previewId = previewId;
@@ -125,10 +156,9 @@ public class FxContentSecurityInfo implements Serializable {
         this.permissions = typePermissions;
         this.typeACL = typeACL;
         this.stepACL = stepACL;
-        this.contentACL = contentACL;
+        this.contentACLs = Collections.unmodifiableList(contentACLs);
         this.previewACL = previewACL;
-        this.usedPropertyACL = new long[usedPropertyACL.length];
-        System.arraycopy(usedPropertyACL, 0, this.usedPropertyACL, 0, usedPropertyACL.length);
+        this.usedPropertyACLs = Collections.unmodifiableList(usedPropertyACLs);
     }
 
     /**
@@ -172,7 +202,7 @@ public class FxContentSecurityInfo implements Serializable {
      *
      * @return ACL of the type
      */
-    public int getTypeACL() {
+    public long getTypeACL() {
         return typeACL;
     }
 
@@ -181,7 +211,7 @@ public class FxContentSecurityInfo implements Serializable {
      *
      * @return ACL of the step
      */
-    public int getStepACL() {
+    public long getStepACL() {
         return stepACL;
     }
 
@@ -189,9 +219,32 @@ public class FxContentSecurityInfo implements Serializable {
      * Get the ACL of the content instance
      *
      * @return ACL of the content instance
+     * @deprecated use {@link #getContentACLs()}
      */
-    public int getContentACL() {
-        return contentACL;
+    @Deprecated
+    public long getContentACL() {
+        return contentACLs.isEmpty() ? -1 : contentACLs.get(0);
+    }
+
+    /**
+     * Get the ACL(s) of the content instance
+     *
+     * @return ACL(s) of the content instance
+     */
+    public List<Long> getContentACLs() {
+        return Collections.unmodifiableList(contentACLs);
+    }
+
+    /**
+     * Get all used and relevant property ACL's. will be empty if property permissions are disabled for
+     * the type
+     *
+     * @return relevant property ACL's
+     * @deprecated use {@link #getUsedPropertyACLs()} 
+     */
+    @Deprecated
+    public long[] getUsedPropertyACL() {
+        return ArrayUtils.toPrimitive(usedPropertyACLs.toArray(new Long[usedPropertyACLs.size()]));
     }
 
     /**
@@ -200,8 +253,8 @@ public class FxContentSecurityInfo implements Serializable {
      *
      * @return relevant property ACL's
      */
-    public long[] getUsedPropertyACL() {
-        return usedPropertyACL.clone();
+    public List<Long> getUsedPropertyACLs() {
+        return usedPropertyACLs;    // immutable
     }
 
     /**
@@ -226,7 +279,7 @@ public class FxContentSecurityInfo implements Serializable {
      *
      * @return
      */
-    public int getPreviewACL() {
+    public long getPreviewACL() {
         return previewACL;
     }
 

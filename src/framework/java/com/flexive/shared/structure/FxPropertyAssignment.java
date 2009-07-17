@@ -328,43 +328,35 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
      * {@inheritDoc}
      */
     @Override
-    public FxData createEmptyData(FxGroupData parent, int index) throws FxCreateException {
+    public FxData createEmptyData(FxGroupData parent, int index) {
         String XPathFull = (this.hasParentGroupAssignment() && parent != null ? parent.getXPathFull() : "") + "/" + this.getAlias();
         String XPath = (this.hasParentGroupAssignment() && parent != null ? parent.getXPath() : "") + "/" + this.getAlias();
-        try {
-            if (!this.getMultiplicity().isValid(index))
-                //noinspection ThrowableInstanceNeverThrown
-                throw new FxCreateException("ex.content.xpath.index.invalid", index, this.getMultiplicity(), this.getXPath()).
-                        setAffectedXPath(parent != null ? parent.getXPathFull() : this.getXPath());
-            final FxPropertyData data = new FxPropertyData(parent == null ? "" : parent.getXPathPrefix(), this.getAlias(), index, XPath, XPathElement.toXPathMult(XPathFull),
-                    XPathElement.getIndices(XPathFull), this.getId(), this.getProperty().getId(), this.getMultiplicity(),
-                    this.getPosition(), parent, this.getEmptyValue(), this.isSystemInternal(), this.getOption(FxStructureOption.OPTION_MAXLENGTH));
-            //Flag if the value is set from the assignments default value
-            data.setContainsDefaultValue(!data.getValue().isEmpty());
-            return data;
-        } catch (FxInvalidParameterException e) {
-            throw new FxCreateException(e);
-        }
+        if (!this.getMultiplicity().isValid(index))
+            //noinspection ThrowableInstanceNeverThrown
+            throw new FxCreateException("ex.content.xpath.index.invalid", index, this.getMultiplicity(), this.getXPath()).
+                    setAffectedXPath(parent != null ? parent.getXPathFull() : this.getXPath()).asRuntimeException();
+        final FxPropertyData data = new FxPropertyData(parent == null ? "" : parent.getXPathPrefix(), this.getAlias(), index, XPath, XPathElement.toXPathMult(XPathFull),
+                XPathElement.getIndices(XPathFull), this.getId(), this.getProperty().getId(), this.getMultiplicity(),
+                this.getPosition(), parent, this.getEmptyValue(), this.isSystemInternal(), this.getOption(FxStructureOption.OPTION_MAXLENGTH));
+        //Flag if the value is set from the assignments default value
+        data.setContainsDefaultValue(!data.getValue().isEmpty());
+        return data;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public FxData createRandomData(Random rnd, FxEnvironment env, FxGroupData parent, int index, int maxMultiplicity) throws FxCreateException {
+    public FxData createRandomData(Random rnd, FxEnvironment env, FxGroupData parent, int index, int maxMultiplicity) {
         String XPathFull = (this.hasParentGroupAssignment() && parent != null ? parent.getXPathFull() : "") + "/" + this.getAlias();
         String XPath = (this.hasParentGroupAssignment() && parent != null ? parent.getXPath() : "") + "/" + this.getAlias();
-        try {
-            if (!this.getMultiplicity().isValid(index))
-                //noinspection ThrowableInstanceNeverThrown
-                throw new FxCreateException("ex.content.xpath.index.invalid", index, this.getMultiplicity(), this.getXPath()).
-                        setAffectedXPath(parent != null ? parent.getXPathFull() : this.getXPath());
-            return new FxPropertyData(parent == null ? "" : parent.getXPathPrefix(), this.getAlias(), index, XPath, XPathElement.toXPathMult(XPathFull),
-                    XPathElement.getIndices(XPathFull), this.getId(), this.getProperty().getId(), this.getMultiplicity(),
-                    this.getPosition(), parent, this.getProperty().getDataType().getRandomValue(rnd, this), this.isSystemInternal(), this.getOption(FxStructureOption.OPTION_MAXLENGTH));
-        } catch (FxInvalidParameterException e) {
-            throw new FxCreateException(e);
-        }
+        if (!this.getMultiplicity().isValid(index))
+            //noinspection ThrowableInstanceNeverThrown
+            throw new FxCreateException("ex.content.xpath.index.invalid", index, this.getMultiplicity(), this.getXPath()).
+                    setAffectedXPath(parent != null ? parent.getXPathFull() : this.getXPath()).asRuntimeException();
+        return new FxPropertyData(parent == null ? "" : parent.getXPathPrefix(), this.getAlias(), index, XPath, XPathElement.toXPathMult(XPathFull),
+                XPathElement.getIndices(XPathFull), this.getId(), this.getProperty().getId(), this.getMultiplicity(),
+                this.getPosition(), parent, this.getProperty().getDataType().getRandomValue(rnd, this), this.isSystemInternal(), this.getOption(FxStructureOption.OPTION_MAXLENGTH));
     }
 
     /**

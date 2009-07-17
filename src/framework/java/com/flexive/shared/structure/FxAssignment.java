@@ -494,7 +494,7 @@ public abstract class FxAssignment implements Serializable, Comparable<FxAssignm
      * @return FxData
      * @throws FxCreateException on errors
      */
-    public abstract FxData createEmptyData(FxGroupData parent, int index) throws FxCreateException;
+    public abstract FxData createEmptyData(FxGroupData parent, int index);
 
     /**
      * Create a random FxData entry for this assignment
@@ -507,7 +507,7 @@ public abstract class FxAssignment implements Serializable, Comparable<FxAssignm
      * @return FxData
      * @throws FxCreateException on errors
      */
-    public abstract FxData createRandomData(Random rnd, FxEnvironment env, FxGroupData parent, int index, int maxMultiplicity) throws FxCreateException;
+    public abstract FxData createRandomData(Random rnd, FxEnvironment env, FxGroupData parent, int index, int maxMultiplicity);
 
     /**
      * Resolve preload dependecies after initial loading

@@ -325,6 +325,7 @@ CREATE TABLE FXS_TYPEDEF (
   LANG_MODE INTEGER NOT NULL COMMENT '0=no multi language, 1=one language per instance, 2=multiple languages per field',
   TYPE_STATE INTEGER NOT NULL COMMENT '0=available, 1=temporary unavailable, 2=permanently unavailable\ntables can be unavailable if structural changes resulted in errors and manual intervention is needed',
   SECURITY_MODE INTEGER NOT NULL COMMENT 'Bit coded field that indicates which permissions are used. 0=none, 0x01=instance, 0x02=property, 0x04=step, 0x08=type',
+  MULTIPLE_CONTENT_ACLS BOOLEAN NOT NULL DEFAULT TRUE COMMENT 'When true, multiple ACLs can be assigned to a content.',
   TRACKHISTORY BOOLEAN NOT NULL COMMENT 'track changes on instance data? HISTORY_AGE tells for how long they are kept.',
   HISTORY_AGE BIGINT COMMENT 'Days to keep histories for instance changes if TRACKHISTORY is true. 0=for ever',
   MAX_VERSIONS INTEGER NOT NULL COMMENT 'maximum number of versions to keep (if the storage mode supports versions)\n-1 = unlimited\n0 = no versioning\n> 0 = number of versions to keep',
@@ -756,6 +757,23 @@ CREATE INDEX FXI_CONTENT_CREATED_BY ON FX_CONTENT(CREATED_BY);
 CREATE INDEX FXI_CONTENT_CREATED_AT ON FX_CONTENT(CREATED_AT);
 CREATE INDEX FXI_CONTENT_MODIFIED_BY ON FX_CONTENT(MODIFIED_BY);
 CREATE INDEX FXI_CONTENT_MODIFIED_AT ON FX_CONTENT(MODIFIED_AT);
+
+-- -------------------------
+-- Additional ACLs (2-) for contents.
+-- -------------------------
+CREATE TABLE FX_CONTENT_ACLS (
+  ID BIGINT NOT NULL,
+  VER INTEGER NOT NULL,
+  ACL BIGINT NOT NULL,
+
+  PRIMARY KEY (ID, VER, ACL),
+  FOREIGN KEY (ID,VER) REFERENCES FX_CONTENT(ID,VER)
+    ON DELETE CASCADE ON UPDATE RESTRICT,
+  FOREIGN KEY (ACL) REFERENCES FXS_ACL(ID)
+    ON DELETE RESTRICT ON UPDATE RESTRICT
+);
+
+COMMENT ON TABLE FX_CONTENT_ACLS IS 'Additional ACLs for contents';
 
 -- -------------------------
 -- Binary transit table

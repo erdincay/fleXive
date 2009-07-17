@@ -198,7 +198,10 @@ public class InheritanceTest extends StructureTestBase {
             try {
                 dc_dis.getPropertyData(TEST_XPATH);
                 Assert.fail(TEST_XPATH + " should not exist after being disabled!");
-            } catch (FxNotFoundException e) {
+            } catch (FxRuntimeException e) {
+                if (!(e.getConverted() instanceof FxNotFoundException)) {
+                    throw e;
+                }
                 //expected!
             }
             Assert.assertTrue(pc.getPropertyData(TEST_XPATH).getValue().equals(data), "Wrong data for parent instance!");

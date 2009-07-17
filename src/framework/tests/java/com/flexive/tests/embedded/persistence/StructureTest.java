@@ -34,6 +34,8 @@ package com.flexive.tests.embedded.persistence;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxLanguage;
+import static com.flexive.shared.CacheAdmin.getEnvironment;
+import static com.flexive.shared.EJBLookup.getTypeEngine;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.exceptions.*;
@@ -48,7 +50,11 @@ import com.flexive.shared.value.FxValue;
 import static com.flexive.tests.embedded.FxTestUtils.login;
 import static com.flexive.tests.embedded.FxTestUtils.logout;
 import com.flexive.tests.embedded.TestUsers;
+import com.google.common.collect.Lists;
 import org.testng.Assert;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -56,6 +62,7 @@ import org.testng.annotations.Test;
 import javax.naming.Context;
 import javax.transaction.UserTransaction;
 import java.util.List;
+import java.util.Collections;
 
 /**
  * Structure tests
@@ -72,7 +79,7 @@ public class StructureTest {
 
     @BeforeClass(groups = {"ejb", "structure"})
     public void beforeClass() throws FxLookupException, FxLoginFailedException, FxAccountInUseException {
-        te = EJBLookup.getTypeEngine();
+        te = getTypeEngine();
         ae = EJBLookup.getAssignmentEngine();
         acl = EJBLookup.getAclEngine();
         ce = EJBLookup.getContentEngine();
@@ -117,7 +124,7 @@ public class StructureTest {
                     structACL = a;
                     break;
                 }
-            Assert.assertTrue(structACL != null, "No available ACL for structure found!");
+            assertTrue(structACL != null, "No available ACL for structure found!");
             FxPropertyEdit pe = FxPropertyEdit.createNew("TestDirectProperty1", desc, hint, true, new FxMultiplicity(0, 1),
                     true, structACL, FxDataType.String1024, new FxString(FxString.EMPTY),
                     true, null, null, null);
@@ -142,18 +149,18 @@ public class StructureTest {
         testEdit.setState(TypeState.Unavailable);
         te.save(testEdit);
         FxType testType = env().getType("TestCDNewName");
-        Assert.assertTrue(testType.getAssignedProperties().size() == propCount, "Property count mismatch");
-        Assert.assertEquals(testType.getAssignment("/TestDirectProperty2").getXPath(), "TESTCDNEWNAME/TESTDIRECTPROPERTY2",
+        assertTrue(testType.getAssignedProperties().size() == propCount, "Property count mismatch");
+        assertEquals(testType.getAssignment("/TestDirectProperty2").getXPath(), "TESTCDNEWNAME/TESTDIRECTPROPERTY2",
                 "Expected [TESTCDNEWNAME/TESTDIRECTPROPERTY2] but got: [" + testType.getAssignment("/TestDirectProperty2").getXPath() + "]");
-        Assert.assertTrue(testType.isUsePermissions());
-        Assert.assertTrue(testType.isUseInstancePermissions());
-        Assert.assertTrue(!testType.isUsePropertyPermissions());
-        Assert.assertTrue(!testType.isUseStepPermissions());
-        Assert.assertTrue(!testType.isUseTypePermissions());
-        Assert.assertTrue(testType.getState() == TypeState.Unavailable);
+        assertTrue(testType.isUsePermissions());
+        assertTrue(testType.isUseInstancePermissions());
+        assertTrue(!testType.isUsePropertyPermissions());
+        assertTrue(!testType.isUseStepPermissions());
+        assertTrue(!testType.isUseTypePermissions());
+        assertTrue(testType.getState() == TypeState.Unavailable);
 
         try {
-            Assert.assertTrue(testId == testType.getId(), "Wrong id for type!");
+            assertTrue(testId == testType.getId(), "Wrong id for type!");
             te.remove(testType.getId());
             try {
                 env().getType("TestCD");
@@ -189,7 +196,7 @@ public class StructureTest {
                     structACL = a;
                     break;
                 }
-            Assert.assertTrue(structACL != null, "No available ACL for structure found!");
+            assertTrue(structACL != null, "No available ACL for structure found!");
             FxPropertyEdit pe = FxPropertyEdit.createNew("TestDirectProperty1", desc, hint, true, new FxMultiplicity(0, 1),
                     true, structACL, FxDataType.String1024, new FxString(FxString.EMPTY),
                     true, null, null, null);
@@ -203,7 +210,7 @@ public class StructureTest {
             Assert.fail(e.getMessage());
         }
         FxType testType = env().getType("TestCDP");
-        Assert.assertTrue(testId == testType.getId(), "Wrong id for type!");
+        assertTrue(testId == testType.getId(), "Wrong id for type!");
 
         long testDerivedId;
         testDerivedId = te.save(FxTypeEdit.createNew("TestCDDerived", new FxString("description..."),
@@ -213,21 +220,21 @@ public class StructureTest {
 //                TypeStorageMode.Hierarchical, TypeCategory.User, TypeMode.Content,
 //                true, LanguageMode.Multiple, TypeState.Available, (byte) 0, true, 0, 0, 0, 0);
         FxType testTypeDerived = env().getType("TestCDDerived");
-        Assert.assertTrue(testTypeDerived.getId() == testDerivedId, "Derived type id does not match!");
-        Assert.assertTrue(testTypeDerived.getParent().getId() == testType.getId(), "Derived types parent does not match!");
+        assertTrue(testTypeDerived.getId() == testDerivedId, "Derived type id does not match!");
+        assertTrue(testTypeDerived.getParent().getId() == testType.getId(), "Derived types parent does not match!");
         FxAssignment dp = null;
         try {
             dp = testTypeDerived.getAssignment("/TestDirectProperty1");
         } catch (Exception e) {
             Assert.fail("Failed to retrieved derived property: " + e.getMessage());
         }
-        Assert.assertTrue(!dp.isEnabled(), "Property should be disabled!");
+        assertTrue(!dp.isEnabled(), "Property should be disabled!");
         FxPropertyAssignmentEdit dpe = new FxPropertyAssignmentEdit((FxPropertyAssignment) dp);
         dpe.setEnabled(true);
         ae.save(dpe, false);
         testTypeDerived = env().getType("TestCDDerived");
         dp = testTypeDerived.getAssignment("/TestDirectProperty1");
-        Assert.assertTrue(dp.isEnabled(), "Property should be enabled!");
+        assertTrue(dp.isEnabled(), "Property should be enabled!");
 
 
         try {
@@ -235,14 +242,14 @@ public class StructureTest {
         } catch (Exception e) {
             Assert.fail("Failed to retrieved derived property: " + e.getMessage());
         }
-        Assert.assertTrue(!dp.isEnabled(), "Property should be disabled!");
+        assertTrue(!dp.isEnabled(), "Property should be disabled!");
 
         FxGroupAssignmentEdit gae = new FxGroupAssignmentEdit((FxGroupAssignment) testTypeDerived.getAssignment("/TestGroup"));
         gae.setEnabled(true);
         ae.save(gae, false);
         testTypeDerived = env().getType("TestCDDerived");
         dp = testTypeDerived.getAssignment("/TestGroup/TestDirectProperty2");
-        Assert.assertTrue(dp.isEnabled(), "Property should be enabled!");
+        assertTrue(dp.isEnabled(), "Property should be enabled!");
 
         try {
             te.remove(testTypeDerived.getId());
@@ -372,7 +379,7 @@ public class StructureTest {
                     structACL = a;
                     break;
                 }
-            Assert.assertTrue(structACL != null, "No available ACL for structure found!");
+            assertTrue(structACL != null, "No available ACL for structure found!");
             FxPropertyEdit pe = FxPropertyEdit.createNew("TestAssignmentRemoveProperty1", desc, hint, true, new FxMultiplicity(0, 1),
                     true, structACL, FxDataType.String1024, new FxString(FxString.EMPTY),
                     true, null, null, null);
@@ -381,12 +388,12 @@ public class StructureTest {
             Assert.fail(e.getMessage());
         }
         FxType testType = env().getType("TestAssignmentRemove");
-        Assert.assertTrue(testId == testType.getId(), "Wrong id for type!");
+        assertTrue(testId == testType.getId(), "Wrong id for type!");
         FxPropertyAssignment pa = null;
         long rmId = -1;
         try {
             pa = (FxPropertyAssignment) testType.getAssignment("/TestAssignmentRemoveProperty1");
-            Assert.assertTrue(pa != null, "Created Property Assignment is null!");
+            assertTrue(pa != null, "Created Property Assignment is null!");
             rmId = pa.getId();
         } catch (Exception e) {
             Assert.fail("Created Property Assignment does not exist!");
@@ -402,11 +409,11 @@ public class StructureTest {
         ae.save(FxPropertyAssignmentEdit.createNew(pa, testType, "TestAssignmentRemoveProperty3", "/"), true);
         //check base's
         testType = env().getType(testId);
-        Assert.assertTrue(testType.getAssignment("/TestAssignmentRemoveProperty1").getBaseAssignmentId() == FxAssignment.NO_PARENT);
-        Assert.assertTrue(testType.getAssignment("/TestAssignmentRemoveProperty2").getBaseAssignmentId() == testType.getAssignment("/TestAssignmentRemoveProperty1").getId());
-        Assert.assertTrue(testType.getAssignment("/TestAssignmentRemoveProperty3").getBaseAssignmentId() == testType.getAssignment("/TestAssignmentRemoveProperty2").getId());
+        assertTrue(testType.getAssignment("/TestAssignmentRemoveProperty1").getBaseAssignmentId() == FxAssignment.NO_PARENT);
+        assertTrue(testType.getAssignment("/TestAssignmentRemoveProperty2").getBaseAssignmentId() == testType.getAssignment("/TestAssignmentRemoveProperty1").getId());
+        assertTrue(testType.getAssignment("/TestAssignmentRemoveProperty3").getBaseAssignmentId() == testType.getAssignment("/TestAssignmentRemoveProperty2").getId());
         ae.removeAssignment(rmId, true, true);
-        Assert.assertTrue(env().getSystemInternalRootPropertyAssignments().size() == env().getType(testId).getAssignedProperties().size(), "Expected to have " + env().getSystemInternalRootPropertyAssignments().size() + " assignments to the type!");
+        assertTrue(env().getSystemInternalRootPropertyAssignments().size() == env().getType(testId).getAssignedProperties().size(), "Expected to have " + env().getSystemInternalRootPropertyAssignments().size() + " assignments to the type!");
 
         //recreate
         FxPropertyEdit pe = FxPropertyEdit.createNew("TestAssignmentRemoveProperty1", desc, hint, true, new FxMultiplicity(0, 1),
@@ -419,14 +426,14 @@ public class StructureTest {
         ae.save(FxPropertyAssignmentEdit.createNew(pa, testType, "TestAssignmentRemoveProperty3", "/"), true);
         //recheck
         testType = env().getType(testId);
-        Assert.assertTrue(testType.getAssignment("/TestAssignmentRemoveProperty1").getBaseAssignmentId() == FxAssignment.NO_PARENT);
-        Assert.assertTrue(testType.getAssignment("/TestAssignmentRemoveProperty2").getBaseAssignmentId() == testType.getAssignment("/TestAssignmentRemoveProperty1").getId());
-        Assert.assertTrue(testType.getAssignment("/TestAssignmentRemoveProperty3").getBaseAssignmentId() == testType.getAssignment("/TestAssignmentRemoveProperty2").getId());
+        assertTrue(testType.getAssignment("/TestAssignmentRemoveProperty1").getBaseAssignmentId() == FxAssignment.NO_PARENT);
+        assertTrue(testType.getAssignment("/TestAssignmentRemoveProperty2").getBaseAssignmentId() == testType.getAssignment("/TestAssignmentRemoveProperty1").getId());
+        assertTrue(testType.getAssignment("/TestAssignmentRemoveProperty3").getBaseAssignmentId() == testType.getAssignment("/TestAssignmentRemoveProperty2").getId());
 
         ae.removeAssignment(testType.getAssignment("/TestAssignmentRemoveProperty1").getId(), false, false);
         testType = env().getType(testId);
-        Assert.assertTrue(testType.getAssignment("/TestAssignmentRemoveProperty2").getBaseAssignmentId() == FxAssignment.NO_PARENT);
-        Assert.assertTrue(testType.getAssignment("/TestAssignmentRemoveProperty3").getBaseAssignmentId() == testType.getAssignment("/TestAssignmentRemoveProperty2").getId());
+        assertTrue(testType.getAssignment("/TestAssignmentRemoveProperty2").getBaseAssignmentId() == FxAssignment.NO_PARENT);
+        assertTrue(testType.getAssignment("/TestAssignmentRemoveProperty3").getBaseAssignmentId() == testType.getAssignment("/TestAssignmentRemoveProperty2").getId());
 
         // test if derived sub-assignments of a derived group are correctly
         // dereferenced from base assignments if parent group is removed
@@ -442,14 +449,14 @@ public class StructureTest {
 
         //verify that property assignment is child of group
         FxPropertyAssignment baseAss = (FxPropertyAssignment) env().getAssignment(baseAssId);
-        Assert.assertTrue(baseAss.getParentGroupAssignment().getId() == baseGrp.getId());
+        assertTrue(baseAss.getParentGroupAssignment().getId() == baseGrp.getId());
 
         //create derived group assignment with derived sub assignments
         long derivedGrpId = ae.save(FxGroupAssignmentEdit.createNew(baseGrp, env().getType(testId), "TestRemoveGroupDerived", "/"), true);
         FxGroupAssignment derivedGrp = (FxGroupAssignment) env().getAssignment(derivedGrpId);
 
         //verify that group is derived
-        Assert.assertTrue(derivedGrp.isDerivedAssignment() && derivedGrp.getBaseAssignmentId() == baseGrp.getId());
+        assertTrue(derivedGrp.isDerivedAssignment() && derivedGrp.getBaseAssignmentId() == baseGrp.getId());
 
         //verify that derived group contains derived assignment from base group
         boolean found = false;
@@ -461,17 +468,17 @@ public class StructureTest {
                 break;
             }
         }
-        Assert.assertTrue(found);
+        assertTrue(found);
 
         //remove base group (together with its sub assignments)
         ae.removeAssignment(baseGrp.getId());
 
         //verify that derived group exists and has been dereferenced
-        Assert.assertTrue(!env().getAssignment(derivedGrp.getId()).isDerivedAssignment() &&
+        assertTrue(!env().getAssignment(derivedGrp.getId()).isDerivedAssignment() &&
                 env().getAssignment(derivedGrp.getId()).getBaseAssignmentId() == FxAssignment.NO_PARENT);
 
         //verify that derived assignment exists and has been dereferenced
-        Assert.assertTrue(!env().getAssignment(derivedAssId).isDerivedAssignment() &&
+        assertTrue(!env().getAssignment(derivedAssId).isDerivedAssignment() &&
                 env().getAssignment(derivedAssId).getBaseAssignmentId() == FxAssignment.NO_PARENT);
 
         te.remove(testId);
@@ -489,12 +496,12 @@ public class StructureTest {
                 (FxPropertyAssignment) env().getAssignment("ROOT/CAPTION"),
 
                 env().getType(FxType.CONTACTDATA), "test", "/");
-        Assert.assertTrue(property.isMultiLang(), "Caption property should be multi-language by default");
+        assertTrue(property.isMultiLang(), "Caption property should be multi-language by default");
         if (property.getProperty().mayOverrideMultiLang())
-            Assert.assertTrue(false, "Expected Caption property to be not overrideable for this test case!");
+            assertTrue(false, "Expected Caption property to be not overrideable for this test case!");
         try {
             property.setMultiLang(false);
-            Assert.assertTrue(false, "Non-overrideable option must not be overridden!");
+            assertTrue(false, "Non-overrideable option must not be overridden!");
         } catch (FxInvalidParameterException ipe) {
             //expected
         }
@@ -578,12 +585,12 @@ public class StructureTest {
             ae.save(pEdit);
 
             p = env().getProperty("TESTPROP");
-            Assert.assertEquals(p.getDataType().getValueClass(), FxSelectOne.class);
-            Assert.assertEquals(p.getReferencedType().getId(), typeIdRefTest);
-            Assert.assertEquals(p.getUniqueMode(), UniqueMode.Type);
-            Assert.assertEquals(p.getACL().getCategory(), ACLCategory.SELECTLIST);
-            Assert.assertEquals(p.getReferencedList().getName(), "Test_selectlist111999");
-            Assert.assertTrue(p.mayOverrideMultiLang());
+            assertEquals(p.getDataType().getValueClass(), FxSelectOne.class);
+            assertEquals(p.getReferencedType().getId(), typeIdRefTest);
+            assertEquals(p.getUniqueMode(), UniqueMode.Type);
+            assertEquals(p.getACL().getCategory(), ACLCategory.SELECTLIST);
+            assertEquals(p.getReferencedList().getName(), "Test_selectlist111999");
+            assertTrue(p.mayOverrideMultiLang());
 
             // test property assignments
             FxPropertyAssignment assProp = (FxPropertyAssignment) env().getAssignment("STRUCTTESTTYPE/TESTPROP");
@@ -596,15 +603,15 @@ public class StructureTest {
             ae.save(assEdit, false);
 
             assProp = (FxPropertyAssignment) env().getAssignment("STRUCTTESTTYPE/TESTPROP");
-            Assert.assertEquals(assProp.getACL(), propACL);
-            Assert.assertTrue(assProp.isMultiLang());
-            Assert.assertEquals(assProp.getLabel().toString(), "assignment_label_123456");
-            Assert.assertEquals(assProp.getDefaultLanguage(), FxLanguage.ENGLISH);
+            assertEquals(assProp.getACL(), propACL);
+            assertTrue(assProp.isMultiLang());
+            assertEquals(assProp.getLabel().toString(), "assignment_label_123456");
+            assertEquals(assProp.getDefaultLanguage(), FxLanguage.ENGLISH);
             FxValue val = assProp.getDefaultValue();
-            Assert.assertEquals(val.getValueClass(), FxSelectListItem.class);
+            assertEquals(val.getValueClass(), FxSelectListItem.class);
             FxSelectOne selOne = (FxSelectOne) val;
             FxSelectListItem item = env().getSelectListItem(testList, "ITEM1");
-            Assert.assertEquals(selOne.fromString("" + item.getId()).getData(), "value_1");
+            assertEquals(selOne.fromString("" + item.getId()).getData(), "value_1");
         } finally {
             // clean up
             te.remove(typeId);
@@ -621,9 +628,9 @@ public class StructureTest {
             FxPropertyAssignmentEdit assEdit = ((FxPropertyAssignment) env().getAssignment("STRUCTTESTTYPE/TESTPROP")).asEditable();
             FxProperty p = env().getProperty("TESTPROP");
             // we should have two assignments for our testprop
-            Assert.assertEquals(ae.getAssignmentInstanceCount(assEdit.getId()), 2);
+            assertEquals(ae.getAssignmentInstanceCount(assEdit.getId()), 2);
             // and two instances of testprop were created
-            Assert.assertEquals(ae.getPropertyInstanceCount(p.getId()), 2);
+            assertEquals(ae.getPropertyInstanceCount(p.getId()), 2);
             // alter the multiplicity to 0..2 and set some other properties
             FxPropertyEdit pEdit = p.asEditable();
             pEdit.setOverrideMultiplicity(false);
@@ -644,11 +651,11 @@ public class StructureTest {
             ae.save(pEdit);
 
             p = env().getProperty("TESTPROP");
-            Assert.assertEquals(p.getMultiplicity().getMin(), 0);
-            Assert.assertEquals(p.getMultiplicity().getMax(), 2);
-            Assert.assertEquals(p.isFulltextIndexed(), !isFulltextIndexed);
-            Assert.assertEquals(p.mayOverrideACL(), !mayOverrideACL);
-            Assert.assertEquals(p.getDefaultValue().toString(), "DefaultValue_for_TESTPROP");
+            assertEquals(p.getMultiplicity().getMin(), 0);
+            assertEquals(p.getMultiplicity().getMax(), 2);
+            assertEquals(p.isFulltextIndexed(), !isFulltextIndexed);
+            assertEquals(p.mayOverrideACL(), !mayOverrideACL);
+            assertEquals(p.getDefaultValue().toString(), "DefaultValue_for_TESTPROP");
 
             // modify the property and implicitly fire #getInstanceMultiplicity via #save
             pEdit = p.asEditable();
@@ -729,8 +736,8 @@ public class StructureTest {
 
 
             assEdit = ((FxPropertyAssignment) env().getAssignment("STRUCTTESTTYPE/TESTPROP")).asEditable();
-            Assert.assertEquals(assEdit.getMultiplicity().getMin(), 0);
-            Assert.assertEquals(assEdit.getMultiplicity().getMax(), 5);
+            assertEquals(assEdit.getMultiplicity().getMin(), 0);
+            assertEquals(assEdit.getMultiplicity().getMax(), 5);
 
             assEdit.setMultiplicity(new FxMultiplicity(4, 4));
             try {
@@ -748,12 +755,12 @@ public class StructureTest {
             ae.save(pEdit);
 
             p = env().getProperty(p.getId()); // reload from cache
-            Assert.assertEquals(p.getLabel().toString(), "TESTPROP new label");
+            assertEquals(p.getLabel().toString(), "TESTPROP new label");
             FxMultiplicity pMult = p.getMultiplicity();
-            Assert.assertEquals(pMult.getMin(), 0);
-            Assert.assertEquals(pMult.getMax(), 5);
-            Assert.assertEquals(p.getHint().toString(), "TESTPROP hint");
-            Assert.assertTrue(p.mayOverrideBaseMultiplicity());
+            assertEquals(pMult.getMin(), 0);
+            assertEquals(pMult.getMax(), 5);
+            assertEquals(p.getHint().toString(), "TESTPROP hint");
+            assertTrue(p.mayOverrideBaseMultiplicity());
         } finally {
             // clean up
             ce.remove(contentPK1);
@@ -785,9 +792,9 @@ public class StructureTest {
         try {
             // assert group properties
             ge = env().getGroup("STRUCTTESTGROUP").asEditable();
-            Assert.assertEquals(ge.getName(), "STRUCTTESTGROUP");
-            Assert.assertEquals(ge.getLabel().toString(), "GROUPDESCR");
-            Assert.assertEquals(ge.getHint().toString(), "GROUPHINT");
+            assertEquals(ge.getName(), "STRUCTTESTGROUP");
+            assertEquals(ge.getLabel().toString(), "GROUPDESCR");
+            assertEquals(ge.getHint().toString(), "GROUPHINT");
 
             // make changes to the group and assert them
             ge.setOverrideMultiplicity(true);
@@ -798,11 +805,11 @@ public class StructureTest {
             long groupId = ae.save(ge);
 
             ge = env().getGroup("STRUCTTESTGROUP_NEW").asEditable();
-            Assert.assertEquals(ge.getId(), groupId);
-            Assert.assertEquals(ge.getLabel().toString(), "GROUPDESCR_NEW");
-            Assert.assertEquals(ge.getHint().toString(), "GROUPHINT_NEW");
-            Assert.assertEquals(ge.getMultiplicity().getMin(), 0);
-            Assert.assertEquals(ge.getMultiplicity().getMax(), 2);
+            assertEquals(ge.getId(), groupId);
+            assertEquals(ge.getLabel().toString(), "GROUPDESCR_NEW");
+            assertEquals(ge.getHint().toString(), "GROUPHINT_NEW");
+            assertEquals(ge.getMultiplicity().getMin(), 0);
+            assertEquals(ge.getMultiplicity().getMax(), 2);
 
             // increase multiplicity of assignment as well in order to be able to add more content
             FxGroupAssignmentEdit assEdit = ((FxGroupAssignment) env().getAssignment("STRUCTTESTTYPE/STRUCTTESTGROUP")).asEditable();
@@ -811,9 +818,9 @@ public class StructureTest {
             ae.save(assEdit, false);
 
             assEdit = ((FxGroupAssignment) env().getAssignment("STRUCTTESTTYPE/STRUCTTESTGROUP")).asEditable();
-            Assert.assertEquals(assEdit.getMultiplicity().getMin(), 0);
-            Assert.assertEquals(assEdit.getMultiplicity().getMax(), 2);
-            Assert.assertEquals(assEdit.getMode(), GroupMode.OneOf);
+            assertEquals(assEdit.getMultiplicity().getMin(), 0);
+            assertEquals(assEdit.getMultiplicity().getMax(), 2);
+            assertEquals(assEdit.getMode(), GroupMode.OneOf);
 
             // create another group/content instance & change the multiplicity settings of both the group and the assignments
             FxContent co = ce.load(contentPK);
@@ -876,9 +883,9 @@ public class StructureTest {
             ae.save(assEdit, false);
 
             assEdit = ((FxGroupAssignment) env().getAssignment("STRUCTTESTTYPE/STRUCTTESTGROUP_NEW_PATH")).asEditable();
-            Assert.assertEquals(assEdit.getLabel().toString(), "ASSIGNMENTLABEL_XX123456");
-            Assert.assertEquals(assEdit.getHint().toString(), "ASSIGNMENTHINT_XX123456");
-            Assert.assertEquals(assEdit.getMode(), GroupMode.AnyOf);
+            assertEquals(assEdit.getLabel().toString(), "ASSIGNMENTLABEL_XX123456");
+            assertEquals(assEdit.getHint().toString(), "ASSIGNMENTHINT_XX123456");
+            assertEquals(assEdit.getMode(), GroupMode.AnyOf);
 
             // set the group mode and the alias
             assEdit.setMode(GroupMode.OneOf);
@@ -893,22 +900,22 @@ public class StructureTest {
             ae.save(assEdit, false);
 
             assEdit = ((FxGroupAssignment) env().getAssignment("STRUCTTESTTYPE/STRUCTTESTGROUP_NEW_ALIAS")).asEditable();
-            Assert.assertEquals(assEdit.getAlias(), "STRUCTTESTGROUP_NEW_ALIAS");
+            assertEquals(assEdit.getAlias(), "STRUCTTESTGROUP_NEW_ALIAS");
 
             // disable the assignment
             assEdit.setEnabled(false);
             ae.save(assEdit, true);
 
             assEdit = ((FxGroupAssignment) env().getAssignment("STRUCTTESTTYPE/STRUCTTESTGROUP_NEW_ALIAS")).asEditable();
-            Assert.assertTrue(!assEdit.isEnabled());
-            Assert.assertEquals(assEdit.getDefaultMultiplicity(), 1);
+            assertTrue(!assEdit.isEnabled());
+            assertEquals(assEdit.getDefaultMultiplicity(), 1);
 
             // test setting the default multiplicity to a higher value than the current
             assEdit.setDefaultMultiplicity(assEdit.getMultiplicity().getMax() + 1);
             ae.save(assEdit, false);
 
             assEdit = ((FxGroupAssignment) env().getAssignment("STRUCTTESTTYPE/STRUCTTESTGROUP_NEW_ALIAS")).asEditable();
-            Assert.assertEquals(assEdit.getDefaultMultiplicity(), assEdit.getMultiplicity().getMax());
+            assertEquals(assEdit.getDefaultMultiplicity(), assEdit.getMultiplicity().getMax());
 
             // TODO: (remaining code blocks) test set position, updategroupassignmentoptions, updategroupoptions, systeminternal flag (prop and group)
         } finally {
@@ -946,13 +953,13 @@ public class StructureTest {
             FxProperty prop1, prop2;
             prop1 = env().getProperty("REMOVETESTPROP1");
             assignments = env().getPropertyAssignments(prop1.getId(), true);
-            Assert.assertEquals(assignments.size(), 2);
-            Assert.assertTrue(findDerivedPropInList(assignments, "REMOVETESTPROP1_ALIAS"));
+            assertEquals(assignments.size(), 2);
+            assertTrue(findDerivedPropInList(assignments, "REMOVETESTPROP1_ALIAS"));
 
             prop2 = env().getProperty("REMOVETESTPROP2");
             assignments = env().getPropertyAssignments(prop2.getId(), true);
-            Assert.assertEquals(assignments.size(), 2);
-            Assert.assertTrue(findDerivedPropInList(assignments, "REMOVETESTPROP2_ALIAS"));
+            assertEquals(assignments.size(), 2);
+            assertTrue(findDerivedPropInList(assignments, "REMOVETESTPROP2_ALIAS"));
 
             // try to remove a property which doesn't exist
             try {
@@ -964,8 +971,8 @@ public class StructureTest {
 
             // remove prop1 and assert that both the property and the alias were removed
             ae.removeProperty(prop1.getId());
-            Assert.assertTrue(!findInPropAssignments("REMOVETESTPROP1"));
-            Assert.assertTrue(!findInPropAssignments("REMOVETESTPROP1_ALIAS"));
+            assertTrue(!findInPropAssignments("REMOVETESTPROP1"));
+            assertTrue(!findInPropAssignments("REMOVETESTPROP1_ALIAS"));
 
             // create content for the remaining assignments and the original properties
             FxContent co = ce.initialize(typeId2);
@@ -978,8 +985,8 @@ public class StructureTest {
 
             // remove the property and assert that the corresponding content was removed as well
             ae.removeProperty(prop2.getId());
-            Assert.assertTrue(!findInPropAssignments("REMOVETESTPROP2"));
-            Assert.assertTrue(!findInPropAssignments("REMOVETESTPROP2_ALIAS"));
+            assertTrue(!findInPropAssignments("REMOVETESTPROP2"));
+            assertTrue(!findInPropAssignments("REMOVETESTPROP2_ALIAS"));
             co = ce.load(contentPK1);
             try {
                 co.getValue("/REMOVETESTPROP2_ALIAS");
@@ -1047,37 +1054,37 @@ public class StructureTest {
         // create derived assignments
         List<FxGroupAssignment> gAssigns = env().getGroupAssignments(g1.getId(), true);
 
-        Assert.assertTrue(gAssigns.size() == 1);
+        assertTrue(gAssigns.size() == 1);
 
         ae.save(FxGroupAssignmentEdit.createNew(gAssigns.get(0), t2, "REMOVETESTGROUP1_ALIAS", "/"), false);
         ae.save(FxPropertyAssignmentEdit.reuse("REMOVALTEST1/REMOVETESTGROUP1/REMOVETESTPROP1", "REMOVALTEST2", "/REMOVETESTGROUP1_ALIAS", "REMOVETESTPROP1_ALIAS"), false); // type2
         gAssigns = env().getGroupAssignments(g1.getId(), true);
 
-        Assert.assertTrue(gAssigns.size() == 2);
+        assertTrue(gAssigns.size() == 2);
 
         gAssigns = env().getGroupAssignments(g2.getId(), true);
 
-        Assert.assertTrue(gAssigns.size() == 1);
+        assertTrue(gAssigns.size() == 1);
 
         ae.save(FxGroupAssignmentEdit.createNew(gAssigns.get(0), t2, "REMOVETESTGROUP2_ALIAS", "/"), false);
         ae.save(FxPropertyAssignmentEdit.reuse("REMOVALTEST1/REMOVETESTGROUP2/REMOVETESTPROP2", "REMOVALTEST2", "/REMOVETESTGROUP2_ALIAS", "REMOVETESTPROP2_ALIAS"), false); // type2
         gAssigns = env().getGroupAssignments(g2.getId(), true);
 
-        Assert.assertTrue(gAssigns.size() == 2);
+        assertTrue(gAssigns.size() == 2);
 
         try { // tests go here
             List<FxPropertyAssignment> pAssigns;
             gAssigns = env().getGroupAssignments(g1.getId(), true);
             pAssigns = env().getPropertyAssignments(p1.getId(), true);
-            Assert.assertTrue(gAssigns.size() == 2);
-            Assert.assertTrue(findDerivedGroupInList(gAssigns, "REMOVETESTGROUP1_ALIAS"));
-            Assert.assertTrue(findDerivedPropInList(pAssigns, "REMOVETESTPROP1_ALIAS"));
+            assertTrue(gAssigns.size() == 2);
+            assertTrue(findDerivedGroupInList(gAssigns, "REMOVETESTGROUP1_ALIAS"));
+            assertTrue(findDerivedPropInList(pAssigns, "REMOVETESTPROP1_ALIAS"));
 
             gAssigns = env().getGroupAssignments(g2.getId(), true);
             pAssigns = env().getPropertyAssignments(p2.getId(), true);
-            Assert.assertTrue(gAssigns.size() == 2);
-            Assert.assertTrue(findDerivedGroupInList(gAssigns, "REMOVETESTGROUP2_ALIAS"));
-            Assert.assertTrue(findDerivedPropInList(pAssigns, "REMOVETESTPROP2_ALIAS"));
+            assertTrue(gAssigns.size() == 2);
+            assertTrue(findDerivedGroupInList(gAssigns, "REMOVETESTGROUP2_ALIAS"));
+            assertTrue(findDerivedPropInList(pAssigns, "REMOVETESTPROP2_ALIAS"));
 
             // remove a group which doesn't exist
             try {
@@ -1090,10 +1097,10 @@ public class StructureTest {
             // remove one of the above created groups
             ae.removeGroup(g2.getId());
             gAssigns = env().getGroupAssignments(g2.getId(), true);
-            Assert.assertTrue(gAssigns.size() == 0);
+            assertTrue(gAssigns.size() == 0);
             // prop 2 should also be a goner
             pAssigns = env().getPropertyAssignments(p2.getId(), true);
-            Assert.assertTrue(pAssigns.size() == 0);
+            assertTrue(pAssigns.size() == 0);
 
             // create content for the remaining group / properties
             FxContent co = ce.initialize(t1.getId());
@@ -1130,10 +1137,10 @@ public class StructureTest {
             }
 
             gAssigns = env().getGroupAssignments(g1.getId(), true);
-            Assert.assertTrue(gAssigns.size() == 0);
+            assertTrue(gAssigns.size() == 0);
             // prop 2 should also be a goner
             pAssigns = env().getPropertyAssignments(p1.getId(), true);
-            Assert.assertTrue(pAssigns.size() == 0);
+            assertTrue(pAssigns.size() == 0);
         } finally {
             if (contentPK1 != null)
                 ce.remove(contentPK1);
@@ -1180,12 +1187,12 @@ public class StructureTest {
 
             // assert that both the aliases have changed, the original XPath assignments do not exist anymore and also that
             // the relevant content instances' paths have changed
-            Assert.assertFalse(env().assignmentExists("ALIASTEST/PROP1"));
-            Assert.assertFalse(env().assignmentExists("ALIASTEST/PROP2"));
-            Assert.assertFalse(env().assignmentExists("ALIASTEST/PROP3"));
-            Assert.assertTrue(env().assignmentExists("ALIASTEST/PROP1ALIAS"));
-            Assert.assertTrue(env().assignmentExists("ALIASTEST/PROP2ALIAS"));
-            Assert.assertTrue(env().assignmentExists("ALIASTEST/PROP3ALIAS"));
+            assertFalse(env().assignmentExists("ALIASTEST/PROP1"));
+            assertFalse(env().assignmentExists("ALIASTEST/PROP2"));
+            assertFalse(env().assignmentExists("ALIASTEST/PROP3"));
+            assertTrue(env().assignmentExists("ALIASTEST/PROP1ALIAS"));
+            assertTrue(env().assignmentExists("ALIASTEST/PROP2ALIAS"));
+            assertTrue(env().assignmentExists("ALIASTEST/PROP3ALIAS"));
 
             FxContent co;
             co = ce.load(contentPK1);
@@ -1199,8 +1206,8 @@ public class StructureTest {
             } catch (Exception e) {
                 // expected
             }
-            Assert.assertEquals(co.getValue("ALIASTEST/PROP1ALIAS[1]").toString(), "Testdata1_1");
-            Assert.assertEquals(co.getValue("ALIASTEST/PROP1ALIAS[2]").toString(), "Testdata1_2");
+            assertEquals(co.getValue("ALIASTEST/PROP1ALIAS[1]").toString(), "Testdata1_1");
+            assertEquals(co.getValue("ALIASTEST/PROP1ALIAS[2]").toString(), "Testdata1_2");
             co = ce.load(contentPK2);
             try {
                 co.getValue("ALIASTEST/PROP2");
@@ -1212,8 +1219,8 @@ public class StructureTest {
             } catch (Exception e) {
                 // expected
             }
-            Assert.assertEquals(co.getValue("ALIASTEST/PROP2ALIAS[1]").toString(), "Testdata2_1");
-            Assert.assertEquals(co.getValue("ALIASTEST/PROP2ALIAS[2]").toString(), "Testdata2_2");
+            assertEquals(co.getValue("ALIASTEST/PROP2ALIAS[1]").toString(), "Testdata2_1");
+            assertEquals(co.getValue("ALIASTEST/PROP2ALIAS[2]").toString(), "Testdata2_2");
             co = ce.load(contentPK3);
             try {
                 co.getValue("ALIASTEST/PROP3");
@@ -1225,8 +1232,8 @@ public class StructureTest {
             } catch (Exception e) {
                 // expected
             }
-            Assert.assertEquals(co.getValue("ALIASTEST/PROP3ALIAS").toString(), "Testdata3_1");
-            Assert.assertEquals(co.getValue("ALIASTEST/PROP3ALIAS[2]").toString(), "Testdata3_2");
+            assertEquals(co.getValue("ALIASTEST/PROP3ALIAS").toString(), "Testdata3_1");
+            assertEquals(co.getValue("ALIASTEST/PROP3ALIAS[2]").toString(), "Testdata3_2");
         } finally {
             for (FxPK pk : ce.getPKsForType(typeId, true)) {
                 ce.remove(pk);
@@ -1278,9 +1285,9 @@ public class StructureTest {
             ga = getGroupAssEd("ALIASTEST/GROUP1ALIAS/GROUP2").setAlias("group2alias"); // diff. case
             ae.save(ga, true);
 
-            Assert.assertFalse(env().assignmentExists("ALIASTEST/GROUP1"));
-            Assert.assertFalse(env().assignmentExists("ALIASTEST/GROUP1/GROUP2"));
-            Assert.assertTrue(env().assignmentExists("ALIASTEST/GROUP1ALIAS/GROUP2ALIAS"));
+            assertFalse(env().assignmentExists("ALIASTEST/GROUP1"));
+            assertFalse(env().assignmentExists("ALIASTEST/GROUP1/GROUP2"));
+            assertTrue(env().assignmentExists("ALIASTEST/GROUP1ALIAS/GROUP2ALIAS"));
 
             // try to load the respective content 2 - proves functionality for all other contents
             FxContent co;
@@ -1295,8 +1302,8 @@ public class StructureTest {
             } catch (Exception e) {
                 // expected
             }
-            Assert.assertEquals(co.getValue("ALIASTEST/GROUP1ALIAS/PROP2").toString(), "Testdata2_1");
-            Assert.assertEquals(co.getValue("ALIASTEST/GROUP1ALIAS/PROP2[2]").toString(), "Testdata2_2");
+            assertEquals(co.getValue("ALIASTEST/GROUP1ALIAS/PROP2").toString(), "Testdata2_1");
+            assertEquals(co.getValue("ALIASTEST/GROUP1ALIAS/PROP2[2]").toString(), "Testdata2_2");
 
             // make changes to the property aliases
             FxPropertyAssignmentEdit pa;
@@ -1309,12 +1316,12 @@ public class StructureTest {
             pa = getPropAssEd("ALIASTEST/GROUP1ALIAS/GROUP2ALIAS/PROP3").setAlias("PROP3ALIAS");
             ae.save(pa, true);
 
-            Assert.assertFalse(env().assignmentExists("ALIASTEST/PROP1"));
-            Assert.assertFalse(env().assignmentExists("ALIASTEST/GROUP1ALIAS/PROP2"));
-            Assert.assertFalse(env().assignmentExists("ALIASTEST/GROUP1ALIAS/GROUP2ALIAS/PROP3"));
-            Assert.assertTrue(env().assignmentExists("ALIASTEST/PROP1ALIAS"));
-            Assert.assertTrue(env().assignmentExists("ALIASTEST/GROUP1ALIAS/PROP2ALIAS"));
-            Assert.assertTrue(env().assignmentExists("ALIASTEST/GROUP1ALIAS/GROUP2ALIAS/PROP3ALIAS"));
+            assertFalse(env().assignmentExists("ALIASTEST/PROP1"));
+            assertFalse(env().assignmentExists("ALIASTEST/GROUP1ALIAS/PROP2"));
+            assertFalse(env().assignmentExists("ALIASTEST/GROUP1ALIAS/GROUP2ALIAS/PROP3"));
+            assertTrue(env().assignmentExists("ALIASTEST/PROP1ALIAS"));
+            assertTrue(env().assignmentExists("ALIASTEST/GROUP1ALIAS/PROP2ALIAS"));
+            assertTrue(env().assignmentExists("ALIASTEST/GROUP1ALIAS/GROUP2ALIAS/PROP3ALIAS"));
 
             // test w/ content 1 & 3
             co = ce.load(contentPK1);
@@ -1328,8 +1335,8 @@ public class StructureTest {
             } catch (Exception e) {
                 // expected
             }
-            Assert.assertEquals(co.getValue("ALIASTEST/PROP1ALIAS").toString(), "Testdata1_1");
-            Assert.assertEquals(co.getValue("ALIASTEST/PROP1ALIAS[2]").toString(), "Testdata1_2");
+            assertEquals(co.getValue("ALIASTEST/PROP1ALIAS").toString(), "Testdata1_1");
+            assertEquals(co.getValue("ALIASTEST/PROP1ALIAS[2]").toString(), "Testdata1_2");
 
             co = ce.load(contentPK3);
             try {
@@ -1342,8 +1349,8 @@ public class StructureTest {
             } catch (Exception e) {
                 // expected
             }
-            Assert.assertEquals(co.getValue("ALIASTEST/GROUP1ALIAS/GROUP2ALIAS/PROP3ALIAS").toString(), "Testdata3_1");
-            Assert.assertEquals(co.getValue("ALIASTEST/GROUP1ALIAS/GROUP2ALIAS/PROP3ALIAS[2]").toString(), "Testdata3_2");
+            assertEquals(co.getValue("ALIASTEST/GROUP1ALIAS/GROUP2ALIAS/PROP3ALIAS").toString(), "Testdata3_1");
+            assertEquals(co.getValue("ALIASTEST/GROUP1ALIAS/GROUP2ALIAS/PROP3ALIAS[2]").toString(), "Testdata3_2");
 
         } finally {
             for (FxPK pk : ce.getPKsForType(typeId, true)) {
@@ -1368,17 +1375,17 @@ public class StructureTest {
                 "/", "group1alias");
 
         try {
-            Assert.assertTrue(env().assignmentExists("ALIASASSIGN/PROP1ALIAS"));
-            Assert.assertFalse(env().assignmentExists("ALIASASSIGN/PROP1"));
-            Assert.assertTrue(env().assignmentExists("ALIASASSIGN/GROUP1ALIAS"));
-            Assert.assertFalse(env().assignmentExists("ALIASASSIGN/GROUP1"));
+            assertTrue(env().assignmentExists("ALIASASSIGN/PROP1ALIAS"));
+            assertFalse(env().assignmentExists("ALIASASSIGN/PROP1"));
+            assertTrue(env().assignmentExists("ALIASASSIGN/GROUP1ALIAS"));
+            assertFalse(env().assignmentExists("ALIASASSIGN/GROUP1"));
 
             // create aliased sub-group
             ae.createGroup(typeId, FxGroupEdit.createNew("GROUP2", new FxString(true, "group2"), new FxString(true, ""), true, new FxMultiplicity(0, 2)),
                     "/group1alias", "group2alias");
 
-            Assert.assertTrue(env().assignmentExists("ALIASASSIGN/GROUP1ALIAS/GROUP2ALIAS"));
-            Assert.assertFalse(env().assignmentExists("ALIASASSIGN/GROUP1ALIAS/GROUP2"));
+            assertTrue(env().assignmentExists("ALIASASSIGN/GROUP1ALIAS/GROUP2ALIAS"));
+            assertFalse(env().assignmentExists("ALIASASSIGN/GROUP1ALIAS/GROUP2"));
 
         } finally {
             te.remove(typeId);
@@ -1408,32 +1415,59 @@ public class StructureTest {
             FxProperty p = env().getProperty("PROP1OPTTEST");
             FxGroup g = env().getGroup("GROUP1OPTTEST");
 
-            Assert.assertEquals(p.getOption("OPT.1P").getValue(), "OPT 1 value");
-            Assert.assertEquals(p.getOption("OPT.2P").getIntValue(), 0);
-            Assert.assertFalse(p.getOption("OPT.1P").isOverrideable());
-            Assert.assertTrue(p.getOption("OPT.2P").isOverrideable());
+            assertEquals(p.getOption("OPT.1P").getValue(), "OPT 1 value");
+            assertEquals(p.getOption("OPT.2P").getIntValue(), 0);
+            assertFalse(p.getOption("OPT.1P").isOverrideable());
+            assertTrue(p.getOption("OPT.2P").isOverrideable());
 
-            Assert.assertEquals(g.getOption("OPT.1G").getValue(), "OPT 1 value");
-            Assert.assertEquals(g.getOption("OPT.2G").getIntValue(), 0);
-            Assert.assertFalse(g.getOption("OPT.1G").isOverrideable());
-            Assert.assertTrue(g.getOption("OPT.2G").isOverrideable());
+            assertEquals(g.getOption("OPT.1G").getValue(), "OPT 1 value");
+            assertEquals(g.getOption("OPT.2G").getIntValue(), 0);
+            assertFalse(g.getOption("OPT.1G").isOverrideable());
+            assertTrue(g.getOption("OPT.2G").isOverrideable());
 
             // create an assignment and check whether the group options are "passed along"
-            FxGroupAssignmentEdit ga = FxGroupAssignmentEdit.createNew((FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment("OPTTEST/GROUP1OPTTEST"),
-                    CacheAdmin.getEnvironment().getType("OPTTEST"), "GROUP1OPTTESTDER", "/");
+            FxGroupAssignmentEdit ga = FxGroupAssignmentEdit.createNew((FxGroupAssignment) getEnvironment().getAssignment("OPTTEST/GROUP1OPTTEST"),
+                    getEnvironment().getType("OPTTEST"), "GROUP1OPTTESTDER", "/");
 
             long aId = ae.save(ga, false);
 
-            FxGroupAssignment gass = (FxGroupAssignment)CacheAdmin.getEnvironment().getAssignment("OPTTEST/GROUP1OPTTESTDER");
+            FxGroupAssignment gass = (FxGroupAssignment) getEnvironment().getAssignment("OPTTEST/GROUP1OPTTESTDER");
 
-            Assert.assertEquals(gass.getOption("OPT.1G").getValue(), "OPT 1 value");
-            Assert.assertEquals(gass.getOption("OPT.2G").getIntValue(), 0);
-            Assert.assertFalse(gass.getOption("OPT.1G").isOverrideable());
-            Assert.assertTrue(gass.getOption("OPT.2G").isOverrideable());
+            assertEquals(gass.getOption("OPT.1G").getValue(), "OPT 1 value");
+            assertEquals(gass.getOption("OPT.2G").getIntValue(), 0);
+            assertFalse(gass.getOption("OPT.1G").isOverrideable());
+            assertTrue(gass.getOption("OPT.2G").isOverrideable());
 
             ae.removeAssignment(aId);
         } finally {
             te.remove(typeId);
+        }
+
+    }
+
+    @Test(groups = {"ejb", "structure"})
+    public void typeAclAssignmentMultiplicity() throws FxApplicationException {
+        final String base = "typeAclAssignmentMultiplicity";
+        final List<Long> typeIds = Lists.newArrayList();
+
+        try {
+            typeIds.add(getTypeEngine().save(FxTypeEdit.createNew(base + "_1").setMultipleContentACLs(false)));
+            assertEquals(getEnvironment().getAssignment(base + "_1/ACL").getMultiplicity(), FxMultiplicity.MULT_1_1);
+
+            // derive without changing the multiple ACLs setting
+            typeIds.add(getTypeEngine().save(FxTypeEdit.createNew(base + "_1_2", base + "_1")));
+            assertEquals(getEnvironment().getAssignment(base + "_1_2/ACL").getMultiplicity(), FxMultiplicity.MULT_1_1);
+
+            typeIds.add(getTypeEngine().save(FxTypeEdit.createNew(base + "_1_2_3", base + "_1_2").setMultipleContentACLs(true)));
+            assertEquals(getEnvironment().getAssignment(base + "_1_2_3/ACL").getMultiplicity(), FxMultiplicity.MULT_1_N);
+
+            typeIds.add(getTypeEngine().save(FxTypeEdit.createNew(base + "_2").setMultipleContentACLs(true)));
+            assertEquals(getEnvironment().getAssignment(base + "_2/ACL").getMultiplicity(), FxMultiplicity.MULT_1_N);
+        } finally {
+            Collections.reverse(typeIds);
+            for (Long typeId : typeIds) {
+                getTypeEngine().remove(typeId);
+            }
         }
 
     }
@@ -1543,6 +1577,6 @@ public class StructureTest {
      * @return FxEnvironment
      */
     private FxEnvironment env() {
-        return CacheAdmin.getEnvironment();
+        return getEnvironment();
     }
 }
