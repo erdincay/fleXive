@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE programlisting [
+        <!ENTITY % global_entities SYSTEM "../global.ent">
+        %global_entities;
+        ]>
+<programlisting language="java" xml:id="jsfsupport_contentEditor_bean"  xmlns="http://docbook.org/ns/docbook">
+import com.flexive.faces.beans.FxContentEditorBean;
+import com.flexive.faces.FxJsfUtils;
+import com.flexive.faces.components.content.FxWrappedContent;
+import com.flexive.faces.messages.FxFacesMsgErr;
+
+
+public String myAction() {
+    // get the content edtior bean
+    FxContentEditorBean editor = (FxContentEditorBean)FxJsfUtils.getManagedBean("fxContentEditorBean");
+     // Retrieve the wrapped content
+    FxWrappedContent content = editor.getContentStorage().get(editor.getEditorId());
+    try {
+        // calling a method
+        editor._save(false);
+    } catch (Throwable t) {
+        new FxFacesMsgErr(t).addToContext();
+    } finally {
+        // delete the component tree to avoid duplicate id errors
+        FxJsfUtils.resetFaceletsComponent(content.getGuiSettings().getFormPrefix() + ":" + content.getEditorId());
+    }
+    // action outcome
+    return null;
+}
+</programlisting>

@@ -1,0 +1,36 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE programlisting [
+        <!ENTITY % global_entities SYSTEM "../global.ent">
+        %global_entities;
+        ]>
+<programlisting language="xhtml" xml:id="jsfsupport_contentEditor_button"
+                xmlns="http://docbook.org/ns/docbook"><![CDATA[
+
+<fx:contentEditor var="myContent" ...>
+    <ui:define name="additionalButtons">
+
+        <!-- adding a command button -->
+        <h:commandButton value="My Button" action="#{myBean.doSomething}">
+            <!-- property action listener for FxWrappedContent-->
+            <f:setPropertyActionListener value="#{myContent}" target="#{myBean.content}"/>
+        </h:commandButton>
+
+        <!-- adding an ajax command button -->
+        <a4j:commandButton value="My Ajax Button" action="#{myBean.doSomething}">
+            <!-- necessary js call when using a4j button(caused by a4j multipart form submit bug -->
+            onclick="flexive.contentEditor.preSubmit();"
+            <!-- rerender attribute -->
+            reRender="#{myContent.guiSettings.reRender}"
+            <!-- using the content editor component's status -->
+            status="#{myContent.editorId}_status">
+        </a4j:commandButton>
+
+        <!-- adding property action listeners for the component's backing bean (FxContentEditorBean)-->
+        <a4j:commandButton .. action="#{__ceBean.action}">
+            <f:setPropertyActionListener value="#{myContent.editorId}" target="#{__ceBean.editorId}"/>
+            <f:setPropertyActionListener value="#{myContent.guiSettings.reRender}" target="#{__ceBean.reRender}"/>
+        </a4j:commandButton>
+
+    </ui:define>
+</fx:contentEditor>
+]]></programlisting>

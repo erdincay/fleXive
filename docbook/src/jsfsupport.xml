@@ -10,6 +10,7 @@
     <title>JSF Support</title>
 
     <xi:include href="includes/author_dlichtenberger.xml"/>
+    <xi:include href="includes/author_gglos.xml"/>
 
     <para>
         &Flexive; offers a set of JSF components for working with &flexive; contents and data structures.
@@ -573,6 +574,513 @@
                 </section>
             </section>
 
+            <section xml:id="jcl_fx_contentEditor">
+                <title>
+                    <code language="xhtml">&lt;fx:contentEditor></code>
+                </title>
+                <para>
+                    The
+                    <code language="xhtml">&lt;fx:contentEditor></code>
+                    component allows creation, editing and deletion of content instances
+                    similar to the <link linkend="adm_instance_editor">Instance Editor</link>.
+                    <warning>
+                        This component depends on <link linkend="jcl_fx_includes">&lt;fx:includes htmlEditor="true" yui="true"></link>
+                        on the beginning of the page, together with <link linkend="jcl_fx_yuisetup">&lt;fx:yuiSetup/></link>
+                        at the end of the page. Furthermore the component needs to be surrounded by a
+                        prefixed multipart form. Beyound the core JSF tag libraries, &ajax4jsf; and
+                        <link xlink:href="http://myfaces.apache.org/tomahawk/index.html">MyFaces Tomahawk</link> are required as well.
+                    </warning>
+                </para>
+
+                <section xml:id="jcl_fx_contentEditor_synopsis">
+                        <title>Synopsis</title>
+                        <programlisting language="xhtml"><![CDATA[<fx:contentEditor editorId="editorId" formPrefix="formPrefix"
+            (contentId="contentId" | pk="pkexpr" | content="contentExpr" | typeId="typeId" | type="typeExpr")
+            [var="varname"] [valueFormatter="valueFormatterExpr"] [reset="true|false"] [reRender="clientId"]
+            [editMode="true|false"] [disableAcl="true|false"] [disableWorkflow="true|false"] [disableEdit="true|false"]
+            [disableDelete="true|false"] [disableVersion="true|false"] [disableCompact="true|false"] [disableSave="true|false"]
+            [disableCancel="true|false"] [disableButtons="true|false"] [disableAddAssignment="true|false"]
+            [disableRemoveAssignment="true|false"] [disablePositionAssignment="true|false"] [disableMessages="true|false"]>
+...
+</fx:contentEditor>
+]]></programlisting>
+                </section>
+                <section xml:id="jcl_fx_contentEditor_parameters">
+                    <title>Parameters</title>
+                    <para>
+                        <variablelist>
+                            <varlistentry>
+                                <term>editorId</term>
+                                <listitem>
+                                    <para>
+                                        Id of the content editor component (must be unique in a view,
+                                        used as key to retrieve a specific content instance stored in view-state).
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+                        </variablelist>
+                    </para>
+                    <para>
+                        <variablelist>
+                            <varlistentry>
+                                <term>formPrefix</term>
+                                <listitem>
+                                    <para>
+                                        The form prefix of the surrounding form.
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+                        </variablelist>
+                    </para>
+                    <para>
+                        <variablelist>
+                            <varlistentry>
+                                <term>contentId</term>
+                                <listitem>
+                                    <para>
+                                        Id of the content to be edited. The maximum available version is loaded.
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+                        </variablelist>
+                    </para>
+                    <para>
+                        <variablelist>
+                            <varlistentry>
+                                <term>pk</term>
+                                <listitem>
+                                    <para>
+                                        FxPk of the content to be edited.
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+                        </variablelist>
+                    </para>
+                    <para>
+                        <variablelist>
+                            <varlistentry>
+                                <term>content</term>
+                                <listitem>
+                                    <para>
+                                        Content instance to be edited.
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+                        </variablelist>
+                    </para>
+                    <para>
+                        <variablelist>
+                            <varlistentry>
+                                <term>typeId</term>
+                                <listitem>
+                                    <para>
+                                        Type id of the content instance to be created.
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+                        </variablelist>
+                    </para>
+                    <para>
+                        <variablelist>
+                            <varlistentry>
+                                <term>type</term>
+                                <listitem>
+                                    <para>
+                                        FxType of the content instance to be created.
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+                        </variablelist>
+                    </para>
+                    <para>
+                        <variablelist>
+                            <varlistentry>
+                                <term>var</term>
+                                <listitem>
+                                    <para>
+                                       Variable name to expose the FxWrappedContent instance within the tag's body.
+                                       Useful if you want to extend the component's functionality.
+                                       See <xref linkend="jcl_fx_contentEditor_customization"/> for details.
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+                        </variablelist>
+                    </para>
+                    <para>
+                        <variablelist>
+                            <varlistentry>
+                                <term>valueFormatter</term>
+                                <listitem>
+                                    <para>
+                                        A custom valueFormatter which is passed to <link linkend="jcl_fx_value_input">&lt;fx:fxValueInput/></link>
+                                        components within this component.
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+                        </variablelist>
+                    </para>
+                    <para>
+                        <variablelist>
+                            <varlistentry>
+                                <term>reset</term>
+                                <listitem>
+                                    <para>
+                                        True if the content for the given editor id should be
+                                        reset upon the next request
+                                        (==removed from content storage and reinitilaized with
+                                        given attributes, default: false). Normally you won't use this, but
+                                        if you want to know more, see <xref linkend="jcl_fx_contentEditor_customization"/>
+                                        for details.
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+                        </variablelist>
+                    </para>
+                    <para>
+                        <variablelist>
+                            <varlistentry>
+                                <term>reRender</term>
+                                <listitem>
+                                    <para>
+                                        External client id which is to be rerendered upon the next AJAX-request triggered
+                                        by the content editor component. Normally you won't use this, unless you need
+                                        to rerender a component containing several fxContentEditors.
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+                        </variablelist>
+                    </para>
+                    <para>
+                        <variablelist>
+                            <varlistentry>
+                                <term>editMode</term>
+                                <listitem>
+                                    <para>
+                                        If true initilaizes this component to edit mode, otherwise to view mode (default: false).
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+                        </variablelist>
+                    </para>
+                    <para>
+                        <variablelist>
+                            <varlistentry>
+                                <term>disableAcl</term>
+                                <listitem>
+                                    <para>
+                                        True if ACL selectbox should not be rendered (default:false).
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+                        </variablelist>
+                    </para>
+                    <para>
+                        <variablelist>
+                            <varlistentry>
+                                <term>disableWorkflow</term>
+                                <listitem>
+                                    <para>
+                                        True if workflow selct box should not be rendered (default:false).
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+                        </variablelist>
+                    </para>
+                    <para>
+                        <variablelist>
+                            <varlistentry>
+                                <term>disableEdit</term>
+                                <listitem>
+                                    <para>
+                                        True if "edit" button should not be rendered (default:false).
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+                        </variablelist>
+                    </para>
+                    <para>
+                        <variablelist>
+                            <varlistentry>
+                                <term>disableDelete</term>
+                                <listitem>
+                                    <para>
+                                        True if "delete" button should not be rendered (default:false).
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+                        </variablelist>
+                    </para>
+                    <para>
+                        <variablelist>
+                            <varlistentry>
+                                <term>disableVersion</term>
+                                <listitem>
+                                    <para>
+                                        True if "save in new version" button and "delete version" button should not be rendered (default:false).
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+                        </variablelist>
+                    </para>
+                    <para>
+                        <variablelist>
+                            <varlistentry>
+                                <term>disableCompact</term>
+                                <listitem>
+                                    <para>
+                                        True if "compact" button should not be rendered (default:false).
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+                        </variablelist>
+                    </para>
+                    <para>
+                        <variablelist>
+                            <varlistentry>
+                                <term>disableSave</term>
+                                <listitem>
+                                    <para>
+                                        True if "save" button should not be rendered (default:false).
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+                        </variablelist>
+                    </para>
+                    <para>
+                        <variablelist>
+                            <varlistentry>
+                                <term>disableCancel</term>
+                                <listitem>
+                                    <para>
+                                        True if "cancel" button should not be rendered (default:false).
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+                        </variablelist>
+                    </para>
+                    <para>
+                        <variablelist>
+                            <varlistentry>
+                                <term>disableButtons</term>
+                                <listitem>
+                                    <para>
+                                        True if no buttons should be rendered (default:false).
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+                        </variablelist>
+                    </para>
+                    <para>
+                        <variablelist>
+                            <varlistentry>
+                                <term>disableAddAssignment</term>
+                                <listitem>
+                                    <para>
+                                        True if icons for adding/inserting assignments should not be rendered (default:false).
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+                        </variablelist>
+                    </para>
+                    <para>
+                        <variablelist>
+                            <varlistentry>
+                                <term>disableRemoveAssignment</term>
+                                <listitem>
+                                    <para>
+                                        True if icons for removing assignments should not be rendered (default:false).
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+                        </variablelist>
+                    </para>
+                    <para>
+                        <variablelist>
+                            <varlistentry>
+                                <term>disablePositionAssignment</term>
+                                <listitem>
+                                    <para>
+                                        True if icons for positioning assignments should not be rendered (default:false).
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+                        </variablelist>
+                    </para>
+                    <para>
+                        <variablelist>
+                            <varlistentry>
+                                <term>disableMessages</term>
+                                <listitem>
+                                    <para>
+                                        True if the &lt;h:messages/&gt; tag inside the content editor should not be rendered (default:false).
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+                        </variablelist>
+                    </para>
+                </section>
+
+                <section xml:id="jcl_fx_contentEditor_customization">
+                    <title>Customizing the <code language="xhtml">&lt;fx:contentEditor></code> component</title>
+                    <para>
+                        Because of its generic nature the content editor cannot
+                        satisfy every need out of the box. However, precautions have been taken to make this
+                        component customizable to your specific application needs. Let's look at the different
+                        parts that make up the content editor more closely:
+                    </para>
+
+                    <para>
+                        <variablelist>
+                            <varlistentry>
+                                <term>Stylesheet</term>
+                                <listitem>
+                                    <para>
+                                        All relevant style entries are prefixed with <code lang="css">.fxContentEditor_</code>.
+                                        So if you want to replace icons and images, change colors etc., you can
+                                        include your own stylesheet overriding those entries.
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+                        </variablelist>
+                    </para>
+                    <para>
+                        <variablelist>
+                            <varlistentry>
+                                <term>Templating</term>
+                                <listitem>
+                                    <para>
+                                        <code language="xhtml">&lt;ui:insert></code> tags allow you
+                                        to insert or replace whole parts of the content editor component
+                                        via <code language="xhtml">&lt;ui:define></code>.
+                                    </para>
+                                     <para>
+                                        The provided names of the <code language="xhtml">&lt;ui:insert></code> tags and respective locations are:
+                                        <variablelist>
+                                            <varlistentry>
+                                                <term>insertTop: located at the very top of the component</term>
+                                            </varlistentry>
+                                             <varlistentry>
+                                                <term>contentSettings: replaces the ACL and Workflow select boxes</term>
+                                            </varlistentry>
+                                            <varlistentry>
+                                                <term>insertMiddle: located right after contentSettings</term>
+                                            </varlistentry>
+                                            <varlistentry>
+                                                <term>buttons: replaces all buttons</term>
+                                            </varlistentry>
+                                            <varlistentry>
+                                                <term>editButton: replaces the "Edit" button</term>
+                                            </varlistentry>
+                                            <varlistentry>
+                                                <term>createButton: replaces the "Create" button</term>
+                                            </varlistentry>
+                                            <varlistentry>
+                                                <term>saveButton: replaces the "Save" button</term>
+                                            </varlistentry>
+                                            <varlistentry>
+                                                <term>saveInNewVersionButton: replaces the "Save in new Version" button</term>
+                                            </varlistentry>
+                                            <varlistentry>
+                                                <term>deleteButton: replaces the "Delete" button</term>
+                                            </varlistentry>
+                                            <varlistentry>
+                                                <term>deleteVersionButton: replaces the "Delete Version" button</term>
+                                            </varlistentry>
+                                            <varlistentry>
+                                                <term>compactVersionButton: replaces the "Compact" button</term>
+                                            </varlistentry>
+                                            <varlistentry>
+                                                <term>cancelButton: replaces the "Cancel" button</term>
+                                            </varlistentry>
+                                            <varlistentry>
+                                                <term>additionalButtons: located right after the previous buttons</term>
+                                            </varlistentry>
+                                            <varlistentry>
+                                                <term>insertBottom: located at the very bottom of the content editor</term>
+                                            </varlistentry>
+                                        </variablelist>
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+                        </variablelist>
+                    </para>
+                    <para>
+                        <variablelist>
+                            <varlistentry>
+                                <term>FxWrappedContent</term>
+                                <listitem>
+                                    <para>
+                                        FxWrappedContent is a wrapper class for FxContent instances
+                                        that provides convenience methods for JSF-handling. By providing
+                                        a variable name you can expose that wrapper class and access it via JSF-EL
+                                        or inject it into your own custom beans via the <code language="xhtml">
+                                        &lt;f:setPropertyActionListener/></code> tags.
+                                        See &flexiveJavadoc; for further details about that class.
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+                        </variablelist>
+                    </para>
+                    <para>
+                        <variablelist>
+                            <varlistentry>
+                                <term>Extending functionality</term>
+                                <listitem>
+                                    <para>
+                                       By using templating and FxWrappedContent as described above
+                                       you can add your own buttons to add additional functionality.
+                                       Also you may extend existing functionality by calling methods
+                                       of the component's backing bean FxContentEditorBean from within
+                                       your own managed beans.
+                                       See <xref linkend="jcl_fx_contentEditor_examples"/>
+                                       for examples and important instructions.
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+                        </variablelist>
+                    </para>
+                </section>
+                <section xml:id="jcl_fx_contentEditor_examples">
+                    <title>Content Editor Examples</title>
+                    <example xml:id="jcl_fx_contentEditor_ex_simple">
+                        <title>Content Editor simple usage</title>
+                        <para>
+                            Here you see a simple usage examples, together with necessary
+                            "surroundings" when using this component. Don't forget that
+                            &ajax4jsf; and <link xlink:href="http://myfaces.apache.org/tomahawk/index.html">MyFaces Tomahawk</link>
+                            tag libraries are also required.
+                        </para>
+                        <xi:include href="listings/jsfsupport_contentEditor_simple.xml"/>
+                    </example>
+                    <example xml:id="jcl_fx_contentEditor_ex_button">
+                        <title>Content Editor adding buttons</title>
+                        <para>
+                            In this example three buttons are added, which will be inserted in the
+                            contentEditor component's template at the &lt;ui:include/>
+                            named "additionalButtons". Note that for the &ajax4jsf; button
+                            flexive.contentEditor.preSubmit() should be called. If you want to
+                            use actions of the component's backing bean, make sure you set up
+                            the property action listeners accordingly.
+                        </para>
+                        <xi:include href="listings/jsfsupport_contentEditor_button.xml"/>
+                    </example>
+                    <example xml:id="jcl_fx_contentEditor_ex_bean">
+                        <title>Content Editor calling the backing bean</title>
+                        <para>
+                            In this example the backing bean is retrieved, an action is called
+                            and finally the component tree is reset. Resetting the component tree
+                            is important if the tree structure changes in between requests, so it
+                            can be constructed anew when the page is rendered.
+                            This is necesarry if for example elements change place or are deleted in
+                            order to avoid duplicate id errors.
+                            Make sure you have set up the actionlisteners accordingly as described in
+                            <xref linkend="jcl_fx_contentEditor_ex_button"/> when calling methods of the
+                            backing bean.
+                        </para>
+                        <xi:include href="listings/jsfsupport_contentEditor_bean.xml"/>
+                    </example>
+                </section>
+            </section>
             <section xml:id="jcl_fx_value">
                 <title>
                     <code language="xhtml">&lt;fx:value></code>

@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE programlisting [
+        <!ENTITY % global_entities SYSTEM "../global.ent">
+        %global_entities;
+        ]>
+<programlisting language="xhtml" xml:id="jsfsupport_contentEditor_simple"
+                xmlns="http://docbook.org/ns/docbook"><![CDATA[
+
+<head>
+    <!-- necessary flexive includes -->
+    <fx:includes all="true"/>
+</head>
+
+<!-- skin for yui based components -->
+<body class="yui-skin-sam">
+
+     <!-- prefixed multipart form -->
+     <h:form id="frm" enctype="multipart/form-data">
+
+        <!-- content editor for editing the content with id 16 -->
+        <fx:contentEditor contentId="16" editorId="editor1" formPrefix="frm"/>
+
+        <!-- content editor for creating a new content with the given type id -->
+        <fx:contentEditor typeId="3" editorId="editor2" formPrefix="frm"/>
+
+        <!-- content editor for editing a given content -->
+        <fx:contentEditor content="#{myBean.myContent}" editorId="editor3" formPrefix="frm"/>
+
+        <!-- necessary yuiSetup tag -->
+        <fx:yuiSetup/>
+    </h:form>
+</body>
+</html>
+]]></programlisting>

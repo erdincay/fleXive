@@ -152,6 +152,11 @@ public class FxContentEditorBean implements Serializable {
         this.referenceId = referenceId;
     }
 
+    /**
+     * Delete the content currently being edited.
+     *
+     * @throws FxApplicationException on erros
+     */
     public void _delete() throws FxApplicationException {
         // remove referencing contents from storage
         for (FxWrappedContent c: getReferencingContents(editorId)) {

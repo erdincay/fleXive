@@ -826,61 +826,65 @@
             <name>contentId</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>Id of the content to edit (maximum available version is loaded).</description>
+            <description>Id of the content to be edited. The maximum available version is loaded.</description>
         </attribute>
         <attribute>
             <name>editMode</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>If true initilaizes the content editor to edit mode, otherwise to view mode (default: false).</description>
+            <description>If true initilaizes this component to edit mode, otherwise to view mode (default: false).</description>
         </attribute>
         <attribute>
             <name>pk</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>FxPk of the content to edit.</description>
+            <description>FxPk of the content to be edited.</description>
         </attribute>
         <attribute>
             <name>content</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>Content instance to edit.</description>
+            <description>Content instance to be edited.</description>
         </attribute>
         <attribute>
             <name>typeId</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>Initializes content editor to create a new content of the given type id.</description>
+            <description>Type id of the content instance to be created.</description>
         </attribute>
         <attribute>
             <name>type</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>Initializes content editor to create a new content of the given type.</description>
+            <description>FxType of the content instance to be created.</description>
         </attribute>
         <attribute>
             <name>var</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>Variable name to expose the wrapped content instance inside the tag's body.</description>
+            <description>Variable name to expose the FxWrappedContent instance within the tag's body.</description>
         </attribute>
         <attribute>
             <name>reset</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>True if the content for the given editor id should be reset (==removed from content storage and reinitilaized with given attributes, default: false).</description>
+            <description>True if the content for the given editor id should be reset upon the next request
+                (==removed from content storage and reinitilaized with given attributes, default: false).</description>
         </attribute>
         <attribute>
             <name>reRender</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>JSF-component id to rerender after AJAX-requests (useful for multiple content ediors in the same view).</description>
+            <description>External client id which is to be rerendered upon the next AJAX-request triggered
+                        by the content editor component. Useful for rerendering a component containing
+                        several fxContentEditors.
+            </description>
         </attribute>
         <attribute>
             <name>valueFormatter</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>A custom FxValueFormatter for the rendering of FxValues in the content editor.</description>
+            <description>A custom FxValueFormatter that is passed to &lt;fxValueInput/> components within the content editor.</description>
         </attribute>
         <attribute>
             <name>disableAcl</name>
@@ -916,7 +920,7 @@
             <name>disableCompact</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>rue if "compact" button should not be rendered (default:false).</description>
+            <description>True if "compact" button should not be rendered (default:false).</description>
         </attribute>
         <attribute>
             <name>disableSave</name>
