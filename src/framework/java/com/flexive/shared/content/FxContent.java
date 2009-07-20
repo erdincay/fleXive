@@ -1218,14 +1218,9 @@ public class FxContent implements Serializable {
      * @return the permission set for the calling user.
      */
     public PermissionSet getPermissions() {
-        try {
-            final FxType type = CacheAdmin.getEnvironment().getType(typeId);
-            final long stepAclId = CacheAdmin.getEnvironment().getStep(stepId).getAclId();
-            return FxPermissionUtils.getPermissionUnion(aclIds, type, stepAclId, lifeCycleInfo.getCreatorId(), mandatorId);
-        } catch (FxNoAccessException e) {
-            // this shouldn't happen since a user must not have access to a content instance without read perms
-            throw e.asRuntimeException();
-        }
+        final FxType type = CacheAdmin.getEnvironment().getType(typeId);
+        final long stepAclId = CacheAdmin.getEnvironment().getStep(stepId).getAclId();
+        return FxPermissionUtils.getPermissionUnion(aclIds, type, stepAclId, lifeCycleInfo.getCreatorId(), mandatorId);
     }
 
     /**
