@@ -62,13 +62,22 @@ disableTab... false if the <adm:tab/> component should be rendered, true otherwi
                             <em>#{fxMessageBean['Content.msg.noSecurity']}</em>
                         </ui:fragment>
                         <ui:fragment rendered="#{myContent.supportSecurity}">
-                            <fx:formRow labelKey="Content.field.ACL" id="#{myContent.editorId}_acl">
-                                 <h:selectOneListbox size="1" id="#{myContent.editorId}_acl" value="#{myContent.content.aclId}"
-                                                    disabled="#{not myContent.guiSettings.editMode or
-                                                    not empty myContent.guiSettings.openedReferenceId}">
-                                    <f:selectItems value="#{fxSelectBean.contentACLs}"/>
-                                </h:selectOneListbox>
-                            </fx:formRow>
+                            <ui:fragment rendered="#{not myContent.multipleContentACLs}">
+                                <fx:formRow labelKey="ContentEditor.field.ACL" id="#{myContent.editorId}_acl">
+                                     <h:selectOneListbox id="#{myContent.editorId}_acl" size="1" value="#{myContent.aclId}"
+                                                        disabled="#{not myContent.guiSettings.editMode or not empty myContent.guiSettings.openedReferenceId}">
+                                        <f:selectItems value="#{fxSelectBean.contentACLs}"/>
+                                    </h:selectOneListbox>
+                                </fx:formRow>
+                            </ui:fragment>
+                            <ui:fragment rendered="#{myContent.multipleContentACLs}">
+                                <fx:formRow labelKey="ContentEditor.field.ACL" id="#{myContent.editorId}_acls">
+                                     <h:selectManyListbox id="#{myContent.editorId}_acls" size="4" value="#{myContent.aclIds}"
+                                                        disabled="#{not myContent.guiSettings.editMode or not empty myContent.guiSettings.openedReferenceId}">
+                                        <f:selectItems value="#{fxSelectBean.contentACLs}"/>
+                                    </h:selectManyListbox>
+                                </fx:formRow>
+                            </ui:fragment>
                         </ui:fragment>
 
                         <!-- wf step -->
@@ -209,7 +218,7 @@ disableTab... false if the <adm:tab/> component should be rendered, true otherwi
         </ui:define>
 
         <ui:define name="additionalButtons">
-            <ui:fragment rendered="#{not myContent.new and myContent.mayExport
+            <ui:fragment rendered="#{not myContent.new and myContent.content.permissions.mayExport
                 and empty myContent.guiSettings.openedReferenceId}">
                 <adm:commandButton id="#{editorId}_exportButton" labelKey="Content.button.export"
                                     lockscreen="false" location="#{empty myContent.guiSettings.openedReferenceId

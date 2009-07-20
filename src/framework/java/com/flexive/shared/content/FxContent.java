@@ -227,6 +227,11 @@ public class FxContent implements Serializable {
         return Collections.unmodifiableList(aclIds);
     }
 
+    /**
+     * Sets the new ACL ids and performs necessary enviroment synchronisatons.
+     *
+     * @param aclIds ACL ids
+     */
     public void setAclIds(Collection<Long> aclIds) {
         this.aclIds.clear();
         this.aclIds.addAll(aclIds);

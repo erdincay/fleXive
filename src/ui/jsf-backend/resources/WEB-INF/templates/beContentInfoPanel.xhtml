@@ -35,7 +35,7 @@ wrappedContent... value binding to wrapped content object provided by fxConentEd
             <f:setPropertyActionListener value="#{srcEditor.infoPanelState=='import'?'':'import'}" target="#{srcEditor.infoPanelState}"/>
             <span class="infoPanelButton">#{fxMessageBean['Content.field.import']}</span>
         </a4j:commandLink>
-        <a4j:commandLink reRender="infoPanel" eventsQueue="ceQueue" rendered="#{wrappedContent.mayExport}">
+        <a4j:commandLink reRender="infoPanel" eventsQueue="ceQueue" rendered="#{wrappedContent.content.permissions.mayExport}">
             <f:setPropertyActionListener value="#{srcEditor.infoPanelState=='export'?'':'export'}" target="#{srcEditor.infoPanelState}"/>
             <f:setPropertyActionListener value="#{wrappedContent}" target="#{srcEditor.wrappedContent}"/>
             <span class="infoPanelButton">#{fxMessageBean['Content.field.export']}</span>

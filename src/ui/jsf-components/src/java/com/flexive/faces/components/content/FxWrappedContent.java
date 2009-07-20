@@ -40,11 +40,9 @@ import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxHistory;
-import com.flexive.shared.configuration.SystemParameters;
 import static com.flexive.shared.configuration.SystemParameters.TREE_CAPTION_PROPERTY;
 import com.flexive.shared.content.*;
 import com.flexive.shared.exceptions.FxNoAccessException;
-import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.ACLPermission;
 import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.structure.*;
@@ -56,14 +54,10 @@ import com.flexive.shared.workflow.Step;
 import com.flexive.shared.workflow.StepDefinition;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.commons.lang.StringUtils;
 
 import javax.faces.model.SelectItem;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.List;
+import java.util.*;
 
 /**
  * Wrapper class for a content instance that provides convenient
@@ -193,7 +187,7 @@ public class FxWrappedContent implements Serializable {
         }
         ArrayList<SelectItem> result = new ArrayList<SelectItem>(steps.size());
         for (Step step : steps) {
-            if (!fxType.useStepPermissions() ||
+            if (!fxType.isUseStepPermissions() ||
                     (isNew ? ticket.mayCreateACL(step.getAclId(), content.getLifeCycleInfo().getCreatorId())
                             : ticket.mayEditACL(step.getAclId(), content.getLifeCycleInfo().getCreatorId()))) {
                 StepDefinition def = environment.getStepDefinition(step.getStepDefinitionId());
@@ -227,26 +221,6 @@ public class FxWrappedContent implements Serializable {
         content.setStepId(stepId);
     }
 
-    /**
-     * Returns the content's ACL if set, <em>null</em> otherwise.
-     *
-     * @return the content's ACL if set, <em>null</em> otherwise.
-     */
-    public ACL getAcl() {
-        if (content.getAclId() > 0)
-            return CacheAdmin.getFilteredEnvironment().getACL(content.getAclId());
-        return null;
-    }
-
-    /**
-     * Sets an ACL for the content.
-     *
-     * @param acl the ACL to be set.
-     */
-    public void setAcl(ACL acl) {
-        content.setAclId(acl.getId());
-    }
-    
     /**
      * The editor id of the associated content editor component.
      *
@@ -286,22 +260,13 @@ public class FxWrappedContent implements Serializable {
     }
 
     /**
-     * Returns if this content instance supports security based on instance permissions.
+     * Returns if multiple ACLs for this content's type are allowed.
      *
-     * @return if this content instance supports security based on instance permissions.
+     * @return if multiple ACLs for this content's type are allowed
      */
-    public boolean isSupportSecurity() {
-        return CacheAdmin.getFilteredEnvironment().getType(content.getTypeId()).useInstancePermissions();
-    }
-
-    private boolean getPermission(ACLPermission aclPermission) {
+    public boolean isMultipleContentACLs() {
         try {
-            return isNew() ? FxPermissionUtils.checkPermission(FxContext.getUserTicket(),
-                    content.getLifeCycleInfo().getCreatorId(), aclPermission,
-                    CacheAdmin.getFilteredEnvironment().getType(content.getTypeId()),
-                    CacheAdmin.getFilteredEnvironment().getStep(content.getStepId()).getAclId(), content.getAclIds(), false) :
-                    FxPermissionUtils.checkPermission(FxContext.getUserTicket(), aclPermission,
-                            EJBLookup.getContentEngine().getContentSecurityInfo(content.getPk()), false);
+            return CacheAdmin.getFilteredEnvironment().getType(content.getTypeId()).isMultipleContentACLs();
         }
         catch (Throwable t) {
             new FxFacesMsgErr(t).addToContext();
@@ -309,22 +274,53 @@ public class FxWrappedContent implements Serializable {
         }
     }
 
-    /**
-     * Returns the {@link com.flexive.shared.security.ACLPermission#DELETE} permission.
+   /**
+     * Return all ACLs assigned to this content.
      *
-     * @return the {@link com.flexive.shared.security.ACLPermission#DELETE} permission.
+     * @return  all ACLs assigned to this content.
      */
-    public boolean isDeleteAble() {
-        return getPermission(ACLPermission.DELETE);
+    public Long[] getAclIds() {
+       return content.getAclIds().toArray(new Long[content.getAclIds().size()]);
     }
 
     /**
-     * Returns the {@link com.flexive.shared.security.ACLPermission#EDIT} permission.
+     * Sets the new ACL ids for this content
      *
-     * @return the {@link com.flexive.shared.security.ACLPermission#EDIT} permission.
+     * @param aclIds ACL ids
      */
-    public boolean isEditAble() {
-        return getPermission(ACLPermission.EDIT);
+    public void setAclIds(Long[] aclIds) {
+        content.setAclIds(Arrays.asList(aclIds));
+    }
+
+    /**
+     * (Used for contents with only one instance ACL !).
+     * Returns the ACL id of the content instance.
+     *
+      * @return ACL id of the content instance.
+     */
+    public Long getAclId() {
+        if (getAclIds().length >0)
+            return getAclIds()[0];
+        return null;
+    }
+
+    /**
+     * Set the content ACL id. If more than one ACL was assigned, the additional ACLs are removed
+     * before assigning the new ACL.
+     *
+     * @param aclId the ACL id
+     */
+    public void setAclId(Long aclId) {
+       content.setAclId(aclId);
+    }
+
+    /**
+     * Returns if this content instance supports security based on instance permissions.
+     *
+     * @return if this content instance supports security based on instance permissions.
+     */
+    public boolean isSupportSecurity() {
+        return CacheAdmin.getFilteredEnvironment().getType(content.getTypeId()).isUseInstancePermissions();
     }
 
     /**
@@ -335,16 +331,7 @@ public class FxWrappedContent implements Serializable {
      *         {@link com.flexive.shared.security.ACLPermission#DELETE} permission, false otherwise.
      */
     public boolean isVersionDeleteAble() {
-        return isDeleteAble() && getVersionInfo().getVersionCount() > 1;
-    }
-
-    /**
-     * Returns the {@link com.flexive.shared.security.ACLPermission#EXPORT} permission.
-     *
-     * @return the {@link com.flexive.shared.security.ACLPermission#EXPORT} permission.
-     */
-    public boolean isMayExport() {
-        return getPermission(ACLPermission.EXPORT);
+        return content.getPermissions().isMayDelete() && getVersionInfo().getVersionCount() > 1;
     }
 
     /**

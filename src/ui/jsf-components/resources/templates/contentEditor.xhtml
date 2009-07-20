@@ -85,12 +85,22 @@
                                 <em>#{fxMessageBean['ContentEditor.msg.noSecurity']}</em>
                             </ui:fragment>
                             <ui:fragment rendered="#{_ceContent.supportSecurity}">
-                                <fx:formRow labelKey="ContentEditor.field.ACL" id="#{_ceContent.editorId}_acl">
-                                     <h:selectOneListbox id="#{_ceContent.editorId}_acl" size="1" value="#{_ceContent.content.aclId}"
-                                                        disabled="#{not _ceContent.guiSettings.editMode or not empty _ceContent.guiSettings.openedReferenceId}">
-                                        <f:selectItems value="#{fxSelectBean.contentACLs}"/>
-                                    </h:selectOneListbox>
-                                </fx:formRow>
+                                <ui:fragment rendered="#{not _ceContent.multipleContentACLs}">
+                                    <fx:formRow labelKey="ContentEditor.field.ACL" id="#{_ceContent.editorId}_acl">
+                                         <h:selectOneListbox id="#{_ceContent.editorId}_acl" size="1" value="#{_ceContent.aclId}"
+                                                            disabled="#{not _ceContent.guiSettings.editMode or not empty _ceContent.guiSettings.openedReferenceId}">
+                                            <f:selectItems value="#{fxSelectBean.contentACLs}"/>
+                                        </h:selectOneListbox>
+                                    </fx:formRow>
+                                </ui:fragment>
+                                <ui:fragment rendered="#{_ceContent.multipleContentACLs}">
+                                    <fx:formRow labelKey="ContentEditor.field.ACL" id="#{_ceContent.editorId}_acls">
+                                         <h:selectManyListbox id="#{_ceContent.editorId}_acls" size="4" value="#{_ceContent.aclIds}"
+                                                            disabled="#{not _ceContent.guiSettings.editMode or not empty _ceContent.guiSettings.openedReferenceId}">
+                                            <f:selectItems value="#{fxSelectBean.contentACLs}"/>
+                                        </h:selectManyListbox>
+                                    </fx:formRow>
+                                </ui:fragment>
                             </ui:fragment>
                         </c:if>
                         <c:if test="#{not _ceContent.guiSettings.disableWorkflow}">
@@ -159,7 +169,7 @@
 
                 <a4j:outputPanel id="#{_ceContent.editorId}_buttons" rendered="#{not _ceContent.guiSettings.disableButtons}" layout="block">
                     <ui:insert name="buttons">
-                        <ui:fragment rendered="#{not _ceContent.guiSettings.editMode and _ceContent.editAble
+                        <ui:fragment rendered="#{not _ceContent.guiSettings.editMode and _ceContent.content.permissions.mayEdit
                         and empty _ceContent.guiSettings.openedReferenceId}">
                             <ui:fragment rendered="#{not _ceContent.guiSettings.disableEdit}">
                                 <ui:insert name="editButton">
@@ -220,7 +230,7 @@
                                     </ui:insert>
                                 </ui:fragment>
 
-                                <ui:fragment rendered="#{_ceContent.deleteAble
+                                <ui:fragment rendered="#{_ceContent.content.permissions.mayDelete
                                 and not _ceContent.guiSettings.disableDelete and empty _ceContent.guiSettings.openedReferenceId
                                 and _ceContent.guiSettings.editMode}">
                                     <ui:insert name="deleteButton">
