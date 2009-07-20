@@ -72,6 +72,8 @@
                 <h:inputHidden id="sortDirection" value="#{fxSearchResultBean.sortDirection}"/>
                 <h:inputHidden id="paginatorPage" value="#{fxSearchResultBean.paginatorPage}"/>
                 <h:inputHidden id="clearCache" value="#{fxSearchResultBean.clearCache}"/>
+                <h:inputHidden id="contentEditorId" value="#{beContentEditorBean.id}"/>
+                <h:inputHidden id="contentEditorVersion" value="#{beContentEditorBean.version}"/>
 
                 <h:selectOneListbox id="typeId" value="#{fxSearchResultBean.typeId}" size="1">
                     <f:selectItems value="#{fxSearchResultBean.contentTypeItems}"/>
@@ -172,11 +174,11 @@
                 </fx:menu>
 
                 <div style="display:none">
-                    <h:commandLink id="showButton" action="#{contentEditorBean.load}">
-                        <f:setPropertyActionListener value="#{true}" target="#{contentEditorBean.readOnly}"/>
+                    <h:commandLink id="showButton" action="#{beContentEditorBean.initEditor}">
+                        <f:setPropertyActionListener value="#{false}" target="#{beContentEditorBean.editMode}"/>
                     </h:commandLink>
-                    <h:commandLink id="editButton" action="#{contentEditorBean.load}">
-                        <f:setPropertyActionListener value="#{false}" target="#{contentEditorBean.readOnly}"/>
+                    <h:commandLink id="editButton" action="#{beContentEditorBean.initEditor}">
+                        <f:setPropertyActionListener value="#{true}" target="#{beContentEditorBean.editMode}"/>
                     </h:commandLink>
                 </div>
             </c:if>

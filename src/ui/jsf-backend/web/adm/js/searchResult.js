@@ -323,13 +323,23 @@ function reload() {
     document.forms["frm"].submit();
 }
 
+function storePk(/* PK */ pk) {
+    if (pk != null) {
+        document.getElementById("frm:contentEditorId").value = pk.id;
+        document.getElementById("frm:contentEditorVersion").value = pk.version;
+    }
+}
+
 function openContent(/* PK */ pk) {
-    invokeContentAction("adm/content/contentEditor.jsf", "editInstance", {editMode: false, pk: pk});
+    storePk(pk);
+    document.getElementById("frm:showButton").onclick();
 }
 
 function editContent(/* PK */ pk) {
-    invokeContentAction("adm/content/contentEditor.jsf", "editInstance", {editMode: true, pk: pk});
+    storePk(pk);
+    document.getElementById("frm:editButton").onclick();
 }
+
 
 function deleteRowsForPks(pks) {
     var pkStrings = {};

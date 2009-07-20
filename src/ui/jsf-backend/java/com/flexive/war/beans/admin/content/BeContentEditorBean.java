@@ -110,6 +110,8 @@ public class BeContentEditorBean implements ActionBean, Serializable {
     // Save after an import or keep editing?
     private boolean importSave;
 
+    private long contentIdToInit= -1;
+
     /**
      * {@inheritDoc}
      */
@@ -567,8 +569,16 @@ public class BeContentEditorBean implements ActionBean, Serializable {
         return pk != null ? pk.getId() : -1;
     }
 
+    public void setId(long id) {
+        this.contentIdToInit = id;
+    }
+
     public void setVersion(int version) {
         this.version = version;
+    }
+
+    public int getVersion() {
+        return version;
     }
 
     /**
@@ -613,6 +623,21 @@ public class BeContentEditorBean implements ActionBean, Serializable {
         resetViewStateVars();
         this.typeId = typeId;
         this.editMode = editMode;
+        return getEditorPage();
+    }
+
+    /**
+     * Initialize the content editor with the set version and content id
+     *
+     * @return editor page
+     */
+    public String initEditor() {
+        // save edit mode
+        boolean editMode = this.editMode;
+        resetViewStateVars();
+        // restore edit mode
+        this.editMode = editMode;
+        this.pk = new FxPK(contentIdToInit, version);
         return getEditorPage();
     }
 
