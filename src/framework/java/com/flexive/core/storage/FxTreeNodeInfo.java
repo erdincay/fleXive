@@ -37,6 +37,9 @@ import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNode;
 
 import java.io.Serializable;
+import java.util.Collection;
+import java.util.List;
+import java.util.Collections;
 
 /**
  * Information about a tree node that implementation specific and provide information about parameters
@@ -55,7 +58,7 @@ public abstract class FxTreeNodeInfo implements Serializable {
     protected long id;
     protected String name;
     protected FxPK reference;
-    protected long ACLId;
+    protected List<Long> aclIds;
     protected FxTreeMode mode;
     protected int position;
     protected String data;
@@ -72,7 +75,7 @@ public abstract class FxTreeNodeInfo implements Serializable {
      * @param id               node id
      * @param name             name
      * @param reference        referenced content
-     * @param ACLId            ACL of the referenced content
+     * @param aclIds           ACLs of the referenced content
      * @param mode             tree mode
      * @param position         position
      * @param data             data
@@ -80,7 +83,7 @@ public abstract class FxTreeNodeInfo implements Serializable {
      * @param permissions      the node permissions of the calling user
      */
     protected FxTreeNodeInfo(int totalChildCount, int directChildCount, int depth, long parentId, long id, String name,
-                             FxPK reference, long ACLId, FxTreeMode mode, int position, String data, long modifiedAt,
+                             FxPK reference, List<Long> aclIds, FxTreeMode mode, int position, String data, long modifiedAt,
                              PermissionSet permissions) {
         this.totalChildCount = totalChildCount;
         this.directChildCount = directChildCount;
@@ -89,7 +92,7 @@ public abstract class FxTreeNodeInfo implements Serializable {
         this.id = id;
         this.name = name;
         this.reference = reference;
-        this.ACLId = ACLId;
+        this.aclIds = Collections.unmodifiableList(aclIds);
         this.mode = mode;
         this.position = position;
         this.data = data;
@@ -198,9 +201,20 @@ public abstract class FxTreeNodeInfo implements Serializable {
      * Get the id of the ACL assigned to the referenced content
      *
      * @return id of the ACL assigned to the referenced content
+     * @deprecated  use {@link #getACLIds()}
      */
+    @Deprecated
     public long getACLId() {
-        return ACLId;
+        return aclIds.isEmpty() ? -1 : aclIds.get(0);
+    }
+
+    /**
+     * Get the id(s) of the ACL(s) assigned to the referenced content
+     *
+     * @return id(s) of the ACL(s) assigned to the referenced content
+     */
+    public List<Long> getACLIds() {
+        return aclIds;
     }
 
     /**

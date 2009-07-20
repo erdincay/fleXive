@@ -33,6 +33,8 @@ package com.flexive.core.conversion;
 
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
+import com.flexive.shared.FxSharedUtils;
+import static com.flexive.shared.FxSharedUtils.*;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxGroupData;
 import com.flexive.shared.content.FxPK;
@@ -45,6 +47,9 @@ import com.thoughtworks.xstream.converters.MarshallingContext;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
 import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
+import org.apache.commons.lang.StringUtils;
+
+import java.util.Arrays;
 
 /**
  * XStream converter for FxContent
@@ -65,7 +70,11 @@ public class FxContentConverter implements Converter {
             writer.addAttribute("pk", co.getPk().toString());
             writer.addAttribute("type", env.getType(co.getTypeId()).getName());
             writer.addAttribute("mandator", env.getMandator(co.getMandatorId()).getName());
-            writer.addAttribute("acl", env.getACL(co.getAclId()).getName());
+            writer.addAttribute("acls", StringUtils.join(
+                    getSelectableObjectNameList(
+                            filterSelectableObjectsById(env.getACLs(), co.getAclIds())
+                    ), ','
+            ));
             final Step step = env.getStep(co.getStepId());
             final String stepName = env.getStepDefinition(step.getStepDefinitionId()).getName();
             final String wfName = env.getWorkflow(step.getWorkflowId()).getName();
@@ -101,9 +110,17 @@ public class FxContentConverter implements Converter {
         try {
             co = EJBLookup.getContentEngine().initialize(env.getType(reader.getAttribute("type")).getId(),
                     env.getMandator(reader.getAttribute("mandator")).getId(),
-                    env.getACL(reader.getAttribute("acl")).getId(),
+                    -1,
                     env.getStep(env.getWorkflow(reader.getAttribute("workflow")).getId(), reader.getAttribute("step")).getId(),
                     EJBLookup.getLanguageEngine().load(reader.getAttribute("mainLanguage")).getId());
+            co.setAclIds(
+                    getSelectableObjectIdList(
+                        filterSelectableObjectsByName(
+                                env.getACLs(),
+                                Arrays.asList(StringUtils.split(reader.getAttribute("acls"), ','))
+                        )
+                    )
+            );
             boolean relation = Boolean.valueOf(reader.getAttribute("relation"));
             if (relation) {
                 //TODO: resolve relation pk's after import

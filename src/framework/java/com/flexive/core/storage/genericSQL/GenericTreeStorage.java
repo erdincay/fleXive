@@ -49,6 +49,7 @@ import com.flexive.shared.scripting.FxScriptEvent;
 import com.flexive.shared.security.UserGroup;
 import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.security.ACLPermission;
+import com.flexive.shared.security.ACL;
 import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.structure.FxType;
@@ -56,6 +57,7 @@ import com.flexive.shared.structure.TypeState;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNode;
 import com.flexive.shared.value.FxString;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -71,7 +73,6 @@ import java.util.*;
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public abstract class GenericTreeStorage implements TreeStorage {
-
     /**
      * Information to be processed when creating a new node (return value helper)
      */
@@ -107,6 +108,10 @@ public abstract class GenericTreeStorage implements TreeStorage {
             "DEPTH,CHILDCOUNT,REF,TEMPLATE,MODIFIED_AT,NAME,tree_getPosition(TRUE,ID,PARENT),ACL,TDEF,VER,STEP,CREATED_BY,MANDATOR " +
             "FROM (SELECT t.LFT,t.RGT,t.PARENT,t.DEPTH,t.TOTAL_CHILDCOUNT,t.CHILDCOUNT,t.REF,t.TEMPLATE,t.MODIFIED_AT,t.NAME,t.ID,c.ACL,c.TDEF,c.VER,c.STEP,c.CREATED_BY,c.MANDATOR FROM " +
             getTable(FxTreeMode.Live) + " t, " + DatabaseConst.TBL_CONTENT + " c WHERE t.ID=? AND c.ID=t.REF AND c.ISLIVE_VER=1) NODE";
+    protected static final String TREE_NODEINFO_ACLS =
+            "SELECT acl FROM " + DatabaseConst.TBL_CONTENT + " WHERE id=? AND ver=? and acl != " + ACL.NULL_ACL_ID +
+            " UNION " +
+            "SELECT acl FROM " + DatabaseConst.TBL_CONTENT_ACLS + " WHERE id=? AND ver=? ";
 
     //                                                       1   2   3      4
     protected static final String TREE_EDIT_NODEINFO = "SELECT LFT,RGT,PARENT,TOTAL_CHILDCOUNT," +
@@ -1476,6 +1481,26 @@ public abstract class GenericTreeStorage implements TreeStorage {
             return;
         checkTree(con, mode);
     }
+
+    protected List<Long> fetchNodeACLs(Connection con, FxPK reference) throws SQLException {
+        PreparedStatement ps2 = null;
+        try {
+            ps2 = con.prepareStatement(TREE_NODEINFO_ACLS);
+            ps2.setLong(1, reference.getId());
+            ps2.setInt(2, reference.getVersion());
+            ps2.setLong(3, reference.getId());
+            ps2.setInt(4, reference.getVersion());
+            final ResultSet rs2 = ps2.executeQuery();
+            final List<Long> aclIds = Lists.newArrayList();
+            while (rs2.next()) {
+                aclIds.add(rs2.getLong(1));
+            }
+            return aclIds;
+        } finally {
+            Database.closeObjects(GenericTreeStorage.class, null, ps2);
+        }
+    }
+
 
     /**
      * Check a tree for invalid nodes, will throw a FxTreeException on errors

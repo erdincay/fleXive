@@ -50,6 +50,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.sql.*;
+import java.util.List;
 
 /**
  * Generic tree storage implementation using a simple nested set tree
@@ -131,16 +132,17 @@ public class GenericTreeStorageSimple extends GenericTreeStorage {
             ResultSet rs = ps.executeQuery();
             if (rs == null || !rs.next())
                 throw new FxNotFoundException("ex.tree.node.notFound", nodeId, mode);
-            long _acl = rs.getLong(14);
             FxType _type = CacheAdmin.getEnvironment().getType(rs.getLong(15));
             long _stepACL = CacheAdmin.getEnvironment().getStep(rs.getLong(17)).getAclId();
             long _createdBy = rs.getLong(18);
             long _mandator = rs.getLong(19);
+            final FxPK reference = new FxPK(rs.getLong(9), rs.getInt(16));
+            final List<Long> aclIds = fetchNodeACLs(con, reference);
             return new FxTreeNodeInfoSimple(rs.getLong(1), rs.getLong(2), rs.getLong(5),
                     rs.getLong(6), rs.getInt(4), rs.getInt(8), rs.getInt(7), rs.getLong(3),
-                    nodeId, rs.getString(12), new FxPK(rs.getLong(9), rs.getInt(16)),
-                    _acl, mode, rs.getInt(13), rs.getString(10), rs.getLong(11),
-                    FxPermissionUtils.getPermissions(_acl, _type, _stepACL, _createdBy, _mandator));
+                    nodeId, rs.getString(12), reference,
+                    aclIds, mode, rs.getInt(13), rs.getString(10), rs.getLong(11),
+                    FxPermissionUtils.getPermissionUnion(aclIds, _type, _stepACL, _createdBy, _mandator));
         } catch (SQLException e) {
             throw new FxTreeException(e, "ex.tree.nodeInfo.sqlError", nodeId, e.getMessage());
         } finally {

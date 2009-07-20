@@ -730,20 +730,16 @@ public class SearchEngineTest {
 
     @Test
     public void aclSelectorTest() throws FxApplicationException {
-        final FxResultSet result = new SqlQueryBuilder().select("@pk", "acl", "acl.label", "acl.name",
+        final FxResultSet result = new SqlQueryBuilder().select("@pk", "acl", "acl.name",
                 "acl.mandator", "acl.description", "acl.cat_type", "acl.color", "acl.created_by", "acl.created_at",
                 "acl.modified_by", "acl.modified_at").type(TEST_TYPE).getResult();
         assertTrue(result.getRowCount() > 0);
         for (FxResultRow row : result.getResultRows()) {
             final ACL acl = CacheAdmin.getEnvironment().getACL(row.getLong("acl"));
             final FxContent content = getContentEngine().load(row.getPk(1));
-            Assert.assertEquals(content.getAclId(), acl.getId(),
+            Assert.assertTrue(content.getAclIds().contains(acl.getId()),
                     "Invalid ACL for instance " + row.getPk(1) + ": " + acl.getId()
-                            + ", content engine returned " + content.getAclId());
-
-            // check label
-            Assert.assertEquals(acl.getLabel().getBestTranslation(), row.getFxValue("acl.label").getBestTranslation(),
-                    "Invalid ACL label '" + row.getValue(3) + "', expected: '" + acl.getLabel() + "'");
+                            + ", content engine returned " + content.getAclIds().get(0));
 
             // check fields selected directly from the ACL table
             assertEquals(row.getString("acl.name"), (Object) acl.getName(), "Invalid value for field: name");
@@ -982,7 +978,7 @@ public class SearchEngineTest {
         final long lastContentChange = getSearchEngine().getLastContentChange(false);
         assertTrue(lastContentChange > 0);
         final FxContent content = getContentEngine().initialize(TEST_TYPE);
-        content.setAclId(TestUsers.getInstanceAcl().getId());
+        content.setAclIds(Arrays.asList(TestUsers.getInstanceAcl().getId()));
         content.setValue("/" + getTestPropertyName("string"), new FxString(false, "lastContentChangeTest"));
         FxPK pk = null;
         try {

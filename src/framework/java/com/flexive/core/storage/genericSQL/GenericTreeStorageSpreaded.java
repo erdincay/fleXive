@@ -34,6 +34,7 @@ package com.flexive.core.storage.genericSQL;
 import com.flexive.core.storage.FxTreeNodeInfo;
 import com.flexive.core.storage.FxTreeNodeInfoSpreaded;
 import com.flexive.core.storage.StorageManager;
+import com.flexive.core.Database;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.content.FxPermissionUtils;
@@ -47,6 +48,7 @@ import com.flexive.shared.structure.FxType;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNode;
 import com.flexive.shared.value.FxString;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -55,6 +57,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.*;
 import java.util.Stack;
+import java.util.List;
 
 /**
  * Generic tree storage implementation using a spreaded nested set tree
@@ -98,25 +101,21 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
             rs = ps.executeQuery();
             if (rs == null || !rs.next())
                 throw new FxNotFoundException("ex.tree.node.notFound", nodeId, mode);
-            long _acl = rs.getLong(14);
             FxType _type = CacheAdmin.getEnvironment().getType(rs.getLong(15));
             long _stepACL = CacheAdmin.getEnvironment().getStep(rs.getLong(17)).getAclId();
             long _createdBy = rs.getLong(18);
             long _mandator = rs.getLong(19);
+            final FxPK reference = new FxPK(rs.getLong(9), rs.getInt(16));
+            final List<Long> aclIds = fetchNodeACLs(con, reference);
             return new FxTreeNodeInfoSpreaded(rs.getBigDecimal(1), rs.getBigDecimal(2), rs.getBigDecimal(5),
                     rs.getBigDecimal(6), maxRight, rs.getInt(4), rs.getInt(8), rs.getInt(7), rs.getLong(3),
-                    nodeId, rs.getString(12), new FxPK(rs.getLong(9), rs.getInt(16)),
-                    _acl, mode, rs.getInt(13), rs.getString(10), rs.getLong(11),
-                    FxPermissionUtils.getPermissions(_acl, _type, _stepACL, _createdBy, _mandator));
+                    nodeId, rs.getString(12), reference,
+                    aclIds, mode, rs.getInt(13), rs.getString(10), rs.getLong(11),
+                    FxPermissionUtils.getPermissionUnion(aclIds, _type, _stepACL, _createdBy, _mandator));
         } catch (SQLException e) {
             throw new FxTreeException(e, "ex.tree.nodeInfo.sqlError", nodeId, e.getMessage());
         } finally {
-            try {
-                if (ps != null)
-                    ps.close();
-            } catch (SQLException e) {
-                LOG.error(e, e);
-            }
+            Database.closeObjects(GenericTreeStorageSpreaded.class, null, ps);
         }
     }
 

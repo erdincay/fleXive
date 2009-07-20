@@ -32,10 +32,13 @@
 package com.flexive.core.search.genericSQL;
 
 import com.flexive.core.DatabaseConst;
+import static com.flexive.core.DatabaseConst.TBL_CONTENT;
+import static com.flexive.core.DatabaseConst.TBL_CONTENT_ACLS;
 import com.flexive.core.search.*;
 import com.flexive.shared.FxArrayUtils;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.security.ACL;
 import com.flexive.shared.exceptions.FxSqlSearchException;
 import com.flexive.shared.search.SortDirection;
 import com.flexive.shared.structure.FxDataType;
@@ -70,7 +73,7 @@ public class GenericSQLDataSelector extends DataSelector {
         SELECTORS.put("MANDATOR", new GenericSQLForeignTableSelector("mandator", DatabaseConst.TBL_MANDATORS, "id", false, null));
         SELECTORS.put("CREATED_BY", new GenericSQLForeignTableSelector("created_by", DatabaseConst.TBL_ACCOUNTS, "id", false, null));
         SELECTORS.put("MODIFIED_BY", new GenericSQLForeignTableSelector("modified_by", DatabaseConst.TBL_ACCOUNTS, "id", false, null));
-        SELECTORS.put("ACL", new GenericSQLForeignTableSelector("acl", DatabaseConst.TBL_ACLS, "id", true, "label"));
+        SELECTORS.put("ACL", new GenericSQLForeignTableSelector("acl", DatabaseConst.TBL_ACLS, "id", false, null));
         SELECTORS.put("STEP", new GenericSQLStepSelector());
         SELECTORS.put("TYPEDEF", new GenericSQLForeignTableSelector("tdef", DatabaseConst.TBL_STRUCT_TYPES, "id", true, "description"));
     }
@@ -299,20 +302,36 @@ public class GenericSQLDataSelector extends DataSelector {
             switch (entry.getTableType()) {
                 case T_CONTENT:
                     for (String column : entry.getReadColumns()) {
-                        final int directSelect = FxArrayUtils.indexOf(CONTENT_DIRECT_SELECT, column, true);
-                        if (directSelect > -1) {
-                            final String val = FILTER_ALIAS + "." + CONTENT_DIRECT_SELECT_PROP[directSelect];
-                            result.addItem(val, resultPos, false);
+                        if ("ACL".equalsIgnoreCase(column)) {
+                            result.addItem(
+                                    "(SELECT acl FROM " + TBL_CONTENT + " subc" +
+                                    " WHERE subc.id = " + FILTER_ALIAS + ".id " +
+                                    " AND subc.ver = " + FILTER_ALIAS + ".ver " +
+                                    " AND subc.acl != " + ACL.NULL_ACL_ID +
+                                    " UNION " +
+                                    "SELECT acl FROM " + TBL_CONTENT_ACLS + " suba" +
+                                    " WHERE suba.id = " + FILTER_ALIAS + ".id AND suba.ver = " + FILTER_ALIAS + ".ver" +
+                                    " LIMIT 1" +
+                                    ")",
+                                    resultPos,
+                                    false
+                            );
                         } else {
-                            String expr = SUBSEL_ALIAS + "." + column;
-                            if (!prop.getSqlFunctions().isEmpty() && PropertyEntry.isDateMillisColumn(column)) {
-                                // need to convert to date before applying a date function
-                                expr = toDBTime(expr);
+                            final int directSelect = FxArrayUtils.indexOf(CONTENT_DIRECT_SELECT, column, true);
+                            if (directSelect > -1) {
+                                final String val = FILTER_ALIAS + "." + CONTENT_DIRECT_SELECT_PROP[directSelect];
+                                result.addItem(val, resultPos, false);
+                            } else {
+                                String expr = SUBSEL_ALIAS + "." + column;
+                                if (!prop.getSqlFunctions().isEmpty() && PropertyEntry.isDateMillisColumn(column)) {
+                                    // need to convert to date before applying a date function
+                                    expr = toDBTime(expr);
+                                }
+                                final String val = "(SELECT " + expr + " FROM " + TBL_CONTENT +
+                                        " " + SUBSEL_ALIAS + " WHERE " + SUBSEL_ALIAS + ".id=" + FILTER_ALIAS + ".id AND " +
+                                        SUBSEL_ALIAS + ".ver=" + FILTER_ALIAS + ".ver)";
+                                result.addItem(val, resultPos, false);
                             }
-                            final String val = "(SELECT " + expr + " FROM " + DatabaseConst.TBL_CONTENT +
-                                    " " + SUBSEL_ALIAS + " WHERE " + SUBSEL_ALIAS + ".id=" + FILTER_ALIAS + ".id AND " +
-                                    SUBSEL_ALIAS + ".ver=" + FILTER_ALIAS + ".ver)";
-                            result.addItem(val, resultPos, false);
                         }
                     }
                     break;

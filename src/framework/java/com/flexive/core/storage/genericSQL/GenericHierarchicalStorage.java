@@ -145,7 +145,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     protected static final String CONTENT_DATA_REMOVE_VERSION = "DELETE FROM " + TBL_CONTENT_DATA + " WHERE ID=? AND VER=?";
 
     //security info main query
-    protected static final String SECURITY_INFO_MAIN = "SELECT DISTINCT c.ACL, t.ACL, s.ACL, t.SECURITY_MODE, t.ID, c.DBIN_ID, c.DBIN_ACL, c.CREATED_BY, c.MANDATOR FROM " +
+    protected static final String SECURITY_INFO_MAIN = "SELECT DISTINCT c.ACL, t.ACL, s.ACL, t.SECURITY_MODE, t.ID, c.DBIN_ID, c.DBIN_ACL, c.CREATED_BY, c.MANDATOR, c.ver FROM " +
             TBL_CONTENT + " c, " + TBL_STRUCT_TYPES + " t, " + TBL_STEP + " s WHERE c.ID=? AND ";
     protected static final String SECURITY_INFO_WHERE = " AND t.ID=c.TDEF AND s.ID=c.STEP";
     protected static final String SECURITY_INFO_VER = SECURITY_INFO_MAIN + "c.VER=?" + SECURITY_INFO_WHERE;
@@ -2188,6 +2188,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             byte typePerm;
             long typeACL, contentACL, stepACL, previewACL;
             long previewId, typeId, ownerId, mandatorId;
+            int version;
             final Set<Long> propertyPerms = new HashSet<Long>();
             ResultSet rs = ps.executeQuery();
             if (rs == null || !rs.next())
@@ -2201,6 +2202,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             previewACL = rs.getLong(7);
             ownerId = rs.getLong(8);
             mandatorId = rs.getLong(9);
+            version = rs.getInt(10);
             if (rs.next())
                 throw new FxLoadException("ex.db.resultSet.tooManyRows");
             if ((typePerm & 0x02) == 0x02) {
@@ -2231,7 +2233,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                     throw new FxLoadException(e);
                 }
             }
-
+            pk = new FxPK(pk.getId(), version);
             final List<Long> acls = contentACL == ACL.NULL_ACL_ID ? loadContentAclTable(con, pk) : Arrays.asList(contentACL);
             return new FxContentSecurityInfo(pk, ownerId, previewId, typeId, mandatorId, typePerm, typeACL, stepACL, acls, previewACL, Lists.newArrayList(propertyPerms));
         } catch (SQLException e) {

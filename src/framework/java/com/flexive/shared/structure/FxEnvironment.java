@@ -43,6 +43,7 @@ import com.flexive.shared.workflow.Workflow;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Collection;
 
 
 /**

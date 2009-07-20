@@ -384,6 +384,52 @@ public class FxPermissionUtils {
     }
 
     /**
+     * Gets the permission set union of all given ACLs.
+     *
+     * @param aclIds    instance ACLs
+     * @param type      used type
+     * @param stepACL   step ACL
+     * @param createdBy owner
+     * @param mandator  mandator
+     * @return array of permissions in the order edit, relate, delete, export and create
+     * @throws com.flexive.shared.exceptions.FxNoAccessException
+     *          if no read access if permitted
+     * @since 3.1
+     */
+    public static PermissionSet getPermissionUnion(Collection<Long> aclIds, FxType type, long stepACL, long createdBy, long mandator) {
+        PermissionSet result = new PermissionSet(false, false, false, false, false);
+        for (long aclId : aclIds) {
+            try {
+                result = result.union(getPermissions(aclId, type, stepACL, createdBy, mandator));
+            } catch (FxNoAccessException e) {
+                // no read access, ignore it since we're starting with an empty permission set anyway
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Gets the permission set intersection of all given ACLs.
+     *
+     * @param aclIds    instance ACLs
+     * @param type      used type
+     * @param stepACL   step ACL
+     * @param createdBy owner
+     * @param mandator  mandator
+     * @return array of permissions in the order edit, relate, delete, export and create
+     * @throws com.flexive.shared.exceptions.FxNoAccessException
+     *          if no read access if permitted
+     * @since 3.1
+     */
+    public static PermissionSet getPermissionIntersection(Collection<Long> aclIds, FxType type, long stepACL, long createdBy, long mandator) throws FxNoAccessException {
+        PermissionSet result = new PermissionSet(true, true, true, true, true);
+        for (long aclId : aclIds) {
+            result = result.intersect(getPermissions(aclId, type, stepACL, createdBy, mandator));
+        }
+        return result;
+    }
+
+    /**
      * Get a users permission for a given instance ACL
      *
      * @param acl       instance ACL

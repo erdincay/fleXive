@@ -41,6 +41,7 @@ import com.flexive.shared.value.FxString;
 import com.flexive.shared.value.FxValue;
 import com.flexive.shared.workflow.Step;
 import com.flexive.shared.workflow.StepDefinition;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import static org.apache.commons.lang.StringUtils.defaultString;
@@ -1344,7 +1345,9 @@ public final class FxSharedUtils {
      *
      * @param values the input values
      * @return the IDs of the input values
+     * @deprecated use {@link #getSelectableObjectIdList(java.util.Collection)}
      */
+    @Deprecated
     public static long[] getSelectableObjectIds(Collection<? extends SelectableObject> values) {
         final long[] result = new long[values.size()];
         int idx = 0;
@@ -1370,6 +1373,21 @@ public final class FxSharedUtils {
     }
 
     /**
+     * Extract the unique names of the given {@link SelectableObject} collection.
+     *
+     * @param values the input values
+     * @return the IDs of the input values
+     * @since 3.1
+     */
+    public static List<String> getSelectableObjectNameList(Collection<? extends SelectableObjectWithName> values) {
+        final List<String> result = new ArrayList<String>(values.size());
+        for (SelectableObjectWithName value : values) {
+            result.add(value.getName());
+        }
+        return result;
+    }
+
+    /**
      * Returns the index of the {@link SelectableObject} with the given ID, or -1 if none was found.
      *
      * @param values the values to be examined
@@ -1384,6 +1402,44 @@ public final class FxSharedUtils {
             }
         }
         return -1;
+    }
+
+    /**
+     * Return the elements of {@code values} that match the given {@code ids}.
+     *
+     * @param values    the values to be search
+     * @param ids       the required IDs
+     * @param <T>       the value type
+     * @return          the elements of {@code values} that match the given {@code ids}.
+     * @since 3.1
+     */
+    public static <T extends SelectableObject> List<T> filterSelectableObjectsById(Collection<T> values, Collection<Long> ids) {
+        final List<T> result = Lists.newArrayListWithCapacity(ids.size());
+        for (T value : values) {
+            if (ids.contains(value.getId())) {
+                result.add(value);
+            }
+        }
+        return result;
+    }
+
+    /**
+     * Return the elements of {@code values} that match the given {@code names}.
+     *
+     * @param values    the values to be search
+     * @param names     the required IDs
+     * @param <T>       the value type
+     * @return          the elements of {@code values} that match the given {@code names}.
+     * @since 3.1
+     */
+    public static <T extends SelectableObjectWithName> List<T> filterSelectableObjectsByName(Collection<T> values, Collection<String> names) {
+        final List<T> result = Lists.newArrayListWithCapacity(names.size());
+        for (T value : values) {
+            if (names.contains(value.getName())) {
+                result.add(value);
+            }
+        }
+        return result;
     }
 
     /**

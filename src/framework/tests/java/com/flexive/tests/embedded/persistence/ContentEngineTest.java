@@ -630,7 +630,7 @@ public class ContentEngineTest {
         Assert.assertTrue(comp.matchesPk(new FxPK(pk.getId(), FxPK.MAX)), "matchesPk for max version failed");
         Assert.assertTrue(1 == comp.getPk().getVersion(), "Version is not 1");
         Assert.assertTrue(comp.getStepId() == test.getStepId(), "Step failed");
-        Assert.assertTrue(comp.getAclId() == test.getAclId(), "ACL failed");
+        Assert.assertEquals(comp.getAclIds(), test.getAclIds(), "ACL failed");
         Assert.assertTrue(comp.isMaxVersion(), "MaxVersion failed");
         Assert.assertTrue(comp.isLiveVersion() == article.getWorkflow().getSteps().get(0).isLiveStep(), "LiveVersion failed. Expected:" + article.getWorkflow().getSteps().get(0).isLiveStep() + " Got:" + comp.isLiveVersion());
         Assert.assertTrue(comp.getMainLanguage() == FxLanguage.ENGLISH, "MainLang failed");

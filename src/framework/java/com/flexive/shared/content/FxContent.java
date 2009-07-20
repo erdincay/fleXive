@@ -40,6 +40,8 @@ import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.security.LifeCycleInfo;
 import com.flexive.shared.security.PermissionSet;
+import com.flexive.shared.security.ACLCategory;
+import com.flexive.shared.security.ACL;
 import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.structure.FxMultiplicity;
 import com.flexive.shared.structure.FxPropertyAssignment;
@@ -198,22 +200,20 @@ public class FxContent implements Serializable {
      * @return ACL id
      * @deprecated use {@link #getAclIds()}
      */
+    @Deprecated
     public long getAclId() {
         return aclIds.isEmpty() ? -1 : aclIds.get(0);
     }
 
     /**
-     * Set the first ACL id
+     * Set the content ACL id. If more than one ACL was assigned, the additional ACLs are removed
+     * before assigning the new ACL.
      *
      * @param aclId the ACL id
-     * @deprecated use {@link #setAclIds(java.util.Collection)}
      */
     public void setAclId(long aclId) {
-        if (aclIds.isEmpty()) {
-            aclIds.add(aclId);
-        } else {
-            aclIds.set(0, aclId);
-        }
+        aclIds.clear();
+        aclIds.add(aclId);
         //TODO: check if ACL is valid!
         updateSystemInternalProperties();
     }
@@ -868,8 +868,6 @@ public class FxContent implements Serializable {
                 value = new FxLargeNumber(false, this.getTypeId());
             else if (sp.getAlias().equals("MANDATOR"))
                 value = new FxLargeNumber(false, this.getMandatorId());
-            else if (sp.getAlias().equals("ACL"))
-                value = new FxLargeNumber(false, this.getAclId());
             else if (sp.getAlias().equals("STEP"))
                 value = new FxLargeNumber(false, this.getStepId());
             else if (sp.getAlias().equals("MAX_VER"))
@@ -907,6 +905,7 @@ public class FxContent implements Serializable {
                 this.data.addProperty(XPathElement.toXPathMult("/" + thispa.getAlias()), thispa, value, thispa.getPosition());
             }
         }
+        updateAclProperty();
 
         return this;
     }
@@ -918,24 +917,35 @@ public class FxContent implements Serializable {
         FxLargeNumber _long = (FxLargeNumber) getValue("/STEP");
         _long.setValue(stepId);
 
-        if (getPropertyData("/ACL").getOccurances() > aclIds.size()) {
-            // remove old ACLs that wouldn't be overwritten otherwise
-            remove("/ACL");
-        }
-        int index = 1;
-        for (long aclId : aclIds) {
-            final String xpath = "/ACL[" + (index++) + "]";
-            if (getValue(xpath) == null) {
-                createXPath(xpath);
-            }
-            setValue(xpath, aclId);
-        }
+        updateAclProperty();
 
         FxLargeNumber _langlong = (FxLargeNumber) getValue("/MAINLANG");
         _langlong.setValue(mainLanguage);
 
         FxBoolean _bool = (FxBoolean) getValue("/ISACTIVE");
         _bool.setValue(isActive());
+    }
+
+    private void updateAclProperty() {
+        if (containsValue("/ACL") && getPropertyData("/ACL").getOccurances() > aclIds.size()) {
+            // remove old ACLs that wouldn't be overwritten otherwise
+            remove("/ACL");
+        }
+        int index = 1;
+        final FxEnvironment environment = CacheAdmin.getEnvironment();
+        for (long aclId : aclIds) {
+            final ACL acl = environment.getACL(aclId);
+            if (acl.getCategory() != ACLCategory.INSTANCE) {
+                throw new FxInvalidParameterException(
+                        "aclId", "ex.content.invalidACLType", acl.getName(), acl.getCategory(), ACLCategory.INSTANCE
+                ).asRuntimeException();
+            }
+            final String xpath = "/ACL[" + (index++) + "]";
+            if (getValue(xpath) == null) {
+                createXPath(xpath);
+            }
+            setValue(xpath, aclId);
+        }
     }
 
     /**
@@ -1209,16 +1219,9 @@ public class FxContent implements Serializable {
      */
     public PermissionSet getPermissions() {
         try {
-            PermissionSet permissions = new PermissionSet(false, false, false, false, false);
             final FxType type = CacheAdmin.getEnvironment().getType(typeId);
             final long stepAclId = CacheAdmin.getEnvironment().getStep(stepId).getAclId();
-            for (long aclId : aclIds) {
-                // a permission has to be present in at least one ACL
-                permissions = permissions.union(
-                        FxPermissionUtils.getPermissions(aclId, type, stepAclId, lifeCycleInfo.getCreatorId(), mandatorId)
-                );
-            }
-            return permissions;
+            return FxPermissionUtils.getPermissionUnion(aclIds, type, stepAclId, lifeCycleInfo.getCreatorId(), mandatorId);
         } catch (FxNoAccessException e) {
             // this shouldn't happen since a user must not have access to a content instance without read perms
             throw e.asRuntimeException();
@@ -1275,7 +1278,7 @@ public class FxContent implements Serializable {
                 continue;
             this.data.addChild(d);
         }
-        this.setAclId(con.getAclId());
+        this.setAclIds(con.getAclIds());
         this.setActive(con.isActive());
 //        this.setBinaryPreview(con.getBinaryPreviewId()); //TODO: fix me
         this.setMainLanguage(con.getMainLanguage());

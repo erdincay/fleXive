@@ -122,6 +122,7 @@ public class ImportExportTest {
      *
      * @throws FxApplicationException on errors
      */
+    @Test
     public void aclMarshalling() throws FxApplicationException {
         XStream xs = ConversionEngine.getXStream();
         ACL testACL = CacheAdmin.getEnvironment().getDefaultACL(ACLCategory.INSTANCE);
