@@ -33,7 +33,6 @@
                  onmouseover='flexive.contentEditor.ignoreEvent(event);'
                  onclick="flexive.contentEditor.ignoreEvent(event);"
                  style="clear:both;">
-                <c:set var="count" value="0"/>
                 <c:if test="#{not empty _ceContent.addAbleAssignments[element]}">
                     <!-- create select list id -->
                     <c:set var="selectListId" value="addElementsListBox_#{_ceContent.idGenerator[element]}"/>
@@ -45,18 +44,17 @@
                                      onclick="flexive.contentEditor.prepareAdd('#{_ceContent.guiSettings.formPrefix}', '#{selectListId}');if (!flexive.contentEditor.preA4jAction('#{_ceContent.guiSettings.formPrefix}','#{_ceContent.editorId}','#{element.XPathFull}','addChilds')) return false;"
                                      onmouseover='flexive.contentEditor.ignoreEvent(event)'
                                      title="#{fxMessageBean['ContentEditor.field.elementmenu.addSelected']}"
-                                     styleClass="fxContentEditor_insertAssignment"
                                      oncomplete="flexive.yui.load();"
                                      rendered="#{empty _ceContent.guiSettings.openedReferenceId}"
                                      status="#{_ceContent.editorId}_status">
                         <f:setPropertyActionListener target="#{__ceBean.element}" value="#{element}"/>
                         <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
                         <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
+                        <span class="fxContentEditor_insertAssignment"></span>
+                        #{fxMessageBean['ContentEditor.field.elementmenu.addSelected']}
                     </a4j:commandLink>
-                    #{fxMessageBean['ContentEditor.field.elementmenu.addSelected']}
-                    <br clear="all"/>
                 </c:if>
-                <c:if test="#{empty __ceBean.contentStorage[_ceContent.editorId].addAbleAssignments[element]}">
+                <c:if test="#{empty _ceContent.addAbleAssignments[element]}">
                     #{fxMessageBean['ContentEditor.field.elementmenu.noOptions']}
                 </c:if>
             </div>
@@ -96,7 +94,6 @@
             <c:if test="#{not _ceContent.guiSettings.disableAddAssignment}">
                 <!-- Add same element button -->
                 <c:if test="#{element.createableElements gt 0}">
-                    <c:set var="count" value="#{count+1}"/>
                         <a4j:commandLink reRender="#{__ce_reRender}" action="#{__ceBean.addElement}" eventsQueue="ceQueue"
                                          onmouseover='flexive.contentEditor.ignoreEvent(event)'
                                          onclick="if (!flexive.contentEditor.preA4jAction('#{_ceContent.guiSettings.formPrefix}','#{_ceContent.editorId}','#{element.XPathFull}','addElement')) return false;flexive.contentEditor.ignoreEvent(event);"
