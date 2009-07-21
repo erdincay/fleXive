@@ -40,6 +40,8 @@ disableTab... false if the <adm:tab/> component should be rendered, true otherwi
                     <!-- export functionality -->
                     <div style="display:none;"><iframe id="exportFrame" ><!--empty--></iframe></div>
                     <c:if test="#{not myContent.referenced}">
+                        <!-- content navigation -->
+                        <adm:contentNavigation pk="#{myContent.content.pk}"/>
                         <!-- info panel -->
                         <adm:contentInfoPanel srcEditor="#{srcEditor}" wrappedContent="#{myContent}"/>
                     </c:if>

@@ -33,6 +33,7 @@ package com.flexive.core.search;
 
 import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.content.FxPK;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxRuntimeException;
@@ -408,6 +409,21 @@ public class FxResultSetImpl implements Serializable, FxResultSet {
      */
     public FxResultRow getResultRow(int index) {
         return new FxResultRow(this, index);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public FxResultRow getResultRow(FxPK pk) {
+        if (getPrimaryKeyIndex() != -1) {
+           RowIterator iterator = new RowIterator();
+           while (iterator.hasNext()) {
+               FxResultRow row = iterator.next();
+               if (row.getPk(getPrimaryKeyIndex()).equals(pk))
+                   return row;
+           }
+       }
+       return null;
     }
 
     /**

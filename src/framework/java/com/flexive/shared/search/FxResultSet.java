@@ -140,7 +140,7 @@ public interface FxResultSet {
      * Returns the total row count.
      * <p />
      * The total row count is the number of entries found by the search, even if they are not contained
-     * in this resultset becaus of the specified start and end index.
+     * in this resultset because of the specified start and end index.
      *
      * @return the total row count
      */
@@ -245,6 +245,17 @@ public interface FxResultSet {
      * @return  a result row wrapper for the given row number.
      */
     public FxResultRow getResultRow(int index);
+
+    /**
+     * Return a result row wrapper for the given pk,
+     * or null if the result row can't be determined.
+     * (I.e. if "@pk" was not selected).
+     *
+     * @param pk FxPK
+     * @return  a result row wrapper for the given pk,
+     * or null if the result row can't be determined.
+     */
+    public FxResultRow getResultRow(FxPK pk);
 
     /**
      * If the query created a new briefcase, its ID can be retrieved with this method.

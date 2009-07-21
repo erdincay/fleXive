@@ -149,7 +149,7 @@ table.historyTable TR TD.action {
     background: #EFEFEF none repeat scroll 0;
     border: 1px 1px 1px 0 solid;
 }
-
+                                 #
 #exportArea {
     width:500px;
     height:200px;
@@ -170,4 +170,15 @@ table.contentOverview input, table.contentOverview select {
 
 table.contentOverview td.contentData {
     width: 200px;
+}
+
+.navigationDisplay {
+    border:1px solid darkBlue;
+    float:left;
+    margin-top:3px;
+    padding-left:2px;
+    padding-right:2px;
+    position:relative;
+    margin-left:2px;
+    margin-right:2px;
 }

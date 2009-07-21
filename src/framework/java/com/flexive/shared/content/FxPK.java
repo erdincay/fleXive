@@ -229,7 +229,7 @@ public class FxPK implements Serializable, Comparable<FxPK> {
      *
      * Note: FxPKs with generic version information like {@link FxPK#LIVE} or {@link FxPK#MAX}
      * will return "false" if they are checked for equality with FxPKs that contain a distinct
-     * version information. Consider using {@link FxContent#matchesPk(FxPK)} if appropraite. 
+     * version information. Consider using {@link FxContent#matchesPk(FxPK)} if appropriate. 
      */
     @Override
     public boolean equals(Object obj) {

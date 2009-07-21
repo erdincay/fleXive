@@ -263,6 +263,13 @@ public final class FxEmptyResultSet implements FxResultSet, Serializable {
     /**
      * {@inheritDoc}
      */
+    public FxResultRow getResultRow(FxPK pk) {
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public long getCreatedBriefcaseId() {
         return -1;
     }

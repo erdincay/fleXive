@@ -36,10 +36,12 @@ package com.flexive.war.beans.admin.content;
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.beans.ActionBean;
 import com.flexive.faces.beans.FxContentEditorBean;
+import com.flexive.faces.beans.SearchResultBean;
 import com.flexive.faces.components.content.FxWrappedContent;
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.faces.messages.FxFacesMsgInfo;
 import com.flexive.shared.*;
+import com.flexive.shared.search.FxResultRow;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxContentVersionInfo;
 import com.flexive.shared.content.FxDelta;
@@ -60,7 +62,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.myfaces.custom.fileupload.UploadedFile;
 
-import javax.faces.event.ActionEvent;
 import javax.faces.model.SelectItem;
 import java.io.Serializable;
 import java.util.*;
@@ -111,6 +112,9 @@ public class BeContentEditorBean implements ActionBean, Serializable {
     private boolean importSave;
 
     private long contentIdToInit= -1;
+
+    // Flag indicating if the content is opened/edited from a result set
+    private boolean fromResultSet;
 
     /**
      * {@inheritDoc}
@@ -165,6 +169,7 @@ public class BeContentEditorBean implements ActionBean, Serializable {
         this.editMode = false;
         this.reset = true;
         this.treeNodes = null;
+        this.fromResultSet = false;
         // hack!
         FxJsfUtils.resetFaceletsComponent(FORM_ID + ":" + EDITOR_ID);
     }
@@ -251,6 +256,14 @@ public class BeContentEditorBean implements ActionBean, Serializable {
         this.importSave = importSave;
     }
 
+    public void setFromResultSet(boolean fromResultSet) {
+        this.fromResultSet = fromResultSet;
+    }
+
+    public boolean isFromResultSet() {
+        return fromResultSet;
+    }
+    
     /**
      * Import a content
      *
@@ -627,16 +640,19 @@ public class BeContentEditorBean implements ActionBean, Serializable {
     }
 
     /**
-     * Initialize the content editor with the set version and content id
+     * Initialize the content editor from the context menu of a result set
+     * with the set version and content id.
      *
      * @return editor page
      */
-    public String initEditor() {
+    public String initEditorFromResultSet() {
         // save edit mode
         boolean editMode = this.editMode;
         resetViewStateVars();
         // restore edit mode
         this.editMode = editMode;
+        // set result set flag
+        this.fromResultSet = true;
         this.pk = new FxPK(contentIdToInit, version);
         return getEditorPage();
     }
@@ -699,9 +715,23 @@ public class BeContentEditorBean implements ActionBean, Serializable {
     public String delete() {
         try {
             boolean isReferenced = wrappedContent.isReferenced();
+            // check if deleted content was part of result set
+            // and update result set if necessary
+            boolean updateSearchResult = isPkInSearchResult();
+            FxPK newPK = null;
+            boolean editModeSaved = editMode;
             ((FxContentEditorBean) FxJsfUtils.getManagedBean("fxContentEditorBean"))._delete();
+            if (updateSearchResult) {
+                newPK = updateSearchResult(isReferenced);
+            }
             if (!isReferenced) {
                 resetViewStateVars();
+            }
+            if (updateSearchResult && newPK != null) {
+                // reinit content editor with saved values
+                this.editMode = editModeSaved;
+                this.pk = newPK;
+                this.fromResultSet = true;
             }
         } catch (Throwable t) {
             new FxFacesMsgErr(t).addToContext();
@@ -719,10 +749,11 @@ public class BeContentEditorBean implements ActionBean, Serializable {
      */
     public String deleteCurrentVersion() {
         try {
-             boolean isReferenced = wrappedContent.isReferenced();
-             ((FxContentEditorBean) FxJsfUtils.getManagedBean("fxContentEditorBean"))._deleteCurrentVersion();
+            boolean isReferenced = wrappedContent.isReferenced();
+            FxContentEditorBean ceBean = (FxContentEditorBean) FxJsfUtils.getManagedBean("fxContentEditorBean");
+            ceBean._deleteCurrentVersion();
              if (!isReferenced) {
-                // load highest available version
+                // retrieve new pl from content storage
                 pk = new FxPK(pk.getId(), FxPK.MAX);
             }
         } catch (Throwable t) {
@@ -873,5 +904,74 @@ public class BeContentEditorBean implements ActionBean, Serializable {
             }
             return null;
         }
+    }
+
+    /**
+     * Returns whether the content instance with the pk currently being edited 
+     * is part of the search result.
+     *
+     * @return whether the content instance with the pk currently being edited
+     * is part of the search result.
+     */
+    private boolean isPkInSearchResult() {
+       return isFromResultSet() && pk != null && ((SearchResultBean) FxJsfUtils.getManagedBean("fxSearchResultBean")).getResult().getResultRow(getPk()) != null;
+    }
+
+    /**
+     * Update the search result and fetch the new PK to edit
+     *
+     * @param matchVersion if true, the updated search result is
+     * matched for the new version, otherwise for index.
+     * @return the new pk to edit
+     */
+    private FxPK updateSearchResult(boolean matchVersion) {
+        SearchResultBean sb =  (SearchResultBean) FxJsfUtils.getManagedBean("fxSearchResultBean");
+        int currentIndex = sb.getResult().getResultRow(getPk()).getIndex();
+        sb.refresh();
+        if (!matchVersion && currentIndex >0 && sb.getResult().getRowCount() >0) {
+            if (sb.getResult().getRowCount() > currentIndex)
+                return sb.getResult().getResultRow(currentIndex).getPk(sb.getResult().getPrimaryKeyIndex());
+            if (sb.getResult().getRowCount() <= currentIndex)
+                return sb.getResult().getResultRow(sb.getResult().getRowCount() -1).getPk(sb.getResult().getPrimaryKeyIndex());
+        }
+        else if (matchVersion) {
+            if (sb.getResult().getResultRow(getPk()) != null)
+                return getPk();
+        }
+        return null;
+    }
+
+    /**
+     * Mapped access to search result row, matching given pk.
+     *
+     * @return Mapped access to search result row, matching given pk.
+     */
+    public Map<FxPK, FxResultRow> getResultRow() {
+        return new HashMap<FxPK, FxResultRow>() {
+            public FxResultRow get(Object key) {
+                return ((SearchResultBean) FxJsfUtils.getManagedBean("fxSearchResultBean")).getResult().getResultRow((FxPK) key);
+            }
+        };
+    }
+
+    /**
+     * Mapped access to the pk of the search result row, matching given index.
+     *
+     * @return mapped access to the pk of the search result row, matching given index.
+     */
+    public Map<Integer, FxPK> getPkByIndex() {
+        return new HashMap<Integer, FxPK>() {
+            public FxPK get(Object key) {
+                SearchResultBean sb = (SearchResultBean) FxJsfUtils.getManagedBean("fxSearchResultBean");
+                // avoid JSF integer/long conversion bug
+                Integer i = new Integer(key.toString());
+                // cap possible overflows
+                if (i<0)
+                    i=0;
+                if (sb.getResult().getRowCount() <= i)
+                    i=sb.getResult().getRowCount() -1;
+                return sb.getResult().getResultRow(i).getPk(sb.getResult().getPrimaryKeyIndex());
+            }
+        };
     }
 }

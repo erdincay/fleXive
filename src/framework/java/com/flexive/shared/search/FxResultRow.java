@@ -66,6 +66,10 @@ public class FxResultRow implements Serializable {
         this.index = index;
     }
 
+    public int getIndex() {
+        return index;
+    }
+
     public Object[] getData() {
         return resultSet.getRows().get(index);
     }

@@ -1,0 +1,56 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+      xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:fx="http://www.flexive.com/jsf/core"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:weblet="http://weblets.dev.java.net/tags_jsp2"
+      >
+Parameters:
+pk... pk of the content to edit
+
+<ui:composition>
+    <c:if test="#{beContentEditorBean.fromResultSet}">
+        <c:set var="resultRow" value="#{beContentEditorBean.resultRow[pk]}"/>
+        <c:if test="#{not empty resultRow}">
+            <div class="contentSearchResultNavigation">
+                <div style="float:left;position:relative">
+                    <adm:commandIcon id="firstResultRow" icon="first" titleKey="Content.button.firstResultRow.title"
+                            bean="#{beContentEditorBean}" action="initEditorFromResultSet">
+                        <f:setPropertyActionListener value="#{beContentEditorBean.pkByIndex[0].id}" target="#{beContentEditorBean.id}"/>
+                        <f:setPropertyActionListener value="#{beContentEditorBean.pkByIndex[0].version}" target="#{beContentEditorBean.version}"/>
+                    </adm:commandIcon>
+                    <adm:commandIcon id="previousResultRow" icon="previous" titleKey="Content.button.previousResultRow.title"
+                            bean="#{beContentEditorBean}" action="initEditorFromResultSet">
+                        <f:setPropertyActionListener value="#{beContentEditorBean.pkByIndex[resultRow.index-1].id}" target="#{beContentEditorBean.id}"/>
+                        <f:setPropertyActionListener value="#{beContentEditorBean.pkByIndex[resultRow.index-1].version}" target="#{beContentEditorBean.version}"/>
+                    </adm:commandIcon>
+                </div>
+                <div class="navigationDisplay">
+                    #{resultRow.index+1} - #{fxSearchResultBean.result.rowCount}
+                </div>
+                <div style="float:left;position:relative">
+                    <adm:commandIcon id="nextResultRow" icon="next" titleKey="Content.button.nextResultRow.title"
+                            bean="#{beContentEditorBean}" action="initEditorFromResultSet">
+                        <f:setPropertyActionListener value="#{beContentEditorBean.pkByIndex[resultRow.index+1].id}" target="#{beContentEditorBean.id}"/>
+                        <f:setPropertyActionListener value="#{beContentEditorBean.pkByIndex[resultRow.index+1].version}" target="#{beContentEditorBean.version}"/>
+                    </adm:commandIcon>
+                    <adm:commandIcon id="lastResultRow" icon="last" titleKey="Content.button.lastResultRow.title"
+                            bean="#{beContentEditorBean}" action="initEditorFromResultSet">
+                        <f:setPropertyActionListener value="#{beContentEditorBean.pkByIndex[fxSearchResultBean.result.rowCount -1].id}" target="#{beContentEditorBean.id}"/>
+                        <f:setPropertyActionListener value="#{beContentEditorBean.pkByIndex[fxSearchResultBean.result.rowCount -1].version}" target="#{beContentEditorBean.version}"/>
+                    </adm:commandIcon>
+                </div>
+                <br clear="all"/>
+            </div>
+        </c:if>
+    </c:if>
+</ui:composition>
+</html>

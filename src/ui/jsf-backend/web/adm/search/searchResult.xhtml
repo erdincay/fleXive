@@ -174,10 +174,10 @@
                 </fx:menu>
 
                 <div style="display:none">
-                    <h:commandLink id="showButton" action="#{beContentEditorBean.initEditor}">
+                    <h:commandLink id="showButton" action="#{beContentEditorBean.initEditorFromResultSet}">
                         <f:setPropertyActionListener value="#{false}" target="#{beContentEditorBean.editMode}"/>
                     </h:commandLink>
-                    <h:commandLink id="editButton" action="#{beContentEditorBean.initEditor}">
+                    <h:commandLink id="editButton" action="#{beContentEditorBean.initEditorFromResultSet}">
                         <f:setPropertyActionListener value="#{true}" target="#{beContentEditorBean.editMode}"/>
                     </h:commandLink>
                 </div>

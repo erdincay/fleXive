@@ -47,6 +47,11 @@
     </tag>
 
     <tag>
+        <tag-name>contentNavigation</tag-name>
+        <source>templates/beContentNavigation.xhtml</source>
+    </tag>
+
+    <tag>
         <tag-name>saveContentEditorState</tag-name>
         <source>templates/saveContentEditorState.xhtml</source>
     </tag>
