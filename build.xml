@@ -786,6 +786,7 @@ database.vendor=MySQL
                              prefix="com/flexive/ejb" packagenames="com.flexive.ejb.*,com.flexive.core.*,com.flexive.shared.*">
             <fileset dir="${flexive.src.framework.dir}">
                 <include name="com/flexive/core/**/*.java"/>
+                <include name="com/flexive/ejb/**/*.java"/>
             </fileset>
         </maven-build-sources>
 
