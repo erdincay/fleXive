@@ -34,6 +34,7 @@ package com.flexive.shared.value;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.exceptions.FxRuntimeException;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.workflow.Step;
 
@@ -244,7 +245,7 @@ public class ReferencedContent extends FxPK implements Serializable {
             try {
                 if( this.content.hasCaption() )
                     this.caption = this.content.getCaption().getBestTranslation();
-            } catch (FxApplicationException e) {
+            } catch (FxRuntimeException e) {
                 LOG.warn(e);
             }
             accessGranted = content != null;

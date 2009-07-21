@@ -1306,10 +1306,13 @@ public class FxContent implements Serializable {
      * Check if this content instance has a caption property assigned
      *
      * @return <code>true</code> if a caption property is assigned to this content instance
-     * @throws FxApplicationException on erros
      */
-    public synchronized boolean hasCaption() throws FxApplicationException {
-        resolveCaption();
+    public synchronized boolean hasCaption() {
+        try {
+            resolveCaption();
+        } catch (FxApplicationException e) {
+            throw e.asRuntimeException();
+        }
         return hasCaption;
     }
 
