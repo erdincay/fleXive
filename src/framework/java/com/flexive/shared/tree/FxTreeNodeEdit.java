@@ -291,4 +291,9 @@ public class FxTreeNodeEdit extends FxTreeNode implements Serializable {
     public void setData(String data) {
         this.data = data;
     }
+
+    @Override
+    public FxTreeNodeEdit asEditable() {
+        return this;    // no need to create a new instance
+    }
 }
