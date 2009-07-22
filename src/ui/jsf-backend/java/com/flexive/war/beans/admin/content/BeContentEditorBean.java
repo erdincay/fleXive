@@ -717,7 +717,7 @@ public class BeContentEditorBean implements ActionBean, Serializable {
             boolean isReferenced = wrappedContent.isReferenced();
             // check if deleted content was part of result set
             // and update result set if necessary
-            boolean updateSearchResult = isPkInSearchResult();
+            boolean updateSearchResult = isPkInSearchResult(wrappedContent.getContent().getPk());
             FxPK newPK = null;
             boolean editModeSaved = editMode;
             ((FxContentEditorBean) FxJsfUtils.getManagedBean("fxContentEditorBean"))._delete();
@@ -751,9 +751,16 @@ public class BeContentEditorBean implements ActionBean, Serializable {
         try {
             boolean isReferenced = wrappedContent.isReferenced();
             FxContentEditorBean ceBean = (FxContentEditorBean) FxJsfUtils.getManagedBean("fxContentEditorBean");
+            // check if deleted content was part of result set
+            // and update result set if necessary
+            boolean updateSearchResult = isPkInSearchResult(wrappedContent.getContent().getPk());
             ceBean._deleteCurrentVersion();
-             if (!isReferenced) {
-                // retrieve new pl from content storage
+            // update search result
+            if (updateSearchResult) {
+                ((SearchResultBean) FxJsfUtils.getManagedBean("fxSearchResultBean")).refresh();
+            }
+            if (!isReferenced) {
+                // retrieve new pk from content storage
                 pk = new FxPK(pk.getId(), FxPK.MAX);
             }
         } catch (Throwable t) {
@@ -773,8 +780,13 @@ public class BeContentEditorBean implements ActionBean, Serializable {
     public String deleteVersion() {
         try {
             FxPK pkToDelete = new FxPK(wrappedContent.getContent().getPk().getId(), version);
+            boolean updateSearchResult = isPkInSearchResult(pkToDelete);
             EJBLookup.getContentEngine().removeVersion(pkToDelete);
             new FxFacesMsgInfo("Content.nfo.deletedVersion", pkToDelete).addToContext();
+            // update search result
+            if (updateSearchResult) {
+                ((SearchResultBean) FxJsfUtils.getManagedBean("fxSearchResultBean")).refresh();
+            }
             // load highest available version
             this.pk = new FxPK(pk.getId(), FxPK.MAX);
         } catch (Throwable t) {
@@ -813,10 +825,17 @@ public class BeContentEditorBean implements ActionBean, Serializable {
             FxPK oldPk = pk;
             long oldTypeId = typeId;
             FxContent oldContent = content;
-
             boolean isReferenced = wrappedContent.isReferenced();
+            // check if saved content was part of result set
+            // and update result set if necessary
+            boolean updateSearchResult = isPkInSearchResult(wrappedContent.getContent().getPk());
+
             FxContentEditorBean ceBean = (FxContentEditorBean) FxJsfUtils.getManagedBean("fxContentEditorBean");
             this.pk = ceBean._save(newVersion);
+            // update search result
+            if (updateSearchResult) {
+                ((SearchResultBean) FxJsfUtils.getManagedBean("fxSearchResultBean")).refresh();
+            }
             if (!isReferenced) {
                 // if content was new, reset typeId, content and wrapped content (-> use newPk after save)
                 if (wrappedContent.getContent().getPk().isNew()) {
@@ -907,13 +926,13 @@ public class BeContentEditorBean implements ActionBean, Serializable {
     }
 
     /**
-     * Returns whether the content instance with the pk currently being edited 
-     * is part of the search result.
+     * Returns whether the given pk is part of the search result.
      *
+     * @param pk pk
      * @return whether the content instance with the pk currently being edited
      * is part of the search result.
      */
-    private boolean isPkInSearchResult() {
+    private boolean isPkInSearchResult(FxPK pk) {
        return isFromResultSet() && pk != null && ((SearchResultBean) FxJsfUtils.getManagedBean("fxSearchResultBean")).getResult().getResultRow(getPk()) != null;
     }
 
