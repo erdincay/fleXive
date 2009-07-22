@@ -36,6 +36,13 @@
             <version>@FLEXIVE_VERSION@</version>
             <optional>false</optional>
         </dependency>
+
+        <dependency>
+            <groupId>com.metaparadigm</groupId>
+            <artifactId>json-rpc</artifactId>
+            <version>1.0</version>
+            <optional>false</optional>
+        </dependency>
     </dependencies>
 
 </project>

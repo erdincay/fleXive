@@ -68,13 +68,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.metaparadigm</groupId>
-            <artifactId>json-rpc</artifactId>
-            <version>1.0</version>
-            <optional>false</optional>
-        </dependency>
-
-        <dependency>
             <groupId>net.java.dev.weblets</groupId>
             <artifactId>weblets-api</artifactId>
             <version>1.0</version>
