@@ -259,11 +259,13 @@ public class FxFilter implements Filter {
         try {
             bridge.registerObject(name, Class.forName(className).newInstance());
         } catch (ClassNotFoundException e) {
-            LOG.info("Skipping JSON/RPC provider "
-                    + name
-                    + "(" + className
-                    + ") because it was not found in the classpath."
-            );
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Skipping JSON/RPC provider "
+                        + name
+                        + "(" + className
+                        + ") because it was not found in the classpath."
+                );
+            }
         } catch (IllegalAccessException e) {
             LOG.warn("Failed to create JSF JSON/RPC objects: " + e.getMessage(), e);
         } catch (InstantiationException e) {
