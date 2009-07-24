@@ -72,7 +72,7 @@ import java.util.*;
 public class CmisSearchEngineTest {
     private final List<FxPK> testInstances = new ArrayList<FxPK>();
 
-    @BeforeClass(groups = {"search", "cmis"})
+    @BeforeClass(groups = {"search", "cmis", "ejb"})
     public void init() throws FxLoginFailedException, FxAccountInUseException, FxApplicationException {
         FxTestUtils.login(TestUsers.REGULAR);
         createContactData("nestedCondition", "First");
@@ -89,7 +89,7 @@ public class CmisSearchEngineTest {
                 "tools provided by the [fleXive] distribution. ");
     }
 
-    @AfterClass(groups = {"search", "cmis"})
+    @AfterClass(groups = {"search", "cmis", "ejb"})
     public void cleanup() throws FxApplicationException, FxLogoutFailedException {
         for (FxPK pk : testInstances) {
             getContentEngine().remove(pk);
@@ -109,7 +109,7 @@ public class CmisSearchEngineTest {
         assertEquals(rs.filterEqual(2, new FxNumber(30)).get(0).getColumn(2).getValue(), new FxNumber(30));
     }
     
-    @Test(groups = {"search", "cmis"})
+    @Test(groups = {"search", "cmis", "ejb"})
     public void simpleSelect() throws FxApplicationException {
         final CmisResultSet result = getCmisSearchEngine().search("SELECT d.surname FROM contactData AS d");
         assertTrue(result.getRowCount() > 0);
@@ -119,7 +119,7 @@ public class CmisSearchEngineTest {
         }
     }
 
-    @Test(groups = {"search", "cmis"})
+    @Test(groups = {"search", "cmis", "ejb"})
     public void paging() throws FxApplicationException {
         final String query = "SELECT name FROM cmis_person ORDER BY name DESC";
         final CmisResultSet refResult = getCmisSearchEngine().search(query);
@@ -145,7 +145,7 @@ public class CmisSearchEngineTest {
     }
 
 
-    @Test(groups = {"search", "cmis"})
+    @Test(groups = {"search", "cmis", "ejb"})
     public void simpleCondition() throws FxApplicationException {
         createContactData("simpleConditionTest", null);
         final CmisResultSet result = getCmisSearchEngine().search(
@@ -155,7 +155,7 @@ public class CmisSearchEngineTest {
         assertEquals(result.getColumn(0, 1).toString(), "simpleConditionTest");
     }
 
-    @Test(groups = {"search", "cmis"})
+    @Test(groups = {"search", "cmis", "ejb"})
     public void simpleDisjunction() throws FxApplicationException {
         createContactData("simpleDisjunction1", null);
         createContactData("simpleDisjunction2", null);
@@ -168,7 +168,7 @@ public class CmisSearchEngineTest {
         assertTrue(!result.getColumn(1, 1).equals(result.getColumn(0, 1)), "Two identical rows returned");
     }
 
-    @Test(groups = {"search", "cmis"})
+    @Test(groups = {"search", "cmis", "ejb"})
     public void simpleNegation() throws FxApplicationException {
         final CmisResultSet result = getCmisSearchEngine().search(
                 "SELECT name FROM cmis_person WHERE name <> 'Peter Bones' ORDER BY name"
@@ -177,7 +177,7 @@ public class CmisSearchEngineTest {
         assertEquals(result.collectColumnValues(1), Arrays.asList("Alex Cervais", "Martin Black", "Sandra Locke"));
     }
 
-    @Test(groups = {"search", "cmis"})
+    @Test(groups = {"search", "cmis", "ejb"})
     public void disjunctionWithOverlap() throws FxApplicationException {
         createContactData("disjunctionWithOverlap", null);
         final CmisResultSet result = getCmisSearchEngine().search(
@@ -187,7 +187,7 @@ public class CmisSearchEngineTest {
         assertEquals(result.getColumn(0, 1).toString(), "disjunctionWithOverlap");
     }
 
-    @Test(groups = {"search", "cmis"})
+    @Test(groups = {"search", "cmis", "ejb"})
     public void nestedCondition() throws FxApplicationException {
         final CmisResultSet result = getCmisSearchEngine().search(
                 "SELECT name, surname FROM contactData WHERE surname = 'nestedCondition' AND (name = 'First' OR name = 'Second')"
@@ -201,7 +201,7 @@ public class CmisSearchEngineTest {
         assertTrue("Second".equals(row1) || "Second".equals(row2), "Unexpected result: " + row1 + ", " + row2);
     }
 
-    @Test(groups = {"search", "cmis"})
+    @Test(groups = {"search", "cmis", "ejb"})
     public void nestedConditions() throws FxApplicationException {
         final CmisResultSet result = getCmisSearchEngine().search(
                 "SELECT d.name, d.surname FROM contactData AS d WHERE (surname = 'nestedCondition' AND name='First') "
@@ -220,7 +220,7 @@ public class CmisSearchEngineTest {
         }
     }
 
-    @Test(groups = {"search", "cmis"})
+    @Test(groups = {"search", "cmis", "ejb"})
     public void selectMainTableColumn() throws FxApplicationException {
         final CmisResultSet result = getCmisSearchEngine().search(
                 "SELECT d.id, d.surname, d.mandator FROM contactData AS d"
@@ -243,7 +243,7 @@ public class CmisSearchEngineTest {
         }
     }
 
-    @Test(groups = {"search", "cmis"})
+    @Test(groups = {"search", "cmis", "ejb"})
     public void selectColumnWithAlias() throws FxApplicationException {
         final CmisResultSet result = getCmisSearchEngine().search(
                 "SELECT surname AS sn FROM contactData AS d"
@@ -252,7 +252,7 @@ public class CmisSearchEngineTest {
         assertEquals(result.getColumn(0, "sn"), result.getColumn(0, 1));
     }
 
-    @Test(groups = {"search", "cmis"})
+    @Test(groups = {"search", "cmis", "ejb"})
     public void selectUpper() throws FxApplicationException {
         final CmisResultSet result = getCmisSearchEngine().search(
                 "SELECT UPPER(surname) FROM contactData"
@@ -263,7 +263,7 @@ public class CmisSearchEngineTest {
         }
     }
 
-    @Test(groups = {"search", "cmis"})
+    @Test(groups = {"search", "cmis", "ejb"})
     public void selectLower() throws FxApplicationException {
         final CmisResultSet result = getCmisSearchEngine().search(
                 "SELECT LOWER(surname) FROM contactData"
@@ -274,7 +274,7 @@ public class CmisSearchEngineTest {
         }
     }
 
-    @Test(groups = {"search", "cmis"})
+    @Test(groups = {"search", "cmis", "ejb"})
     public void stringFunCondition() throws FxApplicationException {
         final CmisResultSet result = getCmisSearchEngine().search(
                 "SELECT surname FROM contactData WHERE LOWER(surname) = 'nestedcondition' OR UPPER(surname) = 'NESTEDCONDITION'"
@@ -285,7 +285,7 @@ public class CmisSearchEngineTest {
         }
     }
 
-    @Test(groups = {"search", "cmis"})
+    @Test(groups = {"search", "cmis", "ejb"})
     public void fulltextQuery() throws FxApplicationException {
         System.out.println("\n\n\n\n\n\n********************************************");
         final CmisResultSet result = getCmisSearchEngine().search(
@@ -296,7 +296,7 @@ public class CmisSearchEngineTest {
         assertTrue(result.getColumn(0, 2).toString().contains("procedural programming language"), "Expected fulltext match against 'complex and evolving': " + result.getColumn(0, 2));
     }
 
-    @Test(groups = {"search", "cmis"})
+    @Test(groups = {"search", "cmis", "ejb"})
     public void selectScore() throws FxApplicationException {
         final CmisResultSet result = getCmisSearchEngine().search(
                 "SELECT id, longtext, SCORE() AS \"score\" FROM article WHERE CONTAINS('Maven')"
@@ -309,7 +309,7 @@ public class CmisSearchEngineTest {
         }
     }
 
-    @Test(groups = {"search", "cmis"})
+    @Test(groups = {"search", "cmis", "ejb"})
     public void selectScoreMulti() throws FxApplicationException {
         final CmisResultSet result = getCmisSearchEngine().search(
                 "SELECT id, SCORE() AS score1, longtext, SCORE() AS score2 FROM article WHERE CONTAINS('Maven')"
@@ -324,7 +324,7 @@ public class CmisSearchEngineTest {
         }
     }
 
-    @Test(groups = {"search", "cmis"})
+    @Test(groups = {"search", "cmis", "ejb"})
     public void basicOrderBy() throws FxApplicationException {
         checkOrderBy("name", "First", "Second", "Third");
         checkOrderBy("name ASC", "First", "Second", "Third");
@@ -339,7 +339,7 @@ public class CmisSearchEngineTest {
         assertEquals(result.collectColumnValues(1), Arrays.asList(expected));
     }
 
-    @Test(groups = {"search", "cmis"})
+    @Test(groups = {"search", "cmis", "ejb"})
     public void mainTableCondition() throws FxApplicationException {
         final CmisResultSet result = getCmisSearchEngine().search(
                 "SELECT person.name FROM cmis_person AS person WHERE person.typedef = "
@@ -351,7 +351,7 @@ public class CmisSearchEngineTest {
 
     }
 
-    @Test(groups = {"search", "cmis"})
+    @Test(groups = {"search", "cmis", "ejb"})
     public void basicJoin() throws FxApplicationException {
         final CmisResultSet result = getCmisSearchEngine().search(
                 "SELECT person.name, data.annualSalary FROM CMIS_PERSON AS person JOIN CMIS_PERSON_DATA AS data "
@@ -360,7 +360,7 @@ public class CmisSearchEngineTest {
         assertRowCount(result, 3);
     }
 
-    @Test(groups = {"search", "cmis"})
+    @Test(groups = {"search", "cmis", "ejb"})
     public void basicJoinWithOrder() throws FxApplicationException {
         checkJoinWithOrder("name", Arrays.asList("Martin Black", "Peter Bones", "Sandra Locke"), Arrays.asList(75000L, 50000L, 85000L));
         checkJoinWithOrder("name ASC", Arrays.asList("Martin Black", "Peter Bones", "Sandra Locke"), Arrays.asList(75000L, 50000L, 85000L));
@@ -379,7 +379,7 @@ public class CmisSearchEngineTest {
         assertEquals(result.collectColumnValues(2), expectedSalaries);
     }
 
-    @Test(groups = {"search", "cmis"})
+    @Test(groups = {"search", "cmis", "ejb"})
     public void basicJoinWithCondition() throws FxApplicationException {
         final CmisResultSet result = getCmisSearchEngine().search(
                 "SELECT person.name, data.annualSalary FROM CMIS_PERSON AS person JOIN CMIS_PERSON_DATA AS data "
@@ -391,7 +391,7 @@ public class CmisSearchEngineTest {
         assertEquals(result.getColumn(0, 2).getInt(), 50000);
     }
 
-    @Test(groups = {"search", "cmis"})
+    @Test(groups = {"search", "cmis", "ejb"})
     public void basicJoinWithDisjunction() throws FxApplicationException {
         final CmisResultSet result = getCmisSearchEngine().search(
                 "SELECT person.name, data.annualSalary FROM CMIS_PERSON AS person JOIN CMIS_PERSON_DATA AS data "
@@ -404,7 +404,7 @@ public class CmisSearchEngineTest {
         assertEquals(result.collectColumnValues(2), Arrays.asList(50000L, 85000L));
     }
 
-    @Test(groups = {"search", "cmis"})
+    @Test(groups = {"search", "cmis", "ejb"})
     public void basicJoinWithConjunction() throws FxApplicationException {
         final CmisResultSet result = getCmisSearchEngine().search(
                 "SELECT person.name, data.annualSalary FROM CMIS_PERSON AS person JOIN CMIS_PERSON_DATA AS data "
@@ -416,7 +416,7 @@ public class CmisSearchEngineTest {
         assertEquals(result.getColumn(0, 2).getInt(), 50000);
     }
 
-    @Test(groups = {"search", "cmis"})
+    @Test(groups = {"search", "cmis", "ejb"})
     public void basicJoinWithConjunctionTriple() throws FxApplicationException {
         // like basicJoinWithConjunction, but with three conditions, of which two reference the same table
         final CmisResultSet result = getCmisSearchEngine().search(
@@ -429,7 +429,7 @@ public class CmisSearchEngineTest {
         assertEquals(result.getColumn(0, 2).getInt(), 50000);
     }
 
-    @Test(groups = {"search", "cmis"})
+    @Test(groups = {"search", "cmis", "ejb"})
     public void basicJoinWithNestedCondition() throws FxApplicationException {
         final CmisResultSet result = getCmisSearchEngine().search(
                 "SELECT person.name, data.annualSalary FROM CMIS_PERSON AS person JOIN CMIS_PERSON_DATA AS data "
@@ -443,7 +443,7 @@ public class CmisSearchEngineTest {
         assertEquals(result.collectColumnValues(1), Arrays.asList("Peter Bones", "Martin Black"));
     }
 
-    @Test(groups = {"search", "cmis"})
+    @Test(groups = {"search", "cmis", "ejb"})
     public void basicJoinWithNestedConditionTriple() throws FxApplicationException {
         final CmisResultSet result = getCmisSearchEngine().search(
                 "SELECT person.name, data.annualSalary FROM CMIS_PERSON AS person JOIN CMIS_PERSON_DATA AS data "
@@ -457,7 +457,7 @@ public class CmisSearchEngineTest {
         assertEquals(result.collectColumnValues(1), Arrays.asList("Peter Bones", "Martin Black"));
     }
 
-    @Test(groups = {"search", "cmis"})
+    @Test(groups = {"search", "cmis", "ejb"})
     public void basicJoinWithNestedConditions() throws FxApplicationException {
         final CmisResultSet result = getCmisSearchEngine().search(
                 "SELECT person.name, data.annualSalary FROM CMIS_PERSON AS person JOIN CMIS_PERSON_DATA AS data "
@@ -471,7 +471,7 @@ public class CmisSearchEngineTest {
         assertEquals(result.collectColumnValues(1), Arrays.asList("Peter Bones", "Martin Black"));
     }
 
-    @Test(groups = {"search", "cmis"})
+    @Test(groups = {"search", "cmis", "ejb"})
     public void mixedCaseQuery() throws FxApplicationException {
         final CmisResultSet result = getCmisSearchEngine().search(
                 "select person.name, data.annualSalary from CMIS_PERSON as person join CMIS_PERSON_DATA as data "
@@ -485,7 +485,7 @@ public class CmisSearchEngineTest {
         assertEquals(result.collectColumnValues("name"), Arrays.asList("Peter Bones", "Martin Black"));
     }
 
-    @Test(groups = {"search", "cmis"})
+    @Test(groups = {"search", "cmis", "ejb"})
     public void delimitedIdentifiersQuery() throws FxApplicationException {
         final CmisResultSet result = getCmisSearchEngine().search(
                 "select \"person\".\"name\", \"data\".\"annualSalary\" from \"CMIS_PERSON\" as \"person\" join \"CMIS_PERSON_DATA\" as \"data\" "
@@ -499,7 +499,7 @@ public class CmisSearchEngineTest {
         assertEquals(result.collectColumnValues("name"), Arrays.asList("Peter Bones", "Martin Black"));
     }
 
-    @Test(groups = {"search", "cmis"})
+    @Test(groups = {"search", "cmis", "ejb"})
     public void basicJoinWithNestedConjunctions() throws FxApplicationException {
         final CmisResultSet result = getCmisSearchEngine().search(
                 "SELECT person.name, data.annualSalary FROM CMIS_PERSON AS person JOIN CMIS_PERSON_DATA AS data "
@@ -512,7 +512,7 @@ public class CmisSearchEngineTest {
         assertEquals(result.collectColumnValues(1), Arrays.asList("Peter Bones", "Martin Black"));
     }
 
-    @Test(groups = {"search", "cmis"})
+    @Test(groups = {"search", "cmis", "ejb"})
     public void joinWithReference() throws FxApplicationException {
         final CmisResultSet result = getCmisSearchEngine().search(
                 "SELECT person.name, log.date, log.activity "
@@ -526,7 +526,7 @@ public class CmisSearchEngineTest {
         assertEquals(result.collectColumnValues(3), Arrays.asList("Logged in", "Logged out", "Updated article #31.5", "Updated contact #912.1"));
     }
 
-    @Test(groups = {"search", "cmis"})
+    @Test(groups = {"search", "cmis", "ejb"})
     public void likeCondition() throws FxApplicationException {
         final CmisResultSet result = getCmisSearchEngine().search(
                 "SELECT name FROM cmis_person WHERE name LIKE 'Peter%'"
@@ -535,7 +535,7 @@ public class CmisSearchEngineTest {
         assertEquals(result.getColumn(0, 1).getString(), "Peter Bones");
     }
 
-    @Test(groups = {"search", "cmis"})
+    @Test(groups = {"search", "cmis", "ejb"})
     public void notLikeCondition() throws FxApplicationException {
         final CmisResultSet result = getCmisSearchEngine().search(
                 "SELECT name FROM cmis_person WHERE name NOT LIKE 'Peter%' ORDER BY name"
@@ -544,7 +544,7 @@ public class CmisSearchEngineTest {
         assertEquals(result.collectColumnValues(1), Arrays.asList("Alex Cervais", "Martin Black", "Sandra Locke"));
     }
 
-    @Test(groups = {"search", "cmis"})
+    @Test(groups = {"search", "cmis", "ejb"})
     public void limitToAssignment() throws FxApplicationException {
         final FxPK pk1 = createContactData("abc", "def");
         final FxPK pk2 = createContactData("def", "abc");
@@ -561,7 +561,7 @@ public class CmisSearchEngineTest {
         assertEquals(result2.getColumn(0, 1).getLong(), pk2.getId(), "Condition not constrained to values of assignment");
     }
 
-    @Test(groups = {"search", "cmis"})
+    @Test(groups = {"search", "cmis", "ejb"})
     public void basicInCondition() throws FxApplicationException {
         final CmisResultSet result = getCmisSearchEngine().search(
                 "SELECT name FROM cmis_person WHERE name IN ('Peter Bones', 'Martin Black') ORDER BY name"
@@ -570,7 +570,7 @@ public class CmisSearchEngineTest {
         assertEquals(result.collectColumnValues(1), Arrays.asList("Martin Black", "Peter Bones"));
     }
 
-    @Test(groups = {"search", "cmis"})
+    @Test(groups = {"search", "cmis", "ejb"})
     public void basicNotInCondition() throws FxApplicationException {
         final CmisResultSet result = getCmisSearchEngine().search(
                 "SELECT name FROM cmis_person WHERE name NOT IN ('Peter Bones', 'Martin Black') ORDER BY name"
@@ -579,7 +579,7 @@ public class CmisSearchEngineTest {
         assertEquals(result.collectColumnValues(1), Arrays.asList("Alex Cervais", "Sandra Locke"));
     }
 
-    @Test(groups = {"search", "cmis"})
+    @Test(groups = {"search", "cmis", "ejb"})
     public void numericInConditionWithJoin() throws FxApplicationException {
         final CmisResultSet result = getCmisSearchEngine().search(
                 "SELECT p.name, d.annualSalary FROM cmis_person AS p JOIN cmis_person_data AS d ON (p.ssn=d.ssn) "
@@ -590,7 +590,7 @@ public class CmisSearchEngineTest {
         assertEquals(result.collectColumnValues(2), Arrays.asList(50000L, 85000L));
     }
 
-    @Test(groups = {"search", "cmis"})
+    @Test(groups = {"search", "cmis", "ejb"})
     public void numericNotInConditionWithJoin() throws FxApplicationException {
         final CmisResultSet result = getCmisSearchEngine().search(
                 "SELECT p.name, d.annualSalary FROM cmis_person AS p JOIN cmis_person_data AS d ON (p.ssn=d.ssn) "
@@ -601,7 +601,7 @@ public class CmisSearchEngineTest {
         assertEquals(result.collectColumnValues(2), Arrays.asList(75000L));
     }
 
-    @Test(groups = {"search", "cmis"})
+    @Test(groups = {"search", "cmis", "ejb"})
     public void anyInStringCondition() throws FxApplicationException {
         final CmisResultSet result = getCmisSearchEngine().search(
                 "SELECT name FROM cmis_person WHERE ANY email IN ('peter.bones@myprov.net', 'sandra.locke@gmx.net') ORDER BY name"
@@ -610,7 +610,7 @@ public class CmisSearchEngineTest {
         assertEquals(result.collectColumnValues(1), Arrays.asList("Peter Bones", "Sandra Locke"));
     }
 
-    @Test(groups = {"search", "cmis"})
+    @Test(groups = {"search", "cmis", "ejb"})
     public void anyNotInStringCondition() throws FxApplicationException {
         final CmisResultSet result = getCmisSearchEngine().search(
                 "SELECT name FROM cmis_person WHERE ANY email NOT IN ('peter.bones@myprov.net', 'sandra.locke@gmx.net') ORDER BY name"
@@ -620,7 +620,7 @@ public class CmisSearchEngineTest {
         assertEquals(result.collectColumnValues(1), Arrays.asList("Peter Bones"));
     }
 
-    @Test(groups = {"search", "cmis"})
+    @Test(groups = {"search", "cmis", "ejb"})
     public void allNotInStringCondition() throws FxApplicationException {
         final CmisResultSet result = getCmisSearchEngine().search(
                 "SELECT name FROM cmis_person WHERE ANY email NOT IN ('peter.bones@myprov.net', 'peter.bones@gmail.com') ORDER BY name"
@@ -630,7 +630,7 @@ public class CmisSearchEngineTest {
         assertEquals(result.collectColumnValues(1), Arrays.asList("Sandra Locke"));
     }
 
-    @Test(groups = {"search", "cmis"})
+    @Test(groups = {"search", "cmis", "ejb"})
     public void multivaluedNegation() throws FxApplicationException {
         final CmisResultSet result = getCmisSearchEngine().search(
                 "SELECT name FROM cmis_person WHERE 'peter.bones@myprov.net' <> ANY email ORDER BY name"
@@ -639,7 +639,7 @@ public class CmisSearchEngineTest {
         assertEquals(result.collectColumnValues(1), Arrays.asList("Peter Bones", "Sandra Locke"));
     }
 
-    @Test(groups = {"search", "cmis"})
+    @Test(groups = {"search", "cmis", "ejb"})
     public void isNullCondition() throws FxApplicationException {
         final CmisResultSet result = getCmisSearchEngine().search(
                 "SELECT name FROM cmis_person WHERE email IS NULL ORDER BY name"
@@ -648,7 +648,7 @@ public class CmisSearchEngineTest {
         assertEquals(result.collectColumnValues(1), Arrays.asList("Alex Cervais", "Martin Black"));
     }
 
-    @Test(groups = {"search", "cmis"})
+    @Test(groups = {"search", "cmis", "ejb"})
     public void isNotNullCondition() throws FxApplicationException {
         final CmisResultSet result = getCmisSearchEngine().search(
                 "SELECT name FROM cmis_person WHERE email IS NOT NULL ORDER BY name"
@@ -657,7 +657,7 @@ public class CmisSearchEngineTest {
         assertEquals(result.collectColumnValues(1), Arrays.asList("Peter Bones", "Sandra Locke"));
     }
 
-    @Test(groups = {"search", "cmis"})
+    @Test(groups = {"search", "cmis", "ejb"})
     public void basicSelectWithDerivedTypes() throws FxApplicationException {
         final CmisResultSet result = getCmisSearchEngine().search(
                 "SELECT astring FROM cmis_type_a ORDER BY astring"
@@ -666,7 +666,7 @@ public class CmisSearchEngineTest {
         assertEquals(result.collectColumnValues(1), Arrays.asList("A", "AB", "ABC"));
     }
 
-    @Test(groups = {"search", "cmis"})
+    @Test(groups = {"search", "cmis", "ejb"})
     public void basicConditionWithDerivedTypes() throws FxApplicationException {
         final CmisResultSet result = getCmisSearchEngine().search(
                 "SELECT astring FROM cmis_type_a WHERE astring LIKE 'A%' ORDER BY astring"
@@ -675,7 +675,7 @@ public class CmisSearchEngineTest {
         assertEquals(result.collectColumnValues(1), Arrays.asList("A", "AB", "ABC"));
     }
 
-    @Test(groups = {"search", "cmis"})
+    @Test(groups = {"search", "cmis", "ejb"})
     public void selectFromDerivedType() throws FxApplicationException {
         final CmisResultSet result = getCmisSearchEngine().search(
                 "SELECT astring, bstring FROM cmis_type_b ORDER BY astring"
@@ -685,7 +685,7 @@ public class CmisSearchEngineTest {
         assertEquals(result.collectColumnValues(2), Arrays.asList("B", "BC"));
     }
 
-    @Test(groups = {"search", "cmis"})
+    @Test(groups = {"search", "cmis", "ejb"})
     public void selectMultivalued() throws FxApplicationException {
         final CmisResultSet result = getCmisSearchEngine().search(
                 "SELECT name, email FROM cmis_person ORDER BY name"
@@ -699,7 +699,7 @@ public class CmisSearchEngineTest {
         ));
     }
 
-    @Test(groups = {"search", "cmis"})
+    @Test(groups = {"search", "cmis", "ejb"})
     public void selectMultivaluedDate() throws FxApplicationException {
         final CmisResultSet result = getCmisSearchEngine().search(
                 "SELECT name, date FROM cmis_multivalued ORDER BY name"
@@ -715,7 +715,7 @@ public class CmisSearchEngineTest {
     }
 
 
-    @Test(groups = {"search", "cmis"})
+    @Test(groups = {"search", "cmis", "ejb"})
     public void propertySecurity() throws FxApplicationException {
         final CmisResultSet result = getCmisSearchEngine().search(
                 "SELECT name, sensible FROM cmis_property_perm ORDER BY name"
@@ -726,7 +726,7 @@ public class CmisSearchEngineTest {
         assertEquals(result.getColumn(1, 2).getValue(), "Unprotected sensible");
     }
 
-    @Test(groups = {"search", "cmis"})
+    @Test(groups = {"search", "cmis", "ejb"})
     public void versionFilter() throws FxApplicationException {
         final FxPK contentPk = new FxPK(
                 getCmisSearchEngine().search("SELECT id FROM cmis_person WHERE name='Peter Bones'").getColumn(0, 1).getLong(),
@@ -751,7 +751,7 @@ public class CmisSearchEngineTest {
         }
     }
 
-    @Test(groups = {"search", "cmis"})
+    @Test(groups = {"search", "cmis", "ejb"})
     public void selectAll() throws FxApplicationException {
         final CmisResultSet result = getCmisSearchEngine().search(
                 "SELECT * FROM cmis_person ORDER BY name"
@@ -761,7 +761,7 @@ public class CmisSearchEngineTest {
         assertEquals(result.collectColumnValues("name"), Arrays.asList("Alex Cervais", "Martin Black", "Peter Bones", "Sandra Locke"));
     }
 
-    @Test(groups = {"search", "cmis"})
+    @Test(groups = {"search", "cmis", "ejb"})
     public void selectAllWithAlias() throws FxApplicationException {
         final CmisResultSet result = getCmisSearchEngine().search(
                 "SELECT p.id, p.* FROM cmis_person AS p ORDER BY name"
@@ -771,7 +771,7 @@ public class CmisSearchEngineTest {
         assertEquals(result.collectColumnValues("name"), Arrays.asList("Alex Cervais", "Martin Black", "Peter Bones", "Sandra Locke"));
     }
 
-    @Test(groups = {"search", "cmis"})
+    @Test(groups = {"search", "cmis", "ejb"})
     public void selectAllWithJoin() throws FxApplicationException {
         final CmisResultSet result = getCmisSearchEngine().search(
                 "SELECT p.*, data.* FROM cmis_person AS p JOIN cmis_person_data AS data ON (p.ssn=data.ssn) ORDER BY name"
@@ -782,7 +782,7 @@ public class CmisSearchEngineTest {
         assertEquals(result.collectColumnValues("annualSalary"), Arrays.asList(75000L, 50000L, 85000L));
     }
 
-    @Test(groups = {"search", "cmis"})
+    @Test(groups = {"search", "cmis", "ejb"})
     public void inSelectMany() throws FxApplicationException {
         final CmisResultSet result = getCmisSearchEngine().search(
                 "SELECT id, selectManySearchProp FROM SearchTest"
