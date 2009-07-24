@@ -260,7 +260,7 @@
                 javacchome="${flexive.lib.dir}"
                 outputdirectory="${flexive.src.framework.dir}/com/flexive/extractor/htmlExtractor"
         />
-		<javac-call srcdir="${flexive.src.framework.dir}" destdir="${build.framework.classes.dir}">
+		<javac-call srcdir="${flexive.src.framework.dir}" includes="com/flexive/shared/**,com/flexive/sqlParser/**,com/flexive/extractor/**" destdir="${build.framework.classes.dir}">
 			<classpath refid="classpath.build.framework"/>
 		</javac-call>
 		<jar jarfile="${flexive.lib.dir}/${sqlparser.jar}">
