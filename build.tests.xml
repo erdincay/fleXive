@@ -55,6 +55,7 @@
         <fileset dir="${flexive.lib.dir}/xstream" includes="*.jar"/>
         <fileset dir="${flexive.lib.dir}/groovy" includes="*.jar"/>
         <fileset dir="${flexive.lib.dir}/jsf" includes="*.jar"/>
+        <fileset dir="${flexive.lib.dir}/antlr" includes="*.jar"/>
         <path refid="emma.lib"/>
     	<path path="${build.ui.classes.dir}"/>
         <path path="${build.ui.shared.classes.dir}"/>
@@ -83,7 +84,7 @@
     <macrodef name="runTests">
         <attribute name="containerClasspathRef" default="build.classpath.testng"/>
         <element name="body" optional="false" implicit="true"/>
-
+        
         <sequential>
             <copy file="${tests.resources.dir}/testlog4j.xml" todir="${tests.classes.dir}"/>
             <testng classpathref="@{containerClasspathRef}"
@@ -144,7 +145,7 @@
         <echo message="EMMA coverage instrumentation will only be enabled"/>
         <echo message="if target 'clean' has been called previously or on first-time builds!"/>
     </target>
-
+    
     <target name="profile.netbeans.enable" if="profile.netbeans.enabled">
         <groovy>
             properties.'run.profile.settings' = "-agentpath:${properties.'profile.netbeans.root'}/${properties.'profile.netbeans.agent'}=${properties.'profile.netbeans.root'}/lib,5140"
@@ -192,7 +193,7 @@
         </javac-call>
         <groovyc-tests srcdir="${tests.framework.groovy.dir}" includes="com/flexive/tests/shared/**/*"/>
     </target>
-
+    
     <target name="tests.compile.browser" depends="tests.prepare, jar.framework.shared, compile.ui.shared">
         <javac-call srcdir="${tests.framework.dir}/"
                destdir="${tests.classes.dir}"
@@ -224,7 +225,7 @@
         </javac-call>
         <groovyc-tests srcdir="${tests.framework.groovy.dir}" includes="com/flexive/tests/embedded/**/*, com/flexive/tests/shared/**/*"/>
     </target>
-
+	
 	<target name="tests.compile.jsf" depends="tests.prepare,jar.ui,tests.compile.ejb">
         <javac-call srcdir="${tests.jsf.dir}/"
                destdir="${tests.classes.dir}"
@@ -254,6 +255,7 @@
 	<target name="tests.all.init">
         <groovy>
             properties.'tests.groups' = "shared,ejb,jsf,tree,dist"
+            //properties.'tests.groups' = "shared,ejb,configuration,content,structure,jsf,security,workflow,streaming,scripting,valuetest,cache,image,tree,relation,search,tutorial,environment,mandator,importexport,roles"
         </groovy>
     </target>
 
@@ -269,9 +271,9 @@
     <target name="tests.ejb.run" depends="tests.compile.ejb">
         <runTests containerClasspathRef="ejb3-embedded.classpath">
             <xmlfileset dir="${tests.resources.dir}" includes="ejb-tests.xml"/>
-		</runTests>
+		</runTests>            
     </target>
-
+	
 	<target name="tests.jsf" depends="tests.jsf.run, emma.report"/>
 	<target name="tests.jsf.run" depends="tests.jsf.init, tests.groups.run"/>
 	<target name="tests.jsf.init" depends="tests.prepare,jar.ui, tests.compile.jsf">
@@ -279,7 +281,7 @@
             properties.'tests.groups' = "jsf"
         </groovy>
     </target>
-
+    
     <target name="tests.groups" depends="tests.groups.run,emma.report"/>
 
     <target name="tests.groups.prepare">
@@ -343,7 +345,7 @@
         </junitreport>
         <move file="${testng.report.dir}/junit-noframes.html" tofile="${testng.report.dir}/${testng.suite.dir}/reporter-output.html" overwrite="true"/>
     </target>
-
+	
 	<target name="tests.debug.enable">
         <groovy>
             properties.'run.debug.settings' = properties.'debug.settings'
@@ -353,7 +355,7 @@
     <target name="tests.emma.enable">
         <property name="tests.emma.enabled" value="1"/>
     </target>
-
+    
     <target name="tests.ejb.debug" depends="tests.compile.ejb,tests.debug.enable">
         <antcall target="tests.ejb"/>
     </target>

@@ -60,8 +60,8 @@
                 <adm:treeNode id="scripts" icon="scripts" titleKey="Admin.scripts.root">
                     <adm:treeNode titleKey="Admin.scripts.overview" link="/adm/main/scripting/overview.jsf" />
                     <adm:treeNode titleKey="Admin.scripts.create" link="/adm/main/scripting/create.jsf" rendered="#{fxSystemBean.isInRole['ScriptManagement']}"/>
-                    <adm:treeNode titleKey="Admin.scripts.scriptConsole" link="/adm/main/scripting/scriptConsole.jsf" rendered="#{fxSystemBean.isInRole['ScriptExecution']}"/>
                     <adm:treeNode titleKey="Admin.scripts.runOnceInfo" link="/adm/main/scripting/runOnceInfo.jsf" rendered="#{fxSystemBean.isInRole['ScriptManagement']}"/>
+                    <adm:treeNode titleKey="Admin.scripts.scriptConsole" link="/adm/main/scripting/scriptConsole.jsf" rendered="#{fxSystemBean.isInRole['ScriptExecution']}"/>
                 </adm:treeNode>
             </c:if>
 
@@ -80,6 +80,10 @@
                                   link="javascript:invokeContentAction('/adm/main/sqlsearch/defaultResultPreferences.jsf', 'loadSystemDefault', {})"
                                   rendered="#{fxSystemBean.isInRole['GlobalSupervisor']}"/>
                 </adm:treeNode>
+                <adm:treeNode id="cmis" icon="content" titleKey="Admin.cmis.root">
+                    <adm:treeNode titleKey="Admin.cmis.query" link="/adm/main/cmis/cmisQuery.xhtml"/>
+                </adm:treeNode>
+                
                 <adm:treeNode titleKey="Admin.system.configuration" link="/adm/main/system/configuration.jsf" rendered="#{fxSystemBean.isInRole['GlobalSupervisor']}"/>
                 <adm:treeNode titleKey="Admin.system.parameters" link="/adm/main/system/sysParamConfig.jsf" rendered="#{fxSystemBean.isInRole['GlobalSupervisor']}"/>
                 <adm:treeNode titleKey="Admin.system.history" link="/adm/main/system/history.jsf" rendered="#{fxSystemBean.isInRole['GlobalSupervisor']}"/>

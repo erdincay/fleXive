@@ -1,0 +1,78 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+<body>
+
+<ui:composition template="/adm/contentTemplate.xhtml">
+
+    <ui:define name="body">
+
+        <h:form id="frm">
+
+            <adm:tab label="#{fxMessageBean['CmisSearch.tabtitle.query']}" active="true" id="tab1"/>
+
+            <a4j:region>
+                <div style="width: 95%; padding-bottom: 0.5em;">
+                    <fx:resizable>
+                        <h:inputTextarea id="query" value="#{cmisSearchBean.query}" style="width:100%; height: 100%" rows="10"/>
+                    </fx:resizable>
+                </div>
+
+                <fx:formRow id="startRow" labelKey="CmisSearch.label.startRow">
+                    <h:inputText id="startRow" value="#{cmisSearchBean.startRow}"/>
+                </fx:formRow>
+
+                <fx:formRow id="maxRows" labelKey="CmisSearch.label.maxRows">
+                    <h:inputText id="maxRows" value="#{cmisSearchBean.maxRows}"/>
+                </fx:formRow>
+
+                <a4j:commandButton id="submit" reRender="results" value="#{fxMessageBean['CmisSearch.button.submit']}" />
+                <adm:shortcut elementId="frm:submit"/>
+
+                <br/><br/>
+
+                <a4j:outputPanel id="results">
+                    <t:saveState id="ssResult" value="#{cmisSearchBean.result}"/>
+                    <c:set var="result" value="#{cmisSearchBean.result}"/>
+
+                    <c:if test="#{not empty result}">
+                        #{fxMessageBean['CmisSearch.result.info, #{result.rowCount}, #{result.timestampRecorder}']}
+                        <br/><br/>
+
+                        <table class="dojoTable">
+                            <thead>
+                            <tr>
+                                <c:forEach var="columnAlias" items="#{result.columnAliases}" varStatus="status">
+                                    <th>#{columnAlias}</th>
+                                </c:forEach>
+                            </tr>
+                            </thead>
+                            <tbody>
+                                <ui:repeat var="row" value="#{cmisSearchBean.resultModel}">
+                                    <tr>
+                                        <c:forEach var="columnAlias" items="#{result.columnAliases}" varStatus="status">
+                                            <td><fx:resultValue value="#{row.columns[status.index]}"/></td>
+                                        </c:forEach>
+                                    </tr>
+                                </ui:repeat>
+                            </tbody>
+                        </table>
+                    </c:if>
+
+                </a4j:outputPanel>
+            </a4j:region>
+        </h:form>
+    </ui:define>
+
+</ui:composition>
+
+</body>
+</html>

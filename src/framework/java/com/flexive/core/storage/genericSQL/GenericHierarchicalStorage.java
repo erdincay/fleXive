@@ -1385,7 +1385,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             if (rs.next())
                 throw new FxLoadException("ex.content.load.notDistinct", pk);
             if (type.isMultipleContentACLs() && aclId == ACL.NULL_ACL_ID) {
-                content.setAclIds(loadContentAclTable(con, pk));
+                content.setAclIds(loadContentAclTable(con, content.getPk()));
             }
             return content;
         } catch (SQLException e) {
@@ -1403,6 +1403,9 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     }
 
     protected List<Long> loadContentAclTable(Connection con, FxPK pk) throws SQLException {
+        if (pk.getVersion() < 0) {
+            throw new IllegalArgumentException("No distinct version number given in PK " + pk);
+        }
         PreparedStatement ps = null;
         try {
             ps = con.prepareStatement(CONTENT_ACLS_LOAD);

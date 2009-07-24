@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<project name="flexive" default="all" basedir="." xmlns:artifact="urn:maven-artifact-ant">
+<project name="flexive" default="all" basedir="." xmlns:artifact="urn:maven-artifact-ant" xmlns:antlr="urn:antlr-ant">
 
 	<!-- ========================== properties ========================== -->
 
@@ -61,6 +61,7 @@
         <fileset dir="${flexive.lib.dir}/xstream" includes="*.jar"/>
         <fileset dir="${flexive.lib.dir}/groovy" includes="*.jar"/>
         <fileset dir="${flexive.lib.dir}/mail" includes="*.jar"/>
+        <fileset dir="${flexive.lib.dir}/antlr" includes="*.jar"/>
         <fileset dir="${flexive.lib.dir}/openejb-3.1/lib" includes="*.jar"/>
     </path>
 
@@ -91,6 +92,8 @@
     <typedef resource="org/apache/maven/artifact/ant/antlib.xml"
                uri="urn:maven-artifact-ant"
                classpathref="classpath.build.framework" />
+    <typedef resource="org/apache/tools/ant/antlr/antlib.xml"
+             uri="urn:antlr-ant" classpathref="classpath.build.framework"/>
 
     <!-- ========================== imports ============================= -->
 	<import file="build.tests.xml"/>
@@ -304,14 +307,17 @@
 		</jar>
 	</target>
 
-    <target name="compile.framework" depends="prepare, check.parsers" description="Compile the complete core framework">
-		<javac-call
+    <target name="compile.framework"
+            depends="prepare, check.parsers, compile.framework.parsers, compile.framework.main, compile.framework.jdk6"
+            description="Compile the complete core framework"/>
+
+    <target name="compile.framework.main">
+        <javac-call
                 srcdir="${flexive.src.framework.dir}"
                 destdir="${build.framework.classes.dir}"
                 excludes="**/sqlParser/**,**/extractor/**">
-			<classpath refid="classpath.build.framework"/>
-		</javac-call>
-        <antcall target="compile.framework.jdk6"/>
+            <classpath refid="classpath.build.framework"/>
+        </javac-call>
     </target>
 
     <target name="compile.framework.jdk6" if="isJDK6">
@@ -321,6 +327,12 @@
                 destdir="${build.framework.classes.dir}">
 			<classpath refid="classpath.build.framework"/>
 		</javac-call>
+    </target>
+
+    <target name="compile.framework.parsers" description="Compiles the parsers embedded in the core framework">
+        <antlr:antlr3 target="${flexive.src.framework.cmisparser.dir}/CmisSql.g">
+            <classpath refid="classpath.build.framework"/>
+        </antlr:antlr3>
     </target>
 
     <target name="jar.framework" depends="jar.framework.shared, jar.ejb" description="Package the complete core framework">
@@ -533,6 +545,8 @@
             <fileset dir="${flexive.lib.dir}" includes="${sqlparser.jar},${extractor.jar},${extractor-documents.jar},${flatstorage.jar},cglib*.jar,fxStream.jar,commons-io-1.1.jar,sanselan.jar,quartz*.jar,PDFRenderer.jar,commons-*.jar,jbosscache-core.jar,jgroups.jar,jboss-common-core-42-compat.jar,urlrewrite-*.jar,google-collect*.jar,jsr173_1.0_api.jar,jtidy.jar"/>
             <fileset dir="${flexive.lib.dir}/groovy" includes="*.jar"/>
             <fileset dir="${build.ui.jar.dir}" includes="*.jar" excludes="flexive-plugin-jsf-testrunner.jar"/>
+            <fileset dir="${flexive.lib.dir}/antlr" includes="antlr-runtime-*.jar"/>
+
             <fileset dir="${build.ui.jar.dir}">
                 <!-- only include the testrunner plugin if target test.package.ear was invoked -->
                 <include name="flexive-plugin-jsf-testrunner.jar" if="package.testNG"/>

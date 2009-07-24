@@ -334,6 +334,16 @@ public class EJBLookup {
     }
 
     /**
+     * Lookup of the CmisSearchEngine EJB.
+     *
+     * @return  a reference to the CmisSearchEngine EJB.
+     * @since 3.1
+     */
+    public static CmisSearchEngine getCmisSearchEngine() {
+        return getEngine(CmisSearchEngine.class);
+    }
+
+    /**
      * Get a reference of the transaction manager
      *
      * @return TransactionManager

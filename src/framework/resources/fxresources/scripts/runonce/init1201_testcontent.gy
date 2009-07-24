@@ -36,7 +36,7 @@ import com.flexive.shared.FxContext
 import com.flexive.shared.FxLanguage
 import com.flexive.shared.content.FxContent
 import com.flexive.shared.content.FxPK
-import com.flexive.shared.security.ACL
+import com.flexive.shared.security.*
 import com.flexive.shared.structure.*
 import com.flexive.shared.value.*
 import com.flexive.shared.search.query.SqlQueryBuilder
@@ -46,7 +46,8 @@ import com.flexive.shared.workflow.Step
 import com.flexive.shared.workflow.StepDefinition
 import com.flexive.shared.scripting.FxScriptEvent
 import com.flexive.shared.scripting.FxScriptInfo
-
+import com.flexive.shared.scripting.groovy.GroovyTypeBuilder
+import com.flexive.shared.scripting.groovy.GroovyContentBuilder
 
 
 /**
@@ -85,7 +86,172 @@ println "Creating test fixture - content..."
 // create test type
 EJBLookup.scriptingEngine.runScript(scriptInfo.id)
 
-//create test data
+long dummyACLId = EJBLookup.aclEngine.create("Dummy ACL", new FxString("Dummy ACL"), Mandator.MANDATOR_FLEXIVE, "#000000", "", ACLCategory.INSTANCE)
+
+// create CMIS example types
+new GroovyTypeBuilder().cmis_person {
+    name()
+    ssn()
+    email(multiplicity: FxMultiplicity.MULT_0_N)
+}
+new GroovyTypeBuilder().cmis_person_data {
+    ssn()   // used to join with cmis_person.ssn
+    entryDate(dataType: FxDataType.Date)
+    annualSalary(dataType: FxDataType.LargeNumber)
+}
+new GroovyTypeBuilder().cmis_audit_log {
+    person(dataType: FxDataType.Reference,      // used to join with cmis_person.id
+            referencedType: CacheAdmin.environment.getType("cmis_person"))
+    date(dataType: FxDataType.DateTime)
+    activity()
+}
+new GroovyTypeBuilder().cmis_multivalued {
+    name()
+    email(multiplicity: FxMultiplicity.MULT_0_N)
+    date(dataType: FxDataType.Date, multiplicity: FxMultiplicity.MULT_0_N)
+    dateTime(dataType: FxDataType.DateTime, multiplicity: FxMultiplicity.MULT_0_N)
+}
+
+// hierarchy for testing descendant types (B is subtype of A, C is subtype of B)
+new GroovyTypeBuilder().cmis_type_A {
+    astring()
+}
+new GroovyTypeBuilder().cmis_type_B(parentTypeName: "cmis_type_A") {
+    bstring()
+}
+new GroovyTypeBuilder().cmis_type_C(parentTypeName: "cmis_type_B") {
+    cstring()
+}
+
+// create test types with property permissions
+new GroovyTypeBuilder().cmis_property_perm(usePropertyPermissions: false) {
+    name()
+    sensible()  // can read it in base type, protected in subtype
+}
+new GroovyTypeBuilder().cmis_property_perm_secured(parentTypeName: "cmis_property_perm", usePropertyPermissions: true) {
+}
+def securedEdit = CacheAdmin.environment.getAssignment("cmis_property_perm_secured/sensible").asEditable()
+// secure assignment in derived type
+def propAclId = EJBLookup.aclEngine.create("CMIS private property permission", new FxString("CMIS Property Perm"), Mandator.MANDATOR_FLEXIVE,
+                               "000000", "", ACLCategory.STRUCTURE)
+EJBLookup.assignmentEngine.save(securedEdit.setACL(CacheAdmin.environment.getACL(
+    propAclId
+)), false)
+
+
+// create CMIS test data
+def builder = new GroovyContentBuilder("CMIS_PERSON")
+builder {
+    name("Peter Bones")
+    ssn("3721")
+    email("peter.bones@gmail.com")
+    email("peter.bones@myprov.net")
+}
+builder.getContent().setAclIds([dummyACLId, builder.getContent().getAclIds().get(0)])
+def bones = builder.getContent().save()
+def bonesPk = bones.pk
+// to test version filtering in all queries, create a second (identical) version
+EJBLookup.contentEngine.createNewVersion(bones)
+builder = new GroovyContentBuilder("CMIS_PERSON")
+builder {
+    name("Sandra Locke")
+    ssn("8392")
+    email("sandra.locke@gmx.net")
+}
+def sandraPk = builder.getContent().save().pk
+
+// SSN 7294 has no match in CMIS_PERSON_DATA
+builder = new GroovyContentBuilder("CMIS_PERSON")
+builder {
+    name("Alex Cervais")
+    ssn("7294")
+}
+builder.getContent().save()
+builder = new GroovyContentBuilder("CMIS_PERSON")
+builder {
+    name("Martin Black")
+    ssn("5241")
+}
+builder.getContent().save()
+
+builder = new GroovyContentBuilder("CMIS_PERSON_DATA")
+builder {
+    ssn("3721")
+    entryDate(new FxDate(false, new Date(2008, 2, 10)))
+    annualSalary(new FxLargeNumber(false, 50000))
+}
+builder.getContent().save()
+builder {
+    ssn("8392")
+    entryDate(new FxDate(false, new Date(2003, 5, 13)))
+    annualSalary(new FxLargeNumber(false, 85000))
+}
+EJBLookup.contentEngine.createNewVersion(builder.getContent().save())
+builder {
+    ssn("5241")
+    entryDate(new FxDate(false, new Date(2001, 3, 24)))
+    annualSalary(new FxLargeNumber(false, 75000))
+}
+builder.getContent().save()
+
+builder = new GroovyContentBuilder("CMIS_AUDIT_LOG")
+builder {
+    person(new FxReference(false, new ReferencedContent(bonesPk)))
+    date(new FxDateTime(false, new Date(new Date().getTime() - 3600L*1000)))
+    activity("Logged in")
+}
+builder.getContent().save()
+builder {
+    date(new FxDateTime(false, new Date(new Date().getTime() - 32L*60*1000)))
+    activity("Logged out")
+}
+builder.getContent().save()
+builder {
+    person(new FxReference(false, new ReferencedContent(sandraPk)))
+    date(new FxDateTime(false, new Date(new Date().getTime() - 28*60*1000)))
+    activity("Updated article #31.5")
+}
+EJBLookup.contentEngine.createNewVersion(builder.getContent().save())
+builder {
+    date(new FxDateTime(false, new Date(new Date().getTime() - 22*60*1000)))
+    activity("Updated contact #912.1")
+}
+builder.getContent().save()
+
+// create some hierarchical data
+EJBLookup.contentEngine.initialize("cmis_type_a").setValue("/astring", "A").save()
+EJBLookup.contentEngine.initialize("cmis_type_b").setValue("/astring", "AB").setValue("/bstring", "B").save()
+EJBLookup.contentEngine.initialize("cmis_type_c").setValue("/astring", "ABC").setValue("/bstring", "BC").setValue("/cstring", "C").save()
+
+// create property permissions test data
+EJBLookup.contentEngine.initialize("cmis_property_perm").setValue("/name", "Unprotected").setValue("/sensible", "Unprotected sensible").save()
+EJBLookup.contentEngine.createNewVersion(
+  EJBLookup.contentEngine.initialize("cmis_property_perm_secured").setValue("/name", "Protected").setValue("/sensible", "Protected sensible").save()
+)
+
+// create multivalued data
+builder = new GroovyContentBuilder("CMIS_MULTIVALUED")
+builder {
+    name("Saturday Night Fever")
+    date(new FxDate(false, new Date(new Date().getTime() - 14L*24*3600*1000)))
+    date(new FxDate(false, new Date(new Date().getTime() - 7L*24*3600*1000)))
+    date(new FxDate(false, new Date(new Date().getTime() + 7L*24*3600*1000)))
+    dateTime(new FxDateTime(false, new Date(new Date().getTime() - 14L*24*3600*1000)))
+    dateTime(new FxDateTime(false, new Date(new Date().getTime() - 7L*24*3600*1000)))
+}
+EJBLookup.contentEngine.createNewVersion(builder.getContent().save())
+builder = new GroovyContentBuilder("CMIS_MULTIVALUED")
+builder {
+    name("Sunday Chillout")
+    date(new FxDate(false, new Date(new Date().getTime() - 25L*24*3600*1000)))
+    date(new FxDate(false, new Date(new Date().getTime() - 10L*24*3600*1000)))
+    date(new FxDate(false, new Date(new Date().getTime())))
+    dateTime(new FxDateTime(false, new Date(new Date().getTime() - 24L*24*3600*1000)))
+    dateTime(new FxDateTime(false, new Date(new Date().getTime() - 11L*24*3600*1000)))
+}
+builder.getContent().save()
+
+//create test type + data
 
 int instanceCount = 10
 
@@ -147,10 +313,14 @@ final List<FxPK> folderPks = new SqlQueryBuilder().select("@pk").type("FOLDER").
 int instances = 0
 final List<Integer> indices = [*1..instanceCount]
 Collections.shuffle(indices)
+
+long instanceACLId = CacheAdmin.environment.getDefaultACL(ACLCategory.INSTANCE).id
+
 instanceCount.times { int counter ->
     final ContentEngine contentEngine = EJBLookup.contentEngine
     final FxEnvironment env = CacheAdmin.environment
     FxContent co = contentEngine.initialize(env.getType("SearchTest").id)
+    co.setAclIds([dummyACLId, instanceACLId])
     // use shuffled index for numeric values to prevent saving all contents
     // in ascending sort order (this will trigger bugs that rely on the DB's natural
     // ordering)
