@@ -51,6 +51,7 @@ import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.value.FxReference;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.workflow.Workflow;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 
@@ -839,20 +840,26 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
 
     /**
      * Determines the property assignment that should be treated as the main binary content for this type.
-     * Currently this is the first binary assignment that has a minimum multiplicity of 1, however,
-     * parent group multiplicities are not yet taken into account.
+     * Currently this is the first binary assignment that has a minimum multiplicity of 1, or if none exists
+     * the first binary assignment.
+     * <p>However, parent group multiplicities are not yet taken into account.</p>
      *
      * @return  the property assignment that should be treated as the main binary content for this type,
      * or null if no such assignment exists
      * @since 3.1
      */
     public FxPropertyAssignment getMainBinaryAssignment() {
+        final List<FxPropertyAssignment> binaryAssignments = Lists.newArrayList();
         for (FxPropertyAssignment assignment : getAllProperties()) {
-            if (assignment.getProperty().getDataType() == FxDataType.Binary && assignment.getMultiplicity().getMin() > 0) {
-                return assignment;
+            if (assignment.getProperty().getDataType() == FxDataType.Binary) {
+                if (assignment.getMultiplicity().getMin() > 0) {
+                    return assignment;
+                }
+                binaryAssignments.add(assignment);
             }
         }
-        return null;
+        // no mandatory binary assignment found, return the first one
+        return binaryAssignments.isEmpty() ? null : binaryAssignments.get(0);
     }
 
     /**

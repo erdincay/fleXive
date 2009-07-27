@@ -282,6 +282,37 @@ public class FxStreamUtils {
     }
 
     /**
+     * Return an InputStream for reading the binary.
+     *
+     * @param server     (optional) list of remote stream servers
+     * @param descriptor binary descriptor
+     * @param size       preview size
+     * @return  an InputStream for reading the binary.
+     * @throws StreamException on errors
+     * @since 3.1
+     */
+    public static InputStream getBinaryStream(List<ServerLocation> server, BinaryDescriptor descriptor, BinaryDescriptor.PreviewSizes size) throws FxStreamException {
+        try {
+            return requestBinary(server, descriptor, size).getInputStream();
+        } catch (StreamException e) {
+            throw new FxStreamException(e);
+        }
+    }
+
+    /**
+     * Return an InputStream for reading the binary.
+     *
+     * @param descriptor binary descriptor
+     * @param size       preview size
+     * @return  an InputStream for reading the binary.
+     * @throws StreamException on errors
+     * @since 3.1
+     */
+    public static InputStream getBinaryStream(BinaryDescriptor descriptor, BinaryDescriptor.PreviewSizes size) throws FxStreamException {
+        return getBinaryStream(null, descriptor, size);
+    }
+
+    /**
      * Download a binary with given size (Original, Preview 1..3)
      *
      * @param server     (optional) list of remote stream servers
@@ -295,13 +326,7 @@ public class FxStreamUtils {
             throw new FxStreamException("ex.stream.download.param.missing");
         StreamClient client = null;
         try {
-            client = getClient(server);
-            DataPacket<BinaryDownloadPayload> req = new DataPacket<BinaryDownloadPayload>(
-                    new BinaryDownloadPayload(descriptor.getId(), descriptor.getVersion(), descriptor.getQuality(), size.getBlobIndex(), false),
-                    true, true);
-            DataPacket<BinaryDownloadPayload> resp = client.connect(req);
-            if (resp.getPayload().isServerError())
-                throw new FxStreamException("ex.stream.serverError", resp.getPayload().getErrorMessage());
+            client = requestBinary(server, descriptor, size);
             client.receiveStream(stream, descriptor.getSize());
             client.close();
             client = null;
@@ -315,5 +340,17 @@ public class FxStreamUtils {
                 //ignore
             }
         }
+    }
+
+    private static StreamClient requestBinary(List<ServerLocation> server, BinaryDescriptor descriptor, BinaryDescriptor.PreviewSizes size) throws FxStreamException, StreamException {
+        StreamClient client;
+        client = getClient(server);
+        DataPacket<BinaryDownloadPayload> req = new DataPacket<BinaryDownloadPayload>(
+                new BinaryDownloadPayload(descriptor.getId(), descriptor.getVersion(), descriptor.getQuality(), size.getBlobIndex(), false),
+                true, true);
+        DataPacket<BinaryDownloadPayload> resp = client.connect(req);
+        if (resp.getPayload().isServerError())
+            throw new FxStreamException("ex.stream.serverError", resp.getPayload().getErrorMessage());
+        return client;
     }
 }
