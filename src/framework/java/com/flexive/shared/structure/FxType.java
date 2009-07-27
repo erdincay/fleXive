@@ -838,6 +838,24 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
     }
 
     /**
+     * Determines the property assignment that should be treated as the main binary content for this type.
+     * Currently this is the first binary assignment that has a minimum multiplicity of 1, however,
+     * parent group multiplicities are not yet taken into account.
+     *
+     * @return  the property assignment that should be treated as the main binary content for this type,
+     * or null if no such assignment exists
+     * @since 3.1
+     */
+    public FxPropertyAssignment getMainBinaryAssignment() {
+        for (FxPropertyAssignment assignment : getAllProperties()) {
+            if (assignment.getProperty().getDataType() == FxDataType.Binary && assignment.getMultiplicity().getMin() > 0) {
+                return assignment;
+            }
+        }
+        return null;
+    }
+
+    /**
      * Get the FxGroupAssignment for the given XPath.
      * This is a convenience method calling internally getAssignment and casting the result to FxGroupAssignment if
      * appropriate, else throws an FxInvalidParameterException if the assignment is a property.

@@ -107,11 +107,19 @@ public class CmisResultRow implements Serializable, Iterable<CmisResultValue> {
         return aliases;
     }
 
-    public int getColumnIndex(String alias) {
+    public int indexOf(String alias) {
         for (int i = 0; i < aliases.size(); i++) {
             if (aliases.get(i).equalsIgnoreCase(alias)) {
                 return i + 1;
             }
+        }
+        return -1;
+    }
+
+    int getColumnIndex(String alias) {
+        final int index = indexOf(alias);
+        if (index != -1) {
+            return index;
         }
         throw new FxInvalidParameterException("column", LOG, "ex.cmis.search.resultset.row.alias",
                 alias, aliases).asRuntimeException();
