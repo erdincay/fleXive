@@ -66,6 +66,9 @@ public class ScriptConsoleBean implements Serializable {
     private String userLang = "en";
 
     public String getCode() {
+        if(code == null) {
+            code = ScriptBean.getClassImports(language);
+        }
         return code;
     }
 
