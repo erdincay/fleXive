@@ -19,27 +19,33 @@ wrappedContent... value binding to wrapped content object provided by fxConentEd
 
 <ui:composition>
     <a4j:outputPanel id="infoPanel" layout="block">
-        <a4j:commandLink reRender="infoPanel" eventsQueue="ceQueue">
+        <a4j:commandLink reRender="infoPanel" eventsQueue="ceQueue" styleClass="infoPanelButton#{srcEditor.infoPanelState=='version'?'Active':''}"
+                oncomplete="ajaxButtonRequest()">
             <f:setPropertyActionListener value="#{srcEditor.infoPanelState=='version'?'':'version'}" target="#{srcEditor.infoPanelState}"/>
-            <span class="infoPanelButton">#{fxMessageBean['Content.field.info']}</span>
+            #{fxMessageBean['Content.field.info']}
         </a4j:commandLink>&nbsp;
-        <a4j:commandLink reRender="infoPanel" eventsQueue="ceQueue" rendered="#{wrappedContent.versionInfo.versionCount > 1}">
+        <a4j:commandLink reRender="infoPanel" eventsQueue="ceQueue" rendered="#{wrappedContent.versionInfo.versionCount > 1}" styleClass="infoPanelButton#{srcEditor.infoPanelState=='compare'?'Active':''}"
+                oncomplete="ajaxButtonRequest()">
             <f:setPropertyActionListener value="#{srcEditor.infoPanelState=='compare'?'':'compare'}" target="#{srcEditor.infoPanelState}"/>
-            <span class="infoPanelButton">#{fxMessageBean['Content.field.versionCompare']}</span>
+            #{fxMessageBean['Content.field.versionCompare']}
         </a4j:commandLink>
-        <a4j:commandLink reRender="infoPanel" eventsQueue="ceQueue" rendered="#{fxMapBean.types[wrappedContent.content.typeId].trackHistory}">
+        <a4j:commandLink reRender="infoPanel" eventsQueue="ceQueue" rendered="#{fxMapBean.types[wrappedContent.content.typeId].trackHistory}" styleClass="infoPanelButton#{srcEditor.infoPanelState=='history'?'Active':''}"
+                oncomplete="ajaxButtonRequest()">
             <f:setPropertyActionListener value="#{srcEditor.infoPanelState=='history'?'':'history'}" target="#{srcEditor.infoPanelState}"/>
-            <span class="infoPanelButton">#{fxMessageBean['Content.field.history']}</span>
+            #{fxMessageBean['Content.field.history']}
         </a4j:commandLink>
-        <a4j:commandLink reRender="infoPanel" eventsQueue="ceQueue" rendered="#{wrappedContent.mayImport and wrappedContent.guiSettings.editMode}">
+        <a4j:commandLink reRender="infoPanel" eventsQueue="ceQueue" rendered="#{wrappedContent.mayImport and wrappedContent.guiSettings.editMode}" styleClass="infoPanelButton#{srcEditor.infoPanelState=='import'?'Active':''}"
+                oncomplete="ajaxButtonRequest()">
             <f:setPropertyActionListener value="#{srcEditor.infoPanelState=='import'?'':'import'}" target="#{srcEditor.infoPanelState}"/>
-            <span class="infoPanelButton">#{fxMessageBean['Content.field.import']}</span>
+            #{fxMessageBean['Content.field.import']}
         </a4j:commandLink>
-        <a4j:commandLink reRender="infoPanel" eventsQueue="ceQueue" rendered="#{wrappedContent.content.permissions.mayExport}">
+        <a4j:commandLink reRender="infoPanel" eventsQueue="ceQueue" rendered="#{wrappedContent.content.permissions.mayExport}" styleClass="infoPanelButton#{srcEditor.infoPanelState=='export'?'Active':''}"
+                oncomplete="ajaxButtonRequest()">
             <f:setPropertyActionListener value="#{srcEditor.infoPanelState=='export'?'':'export'}" target="#{srcEditor.infoPanelState}"/>
             <f:setPropertyActionListener value="#{wrappedContent}" target="#{srcEditor.wrappedContent}"/>
-            <span class="infoPanelButton">#{fxMessageBean['Content.field.export']}</span>
+            #{fxMessageBean['Content.field.export']}
         </a4j:commandLink>
+
         <ui:fragment rendered="#{srcEditor.infoPanelState=='import'}">
             <div class="infoPanel">
                 <h:panelGrid columns="2" columnClasses="top">
@@ -51,19 +57,32 @@ wrappedContent... value binding to wrapped content object provided by fxConentEd
                     <h:inputTextarea id="importPaste" rows="6" cols="50" value="#{srcEditor.importPasted}" readonly="false"/>
                     #{fxMessageBean['Content.field.importSave']}
                     <h:selectBooleanCheckbox id="importSave" value="#{srcEditor.importSave}"/>
-                    <h:commandLink action="#{srcEditor.doImport}" rendered="#{wrappedContent.guiSettings.editMode and empty wrappedContent.guiSettings.openedReferenceId}">
+
+                    <adm:commandButton id="importButton" bean="#{srcEditor}" action="doImport" icon="add" location="content"
+                                       labelKey="Content.button.import"
+                                       rendered="#{wrappedContent.guiSettings.editMode and empty wrappedContent.guiSettings.openedReferenceId}">
                         <f:setPropertyActionListener value="#{wrappedContent}" target="#{srcEditor.wrappedContent}"/>
-                        <span class="infoPanelButton" style="display: block; float: left;">#{fxMessageBean['Content.button.import']}</span>
-                    </h:commandLink>
+                   </adm:commandButton>
                 </h:panelGrid>
                 <br clear="all"/>
             </div>
         </ui:fragment>
+
         <ui:fragment rendered="#{srcEditor.infoPanelState=='export'}">
             <div class="infoPanel">
-                <div class="infoPanelButton" style="margin: 12px; display: block; float: left;" onclick="copy2clipboard(getPreElementContent('exportArea'),'#{fxMessageBean['Global.clipboard.error']}','#{fxMessageBean['Global.clipboard.success']}')">#{fxMessageBean['Content.button.copyToClipboard']}</div>
-                <br clear="all"/>
                 <pre id="exportArea">#{srcEditor.exportData[wrappedContent]}</pre>
+
+                <adm:commandButton id="exportDownloadButton" labelKey="Content.button.export"
+                                    lockscreen="false" location="content"
+                               icon="export"
+                               onclick="exportContent('#{myContent.content.pk}');return false;"/>
+                
+                <adm:commandButton id="exportCopyClipboardButton" location="content" labelKey="Content.button.copyToClipboard"
+                                   icon="paste" lockscreen="false"
+                                   onclick="copy2clipboard(getPreElementContent('exportArea'),'#{fxMessageBean['Global.clipboard.error']}','#{fxMessageBean['Global.clipboard.success']}'); return false"
+                        />
+
+                <br clear="all"/>
             </div>
         </ui:fragment>
         <ui:fragment rendered="#{srcEditor.infoPanelState=='version'}">

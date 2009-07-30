@@ -2,6 +2,7 @@
     background-color:#F2F2F2;
     margin-right:15px;
     border: 1px solid #CCCCCC;
+    width: 680px;
 }
 
 .contentSettings .formLabel{
@@ -36,28 +37,40 @@
 
 /* info panel */
 
-.infoPanelButton {
+.infoPanelButton, .infoPanelButtonActive {
+    padding: 0 8px;
+    margin: 0 5px 0 0;
+    
     text-align: center;
-    padding-left: 5px;
-    padding-right: 5px;
     border:1px solid #CCCCCC;
     background-color: #EFEFEF;
     color: gray;
     font-weight: bold;
-    margin-right: 2px;
     cursor: pointer;
 }
 
-.infoPanel {
-    position:relative;
-    top:5px;
-    padding-left:2px;
-    padding-right:2px;
-    border:1px solid #BDBDBD;
+.infoPanelButtonActive {
     background-color:#F9FCF1;
+    border-color: #ccc;
+    border-bottom: 1px solid #F9FCF1;
+    color: black;
+    z-index: 99;    /* put above the infoPanel border */
+}
+
+.infoPanelButton:hover {
+    color: black;
+}
+
+.infoPanel {
     display: block;
-    width: 550px;
-    margin-bottom: 5px;
+    
+    margin: 0 0 5px 0;
+    padding: 10px;
+    border:1px solid #ccc;
+    width: 660px;
+    
+    background-color:#F9FCF1;
+    z-index: 9;
 }
 
 /* version compare - changes */
@@ -149,15 +162,15 @@ table.historyTable TR TD.action {
     background: #EFEFEF none repeat scroll 0;
     border: 1px 1px 1px 0 solid;
 }
-                                 #
+                                 
 #exportArea {
-    width:500px;
+    width:650px;
     height:200px;
-    overflow: auto;
+    overflow: scroll;
     border: 1px solid #CCCCCC;
-    background-color: #EFEFEF;
+    background-color: #FAFAFA;
     color: gray;
-    margin: 12px;
+    margin: 5px 0 12px 0;
 }
 
 table.contentOverview {
@@ -181,4 +194,31 @@ table.contentOverview td.contentData {
     position:relative;
     margin-left:2px;
     margin-right:2px;
+}
+
+.contentSearchResultNavigation {
+    position: absolute;
+    background-color: white;
+    padding: 3px 7px;
+    top: 10px;
+    left: 560px;
+
+    border: 1px solid #ddd;
+    -moz-border-radius: 5px;
+    -webkit-border-radius: 5px;
+}
+
+/* Content editor overrides */
+
+.fxContentEditor_group {
+    width: 680px;
+}
+
+/* Version info overrides */
+.infoPanel .beVersionInfo h4,
+.infoPanel .beVersionInfo h5 {
+    /** account for infoPanel padding */
+    margin-left: -10px;
+    margin-right: -10px;
+    padding-left: 10px;
 }

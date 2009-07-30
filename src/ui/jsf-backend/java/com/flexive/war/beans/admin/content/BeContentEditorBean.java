@@ -576,6 +576,7 @@ public class BeContentEditorBean implements ActionBean, Serializable {
         reload();
         this.pk = new FxPK(wrappedContent.getContent().getId(), version);
         this.editMode = wrappedContent.getGuiSettings().isEditMode();
+        new FxFacesMsgInfo("ContentEditor.nfo.version.loaded", version, pk).addToContext();
     }
 
     public long getId() {

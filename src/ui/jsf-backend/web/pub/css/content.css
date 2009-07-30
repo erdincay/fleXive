@@ -27,7 +27,6 @@ fieldset.formFields {
 
 .commandButton {
     border: 0;
-    outline: none;
     height: 22px;
     color: black;
     float: left;
@@ -42,7 +41,12 @@ fieldset.formFields {
 }
 
 .commandButton a {
-    outline: none;
+    color: gray;
+    font-weight: bold;
+}
+
+.commandButton a:focus {
+    outline: black dotted 1px;
 }
 
 .commandButtonRight, .commandButtonRightDisabled {
@@ -65,8 +69,6 @@ fieldset.formFields {
     padding-right: 5px;
     padding-top:5px;
     text-decoration: none;
-    color: gray;
-    font-weight: bold;
     height:22px;
     float:left;
     margin:auto;
@@ -85,7 +87,7 @@ fieldset.formFields {
     float:left;
 }
 
-.commandButton:active .commandButtonLabelText {
+.commandButton:active a {
     color: black;
 }
 
@@ -419,6 +421,27 @@ table.plain td {
     white-space: nowrap;
 }
 
+/* adm:versionInfo */
+.beVersionInfo h4,
+.beVersionInfo h5 {
+    background-color: #EFEFEF;
+    margin: 0 0 5px 0;
+}
+
+.beVersionInfo h4 {
+    padding: 5px 2px;
+}
+
+.beVersionInfo h5 {
+    font-size: 11px;
+    margin-top: 10px;
+    padding: 3px 2px;
+}
+
+.beVersionInfo .currentVersion {
+    
+}
+
 /** YUI styles */
 
 li.yuimenuitem {
@@ -468,3 +491,4 @@ tr.yui-dt-odd td.yui-dt-selected {
 .yui-dt-coltarget {
     background-color: #D3DCB7 !important;
 }
+

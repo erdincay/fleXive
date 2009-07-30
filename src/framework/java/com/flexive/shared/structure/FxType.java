@@ -863,6 +863,34 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
     }
 
     /**
+     * Returns the mandatory assignments of the given type.
+     *
+     * @return  the mandatory assignments of the given type.
+     * @since 3.1
+     */
+    public List<FxPropertyAssignment> getMandatoryAssignments(FxDataType type) {
+        final List<FxPropertyAssignment> result = new ArrayList<FxPropertyAssignment>();
+        for (FxPropertyAssignment assignment : getAllProperties()) {
+            if (assignment.getProperty().getDataType() == type && assignment.getMultiplicity().getMin() > 0) {
+                boolean allRequired = true;
+                FxAssignment parent = assignment;
+                // check if all parents are also required
+                while ((parent = parent.getParentGroupAssignment()) != null) {
+                    if (parent.getMultiplicity().getMin() == 0) {
+                        allRequired = false;
+                        break;
+                    }
+                }
+                if (allRequired) {
+                    // assignment must exist in every instance, return true
+                    result.add(assignment);
+                }
+            }
+        }
+        return result;
+    }
+
+    /**
      * Get the FxGroupAssignment for the given XPath.
      * This is a convenience method calling internally getAssignment and casting the result to FxGroupAssignment if
      * appropriate, else throws an FxInvalidParameterException if the assignment is a property.

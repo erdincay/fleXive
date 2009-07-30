@@ -211,7 +211,7 @@ public class YahooResultProvider implements Serializable {
                 // check if the type has at least one binary property
                 final Long typeId = row.getLong(typeColumnIndex);
                 if (!typeHasBinary.containsKey(typeId)) {
-                    typeHasBinary.put(typeId, environment.getType(typeId).getMainBinaryAssignment() != null);
+                    typeHasBinary.put(typeId, !environment.getType(typeId).getMandatoryAssignments(FxDataType.Binary).isEmpty());
                 }
                 writer.writeAttribute("hasBinary", typeHasBinary.get(typeId));
             }

@@ -39,9 +39,9 @@ for more info
     <c:if test="#{not wrappedContent.new and versionInfo.versionCount == 1}">
         <c:set var="lbl1" value="#{typeLabel} [Id: #{wrappedContent.content.pk.id}]"/>
     </c:if>
-
+    <div class="beVersionInfo">
         <ui:repeat var="vi" value="#{versionInfo}">
-            <b>#{lbl1}</b><br/>
+            <h4>#{lbl1}</h4>
             <ui:fragment rendered="#{versionInfo.hasLiveVersion}">
                 #{fxMessageBean['Content.field.versionInfo.liveVersion,#{vi.liveVersion}']}<br/>
             </ui:fragment>
@@ -52,31 +52,35 @@ for more info
                 #{fxMessageBean['Content.field.versionInfo.maxVersion,#{vi.maxVersion}']}<br/>
             </ui:fragment>
             <ui:repeat var="ver" value="#{vi.versions}">
-                <hr/>
-                <b>#{fxMessageBean['Content.field.versionInfo.version,#{ver}']}</b>
-                #{fxMessageBean['Content.field.versionInfo.step,#{fxMapBean.step[vi.versionSelector[ver].step]}']}
-                <br/>
-                <ui:fragment rendered="#{ver!=wrappedContent.content.pk.version and
-                                        empty wrappedContent.guiSettings.openedReferenceId}">
-                    <adm:commandIcon labelKey="Content.button.loadVersion" location="content"
-                                     icon="load" action="loadVersion" bean="#{srcEditor}"
-                                     id="loadVersion_#{ver}">
-                        <f:setPropertyActionListener target="#{srcEditor.version}" value="#{ver}"/>
-                        <f:setPropertyActionListener target="#{srcEditor.wrappedContent}" value="#{wrappedContent}"/>
-                    </adm:commandIcon>
-                    <ui:fragment rendered="#{wrappedContent.versionDeleteAble and wrappedContent.guiSettings.editMode}">
-                        <adm:commandIcon labelKey="Content.button.deleteVersion" location="content"
-                                         icon="deleteVersion" action="deleteVersion" bean="#{srcEditor}"
-                                         id="removeVersion_#{ver}">
+                <div class="#{ver!=wrappedContent.content.pk.version and
+                                        empty wrappedContent.guiSettings.openedReferenceId ? 'currentVersion' : 'otherVersion'}">
+                    <h5>
+                        #{fxMessageBean['Content.field.versionInfo.version,#{ver}']}
+                        #{fxMessageBean['Content.field.versionInfo.step,#{fxMapBean.step[vi.versionSelector[ver].step]}']}
+                    </h5>
+                    <ui:fragment rendered="#{ver!=wrappedContent.content.pk.version and
+                                            empty wrappedContent.guiSettings.openedReferenceId}">
+                        <adm:commandIcon labelKey="Content.button.loadVersion" location="content"
+                                         icon="load" action="loadVersion" bean="#{srcEditor}"
+                                         id="loadVersion_#{ver}">
                             <f:setPropertyActionListener target="#{srcEditor.version}" value="#{ver}"/>
                             <f:setPropertyActionListener target="#{srcEditor.wrappedContent}" value="#{wrappedContent}"/>
                         </adm:commandIcon>
+                        <ui:fragment rendered="#{wrappedContent.versionDeleteAble and wrappedContent.guiSettings.editMode}">
+                            <adm:commandIcon labelKey="Content.button.deleteVersion" location="content"
+                                             icon="deleteVersion" action="deleteVersion" bean="#{srcEditor}"
+                                             id="removeVersion_#{ver}">
+                                <f:setPropertyActionListener target="#{srcEditor.version}" value="#{ver}"/>
+                                <f:setPropertyActionListener target="#{srcEditor.wrappedContent}" value="#{wrappedContent}"/>
+                            </adm:commandIcon>
+                        </ui:fragment>
+                        <br/>
                     </ui:fragment>
-                    <br/>
-                </ui:fragment>
-                #{fxMessageBean['Content.field.versionInfo.created,#{fxMapBean.dateTime[vi.versionSelector[ver].lifeCycleInfo.creationTime]},#{fxMapBean.account[vi.versionSelector[ver].lifeCycleInfo.creatorId].name}']}<br/>
-                #{fxMessageBean['Content.field.versionInfo.modified,#{fxMapBean.dateTime[vi.versionSelector[ver].lifeCycleInfo.modificationTime]},#{fxMapBean.account[vi.versionSelector[ver].lifeCycleInfo.modificatorId].name}']}<br/>
+                    #{fxMessageBean['Content.field.versionInfo.created,#{fxMapBean.dateTime[vi.versionSelector[ver].lifeCycleInfo.creationTime]},#{fxMapBean.account[vi.versionSelector[ver].lifeCycleInfo.creatorId].name}']}<br/>
+                    #{fxMessageBean['Content.field.versionInfo.modified,#{fxMapBean.dateTime[vi.versionSelector[ver].lifeCycleInfo.modificationTime]},#{fxMapBean.account[vi.versionSelector[ver].lifeCycleInfo.modificatorId].name}']}<br/>
+                </div>
             </ui:repeat>
         </ui:repeat>
+    </div>
 </ui:composition>
 </html>
