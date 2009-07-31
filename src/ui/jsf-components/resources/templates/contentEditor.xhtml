@@ -54,7 +54,9 @@
                 <t:inputHidden id="__foldedGroups_allOpened" value="#{__ceBean.allOpened}"/>
                 <t:inputHidden id="__affectedXPath" value="#{__ceBean.affectedXPath}"/>
                 <h:commandButton action="#{__ceBean.resolveA4jAction}" id="__ceResolveA4jAction"
-                                 style="display:none;"/>
+                                 style="display:none;">
+                    <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
+                 </h:commandButton>
              </c:if>
 
             <c:set var="__ceRenderedBoxed" value="true"/>
