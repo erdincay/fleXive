@@ -123,22 +123,26 @@
                 <c:set var="editor_root" value="#{_ceContent.editorId}_editor"/>
                 <!-- Content editor screen -->
                 <a4j:outputPanel id="#{editor_root}" styleClass="fxContentEditor_editorContent">
-                    <!-- open and fold groups -->
-                    <div title="#{fxMessageBean['ContentEditor.button.openGroups.title']}"
-                       class="fxContentEditor_openGroups"
-                       onclick="flexive.contentEditor.toggleGroups('#{_ceContent.editorId}',true);"/>
-                    <div title="#{fxMessageBean['ContentEditor.button.foldGroups.title']}"
-                       class="fxContentEditor_foldGroups"
-                       onclick="flexive.contentEditor.toggleGroups('#{_ceContent.editorId}',false);"/>
+                    <ui:fragment rendered="#{_ceContent.content.rootGroup.hasGroups}">
+                        <!-- open and fold groups -->
+                        <div title="#{fxMessageBean['ContentEditor.button.openGroups.title']}"
+                           class="fxContentEditor_openGroups"
+                           onclick="flexive.contentEditor.toggleGroups('#{_ceContent.editorId}',true);"> </div>
+                        <div title="#{fxMessageBean['ContentEditor.button.foldGroups.title']}"
+                           class="fxContentEditor_foldGroups"
+                           onclick="flexive.contentEditor.toggleGroups('#{_ceContent.editorId}',false);"> </div>
+                    </ui:fragment>
 
-                    <!-- input language switch -->
-                    <div class="fxContentEditor_languageSwitch">
-                        <div style="#{not _ceContent.guiSettings.editMode or not empty _ceContent.guiSettings.openedReferenceId ? 'display:none' : ''}">
-                            <fx:formRow labelKey="ContentEditor.field.language" id="#{_ceContent.editorId}_updateLanguage">
-                                <fx:fxValueInputLanguageSelect id="#{_ceContent.editorId}_updateLanguage"/>
-                            </fx:formRow>
+                    <ui:fragment rendered="#{_ceContent.content.rootGroup.hasMultiLangProperty}">
+                        <!-- input language switch -->
+                        <div class="fxContentEditor_languageSwitch">
+                            <div style="#{not _ceContent.guiSettings.editMode or not empty _ceContent.guiSettings.openedReferenceId ? 'display:none' : ''}">
+                                <fx:formRow labelKey="ContentEditor.field.language" id="#{_ceContent.editorId}_updateLanguage">
+                                    <fx:fxValueInputLanguageSelect id="#{_ceContent.editorId}_updateLanguage"/>
+                                </fx:formRow>
+                            </div>
                         </div>
-                    </div>
+                    </ui:fragment>
 
                     <!-- Properties and Groups -->
                     <!-- clear group ids from last request -->

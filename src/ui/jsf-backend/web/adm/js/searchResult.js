@@ -12,35 +12,31 @@ function getTypeIdSelect() {
 }
 
 function onShowContextMenu() {
-    try {
-        // if contextEventTarget is null, we're in a submenu
-        if (this.contextEventTarget != null) {
-            var perms = flexive.yui.datatable.getPermissions(resultTable, this.contextEventTarget);
-            var selectedIds = getSelectedIds();
-            var pk = tryGetPk(this.contextEventTarget);
-            var hasBinary = flexive.yui.datatable.getRecordValue(resultTable, this.contextEventTarget, "hasBinary") == "true";
-            contextMenuPK = pk;
-            var noItemUnderCursor = pk == null;
-            var noSelection = selectedIds.length == 0;
-            flexive.yui.setMenuItems(["show", "showScreenview", "edit"], "disabled", noItemUnderCursor);
-            flexive.yui.setMenuItems(["copy", "copy_briefcases"], "disabled", noSelection && noItemUnderCursor);
-            flexive.yui.setMenuItem("edit", "disabled", !perms["edit"]);
-            flexive.yui.setMenuItem("delete", "disabled", !perms["delete"]);
-            flexive.yui.setMenuItem("download", "disabled", !hasBinary);
+    // if contextEventTarget is null, we're in a submenu
+    if (this.contextEventTarget != null) {
+        var perms = flexive.yui.datatable.getPermissions(resultTable, this.contextEventTarget);
+        var selectedIds = getSelectedIds();
+        var pk = tryGetPk(this.contextEventTarget);
+        var hasBinary = flexive.yui.datatable.getRecordValue(resultTable, this.contextEventTarget, "hasBinary") == "true";
+        contextMenuPK = pk;
+        var noItemUnderCursor = pk == null;
+        var noSelection = selectedIds.length == 0;
+        flexive.yui.setMenuItems(["show", "showScreenview", "edit"], "disabled", noItemUnderCursor);
+        flexive.yui.setMenuItems(["copy", "copy_briefcases"], "disabled", noSelection && noItemUnderCursor);
+        flexive.yui.setMenuItem("edit", "disabled", !perms["edit"]);
+        flexive.yui.setMenuItem("delete", "disabled", !perms["delete"]);
+        flexive.yui.setMenuItem("download", "disabled", !hasBinary);
+        if (getBriefcaseId() != -1) {
+            flexive.yui.setMenuItem("deleteBriefcase", "disabled", noItemUnderCursor);
+            flexive.yui.setMenuItem("move_briefcases", "disabled", noSelection && noItemUnderCursor);
+        }
+        if (parent.getNavFrameWnd().briefcasePanel) {
+            // sync briefcase submenu with briefcases from the briefcase panel if it's open
+            syncWithBriefcasePanel("copy_briefcases", "copy_briefcase");
             if (getBriefcaseId() != -1) {
-                flexive.yui.setMenuItem("deleteBriefcase", "disabled", noItemUnderCursor);
-                flexive.yui.setMenuItem("move_briefcases", "disabled", noSelection && noItemUnderCursor);
-            }
-            if (parent.getNavFrameWnd().briefcasePanel) {
-                // sync briefcase submenu with briefcases from the briefcase panel if it's open
-                syncWithBriefcasePanel("copy_briefcases", "copy_briefcase");
-                if (getBriefcaseId() != -1) {
-                    syncWithBriefcasePanel("move_briefcases", "move_briefcase");
-                }
+                syncWithBriefcasePanel("move_briefcases", "move_briefcase");
             }
         }
-    } catch (e) {
-        alertDialog(e);
     }
 }
 

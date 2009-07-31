@@ -113,6 +113,27 @@ public class FxGroupData extends FxData {
     }
 
     /**
+     * Return true if this content has at least one multilingual property set.
+     *
+     * @return  true if this content has at least one multilingual property set.
+     * @since   3.1
+     */
+    public boolean isHasMultiLangProperty() {
+        for (FxData fxData : data) {
+            if (fxData.isGroup()) {
+                if (((FxGroupData) fxData).isHasMultiLangProperty()) {
+                    return true;
+                }
+            } else {
+                if (((FxPropertyData) fxData).getPropertyAssignment().isMultiLang()) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
      * Helper to create a virtual root group
      *
      * @param xpPrefix XPath prefix like "FxType name[@pk=..]"
@@ -423,6 +444,21 @@ public class FxGroupData extends FxData {
         if (found == null)
             throw new FxNotFoundException("ex.content.xpath.notFound", xPath).asRuntimeException();
         return found;
+    }
+
+    /**
+     * Return true if the content has at least one group.
+     *
+     * @return  true if the content has at least one group.
+     * @since   3.1
+     */
+    public boolean isHasGroups() {
+        for (FxData data : this.data) {
+            if (data.isGroup()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
