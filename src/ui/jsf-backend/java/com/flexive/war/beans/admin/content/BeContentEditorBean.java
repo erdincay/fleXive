@@ -113,6 +113,9 @@ public class BeContentEditorBean implements ActionBean, Serializable {
 
     private long contentIdToInit= -1;
 
+    private String fxCeRenderFieldsJSFunction = null;
+    private boolean beBeanInUse;
+
     // Flag indicating if the content is opened/edited from a result set
     private boolean fromResultSet;
 
@@ -137,6 +140,7 @@ public class BeContentEditorBean implements ActionBean, Serializable {
                     setTreeNodeParent(nodeId);
                     addTreeNode();
                 }
+                beBeanInUse = true;
                 editMode = true;
             } else if ("editInstance".equals(action)) {
                 FxPK newPk;
@@ -149,6 +153,7 @@ public class BeContentEditorBean implements ActionBean, Serializable {
                     newPk = new FxPK(FxJsfUtils.getLongParameter("id"), FxPK.MAX);
                 }
                 pk = newPk;
+                beBeanInUse = true;
                 editMode = FxJsfUtils.getBooleanParameter("editMode", false);
             }
         } catch (Throwable t) {
@@ -170,6 +175,7 @@ public class BeContentEditorBean implements ActionBean, Serializable {
         this.reset = true;
         this.treeNodes = null;
         this.fromResultSet = false;
+        this.beBeanInUse = false;
         // hack!
         FxJsfUtils.resetFaceletsComponent(FORM_ID + ":" + EDITOR_ID);
     }
@@ -263,7 +269,15 @@ public class BeContentEditorBean implements ActionBean, Serializable {
     public boolean isFromResultSet() {
         return fromResultSet;
     }
-    
+
+    public boolean isBeBeanInUse() {
+        return beBeanInUse;
+    }
+
+    public void setBeBeanInUse(boolean beBeanInUse) {
+        this.beBeanInUse = beBeanInUse;
+    }
+
     /**
      * Import a content
      *
@@ -543,6 +557,7 @@ public class BeContentEditorBean implements ActionBean, Serializable {
     public String createNewContent() {
         resetViewStateVars();
         this.typeId = newTypeId;
+        beBeanInUse = true;
         this.editMode = true;
         return getEditorPage();
     }
@@ -607,6 +622,7 @@ public class BeContentEditorBean implements ActionBean, Serializable {
         resetViewStateVars();
         content = con;
         this.editMode = editMode;
+        beBeanInUse = true;
         return getEditorPage();
     }
 
@@ -622,6 +638,7 @@ public class BeContentEditorBean implements ActionBean, Serializable {
         resetViewStateVars();
         this.pk = pk;
         this.editMode = editMode;
+        beBeanInUse = true;
         return getEditorPage();
     }
 
@@ -637,6 +654,7 @@ public class BeContentEditorBean implements ActionBean, Serializable {
         resetViewStateVars();
         this.typeId = typeId;
         this.editMode = editMode;
+        beBeanInUse = true;
         return getEditorPage();
     }
 
@@ -655,6 +673,7 @@ public class BeContentEditorBean implements ActionBean, Serializable {
         // set result set flag
         this.fromResultSet = true;
         this.pk = new FxPK(contentIdToInit, version);
+        beBeanInUse = true;
         return getEditorPage();
     }
 

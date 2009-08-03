@@ -12,22 +12,29 @@
       xmlns:weblet="http://weblets.dev.java.net/tags_jsp2">
 
 <ui:composition>
+    <t:saveState value="#{beContentEditorBean.beBeanInUse}"/>
     <!-- jsf-id of parent element that would need a "reRender" on a4j action.
     unfortunately not working together with resetFaceletsComponent, so not used atm,
     instead the whole form is rerenderd -->
     <c:set var="parentElement" value="#{_ceContent.parentIdGenerator[element]}"/>
 
     <c:if test="#{_ceContent.guiSettings.editMode}">
+        <!-- separate js function call for the BE app -->
+        <c:set var="jsfunc" value="flexive.yui.load();"/>
+        <c:if test="#{beContentEditorBean.beBeanInUse}">
+            <c:set var="jsfunc" value="beAjaxButtonRequest();"/>
+        </c:if>
+
         <c:if test="#{not _ceContent.guiSettings.disableAddAssignment}">
             <ui:fragment rendered="#{empty _ceContent.guiSettings.openedReferenceId}">
                 <span title="#{element.property ? fxMessageBean['ContentEditor.button.insert.property.title'] :
                          element.XPathFull ne '/' ? fxMessageBean['ContentEditor.button.insert.group.title'] :
                          fxMessageBean['ContentEditor.button.insert.root.title']}"
-                  class="#{element.property ? 'fxContentEditor_insertBelowProperty' :
+                      class="#{element.property ? 'fxContentEditor_insertBelowProperty' :
                          element.XPathFull ne '/' ? 'fxContentEditor_insertIntoGroup' :
                          'fxContentEditor_insertIntoRootGroup'}"
-                onclick="flexive.contentEditor.showMenu(event,this,'Menu_#{_ceContent.idGenerator[element]}');"/>
-           </ui:fragment>
+                      onclick="flexive.contentEditor.showMenu(event,this,'Menu_#{_ceContent.idGenerator[element]}');"/>
+            </ui:fragment>
             <!-- render popup menu for each element to add property assignments -->
             <div class="fxContentEditor_popupMenu" id="Menu_#{_ceContent.idGenerator[element]}"
                  onmouseover='flexive.contentEditor.ignoreEvent(event);'
@@ -44,7 +51,7 @@
                                      onclick="flexive.contentEditor.prepareAdd('#{_ceContent.guiSettings.formPrefix}', '#{selectListId}');if (!flexive.contentEditor.preA4jAction('#{_ceContent.guiSettings.formPrefix}','#{_ceContent.editorId}','#{element.XPathFull}','addChilds')) return false;"
                                      onmouseover='flexive.contentEditor.ignoreEvent(event)'
                                      title="#{fxMessageBean['ContentEditor.field.elementmenu.addSelected']}"
-                                     oncomplete="flexive.yui.load();"
+                                     oncomplete="#{jsfunc}"
                                      rendered="#{empty _ceContent.guiSettings.openedReferenceId}"
                                      status="#{_ceContent.editorId}_status">
                         <f:setPropertyActionListener target="#{__ceBean.element}" value="#{element}"/>
@@ -69,10 +76,10 @@
                                  onclick="if (!flexive.contentEditor.preA4jAction('#{_ceContent.guiSettings.formPrefix}','#{_ceContent.editorId}','#{element.XPathFull}','moveElementUp')) return false;flexive.contentEditor.ignoreEvent(event);"
                                  title="#{fxMessageBean['ContentEditor.button.up.title']}"
                                  styleClass="fxContentEditor_moveUpIcon"
-                                 oncomplete="flexive.yui.load();"
+                                 oncomplete="#{jsfunc}"
                                  rendered="#{empty _ceContent.guiSettings.openedReferenceId}"
                                  status="#{_ceContent.editorId}_status"
-                                 >
+                        >
                     <f:setPropertyActionListener target="#{__ceBean.element}" value="#{element}"/>
                     <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
                     <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
@@ -83,8 +90,8 @@
                                  onclick="if (!flexive.contentEditor.preA4jAction('#{_ceContent.guiSettings.formPrefix}','#{_ceContent.editorId}','#{element.XPathFull}','moveElementDown')) return false;flexive.contentEditor.ignoreEvent(event);"
                                  rendered="#{not _ceContent.guiSettings.disablePositionAssignment and empty _ceContent.guiSettings.openedReferenceId}"
                                  title="#{fxMessageBean['ContentEditor.button.down.title']}"
-                                 styleClass="fxContentEditor_moveDownIcon" 
-                                 oncomplete="flexive.yui.load();"
+                                 styleClass="fxContentEditor_moveDownIcon"
+                                 oncomplete="#{jsfunc}"
                                  status="#{_ceContent.editorId}_status">
                     <f:setPropertyActionListener target="#{__ceBean.element}" value="#{element}"/>
                     <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
@@ -94,15 +101,15 @@
             <c:if test="#{not _ceContent.guiSettings.disableAddAssignment}">
                 <!-- Add same element button -->
                 <c:if test="#{element.createableElements gt 0}">
-                        <a4j:commandLink reRender="#{__ce_reRender}" action="#{__ceBean.addElement}" eventsQueue="ceQueue"
-                                         onmouseover='flexive.contentEditor.ignoreEvent(event)'
-                                         onclick="if (!flexive.contentEditor.preA4jAction('#{_ceContent.guiSettings.formPrefix}','#{_ceContent.editorId}','#{element.XPathFull}','addElement')) return false;flexive.contentEditor.ignoreEvent(event);"
-                                         rendered="#{not _ceContent.guiSettings.disableAddAssignment and empty _ceContent.guiSettings.openedReferenceId}"
-                                         title="#{fxMessageBean['ContentEditor.button.add.title']} #{fxMapBean.assignments[element.assignmentId].label}"
-                                         styleClass="fxContentEditor_addIcon"
-                                         oncomplete="flexive.yui.load();"
-                                         status="#{_ceContent.editorId}_status"
-                                         >
+                    <a4j:commandLink reRender="#{__ce_reRender}" action="#{__ceBean.addElement}" eventsQueue="ceQueue"
+                                     onmouseover='flexive.contentEditor.ignoreEvent(event)'
+                                     onclick="if (!flexive.contentEditor.preA4jAction('#{_ceContent.guiSettings.formPrefix}','#{_ceContent.editorId}','#{element.XPathFull}','addElement')) return false;flexive.contentEditor.ignoreEvent(event);"
+                                     rendered="#{not _ceContent.guiSettings.disableAddAssignment and empty _ceContent.guiSettings.openedReferenceId}"
+                                     title="#{fxMessageBean['ContentEditor.button.add.title']} #{fxMapBean.assignments[element.assignmentId].label}"
+                                     styleClass="fxContentEditor_addIcon"
+                                     oncomplete="#{jsfunc}"
+                                     status="#{_ceContent.editorId}_status"
+                            >
                         <f:setPropertyActionListener target="#{__ceBean.element}" value="#{element}"/>
                         <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
                         <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
@@ -117,12 +124,13 @@
             <c:if test="#{not _ceContent.guiSettings.disableRemoveAssignment}">
                 <!-- Remove element button -->
                 <c:if test="#{element.removeableElements gt 0}">
-                    <a4j:commandLink reRender="#{__ce_reRender}" action="#{__ceBean.removeElement}" eventsQueue="ceQueue"
+                    <a4j:commandLink reRender="#{__ce_reRender}" action="#{__ceBean.removeElement}"
+                                     eventsQueue="ceQueue"
                                      onmouseover='flexive.contentEditor.ignoreEvent(event)'
                                      onclick="if (!flexive.contentEditor.preA4jAction('#{_ceContent.guiSettings.formPrefix}','#{_ceContent.editorId}','#{element.XPathFull}','removeElement')) return false;flexive.contentEditor.ignoreEvent(event);"
                                      title="#{fxMessageBean['ContentEditor.button.remove.title']} #{fxMapBean.assignments[element.assignmentId].label}"
                                      styleClass="fxContentEditor_removeIcon"
-                                     oncomplete="flexive.yui.load();"
+                                     oncomplete="#{jsfunc}"
                                      rendered="#{empty _ceContent.guiSettings.openedReferenceId}"
                                      status="#{_ceContent.editorId}_status">
                         <f:setPropertyActionListener target="#{__ceBean.element}" value="#{element}"/>

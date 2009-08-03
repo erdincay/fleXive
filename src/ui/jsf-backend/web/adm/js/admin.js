@@ -267,7 +267,15 @@ function alertDialog(message) {
  */
 function ajaxButtonRequest() {
     initialiseAjaxComponent();
-    regAjaxComponentInToolbar();
+    regAjaxComponentInToolbar(false);
+}
+
+/**
+ * Call this for the BE application ajax requests in the content editor component
+ */
+function beAjaxButtonRequest() {
+    initialiseAjaxComponent();
+    regAjaxComponentInToolbar(true);
 }
 
 /**
@@ -283,7 +291,7 @@ function initialiseAjaxComponent() {
  * The actual logic will only be executed if ajaxButtons are found in parent.ajaxRegisteredIds (main.js).
  * [i.e. the corresponding adm:commandButtons's "ajax" attribute was set to "true"]
  */
-function regAjaxComponentInToolbar() {
+function regAjaxComponentInToolbar(contentEditor) {
     // retrieve the content frame (kept in sep. var for possible future changes)
     var contentFrame = window.parent.document.getElementById('contentFrame');
     var content = contentFrame.contentWindow.document;
@@ -296,6 +304,26 @@ function regAjaxComponentInToolbar() {
     var _toolbarClick = [];
     var _toolbarImages = [];
     var countTbButtons = 0;
+
+    /**
+     * ContentEditor only:
+     * This function merely updates the onclick events in the toolbar from the given onclicks in the commandbuttons
+     */
+    function updateToolbarClickFuncsOnly() {
+        if (_toolBar != null) {
+            var _images = _toolBar.getElementsByTagName('img');
+            if (_images.length > 0) {
+                for (var i = 0; i < _images.length; i++) {
+                    var currentImgId = _images[i].id;
+                    // only check "regular" buttons
+                    if (currentImgId != "" && _images[i].src.indexOf('separator.png' < 1)) { // separator
+                        var commandEleName = 'frm:' + currentImgId.substring(0, currentImgId.lastIndexOf('_'));
+                        window.parent.document.getElementById(currentImgId).onclick = eval(content.getElementById(commandEleName).onclick);
+                    }
+                }
+            }
+        }
+    }
 
     // retrieve the current toolbar buttons from the DOM (leaving out ajaxButtons) tree
     function getToolbarButtons() {
@@ -507,7 +535,10 @@ function regAjaxComponentInToolbar() {
     };
 
     // rendering logic
-    if (parent.ajaxRegisteredIds.length > 0) {
+    if(contentEditor) {
+        updateToolbarClickFuncsOnly();
+    }
+    else if (parent.ajaxRegisteredIds.length > 0) {
         getToolbarButtons();
         if (renderAjaxButtonsToToolbar()) {
             copyToolbarButtonsToParent(false);
@@ -612,14 +643,18 @@ function setDefaultCursor() {
  * @return                  the animation (useful for chaining)
  */
 function flash(elementId, flashColor, backgroundColor) {
-//    if (document.all) {
-//        return null;     // IE seems to play animations a bit too choppy for my taste...
-//    }
+    //    if (document.all) {
+    //        return null;     // IE seems to play animations a bit too choppy for my taste...
+    //    }
     var anim = new YAHOO.util.ColorAnim(elementId, { backgroundColor: { from: backgroundColor, to: flashColor } }, 0.3, YAHOO.util.Easing.easeInStrong);
     var anim2 = new YAHOO.util.ColorAnim(elementId, { backgroundColor: { to: backgroundColor } }, 1.5, YAHOO.util.Easing.easeOutStrong);
-    anim.onComplete.subscribe(function() { anim2.animate(); });
+    anim.onComplete.subscribe(function() {
+        anim2.animate();
+    });
     // remove element background after animation
-    anim2.onComplete.subscribe(function() { document.getElementById(elementId).style.backgroundColor = ""; });
+    anim2.onComplete.subscribe(function() {
+        document.getElementById(elementId).style.backgroundColor = "";
+    });
     anim.animate();
     return anim2;
 }
@@ -635,9 +670,9 @@ function getOnClick(id, onClickAction, lockscreen) {
     var contentFrame = window.parent.document.getElementById('contentFrame');
     var callerWindow = contentFrame.contentWindow;
     var linkElement = getFirstLinkElement(callerWindow.document, id);
-    if(onClickAction == 'null')
+    if (onClickAction == 'null')
         onClickAction = "";
-    if(lockscreen)
+    if (lockscreen)
         onClickAction = onClickAction + "parent.lockScreen();";
     onClickAction = onClickAction + "document.getElementById('" + linkElement.getAttribute("id") + "').onclick();";
     return eval(onClickAction);
