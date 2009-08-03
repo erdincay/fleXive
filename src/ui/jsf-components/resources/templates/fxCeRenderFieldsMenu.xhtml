@@ -53,6 +53,7 @@
                                      title="#{fxMessageBean['ContentEditor.field.elementmenu.addSelected']}"
                                      oncomplete="#{jsfunc}"
                                      rendered="#{empty _ceContent.guiSettings.openedReferenceId}"
+                                     onblur="#{jsfunc}"
                                      status="#{_ceContent.editorId}_status">
                         <f:setPropertyActionListener target="#{__ceBean.element}" value="#{element}"/>
                         <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
