@@ -47,9 +47,7 @@ import org.antlr.runtime.tree.Tree;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * Translates a CMIS SQL AST to a {@link Statement}.
@@ -60,6 +58,11 @@ import java.util.List;
  */
 class StatementBuilder {
     private static final Log LOG = LogFactory.getLog(StatementBuilder.class);
+
+    /** System assignments that are not selected by "*" */
+    private static Set<String> IGNORED_SYSTEM_ASSIGNMENTS = Collections.unmodifiableSet(new HashSet<String>(
+            Arrays.asList("ACL", "RELSRC", "RELDST", "RELPOS_SRC", "RELPOS_DST", "STEP", "MANDATOR", "ISACTIVE")
+    ));
 
     private final Tree root;
     private final Statement stmt = new Statement();
@@ -270,6 +273,9 @@ class StatementBuilder {
                     stmt.getTable(decodeIdent(tableReferenceNode.getChild(0)))
             );
         } else {
+            if (stmt.getTables().size() > 1) {
+                throw new IllegalArgumentException("'*' without table alias, but with more than one source table");
+            }
             tables.addAll(stmt.getTables());
         }
 
@@ -294,6 +300,22 @@ class StatementBuilder {
                 }
             }
         }
+
+        // add all system properties
+        for (FxPropertyAssignment assignment : environment.getType(FxType.ROOT_ID).getAllProperties()) {
+            if (assignment.isSystemInternal() && !IGNORED_SYSTEM_ASSIGNMENTS.contains(assignment.getAlias())) {
+                result.add(
+                        new ColumnReference(
+                                environment, storage,
+                                tables.get(0),
+                                assignment.getAlias().toLowerCase(),
+                                null,
+                                false
+                        )
+                );
+            }
+        }
+
         return result;
     }
 

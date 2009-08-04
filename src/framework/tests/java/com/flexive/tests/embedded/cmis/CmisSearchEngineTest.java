@@ -54,6 +54,7 @@ import com.flexive.tests.embedded.FxTestUtils;
 import com.flexive.tests.embedded.TestUsers;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
 import static org.testng.Assert.*;
 import org.testng.annotations.AfterClass;
@@ -757,7 +758,7 @@ public class CmisSearchEngineTest {
                 "SELECT * FROM cmis_person ORDER BY name"
         );
         assertRowCount(result, 4);
-        assertEquals(result.getColumnAliases(), Arrays.asList("name", "ssn", "email"));
+        assertEquals(result.getColumnAliases().subList(0, 3), Arrays.asList("name", "ssn", "email"));
         assertEquals(result.collectColumnValues("name"), Arrays.asList("Alex Cervais", "Martin Black", "Peter Bones", "Sandra Locke"));
     }
 
@@ -767,7 +768,7 @@ public class CmisSearchEngineTest {
                 "SELECT p.id, p.* FROM cmis_person AS p ORDER BY name"
         );
         assertRowCount(result, 4);
-        assertEquals(result.getColumnAliases(), Arrays.asList("id", "name", "ssn", "email"));
+        assertEquals(result.getColumnAliases().subList(0, 4), Arrays.asList("id", "name", "ssn", "email"));
         assertEquals(result.collectColumnValues("name"), Arrays.asList("Alex Cervais", "Martin Black", "Peter Bones", "Sandra Locke"));
     }
 
@@ -777,7 +778,14 @@ public class CmisSearchEngineTest {
                 "SELECT p.*, data.* FROM cmis_person AS p JOIN cmis_person_data AS data ON (p.ssn=data.ssn) ORDER BY name"
         );
         assertRowCount(result, 3);
-        assertEquals(result.getColumnAliases(), Arrays.asList("name", "ssn", "email", "ssn", "entrydate", "annualsalary"));
+        assertEquals(
+                Lists.newArrayList(Iterables.concat(
+                        result.getColumnAliases().subList(0, 3),
+                        result.getColumnAliases().subList(result.getRow(0).indexOf("entrydate") - 2, result.getRow(0).indexOf("entryDate") + 1)
+                )),
+                // TODO: table alias should be set in column alias
+                Arrays.asList("name", "ssn", "email", "ssn", "entrydate", "annualsalary")
+        );
         assertEquals(result.collectColumnValues("name"), Arrays.asList("Martin Black", "Peter Bones", "Sandra Locke"));
         assertEquals(result.collectColumnValues("annualSalary"), Arrays.asList(75000L, 50000L, 85000L));
     }
