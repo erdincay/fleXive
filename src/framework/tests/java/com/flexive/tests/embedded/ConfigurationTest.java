@@ -385,7 +385,7 @@ public class ConfigurationTest {
             assertTrue(StringUtils.isNotBlank(data.getDomainRegEx()), "Domain regexp missing");
             if (data.isAvailable()) {
                 assertTrue(StringUtils.isNotBlank(data.getDbVersion()), "DB version missing");
-                assertTrue(data.getDbVendor().getId() >= 0, "DB vendor missing");
+                assertTrue(!data.getDbVendor().equals("Unknown"), "DB vendor missing");
             }
             config.clearDivisionCache();
             assertTrue(config.getDivisionData(data.getId()).equals(data));
@@ -397,7 +397,7 @@ public class ConfigurationTest {
         final DivisionData[] orig = config.getDivisions();
         FxContext.get().setGlobalAuthenticated(true);
         try {
-            final DivisionData newDivision = new DivisionData(1, false, "test", "xxx", DBVendor.Unknown, "1.2");
+            final DivisionData newDivision = new DivisionData(1, false, "test", "xxx", "Unknown", "1.2");
             config.saveDivisions(Arrays.asList(newDivision));
             assertTrue(config.getDivisions().length == 1, "Division table not updated");
             assertTrue(config.getDivisions()[0].equals(newDivision), "New division not written properly");

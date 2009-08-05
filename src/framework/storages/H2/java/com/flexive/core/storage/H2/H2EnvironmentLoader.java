@@ -29,52 +29,21 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the file!
  ***************************************************************/
-package com.flexive.shared.configuration;
+package com.flexive.core.storage.H2;
 
-import java.util.regex.Pattern;
+import com.flexive.core.storage.EnvironmentLoader;
+import com.flexive.core.storage.genericSQL.GenericEnvironmentLoader;
 
 /**
- * Editable division data class, used for division data setup forms.
+ * concrete environment loader implementation for H2
  *
- * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
- * @version $Rev$
+ * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-public class DivisionDataEdit extends DivisionData {
-    private static final long serialVersionUID = 9017722116723955308L;
+public class H2EnvironmentLoader extends GenericEnvironmentLoader {
 
-    /**
-     * Create an editable division data object that is independent from its source object.
-     *
-     * @param data  the source division data.
-     */
-    public DivisionDataEdit(DivisionData data) {
-        super(data.id, data.available, data.dataSource, data.domainRegEx, data.dbVendor, data.dbVersion);
+    private static final H2EnvironmentLoader instance = new H2EnvironmentLoader();
+
+    public static EnvironmentLoader getInstance() {
+        return instance;
     }
-
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public void setAvailable(boolean available) {
-        this.available = available;
-    }
-
-    public void setDataSource(String dataSource) {
-        this.dataSource = dataSource;
-    }
-
-    public void setDomainRegEx(String domainRegEx) {
-        this.domainPattern = Pattern.compile(domainRegEx);
-        this.domainRegEx = domainRegEx; // update regex only if it successfully compiles
-    }
-
-    public void setDbVendor(String dbVendor) {
-        this.dbVendor = dbVendor;
-    }
-
-    public void setDbVersion(String dbVersion) {
-        this.dbVersion = dbVersion;
-    }
-
 }

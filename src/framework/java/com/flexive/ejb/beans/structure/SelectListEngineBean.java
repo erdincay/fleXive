@@ -228,26 +228,11 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
             ps.close();
             sb.setLength(0);
             //fix item references
-            switch (FxContext.get().getDivisionData().getDbVendor()) {
-                case H2:
-                    sb.append("UPDATE ").append(TBL_SELECTLIST_ITEM).
-                            append(" SET PARENTID=? WHERE PARENTID IN (SELECT p.ID FROM ").append(TBL_SELECTLIST_ITEM).
-                            append(" p WHERE p.LISTID=?)");
-                    break;
-                //MySQL does not support updates if the target table is contained in the where clause
-                case MySQL:
-                default:
-                    sb.append("UPDATE ").append(TBL_SELECTLIST_ITEM).append(" i1, ").append(TBL_SELECTLIST_ITEM).
-                            append(" i2 SET i1.PARENTID=? WHERE i1.PARENTID=i2.ID AND i2.LISTID=?");
-                    break;
-            }
-
-            ps = con.prepareStatement(sb.toString());
+            ps = con.prepareStatement(StorageManager.getSelectListItemReferenceFixStatement());
             ps.setNull(1, java.sql.Types.INTEGER);
             ps.setLong(2, list.getId());
             ps.executeUpdate();
             ps.close();
-            sb.setLength(0);
             //items
             sb.append("DELETE FROM ").append(TBL_SELECTLIST_ITEM).append(" WHERE LISTID=?");
             ps = con.prepareStatement(sb.toString());

@@ -35,7 +35,6 @@ import com.flexive.shared.exceptions.FxCreateException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.structure.FxAssignment;
-import com.flexive.shared.structure.FxSelectListItemEdit;
 import com.flexive.shared.structure.FxSelectListItem;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.value.FxValue;
@@ -111,7 +110,8 @@ public final class FxSharedUtils {
      */
     public final static boolean USE_JDK6_EXTENSION;
     public final static boolean WINDOWS = System.getProperty("os.name").indexOf("Windows") >= 0;
-    private static final String FLEXIVE_PROPERTIES = "flexive-application.properties";
+    private static final String FLEXIVE_DROP_PROPERTIES = "flexive-application.properties";
+    private static final String FLEXIVE_STORAGE_PROPERTIES = "flexive-storage.properties";
 
     static {
         int major = -1, minor = -1;
@@ -472,7 +472,7 @@ public final class FxSharedUtils {
     private static void addDropsFromClasspath(List<FxDropApplication> dropApplications) {
         try {
             final Enumeration<URL> fileUrls =
-                    Thread.currentThread().getContextClassLoader().getResources(FLEXIVE_PROPERTIES);
+                    Thread.currentThread().getContextClassLoader().getResources(FLEXIVE_DROP_PROPERTIES);
             while (fileUrls.hasMoreElements()) {
                 final URL url = fileUrls.nextElement();
 
@@ -485,7 +485,7 @@ public final class FxSharedUtils {
                 final String contextRoot = properties.getProperty("contextRoot");
                 final String displayName = properties.getProperty("displayName");
                 if (StringUtils.isNotBlank(name)) {
-                    String path = url.getPath().replace("/" + FLEXIVE_PROPERTIES, "");
+                    String path = url.getPath().replace("/" + FLEXIVE_DROP_PROPERTIES, "");
                     if (path.endsWith("!")) {
                         path = StringUtils.chop(path);
                     }
@@ -502,6 +502,34 @@ public final class FxSharedUtils {
         } catch (IOException e) {
             LOG.error("Failed to initialize drops from the classpath: " + e.getMessage(), e);
         }
+    }
+
+    /**
+     * Scan all flexive storage implementations to get the name of the factory classes
+     *
+     * @return list containing the name of all storage factory classes
+     */
+    public static List<String> getStorageImplementations() {
+        List<String> found = new ArrayList<String>(10);
+        try {
+            final Enumeration<URL> fileUrls =
+                    Thread.currentThread().getContextClassLoader().getResources(FLEXIVE_STORAGE_PROPERTIES);
+            while (fileUrls.hasMoreElements()) {
+                final URL url = fileUrls.nextElement();
+
+                // load properties from file
+                final Properties properties = new Properties();
+                properties.load(url.openStream());
+
+                // load factory parameter
+                final String factory = properties.getProperty("storage.factory");
+                if (StringUtils.isNotBlank(factory))
+                    found.add(factory);
+            }
+        } catch (IOException e) {
+            LOG.error("Failed to initialize storage implementations from the classpath: " + e.getMessage(), e);
+        }
+        return found;
     }
 
 

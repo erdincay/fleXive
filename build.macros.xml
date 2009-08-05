@@ -58,12 +58,13 @@
         <attribute name="delimiter" default=";"/>
         <element name="args" optional="true" implicit="true"/>
         <sequential >
+            <echo  message="dir: ${flexive.build.framework.sqlResources.dir}"/>
             <sql driver="${database.driver}" url="@{url}"
                 userid="${database.username}" password="${database.password}" delimiter="@{delimiter}">
                 <classpath refid="${database.classpathref}"/>
                 <args/>
                 <sort>
-                    <fileset dir="${database.src.dir}${database.vendor}" includes="@{includes}" excludes="@{excludes}"/>
+                    <fileset dir="${flexive.build.framework.sqlResources.dir}" includes="@{includes}" excludes="@{excludes}"/>
                 </sort>
             </sql>
         </sequential>
@@ -171,6 +172,26 @@
                 destdir="@{builddir}/classes">
                 <classpath refid="@{classpathref}"/>
             </javac-call>
+        </sequential>
+    </macrodef>
+
+    <macrodef name="buildStorage" description="Compile storage sources and package them">
+        <attribute name="srcdir" description="Base directory of the storage"/>
+        <attribute name="builddir" description="Directory to generate the artifacts at"/>
+        <attribute name="classpathref" description="Reference to the [fleXive] classpath"/>
+        <attribute name="jarfile" description="Resulting jar file"/>
+        <sequential>
+            <mkdir dir="@{builddir}/classes"/>
+            <javac-call
+                srcdir="@{srcdir}/java"
+                destdir="@{builddir}/classes">
+                <classpath refid="@{classpathref}"/>
+            </javac-call>
+            <jar jarfile="@{jarfile}">
+                <fileset dir="@{builddir}/classes"/>
+                <zipfileset dir="@{srcdir}/resources" prefix="resources" includes="**/*sql"/>
+                <zipfileset dir="@{srcdir}/resources" includes="**/*properties"/>
+            </jar>
         </sequential>
     </macrodef>
 

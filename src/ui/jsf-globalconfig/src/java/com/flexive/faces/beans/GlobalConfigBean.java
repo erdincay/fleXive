@@ -36,7 +36,6 @@ import com.flexive.faces.messages.FxFacesMsgInfo;
 import com.flexive.faces.messages.FxFacesMsgWarn;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
-import com.flexive.shared.configuration.DBVendor;
 import com.flexive.shared.configuration.DivisionData;
 import com.flexive.shared.configuration.DivisionDataEdit;
 import com.flexive.shared.exceptions.FxApplicationException;
@@ -116,7 +115,7 @@ public class GlobalConfigBean {
                     maxId = data.getId();
                 }
             }
-            getDivisions().add(new DivisionDataEdit(new DivisionData(maxId + 1, false, "", "", DBVendor.Unknown, "")));
+            getDivisions().add(new DivisionDataEdit(new DivisionData(maxId + 1, false, "", "", "Unknown", "")));
             editIndex = getDivisions().size() - 1;
         } catch (FxApplicationException e) {
             new FxFacesMsgErr(e).addToContext();

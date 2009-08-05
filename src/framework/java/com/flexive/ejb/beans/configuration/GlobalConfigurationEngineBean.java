@@ -36,7 +36,6 @@ import static com.flexive.core.DatabaseConst.TBL_GLOBAL_CONFIG;
 import com.flexive.ejb.mbeans.FxCache;
 import com.flexive.shared.*;
 import com.flexive.shared.cache.FxCacheException;
-import com.flexive.shared.configuration.DBVendor;
 import com.flexive.shared.configuration.DivisionData;
 import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.configuration.ParameterScope;
@@ -348,8 +347,7 @@ public class GlobalConfigurationEngineBean extends GenericConfigurationImpl impl
         } finally {
             Database.closeObjects(GlobalConfigurationEngineBean.class, con, null);
         }
-        return new DivisionData(divisionId, available, dataSource, domainRegEx,
-                DBVendor.getVendor(dbVendor), dbVersion);
+        return new DivisionData(divisionId, available, dataSource, domainRegEx, dbVendor, dbVersion);
     }
 
     /**

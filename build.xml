@@ -21,6 +21,7 @@
     <property name="build.ui.jar.dir" value="${flexive.base.build.dir}/ui/jar"/>
 	<property name="build.ui.meta.dir" value="${flexive.base.build.dir}/ui/jar/WEB-INF"/>
     <property name="build.ui.components.meta.dir" value="${flexive.base.build.dir}/ui/jar/components/WEB-INF"/>
+    <property name="build.storages.dir" value="${flexive.base.build.dir}/storages"/>
     <property name="shared.meta.dir" value="${flexive.build.framework.jar.dir}/shared.meta"/>
     <property name="database.src.dir" value="${flexive.resources.framework.dir}/sql/"/>
     <property name="database.classpathref" value="classpath.build.framework"/>
@@ -99,7 +100,7 @@
 	<import file="build.tests.xml"/>
     <import file="build.javadoc.xml"/>
     <import file="build.macros.xml"/>
-    <import file="${flexive.base.framework.dir}/resources/sql/H2/StoredProcedures/build.xml"/>
+    <import file="${flexive.base.framework.dir}/storages/H2/build.xml"/>
 
     <!-- ========================== targets ============================= -->
 
@@ -186,6 +187,7 @@
         <mkdir dir="${build.ui.shared.classes.dir}"/>
         <mkdir dir="${flexive.build.framework.jar.dir}"/>
 		<mkdir dir="${build.ui.jar.dir}"/>
+        <mkdir dir="${build.storages.dir}"/>
 		<mkdir dir="${invalid.path}"/>
         <javac-call srcdir="${flexive.src.framework.dir}"
                     destdir="${build.framework.classes.dir}"
@@ -335,8 +337,7 @@
         </antlr:antlr3>
     </target>
 
-    <target name="jar.framework" depends="jar.framework.shared, jar.ejb" description="Package the complete core framework">
-	</target>
+    <target name="jar.framework" depends="jar.framework.shared, jar.ejb, jar.storages" description="Package the complete core framework"/>
 
 	<target name="jar.framework.shared.prepare">
 		<uptodate property="jar.framework.shared.skip" targetfile="${flexive.build.framework.jar.dir}/flexive-shared.jar">
@@ -520,6 +521,17 @@
 		</emma>
 	</target>
 
+    <target name="jar.storages" depends="jar.ejb">
+        <buildStorage srcdir="${flexive.base.framework.dir}/storages/MySQL"
+                      builddir="${build.storages.dir}/MySQL"
+                      classpathref="classpath.build.plugin"
+                      jarfile="${flexive.build.framework.jar.dir}/flexive-storage-MySQL.jar"/>
+        <buildStorage srcdir="${flexive.base.framework.dir}/storages/H2"
+                      builddir="${build.storages.dir}/H2"
+                      classpathref="classpath.build.plugin"
+                      jarfile="${flexive.build.framework.jar.dir}/flexive-storage-H2.jar"/>
+    </target>
+
     <target name="jar.tests" depends="tests.compile.all">
         <jar file="${flexive.build.framework.jar.dir}/flexive-tests.jar">
             <fileset dir="${tests.classes.dir}" includes="com/flexive/tests/**/*"/>
@@ -527,7 +539,7 @@
     </target>
 
     <!--<target name="jar.all" depends="jar.framework, jar.ui, jar.tests"/>-->
-    <target name="jar.all" depends="jar.framework, jar.ui, h2.jar"/>
+    <target name="jar.all" depends="jar.framework, jar.storages, jar.ui"/>
 
     <target name="jar.ear" depends="prepare" description="Assemble flexive.ear">
         <mkdir dir="${flexive.drop.dir}"/>
@@ -606,7 +618,29 @@
         <echo message="Skipping database update!"/>
     </target>
 
-    <target name="db.update" description="Update database" depends="init" unless="db.noupdate">
+    <target name="db.extractScripts" description="Extract sql script from used storage archive" depends="jar.storages">
+        <groovy>
+            String jar = "flexive-storage-"+properties['database.vendor']+".jar"
+            String embeddedPath = properties['flexive.build.framework.jar.dir']
+            File jarFile = new File(properties['flexive.build.framework.jar.dir']+File.separatorChar+jar)
+            if(!jarFile.exists()) {
+                //either provide a fallback here or just fail
+                ant.fail(message:"Could not find storage implementation jar file $jar!")
+            }
+            if(new File(properties['flexive.build.framework.sqlResources.dir']).exists())
+                ant.delete(dir:properties['flexive.build.framework.sqlResources.dir'])
+            ant.unzip(src:jarFile.absolutePath, dest:properties['flexive.build.framework.sqlResources.dir']) {
+                patternset() {
+                    include(name:"**/*sql")
+                }
+                filtermapper() {
+                    replacestring(from:"resources/",to:"")
+                }
+            }
+        </groovy>
+    </target>
+
+    <target name="db.update" description="Update database" depends="init, db.extractScripts" unless="db.noupdate">
         <echo taskname="flexive">[fleXive] is using ${database.vendor} database settings... (this can be changed in build.properties)</echo>
         <input taskname="flexive" addproperty="schema.name" defaultvalue="flexive"
                message="Please enter the database schema you want to create or reset:"/>
@@ -614,7 +648,7 @@
         <globalconfig-setup />
     </target>
 
-    <target name="db.update.test" description="Update test database" depends="init" unless="db.noupdate">
+    <target name="db.update.test" description="Update test database" depends="init, db.extractScripts" unless="db.noupdate">
         <echo taskname="flexive">[fleXive] is using ${database.vendor} database settings... (this can be changed in build.properties)</echo>
         <division-setup database="flexiveTest"/>
     </target>
@@ -667,7 +701,7 @@
         <echo file="${flexive.dist.apps.disabled.dir}/README.txt">Use this directory for flexive applications that should not be included in flexive.ear.</echo>
     </target>
 
-    <target name="dist" depends="jar.all,dist.prepare,tests.package.dist,dist.srcOnly,h2.jar,dist.assemble,examples,dist.package" description="Build a distribution of all jars, wars and ears">
+    <target name="dist" depends="jar.all,dist.prepare,tests.package.dist,dist.srcOnly,dist.assemble,examples,dist.package" description="Build a distribution of all jars, wars and ears">
     </target>
 
     <target name="dist.assemble">

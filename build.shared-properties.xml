@@ -9,7 +9,9 @@
     <property name="flexive.base.ui.components.dir" value="${flexive.base.ui.dir}/jsf-components"/>
 
     <property name="flexive.base.build.dir" value="${flexive.basedir}/build"/>
-    <property name="flexive.build.framework.jar.dir" value="${flexive.base.build.dir}/framework/jar"/>
+    <property name="flexive.build.framework.dir" value="${flexive.base.build.dir}/framework"/>
+    <property name="flexive.build.framework.jar.dir" value="${flexive.build.framework.dir}/jar"/>
+    <property name="flexive.build.framework.sqlResources.dir" value="${flexive.build.framework.dir}/sqlResources"/>
     <property name="flexive.build.repo.dir" value="${flexive.base.build.dir}/repository"/>
 
     <property name="flexive.dist.dir" value="${flexive.basedir}/flexive-dist"/>

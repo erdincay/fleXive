@@ -5,7 +5,6 @@ import com.flexive.core.storage.StorageManager;
 import com.flexive.core.storage.ContentStorage;
 import com.flexive.core.search.cmis.impl.CmisSqlQuery;
 import com.flexive.core.search.cmis.impl.sql.SqlDialect;
-import com.flexive.core.search.cmis.impl.sql.SqlDialectFactory;
 import com.flexive.core.search.cmis.parser.CmisSqlUtils;
 import static com.flexive.shared.FxContext.getUserTicket;
 import com.flexive.shared.exceptions.FxApplicationException;
@@ -72,7 +71,7 @@ public class CmisSearchEngineBean implements CmisSearchEngine, CmisSearchEngineL
             );
             tsr.timestamp("Parsing, AST generation");
 
-            final SqlDialect sqlDialect = SqlDialectFactory.getInstance(
+            final SqlDialect sqlDialect = StorageManager.getCmisSqlDialect(
                     environment,
                     contentEngine,
                     cmisQuery, 

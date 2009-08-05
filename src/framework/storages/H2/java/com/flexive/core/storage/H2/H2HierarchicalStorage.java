@@ -29,52 +29,43 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the file!
  ***************************************************************/
-package com.flexive.shared.configuration;
+package com.flexive.core.storage.H2;
 
-import java.util.regex.Pattern;
+import com.flexive.core.storage.ContentStorage;
+import com.flexive.core.storage.genericSQL.GenericHierarchicalStorage;
+import com.flexive.core.storage.genericSQL.GenericBinarySQLStorage;
+import com.flexive.shared.exceptions.FxRuntimeException;
+
+import java.sql.Connection;
 
 /**
- * Editable division data class, used for division data setup forms.
+ * H2 implementation of hierarchical content handling
  *
- * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
- * @version $Rev$
+ * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-public class DivisionDataEdit extends DivisionData {
-    private static final long serialVersionUID = 9017722116723955308L;
+public class H2HierarchicalStorage extends GenericHierarchicalStorage {
+    private static final H2HierarchicalStorage instance = new H2HierarchicalStorage();
 
     /**
-     * Create an editable division data object that is independent from its source object.
-     *
-     * @param data  the source division data.
+     * Ctor
      */
-    public DivisionDataEdit(DivisionData data) {
-        super(data.id, data.available, data.dataSource, data.domainRegEx, data.dbVendor, data.dbVersion);
+    public H2HierarchicalStorage() {
+        super(new GenericBinarySQLStorage());
     }
 
-
-    public void setId(int id) {
-        this.id = id;
+    /**
+     * Singleton getter
+     *
+     * @return ContentStorage
+     */
+    public static ContentStorage getInstance() {
+        return instance;
     }
 
-    public void setAvailable(boolean available) {
-        this.available = available;
+    /**
+     * {@inheritDoc}
+     */
+    public void lockTables(Connection con, long id, int version) throws FxRuntimeException {
+        //do nothing for H2 since we rely on MVCC
     }
-
-    public void setDataSource(String dataSource) {
-        this.dataSource = dataSource;
-    }
-
-    public void setDomainRegEx(String domainRegEx) {
-        this.domainPattern = Pattern.compile(domainRegEx);
-        this.domainRegEx = domainRegEx; // update regex only if it successfully compiles
-    }
-
-    public void setDbVendor(String dbVendor) {
-        this.dbVendor = dbVendor;
-    }
-
-    public void setDbVersion(String dbVersion) {
-        this.dbVersion = dbVersion;
-    }
-
 }

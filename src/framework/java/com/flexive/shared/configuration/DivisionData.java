@@ -52,7 +52,7 @@ public class DivisionData implements Serializable {
     protected String dataSource = null;
     protected String domainRegEx = null;
     protected Pattern domainPattern = null;
-    protected DBVendor dbVendor = null;
+    protected String dbVendor = null;
     protected String dbVersion = null;
 
     /**
@@ -64,7 +64,7 @@ public class DivisionData implements Serializable {
      * @param dbVendor  database vendor
      * @param dbVersion database version
      */
-    public DivisionData(int id, boolean available, String dataSource, String domainRegEx, DBVendor dbVendor, 
+    public DivisionData(int id, boolean available, String dataSource, String domainRegEx, String dbVendor,
             String dbVersion) {
         this.id = id;
         this.available = available;
@@ -121,7 +121,7 @@ public class DivisionData implements Serializable {
      *
      * @return DB Vendor
      */
-    public DBVendor getDbVendor() {
+    public String getDbVendor() {
         return dbVendor;
     }
 

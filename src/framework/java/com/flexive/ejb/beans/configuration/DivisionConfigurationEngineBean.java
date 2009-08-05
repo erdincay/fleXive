@@ -39,7 +39,6 @@ import com.flexive.core.storage.ContentStorage;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSharedUtils;
-import com.flexive.shared.configuration.DBVendor;
 import com.flexive.shared.configuration.DivisionData;
 import com.flexive.shared.configuration.ParameterScope;
 import com.flexive.shared.configuration.SystemParameters;
@@ -274,7 +273,7 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
             }
             //lets see if we have a patch we can apply
             try {
-                final DBVendor dbVendor = FxContext.get().getDivisionData().getDbVendor();
+                final String dbVendor = FxContext.get().getDivisionData().getDbVendor();
                 final String dir = "fxresources/sql/" + dbVendor + "/";
                 String idxFile = dir + "resourceindex.flexive";
                 ClassLoader cl = Thread.currentThread().getContextClassLoader();
@@ -437,7 +436,7 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public String getDatabaseInfo() {
         final DivisionData divisionData = FxContext.get().getDivisionData();
-        return "Division #" + divisionData.getId() + " - " + divisionData.getDbVendor().name() + " " + divisionData.getDbVersion();
+        return "Division #" + divisionData.getId() + " - " + divisionData.getDbVendor() + " " + divisionData.getDbVersion();
     }
 
     /**

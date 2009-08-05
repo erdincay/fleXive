@@ -31,33 +31,26 @@
  ***************************************************************/
 package com.flexive.core.storage;
 
-import com.flexive.core.Database;
 import com.flexive.core.search.DataFilter;
 import com.flexive.core.search.DataSelector;
-import com.flexive.core.search.H2.H2SQLDataFilter;
-import com.flexive.core.search.H2.H2SQLDataSelector;
 import com.flexive.core.search.SqlSearch;
-import com.flexive.core.search.genericSQL.GenericSQLDataFilter;
-import com.flexive.core.search.genericSQL.GenericSQLDataSelector;
-import com.flexive.core.storage.h2.H2EnvironmentLoader;
-import com.flexive.core.storage.h2.H2HierarchicalStorage;
-import com.flexive.core.storage.h2.H2SequencerStorage;
-import com.flexive.core.storage.h2.H2TreeStorage;
-import com.flexive.core.storage.mySQL.MySQLEnvironmentLoader;
-import com.flexive.core.storage.mySQL.MySQLHierarchicalStorage;
-import com.flexive.core.storage.mySQL.MySQLSequencerStorage;
-import com.flexive.core.storage.mySQL.MySQLTreeStorage;
+import com.flexive.core.search.cmis.impl.CmisSqlQuery;
+import com.flexive.core.search.cmis.impl.sql.SqlDialect;
 import com.flexive.shared.FxContext;
-import com.flexive.shared.configuration.DBVendor;
+import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.configuration.DivisionData;
+import com.flexive.shared.exceptions.FxDbException;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.exceptions.FxSqlSearchException;
+import com.flexive.shared.interfaces.ContentEngine;
+import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.structure.TypeStorageMode;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.sql.Connection;
-import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Singleton Facade for the various storage implementations
@@ -68,6 +61,51 @@ public class StorageManager {
     private static final Log LOG = LogFactory.getLog(StorageManager.class);
 
     /**
+     * Mapping vendor -> storage implementation
+     */
+    private static final Map<String, DBStorage> storages = new HashMap<String, DBStorage>(10);
+
+    static {
+        LOG.info("Scanning available storage implementations ...");
+        for (String storage : FxSharedUtils.getStorageImplementations()) {
+            try {
+                DBStorage impl = (DBStorage) Class.forName(storage).newInstance();
+                LOG.info("Adding storage for vendor [" + impl.getStorageVendor() + "]");
+                storages.put(impl.getStorageVendor(), impl);
+            } catch (Exception e) {
+                LOG.error("Could not instantiate storage factory class [" + storage + "]: " + e.getMessage(), e);
+            }
+        }
+    }
+
+    /**
+     * Get the storage implementation for the db vendor of the current division
+     *
+     * @return storage implementation for the db vendor of the current division
+     */
+    public static DBStorage getStorageImpl() {
+        DBStorage storage = storages.get(FxContext.get().getDivisionData().getDbVendor());
+        if (storage == null)
+            //noinspection ThrowableInstanceNeverThrown
+            throw new FxDbException("ex.db.storage.undefined", FxContext.get().getDivisionData().getDbVendor()).asRuntimeException();
+        return storage;
+    }
+
+    /**
+     * Get the storage implementation for the db vendor of the requested division data
+     *
+     * @param data division data to get the db vendor from
+     * @return storage implementation for the db vendor of the requested division data
+     */
+    private static DBStorage getStorageImpl(DivisionData data) {
+        DBStorage storage = storages.get(data.getDbVendor());
+        if (storage == null)
+            //noinspection ThrowableInstanceNeverThrown
+            throw new FxDbException("ex.db.storage.undefined", data.getDbVendor()).asRuntimeException();
+        return storage;
+    }
+
+    /**
      * Get concrete content storage implementation for the given type storage mode
      *
      * @param mode used storage mode
@@ -75,21 +113,7 @@ public class StorageManager {
      * @throws FxNotFoundException if no implementation was found
      */
     public static ContentStorage getContentStorage(TypeStorageMode mode) throws FxNotFoundException {
-        DBVendor vendor;
-        vendor = FxContext.get().getDivisionData().getDbVendor();
-        switch (mode) {
-            case Hierarchical:
-                switch (vendor) {
-                    case MySQL:
-                        return MySQLHierarchicalStorage.getInstance();
-                    case H2:
-                        return H2HierarchicalStorage.getInstance();
-                    default:
-                        throw new FxNotFoundException("ex.db.contentStorage.undefined", vendor, mode);
-                }
-            default:
-                throw new FxNotFoundException("ex.structure.typeStorageMode.notImplemented", mode);
-        }
+        return getStorageImpl().getContentStorage(mode);
     }
 
     /**
@@ -102,19 +126,7 @@ public class StorageManager {
      * @throws FxNotFoundException if no implementation was found
      */
     public static ContentStorage getContentStorage(DivisionData data, TypeStorageMode mode) throws FxNotFoundException {
-        switch (mode) {
-            case Hierarchical:
-                switch (data.getDbVendor()) {
-                    case MySQL:
-                        return MySQLHierarchicalStorage.getInstance();
-                    case H2:
-                        return H2HierarchicalStorage.getInstance();
-                    default:
-                        throw new FxNotFoundException("ex.db.contentStorage.undefined", data.getDbVendor(), mode);
-                }
-            default:
-                throw new FxNotFoundException("ex.structure.typeStorageMode.notImplemented", mode);
-        }
+        return getStorageImpl(data).getContentStorage(mode);
     }
 
     /**
@@ -124,16 +136,7 @@ public class StorageManager {
      * @throws FxNotFoundException if no implementation was found
      */
     public static TreeStorage getTreeStorage() throws FxNotFoundException {
-        DBVendor vendor;
-        vendor = FxContext.get().getDivisionData().getDbVendor();
-        switch (vendor) {
-            case MySQL:
-                return MySQLTreeStorage.getInstance();
-            case H2:
-                return H2TreeStorage.getInstance();
-            default:
-                throw new FxNotFoundException("ex.db.treeStorage.undefined", vendor);
-        }
+        return getStorageImpl().getTreeStorage();
     }
 
     /**
@@ -144,15 +147,7 @@ public class StorageManager {
      * @throws FxNotFoundException if no implementation was found
      */
     public static EnvironmentLoader getEnvironmentLoader(DivisionData dd) throws FxNotFoundException {
-        DBVendor vendor = dd.getDbVendor();
-        switch (vendor) {
-            case MySQL:
-                return MySQLEnvironmentLoader.getInstance();
-            case H2:
-                return H2EnvironmentLoader.getInstance();
-            default:
-                throw new FxNotFoundException("ex.db.environmentLoader.undefined", vendor);
-        }
+        return getStorageImpl(dd).getEnvironmentLoader();
     }
 
     /**
@@ -162,16 +157,20 @@ public class StorageManager {
      * @throws FxNotFoundException if no implementation was found
      */
     public static SequencerStorage getSequencerStorage() throws FxNotFoundException {
-        DBVendor vendor;
-        vendor = FxContext.get().getDivisionData().getDbVendor();
-        switch (vendor) {
-            case MySQL:
-                return MySQLSequencerStorage.getInstance();
-            case H2:
-                return H2SequencerStorage.getInstance();
-            default:
-                throw new FxNotFoundException("ex.db.treeStorage.undefined", vendor);
-        }
+        return getStorageImpl().getSequencerStorage();
+    }
+
+    /**
+     * Get the CMIS SQL Dialect implementation
+     *
+     * @param environment      environment
+     * @param contentEngine    content engine in use
+     * @param query            query
+     * @param returnPrimitives return primitives?
+     * @return CMIS SQL Dialect implementation
+     */
+    public static SqlDialect getCmisSqlDialect(FxEnvironment environment, ContentEngine contentEngine, CmisSqlQuery query, boolean returnPrimitives) {
+        return getStorageImpl().getCmisSqlDialect(environment, contentEngine, query, returnPrimitives);
     }
 
     /**
@@ -180,14 +179,7 @@ public class StorageManager {
      * @return database vendor specific timestamp of the current time in milliseconds as Long
      */
     public static String getTimestampFunction() {
-        switch (FxContext.get().getDivisionData().getDbVendor()) {
-            case MySQL:
-                return "UNIX_TIMESTAMP()*1000";
-            case H2:
-                return "TIMEMILLIS(NOW())";
-        }
-        //default fallback
-        return "UNIX_TIMESTAMP()*1000";
+        return getStorageImpl().getTimestampFunction();
     }
 
     /**
@@ -196,14 +188,7 @@ public class StorageManager {
      * @return database vendor specific "IF" function
      */
     public static String getIfFunction() {
-        switch (FxContext.get().getDivisionData().getDbVendor()) {
-            case MySQL:
-                return "IF";
-            case H2:
-                return "CASEWHEN";
-        }
-        //default fallback
-        return "IF";
+        return getStorageImpl().getIfFunction();
     }
 
     /**
@@ -213,14 +198,16 @@ public class StorageManager {
      * @return database vendor specific statement to enable or disable referential integrity checks
      */
     public static String getReferentialIntegrityChecksStatement(boolean enable) {
-        switch (FxContext.get().getDivisionData().getDbVendor()) {
-            case MySQL:
-                return "SET FOREIGN_KEY_CHECKS=" + (enable ? 1 : 0);
-            case H2:
-                return "SET REFERENTIAL_INTEGRITY " + (enable ? "TRUE" : "FALSE");
-        }
-        //default fallback: nothing
-        return "";
+        return getStorageImpl().getReferentialIntegrityChecksStatement(enable);
+    }
+
+    /**
+     * Get the sql code of the statement to fix referential integrity when removing selectlist items
+     *
+     * @return sql code of the statement to fix referential integrity when removing selectlist items
+     */
+    public static String getSelectListItemReferenceFixStatement() {
+        return getStorageImpl().getSelectListItemReferenceFixStatement();
     }
 
     /**
@@ -230,28 +217,7 @@ public class StorageManager {
      * @return true if the SqlError is a unique constraint violation
      */
     public static boolean isUniqueConstraintViolation(Exception exc) {
-        final int sqlErr = Database.getSqlErrorCode(exc);
-        switch (FxContext.get().getDivisionData().getDbVendor()) {
-            case MySQL:
-                //see http://dev.mysql.com/doc/refman/5.1/en/error-messages-server.html
-                // 1582 Example error: Duplicate entry 'ABSTRACT' for key 'UK_TYPEPROPS_NAME'
-                return (sqlErr == 1062 || sqlErr == 1582);
-            case H2:
-                return sqlErr == 23001;
-
-        }
-
-        // final String sMsg = (exc.getMessage() == null) ? "" : exc.getMessage().toLowerCase();
-
-        // Oracle:
-        // msg: "unique constraint (XXXX) violated"
-        // return sMsg.indexOf("unique constraint") != -1 && sMsg.indexOf("violated") != -1;
-
-        // MySQL5:
-        // msg="Duplicate key or integrity constraint violation message from server: "Cannot delete or update a
-        // parent row: a foreign key constraint fails"
-        // SQLState: 23000
-        return ((SQLException) exc).getSQLState().equalsIgnoreCase("23000");
+        return getStorageImpl().isUniqueConstraintViolation(exc);
     }
 
     /**
@@ -261,17 +227,7 @@ public class StorageManager {
      * @return true if the SqlError is a foreign key violation
      */
     public static boolean isForeignKeyViolation(Exception exc) {
-        final int errorCode = Database.getSqlErrorCode(exc);
-        switch (FxContext.get().getDivisionData().getDbVendor()) {
-            case MySQL:
-                //see http://dev.mysql.com/doc/refman/5.0/en/error-messages-server.html
-                return errorCode == 1451 || errorCode == 1217;
-            case H2:
-                //see http://h2database.com/javadoc/org/h2/constant/ErrorCode.html#c23002
-                return errorCode == 23002 || errorCode == 23003;
-            default:
-                return false;
-        }
+        return getStorageImpl().isForeignKeyViolation(exc);
     }
 
     /**
@@ -282,18 +238,7 @@ public class StorageManager {
      * @since 3.1
      */
     public static boolean isQueryTimeout(Exception e) {
-        final int errorCode = Database.getSqlErrorCode(e);
-        switch (FxContext.get().getDivisionData().getDbVendor()) {
-            case MySQL:
-                //see http://dev.mysql.com/doc/refman/5.0/en/error-messages-server.html
-                return errorCode == 1317 || errorCode == 1028
-                        || e.getClass().getName().equals("com.mysql.jdbc.exceptions.MySQLTimeoutException");
-            case H2:
-                //see http://h2database.com/javadoc/org/h2/constant/ErrorCode.html#c23002
-                return errorCode == 90051;
-            default:
-                return false;
-        }
+        return getStorageImpl().isQueryTimeout(e);
     }
 
     /**
@@ -305,15 +250,7 @@ public class StorageManager {
      * @throws FxSqlSearchException if the function fails
      */
     public static DataFilter getDataFilter(Connection con, SqlSearch sqlSearch) throws FxSqlSearchException {
-        final DBVendor vendor = FxContext.get().getDivisionData().getDbVendor();
-        switch (vendor) {
-            case MySQL:
-                return new GenericSQLDataFilter(con, sqlSearch);
-            case H2:
-                return new H2SQLDataFilter(con, sqlSearch);
-            default:
-                throw new FxSqlSearchException(LOG, "ex.db.filter.undefined", vendor);
-        }
+        return getStorageImpl().getDataFilter(con, sqlSearch);
     }
 
     /**
@@ -324,15 +261,6 @@ public class StorageManager {
      * @throws FxSqlSearchException if the function fails
      */
     public static DataSelector getDataSelector(SqlSearch sqlSearch) throws FxSqlSearchException {
-        final DBVendor vendor = FxContext.get().getDivisionData().getDbVendor();
-        switch (vendor) {
-            case H2:
-                return new H2SQLDataSelector(sqlSearch);
-            case MySQL:
-                return new GenericSQLDataSelector(sqlSearch);
-            default:
-                throw new FxSqlSearchException(LOG, "ex.db.selector.undefined", vendor);
-        }
+        return getStorageImpl().getDataSelector(sqlSearch);
     }
-
 }

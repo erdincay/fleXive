@@ -142,5 +142,5 @@ public class SystemParameters {
     /**
      * If the flat storage is enabled, automatically flatten matching assignments
      */
-    public static final Parameter<Boolean> FLATSTORAGE_AUTO = ParameterFactory.newInstance(Boolean.class, DIVISION_CONFIG, "flatStorageAuto", Boolean.FALSE);
+    public static final Parameter<Boolean> FLATSTORAGE_AUTO = ParameterFactory.newInstance(Boolean.class, DIVISION_CONFIG, "flatStorageAuto", Boolean.TRUE);
 }
