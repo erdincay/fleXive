@@ -274,7 +274,7 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
             //lets see if we have a patch we can apply
             try {
                 final String dbVendor = FxContext.get().getDivisionData().getDbVendor();
-                final String dir = "fxresources/sql/" + dbVendor + "/";
+                final String dir = "resources/patch-" + dbVendor + "/";
                 String idxFile = dir + "resourceindex.flexive";
                 ClassLoader cl = Thread.currentThread().getContextClassLoader();
                 final InputStream scriptIndex = cl.getResourceAsStream(idxFile);
@@ -309,8 +309,8 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
                         long toVersion = Long.parseLong(data[2].substring(0, data[2].indexOf('.')));
                         String code = FxSharedUtils.loadFromInputStream(cl.getResourceAsStream(dir + f[0]), size);
                         scripts.add(new SQLPatchScript(fromVersion, toVersion, code));
+                        LOG.info("Patch available from version " + fromVersion + " to " + toVersion);
                     }
-//                LOG.info("Patch available from version " + fromVersion + " to " + toVersion);
 //                    stmt.executeUpdate(code);
                     boolean patching = true;
                     long maxVersion = currentVersion;

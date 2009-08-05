@@ -176,6 +176,7 @@
     </macrodef>
 
     <macrodef name="buildStorage" description="Compile storage sources and package them">
+        <attribute name="vendor" description="Name of the vendor"/>
         <attribute name="srcdir" description="Base directory of the storage"/>
         <attribute name="builddir" description="Directory to generate the artifacts at"/>
         <attribute name="classpathref" description="Reference to the [fleXive] classpath"/>
@@ -187,10 +188,14 @@
                 destdir="@{builddir}/classes">
                 <classpath refid="@{classpathref}"/>
             </javac-call>
+            <scriptIndexBuilder indexFile="@{builddir}/resources/patch-@{vendor}/resourceindex.flexive"
+                            scriptDir="@{srcdir}/resources/patch"
+                            copyFiles="true"/>
             <jar jarfile="@{jarfile}">
                 <fileset dir="@{builddir}/classes"/>
-                <zipfileset dir="@{srcdir}/resources" prefix="resources" includes="**/*sql"/>
+                <zipfileset dir="@{srcdir}/resources" prefix="resources" includes="**/*sql" excludes="**/patch/*"/>
                 <zipfileset dir="@{srcdir}/resources" includes="**/*properties"/>
+                <zipfileset dir="@{builddir}/resources/patch-@{vendor}" prefix="resources/patch-@{vendor}" includes="**/*"/>
             </jar>
         </sequential>
     </macrodef>

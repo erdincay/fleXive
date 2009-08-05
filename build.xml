@@ -499,12 +499,6 @@
                             scriptDir="${flexive.resources.framework.dir}/fxresources/scripts/library"/>
         <scriptIndexBuilder indexFile="${build.framework.classes.dir}/fxresources/binaries/thumbs/resourceindex.flexive"
                             scriptDir="${flexive.resources.framework.dir}/fxresources/binaries/thumbs"/>
-        <scriptIndexBuilder indexFile="${build.framework.classes.dir}/fxresources/sql/MySQL/resourceindex.flexive"
-                            scriptDir="${flexive.resources.framework.dir}/sql/MySQL/patch"
-                            copyFiles="true"/>
-        <scriptIndexBuilder indexFile="${build.framework.classes.dir}/fxresources/sql/H2/resourceindex.flexive"
-                            scriptDir="${flexive.resources.framework.dir}/sql/H2/patch"
-                            copyFiles="true"/>
         <jar jarfile="${flexive.build.framework.jar.dir}/flexive-ejb.jar">
 			<fileset refid="jar.ejb.classes"/>
 			<fileset refid="jar.ejb.resources"/>
@@ -522,11 +516,13 @@
 	</target>
 
     <target name="jar.storages" depends="jar.ejb">
-        <buildStorage srcdir="${flexive.base.framework.dir}/storages/MySQL"
+        <buildStorage vendor="MySQL"
+                      srcdir="${flexive.base.framework.dir}/storages/MySQL"
                       builddir="${build.storages.dir}/MySQL"
                       classpathref="classpath.build.plugin"
                       jarfile="${flexive.build.framework.jar.dir}/flexive-storage-MySQL.jar"/>
-        <buildStorage srcdir="${flexive.base.framework.dir}/storages/H2"
+        <buildStorage vendor="H2"
+                      srcdir="${flexive.base.framework.dir}/storages/H2"
                       builddir="${build.storages.dir}/H2"
                       classpathref="classpath.build.plugin"
                       jarfile="${flexive.build.framework.jar.dir}/flexive-storage-H2.jar"/>
