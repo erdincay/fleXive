@@ -23,7 +23,7 @@
     <property name="build.ui.components.meta.dir" value="${flexive.base.build.dir}/ui/jar/components/WEB-INF"/>
     <property name="build.storages.dir" value="${flexive.base.build.dir}/storages"/>
     <property name="shared.meta.dir" value="${flexive.build.framework.jar.dir}/shared.meta"/>
-    <property name="database.src.dir" value="${flexive.resources.framework.dir}/sql/"/>
+    <property name="database.src.dir" value="${flexive.build.framework.sqlResources.dir}"/>
     <property name="database.classpathref" value="classpath.build.framework"/>
 
     <property name="web.ui.dojo.baseName" value="dojo-flexive"/>
@@ -615,25 +615,10 @@
     </target>
 
     <target name="db.extractScripts" description="Extract sql script from used storage archive" depends="jar.storages">
-        <groovy>
-            String jar = "flexive-storage-"+properties['database.vendor']+".jar"
-            String embeddedPath = properties['flexive.build.framework.jar.dir']
-            File jarFile = new File(properties['flexive.build.framework.jar.dir']+File.separatorChar+jar)
-            if(!jarFile.exists()) {
-                //either provide a fallback here or just fail
-                ant.fail(message:"Could not find storage implementation jar file $jar!")
-            }
-            if(new File(properties['flexive.build.framework.sqlResources.dir']).exists())
-                ant.delete(dir:properties['flexive.build.framework.sqlResources.dir'])
-            ant.unzip(src:jarFile.absolutePath, dest:properties['flexive.build.framework.sqlResources.dir']) {
-                patternset() {
-                    include(name:"**/*sql")
-                }
-                filtermapper() {
-                    replacestring(from:"resources/",to:"")
-                }
-            }
-        </groovy>
+        <extractDatabaseSchemas
+                storagesdir="${flexive.build.framework.jar.dir}"
+                dest="${flexive.build.framework.sqlResources.dir}"
+        />
     </target>
 
     <target name="db.update" description="Update database" depends="init, db.extractScripts" unless="db.noupdate">
@@ -717,6 +702,8 @@
             <fileset dir="${build.ui.jar.dir}" includes="*.jar" excludes="flexive-backend.jar,flexive-plugin-*.jar"/>
         </copy>
         <copy file="${flexive.build.framework.jar.dir}/flexive-ejb.jar" tofile="${flexive.dist.lib.dir}/flexive-ejb.jar"/>
+        <copy file="${flexive.build.framework.jar.dir}/flexive-storage-H2.jar" tofile="${flexive.dist.lib.dir}/flexive-storage-H2.jar"/>
+        <copy file="${flexive.build.framework.jar.dir}/flexive-storage-MySQL.jar" tofile="${flexive.dist.lib.dir}/flexive-storage-MySQL.jar"/>
         <copy file="${flexive.lib.dir}/flexive-flatstorage.jar" tofile="${flexive.dist.lib.dir}/flexive-flatstorage.jar"/>
 
         <!-- Copy backend administration to applications folder -->
@@ -761,11 +748,6 @@
             <fileset file="${flexive.base.framework.dir}/resources/glassfish/sun-application.xml"/>
         </copy>
         <!--<copy file="${flexive.base.build.dir}/flexive.ear" tofile="${flexive.dist.dir}/flexive.ear" overwrite="true"/>-->
-
-        <!-- Copy database setup scripts -->
-        <copy todir="${flexive.dist.sql.dir}">
-            <fileset dir="${database.src.dir}" includes="**/*"/>
-        </copy>
 
         <!-- Create a sample database.properties file -->
         <echo file="${flexive.dist.dir}/database.properties">
@@ -849,7 +831,8 @@ database.vendor=MySQL
                              prefix="com/flexive/extractor/" packagenames="com.flexive.extractor.*"/>
         <maven-build-sources artifactId="flexive-sqlParser" label="[fleXive] FxSQL parser" srcdir="${flexive.src.framework.dir}"
                              prefix="com/flexive/sqlParser/" packagenames="com.flexive.sqlParser.*"/>
-        <maven-build-sources artifactId="flexive-h2" label="[fleXive] H2 database support" srcdir="${flexive.resources.framework.dir}/sql/H2/StoredProcedures"/>
+        <maven-build-sources artifactId="flexive-h2" label="[fleXive] H2 database support" srcdir="${flexive.base.framework.dir}/storages/H2/java"/>
+        <maven-build-sources artifactId="flexive-mysql" label="[fleXive] MySQL database support" srcdir="${flexive.base.framework.dir}/storages/MySQL/java"/>
 
     </target>
 
@@ -901,7 +884,12 @@ database.vendor=MySQL
         <maven-deploy-with-sources path="${flexive.lib.dir}" name="flexive-sqlParser"/>
         <maven-deploy file="${flexive.lib.dir}/fxStream.jar" pom="fxStream.pom"/>
         <maven-deploy file="${flexive.lib.dir}/flexive-flatstorage.jar" pom="flexive-flatstorage.pom"/>
-        <maven-deploy-with-sources path="${flexive.lib.dir}" name="flexive-h2"/>
+
+        <copy file="${flexive.build.framework.jar.dir}/flexive-storage-H2.jar" tofile="${flexive.build.repo.dir}/flexive-h2.jar"/>
+        <copy file="${flexive.build.framework.jar.dir}/flexive-storage-MySQL.jar" tofile="${flexive.build.repo.dir}/flexive-mysql.jar"/>
+
+        <maven-deploy-with-sources path="${flexive.build.repo.dir}" name="flexive-h2"/>
+        <maven-deploy-with-sources path="${flexive.build.repo.dir}" name="flexive-mysql"/>
 
         <maven-deploy file="${flexive.base.build.dir}/ui/flexive.war" pom="flexive-backend-war.pom"/>
 
@@ -914,9 +902,10 @@ database.vendor=MySQL
         <maven-deploy file="${flexive.lib.dir}/PDFRenderer.jar" pom="pdf-renderer.pom"/>
 
 
-        <!-- ZIP SQL Schemas -->
+        <!-- ZIP SQL Schemas - TODO: legacy package, remove after next release (schemas are also contained in flexive-h2 and flexive-mysql) -->
         <jar file="${flexive.base.build.dir}/flexive-sql-schemas.jar">
-            <zipfileset prefix="com/flexive/schemas" dir="${flexive.resources.framework.dir}/sql" includes="**/*"/>
+            <zipfileset prefix="com/flexive/schemas/MySQL" dir="${flexive.base.framework.dir}/storages/MySQL/resources" includes="**/*"/>
+            <zipfileset prefix="com/flexive/schemas/H2" dir="${flexive.base.framework.dir}/storages/H2/resources" includes="**/*"/>
         </jar>
         <maven-deploy file="${flexive.base.build.dir}/flexive-sql-schemas.jar" pom="flexive-sql-schemas.pom"/>
 

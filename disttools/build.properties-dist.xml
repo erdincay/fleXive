@@ -12,7 +12,6 @@
     <property name="applications.dir" value="${dist.basedir}/applications" description="Directory to add compiled flexive applications"/>
 
     <property name="flexive.ant.jar" value="${dist.lib.dir}/flexive-ant.jar"/>
-    <property name="database.src.dir" value="${dist.basedir}/lib/resources/sql/"/>
     <property name="database.classpathref" value="dist.path"/>
 
     <!-- Component/project source and build paths -->
@@ -23,6 +22,7 @@
     <property name="resources.dir" value="${basedir}/resources"/>
     <property name="meta.dir" value="${resources.dir}/META-INF"/>
     <property name="templates.dir" value="${resources.dir}/templates"/>
+    <property name="database.src.dir" value="${build.dir}/schemas"/>
 
     <!-- Library filters for building the EAR lib directory -->
     <property name="extlib.excludes" value="jsf-api.jar,jsf-impl.jar,el-api.jar,el-ri.jar,javaee.jar,selenium-*,testng-*,jboss-common-core.jar,jboss-jmx.jar,jboss-system.jar,mysql-connector-*.jar,concurrent.jar"/>

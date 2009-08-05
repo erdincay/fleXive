@@ -5,9 +5,9 @@
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.flexive</groupId>
-    <artifactId>flexive-h2</artifactId>
+    <artifactId>flexive-mysql</artifactId>
     <version>@FLEXIVE_VERSION@</version>
-    <description>Flexive H2 storage driver</description>
+    <description>Flexive MySQL storage driver</description>
 
     <licenses>
         <license>
@@ -26,7 +26,7 @@
     </organization>
     <scm>
         <connection>scm:svn:http://svn.flexive.org/repository/flexive/@FLEXIVE_BRANCH@</connection>
-        <url>http://source.flexive.org/browse/fleXive/@FLEXIVE_BRANCH@/src/framework/storages/H2</url>
+        <url>http://source.flexive.org/browse/fleXive/@FLEXIVE_BRANCH@/src/framework/storages/MySQL</url>
     </scm>
 
     <dependencies>

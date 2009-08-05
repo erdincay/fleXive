@@ -58,13 +58,12 @@
         <attribute name="delimiter" default=";"/>
         <element name="args" optional="true" implicit="true"/>
         <sequential >
-            <echo  message="dir: ${flexive.build.framework.sqlResources.dir}"/>
             <sql driver="${database.driver}" url="@{url}"
                 userid="${database.username}" password="${database.password}" delimiter="@{delimiter}">
                 <classpath refid="${database.classpathref}"/>
                 <args/>
                 <sort>
-                    <fileset dir="${flexive.build.framework.sqlResources.dir}" includes="@{includes}" excludes="@{excludes}"/>
+                    <fileset dir="${database.src.dir}" includes="@{includes}" excludes="@{excludes}"/>
                 </sort>
             </sql>
         </sequential>
@@ -280,6 +279,33 @@
                 <jvmarg value="-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"/>
                 <jvmarg value="-Dlog4j.configuration=flatStorageLog4j.xml"/>
             </java>
+        </sequential>
+    </macrodef>
+
+    <!-- Extract the SQL schemas of a storage engine -->
+    <macrodef name="extractDatabaseSchemas" description="Extract the SQL schemas of the current storage engine">
+        <attribute name="storagesDir" description="Directory that contains the storage engine for the current database vendor"/>
+        <attribute name="dest" description="The target directory"/>
+        <sequential >
+            <groovy>
+                String jar = "flexive-storage-"+properties['database.vendor']+".jar"
+                String embeddedPath = "@{storagesDir}"
+                File jarFile = new File(embeddedPath+File.separatorChar+jar)
+                if(!jarFile.exists()) {
+                    //either provide a fallback here or just fail
+                    ant.fail(message:"Could not find storage implementation jar file $jar!")
+                }
+                if(new File("@{dest}").exists())
+                    ant.delete(dir:"@{dest}")
+                ant.unzip(src:jarFile.absolutePath, dest:"@{dest}") {
+                    patternset() {
+                        include(name:"**/*sql")
+                    }
+                    filtermapper() {
+                        replacestring(from:"resources/",to:"")
+                    }
+                }
+            </groovy>
         </sequential>
     </macrodef>
 </project>

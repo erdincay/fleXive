@@ -30,6 +30,29 @@
     </scm>
 
     <dependencies>
+        <!-- default storage engines -->
+        <dependency>
+            <groupId>com.flexive</groupId>
+            <artifactId>flexive-h2</artifactId>
+            <version>@FLEXIVE_VERSION@</version>
+            <optional>false</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>com.flexive</groupId>
+            <artifactId>flexive-mysql</artifactId>
+            <version>@FLEXIVE_VERSION@</version>
+            <optional>false</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>com.flexive</groupId>
+            <artifactId>flexive-flatstorage</artifactId>
+            <version>@FLEXIVE_VERSION@</version>
+            <optional>false</optional>
+        </dependency>
+
+        <!-- SQL parser and extractors -->
         <dependency>
             <groupId>com.flexive</groupId>
             <artifactId>flexive-sqlParser</artifactId>
@@ -47,13 +70,6 @@
         <dependency>
             <groupId>com.flexive</groupId>
             <artifactId>flexive-shared</artifactId>
-            <version>@FLEXIVE_VERSION@</version>
-            <optional>false</optional>
-        </dependency>
-
-        <dependency>
-            <groupId>com.flexive</groupId>
-            <artifactId>flexive-flatstorage</artifactId>
             <version>@FLEXIVE_VERSION@</version>
             <optional>false</optional>
         </dependency>

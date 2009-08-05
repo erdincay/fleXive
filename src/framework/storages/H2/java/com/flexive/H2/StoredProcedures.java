@@ -29,7 +29,7 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the file!
  ***************************************************************/
-package com.flexive.h2;
+package com.flexive.H2;
 
 import java.sql.*;
 
