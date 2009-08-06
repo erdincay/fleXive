@@ -33,10 +33,16 @@ package com.flexive.core.search;
 
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxSqlSearchException;
+import com.flexive.shared.value.BinaryDescriptor;
+import com.flexive.shared.CacheAdmin;
+import com.flexive.core.DatabaseConst;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.lang.StringUtils;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
 
 /**
@@ -51,13 +57,13 @@ public abstract class DataSelector {
     /**
      * The delimiter for the encoded binary column returned by the selector.
      */
-    public static final String BINARY_DELIM = "||";
+    private static final String BINARY_DELIM = "||";
 
     /**
      * The columns to be selected by the binary selector. The result will be returned in a single
      * string column, the entries delimited by {@link #BINARY_DELIM}.
      */
-    protected static final List<String> BINARY_COLUMNS = Collections.unmodifiableList(
+    private static final List<String> BINARY_COLUMNS = Collections.unmodifiableList(
             Arrays.asList(
                     "ID", "NAME", "BLOBSIZE", "CREATED_AT", "MIMETYPE",
                     "ISIMAGE", "RESOLUTION", "WIDTH", "HEIGHT"
@@ -139,4 +145,48 @@ public abstract class DataSelector {
      * @throws com.flexive.shared.exceptions.FxSqlSearchException on errors
      */
     public abstract void cleanup(Connection con) throws FxSqlSearchException;
+
+    /**
+     * Select the properties required for selecting a property of type FxBinary.
+     *
+     * @param idSelect  select to return the binary ID
+     * @return
+     */
+    public static String selectBinary(String idSelect) {
+        // TODO link version/quality filtering to the main object version
+        return "(SELECT CONCAT_WS('" + BINARY_DELIM + "'," +
+                StringUtils.join(BINARY_COLUMNS, ',') + ") " +
+                "FROM " + DatabaseConst.TBL_CONTENT_BINARY + " " +
+                "WHERE id=" + idSelect + " " +
+                " AND ver=1 AND quality=1)";
+    }
+
+    /**
+     * Decode the binary value that was previously selected with
+     * {@link #selectBinary(String)} at the given result set position.
+     *
+     * @param rs    the result set
+     * @param pos   the column index
+     * @return      the decoded binary
+     * @throws SQLException on database errors
+     */
+    public static BinaryDescriptor decodeBinary(ResultSet rs, int pos) throws SQLException {
+        final String encodedBinary = rs.getString(pos);
+        if (rs.wasNull()) {
+            return new BinaryDescriptor();
+        }
+        final String[] values = StringUtils.split(encodedBinary, BINARY_DELIM);
+        return new BinaryDescriptor(CacheAdmin.getStreamServers(),
+                java.lang.Long.parseLong(getBinaryValue(values, "ID")), 1, 1,
+                java.lang.Long.parseLong(getBinaryValue(values, "CREATED_AT")),
+                getBinaryValue(values, "NAME"),
+                java.lang.Long.parseLong(getBinaryValue(values, "BLOBSIZE")),
+                null,
+                getBinaryValue(values, "MIMETYPE"),
+                "1".equals(getBinaryValue(values, "ISIMAGE")),
+                Double.parseDouble(getBinaryValue(values, "RESOLUTION")),
+                java.lang.Integer.parseInt(getBinaryValue(values, "WIDTH")),
+                java.lang.Integer.parseInt(getBinaryValue(values, "HEIGHT"))
+        );
+    }
 }

@@ -408,30 +408,25 @@ public class GenericSQLDataSelector extends DataSelector {
      */
     protected String getContentDataSubselect(String column, PropertyEntry entry, boolean xpath) {
         String select = "(SELECT " + SUBSEL_ALIAS + "." + column +
-                " FROM " + DatabaseConst.TBL_CONTENT_DATA + " " +
-                SUBSEL_ALIAS + " WHERE " +
-                SUBSEL_ALIAS + ".id=" +
-                FILTER_ALIAS + ".id AND " +
-                SUBSEL_ALIAS + ".ver=" +
-                FILTER_ALIAS + ".ver AND " +
-                (entry.isAssignment()
-                        ? "ASSIGN IN ("
-                        + StringUtils.join(FxSharedUtils.getSelectableObjectIdList(entry.getAssignmentWithDerived()), ',')
-                        + ")"
-                        : "TPROP=" + entry.getProperty().getId()) + " AND " +
-                "(" + SUBSEL_ALIAS + ".lang=" + search.getLanguage().getId() +
-                " OR " + SUBSEL_ALIAS + ".ismldef=true)" +
-                // fetch exact language match before default
-                " ORDER BY " + SUBSEL_ALIAS + ".ismldef " +
-                " LIMIT 1 " + ")";
+            " FROM " + DatabaseConst.TBL_CONTENT_DATA + " " +
+            SUBSEL_ALIAS + " WHERE " +
+            SUBSEL_ALIAS + ".id=" +
+            FILTER_ALIAS + ".id AND " +
+            SUBSEL_ALIAS + ".ver=" +
+            FILTER_ALIAS + ".ver AND " +
+            (entry.isAssignment()
+                    ? "ASSIGN IN ("
+                    + StringUtils.join(FxSharedUtils.getSelectableObjectIdList(entry.getAssignmentWithDerived()), ',')
+                    + ")"
+                    : "TPROP=" + entry.getProperty().getId()) + " AND " +
+            "(" + SUBSEL_ALIAS + ".lang=" + search.getLanguage().getId() +
+            " OR " + SUBSEL_ALIAS + ".ismldef=true)" +
+            // fetch exact language match before default
+            " ORDER BY " + SUBSEL_ALIAS + ".ismldef " +
+            " LIMIT 1 " + ")";
         if (!xpath && entry.getProperty().getDataType() == FxDataType.Binary) {
             // select string-coded form of the BLOB properties
-            // TODO link version/quality filtering to the main object version
-            select = "(SELECT CONCAT_WS('" + BINARY_DELIM + "'," +
-                    StringUtils.join(BINARY_COLUMNS, ',') + ") " +
-                    "FROM " + DatabaseConst.TBL_CONTENT_BINARY + " " +
-                    "WHERE id=" + select + " " +
-                    " AND ver=1 AND quality=1)";
+            select = selectBinary(select);
         }
         return select;
     }

@@ -40,7 +40,6 @@ import com.flexive.shared.search.FxSQLFunction;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.core.DatabaseConst;
-import static com.flexive.core.search.DataSelector.getBinaryValue;
 import com.flexive.core.storage.ContentStorage;
 import com.flexive.sqlParser.Property;
 import com.google.common.collect.*;
@@ -574,7 +573,7 @@ public class PropertyEntry {
                     result = new FxSelectMany(multilanguage, FxLanguage.SYSTEM_ID, valueMany);
                     break;
                 case Binary:
-                    result = new FxBinary(multilanguage, FxLanguage.SYSTEM_ID, decodeBinary(rs, pos));
+                    result = new FxBinary(multilanguage, FxLanguage.SYSTEM_ID, DataSelector.decodeBinary(rs, pos));
                     break;
                 default:
                     throw new FxSqlSearchException(LOG, "ex.sqlSearch.reader.UnknownColumnType",
@@ -618,26 +617,6 @@ public class PropertyEntry {
         final Date from = fromTimestamp != null ? new Date(fromTimestamp.getTime()) : null;
         final Date to = toTimestamp != null ? new Date(toTimestamp.getTime()) : null;
         return new Pair<Date, Date>(from, to);
-    }
-
-    private BinaryDescriptor decodeBinary(ResultSet rs, int pos) throws SQLException {
-        final String encodedBinary = rs.getString(pos);
-        if (rs.wasNull()) {
-            return new BinaryDescriptor();
-        }
-        final String[] values = StringUtils.split(encodedBinary, DataSelector.BINARY_DELIM);
-        return new BinaryDescriptor(CacheAdmin.getStreamServers(),
-                parseLong(getBinaryValue(values, "ID")), 1, 1,
-                parseLong(getBinaryValue(values, "CREATED_AT")),
-                getBinaryValue(values, "NAME"),
-                parseLong(getBinaryValue(values, "BLOBSIZE")),
-                null,
-                getBinaryValue(values, "MIMETYPE"),
-                "1".equals(getBinaryValue(values, "ISIMAGE")),
-                Double.parseDouble(getBinaryValue(values, "RESOLUTION")),
-                parseInt(getBinaryValue(values, "WIDTH")),
-                parseInt(getBinaryValue(values, "HEIGHT"))
-        );
     }
 
     /**

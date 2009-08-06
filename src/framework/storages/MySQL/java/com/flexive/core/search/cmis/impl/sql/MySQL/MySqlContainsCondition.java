@@ -47,7 +47,7 @@ import java.sql.SQLException;
 
 /**
  * MySQL fulltext query/scoring provider. The values returned by SCORE() are not normalized, thus the
- * {@link com.flexive.shared.search.cmis.CmisResultSet} must apply normalization when the entire result is loaded.
+ * {@link com.flexive.shared.cmis.search.CmisResultSet} must apply normalization when the entire result is loaded.
  *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$

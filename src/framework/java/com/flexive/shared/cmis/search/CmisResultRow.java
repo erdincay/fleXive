@@ -29,16 +29,19 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the file!
  ***************************************************************/
-package com.flexive.shared.search.cmis;
+package com.flexive.shared.cmis.search;
 
-import com.flexive.shared.exceptions.FxInvalidStateException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
+import com.flexive.shared.exceptions.FxInvalidStateException;
+import com.google.common.collect.Lists;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.io.Serializable;
-import java.util.*;
-
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * A row in a {@link CmisResultSet}. The column values are boxed in {@link CmisResultValue} objects.
@@ -63,18 +66,18 @@ public class CmisResultRow implements Serializable, Iterable<CmisResultValue> {
     private static final Log LOG = LogFactory.getLog(CmisResultRow.class);
 
     private final CmisResultValue[] columns;
-    private final List<String> aliases;
+    private final List<CmisResultColumnDefinition> columnDefinitions;
     private boolean frozen;
 
     /**
      * Create a new result row. To add a new row to a result set, create the row with
-     * {@link com.flexive.shared.search.cmis.CmisResultSet#newRow()}.
+     * {@link CmisResultSet#newRow()}.
      *
-     * @param aliases the column aliases (fixes column count)
+     * @param columnDefinitions the column definitions (fixes column count)
      */
-    CmisResultRow(List<String> aliases) {
-        this.aliases = aliases;
-        this.columns = new CmisResultValue[aliases.size()];
+    CmisResultRow(List<CmisResultColumnDefinition> columnDefinitions) {
+        this.columnDefinitions = columnDefinitions;
+        this.columns = new CmisResultValue[columnDefinitions.size()];
         this.frozen = false;
     }
 
@@ -103,13 +106,13 @@ public class CmisResultRow implements Serializable, Iterable<CmisResultValue> {
         return new ColumnIterator();
     }
 
-    public List<String> getAliases() {
-        return aliases;
+    public List<CmisResultColumnDefinition> getColumnDefinitions() {
+        return columnDefinitions;
     }
 
     public int indexOf(String alias) {
-        for (int i = 0; i < aliases.size(); i++) {
-            if (aliases.get(i).equalsIgnoreCase(alias)) {
+        for (int i = 0; i < columnDefinitions.size(); i++) {
+            if (columnDefinitions.get(i).getAlias().equalsIgnoreCase(alias)) {
                 return i + 1;
             }
         }
@@ -122,7 +125,7 @@ public class CmisResultRow implements Serializable, Iterable<CmisResultValue> {
             return index;
         }
         throw new FxInvalidParameterException("column", LOG, "ex.cmis.search.resultset.row.alias",
-                alias, aliases).asRuntimeException();
+                alias, getAliases()).asRuntimeException();
     }
 
     @Override
@@ -152,6 +155,13 @@ public class CmisResultRow implements Serializable, Iterable<CmisResultValue> {
         frozen = true;
         return this;
     }
+
+    private List<String> getAliases() {
+        return Lists.transform(
+                columnDefinitions, CmisResultColumnDefinition.TRANFORM_ALIAS
+        );
+    }
+
 
     /**
      * Iterator for the columns of this result row.

@@ -34,8 +34,7 @@
 package com.flexive.war.beans.admin.main;
 
 import com.flexive.shared.EJBLookup;
-import com.flexive.shared.exceptions.FxApplicationException;
-import com.flexive.shared.search.cmis.CmisResultSet;
+import com.flexive.shared.cmis.search.CmisResultSet;
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.faces.FxJsfUtils;
 import org.apache.commons.lang.StringUtils;

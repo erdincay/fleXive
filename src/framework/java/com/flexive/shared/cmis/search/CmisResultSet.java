@@ -29,12 +29,13 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the file!
  ***************************************************************/
-package com.flexive.shared.search.cmis;
+package com.flexive.shared.cmis.search;
 
 import com.flexive.shared.TimestampRecorder;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxInvalidStateException;
 import com.flexive.shared.value.FxValue;
+import com.google.common.collect.Lists;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -64,29 +65,34 @@ public class CmisResultSet implements Serializable, Iterable<CmisResultRow> {
     private static final long serialVersionUID = -5423097964253577081L;
 
     private final List<CmisResultRow> rows;
-    private final List<String> columnAliases;
+    private final List<CmisResultColumnDefinition> columns;
     private final boolean frozen;
     private TimestampRecorder timestampRecorder;
 
-    public CmisResultSet(List<String> columnAliases) {
+    public CmisResultSet(List<CmisResultColumnDefinition> columns) {
         this.rows = new ArrayList<CmisResultRow>();
-        this.columnAliases = Collections.unmodifiableList(columnAliases);
+        this.columns = Collections.unmodifiableList(columns);
         this.frozen = false;
     }
 
+    /**
+     * Constructor used for creating empty result sets (used for testing only).
+     *
+     * @param columnCount   the number of columns
+     */
     public CmisResultSet(int columnCount) {
         this.rows = new ArrayList<CmisResultRow>();
-        final List<String> aliases = new ArrayList<String>(columnCount);
+        final List<CmisResultColumnDefinition> columns = Lists.newArrayListWithCapacity(columnCount);
         for (int i = 1; i <= columnCount; i++) {
-            aliases.add("column" + i);
+            columns.add(new CmisResultColumnDefinition("column" + i, -1));
         }
-        this.columnAliases = Collections.unmodifiableList(aliases);
+        this.columns = Collections.unmodifiableList(columns);
         this.frozen = false;
     }
 
     private CmisResultSet(CmisResultSet other) {
         this.rows = Collections.unmodifiableList(other.rows);
-        this.columnAliases = other.columnAliases;
+        this.columns = other.columns;
         this.frozen = true;
     }
 
@@ -139,7 +145,7 @@ public class CmisResultSet implements Serializable, Iterable<CmisResultRow> {
      * @return a new row for this result set
      */
     public CmisResultRow newRow() {
-        return new CmisResultRow(columnAliases);
+        return new CmisResultRow(columns);
     }
 
     /**
@@ -151,7 +157,7 @@ public class CmisResultSet implements Serializable, Iterable<CmisResultRow> {
      */
     public CmisResultSet addRow(CmisResultRow row) {
         checkNotFrozen();
-        assert row.getAliases() == columnAliases : "Row not created with #newRow() of this result set instance: " + this;
+        assert row.getColumnDefinitions() == columns : "Row not created with #newRow() of this result set instance: " + this;
         rows.add(row.freeze());
         return this;
     }
@@ -162,7 +168,16 @@ public class CmisResultSet implements Serializable, Iterable<CmisResultRow> {
      * @return the column aliases of this result set
      */
     public List<String> getColumnAliases() {
-        return columnAliases;
+        return Lists.transform(columns, CmisResultColumnDefinition.TRANFORM_ALIAS);
+    }
+
+    /**
+     * Return the column aliases of this result set. The order corresponds to the columns of the result set.
+     *
+     * @return the column aliases of this result set
+     */
+    public List<Long> getColumnAssignmentIds() {
+        return Lists.transform(columns, CmisResultColumnDefinition.TRANSFORM_ASSIGNMENT_ID);
     }
 
     /**
@@ -171,7 +186,7 @@ public class CmisResultSet implements Serializable, Iterable<CmisResultRow> {
      * @return the number of columns in this result set.
      */
     public int getColumnCount() {
-        return columnAliases.size();
+        return columns.size();
     }
 
     /**

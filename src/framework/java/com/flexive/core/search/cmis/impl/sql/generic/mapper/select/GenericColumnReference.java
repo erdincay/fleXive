@@ -33,6 +33,7 @@ package com.flexive.core.search.cmis.impl.sql.generic.mapper.select;
 
 import com.flexive.core.DatabaseConst;
 import com.flexive.core.search.PropertyResolver;
+import com.flexive.core.search.DataSelector;
 import com.flexive.core.search.cmis.impl.CmisSqlQuery;
 import com.flexive.core.search.cmis.impl.ResultColumnReference;
 import com.flexive.core.search.cmis.impl.sql.ColumnIndex;
@@ -80,10 +81,11 @@ public class GenericColumnReference implements ResultColumnMapper<ResultColumnRe
         // this is a modified version of GenericSQLDataSelector#getContentDataSubSelect
 
         // select data fields
+        final FxDataType dataType = column.getPropertyEntry().getProperty().getDataType();
         final String[] readColumns = column.getPropertyEntry().getReadColumns();
         final List<String> columns = new ArrayList<String>(readColumns.length);
         int ctr = 0;
-        if (column.getSelectedObject().isMultivalued() && !isDirectSelectForMultivalued(sqlMapperFactory, column, column.getPropertyEntry().getProperty().getDataType())) {
+        if (column.getSelectedObject().isMultivalued() && !isDirectSelectForMultivalued(sqlMapperFactory, column, dataType)) {
             // multivalued select, but database does not support direct select - select only ID and version
             final TableReference table = column.getSelectedObject().getTableReference();
             columns.add(FILTER_ALIAS + "." + table.getIdFilterColumn());
@@ -96,9 +98,10 @@ public class GenericColumnReference implements ResultColumnMapper<ResultColumnRe
                         getSelect(sqlMapperFactory.getSqlDialect(), readColumn,
                                 column.getSelectedObject(),
                                 column.getSelectedObject().getReferencedAssignments(), languageId)
-                                + (includeResultAlias ?
+                                + (includeResultAlias  && dataType != FxDataType.Binary ?
                                 // add unique suffix if more than one column is selected,
                                 // but first column is exposed as the "official" value (for sorting)
+                                // (don't add the alias for binaries yet, because the select will be wrapped)
                                 " " + column.getResultSetAlias()
                                         + (readColumns.length > 1 && ctr++ > 0 ? "_" + ctr : "")
 
@@ -128,22 +131,15 @@ public class GenericColumnReference implements ResultColumnMapper<ResultColumnRe
         //columns.add(getContentDataSelect("XPATHMULT", null, assignment, languageId, true));
         //index.increment();
 
-        final String select = StringUtils.join(columns, ",\n");
+        String select = StringUtils.join(columns, ",\n");
 
         // use base assignment for datatype checks
         final FxPropertyAssignment assignment = column.getSelectedObject().getReferencedAssignments().get(0);
 
         if (!xpath && assignment.getProperty().getDataType() == FxDataType.Binary) {
             // select string-coded form of the BLOB properties
-            // TODO implement?
-            throw new UnsupportedOperationException("Binary values not implemented yet");
-/*
-            select = "(SELECT CONCAT_WS('" + BINARY_DELIM + "'," +
-                    StringUtils.join(BINARY_COLUMNS, ',') + ") " +
-                    "FROM " + DatabaseConst.TBL_CONTENT_BINARY + " " +
-                    "WHERE id=" + select + " " +
-                    " AND ver=1 AND quality=1)";
-*/
+            select = DataSelector.selectBinary(columns.get(0))
+                    + (includeResultAlias ? " " + column.getResultSetAlias() : "");
         }
         return select;
 

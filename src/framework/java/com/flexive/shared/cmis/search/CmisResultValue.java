@@ -29,10 +29,12 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the file!
  ***************************************************************/
-package com.flexive.shared.search.cmis;
+package com.flexive.shared.cmis.search;
 
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.value.FxValue;
+import com.flexive.shared.value.BinaryDescriptor;
+import com.flexive.shared.value.FxBinary;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.Serializable;
@@ -176,6 +178,17 @@ public abstract class CmisResultValue<T> implements Serializable {
     }
 
     /**
+     * Return the {@link BinaryDescriptor} of a binary column.
+     *
+     * @return  the {@link BinaryDescriptor} of a binary column.
+     */
+    public BinaryDescriptor getBinary() {
+        return (value instanceof FxValue)
+                ? ((FxBinary) value).getBestTranslation()
+                : (BinaryDescriptor) value;
+    }
+
+    /**
      * Return the value as a FxValue. Note that CMIS queries return primitive values by default, in this
      * case this method will throw a ClassCastException.
      *
@@ -205,6 +218,16 @@ public abstract class CmisResultValue<T> implements Serializable {
 
         private NullResult() {
             super(null);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            return obj instanceof NullResult;
+        }
+
+        @Override
+        public int hashCode() {
+            return 0;
         }
     }
 

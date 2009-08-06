@@ -33,11 +33,10 @@ package com.flexive.tests.shared;
 
 import org.testng.annotations.Test;
 import static org.testng.Assert.assertEquals;
-import com.flexive.shared.search.cmis.CmisResultSet;
-import com.flexive.shared.search.cmis.CmisResultRow;
-import com.flexive.shared.search.cmis.CmisResultValue;
+import com.flexive.shared.cmis.search.CmisResultSet;
+import com.flexive.shared.cmis.search.CmisResultRow;
+import com.flexive.shared.cmis.search.CmisResultValue;
 import com.flexive.shared.value.FxString;
-import com.flexive.shared.value.FxNumber;
 import com.flexive.shared.exceptions.FxRuntimeException;
 
 import java.util.Arrays;

@@ -31,13 +31,16 @@
  ***************************************************************/
 package com.flexive.core.search.cmis.model;
 
+import com.flexive.shared.cmis.CmisVirtualProperty;
+import com.flexive.shared.exceptions.FxCmisQueryException;
+import com.flexive.shared.exceptions.FxRuntimeException;
 import com.flexive.shared.structure.FxEnvironment;
+import com.flexive.shared.structure.FxProperty;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.structure.FxType;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Collections2;
-import com.google.common.collect.Iterators;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.util.*;
 
@@ -48,17 +51,32 @@ import java.util.*;
  * @version $Rev$
  */
 public class SingleTableReference implements TableReference {
+    private static final Log LOG = LogFactory.getLog(SingleTableReference.class);
+
     private final String alias;
     private final List<FxType> referencedTypes;
     private final FxType baseType;
 
     public SingleTableReference(FxEnvironment env, String name, String alias) {
         this.alias = alias;
-        final FxType type = env.getType(name);
-        final List<FxType> types = new ArrayList<FxType>(type.getDerivedTypes(true));
-        types.add(0, type); // root type comes first
+        final List<FxType> types;
+        if ("root".equalsIgnoreCase(name)) {
+            // treat root type as a special case, because the API won't return any derived types
+            this.baseType = env.getType(FxType.ROOT_ID);
+            types = Lists.newArrayList();
+            types.add(baseType);
+            for (FxType type : env.getTypes()) {
+                if (type.getId() != FxType.ROOT_ID) {
+                    types.add(type);
+                }
+            }
+        } else {
+            // normal type, add type and all subtypes
+            this.baseType = env.getType(name);
+            types = Lists.newArrayList(baseType.getDerivedTypes(true));
+            types.add(0, baseType); // root type comes first
+        }
         this.referencedTypes = Collections.unmodifiableList(types);
-        this.baseType = type;
     }
 
     public SingleTableReference(FxEnvironment env, String name) {
@@ -98,7 +116,7 @@ public class SingleTableReference implements TableReference {
      */
     public boolean isPropertySecurityEnabled() {
         for (FxType type : referencedTypes) {
-            if (type.usePropertyPermissions()) {
+            if (type.isUsePropertyPermissions()) {
                 return true;
             }
         }
@@ -112,13 +130,55 @@ public class SingleTableReference implements TableReference {
         final List<FxPropertyAssignment> result = Lists.newArrayList();
 
         // select the assignment in the root type
-        final FxPropertyAssignment base = baseType.getPropertyAssignment("/" + name);
+        final CmisVirtualProperty cmisProperty = CmisVirtualProperty.getByCmisName(name);
+
+        final FxPropertyAssignment base = baseType.getPropertyAssignment("/" + getAssignmentAlias(environment, name, cmisProperty));
         result.add(base);
-        
+
         // add all derived assignments
         result.addAll(base.getDerivedAssignments(environment));
 
         return result;
+    }
+
+    private String getAssignmentAlias(FxEnvironment environment, String name, CmisVirtualProperty cmisProperty) {
+        if (cmisProperty != null) {
+            try {
+                final String assignmentXPath = "/" + name;
+                baseType.getPropertyAssignment(assignmentXPath);
+                // the CMIS property is already mapped in the type, ignore the CMIS mapping
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(
+                            "CMIS property '" + name + "' is already mapped in " + baseType + ", using assignment "
+                            + baseType.getPropertyAssignment(assignmentXPath).getXPath()
+                    );
+                }
+                return name;
+            } catch (FxRuntimeException e) {
+                // not found, pass
+            }
+
+            // CMIS base property selected, not hidden by a flexive property assignment
+            if (cmisProperty.getFxPropertyName() != null) {
+                final FxProperty property = environment.getProperty(cmisProperty.getFxPropertyName());
+                final List<FxPropertyAssignment> assignments = baseType.getAssignmentsForProperty(property.getId());
+                if (assignments.isEmpty()) {
+                    throw new FxCmisQueryException(
+                            "ex.cmis.model.undefined.cmisprop",
+                            cmisProperty.getCmisPropertyName(),
+                            alias,
+                            cmisProperty.getFxPropertyName()
+                    ).asRuntimeException();
+                }
+                return assignments.get(0).getAlias();
+            } else {
+                throw new IllegalArgumentException("Cannot select CMIS property " + name
+                        + " because it is not yet mapped to the [fleXive] repository.");
+            }
+        } else {
+            // normal flexive property assignment selected
+            return name;
+        }
     }
 
     /**

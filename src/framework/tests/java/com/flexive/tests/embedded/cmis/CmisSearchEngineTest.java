@@ -37,16 +37,18 @@ import static com.flexive.shared.EJBLookup.getCmisSearchEngine;
 import static com.flexive.shared.EJBLookup.getContentEngine;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.cmis.CmisVirtualProperty;
+import com.flexive.shared.cmis.search.CmisResultRow;
+import com.flexive.shared.cmis.search.CmisResultSet;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxAccountInUseException;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxLoginFailedException;
 import com.flexive.shared.exceptions.FxLogoutFailedException;
-import com.flexive.shared.search.cmis.CmisResultRow;
-import com.flexive.shared.search.cmis.CmisResultSet;
 import com.flexive.shared.structure.FxSelectListItem;
 import com.flexive.shared.structure.FxType;
+import com.flexive.shared.value.BinaryDescriptor;
 import com.flexive.shared.value.FxNoAccess;
 import com.flexive.shared.value.FxNumber;
 import com.flexive.shared.value.SelectMany;
@@ -109,7 +111,7 @@ public class CmisSearchEngineTest {
         assertEquals(rs.filterEqual(2, 30).get(0).getColumn(2).getValue(), new FxNumber(30));
         assertEquals(rs.filterEqual(2, new FxNumber(30)).get(0).getColumn(2).getValue(), new FxNumber(30));
     }
-    
+
     @Test(groups = {"search", "cmis", "ejb"})
     public void simpleSelect() throws FxApplicationException {
         final CmisResultSet result = getCmisSearchEngine().search("SELECT d.surname FROM contactData AS d");
@@ -254,6 +256,49 @@ public class CmisSearchEngineTest {
     }
 
     @Test(groups = {"search", "cmis", "ejb"})
+    public void selectCmisProperties() throws FxApplicationException {
+        final List<String> columns = Lists.newArrayList();
+        for (CmisVirtualProperty vp : CmisVirtualProperty.values()) {
+            if (vp.getFxPropertyName() != null) {
+                // property can be mapped directly, select the CMIS variant and the flexive one
+                columns.add(vp.getCmisPropertyName());
+                columns.add(vp.getFxPropertyName());
+            }
+        }
+        // TODO: select from virtual "document" table
+        final CmisResultSet result = getCmisSearchEngine().search(
+                "SELECT " + StringUtils.join(columns, ',') + " FROM root"
+        );
+        assertTrue(result.getRowCount() > 0);
+        for (CmisResultRow row : result) {
+            for (int i = 0; i < result.getColumnCount() / 2; i++) {
+                final int cmis = i * 2 + 1;
+                final int flexive = i * 2 + 2;
+                assertEquals(row.getColumn(cmis), row.getColumn(flexive),
+                        "CMIS property returned other result than flexive property: "
+                                + row.getColumn(cmis) + " (" + result.getColumnAliases().get(cmis - 1) + ") vs. "
+                                + row.getColumn(flexive) + " (" + result.getColumnAliases().get(flexive - 1) + ")"
+                );
+            }
+        }
+    }
+
+    @Test(groups = {"search", "cmis", "ejb"})
+    public void selectBinary() throws FxApplicationException {
+        final CmisResultSet result = getCmisSearchEngine().search(
+                "SELECT id, imageBinary FROM image"
+        );
+        assertTrue(result.getRowCount() > 0);
+        for (CmisResultRow row : result) {
+            final BinaryDescriptor binary = row.getColumn(2).getBinary();
+            assertNotNull(binary);
+            assertNotNull(binary.getName());
+            assertNotNull(binary.getMimeType());
+            assertTrue(binary.getSize() > 0, "Expected size to be greater than 0");
+        }
+    }
+
+    @Test(groups = {"search", "cmis", "ejb"})
     public void selectUpper() throws FxApplicationException {
         final CmisResultSet result = getCmisSearchEngine().search(
                 "SELECT UPPER(surname) FROM contactData"
@@ -348,7 +393,7 @@ public class CmisSearchEngineTest {
                         + " AND person.name = 'Peter Bones'"
         );
         assertRowCount(result, 1);
-        assertEquals(result.getColumn(0, 1).getString(), "Peter Bones"); 
+        assertEquals(result.getColumn(0, 1).getString(), "Peter Bones");
 
     }
 
@@ -584,7 +629,7 @@ public class CmisSearchEngineTest {
     public void numericInConditionWithJoin() throws FxApplicationException {
         final CmisResultSet result = getCmisSearchEngine().search(
                 "SELECT p.name, d.annualSalary FROM cmis_person AS p JOIN cmis_person_data AS d ON (p.ssn=d.ssn) "
-                + "WHERE d.annualSalary IN (50000, 85000) ORDER BY name"
+                        + "WHERE d.annualSalary IN (50000, 85000) ORDER BY name"
         );
         assertRowCount(result, 2);
         assertEquals(result.collectColumnValues(1), Arrays.asList("Peter Bones", "Sandra Locke"));
@@ -595,7 +640,7 @@ public class CmisSearchEngineTest {
     public void numericNotInConditionWithJoin() throws FxApplicationException {
         final CmisResultSet result = getCmisSearchEngine().search(
                 "SELECT p.name, d.annualSalary FROM cmis_person AS p JOIN cmis_person_data AS d ON (p.ssn=d.ssn) "
-                + "WHERE d.annualSalary NOT IN (50000, 85000) ORDER BY name"
+                        + "WHERE d.annualSalary NOT IN (50000, 85000) ORDER BY name"
         );
         assertRowCount(result, 1);
         assertEquals(result.collectColumnValues(1), Arrays.asList("Martin Black"));
@@ -832,7 +877,7 @@ public class CmisSearchEngineTest {
         );
         assertEquals(invResult.getRowCount(), result.getRowCount() - partialMatchingRows,
                 "Wrong result row count for NOT IN query on " + queryItems
-                + ", result:\n" + formatResult(invResult)
+                        + ", result:\n" + formatResult(invResult)
         );
         assertTrue(invResult.getRowCount() > 0, "NOT IN query returned no rows");
 

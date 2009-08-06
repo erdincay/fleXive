@@ -298,6 +298,19 @@ class StatementBuilder {
                         );
                     }
                 }
+
+                // add the main binary property
+                if (type.getMainBinaryAssignment() != null) {
+                    result.add(
+                            new ColumnReference(
+                                    environment, storage,
+                                    table,
+                                    type.getMainBinaryAssignment().getAlias().toLowerCase(),
+                                    null,
+                                    false
+                            )
+                    );
+                }
             }
         }
 

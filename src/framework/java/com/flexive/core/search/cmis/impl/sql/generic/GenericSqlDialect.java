@@ -53,9 +53,10 @@ import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.search.SortDirection;
-import com.flexive.shared.search.cmis.CmisResultRow;
-import com.flexive.shared.search.cmis.CmisResultSet;
-import com.flexive.shared.search.cmis.CmisResultValue;
+import com.flexive.shared.cmis.search.CmisResultValue;
+import com.flexive.shared.cmis.search.CmisResultColumnDefinition;
+import com.flexive.shared.cmis.search.CmisResultRow;
+import com.flexive.shared.cmis.search.*;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.security.ACLPermission;
@@ -66,6 +67,7 @@ import com.flexive.shared.structure.FxType;
 import com.flexive.shared.value.FxValue;
 import com.flexive.shared.workflow.Step;
 import com.flexive.shared.workflow.Workflow;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
 import static org.apache.commons.lang.StringUtils.isBlank;
 
@@ -166,9 +168,13 @@ public class GenericSqlDialect implements SqlMapperFactory, SqlDialect {
      * {@inheritDoc}
      */
     public CmisResultSet processResultSet(ResultSet rs) throws SQLException {
-        final List<String> columnAliases = new ArrayList<String>(query.getUserColumns().size());
+        final List<CmisResultColumnDefinition> columnAliases = Lists.newArrayListWithCapacity(query.getUserColumns().size());
         for (ResultColumn column : query.getUserColumns()) {
-            columnAliases.add(column.getAlias());
+            columnAliases.add(new CmisResultColumnDefinition(column.getAlias(),
+                    column.getSelectedObject() instanceof ColumnReference
+                            ? ((ColumnReference) column.getSelectedObject()).getReferencedAssignments().get(0).getId()
+                            : -1
+            ));
         }
         final CmisResultSet result = new CmisResultSet(columnAliases);
 

@@ -364,6 +364,19 @@ public class SearchEngineTest {
     }
 
     @Test
+    public void selectBinaryTest() throws FxApplicationException {
+        final FxResultSet result = new SqlQueryBuilder().type("image").select("@pk", "imageBinary").getResult();
+        assertTrue(result.getRowCount() > 0);
+        for (FxResultRow row : result.getResultRows()) {
+            final BinaryDescriptor binary = ((FxBinary) row.getFxValue("imageBinary")).getBestTranslation();
+            assertFalse(binary.isNewBinary());
+            assertNotNull(binary.getName());
+            assertNotNull(binary.getMimeType());
+            assertTrue(binary.getSize() > 0, "Expected size to be greater than 0");
+        }
+    }
+
+    @Test
     public void orderByResultPreferencesTest() throws FxApplicationException {
         setResultPreferences(SortDirection.ASCENDING);
         final FxResultSet result = new SqlQueryBuilder().select("@pk", getTestPropertyName("string")).filterType(TEST_TYPE).getResult();

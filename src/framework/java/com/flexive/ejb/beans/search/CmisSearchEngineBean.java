@@ -12,7 +12,7 @@ import com.flexive.shared.exceptions.FxCmisQueryException;
 import com.flexive.shared.interfaces.CmisSearchEngine;
 import com.flexive.shared.interfaces.CmisSearchEngineLocal;
 import com.flexive.shared.interfaces.ContentEngine;
-import com.flexive.shared.search.cmis.CmisResultSet;
+import com.flexive.shared.cmis.search.CmisResultSet;
 import com.flexive.shared.TimestampRecorder;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.structure.TypeStorageMode;
@@ -41,6 +41,7 @@ public class CmisSearchEngineBean implements CmisSearchEngine, CmisSearchEngineL
     @EJB
     private ContentEngine contentEngine;
 
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public CmisResultSet search(String query) throws FxApplicationException {
         return search(query, true, 0, 2000);
     }

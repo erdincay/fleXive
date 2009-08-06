@@ -29,44 +29,50 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the file!
  ***************************************************************/
-package com.flexive.shared.interfaces;
+package com.flexive.shared.cmis.search;
 
-import com.flexive.shared.exceptions.FxApplicationException;
-import com.flexive.shared.cmis.search.CmisResultSet;
+import com.google.common.base.Function;
 
-import javax.ejb.Remote;
+import java.io.Serializable;
 
 /**
- * The CMIS search engine EJB interface.
- *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  * @since 3.1
  */
-@Remote
-public interface CmisSearchEngine {
+public class CmisResultColumnDefinition implements Serializable {
+    private static final long serialVersionUID = -551715816082744944L;
 
     /**
-     * @param query the CMIS-SQL query to be submitted
-     * @return the query result
-     * @throws com.flexive.shared.exceptions.FxCmisSqlParseException
-     *          when the query could not be parsed
-     * @throws com.flexive.shared.exceptions.FxCmisQueryException
-     *          when the query could not be executed
+     * Google transform function to extract the <strong>alias</strong> from a list of column definitions.
      */
-    CmisResultSet search(String query) throws FxApplicationException;
-
+    public static final Function<CmisResultColumnDefinition,Long> TRANSFORM_ASSIGNMENT_ID = new Function<CmisResultColumnDefinition, Long>() {
+        public Long apply(CmisResultColumnDefinition from) {
+            return from.getAssignmentId();
+        }
+    };
     /**
-     * @param query                 the CMIS-SQL query to be submitted
-     * @param returnPrimitiveValues if true, the return values will not be boxed in
-     *                              {@link com.flexive.shared.value.FxValue} objects
-     * @param startRow
-     * @param maxRows               @return      the query result
-     * @throws com.flexive.shared.exceptions.FxCmisSqlParseException
-     *          when the query could not be parsed
-     * @throws com.flexive.shared.exceptions.FxCmisQueryException
-     *          when the query could not be executed
+     * Google transform function to extract the <strong>assignmentId</strong> from a list of column definitions.
      */
-    CmisResultSet search(String query, boolean returnPrimitiveValues, int startRow, int maxRows) throws FxApplicationException;
+    public static final Function<CmisResultColumnDefinition,String> TRANFORM_ALIAS = new Function<CmisResultColumnDefinition, String>() {
+        public String apply(CmisResultColumnDefinition from) {
+            return from.getAlias();
+        }
+    };
 
+    private final String alias;
+    private final long assignmentId;
+
+    public CmisResultColumnDefinition(String alias, long assignmentId) {
+        this.alias = alias;
+        this.assignmentId = assignmentId;
+    }
+
+    public String getAlias() {
+        return alias;
+    }
+
+    public long getAssignmentId() {
+        return assignmentId;
+    }
 }
