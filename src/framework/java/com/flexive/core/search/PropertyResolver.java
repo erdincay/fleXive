@@ -150,12 +150,7 @@ public class PropertyResolver {
         PropertyEntry entry = cache.get(key);
         if (entry == null) {
             // first check hardcoded virtual properties like @pk and @path
-            for (PropertyEntry.Type type : PropertyEntry.Type.values()) {
-                if (type.matchesProperty(property.getPropertyName())) {
-                    entry = type.createEntry();
-                    break;
-                }
-            }
+            entry = PropertyEntry.Type.createForProperty(property.getPropertyName());
             if (entry == null) {
                 entry = new PropertyEntry(property, hierarchicalStorage, fx_stmt.getIgnoreCase());
             }

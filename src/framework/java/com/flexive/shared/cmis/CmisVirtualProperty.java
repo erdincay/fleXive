@@ -31,6 +31,8 @@
  ***************************************************************/
 package com.flexive.shared.cmis;
 
+import org.apache.commons.lang.StringUtils;
+
 /**
  * Definitions of CMIS property names (CMIS draft 0.62) and their mapping to [fleXive] properties, if available.
  *
@@ -39,7 +41,7 @@ package com.flexive.shared.cmis;
  * @since 3.1
  */
 public enum CmisVirtualProperty {
-    Id("ObjectId", null),
+    Id("ObjectId", "@pk"),
 
     Uri("Uri", null),
 
@@ -91,6 +93,10 @@ public enum CmisVirtualProperty {
         return fxPropertyName;
     }
 
+    public boolean isVirtualFxProperty() {
+        return StringUtils.isNotBlank(fxPropertyName) && fxPropertyName.charAt(0) == '@';
+    }
+    
     /**
      * Returns the CmisVirtualProperty for the given property name, or null if none was found.
      * 

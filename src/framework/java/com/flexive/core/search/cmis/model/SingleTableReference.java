@@ -38,6 +38,7 @@ import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.structure.FxProperty;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.structure.FxType;
+import com.flexive.core.search.PropertyEntry;
 import com.google.common.collect.Lists;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -143,6 +144,10 @@ public class SingleTableReference implements TableReference {
 
     private String getAssignmentAlias(FxEnvironment environment, String name, CmisVirtualProperty cmisProperty) {
         if (cmisProperty != null) {
+            if (cmisProperty.getFxPropertyName() != null && cmisProperty.getFxPropertyName().charAt(0) == '@') {
+                // FxSQL virtual property selected, use first read column
+                return PropertyEntry.Type.createForProperty(cmisProperty.getFxPropertyName()).getReadColumns()[0];
+            }
             try {
                 final String assignmentXPath = "/" + name;
                 baseType.getPropertyAssignment(assignmentXPath);

@@ -259,7 +259,7 @@ public class CmisSearchEngineTest {
     public void selectCmisProperties() throws FxApplicationException {
         final List<String> columns = Lists.newArrayList();
         for (CmisVirtualProperty vp : CmisVirtualProperty.values()) {
-            if (vp.getFxPropertyName() != null) {
+            if (vp.getFxPropertyName() != null && vp.getFxPropertyName().charAt(0) != '@') {
                 // property can be mapped directly, select the CMIS variant and the flexive one
                 columns.add(vp.getCmisPropertyName());
                 columns.add(vp.getFxPropertyName());
@@ -280,6 +280,20 @@ public class CmisSearchEngineTest {
                                 + row.getColumn(flexive) + " (" + result.getColumnAliases().get(flexive - 1) + ")"
                 );
             }
+        }
+    }
+
+    @Test(groups = {"search", "cmis", "ejb"})
+    public void selectPK() throws FxApplicationException {
+        final CmisResultSet result = getCmisSearchEngine().search(
+                "SELECT " + CmisVirtualProperty.Id.getCmisPropertyName() + ", id, version FROM root"
+        );
+        assertTrue(result.getRowCount() > 0);
+        for (CmisResultRow row : result) {
+            assertEquals(
+                    row.getColumn(CmisVirtualProperty.Id.getCmisPropertyName()).getValue(),
+                    new FxPK(row.getColumn(2).getLong(), row.getColumn(3).getInt())
+            );
         }
     }
 

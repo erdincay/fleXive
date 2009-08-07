@@ -34,6 +34,7 @@ package com.flexive.core.search.cmis.impl.sql.generic.mapper.select;
 import com.flexive.core.DatabaseConst;
 import com.flexive.core.search.PropertyResolver;
 import com.flexive.core.search.DataSelector;
+import com.flexive.core.search.PropertyEntry;
 import com.flexive.core.search.cmis.impl.CmisSqlQuery;
 import com.flexive.core.search.cmis.impl.ResultColumnReference;
 import com.flexive.core.search.cmis.impl.sql.ColumnIndex;
@@ -81,8 +82,9 @@ public class GenericColumnReference implements ResultColumnMapper<ResultColumnRe
         // this is a modified version of GenericSQLDataSelector#getContentDataSubSelect
 
         // select data fields
-        final FxDataType dataType = column.getPropertyEntry().getProperty().getDataType();
-        final String[] readColumns = column.getPropertyEntry().getReadColumns();
+        final PropertyEntry entry = column.getPropertyEntry();
+        final FxDataType dataType = entry.getProperty() == null ? null : entry.getProperty().getDataType();
+        final String[] readColumns = entry.getReadColumns();
         final List<String> columns = new ArrayList<String>(readColumns.length);
         int ctr = 0;
         if (column.getSelectedObject().isMultivalued() && !isDirectSelectForMultivalued(sqlMapperFactory, column, dataType)) {
@@ -113,7 +115,7 @@ public class GenericColumnReference implements ResultColumnMapper<ResultColumnRe
             }
             // type uses property permissions, we have to select the XPath
             if (sqlMapperFactory.getSqlDialect().isPropertyPermissionsEnabled(column)
-                    && PropertyResolver.Table.T_CONTENT_DATA.equals(column.getPropertyEntry().getTableType())) {
+                    && PropertyResolver.Table.T_CONTENT_DATA.equals(entry.getTableType())) {
                 columns.add(
                         getSelect(sqlMapperFactory.getSqlDialect(), "xpath",
                                 column.getSelectedObject(),

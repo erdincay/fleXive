@@ -38,6 +38,7 @@ import com.flexive.core.search.cmis.impl.sql.mapper.ConditionColumnMapper;
 import com.flexive.core.storage.ContentStorage;
 import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.structure.FxPropertyAssignment;
+import com.flexive.shared.cmis.CmisVirtualProperty;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -62,14 +63,19 @@ public class ColumnReference extends ValueExpression<ColumnReference> {
                            String column, String alias, boolean useUpperCase) {
         super(alias != null ? alias : column);
         this.tableReference = tableReference;
-        this.assignments = Collections.unmodifiableList(
-                tableReference.resolvePropertyAssignment(environment, column)
-        );
-        // use the base assignment for the read columns - the data type cannot vary in derived assignments
-        final List<String> readColumns = new ArrayList<String>();
-        readColumns.addAll(Arrays.asList(
-                PropertyEntry.getReadColumns(storage, assignments.get(0).getProperty())
-        ));
+
+        final CmisVirtualProperty cmisProperty = CmisVirtualProperty.getByCmisName(column);
+        if (cmisProperty != null && cmisProperty.isVirtualFxProperty()) {
+            this.assignments = Arrays.asList(
+                    environment.getPropertyAssignment("ROOT/"
+                            + PropertyEntry.Type.createForProperty(cmisProperty.getFxPropertyName()).getReadColumns()[0])
+            );
+        } else {
+            this.assignments = Collections.unmodifiableList(
+                    tableReference.resolvePropertyAssignment(environment, column)
+            );
+        }
+
         // multivalued properties have a maximum multiplicity > 1
         multivalued = assignments.get(0).getMultiplicity().getMax() > 1;
         boolean mlang = false;
@@ -80,6 +86,12 @@ public class ColumnReference extends ValueExpression<ColumnReference> {
             }
         }
         multilanguage = mlang;
+
+        // use the base assignment for the read columns - the data type cannot vary in derived assignments
+        final List<String> readColumns = new ArrayList<String>();
+        readColumns.addAll(Arrays.asList(
+                PropertyEntry.getReadColumns(storage, assignments.get(0).getProperty())
+        ));
 
         // sub-assignments will always have the same read columns etc. as our base assignment,
         // so use the base assignment to determine database mapper information like read columns 
@@ -94,13 +106,17 @@ public class ColumnReference extends ValueExpression<ColumnReference> {
             table = PropertyResolver.Table.forTableName(storage.getTableName(assignment.getProperty()));
             filterColumn = useUpperCase && upperCaseColumn != null ? upperCaseColumn : readColumns.get(0);
         }
-        propertyEntry = new PropertyEntry(PropertyEntry.Type.PROPERTY_REF,
-                table,
-                assignment, 
-                readColumns.toArray(new String[readColumns.size()]),
-                filterColumn,
-                assignment.isMultiLang(), null
-        );
+        if (cmisProperty != null && cmisProperty.isVirtualFxProperty()) {
+            propertyEntry = PropertyEntry.Type.createForProperty(cmisProperty.getFxPropertyName());
+        } else {
+            propertyEntry = new PropertyEntry(PropertyEntry.Type.PROPERTY_REF,
+                    table,
+                    assignment,
+                    readColumns.toArray(new String[readColumns.size()]),
+                    filterColumn,
+                    assignment.isMultiLang(), null
+            );
+        }
     }
 
     /**

@@ -168,6 +168,21 @@ public class PropertyEntry {
                     throw new IllegalStateException();
             }
         }
+
+        /**
+         * Return the entry for the given property name (e.g. "@pk"), or null if none exists.
+         *
+         * @param propertyName  the given property name (e.g. "@pk")
+         * @return              the entry for the given property name, or null if none exists.      
+         */
+        public static PropertyEntry createForProperty(String propertyName) {
+            for (Type type : values()) {
+                if (type.matchesProperty(propertyName)) {
+                    return type.createEntry();
+                }
+            }
+            return null;
+        }
     }
 
     /**
@@ -177,7 +192,7 @@ public class PropertyEntry {
         private PkEntry() {
             super(Type.PK,
                     PropertyResolver.Table.T_CONTENT,
-                    new String[]{"ID", "VERSION"},
+                    new String[]{"ID", "VER"},
                     null, false, null);
         }
 

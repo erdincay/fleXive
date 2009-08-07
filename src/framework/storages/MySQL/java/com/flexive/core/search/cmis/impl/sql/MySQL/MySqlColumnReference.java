@@ -54,9 +54,9 @@ public class MySqlColumnReference extends GenericColumnReference {
 
     @Override
     public boolean isDirectSelectForMultivalued(SqlMapperFactory factory, ResultColumnReference column, FxDataType dataType) {
-        return dataType.isPrimitiveValueType()
+        return dataType != null && (dataType.isPrimitiveValueType()
                 || FxDataType.Reference.equals(dataType)
-                || FxDataType.SelectOne.equals(dataType);
+                || FxDataType.SelectOne.equals(dataType));
     }
 
     @Override

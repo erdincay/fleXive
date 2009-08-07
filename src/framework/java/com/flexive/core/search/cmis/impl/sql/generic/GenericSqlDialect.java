@@ -716,7 +716,7 @@ public class GenericSqlDialect implements SqlMapperFactory, SqlDialect {
             // and one of the assignments has property permissions enabled
             if (column.getSelectedObject().getTableReference().isPropertySecurityEnabled()) {
                 for (FxPropertyAssignment assignment : column.getSelectedObject().getReferencedAssignments()) {
-                    if (assignment.getACL() != null) {
+                    if (assignment.getACL() != null && !assignment.isSystemInternal()) {
                         enabled = true;
                         break;
                     }
