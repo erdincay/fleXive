@@ -36,6 +36,7 @@ import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxFileUtils;
+import com.flexive.shared.stream.FxStreamUtils;
 import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxPK;
@@ -201,6 +202,11 @@ public class BinaryTest {
                 checkPreviewFile(prevThreshold, desc, bin, PreviewSizes.PREVIEW2);
                 checkPreviewFile(prevThreshold, desc, bin, PreviewSizes.PREVIEW3);
             }
+            
+            InputStream is = FxStreamUtils.getBinaryStream(desc, PreviewSizes.ORIGINAL);
+            File tmp = File.createTempFile("testTmpIS", "");
+            FxFileUtils.copyStream2File(desc.getSize(), is, tmp);
+            Assert.assertEquals(tmp.length(), desc.getSize(), "Filesize mismatch!");
             FxFileUtils.removeFile(comp);
         } finally {
             if (pk != null)
