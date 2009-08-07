@@ -389,6 +389,9 @@ var toolbarStyle = [];
 var ajaxRegisteredIds = []; // ajax-enabled buttons
 var ajaxRegisteredIdPositions = [];
 var ajaxRegisteredIdsToolbarOnly = [];
+var toolbarButtonParamId = [];
+var toolbarButtonParamLockScreen = [];
+var toolbarButtonParamConfirm = [];
 
 function clearToolbar() {
     toolbarImages=[];
@@ -396,6 +399,9 @@ function clearToolbar() {
     toolbarClick=[];
     toolbarIds=[];
     toolbarStyle=[];
+    toolbarButtonParamId = [];
+    toolbarButtonParamLockScreen = [];
+    toolbarButtonParamConfirm = [];
 }
 
 // clear ajax-enabled buttons

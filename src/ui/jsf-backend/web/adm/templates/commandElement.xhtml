@@ -111,6 +111,7 @@ buttonDisabled - [optional] renders the commandElement, but disables its functio
                         eval(parent.getCommandElementScript(self,'#{id}'));
                     }
                     parent.registerAjaxToolbarButtons(#{ajax}, '#{location}', '#{id}', '#{toolbarPosition}');
+                    parent.registerCommandButtonParams('#{id}', #{lockscreen}, '#{fxMessageBean[confirmKey]}');
                 } else {
                     flexive.yui.onYahooLoaded(function() {
                         document.getElementById("commandButton_#{id}").onclick = function() {

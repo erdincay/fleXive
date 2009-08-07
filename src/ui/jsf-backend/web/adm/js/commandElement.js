@@ -120,3 +120,23 @@ function sortAjaxPositions() {
         }
     }
 }
+
+//======================================================================================================================
+// ContentEditor: needed for FF only, saves parameters of commandButtons
+//======================================================================================================================
+function registerCommandButtonParams(id, lockScreen, confirmDialogue) {
+    var onClickAction = "";
+    var l = parent.toolbarButtonParamId.length;
+    parent.toolbarButtonParamId[l] = id;
+    // first the dialogue, then the lockscreen action!
+    // TODO: Test!
+    if(lockScreen)
+        parent.toolbarButtonParamLockScreen[l] = lockScreen;
+    else
+        parent.toolbarButtonParamLockScreen[l] = false;
+
+    if(confirmDialogue && confirmDialogue != null && confirmDialogue != '') {
+        parent.toolbarButtonParamConfirm[l] = confirmDialogue;
+    } else
+        parent.toolbarButtonParamConfirm[l] = null;
+}

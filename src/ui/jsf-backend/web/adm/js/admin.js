@@ -274,8 +274,8 @@ function ajaxButtonRequest() {
  * Call this for the BE application ajax requests in the content editor component
  */
 function beAjaxButtonRequest() {
-    initialiseAjaxComponent();
     regAjaxComponentInToolbar(true);
+    flexive.yui.load();
 }
 
 /**
@@ -308,6 +308,7 @@ function regAjaxComponentInToolbar(contentEditor) {
     /**
      * ContentEditor only:
      * This function merely updates the onclick events in the toolbar from the given onclicks in the commandbuttons
+     * This is for FF only (necessary since the last richfaces update)
      */
     function updateToolbarClickFuncsOnly() {
         if (_toolBar != null) {
@@ -316,9 +317,28 @@ function regAjaxComponentInToolbar(contentEditor) {
                 for (var i = 0; i < _images.length; i++) {
                     var currentImgId = _images[i].id;
                     // only check "regular" buttons
-                    if (currentImgId != "" && _images[i].src.indexOf('separator.png' < 1)) { // separator
-                        var commandEleName = 'frm:' + currentImgId.substring(0, currentImgId.lastIndexOf('_'));
-                        window.parent.document.getElementById(currentImgId).onclick = eval(content.getElementById(commandEleName).onclick);
+                    if (currentImgId != "" && _images[i].src.indexOf('separator.png' < 1)) {
+                        var commandEleName = currentImgId.substring(0, currentImgId.lastIndexOf('_'));
+                        var formEleName = 'frm:' + commandEleName;
+                        var onClickAction = content.getElementById(formEleName).onclick.toString();
+
+                        var afterSplit = [];
+                        afterSplit = onClickAction.split('{\n'); // [1].split('\n}')[0];
+                        afterSplit.shift(); // remove first ele and reconcat the array
+                        if (afterSplit.length > 1)
+                            onClickAction = afterSplit.join(" {\n ");
+                        else
+                            onClickAction = afterSplit.join(" ");
+                        onClickAction = onClickAction.substring(0, onClickAction.lastIndexOf("\n}"));
+
+                        var idx = linearSearch(commandEleName, parent.toolbarButtonParamId, false);
+                        if (idx != -1) {
+                            if (parent.toolbarButtonParamLockScreen[idx])
+                                onClickAction = "parent.lockScreen();" + onClickAction;
+                            if (parent.toolbarButtonParamConfirm[idx] != null)
+                                onClickAction = "confirmDialog('" + parent.toolbarButtonParamConfirm[idx] + "', function() { " + onClickAction + " });";
+                        }
+                        window.parent.document.getElementById(currentImgId).onclick = new Function(onClickAction);
                     }
                 }
             }
@@ -373,7 +393,7 @@ function regAjaxComponentInToolbar(contentEditor) {
 
             // if a toolbarPosition was given for the ajax buttons, reorder the relevant arrays
             if (reorder && rerender && parent.ajaxRegisteredIdPositions.length > 0 && (parent.ajaxRegisteredIdPositions.length == parent.ajaxRegisteredIds.length)) {
-                var smallestNonRenderedPos = -1; // var to keep track of buttons which are not rendered 
+                var smallestNonRenderedPos = -1; // var to keep track of buttons which are not rendered
                 for (var i = 0; i < parent.ajaxRegisteredIds.length; i++) {
                     if (linearSearch(parent.ajaxRegisteredIds[i], parent.ajaxRegisteredIdsToolbarOnly, false) >= 0) {
                         if (linearSearch(parent.ajaxRegisteredIds[i], parent.toolbarIds, true) >= 0)
@@ -535,7 +555,7 @@ function regAjaxComponentInToolbar(contentEditor) {
     };
 
     // rendering logic
-    if(contentEditor) {
+    if (contentEditor) {
         updateToolbarClickFuncsOnly();
     }
     else if (parent.ajaxRegisteredIds.length > 0) {

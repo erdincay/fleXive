@@ -111,7 +111,7 @@ public class BeContentEditorBean implements ActionBean, Serializable {
     // Save after an import or keep editing?
     private boolean importSave;
 
-    private long contentIdToInit= -1;
+    private long contentIdToInit = -1;
 
     private String fxCeRenderFieldsJSFunction = null;
     private boolean beBeanInUse;
@@ -701,14 +701,13 @@ public class BeContentEditorBean implements ActionBean, Serializable {
 
     public String cancel() {
         if ("import".equals(infoPanelState))
-            infoPanelState=null;
+            infoPanelState = null;
         boolean isReferenced = wrappedContent.isReferenced();
         ((FxContentEditorBean) FxJsfUtils.getManagedBean("fxContentEditorBean")).cancel();
         if (!isReferenced) {
             if (wrappedContent.isNew()) {
                 resetViewStateVars();
-            }
-            else {
+            } else {
                 editMode = false;
                 wrappedContent.setReset(true);
                 treeNodes = null;
@@ -861,7 +860,7 @@ public class BeContentEditorBean implements ActionBean, Serializable {
                 if (wrappedContent.getContent().getPk().isNew()) {
                     typeId = -1;
                     content = null;
-                    this.editMode=false;
+                    this.editMode = false;
                     // retrieve saved content from storage and set reset flag,
                     // for edit mode to be deactivated 
                     ceBean.getContentStorage().get(wrappedContent.getEditorId()).setReset(true);
@@ -893,7 +892,7 @@ public class BeContentEditorBean implements ActionBean, Serializable {
                         }
                     }
                     // Reload changes
-                    this.treeNodes=null;
+                    this.treeNodes = null;
                     // TODO: only call when tree node labels need to be manually updated
                     // (i.e. after an existing content is edited and caption changed)
                     FxContext.get().setTreeWasModified();
@@ -902,9 +901,9 @@ public class BeContentEditorBean implements ActionBean, Serializable {
             if (isReferenced) {
                 // if content was referenced, reset to saved view state vars
                 // (so that base content is displayed again)
-                pk=oldPk;
-                content=oldContent;
-                typeId=oldTypeId;
+                pk = oldPk;
+                content = oldContent;
+                typeId = oldTypeId;
             }
         } catch (Throwable t) {
             new FxFacesMsgErr(t).addToContext();
@@ -912,7 +911,7 @@ public class BeContentEditorBean implements ActionBean, Serializable {
     }
 
     public String enableEdit() {
-       ((FxContentEditorBean) FxJsfUtils.getManagedBean("fxContentEditorBean")).enableEdit();
+        ((FxContentEditorBean) FxJsfUtils.getManagedBean("fxContentEditorBean")).enableEdit();
         return null;
     }
 
@@ -950,30 +949,29 @@ public class BeContentEditorBean implements ActionBean, Serializable {
      *
      * @param pk pk
      * @return whether the content instance with the pk currently being edited
-     * is part of the search result.
+     *         is part of the search result.
      */
     private boolean isPkInSearchResult(FxPK pk) {
-       return isFromResultSet() && pk != null && ((SearchResultBean) FxJsfUtils.getManagedBean("fxSearchResultBean")).getResult().getResultRow(getPk()) != null;
+        return isFromResultSet() && pk != null && ((SearchResultBean) FxJsfUtils.getManagedBean("fxSearchResultBean")).getResult().getResultRow(getPk()) != null;
     }
 
     /**
      * Update the search result and fetch the new PK to edit
      *
      * @param matchVersion if true, the updated search result is
-     * matched for the new version, otherwise for index.
+     *                     matched for the new version, otherwise for index.
      * @return the new pk to edit
      */
     private FxPK updateSearchResult(boolean matchVersion) {
-        SearchResultBean sb =  (SearchResultBean) FxJsfUtils.getManagedBean("fxSearchResultBean");
+        SearchResultBean sb = (SearchResultBean) FxJsfUtils.getManagedBean("fxSearchResultBean");
         int currentIndex = sb.getResult().getResultRow(getPk()).getIndex();
         sb.refresh();
-        if (!matchVersion && currentIndex >0 && sb.getResult().getRowCount() >0) {
+        if (!matchVersion && currentIndex > 0 && sb.getResult().getRowCount() > 0) {
             if (sb.getResult().getRowCount() > currentIndex)
                 return sb.getResult().getResultRow(currentIndex).getPk(sb.getResult().getPrimaryKeyIndex());
             if (sb.getResult().getRowCount() <= currentIndex)
-                return sb.getResult().getResultRow(sb.getResult().getRowCount() -1).getPk(sb.getResult().getPrimaryKeyIndex());
-        }
-        else if (matchVersion) {
+                return sb.getResult().getResultRow(sb.getResult().getRowCount() - 1).getPk(sb.getResult().getPrimaryKeyIndex());
+        } else if (matchVersion) {
             if (sb.getResult().getResultRow(getPk()) != null)
                 return getPk();
         }
@@ -1005,12 +1003,19 @@ public class BeContentEditorBean implements ActionBean, Serializable {
                 // avoid JSF integer/long conversion bug
                 Integer i = new Integer(key.toString());
                 // cap possible overflows
-                if (i<0)
-                    i=0;
+                if (i < 0)
+                    i = 0;
                 if (sb.getResult().getRowCount() <= i)
-                    i=sb.getResult().getRowCount() -1;
+                    i = sb.getResult().getRowCount() - 1;
                 return sb.getResult().getResultRow(i).getPk(sb.getResult().getPrimaryKeyIndex());
             }
         };
+    }
+
+    /**
+     * @return the browser the client is using
+     */
+    public String getBrowserAsString() {
+        return String.valueOf(FxJsfUtils.getRequest().getBrowser());
     }
 }
