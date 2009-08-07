@@ -164,6 +164,11 @@ public class GenericColumnReference implements ResultColumnMapper<ResultColumnRe
     }
 
     protected String getContentSelect(String readColumn, ColumnReference column) {
+        if ("id".equalsIgnoreCase(readColumn)) {
+            return FILTER_ALIAS + "." + column.getTableReference().getIdFilterColumn();
+        } else if ("ver".equalsIgnoreCase(readColumn)) {
+            return FILTER_ALIAS + "." + column.getTableReference().getVersionFilterColumn();
+        }
         return "(" + selectUsingTableFilter(readColumn, column, DatabaseConst.TBL_CONTENT) + ")";
 
     }
