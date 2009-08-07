@@ -34,6 +34,7 @@ package com.flexive.core.search.cmis.parser;
 import com.flexive.core.search.cmis.model.*;
 import com.flexive.core.storage.ContentStorage;
 import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.cmis.CmisVirtualProperty;
 import com.flexive.shared.exceptions.FxCmisSqlParseException;
 import static com.flexive.shared.exceptions.FxCmisSqlParseException.ErrorCause;
 import com.flexive.shared.exceptions.FxRuntimeException;
@@ -58,11 +59,6 @@ import java.util.*;
  */
 class StatementBuilder {
     private static final Log LOG = LogFactory.getLog(StatementBuilder.class);
-
-    /** System assignments that are not selected by "*" */
-    private static Set<String> IGNORED_SYSTEM_ASSIGNMENTS = Collections.unmodifiableSet(new HashSet<String>(
-            Arrays.asList("ACL", "RELSRC", "RELDST", "RELPOS_SRC", "RELPOS_DST", "STEP", "MANDATOR", "ISACTIVE")
-    ));
 
     private final Tree root;
     private final Statement stmt = new Statement();
@@ -314,16 +310,16 @@ class StatementBuilder {
             }
         }
 
-        // add all system properties
-        for (FxPropertyAssignment assignment : environment.getType(FxType.ROOT_ID).getAllProperties()) {
-            if (assignment.isSystemInternal() && !IGNORED_SYSTEM_ASSIGNMENTS.contains(assignment.getAlias())) {
+        // add all CMIS system properties
+        for (CmisVirtualProperty property : CmisVirtualProperty.values()) {
+            if (property.getFxPropertyName() != null) {
                 result.add(
                         new ColumnReference(
-                                environment, storage,
-                                tables.get(0),
-                                assignment.getAlias().toLowerCase(),
-                                null,
-                                false
+                            environment, storage,
+                            tables.get(0),
+                            property.getCmisPropertyName(),
+                            null,
+                            false
                         )
                 );
             }

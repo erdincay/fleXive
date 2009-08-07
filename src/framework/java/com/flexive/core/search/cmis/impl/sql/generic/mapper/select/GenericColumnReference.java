@@ -83,6 +83,9 @@ public class GenericColumnReference implements ResultColumnMapper<ResultColumnRe
 
         // select data fields
         final PropertyEntry entry = column.getPropertyEntry();
+        if (entry == null) {
+            return "null";  // don't select anything
+        }
         final FxDataType dataType = entry.getProperty() == null ? null : entry.getProperty().getDataType();
         final String[] readColumns = entry.getReadColumns();
         final List<String> columns = new ArrayList<String>(readColumns.length);
@@ -211,6 +214,9 @@ public class GenericColumnReference implements ResultColumnMapper<ResultColumnRe
      * {@inheritDoc}
      */
     public Object decodeResultValue(SqlMapperFactory factory, ResultSet rs, ResultColumnReference column, long languageId) {
+        if (column.getPropertyEntry() == null) {
+            return null;    // null selected
+        }
         column.getPropertyEntry().setPositionInResultSet(column.getColumnStart());
         try {
             if (column.getSelectedObject().isMultivalued()) {

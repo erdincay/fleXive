@@ -76,46 +76,58 @@ public class ColumnReference extends ValueExpression<ColumnReference> {
             );
         }
 
-        // multivalued properties have a maximum multiplicity > 1
-        multivalued = assignments.get(0).getMultiplicity().getMax() > 1;
-        boolean mlang = false;
-        for (FxPropertyAssignment assignment : assignments) {
-            if (assignment.isMultiLang()) {
-                mlang = true;
-                break;
+        if (assignments.isEmpty()) {
+            if (cmisProperty == null) {
+                throw new IllegalArgumentException("No assignments returned, but no CMIS property selected.");
             }
-        }
-        multilanguage = mlang;
-
-        // use the base assignment for the read columns - the data type cannot vary in derived assignments
-        final List<String> readColumns = new ArrayList<String>();
-        readColumns.addAll(Arrays.asList(
-                PropertyEntry.getReadColumns(storage, assignments.get(0).getProperty())
-        ));
-
-        // sub-assignments will always have the same read columns etc. as our base assignment,
-        // so use the base assignment to determine database mapper information like read columns 
-        final FxPropertyAssignment assignment = assignments.get(0);
-        final String upperCaseColumn = storage.getUppercaseColumn(assignment.getProperty());
-        final PropertyResolver.Table table;
-        final String filterColumn;
-        if (assignment.isFlatStorageEntry()) {
-            table = PropertyResolver.Table.T_CONTENT_DATA_FLAT;
-            filterColumn = assignment.getFlatStorageMapping().getColumn();
+            // can happen when a CMIS base property is not available in this content instance.
+            // Currently we ignore this, since a few CMIS properties like NAME are not mandatory,
+            // but just returning null in this case seems preferable
+            multivalued = false;
+            multilanguage = false;
+            propertyEntry = null;
         } else {
-            table = PropertyResolver.Table.forTableName(storage.getTableName(assignment.getProperty()));
-            filterColumn = useUpperCase && upperCaseColumn != null ? upperCaseColumn : readColumns.get(0);
-        }
-        if (cmisProperty != null && cmisProperty.isVirtualFxProperty()) {
-            propertyEntry = PropertyEntry.Type.createForProperty(cmisProperty.getFxPropertyName());
-        } else {
-            propertyEntry = new PropertyEntry(PropertyEntry.Type.PROPERTY_REF,
-                    table,
-                    assignment,
-                    readColumns.toArray(new String[readColumns.size()]),
-                    filterColumn,
-                    assignment.isMultiLang(), null
-            );
+            // multivalued properties have a maximum multiplicity > 1
+            multivalued = assignments.get(0).getMultiplicity().getMax() > 1;
+            boolean mlang = false;
+            for (FxPropertyAssignment assignment : assignments) {
+                if (assignment.isMultiLang()) {
+                    mlang = true;
+                    break;
+                }
+            }
+            multilanguage = mlang;
+
+            // use the base assignment for the read columns - the data type cannot vary in derived assignments
+            final List<String> readColumns = new ArrayList<String>();
+            readColumns.addAll(Arrays.asList(
+                    PropertyEntry.getReadColumns(storage, assignments.get(0).getProperty())
+            ));
+
+            // sub-assignments will always have the same read columns etc. as our base assignment,
+            // so use the base assignment to determine database mapper information like read columns
+            final FxPropertyAssignment assignment = assignments.get(0);
+            final String upperCaseColumn = storage.getUppercaseColumn(assignment.getProperty());
+            final PropertyResolver.Table table;
+            final String filterColumn;
+            if (assignment.isFlatStorageEntry()) {
+                table = PropertyResolver.Table.T_CONTENT_DATA_FLAT;
+                filterColumn = assignment.getFlatStorageMapping().getColumn();
+            } else {
+                table = PropertyResolver.Table.forTableName(storage.getTableName(assignment.getProperty()));
+                filterColumn = useUpperCase && upperCaseColumn != null ? upperCaseColumn : readColumns.get(0);
+            }
+            if (cmisProperty != null && cmisProperty.isVirtualFxProperty()) {
+                propertyEntry = PropertyEntry.Type.createForProperty(cmisProperty.getFxPropertyName());
+            } else {
+                propertyEntry = new PropertyEntry(PropertyEntry.Type.PROPERTY_REF,
+                        table,
+                        assignment,
+                        readColumns.toArray(new String[readColumns.size()]),
+                        filterColumn,
+                        assignment.isMultiLang(), null
+                );
+            }
         }
     }
 

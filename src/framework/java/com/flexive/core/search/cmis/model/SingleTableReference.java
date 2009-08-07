@@ -133,11 +133,14 @@ public class SingleTableReference implements TableReference {
         // select the assignment in the root type
         final CmisVirtualProperty cmisProperty = CmisVirtualProperty.getByCmisName(name);
 
-        final FxPropertyAssignment base = baseType.getPropertyAssignment("/" + getAssignmentAlias(environment, name, cmisProperty));
-        result.add(base);
+        final String alias = getAssignmentAlias(environment, name, cmisProperty);
+        if (alias != null) {
+            final FxPropertyAssignment base = baseType.getPropertyAssignment("/" + alias);
+            result.add(base);
 
-        // add all derived assignments
-        result.addAll(base.getDerivedAssignments(environment));
+            // add all derived assignments
+            result.addAll(base.getDerivedAssignments(environment));
+        }
 
         return result;
     }
@@ -167,15 +170,7 @@ public class SingleTableReference implements TableReference {
             if (cmisProperty.getFxPropertyName() != null) {
                 final FxProperty property = environment.getProperty(cmisProperty.getFxPropertyName());
                 final List<FxPropertyAssignment> assignments = baseType.getAssignmentsForProperty(property.getId());
-                if (assignments.isEmpty()) {
-                    throw new FxCmisQueryException(
-                            "ex.cmis.model.undefined.cmisprop",
-                            cmisProperty.getCmisPropertyName(),
-                            alias,
-                            cmisProperty.getFxPropertyName()
-                    ).asRuntimeException();
-                }
-                return assignments.get(0).getAlias();
+                return assignments.isEmpty() ? null : assignments.get(0).getAlias();
             } else {
                 throw new IllegalArgumentException("Cannot select CMIS property " + name
                         + " because it is not yet mapped to the [fleXive] repository.");

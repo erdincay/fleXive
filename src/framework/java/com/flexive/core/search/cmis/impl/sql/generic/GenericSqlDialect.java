@@ -147,10 +147,10 @@ public class GenericSqlDialect implements SqlMapperFactory, SqlDialect {
     /**
      * Add query row limits (paging) to the final SQL query.
      *
-     * @param sql   the final SQL query
-     * @return      the query with paging limits.
-     * When query limits were applied {@link com.flexive.core.search.cmis.impl.sql.Capabilities#supportsPaging()}
-     * must return true.
+     * @param sql the final SQL query
+     * @return the query with paging limits.
+     *         When query limits were applied {@link com.flexive.core.search.cmis.impl.sql.Capabilities#supportsPaging()}
+     *         must return true.
      */
     protected String limitQuery(String sql) {
         // nothing to do, default dialect does not support SQL query paging
@@ -170,11 +170,22 @@ public class GenericSqlDialect implements SqlMapperFactory, SqlDialect {
     public CmisResultSet processResultSet(ResultSet rs) throws SQLException {
         final List<CmisResultColumnDefinition> columnAliases = Lists.newArrayListWithCapacity(query.getUserColumns().size());
         for (ResultColumn column : query.getUserColumns()) {
-            columnAliases.add(new CmisResultColumnDefinition(column.getAlias(),
-                    column.getSelectedObject() instanceof ColumnReference
-                            ? ((ColumnReference) column.getSelectedObject()).getReferencedAssignments().get(0).getId()
-                            : -1
-            ));
+            if (column.getSelectedObject() instanceof ColumnReference) {
+                final List<FxPropertyAssignment> assignments = ((ColumnReference) column.getSelectedObject()).getReferencedAssignments();
+                columnAliases.add(
+                        new CmisResultColumnDefinition(
+                                column.getAlias(),
+                                assignments.isEmpty() ? -1 : assignments.get(0).getId()
+                        )
+                );
+
+            } else {
+                columnAliases.add(
+                        new CmisResultColumnDefinition(
+                                column.getAlias(), -1
+                        )
+                );
+            }
         }
         final CmisResultSet result = new CmisResultSet(columnAliases);
 
@@ -619,7 +630,7 @@ public class GenericSqlDialect implements SqlMapperFactory, SqlDialect {
                 tableAlias,
                 tableAlias + "." + column + " IN (" + StringUtils.join(readableIds, ',') + ")",
                 privateReadableIds.isEmpty() ? null :
-                tableAlias + "." + column + " IN (" + StringUtils.join(privateReadableIds, ',') + ")"
+                        tableAlias + "." + column + " IN (" + StringUtils.join(privateReadableIds, ',') + ")"
         );
     }
 
@@ -642,7 +653,7 @@ public class GenericSqlDialect implements SqlMapperFactory, SqlDialect {
      * {@inheritDoc}
      */
     public String getAssignmentFilter(PropertyResolver.Table tableType, String tableAlias, Collection<? extends FxPropertyAssignment> assignments) {
-        switch(tableType) {
+        switch (tableType) {
             case T_CONTENT:
                 return "";  // no assignment filter necessary, the selected column determines the assignment
             case T_CONTENT_DATA:
@@ -655,8 +666,8 @@ public class GenericSqlDialect implements SqlMapperFactory, SqlDialect {
                 return tableAlias + ".assign IN ("
                         + StringUtils.join(FxSharedUtils.getSelectableObjectIdList(assignments), ',') + ")";
             case T_CONTENT_DATA_FLAT:
-               // the column determines the assignment (the first assignment is always the base assignment)
-               return SearchUtils.getFlatStorageAssignmentFilter(environment, tableAlias, assignments.iterator().next());
+                // the column determines the assignment (the first assignment is always the base assignment)
+                return SearchUtils.getFlatStorageAssignmentFilter(environment, tableAlias, assignments.iterator().next());
             default:
                 throw new IllegalArgumentException("Unsupported table type: " + tableType);
         }
