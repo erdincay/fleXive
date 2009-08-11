@@ -36,10 +36,7 @@ import com.flexive.core.search.SearchUtils;
 import com.flexive.core.search.cmis.impl.*;
 import com.flexive.core.search.cmis.impl.sql.*;
 import com.flexive.core.search.cmis.impl.sql.generic.mapper.condition.*;
-import com.flexive.core.search.cmis.impl.sql.generic.mapper.select.GenericColumnFunction;
-import com.flexive.core.search.cmis.impl.sql.generic.mapper.select.GenericColumnReference;
-import com.flexive.core.search.cmis.impl.sql.generic.mapper.select.GenericLiteralMapper;
-import com.flexive.core.search.cmis.impl.sql.generic.mapper.select.GenericRowNumberMapper;
+import com.flexive.core.search.cmis.impl.sql.generic.mapper.select.*;
 import com.flexive.core.search.cmis.impl.sql.mapper.ConditionColumnMapper;
 import com.flexive.core.search.cmis.impl.sql.mapper.ConditionMapper;
 import com.flexive.core.search.cmis.impl.sql.mapper.ResultColumnMapper;
@@ -272,7 +269,7 @@ public class GenericSqlDialect implements SqlMapperFactory, SqlDialect {
      */
     @SuppressWarnings({"unchecked"})
     protected void resolveMultivaluedProperties(List<CmisResultRow> rows) {
-        final ResultColumnMapper<ResultColumnReference> columnMapper = getColumnReferenceSqlMapper();
+        final ResultColumnMapper<ResultColumnReference> columnMapper = selectColumnReference();
         final List<Pair<ResultColumn, Integer>> mvColumns = getMultivaluedForPostProcessing(columnMapper);
         for (CmisResultRow row : rows) {
             for (Pair<ResultColumn, Integer> column : mvColumns) {
@@ -336,7 +333,10 @@ public class GenericSqlDialect implements SqlMapperFactory, SqlDialect {
         final FxContent content = contents.get(pk);
 
         // accumulate queries
-        final String xpath = "/" + column.getReferencedAssignments().get(0).getAlias();
+        if (column.getBaseAssignment() == null) {
+            throw new IllegalStateException("A column without a baseAssignment cannot be multivalued.");
+        }
+        final String xpath = "/" + column.getBaseAssignment().getAlias();
         int index = 0;
         final List<Object> result = new ArrayList<Object>();
         while (content.containsValue(xpath + "[" + (++index) + "]")) {
@@ -808,84 +808,91 @@ public class GenericSqlDialect implements SqlMapperFactory, SqlDialect {
     /**
      * {@inheritDoc}
      */
-    public ResultColumnMapper<ResultRowNumber> getRowNumberSqlMapper() {
-        return GenericRowNumberMapper.getInstance();
+    public ResultColumnMapper<ResultRowNumber> selectRowNumber() {
+        return GenericRowNumber.getInstance();
     }
 
     /**
      * {@inheritDoc}
      */
-    public ResultColumnMapper<ResultColumnReference> getColumnReferenceSqlMapper() {
+    public ResultColumnMapper<ResultColumnReference> selectColumnReference() {
         return GenericColumnReference.getInstance();
     }
 
     /**
      * {@inheritDoc}
      */
-    public ConditionColumnMapper<ColumnReference> getColumnReferenceFilterColumn() {
+    public ResultColumnMapper<ResultColumnReference> selectPath() {
+        return GenericObjectPath.getInstance();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public ConditionColumnMapper<ColumnReference> filterColumnReference() {
         return GenericColumnReference.getInstance();
     }
 
     /**
      * {@inheritDoc}
      */
-    public ConditionMapper<ComparisonCondition> getComparisonConditionSqlMapper() {
+    public ConditionMapper<ComparisonCondition> conditionCompare() {
         return GenericComparisonCondition.getInstance();
     }
 
     /**
      * {@inheritDoc}
      */
-    public ConditionColumnMapper<Literal> getLiteralFilterColumn() {
-        return GenericLiteralMapper.getInstance();
+    public ConditionColumnMapper<Literal> filterLiteral() {
+        return GenericLiteral.getInstance();
     }
 
     /**
      * {@inheritDoc}
      */
-    public ResultColumnMapper<ResultColumnFunction> getColumnFunctionSqlMapper() {
+    public ResultColumnMapper<ResultColumnFunction> selectColumnFunction() {
         return GenericColumnFunction.getInstance();
     }
 
     /**
      * {@inheritDoc}
      */
-    public ResultColumnMapper<ResultScore> getScoreSqlMapper() {
+    public ResultColumnMapper<ResultScore> selectScore() {
         return GenericContainsCondition.getInstance();
     }
 
     /**
      * {@inheritDoc}
      */
-    public ConditionColumnMapper<ColumnValueFunction> getColumnFunctionFilterColumn() {
+    public ConditionColumnMapper<ColumnValueFunction> filterColumnFunction() {
         return GenericColumnFunction.getInstance();
     }
 
     /**
      * {@inheritDoc}
      */
-    public ConditionMapper<ContainsCondition> getContainsConditionSqlMapper() {
+    public ConditionMapper<ContainsCondition> conditionContain() {
         return GenericContainsCondition.getInstance();
     }
 
     /**
      * {@inheritDoc}
      */
-    public ConditionMapper<LikeCondition> getLikeConditionSqlMapper() {
+    public ConditionMapper<LikeCondition> conditionLike() {
         return GenericLikeColumnReferenceCondition.getInstance();
     }
 
     /**
      * {@inheritDoc}
      */
-    public ConditionMapper<InCondition> getInConditionSqlMapper() {
+    public ConditionMapper<InCondition> conditionIn() {
         return GenericInColumnReferenceCondition.getInstance();
     }
 
     /**
      * {@inheritDoc}
      */
-    public ConditionMapper<NullCondition> getNullConditionSqlMapper() {
+    public ConditionMapper<NullCondition> conditionNull() {
         return GenericNullColumnReferenceCondition.getInstance();
     }
 

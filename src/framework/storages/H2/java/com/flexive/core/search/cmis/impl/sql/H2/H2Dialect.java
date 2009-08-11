@@ -45,12 +45,12 @@ public class H2Dialect extends GenericSqlDialect {
     }
 
     @Override
-    public ResultColumnMapper<ResultScore> getScoreSqlMapper() {
+    public ResultColumnMapper<ResultScore> selectScore() {
         return H2ContainsCondition.getInstance();
     }
 
     @Override
-    public ConditionMapper<ContainsCondition> getContainsConditionSqlMapper() {
+    public ConditionMapper<ContainsCondition> conditionContain() {
         return H2ContainsCondition.getInstance();
     }
 

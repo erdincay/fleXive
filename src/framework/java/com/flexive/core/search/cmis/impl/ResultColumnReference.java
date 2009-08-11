@@ -67,6 +67,26 @@ public class ResultColumnReference extends AbstractResultColumn<ColumnReference,
 
     @Override
     public ResultColumnMapper<ResultColumnReference> getSqlMapper(SqlMapperFactory factory) {
-        return factory.getColumnReferenceSqlMapper();
+        final PropertyEntry entry = reference.getPropertyEntry();
+        if (entry == null) {
+            return factory.selectColumnReference(); // default mapper
+        }
+        switch (entry.getType()) {
+            case METADATA:
+                throw new UnsupportedOperationException("Briefcase metadata not supported yet.");
+            case NODE_POSITION:
+                throw new UnsupportedOperationException("Tree node positions not supported yet.");
+            case PATH:
+                return factory.selectPath();
+            case PERMISSIONS:
+                throw new UnsupportedOperationException("ACL/permissions not supported yet.");
+            case PK:
+            case PROPERTY_REF:
+                return factory.selectColumnReference();
+            default:
+                throw new UnsupportedOperationException(
+                        "Unsupported entry type: " + entry.getType()
+                );
+        }
     }
 }

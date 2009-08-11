@@ -31,41 +31,27 @@
  ***************************************************************/
 package com.flexive.core.search.cmis.impl.sql.generic.mapper.select;
 
-import com.flexive.core.search.cmis.impl.CmisSqlQuery;
-import com.flexive.core.search.cmis.impl.ResultRowNumber;
-import com.flexive.core.search.cmis.impl.sql.ColumnIndex;
 import com.flexive.core.search.cmis.impl.sql.SqlMapperFactory;
-import com.flexive.core.search.cmis.impl.sql.mapper.ResultColumnMapper;
-import com.flexive.shared.structure.FxDataType;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import com.flexive.core.search.cmis.impl.sql.mapper.ConditionColumnMapper;
+import com.flexive.core.search.cmis.model.Literal;
+import com.flexive.shared.FxFormatUtils;
 
 /**
- * Selects a (automatically calculated) row number that can be used for sorting and paging.
- * 
+ * Represents a literal value in a condition. Literal values cannot be selected.
+ *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  * @since 3.1
  */
-public class GenericRowNumberMapper implements ResultColumnMapper<ResultRowNumber> {
-    private static final GenericRowNumberMapper INSTANCE = new GenericRowNumberMapper();
+public class GenericLiteral implements ConditionColumnMapper<Literal> {
+    private static final GenericLiteral INSTANCE = new GenericLiteral();
 
-    public String selectColumn(SqlMapperFactory sqlMapperFactory, CmisSqlQuery query, ResultRowNumber rowNum, long languageId, boolean xpath, boolean includeResultAlias, ColumnIndex index) {
-        index.increment();
-        final String ctr = rowNum.getSelectedObject();
-        return "@" + ctr + ":=@" + ctr + "+1 " + (includeResultAlias ? rowNum.getResultSetAlias() : "");
+    /** {@inheritDoc} */
+    public String getConditionColumn(SqlMapperFactory sqlMapperFactory, Literal expression, String tableAlias) {
+        return FxFormatUtils.escapeForSql(expression.getValue());
     }
 
-    public Object decodeResultValue(SqlMapperFactory factory, ResultSet rs, ResultRowNumber column, long languageId) throws SQLException {
-        return rs.getInt(column.getColumnStart());
-    }
-
-    public boolean isDirectSelectForMultivalued(SqlMapperFactory factory, ResultRowNumber column, FxDataType dataType) {
-        return false;
-    }
-
-    public static GenericRowNumberMapper getInstance() {
+    public static GenericLiteral getInstance() {
         return INSTANCE;
     }
 }

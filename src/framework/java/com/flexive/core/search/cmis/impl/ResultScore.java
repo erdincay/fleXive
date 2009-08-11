@@ -56,7 +56,7 @@ public class ResultScore extends AbstractResultColumn<Double, ResultScore> {
 
     @Override
     protected ResultColumnMapper<ResultScore> getSqlMapper(SqlMapperFactory factory) {
-        return factory.getScoreSqlMapper();
+        return factory.selectScore();
     }
 
     public Double getSelectedObject() {

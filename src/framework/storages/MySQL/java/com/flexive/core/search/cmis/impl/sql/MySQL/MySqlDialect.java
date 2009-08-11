@@ -136,7 +136,7 @@ public class MySqlDialect extends GenericSqlDialect {
      * {@inheritDoc}
      */
     @Override
-    public ConditionMapper<ContainsCondition> getContainsConditionSqlMapper() {
+    public ConditionMapper<ContainsCondition> conditionContain() {
         return MySqlContainsCondition.getInstance();
     }
 
@@ -144,17 +144,17 @@ public class MySqlDialect extends GenericSqlDialect {
      * {@inheritDoc}
      */
     @Override
-    public ResultColumnMapper<ResultScore> getScoreSqlMapper() {
+    public ResultColumnMapper<ResultScore> selectScore() {
         return MySqlContainsCondition.getInstance();
     }
 
     @Override
-    public ResultColumnMapper<ResultColumnReference> getColumnReferenceSqlMapper() {
+    public ResultColumnMapper<ResultColumnReference> selectColumnReference() {
         return MySqlColumnReference.getInstance();
     }
 
     @Override
-    public ConditionColumnMapper<ColumnReference> getColumnReferenceFilterColumn() {
+    public ConditionColumnMapper<ColumnReference> filterColumnReference() {
         return MySqlColumnReference.getInstance();
     }
 

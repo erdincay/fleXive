@@ -50,6 +50,14 @@ public interface Selectable {
     List<FxPropertyAssignment> getReferencedAssignments();
 
     /**
+     * Return the base assignment for this column. May be null if the column a virtual property
+     * that is not mapped to a flexive property.
+     *
+     * @return  the base assignment for this column
+     */
+    FxPropertyAssignment getBaseAssignment();
+
+    /**
      * Return the table reference of this column.
      *
      * @return  the table reference of this column.

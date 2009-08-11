@@ -37,6 +37,7 @@ import static com.flexive.shared.EJBLookup.getCmisSearchEngine;
 import static com.flexive.shared.EJBLookup.getContentEngine;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.search.FxPaths;
 import com.flexive.shared.cmis.CmisVirtualProperty;
 import com.flexive.shared.cmis.search.CmisResultRow;
 import com.flexive.shared.cmis.search.CmisResultSet;
@@ -265,9 +266,8 @@ public class CmisSearchEngineTest {
                 columns.add(vp.getFxPropertyName());
             }
         }
-        // TODO: select from virtual "document" table
         final CmisResultSet result = getCmisSearchEngine().search(
-                "SELECT " + StringUtils.join(columns, ',') + " FROM root"
+                "SELECT " + StringUtils.join(columns, ',') + " FROM document"
         );
         assertTrue(result.getRowCount() > 0);
         for (CmisResultRow row : result) {
@@ -279,6 +279,21 @@ public class CmisSearchEngineTest {
                                 + row.getColumn(cmis) + " (" + result.getColumnAliases().get(cmis - 1) + ") vs. "
                                 + row.getColumn(flexive) + " (" + result.getColumnAliases().get(flexive - 1) + ")"
                 );
+            }
+        }
+    }
+
+    @Test(groups = {"search", "cmis", "ejb"})
+    public void selectParent() throws FxApplicationException {
+        final CmisResultSet result = getCmisSearchEngine().search(
+                "SELECT ObjectId, ParentId, Name FROM folder WHERE Name NOT LIKE 'test caption%'"
+        );
+        assertTrue(result.getRowCount() > 0);
+        for (CmisResultRow row : result) {
+            assertNotNull(row.getColumn("ParentId").getValue());
+            if (!"root".equalsIgnoreCase(row.getColumn("name").getString())) {
+                final FxPaths paths = row.getColumn("ParentId").getPaths();
+                assertTrue(paths.getPaths().size() > 0);
             }
         }
     }

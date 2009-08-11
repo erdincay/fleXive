@@ -74,7 +74,7 @@ public enum CmisVirtualProperty {
     /*
      * Folder
      */
-    ParentId("ParentId", null),
+    ParentId("ParentId", "@path"),
     AllowedChildObjectTypeIds("AllowedChildObjectTypeIds", null);
     
     private final String cmisPropertyName;

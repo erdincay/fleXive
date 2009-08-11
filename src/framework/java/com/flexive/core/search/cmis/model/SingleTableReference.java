@@ -71,6 +71,19 @@ public class SingleTableReference implements TableReference {
                     types.add(type);
                 }
             }
+        } else if ("document".equalsIgnoreCase(name)) {
+            // select all types that are not folders
+            this.baseType = env.getType(FxType.ROOT_ID);
+            final FxType folder = env.getType(FxType.FOLDER);
+            final Set<FxType> folderTypes = new HashSet<FxType>();
+            folderTypes.addAll(folder.getDerivedTypes(true));
+            folderTypes.add(folder);
+            types = Lists.newArrayList();
+            for (FxType type : env.getTypes()) {
+                if (!folderTypes.contains(type)) {
+                    types.add(type);
+                }
+            }
         } else {
             // normal type, add type and all subtypes
             this.baseType = env.getType(name);
@@ -217,7 +230,7 @@ public class SingleTableReference implements TableReference {
      * {@inheritDoc}
      */
     public FxType getRootType() {
-        return referencedTypes.get(0);
+        return baseType;
     }
 
     /**

@@ -47,29 +47,31 @@ import com.flexive.core.search.cmis.model.*;
  */
 public interface SqlMapperFactory {
 
-    ResultColumnMapper<ResultRowNumber> getRowNumberSqlMapper();
+    ResultColumnMapper<ResultRowNumber> selectRowNumber();
 
-    ResultColumnMapper<ResultColumnReference> getColumnReferenceSqlMapper();
+    ResultColumnMapper<ResultColumnReference> selectColumnReference();
 
-    ResultColumnMapper<ResultColumnFunction> getColumnFunctionSqlMapper();
+    ResultColumnMapper<ResultColumnReference> selectPath();
 
-    ResultColumnMapper<ResultScore> getScoreSqlMapper();
+    ResultColumnMapper<ResultColumnFunction> selectColumnFunction();
 
-    ConditionMapper<ComparisonCondition> getComparisonConditionSqlMapper();
+    ResultColumnMapper<ResultScore> selectScore();
 
-    ConditionMapper<ContainsCondition> getContainsConditionSqlMapper();
+    ConditionMapper<ComparisonCondition> conditionCompare();
 
-    ConditionMapper<LikeCondition> getLikeConditionSqlMapper();
+    ConditionMapper<ContainsCondition> conditionContain();
 
-    ConditionMapper<InCondition> getInConditionSqlMapper();
+    ConditionMapper<LikeCondition> conditionLike();
 
-    ConditionMapper<NullCondition> getNullConditionSqlMapper();
+    ConditionMapper<InCondition> conditionIn();
 
-    ConditionColumnMapper<ColumnReference> getColumnReferenceFilterColumn();
+    ConditionMapper<NullCondition> conditionNull();
+
+    ConditionColumnMapper<ColumnReference> filterColumnReference();
     
-    ConditionColumnMapper<Literal> getLiteralFilterColumn();
+    ConditionColumnMapper<Literal> filterLiteral();
 
-    ConditionColumnMapper<ColumnValueFunction> getColumnFunctionFilterColumn();
+    ConditionColumnMapper<ColumnValueFunction> filterColumnFunction();
 
     SqlDialect getSqlDialect();
 }

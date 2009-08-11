@@ -126,35 +126,35 @@ public class GenericConditionTableBuilder implements ConditionNodeVisitor {
      */
     @SuppressWarnings({"unchecked"})
     public void visit(ComparisonCondition comparison) {
-        visitCondition(factory.getComparisonConditionSqlMapper().getConditionSql(factory, comparison, joinedTables));
+        visitCondition(factory.conditionCompare().getConditionSql(factory, comparison, joinedTables));
     }
 
     /**
      * {@inheritDoc}
      */
     public void visit(ContainsCondition contains) {
-        visitCondition(factory.getContainsConditionSqlMapper().getConditionSql(factory, contains, joinedTables));
+        visitCondition(factory.conditionContain().getConditionSql(factory, contains, joinedTables));
     }
 
     /**
      * {@inheritDoc}
      */
     public void visit(LikeCondition like) {
-        visitCondition(factory.getLikeConditionSqlMapper().getConditionSql(factory, like, joinedTables));
+        visitCondition(factory.conditionLike().getConditionSql(factory, like, joinedTables));
     }
 
     /**
      * {@inheritDoc}
      */
     public void visit(InCondition in) {
-        visitCondition(factory.getInConditionSqlMapper().getConditionSql(factory, in, joinedTables));
+        visitCondition(factory.conditionIn().getConditionSql(factory, in, joinedTables));
     }
 
     /**
      * {@inheritDoc}
      */
     public void visit(NullCondition nullCondition) {
-        visitCondition(factory.getNullConditionSqlMapper().getConditionSql(factory, nullCondition, joinedTables));
+        visitCondition(factory.conditionNull().getConditionSql(factory, nullCondition, joinedTables));
     }
 
     /**

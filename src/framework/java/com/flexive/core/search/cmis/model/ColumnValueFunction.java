@@ -65,6 +65,13 @@ public abstract class ColumnValueFunction<T extends ColumnValueFunction> extends
     /**
      * {@inheritDoc}
      */
+    public FxPropertyAssignment getBaseAssignment() {
+        return columnReference.getBaseAssignment();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public TableReference getTableReference() {
         return columnReference.getTableReference();
     }

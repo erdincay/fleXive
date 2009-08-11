@@ -84,6 +84,13 @@ public class NumericValueFunction extends ValueFunction<NumericValueFunction> {
     /**
      * {@inheritDoc}
      */
+    public FxPropertyAssignment getBaseAssignment() {
+        return assignments.isEmpty() ? null : assignments.get(0);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public TableReference getTableReference() {
         return null;
     }

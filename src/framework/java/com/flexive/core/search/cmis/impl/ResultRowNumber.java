@@ -61,7 +61,7 @@ public class ResultRowNumber extends AbstractResultColumn<String, ResultRowNumbe
 
     @Override
     public ResultColumnMapper<ResultRowNumber> getSqlMapper(SqlMapperFactory sqlMapperFactory) {
-        return sqlMapperFactory.getRowNumberSqlMapper();
+        return sqlMapperFactory.selectRowNumber();
     }
 
 }

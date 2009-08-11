@@ -35,6 +35,8 @@ import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.value.FxValue;
 import com.flexive.shared.value.BinaryDescriptor;
 import com.flexive.shared.value.FxBinary;
+import com.flexive.shared.search.FxPaths;
+import com.flexive.shared.content.FxPK;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.Serializable;
@@ -198,6 +200,24 @@ public abstract class CmisResultValue<T> implements Serializable {
         return (FxValue) value;
     }
 
+    /**
+     * Return the node path(s) selected with the ParentId property.
+     *
+     * @return  the node path(s) selected with the ParentId property.
+     */
+    public FxPaths getPaths() {
+        return (FxPaths) value;
+    }
+
+    /**
+     * Return the primary key of a content selected with the ObjectId property.
+     *
+     * @return  the primary key of a content selected with the ObjectId property.
+     */
+    public FxPK getPK() {
+        return (FxPK) value;
+    }
+    
     /**
      * Helper method for the getXXX methods that returns the boxed value as a {@link Number}, or throws
      * a runtime exception if the boxed value is not a Number.

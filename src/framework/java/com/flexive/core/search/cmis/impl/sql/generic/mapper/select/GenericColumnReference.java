@@ -139,9 +139,9 @@ public class GenericColumnReference implements ResultColumnMapper<ResultColumnRe
         String select = StringUtils.join(columns, ",\n");
 
         // use base assignment for datatype checks
-        final FxPropertyAssignment assignment = column.getSelectedObject().getReferencedAssignments().get(0);
+        final FxPropertyAssignment assignment = column.getSelectedObject().getBaseAssignment();
 
-        if (!xpath && assignment.getProperty().getDataType() == FxDataType.Binary) {
+        if (!xpath && assignment != null && assignment.getProperty().getDataType() == FxDataType.Binary) {
             // select string-coded form of the BLOB properties
             select = DataSelector.selectBinary(columns.get(0))
                     + (includeResultAlias ? " " + column.getResultSetAlias() : "");

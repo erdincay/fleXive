@@ -61,7 +61,7 @@ public class ResultColumnFunction extends AbstractResultColumn<ColumnReference, 
 
     @Override
     protected ResultColumnMapper<ResultColumnFunction> getSqlMapper(SqlMapperFactory factory) {
-        return factory.getColumnFunctionSqlMapper();
+        return factory.selectColumnFunction();
     }
 
     public ColumnReference getSelectedObject() {

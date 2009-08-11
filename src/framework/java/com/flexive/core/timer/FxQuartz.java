@@ -62,10 +62,12 @@ public class FxQuartz {
 
     public final static String GROUP_INTERNAL = "FxInternal";
     public final static String JOB_MAINTENANCE = "FxMaintenanceJob";
+    /** A system property to disable the Quartz-based timer service (e.g. for tests) */
+    public static final String PROP_DISABLE = "flexive.quartz.disable";
 
     /**
      * Get the Scheduler for the current division
-     *
+     *                                                                               cd .
      * @return Scheduler for the current division
      */
     public static Scheduler getScheduler() {
@@ -83,6 +85,10 @@ public class FxQuartz {
         if (currCtx.isTestDivision()) {
             //disable scheduler for embedded containers
             LOG.info("Quartz scheduler disabled for embedded (test) container.");
+            return;
+        }
+        if (System.getProperty(PROP_DISABLE) != null) {
+            LOG.info("Quartz scheduler disabled because system property " + PROP_DISABLE + " is set.");
             return;
         }
 
@@ -147,7 +153,7 @@ public class FxQuartz {
 
         if( found ) {
 //            System.out.println("Maintenance job already exists - done.");
-            LOG.info("Quartz started.");
+            LOG.info("Quartz started. The scheduler can be disabled by with the command line option -D" + PROP_DISABLE);
             return;
         }
 

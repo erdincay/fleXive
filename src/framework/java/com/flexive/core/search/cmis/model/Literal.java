@@ -61,7 +61,7 @@ public class Literal<T> implements ConditionalExpressionPart<Literal> {
     }
 
     public ConditionColumnMapper<? super Literal> getConditionColumnMapper(SqlMapperFactory factory) {
-        return factory.getLiteralFilterColumn();
+        return factory.filterLiteral();
     }
 
     public PropertyResolver.Table getFilterTableType() {

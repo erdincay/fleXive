@@ -36,9 +36,11 @@ import com.flexive.core.search.PropertyResolver;
 import com.flexive.core.search.cmis.impl.sql.SqlMapperFactory;
 import com.flexive.core.search.cmis.impl.sql.mapper.ConditionColumnMapper;
 import com.flexive.core.storage.ContentStorage;
+import com.flexive.shared.cmis.CmisVirtualProperty;
 import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.structure.FxPropertyAssignment;
-import com.flexive.shared.cmis.CmisVirtualProperty;
+import static com.google.common.collect.Lists.newArrayListWithCapacity;
+import org.apache.commons.lang.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -66,10 +68,14 @@ public class ColumnReference extends ValueExpression<ColumnReference> {
 
         final CmisVirtualProperty cmisProperty = CmisVirtualProperty.getByCmisName(column);
         if (cmisProperty != null && cmisProperty.isVirtualFxProperty()) {
-            this.assignments = Arrays.asList(
-                    environment.getPropertyAssignment("ROOT/"
-                            + PropertyEntry.Type.createForProperty(cmisProperty.getFxPropertyName()).getReadColumns()[0])
-            );
+            final String[] columns = PropertyEntry.Type.createForProperty(cmisProperty.getFxPropertyName()).getReadColumns();
+            if (columns.length > 0 && StringUtils.isNotBlank(columns[0])) {
+                this.assignments = Arrays.asList(
+                        environment.getPropertyAssignment("ROOT/" + columns[0])
+                );
+            } else {
+                this.assignments = newArrayListWithCapacity(0);
+            }
         } else {
             this.assignments = Collections.unmodifiableList(
                     tableReference.resolvePropertyAssignment(environment, column)
@@ -80,12 +86,20 @@ public class ColumnReference extends ValueExpression<ColumnReference> {
             if (cmisProperty == null) {
                 throw new IllegalArgumentException("No assignments returned, but no CMIS property selected.");
             }
-            // can happen when a CMIS base property is not available in this content instance.
-            // Currently we ignore this, since a few CMIS properties like NAME are not mandatory,
-            // but just returning null in this case seems preferable
-            multivalued = false;
-            multilanguage = false;
-            propertyEntry = null;
+            if (!cmisProperty.isVirtualFxProperty()) {
+                // can happen when a CMIS base property is not available in this content instance.
+                // Currently we ignore this, since a few CMIS properties like NAME are not mandatory,
+                // but just returning null in this case seems preferable
+                multivalued = false;
+                multilanguage = false;
+                propertyEntry = null;
+            } else {
+                // virtual property without an assignment (like @path)
+                propertyEntry = PropertyEntry.Type.createForProperty(cmisProperty.getFxPropertyName());
+                assert propertyEntry != null;
+                multilanguage = false;
+                multivalued = false;
+            }
         } else {
             // multivalued properties have a maximum multiplicity > 1
             multivalued = assignments.get(0).getMultiplicity().getMax() > 1;
@@ -141,6 +155,13 @@ public class ColumnReference extends ValueExpression<ColumnReference> {
     /**
      * {@inheritDoc}
      */
+    public FxPropertyAssignment getBaseAssignment() {
+        return assignments.isEmpty() ? null : assignments.get(0);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public TableReference getTableReference() {
         return tableReference;
     }
@@ -149,7 +170,7 @@ public class ColumnReference extends ValueExpression<ColumnReference> {
      * {@inheritDoc}
      */
     public ConditionColumnMapper<? super ColumnReference> getConditionColumnMapper(SqlMapperFactory factory) {
-        return factory.getColumnReferenceFilterColumn();
+        return factory.filterColumnReference();
     }
 
     /**

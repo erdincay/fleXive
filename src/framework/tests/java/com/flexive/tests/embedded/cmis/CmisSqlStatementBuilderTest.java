@@ -79,7 +79,7 @@ public class CmisSqlStatementBuilderTest {
             assertEquals(stmt.getTables().get(0).getReferencedTypes().get(0).getName(), "CONTACTDATA");
 
             final Selectable col = stmt.getSelectedColumns().get(0);
-            final FxPropertyAssignment ass = col.getReferencedAssignments().get(0);
+            final FxPropertyAssignment ass = col.getBaseAssignment();
             assertTrue(ass.getXPath().endsWith("/NAME"), "Invalid assignment: " + ass.getXPath());
             assertEquals(col.getTableReference(), stmt.getTables().get(0));
         }
@@ -141,7 +141,7 @@ public class CmisSqlStatementBuilderTest {
         assertEquals(col1.getClass(), StringValueFunction.class);
         final StringValueFunction fun = (StringValueFunction) col1;
         assertEquals(fun.getFunction(), ValueFunction.Functions.UPPER);
-        final String xpath = fun.getColumnReference().getReferencedAssignments().get(0).getXPath();
+        final String xpath = fun.getColumnReference().getBaseAssignment().getXPath();
         assertTrue(xpath.endsWith("/NAME"), "Invalid XPath: " + xpath);
     }
 
