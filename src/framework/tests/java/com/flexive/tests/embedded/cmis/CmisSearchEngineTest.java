@@ -362,11 +362,9 @@ public class CmisSearchEngineTest {
 
     @Test(groups = {"search", "cmis", "ejb"})
     public void fulltextQuery() throws FxApplicationException {
-        System.out.println("\n\n\n\n\n\n********************************************");
         final CmisResultSet result = getCmisSearchEngine().search(
                 "SELECT id, longtext FROM article WHERE CONTAINS('procedural')"
         );
-        System.out.println("\n\n\n\n\n\n********************************************");
         assertRowCount(result, 1);
         assertTrue(result.getColumn(0, 2).toString().contains("procedural programming language"), "Expected fulltext match against 'complex and evolving': " + result.getColumn(0, 2));
     }

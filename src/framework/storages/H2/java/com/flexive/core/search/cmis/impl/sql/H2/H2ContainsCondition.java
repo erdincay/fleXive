@@ -52,7 +52,7 @@ public class H2ContainsCondition extends GenericContainsCondition {
         return "(SELECT DISTINCT " + joinedTables.getSelectForSingleTable(condition.getTableReference()) + " FROM "
                 + DatabaseConst.TBL_CONTENT_DATA_FT + " " + alias + " "
                 + "WHERE value LIKE "
-                + FxFormatUtils.escapeForSql("%" + condition.getExpression() + "%")
+                + FxFormatUtils.escapeForSql("%" + condition.getExpression().toUpperCase() + "%")
                 + sqlMapperFactory.getSqlDialect().limitSubquery()
                 + ")";
 
