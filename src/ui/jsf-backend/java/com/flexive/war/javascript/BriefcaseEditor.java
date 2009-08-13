@@ -38,15 +38,13 @@ import com.flexive.shared.content.FxPK;
 import com.flexive.shared.interfaces.BriefcaseEngine;
 import com.flexive.shared.search.Briefcase;
 import com.flexive.war.JsonWriter;
+import static com.google.common.collect.Lists.newArrayList;
 
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringWriter;
-import java.util.Arrays;
-import java.util.List;
 import java.util.ArrayList;
-
-import org.apache.commons.lang.ArrayUtils;
+import java.util.List;
 
 /**
  * JSON/RPC beans for the briefcase navigation page.
@@ -109,7 +107,7 @@ public class BriefcaseEditor implements Serializable {
      * @throws Exception if the briefcase could not be deleted
      */
     public String removeItems(long id, long[] itemIds) throws Exception {
-        EJBLookup.getBriefcaseEngine().removeItems(id, itemIds);
+        EJBLookup.getBriefcaseEngine().removeItems(id, getPKs(itemIds));
         return EMPTY;
     }
 
@@ -123,7 +121,7 @@ public class BriefcaseEditor implements Serializable {
      */
     public String add(long id, long[] itemIds) throws Exception {
         final BriefcaseEngine be = EJBLookup.getBriefcaseEngine();
-        be.addItems(id, itemIds);
+        be.addItems(id, getPKs(itemIds));
         return writeBriefcaseInfo(new JsonWriter(), be.load(id)).toString();
     }
 
@@ -188,4 +186,14 @@ public class BriefcaseEditor implements Serializable {
                 .closeMap();
         return writer;
     }
+
+    private List<FxPK> getPKs(long[] itemIds) {
+        final List<FxPK> pks = newArrayList();
+        for (long itemId : itemIds) {
+            pks.add(new FxPK(itemId));
+        }
+        return pks;
+    }
+
+
 }

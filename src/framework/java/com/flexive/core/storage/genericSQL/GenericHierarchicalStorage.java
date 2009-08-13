@@ -1728,9 +1728,21 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 caption = rs.getString(1);
             else
                 caption = "";
-            FxEnvironment env = CacheAdmin.getEnvironment();
 
-            ReferencedContent ref = new ReferencedContent(new FxPK(referencedId, referencedVersion), caption, env.getStep(stepId), env.getACL(aclId));
+            // resolve ACLs from ACL table, if necessary
+            FxEnvironment env = CacheAdmin.getEnvironment();
+            final FxPK pk = new FxPK(referencedId, referencedVersion);
+            final List<ACL> acls;
+            if (aclId == ACL.NULL_ACL_ID) {
+                // multiple ACLs for this content instance
+                acls = FxSharedUtils.filterSelectableObjectsById(env.getACLs(), loadContentAclTable(con, pk));
+            } else {
+                // only one ACL
+                acls = Arrays.asList(env.getACL(aclId));
+            }
+
+
+            ReferencedContent ref = new ReferencedContent(pk, caption, env.getStep(stepId), acls);
             try {
                 ref.setAccessGranted(
                         FxPermissionUtils.checkPermission(
@@ -1738,7 +1750,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                                 ownerId, ACLPermission.READ,
                                 env.getType(typeId),
                                 ref.getStep().getAclId(),
-                                ref.getAcl().getId(),
+                                FxSharedUtils.getSelectableObjectIdList(acls),
                                 false));
             } catch (FxNoAccessException e) {
                 ref.setAccessGranted(false);

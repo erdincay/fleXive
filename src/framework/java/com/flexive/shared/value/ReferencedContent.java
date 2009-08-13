@@ -37,12 +37,15 @@ import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxRuntimeException;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.workflow.Step;
-
-import java.io.Serializable;
-
+import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import java.io.Serializable;
+import java.util.List;
+import java.util.Arrays;
+import java.util.Collections;
 
 /**
  * A referenced content - value class for FxReference
@@ -54,7 +57,7 @@ public class ReferencedContent extends FxPK implements Serializable {
     private static final long serialVersionUID = 4530337199230606480L;
     private String caption;
     private final Step step;
-    private final ACL acl;
+    private final List<ACL> acls = newArrayListWithCapacity(5);
 
     private FxContent content;
     private boolean accessGranted;
@@ -67,15 +70,32 @@ public class ReferencedContent extends FxPK implements Serializable {
      * @param pk      referenced primary key
      * @param caption caption of the referenced content, only available if loaded
      * @param step    the step
-     * @param acl     the acl
+     * @param acls    the ACL(s)
+     * @since         3.1
      */
-    public ReferencedContent(FxPK pk, String caption, Step step, ACL acl) {
+    public ReferencedContent(FxPK pk, String caption, Step step, List<ACL> acls) {
         super(pk.getId(), pk.getVersion());
         this.caption = caption;
         this.step = step;
-        this.acl = acl;
+        if (acls != null) {
+            this.acls.addAll(acls);
+        }
         this.content = null;
         this.accessGranted = false;
+    }
+
+    /**
+     * Ctor
+     *
+     * @param pk      referenced primary key
+     * @param caption caption of the referenced content, only available if loaded
+     * @param step    the step
+     * @param acl     the acl
+     * @deprecated    use {@link #ReferencedContent(com.flexive.shared.content.FxPK, String, com.flexive.shared.workflow.Step, java.util.List)}
+     */
+    @Deprecated
+    public ReferencedContent(FxPK pk, String caption, Step step, ACL acl) {
+        this(pk, caption, step, acl == null ? null : Arrays.asList(acl));
     }
 
     /**
@@ -87,7 +107,6 @@ public class ReferencedContent extends FxPK implements Serializable {
         super(pk.getId(), pk.getVersion());
         this.caption = "";
         this.step = null;
-        this.acl = null;
         this.content = null;
         this.accessGranted = false;
     }
@@ -102,7 +121,6 @@ public class ReferencedContent extends FxPK implements Serializable {
         super(id, version);
         this.caption = "";
         this.step = null;
-        this.acl = null;
         this.content = null;
         this.accessGranted = false;
     }
@@ -116,7 +134,6 @@ public class ReferencedContent extends FxPK implements Serializable {
         super(id);
         this.caption = "";
         this.step = null;
-        this.acl = null;
         this.content = null;
         this.accessGranted = false;
     }
@@ -128,7 +145,6 @@ public class ReferencedContent extends FxPK implements Serializable {
         super();
         this.caption = "";
         this.step = null;
-        this.acl = null;
         this.content = null;
         this.accessGranted = false;
     }
@@ -141,7 +157,7 @@ public class ReferencedContent extends FxPK implements Serializable {
     public ReferencedContent(ReferencedContent other) {
         this.caption = other.caption;
         this.step = other.step;
-        this.acl = other.acl;
+        this.acls.addAll(other.acls);
         this.content = other.hasContent() ? other.getContent().copy() : null;
         this.accessGranted = other.accessGranted;
         this.resolved = other.isResolved();
@@ -180,7 +196,7 @@ public class ReferencedContent extends FxPK implements Serializable {
      * @return if an ACL is known for this reference
      */
     public boolean hasACL() {
-        return acl != null;
+        return !acls.isEmpty();
     }
 
     /**
@@ -195,14 +211,26 @@ public class ReferencedContent extends FxPK implements Serializable {
     }
 
     /**
-     * Get the ACL for this reference
+     * Get the first ACL for this reference
      *
      * @return ACL for this reference
+     * @deprecated  use {@link #getAcls()}
      */
+    @Deprecated
     public ACL getAcl() {
         if (!hasACL())
             throw new FxApplicationException("ex.content.reference.ACL.missing").asRuntimeException();
-        return acl;
+        return acls.get(0);
+    }
+
+    /**
+     * Return the ACL(s) assigned to the reference.
+     *
+     * @return  the ACL(s) assigned to the reference
+     * @since 3.1
+     */
+    public List<ACL> getAcls() {
+        return Collections.unmodifiableList(acls);
     }
 
     /**

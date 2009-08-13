@@ -859,7 +859,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             sbHistory.append("</original>\n");
             //only allow to assign roles which the calling user is a member of (unless it is a global supervisor)
             if (!ticket.isGlobalSupervisor() && !(ticket.isMandatorSupervisor() && account.getMandatorId() == ticket.getMandatorId())) {
-                final long[] orgRoleIds = FxSharedUtils.getSelectableObjectIds(orgRoles);
+                final List<Long> orgRoleIds = FxSharedUtils.getSelectableObjectIdList(orgRoles);
                 //check removed roles
                 for (long check : orgRoleIds) {
                     if (!ArrayUtils.contains(roles, check)) {
@@ -871,7 +871,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
                 }
                 //check added roles
                 for (long check : roles) {
-                    if (!ArrayUtils.contains(orgRoleIds, check)) {
+                    if (!orgRoleIds.contains(check)) {
                         if (!ticket.isInRole(Role.getById(check))) {
                             ctx.setRollbackOnly();
                             throw new FxNoAccessException("ex.account.roles.assign.noMember.add", Role.getById(check).getName());

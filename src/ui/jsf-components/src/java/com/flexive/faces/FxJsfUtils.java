@@ -127,8 +127,9 @@ public class FxJsfUtils {
      * @param linkFormat link format
      * @param itemLinkFormat item link format
      * @throws java.io.IOException if the value could not be written
-     * @deprecated
+     * @deprecated  use {@link #formatResultValue(String, Object, com.flexive.shared.ContentLinkFormatter, String, String)}
      */
+    @Deprecated
     public static void writeResultValue(Writer out, Object value, ContentLinkFormatter linkFormatter, String linkFormat, String itemLinkFormat) throws IOException {
         out.write(formatResultValue(null, value, linkFormatter, linkFormat, itemLinkFormat));
     }
@@ -141,7 +142,7 @@ public class FxJsfUtils {
      * @param linkFormat link format
      * @param itemLinkFormat item link format
      * @return the formatted string value
-     * @deprecated
+     * @deprecated  use {@link #formatResultValue(String, Object, com.flexive.shared.ContentLinkFormatter, String, String)}
      */
     public static String formatResultValue(Object value, ContentLinkFormatter linkFormatter, String linkFormat, String itemLinkFormat) {
         return formatResultValue(null, value, linkFormatter, linkFormat, itemLinkFormat);

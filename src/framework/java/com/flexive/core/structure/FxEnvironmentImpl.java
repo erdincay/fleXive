@@ -51,6 +51,7 @@ import com.flexive.shared.workflow.Step;
 import com.flexive.shared.workflow.StepDefinition;
 import com.flexive.shared.workflow.Workflow;
 import com.google.common.collect.Lists;
+import static com.google.common.collect.Lists.newArrayListWithCapacity;
 
 import java.util.*;
 

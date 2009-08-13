@@ -120,8 +120,9 @@ public class ResultValue extends UIOutput {
                 input.setId(getId() + "_input");
             }
         } else {
-            FxJsfUtils.writeResultValue(context.getResponseWriter(), value, getLinkFormatter(),
-                    getContentLinkFormat(), getItemLinkFormat());
+            // TODO: specify result property name?
+            context.getResponseWriter().write(FxJsfUtils.formatResultValue(null, value, getLinkFormatter(),
+                    getContentLinkFormat(), getItemLinkFormat()));
         }
 
     }

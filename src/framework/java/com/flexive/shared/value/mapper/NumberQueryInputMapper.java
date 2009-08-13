@@ -8,9 +8,12 @@ import com.flexive.shared.structure.FxProperty;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.EJBLookup;
+import com.flexive.shared.security.ACL;
 import com.flexive.shared.content.FxPK;
+import com.google.common.collect.Lists;
 
 import java.util.List;
+import java.util.Arrays;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -92,10 +95,10 @@ public abstract class NumberQueryInputMapper<T, BaseType extends FxValue<T, ?>> 
             final int sepIndex = query.indexOf(SEP_PK_CAPTION);
             if (sepIndex == -1) {
                 // not properly formatted, return a temporary reference that uses the entire query in the caption
-                return new ReferencedContent(new FxPK(-1), query, null, null);
+                return new ReferencedContent(new FxPK(-1), query, null, Lists.<ACL>newArrayList());
             }
             final FxPK pk = FxPK.fromString(query.substring(0, sepIndex));
-            return new ReferencedContent(pk, query.substring(sepIndex + SEP_PK_CAPTION.length()), null, null);
+            return new ReferencedContent(pk, query.substring(sepIndex + SEP_PK_CAPTION.length()), null, Lists.<ACL>newArrayList());
         }
 
         @Override

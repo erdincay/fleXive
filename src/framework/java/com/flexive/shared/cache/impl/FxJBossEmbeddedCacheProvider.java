@@ -69,7 +69,7 @@ public class FxJBossEmbeddedCacheProvider extends AbstractBackingCacheProvider<F
         if (cache != null)
             return;
         try {
-            final Cache<Object, Object> tc = DefaultCacheFactory.getInstance().createCache(
+            final Cache<Object, Object> tc = new DefaultCacheFactory<Object, Object>().createCache(
                     StringUtils.defaultString(System.getProperty(SYSTEM_CACHE_CONFIG), CONFIG_FILE)
             );
             tc.create();

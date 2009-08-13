@@ -235,7 +235,7 @@ public class YahooResultProvider implements Serializable {
     private static String createSortableDate(SimpleDateFormat sortableDateFormat, Object value, Date date) {
         // add sortable value to enable sorting independent of the string representation
         return (date != null ? "<!--" + sortableDateFormat.format(date) + "-->" : "")
-                + FxJsfUtils.formatResultValue(value, null, null, null);
+                + FxJsfUtils.formatResultValue(null, value, null, null, null);
     }
 
     /**

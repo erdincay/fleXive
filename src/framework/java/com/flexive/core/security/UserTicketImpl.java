@@ -121,7 +121,8 @@ public class UserTicketImpl implements UserTicket, Serializable {
             guestACLAssignments = assignmentList.toArray(new ACLAssignment[assignmentList.size()]);
             final List<Role> roles = accountInterface.getRoles(Account.USER_GUEST, RoleLoadMode.ALL);
             guestRoles = roles.toArray(new Role[roles.size()]);
-            guestGroups = FxSharedUtils.getSelectableObjectIds(accountInterface.getGroups(Account.USER_GUEST));
+            final List<Long> groupList = FxSharedUtils.getSelectableObjectIdList(accountInterface.getGroups(Account.USER_GUEST));
+            guestGroups = ArrayUtils.toPrimitive(groupList.toArray(new Long[groupList.size()]));
             guestContactData = accountInterface.load(Account.USER_GUEST).getContactData();
             if (flagDirty)
                 UserTicketStore.flagDirtyHavingUserId(Account.USER_GUEST);
@@ -421,7 +422,7 @@ public class UserTicketImpl implements UserTicket, Serializable {
                 "; mandator:" + this.mandator +
                 "; language: " + this.getLanguage().getIso2digit() +
                 "; groups:" + StringUtils.join(ArrayUtils.toObject(this.groups), ',') +
-                "; roles:" + StringUtils.join(ArrayUtils.toObject(FxSharedUtils.getSelectableObjectIds(Arrays.asList((SelectableObjectWithLabel[]) this.roles))), ',') +
+                "; roles:" + StringUtils.join(FxSharedUtils.getSelectableObjectIdList(Arrays.asList((SelectableObjectWithLabel[]) this.roles)), ',') +
                 "; globalSupervisor:" + this.globalSupervisor +
                 "; multiLogin:" + this.multiLogin +
                 "]";

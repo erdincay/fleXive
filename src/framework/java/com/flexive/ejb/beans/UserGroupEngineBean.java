@@ -495,7 +495,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
         //only allow to assign roles which the calling user is a member of (unless it is a global supervisor)
         if (!ticket.isGlobalSupervisor()) {
             List<Role> orgRoles = getRoles(groupId);
-            long[] orgRoleIds = FxSharedUtils.getSelectableObjectIds(orgRoles);
+            List<Long> orgRoleIds = FxSharedUtils.getSelectableObjectIdList(orgRoles);
             //check removed roles
             for (long check : orgRoleIds) {
                 if (!ArrayUtils.contains(roles, check)) {
@@ -507,7 +507,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
             }
             //check added roles
             for (long check : roles) {
-                if (!ArrayUtils.contains(orgRoleIds, check)) {
+                if (!orgRoleIds.contains(check)) {
                     if (!ticket.isInRole(Role.getById(check))) {
                         ctx.setRollbackOnly();
                         throw new FxNoAccessException("ex.account.roles.assign.noMember.add", Role.getById(check).getName());

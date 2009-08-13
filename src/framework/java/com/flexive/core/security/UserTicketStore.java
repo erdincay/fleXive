@@ -43,6 +43,7 @@ import com.flexive.shared.security.*;
 import com.flexive.core.structure.StructureLoader;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.lang.ArrayUtils;
 
 import javax.security.auth.Subject;
 import java.util.ArrayList;
@@ -243,8 +244,9 @@ public class UserTicketStore {
             final Role[] roles = roleList.toArray(new Role[roleList.size()]);
             final List<ACLAssignment> assignmentList = ae.loadAccountAssignments(acc.getId());
             ACLAssignment[] aad = assignmentList.toArray(new ACLAssignment[assignmentList.size()]);
+            final List<Long> groupIds = FxSharedUtils.getSelectableObjectIdList(groups);
             return new UserTicketImpl(ri.getApplicationId(), ri.isWebDAV(), acc,
-                    FxSharedUtils.getSelectableObjectIds(groups),
+                    ArrayUtils.toPrimitive(groupIds.toArray(new Long[groupIds.size()])),
                     roles, aad, acc.getLanguage());
         } catch (FxNoAccessException exc) {
             // This should NEVER happen since we are running as system

@@ -33,12 +33,14 @@ package com.flexive.faces.components.input;
 
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxLanguage;
+import com.flexive.shared.security.ACL;
 import static com.flexive.shared.FxFormatUtils.toDateTime;
 import static com.flexive.shared.FxFormatUtils.toDate;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxUpdateException;
 import com.flexive.shared.value.*;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
 import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
@@ -262,7 +264,7 @@ public class FxValueInputRenderer extends Renderer {
                 if (value instanceof FxReference && value.isValid()) {
                     // store translation
                     final ReferencedContent reference = ((FxReference) value).getTranslation(languageId);
-                    value.setTranslation(languageId, new ReferencedContent(reference, (String) parameters.get(inputId + "_caption"), null, null));
+                    value.setTranslation(languageId, new ReferencedContent(reference, (String) parameters.get(inputId + "_caption"), null, Lists.<ACL>newArrayList()));
                 }
             } 
 
