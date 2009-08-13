@@ -284,20 +284,21 @@
 
     <!-- Extract the SQL schemas of a storage engine -->
     <macrodef name="extractDatabaseSchemas" description="Extract the SQL schemas of the current storage engine">
-        <attribute name="storagesDir" description="Directory that contains the storage engine for the current database vendor"/>
-        <attribute name="dest" description="The target directory"/>
+        <attribute name="storagesDirProp" description="Property that contains the directory of the storage engine for the current database vendor"/>
+        <attribute name="destDirProp" description="Poperty that contains the target directory"/>
         <sequential >
             <groovy>
                 String jar = "flexive-storage-"+properties['database.vendor']+".jar"
-                String embeddedPath = "@{storagesDir}"
+                String embeddedPath = project.properties['@{storagesDirProp}']
+                String destPath = project.properties['@{destDirProp}']
                 File jarFile = new File(embeddedPath+File.separatorChar+jar)
                 if(!jarFile.exists()) {
                     //either provide a fallback here or just fail
                     ant.fail(message:"Could not find storage implementation jar file $jar!")
                 }
-                if(new File("@{dest}").exists())
-                    ant.delete(dir:"@{dest}")
-                ant.unzip(src:jarFile.absolutePath, dest:"@{dest}") {
+                if(new File(destPath).exists())
+                    ant.delete(dir: destPath)
+                ant.unzip(src:jarFile.absolutePath, dest:destPath) {
                     patternset() {
                         include(name:"**/*sql")
                     }

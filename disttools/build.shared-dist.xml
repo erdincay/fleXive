@@ -16,7 +16,7 @@
             properties['database.url.base'] = properties['database.'+properties['database.vendor']+'.url.base']
             properties['database.url.parameters'] = properties['database.'+properties['database.vendor']+'.url.parameters']
         </groovy>
-        <extractDatabaseSchemas storagesDir="${dist.lib.dir}" dest="${database.src.dir}"/>
+        <extractDatabaseSchemas storagesDirProp="dist.lib.dir" destdirprop="database.src.dir"/>
     </target>
 
     <!-- Database setup tasks -->

@@ -616,8 +616,8 @@
 
     <target name="db.extractScripts" description="Extract sql script from used storage archive" depends="jar.storages">
         <extractDatabaseSchemas
-                storagesdir="${flexive.build.framework.jar.dir}"
-                dest="${flexive.build.framework.sqlResources.dir}"
+                storagesdirprop="flexive.build.framework.jar.dir"
+                destdirprop="flexive.build.framework.sqlResources.dir"
         />
     </target>
 
