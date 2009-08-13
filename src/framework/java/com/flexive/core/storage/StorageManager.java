@@ -161,6 +161,16 @@ public class StorageManager {
     }
 
     /**
+     * Get concrete lock storage implementation for the used database
+     *
+     * @return LockStorage
+     * @throws FxNotFoundException if no implementation was found
+     */
+    public static LockStorage getLockStorage() throws FxNotFoundException {
+        return getStorageImpl().getLockStorage();
+    }
+
+    /**
      * Get the CMIS SQL Dialect implementation
      *
      * @param environment      environment

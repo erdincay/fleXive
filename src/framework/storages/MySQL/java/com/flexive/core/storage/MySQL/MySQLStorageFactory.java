@@ -42,6 +42,7 @@ import com.flexive.core.search.genericSQL.GenericSQLDataFilter;
 import com.flexive.core.search.genericSQL.GenericSQLDataSelector;
 import com.flexive.core.search.cmis.impl.sql.MySQL.MySqlDialect;
 import com.flexive.core.storage.*;
+import com.flexive.core.storage.genericSQL.GenericLockStorage;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.exceptions.FxSqlSearchException;
 import com.flexive.shared.structure.TypeStorageMode;
@@ -110,6 +111,13 @@ public class MySQLStorageFactory implements DBStorage {
      */
     public TreeStorage getTreeStorage() {
         return MySQLTreeStorage.getInstance();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public LockStorage getLockStorage() {
+        return GenericLockStorage.getInstance();
     }
 
     /**

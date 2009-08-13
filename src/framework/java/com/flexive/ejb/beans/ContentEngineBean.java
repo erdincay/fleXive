@@ -35,6 +35,7 @@ import com.flexive.core.Database;
 import com.flexive.core.LifeCycleInfoImpl;
 import com.flexive.core.conversion.ConversionEngine;
 import com.flexive.core.storage.ContentStorage;
+import com.flexive.core.storage.LockStorage;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.core.storage.binary.FxBinaryUtils;
 import com.flexive.shared.*;
@@ -143,7 +144,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             destinationPK = FxPK.createNewPK();
             sourcePos = destinationPos = 0;
         }
-        FxContent content = new FxContent(FxPK.createNewPK(), type.getId(), type.isRelation(), mandatorId, acl, step, 1,
+        FxContent content = new FxContent(FxPK.createNewPK(), FxLock.noLockPK(), type.getId(), type.isRelation(), mandatorId, acl, step, 1,
                 environment.getStep(step).isLiveStep() ? 1 : 0, true, lang,
                 sourcePK, destinationPK, sourcePos, destinationPos,
                 LifeCycleInfoImpl.createNew(ticket), type.createEmptyData(type.buildXPathPrefix(FxPK.createNewPK())), BinaryDescriptor.SYS_UNKNOWN, 1).initSystemProperties();
@@ -875,5 +876,213 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public String exportContent(FxContent content) throws FxApplicationException {
         return ConversionEngine.getXStream().toXML(content);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public FxLock lock(FxLockType lockType, FxPK pk) throws FxLockException {
+        Connection con = null;
+        try {
+            con = Database.getDbConnection();
+            FxLock lock = StorageManager.getLockStorage().lock(con, lockType, pk);
+            FxCachedContent cachedContent = CacheAdmin.getCachedContent(pk);
+            if( cachedContent != null ) {
+                cachedContent.updateLock(lock);
+                CacheAdmin.cacheContent(cachedContent);
+            }
+            return lock;
+        } catch (SQLException e) {
+            throw new FxLockException(e, "ex.db.sqlError", e.getMessage());
+        } catch (FxNotFoundException e) {
+            throw new FxLockException(e);
+        } finally {
+            Database.closeObjects(ContentEngineBean.class, con, null);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public FxLock lock(FxLockType lockType, FxPK pk, long duration) throws FxLockException {
+        Connection con = null;
+        try {
+            con = Database.getDbConnection();
+            FxLock lock = StorageManager.getLockStorage().lock(con, lockType, pk, duration);
+            FxCachedContent cachedContent = CacheAdmin.getCachedContent(pk);
+            if( cachedContent != null ) {
+                cachedContent.updateLock(lock);
+                CacheAdmin.cacheContent(cachedContent);
+            }
+            return lock;
+        } catch (SQLException e) {
+            throw new FxLockException(e, "ex.db.sqlError", e.getMessage());
+        } catch (FxNotFoundException e) {
+            throw new FxLockException(e);
+        } finally {
+            Database.closeObjects(ContentEngineBean.class, con, null);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public FxLock takeOverLock(FxLock lock) throws FxLockException {
+        if( !lock.isContentLock() )
+            return lock;
+        Connection con = null;
+        try {
+            con = Database.getDbConnection();
+            FxLock newLock = StorageManager.getLockStorage().takeOver(con, lock);
+            FxCachedContent cachedContent = CacheAdmin.getCachedContent(lock.getLockedPK());
+            if( cachedContent != null ) {
+                cachedContent.updateLock(newLock);
+                CacheAdmin.cacheContent(cachedContent);
+            }
+            return newLock;
+        } catch (SQLException e) {
+            throw new FxLockException(e, "ex.db.sqlError", e.getMessage());
+        } catch (FxNotFoundException e) {
+            throw new FxLockException(e);
+        } finally {
+            Database.closeObjects(ContentEngineBean.class, con, null);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public FxLock takeOverLock(FxPK pk) throws FxLockException {
+        Connection con = null;
+        try {
+            con = Database.getDbConnection();
+            final LockStorage lockStorage = StorageManager.getLockStorage();
+            final FxLock lock = lockStorage.getLock(con, pk);
+            FxLock newLock;
+            if (lock.isLocked())
+                newLock = lockStorage.takeOver(con, lock);
+            else
+                newLock = lockStorage.lock(con, FxLockType.Loose, pk);
+            FxCachedContent cachedContent = CacheAdmin.getCachedContent(pk);
+            if( cachedContent != null ) {
+                cachedContent.updateLock(newLock);
+                CacheAdmin.cacheContent(cachedContent);
+            }
+            return newLock;
+        } catch (SQLException e) {
+            throw new FxLockException(e, "ex.db.sqlError", e.getMessage());
+        } catch (FxNotFoundException e) {
+            throw new FxLockException(e);
+        } finally {
+            Database.closeObjects(ContentEngineBean.class, con, null);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public FxLock extendLock(FxLock lock, long duration) throws FxLockException {
+        Connection con = null;
+        try {
+            con = Database.getDbConnection();
+            FxLock newLock =  StorageManager.getLockStorage().extend(con, lock, duration);
+            FxCachedContent cachedContent = CacheAdmin.getCachedContent(lock.getLockedPK());
+            if( cachedContent != null ) {
+                cachedContent.updateLock(newLock);
+                CacheAdmin.cacheContent(cachedContent);
+            }
+            return newLock;
+        } catch (SQLException e) {
+            throw new FxLockException(e, "ex.db.sqlError", e.getMessage());
+        } catch (FxNotFoundException e) {
+            throw new FxLockException(e);
+        } finally {
+            Database.closeObjects(ContentEngineBean.class, con, null);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public FxLock extendLock(FxPK pk, long duration) throws FxLockException {
+        Connection con = null;
+        try {
+            con = Database.getDbConnection();
+            final LockStorage lockStorage = StorageManager.getLockStorage();
+            final FxLock lock = lockStorage.getLock(con, pk);
+            FxLock newLock;
+            if (lock.isLocked())
+                newLock = lockStorage.extend(con, lock, duration);
+            else
+                newLock = lockStorage.lock(con, FxLockType.Loose, pk, duration);
+            FxCachedContent cachedContent = CacheAdmin.getCachedContent(pk);
+            if( cachedContent != null ) {
+                cachedContent.updateLock(newLock);
+                CacheAdmin.cacheContent(cachedContent);
+            }
+            return newLock;
+        } catch (SQLException e) {
+            throw new FxLockException(e, "ex.db.sqlError", e.getMessage());
+        } catch (FxNotFoundException e) {
+            throw new FxLockException(e);
+        } finally {
+            Database.closeObjects(ContentEngineBean.class, con, null);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.SUPPORTS)
+    public FxLock getLock(FxPK pk) {
+        Connection con = null;
+        try {
+            con = Database.getDbConnection();
+            FxCachedContent cachedContent = CacheAdmin.getCachedContent(pk);
+            if( cachedContent != null )
+                return cachedContent.getContent().getLock();
+            return StorageManager.getLockStorage().getLock(con, pk);
+        } catch (SQLException e) {
+            //noinspection ThrowableInstanceNeverThrown
+            throw new FxLockException(e, "ex.db.sqlError", e.getMessage()).asRuntimeException();
+        } catch (FxNotFoundException e) {
+            throw e.asRuntimeException();
+        } catch (FxLockException e) {
+            throw e.asRuntimeException();
+        } finally {
+            Database.closeObjects(ContentEngineBean.class, con, null);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void unlock(FxPK pk) throws FxLockException {
+        Connection con = null;
+        try {
+            con = Database.getDbConnection();
+            final LockStorage lockStorage = StorageManager.getLockStorage();
+            final FxLock lock = lockStorage.getLock(con, pk);
+            if (lock.isLocked())
+                lockStorage.unlock(con, pk);
+            FxCachedContent cachedContent = CacheAdmin.getCachedContent(pk);
+            if( cachedContent != null ) {
+                cachedContent.updateLock(FxLock.noLockPK());
+                CacheAdmin.cacheContent(cachedContent);
+            }
+        } catch (SQLException e) {
+            throw new FxLockException(e, "ex.db.sqlError", e.getMessage());
+        } catch (FxNotFoundException e) {
+            throw new FxLockException(e);
+        } finally {
+            Database.closeObjects(ContentEngineBean.class, con, null);
+        }
     }
 }

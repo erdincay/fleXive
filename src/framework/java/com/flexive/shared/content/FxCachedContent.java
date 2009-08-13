@@ -31,6 +31,8 @@
  ***************************************************************/
 package com.flexive.shared.content;
 
+import com.flexive.shared.FxLock;
+
 import java.io.Serializable;
 
 /**
@@ -70,5 +72,14 @@ public class FxCachedContent implements Serializable {
      */
     public FxContentSecurityInfo getSecurityInfo() {
         return securityInfo;
+    }
+
+    /**
+     * Update the lock of the cache instance
+     *
+     * @param lock the lock to set
+     */
+    public void updateLock(FxLock lock) {
+        this.content.updateLock(lock);
     }
 }

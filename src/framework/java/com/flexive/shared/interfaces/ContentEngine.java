@@ -32,6 +32,8 @@
 package com.flexive.shared.interfaces;
 
 import com.flexive.shared.FxLanguage;
+import com.flexive.shared.FxLock;
+import com.flexive.shared.FxLockType;
 import com.flexive.shared.content.*;
 import com.flexive.shared.exceptions.*;
 
@@ -267,4 +269,79 @@ public interface ContentEngine {
      * @throws FxApplicationException on errors
      */
     String exportContent(FxContent content) throws FxApplicationException;
+
+    /**
+     * Lock an instance
+     *
+     * @param lockType type of the lock
+     * @param pk       primary key
+     * @return FxLock
+     * @throws FxLockException on errors
+     */
+    FxLock lock(FxLockType lockType, FxPK pk) throws FxLockException;
+
+    /**
+     * Lock an instance
+     *
+     * @param lockType type of the lock
+     * @param pk       primary key
+     * @param duration duration in [ms] of the lock
+     * @return FxLock
+     * @throws FxLockException on errors
+     */
+    FxLock lock(FxLockType lockType, FxPK pk, long duration) throws FxLockException;
+
+    /**
+     * Take over a lock held by another user (if permitted)
+     *
+     * @param lock the lock to take over
+     * @return FxLock
+     * @throws FxLockException on errors
+     */
+    FxLock takeOverLock(FxLock lock) throws FxLockException;
+
+    /**
+     * Take over a lock held by another user (if permitted)
+     *
+     * @param pk primary key of the instance whose lock should be taken over
+     * @return FxLock
+     * @throws FxLockException on errors
+     */
+    FxLock takeOverLock(FxPK pk) throws FxLockException;
+
+    /**
+     * Extend an existing lock for the given duration (duration will be added to current expire time)
+     *
+     * @param lock     the lock to extend
+     * @param duration duration in [ms] to extend the original expire time
+     * @return extended lock
+     * @throws FxLockException on errors
+     */
+    FxLock extendLock(FxLock lock, long duration) throws FxLockException;
+
+    /**
+     * Extend an existing lock for the given duration (duration will be added to current expire time)
+     *
+     * @param pk       primary key of the instance whose lock should be extended
+     * @param duration duration in [ms] to extend the original expire time
+     * @return extended lock
+     * @throws FxLockException on errors
+     */
+    FxLock extendLock(FxPK pk, long duration) throws FxLockException;
+
+    /**
+     * Get the lock for a primary key. If the instance is not locked a lock with <code>FxLockType.None</code> is returned
+     *
+     * @param pk primary key
+     * @return FxLock, if not locked a lock with <code>FxLockType.None</code> is returned
+     */
+    FxLock getLock(FxPK pk);
+
+    /**
+     * Unlock a locked instance. If the instance is not locked, no exception will be thrown
+     *
+     * @param pk primary key
+     * @throws FxLockException on errors
+     */
+    void unlock(FxPK pk) throws FxLockException;
 }

@@ -31,17 +31,14 @@
  ***************************************************************/
 package com.flexive.shared.content;
 
-import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.EJBLookup;
-import com.flexive.shared.FxSharedUtils;
-import com.flexive.shared.XPathElement;
+import com.flexive.shared.*;
 import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.ContentEngine;
+import com.flexive.shared.security.ACL;
+import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.security.LifeCycleInfo;
 import com.flexive.shared.security.PermissionSet;
-import com.flexive.shared.security.ACLCategory;
-import com.flexive.shared.security.ACL;
 import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.structure.FxMultiplicity;
 import com.flexive.shared.structure.FxPropertyAssignment;
@@ -79,6 +76,7 @@ public class FxContent implements Serializable {
     private int maxVersion;
     private int liveVersion;
     private long mainLanguage;
+    private FxLock lock;
 
     private boolean active;
 
@@ -104,6 +102,7 @@ public class FxContent implements Serializable {
      * Constructor
      *
      * @param pk                         primary key
+     * @param lock                       lock of this content, if not locked a lock with type <code>FxLockType.None</code> will be set
      * @param typeId                     used type id
      * @param relation                   is this a content for a relation?
      * @param mandatorId                 mandator id
@@ -122,11 +121,12 @@ public class FxContent implements Serializable {
      * @param binaryPreviewId            id of the preview binary
      * @param binaryPreviewACL           id of the ACL of the preview binary
      */
-    public FxContent(FxPK pk, long typeId, boolean relation, long mandatorId, long aclId, long stepId, int maxVersion, int liveVersion,
+    public FxContent(FxPK pk, FxLock lock, long typeId, boolean relation, long mandatorId, long aclId, long stepId, int maxVersion, int liveVersion,
                      boolean active, long mainLanguage, FxPK relatedSource, FxPK relatedDestination, int relatedSourcePosition,
                      int relatedDestinationPosition, LifeCycleInfo lifeCycleInfo, FxGroupData data, long binaryPreviewId,
                      long binaryPreviewACL) {
         this.pk = pk;
+        this.lock = lock;
         this.typeId = typeId;
         this.relation = relation;
         this.mandatorId = mandatorId;
@@ -221,7 +221,7 @@ public class FxContent implements Serializable {
     /**
      * Return all ACLs assigned to this content.
      *
-     * @return  all ACLs assigned to this content.
+     * @return all ACLs assigned to this content.
      */
     public List<Long> getAclIds() {
         return Collections.unmodifiableList(aclIds);
@@ -435,6 +435,24 @@ public class FxContent implements Serializable {
     }
 
     /**
+     * Is this content locked?
+     *
+     * @return if this content is locked
+     */
+    public boolean isLocked() {
+        return lock.getLockType() != FxLockType.None;
+    }
+
+    /**
+     * Get the lock of this content
+     *
+     * @return lock of this content
+     */
+    public FxLock getLock() {
+        return lock;
+    }
+
+    /**
      * Get all FxData (Group or Property) entries for the given XPath.
      * <p/>
      * Note: If the XPath refers to a group, only its child entries are returned
@@ -444,6 +462,7 @@ public class FxContent implements Serializable {
      * @param XPath requested XPath
      * @return FxData elements for the given XPath
      */
+    @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     public List<FxData> getData(String XPath) {
         List<FxData> base = data.getChildren();
         if (StringUtils.isEmpty(XPath) || "/".equals(XPath))
@@ -477,6 +496,7 @@ public class FxContent implements Serializable {
      * @param XPath requested XPath
      * @return FxPropertyData entry for the given XPath
      */
+    @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     public FxPropertyData getPropertyData(String XPath) {
         FxSharedUtils.checkParameterEmpty(XPath, "XPATH");
         XPath = XPathElement.stripType(XPath);
@@ -503,6 +523,7 @@ public class FxContent implements Serializable {
      * @param XPath requested XPath
      * @return FxGroupData entry for the given XPath
      */
+    @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     public FxGroupData getGroupData(String XPath) {
         FxSharedUtils.checkParameterEmpty(XPath, "XPATH");
         XPath = XPathElement.stripType(XPathElement.toXPathMult(XPath.toUpperCase()));
@@ -560,6 +581,7 @@ public class FxContent implements Serializable {
      * @param XPath requested xpath
      * @return FxPropertyData
      */
+    @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     private FxPropertyData getProperyData(String XPath) {
         XPath = XPathElement.stripType(XPath);
         createXPath(XPath);
@@ -629,7 +651,8 @@ public class FxContent implements Serializable {
      *
      * @param XPath the XPath to create
      */
-    private void createXPath(String XPath)  {
+    @SuppressWarnings({"ThrowableInstanceNeverThrown"})
+    private void createXPath(String XPath) {
         FxEnvironment env = CacheAdmin.getEnvironment();
         if (!env.getType(this.getTypeId()).isXPathValid(XPath, true))
             throw new FxInvalidParameterException("XPATH", "ex.content.xpath.set.invalid", XPath, env.getType(getTypeId()).getName()).asRuntimeException();
@@ -799,6 +822,7 @@ public class FxContent implements Serializable {
      *
      * @param XPath the XPath to remove
      */
+    @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     public void remove(String XPath) {
         FxSharedUtils.checkParameterEmpty(XPath, "XPATH");
         XPath = XPathElement.stripType(XPath);
@@ -931,6 +955,7 @@ public class FxContent implements Serializable {
         _bool.setValue(isActive());
     }
 
+    @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     private void updateAclProperty() {
         if (containsValue("/ACL") && getPropertyData("/ACL").getOccurances() > aclIds.size()) {
             // remove old ACLs that wouldn't be overwritten otherwise
@@ -1166,7 +1191,7 @@ public class FxContent implements Serializable {
      */
     public FxContent copy() {
         FxContent clone;
-        clone = new FxContent(pk, typeId, relation, mandatorId, -1, stepId, maxVersion, liveVersion, active,
+        clone = new FxContent(pk, lock, typeId, relation, mandatorId, -1, stepId, maxVersion, liveVersion, active,
                 mainLanguage, relatedSource, relatedDestination, relatedSourcePosition, relatedDestinationPosition,
                 lifeCycleInfo, data.copy(null), binaryPreviewId, binaryPreviewACL);
         clone.setAclIds(aclIds);
@@ -1180,7 +1205,7 @@ public class FxContent implements Serializable {
      */
     public FxContent copyAsNewInstance() {
         FxContent clone;
-        clone = new FxContent(new FxPK(), typeId, relation, mandatorId, -1, stepId, maxVersion, liveVersion, active,
+        clone = new FxContent(new FxPK(), FxLock.noLockPK(), typeId, relation, mandatorId, -1, stepId, maxVersion, liveVersion, active,
                 mainLanguage, relatedSource, relatedDestination, relatedSourcePosition, relatedDestinationPosition,
                 lifeCycleInfo, data.copy(null), binaryPreviewId, binaryPreviewACL);
         clone.setAclIds(aclIds);
@@ -1264,6 +1289,7 @@ public class FxContent implements Serializable {
      *
      * @param con other content to take data from
      */
+    @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     public void replaceData(FxContent con) {
         if (con == null)
             throw new FxInvalidParameterException("con", "ex.content.import.empty").asRuntimeException();
@@ -1362,5 +1388,15 @@ public class FxContent implements Serializable {
             } else if (check instanceof FxGroupData)
                 _resolveCaption((FxGroupData) check, captionPropertyId);
         }
+    }
+
+    /**
+     * Update the lock of this instance.
+     * Internal use only to reflect changes to lock status for cached contents
+     *
+     * @param lock the new lock to apply
+     */
+    protected void updateLock(FxLock lock) {
+        this.lock = lock;
     }
 }

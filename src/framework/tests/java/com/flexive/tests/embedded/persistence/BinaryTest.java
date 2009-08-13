@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2008
+ *  Copyright (c) 1999-2009
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -206,7 +206,8 @@ public class BinaryTest {
             InputStream is = FxStreamUtils.getBinaryStream(desc, PreviewSizes.ORIGINAL);
             File tmp = File.createTempFile("testTmpIS", "");
             FxFileUtils.copyStream2File(desc.getSize(), is, tmp);
-            Assert.assertEquals(tmp.length(), desc.getSize(), "Filesize mismatch!");
+            Assert.assertTrue(FxFileUtils.fileCompare(comp, tmp), "Files do not match!");
+            FxFileUtils.removeFile(tmp);
             FxFileUtils.removeFile(comp);
         } finally {
             if (pk != null)

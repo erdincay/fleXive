@@ -44,7 +44,6 @@ import org.apache.commons.lang.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -65,6 +64,10 @@ public class TestUsers {
      * A "normal" test user who belongs to the shared test group but has no other roles/groups
      */
     public static TestUser REGULAR;
+    /**
+     * Another regular user
+     */
+    public static TestUser REGULAR2;
     public static List<TestUser> ALL_USERS;
     /**
      * Keeps track of user defined users
@@ -83,7 +86,8 @@ public class TestUsers {
         GUEST = new TestUser("GUEST");
         /** A "normal" test user who belongs to the shared test group but has no other roles/groups */
         REGULAR = new TestUser("REGULAR");
-        ALL_USERS = new ArrayList<TestUser>(Arrays.asList(SUPERVISOR, MANDATOR_SUPERVISOR, GUEST, REGULAR));
+        REGULAR2 = new TestUser("REGULAR2");
+        ALL_USERS = new ArrayList<TestUser>(Arrays.asList(SUPERVISOR, MANDATOR_SUPERVISOR, GUEST, REGULAR, REGULAR2));
         USER_DEFINED_USERS = new ArrayList<TestUser>();
     }
 
@@ -110,6 +114,7 @@ public class TestUsers {
             GUEST.createUser(mandatorId, languageId);
 
             REGULAR.createUser(mandatorId, languageId);
+            REGULAR2.createUser(mandatorId, languageId);
 
             // create user-defined users
             for (TestUser user : USER_DEFINED_USERS) {
@@ -245,7 +250,7 @@ public class TestUsers {
         }
         if (StringUtils.isBlank(enableUsers)) {
 //            return Collections.unmodifiableList(Arrays.asList(new TestUser[]{SUPERVISOR}));
-            return Lists.newArrayList(SUPERVISOR, REGULAR, GUEST);
+            return Lists.newArrayList(SUPERVISOR, REGULAR, REGULAR2, GUEST);
         } else if ("all".equalsIgnoreCase(enableUsers)) {
             return ALL_USERS;
         } else {

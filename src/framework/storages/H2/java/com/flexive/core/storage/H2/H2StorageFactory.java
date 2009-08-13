@@ -38,15 +38,16 @@ import com.flexive.core.search.DataSelector;
 import com.flexive.core.search.H2.H2SQLDataFilter;
 import com.flexive.core.search.H2.H2SQLDataSelector;
 import com.flexive.core.search.SqlSearch;
-import com.flexive.core.search.cmis.impl.sql.SqlDialect;
-import com.flexive.core.search.cmis.impl.sql.H2.H2Dialect;
 import com.flexive.core.search.cmis.impl.CmisSqlQuery;
+import com.flexive.core.search.cmis.impl.sql.H2.H2Dialect;
+import com.flexive.core.search.cmis.impl.sql.SqlDialect;
 import com.flexive.core.storage.*;
+import com.flexive.core.storage.genericSQL.GenericLockStorage;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.exceptions.FxSqlSearchException;
-import com.flexive.shared.structure.TypeStorageMode;
-import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.interfaces.ContentEngine;
+import com.flexive.shared.structure.FxEnvironment;
+import com.flexive.shared.structure.TypeStorageMode;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -110,6 +111,13 @@ public class H2StorageFactory implements DBStorage {
      */
     public TreeStorage getTreeStorage() {
         return H2TreeStorage.getInstance();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public LockStorage getLockStorage() {
+        return GenericLockStorage.getInstance();
     }
 
     /**

@@ -34,13 +34,13 @@ package com.flexive.core.storage;
 import com.flexive.core.search.DataFilter;
 import com.flexive.core.search.DataSelector;
 import com.flexive.core.search.SqlSearch;
-import com.flexive.core.search.cmis.impl.sql.SqlDialect;
 import com.flexive.core.search.cmis.impl.CmisSqlQuery;
+import com.flexive.core.search.cmis.impl.sql.SqlDialect;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.exceptions.FxSqlSearchException;
-import com.flexive.shared.structure.TypeStorageMode;
-import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.interfaces.ContentEngine;
+import com.flexive.shared.structure.FxEnvironment;
+import com.flexive.shared.structure.TypeStorageMode;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -57,7 +57,7 @@ public interface DBStorage {
      *
      * @return name of the storage vendor (DB vendor name)
      */
-    public String getStorageVendor();
+    String getStorageVendor();
 
     /**
      * Can this storage handle the requested database?
@@ -65,7 +65,7 @@ public interface DBStorage {
      * @param dbm database meta data
      * @return if storage can handle the requested database
      */
-    public boolean canHandle(DatabaseMetaData dbm);
+    boolean canHandle(DatabaseMetaData dbm);
 
     /**
      * Get the ContentStorage singleton instance
@@ -74,28 +74,35 @@ public interface DBStorage {
      * @return ContentStorage singleton instance
      * @throws FxNotFoundException if no implementation was found
      */
-    public ContentStorage getContentStorage(TypeStorageMode mode) throws FxNotFoundException;
+    ContentStorage getContentStorage(TypeStorageMode mode) throws FxNotFoundException;
 
     /**
      * Get the EnvironmentLoader singleton instance
      *
      * @return EnvironmentLoader singleton instance
      */
-    public EnvironmentLoader getEnvironmentLoader();
+    EnvironmentLoader getEnvironmentLoader();
 
     /**
      * Get the SequencerStorage singleton instance
      *
      * @return SequencerStorage singleton instance
      */
-    public SequencerStorage getSequencerStorage();
+    SequencerStorage getSequencerStorage();
 
     /**
      * Get the TreeStorage singleton instance
      *
      * @return TreeStorage singleton instance
      */
-    public TreeStorage getTreeStorage();
+    TreeStorage getTreeStorage();
+
+    /**
+     * Get the LockStorage singleton instance
+     *
+     * @return LockStorage singleton instance
+     */
+    LockStorage getLockStorage();
 
     /**
      * Get a data selector for a sql search
@@ -104,7 +111,7 @@ public interface DBStorage {
      * @return data selector
      * @throws FxSqlSearchException on errors
      */
-    public DataSelector getDataSelector(SqlSearch search) throws FxSqlSearchException;
+    DataSelector getDataSelector(SqlSearch search) throws FxSqlSearchException;
 
     /**
      * Get a data filter for a sql search
@@ -114,7 +121,7 @@ public interface DBStorage {
      * @return DataFilter
      * @throws FxSqlSearchException on errors
      */
-    public DataFilter getDataFilter(Connection con, SqlSearch search) throws FxSqlSearchException;
+    DataFilter getDataFilter(Connection con, SqlSearch search) throws FxSqlSearchException;
 
     /**
      * Get the CMIS SQL Dialect implementation
@@ -125,14 +132,14 @@ public interface DBStorage {
      * @param returnPrimitives return primitives?
      * @return CMIS SQL Dialect implementation
      */
-    public SqlDialect getCmisSqlDialect(FxEnvironment environment, ContentEngine contentEngine, CmisSqlQuery query, boolean returnPrimitives);
+    SqlDialect getCmisSqlDialect(FxEnvironment environment, ContentEngine contentEngine, CmisSqlQuery query, boolean returnPrimitives);
 
     /**
      * Get a database vendor specific "IF" function
      *
      * @return database vendor specific "IF" function
      */
-    public String getIfFunction();
+    String getIfFunction();
 
     /**
      * Get the database vendor specific statement to enable or disable referential integrity checks
@@ -140,21 +147,21 @@ public interface DBStorage {
      * @param enable enable or disable checks?
      * @return database vendor specific statement to enable or disable referential integrity checks
      */
-    public String getReferentialIntegrityChecksStatement(boolean enable);
+    String getReferentialIntegrityChecksStatement(boolean enable);
 
     /**
      * Get the sql code of the statement to fix referential integrity when removing selectlist items
      *
      * @return sql code of the statement to fix referential integrity when removing selectlist items
      */
-    public String getSelectListItemReferenceFixStatement();
+    String getSelectListItemReferenceFixStatement();
 
     /**
      * Get a database vendor specific timestamp of the current time in milliseconds as Long
      *
      * @return database vendor specific timestamp of the current time in milliseconds as Long
      */
-    public String getTimestampFunction();
+    String getTimestampFunction();
 
     /**
      * Returns true if the SqlError is a foreign key violation.
@@ -162,7 +169,7 @@ public interface DBStorage {
      * @param exc the exception
      * @return true if the SqlError is a foreign key violation
      */
-    public boolean isForeignKeyViolation(Exception exc);
+    boolean isForeignKeyViolation(Exception exc);
 
     /**
      * Returns true if the given exception was caused by a query timeout.
@@ -171,7 +178,7 @@ public interface DBStorage {
      * @return true if the given exception was caused by a query timeout
      * @since 3.1
      */
-    public boolean isQueryTimeout(Exception e);
+    boolean isQueryTimeout(Exception e);
 
     /**
      * Returns true if the SqlError is a unique constraint violation.
@@ -179,5 +186,5 @@ public interface DBStorage {
      * @param exc the exception
      * @return true if the SqlError is a unique constraint violation
      */
-    public boolean isUniqueConstraintViolation(Exception exc);
+    boolean isUniqueConstraintViolation(Exception exc);
 }

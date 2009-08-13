@@ -51,8 +51,8 @@ import com.flexive.shared.structure.TypeStorageMode;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import javax.ejb.*;
 import javax.annotation.Resource;
+import javax.ejb.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -309,7 +309,7 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
                         long toVersion = Long.parseLong(data[2].substring(0, data[2].indexOf('.')));
                         String code = FxSharedUtils.loadFromInputStream(cl.getResourceAsStream(dir + f[0]), size);
                         scripts.add(new SQLPatchScript(fromVersion, toVersion, code));
-                        LOG.info("Patch available from version " + fromVersion + " to " + toVersion);
+//                        LOG.info("Patch available from version " + fromVersion + " to " + toVersion);
                     }
 //                    stmt.executeUpdate(code);
                     boolean patching = true;
@@ -369,6 +369,7 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
 
         private Statement stmt;
         private String script;
+        private List<String> lines;
 
         /**
          * Ctor
@@ -381,6 +382,7 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
         public SQLScriptExecutor(String script, Statement stat) throws SQLException, IOException {
             this.stmt = stat;
             this.script = script;
+            this.lines = new ArrayList<String>(20);
             parse();
         }
 
@@ -402,7 +404,7 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
                 eos = currLine.indexOf(DELIMITER) != -1;
                 sb.append(currLine).append(' ');
                 if (eos) {
-                    stmt.addBatch(sb.toString());
+                    lines.add(sb.toString());
                     sb.setLength(0);
                 }
             }
@@ -425,7 +427,14 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
          * @throws SQLException on errors
          */
         public void execute() throws SQLException {
-            stmt.executeBatch();
+            for (String line : lines) {
+                try {
+                    stmt.execute(line);
+                } catch (SQLException e) {
+                    LOG.error("Failed to execute [" + line + "]!");
+                    throw e;
+                }
+            }
         }
 
     }
