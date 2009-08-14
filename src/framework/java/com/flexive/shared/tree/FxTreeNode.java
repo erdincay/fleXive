@@ -59,6 +59,7 @@ public class FxTreeNode implements Serializable, SelectableObjectWithLabel, Sele
     protected FxString label = null;
     protected FxPK reference;
     protected long referenceTypeId = 0;
+    protected FxLock lock = FxLock.noLockPK();
     protected FxTreeMode mode;
     protected int position;
     protected List<FxTreeNode> children;
@@ -121,12 +122,13 @@ public class FxTreeNode implements Serializable, SelectableObjectWithLabel, Sele
      * @param mayRelate        relate permission for the calling user
      * @param mayExport        export permission for the calling user
      */
-    public FxTreeNode(FxTreeMode mode, long id, long parentNodeId, FxPK reference, long referenceTypeId, List<Long> acls, String name, String path,
+    public FxTreeNode(FxTreeMode mode, FxLock lock, long id, long parentNodeId, FxPK reference, long referenceTypeId, List<Long> acls, String name, String path,
                       FxString label, int position, List<FxTreeNode> children, List<Long> childIds, int depth,
                       int totalChildCount, int directChildCount, boolean leaf, boolean dirty, long modifiedAt,
                       String data, boolean mayEdit, boolean mayCreate, boolean mayDelete, boolean mayRelate, boolean mayExport) {
         this.path = FxFormatUtils.escapeTreePath(path);
         this.label = label;
+        this.lock = lock;
         this.reference = reference;
         this.referenceTypeId = referenceTypeId;
         this.acls = acls != null ? FxArrayUtils.toPrimitiveLongArray(acls) : new long[0];
@@ -261,6 +263,16 @@ public class FxTreeNode implements Serializable, SelectableObjectWithLabel, Sele
      */
     public long getReferenceTypeId() {
         return referenceTypeId;
+    }
+
+    /**
+     * Get the lock of the reference, if set
+     *
+     * @return lock of the reference, if set
+     * @since 3.1
+     */
+    public FxLock getLock() {
+        return lock;
     }
 
     /**
@@ -490,7 +502,7 @@ public class FxTreeNode implements Serializable, SelectableObjectWithLabel, Sele
      * @return FxTreeNode
      */
     public static FxTreeNode createErrorNode(long nodeId, String message) {
-        return new FxTreeNode(FxTreeMode.Edit, nodeId, 0,
+        return new FxTreeNode(FxTreeMode.Edit, FxLock.noLockPK(), nodeId, 0,
                 FxPK.createNewPK(), 0L, Arrays.asList(ACLCategory.INSTANCE.getDefaultId()), "Error", message, new FxString(false, "Error"), Integer.MAX_VALUE,
                 new ArrayList<FxTreeNode>(0), new ArrayList<Long>(0), 0, 0, 0, true, true,
                 System.currentTimeMillis(), "", true, true, true, true, true);
@@ -531,7 +543,7 @@ public class FxTreeNode implements Serializable, SelectableObjectWithLabel, Sele
      * @return temporary node
      */
     public static FxTreeNode createNewTemporaryChildNode(FxTreeNode parentNode) {
-        FxTreeNode n = new FxTreeNode(parentNode.getMode(), (System.currentTimeMillis() * -1), parentNode.getId(),
+        FxTreeNode n = new FxTreeNode(parentNode.getMode(), FxLock.noLockPK(), (System.currentTimeMillis() * -1), parentNode.getId(),
                 FxPK.createNewPK(), 0L, Arrays.asList(ACLCategory.INSTANCE.getDefaultId()), "@@TMP", "",
                 new FxString(parentNode.getLabel().isMultiLanguage(), ""), Integer.MAX_VALUE,
                 new ArrayList<FxTreeNode>(0), new ArrayList<Long>(0), 0, 0, 0, true, true,

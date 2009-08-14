@@ -34,6 +34,7 @@ package com.flexive.shared.tree;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.value.FxString;
+import com.flexive.shared.FxLock;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -61,7 +62,7 @@ public class FxTreeNodeEdit extends FxTreeNode implements Serializable {
      * @param node the tree node to make editable
      */
     public FxTreeNodeEdit(FxTreeNode node) {
-        super(node.getMode(), node.getId(), node.getParentNodeId(), node.getReference(), node.getReferenceTypeId(), 
+        super(node.getMode(), node.getLock(), node.getId(), node.getParentNodeId(), node.getReference(), node.getReferenceTypeId(),
                 node.getACLIds(), node.getName(), node.getPath(), node.getLabel(), node.getPosition(), node.getChildren(),
                 node.getChildIds(), node.getDepth(), node.getTotalChildCount(), node.getDirectChildCount(),
                 node.isLeaf(), node.isDirty(), node.getModifiedAt(), node.getData(), true, true, true, true, true);
@@ -77,7 +78,7 @@ public class FxTreeNodeEdit extends FxTreeNode implements Serializable {
      * @param name name of the new node
      */
     public FxTreeNodeEdit(String name) {
-        super(FxTreeMode.Edit, (System.currentTimeMillis() * -1), ROOT_NODE,
+        super(FxTreeMode.Edit, FxLock.noLockPK(), (System.currentTimeMillis() * -1), ROOT_NODE,
                 FxPK.createNewPK(), 0L, Arrays.asList(ACLCategory.INSTANCE.getDefaultId()), name, "", new FxString(false, name), Integer.MAX_VALUE,
                 new ArrayList<FxTreeNode>(0), new ArrayList<Long>(0), 0, 0, 0, true, true,
                 System.currentTimeMillis(), "", true, true, true, true, true);
@@ -91,7 +92,7 @@ public class FxTreeNodeEdit extends FxTreeNode implements Serializable {
      * @param parentNode parent node id
      */
     public FxTreeNodeEdit(String name, long parentNode) {
-        super(FxTreeMode.Edit, (System.currentTimeMillis() * -1), parentNode,
+        super(FxTreeMode.Edit, FxLock.noLockPK(), (System.currentTimeMillis() * -1), parentNode,
                 FxPK.createNewPK(), 0L, Arrays.asList(ACLCategory.INSTANCE.getDefaultId()), name, "", new FxString(false, name), Integer.MAX_VALUE,
                 new ArrayList<FxTreeNode>(0), new ArrayList<Long>(0), 0, 0, 0, true, true,
                 System.currentTimeMillis(), "", true, true, true, true, true);
@@ -106,7 +107,7 @@ public class FxTreeNodeEdit extends FxTreeNode implements Serializable {
      * @return editable node
      */
     public static FxTreeNodeEdit createNewChildNode(FxTreeNode parentNode) {
-        FxTreeNodeEdit edit = new FxTreeNode(parentNode.getMode(), (System.currentTimeMillis() * -1), parentNode.getId(),
+        FxTreeNodeEdit edit = new FxTreeNode(parentNode.getMode(), FxLock.noLockPK(), (System.currentTimeMillis() * -1), parentNode.getId(),
                 FxPK.createNewPK(), 0L, parentNode.getACLIds(), "", "", new FxString(parentNode.getLabel().isMultiLanguage(), ""), Integer.MAX_VALUE,
                 new ArrayList<FxTreeNode>(0), new ArrayList<Long>(0), 0, 0, 0, true, true,
                 System.currentTimeMillis(), "", true, true, true, true, true).asEditable();
@@ -121,7 +122,7 @@ public class FxTreeNodeEdit extends FxTreeNode implements Serializable {
      * @return editable tree node
      */
     public static FxTreeNodeEdit createNew(String name) {
-        FxTreeNodeEdit edit = new FxTreeNode(FxTreeMode.Edit, (System.currentTimeMillis() * -1), ROOT_NODE,
+        FxTreeNodeEdit edit = new FxTreeNode(FxTreeMode.Edit, FxLock.noLockPK(), (System.currentTimeMillis() * -1), ROOT_NODE,
                 FxPK.createNewPK(), 0L, Arrays.asList(ACLCategory.INSTANCE.getDefaultId()), name, "", new FxString(false, name), Integer.MAX_VALUE,
                 new ArrayList<FxTreeNode>(0), new ArrayList<Long>(0), 0, 0, 0, true, true,
                 System.currentTimeMillis(), "", true, true, true, true, true).asEditable();
