@@ -276,7 +276,7 @@ public class FxJsfComponentUtils {
                 } else
                     throw new IllegalArgumentException("Child is not of expected type UISelectItem/UISelectItems. Family:" +
                             component.getFamily() + ", id:" + component.getId() + ", value class:" +
-                            value != null ? value.getClass().getName() : "null");
+                            (value != null ? value.getClass().getName() : "null"));
             }
         }
         return (list);

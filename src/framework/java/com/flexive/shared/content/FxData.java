@@ -460,6 +460,7 @@ public abstract class FxData implements Serializable {
         int result;
         result = XPathFull.hashCode();
         result = 31 * result + (int) (assignmentId ^ (assignmentId >>> 32));
+        result = 31 * result + (isEmpty() ? 1 : 0);
         return result;
     }
 

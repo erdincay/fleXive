@@ -47,9 +47,9 @@
                     <!-- create select list id -->
                     <c:set var="selectListId" value="addElementsListBox_#{_ceContent.idGenerator[element]}"/>
 
-                    <t:selectManyListbox styleClass="elementSelectListbox" size="4" id="#{selectListId}">
+                    <h:selectManyListbox styleClass="elementSelectListbox" size="4" id="#{selectListId}">
                         <f:selectItems value="#{_ceContent.addAbleAssignments[element]}"/>
-                    </t:selectManyListbox>
+                    </h:selectManyListbox>
                     <a4j:commandLink reRender="#{__ce_reRender}" action="#{__ceBean.addChilds}" eventsQueue="ceQueue"
                                      onclick="flexive.contentEditor.prepareAdd('#{_ceContent.guiSettings.formPrefix}', '#{selectListId}');if (!flexive.contentEditor.preA4jAction('#{_ceContent.guiSettings.formPrefix}','#{_ceContent.editorId}','#{element.XPathFull}','addChilds')) return false;"
                                      onmouseover='flexive.contentEditor.ignoreEvent(event)'

@@ -39,6 +39,9 @@ import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.FxReference;
 import com.flexive.shared.value.FxValue;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Iterables;
+import com.google.common.base.Predicate;
 import org.apache.commons.lang.ArrayUtils;
 
 import java.util.ArrayList;
@@ -86,6 +89,22 @@ public class FxGroupData extends FxData {
      */
     public List<FxData> getChildren() {
         return data;
+    }
+
+    /**
+     * Get all child entries for this group, excluding all internal properties.
+     *
+     * @return child entries, excluding all internal properties.
+     * @since 3.1
+     */
+    public List<FxData> getChildrenWithoutInternal() {
+        final List<FxData> result = Lists.newArrayList();
+        for (FxData child : data) {
+            if (!child.isSystemInternal()) {
+                result.add(child);
+            }
+        }
+        return result;
     }
 
     /**
