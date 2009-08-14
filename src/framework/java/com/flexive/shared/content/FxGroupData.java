@@ -34,14 +34,15 @@ package com.flexive.shared.content;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.XPathElement;
-import com.flexive.shared.exceptions.*;
+import com.flexive.shared.exceptions.FxCreateException;
+import com.flexive.shared.exceptions.FxInvalidParameterException;
+import com.flexive.shared.exceptions.FxNoAccessException;
+import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.FxReference;
 import com.flexive.shared.value.FxValue;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Iterables;
-import com.google.common.base.Predicate;
 import org.apache.commons.lang.ArrayUtils;
 
 import java.util.ArrayList;

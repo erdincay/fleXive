@@ -67,10 +67,6 @@
         </dependency>
 
         <!-- Include database runtime -->
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-        </dependency>
 
         <dependency>
             <groupId>com.flexive</groupId>
