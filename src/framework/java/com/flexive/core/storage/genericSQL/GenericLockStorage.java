@@ -233,7 +233,21 @@ public class GenericLockStorage implements LockStorage {
             ResultSet rs = ps.executeQuery();
             if (rs == null || !rs.next())
                 return (obj instanceof FxPK ? FxLock.noLockPK() : FxLock.noLockResource());
-            return new FxLock(FxLockType.getById(rs.getInt(2)), rs.getLong(3), rs.getLong(4), rs.getLong(1), obj);
+            FxLock ret = new FxLock(FxLockType.getById(rs.getInt(2)), rs.getLong(3), rs.getLong(4), rs.getLong(1), obj);
+            if (ret.isExpired()) {
+                ps.close();
+                if (ret.isContentLock()) {
+                    ps = con.prepareStatement("DELETE FROM " + TBL_LOCK + " WHERE LOCK_ID=? AND LOCK_VER=?");
+                    ps.setLong(1, ((FxPK) obj).getId());
+                    ps.setInt(2, ((FxPK) obj).getVersion());
+                } else {
+                    ps = con.prepareStatement("DELETE FROM " + TBL_LOCK + " WHERE LOCK_RESOURCE=?");
+                    ps.setString(1, String.valueOf(obj));
+                }
+                ps.executeUpdate();
+                return (obj instanceof FxPK ? FxLock.noLockPK() : FxLock.noLockResource());
+            }
+            return ret;
         } catch (SQLException e) {
             throw new FxDbException(e, "ex.db.sqlError", e.getMessage()).asRuntimeException();
         } finally {
@@ -269,6 +283,7 @@ public class GenericLockStorage implements LockStorage {
             return; //nothing locked, so unlock is successful
         final UserTicket ticket = FxContext.getUserTicket();
         final boolean allowUnlock = currentLock.getLockType() == FxLockType.Loose ||
+                currentLock.isExpired() ||
                 (currentLock.getLockType() == FxLockType.Permanent &&
                         (ticket.getUserId() == currentLock.getUserId() ||
                                 ticket.isGlobalSupervisor() ||
@@ -299,6 +314,10 @@ public class GenericLockStorage implements LockStorage {
     @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     public FxLock extend(Connection con, FxLock lock, long duration) throws FxLockException {
         final UserTicket ticket = FxContext.getUserTicket();
+        if (lock.isExpired()) {
+            final Object obj = lock.isContentLock() ? lock.getLockedPK() : lock.getLockedResource();
+            return _lock(con, lock.getLockType(), obj, duration);
+        }
         final boolean allowExtend = lock.getLockType() == FxLockType.Loose ||
                 (lock.getLockType() == FxLockType.Permanent &&
                         (ticket.getUserId() == lock.getUserId() ||
@@ -341,6 +360,7 @@ public class GenericLockStorage implements LockStorage {
     public FxLock takeOver(Connection con, FxLock lock, long duration) throws FxLockException {
         final UserTicket ticket = FxContext.getUserTicket();
         final boolean allowTakeOver = lock.getLockType() == FxLockType.Loose ||
+                lock.isExpired() ||
                 (lock.getLockType() == FxLockType.Permanent && (ticket.isGlobalSupervisor() || ticket.isMandatorSupervisor()));
         if (!allowTakeOver) {
             if (lock.isContentLock())
@@ -409,7 +429,18 @@ public class GenericLockStorage implements LockStorage {
     /**
      * {@inheritDoc}
      */
-    public void unlockType(Connection con, long typeId) throws FxLockException {
-        throw new UnsupportedOperationException();
+    public void removeExpiredLocks(Connection con) {
+        PreparedStatement ps = null;
+        try {
+            ps = con.prepareStatement("DELETE FROM " + TBL_LOCK + " WHERE EXPIRES_AT<?");
+            ps.setLong(1, System.currentTimeMillis());
+            int count = ps.executeUpdate();
+            if (count > 0)
+                LOG.info("Expired " + count + " locks");
+        } catch (SQLException e) {
+            throw new FxDbException(e, "ex.db.sqlError", e.getMessage()).asRuntimeException();
+        } finally {
+            Database.closeObjects(GenericLockStorage.class, null, ps);
+        }
     }
 }

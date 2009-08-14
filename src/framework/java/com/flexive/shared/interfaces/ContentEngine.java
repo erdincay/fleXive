@@ -310,8 +310,8 @@ public interface ContentEngine {
     FxLock takeOverLock(FxPK pk) throws FxLockException;
 
     /**
-     * Extend an existing lock for the given duration (duration will be added to current expire time)
-     *
+     * Extend an existing lock for the given duration (duration will be added to current expire time).
+     * If the lock is expired, a new one will be created.
      * @param lock     the lock to extend
      * @param duration duration in [ms] to extend the original expire time
      * @return extended lock
@@ -320,7 +320,8 @@ public interface ContentEngine {
     FxLock extendLock(FxLock lock, long duration) throws FxLockException;
 
     /**
-     * Extend an existing lock for the given duration (duration will be added to current expire time)
+     * Extend an existing lock for the given duration (duration will be added to current expire time).
+     * If the lock is expired, a new one will be created.
      *
      * @param pk       primary key of the instance whose lock should be extended
      * @param duration duration in [ms] to extend the original expire time

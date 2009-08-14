@@ -2500,6 +2500,11 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      */
     public void maintenance(Connection con) {
         binaryStorage.removeExpiredTransitEntries(con);
+        try {
+            StorageManager.getLockStorage().removeExpiredLocks(con);
+        } catch (FxNotFoundException e) {
+            LOG.error(e);
+        }
     }
 
     /**

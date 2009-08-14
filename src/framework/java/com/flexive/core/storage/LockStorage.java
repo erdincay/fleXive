@@ -130,7 +130,8 @@ public interface LockStorage {
     void unlock(Connection con, String resource) throws FxLockException;
 
     /**
-     * Extend an existing lock for the given duration (duration will be added to current expire time)
+     * Extend an existing lock for the given duration (duration will be added to current expire time).
+     * If the lock is expired, a new one will be created.
      *
      * @param con      an open and valid connection
      * @param lock     the lock to extend
@@ -170,12 +171,11 @@ public interface LockStorage {
      */
     List<FxLock> getUserLocks(Connection con, long userId);
 
+
     /**
-     * Remove all locks that are held for a given type
+     * Remove all locks that have expired
      *
-     * @param con    an open and valid connection
-     * @param typeId id of the type
-     * @throws FxLockException on errors
+     * @param con an open and valid connection
      */
-    void unlockType(Connection con, long typeId) throws FxLockException;
+    void removeExpiredLocks(Connection con);
 }

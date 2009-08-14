@@ -1,9 +1,9 @@
 -- -------------------------
 -- Locks (FX-77)
--- LOCK_ID has to be INTEGER UNSIGNED, else patching does not work and MySQL will report error 150 ... (weird!)
+-- LOCK_ID has to be INTEGER UNSIGNED for MySQL 5.1, else patching does not work and MySQL will report error 150 ... (weird!)
 -- -------------------------
 CREATE TABLE FXS_LOCK (
-  LOCK_ID INTEGER UNSIGNED,
+  LOCK_ID BIGINT,
   LOCK_VER SMALLINT(6),
   LOCK_RESOURCE VARCHAR(256) CHARACTER SET UTF8,
   USER_ID INTEGER UNSIGNED NOT NULL,
