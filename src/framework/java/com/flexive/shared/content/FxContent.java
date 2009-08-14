@@ -212,10 +212,7 @@ public class FxContent implements Serializable {
      * @param aclId the ACL id
      */
     public void setAclId(long aclId) {
-        aclIds.clear();
-        aclIds.add(aclId);
-        //TODO: check if ACL is valid!
-        updateSystemInternalProperties();
+        setAclIds(Arrays.asList(aclId));
     }
 
     /**
@@ -233,6 +230,19 @@ public class FxContent implements Serializable {
      * @param aclIds ACL ids
      */
     public void setAclIds(Collection<Long> aclIds) {
+        if (aclIds.isEmpty()) {
+            throw new FxUpdateException("ex.content.noACL", pk).asRuntimeException();
+        }
+        // check if all ACLs are usable
+        final FxEnvironment env = CacheAdmin.getEnvironment();
+        for (Long id : aclIds) {
+            final ACL acl = env.getACL(id);
+            if (acl.getCategory() != ACLCategory.INSTANCE) {
+                throw new FxUpdateException(
+                        "ex.content.invalidACLType", acl.getName(), acl.getCategory(), ACLCategory.INSTANCE
+                ).asRuntimeException();
+            }
+        }
         this.aclIds.clear();
         this.aclIds.addAll(aclIds);
         updateSystemInternalProperties();
@@ -959,7 +969,11 @@ public class FxContent implements Serializable {
     private void updateAclProperty() {
         if (containsValue("/ACL") && getPropertyData("/ACL").getOccurances() > aclIds.size()) {
             // remove old ACLs that wouldn't be overwritten otherwise
-            remove("/ACL");
+            int index = 2;
+            while (getValue("/ACL[" + index + "]") != null) {
+                remove("/ACL[" + index + "]");
+                index++;
+            }
         }
         int index = 1;
         final FxEnvironment environment = CacheAdmin.getEnvironment();
@@ -975,6 +989,12 @@ public class FxContent implements Serializable {
                 createXPath(xpath);
             }
             setValue(xpath, aclId);
+            try {
+                //since ACL is a system property, move it to the top because it is not visible in editors and can mess up positioning (see FX-649)
+                move(xpath, Integer.MIN_VALUE);
+            } catch (FxApplicationException e) {
+                throw e.asRuntimeException();
+            }
         }
     }
 

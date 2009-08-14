@@ -758,6 +758,8 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             
         } catch (SQLException e) {
             throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
+        } catch (FxUpdateException e) {
+            throw new FxCreateException(e);
         } finally {
             if (ps != null)
                 try {
@@ -769,9 +771,16 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         return pk;
     }
 
-    protected void updateACLEntries(Connection con, FxContent content, FxPK pk, boolean newEntry) throws SQLException {
+    protected void updateACLEntries(Connection con, FxContent content, FxPK pk, boolean newEntry) throws SQLException, FxCreateException, FxUpdateException {
         PreparedStatement ps = null;
         try {
+            if (content.getAclIds().isEmpty() || (content.getAclIds().size() == 1 && content.getAclIds().get(0) == ACL.NULL_ACL_ID)) {
+                if (newEntry) {
+                    throw new FxCreateException(LOG, "ex.content.noACL", pk);
+                } else {
+                    throw new FxUpdateException(LOG, "ex.content.noACL", pk);
+                }
+            }
             if (!newEntry) {
                 // first remove all ACLs, then update them (TODO: check if update is necessary)
                 ps = con.prepareStatement(CONTENT_ACLS_CLEAR);
@@ -2175,6 +2184,8 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
 
         } catch (SQLException e) {
             throw new FxUpdateException(LOG, e, "ex.db.sqlError", e.getMessage());
+        } catch (FxCreateException e) {
+            throw new FxUpdateException(e);
         } finally {
             if (ps != null)
                 try {

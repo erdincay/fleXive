@@ -47,7 +47,7 @@ public class ACL extends AbstractSelectableObjectWithName implements Serializabl
     /**
      * ID for an empty placeholder ACL.
      */
-    public static final int NULL_ACL_ID = 0;
+    public static final long NULL_ACL_ID = 0;
 
     /**
      * Max. id for internal ACL's (needed for internal checks)

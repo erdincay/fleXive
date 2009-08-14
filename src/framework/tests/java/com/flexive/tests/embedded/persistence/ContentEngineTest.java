@@ -51,6 +51,8 @@ import com.flexive.tests.embedded.ScriptingTest;
 import com.flexive.tests.embedded.TestUsers;
 import org.apache.commons.lang.RandomStringUtils;
 import org.testng.Assert;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.fail;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -59,6 +61,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.Arrays;
 
 /**
  * Tests for the ContentEngine
@@ -317,7 +320,7 @@ public class ContentEngineTest {
         test.remove("/TestGroup1/TestGroup1_2");
         try {
             test.getGroupData("/TestGroup1/TestGroup1_2");
-            Assert.fail("/TestGroup1/TestGroup1_2 should no longer exist!");
+            fail("/TestGroup1/TestGroup1_2 should no longer exist!");
         } catch (FxRuntimeException e) {
             if (!(e.getConverted() instanceof FxNotFoundException)) {
                 throw e;
@@ -346,7 +349,7 @@ public class ContentEngineTest {
         test.getGroupData("/TestGroup1").addEmptyChild("/TESTGROUP1[1]/TESTGROUP1_2[4]", FxData.POSITION_BOTTOM);
         try {
             test.getRootGroup().addEmptyChild("/TESTPROPERTY1[2]", FxData.POSITION_BOTTOM);
-            Assert.fail("FxCreateException expected! max. multiplicity reached");
+            fail("FxCreateException expected! max. multiplicity reached");
         } catch (FxRuntimeException e) {
             if (!(e.getConverted() instanceof FxInvalidParameterException)) {
                 throw e;
@@ -356,7 +359,7 @@ public class ContentEngineTest {
         test.remove("/TestGroup1");
         try {
             test.getGroupData("/TestGroup1");
-            Assert.fail("/TestGroup1 should no longer exist!");
+            fail("/TestGroup1 should no longer exist!");
         } catch (FxRuntimeException e) {
             if (!(e.getConverted() instanceof FxNotFoundException)) {
                 throw e;
@@ -366,7 +369,7 @@ public class ContentEngineTest {
         test.remove("/TestNumber");
         try {
             test.getPropertyData("/TestNumber");
-            Assert.fail("/TestNumber should no longer exist!");
+            fail("/TestNumber should no longer exist!");
         } catch (FxRuntimeException e) {
             if (!(e.getConverted() instanceof FxNotFoundException)) {
                 throw e;
@@ -412,7 +415,7 @@ public class ContentEngineTest {
         //check required with empty values
         try {
             test.checkValidity();
-            Assert.fail("checkValidity() succeeded when it should not!");
+            fail("checkValidity() succeeded when it should not!");
         } catch (FxInvalidParameterException e) {
             //ok
             Assert.assertTrue("ex.content.required.missing".equals(e.getExceptionMessage().getKey()));
@@ -428,12 +431,12 @@ public class ContentEngineTest {
         try {
             test.checkValidity();
         } catch (FxInvalidParameterException e) {
-            Assert.fail("checkValidity() did not succeed when it should!");
+            fail("checkValidity() did not succeed when it should!");
         }
         test.setValue("/TestGroup1[1]/TestProperty1_2", testValue);
         try {
             test.checkValidity();
-            Assert.fail("checkValidity() succeeded but /TestGroup1/TestProperty1_3 is missing!");
+            fail("checkValidity() succeeded but /TestGroup1/TestProperty1_3 is missing!");
         } catch (FxInvalidParameterException e) {
             //ok
             Assert.assertTrue("ex.content.required.missing".equals(e.getExceptionMessage().getKey()));
@@ -442,13 +445,13 @@ public class ContentEngineTest {
         try {
             test.checkValidity();
         } catch (FxInvalidParameterException e) {
-            Assert.fail("checkValidity() did not succeed when it should!");
+            fail("checkValidity() did not succeed when it should!");
         }
         test.setValue("/TestGroup1/TestProperty1_2", testValue);
         try {
             test.checkValidity();
         } catch (FxInvalidParameterException e) {
-            Assert.fail("checkValidity() did not succeed when it should!");
+            fail("checkValidity() did not succeed when it should!");
         }
         FxPK pk = co.save(test);
         co.remove(pk);
@@ -462,7 +465,7 @@ public class ContentEngineTest {
         try {
             test.checkValidity();
         } catch (FxInvalidParameterException e) {
-            Assert.fail("checkValidity() did not succeed when it should!");
+            fail("checkValidity() did not succeed when it should!");
         }
         test.setValue("/TestGroup1[2]/TestProperty1_2", testValue);
         test.setValue("/TestGroup1[2]/TestProperty1_3", testValue);
@@ -512,14 +515,14 @@ public class ContentEngineTest {
         try {
             //should throw unchecked exception since multiplicity 3 is out of range
             testLoad3.getValue("/TestNumberSL[3]");
-            Assert.fail("Accessing an invalid XPath should have failed. Multiplicity out of range.");
+            fail("Accessing an invalid XPath should have failed. Multiplicity out of range.");
         } catch (FxRuntimeException re) {
             //expected
         }
         try {
             //should throw unchecked exception since multiplicity 3 is out of range
             testLoad3.getValue("/TestNumberSLXXX[1]");
-            Assert.fail("Accessing an invalid XPath should have failed.");
+            fail("Accessing an invalid XPath should have failed.");
         } catch (FxRuntimeException re) {
             //expected
         }
@@ -532,23 +535,23 @@ public class ContentEngineTest {
         Assert.assertTrue(testType != null);
         FxContent test = co.initialize(testType.getId());
         final String XP = "/TestProperty3";
-        Assert.assertEquals(test.getValues(XP).size(), 1); //initialized with 1 empty entry
+        assertEquals(test.getValues(XP).size(), 1); //initialized with 1 empty entry
         test.setValue(XP + "[1]", new FxString(true, "1"));
-        Assert.assertEquals(test.getValues(XP).size(), 1);
+        assertEquals(test.getValues(XP).size(), 1);
         test.setValue(XP + "[2]", new FxString(true, "2"));
-        Assert.assertEquals(test.getValues(XP).size(), 2);
+        assertEquals(test.getValues(XP).size(), 2);
         test.setValue(XP + "[3]", new FxString(true, "3"));
-        Assert.assertEquals(test.getValues(XP).size(), 3);
+        assertEquals(test.getValues(XP).size(), 3);
         List<FxValue> values = test.getValues(XP);
-        Assert.assertEquals(values.get(0).getBestTranslation(), "1");
-        Assert.assertEquals(values.get(1).getBestTranslation(), "2");
-        Assert.assertEquals(values.get(2).getBestTranslation(), "3");
+        assertEquals(values.get(0).getBestTranslation(), "1");
+        assertEquals(values.get(1).getBestTranslation(), "2");
+        assertEquals(values.get(2).getBestTranslation(), "3");
         test.getPropertyData(XP + "[2]").setPos(3); //1,2,3 -> 1,3,2
         values = test.getValues(XP);
         //positions should be sorted
-        Assert.assertEquals(values.get(0).getBestTranslation(), "1");
-        Assert.assertEquals(values.get(1).getBestTranslation(), "2");
-        Assert.assertEquals(values.get(2).getBestTranslation(), "3");
+        assertEquals(values.get(0).getBestTranslation(), "1");
+        assertEquals(values.get(1).getBestTranslation(), "2");
+        assertEquals(values.get(2).getBestTranslation(), "3");
     }
 
     @Test
@@ -567,7 +570,7 @@ public class ContentEngineTest {
             else if (getUserTicket().getLanguage().getId() == FxLanguage.GERMAN)
                 Assert.assertTrue("Zugriff verweigert!".equals(noAccess.getDefaultTranslation()), "Shared message loading failed!");
         } catch (FxApplicationException e) {
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         }
     }
 
@@ -590,12 +593,12 @@ public class ContentEngineTest {
             test.getData("/TEXT[1]");
             try {
                 test.getData("/TEXT[2]");
-                Assert.fail("No /TEXT[2] should exist!");
+                fail("No /TEXT[2] should exist!");
             } catch (Exception e) {
                 //ok
             }
         } catch (FxApplicationException e) {
-            Assert.fail(e.getMessage());
+            fail(e.getMessage());
         }
     }
 
@@ -630,7 +633,7 @@ public class ContentEngineTest {
         Assert.assertTrue(comp.matchesPk(new FxPK(pk.getId(), FxPK.MAX)), "matchesPk for max version failed");
         Assert.assertTrue(1 == comp.getPk().getVersion(), "Version is not 1");
         Assert.assertTrue(comp.getStepId() == test.getStepId(), "Step failed");
-        Assert.assertEquals(comp.getAclIds(), test.getAclIds(), "ACL failed");
+        assertEquals(comp.getAclIds(), test.getAclIds(), "ACL failed");
         Assert.assertTrue(comp.isMaxVersion(), "MaxVersion failed");
         Assert.assertTrue(comp.isLiveVersion() == article.getWorkflow().getSteps().get(0).isLiveStep(), "LiveVersion failed. Expected:" + article.getWorkflow().getSteps().get(0).isLiveStep() + " Got:" + comp.isLiveVersion());
         Assert.assertTrue(comp.getMainLanguage() == FxLanguage.ENGLISH, "MainLang failed");
@@ -651,11 +654,11 @@ public class ContentEngineTest {
         Assert.assertTrue(1 == cvi.getMinVersion());
 
         FxContentContainer cc = co.loadContainer(cvi.getId());
-        Assert.assertEquals(cc.getVersionInfo().getLastModifiedVersion(), cvi.getLastModifiedVersion());
-        Assert.assertEquals(cc.getVersionInfo().getLiveVersion(), cvi.getLiveVersion());
-        Assert.assertEquals(cc.getVersionInfo().getMinVersion(), cvi.getMinVersion());
-        Assert.assertEquals(cc.getVersion(2), co.load(pk2));
-        Assert.assertEquals(cc.getVersion(3), co.load(pk3));
+        assertEquals(cc.getVersionInfo().getLastModifiedVersion(), cvi.getLastModifiedVersion());
+        assertEquals(cc.getVersionInfo().getLiveVersion(), cvi.getLiveVersion());
+        assertEquals(cc.getVersionInfo().getMinVersion(), cvi.getMinVersion());
+        assertEquals(cc.getVersion(2), co.load(pk2));
+        assertEquals(cc.getVersion(3), co.load(pk3));
         Assert.assertNotSame(cc.getVersion(1), cc.getVersion(2));
         Assert.assertTrue(FxDelta.processDelta(cc.getVersion(1), cc.getVersion(2)).isOnlyInternalPropertyChanges());
         Assert.assertNotSame(cc.getVersion(1), cc.getVersion(3));
@@ -673,7 +676,7 @@ public class ContentEngineTest {
         co.removeVersion(new FxPK(pk.getId(), 2));
         try {
             co.getContentVersionInfo(new FxPK(pk.getId()));
-            Assert.fail("VersionInfo available for a removed instance!");
+            fail("VersionInfo available for a removed instance!");
         } catch (FxApplicationException e) {
             //ok
         }
@@ -800,9 +803,9 @@ public class ContentEngineTest {
         org.setValue("/TestGroup1/TestProperty1_3[4]", testValue3);
         org.getRootGroup().removeEmptyEntries();
         org.getRootGroup().compact();
-        Assert.assertEquals(org.getValue("/TestProperty4[1]"), testValue2);
+        assertEquals(org.getValue("/TestProperty4[1]"), testValue2);
         Assert.assertFalse(org.containsValue("/TestProperty4[2]"));
-        Assert.assertEquals(org.getValue("/TestGroup1/TestProperty1_3[1]"), testValue3);
+        assertEquals(org.getValue("/TestGroup1/TestProperty1_3[1]"), testValue3);
         Assert.assertFalse(org.containsValue("/TestGroup1/TestProperty1_3[4]"));
     }
 
@@ -819,24 +822,24 @@ public class ContentEngineTest {
 
         FxPK pk = null;
         try {
-            Assert.assertEquals(
+            assertEquals(
                     ((FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(TEST_TYPE + defaultXPath)).getDefaultValue(),
                     DEFAULT_STRING);
-            Assert.assertEquals(
+            assertEquals(
                     CacheAdmin.getEnvironment().getAssignment(TEST_TYPE + defaultXPath).getDefaultMultiplicity(),
                     1);
             FxContent c = co.initialize(TEST_TYPE);
-            Assert.assertEquals(c.getValue(defaultXPath), DEFAULT_STRING);
+            assertEquals(c.getValue(defaultXPath), DEFAULT_STRING);
             c.setValue(req1, tmpValue);
             c.setValue(req2, tmpValue);
             pk = co.save(c);
             FxContent test = co.load(pk);
-            Assert.assertEquals(test.getValue(defaultXPath), DEFAULT_STRING);
+            assertEquals(test.getValue(defaultXPath), DEFAULT_STRING);
             test.setValue(defaultXPath, tmpValue);
-            Assert.assertEquals(test.getValue(defaultXPath), tmpValue);
+            assertEquals(test.getValue(defaultXPath), tmpValue);
             co.save(test);
             test = co.load(test.getPk());
-            Assert.assertEquals(test.getValue(defaultXPath), tmpValue, "Default value should have been overwritten.");
+            assertEquals(test.getValue(defaultXPath), tmpValue, "Default value should have been overwritten.");
             test.remove(defaultXPath);
             Assert.assertFalse(test.containsValue(defaultXPath), "Default value should have been removed (before save)");
             co.save(test);
@@ -846,7 +849,7 @@ public class ContentEngineTest {
             FxPropertyAssignment pa = (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(TEST_TYPE + defaultXPath);
             ass.save(pa.asEditable().setDefaultMultiplicity(0), false);
             pa = (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(TEST_TYPE + defaultXPath);
-            Assert.assertEquals(pa.getDefaultMultiplicity(), 0);
+            assertEquals(pa.getDefaultMultiplicity(), 0);
             test = co.load(test.getPk());
             Assert.assertFalse(test.containsValue(defaultXPath), "Default value should have been removed (after save with a default multiplicity of 0)");
         } finally {
@@ -871,7 +874,7 @@ public class ContentEngineTest {
         test.setValue("/TestProperty3[3]", testValue3);
         test.remove("/TestProperty3[2]");
         Assert.assertFalse(test.containsValue("/TestProperty3[3]"));
-        Assert.assertEquals(test.getValue("/TestProperty3[2]"), testValue3, "Propery gap should have been closed and [3] is now [2]");
+        assertEquals(test.getValue("/TestProperty3[2]"), testValue3, "Propery gap should have been closed and [3] is now [2]");
         test.remove("/TestProperty3");
         Assert.assertFalse(test.containsValue("/TestProperty4[3]"));
 
@@ -881,7 +884,7 @@ public class ContentEngineTest {
         test.setValue("/TestGroup1/TestGroup1_2[3]/TestProperty1_2_1[1]", testValue3);
         test.remove("/TestGroup1/TestGroup1_2[2]");
         Assert.assertFalse(test.containsValue("/TestGroup1/TestGroup1_2[3]/TestProperty1_2_1[1]"));
-        Assert.assertEquals(test.getValue("/TestGroup1/TestGroup1_2[2]/TestProperty1_2_1[1]"), testValue3, "Group gap should have been closed and [3] is now [2]");
+        assertEquals(test.getValue("/TestGroup1/TestGroup1_2[2]/TestProperty1_2_1[1]"), testValue3, "Group gap should have been closed and [3] is now [2]");
         test.remove("/TestGroup1/TestGroup1_2");
         Assert.assertFalse(test.containsValue("/TestGroup1/TestGroup1_2[1]/TestProperty1_2_1[1]"));
     }
@@ -904,14 +907,14 @@ public class ContentEngineTest {
         ped.setOverrideMaxLength(true);
         ass.createProperty(typeId, ped, "/");
 
-        Assert.assertEquals(CacheAdmin.getEnvironment().getProperty("LENGTHPROP2").getMaxLength(), -1); // "no" length restriction
+        assertEquals(CacheAdmin.getEnvironment().getProperty("LENGTHPROP2").getMaxLength(), -1); // "no" length restriction
 
         try {
             FxContent c = co.initialize(typeId);
             c.setValue("/LENGTHPROP1", new FxString(false, "1234"));
             try {
                 co.save(c);
-                Assert.fail("Setting a content String with length = 4 for a property w/ maxLength = 3 should have failed");
+                fail("Setting a content String with length = 4 for a property w/ maxLength = 3 should have failed");
             } catch (FxApplicationException e) {
                 // expected
             }
@@ -921,13 +924,64 @@ public class ContentEngineTest {
             ass.save(ped);
 
             c.setValue("/LENGTHPROP1", new FxString(false, "1234"));
-            Assert.assertEquals(c.getValue("/LENGTHPROP1").toString(), "1234");
+            assertEquals(c.getValue("/LENGTHPROP1").toString(), "1234");
 
             c.setValue("/LENGTHPROP2", new FxString(false, "1234"));
-            Assert.assertEquals(c.getValue("/LENGTHPROP2").toString(), "1234");
+            assertEquals(c.getValue("/LENGTHPROP2").toString(), "1234");
 
         } finally {
             type.remove(typeId);
         }
+    }
+
+    @Test
+    public void removeAssignedACLTest() throws FxApplicationException {
+        FxContent test = co.initialize(FxType.CONTACTDATA);
+        final FxEnvironment env = CacheAdmin.getEnvironment();
+        final long defaultInstanceAclId = env.getDefaultACL(ACLCategory.INSTANCE).getId();
+        test.setAclIds(Arrays.asList(
+                defaultInstanceAclId,
+                ACL.ACL_CONTACTDATA
+        ));
+        test = test.save();
+        try {
+            assertEquals(test.getAclIds(), Arrays.asList(defaultInstanceAclId, ACL.ACL_CONTACTDATA));
+            // remove second ACL 
+            test.setAclId(defaultInstanceAclId);
+            test = test.save();
+            assertEquals(test.getAclIds(), Arrays.asList(defaultInstanceAclId));
+        } finally {
+            co.remove(test.getPk());
+        }
+    }
+
+    @Test
+    public void nullAclAssignmentTest() throws FxApplicationException {
+        FxContent test = co.initialize(FxType.CONTACTDATA);
+        try {
+            test.setAclId(ACL.NULL_ACL_ID);
+            fail("Null ACL cannot be assigned.");
+        } catch (FxRuntimeException e) {
+            // pass
+        }
+        try {
+            test.setAclIds(Arrays.asList(ACL.NULL_ACL_ID));
+            fail("Null ACL cannot be assigned.");
+        } catch (FxRuntimeException e) {
+            // pass
+        }
+        try {
+            test.setAclIds(Arrays.<Long>asList());
+            fail("At least one ACL must be assigned.");
+        } catch (FxRuntimeException e) {
+            // pass
+        }
+        try {
+            test.setAclIds(Arrays.asList(ACL.NULL_ACL_ID, ACL.ACL_CONTACTDATA));
+            fail("Null ACL cannot be assigned.");
+        } catch (FxRuntimeException e) {
+            // pass
+        }
+        test.setAclIds(Arrays.asList(ACL.ACL_CONTACTDATA));
     }
 }
