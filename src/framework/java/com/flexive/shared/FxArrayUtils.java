@@ -114,6 +114,20 @@ public class FxArrayUtils {
     }
 
     /**
+     * Convert a Long list to a long array
+     *
+     * @param items List<Long>
+     * @return long[]
+     * @since 3.1
+     */
+    public static long[] toPrimitiveLongArray(List<Long> items) {
+        final long[] res = new long[items.size()];
+        for (int i = 0; i < res.length; i++)
+            res[i] = items.get(i);
+        return res;
+    }
+
+    /**
      * Removes dupicated entries from the list.
      *
      * @param list the list

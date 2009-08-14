@@ -31,18 +31,19 @@
  ***************************************************************/
 package com.flexive.shared.tree;
 
-import com.flexive.shared.FxFormatUtils;
-import com.flexive.shared.SelectableObject;
-import com.flexive.shared.SelectableObjectWithLabel;
-import com.flexive.shared.SelectableObjectWithName;
+import com.flexive.shared.*;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.security.ACLCategory;
+import com.flexive.shared.security.ACL;
 import com.flexive.shared.value.FxString;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Iterator;
+import java.util.Arrays;
+
+import org.apache.commons.lang.ArrayUtils;
 
 /**
  * FxNode implementation for flexive
@@ -64,7 +65,7 @@ public class FxTreeNode implements Serializable, SelectableObjectWithLabel, Sele
     private List<Long> childIds = null;
     private boolean dirty;
     protected long id;
-    private long ACLId;
+    private long[] acls;
     protected long parentNodeId;
     protected String name;
     private long modifiedAt;
@@ -100,7 +101,7 @@ public class FxTreeNode implements Serializable, SelectableObjectWithLabel, Sele
      * @param parentNodeId     id of the parent node
      * @param reference        pk of the referenced content
      * @param referenceTypeId  type id of the referenced content
-     * @param ACLId            acl of the referenced content
+     * @param acls             acls of the referenced content
      * @param name             name (part of the path)
      * @param path             complete path from the root node
      * @param label            label
@@ -120,7 +121,7 @@ public class FxTreeNode implements Serializable, SelectableObjectWithLabel, Sele
      * @param mayRelate        relate permission for the calling user
      * @param mayExport        export permission for the calling user
      */
-    public FxTreeNode(FxTreeMode mode, long id, long parentNodeId, FxPK reference, long referenceTypeId, long ACLId, String name, String path,
+    public FxTreeNode(FxTreeMode mode, long id, long parentNodeId, FxPK reference, long referenceTypeId, List<Long> acls, String name, String path,
                       FxString label, int position, List<FxTreeNode> children, List<Long> childIds, int depth,
                       int totalChildCount, int directChildCount, boolean leaf, boolean dirty, long modifiedAt,
                       String data, boolean mayEdit, boolean mayCreate, boolean mayDelete, boolean mayRelate, boolean mayExport) {
@@ -128,7 +129,7 @@ public class FxTreeNode implements Serializable, SelectableObjectWithLabel, Sele
         this.label = label;
         this.reference = reference;
         this.referenceTypeId = referenceTypeId;
-        this.ACLId = ACLId;
+        this.acls = acls != null ? FxArrayUtils.toPrimitiveLongArray(acls) : new long[0];
         this.mode = mode;
         this.position = position;
         this.children = children;
@@ -199,12 +200,22 @@ public class FxTreeNode implements Serializable, SelectableObjectWithLabel, Sele
     }
 
     /**
-     * Get the id of the ACL assigned to the referenced content
+     * Get the id of the first ACL assigned to the referenced content
      *
-     * @return id of the ACL assigned to the referenced content
+     * @return id of the first ACL assigned to the referenced content
+     * @deprecated  use {@link #getACLIds()}
      */
     public long getACLId() {
-        return ACLId;
+        return acls != null && acls.length > 0 ? acls[0] : ACL.NULL_ACL_ID;
+    }
+
+    /**
+     * Return the ACL id(s) of the referenced content.
+     *
+     * @return  the ACL id(s) of the referenced content.
+     */
+    public List<Long> getACLIds() {
+        return Arrays.asList(ArrayUtils.toObject(acls));
     }
 
     /**
@@ -454,6 +465,7 @@ public class FxTreeNode implements Serializable, SelectableObjectWithLabel, Sele
     /**
      * {@inheritDoc}
      */
+    @Override
     public int hashCode() {
         return (int) this.getId();
     }
@@ -461,6 +473,7 @@ public class FxTreeNode implements Serializable, SelectableObjectWithLabel, Sele
     /**
      * {@inheritDoc}
      */
+    @Override
     public boolean equals(Object obj) {
         if (obj == null || (!(obj instanceof SelectableObject)))
             return false;
@@ -478,7 +491,7 @@ public class FxTreeNode implements Serializable, SelectableObjectWithLabel, Sele
      */
     public static FxTreeNode createErrorNode(long nodeId, String message) {
         return new FxTreeNode(FxTreeMode.Edit, nodeId, 0,
-                FxPK.createNewPK(), 0L, ACLCategory.INSTANCE.getDefaultId(), "Error", message, new FxString(false, "Error"), Integer.MAX_VALUE,
+                FxPK.createNewPK(), 0L, Arrays.asList(ACLCategory.INSTANCE.getDefaultId()), "Error", message, new FxString(false, "Error"), Integer.MAX_VALUE,
                 new ArrayList<FxTreeNode>(0), new ArrayList<Long>(0), 0, 0, 0, true, true,
                 System.currentTimeMillis(), "", true, true, true, true, true);
     }
@@ -519,7 +532,7 @@ public class FxTreeNode implements Serializable, SelectableObjectWithLabel, Sele
      */
     public static FxTreeNode createNewTemporaryChildNode(FxTreeNode parentNode) {
         FxTreeNode n = new FxTreeNode(parentNode.getMode(), (System.currentTimeMillis() * -1), parentNode.getId(),
-                FxPK.createNewPK(), 0L, ACLCategory.INSTANCE.getDefaultId(), "@@TMP", "",
+                FxPK.createNewPK(), 0L, Arrays.asList(ACLCategory.INSTANCE.getDefaultId()), "@@TMP", "",
                 new FxString(parentNode.getLabel().isMultiLanguage(), ""), Integer.MAX_VALUE,
                 new ArrayList<FxTreeNode>(0), new ArrayList<Long>(0), 0, 0, 0, true, true,
                 System.currentTimeMillis(), "", true, true, true, true, true).flagTemporary();
