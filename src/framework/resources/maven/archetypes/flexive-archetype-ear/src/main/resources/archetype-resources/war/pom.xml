@@ -226,12 +226,6 @@
 
                     <!-- Deploy H2 database support -->
                     <dependency>
-                        <groupId>com.h2database</groupId>
-                        <artifactId>h2</artifactId>
-                        <scope>provided</scope>
-                        <version>${h2.version}</version>
-                    </dependency>
-                    <dependency>
                         <groupId>com.flexive</groupId>
                         <artifactId>flexive-h2</artifactId>
                         <version>${flexive.version}</version>
