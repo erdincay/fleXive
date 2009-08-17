@@ -37,6 +37,7 @@ import com.flexive.shared.EJBLookup;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.configuration.DivisionData;
 import com.flexive.war.webdav.FxWebDavUtils;
+import com.flexive.core.flatstorage.FxFlatStorageManager;
 import com.metaparadigm.jsonrpc.JSONRPCBridge;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -208,6 +209,8 @@ public class FxFilter implements Filter {
                 } catch (FxApplicationException e) {
                     throw e.asRuntimeException();
                 }
+                // initialize flat storage, if available
+                FxFlatStorageManager.getInstance().getDefaultStorage();
                 setDivisionServicesPerformed();
             }
         }
