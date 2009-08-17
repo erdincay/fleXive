@@ -62,9 +62,10 @@ public class ScriptConsoleBean implements Serializable {
     private boolean web;
     private String language = "groovy"; // initial setting for script syntax check
     private boolean verifyButtonEnabled = false;
-    private Object result;
     private String userLang = "en";
 
+    private transient Object result;
+    
     public String getCode() {
         if(code == null) {
             code = ScriptBean.getClassImports(language);

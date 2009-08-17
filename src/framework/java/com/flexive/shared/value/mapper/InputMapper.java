@@ -41,6 +41,7 @@ import com.flexive.shared.value.FxValue;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.io.Serializable;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -75,7 +76,7 @@ import org.apache.commons.lang.StringUtils;
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-public abstract class InputMapper<BaseType extends FxValue, MappedType extends FxValue> {
+public abstract class InputMapper<BaseType extends FxValue, MappedType extends FxValue> implements Serializable {
     private String autocompleteHandler;
 
     /**

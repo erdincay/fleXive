@@ -449,11 +449,15 @@
             excludeFilter="${findbugs.dir}/excludeFilters.xml"
 		    jvmargs="-Xmx768M -server">
         	<sourcePath path="${flexive.src.framework.dir}"/>
+        	<sourcePath path="${flexive.src.framework.dir}/storages/H2/java"/>
+        	<sourcePath path="${flexive.src.framework.dir}/storages/MySQL/java"/>
         	<sourcePath path="${flexive.src.ui.jsf.dir}"/>
         	<sourcePath path="${flexive.src.ui.components.dir}"/>
         	<sourcePath path="${flexive.src.ui.shared.dir}"/>
             <class location="${flexive.build.framework.jar.dir}/flexive-shared.jar"/>
             <class location="${flexive.build.framework.jar.dir}/flexive-ejb.jar"/>
+            <class location="${flexive.build.framework.jar.dir}/flexive-storage-H2.jar"/>
+            <class location="${flexive.build.framework.jar.dir}/flexive-storage-MySQL.jar"/>
             <class location="${build.ui.jar.dir}/flexive-backend.jar"/>
             <class location="${build.ui.jar.dir}/flexive-web-shared.jar"/>
             <class location="${build.ui.jar.dir}/flexive-plugin-jsf-core.jar"/>

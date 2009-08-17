@@ -52,6 +52,8 @@ import java.util.List;
  * @version $Rev$
  */
 public class FxPkSelectOneInputMapper extends InputMapper<FxReference, FxSelectOne> {
+    private static final long serialVersionUID = -8142350562154899086L;
+    
     private final FxSelectList selectList;
 
     /**

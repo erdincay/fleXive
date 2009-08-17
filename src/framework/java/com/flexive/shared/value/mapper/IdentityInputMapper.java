@@ -40,6 +40,8 @@ import com.flexive.shared.value.FxValue;
  * @version $Rev$
  */
 public final class IdentityInputMapper extends InputMapper<FxValue, FxValue> {
+    private static final long serialVersionUID = -376854528162535473L;
+
     private final static IdentityInputMapper INSTANCE = new IdentityInputMapper();
 
     /** {@inheritDoc} */

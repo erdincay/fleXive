@@ -54,10 +54,11 @@ public class CmisSearchBean implements Serializable {
 
     private String query;
     private CmisResultSet result;
-    private DataModel resultModel;
     private int startRow;
     private int maxRows = 1000;
 
+    private transient DataModel resultModel;
+    
     public String getQuery() {
         if (query == null) {
             query = (String) FxJsfUtils.getSessionAttribute(LAST_QUERY_STORE);

@@ -87,11 +87,12 @@ public class ScriptBean implements Serializable {
     private boolean inputFieldEnabled = false;
     private boolean verifyButtonEnabled = false;
     private boolean executeButtonEnabled = false;
-    private Object result;
     private long executionTime;
     private String userLang = "en";
     private String language = "groovy";
 
+    private transient Object result;
+    
     private static final String ID_CACHE_KEY = ScriptBean.class + "_id";
 
 

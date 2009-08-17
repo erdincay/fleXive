@@ -93,7 +93,8 @@ public class FxSelectListItemEdit extends FxSelectListItem implements Serializab
      * @param color color for display
      */
     public FxSelectListItemEdit(String name, ACL acl, FxSelectList list, FxString label, String data, String color) {
-        super(calcId(list), name, acl, list, -1, label, data, color, BinaryDescriptor.SYS_SELECTLIST_DEFAULT, 1, 1, null, list.getItemCount()+1);
+        super(calcId(list), name, acl, list, -1, label, data, color, BinaryDescriptor.SYS_SELECTLIST_DEFAULT, 1, 1, null, 
+                list == null ? 0 : list.getItemCount()+1);
         this.isNew = true;
         this.original = null;
     }

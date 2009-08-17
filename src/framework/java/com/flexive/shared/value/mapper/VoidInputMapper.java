@@ -42,6 +42,8 @@ import com.flexive.shared.value.FxVoid;
  * @version $Rev$
  */
 public final class VoidInputMapper extends InputMapper<FxValue, FxVoid> {
+    private static final long serialVersionUID = 8324060710725065274L;
+
     private static final VoidInputMapper INSTANCE = new VoidInputMapper();
 
     /** {@inheritDoc} */

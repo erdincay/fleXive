@@ -5,7 +5,6 @@ import com.flexive.shared.search.query.ValueComparator;
 import com.flexive.shared.search.query.PropertyValueComparator;
 import com.flexive.shared.structure.FxDataType;
 import com.flexive.shared.structure.FxProperty;
-import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.security.ACL;
@@ -34,6 +33,8 @@ public abstract class NumberQueryInputMapper<T, BaseType extends FxValue<T, ?>> 
      * com.flexive.faces.javascript.AutoCompleteProvider#userQuery().
      */
     public static class AccountQueryInputMapper extends NumberQueryInputMapper<Long, FxLargeNumber> {
+        private static final long serialVersionUID = 6817350554032949604L;
+
         public AccountQueryInputMapper() {
             buildAutocompleteHandler("AutoCompleteProvider.userQuery");
         }
@@ -80,6 +81,8 @@ public abstract class NumberQueryInputMapper<T, BaseType extends FxValue<T, ?>> 
     }
 
     public static class ReferenceQueryInputMapper extends NumberQueryInputMapper<ReferencedContent, FxReference> {
+        private static final long serialVersionUID = -4520178265422619418L;
+
         /** Separator between primary key and caption */
         private static final String SEP_PK_CAPTION = " - ";
 

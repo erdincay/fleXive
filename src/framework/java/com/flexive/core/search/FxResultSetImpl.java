@@ -31,16 +31,17 @@
  ***************************************************************/
 package com.flexive.core.search;
 
-import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.content.FxPK;
-import com.flexive.shared.value.FxString;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxRuntimeException;
 import com.flexive.shared.search.*;
 import com.flexive.sqlParser.FxStatement;
 import com.flexive.sqlParser.SelectedValue;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -118,6 +119,11 @@ public class FxResultSetImpl implements Serializable, FxResultSet {
         this.totalTime = parserExecutionTime;
         this.creationTime = System.currentTimeMillis();
         this.typeId = typeId;
+    }
+
+    private void readObject(ObjectInputStream os) throws ClassNotFoundException, IOException {
+        os.defaultReadObject();
+        pkIndex = -2;
     }
 
     /**
