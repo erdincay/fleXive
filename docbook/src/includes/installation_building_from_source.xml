@@ -10,49 +10,54 @@
         This procedure is for those building &Flexive; from the
         <link xlink:href="http://www.flexive.org/download">source code</link>.
         <itemizedlist>
-            <listitem>Copy the
-                <filename>build.properties.sample</filename>
-                file located in the root directory of the
-                <link xlink:href="http://www.flexive.org/download">&Flexive; source code</link>
-                to
-                <filename>build.properties</filename>.
-                <xi:include href="../listings/installation_build.properties.xml"/>
-            </listitem>
-            <listitem>Execute
-                <code>ant db.update</code>
-                before
-                <code>ant all</code>
-                in the root directory of the
-                <link xlink:href="http://www.flexive.org/download">&Flexive; source code,</link>
-                where the
-                <filename>build.xml</filename>
-                file
-                resides.
-                This will recreate all configured databases and destroy existing data.
+            <listitem>
+                <para>
+                    Fetch the current source code:
+                    <userinput>svn co http://svn.flexive.org/repository/flexive/trunk flexive-trunk</userinput>
+                </para>
             </listitem>
             <listitem>
-                <para>To deploy the ear execute
-                    <code>ant deploy</code>
+                <para>Copy the
+                    <filename>build.properties.sample</filename>
+                    file located in the root directory of the checked out sources (flexive-trunk) to
+                    <filename>build.properties</filename>.
                 </para>
-                <para>Don't forget to set your
-                    <code>${jboss.home}</code>
-                    variable in the
+            </listitem>
+            <listitem>
+                <para>Configure your datasource in
+                    <filename>build.properties</filename>
+                    and execute
+                    <code>ant db.update all</code>.
+                    This will recreate the database schema to be used (default: flexive).
+                </para>
+            </listitem>
+            <listitem>
+                <para>To build and deploy the ear execute
+                    <code>ant build-deploy</code>.
+                </para>
+                <para>Don't forget to set the
+                    <code>deploy.ear.path</code>
+                    in
                     <filename>build.properties</filename>
                     file properly!
                 </para>
                 <itemizedlist>
-                    <listitem>Note: to successfully compile &Flexive;
-                        <link xlink:href="http://java.sun.com/javase/downloads/index.jsp">JAVA 1.6</link>
-                        and
-                        <link xlink:href="http://ant.apache.org/">Apache ANT 1.7</link>
-                        is needed
+                    <listitem>
+                        <para>Note: to successfully compile &Flexive;
+                            <link xlink:href="http://java.sun.com/javase/downloads/index.jsp">JAVA 1.6</link>
+                            and
+                            <link xlink:href="http://ant.apache.org/">Apache ANT 1.7</link>
+                            is needed
+                        </para>
                     </listitem>
-                    <listitem>Be also sure to set the
-                        <code>JDK_HOME</code>
-                        and
-                        <code>JAVA_HOME</code>
-                        variables accordingly as explained in section
-                        <link linkend="prerequisites">Prerequisites</link>.
+                    <listitem>
+                        <para>Be also sure to set the
+                            <code>JDK_HOME</code>
+                            and
+                            <code>JAVA_HOME</code>
+                            variables accordingly as explained in section
+                            <link linkend="prerequisites">Prerequisites</link>.
+                        </para>
                     </listitem>
                 </itemizedlist>
             </listitem>
