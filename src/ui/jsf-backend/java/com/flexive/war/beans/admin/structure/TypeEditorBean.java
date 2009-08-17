@@ -636,9 +636,10 @@ public class TypeEditorBean implements Serializable {
      */
     public List<FxPropertyAssignment> getFlatStorageAssignments() {
         List<FxPropertyAssignment> flat = new ArrayList<FxPropertyAssignment>(20);
-        for (FxPropertyAssignment pa : type.getAssignedProperties())
-            if (pa.isFlatStorageEntry())
-                flat.add(pa);
+        if (type != null && type.isContainsFlatStorageAssignments())
+            for (FxPropertyAssignment pa : type.getAssignedProperties())
+                if (pa.isFlatStorageEntry())
+                    flat.add(pa);
         return flat;
     }
 

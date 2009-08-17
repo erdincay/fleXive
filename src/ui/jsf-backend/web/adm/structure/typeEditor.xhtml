@@ -352,13 +352,15 @@
                 <fx:resultValue id="storageMode" value="#{typeEditorBean.type.storageMode.label}"/>
             </fx:formRow>
 
-            <fx:fieldSet legendKey="TypeEditor.label.flatAssignments">
-                <ui:repeat var="fa" value="#{typeEditorBean.flatStorageAssignments}">
-                    <fx:formRow label="#{fa.XPath}">    
-                        #{fa.flatStorageMapping.storage}:#{fa.flatStorageMapping.column}:#{fa.flatStorageMapping.level}
-                    </fx:formRow>
-                </ui:repeat>
-            </fx:fieldSet>
+            <ui:fragment rendered="#{typeEditorBean.type.containsFlatStorageAssignments}">
+                <fx:fieldSet legendKey="TypeEditor.label.flatAssignments">
+                    <ui:repeat var="fa" value="#{typeEditorBean.flatStorageAssignments}">
+                        <fx:formRow label="#{fa.XPath}">
+                            #{fa.flatStorageMapping.storage}:#{fa.flatStorageMapping.column}:#{fa.flatStorageMapping.level}
+                        </fx:formRow>
+                    </ui:repeat>
+                </fx:fieldSet>
+            </ui:fragment>
 
             <br/><br/>
             

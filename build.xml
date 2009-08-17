@@ -141,25 +141,54 @@
     <target name="redeploy.web.jboss" depends="init" description="Redeploy web files to JBoss">
         <groovy>
              File jbossDir = null
+             boolean isJBoss5 = false;
              new File(properties['deploy.ear.path']+"/../tmp/deploy").eachFileMatch(~/.*flexive.ear-contents.*/) { dir ->
-                if( jbossDir == null )
+                if( jbossDir == null ) {
                     jbossDir = dir
+                }
              }
              if( jbossDir == null ) {
-                ant.fail(message:"No JBoss webdeployment found!")
+                //search in JBoss 5.x deployments
+                new File(properties['deploy.ear.path']+"/../tmp").eachFile() { dir ->
+                    if(!dir.isDirectory())
+                        return
+                    File war = new File(dir.getAbsolutePath()+File.separatorChar+"flexive.war")
+                    if( war.exists() ) {
+                      if( jbossDir == null ) {
+                        jbossDir = war
+                        isJBoss5 = true
+                      } else
+                        if( war.lastModified() > jbossDir.lastModified() )
+                            jbossDir = war
+                    }
+                }
              }
+             if( jbossDir == null )
+                ant.fail(message:"No JBoss webdeployment found!")
              println "Redeploying web files to [$jbossDir] ..."
              properties['dir.deploy.jboss'] = jbossDir
+             if( isJBoss5 ) {
+                ant.copy(todir:(jbossDir.absolutePath+"/adm"), verbose:true) {
+                    fileset(dir:properties['basedir']+"/src/ui/jsf-backend/web/adm")
+                }
+                ant.copy(todir:(jbossDir.absolutePath+"/pub"), verbose:true) {
+                    fileset(dir:properties['basedir']+"/src/ui/jsf-backend/web/pub")
+                }
+                ant.copy(todir:(jbossDir.absolutePath+"/WEB-INF"), verbose:true) {
+                    fileset(dir:properties['basedir']+"/src/ui/jsf-backend/resources/WEB-INF")
+                }
+             } else {
+                ant.copy(todir:(jbossDir.absolutePath+"/flexive-exp.war/adm"), verbose:true) {
+                    fileset(dir:properties['basedir']+"/src/ui/jsf-backend/web/adm")
+                }
+                ant.copy(todir:(jbossDir.absolutePath+"/flexive-exp.war/pub"), verbose:true) {
+                    fileset(dir:properties['basedir']+"/src/ui/jsf-backend/web/pub")
+                }
+                ant.copy(todir:(jbossDir.absolutePath+"/flexive-exp.war/WEB-INF"), verbose:true) {
+                    fileset(dir:properties['basedir']+"/src/ui/jsf-backend/resources/WEB-INF")
+                }
+             }
         </groovy>
-        <copy todir="${dir.deploy.jboss}/flexive-exp.war/adm" verbose="true" >
-            <fileset dir="${basedir}/src/ui/jsf-backend/web/adm"/>
-        </copy>
-        <copy todir="${dir.deploy.jboss}/flexive-exp.war/pub" verbose="true" >
-            <fileset dir="${basedir}/src/ui/jsf-backend/web/pub"/>
-        </copy>
-        <copy todir="${dir.deploy.jboss}/flexive-exp.war/WEB-INF" verbose="true" >
-            <fileset dir="${basedir}/src/ui/jsf-backend/resources/WEB-INF"/>
-        </copy>
     </target>
 
     <target name="prepare" description="Prepare build directory structures" depends="init">

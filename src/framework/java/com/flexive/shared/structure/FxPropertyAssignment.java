@@ -37,7 +37,6 @@ import com.flexive.shared.content.FxData;
 import com.flexive.shared.content.FxGroupData;
 import com.flexive.shared.content.FxPropertyData;
 import com.flexive.shared.exceptions.FxCreateException;
-import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxRuntimeException;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.value.FxString;
