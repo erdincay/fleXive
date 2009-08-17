@@ -232,6 +232,12 @@
                 </para>
                 <itemizedlist>
                     <listitem>
+                        <para>
+                            continue browsing the backend at
+                            <link xlink:href="http://localhost:8080/flexive/adm/">http://localhost:8080/flexive/adm/</link>,
+                        </para>
+                    </listitem>
+                    <listitem>
                         <para>watch the
                             <link xlink:href="http://www.flexive.org/explore-javaee-framework-flexive/screencasts.html">
                                 screencasts
