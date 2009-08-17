@@ -33,6 +33,7 @@ package com.flexive.ejb.beans;
 
 import com.flexive.core.Database;
 import com.flexive.core.LifeCycleInfoImpl;
+import com.flexive.core.flatstorage.FxFlatStorageManager;
 import com.flexive.core.conversion.ConversionEngine;
 import com.flexive.core.storage.ContentStorage;
 import com.flexive.core.storage.LockStorage;
@@ -759,7 +760,8 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
         try {
             ContentStorage storage = StorageManager.getContentStorage(pk.getStorageMode());
             con = Database.getDbConnection();
-            return storage.getReferencedContentCount(con, pk.getId());
+            return storage.getReferencedContentCount(con, pk.getId()) +
+                    (int)FxFlatStorageManager.getInstance().getReferencedContentCount(con, pk.getId());
         } catch (FxNotFoundException e) {
             throw new FxLoadException(e);
         } catch (SQLException e) {
