@@ -320,7 +320,7 @@
                 </ui:fragment>
             </fx:fieldSet>
 
-            <fx:fieldSet legend="#{fxMessageBean['TypeEditor.label.permissions']}">
+            <fx:fieldSet legendKey="TypeEditor.label.permissions">
 
                 <fx:formRow labelKey="TypeEditor.label.useInstancePermissions" id="useInstancePermissions">
                         <h:selectBooleanCheckbox id="useInstancePermissions" value="#{typeEditorBean.useInstancePermissions}"
@@ -351,6 +351,14 @@
             <fx:formRow labelKey="TypeEditor.label.storageMode" id="storageMode">
                 <fx:resultValue id="storageMode" value="#{typeEditorBean.type.storageMode.label}"/>
             </fx:formRow>
+
+            <fx:fieldSet legendKey="TypeEditor.label.flatAssignments">
+                <ui:repeat var="fa" value="#{typeEditorBean.flatStorageAssignments}">
+                    <fx:formRow label="#{fa.XPath}">    
+                        #{fa.flatStorageMapping.storage}:#{fa.flatStorageMapping.column}:#{fa.flatStorageMapping.level}
+                    </fx:formRow>
+                </ui:repeat>
+            </fx:fieldSet>
 
             <br/><br/>
             

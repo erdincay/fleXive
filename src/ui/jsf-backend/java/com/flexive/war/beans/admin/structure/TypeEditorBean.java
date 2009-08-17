@@ -43,21 +43,21 @@ import com.flexive.shared.EJBLookup;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.scripting.FxScriptInfo;
-import com.flexive.shared.security.Role;
 import com.flexive.shared.security.ACLCategory;
+import com.flexive.shared.security.Role;
 import com.flexive.shared.structure.*;
-import com.flexive.shared.value.FxString;
 import com.flexive.shared.value.FxReference;
+import com.flexive.shared.value.FxString;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.faces.model.SelectItem;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.io.Serializable;
 
 /**
  * Bean behind typeEditor.xhtml to
@@ -68,7 +68,7 @@ import java.io.Serializable;
 
 public class TypeEditorBean implements Serializable {
     private static final long serialVersionUID = 8135993708769879811L;
-   
+
     private static final Log LOG = LogFactory.getLog(TypeEditorBean.class);
     private FxTypeEdit type = null;
     private List<WrappedRelation> wrappedRelations = null;
@@ -220,7 +220,7 @@ public class TypeEditorBean implements Serializable {
     }
 
     public FxReference getIcon() {
-        if( !icon.isEmpty() && !icon.getDefaultTranslation().hasContent() ) {
+        if (!icon.isEmpty() && !icon.getDefaultTranslation().hasContent()) {
             //load the content to be able to display the caption
             try {
                 icon.getDefaultTranslation().setContent(EJBLookup.getContentEngine().load(new FxPK(icon.getDefaultTranslation().getId())));
@@ -629,6 +629,19 @@ public class TypeEditorBean implements Serializable {
         type.setMultipleContentACLs(value);
     }
 
+    /**
+     * Get a list of all property assignments that use the flat storage
+     *
+     * @return list of all property assignments that use the flat storage
+     */
+    public List<FxPropertyAssignment> getFlatStorageAssignments() {
+        List<FxPropertyAssignment> flat = new ArrayList<FxPropertyAssignment>(20);
+        for (FxPropertyAssignment pa : type.getAssignedProperties())
+            if (pa.isFlatStorageEntry())
+                flat.add(pa);
+        return flat;
+    }
+
     /*
      *  Simple wrapper class for FxTypeRelation with convenient getters and setters
      * for GUI operations
@@ -819,9 +832,9 @@ public class TypeEditorBean implements Serializable {
 
     public FxScriptInfo getSelectedScriptInfo() {
         if (selectedScriptInfo == null) {
-            SelectBean b= new SelectBean();
-            if (b.getTypeScripts().size()>0)
-                selectedScriptInfo = CacheAdmin.getEnvironment().getScript((Long)b.getTypeScripts().get(0).getValue());
+            SelectBean b = new SelectBean();
+            if (b.getTypeScripts().size() > 0)
+                selectedScriptInfo = CacheAdmin.getEnvironment().getScript((Long) b.getTypeScripts().get(0).getValue());
         }
         return selectedScriptInfo;
     }
