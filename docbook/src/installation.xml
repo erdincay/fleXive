@@ -88,7 +88,8 @@
                             option
                             to run it directly, double-click on the downloaded
                             <filename>flexive-installer.jar</filename>
-                            file.
+                            file or launch it from the command line with
+                            <command>java -jar flexive-installer.jar</command>.
                         </para>
                     </listitem>
                     <listitem>
@@ -156,11 +157,18 @@
                         </blockquote>
                         <para>
                             Point your browser to
-                            <link xlink:href="http://localhost:8080/flexive-backend-war/adm/">http://localhost:8080/flexive-backend-war/adm/</link>
+                            <link xlink:href="http://localhost:8080/flexive-backend-war/adm/">
+                                http://localhost:8080/flexive-backend-war/adm/
+                            </link>
                             to access the backend application.
                         </para>
                     </listitem>
                 </itemizedlist>
+
+                <para>
+                    For further information on &flexive; Maven support please continue with
+                    <xref linkend="writing_applications_maven"/>.
+                </para>
             </section>
 
             <section xml:id="i_quickstart_applicationserver">
@@ -187,7 +195,8 @@
                     <itemizedlist>
                         <listitem>
                             <para>
-                                <link linkend="jboss_installation">Jboss 4.2</link> (also applies to 5.0)
+                                <link linkend="jboss_installation">JBoss 4.2</link>
+                                (also applies to 5.0)
                             </para>
                         </listitem>
                         <listitem>
@@ -197,12 +206,18 @@
                         </listitem>
                         <listitem>
                             <para>
-                                <link xlink:href="http://wiki.flexive.org/confluence/display/FX/Deploy+in+Geronimo+2.1">Geronimo 2.1</link> (Wiki)
+                                <link xlink:href="http://wiki.flexive.org/confluence/display/FX/Deploy+in+Geronimo+2.1">
+                                    Geronimo 2.1
+                                </link>
+                                (Wiki)
                             </para>
                         </listitem>
                         <listitem>
                             <para>
-                                <link xlink:href="http://wiki.flexive.org/confluence/display/FX/Deploy+in+WebLogic+10.3">WebLogic 10.3</link> (Wiki)
+                                <link xlink:href="http://wiki.flexive.org/confluence/display/FX/Deploy+in+WebLogic+10.3">
+                                    WebLogic 10.3
+                                </link>
+                                (Wiki)
                             </para>
                         </listitem>
                     </itemizedlist>
@@ -218,7 +233,9 @@
                 <itemizedlist>
                     <listitem>
                         <para>watch the
-                            <link xlink:href="http://www.flexive.org/explore-javaee-framework-flexive/screencasts.html">screencasts</link>
+                            <link xlink:href="http://www.flexive.org/explore-javaee-framework-flexive/screencasts.html">
+                                screencasts
+                            </link>
                             on our homepage giving you an introduction to the backend application and to the
                             process of writing applications with &flexive;,
                         </para>
@@ -750,6 +767,32 @@ database.vendor=MySQL]]></programlisting>
 
     <section xml:id="installation_troubleshooting">
         <title>Troubleshooting</title>
+
+        <para>
+            There are several locations to look for information in case trouble strikes:
+
+            <itemizedlist>
+                <listitem>
+                    <para>this section</para>
+                </listitem>
+                <listitem>
+                    <para>
+                        <link xlink:href="http://wiki.flexive.org/confluence/display/FX/FAQ#FAQ-Troubleshooting">Wiki FAQ: Troubleshooting</link>
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        <link xlink:href="http://wiki.flexive.org/confluence/display/FX/How-Tos">Wiki: How-Tos</link>
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        &forums;
+                    </para>
+                </listitem>
+            </itemizedlist>
+        </para>
+
         <section xml:id="installation_troubleshooting_jboss_multiple">
             <title>Multiple JBoss installations</title>
             <para>If there are multiple JBoss installations running in your local network you need
