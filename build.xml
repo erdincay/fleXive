@@ -995,6 +995,7 @@ database.vendor=MySQL
             <zipfileset prefix="flexive-dist/applications/disabled/tutorial01-documentstore" dir="${flexive.drop.dir}" includes="tutorial01-documentstore*"/>
             <zipfileset prefix="flexive-dist/applications/disabled/products" dir="${flexive.drop.dir}" includes="products*"/>
             <zipfileset prefix="flexive-dist/applications/disabled/announcement-submission" dir="${flexive.drop.dir}" includes="announcement-submission*"/>
+            <zipfileset prefix="flexive-dist/applications/flexive-atompub" dir="${flexive.drop.dir}" includes="flexive-atompub*"/>
         </zip>
         <copy file="${flexive.base.build.dir}/${dist.bin-all.file}" toFile="${flexive.base.build.dir}/flexive-dist.zip"/>
         <!-- Create flexive distribution w/o backend and GPL'd files -->
