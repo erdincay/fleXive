@@ -3,6 +3,11 @@ body {
     font-size: 0.9em;
 }
 
+dd, dl {
+    margin-top: 0.1em;
+    margin-bottom: 0.4em;
+}
+
 .command {
     font-family: monospace;
 }
