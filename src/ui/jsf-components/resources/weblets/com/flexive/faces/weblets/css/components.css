@@ -18,9 +18,9 @@ div.fxValueInput {
 
 /* An input row containing the input element and the default language checkbox */
 div.fxValueInputRow {
-    /*position: relative;*/
+/*position: relative;*/
     width: 225px;
-    min-height: 20px;   /* avoid problems with floating checkboxes */
+    min-height: 20px; /* avoid problems with floating checkboxes */
     padding: 1px 1px 1px 0;
 }
 
@@ -29,13 +29,13 @@ input.fxValueDefaultLanguageRadio {
 }
 
 .FxHTMLInput .fxValueInputRow .fxValueHtmlEditorContainer {
-    padding-top: 25px;  /* Move below language select */
+    padding-top: 25px; /* Move below language select */
 }
 
 /* Limit width of the month select list*/
 
 .FxDateInput .popupCalendar, .FxDateTimeInput .popupCalendar,
-.FxDateRangeInput .popupCalendar, .FxDateTimeRangeInput .popupCalendar {
+    .FxDateRangeInput .popupCalendar, .FxDateTimeRangeInput .popupCalendar {
     display: none;
     position: absolute;
     left: 10px;
@@ -48,33 +48,33 @@ select.fxValueSelectInput, .fxValueInputElementWidth, input.fxValueTextInput {
 }
 
 textarea.fxValueTextArea, textarea.fxValueTextAreaHtml {
-    width: 100%;    /* Size will be constrained by .fxValueTextAreaContainer */
+    width: 100%; /* Size will be constrained by .fxValueTextAreaContainer */
     height: 140px;
 }
 
 /* Stretch single-language inputs over space normally occupied by the language select */
 .fxValueInput input[type="text"].singleLanguage,
-.fxValueInput textarea.singleLanguage,
-.fxValueInput select.singleLanguage {
+    .fxValueInput textarea.singleLanguage,
+    .fxValueInput select.singleLanguage {
     width: 100%; /* don't force with !important because it breaks standalone inputs outside a fx:formRow */
 }
 
 .FxReferenceInput input[type=text] {
-    width: 65% !important;     /* leave room for the browse references button, overrides yui-skin-sam autocomplete width */
+    width: 65% !important; /* leave room for the browse references button, overrides yui-skin-sam autocomplete width */
 }
 
 .FxReferenceInput input[type=text].singleLanguage {
-    width: 92% !important;     /* leave room for the browse references button, overrides yui-skin-sam autocomplete width */
+    width: 92% !important; /* leave room for the browse references button, overrides yui-skin-sam autocomplete width */
 }
 
 .fxValueInput input,
-.fxValueInput textarea {
+    .fxValueInput textarea {
     border: 1px solid gray;
 }
 
 .fxValueInput input[type="checkbox"] {
-    border: none;           /* looks ugly in IE */
-    margin: 0 0.3em 0 0;    /* don't use vertical margins to ensure the checkbox isn't higher than the main input (FF Windows) */
+    border: none; /* looks ugly in IE */
+    margin: 0 0.3em 0 0; /* don't use vertical margins to ensure the checkbox isn't higher than the main input (FF Windows) */
 }
 
 .fxValueInput input[type="checkbox"].fxValueEmpty {
@@ -87,16 +87,15 @@ textarea.fxValueTextArea, textarea.fxValueTextAreaHtml {
 }
 
 .fxResizeable textArea.fxValueTextArea {
-    height: 100%;   /* stretch to dynamic container size */
+    height: 100%; /* stretch to dynamic container size */
 }
 
-
 input.fxValueTextInput {
-    /*float: left;*/
+/*float: left;*/
 }
 
 input.fxValueFileInput {
-    /*float: left;*/
+/*float: left;*/
 }
 
 div.fxValueInput {
@@ -228,14 +227,13 @@ select.queryValueComparator {
 }
 
 .queryRoot .fxValueInputElementWidth {
-    width: 122px;
-    /*overflow: hidden;*/
+    width: 122px; /*overflow: hidden;*/
 }
 
 .queryRoot input.fxValueTextInput,
-.queryRoot .fxValueInput input[type="text"].singleLanguage,
-.queryRoot .fxValueInput textarea.singleLanguage,
-.queryRoot .fxValueInput select.singleLanguage {
+    .queryRoot .fxValueInput input[type="text"].singleLanguage,
+    .queryRoot .fxValueInput textarea.singleLanguage,
+    .queryRoot .fxValueInput select.singleLanguage {
     width: 125px;
 }
 
@@ -330,7 +328,7 @@ div.formRow {
 }
 
 div.formRow input[type=text] {
-    /* Limit plain text input width */
+/* Limit plain text input width */
     max-width: 100%;
 }
 
@@ -400,7 +398,6 @@ div.tooltip:hover div.tooltipContent {
     padding: 3px;
 }
 
-
 /** Autocomplete styles */
 
 /* Content autocomplete - a block div with a thumbnail preview */
@@ -418,6 +415,7 @@ div.pkAutoComplete div {
     margin-left: 55px;
     display: block;
 }
+
 div.pkAutoComplete .caption {
     padding-bottom: 3px;
     font-size: 13px;
@@ -441,7 +439,7 @@ img.button {
 
 /** Yahoo UI default skin overrides */
 .yui-skin-sam .yui-ac-input {
-    position: relative !important;  /* override position:absolute since it makes buttons near the input field difficult to place*/
+    position: relative !important; /* override position:absolute since it makes buttons near the input field difficult to place*/
 }
 
 /** "CSSPopup" styles for fx:navigation */
@@ -523,15 +521,15 @@ img.button {
 }
 
 flexiveResultThumbnails > table,
-flexiveResultList > table {
+    flexiveResultList > table {
     max-width: 99%;
 }
 
 /* Horizontally center thumbnails */
 .flexiveResultThumbnails img.resultThumbnail,
-.flexiveResultList tbody img.fxThumbnail {
+    .flexiveResultList tbody img.fxThumbnail {
     display: block;
-    margin: auto;   /* center horizontally */
+    margin: auto; /* center horizontally */
 }
 
 .flexiveResultThumbnails .yui-dt-liner {
@@ -539,7 +537,7 @@ flexiveResultList > table {
 }
 
 .PREVIEW1 .yui-dt-liner {
-    height: 57px;  /* 42px thumbnail + 15px footer */
+    height: 57px; /* 42px thumbnail + 15px footer */
 }
 
 .PREVIEW1 .thumbnailContainer {
@@ -550,7 +548,7 @@ flexiveResultList > table {
 }
 
 .PREVIEW2 .yui-dt-liner {
-    height: 100px;  /* 85px thumbnail + 15px footer */
+    height: 100px; /* 85px thumbnail + 15px footer */
 }
 
 .PREVIEW2 .thumbnailContainer {
@@ -561,7 +559,7 @@ flexiveResultList > table {
 }
 
 .PREVIEW3 .yui-dt-liner {
-    height: 247px;  /* 232px thumbnail + 15px footer */
+    height: 247px; /* 232px thumbnail + 15px footer */
 }
 
 .PREVIEW3 .thumbnailContainer {
@@ -573,7 +571,7 @@ flexiveResultList > table {
 
 /* Thumbnail footer */
 .flexiveResultThumbnails .resultThumbnailCaption,
-.flexiveResultThumbnails .resultThumbnailAction {
+    .flexiveResultThumbnails .resultThumbnailAction {
     background-color: #555;
     color: #DDD;
     height: 15px;
@@ -603,292 +601,272 @@ flexiveResultList > table {
 
 /* fx:resizable container */
 .fxResizeable {
-    padding: 0 9px 8px 0;   /* create room for resizable textarea handles */
+    padding: 0 9px 8px 0; /* create room for resizable textarea handles */
 }
 
 /* Content Editor */
 
-.fxContentEditor_languageSwitch .formLabel{
-    font-weight:bold;
+.fxContentEditor_languageSwitch .formLabel {
+    font-weight: bold;
 }
 
-.fxContentEditor_languageSwitch .formLabelContainer{
-    width:100px;
+.fxContentEditor_languageSwitch .formLabelContainer {
+    width: 100px;
 }
 
 .fxContentEditor_moveUpIcon {
-  cursor: pointer;
-  background-image: url( weblet:url( "com.flexive.faces.weblets" , "/images/contentEditor/up.png"));
-  background-repeat:no-repeat;
-  border:0;
-  float:left;
-  margin-right:1px;
-  display:block;
-  height:17px;
-  width:17px;
+    cursor: pointer;
+    background: url(../images/contentEditor/up.png) no-repeat;
+    border: 0;
+    float: left;
+    margin-right: 1px;
+    display: block;
+    height: 17px;
+    width: 17px;
 }
 
 .fxContentEditor_moveDownIcon {
-  cursor: pointer;
-  background-image: url( weblet:url( "com.flexive.faces.weblets" , "/images/contentEditor/down.png"));
-  background-repeat:no-repeat;
-  border:0;
-  float:left;
-  display:block;
-  height:17px;
-  width:17px;
-  margin-right:3px;
+    cursor: pointer;
+    background: url("../images/contentEditor/down.png") no-repeat;
+    border: 0;
+    float: left;
+    display: block;
+    height: 17px;
+    width: 17px;
+    margin-right: 3px;
 }
 
 .fxContentEditor_addIcon {
-  cursor: pointer;
-  background-image: url( weblet:url( "com.flexive.faces.weblets" , "/images/contentEditor/add.png"));
-  background-repeat:no-repeat;
-  border:0;
-  float:left;
-  display:block;
-  height:17px;
-  width:17px;
-  margin-right:3px;
+    cursor: pointer;
+    background: url("../images/contentEditor/add.png") no-repeat;
+    border: 0;
+    float: left;
+    display: block;
+    height: 17px;
+    width: 17px;
+    margin-right: 3px;
 }
 
 .fxContentEditor_addIcon_disabled {
-  background-image: url( weblet:url( "com.flexive.faces.weblets" , "/images/contentEditor/add.png"));
-  background-repeat:no-repeat;
-  border:0;
-  float:left;
-  margin-right:3px;
-  display:block;
-  height:17px;
-  width:17px;
-  -moz-opacity:.25;
-  opacity:.25;
+    background: url("../images/contentEditor/add.png") no-repeat;
+    border: 0;
+    float: left;
+    margin-right: 3px;
+    display: block;
+    height: 17px;
+    width: 17px;
+    -moz-opacity: .25;
+    opacity: .25;
 }
 
 .fxContentEditor_removeIcon {
-  cursor: pointer;
-  background-image: url( weblet:url( "com.flexive.faces.weblets" , "/images/contentEditor/remove.png"));
-  background-repeat:no-repeat;
-  border:0;
-  float:left;
-  display:block;
-  height:17px;
-  width:17px;
-  margin-right:5px;
+    cursor: pointer;
+    background: url("../images/contentEditor/remove.png") no-repeat;
+    border: 0;
+    float: left;
+    display: block;
+    height: 17px;
+    width: 17px;
+    margin-right: 5px;
 }
 
 .fxContentEditor_removeIcon_disabled {
-  background-image: url( weblet:url( "com.flexive.faces.weblets" , "/images/contentEditor/remove.png"));
-  background-repeat:no-repeat;
-  border:0;
-  float:left;
-  display:block;
-  margin-right:5px;
-  height:17px;
-  width:17px;
-  filter:alpha(opacity=25);
-  -moz-opacity:.25;
-  opacity:.25;
+    background: url("../images/contentEditor/remove.png") no-repeat;
+    border: 0;
+    float: left;
+    display: block;
+    margin-right: 5px;
+    height: 17px;
+    width: 17px;
+    filter: alpha(opacity = 25);
+    -moz-opacity: .25;
+    opacity: .25;
 }
 
 .fxContentEditor_insertIntoGroup {
-  cursor: pointer;
-  background-image: url( weblet:url( "com.flexive.faces.weblets" , "/images/contentEditor/group.png"));
-  background-repeat:no-repeat;
-  border:0;
-  float:left;
-  display:block;
-  height:17px;
-  width:17px;
-  margin-right:3px;
+    cursor: pointer;
+    background: url("../images/contentEditor/group.png") no-repeat;
+    border: 0;
+    float: left;
+    display: block;
+    height: 17px;
+    width: 17px;
+    margin-right: 3px;
 }
 
 .fxContentEditor_insertIntoRootGroup {
-  cursor: pointer;
-  background-image: url( weblet:url( "com.flexive.faces.weblets" , "/images/contentEditor/group.png"));
-  background-repeat:no-repeat;
-  border:0;
-  float:left;
-  display:block;
-  height:17px;
-  width:17px;
-  margin-right:3px;
+    cursor: pointer;
+    background: url("../images/contentEditor/group.png") no-repeat;
+    border: 0;
+    float: left;
+    display: block;
+    height: 17px;
+    width: 17px;
+    margin-right: 3px;
 }
 
 .fxContentEditor_insertBelowProperty {
-  cursor: pointer;
-  background-image: url( weblet:url( "com.flexive.faces.weblets" , "/images/contentEditor/property.png"));
-  background-repeat:no-repeat;
-  border:0;
-  float:left;
-  display:block;
-  height:17px;
-  width:17px;
-  margin-right:3px;
+    cursor: pointer;
+    background: url("../images/contentEditor/property.png") no-repeat;
+
+    border: 0;
+    float: left;
+    display: block;
+    height: 17px;
+    width: 17px;
+    margin-right: 3px;
 }
 
 .fxContentEditor_insertAssignment {
-  cursor: pointer;
-  background-image: url( weblet:url( "com.flexive.faces.weblets" , "/images/contentEditor/add.png"));
-  background-repeat:no-repeat;
-  border:0;
-  float:left;
-  display:block;
-  height:17px;
-  width:17px;
-  margin-right:3px;
+    cursor: pointer;
+    background: url("../images/contentEditor/add.png") no-repeat;
+    border: 0;
+    float: left;
+    display: block;
+    height: 17px;
+    width: 17px;
+    margin-right: 3px;
 }
 
 .fxContentEditor_newReferenceIcon {
-  cursor: pointer;
-  background-image: url( weblet:url( "com.flexive.faces.weblets" , "/images/contentEditor/new.png"));
-  background-repeat:no-repeat;
-  border:0;
-  float:left;
-  display:block;
-  height:16px;
-  width:16px;
-  margin-right:3px;
+    cursor: pointer;
+    background: url("../images/contentEditor/new.png") no-repeat;
+    border: 0;
+    float: left;
+    display: block;
+    height: 16px;
+    width: 16px;
+    margin-right: 3px;
 }
 
 .fxContentEditor_editReferenceIcon {
-  cursor: pointer;
-  background-image: url( weblet:url( "com.flexive.faces.weblets" , "/images/contentEditor/edit.png"));
-  background-repeat:no-repeat;
-  border:0;
-  float:left;
-  display:block;
-  height:16px;
-  width:16px;
-  margin-right:3px;
+    cursor: pointer;
+    background: url("../images/contentEditor/edit.png") no-repeat;
+    border: 0;
+    float: left;
+    display: block;
+    height: 16px;
+    width: 16px;
+    margin-right: 3px;
 }
 
 .fxContentEditor_group {
-    margin-right:15px;
-    border-left:1px solid #d3dcb7;
-    border-right:1px solid #d3dcb7;
-    margin-top:8px;
-    margin-bottom:8px;
-    margin-left:0px;
-    background-color:#f9fcf1
+    margin: 8px 15px 8px 0;
+    border-left: 1px solid #d3dcb7;
+    border-right: 1px solid #d3dcb7;
+    background-color: #f9fcf1
 }
 
 .fxContentEditor_group .header {
-    background: #bdbdbd url( weblet:url( "com.flexive.faces.weblets" , "/images/contentEditor/groupHeader.gif" ));
-    border-bottom:1px solid #d3dcb7;
-    color:black;
-    padding:2px;
-    height:16px;
-    vertical-align:middle;
+    background: #bdbdbd url("../images/contentEditor/groupHeader.gif");
+    border-bottom: 1px solid #d3dcb7;
+    color: black;
+    padding: 2px;
+    height: 16px;
+    vertical-align: middle;
 }
 
 .fxContentEditor_group_content {
-    margin-top:8px;
-    padding-left:6px;
+    margin-top: 8px;
+    padding-left: 6px;
 }
 
 .fxContentEditor_group .header .display {
-    position:relative;
-    /*padding-left:5px;*/
-    font-style:italic;
-    font-weight:bold;
-    float:left;
+    position: relative; /*padding-left:5px;*/
+    font-style: italic;
+    font-weight: bold;
+    float: left;
 }
 
 .fxContentEditor_group .header .icon {
-    height:16px;
-    width:16px;
-    border:0;
-    float:left;
-    margin-left:2px;
+    height: 16px;
+    width: 16px;
+    border: 0;
+    float: left;
+    margin-left: 2px;
     clear: both;
 }
 
 .fxContentEditor_group .end {
-    border-bottom:1px solid #bdbdbd;
-    margin-bottom:5px
+    border-bottom: 1px solid #bdbdbd;
+    margin-bottom: 5px
 }
 
 .fxContentEditor_property {
-    /*margin-left:8px;*/
-    margin-top:4px;
-    margin-bottom:4px;
+/*margin-left:8px;*/
+    margin-top: 4px;
+    margin-bottom: 4px;
 }
 
 .fxContentEditor_property .display {
-    /*padding-left:5px;*/
-    float:left;
-    width:130px;
-    overflow:hidden;
+/*padding-left:5px;*/
+    float: left;
+    width: 130px;
+    overflow: hidden;
 }
 
 .fxContentEditor_property .fxContentEditor_value[readonly='true'] {
-    width:400px; 
-    float:left;
-    margin-bottom:4px;
-    padding-left:2px;
-    padding-right:2px;
+    width: 400px;
+    float: left;
+    margin-bottom: 4px;
+    padding-left: 2px;
+    padding-right: 2px;
     padding-bottom: 2px;
-    border:1px solid #bdbdbd;
-    background-color:#f9fcf1
+    border: 1px solid #bdbdbd;
+    background-color: #f9fcf1
 }
 
 .fxContentEditor_property .fxContentEditor_value[readonly='false'] {
-    width:400px;
-    float:left;
-    margin-bottom:4px
+    width: 400px;
+    float: left;
+    margin-bottom: 4px
 }
 
 .fxContentEditor_popupMenu {
-    position:absolute;
-    background-color:#ebf5cc;
-    border:1px dotted black;
-    display:none;z-index:997;
-    text-decoration:none;
-    color:black;
-    padding-top:10px;
-    padding-bottom:15px;
-    padding-left:10px;
-    padding-right:10px;
-    font-weight:bold;
-    width:250px;
+    position: absolute;
+    background-color: #ebf5cc;
+    border: 1px dotted black;
+    display: none;
+    z-index: 997;
+    text-decoration: none;
+    color: black;
+    padding: 10px 10px 15px;
+
+    font-weight: bold;
+    width: 250px;
 }
 
 .fxContentEditor_popupMenu .icon {
-    border:0;
-    margin-right:5px;
+    border: 0;
+    margin-right: 5px;
 }
 
 .fxContentEditor_popupMenu .elementSelectListbox {
-    margin-top:8px;
-    width:250px;
-    margin-bottom:5px;
+    margin-top: 8px;
+    width: 250px;
+    margin-bottom: 5px;
 }
 
 .fxContentEditor_popupMenu .txt {
-    color:black;
-    position:relative;
-    top:-4px;
+    color: black;
+    position: relative;
+    top: -4px;
 }
 
 .fxContentEditor_popupMenu a {
-    text-decoration:none;
-    color:black;
+    text-decoration: none;
+    color: black;
 }
 
 .fxContentEditor_referenceContainer {
     padding: 5px;
     border: 2px solid #CCCCCC;
-    background-attachment:scroll;
-    background-color:white;
-    background-image:none;
-    background-position:0 0;
-    background-repeat:repeat;
-    display:inline;
-    left:40px;
-    position:absolute;
-}
+    background: white none repeat scroll 0 0;
 
+    display: inline;
+    left: 40px;
+    position: absolute;
+}
 
 /* Content editor input styles */
 .fxContentEditor_property .fxValueTextInput, .property .fxValueInputElementWidth, .property .fxValueTextArea, .property .fxValueTextAreaHtml {
@@ -911,74 +889,72 @@ flexiveResultList > table {
 }
 
 .fxContentEditor_value .binaryDescription {
-    padding-left:3px;
-    border:1px solid #d3dcb7;
-    background-color:white;
+    padding-left: 3px;
+    border: 1px solid #d3dcb7;
+    background-color: white;
 }
 
 .fxContentEditor_value .binaryDownloadIcon {
-    padding:0;
-    margin-left:5px;
-    border:0;
-    height:16px;
-    width:16px;
-    vertical-align:middle;
+    padding: 0;
+    margin-left: 5px;
+    border: 0;
+    height: 16px;
+    width: 16px;
+    vertical-align: middle;
 }
 
 .fxContentEditor_locked {
-    background: url( weblet:url( "com.flexive.faces.weblets" , "/images/contentEditor/screenLockBg.gif" ));
-    position:absolute;
-    top:0;
-    left:0;
-    width:100%;
-    height:100%;
-    background-color:#CCCCCC;
-    z-index:999;
+    background: #CCCCCC url("../images/contentEditor/screenLockBg.gif");
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+
+    z-index: 999;
 }
 
 .fxContentEditor_openGroups {
-  cursor: pointer;
-  background-image: url( weblet:url( "com.flexive.faces.weblets" , "/images/contentEditor/openGroups.png"));
-  background-repeat:no-repeat;
-  border:0;
-  float:left;
-  display:block;
-  height:16px;
-  width:16px;
-  margin-right:5px;
+    cursor: pointer;
+    background: url("../images/contentEditor/openGroups.png") no-repeat;
+
+    border: 0;
+    float: left;
+    display: block;
+    height: 16px;
+    width: 16px;
+    margin-right: 5px;
 }
 
 .fxContentEditor_foldGroups {
-  cursor: pointer;
-  background-image: url( weblet:url( "com.flexive.faces.weblets" , "/images/contentEditor/foldGroups.png"));
-  background-repeat:no-repeat;
-  border:0;
-  float:left;
-  display:block;
-  height:16px;
-  width:16px;
-  margin-right:5px;
+    cursor: pointer;
+    background: url("../images/contentEditor/foldGroups.png") no-repeat;
+    border: 0;
+    float: left;
+    display: block;
+    height: 16px;
+    width: 16px;
+    margin-right: 5px;
 }
 
 .fxContentEditor_editorContent {
-    postion:relative;
-    left:-10px;
-    display:block;
-    padding-top:4px;
+    position: relative;
+    left: -10px;
+    display: block;
+    padding-top: 4px;
 }
 
 .fxContentEditor_statusStart {
-    position:fixed;
-    left:50%;
-    top:50%;
-    z-index:999;
-    background-image: url( weblet:url( "com.flexive.faces.weblets" , "/images/contentEditor/busy.gif"));
-    background-repeat:no-repeat;
-    border:0;
-    height:67px;
-    width:67px;
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    z-index: 999;
+    background: url("../images/contentEditor/busy.gif") no-repeat;
+    border: 0;
+    height: 67px;
+    width: 67px;
 }
 
 .fxContentEditor_xpathError {
-    background-color:#FF9999;
+    background-color: #FF9999;
 }

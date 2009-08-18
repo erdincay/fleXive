@@ -103,7 +103,8 @@
                             Open the &flexive; backend using the shortcut from the desktop or the program group or
                             point your browser to
                             <link xlink:href="http://localhost:8080/flexive/adm/">
-                                http://localhost:8080/flexive/adm/</link>.
+                                http://localhost:8080/flexive/adm/</link> and login with the default credentials
+                            (<userinput>supervisor/supervisor</userinput>).
                         </para>
                     </listitem>
                 </itemizedlist>
@@ -160,7 +161,8 @@
                             <link xlink:href="http://localhost:8080/flexive-backend-war/adm/">
                                 http://localhost:8080/flexive-backend-war/adm/
                             </link>
-                            to access the backend application.
+                            and login with the default credentials
+                            (<userinput>supervisor/supervisor</userinput>).
                         </para>
                     </listitem>
                 </itemizedlist>
