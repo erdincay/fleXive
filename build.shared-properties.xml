@@ -44,7 +44,7 @@
 
     <fileset id="flexive.dist.jar.all" dir="${flexive.dist.dir}" includes="**/flexive-*.jar"/>
     <fileset id="flexive.dist.jar.libs" dir="${flexive.lib.dir}"
-        includes="cglib*.jar, commons-*.jar, fxTree.jar, fxStream.jar, jbosscache-core.jar, jboss-common-core-42-compat.jar, javaee.jar, testNG/*.jar, mail/*.jar, xstream/*.jar, groovy/*.jar, selenium-java-client-driver.jar, text_extraction/*.jar, mysql-*.jar, jtidy.jar, sanselan.jar, PDFRenderer.jar, jgroups.jar, concurrent.jar, jboss-common-core.jar, jboss-jmx.jar, jboss-system.jar, quartz-*.jar, urlrewrite-*.jar, *h2.jar, google-collect*.jar"/>
+        includes="cglib*.jar, commons-*.jar, fxTree.jar, fxStream.jar, jbosscache-core.jar, jboss-common-core-42-compat.jar, javaee.jar, testNG/*.jar, mail/*.jar, xstream/*.jar, groovy/*.jar, selenium-java-client-driver.jar, text_extraction/*.jar, mysql-*.jar, jtidy.jar, sanselan.jar, PDFRenderer.jar, jgroups.jar, concurrent.jar, jboss-common-core.jar, jboss-jmx.jar, jboss-system.jar, quartz-*.jar, urlrewrite-*.jar, *h2.jar, google-collect*.jar, antlr/antlr-runtime-*.jar"/>
     <fileset id="flexive.dist.appserver.libs" dir="${flexive.lib.dir}" includes="${flexive.global.include.appserverlibs}"/>
 
 
