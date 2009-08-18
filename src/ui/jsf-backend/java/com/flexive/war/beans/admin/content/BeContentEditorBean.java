@@ -47,7 +47,9 @@ import com.flexive.shared.content.FxContentVersionInfo;
 import com.flexive.shared.content.FxDelta;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.exceptions.FxLockException;
 import com.flexive.shared.interfaces.TreeEngine;
+import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.security.LifeCycleInfo;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.tree.FxTreeMode;
@@ -353,14 +355,15 @@ public class BeContentEditorBean implements ActionBean, Serializable {
     public List<FxDelta.FxDeltaChange> getCompareEntries() {
         List<FxDelta.FxDeltaChange> emptyResult = new ArrayList<FxDelta.FxDeltaChange>(0);
         try {
-            FxContentVersionInfo versionInfo = pk.isNew() ? FxContentVersionInfo.createEmpty() : EJBLookup.getContentEngine().getContentVersionInfo(pk);
+            final ContentEngine ce = EJBLookup.getContentEngine();
+            FxContentVersionInfo versionInfo = pk.isNew() ? FxContentVersionInfo.createEmpty() : ce.getContentVersionInfo(pk);
             if ("compare".equals(infoPanelState) &&
                     compareSourceVersion > 0 &&
                     compareSourceVersion <= versionInfo.getMaxVersion() &&
                     compareDestinationVersion > 0 &&
                     compareDestinationVersion <= versionInfo.getMaxVersion()) {
-                FxContent content1 = EJBLookup.getContentEngine().load(new FxPK(getId(), compareSourceVersion));
-                FxContent content2 = EJBLookup.getContentEngine().load(new FxPK(getId(), compareDestinationVersion));
+                FxContent content1 = ce.load(new FxPK(getId(), compareSourceVersion));
+                FxContent content2 = ce.load(new FxPK(getId(), compareDestinationVersion));
                 FxDelta delta = FxDelta.processDelta(content1, content2);
                 List<FxDelta.FxDeltaChange> changes = delta.getDiff(content1, content2);
                 //filter internal

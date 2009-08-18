@@ -38,9 +38,10 @@ import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.components.content.FxWrappedContent;
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.faces.messages.FxFacesMsgInfo;
-import com.flexive.shared.EJBLookup;
-import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.*;
+import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.exceptions.FxLockException;
 import com.flexive.shared.value.FxReference;
 import com.flexive.shared.value.ReferencedContent;
 import com.flexive.shared.content.*;
@@ -221,6 +222,48 @@ public class FxContentEditorBean implements Serializable {
     }
 
     /**
+     * If the content is not locked, lock it with a loose lock
+     *
+     * @return if editing is allowed (locking possible)
+     */
+    public boolean lock() {
+        FxWrappedContent wc = contentStorage.get(editorId);
+        final ContentEngine ce = EJBLookup.getContentEngine();
+        try {
+            if (!wc.getContent().isLocked()) {
+                wc.getContent().updateLock(ce.lock(FxLockType.Loose, wc.getContent().getPk()));
+            } else {
+                FxLock lock = wc.getContent().getLock();
+                final UserTicket ticket = FxContext.getUserTicket();
+                if( lock.getLockType() == FxLockType.Permanent && lock.getUserId() != ticket.getUserId() ) {
+                    new FxFacesMsgErr("ex.lock.content.locked").addToContext();
+                    return false;
+                }
+            }
+            return true;
+        } catch (FxLockException e) {
+            new FxFacesMsgErr(e).addToContext();
+            return false;
+        }
+    }
+
+    /**
+     * If the content is locked with a loose lock, unlock it
+     */
+    public void unlock() {
+        FxWrappedContent wc = contentStorage.get(editorId);
+        final ContentEngine ce = EJBLookup.getContentEngine();
+        try {
+            if (wc.getContent().isLocked() && wc.getContent().getLock().getLockType() == FxLockType.Loose) {
+                ce.unlock(wc.getContent().getPk());
+                wc.getContent().updateLock(FxLock.noLockPK());
+            }
+        } catch (FxLockException e) {
+            new FxFacesMsgErr(e).addToContext();
+        }
+    }
+
+    /**
      * Saves the content in the current or in a new version.
      *
      * @param newVersion true if the data should be saved in a new version.
@@ -369,6 +412,7 @@ public class FxContentEditorBean implements Serializable {
     public void cancel() {
         String formPrefix = "";
         try {
+            unlock();
              // remove referencing contents from storage
             for (FxWrappedContent c: getReferencingContents(editorId)) {
                 contentStorage.remove(c.getEditorId());
@@ -396,6 +440,8 @@ public class FxContentEditorBean implements Serializable {
      * JSF-action to enable editing.
      */
     public void enableEdit() {
+        if(!lock())
+            return;
         contentStorage.get(editorId).getGuiSettings().setEditMode(true);
         resetForm(contentStorage.get(editorId).getGuiSettings().getFormPrefix());
     }

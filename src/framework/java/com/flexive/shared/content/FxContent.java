@@ -1416,7 +1416,7 @@ public class FxContent implements Serializable {
      *
      * @param lock the new lock to apply
      */
-    protected void updateLock(FxLock lock) {
+    public void updateLock(FxLock lock) {
         this.lock = lock;
     }
 }
