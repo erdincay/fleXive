@@ -51,7 +51,7 @@ function LyteBox() {
 	/*** End Slideshow Configuration ***/
 	
 	if(this.resizeSpeed > 10) { this.resizeSpeed = 10; }
-	if(this.resizeSpeed < 1) { resizeSpeed = 1; }
+	if(this.resizeSpeed < 1) { this.resizeSpeed = 1; }
 	this.resizeDuration = (11 - this.resizeSpeed) * 0.15;
 	this.resizeWTimerArray		= new Array();
 	this.resizeWTimerCount		= 0;
@@ -83,9 +83,23 @@ function LyteBox() {
 			this.ie = false;
 		/*@end
 	@*/
-	this.ie7 = (this.ie && window.XMLHttpRequest);	
+	this.ie7 = (this.ie && window.XMLHttpRequest);
+    this.ie8 = (this.ie && this.getInternetExplorerVersion() >= 8.0);
 	this.initialize();
 }
+
+// IE version code from http://blogs.msdn.com/giorgio/archive/2009/04/14/how-to-detect-ie8-using-javascript-client-side.aspx
+LyteBox.prototype.getInternetExplorerVersion = function() {
+    var rv = -1; // Return value assumes failure.
+    if (navigator.appName == 'Microsoft Internet Explorer') {
+        var ua = navigator.userAgent;
+        var re = new RegExp("MSIE ([0-9]{1,}[\\.0-9]{0,})");
+        if (re.exec(ua) != null)
+            rv = parseFloat(RegExp.$1);
+    }
+    return rv;
+};
+
 LyteBox.prototype.initialize = function() {
 	this.updateLyteboxItems();
 	var objBody = this.doc.getElementsByTagName("body").item(0);	
@@ -95,7 +109,7 @@ LyteBox.prototype.initialize = function() {
 	}
 	var objOverlay = this.doc.createElement("div");
 		objOverlay.setAttribute('id','lbOverlay');
-		objOverlay.setAttribute((this.ie ? 'className' : 'class'), this.theme);
+		objOverlay.setAttribute((this.ie && !this.ie8 ? 'className' : 'class'), this.theme);
 		if ((this.ie && !this.ie7) || (this.ie7 && this.doc.compatMode == 'BackCompat')) {
 			objOverlay.style.position = 'absolute';
 		}
@@ -107,7 +121,7 @@ LyteBox.prototype.initialize = function() {
 		objBody.appendChild(objLytebox);
 	var objOuterContainer = this.doc.createElement("div");
 		objOuterContainer.setAttribute('id','lbOuterContainer');
-		objOuterContainer.setAttribute((this.ie ? 'className' : 'class'), this.theme);
+		objOuterContainer.setAttribute((this.ie && !this.ie8 ? 'className' : 'class'), this.theme);
 		objLytebox.appendChild(objOuterContainer);
 	var objIframeContainer = this.doc.createElement("div");
 		objIframeContainer.setAttribute('id','lbIframeContainer');
@@ -129,11 +143,11 @@ LyteBox.prototype.initialize = function() {
 		objOuterContainer.appendChild(objLoading);
 	var objDetailsContainer = this.doc.createElement("div");
 		objDetailsContainer.setAttribute('id','lbDetailsContainer');
-		objDetailsContainer.setAttribute((this.ie ? 'className' : 'class'), this.theme);
+		objDetailsContainer.setAttribute((this.ie && !this.ie8 ? 'className' : 'class'), this.theme);
 		objLytebox.appendChild(objDetailsContainer);
 	var objDetailsData =this.doc.createElement("div");
 		objDetailsData.setAttribute('id','lbDetailsData');
-		objDetailsData.setAttribute((this.ie ? 'className' : 'class'), this.theme);
+		objDetailsData.setAttribute((this.ie && !this.ie8 ? 'className' : 'class'), this.theme);
 		objDetailsContainer.appendChild(objDetailsData);
 	var objDetails = this.doc.createElement("div");
 		objDetails.setAttribute('id','lbDetails');
@@ -149,12 +163,12 @@ LyteBox.prototype.initialize = function() {
 		objDetailsData.appendChild(objBottomNav);
 	var objPrev = this.doc.createElement("a");
 		objPrev.setAttribute('id','lbPrev');
-		objPrev.setAttribute((this.ie ? 'className' : 'class'), this.theme);
+		objPrev.setAttribute((this.ie && !this.ie8 ? 'className' : 'class'), this.theme);
 		objPrev.setAttribute('href','#');
 		objHoverNav.appendChild(objPrev);
 	var objNext = this.doc.createElement("a");
 		objNext.setAttribute('id','lbNext');
-		objNext.setAttribute((this.ie ? 'className' : 'class'), this.theme);
+		objNext.setAttribute((this.ie && !this.ie8 ? 'className' : 'class'), this.theme);
 		objNext.setAttribute('href','#');
 		objHoverNav.appendChild(objNext);
 	var objNumberDisplay = this.doc.createElement("span");
@@ -166,18 +180,18 @@ LyteBox.prototype.initialize = function() {
 		objDetails.appendChild(objNavDisplay);
 	var objClose = this.doc.createElement("a");
 		objClose.setAttribute('id','lbClose');
-		objClose.setAttribute((this.ie ? 'className' : 'class'), this.theme);
+		objClose.setAttribute((this.ie && !this.ie8 ? 'className' : 'class'), this.theme);
 		objClose.setAttribute('href','#');
 		objBottomNav.appendChild(objClose);
 	var objPause = this.doc.createElement("a");
 		objPause.setAttribute('id','lbPause');
-		objPause.setAttribute((this.ie ? 'className' : 'class'), this.theme);
+		objPause.setAttribute((this.ie && !this.ie8 ? 'className' : 'class'), this.theme);
 		objPause.setAttribute('href','#');
 		objPause.style.display = 'none';
 		objBottomNav.appendChild(objPause);
 	var objPlay = this.doc.createElement("a");
 		objPlay.setAttribute('id','lbPlay');
-		objPlay.setAttribute((this.ie ? 'className' : 'class'), this.theme);
+		objPlay.setAttribute((this.ie && !this.ie8 ? 'className' : 'class'), this.theme);
 		objPlay.setAttribute('href','#');
 		objPlay.style.display = 'none';
 		objBottomNav.appendChild(objPlay);
@@ -266,7 +280,7 @@ LyteBox.prototype.start = function(imageLink, doSlide, doFrame) {
 		this.doc.getElementById('lbDetailsContainer').style.border = 'none';
 	} else {
 		this.doc.getElementById('lbOuterContainer').style.borderBottom = '';
-		this.doc.getElementById('lbOuterContainer').setAttribute((this.ie ? 'className' : 'class'), this.theme);
+		this.doc.getElementById('lbOuterContainer').setAttribute((this.ie && !this.ie8 ? 'className' : 'class'), this.theme);
 	}
 	this.doc.getElementById('lbOverlay').onclick = function() { myLytebox.end(); return false; }
 	this.doc.getElementById('lbMain').onclick = function(e) {
@@ -310,7 +324,7 @@ LyteBox.prototype.changeContent = function(imageNum) {
 		this.doc.getElementById('lbDetailsContainer').style.border = 'none';
 	} else {
 		this.doc.getElementById('lbOuterContainer').style.borderBottom = '';
-		this.doc.getElementById('lbOuterContainer').setAttribute((this.ie ? 'className' : 'class'), this.theme);
+		this.doc.getElementById('lbOuterContainer').setAttribute((this.ie && !this.ie8 ? 'className' : 'class'), this.theme);
 	}
 	this.doc.getElementById('lbLoading').style.display = '';
 	this.doc.getElementById('lbImage').style.display = 'none';
