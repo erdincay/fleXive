@@ -51,6 +51,7 @@ public class AdminConfigurationBean implements Serializable {
     private static final long serialVersionUID = 5407293253771169788L;
 
     private Boolean treeLiveEnabled;
+    private Boolean autoFlatStorageEnabled;
     private Boolean binaryTransitDB;
     private String binaryTransitPath;
     private Long binaryThreshold;
@@ -65,6 +66,7 @@ public class AdminConfigurationBean implements Serializable {
     public void updateConfiguration() {
         try {
             EJBLookup.getConfigurationEngine().put(SystemParameters.TREE_LIVE_ENABLED, isTreeLiveEnabled());
+            EJBLookup.getConfigurationEngine().put(SystemParameters.FLATSTORAGE_AUTO, isAutoFlatStorageEnabled());
             EJBLookup.getConfigurationEngine().put(SystemParameters.EXPORT_DOWNLOAD_URL, getExportURLprefix());
             EJBLookup.getConfigurationEngine().put(SystemParameters.BINARY_TRANSIT_DB, isBinaryTransitDB());
             EJBLookup.getConfigurationEngine().put(SystemParameters.NODE_TRANSIT_PATH, getBinaryTransitPath());
@@ -91,6 +93,23 @@ public class AdminConfigurationBean implements Serializable {
 
     public void setTreeLiveEnabled(boolean treeLiveEnabled) {
         this.treeLiveEnabled = treeLiveEnabled;
+    }
+
+    /**
+     * Returns true if assignments should be automatically be stored in the FlatStorage if applicable
+     *
+     * @return true if the assignments should be automatically be stored in the FlatStorage if applicable
+     * @throws FxApplicationException on system errors
+     * @see SystemParameters#FLATSTORAGE_AUTO
+     */
+    public boolean isAutoFlatStorageEnabled() throws FxApplicationException {
+        if (autoFlatStorageEnabled == null)
+            autoFlatStorageEnabled = EJBLookup.getConfigurationEngine().get(SystemParameters.FLATSTORAGE_AUTO);
+        return autoFlatStorageEnabled;
+    }
+
+    public void setAutoFlatStorageEnabled(boolean autoFlatStorageEnabled) {
+        this.autoFlatStorageEnabled = autoFlatStorageEnabled;
     }
 
     /**

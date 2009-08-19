@@ -25,6 +25,13 @@
 
             </fx:fieldSet>
 
+            <fx:fieldSet legendKey="SystemConfiguration.title.flatStorage" width="500">
+                <fx:formRow id="autoFlatStorage" labelKey="SystemConfiguration.label.autoFlatStorage">
+                    <h:selectBooleanCheckbox id="autoFlatStorageEnabled" value="#{adminConfigurationBean.autoFlatStorageEnabled}"/>
+                </fx:formRow>
+
+            </fx:fieldSet>
+
             <div class="stretched">
                 <fx:fieldSet legendKey="SystemConfiguration.title.export" width="500">
 
