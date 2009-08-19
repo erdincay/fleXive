@@ -38,6 +38,7 @@ import com.flexive.shared.exceptions.FxLoginFailedException;
 import com.flexive.shared.exceptions.FxLogoutFailedException;
 import com.flexive.shared.interfaces.AccountEngine;
 import com.flexive.shared.security.UserTicket;
+import com.flexive.core.flatstorage.FxFlatStorageManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -728,16 +729,11 @@ public class FxContext implements Serializable {
      * @since 3.1
      */
     public static synchronized void initializeSystem(int divisionId, String applicationName) {
-        if(MANUAL_INIT_CALLED && divisionId == -2) {
-            get().setDivisionId(divisionId);
-            get().setContextPath(applicationName);
-            get().setTicket(EJBLookup.getAccountEngine().getGuestTicket());
-            CacheAdmin.getEnvironment();
-            return;
-        }
         get().setDivisionId(divisionId);
         get().setContextPath(applicationName);
         get().setTicket(EJBLookup.getAccountEngine().getGuestTicket());
+        // initialize flat storage, if available
+        FxFlatStorageManager.getInstance().getDefaultStorage();
 
         // force flexive initialization
         get().runAsSystem();
@@ -746,6 +742,12 @@ public class FxContext implements Serializable {
         } finally {
             get().stopRunAsSystem();
         }
+        
+        if (MANUAL_INIT_CALLED && divisionId == -2) {
+            // don't replace userticket
+            return;
+        }
+
         // load guest ticket
         get().setTicket(EJBLookup.getAccountEngine().getGuestTicket());
 
