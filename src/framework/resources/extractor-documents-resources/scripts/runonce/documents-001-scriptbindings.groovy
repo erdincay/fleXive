@@ -32,6 +32,7 @@
 import com.flexive.shared.scripting.FxScriptEvent
 import com.flexive.shared.*
 import com.flexive.shared.scripting.*
+import com.flexive.shared.structure.FxType
 
 def se = EJBLookup.getScriptingEngine()
 
@@ -51,4 +52,4 @@ se.createScriptFromDropLibrary("flexive-extractor-documents", FxScriptEvent.Bina
 // attach document extractor to document type    
 long scriptId = se.createScriptFromDropLibrary("flexive-extractor-documents", FxScriptEvent.BeforeContentCreate,
     "DocumentMetaParser.gy", "DocumentMetaParser.gy", "Script filling document properties").id;
-se.createTypeScriptMapping(scriptId, CacheAdmin.environment.getType("Document").id, true, true)
+se.createTypeScriptMapping(scriptId, CacheAdmin.environment.getType(FxType.DOCUMENT).id, true, true)

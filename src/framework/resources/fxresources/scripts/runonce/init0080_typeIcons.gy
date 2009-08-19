@@ -44,6 +44,7 @@ import com.flexive.shared.content.FxPK
 import com.flexive.shared.scripting.groovy.GroovyContentBuilder
 import com.flexive.shared.value.FxReference
 import com.flexive.shared.value.ReferencedContent
+import com.flexive.shared.structure.FxType
 
 InputStream getImageResource(path) {
     return Thread.currentThread().getContextClassLoader().getResourceAsStream("fxresources/binaries/thumbs/" + path)
@@ -71,7 +72,7 @@ def addTypeIcon(String typeName, String fileName) {
 }
 
 addTypeIcon("image", "type-image.png")
-addTypeIcon("contactdata", "type-contact.png")
+addTypeIcon(FxType.CONTACTDATA, "type-contact.png")
 addTypeIcon("article", "type-article.png")
-addTypeIcon("document", "type-document.png")
-addTypeIcon("folder", "type-folder.png")
+addTypeIcon(FxType.DOCUMENT, "type-document.png")
+addTypeIcon(FxType.FOLDER, "type-folder.png")

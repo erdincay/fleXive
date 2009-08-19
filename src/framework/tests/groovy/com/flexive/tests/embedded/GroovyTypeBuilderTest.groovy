@@ -97,7 +97,7 @@ class GroovyTypeBuilderTest {
                 multilineProperty(multiline: true)
                 multilangProperty(multilang: true)
                 uniqueProperty(uniqueMode: UniqueMode.Global)
-                referenceProperty(FxDataType.Reference, referencedType: CacheAdmin.environment.getType("DOCUMENT"))
+                referenceProperty(FxDataType.Reference, referencedType: CacheAdmin.environment.getType(FxType.DOCUMENT))
                 listProperty(FxDataType.SelectMany, referencedList: CacheAdmin.environment.getSelectLists().get(0))
                 veryLongUniquePropertyName(alias: "myProperty")
 
@@ -133,7 +133,7 @@ class GroovyTypeBuilderTest {
             assertEquals(getProperty(type, "/multilangProperty").isMultiLine(), false)
             assertEquals(getProperty(type, "/multilangProperty").isMultiLang(), true)
             assertEquals(getProperty(type, "/uniqueProperty").getUniqueMode(), UniqueMode.Global)
-            assertEquals(getProperty(type, "/referenceProperty").getReferencedType(), CacheAdmin.environment.getType("DOCUMENT"))
+            assertEquals(getProperty(type, "/referenceProperty").getReferencedType(), CacheAdmin.environment.getType(FxType.DOCUMENT))
             assertEquals(getProperty(type, "/listProperty").getReferencedList(), CacheAdmin.environment.getSelectLists().get(0))
             assertEquals(getProperty(type, "/multigroup/groupNumberProperty").getDataType(), FxDataType.Number)
             assertEquals(getPropertyAssignment(type, "/multigroup/groupNumberProperty").getParentGroupAssignment().getAlias(), "MULTIGROUP")

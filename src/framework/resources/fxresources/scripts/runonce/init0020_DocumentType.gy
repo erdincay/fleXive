@@ -46,7 +46,7 @@ import com.flexive.shared.search.*
 class DocumentType {
     def typeEngine = EJBLookup.getTypeEngine();
     def assignmentEngine = EJBLookup.getAssignmentEngine()
-    def name = "Document"
+    def name = FxType.DOCUMENT
     def typeDesc = new FxString(FxLanguage.ENGLISH, "Document")
     ACL documentACL = CacheAdmin.environment.getACL(ACLCategory.STRUCTURE.defaultId)
     FxType type
@@ -104,15 +104,15 @@ dt.createScriptMappings()
 EJBLookup.resultPreferencesEngine.saveSystemDefault(
         new ResultPreferences(
                 [new ResultColumnInfo("@pk"),
-                 new ResultColumnInfo("#document/title"),
-                 new ResultColumnInfo("#document/createDate"),
-                 new ResultColumnInfo("#document/description"),
-                 new ResultColumnInfo("#document/author"),
+                 new ResultColumnInfo("#" + FxType.DOCUMENT + "/title"),
+                 new ResultColumnInfo("#" + FxType.DOCUMENT + "/createDate"),
+                 new ResultColumnInfo("#" + FxType.DOCUMENT + "/description"),
+                 new ResultColumnInfo("#" + FxType.DOCUMENT + "/author"),
                 ],
-                [new ResultOrderByInfo("#document/title", SortDirection.ASCENDING)],
+                [new ResultOrderByInfo("#" + FxType.DOCUMENT + "/title", SortDirection.ASCENDING)],
                 25, 0
         ),
-        CacheAdmin.environment.getType("document").id,
+        CacheAdmin.environment.getType(FxType.DOCUMENT).id,
         ResultViewType.LIST,
         AdminResultLocations.values()
 )

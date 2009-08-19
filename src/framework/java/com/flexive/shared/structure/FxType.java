@@ -79,6 +79,10 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      * Name of the folder data type.
      */
     public static final String FOLDER = "FOLDER";
+    /**
+     * Name of the document type for storing typical document file formats (PDF, Word, Excel, ...)
+     */
+    public static final String DOCUMENT = "DOCUMENTFILE";
 
     protected long id;
     protected ACL ACL;

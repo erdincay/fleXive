@@ -105,6 +105,7 @@ public class FxWrappedContent implements Serializable {
     private GuiSettings guiSettings;
     // boolean indicating if the content is referenced by another content that is currently being edited
     private boolean referenced = false;
+    private transient FxContentVersionInfo versionInfo; // cached version info
 
     public FxWrappedContent(FxContent content, String editorId, GuiSettings guiSettings, boolean referenced) {
         this.content = content;
@@ -367,7 +368,10 @@ public class FxWrappedContent implements Serializable {
      */
     public FxContentVersionInfo getVersionInfo() {
         try {
-            return isNew() ? FxContentVersionInfo.createEmpty() : EJBLookup.getContentEngine().getContentVersionInfo(content.getPk());
+            if (versionInfo == null || versionInfo.getId() != content.getId()) {
+                versionInfo = isNew() ? FxContentVersionInfo.createEmpty() : EJBLookup.getContentEngine().getContentVersionInfo(content.getPk());
+            }
+            return versionInfo;
         }
         catch (Throwable t) {
             new FxFacesMsgErr(t).addToContext();
@@ -381,6 +385,7 @@ public class FxWrappedContent implements Serializable {
      * @return the history entries.
      */
     public List<FxHistory> getHistoryEntries() {
+        // TODO: cache the history entries
         return EJBLookup.getHistoryTrackerEngine().getContentEntries(content.getId());
     }
 
