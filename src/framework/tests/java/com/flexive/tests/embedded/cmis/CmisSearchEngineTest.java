@@ -37,7 +37,6 @@ import static com.flexive.shared.EJBLookup.getCmisSearchEngine;
 import static com.flexive.shared.EJBLookup.getContentEngine;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSharedUtils;
-import com.flexive.shared.search.FxPaths;
 import com.flexive.shared.cmis.CmisVirtualProperty;
 import com.flexive.shared.cmis.search.CmisResultRow;
 import com.flexive.shared.cmis.search.CmisResultSet;
@@ -47,6 +46,7 @@ import com.flexive.shared.exceptions.FxAccountInUseException;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxLoginFailedException;
 import com.flexive.shared.exceptions.FxLogoutFailedException;
+import com.flexive.shared.search.FxPaths;
 import com.flexive.shared.structure.FxSelectListItem;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.value.BinaryDescriptor;
@@ -892,6 +892,7 @@ public class CmisSearchEngineTest {
         assertEquals(result.collectColumnValues("annualSalary"), Arrays.asList(75000L, 50000L, 85000L));
     }
 
+    @SuppressWarnings({"unchecked"})
     @Test(groups = {"search", "cmis", "ejb"})
     public void selectSystemProperties() throws FxApplicationException {
         final CmisResultSet result = getCmisSearchEngine().search(
@@ -909,9 +910,13 @@ public class CmisSearchEngineTest {
             assertEquals(row.getColumn("created_by").getLong(), content.getLifeCycleInfo().getCreatorId());
             assertEquals(row.getColumn("modified_at").getDate().getTime(), content.getLifeCycleInfo().getModificationTime());
             assertEquals(row.getColumn("modified_by").getLong(), content.getLifeCycleInfo().getModificatorId());
+            final List<Long> rowValues = Lists.newArrayList(row.getColumn("acl").getValues());
+            final List<Long> contentValues = Lists.newArrayList(content.getAclIds());
+            Collections.sort(rowValues);
+            Collections.sort(contentValues);
             assertEquals(
-                    row.getColumn("acl").getValues(), content.getAclIds(),
-                    "Expected ACLs: " + content.getAclIds() + ", got: " + row.getColumn("acl").getValues()
+                    rowValues, contentValues,
+                    "Expected ACLs: " + contentValues + ", got: " + rowValues
             );
         }
     }
