@@ -345,11 +345,11 @@
             </fx:fieldSet>
 
             <fx:formRow labelKey="TypeEditor.label.multipleContentACLs" id="multipleContentACLs">
-                <h:selectBooleanCheckbox id="multipleContentACLs" value="#{typeEditorBean.multipleContentACLs}"/>
+                <h:selectBooleanCheckbox id="multipleContentACLs" value="#{typeEditorBean.multipleContentACLs}" disabled="#{not typeEditorBean.editMode}"/>
             </fx:formRow>
 
             <fx:formRow labelKey="TypeEditor.label.includedInSupertypeQueries" id="includedInSupertypeQueries">
-                <h:selectBooleanCheckbox id="includedInSupertypeQueries" value="#{typeEditorBean.includedInSupertypeQueries}"/>
+                <h:selectBooleanCheckbox id="includedInSupertypeQueries" value="#{typeEditorBean.includedInSupertypeQueries}" disabled="#{not typeEditorBean.editMode}"/>
             </fx:formRow>
 
             <fx:formRow labelKey="TypeEditor.label.storageMode" id="storageMode">
