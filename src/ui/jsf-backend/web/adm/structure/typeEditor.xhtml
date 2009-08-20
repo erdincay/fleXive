@@ -348,6 +348,10 @@
                 <h:selectBooleanCheckbox id="multipleContentACLs" value="#{typeEditorBean.multipleContentACLs}"/>
             </fx:formRow>
 
+            <fx:formRow labelKey="TypeEditor.label.includedInSupertypeQueries" id="includedInSupertypeQueries">
+                <h:selectBooleanCheckbox id="includedInSupertypeQueries" value="#{typeEditorBean.includedInSupertypeQueries}"/>
+            </fx:formRow>
+
             <fx:formRow labelKey="TypeEditor.label.storageMode" id="storageMode">
                 <fx:resultValue id="storageMode" value="#{typeEditorBean.type.storageMode.label}"/>
             </fx:formRow>

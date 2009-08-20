@@ -102,6 +102,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
     protected int maxRelSource;
     protected int maxRelDestination;
     protected boolean multipleContentACLs;
+    protected boolean includedInSupertypeQueries;
     protected LifeCycleInfo lifeCycleInfo;
     protected boolean containsFlatStorageAssignments;
     protected List<FxType> derivedTypes;
@@ -115,8 +116,8 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
 
     public FxType(long id, ACL acl, Workflow workflow, String name, FxString label, FxType parent, TypeStorageMode storageMode,
                   TypeCategory category, TypeMode mode, LanguageMode language, TypeState state, byte permissions,
-                  boolean multipleContentACLs,
-                  boolean trackHistory, long historyAge, long maxVersions, int maxRelSource, int maxRelDestination,
+                  boolean multipleContentACLs, boolean includedInSupertypeQueries, boolean trackHistory,
+                  long historyAge, long maxVersions, int maxRelSource, int maxRelDestination,
                   LifeCycleInfo lifeCycleInfo, List<FxType> derivedTypes, List<FxTypeRelation> relations) {
         this.id = id;
         this.ACL = acl;
@@ -131,6 +132,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
         this.state = state;
         this.permissions = permissions;
         this.multipleContentACLs = multipleContentACLs;
+        this.includedInSupertypeQueries = includedInSupertypeQueries;
         this.trackHistory = trackHistory;
         this.historyAge = historyAge;
         this.maxVersions = maxVersions;
@@ -438,6 +440,16 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      */
     public boolean isMultipleContentACLs() {
         return multipleContentACLs;
+    }
+
+    /**
+     * Should this type be included in supertype queries?
+     *
+     * @return true if this type be included in supertype queries
+     * @since 3.1
+     */
+    public boolean isIncludedInSupertypeQueries() {
+        return includedInSupertypeQueries;
     }
 
     /**

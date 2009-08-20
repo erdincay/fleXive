@@ -326,6 +326,7 @@ CREATE TABLE FXS_TYPEDEF (
   TYPE_STATE INTEGER NOT NULL COMMENT '0=available, 1=temporary unavailable, 2=permanently unavailable\ntables can be unavailable if structural changes resulted in errors and manual intervention is needed',
   SECURITY_MODE INTEGER NOT NULL COMMENT 'Bit coded field that indicates which permissions are used. 0=none, 0x01=instance, 0x02=property, 0x04=step, 0x08=type',
   MULTIPLE_CONTENT_ACLS BOOLEAN NOT NULL DEFAULT TRUE COMMENT 'When true, multiple ACLs can be assigned to a content.',
+  INSUPERTYPEQUERY BOOLEAN NOT NULL DEFAULT TRUE COMMENT 'When true, this type will be included in supertype queries.',
   TRACKHISTORY BOOLEAN NOT NULL COMMENT 'track changes on instance data? HISTORY_AGE tells for how long they are kept.',
   HISTORY_AGE BIGINT COMMENT 'Days to keep histories for instance changes if TRACKHISTORY is true. 0=for ever',
   MAX_VERSIONS INTEGER NOT NULL COMMENT 'maximum number of versions to keep (if the storage mode supports versions)\n-1 = unlimited\n0 = no versioning\n> 0 = number of versions to keep',

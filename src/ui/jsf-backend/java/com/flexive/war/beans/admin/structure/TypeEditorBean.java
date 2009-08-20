@@ -629,6 +629,14 @@ public class TypeEditorBean implements Serializable {
         type.setMultipleContentACLs(value);
     }
 
+    public boolean isIncludedInSupertypeQueries() {
+        return type.isIncludedInSupertypeQueries();
+    }
+
+    public void setIncludedInSupertypeQueries(boolean value) {
+        type.setIncludedInSupertypeQueries(value);
+    }
+
     /**
      * Get a list of all property assignments that use the flat storage
      *

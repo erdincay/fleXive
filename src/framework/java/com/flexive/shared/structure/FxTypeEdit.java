@@ -37,10 +37,10 @@ import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.security.ACL;
-import com.flexive.shared.security.LifeCycleInfo;
 import com.flexive.shared.security.ACLCategory;
-import com.flexive.shared.value.FxString;
+import com.flexive.shared.security.LifeCycleInfo;
 import com.flexive.shared.value.FxReference;
+import com.flexive.shared.value.FxString;
 import com.flexive.shared.workflow.Workflow;
 import org.apache.commons.lang.StringUtils;
 
@@ -65,33 +65,35 @@ public class FxTypeEdit extends FxType implements Serializable {
     /**
      * Constructor
      *
-     * @param name                    name of the type
-     * @param label                   label
-     * @param acl                     type ACL
-     * @param workflow                workflow to use
-     * @param parent                  parent type or <code>null</code> if not derived
-     * @param enableParentAssignments if parent is not <code>null</code> enable all derived assignments from the parent?
-     * @param storageMode             the storage mode
-     * @param category                category mode (system, user)
-     * @param mode                    type mode (content, relation)
-     * @param language                language mode
-     * @param state                   type state (active, locked, etc)
-     * @param permissions             permissions bit coded
-     * @param multipleContentACLs     if multiple ACLs per content are enabled
-     * @param trackHistory            track history
-     * @param historyAge              max. age of the history to track
-     * @param maxVersions             max. number of versions to keep, if &lt; 0 unlimited
-     * @param maxRelSource            max. number of instance related as source
-     * @param maxRelDestination       max. number of instances related as destination
+     * @param name                       name of the type
+     * @param label                      label
+     * @param acl                        type ACL
+     * @param workflow                   workflow to use
+     * @param parent                     parent type or <code>null</code> if not derived
+     * @param enableParentAssignments    if parent is not <code>null</code> enable all derived assignments from the parent?
+     * @param storageMode                the storage mode
+     * @param category                   category mode (system, user)
+     * @param mode                       type mode (content, relation)
+     * @param language                   language mode
+     * @param state                      type state (active, locked, etc)
+     * @param permissions                permissions bit coded
+     * @param multipleContentACLs        if multiple ACLs per content are enabled
+     * @param includedInSupertypeQueries if this type should be included in supertype queries
+     * @param trackHistory               track history
+     * @param historyAge                 max. age of the history to track
+     * @param maxVersions                max. number of versions to keep, if &lt; 0 unlimited
+     * @param maxRelSource               max. number of instance related as source
+     * @param maxRelDestination          max. number of instances related as destination
      */
     private FxTypeEdit(String name, FxString label, ACL acl, Workflow workflow, FxType parent,
                        boolean enableParentAssignments,
                        TypeStorageMode storageMode, TypeCategory category, TypeMode mode,
                        LanguageMode language, TypeState state, byte permissions, boolean multipleContentACLs,
+                       boolean includedInSupertypeQueries,
                        boolean trackHistory, long historyAge, long maxVersions, int maxRelSource,
                        int maxRelDestination) {
-        super(-1, acl, workflow, name, label, parent, storageMode,
-                category, mode, language, state, permissions, multipleContentACLs, trackHistory, historyAge,
+        super(-1, acl, workflow, name, label, parent, storageMode, category, mode, language, state, permissions,
+                multipleContentACLs, includedInSupertypeQueries, trackHistory, historyAge,
                 maxVersions, maxRelSource, maxRelDestination, null, null, new ArrayList<FxTypeRelation>(5));
         FxSharedUtils.checkParameterMultilang(label, "label");
         this.enableParentAssignments = enableParentAssignments;
@@ -111,7 +113,7 @@ public class FxTypeEdit extends FxType implements Serializable {
         super(type.getId(), type.getACL(), type.getWorkflow(),
                 type.getName(), type.getLabel(), type.getParent(), type.getStorageMode(), type.getCategory(),
                 type.getMode(), type.getLanguage(), type.getState(), type.permissions, type.isMultipleContentACLs(),
-                type.isTrackHistory(), type.getHistoryAge(), type.getMaxVersions(), type.getMaxRelSource(),
+                type.isIncludedInSupertypeQueries(), type.isTrackHistory(), type.getHistoryAge(), type.getMaxVersions(), type.getMaxRelSource(),
                 type.getMaxRelDestination(), type.getLifeCycleInfo(), type.getDerivedTypes(), type.getRelations());
         FxSharedUtils.checkParameterMultilang(label, "label");
         this.isNew = false;
@@ -140,7 +142,7 @@ public class FxTypeEdit extends FxType implements Serializable {
     /**
      * Create a new FxTypeEdit instance for creating a new FxType
      *
-     * @param name name of the type
+     * @param name           name of the type
      * @param parentTypeName parent type name
      * @return FxTypeEdit instance for creating a new FxType
      * @since 3.1
@@ -152,7 +154,7 @@ public class FxTypeEdit extends FxType implements Serializable {
     /**
      * Create a new FxTypeEdit instance for creating a new FxType
      *
-     * @param name name of the type
+     * @param name       name of the type
      * @param parentType the parent type ID
      * @return FxTypeEdit instance for creating a new FxType
      * @since 3.0.3
@@ -169,7 +171,7 @@ public class FxTypeEdit extends FxType implements Serializable {
     /**
      * Create a new FxTypeEdit instance for creating a new FxType
      *
-     * @param name name of the type
+     * @param name         name of the type
      * @param parentTypeId the parent type ID
      * @return FxTypeEdit instance for creating a new FxType
      * @since 3.0.3
@@ -187,9 +189,9 @@ public class FxTypeEdit extends FxType implements Serializable {
     /**
      * Create a new FxTypeEdit instance for creating a new FxType
      *
-     * @param name        name of the type
-     * @param label       label
-     * @param acl         type ACL
+     * @param name  name of the type
+     * @param label label
+     * @param acl   type ACL
      * @return FxTypeEdit instance for creating a new FxType
      */
     public static FxTypeEdit createNew(String name, FxString label, ACL acl) {
@@ -199,10 +201,10 @@ public class FxTypeEdit extends FxType implements Serializable {
     /**
      * Create a new FxTypeEdit instance derived from an existing FxType
      *
-     * @param name        name of the type
-     * @param label       label
-     * @param acl         type ACL
-     * @param parent      parent type or <code>null</code> if not derived
+     * @param name   name of the type
+     * @param label  label
+     * @param acl    type ACL
+     * @param parent parent type or <code>null</code> if not derived
      * @return FxTypeEdit instance for creating a new FxType
      */
     public static FxTypeEdit createNew(String name, FxString label, ACL acl, FxType parent) {
@@ -245,7 +247,8 @@ public class FxTypeEdit extends FxType implements Serializable {
                                        boolean trackHistory, long historyAge, long maxVersions, int maxRelSource,
                                        int maxRelDestination) {
         return new FxTypeEdit(name, label, acl, workflow, parent, enableParentAssignments,
-                storageMode, category, mode, language, state, permissions, parent == null || parent.isMultipleContentACLs(), trackHistory, historyAge,
+                storageMode, category, mode, language, state, permissions, parent == null || parent.isMultipleContentACLs(),
+                parent == null || parent.isIncludedInSupertypeQueries(), trackHistory, historyAge,
                 maxVersions, maxRelSource, maxRelDestination);
     }
 
@@ -360,16 +363,17 @@ public class FxTypeEdit extends FxType implements Serializable {
         return this;
     }
 
-    
+
     /**
      * Set the description (=label) of this type
-     * @deprecated replaced by {@link #setLabel(com.flexive.shared.value.FxString)}
      *
      * @param description description
      * @return the type itself, useful for chained calls
+     * @deprecated replaced by {@link #setLabel(com.flexive.shared.value.FxString)}
      */
-    @Deprecated public FxTypeEdit setDescription(FxString description) {
-        return setLabel(description);    
+    @Deprecated
+    public FxTypeEdit setDescription(FxString description) {
+        return setLabel(description);
     }
 
     /**
@@ -578,6 +582,17 @@ public class FxTypeEdit extends FxType implements Serializable {
      */
     public FxTypeEdit setMultipleContentACLs(boolean value) {
         this.multipleContentACLs = value;
+        return this;
+    }
+
+    /**
+     * Enable or disable inclusion of this type in supertype queries
+     *
+     * @param value true to enable
+     * @return the type itself, useful for chained calls
+     */
+    public FxTypeEdit setIncludedInSupertypeQueries(boolean value) {
+        this.includedInSupertypeQueries = value;
         return this;
     }
 
