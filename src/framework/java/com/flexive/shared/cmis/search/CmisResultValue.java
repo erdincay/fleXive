@@ -43,6 +43,7 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Date;
 
 /**
  * A boxed column value in a CMIS result set. You can access the boxed value with
@@ -170,6 +171,15 @@ public abstract class CmisResultValue<T> implements Serializable {
     }
 
     /**
+     * Return the value as a Date.
+     *
+     * @return  the value as a Date.
+     */
+    public Date getDate() {
+        return (Date) unboxValue();
+    }
+
+    /**
      * Return the value as a {@link String}. If the boxed value is not a {@link String}, the
      * result of the {@link #toString()} method is returned.
      *
@@ -185,9 +195,7 @@ public abstract class CmisResultValue<T> implements Serializable {
      * @return  the {@link BinaryDescriptor} of a binary column.
      */
     public BinaryDescriptor getBinary() {
-        return (value instanceof FxValue)
-                ? ((FxBinary) value).getBestTranslation()
-                : (BinaryDescriptor) value;
+        return (BinaryDescriptor) unboxValue();
     }
 
     /**
@@ -231,6 +239,10 @@ public abstract class CmisResultValue<T> implements Serializable {
             throw new FxInvalidParameterException("value", "ex.cmis.search.resultset.column.value.number", value)
                     .asRuntimeException();
         }
+    }
+
+    protected Object unboxValue() {
+        return value instanceof FxValue ? ((FxValue) value).getBestTranslation() : value;
     }
 
     private static class NullResult extends CmisResultValue<Object> {

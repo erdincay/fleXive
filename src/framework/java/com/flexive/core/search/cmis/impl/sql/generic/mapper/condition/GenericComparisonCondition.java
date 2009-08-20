@@ -61,13 +61,14 @@ public class GenericComparisonCondition implements ConditionMapper<ComparisonCon
 
         final String cond = lhs + " " + mapComparator(condition.getComparator()) + " " + rhs;
         final String assignmentFilter = sqlMapperFactory.getSqlDialect().getAssignmentFilter(
-                                    condition.getLhs().getFilterTableType(),
-                                    tableAlias,
-                                    condition.getLhs().getReferencedAssignments());
+                condition.getLhs().getFilterTableType(),
+                tableAlias,
+                true,
+                condition.getLhs().getReferencedAssignments());
         return "(SELECT DISTINCT " + joinedTables.getSelectForSingleTable(table) + " FROM "
                 + condition.getLhs().getFilterTableName()
                 + " " + tableAlias
-                + " WHERE " + cond + (StringUtils.isNotBlank(assignmentFilter) ? " AND " + assignmentFilter : "") 
+                + " WHERE " + cond + (StringUtils.isNotBlank(assignmentFilter) ? " AND " + assignmentFilter : "")
                 + " AND " + sqlMapperFactory.getSqlDialect().getVersionFilter(tableAlias)
                 + sqlMapperFactory.getSqlDialect().limitSubquery()
                 + ")";

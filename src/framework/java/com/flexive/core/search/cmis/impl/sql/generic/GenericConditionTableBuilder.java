@@ -126,6 +126,7 @@ public class GenericConditionTableBuilder implements ConditionNodeVisitor {
      */
     @SuppressWarnings({"unchecked"})
     public void visit(ComparisonCondition comparison) {
+        onTableVisited(comparison.getLhs().getTableReference());
         visitCondition(factory.conditionCompare().getConditionSql(factory, comparison, joinedTables));
     }
 
@@ -133,6 +134,7 @@ public class GenericConditionTableBuilder implements ConditionNodeVisitor {
      * {@inheritDoc}
      */
     public void visit(ContainsCondition contains) {
+        onTableVisited(contains.getTableReference());
         visitCondition(factory.conditionContain().getConditionSql(factory, contains, joinedTables));
     }
 
@@ -140,6 +142,7 @@ public class GenericConditionTableBuilder implements ConditionNodeVisitor {
      * {@inheritDoc}
      */
     public void visit(LikeCondition like) {
+        onTableVisited(like.getColumnReference().getTableReference());
         visitCondition(factory.conditionLike().getConditionSql(factory, like, joinedTables));
     }
 
@@ -147,6 +150,7 @@ public class GenericConditionTableBuilder implements ConditionNodeVisitor {
      * {@inheritDoc}
      */
     public void visit(InCondition in) {
+        onTableVisited(in.getColumnReference().getTableReference());
         visitCondition(factory.conditionIn().getConditionSql(factory, in, joinedTables));
     }
 
@@ -154,7 +158,12 @@ public class GenericConditionTableBuilder implements ConditionNodeVisitor {
      * {@inheritDoc}
      */
     public void visit(NullCondition nullCondition) {
+        onTableVisited(nullCondition.getColumnReference().getTableReference());
         visitCondition(factory.conditionNull().getConditionSql(factory, nullCondition, joinedTables));
+    }
+
+    protected void onTableVisited(TableReference table) {
+        // place generic bookkeeping that's dependent on the condition's table reference here
     }
 
     /**
@@ -202,7 +211,7 @@ public class GenericConditionTableBuilder implements ConditionNodeVisitor {
      * Called when a statement has been added. If the database supports INTERSECT, no action is
      * required. However, one way to emulate INTERSECT is an inner join between the
      * results of the statements, thus we need to add a table alias after each statement. Look at
-     * the {@link com.flexive.core.search.cmis.impl.sql.mysql.MySqlDialect} for an example.
+     * the {@link com.flexive.core.search.cmis.impl.sql.MySQL.MySqlDialect} for an example.
      */
     protected void onStatementAdded() {
     }

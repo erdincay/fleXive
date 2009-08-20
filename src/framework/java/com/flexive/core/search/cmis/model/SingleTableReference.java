@@ -211,6 +211,16 @@ public class SingleTableReference implements TableReference {
     /**
      * {@inheritDoc}
      */
+    public String getIdVersionLink(String filterTableAlias, String subSelectTableAlias) {
+        return "("
+                + filterTableAlias + "." + getIdFilterColumn() + "=" + subSelectTableAlias + ".id"
+                + " AND " + filterTableAlias + "." + getVersionFilterColumn() + "=" + subSelectTableAlias + ".ver"
+                + ")";
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public List<TableReference> getSubTables() {
         return new ArrayList<TableReference>(0);
     }

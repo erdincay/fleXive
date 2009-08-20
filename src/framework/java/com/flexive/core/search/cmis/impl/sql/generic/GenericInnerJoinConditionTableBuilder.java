@@ -33,10 +33,7 @@ package com.flexive.core.search.cmis.impl.sql.generic;
 
 import com.flexive.core.search.cmis.impl.sql.SelectedTableVisitor;
 import com.flexive.core.search.cmis.impl.sql.SqlMapperFactory;
-import com.flexive.core.search.cmis.model.ComparisonCondition;
-import com.flexive.core.search.cmis.model.ConditionList;
-import com.flexive.core.search.cmis.model.ContainsCondition;
-import com.flexive.core.search.cmis.model.TableReference;
+import com.flexive.core.search.cmis.model.*;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.*;
@@ -180,19 +177,7 @@ public class GenericInnerJoinConditionTableBuilder extends GenericConditionTable
 
     /** {@inheritDoc} */
     @Override
-    public void visit(ComparisonCondition comparison) {
-        addToCurrentConjunction(comparison.getLhs().getTableReference());
-        super.visit(comparison);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void visit(ContainsCondition contains) {
-        addToCurrentConjunction(contains.getTableReference());
-        super.visit(contains);
-    }
-
-    protected void addToCurrentConjunction(TableReference tableReference) {
+    protected void onTableVisited(TableReference tableReference) {
         currentConjuctionTables.add(tableReference);
     }
 

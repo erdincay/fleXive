@@ -34,9 +34,17 @@ package com.flexive.core.search.cmis.impl.sql.MySQL;
 import com.flexive.core.search.cmis.impl.ResultColumnReference;
 import com.flexive.core.search.cmis.impl.sql.SqlMapperFactory;
 import com.flexive.core.search.cmis.impl.sql.generic.mapper.select.GenericColumnReference;
+import com.flexive.core.search.cmis.impl.sql.generic.GenericSqlDialect;
+import com.flexive.core.search.cmis.model.ColumnReference;
+import com.flexive.core.search.PropertyResolver;
+import com.flexive.core.search.genericSQL.GenericSQLDataFilter;
+import com.flexive.core.DatabaseConst;
+import static com.flexive.core.DatabaseConst.TBL_CONTENT;
+import static com.flexive.core.DatabaseConst.TBL_CONTENT_ACLS;
 import com.flexive.shared.structure.FxDataType;
 import com.flexive.shared.structure.FxSelectListItem;
 import com.flexive.shared.value.*;
+import com.flexive.shared.security.ACL;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.ArrayList;
@@ -54,14 +62,44 @@ public class MySqlColumnReference extends GenericColumnReference {
 
     @Override
     public boolean isDirectSelectForMultivalued(SqlMapperFactory factory, ResultColumnReference column, FxDataType dataType) {
-        return dataType != null && (dataType.isPrimitiveValueType()
+        return dataType != null
+                && column.getPropertyEntry() != null
+                // multivalued properties are stored in CONTENT_DATA
+                && (column.getPropertyEntry().getTableType() == PropertyResolver.Table.T_CONTENT_DATA
+                // ... except for the ACL, which will require extra care
+                || isACL(column.getSelectedObject()))
+                && (dataType.isPrimitiveValueType()
                 || FxDataType.Reference.equals(dataType)
                 || FxDataType.SelectOne.equals(dataType));
     }
 
     @Override
-    protected String getMultivaluedConcatFunction(String column) {
+    protected String getMultivaluedConcatFunction(ColumnReference reference, String column) {
+        if (reference.getPropertyEntry() != null && reference.getPropertyEntry().getTableType() != PropertyResolver.Table.T_CONTENT_DATA) {
+            throw new IllegalArgumentException(
+                    "Cannot select multivalued property " + reference.getAlias() + " from table " + reference.getPropertyEntry().getTableName()
+            );
+        }
         return "GROUP_CONCAT(" + column + " ORDER BY pos SEPARATOR '" + GROUPSEP + "')";
+    }
+
+    @Override
+    protected String selectUsingTableFilter(String readColumn, ColumnReference column, String tableName) {
+        if (isACL(column)) {
+            // select ACLs from main table and from links FX_CONTENT_ACLS table
+            // TODO: FX-658: this is *very* slow and could be greatly improved by caching the ACL ID list in FX_CONTENT
+            return "SELECT GROUP_CONCAT(" + SUBSEL_ALIAS + "." + readColumn + " SEPARATOR '" + GROUPSEP + "') "
+                    // select from FX_CONTENT
+                    + " FROM (SELECT id, ver, acl FROM " + TBL_CONTENT + " acls_content"
+                    + " WHERE acl != " + ACL.NULL_ACL_ID
+                    // select from FX_CONTENT_ACLS 
+                    + " UNION"
+                    + " SELECT id, ver, acl FROM " + TBL_CONTENT_ACLS + " acls"
+                    + ") " + SUBSEL_ALIAS
+                    + " WHERE " + column.getTableReference().getIdVersionLink(GenericSqlDialect.FILTER_ALIAS, SUBSEL_ALIAS);
+        } else {
+            return super.selectUsingTableFilter(readColumn, column, tableName);
+        }
     }
 
     @Override
@@ -110,5 +148,9 @@ public class MySqlColumnReference extends GenericColumnReference {
 
     public static MySqlColumnReference getInstance() {
         return INSTANCE;
+    }
+
+    private boolean isACL(ColumnReference columnReference) {
+        return "ACL".equalsIgnoreCase(columnReference.getPropertyEntry().getProperty().getName());
     }
 }

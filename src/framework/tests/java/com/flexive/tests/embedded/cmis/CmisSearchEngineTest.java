@@ -425,6 +425,27 @@ public class CmisSearchEngineTest {
     }
 
     @Test(groups = {"search", "cmis", "ejb"})
+    public void broadTableCondition() throws FxApplicationException {
+        // test a condition that is "broader" than the defining type to check if conditions are properly
+        // constrained - the can only be triggered as supervisor, because this skips the security
+        // (and thus typechecks)
+        FxContext.get().runAsSystem();
+        final CmisResultSet result;
+        try {
+            result = getCmisSearchEngine().search(
+                    "SELECT ObjectId, typedef FROM cmis_person WHERE step=0"
+            );
+        } finally {
+            FxContext.get().stopRunAsSystem();
+        }
+        assertTrue(result.getRowCount() > 0);
+        final long typeId = CacheAdmin.getEnvironment().getType("cmis_person").getId();
+        for (CmisResultRow row : result) {
+            assertEquals(row.getColumn(2).getLong(), typeId);
+        }
+    }
+
+    @Test(groups = {"search", "cmis", "ejb"})
     public void basicJoin() throws FxApplicationException {
         final CmisResultSet result = getCmisSearchEngine().search(
                 "SELECT person.name, data.annualSalary FROM CMIS_PERSON AS person JOIN CMIS_PERSON_DATA AS data "
@@ -606,6 +627,15 @@ public class CmisSearchEngineTest {
         );
         assertRowCount(result, 1);
         assertEquals(result.getColumn(0, 1).getString(), "Peter Bones");
+    }
+
+    @Test(groups = {"search", "cmis", "ejb"})
+    public void likeConditionConjunction() throws FxApplicationException {
+        final CmisResultSet result = getCmisSearchEngine().search(
+                "SELECT ObjectId, name FROM contactData WHERE name LIKE 'First' AND surname LIKE 'nestedCondition'"
+        );
+        assertRowCount(result, 1);
+        assertEquals(result.getRow(0).getColumn("name").getString(), "First");
     }
 
     @Test(groups = {"search", "cmis", "ejb"})
@@ -860,6 +890,30 @@ public class CmisSearchEngineTest {
         );
         assertEquals(result.collectColumnValues("name"), Arrays.asList("Martin Black", "Peter Bones", "Sandra Locke"));
         assertEquals(result.collectColumnValues("annualSalary"), Arrays.asList(75000L, 50000L, 85000L));
+    }
+
+    @Test(groups = {"search", "cmis", "ejb"})
+    public void selectSystemProperties() throws FxApplicationException {
+        final CmisResultSet result = getCmisSearchEngine().search(
+                "SELECT id, version, acl, step, typedef, created_at, created_by, "
+                        + "modified_at, modified_by FROM cmis_person"
+        );
+        assertRowCount(result, 4);
+        for (CmisResultRow row : result) {
+            final FxContent content = EJBLookup.getContentEngine().load(
+                    new FxPK(row.getColumn(1).getLong(), row.getColumn(2).getInt())
+            );
+            assertEquals(row.getColumn("step").getLong(), content.getStepId());
+            assertEquals(row.getColumn("typedef").getLong(), content.getTypeId());
+            assertEquals(row.getColumn("created_at").getDate().getTime(), content.getLifeCycleInfo().getCreationTime());
+            assertEquals(row.getColumn("created_by").getLong(), content.getLifeCycleInfo().getCreatorId());
+            assertEquals(row.getColumn("modified_at").getDate().getTime(), content.getLifeCycleInfo().getModificationTime());
+            assertEquals(row.getColumn("modified_by").getLong(), content.getLifeCycleInfo().getModificatorId());
+            assertEquals(
+                    row.getColumn("acl").getValues(), content.getAclIds(),
+                    "Expected ACLs: " + content.getAclIds() + ", got: " + row.getColumn("acl").getValues()
+            );
+        }
     }
 
     @Test(groups = {"search", "cmis", "ejb"})

@@ -63,7 +63,7 @@ public abstract class AbstractColumnReferenceCondition<T extends Condition> impl
         final String filterTableName;
         if (negationQuery(condition)) {
             // we select the difference between all types of this table AND the selected ones (i.e. a MINUS query)
-            final String assignmentFilter = dialect.getAssignmentFilter(ref.getFilterTableType(), "sub", ref.getReferencedAssignments());
+            final String assignmentFilter = dialect.getAssignmentFilter(ref.getFilterTableType(), "sub", true, ref.getReferencedAssignments());
             filterTableName = PropertyResolver.Table.T_CONTENT.getTableName();
             matchConditions = "id NOT IN (SELECT id FROM "
                     + ref.getFilterTableName()
@@ -78,7 +78,7 @@ public abstract class AbstractColumnReferenceCondition<T extends Condition> impl
         } else {
             // simply select all matching rows
             filterTableName = ref.getFilterTableName();
-            final String assignmentFilter = dialect.getAssignmentFilter(ref.getFilterTableType(), tableAlias, ref.getReferencedAssignments());
+            final String assignmentFilter = dialect.getAssignmentFilter(ref.getFilterTableType(), tableAlias, true, ref.getReferencedAssignments());
             matchConditions = (isNotBlank(assignmentFilter) ? assignmentFilter + " AND " : "")
                     + mapper.getConditionColumn(sqlMapperFactory, ref, tableAlias)
                     + " " + getColumnCondition(condition)

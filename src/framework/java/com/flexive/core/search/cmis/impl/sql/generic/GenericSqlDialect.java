@@ -612,11 +612,13 @@ public class GenericSqlDialect implements SqlMapperFactory, SqlDialect {
     }
 
     protected String contentAclFilter(String contentTableAlias, List<Long> acls) {
-        return acls.isEmpty() ? null : "EXISTS(" +
-                contentAclFilter(contentTableAlias, DatabaseConst.TBL_CONTENT, acls) +
-                " UNION " +
+        return acls.isEmpty() ? null :
+                // first check for contents that have the desired ACL in the main table column
+                "(" + contentTableAlias + ".acl IN (" + StringUtils.join(acls, ',') + ") " +
+                // then check for the ACL in TBL_CONTENT_ACLS 
+                "OR EXISTS(" +
                 contentAclFilter(contentTableAlias, DatabaseConst.TBL_CONTENT_ACLS, acls)
-                + ")";
+                + "))";
     }
 
     protected String contentAclFilter(String contentTableAlias, String table, List<Long> acls) {
@@ -652,10 +654,19 @@ public class GenericSqlDialect implements SqlMapperFactory, SqlDialect {
     /**
      * {@inheritDoc}
      */
-    public String getAssignmentFilter(PropertyResolver.Table tableType, String tableAlias, Collection<? extends FxPropertyAssignment> assignments) {
+    public String getAssignmentFilter(PropertyResolver.Table tableType, String tableAlias, boolean constrainResult, Collection<? extends FxPropertyAssignment> assignments) {
         switch (tableType) {
             case T_CONTENT:
-                return "";  // no assignment filter necessary, the selected column determines the assignment
+                if (constrainResult) {
+                    // we must check if the instances are for the right version
+                    final List<FxType> types = Lists.newArrayListWithCapacity(assignments.size());
+                    for (FxPropertyAssignment assignment : assignments) {
+                        types.add(assignment.getAssignedType());
+                    }
+                    return getTypeFilter(tableAlias + ".tdef", types);
+                } else {
+                    return "";  // no assignment filter necessary, the selected column determines the assignment
+                }
             case T_CONTENT_DATA:
                 // add constraint on ASSIGN column
                 if (assignments == null || assignments.isEmpty()) {

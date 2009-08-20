@@ -139,10 +139,13 @@ public interface SqlDialect {
      * Filters the given column against the given list of assignments.
      *
      * @param tableAlias        the table alias
-     * @param assignments       the assignments which should be filtered
-     * @return                  a condition that constrains the given column to the assignments
+     * @param constrainResult   if the result <strong>must</strong> be constrained to the given types. For example,
+     * when reading the value of a FX_CONTENT column, this flag does not have to be set (because the condition
+     * filter already removed instances), but when creating a condition on a FX_CONTENT column, this
+     * MUST be set - otherwise instances of foreign types are returned.
+     * @param assignments       the assignments which should be filtered  @return                  a condition that constrains the given column to the assignments
      */
-    String getAssignmentFilter(PropertyResolver.Table tableType, String tableAlias, Collection<? extends FxPropertyAssignment> assignments);
+    String getAssignmentFilter(PropertyResolver.Table tableType, String tableAlias, boolean constrainResult, Collection<? extends FxPropertyAssignment> assignments);
 
     /**
      * Return the version filter for the given table alias.

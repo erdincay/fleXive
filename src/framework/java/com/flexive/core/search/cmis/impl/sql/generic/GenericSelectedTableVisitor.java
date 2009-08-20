@@ -31,7 +31,6 @@
  ***************************************************************/
 package com.flexive.core.search.cmis.impl.sql.generic;
 
-import com.flexive.core.search.PropertyResolver;
 import com.flexive.core.search.cmis.impl.sql.SelectedTableVisitor;
 import com.flexive.core.search.cmis.impl.sql.SqlDialect;
 import com.flexive.core.search.cmis.model.ColumnReference;
@@ -230,7 +229,7 @@ public class GenericSelectedTableVisitor implements SelectedTableVisitor {
         final String assignmentFilter = sqlDialect.getAssignmentFilter(
                 column.getFilterTableType(),
                 tableAliasPrefix + column.getTableReference().getAlias(),
-                column.getReferencedAssignments()
+                false, column.getReferencedAssignments()
         );
         if (StringUtils.isNotBlank(assignmentFilter)) {
             conditions.add(assignmentFilter);

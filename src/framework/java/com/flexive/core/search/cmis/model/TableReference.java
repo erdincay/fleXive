@@ -117,6 +117,24 @@ public interface TableReference {
     String getVersionFilterColumn();
 
     /**
+     * Returns the link condition between a filter table and a subselect. The columns selected from
+     * the filter table are {@link #getIdFilterColumn()} and {@link #getVersionFilterColumn()}, i.e.
+     * the columns provided for selection.
+     * <p>
+     * For example:
+     * <code>
+     * getIdVersionLink("filter", "sub")
+     * -> filter.article_id=sub.id AND filter.article_ver=sub.ver
+     * </code>
+     * </p>
+     *
+     * @param filterTableAlias      the filter table alias
+     * @param subSelectTableAlias   the subselect table alias
+     * @return  the link condition between a filter table and a subselect.
+     */
+    String getIdVersionLink(String filterTableAlias, String subSelectTableAlias);
+
+    /**
      * Returns all subtables of this table (for JOIN table references).
      *
      * @return  all subtables of this table (for JOIN table references).

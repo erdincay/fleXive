@@ -161,6 +161,10 @@ public class JoinedTableReference implements TableReference {
         throw new UnsupportedOperationException("A joined table cannot be addressed by a column reference.");
     }
 
+    public String getIdVersionLink(String filterTableAlias, String subSelectTableAlias) {
+        throw new UnsupportedOperationException("A joined table cannot be addressed by a column reference.");
+    }
+
     /**
      * {@inheritDoc}
      */

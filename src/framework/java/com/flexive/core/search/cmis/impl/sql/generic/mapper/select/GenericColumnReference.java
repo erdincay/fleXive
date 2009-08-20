@@ -72,7 +72,7 @@ import java.util.List;
  */
 public class GenericColumnReference implements ResultColumnMapper<ResultColumnReference>, ConditionColumnMapper<ColumnReference> {
     private static final Log LOG = LogFactory.getLog(GenericColumnReference.class);
-    private static final String SUBSEL_ALIAS = "sub";
+    protected static final String SUBSEL_ALIAS = "sub";
     private static final GenericColumnReference INSTANCE = new GenericColumnReference();
 
     /**
@@ -189,7 +189,7 @@ public class GenericColumnReference implements ResultColumnMapper<ResultColumnRe
         final FxPropertyAssignment assignment = assignments.get(0);
         final FxFlatStorageMapping mapping = assignment.getFlatStorageMapping();
         return "(" + selectUsingTableFilter(mapping.getColumn(), column, mapping.getStorage()) +
-                " AND " + dialect.getAssignmentFilter(column.getFilterTableType(), "", column.getReferencedAssignments()) +
+                " AND " + dialect.getAssignmentFilter(column.getFilterTableType(), "", false, column.getReferencedAssignments()) +
                 (assignment.isMultiLang()
                         ? " AND " + mapping.getColumn() + " IS NOT NULL"
                                             + " AND (lang=" + languageId
@@ -202,17 +202,13 @@ public class GenericColumnReference implements ResultColumnMapper<ResultColumnRe
     protected String selectUsingTableFilter(String readColumn, ColumnReference column, String tableName) {
         final String select;
         if (column.isMultivalued()) {
-            select = "SELECT " + getMultivaluedConcatFunction(SUBSEL_ALIAS + "." + readColumn);
+            select = "SELECT " + getMultivaluedConcatFunction(column, SUBSEL_ALIAS + "." + readColumn);
         } else {
             select = "SELECT " + SUBSEL_ALIAS + "." + readColumn;
         }
         return select +
                 " FROM " + tableName + " " + SUBSEL_ALIAS +
-                " WHERE " +
-                SUBSEL_ALIAS + ".id=" +
-                FILTER_ALIAS + "." + column.getTableReference().getIdFilterColumn() + " AND " +
-                SUBSEL_ALIAS + ".ver=" +
-                FILTER_ALIAS + "." + column.getTableReference().getVersionFilterColumn() + " ";
+                " WHERE " + column.getTableReference().getIdVersionLink(FILTER_ALIAS, SUBSEL_ALIAS);
     }
 
 
@@ -292,7 +288,7 @@ public class GenericColumnReference implements ResultColumnMapper<ResultColumnRe
         return false;
     }
 
-    protected String getMultivaluedConcatFunction(String column) {
+    protected String getMultivaluedConcatFunction(ColumnReference reference, String column) {
         throw new UnsupportedOperationException("Direct SELECT for multivalued properties not supported by generic SQL dialect.");
     }
 
