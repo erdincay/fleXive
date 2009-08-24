@@ -364,6 +364,9 @@ BUILD SUCCESSFUL
                 If you already have a &flexive; EAR deployed in this instance, be sure to undeploy it before
                 you deploy
                 <filename>helloworld.ear</filename>.
+                If you used the
+                Java-based installer, you can deploy and run the application with
+                <command>ant deploy.jetty run.jetty</command>.
             </para>
             <para>
                 If you need to setup or reset the database schema, update your database connection settings in
@@ -736,6 +739,9 @@ BUILD SUCCESSFUL
                 If you already have a &flexive; EAR deployed in this instance, be sure to undeploy it before
                 you deploy
                 <filename>tutorial01-documentstore.ear</filename>.
+                If you used the
+                Java-based installer, you can deploy and run the application with
+                <command>ant deploy.jetty run.jetty</command>.
             </para>
             <para>
                 If you need to setup or reset the database schema, update your database connection settings in

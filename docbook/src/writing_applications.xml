@@ -16,7 +16,7 @@
         <orderedlist>
             <listitem>
                 <para>
-                    to use the &flexive; distribution and utilize its &ant; build infrastructure, or
+                    to use the &flexive; distribution and create new projects with &ant;, or
                 </para>
             </listitem>
             <listitem>
@@ -37,11 +37,11 @@
         </title>
 
         <para>
-            The easiest way to get started with &flexive; is to grab a distribution package from the
-            &downloadsPage;, unzip it to a local development directory, and create a new project
-            from scratch. In this chapter we will concentrate on creating new &flexive; applications.<!--,
-            although you can also read about embedding &flexive; in existing applications in
-            <xref linkend="writing_applications_embed"/>.-->
+            The easiest way to get started with &flexive; is to use the Java-based installer from the
+            &downloadsPage;. The installation directory contains the &flexive; distribution in the
+            <filename>flexive-dist</filename>
+            directory.
+            In this chapter we will concentrate on creating new &flexive; applications.
         </para>
 
         <para>
@@ -153,8 +153,9 @@
                         </para>
                     </listitem>
                 </itemizedlist>
-                For running the application you need a working environment including MySQL
-                as described in the <!-- TODO --> installation chapter.
+                For running the application you can use Jetty and the integrated H2 database if you used
+                the installer. Otherwise, you have to configure an application server and a database
+                according to <xref linkend="installation"/>.
             </para>
             <para>
                 To get started with your first &flexive; application, open a command shell
@@ -287,12 +288,16 @@ BUILD SUCCESSFUL]]></screen>
             </para>
 
             <para>
-                To deploy the application, first you need to setup the database schemas. Type
+                If you used the installer, you can instantly boot the application with
+                <command>ant deploy.jetty run.jetty</command>.
+                If you didn't use the installer, or you want to reset the database schemas
+                during development, type
                 <command>ant db.create db.config.create</command>
                 and when prompted for the database schema use the default name,
-                <code>flexive.</code>
-                When the command completed successfully, your can deploy
+                <code>flexive</code>.
+                After the command completes successfully, your can deploy
                 <filename>flexive-test.ear</filename>
+                to your application server
                 and have a working (albeit empty) &flexive; application, including the &backendGui;.
             </para>
 
@@ -1042,7 +1047,8 @@ BUILD SUCCESSFUL]]></screen>
                     </command>
                 </para>
                 <para>
-                    This will create a new project called "hello-flexive" in the current directory.
+                    This will prompt you for the artifact and group IDs and
+                    create a new project in the current directory.
                     The &flexive; version to be used can be specified in the main module's
                     <filename>pom.xml</filename>
                     file. By default, it is set to the current release required for all features
@@ -1059,7 +1065,7 @@ BUILD SUCCESSFUL]]></screen>
                 <variablelist>
                     <varlistentry>
                         <term>
-                            <code>mvn package</code>
+                            <command>mvn package</command>
                         </term>
                         <listitem>
                             <para>
@@ -1071,7 +1077,7 @@ BUILD SUCCESSFUL]]></screen>
                     </varlistentry>
                     <varlistentry>
                         <term>
-                            <code>mvn install</code>
+                            <command>mvn install</command>
                         </term>
                         <listitem>
                             <para>
@@ -1084,7 +1090,7 @@ BUILD SUCCESSFUL]]></screen>
                     </varlistentry>
                     <varlistentry>
                         <term>
-                            <code>mvn install -Pflexive-db-setup-h2</code>
+                            <command>mvn install -Pflexive-db-setup-h2</command>
                             (since 3.1)
                         </term>
                         <listitem>
@@ -1093,16 +1099,19 @@ BUILD SUCCESSFUL]]></screen>
                                 <code>flexive-db-setup-h2</code>
                                 to reset the H2 database in the
                                 <filename>database/h2</filename>
-                                subdirectory.
+                                subdirectory. (You can also force a reset of the H2 database by deleting the
+                                <filename>database/h2</filename>
+                                directory and running
+                                <command>mvn install</command>.)
                             </para>
                         </listitem>
                     </varlistentry>
                     <varlistentry>
                         <term>
-                            <code>cd war</code>
+                            <command>cd war</command>
                         </term>
                         <term>
-                            <code>mvn jetty:run</code>
+                            <command>mvn jetty:run</command>
                             (since 3.1)
                         </term>
                         <listitem>
@@ -1152,7 +1161,7 @@ BUILD SUCCESSFUL]]></screen>
                     containers that support EJB deployment for WAR applications.
                 </para>
                 <para>
-                    Currently the support is targeted on the features provided by the Glassfish 3 Prelude
+                    Currently the support is targeted on the features provided by the Glassfish 3 Preview
                     release, but no Glassfish-specific features are required. To create a new project:
                 </para>
 
