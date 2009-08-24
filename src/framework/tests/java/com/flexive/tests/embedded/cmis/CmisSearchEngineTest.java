@@ -910,13 +910,10 @@ public class CmisSearchEngineTest {
             assertEquals(row.getColumn("created_by").getLong(), content.getLifeCycleInfo().getCreatorId());
             assertEquals(row.getColumn("modified_at").getDate().getTime(), content.getLifeCycleInfo().getModificationTime());
             assertEquals(row.getColumn("modified_by").getLong(), content.getLifeCycleInfo().getModificatorId());
-            final List<Long> rowValues = Lists.newArrayList(row.getColumn("acl").getValues());
-            final List<Long> contentValues = Lists.newArrayList(content.getAclIds());
-            Collections.sort(rowValues);
-            Collections.sort(contentValues);
             assertEquals(
-                    rowValues, contentValues,
-                    "Expected ACLs: " + contentValues + ", got: " + rowValues
+                    new HashSet(row.getColumn("acl").getValues()),
+                    new HashSet(content.getAclIds()),
+                    "Expected ACLs: " + row.getColumn("acl").getValues() + ", got: " + content.getAclIds()
             );
         }
     }
