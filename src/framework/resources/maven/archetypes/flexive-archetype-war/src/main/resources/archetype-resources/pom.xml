@@ -10,7 +10,7 @@
 
     <!-- Define common versions of dependencies -->
     <properties>
-        <flexive.version>3.1-SNAPSHOT</flexive.version>
+        <flexive.version>3.1-beta-1</flexive.version>
     </properties>
 
     <dependencies>
