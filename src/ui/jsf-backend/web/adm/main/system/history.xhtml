@@ -53,7 +53,13 @@
                             <br/>
                             <ui:fragment rendered="#{historyBean.selectedEntry.typeSpecific}">
                                 <br/>
-                                <b>#{fxMessageBean['History.field.type']}:</b> #{fxMapBean.types[historyBean.selectedEntry.typeId]}<br/>
+                                <b>#{fxMessageBean['History.field.type']}:</b>
+                                <c:if test="#{fxMapBean.types[historyBean.selectedEntry.typeId] == null}">
+                                    #{fxMessageBean['History.msg.typeRemoved,#{historyBean.selectedEntry.typeId}']}
+                                </c:if>
+                                <c:if test="#{fxMapBean.types[historyBean.selectedEntry.typeId] != null}">
+                                    #{fxMapBean.types[historyBean.selectedEntry.typeId]}
+                                </c:if>
                             </ui:fragment>
                             <ui:fragment rendered="#{historyBean.selectedEntry.contentSpecific}">
                                 <b>#{fxMessageBean['History.field.content']}:</b> #{historyBean.selectedEntry.contentId}.#{historyBean.selectedEntry.contentVersion}<br/>
