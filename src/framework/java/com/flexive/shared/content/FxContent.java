@@ -616,11 +616,14 @@ public class FxContent implements Serializable {
     public FxContent setValue(String XPath, Object value) {
         if (value instanceof FxValue)
             return this.setValue(XPath, (FxValue) value);
+        if (!containsValue(XPath))
+            createXPath(XPath);
         FxValue val = getPropertyData(XPath).getValue();
         if (val.isMultiLanguage())
             val.setDefaultTranslation(value);
         else
             val.setValue(value);
+
         return this;
     }
 

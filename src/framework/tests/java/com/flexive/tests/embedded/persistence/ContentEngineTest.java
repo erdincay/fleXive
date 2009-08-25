@@ -566,7 +566,10 @@ public class ContentEngineTest {
             FxContent loaded = co.load(pk);
             //test setting a value that is not present in the loaded content
             Assert.assertFalse(loaded.containsValue("/TestProperty1"));
-            loaded.setValue("/TestProperty1", new FxString(true, "Test1"));
+            loaded.setValue(
+                    testType.getPropertyAssignment("/TestProperty1").getXPath(), 
+                    "Test1"
+            );
             loaded.save();
             loaded = co.load(pk);
             Assert.assertEquals(loaded.getValue("/TestProperty1").getBestTranslation(), "Test1");
