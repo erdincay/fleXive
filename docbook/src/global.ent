@@ -28,7 +28,7 @@
 <!ENTITY groovy "<link xlink:href='http://groovy.codehaus.org/'>Groovy</link>">
 <!ENTITY mavenRepoUrl "http://repo.flexive.org/maven2/">
 <!ENTITY mavenRepo "<link xlink:href='&mavenRepoUrl;'>&mavenRepoUrl;</link>">
-<!ENTITY mavenVersion "3.1-SNAPSHOT">
+<!ENTITY mavenVersion "3.1-beta-1">
 <!ENTITY mavenArchetypeVersion "1.0-SNAPSHOT">
 <!ENTITY hudson "<link xlink:href='https://hudson.dev.java.net/'>Hudson</link>">
 <!ENTITY eclipse "<link xlink:href='http://www.eclipse.org/'>Eclipse</link>">
