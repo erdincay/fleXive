@@ -555,6 +555,27 @@ public class ContentEngineTest {
     }
 
     @Test
+    public void setValue() throws Exception {
+        FxType testType = CacheAdmin.getEnvironment().getType(TEST_TYPE);
+        FxContent test = co.initialize(testType.getId());
+        //set required properties
+        test.setValue("/TestProperty2", new FxString(true, "Test2"));
+        test.setValue("/TestProperty4", new FxString(true, "Test4"));
+        FxPK pk = test.save().getPk();
+        try {
+            FxContent loaded = co.load(pk);
+            //test setting a value that is not present in the loaded content
+            Assert.assertFalse(loaded.containsValue("/TestProperty1"));
+            loaded.setValue("/TestProperty1", new FxString(true, "Test1"));
+            loaded.save();
+            loaded = co.load(pk);
+            Assert.assertEquals(loaded.getValue("/TestProperty1").getBestTranslation(), "Test1");
+        } finally {
+            co.remove(pk);
+        }
+    }
+
+    @Test
     public void contentInitialize() throws Exception {
         try {
             FxType article = CacheAdmin.getEnvironment().getType(TYPE_ARTICLE);
