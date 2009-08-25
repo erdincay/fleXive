@@ -470,11 +470,12 @@ public final class Database {
         try {
             sql.append("SELECT ID, LANG");
             final boolean hasDefLang = columns.length == 1; // deflang is only meaningful for single-column tables
-            if (hasDefLang) {
+            if (hasDefLang)
                 sql.append(", DEFLANG");
-            }
             for (String column : columns) {
                 sql.append(',').append(column);
+                if (!hasDefLang)
+                    sql.append(',').append(column).append("_MLD");
             }
             sql.append(" FROM ").append(table).append(ML).append(" ORDER BY LANG");
             final int startIndex = hasDefLang ? 4 : 3;
@@ -483,7 +484,9 @@ public final class Database {
             while (rs.next()) {
                 final long id = rs.getLong(1);
                 final int lang = rs.getInt(2);
-                final boolean defLang = hasDefLang && rs.getBoolean(3);
+                boolean defLang = false;
+                if( hasDefLang )
+                    defLang = rs.getBoolean(3);
                 if (lang == FxLanguage.SYSTEM_ID) {
                     continue;   // TODO how to deal with system language? 
                 }
@@ -496,14 +499,15 @@ public final class Database {
                     result.put(id, entry);*/
                 }
                 for (int i = 0; i < columns.length; i++) {
-                    final String translation = rs.getString(startIndex + i);
+                    final String translation = rs.getString(startIndex + i * (hasDefLang ? 1 : 2));
                     if (entry[i] == null)
                         entry[i] = new FxString(true, lang, translation);
                     else
                         entry[i].setTranslation(lang, translation);
-                    if (defLang) {
+                    if(!hasDefLang)
+                        defLang = rs.getBoolean(startIndex + 1 + i * 2);
+                    if (defLang)
                         entry[i].setDefaultLanguage(lang);
-                    }
                 }
                 result.put(id, entry);
             }
@@ -594,10 +598,10 @@ public final class Database {
                 StringBuffer sql = new StringBuffer(300);
                 sql.append("INSERT INTO ").append(table).append(ML + "(").append(idColumn).append(",LANG");
                 for (String dc : dataColumn)
-                    sql.append(',').append(dc);
+                    sql.append(',').append(dc).append(',').append(dc).append("_MLD");
                 sql.append(")VALUES(?,?");
                 //noinspection UnusedDeclaration
-                for (FxString aString : string) sql.append(",?");
+                for (FxString aString : string) sql.append(",?,?");
                 sql.append(')');
                 ps.close();
                 ps = con.prepareStatement(sql.toString());
@@ -607,10 +611,12 @@ public final class Database {
                     ps.setLong(1, id);
                     ps.setInt(2, (int) lang);
                     for (int i = 0; i < string.length; i++) {
-                        if (FxString.EMPTY.equals(string[i].getTranslation(lang)))
-                            ps.setNull(3 + i, java.sql.Types.VARCHAR);
-                        else {
-                            ps.setString(3 + i, string[i].getTranslation(lang)); //get translation or empty string
+                        if (FxString.EMPTY.equals(string[i].getTranslation(lang))) {
+                            ps.setNull(3 + i*2, java.sql.Types.VARCHAR);
+                            ps.setBoolean(3 + 1 + i*2, false);
+                        } else {
+                            ps.setString(3 + i*2, string[i].getTranslation(lang)); //get translation or empty string
+                            ps.setBoolean(3 + 1 + i*2, string[i].isDefaultLanguage(lang));
                             hasData = true;
                         }
                     }

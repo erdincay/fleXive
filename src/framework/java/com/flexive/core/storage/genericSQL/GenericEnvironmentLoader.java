@@ -196,41 +196,28 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
         ArrayList<FxGroup> alRet = new ArrayList<FxGroup>(50);
         try {
             final Map<Long, List<FxStructureOption>> groupOptions = loadAllGroupOptions(con);
-            //final List<FxStructureOption> emptyGroupOptions = new ArrayList<FxStructureOption>(0);
-            //                     1     2       3             4             5                  6       7              8
-            final String sql = "SELECT g.ID, g.NAME, g.DEFMINMULT, g.DEFMAXMULT, g.MAYOVERRIDEMULT, t.LANG, t.DESCRIPTION, t.HINT FROM " +
-                    TBL_STRUCT_GROUPS + " g LEFT JOIN " + TBL_STRUCT_GROUPS + ML + " t ON t.ID=g.ID ORDER BY g.ID, t.LANG ASC";
+            final Map<Long, FxString[]> mlText = Database.loadFxStrings(con, TBL_STRUCT_GROUPS, "DESCRIPTION", "HINT");
+
+            //                         1   2     3           4           5
+            final String sql = "SELECT ID, NAME, DEFMINMULT, DEFMAXMULT, MAYOVERRIDEMULT FROM " +
+                    TBL_STRUCT_GROUPS + " ORDER BY ID ASC";
             stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
-            Map<Long, String> hmDesc = new HashMap<Long, String>(5);
-            Map<Long, String> hmHint = new HashMap<Long, String>(5);
-            String name = null;
-            long id = -1;
-            int minMult = -1;
-            int maxMult = -1;
-            boolean mayOverride = false;
+            long id;
             while (rs != null && rs.next()) {
-                if (name != null && rs.getLong(1) != id) {
-                    alRet.add(new FxGroup(id, name, new FxString(FxLanguage.DEFAULT_ID, hmDesc),
-                            new FxString(FxLanguage.DEFAULT_ID, hmHint), mayOverride,
-                            new FxMultiplicity(minMult, maxMult), FxSharedUtils.get(groupOptions, id, new ArrayList<FxStructureOption>(0))));
-                    hmDesc.clear();
+                id = rs.getLong(1);
+                FxString label;
+                FxString hint;
+                if( mlText.containsKey(id)) {
+                    label = mlText.get(id)[0];
+                    hint = mlText.get(id)[1];
+                } else {
+                    label = new FxString("");
+                    hint = new FxString("");
                 }
-
-                if (hmDesc.size() == 0) {
-                    id = rs.getLong(1);
-                    name = rs.getString(2);
-                    minMult = rs.getInt(3);
-                    maxMult = rs.getInt(4);
-                    mayOverride = rs.getBoolean(5);
-                }
-                hmDesc.put(rs.getLong(6), rs.getString(7));
-                hmHint.put(rs.getLong(6), rs.getString(8));
-            }
-            if (hmDesc.size() > 0) {
-                alRet.add(new FxGroup(id, name, new FxString(FxLanguage.DEFAULT_ID, hmDesc),
-                        new FxString(FxLanguage.DEFAULT_ID, hmHint), mayOverride,
-                        new FxMultiplicity(minMult, maxMult), FxSharedUtils.get(groupOptions, id, new ArrayList<FxStructureOption>(0))));
+                alRet.add(new FxGroup(id, rs.getString(2), label, hint, rs.getBoolean(5),
+                        new FxMultiplicity(rs.getInt(3), rs.getInt(4)),
+                        FxSharedUtils.get(groupOptions, id, new ArrayList<FxStructureOption>(0))));
             }
             return alRet;
         } catch (SQLException e) {
@@ -248,98 +235,85 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
         ArrayList<FxProperty> alRet = new ArrayList<FxProperty>(50);
         try {
             final Map<Long, List<FxStructureOption>> propertyOptions = loadAllPropertyOptions(con);
-            //final List<FxStructureOption> emptyPropertyOptions = new ArrayList<FxStructureOption>(0);
+            final Map<Long, FxString[]> mlText = Database.loadFxStrings(con, TBL_STRUCT_PROPERTIES, "DESCRIPTION", "HINT");
 
-            //                     1     2       3             4             5                  6       7
-            String sql = "SELECT p.ID, p.NAME, p.DEFMINMULT, p.DEFMAXMULT, p.MAYOVERRIDEMULT, t.LANG, t.DESCRIPTION, " +
-                    // 8      9                 10          11
-                    "p.ACL, p.MAYOVERRIDEACL, p.DATATYPE, p.REFTYPE, " +
-                    // 12                   13               14     15
-                    "p.ISFULLTEXTINDEXED, p.DEFAULT_VALUE, t.HINT, p.SYSINTERNAL, " +
-                    //16          17
-                    "p.REFLIST, p.UNIQUEMODE FROM " +
-                    TBL_STRUCT_PROPERTIES + " p LEFT JOIN " + TBL_STRUCT_PROPERTIES + ML + " t ON t.ID=p.ID ORDER BY p.ID, t.LANG ASC";
+            //                   1   2     3           4           5
+            String sql = "SELECT ID, NAME, DEFMINMULT, DEFMAXMULT, MAYOVERRIDEMULT," +
+                    //6   7               8         9
+                    "ACL, MAYOVERRIDEACL, DATATYPE, REFTYPE, " +
+                    //10                11             12
+                    "ISFULLTEXTINDEXED, DEFAULT_VALUE, SYSINTERNAL, " +
+                    //13          14
+                    "REFLIST, UNIQUEMODE FROM " + TBL_STRUCT_PROPERTIES + " ORDER BY ID ASC";
             stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
-            Map<Long, String> hmDesc = new HashMap<Long, String>(5);
-            Map<Long, String> hmHint = new HashMap<Long, String>(5);
-            FxValue defaultValue = null;
-            String name = null;
-            long id = -1;
-            int minMult = -1;
-            int maxMult = -1;
-            boolean mayOverrideMult = false;
-            boolean mayOverrideACL = false;
-            ACL acl = null;
-            FxDataType dataType = null;
-            boolean fulltextIndexed = false;
-            long refTypeId = -1;
-            long refListId = -1;
-            boolean systemInternal = false;
-            UniqueMode uniqueMode = UniqueMode.None;
+            FxValue defaultValue;
+            String name;
+            long id;
+            int minMult;
+            int maxMult;
+            boolean mayOverrideMult;
+            boolean mayOverrideACL;
+            ACL acl;
+            FxDataType dataType;
+            boolean fulltextIndexed;
+            long refTypeId;
+            long refListId;
+            boolean systemInternal;
+            UniqueMode uniqueMode;
             final XStream xStream = ConversionEngine.getXStream();
 
             while (rs != null && rs.next()) {
-                if (name != null && rs.getLong(1) != id) {
-//                    if( !name.startsWith("TEST"))
-//                        System.out.println("=======> Loaded: "+name);
-                    alRet.add(new FxProperty(id, name, new FxString(FxLanguage.DEFAULT_ID, hmDesc),
-                            new FxString(FxLanguage.DEFAULT_ID, hmHint), systemInternal, mayOverrideMult,
-                            new FxMultiplicity(minMult, maxMult), mayOverrideACL, acl, dataType,
-                            defaultValue,
-                            fulltextIndexed, (refTypeId == -1 ? null : environment.getType(refTypeId)),
-                            (refListId == -1 ? null : environment.getSelectList(refListId)), uniqueMode,
-                            FxSharedUtils.get(propertyOptions, id, new ArrayList<FxStructureOption>(0))));
-                    hmDesc.clear();
-                }
-
-                if (hmDesc.size() == 0) {
-                    id = rs.getLong(1);
-                    name = rs.getString(2);
-                    minMult = rs.getInt(3);
-                    maxMult = rs.getInt(4);
-                    mayOverrideMult = rs.getBoolean(5);
-                    acl = environment.getACL(rs.getInt(8));
-                    mayOverrideACL = rs.getBoolean(9);
-                    dataType = environment.getDataType(rs.getLong(10));
-                    refTypeId = rs.getLong(11);
-                    if (rs.wasNull())
-                        refTypeId = -1;
-                    refListId = rs.getLong(16);
-                    if (rs.wasNull())
-                        refListId = -1;
-                    fulltextIndexed = rs.getBoolean(12);
-                    systemInternal = rs.getBoolean(15);
-                    uniqueMode = UniqueMode.getById(rs.getInt(17));
-                    String _def = rs.getString(13);
-                    defaultValue = null;
-                    if (!StringUtils.isEmpty(_def) && CacheAdmin.isEnvironmentLoaded()) {
-                        try {
-                            defaultValue = (FxValue) xStream.fromXML(_def);
-                            if (defaultValue != null && defaultValue.isEmpty())
-                                defaultValue = null;
-                            if (defaultValue != null) {
-                                defaultValue.setXPath(name);
-                            }
-                        } catch (Exception e) {
+                id = rs.getLong(1);
+                name = rs.getString(2);
+                minMult = rs.getInt(3);
+                maxMult = rs.getInt(4);
+                mayOverrideMult = rs.getBoolean(5);
+                acl = environment.getACL(rs.getInt(6));
+                mayOverrideACL = rs.getBoolean(7);
+                dataType = environment.getDataType(rs.getLong(8));
+                refTypeId = rs.getLong(9);
+                fulltextIndexed = rs.getBoolean(10);
+                String _def = rs.getString(11);
+                defaultValue = null;
+                if (!StringUtils.isEmpty(_def) && CacheAdmin.isEnvironmentLoaded()) {
+                    try {
+                        defaultValue = (FxValue) xStream.fromXML(_def);
+                        if (defaultValue != null && defaultValue.isEmpty())
                             defaultValue = null;
-                            LOG.warn("Failed to unmarshall default value for propery " + name + ": " + e.getMessage(), e);
+                        if (defaultValue != null) {
+                            defaultValue.setXPath(name);
                         }
+                    } catch (Exception e) {
+                        defaultValue = null;
+                        LOG.warn("Failed to decode default value for property [" + name + "]: " + e.getMessage(), e);
                     }
                 }
-                hmDesc.put(rs.getLong(6), rs.getString(7));
-                hmHint.put(rs.getLong(6), rs.getString(14));
-            }
-            if (hmDesc.size() > 0) {
-//                if( !name.startsWith("TEST"))
-//                        System.out.println("=======> Loaded: "+name);
-                alRet.add(new FxProperty(id, name, new FxString(FxLanguage.DEFAULT_ID, hmDesc),
-                        new FxString(FxLanguage.DEFAULT_ID, hmHint), systemInternal, mayOverrideMult,
+                systemInternal = rs.getBoolean(12);
+                if (rs.wasNull())
+                    refTypeId = -1;
+                refListId = rs.getLong(13);
+                if (rs.wasNull())
+                    refListId = -1;
+                uniqueMode = UniqueMode.getById(rs.getInt(14));
+                FxString label;
+                FxString hint;
+                if( mlText.containsKey(id)) {
+                    label = mlText.get(id)[0];
+                    hint = mlText.get(id)[1];
+                } else {
+                    label = new FxString("");
+                    hint = new FxString("");
+                }
+                
+                alRet.add(new FxProperty(id, name, label,
+                        hint, systemInternal, mayOverrideMult,
                         new FxMultiplicity(minMult, maxMult), mayOverrideACL, acl, dataType,
                         defaultValue,
                         fulltextIndexed, (refTypeId == -1 ? null : environment.getType(refTypeId)),
                         (refListId == -1 ? null : environment.getSelectList(refListId)), uniqueMode,
                         FxSharedUtils.get(propertyOptions, id, new ArrayList<FxStructureOption>(0))));
+
             }
             return alRet;
         } catch (SQLException e) {
