@@ -367,21 +367,21 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             //scripting after end
             return pk;
         } catch (FxNotFoundException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxCreateException(e);
         } catch (SQLException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
 //            if (Database.isUniqueConstraintViolation(e))
 //                throw new FxEntryExistsException("ex.structure.property.exists", property.getName(), (parentXPath.length() == 0 ? "/" : parentXPath));
             throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
         } catch (FxInvalidParameterException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxCreateException(e);
         } catch (FxCreateException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw e;
         } catch (Throwable t) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             if (t instanceof FxApplicationException)
                 throw new FxCreateException(t); //no logging
             else
@@ -418,13 +418,13 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             con = Database.getDbConnection();
             return storage.contentCreateVersion(con, CacheAdmin.getEnvironment(), null, content);
         } catch (SQLException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
         } catch (FxNotFoundException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw e;
         } catch (FxApplicationException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxCreateException(e);
         } finally {
             Database.closeObjects(ContentEngineBean.class, con, ps);
@@ -465,13 +465,13 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             //scripting before end
             return content;
         } catch (FxNotFoundException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxCreateException(e);
         } catch (SQLException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
         } catch (FxInvalidParameterException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxCreateException(e);
         } finally {
             Database.closeObjects(ContentEngineBean.class, con, ps);
@@ -563,12 +563,12 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
                 }
             //scripting after end
         } catch (FxRemoveException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw e;
         } catch (FxNotFoundException e) {
             //not found is ok for removed instances
         } catch (SQLException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxRemoveException(LOG, e, "ex.db.sqlError", e.getMessage());
         } finally {
             Database.closeObjects(ContentEngineBean.class, con, ps);
@@ -597,10 +597,10 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
 
             storage.contentRemoveVersion(con, type, pk);
         } catch (FxNotFoundException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw e;
         } catch (SQLException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxRemoveException(LOG, e, "ex.db.sqlError", e.getMessage());
         } finally {
             Database.closeObjects(ContentEngineBean.class, con, ps);
@@ -698,10 +698,10 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             }
             return removed;
         } catch (FxNotFoundException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxRemoveException(e);
         } catch (SQLException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxRemoveException(LOG, e, "ex.db.sqlError", e.getMessage());
         } finally {
             Database.closeObjects(ContentEngineBean.class, con, null);

@@ -49,6 +49,7 @@ import com.flexive.shared.workflow.Step;
 import com.flexive.shared.workflow.StepDefinition;
 import com.flexive.shared.workflow.StepPermission;
 import com.flexive.shared.workflow.StepPermissionEdit;
+import com.flexive.ejb.beans.EJBUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -159,7 +160,7 @@ public class StepEngineBean implements StepEngine, StepEngineLocal {
         } finally {
             Database.closeObjects(StepEngineBean.class, con, stmt);
             if (!success) {
-                ctx.setRollbackOnly();
+                EJBUtils.rollback(ctx);
             } else {
                 StructureLoader.reloadWorkflows(FxContext.get().getDivisionId());
             }
@@ -402,7 +403,7 @@ public class StepEngineBean implements StepEngine, StepEngineLocal {
         } finally {
             Database.closeObjects(StepEngineBean.class, con, stmt);
             if (!success) {
-                ctx.setRollbackOnly();
+                EJBUtils.rollback(ctx);
             } else {
                 StructureLoader.reloadWorkflows(FxContext.get().getDivisionId());
             }

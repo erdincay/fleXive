@@ -154,7 +154,7 @@ public class XPathElement implements Serializable {
         }
         if (!isValidXPath(XPath))
             throw new FxInvalidParameterException("XPATH", "ex.xpath.invalid", XPath).asRuntimeException();
-        String[] xp = XPath.substring(1).split("\\/"); //skip first '/' to avoid empty entries
+        String[] xp = StringUtils.split(XPath.substring(1), '/'); //skip first '/' to avoid empty entries
         List<XPathElement> elements = new ArrayList<XPathElement>(xp.length);
         for (String xpcurr : xp) {
             elements.add(toElement(XPath, xpcurr));

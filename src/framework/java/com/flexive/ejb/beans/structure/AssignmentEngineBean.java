@@ -53,6 +53,7 @@ import com.flexive.shared.value.FxBinary;
 import com.flexive.shared.value.FxReference;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.value.FxValue;
+import com.flexive.ejb.beans.EJBUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -267,7 +268,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     try {
                         StructureLoader.reload(con);
                     } catch (FxCacheException e) {
-                        ctx.setRollbackOnly();
+                        EJBUtils.rollback(ctx);
                         throw new FxCreateException(e, "ex.cache", e.getMessage());
                     }
                 }
@@ -275,19 +276,19 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             htracker.track(type, "history.assignment.createProperty", property.getName(), type.getId(), type.getName());
             createInheritedAssignments(CacheAdmin.getEnvironment().getAssignment(newAssignmentId), con, sql, type.getDerivedTypes());
         } catch (FxNotFoundException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxCreateException(e);
         } catch (FxLoadException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxCreateException(e);
         } catch (SQLException e) {
             final boolean uniqueConstraintViolation = StorageManager.isUniqueConstraintViolation(e);
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             if (uniqueConstraintViolation)
                 throw new FxEntryExistsException("ex.structure.property.exists", property.getName(), (parentXPath.length() == 0 ? "/" : parentXPath));
             throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
         } catch (FxCacheException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxCreateException(e, "ex.cache", e.getMessage());
         } finally {
             Database.closeObjects(AssignmentEngineBean.class, con, ps);
@@ -606,12 +607,12 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             }
             success = true;
         } catch (SQLException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
         } finally {
             Database.closeObjects(AssignmentEngineBean.class, null, ps);
             if (!success) {
-                ctx.setRollbackOnly();
+                EJBUtils.rollback(ctx);
             }
         }
         return changes;
@@ -726,19 +727,19 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             htracker.track(type, "history.assignment.createGroup", group.getName(), type.getId(), type.getName());
             createInheritedAssignments(CacheAdmin.getEnvironment().getAssignment(newAssignmentId), con, sql, type.getDerivedTypes());
         } catch (FxNotFoundException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxCreateException(e);
         } catch (FxLoadException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxCreateException(e);
         } catch (SQLException e) {
             final boolean uniqueConstraintViolation = StorageManager.isUniqueConstraintViolation(e);
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             if (uniqueConstraintViolation)
                 throw new FxEntryExistsException("ex.structure.group.exists", group.getName(), (parentXPath.length() == 0 ? "/" : parentXPath));
             throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
         } catch (FxCacheException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxCreateException(e, "ex.cache", e.getMessage());
         } finally {
             Database.closeObjects(AssignmentEngineBean.class, con, ps);
@@ -780,10 +781,10 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     try {
                         reload = updatePropertyAssignment(con, null, (FxPropertyAssignmentEdit) assignment);
                     } catch (FxLoadException e) {
-                        ctx.setRollbackOnly();
+                        EJBUtils.rollback(ctx);
                         throw new FxUpdateException(e);
                     } catch (FxNotFoundException e) {
-                        ctx.setRollbackOnly();
+                        EJBUtils.rollback(ctx);
                         throw new FxUpdateException(e);
                     }
                 }
@@ -796,10 +797,10 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     try {
                         reload = updateGroupAssignment(con, (FxGroupAssignmentEdit) assignment);
                     } catch (FxLoadException e) {
-                        ctx.setRollbackOnly();
+                        EJBUtils.rollback(ctx);
                         throw new FxUpdateException(e);
                     } catch (FxNotFoundException e) {
-                        ctx.setRollbackOnly();
+                        EJBUtils.rollback(ctx);
                         throw new FxUpdateException(e);
                     }
                 }
@@ -843,10 +844,10 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     }
                 }
             } catch (FxCacheException e) {
-                ctx.setRollbackOnly();
+                EJBUtils.rollback(ctx);
                 throw new FxCreateException(e, "ex.cache", e.getMessage());
             } catch (FxLoadException e) {
-                ctx.setRollbackOnly();
+                EJBUtils.rollback(ctx);
                 throw new FxCreateException(e);
             }
             return returnId;
@@ -1047,14 +1048,14 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             success = true;
         } catch (SQLException e) {
             final boolean uniqueConstraintViolation = StorageManager.isUniqueConstraintViolation(e);
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             if (uniqueConstraintViolation)
                 throw new FxEntryExistsException("ex.structure.assignment.group.exists", group.getAlias(), group.getXPath());
             throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
         } finally {
             Database.closeObjects(AssignmentEngineBean.class, null, ps);
             if (!success) {
-                ctx.setRollbackOnly();
+                EJBUtils.rollback(ctx);
             }
         }
         return changes;
@@ -1248,14 +1249,14 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             try {
                 StructureLoader.reload(con);
             } catch (FxCacheException e) {
-                ctx.setRollbackOnly();
+                EJBUtils.rollback(ctx);
                 throw new FxCreateException(e, "ex.cache", e.getMessage());
             }
             createInheritedAssignments(CacheAdmin.getEnvironment().getAssignment(newAssignmentId), con, sql,
                     group.getAssignedType().getDerivedTypes());
         } catch (SQLException e) {
             final boolean uniqueConstraintViolation = StorageManager.isUniqueConstraintViolation(e);
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             if (uniqueConstraintViolation)
                 throw new FxEntryExistsException("ex.structure.assignment.group.exists", group.getAlias(), group.getXPath());
             throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
@@ -1546,7 +1547,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             }
             success = true;
         } catch (SQLException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             /*TODO: Determine if this must be checked
             if (Database.isUniqueConstraintViolation(e))
                 throw new FxEntryExistsException("ex.structure.assignment.property.exists", prop.getAlias(), prop.getXPath());
@@ -1555,7 +1556,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
         } finally {
             Database.closeObjects(AssignmentEngineBean.class, null, ps);
             if (!success) {
-                ctx.setRollbackOnly();
+                EJBUtils.rollback(ctx);
             }
         }
         return changes;
@@ -1837,14 +1838,14 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             success = true;
         } catch (SQLException e) {
             final boolean uniqueConstraintViolation = StorageManager.isUniqueConstraintViolation(e);
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             if (uniqueConstraintViolation)
                 throw new FxEntryExistsException("ex.structure.assignment.property.exists", original.getAlias(), original.getXPath());
             throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
         } finally {
             Database.closeObjects(AssignmentEngineBean.class, null, ps);
             if (!success) {
-                ctx.setRollbackOnly();
+                EJBUtils.rollback(ctx);
             }
         }
         return changes;
@@ -1928,7 +1929,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                         try {
                             StructureLoader.reload(con);
                         } catch (FxCacheException e) {
-                            ctx.setRollbackOnly();
+                            EJBUtils.rollback(ctx);
                             throw new FxCreateException(e, "ex.cache", e.getMessage());
                         }
                         fs.flatten(con, fs.getDefaultStorage(), (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(newAssignmentId));
@@ -1940,7 +1941,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 try {
                     StructureLoader.reload(con);
                 } catch (FxCacheException e) {
-                    ctx.setRollbackOnly();
+                    EJBUtils.rollback(ctx);
                     throw new FxCreateException(e, "ex.cache", e.getMessage());
                 }
                 createInheritedAssignments(CacheAdmin.getEnvironment().getAssignment(newAssignmentId), con, sql,
@@ -1949,7 +1950,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
         } catch (SQLException e) {
             final boolean uniqueConstraintViolation = StorageManager.isUniqueConstraintViolation(e);
             if (!ctx.getRollbackOnly())
-                ctx.setRollbackOnly();
+                EJBUtils.rollback(ctx);
             if (uniqueConstraintViolation)
                 throw new FxEntryExistsException("ex.structure.assignment.property.exists", pa.getAlias(), pa.getXPath());
             throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
@@ -2237,13 +2238,13 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     disableAssignment ? "history.assignment.remove" : "history.assignment.disable",
                     assignment.getXPath(), assignmentId, removeSubAssignments, removeDerivedAssignments);
         } catch (SQLException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxRemoveException(LOG, e, "ex.db.sqlError", e.getMessage());
         } catch (FxCacheException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxRemoveException(LOG, e, "ex.cache", e.getMessage());
         } catch (FxLoadException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxRemoveException(e);
         } finally {
             Database.closeObjects(TypeEngineBean.class, con, ps);
@@ -2330,13 +2331,13 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             if (reload)
                 StructureLoader.reload(con);
         } catch (SQLException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
         } catch (FxCacheException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxCreateException(e, "ex.cache", e.getMessage());
         } catch (FxLoadException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxCreateException(e);
         } finally {
             Database.closeObjects(AssignmentEngineBean.class, con, null);
@@ -2359,13 +2360,13 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             if (reload)
                 StructureLoader.reload(con);
         } catch (SQLException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
         } catch (FxCacheException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxCreateException(e, "ex.cache", e.getMessage());
         } catch (FxLoadException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxCreateException(e);
         } finally {
             Database.closeObjects(AssignmentEngineBean.class, con, null);
@@ -2531,13 +2532,13 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             final FxFlatStorage fs = FxFlatStorageManager.getInstance();
             fs.flatten(fs.getDefaultStorage(), assignment);
         } catch (FxApplicationException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw e;
         }
         try {
             StructureLoader.reload(null);
         } catch (FxCacheException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxUpdateException(e, "ex.cache", e.getMessage());
         }
     }
@@ -2550,13 +2551,13 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
         try {
             FxFlatStorageManager.getInstance().flatten(storage, assignment);
         } catch (FxApplicationException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw e;
         }
         try {
             StructureLoader.reload(null);
         } catch (FxCacheException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxUpdateException(e, "ex.cache", e.getMessage());
         }
     }
@@ -2569,13 +2570,13 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
         try {
             FxFlatStorageManager.getInstance().unflatten(assignment);
         } catch (FxApplicationException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw e;
         }
         try {
             StructureLoader.reload(null);
         } catch (FxCacheException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxUpdateException(e, "ex.cache", e.getMessage());
         }
     }

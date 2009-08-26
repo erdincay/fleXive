@@ -519,7 +519,7 @@ public class FxContent implements Serializable {
     /**
      * Get a list of all FxPropertyData entries that are assigned to propertyId
      *
-     * @param propertyId   the property id requested
+     * @param propertyId   the property id requested. -1 to return all properties.
      * @param includeEmpty include empty data instances?
      * @return list of all FxPropertyData entries that are assigned to propertyId
      */
@@ -738,9 +738,10 @@ public class FxContent implements Serializable {
      * @since 3.1
      */
     public List<FxValue> getValues(String XPath) {
-        if (!isXPathValid(XPath, true))
+        // XPath check can be skipped because it is performed by FxType#getAssignment below
+        //if (!isXPathValid(XPath, true))
             //noinspection ThrowableInstanceNeverThrown
-            throw new FxInvalidParameterException("XPATH", "ex.xpath.element.noProperty", XPath).asRuntimeException();
+         //   throw new FxInvalidParameterException("XPATH", "ex.xpath.element.noProperty", XPath).asRuntimeException();
         final FxEnvironment env = CacheAdmin.getEnvironment();
         long assignmentId = env.getType(getTypeId()).getAssignment(XPath).getId();
         FxGroupData group = getGroupData(XPathElement.stripLastElement(XPath));

@@ -48,6 +48,7 @@ import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.workflow.Route;
 import com.flexive.shared.workflow.Step;
 import com.flexive.shared.workflow.Workflow;
+import com.flexive.ejb.beans.EJBUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -122,7 +123,7 @@ public class WorkflowEngineBean implements WorkflowEngine, WorkflowEngineLocal {
         } finally {
             Database.closeObjects(WorkflowEngineBean.class, con, stmt);
             if (!success) {
-                ctx.setRollbackOnly();
+                EJBUtils.rollback(ctx);
             } else {
                 StructureLoader.reloadWorkflows(FxContext.get().getDivisionId());
             }
@@ -330,7 +331,7 @@ public class WorkflowEngineBean implements WorkflowEngine, WorkflowEngineLocal {
         } finally {
             Database.closeObjects(WorkflowEngineBean.class, con, stmt);
             if (!success) {
-                ctx.setRollbackOnly();
+                EJBUtils.rollback(ctx);
             } else {
                 StructureLoader.reloadWorkflows(FxContext.get().getDivisionId());
             }
@@ -417,7 +418,7 @@ public class WorkflowEngineBean implements WorkflowEngine, WorkflowEngineLocal {
         } finally {
             Database.closeObjects(WorkflowEngineBean.class, con, stmt);
             if (!success) {
-                ctx.setRollbackOnly();
+                EJBUtils.rollback(ctx);
             } else {
                 StructureLoader.reloadWorkflows(FxContext.get().getDivisionId());
             }

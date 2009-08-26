@@ -198,7 +198,7 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
             return newId;
         } catch (SQLException exc) {
             final boolean uniqueConstraintViolation = StorageManager.isUniqueConstraintViolation(exc);
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             if (uniqueConstraintViolation) {
                 throw new FxEntryExistsException("ex.acl.aclAlreadyExists", name);
             } else {
@@ -264,7 +264,7 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
         } catch (SQLException exc) {
             final boolean uniqueConstraintViolation = StorageManager.isUniqueConstraintViolation(exc);
             final boolean keyViolation = StorageManager.isForeignKeyViolation(exc);
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             if (uniqueConstraintViolation)
                 throw new FxRemoveException(LOG, exc, "ex.acl.aclAlreadyExists", theACL.getName());
             else if (keyViolation)
@@ -422,7 +422,7 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
             EJBLookup.getHistoryTrackerEngine().trackData(sbHistory.toString(), "history.acl.update", theACL.getName());
         } catch (SQLException exc) {
             final boolean uniqueConstraintViolation = StorageManager.isUniqueConstraintViolation(exc);
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             if (uniqueConstraintViolation)
                 throw new FxEntryExistsException(LOG, "ex.acl.updateFailed.nameTaken",
                         theACL.getName(), name);
@@ -555,7 +555,7 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
             sbHistory.append(ConversionEngine.getXStream().toXML(as));
             EJBLookup.getHistoryTrackerEngine().trackData(sbHistory.toString(), "history.acl.assign", CacheAdmin.getEnvironment().getACL(aclId).getName());
         } catch (Exception exc) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxCreateException(LOG, exc, "ex.aclAssignment.createFailed");
         } finally {
             Database.closeObjects(ACLEngineBean.class, con, stmt);
@@ -641,7 +641,7 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
         } catch (FxNotFoundException e) {
             throw e;
         } catch (Exception exc) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxRemoveException(LOG, exc, "ex.aclAssignment.unassigneFailed", aclId, groupId);
         } finally {
             Database.closeObjects(ACLEngineBean.class, con, stmt);

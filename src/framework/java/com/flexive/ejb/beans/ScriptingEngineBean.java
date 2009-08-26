@@ -212,7 +212,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
                 throw new FxNotFoundException("ex.scripting.notFound.id", scriptId);
             code = rs.getString(1);
         } catch (SQLException exc) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxLoadException(LOG, exc, "ex.scripting.load.failed", scriptId, exc.getMessage());
         } finally {
             Database.closeObjects(ScriptingEngineBean.class, con, ps);
@@ -243,7 +243,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
             }
 
         } catch (SQLException exc) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxLoadException(LOG, exc, "ex.scripts.load.failed", exc.getMessage());
         } finally {
             Database.closeObjects(ScriptingEngineBean.class, con, ps);
@@ -283,7 +283,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         } finally {
             Database.closeObjects(ScriptingEngineBean.class, con, ps);
             if (!success)
-                ctx.setRollbackOnly();
+                EJBUtils.rollback(ctx);
             else
                 StructureLoader.reloadScripting(FxContext.get().getDivisionId());
         }
@@ -332,7 +332,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
             while (rs != null && rs.next())
                 ret.add(rs.getLong(1));
         } catch (SQLException exc) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxDbException(LOG, exc, "ex.db.sqlError", exc.getMessage()).asRuntimeException();
         } finally {
             Database.closeObjects(ScriptingEngineBean.class, con, ps);
@@ -400,7 +400,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         } finally {
             Database.closeObjects(ScriptingEngineBean.class, con, ps);
             if (!success)
-                ctx.setRollbackOnly();
+                EJBUtils.rollback(ctx);
             else
                 StructureLoader.reloadScripting(FxContext.get().getDivisionId());
         }
@@ -487,7 +487,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         } finally {
             Database.closeObjects(ScriptingEngineBean.class, con, ps);
             if (!success)
-                ctx.setRollbackOnly();
+                EJBUtils.rollback(ctx);
             else
                 StructureLoader.reloadScripting(FxContext.get().getDivisionId());
         }
@@ -611,7 +611,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         } finally {
             Database.closeObjects(ScriptingEngineBean.class, con, ps);
             if (!success)
-                ctx.setRollbackOnly();
+                EJBUtils.rollback(ctx);
             else
                 StructureLoader.reloadScripting(FxContext.get().getDivisionId());
         }
@@ -673,7 +673,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         } finally {
             Database.closeObjects(ScriptingEngineBean.class, con, ps);
             if (!success)
-                ctx.setRollbackOnly();
+                EJBUtils.rollback(ctx);
             else
                 StructureLoader.reloadScripting(FxContext.get().getDivisionId());
         }
@@ -714,7 +714,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         } finally {
             Database.closeObjects(ScriptingEngineBean.class, con, ps);
             if (!success)
-                ctx.setRollbackOnly();
+                EJBUtils.rollback(ctx);
             else
                 StructureLoader.reloadScripting(FxContext.get().getDivisionId());
         }
@@ -746,7 +746,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         } finally {
             Database.closeObjects(ScriptingEngineBean.class, con, ps);
             if (!success)
-                ctx.setRollbackOnly();
+                EJBUtils.rollback(ctx);
             else
                 StructureLoader.reloadScripting(FxContext.get().getDivisionId());
         }
@@ -777,7 +777,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         } finally {
             Database.closeObjects(ScriptingEngineBean.class, con, ps);
             if (!success)
-                ctx.setRollbackOnly();
+                EJBUtils.rollback(ctx);
             else
                 StructureLoader.reloadScripting(FxContext.get().getDivisionId());
         }
@@ -809,7 +809,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         } finally {
             Database.closeObjects(ScriptingEngineBean.class, con, ps);
             if (!success)
-                ctx.setRollbackOnly();
+                EJBUtils.rollback(ctx);
             else
                 StructureLoader.reloadScripting(FxContext.get().getDivisionId());
         }
@@ -859,7 +859,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         } finally {
             Database.closeObjects(ScriptingEngineBean.class, con, ps);
             if (!success)
-                ctx.setRollbackOnly();
+                EJBUtils.rollback(ctx);
             else
                 StructureLoader.reloadScripting(FxContext.get().getDivisionId());
         }
@@ -911,7 +911,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         } finally {
             Database.closeObjects(ScriptingEngineBean.class, con, ps);
             if (!success)
-                ctx.setRollbackOnly();
+                EJBUtils.rollback(ctx);
             else
                 StructureLoader.reloadScripting(FxContext.get().getDivisionId());
         }

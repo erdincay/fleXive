@@ -144,7 +144,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
         } catch (SQLException exc) {
             final boolean uniqueConstraintViolation = StorageManager.isUniqueConstraintViolation(exc);
             if (ctx != null)
-                ctx.setRollbackOnly();
+                EJBUtils.rollback(ctx);
             else
                 try {
                     con.rollback();
@@ -207,7 +207,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
             if (description != null) ps.setString(pos, description);
             ps.executeUpdate();
         } catch (SQLException exc) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxLoadException(LOG, exc, "ex.briefcase.modifyFailed", br.getName());
         } finally {
             closeObjects(BriefcaseEngineBean.class, con, ps);
@@ -293,7 +293,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
             stmt.setLong(1, id);
             stmt.executeUpdate();
         } catch (Exception e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxUpdateException(LOG, e, "ex.briefcase.clear", br.getName(), e);
         } finally {
             closeObjects(BriefcaseEngineBean.class, con, stmt);
@@ -346,7 +346,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
             }
             stmt.executeBatch();
         } catch (Exception e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxUpdateException(LOG, e, "ex.briefcase.addItems", br.getName(), e);
         } finally {
             closeObjects(BriefcaseEngineBean.class, con, stmt);
@@ -381,7 +381,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
             stmt.setLong(1, id);
             stmt.executeUpdate();
         } catch (Exception e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxUpdateException(LOG, e, "ex.briefcase.removeItems", br.getName(), e);
         } finally {
             closeObjects(BriefcaseEngineBean.class, con, stmt);
@@ -452,7 +452,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
             }
             return ArrayUtils.toPrimitive(result.toArray(new Long[result.size()]));
         } catch (Exception e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxUpdateException(LOG, e, "ex.briefcase.getItems", br.getName(), e);
         } finally {
             closeObjects(BriefcaseEngineBean.class, con, stmt);
@@ -471,7 +471,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
             con = Database.getDbConnection();
             replaceMetaData(con, id, metadata);
         } catch (SQLException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxUpdateException(LOG, e);
         } finally {
             closeObjects(BriefcaseEngineBean.class, con, null);
@@ -501,7 +501,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
             throw new FxUpdateException(LOG, e);
         } finally {
             if (!success) {
-                ctx.setRollbackOnly();
+                EJBUtils.rollback(ctx);
             }
             closeObjects(BriefcaseEngineBean.class, null, stmt);
         }
@@ -545,7 +545,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
             throw new FxUpdateException(LOG, e);
         } finally {
             if (!success) {
-                ctx.setRollbackOnly();
+                EJBUtils.rollback(ctx);
             }
             closeObjects(BriefcaseEngineBean.class, con, stmt);
         }

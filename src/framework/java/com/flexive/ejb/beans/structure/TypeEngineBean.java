@@ -51,6 +51,7 @@ import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.security.Role;
 import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.structure.*;
+import com.flexive.ejb.beans.EJBUtils;
 import com.thoughtworks.xstream.converters.ConversionException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -229,25 +230,25 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
             StructureLoader.reload(con);
         } catch (SQLException e) {
             if (StorageManager.isUniqueConstraintViolation(e)) {
-                ctx.setRollbackOnly();
+                EJBUtils.rollback(ctx);
                 throw new FxCreateException("ex.structure.type.exists", type.getName());
             }
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
         } catch (FxCacheException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxCreateException(LOG, e, "ex.cache", e.getMessage());
         } catch (FxLoadException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxCreateException(e);
         } catch (FxNotFoundException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxCreateException(e);
         } catch (FxEntryExistsException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxCreateException(e);
         } catch (FxUpdateException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxCreateException(e);
         } finally {
             Database.closeObjects(TypeEngineBean.class, con, ps);
@@ -293,13 +294,13 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
         try {
             FxFlatStorageManager.getInstance().flattenType(storage, CacheAdmin.getEnvironment().getType(typeId));
         } catch (FxApplicationException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw e;
         }
         try {
             StructureLoader.reload(null);
         } catch (FxCacheException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxUpdateException(e, "ex.cache", e.getMessage());
         }
     }
@@ -761,7 +762,7 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
                 LOG.fatal(e.getMessage(), e);
             }
         } catch (SQLException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxUpdateException(LOG, e, "ex.db.sqlError", e.getMessage());
         } finally {
             Database.closeObjects(TypeEngineBean.class, con, ps);
@@ -925,16 +926,16 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
             htracker.track(type, "history.type.remove", type.getName(), type.getId());
         } catch (SQLException e) {
             if (StorageManager.isForeignKeyViolation(e)) {
-                ctx.setRollbackOnly();
+                EJBUtils.rollback(ctx);
                 throw new FxRemoveException(LOG, e, "ex.structure.type.inUse", type.getName());
             }
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxRemoveException(LOG, e, "ex.db.sqlError", e.getMessage());
         } catch (FxCacheException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxRemoveException(LOG, e, "ex.cache", e.getMessage());
         } catch (FxLoadException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxRemoveException(e);
         } finally {
             Database.closeObjects(TypeEngineBean.class, con, ps);

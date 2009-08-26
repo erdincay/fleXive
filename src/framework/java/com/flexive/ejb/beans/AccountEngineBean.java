@@ -519,7 +519,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             return newId;
         } catch (SQLException exc) {
             final boolean uniqueConstraintViolation = StorageManager.isUniqueConstraintViolation(exc);
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             if (uniqueConstraintViolation) {
                 throw new FxEntryExistsException(LOG, exc, "ex.account.userExists", loginName, userName);
             } else {
@@ -629,7 +629,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             }
             EJBLookup.getHistoryTrackerEngine().track("history.account.remove", account.getLoginName());
         } catch (SQLException exc) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxRemoveException(LOG, exc, "ex.account.delete.failed.sql", accountId, exc.getMessage(), curSql);
         } finally {
             Database.closeObjects(AccountEngineBean.class, con, stmt);
@@ -809,7 +809,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             UserTicketStore.flagDirtyHavingUserId(accountId);
             EJBLookup.getHistoryTrackerEngine().trackData(sbHistory.toString(), "history.account.setGroups", account.getLoginName());
         } catch (SQLException exc) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxUpdateException(LOG, exc, "ex.account.roles.updateFailed.sql", accountId, exc.getMessage());
         } finally {
             Database.closeObjects(AccountEngineBean.class, con, ps);
@@ -864,7 +864,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
                 for (long check : orgRoleIds) {
                     if (!ArrayUtils.contains(roles, check)) {
                         if (!ticket.isInRole(Role.getById(check))) {
-                            ctx.setRollbackOnly();
+                            EJBUtils.rollback(ctx);
                             throw new FxNoAccessException("ex.account.roles.assign.noMember.remove", Role.getById(check).getName());
                         }
                     }
@@ -873,7 +873,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
                 for (long check : roles) {
                     if (!orgRoleIds.contains(check)) {
                         if (!ticket.isInRole(Role.getById(check))) {
-                            ctx.setRollbackOnly();
+                            EJBUtils.rollback(ctx);
                             throw new FxNoAccessException("ex.account.roles.assign.noMember.add", Role.getById(check).getName());
                         }
                     }
@@ -907,7 +907,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             UserTicketStore.flagDirtyHavingUserId(accountId);
             EJBLookup.getHistoryTrackerEngine().trackData(sbHistory.toString(), "history.account.setRoles", account.getLoginName());
         } catch (SQLException exc) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxUpdateException(LOG, exc, "ex.account.roles.updateFailed.sql", accountId, exc.getMessage());
         } finally {
             Database.closeObjects(AccountEngineBean.class, con, ps);
@@ -1290,7 +1290,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             EJBLookup.getHistoryTrackerEngine().trackData(sbHistory.toString(), "history.account.update", account.getLoginName());
         } catch (SQLException exc) {
             final boolean uniqueConstraintViolation = StorageManager.isUniqueConstraintViolation(exc);
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             if (uniqueConstraintViolation) {
                 throw new FxEntryExistsException(LOG, "ex.account.userExists", name, loginName);
             } else {
@@ -1360,7 +1360,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             UserTicketStore.flagDirtyHavingUserId(account.getId());
         } catch (SQLException exc) {
             final boolean uniqueConstraintViolation = StorageManager.isUniqueConstraintViolation(exc);
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             if (uniqueConstraintViolation) {
                 throw new FxEntryExistsException(LOG, "ex.account.userExists", name, loginName);
             } else {

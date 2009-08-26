@@ -50,6 +50,7 @@ import com.flexive.shared.value.FxString;
 import com.flexive.shared.workflow.Step;
 import com.flexive.shared.workflow.StepDefinition;
 import com.flexive.shared.workflow.Workflow;
+import com.flexive.ejb.beans.EJBUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -214,7 +215,7 @@ public class StepDefinitionEngineBean implements StepDefinitionEngine, StepDefin
         } finally {
             Database.closeObjects(StepDefinitionEngineBean.class, con, ps);
             if (!success) {
-                ctx.setRollbackOnly();
+                EJBUtils.rollback(ctx);
             } else {
                 StructureLoader.reloadWorkflows(FxContext.get().getDivisionId());
             }
@@ -330,7 +331,7 @@ public class StepDefinitionEngineBean implements StepDefinitionEngine, StepDefin
         } finally {
             Database.closeObjects(StepDefinitionEngineBean.class, con, stmt);
             if (!success) {
-                ctx.setRollbackOnly();
+                EJBUtils.rollback(ctx);
             } else {
                 StructureLoader.reloadWorkflows(FxContext.get().getDivisionId());
             }
@@ -398,7 +399,7 @@ public class StepDefinitionEngineBean implements StepDefinitionEngine, StepDefin
         } finally {
             Database.closeObjects(StepDefinitionEngineBean.class, con, stmt);
             if (!success) {
-                ctx.setRollbackOnly();
+                EJBUtils.rollback(ctx);
             } else {
                 StructureLoader.reloadWorkflows(FxContext.get().getDivisionId());
             }

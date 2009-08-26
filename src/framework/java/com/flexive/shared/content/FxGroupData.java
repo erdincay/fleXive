@@ -752,14 +752,14 @@ public class FxGroupData extends FxData {
     /**
      * Get a list of all FxPropertyData entries that are assigned to propertyId
      *
-     * @param propertyId   the property id requested
+     * @param propertyId   the property id requested. -1 to return all properties.
      * @param includeEmpty include empty data instances?
      * @return list of all FxPropertyData entries that are assigned to propertyId
      */
     public List<FxPropertyData> getPropertyData(long propertyId, boolean includeEmpty) {
         List<FxPropertyData> res = new ArrayList<FxPropertyData>(5);
         for (FxData d : getChildren()) {
-            if (d instanceof FxPropertyData && ((FxPropertyData) d).getPropertyId() == propertyId) {
+            if (d instanceof FxPropertyData && (propertyId == -1 || ((FxPropertyData) d).getPropertyId() == propertyId)) {
                 if (includeEmpty || !d.isEmpty())
                     res.add((FxPropertyData) d);
             } else if (d instanceof FxGroupData)

@@ -73,7 +73,7 @@ public class SequencerEngineBean implements SequencerEngine, SequencerEngineLoca
         try {
             return StorageManager.getSequencerStorage().getId(type);
         } catch (FxApplicationException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw e;
         }
     }
@@ -86,7 +86,7 @@ public class SequencerEngineBean implements SequencerEngine, SequencerEngineLoca
         try {
             StorageManager.getSequencerStorage().createSequencer(name, allowRollover, startNumber);
         } catch (FxApplicationException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw e;
         }
     }
@@ -99,7 +99,7 @@ public class SequencerEngineBean implements SequencerEngine, SequencerEngineLoca
         try {
             StorageManager.getSequencerStorage().removeSequencer(name);
         } catch (FxApplicationException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw e;
         }
     }
@@ -112,7 +112,7 @@ public class SequencerEngineBean implements SequencerEngine, SequencerEngineLoca
         try {
             return StorageManager.getSequencerStorage().getId(name);
         } catch (FxApplicationException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw e;
         }
     }
@@ -125,7 +125,7 @@ public class SequencerEngineBean implements SequencerEngine, SequencerEngineLoca
         try {
             return StorageManager.getSequencerStorage().sequencerExists(name);
         } catch (FxApplicationException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw e;
         }
     }
@@ -138,7 +138,7 @@ public class SequencerEngineBean implements SequencerEngine, SequencerEngineLoca
         try {
             return StorageManager.getSequencerStorage().getCustomSequencers();
         } catch (FxApplicationException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw e;
         }
     }

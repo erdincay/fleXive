@@ -38,6 +38,7 @@ import com.flexive.shared.exceptions.FxLoginFailedException;
 import com.flexive.shared.exceptions.FxLogoutFailedException;
 import com.flexive.shared.interfaces.AccountEngine;
 import com.flexive.shared.security.UserTicket;
+import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.core.flatstorage.FxFlatStorageManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

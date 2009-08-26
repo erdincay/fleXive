@@ -45,6 +45,7 @@ import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.*;
 import com.flexive.shared.search.*;
 import com.flexive.shared.search.query.QueryRootNode;
+import com.flexive.ejb.beans.EJBUtils;
 import com.google.common.collect.Lists;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -112,7 +113,7 @@ public class SearchEngineBean implements SearchEngine, SearchEngineLocal {
             return new SqlSearch(seq, briefcase, treeEngine, query, startIndex, fetchRows, 
                     params, resultPreferences, location, viewType, null).executeQuery();
         } catch (FxSqlSearchException exc) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw exc;
         }
     }

@@ -257,7 +257,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
 
         } catch (SQLException exc) {
             final boolean uniqueConstraintViolation = StorageManager.isUniqueConstraintViolation(exc);
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             if (uniqueConstraintViolation) {
                 FxEntryExistsException eee = new FxEntryExistsException("ex.usergroup.create.groupExists", name);
                 if (LOG.isInfoEnabled()) LOG.info(eee);
@@ -327,7 +327,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
 
         } catch (SQLException exc) {
             final boolean uniqueConstraintViolation = StorageManager.isUniqueConstraintViolation(exc);
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             if (uniqueConstraintViolation) {
                 FxEntryExistsException eee = new FxEntryExistsException("ex.usergroup.groupExists", name);
                 if (LOG.isInfoEnabled()) LOG.info(eee);
@@ -408,7 +408,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
             if (LOG.isDebugEnabled()) LOG.debug("Group [" + theGroup + "] was successfully deleted.");
 
         } catch (SQLException exc) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             FxRemoveException ce = new FxRemoveException(exc, "ex.usergroup.deleteSqlException", theGroup.getName());
             LOG.error(ce);
             throw ce;
@@ -500,7 +500,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
             for (long check : orgRoleIds) {
                 if (!ArrayUtils.contains(roles, check)) {
                     if (!ticket.isInRole(Role.getById(check))) {
-                        ctx.setRollbackOnly();
+                        EJBUtils.rollback(ctx);
                         throw new FxNoAccessException("ex.account.roles.assign.noMember.remove", Role.getById(check).getName());
                     }
                 }
@@ -509,7 +509,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
             for (long check : roles) {
                 if (!orgRoleIds.contains(check)) {
                     if (!ticket.isInRole(Role.getById(check))) {
-                        ctx.setRollbackOnly();
+                        EJBUtils.rollback(ctx);
                         throw new FxNoAccessException("ex.account.roles.assign.noMember.add", Role.getById(check).getName());
                     }
                 }
@@ -547,7 +547,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
             UserTicketStore.flagDirtyHavingGroupId(groupId);
 
         } catch (SQLException exc) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             FxUpdateException dbe = new FxUpdateException(exc, "ex.usergroup.updateRolesSqlException", aGroup.getName());
             LOG.error(dbe);
             throw dbe;

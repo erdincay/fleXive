@@ -137,7 +137,7 @@ public class MandatorEngineBean implements MandatorEngine, MandatorEngineLocal {
             return newId;
         } catch (SQLException exc) {
             final boolean uniqueConstraintViolation = StorageManager.isUniqueConstraintViolation(exc);
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             if (uniqueConstraintViolation) {
                 throw new FxEntryExistsException(LOG, "ex.mandator.exists", name);
             } else {
@@ -180,7 +180,7 @@ public class MandatorEngineBean implements MandatorEngine, MandatorEngineLocal {
                     contentId, true, new LifeCycleInfoImpl(mand.getLifeCycleInfo().getCreatorId(),
                     mand.getLifeCycleInfo().getCreationTime(), ticket.getUserId(), NOW)));
         } catch(SQLException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxUpdateException(LOG, e, "ex.mandator.assignMetaDataFailed", contentId, mand.getName(), mand.getId(), e.getMessage());
         } finally {
             Database.closeObjects(MandatorEngineBean.class, con, ps);
@@ -218,7 +218,7 @@ public class MandatorEngineBean implements MandatorEngine, MandatorEngineLocal {
                     metadataId, true, new LifeCycleInfoImpl(mand.getLifeCycleInfo().getCreatorId(),
                     mand.getLifeCycleInfo().getCreationTime(), ticket.getUserId(), NOW)));
         } catch(SQLException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxUpdateException(LOG, e, "ex.mandator.removeMetaDataFailed", mand.getMetadataId(), mand.getName(), mand.getId(), e.getMessage());
         } finally {
             Database.closeObjects(MandatorEngineBean.class, con, ps);
@@ -262,7 +262,7 @@ public class MandatorEngineBean implements MandatorEngine, MandatorEngineLocal {
                     mand.getMetadataId(), true, new LifeCycleInfoImpl(mand.getLifeCycleInfo().getCreatorId(),
                     mand.getLifeCycleInfo().getCreationTime(), ticket.getUserId(), NOW)));
         } catch (SQLException exc) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxUpdateException(LOG, exc, "ex.mandator.updateFailed", mand.getName(), exc.getMessage());
         } finally {
             Database.closeObjects(MandatorEngineBean.class, con, ps);
@@ -308,7 +308,7 @@ public class MandatorEngineBean implements MandatorEngine, MandatorEngineLocal {
                     mand.getMetadataId(), false, new LifeCycleInfoImpl(mand.getLifeCycleInfo().getCreatorId(),
                     mand.getLifeCycleInfo().getCreationTime(), ticket.getUserId(), NOW)));
         } catch (SQLException exc) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxUpdateException(LOG, exc, "ex.mandator.updateFailed", mand.getName(), exc.getMessage());
         } finally {
             Database.closeObjects(MandatorEngineBean.class, con, ps);
@@ -352,7 +352,7 @@ public class MandatorEngineBean implements MandatorEngine, MandatorEngineLocal {
             StructureLoader.removeMandator(FxContext.get().getDivisionId(), mandatorId);
         } catch (SQLException exc) {
             final boolean keyViolation = StorageManager.isForeignKeyViolation(exc);
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             if (keyViolation)
                 throw new FxEntryInUseException(exc, "ex.mandator.removeFailed.inUse", mand.getName());
             throw new FxRemoveException(LOG, exc, "ex.mandator.removeFailed", mand.getName(), exc.getMessage());
@@ -402,7 +402,7 @@ public class MandatorEngineBean implements MandatorEngine, MandatorEngineLocal {
         } catch (SQLException exc) {
             // check before rollback, because it might need an active transaciton
             final boolean uniqueConstraintViolation = StorageManager.isUniqueConstraintViolation(exc);
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             if (uniqueConstraintViolation) {
                 throw new FxUpdateException(LOG, "ex.mandator.update.name.unique", name);
             } else {

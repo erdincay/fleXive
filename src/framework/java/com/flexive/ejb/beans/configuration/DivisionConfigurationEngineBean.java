@@ -48,6 +48,7 @@ import com.flexive.shared.exceptions.FxNoAccessException;
 import com.flexive.shared.interfaces.DivisionConfigurationEngine;
 import com.flexive.shared.interfaces.DivisionConfigurationEngineLocal;
 import com.flexive.shared.structure.TypeStorageMode;
+import com.flexive.ejb.beans.EJBUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -477,11 +478,11 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
             try {
                 FxFlatStorageManager.getInstance().createFlatStorage(name, description, stringColumns, textColumns, bigIntColumns, doubleColumns, selectColumns);
             } catch (FxApplicationException e) {
-                ctx.setRollbackOnly();
+                EJBUtils.rollback(ctx);
                 throw e;
             }
         } catch (SQLException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxDbException(e, "ex.db.sqlError", e.getMessage());
         }
     }
@@ -495,7 +496,7 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
             try {
                 FxFlatStorageManager.getInstance().removeFlatStorage(name);
             } catch (FxApplicationException e) {
-                ctx.setRollbackOnly();
+                EJBUtils.rollback(ctx);
                 throw e;
             }
         } catch (SQLException e) {

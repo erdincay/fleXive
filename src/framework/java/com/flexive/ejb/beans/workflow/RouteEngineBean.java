@@ -45,6 +45,7 @@ import com.flexive.shared.interfaces.*;
 import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.security.Role;
 import com.flexive.shared.workflow.Step;
+import com.flexive.ejb.beans.EJBUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.lang.StringUtils;
@@ -169,7 +170,7 @@ public class RouteEngineBean implements RouteEngine, RouteEngineLocal {
         } finally {
             Database.closeObjects(RouteEngineBean.class, con, stmt);
         	if (!success) {
-        		ctx.setRollbackOnly();
+        		EJBUtils.rollback(ctx);
         	} else {
                 StructureLoader.reloadWorkflows(FxContext.get().getDivisionId());
         	}
@@ -205,7 +206,7 @@ public class RouteEngineBean implements RouteEngine, RouteEngineLocal {
         } finally {
             Database.closeObjects(RouteEngineBean.class, con, stmt);
         	if (!success) {
-        		ctx.setRollbackOnly();
+        		EJBUtils.rollback(ctx);
         	} else {
                 StructureLoader.reloadWorkflows(FxContext.get().getDivisionId());
         	}

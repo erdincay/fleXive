@@ -78,6 +78,10 @@ public class CacheAdmin {
     private static final Parameter<Boolean> DROP_RUNONCE = ParameterFactory.newInstance(Boolean.class,
             "/cacheAdmin/dropInRunOnce", ParameterScope.DIVISION_ONLY, false);
 
+    // request-scoped cache for FxEnvironment
+    private static final String ATTR_ENVIRONMENT = "$flexive_environment$";
+
+
     // "cached" cache beans
     private static FxCacheMBean cache = null;
     //    private static ThreadLocal<FxEnvironment> requestEnvironment = new ThreadLocal<FxEnvironment>();
@@ -184,10 +188,10 @@ public class CacheAdmin {
      * @return FxEnvironment
      */
     public static FxEnvironment getEnvironment() {
+        if (getCachedEnvironment() != null) {
+            return getCachedEnvironment();
+        }
         try {
-//            if (requestEnvironment.get() != null) {
-//                return requestEnvironment.get();
-//            }
             FxEnvironment ret = (FxEnvironment) getInstance().get(ENVIRONMENT_BASE, ENVIRONMENT_RUNTIME);
             if (ret == null) {
                 synchronized (ENV_LOCK) {
@@ -230,7 +234,7 @@ public class CacheAdmin {
                         throw new FxLoadException("ex.structure.runtime.cache.notFound");
                 }
             }
-            //            requestEnvironment.set(ret);
+            setCachedEnvironment(ret);
             return ret;
         } catch (FxCacheException e) {
             throw new FxLoadException(LOG, e, "ex.cache.access.error", e.getMessage()).asRuntimeException();
@@ -263,7 +267,7 @@ public class CacheAdmin {
             throw new FxNoAccessException("ex.cache.reload.privileges").asRuntimeException();
         }
         getInstance().reloadEnvironment(FxContext.get().getDivisionId());
-//        requestEnvironment.set(null);
+        setCachedEnvironment(null);
     }
 
     /**
@@ -346,7 +350,7 @@ public class CacheAdmin {
      * Called from external methods when the environment changed.
      */
     public static void environmentChanged() {
-//        requestEnvironment.set(null);
+        setCachedEnvironment(null);
     }
 
     /**
@@ -369,6 +373,29 @@ public class CacheAdmin {
             throw new FxLoadException(LOG, e, "ex.cache.access.error", e.getClass().getName(), e.getMessage()).asRuntimeException();
         }
     }
+
+    /**
+     * Return the cached environment for this request. Do not call this code to retrieve the environment,
+     * use {@link com.flexive.shared.CacheAdmin#getEnvironment()} instead.
+     *
+     * @return  the cached environment for this request, or null if it hasn't been set.
+     * @since 3.1
+     */
+    private static FxEnvironment getCachedEnvironment() {
+        return (FxEnvironment) FxContext.get().getAttribute(ATTR_ENVIRONMENT);
+    }
+
+    /**
+     * Store the given environment for the rest of this request.
+     *
+     * @param env   the new environment
+     * @since 3.1
+     */
+    private static void setCachedEnvironment(FxEnvironment env) {
+        FxContext.get().setAttribute(ATTR_ENVIRONMENT, env);
+    }
+
+
 
 
 }

@@ -54,6 +54,7 @@ import com.flexive.shared.structure.FxSelectListEdit;
 import com.flexive.shared.structure.FxSelectListItem;
 import com.flexive.shared.structure.FxSelectListItemEdit;
 import com.flexive.shared.value.FxString;
+import com.flexive.ejb.beans.EJBUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -165,7 +166,7 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
             if (changes)
                 StructureLoader.reload(null);
         } catch (FxCacheException e1) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxCreateException(LOG, e1, "ex.cache", e1.getMessage());
         }
         return id;
@@ -187,7 +188,7 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
         try {
             StructureLoader.reload(null);
         } catch (FxCacheException e1) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxCreateException(LOG, e1, "ex.cache", e1.getMessage());
         }
         return id;
@@ -248,10 +249,10 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
             StructureLoader.reload(null);
         } catch (SQLException e) {
             e.printStackTrace();
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
         } catch (FxCacheException e1) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxCreateException(LOG, e1, "ex.cache", e1.getMessage());
         } finally {
             Database.closeObjects(TypeEngineBean.class, con, ps);
@@ -293,10 +294,10 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
             ps.executeUpdate();
             StructureLoader.reload(null);
         } catch (SQLException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
         } catch (FxCacheException e1) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxCreateException(LOG, e1, "ex.cache", e1.getMessage());
         } finally {
             Database.closeObjects(TypeEngineBean.class, con, ps);
@@ -334,7 +335,7 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
                     con, TBL_SELECTLIST, new String[]{"LABEL", "DESCRIPTION"}, "ID", newId);
             return newId;
         } catch (SQLException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
         } finally {
             Database.closeObjects(TypeEngineBean.class, con, ps);
@@ -362,7 +363,7 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
             ps.setLong(2, listId);
             ps.executeUpdate();
         } catch (SQLException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
         } finally {
             Database.closeObjects(TypeEngineBean.class, con, ps);
@@ -393,7 +394,7 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
             }
             ps.executeBatch();
         } catch (SQLException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
         } finally {
             Database.closeObjects(TypeEngineBean.class, con, ps);
@@ -429,7 +430,7 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
             Database.storeFxString(new FxString[]{list.getLabel(), list.getDescription()},
                     con, TBL_SELECTLIST, new String[]{"LABEL", "DESCRIPTION"}, "ID", list.getId());
         } catch (SQLException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
         } finally {
             Database.closeObjects(TypeEngineBean.class, con, ps);
@@ -496,7 +497,7 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
                     throw new FxCreateException(LOG, e, "ex.selectlist.item.name.notUnique", item.getName());
                 throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
             } finally {
-                ctx.setRollbackOnly();
+                EJBUtils.rollback(ctx);
             }
         } finally {
             Database.closeObjects(TypeEngineBean.class, con, ps);
@@ -547,7 +548,7 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
                     throw new FxUpdateException(LOG, e, "ex.selectlist.item.name.notUnique", item.getName());
                 throw new FxUpdateException(LOG, e, "ex.db.sqlError", e.getMessage());
             } finally {
-                ctx.setRollbackOnly();
+                EJBUtils.rollback(ctx);
             }
         } finally {
             Database.closeObjects(TypeEngineBean.class, con, ps);

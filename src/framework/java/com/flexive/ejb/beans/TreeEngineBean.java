@@ -266,10 +266,10 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
                     StorageManager.getTreeStorage().checkTreeIfEnabled(con, mode);
             }
         } catch (FxApplicationException ae) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw ae;
         } catch (Throwable t) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxCreateException(LOG, t, "ex.tree.create.failed", path);
         } finally {
             Database.closeObjects(TreeEngineBean.class, con, null);
@@ -291,10 +291,10 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
             else
                 throw new FxApplicationException("ex.tree.clear.notAllowed", mode.name());
         } catch (FxApplicationException ae) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw ae;
         } catch (Throwable t) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxCreateException(LOG, t, "FxTree.err.clear.failed", mode);
         } finally {
             Database.closeObjects(TreeEngineBean.class, con, null);
@@ -352,7 +352,7 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
             }
             StorageManager.getTreeStorage().checkTreeIfEnabled(con, mode);
         } catch (Exception t) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxUpdateException(LOG, t, "ex.tree.rename.failed", nodeId);
         } finally {
             Database.closeObjects(TreeEngineBean.class, con, null);
@@ -398,10 +398,10 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
         } catch (FxNotFoundException nf) {
             // Node does not exist and we wanted to delete it anyway .. so this is no error
         } catch (FxApplicationException ae) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw ae;
         } catch (Throwable t) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxRemoveException(LOG, t, "ex.tree.delete.failed", nodeId, t.getMessage());
         } finally {
             Database.closeObjects(TreeEngineBean.class, con, null);
@@ -420,7 +420,7 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
             con = Database.getDbConnection();
             StorageManager.getTreeStorage().updateReference(con, node.getMode(), node.getId(), node.getReference().getId());
         } catch (Throwable t) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxTreeException(LOG, t, "ex.tree.update.reference.failed", node.getId(), node.getMode().name(), t.getMessage());
         } finally {
             Database.closeObjects(TreeEngineBean.class, con, null);
@@ -440,10 +440,10 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
             StorageManager.getTreeStorage().checkTreeIfEnabled(con, mode);
             FxContext.get().setTreeWasModified();
         } catch (FxApplicationException ae) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw ae;
         } catch (Throwable t) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxUpdateException(LOG, t, "ex.tree.move.failed", nodeId, destinationId, newPosition);
         } finally {
             Database.closeObjects(TreeEngineBean.class, con, null);
@@ -475,10 +475,10 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
                     StorageManager.getTreeStorage().checkTreeIfEnabled(con, mode);
             }
         } catch (FxApplicationException ae) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw ae;
         } catch (Throwable t) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxUpdateException(LOG, t, "ex.tree.copy.failed", source, destination, destinationPosition);
         } finally {
             Database.closeObjects(TreeEngineBean.class, con, null);
@@ -559,10 +559,10 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
             StorageManager.getTreeStorage().checkTreeIfEnabled(con, FxTreeMode.Live);
             FxContext.get().setTreeWasModified();
         } catch (FxApplicationException ae) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw ae;
         } catch (Throwable t) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxUpdateException(LOG, t, "ex.tree.activate.failed", nodeId, includeChildren, t.getMessage());
         } finally {
             Database.closeObjects(TreeEngineBean.class, con, null);
@@ -706,10 +706,10 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
             StorageManager.getTreeStorage().setData(con, mode, nodeId, data);
             FxContext.get().setTreeWasModified();
         } catch (FxApplicationException e) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw e;
         } catch (Throwable t) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxUpdateException(LOG, t, "ex.tree.setData.failed", data, nodeId, t.getMessage());
         } finally {
             Database.closeObjects(TreeEngineBean.class, con, null);
@@ -831,10 +831,10 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
             StorageManager.getTreeStorage().populate(con, seq, contentEngine, mode, (maxLevel.length > 0 ? maxLevel[0] : defLevel));
             FxContext.get().setTreeWasModified();
         } catch (FxApplicationException ae) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw ae;
         } catch (Throwable t) {
-            ctx.setRollbackOnly();
+            EJBUtils.rollback(ctx);
             throw new FxLoadException(LOG, t, "ex.tree.populate", mode, t.getMessage());
         } finally {
             Database.closeObjects(TreeEngineBean.class, con, null);

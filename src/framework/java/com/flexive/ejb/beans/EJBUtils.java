@@ -29,36 +29,30 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the file!
  ***************************************************************/
-package com.flexive.ejb.beans.test;
+package com.flexive.ejb.beans;
 
 import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.cache.FxCacheException;
-import com.flexive.shared.interfaces.StatelessTest;
-import com.flexive.shared.interfaces.StatelessTestLocal;
-import com.flexive.ejb.beans.EJBUtils;
 
-import javax.annotation.Resource;
-import javax.ejb.*;
-import java.io.Serializable;
+import javax.ejb.SessionContext;
 
 /**
- * A stateless test beans containing special cases needed for automated testing.
- * 
- * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+ * EJB utility methods.
  *
+ * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+ * @version $Rev$
+ * @since   3.1
  */
-@Stateless(name = "StatelessTest", mappedName="StatelessTest")
-@TransactionAttribute(TransactionAttributeType.SUPPORTS)
-@TransactionManagement(TransactionManagementType.CONTAINER)
-public class StatelessTestBean implements StatelessTest, StatelessTestLocal {
+public class EJBUtils {
 
-	@Resource private SessionContext ctx;
-	
-	/** {@inheritDoc} */
-	@TransactionAttribute(TransactionAttributeType.REQUIRED)
-	public void cachePutRollback(String path, String key, Serializable value) throws FxCacheException {
-		CacheAdmin.getInstance().put(path, key, value);
-		EJBUtils.rollback(ctx);
-	}
+    /**
+     * Rollback the transaction and notify any transaction-based caches.
+     *
+     * @param ctx   the session context
+     */
+    public static void rollback(SessionContext ctx) {
+        ctx.setRollbackOnly();
+        // notify environment cache that the thread-local environment may have changed
+        CacheAdmin.environmentChanged();
+    }
 
 }
