@@ -293,17 +293,27 @@ public class FxContentVersionInfo implements Serializable {
     /**
      * Temp. class to create LifeCycleInfo's for new instances
      */
-    static class NewLifeCycleInfoImpl implements LifeCycleInfo {
+    public static class NewLifeCycleInfoImpl implements LifeCycleInfo {
 
         private long userId;
         private long time;
+
+        /**
+         * Ctor using the current user
+         * 
+         * @since 3.1
+         */
+        public NewLifeCycleInfoImpl() {
+            this.userId = FxContext.getUserTicket().getUserId();
+            this.time = System.currentTimeMillis();
+        }
 
         /**
          * Ctor
          *
          * @param userId user id to use
          */
-        NewLifeCycleInfoImpl(long userId) {
+        public NewLifeCycleInfoImpl(long userId) {
             this.userId = userId;
             this.time = System.currentTimeMillis();
         }

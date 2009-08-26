@@ -32,18 +32,19 @@
 package com.flexive.shared.tree;
 
 import com.flexive.shared.*;
+import com.flexive.shared.content.FxContentVersionInfo;
 import com.flexive.shared.content.FxPK;
-import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.security.ACL;
+import com.flexive.shared.security.ACLCategory;
+import com.flexive.shared.security.LifeCycleInfo;
 import com.flexive.shared.value.FxString;
+import org.apache.commons.lang.ArrayUtils;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.Iterator;
 import java.util.Arrays;
-
-import org.apache.commons.lang.ArrayUtils;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * FxNode implementation for flexive
@@ -58,6 +59,7 @@ public class FxTreeNode implements Serializable, SelectableObjectWithLabel, Sele
     private boolean markForDelete = false;
     protected FxString label = null;
     protected FxPK reference;
+    protected LifeCycleInfo referenceLifeCycleInfo;
     protected long referenceTypeId = 0;
     protected FxLock lock = FxLock.noLockPK();
     protected FxTreeMode mode;
@@ -97,32 +99,35 @@ public class FxTreeNode implements Serializable, SelectableObjectWithLabel, Sele
     /**
      * Ctor
      *
-     * @param mode             FxTreeMode
-     * @param id               node id
-     * @param parentNodeId     id of the parent node
-     * @param reference        pk of the referenced content
-     * @param referenceTypeId  type id of the referenced content
-     * @param acls             acls of the referenced content
-     * @param name             name (part of the path)
-     * @param path             complete path from the root node
-     * @param label            label
-     * @param position         position
-     * @param children         child nodes (only available if loaded with <code>#getTree</code>)
-     * @param childIds         ids of the child nodes (only available if loaded with <code>#getTree</code>)
-     * @param depth            depth of this node relative to the root node
-     * @param totalChildCount  total number of children
-     * @param directChildCount number of children attached to this node directly
-     * @param leaf             is this node a leaf?
-     * @param dirty            dirty flag
-     * @param modifiedAt       timestamp of last modification
-     * @param data             optional data
-     * @param mayEdit          edit permission for the calling user
-     * @param mayCreate        create permission for the calling user
-     * @param mayDelete        delete permission for the calling user
-     * @param mayRelate        relate permission for the calling user
-     * @param mayExport        export permission for the calling user
+     * @param mode                   FxTreeMode
+     * @param lock                   the lock of the reference
+     * @param id                     node id
+     * @param parentNodeId           id of the parent node
+     * @param reference              pk of the referenced content
+     * @param referenceLifeCycleInfo if the node has a referenced content this is its LifeCycleInfo
+     * @param referenceTypeId        type id of the referenced content
+     * @param acls                   acls of the referenced content
+     * @param name                   name (part of the path)
+     * @param path                   complete path from the root node
+     * @param label                  label
+     * @param position               position
+     * @param children               child nodes (only available if loaded with <code>#getTree</code>)
+     * @param childIds               ids of the child nodes (only available if loaded with <code>#getTree</code>)
+     * @param depth                  depth of this node relative to the root node
+     * @param totalChildCount        total number of children
+     * @param directChildCount       number of children attached to this node directly
+     * @param leaf                   is this node a leaf?
+     * @param dirty                  dirty flag
+     * @param modifiedAt             timestamp of last modification
+     * @param data                   optional data
+     * @param mayEdit                edit permission for the calling user
+     * @param mayCreate              create permission for the calling user
+     * @param mayDelete              delete permission for the calling user
+     * @param mayRelate              relate permission for the calling user
+     * @param mayExport              export permission for the calling user
      */
-    public FxTreeNode(FxTreeMode mode, FxLock lock, long id, long parentNodeId, FxPK reference, long referenceTypeId, List<Long> acls, String name, String path,
+    public FxTreeNode(FxTreeMode mode, FxLock lock, long id, long parentNodeId, FxPK reference, LifeCycleInfo referenceLifeCycleInfo,
+                      long referenceTypeId, List<Long> acls, String name, String path,
                       FxString label, int position, List<FxTreeNode> children, List<Long> childIds, int depth,
                       int totalChildCount, int directChildCount, boolean leaf, boolean dirty, long modifiedAt,
                       String data, boolean mayEdit, boolean mayCreate, boolean mayDelete, boolean mayRelate, boolean mayExport) {
@@ -130,6 +135,7 @@ public class FxTreeNode implements Serializable, SelectableObjectWithLabel, Sele
         this.label = label;
         this.lock = lock;
         this.reference = reference;
+        this.referenceLifeCycleInfo = referenceLifeCycleInfo;
         this.referenceTypeId = referenceTypeId;
         this.acls = acls != null ? FxArrayUtils.toPrimitiveLongArray(acls) : new long[0];
         this.mode = mode;
@@ -205,7 +211,7 @@ public class FxTreeNode implements Serializable, SelectableObjectWithLabel, Sele
      * Get the id of the first ACL assigned to the referenced content
      *
      * @return id of the first ACL assigned to the referenced content
-     * @deprecated  use {@link #getACLIds()}
+     * @deprecated use {@link #getACLIds()}
      */
     public long getACLId() {
         return acls != null && acls.length > 0 ? acls[0] : ACL.NULL_ACL_ID;
@@ -214,7 +220,7 @@ public class FxTreeNode implements Serializable, SelectableObjectWithLabel, Sele
     /**
      * Return the ACL id(s) of the referenced content.
      *
-     * @return  the ACL id(s) of the referenced content.
+     * @return the ACL id(s) of the referenced content.
      */
     public List<Long> getACLIds() {
         return Arrays.asList(ArrayUtils.toObject(acls));
@@ -257,8 +263,18 @@ public class FxTreeNode implements Serializable, SelectableObjectWithLabel, Sele
     }
 
     /**
+     * Get the LifeCycleInfo of the referenced content
+     *
+     * @return LifeCycleInfo of the referenced content
+     * @since 3.1
+     */
+    public LifeCycleInfo getReferenceLifeCycleInfo() {
+        return referenceLifeCycleInfo;
+    }
+
+    /**
      * Get the type id of the referenced content
-     * 
+     *
      * @return type id of the referenced content
      */
     public long getReferenceTypeId() {
@@ -502,9 +518,10 @@ public class FxTreeNode implements Serializable, SelectableObjectWithLabel, Sele
      * @return FxTreeNode
      */
     public static FxTreeNode createErrorNode(long nodeId, String message) {
-        return new FxTreeNode(FxTreeMode.Edit, FxLock.noLockPK(), nodeId, 0,
-                FxPK.createNewPK(), 0L, Arrays.asList(ACLCategory.INSTANCE.getDefaultId()), "Error", message, new FxString(false, "Error"), Integer.MAX_VALUE,
-                new ArrayList<FxTreeNode>(0), new ArrayList<Long>(0), 0, 0, 0, true, true,
+        return new FxTreeNode(FxTreeMode.Edit, FxLock.noLockPK(), nodeId, 0, FxPK.createNewPK(),
+                new FxContentVersionInfo.NewLifeCycleInfoImpl(), 0L,
+                Arrays.asList(ACLCategory.INSTANCE.getDefaultId()), "Error", message, new FxString(false, "Error"),
+                Integer.MAX_VALUE, new ArrayList<FxTreeNode>(0), new ArrayList<Long>(0), 0, 0, 0, true, true,
                 System.currentTimeMillis(), "", true, true, true, true, true);
     }
 
@@ -544,7 +561,8 @@ public class FxTreeNode implements Serializable, SelectableObjectWithLabel, Sele
      */
     public static FxTreeNode createNewTemporaryChildNode(FxTreeNode parentNode) {
         FxTreeNode n = new FxTreeNode(parentNode.getMode(), FxLock.noLockPK(), (System.currentTimeMillis() * -1), parentNode.getId(),
-                FxPK.createNewPK(), 0L, Arrays.asList(ACLCategory.INSTANCE.getDefaultId()), "@@TMP", "",
+                FxPK.createNewPK(), new FxContentVersionInfo.NewLifeCycleInfoImpl(), 0L,
+                Arrays.asList(ACLCategory.INSTANCE.getDefaultId()), "@@TMP", "",
                 new FxString(parentNode.getLabel().isMultiLanguage(), ""), Integer.MAX_VALUE,
                 new ArrayList<FxTreeNode>(0), new ArrayList<Long>(0), 0, 0, 0, true, true,
                 System.currentTimeMillis(), "", true, true, true, true, true).flagTemporary();
@@ -588,7 +606,7 @@ public class FxTreeNode implements Serializable, SelectableObjectWithLabel, Sele
     /**
      * Returns an iterator over this node and its children.
      *
-     * @return  an iterator over this node and its children.
+     * @return an iterator over this node and its children.
      */
     public Iterator<FxTreeNode> iterator() {
         return new NodeIterator();
@@ -603,9 +621,9 @@ public class FxTreeNode implements Serializable, SelectableObjectWithLabel, Sele
             return index == -1 ||
                     (index >= 0 && !children.isEmpty() && (
                             (children.size() > index) ||
-                            (children.size() == index && childIterator != null && childIterator.hasNext())
+                                    (children.size() == index && childIterator != null && childIterator.hasNext())
                     )
-            );
+                    );
         }
 
         public FxTreeNode next() {

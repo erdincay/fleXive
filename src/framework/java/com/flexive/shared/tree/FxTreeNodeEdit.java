@@ -32,6 +32,7 @@
 package com.flexive.shared.tree;
 
 import com.flexive.shared.content.FxPK;
+import com.flexive.shared.content.FxContentVersionInfo;
 import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.FxLock;
@@ -62,7 +63,8 @@ public class FxTreeNodeEdit extends FxTreeNode implements Serializable {
      * @param node the tree node to make editable
      */
     public FxTreeNodeEdit(FxTreeNode node) {
-        super(node.getMode(), node.getLock(), node.getId(), node.getParentNodeId(), node.getReference(), node.getReferenceTypeId(),
+        super(node.getMode(), node.getLock(), node.getId(), node.getParentNodeId(), node.getReference(),
+                node.getReferenceLifeCycleInfo(), node.getReferenceTypeId(),
                 node.getACLIds(), node.getName(), node.getPath(), node.getLabel(), node.getPosition(), node.getChildren(),
                 node.getChildIds(), node.getDepth(), node.getTotalChildCount(), node.getDirectChildCount(),
                 node.isLeaf(), node.isDirty(), node.getModifiedAt(), node.getData(), true, true, true, true, true);
@@ -79,7 +81,8 @@ public class FxTreeNodeEdit extends FxTreeNode implements Serializable {
      */
     public FxTreeNodeEdit(String name) {
         super(FxTreeMode.Edit, FxLock.noLockPK(), (System.currentTimeMillis() * -1), ROOT_NODE,
-                FxPK.createNewPK(), 0L, Arrays.asList(ACLCategory.INSTANCE.getDefaultId()), name, "", new FxString(false, name), Integer.MAX_VALUE,
+                FxPK.createNewPK(), new FxContentVersionInfo.NewLifeCycleInfoImpl(), 0L,
+                Arrays.asList(ACLCategory.INSTANCE.getDefaultId()), name, "", new FxString(false, name), Integer.MAX_VALUE,
                 new ArrayList<FxTreeNode>(0), new ArrayList<Long>(0), 0, 0, 0, true, true,
                 System.currentTimeMillis(), "", true, true, true, true, true);
         this.isNew = true;
@@ -93,7 +96,8 @@ public class FxTreeNodeEdit extends FxTreeNode implements Serializable {
      */
     public FxTreeNodeEdit(String name, long parentNode) {
         super(FxTreeMode.Edit, FxLock.noLockPK(), (System.currentTimeMillis() * -1), parentNode,
-                FxPK.createNewPK(), 0L, Arrays.asList(ACLCategory.INSTANCE.getDefaultId()), name, "", new FxString(false, name), Integer.MAX_VALUE,
+                FxPK.createNewPK(), new FxContentVersionInfo.NewLifeCycleInfoImpl(), 0L,
+                Arrays.asList(ACLCategory.INSTANCE.getDefaultId()), name, "", new FxString(false, name), Integer.MAX_VALUE,
                 new ArrayList<FxTreeNode>(0), new ArrayList<Long>(0), 0, 0, 0, true, true,
                 System.currentTimeMillis(), "", true, true, true, true, true);
         this.isNew = true;
@@ -108,7 +112,8 @@ public class FxTreeNodeEdit extends FxTreeNode implements Serializable {
      */
     public static FxTreeNodeEdit createNewChildNode(FxTreeNode parentNode) {
         FxTreeNodeEdit edit = new FxTreeNode(parentNode.getMode(), FxLock.noLockPK(), (System.currentTimeMillis() * -1), parentNode.getId(),
-                FxPK.createNewPK(), 0L, parentNode.getACLIds(), "", "", new FxString(parentNode.getLabel().isMultiLanguage(), ""), Integer.MAX_VALUE,
+                FxPK.createNewPK(), new FxContentVersionInfo.NewLifeCycleInfoImpl(), 0L, parentNode.getACLIds(), "", "",
+                new FxString(parentNode.getLabel().isMultiLanguage(), ""), Integer.MAX_VALUE,
                 new ArrayList<FxTreeNode>(0), new ArrayList<Long>(0), 0, 0, 0, true, true,
                 System.currentTimeMillis(), "", true, true, true, true, true).asEditable();
         edit.isNew = true;
@@ -123,7 +128,8 @@ public class FxTreeNodeEdit extends FxTreeNode implements Serializable {
      */
     public static FxTreeNodeEdit createNew(String name) {
         FxTreeNodeEdit edit = new FxTreeNode(FxTreeMode.Edit, FxLock.noLockPK(), (System.currentTimeMillis() * -1), ROOT_NODE,
-                FxPK.createNewPK(), 0L, Arrays.asList(ACLCategory.INSTANCE.getDefaultId()), name, "", new FxString(false, name), Integer.MAX_VALUE,
+                FxPK.createNewPK(), new FxContentVersionInfo.NewLifeCycleInfoImpl(), 0L,
+                Arrays.asList(ACLCategory.INSTANCE.getDefaultId()), name, "", new FxString(false, name), Integer.MAX_VALUE,
                 new ArrayList<FxTreeNode>(0), new ArrayList<Long>(0), 0, 0, 0, true, true,
                 System.currentTimeMillis(), "", true, true, true, true, true).asEditable();
         edit.isNew = true;
@@ -168,6 +174,8 @@ public class FxTreeNodeEdit extends FxTreeNode implements Serializable {
      */
     public FxTreeNodeEdit clearReference() {
         this.reference = null;
+        this.referenceTypeId = -1L;
+        this.referenceLifeCycleInfo = null;
         return this;
     }
 
