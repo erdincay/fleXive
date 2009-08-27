@@ -44,8 +44,7 @@ import java.util.Collection;
 /**
  * Bean handling Briefcases.
  * <p />
- * A briefcase is a object store which may be accessed with flexive SQL
- * or the API provided by this beans.
+ * A briefcase is a object store which may be accessed with FxSQL or the API provided by this bean.
  *
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
@@ -201,7 +200,7 @@ public interface BriefcaseEngine {
      * @throws FxApplicationException   if the metadata could not be updated
      * @since 3.1
      */
-    void replaceMetaData(long id, Collection<FxReferenceMetaData<FxPK>> metaData) throws FxApplicationException;
+    void setMetaData(long id, Collection<FxReferenceMetaData<FxPK>> metaData) throws FxApplicationException;
 
     /**
      * Merges the given metadata fields into the existing metadata stored in the items. Existing
@@ -223,12 +222,24 @@ public interface BriefcaseEngine {
      * Loads the metadata instance(s) associated to the briefcase items. If an item has no metadata
      * stored, it is not returned by this method.
      *
-     * @param id    the briefcase ID
+     * @param briefcaseId    the briefcase ID
      * @return      the metadata instances
      * @throws FxApplicationException   if the metadata could not be retrieved
      * @since 3.1
      */
-    List<FxReferenceMetaData<FxPK>> loadMetaData(long id) throws FxApplicationException;
+    List<FxReferenceMetaData<FxPK>> getMetaData(long briefcaseId) throws FxApplicationException;
+
+    /**
+     * Loads the metadata instance(s) associated to given briefcase item. If an item has no metadata
+     * stored, or no item with the given ID was found, null is returned.
+     *
+     * @param briefcaseId    the briefcase ID
+     * @param pk             the item PK
+     * @return      the metadata instances
+     * @throws FxApplicationException   if the metadata could not be retrieved
+     * @since 3.1
+     */
+    FxReferenceMetaData<FxPK> getMetaData(long briefcaseId, FxPK pk) throws FxApplicationException;
 
     /**
      * Removes the given items from the briefcase.

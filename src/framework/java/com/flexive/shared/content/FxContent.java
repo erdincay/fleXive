@@ -660,6 +660,18 @@ public class FxContent implements Serializable {
     }
 
     /**
+     * Convenience method which saves this FxContent in a new version and returns the loaded instance.
+     *
+     * @return saved FxContent
+     * @throws FxApplicationException on errors
+     * @since 3.1
+     */
+    public FxContent saveNewVersion() throws FxApplicationException {
+        final ContentEngine ce = EJBLookup.getContentEngine();
+        return ce.load(ce.createNewVersion(this));
+    }
+
+    /**
      * Create (if possible and not already exists) the given XPath
      *
      * @param XPath the XPath to create

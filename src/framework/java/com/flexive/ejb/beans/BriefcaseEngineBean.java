@@ -463,7 +463,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void replaceMetaData(long id, Collection<FxReferenceMetaData<FxPK>> metadata) throws FxApplicationException {
+    public void setMetaData(long id, Collection<FxReferenceMetaData<FxPK>> metadata) throws FxApplicationException {
         checkEditBriefcase(load(id));
         Connection con = null;
         
@@ -520,7 +520,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
             con = Database.getDbConnection();
 
             // merge changes into existing metadata
-            final List<FxReferenceMetaData<FxPK>> currentMeta = loadMetaData(con, id, true);
+            final List<FxReferenceMetaData<FxPK>> currentMeta = loadMetaData(con, id, -1, true);
             for (FxReferenceMetaData<FxPK> update : metaData) {
                 if (update.getReference() == null) {
                     throw new FxUpdateException(LOG, "ex.briefcase.metadata.update.reference");
@@ -556,13 +556,13 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public List<FxReferenceMetaData<FxPK>> loadMetaData(long id) throws FxApplicationException {
-        load(id);   // check read permissions
+    public List<FxReferenceMetaData<FxPK>> getMetaData(long briefcaseId) throws FxApplicationException {
+        load(briefcaseId);   // check read permissions
         Connection con = null;
 
         try {
             con = Database.getDbConnection();
-            return loadMetaData(con, id, false);
+            return loadMetaData(con, briefcaseId, -1, false);
         } catch (SQLException e) {
             throw new FxLoadException(LOG, e);
         } finally {
@@ -570,14 +570,33 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
         }
     }
 
-    private List<FxReferenceMetaData<FxPK>> loadMetaData(Connection con, long id, boolean forUpdate) throws FxApplicationException {
+    public FxReferenceMetaData<FxPK> getMetaData(long briefcaseId, FxPK pk) throws FxApplicationException {
+        load(briefcaseId);   // check read permissions
+        Connection con = null;
+
+        try {
+            con = Database.getDbConnection();
+            final List<FxReferenceMetaData<FxPK>> meta = loadMetaData(con, briefcaseId, pk.getId(), false);
+            return meta.isEmpty() ? null : meta.get(0);
+        } catch (SQLException e) {
+            throw new FxLoadException(LOG, e);
+        } finally {
+            Database.closeObjects(BriefcaseEngineBean.class, con, null);
+        }
+    }
+
+    private List<FxReferenceMetaData<FxPK>> loadMetaData(Connection con, long id, long itemId, boolean forUpdate) throws FxApplicationException {
         PreparedStatement stmt = null;
         try {
             final List<FxReferenceMetaData<FxPK>> result = Lists.newArrayList();
             stmt = con.prepareStatement("SELECT id, metadata FROM " + TBL_BRIEFCASE_DATA
                     + " WHERE briefcase_id=?"
+                    + (itemId == -1 ? "" : " AND id=?")
                     + (forUpdate ? " FOR UPDATE" : ""));
             stmt.setLong(1, id);
+            if (itemId != -1) {
+                stmt.setLong(2, itemId);
+            }
             final ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 result.add(
@@ -612,7 +631,8 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
         final String colMANDATOR = briefcaseTblAlias + "MANDATOR";
         final String colACL = briefcaseTblAlias + "ACL";
         final String colCREATED_BY = briefcaseTblAlias + "CREATED_BY";
-        filter.append("(").append(colCREATED_BY).append("=").append(ticket.getUserId());
+        filter.append("((").append(colCREATED_BY).append("=").append(ticket.getUserId())
+                .append(" AND ").append(colACL).append(" IS NULL)");
         if (includeShared) {
             if (ticket.isGlobalSupervisor()) {
                 // add all shared

@@ -58,7 +58,6 @@ import static com.flexive.tests.embedded.FxTestUtils.login;
 import static com.flexive.tests.embedded.FxTestUtils.logout;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
-import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
 import org.testng.Assert;
@@ -213,7 +212,7 @@ public class SearchEngineTest {
             meta2.put("secondkey", "anothervalue");
             getBriefcaseEngine().mergeMetaData(bcId, Arrays.asList(meta1, meta2));
 
-            final List<FxReferenceMetaData<FxPK>> dbMeta = getBriefcaseEngine().loadMetaData(bcId);
+            final List<FxReferenceMetaData<FxPK>> dbMeta = getBriefcaseEngine().getMetaData(bcId);
             assertEquals(FxReferenceMetaData.findByContent(dbMeta, meta1.getReference()).get("firstkey"), "somevalue");
             assertEquals(FxReferenceMetaData.findByContent(dbMeta, meta2.getReference()).get("secondkey"), "anothervalue");
 

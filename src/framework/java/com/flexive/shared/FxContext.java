@@ -101,11 +101,11 @@ public class FxContext implements Serializable {
     private long nodeId = -1;
     private DivisionData divisionData;
 
-    protected static UserTicket getLastUserTicket(HttpSession session) {
+    private static UserTicket getLastUserTicket(HttpSession session) {
         return (UserTicket) session.getAttribute("LAST_USERTICKET");
     }
 
-    protected static void setLastUserTicket(HttpSession session, UserTicket lastUserTicket) {
+    private static void setLastUserTicket(HttpSession session, UserTicket lastUserTicket) {
         session.setAttribute("LAST_USERTICKET", lastUserTicket);
     }
 
@@ -467,60 +467,6 @@ public class FxContext implements Serializable {
         return "/" + getApplicationId() + path;
     }
 
-    /**
-     * Gets the session information for the running thread
-     *
-     * @return the session information for the running thread
-     */
-    public static FxContext get() {
-        FxContext result = info.get();
-        if (result == null) {
-            result = new FxContext();
-            info.set(result);
-        }
-        return result;
-    }
-
-    /**
-     * Returns the user ticket associated to the current thread.
-     *
-     * @return  the user ticket associated to the current thread.
-     */
-    public static UserTicket getUserTicket() {
-        final FxContext context = get();
-        if (context == null) {
-            throw new NullPointerException("FxContext not set in current thread.");
-        }
-        return context.getTicket();
-    }
-
-    /**
-     * Replace the threadlocal context with another one.
-     * This method provides a mean to escalate the current context to other threads.
-     * As a safeguard, the context can only be replaced if the current UserTicket is <code>null</code>
-     *
-     * @param context the FxContext to use as replacement
-     * @deprecated use {@link com.flexive.shared.FxContext#replace()} 
-     */
-    @Deprecated
-    public static void replace(FxContext context) {
-        if (FxContext.getUserTicket() == null)
-            context.replace();
-    }
-
-    /**
-     * Get a FxContext instance to use at the EJB layer.
-     * The returned context is a guest user only!
-     * This method should only be used internally (for use in different threads, etc.)
-     *
-     * @param template the template to use for the division
-     * @return FxContext
-     */
-    public static FxContext _getEJBContext(FxContext template) {
-        FxContext ctx = new FxContext();
-        ctx.division = template.division;
-        return ctx;
-    }
 
     /**
      * Reload the UserTicket, needed i.e. when language settings change
@@ -763,5 +709,81 @@ public class FxContext implements Serializable {
     @Override
     public String toString() {
         return this.getClass() + "[sessionId:" + sessionID + ";requestUri:" + requestURI + "]";
+    }
+
+    // ------ static accessors for frequently used operations -----------
+
+    /**
+     * Gets the session information for the running thread
+     *
+     * @return the session information for the running thread
+     */
+    public static FxContext get() {
+        FxContext result = info.get();
+        if (result == null) {
+            result = new FxContext();
+            info.set(result);
+        }
+        return result;
+    }
+
+    /**
+     * Returns the user ticket associated to the current thread.
+     *
+     * @return  the user ticket associated to the current thread.
+     */
+    public static UserTicket getUserTicket() {
+        final FxContext context = get();
+        if (context == null) {
+            throw new NullPointerException("FxContext not set in current thread.");
+        }
+        return context.getTicket();
+    }
+
+    /**
+     * Replace the threadlocal context with another one.
+     * This method provides a mean to escalate the current context to other threads.
+     * As a safeguard, the context can only be replaced if the current UserTicket is <code>null</code>
+     *
+     * @param context the FxContext to use as replacement
+     * @deprecated use {@link com.flexive.shared.FxContext#replace()}
+     */
+    @Deprecated
+    public static void replace(FxContext context) {
+        if (FxContext.getUserTicket() == null)
+            context.replace();
+    }
+
+    /**
+     * Shortcut for {@code FxContext.get().runAsSystem()}.
+     *
+     * @since 3.1
+     */
+    public static void startRunningAsSystem() {
+        FxContext.get().runAsSystem();
+    }
+
+    /**
+     * Shortcut for {@code FxContext.get().stopRunAsSystem()}.
+     *
+     * @since 3.1
+     */
+    public static void stopRunningAsSystem() {
+        FxContext.get().stopRunAsSystem();
+    }
+
+
+    /**
+     * Get a FxContext instance to use at the EJB layer.
+     * The returned context is a guest user only!
+     * This method should only be used internally (for use in different threads, etc.)
+     *
+     * @param template the template to use for the division
+     * @return FxContext
+     */
+    public static FxContext _getEJBContext(FxContext template) {
+        FxContext ctx = new FxContext();
+        ctx.division = template.division;
+        return ctx;
     }
 }

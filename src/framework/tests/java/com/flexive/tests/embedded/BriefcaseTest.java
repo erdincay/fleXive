@@ -32,10 +32,14 @@
 package com.flexive.tests.embedded;
 
 import static com.flexive.shared.EJBLookup.getBriefcaseEngine;
+import static com.flexive.shared.EJBLookup.getSearchEngine;
 import com.flexive.shared.FxReferenceMetaData;
+import com.flexive.shared.FxContext;
+import com.flexive.shared.security.ACL;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxLogoutFailedException;
+import com.flexive.shared.exceptions.FxNoAccessException;
 import com.flexive.shared.interfaces.BriefcaseEngine;
 import com.flexive.shared.search.Briefcase;
 import com.flexive.shared.search.FxResultSet;
@@ -43,8 +47,7 @@ import com.flexive.shared.search.query.PropertyValueComparator;
 import com.flexive.shared.search.query.SqlQueryBuilder;
 import static com.flexive.tests.embedded.FxTestUtils.login;
 import static com.flexive.tests.embedded.FxTestUtils.logout;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -62,7 +65,7 @@ import java.util.List;
 public class BriefcaseTest {
     @BeforeClass
     public void beforeClass() throws Exception {
-        login(TestUsers.SUPERVISOR);
+        login(TestUsers.REGULAR);
     }
 
     @AfterClass
@@ -138,7 +141,7 @@ public class BriefcaseTest {
             // move to second briefcase
             assertEquals(be.load(briefcase2).getSize(), 0);
             be.moveItems(briefcase1, briefcase2, ids);
-            
+
             assertEquals(be.load(briefcase1).getSize(), 0);
             assertEquals(be.load(briefcase2).getSize(), ids.size());
         } finally {
@@ -154,7 +157,7 @@ public class BriefcaseTest {
             final List<FxPK> ids = getFolders();
             getBriefcaseEngine().addItems(briefcaseId, ids);
 
-            final List<FxReferenceMetaData<FxPK>> emptyMeta = getBriefcaseEngine().loadMetaData(briefcaseId);
+            final List<FxReferenceMetaData<FxPK>> emptyMeta = getBriefcaseEngine().getMetaData(briefcaseId);
             assertEquals(emptyMeta.size(), ids.size());
             final FxPK reference = emptyMeta.get(0).getReference();
             assertTrue(emptyMeta.get(0).isEmpty(), "Empty metadata should be empty");
@@ -162,9 +165,15 @@ public class BriefcaseTest {
             final FxReferenceMetaData<FxPK> meta = FxReferenceMetaData.createNew(ids.get(0));
             meta.put("akey", "avalue");
             meta.put("bkey", "bvalue");
-            getBriefcaseEngine().replaceMetaData(briefcaseId, asList(meta));
+            getBriefcaseEngine().setMetaData(briefcaseId, asList(meta));
 
-            final List<FxReferenceMetaData<FxPK>> newMeta = getBriefcaseEngine().loadMetaData(briefcaseId);
+            final List<FxReferenceMetaData<FxPK>> newMeta = getBriefcaseEngine().getMetaData(briefcaseId);
+            // check BriefcaseEngine#getMetaData(long, FxPK)
+            assertFalse(newMeta.isEmpty());
+            for (FxReferenceMetaData<FxPK> metaData : newMeta) {
+                assertEquals(getBriefcaseEngine().getMetaData(briefcaseId, metaData.getReference()), metaData);
+            }
+
             assertEquals(newMeta.size(), ids.size());
             assertMetaDataSize(newMeta, reference, 2);
             assertMetadata(newMeta, reference, "akey", "avalue");
@@ -175,7 +184,7 @@ public class BriefcaseTest {
             update.put("akey", "newvalue");
             update.put("newkey", 123);
             getBriefcaseEngine().mergeMetaData(briefcaseId, asList(update));
-            final List<FxReferenceMetaData<FxPK>> updatedMeta = getBriefcaseEngine().loadMetaData(briefcaseId);
+            final List<FxReferenceMetaData<FxPK>> updatedMeta = getBriefcaseEngine().getMetaData(briefcaseId);
             assertEquals(updatedMeta.size(), ids.size());
             assertMetaDataSize(updatedMeta, reference, 3);
             assertMetadata(updatedMeta, reference, "akey", "newvalue");
@@ -186,7 +195,7 @@ public class BriefcaseTest {
             final FxReferenceMetaData<FxPK> removeUpdate = FxReferenceMetaData.createNew(reference);
             removeUpdate.put("newkey", "");
             getBriefcaseEngine().mergeMetaData(briefcaseId, asList(removeUpdate));
-            final List<FxReferenceMetaData<FxPK>> updatedMeta2 = getBriefcaseEngine().loadMetaData(briefcaseId);
+            final List<FxReferenceMetaData<FxPK>> updatedMeta2 = getBriefcaseEngine().getMetaData(briefcaseId);
             assertEquals(updatedMeta2.size(), ids.size());
             assertMetaDataSize(updatedMeta2, reference, 2);
             assertMetadata(updatedMeta2, reference, "akey", "newvalue");
@@ -195,6 +204,66 @@ public class BriefcaseTest {
             getBriefcaseEngine().remove(briefcaseId);
         }
     }
+
+    @Test
+    public void systemInternalBriefcase() throws FxApplicationException {
+        // use the NULL ACL to create a briefcase that can be read and queried only by the global supervisor
+        // or with FxContext.get().runAsSystem()
+        final List<FxPK> pks = getSearchEngine().search("SELECT @pk").<FxPK>collectColumn(1).subList(0, 10);
+        assertFalse(pks.isEmpty());
+
+        try {
+            final long id = getBriefcaseEngine().create("systemInternalBriefcase", "", ACL.NULL_ACL_ID);
+            fail("Normal user shouldn't be able to create a system internal briefcase");
+            getBriefcaseEngine().remove(id);
+        } catch (FxNoAccessException e) {
+            // pass
+        }
+
+        final long id;
+        FxContext.get().runAsSystem();
+        try {
+            id = getBriefcaseEngine().create("systemInternalBriefcase", "", ACL.NULL_ACL_ID);
+        } finally {
+            FxContext.get().stopRunAsSystem();
+        }
+        try {
+            // try to read as a normal user
+            try {
+                getBriefcaseEngine().load(id);
+                fail("Normal user shouldn't be able to load the system internal briefcase.");
+            } catch (FxApplicationException e) {
+                // pass
+            }
+
+            // try to update as a normal user
+            try {
+                getBriefcaseEngine().addItems(id, pks);
+                fail("Normal user shouldn't be able to add items to a system internal briefcase.");
+            } catch (FxApplicationException e) {
+                // pass
+            }
+
+            // try to read/update as a system user
+            FxContext.get().runAsSystem();
+            try {
+                getBriefcaseEngine().load(id);
+                getBriefcaseEngine().removeItems(id, pks);
+                assertEquals(getBriefcaseEngine().load(id).getSize(), 0, "Items should have been removed");
+            } finally {
+                FxContext.get().stopRunAsSystem();
+            }
+
+        } finally {
+            FxContext.get().runAsSystem();
+            try {
+                getBriefcaseEngine().remove(id);
+            } finally {
+                FxContext.get().stopRunAsSystem();
+            }
+        }
+    }
+
 
     private void assertMetaDataSize(List<FxReferenceMetaData<FxPK>> updatedMeta2, FxPK reference, int size) {
         assertEquals(FxReferenceMetaData.find(updatedMeta2, reference).size(), size);
