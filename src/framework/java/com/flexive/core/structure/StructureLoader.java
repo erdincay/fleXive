@@ -125,6 +125,7 @@ public final class StructureLoader {
             environment.setScriptMappings(loader.loadScriptMapping(con, environment));
             environment.resolveDependencies();
             environment.updateTimeStamp();
+            CacheAdmin.environmentChanged();
             //structure might have been loaded meanwhile on another node - only put it into the cache if forcing
             if (FxEnvironmentUtils.cacheGet(divisionId, CacheAdmin.ENVIRONMENT_BASE, CacheAdmin.ENVIRONMENT_RUNTIME) == null || forceReload) {
                 FxEnvironmentUtils.cachePut(divisionId, CacheAdmin.ENVIRONMENT_BASE, CacheAdmin.ENVIRONMENT_RUNTIME, environment);

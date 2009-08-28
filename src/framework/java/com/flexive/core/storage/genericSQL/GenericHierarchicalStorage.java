@@ -897,7 +897,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         if (data == null || data.isEmpty())
             return;
         if (data.getPropertyAssignment().isFlatStorageEntry()) {
-            if (ft != null)
+            if (ft != null && prop.isFulltextIndexed())
                 ft.index(data);
             return;
         }

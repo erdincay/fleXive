@@ -49,6 +49,11 @@ public class FxStructureOption implements Serializable {
 
     private static final long serialVersionUID = 737017384585248182L;
     public final static String OPTION_MULTILANG = "MULTILANG";
+    /**
+     * Fulltext indexed?
+     * @since 3.1
+     */
+    public final static String OPTION_FULLTEXT = "FULLTEXT";
     public final static String OPTION_SHOW_OVERVIEW = "SHOW.OVERVIEW";
     public final static String OPTION_HTML_EDITOR = "HTML.EDITOR";
     public final static String OPTION_SEARCHABLE = "SEARCHABLE";

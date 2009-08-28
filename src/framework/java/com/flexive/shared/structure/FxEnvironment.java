@@ -363,6 +363,15 @@ public interface FxEnvironment extends Serializable {
     FxPropertyAssignment getPropertyAssignment(String xpath);
 
     /**
+     * Return the property assignment for the given ID.
+     *
+     * @param id    the requested ID
+     * @return the property assignment that matches the given XPath
+     * @since 3.1
+     */
+    FxPropertyAssignment getPropertyAssignment(long id);
+
+    /**
      * Get an assignment by its id
      *
      * @param assignmentId assignment id

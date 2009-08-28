@@ -620,6 +620,13 @@ public final class FxFilteredEnvironment implements FxEnvironment {
     /**
      * {@inheritDoc}
      */
+    public FxPropertyAssignment getPropertyAssignment(long id) {
+        return environment.getPropertyAssignment(id);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public List<FxFlatStorageMapping> getFlatStorageMappings(String storage, long typeId, int level) {
         return environment.getFlatStorageMappings(storage, typeId, level);
     }

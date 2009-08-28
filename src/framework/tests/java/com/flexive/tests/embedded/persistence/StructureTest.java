@@ -1472,6 +1472,34 @@ public class StructureTest {
 
     }
 
+    @Test(groups = {"ejb", "structure"})
+    public void typeFastCreateTest() throws FxApplicationException {
+        // creates a type through FxTypeEdit's add... methods
+        final FxTypeEdit type = FxTypeEdit.createNew("typeFastCreateTest").save();
+        FxPK pk = null;
+        try {
+            type.addProperty("string", FxDataType.String1024).setMultiplicity(FxMultiplicity.MULT_1_1).save();
+            type.addGroup("group1").setLabel(new FxString(true, "group label")).save();
+            type.addProperty("group1/groupstring", FxDataType.String1024);
+            type.addGroup("group1/group2");
+            type.addProperty("group1/group2/group2string", FxDataType.String1024);
+            type.addProperty("number", FxDataType.Number);
+
+            // try to create some content...
+            final FxContent content = EJBLookup.getContentEngine().initialize(type.getId());
+            content.setValue("/string", "a value");
+            content.setValue("/group1/groupstring", "group value");
+            content.setValue("/group1/group2/group2string", "group 2 value");
+            content.setValue("/number", 123);
+            pk = content.save().getPk();
+        } finally {
+            if (pk != null) {
+                EJBLookup.getContentEngine().remove(pk);
+            }
+            EJBLookup.getTypeEngine().remove(type.getId());
+        }
+    }
+
     /**
      * Helper method to find the alias in a list of property assignments
      *

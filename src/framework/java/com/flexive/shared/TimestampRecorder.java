@@ -68,11 +68,13 @@ public class TimestampRecorder implements Serializable {
      * recorded yet.
      *
      * @param name  Timestamp name which will be included in the string representation
+     * @return      the time taken for the last task, in nanoseconds
      */
-    public void timestamp(String name) {
+    public long timestamp(String name) {
         final long nanos = System.nanoTime() - totalNanos - startNanos;
         timestamps.add(new Pair<String, Long>(name, nanos));
         totalNanos += nanos;
+        return nanos;
     }
 
     /**

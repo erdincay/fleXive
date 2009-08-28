@@ -34,6 +34,7 @@ package com.flexive.shared.structure;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxLanguage;
 import com.flexive.shared.XPathElement;
+import com.flexive.shared.EJBLookup;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxNotFoundException;
@@ -545,6 +546,17 @@ public class FxPropertyAssignmentEdit extends FxPropertyAssignment {
             //noinspection ThrowableInstanceNeverThrown
             throw new FxApplicationException("ex.structure.noEditableProperty").asRuntimeException();
         else return (FxPropertyEdit) property;
+    }
+
+    /**
+     * Save this assignment and return the saved instance.
+     *
+     * @return  the saved assignment
+     * @since 3.1
+     */
+    public FxPropertyAssignmentEdit save() throws FxApplicationException {
+        final long id = EJBLookup.getAssignmentEngine().save(this, false);
+        return CacheAdmin.getEnvironment().getPropertyAssignment(id).asEditable();
     }
 
     /**

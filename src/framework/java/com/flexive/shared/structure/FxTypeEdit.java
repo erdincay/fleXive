@@ -34,14 +34,17 @@ package com.flexive.shared.structure;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxLanguage;
 import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.EJBLookup;
 import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
+import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.security.LifeCycleInfo;
 import com.flexive.shared.value.FxReference;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.workflow.Workflow;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.Serializable;
@@ -61,6 +64,7 @@ public class FxTypeEdit extends FxType implements Serializable {
     private boolean enableParentAssignments;
     private boolean removeInstancesWithRelationTypes;
     private List<FxTypeRelation> originalRelations;
+    private List<FxStructureOption> defaultOptions = Lists.newArrayList();
 
     /**
      * Constructor
@@ -751,6 +755,84 @@ public class FxTypeEdit extends FxType implements Serializable {
     }
 
     /**
+     * Set the default options for new assignments created with
+     * {@link #addProperty(String, FxDataType)}.
+     *
+     * @param defaultOptions    the default options
+     */
+    public void setDefaultOptions(List<FxStructureOption> defaultOptions) {
+        this.defaultOptions.clear();
+        this.defaultOptions.addAll(defaultOptions);
+    }
+
+    /**
+     * Add a new assignment to this type. The assignment is saved instantly and is returned to the caller.
+     *
+     * @param name      the assignment name
+     * @param dataType  the data type
+     * @return          the created assignment
+     * @throws FxApplicationException   on errors
+     * @since           3.1
+     */
+    public FxPropertyAssignmentEdit addProperty(String name, FxDataType dataType) throws FxApplicationException {
+        final String alias = getAssignmentAlias(name);
+        // create property
+        final FxPropertyEdit prop = FxPropertyEdit.createNew(
+                alias,
+                new FxString(true, alias),
+                new FxString(true, ""),
+                FxMultiplicity.MULT_0_1,
+                CacheAdmin.getEnvironment().getDefaultACL(ACLCategory.STRUCTURE),
+                dataType
+        );
+        prop.setAutoUniquePropertyName(true);
+        prop.setOptions(defaultOptions);
+        final long propId = EJBLookup.getAssignmentEngine().createProperty(
+                getId(),
+                prop,
+                getAssignmentParent(name)
+        );
+        return CacheAdmin.getEnvironment().getPropertyAssignment(propId).asEditable();
+    }
+
+    /**
+     * Add a new group to this type. The group assignment is saved instantly and is returned to the caller.
+     *
+     * @param name  the group name
+     * @return      the group assignment
+     * @throws FxApplicationException   on errors
+     * @since       3.1
+     */
+    public FxGroupAssignmentEdit addGroup(String name) throws FxApplicationException {
+        final String alias = getAssignmentAlias(name);
+        final FxGroupEdit group = FxGroupEdit.createNew(
+                alias,
+                new FxString(true, alias),
+                new FxString(true, ""),
+                false,
+                FxMultiplicity.MULT_0_1
+        );
+        final long groupId = EJBLookup.getAssignmentEngine().createGroup(
+                getId(),
+                group,
+                getAssignmentParent(name)
+        );
+        return ((FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment(groupId)).asEditable();
+    }
+
+    private String getAssignmentParent(String name) {
+        return name.indexOf('/') == -1
+                ? "/"
+                : (name.charAt(0) == '/' ? "" : "/")
+                + name.substring(0, name.lastIndexOf('/'));
+    }
+
+    private String getAssignmentAlias(String name) {
+        return name.indexOf('/') == -1 ? name : name.substring(name.lastIndexOf('/') + 1);
+    }
+
+
+    /**
      * Add or update a relation
      *
      * @param relation the relation to add or update
@@ -793,5 +875,16 @@ public class FxTypeEdit extends FxType implements Serializable {
      */
     public boolean isChanged() {
         return changed || getAddedRelations().size() > 0 || getRemovedRelations().size() > 0 || getUpdatedRelations().size() > 0;
+    }
+
+    /**
+     * Save the type and return the saved instance.
+     *
+     * @return  the saved instance.
+     * @since   3.1
+     */
+    public FxTypeEdit save() throws FxApplicationException {
+        final long id = EJBLookup.getTypeEngine().save(this);
+        return CacheAdmin.getEnvironment().getType(id).asEditable();
     }
 }

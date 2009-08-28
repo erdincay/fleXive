@@ -33,11 +33,14 @@ package com.flexive.shared.structure;
 
 import com.flexive.shared.FxContext;
 import com.flexive.shared.XPathElement;
+import com.flexive.shared.EJBLookup;
+import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.content.FxData;
 import com.flexive.shared.content.FxGroupData;
 import com.flexive.shared.exceptions.FxCreateException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxNotFoundException;
+import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.value.FxString;
 
@@ -369,5 +372,16 @@ public class FxGroupAssignment extends FxAssignment implements Serializable {
      */
     public FxGroupAssignmentEdit asEditable() {
         return new FxGroupAssignmentEdit(this);
+    }
+
+    /**
+     * Save this assignment and return the saved instance.
+     *
+     * @return  the saved assignment
+     * @since 3.1
+     */
+    public FxGroupAssignmentEdit save() throws FxApplicationException {
+        final long id = EJBLookup.getAssignmentEngine().save(this, true);
+        return ((FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment(id)).asEditable();
     }
 }

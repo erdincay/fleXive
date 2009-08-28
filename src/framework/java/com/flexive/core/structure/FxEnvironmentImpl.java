@@ -877,6 +877,19 @@ public final class FxEnvironmentImpl implements FxEnvironment {
     /**
      * {@inheritDoc}
      */
+    public FxPropertyAssignment getPropertyAssignment(long id) {
+        final FxAssignment assignment = getAssignment(id);
+        try {
+            return (FxPropertyAssignment) assignment;
+        } catch (ClassCastException e) {
+            throw new FxInvalidParameterException("id", "ex.structure.assignment.property.id",
+                    id, assignment.getClass()).asRuntimeException();
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public FxAssignment getAssignment(long assignmentId) {
         final FxAssignment result = assignments.get(assignmentId);
         if (result != null) {
