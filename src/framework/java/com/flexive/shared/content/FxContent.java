@@ -784,6 +784,30 @@ public class FxContent implements Serializable {
     }
 
     /**
+     * Check if a XPath exists in the content instance. The XPath may refer either to a property
+     * or a group.
+     *
+     * @param XPath the XPath to check
+     * @return if a value exists for the given XPath that is not empty
+     * @since 3.1
+     */
+    public boolean containsXPath(String XPath) {
+        try {
+            if (getValue(XPath) != null) {
+                return true;
+            }
+        } catch (FxRuntimeException e) {
+            // ignore, XPath exists but doesn't point to a property
+        }
+        try {
+            getGroupData(XPath);
+            return true;
+        } catch (FxRuntimeException e1) {
+            return false;
+        }
+    }
+
+    /**
      * Check if the given XPath is valid for this content.
      * This is a shortcut to the corresponding type's method!
      *

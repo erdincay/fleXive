@@ -51,8 +51,7 @@ import com.flexive.tests.embedded.ScriptingTest;
 import com.flexive.tests.embedded.TestUsers;
 import org.apache.commons.lang.RandomStringUtils;
 import org.testng.Assert;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.fail;
+import static org.testng.Assert.*;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -304,19 +303,21 @@ public class ContentEngineTest {
     @Test
     public void removeAddData() throws Exception {
         FxType testType = CacheAdmin.getEnvironment().getType(TEST_TYPE);
-        Assert.assertTrue(testType != null);
+        assertTrue(testType != null);
         FxContent test = co.initialize(testType.getId());
-        Assert.assertTrue(test != null);
+        assertTrue(test != null);
         test.setAclId(CacheAdmin.getEnvironment().getACL("Test ACL Content 1").getId());
 
-        Assert.assertTrue(test.getRootGroup().getCreateableChildren(true).size() == 6);
-        Assert.assertTrue(!test.getRootGroup().isRemoveable());
-        Assert.assertTrue(test.getGroupData("/TestGroup1").isRemoveable());
-        Assert.assertTrue(!test.getGroupData("/TestGroup1/TestGroup1_1").isRemoveable());
-        Assert.assertTrue(test.getPropertyData("/TestProperty1").isRemoveable());
-        Assert.assertTrue(!test.getPropertyData("/TestProperty2").isRemoveable());
-        Assert.assertTrue(test.getPropertyData("/TestProperty3").isRemoveable());
-        Assert.assertTrue(!test.getPropertyData("/TestProperty4").isRemoveable());
+        assertTrue(test.getRootGroup().getCreateableChildren(true).size() == 6);
+        assertTrue(!test.getRootGroup().isRemoveable());
+        assertTrue(test.containsXPath("/TestGroup1"));
+        assertTrue(test.getGroupData("/TestGroup1").isRemoveable());
+        assertTrue(test.containsXPath("/TestGroup1/Testgroup1_1"));
+        assertTrue(!test.getGroupData("/TestGroup1/TestGroup1_1").isRemoveable());
+        assertTrue(test.getPropertyData("/TestProperty1").isRemoveable());
+        assertTrue(!test.getPropertyData("/TestProperty2").isRemoveable());
+        assertTrue(test.getPropertyData("/TestProperty3").isRemoveable());
+        assertTrue(!test.getPropertyData("/TestProperty4").isRemoveable());
         test.remove("/TestGroup1/TestGroup1_2");
         try {
             test.getGroupData("/TestGroup1/TestGroup1_2");
@@ -328,21 +329,21 @@ public class ContentEngineTest {
             //expected
         }
         List<String> cr = test.getGroupData("/TestGroup1").getCreateableChildren(true);
-        Assert.assertTrue(cr.size() == 3);
-        Assert.assertTrue(cr.get(0).equals("/TESTGROUP1[1]/TESTPROPERTY1_3[2]"));
-        Assert.assertTrue(cr.get(1).equals("/TESTGROUP1[1]/TESTGROUP1_2[1]"));
-        Assert.assertTrue(cr.get(2).equals("/TESTGROUP1[1]/TESTGROUP1_3[2]"));
+        assertTrue(cr.size() == 3);
+        assertTrue(cr.get(0).equals("/TESTGROUP1[1]/TESTPROPERTY1_3[2]"));
+        assertTrue(cr.get(1).equals("/TESTGROUP1[1]/TESTGROUP1_2[1]"));
+        assertTrue(cr.get(2).equals("/TESTGROUP1[1]/TESTGROUP1_3[2]"));
         cr = test.getGroupData("/TestGroup1").getCreateableChildren(false);
 //        for(String xp: cr)
 //            System.out.println("==cr=> "+xp);
-        Assert.assertTrue(cr.size() == 1);
-        Assert.assertTrue(cr.get(0).equals("/TESTGROUP1[1]/TESTGROUP1_2[1]"));
+        assertTrue(cr.size() == 1);
+        assertTrue(cr.get(0).equals("/TESTGROUP1[1]/TESTGROUP1_2[1]"));
 
         test.getGroupData("/TestGroup1").explode(false);
-        Assert.assertTrue(test.getGroupData("/TestGroup1").getChildren().size() == 6);
-        Assert.assertTrue(test.getGroupData("/TESTGROUP1[1]/TESTGROUP1_2[1]").getChildren().size() == 3);
+        assertTrue(test.getGroupData("/TestGroup1").getChildren().size() == 6);
+        assertTrue(test.getGroupData("/TESTGROUP1[1]/TESTGROUP1_2[1]").getChildren().size() == 3);
         test.remove("/TESTGROUP1[1]/TESTGROUP1_2[1]");
-        Assert.assertTrue(test.getGroupData("/TestGroup1").getCreateableChildren(false).size() == 1);
+        assertTrue(test.getGroupData("/TestGroup1").getCreateableChildren(false).size() == 1);
 
         test.getGroupData("/TestGroup1").addEmptyChild("/TESTGROUP1[1]/TESTGROUP1_2[1]", FxData.POSITION_BOTTOM);
         test.getGroupData("/TestGroup1").addEmptyChild("/TESTGROUP1[1]/TESTGROUP1_2[2]", FxData.POSITION_BOTTOM);
@@ -381,44 +382,44 @@ public class ContentEngineTest {
     @Test
     public void contentComplex() throws Exception {
         FxType testType = CacheAdmin.getEnvironment().getType(TEST_TYPE);
-        Assert.assertTrue(testType != null);
+        assertTrue(testType != null);
         //initialize tests start
         FxContent test = co.initialize(testType.getId());
         test.setAclId(CacheAdmin.getEnvironment().getACL("Test ACL Content 1").getId());
-        Assert.assertTrue(test != null);
+        assertTrue(test != null);
         int rootSize = 9 + CacheAdmin.getEnvironment().getSystemInternalRootPropertyAssignments().size();
-        Assert.assertTrue(rootSize == test.getData("/").size(), "Root size expected " + rootSize + ", was " + test.getData("/").size());
+        assertTrue(rootSize == test.getData("/").size(), "Root size expected " + rootSize + ", was " + test.getData("/").size());
 //        FxGroupData groot = test.getData("/").get(0).getParent();
         //basic sanity checks
 //        Assert.assertTrue(groot.isEmpty()); TODO: isEmpty means no sys internal properties!
-        Assert.assertTrue(test.getData("/TestProperty1").get(0).getAssignmentMultiplicity().toString().equals("0..1"));
-        Assert.assertTrue(1 == test.getData("/TestProperty1").get(0).getIndex());
-        Assert.assertTrue(!(test.getData("/TestProperty1").get(0).mayCreateMore())); //should be at multiplicity 1
-        Assert.assertTrue(!(test.getPropertyData("/TestProperty2").mayCreateMore())); //should be at multiplicity 1
-        Assert.assertTrue(test.getPropertyData("/TestProperty3").mayCreateMore()); //max of 5
-        Assert.assertTrue(test.getGroupData("/TestGroup1").mayCreateMore()); //max of 2
-        Assert.assertTrue(1 == test.getGroupData("/TestGroup1").getCreateableElements()); //1 left to create
-        Assert.assertTrue(1 == test.getGroupData("/TestGroup1").getRemoveableElements()); //1 left to remove
-        Assert.assertTrue(6 == test.getData("/TestGroup1").size());
-        Assert.assertTrue(0 == test.getPropertyData("/TestGroup1/TestGroup1_1/TestProperty1_1_1").getCreateableElements()); //0 left
-        Assert.assertTrue(1 == test.getPropertyData("/TestGroup1/TestGroup1_1/TestProperty1_1_1").getRemoveableElements()); //0 left
-        Assert.assertTrue(!(test.getPropertyData("/TestGroup1/TestGroup1_1/TestProperty1_1_1").mayCreateMore())); //0 left
-        Assert.assertTrue(1 == test.getGroupData("/TestGroup1/TestGroup1_2").getIndex());
+        assertTrue(test.getData("/TestProperty1").get(0).getAssignmentMultiplicity().toString().equals("0..1"));
+        assertTrue(1 == test.getData("/TestProperty1").get(0).getIndex());
+        assertTrue(!(test.getData("/TestProperty1").get(0).mayCreateMore())); //should be at multiplicity 1
+        assertTrue(!(test.getPropertyData("/TestProperty2").mayCreateMore())); //should be at multiplicity 1
+        assertTrue(test.getPropertyData("/TestProperty3").mayCreateMore()); //max of 5
+        assertTrue(test.getGroupData("/TestGroup1").mayCreateMore()); //max of 2
+        assertTrue(1 == test.getGroupData("/TestGroup1").getCreateableElements()); //1 left to create
+        assertTrue(1 == test.getGroupData("/TestGroup1").getRemoveableElements()); //1 left to remove
+        assertTrue(6 == test.getData("/TestGroup1").size());
+        assertTrue(0 == test.getPropertyData("/TestGroup1/TestGroup1_1/TestProperty1_1_1").getCreateableElements()); //0 left
+        assertTrue(1 == test.getPropertyData("/TestGroup1/TestGroup1_1/TestProperty1_1_1").getRemoveableElements()); //0 left
+        assertTrue(!(test.getPropertyData("/TestGroup1/TestGroup1_1/TestProperty1_1_1").mayCreateMore())); //0 left
+        assertTrue(1 == test.getGroupData("/TestGroup1/TestGroup1_2").getIndex());
         FxPropertyData p = test.getPropertyData("/TestGroup1/TestGroup1_2/TestGroup1_2_1/TestProperty1_2_1_1");
-        Assert.assertTrue(1 == p.getIndex());
-        Assert.assertTrue(p.isEmpty());
-        Assert.assertTrue(p.isProperty());
-        Assert.assertTrue("TESTPROPERTY1_2_1_1".equals(p.getAlias()));
-        Assert.assertTrue("TESTGROUP1_2_1".equals(p.getParent().getAlias()));
-        Assert.assertTrue(p.getAssignmentMultiplicity().equals(new FxMultiplicity(0, 2)));
-        Assert.assertTrue(4 == p.getIndices().length);
+        assertTrue(1 == p.getIndex());
+        assertTrue(p.isEmpty());
+        assertTrue(p.isProperty());
+        assertTrue("TESTPROPERTY1_2_1_1".equals(p.getAlias()));
+        assertTrue("TESTGROUP1_2_1".equals(p.getParent().getAlias()));
+        assertTrue(p.getAssignmentMultiplicity().equals(new FxMultiplicity(0, 2)));
+        assertTrue(4 == p.getIndices().length);
         //check required with empty values
         try {
             test.checkValidity();
             fail("checkValidity() succeeded when it should not!");
         } catch (FxInvalidParameterException e) {
             //ok
-            Assert.assertTrue("ex.content.required.missing".equals(e.getExceptionMessage().getKey()));
+            assertTrue("ex.content.required.missing".equals(e.getExceptionMessage().getKey()));
         }
         //fill all required properties
         FxString testValue = new FxString(FxLanguage.ENGLISH, TEST_EN);
@@ -439,7 +440,7 @@ public class ContentEngineTest {
             fail("checkValidity() succeeded but /TestGroup1/TestProperty1_3 is missing!");
         } catch (FxInvalidParameterException e) {
             //ok
-            Assert.assertTrue("ex.content.required.missing".equals(e.getExceptionMessage().getKey()));
+            assertTrue("ex.content.required.missing".equals(e.getExceptionMessage().getKey()));
         }
         test.setValue("/TestGroup1[1]/TestProperty1_3", testValue);
         try {
@@ -457,10 +458,10 @@ public class ContentEngineTest {
         co.remove(pk);
         //test /TestGroup1[2]...
         FxGroupData gd = test.getGroupData("/TestGroup1");
-        Assert.assertTrue(gd.mayCreateMore());
-        Assert.assertTrue(1 == gd.getCreateableElements()); //1 more should be createable
+        assertTrue(gd.mayCreateMore());
+        assertTrue(1 == gd.getCreateableElements()); //1 more should be createable
         gd.createNew(FxData.POSITION_BOTTOM);
-        Assert.assertTrue(test.getGroupData("/TestGroup1[2]").isEmpty());
+        assertTrue(test.getGroupData("/TestGroup1[2]").isEmpty());
         //should still be valid since [2] is empty
         try {
             test.checkValidity();
@@ -472,7 +473,7 @@ public class ContentEngineTest {
         pk = co.save(test);
         FxContent testLoad = co.load(pk);
         final String transIt = ((FxString) testLoad.getPropertyData("/TestGroup1[2]/TestProperty1_3").getValue()).getTranslation(FxLanguage.ITALIAN);
-        Assert.assertTrue(TEST_IT.equals(transIt), "Expected italian translation '" + TEST_IT + "', got: '" + transIt + "' for pk " + pk);
+        assertTrue(TEST_IT.equals(transIt), "Expected italian translation '" + TEST_IT + "', got: '" + transIt + "' for pk " + pk);
         co.remove(pk);
         pk = co.save(test);
         FxContent testLoad2 = co.load(pk);
@@ -480,34 +481,34 @@ public class ContentEngineTest {
         number.setTranslation(FxLanguage.ENGLISH, 43);
         testLoad2.setValue("/TestNumber", number);
         FxNumber numberSL = new FxNumber(false, FxLanguage.GERMAN, 12);
-        Assert.assertTrue(numberSL.getDefaultLanguage() == FxLanguage.SYSTEM_ID);
-        Assert.assertTrue(12 == numberSL.getTranslation(FxLanguage.FRENCH));
+        assertTrue(numberSL.getDefaultLanguage() == FxLanguage.SYSTEM_ID);
+        assertTrue(12 == numberSL.getTranslation(FxLanguage.FRENCH));
         numberSL.setTranslation(FxLanguage.ITALIAN, 13);
-        Assert.assertTrue(13 == numberSL.getTranslation(FxLanguage.FRENCH));
+        assertTrue(13 == numberSL.getTranslation(FxLanguage.FRENCH));
         testLoad2.setValue("/TestNumberSL", numberSL);
         FxFloat fxFloat = new FxFloat(true, FxLanguage.GERMAN, 42.42f);
         fxFloat.setTranslation(FxLanguage.ENGLISH, 43.43f);
         testLoad2.setValue("/TestFloat", fxFloat);
-        Assert.assertTrue(42 == ((FxNumber) testLoad2.getPropertyData("/TestNumber").getValue()).getDefaultTranslation(), "Default translation invalid (should be 42 for german, before save)");
-        Assert.assertTrue(43 == ((FxNumber) testLoad2.getPropertyData("/TestNumber").getValue()).getTranslation(FxLanguage.ENGLISH), "English translation invalid (should be 43, before save)");
-        Assert.assertTrue(testLoad2.getPropertyData("/TestNumber").getValue().hasDefaultLanguage());
-        Assert.assertTrue(42.42f == ((FxFloat) testLoad2.getPropertyData("/TestFloat").getValue()).getDefaultTranslation(), "Default translation invalid (should be 42.42f for german, before save)");
-        Assert.assertTrue(43.43f == ((FxFloat) testLoad2.getPropertyData("/TestFloat").getValue()).getTranslation(FxLanguage.ENGLISH), "English translation invalid (should be 43.43f, before save)");
-        Assert.assertTrue(testLoad2.getPropertyData("/TestFloat").getValue().hasDefaultLanguage());
+        assertTrue(42 == ((FxNumber) testLoad2.getPropertyData("/TestNumber").getValue()).getDefaultTranslation(), "Default translation invalid (should be 42 for german, before save)");
+        assertTrue(43 == ((FxNumber) testLoad2.getPropertyData("/TestNumber").getValue()).getTranslation(FxLanguage.ENGLISH), "English translation invalid (should be 43, before save)");
+        assertTrue(testLoad2.getPropertyData("/TestNumber").getValue().hasDefaultLanguage());
+        assertTrue(42.42f == ((FxFloat) testLoad2.getPropertyData("/TestFloat").getValue()).getDefaultTranslation(), "Default translation invalid (should be 42.42f for german, before save)");
+        assertTrue(43.43f == ((FxFloat) testLoad2.getPropertyData("/TestFloat").getValue()).getTranslation(FxLanguage.ENGLISH), "English translation invalid (should be 43.43f, before save)");
+        assertTrue(testLoad2.getPropertyData("/TestFloat").getValue().hasDefaultLanguage());
         FxPK saved = co.save(testLoad2);
         FxContent testLoad3 = co.load(saved);
-        Assert.assertTrue(42 == ((FxNumber) testLoad3.getPropertyData("/TestNumber").getValue()).getDefaultTranslation(), "Default translation invalid (should be 42 for german, after load)");
-        Assert.assertTrue(43 == ((FxNumber) testLoad3.getPropertyData("/TestNumber").getValue()).getTranslation(FxLanguage.ENGLISH), "English translation invalid (should be 43, after load)");
-        Assert.assertTrue(13 == ((FxNumber) testLoad3.getPropertyData("/TestNumberSL").getValue()).getTranslation(FxLanguage.ENGLISH), "English translation invalid (should be 13, after load)");
-        Assert.assertTrue(!testLoad3.getPropertyData("/TestNumberSL").getValue().isMultiLanguage(), "Single language value expected");
-        Assert.assertTrue(testLoad3.getPropertyData("/TestNumber").getValue().hasDefaultLanguage(), "Missing default language after load");
-        Assert.assertTrue(42.42f == ((FxFloat) testLoad3.getPropertyData("/TestFloat").getValue()).getDefaultTranslation(), "Default translation invalid (should be 42.42f for german, before save)");
-        Assert.assertTrue(43.43f == ((FxFloat) testLoad3.getPropertyData("/TestFloat").getValue()).getTranslation(FxLanguage.ENGLISH), "English translation invalid (should be 43.43f, before save)");
-        Assert.assertTrue(testLoad3.getPropertyData("/TestFloat").getValue().hasDefaultLanguage(), "Missing default language after load");
+        assertTrue(42 == ((FxNumber) testLoad3.getPropertyData("/TestNumber").getValue()).getDefaultTranslation(), "Default translation invalid (should be 42 for german, after load)");
+        assertTrue(43 == ((FxNumber) testLoad3.getPropertyData("/TestNumber").getValue()).getTranslation(FxLanguage.ENGLISH), "English translation invalid (should be 43, after load)");
+        assertTrue(13 == ((FxNumber) testLoad3.getPropertyData("/TestNumberSL").getValue()).getTranslation(FxLanguage.ENGLISH), "English translation invalid (should be 13, after load)");
+        assertTrue(!testLoad3.getPropertyData("/TestNumberSL").getValue().isMultiLanguage(), "Single language value expected");
+        assertTrue(testLoad3.getPropertyData("/TestNumber").getValue().hasDefaultLanguage(), "Missing default language after load");
+        assertTrue(42.42f == ((FxFloat) testLoad3.getPropertyData("/TestFloat").getValue()).getDefaultTranslation(), "Default translation invalid (should be 42.42f for german, before save)");
+        assertTrue(43.43f == ((FxFloat) testLoad3.getPropertyData("/TestFloat").getValue()).getTranslation(FxLanguage.ENGLISH), "English translation invalid (should be 43.43f, before save)");
+        assertTrue(testLoad3.getPropertyData("/TestFloat").getValue().hasDefaultLanguage(), "Missing default language after load");
         final String transIt2 = ((FxString) testLoad3.getPropertyData("/TestGroup1[2]/TestProperty1_3").getValue()).getTranslation(FxLanguage.ITALIAN);
-        Assert.assertTrue(TEST_IT.equals(transIt2), "Expected italian translation '" + TEST_IT + "', got: '" + transIt2 + "'");
-        Assert.assertTrue(1 == co.removeForType(testType.getId()), "Only one instance should be removed!");
-        Assert.assertTrue(0 == co.removeForType(testType.getId()), "No instance should be left to remove!");
+        assertTrue(TEST_IT.equals(transIt2), "Expected italian translation '" + TEST_IT + "', got: '" + transIt2 + "'");
+        assertTrue(1 == co.removeForType(testType.getId()), "Only one instance should be removed!");
+        assertTrue(0 == co.removeForType(testType.getId()), "No instance should be left to remove!");
 
         // /TestNumberSL has a max. multiplicity of 2
         //since FX-473 null should be returned if not set
@@ -532,7 +533,7 @@ public class ContentEngineTest {
     @Test
     public void getValues() throws Exception {
         FxType testType = CacheAdmin.getEnvironment().getType(TEST_TYPE);
-        Assert.assertTrue(testType != null);
+        assertTrue(testType != null);
         FxContent test = co.initialize(testType.getId());
         final String XP = "/TestProperty3";
         assertEquals(test.getValues(XP).size(), 1); //initialized with 1 empty entry
@@ -565,7 +566,8 @@ public class ContentEngineTest {
         try {
             FxContent loaded = co.load(pk);
             //test setting a value that is not present in the loaded content
-            Assert.assertFalse(loaded.containsValue("/TestProperty1"));
+            assertFalse(loaded.containsValue("/TestProperty1"));
+            assertFalse(loaded.containsXPath("/TestProperty1"));
             loaded.setValue(
                     testType.getPropertyAssignment("/TestProperty1").getXPath(), 
                     "Test1"
@@ -590,9 +592,9 @@ public class ContentEngineTest {
             //test if shared message loading works
             FxNoAccess noAccess = new FxNoAccess(getUserTicket(), new FxString("test"));
             if (getUserTicket().getLanguage().getId() == FxLanguage.ENGLISH)
-                Assert.assertTrue("Access denied!".equals(noAccess.getDefaultTranslation()), "Shared message loading failed! Expected [Access denied!] got: [" + noAccess.getDefaultTranslation() + "]");
+                assertTrue("Access denied!".equals(noAccess.getDefaultTranslation()), "Shared message loading failed! Expected [Access denied!] got: [" + noAccess.getDefaultTranslation() + "]");
             else if (getUserTicket().getLanguage().getId() == FxLanguage.GERMAN)
-                Assert.assertTrue("Zugriff verweigert!".equals(noAccess.getDefaultTranslation()), "Shared message loading failed!");
+                assertTrue("Zugriff verweigert!".equals(noAccess.getDefaultTranslation()), "Shared message loading failed!");
         } catch (FxApplicationException e) {
             fail(e.getMessage());
         }
@@ -605,7 +607,7 @@ public class ContentEngineTest {
 
             FxPropertyAssignmentEdit pe = new FxPropertyAssignmentEdit((FxPropertyAssignment) article.getAssignment("/TEXT"));
             pe.setDefaultMultiplicity(2);
-            Assert.assertTrue(2 == pe.getDefaultMultiplicity(), "Wrong default multiplicity");
+            assertTrue(2 == pe.getDefaultMultiplicity(), "Wrong default multiplicity");
             ass.save(pe, false);
 
             FxContent test = co.initialize(article.getId());
@@ -641,41 +643,41 @@ public class ContentEngineTest {
         int titlePos = test.getPropertyData("/MYTITLE").getPos();
         test.move("/MYTITLE", 1); //move title 1 position down
         FxPropertyData pText = test.getPropertyData("/TEXT");
-        Assert.assertTrue("Text english1".equals(((FxString) test.getPropertyData("/TEXT[1]").getValue()).getTranslation(FxLanguage.ENGLISH)));
+        assertTrue("Text english1".equals(((FxString) test.getPropertyData("/TEXT[1]").getValue()).getTranslation(FxLanguage.ENGLISH)));
         if (pText.mayCreateMore()) {
             FxPropertyData pText2 = (FxPropertyData) pText.createNew(FxData.POSITION_BOTTOM);
             pText2.setValue(new FxString(FxLanguage.ENGLISH, "Text english2"));
-            Assert.assertTrue("Text english2".equals(((FxString) test.getPropertyData("/TEXT[2]").getValue()).getTranslation(FxLanguage.ENGLISH)));
+            assertTrue("Text english2".equals(((FxString) test.getPropertyData("/TEXT[2]").getValue()).getTranslation(FxLanguage.ENGLISH)));
         }
         //            for( int i=0; i<100;i++)
         FxPK pk = test.save().getPk();
         FxContent comp = co.load(pk);
-        Assert.assertTrue(comp != null);
-        Assert.assertTrue(comp.getPk().getId() == pk.getId(), "Id failed");
-        Assert.assertTrue(comp.getPk().getId() == comp.getId(), "Id of content not equal the Id of contents pk");
-        Assert.assertTrue(comp.matchesPk(pk), "matchesPk failed");
-        Assert.assertTrue(comp.matchesPk(new FxPK(pk.getId(), FxPK.MAX)), "matchesPk for max version failed");
-        Assert.assertTrue(1 == comp.getPk().getVersion(), "Version is not 1");
-        Assert.assertTrue(comp.getStepId() == test.getStepId(), "Step failed");
+        assertTrue(comp != null);
+        assertTrue(comp.getPk().getId() == pk.getId(), "Id failed");
+        assertTrue(comp.getPk().getId() == comp.getId(), "Id of content not equal the Id of contents pk");
+        assertTrue(comp.matchesPk(pk), "matchesPk failed");
+        assertTrue(comp.matchesPk(new FxPK(pk.getId(), FxPK.MAX)), "matchesPk for max version failed");
+        assertTrue(1 == comp.getPk().getVersion(), "Version is not 1");
+        assertTrue(comp.getStepId() == test.getStepId(), "Step failed");
         assertEquals(comp.getAclIds(), test.getAclIds(), "ACL failed");
-        Assert.assertTrue(comp.isMaxVersion(), "MaxVersion failed");
-        Assert.assertTrue(comp.isLiveVersion() == article.getWorkflow().getSteps().get(0).isLiveStep(), "LiveVersion failed. Expected:" + article.getWorkflow().getSteps().get(0).isLiveStep() + " Got:" + comp.isLiveVersion());
-        Assert.assertTrue(comp.getMainLanguage() == FxLanguage.ENGLISH, "MainLang failed");
-        Assert.assertTrue(comp.getLifeCycleInfo().getCreatorId() == getUserTicket().getUserId(), "CreatedBy failed");
-        Assert.assertTrue("Text english1".equals(((FxString) comp.getPropertyData("/TEXT[1]").getValue()).getTranslation(FxLanguage.ENGLISH)), "Expected 'Text english1', got '" + ((FxString) comp.getPropertyData("/TEXT[1]").getValue()).getTranslation(FxLanguage.ENGLISH) + "'");
+        assertTrue(comp.isMaxVersion(), "MaxVersion failed");
+        assertTrue(comp.isLiveVersion() == article.getWorkflow().getSteps().get(0).isLiveStep(), "LiveVersion failed. Expected:" + article.getWorkflow().getSteps().get(0).isLiveStep() + " Got:" + comp.isLiveVersion());
+        assertTrue(comp.getMainLanguage() == FxLanguage.ENGLISH, "MainLang failed");
+        assertTrue(comp.getLifeCycleInfo().getCreatorId() == getUserTicket().getUserId(), "CreatedBy failed");
+        assertTrue("Text english1".equals(((FxString) comp.getPropertyData("/TEXT[1]").getValue()).getTranslation(FxLanguage.ENGLISH)), "Expected 'Text english1', got '" + ((FxString) comp.getPropertyData("/TEXT[1]").getValue()).getTranslation(FxLanguage.ENGLISH) + "'");
         //test result of move
-        Assert.assertTrue(titlePos == comp.getPropertyData("/TEXT").getPos(), "Text[1] position should be " + (titlePos) + " but is " + comp.getPropertyData("/TEXT").getPos());
-        Assert.assertTrue(titlePos + 1 == comp.getPropertyData("/MYTITLE[1]").getPos());
-        Assert.assertTrue(titlePos + 2 == comp.getPropertyData("/TEXT[2]").getPos());
+        assertTrue(titlePos == comp.getPropertyData("/TEXT").getPos(), "Text[1] position should be " + (titlePos) + " but is " + comp.getPropertyData("/TEXT").getPos());
+        assertTrue(titlePos + 1 == comp.getPropertyData("/MYTITLE[1]").getPos());
+        assertTrue(titlePos + 2 == comp.getPropertyData("/TEXT[2]").getPos());
         FxPK pk2 = co.createNewVersion(comp);
-        Assert.assertTrue(2 == pk2.getVersion());
+        assertTrue(2 == pk2.getVersion());
         comp.setValue("/TEXT", new FxString(FxLanguage.GERMAN, "Different text"));
         FxPK pk3 = co.createNewVersion(comp);
-        Assert.assertTrue(3 == pk3.getVersion());
+        assertTrue(3 == pk3.getVersion());
         FxContentVersionInfo cvi = co.getContentVersionInfo(pk3);
-        Assert.assertTrue(3 == cvi.getLastModifiedVersion());
-        Assert.assertTrue(3 == cvi.getLiveVersion());
-        Assert.assertTrue(1 == cvi.getMinVersion());
+        assertTrue(3 == cvi.getLastModifiedVersion());
+        assertTrue(3 == cvi.getLiveVersion());
+        assertTrue(1 == cvi.getMinVersion());
 
         FxContentContainer cc = co.loadContainer(cvi.getId());
         assertEquals(cc.getVersionInfo().getLastModifiedVersion(), cvi.getLastModifiedVersion());
@@ -684,19 +686,19 @@ public class ContentEngineTest {
         assertEquals(cc.getVersion(2), co.load(pk2));
         assertEquals(cc.getVersion(3), co.load(pk3));
         Assert.assertNotSame(cc.getVersion(1), cc.getVersion(2));
-        Assert.assertTrue(FxDelta.processDelta(cc.getVersion(1), cc.getVersion(2)).isOnlyInternalPropertyChanges());
+        assertTrue(FxDelta.processDelta(cc.getVersion(1), cc.getVersion(2)).isOnlyInternalPropertyChanges());
         Assert.assertNotSame(cc.getVersion(1), cc.getVersion(3));
-        Assert.assertFalse(FxDelta.processDelta(cc.getVersion(2), cc.getVersion(3)).isOnlyInternalPropertyChanges());
+        assertFalse(FxDelta.processDelta(cc.getVersion(2), cc.getVersion(3)).isOnlyInternalPropertyChanges());
 
         co.removeVersion(new FxPK(pk.getId(), 1));
         cvi = co.getContentVersionInfo(pk3);
-        Assert.assertTrue(2 == cvi.getMinVersion());
-        Assert.assertTrue(3 == cvi.getMaxVersion());
+        assertTrue(2 == cvi.getMinVersion());
+        assertTrue(3 == cvi.getMaxVersion());
         co.removeVersion(new FxPK(pk.getId(), 3));
         cvi = co.getContentVersionInfo(pk3);
-        Assert.assertTrue(2 == cvi.getMinVersion());
-        Assert.assertTrue(2 == cvi.getMaxVersion());
-        Assert.assertTrue(!cvi.hasLiveVersion());
+        assertTrue(2 == cvi.getMinVersion());
+        assertTrue(2 == cvi.getMaxVersion());
+        assertTrue(!cvi.hasLiveVersion());
         co.removeVersion(new FxPK(pk.getId(), 2));
         try {
             co.getContentVersionInfo(new FxPK(pk.getId()));
@@ -723,22 +725,22 @@ public class ContentEngineTest {
     @Test
     public void typeValidityTest() throws Exception {
         FxType t = CacheAdmin.getEnvironment().getType(TEST_TYPE);
-        Assert.assertTrue(t.isXPathValid("/", false), "Root group should be valid for groups");
-        Assert.assertTrue(!t.isXPathValid("/", true), "Root group should be invalid for properties");
-        Assert.assertTrue(t.isXPathValid("/TestProperty1", true));
-        Assert.assertTrue(!t.isXPathValid("/TestProperty1", false));
-        Assert.assertTrue(t.isXPathValid(TEST_TYPE + "/TestProperty1", true));
-        Assert.assertTrue(!t.isXPathValid(TEST_TYPE + "123/TestProperty1", true));
-        Assert.assertTrue(!t.isXPathValid("WrongType/TestProperty1", true));
-        Assert.assertTrue(!t.isXPathValid(TEST_TYPE + "/TestProperty1/Dummy", true));
-        Assert.assertTrue(t.isXPathValid("/TestProperty1[1]", true));
-        Assert.assertTrue(!t.isXPathValid("/TestProperty1[2]", true));
-        Assert.assertTrue(t.isXPathValid("/TestGroup1[2]", false));
-        Assert.assertTrue(t.isXPathValid("/TestGroup1[1]/TestProperty1_3[4711]", true));
-        Assert.assertTrue(!t.isXPathValid("/TestGroup1[1]/TestProperty1_3[4711]", false));
-        Assert.assertTrue(t.isXPathValid("/TestGroup1[1]/TestGroup1_2[42]/TestProperty1_2_2[5]", true));
-        Assert.assertTrue(!t.isXPathValid("/TestGroup1[1]/TestGroup1_2[42]/TestProperty1_2_2[5]", false));
-        Assert.assertTrue(!t.isXPathValid("/TestGroup1[1]/TestGroup1_2[42]/TestProperty1_2_2[6]", true));
+        assertTrue(t.isXPathValid("/", false), "Root group should be valid for groups");
+        assertTrue(!t.isXPathValid("/", true), "Root group should be invalid for properties");
+        assertTrue(t.isXPathValid("/TestProperty1", true));
+        assertTrue(!t.isXPathValid("/TestProperty1", false));
+        assertTrue(t.isXPathValid(TEST_TYPE + "/TestProperty1", true));
+        assertTrue(!t.isXPathValid(TEST_TYPE + "123/TestProperty1", true));
+        assertTrue(!t.isXPathValid("WrongType/TestProperty1", true));
+        assertTrue(!t.isXPathValid(TEST_TYPE + "/TestProperty1/Dummy", true));
+        assertTrue(t.isXPathValid("/TestProperty1[1]", true));
+        assertTrue(!t.isXPathValid("/TestProperty1[2]", true));
+        assertTrue(t.isXPathValid("/TestGroup1[2]", false));
+        assertTrue(t.isXPathValid("/TestGroup1[1]/TestProperty1_3[4711]", true));
+        assertTrue(!t.isXPathValid("/TestGroup1[1]/TestProperty1_3[4711]", false));
+        assertTrue(t.isXPathValid("/TestGroup1[1]/TestGroup1_2[42]/TestProperty1_2_2[5]", true));
+        assertTrue(!t.isXPathValid("/TestGroup1[1]/TestGroup1_2[42]/TestProperty1_2_2[5]", false));
+        assertTrue(!t.isXPathValid("/TestGroup1[1]/TestGroup1_2[42]/TestProperty1_2_2[6]", true));
     }
 
     @Test
@@ -751,12 +753,12 @@ public class ContentEngineTest {
 
         FxString testValue = new FxString(TEST_VALUE_EN);
         test.setValue(TEST_XPATH, testValue);
-        Assert.assertTrue(test.getValue(TEST_XPATH).equals(testValue));
+        assertTrue(test.getValue(TEST_XPATH).equals(testValue));
         test.setValue(TEST_XPATH, TEST_VALUE_EN);
         test.setValue(TEST_XPATH, FxLanguage.GERMAN, TEST_VALUE_DE);
-        Assert.assertTrue(test.getValue(TEST_XPATH).getTranslation(FxLanguage.ENGLISH).equals(TEST_VALUE_EN));
-        Assert.assertTrue(test.getValue(TEST_XPATH).getTranslation(FxLanguage.GERMAN).equals(TEST_VALUE_DE));
-        Assert.assertTrue(test.getValue(TEST_XPATH).getDefaultTranslation().equals(TEST_VALUE_EN));
+        assertTrue(test.getValue(TEST_XPATH).getTranslation(FxLanguage.ENGLISH).equals(TEST_VALUE_EN));
+        assertTrue(test.getValue(TEST_XPATH).getTranslation(FxLanguage.GERMAN).equals(TEST_VALUE_DE));
+        assertTrue(test.getValue(TEST_XPATH).getDefaultTranslation().equals(TEST_VALUE_EN));
     }
 
     @Test
@@ -780,18 +782,18 @@ public class ContentEngineTest {
             FxContent test = co.load(pk);
             FxDelta d = FxDelta.processDelta(org, test);
             System.out.println(d.dump());
-            Assert.assertTrue(d.getAdds().size() == 0, "Expected no adds, but got " + d.getAdds().size());
-            Assert.assertTrue(d.getRemoves().size() == 0, "Expected no deletes, but got " + d.getRemoves().size());
-            Assert.assertTrue(d.getUpdates().size() == 0, "Expected no updates, but got " + d.getUpdates().size());
+            assertTrue(d.getAdds().size() == 0, "Expected no adds, but got " + d.getAdds().size());
+            assertTrue(d.getRemoves().size() == 0, "Expected no deletes, but got " + d.getRemoves().size());
+            assertTrue(d.getUpdates().size() == 0, "Expected no updates, but got " + d.getUpdates().size());
 
             test.remove("/TestProperty3[2]");
             d = FxDelta.processDelta(org, test);
             System.out.println(d.dump());
-            Assert.assertTrue(d.getAdds().size() == 0, "Expected no adds, but got " + d.getAdds().size());
-            Assert.assertTrue(d.getRemoves().size() == 1, "Expected 1 deletes, but got " + d.getRemoves().size());
-            Assert.assertTrue(d.getUpdates().size() == 1, "Expected 1 updates, but got " + d.getUpdates().size());
-            Assert.assertTrue(d.getRemoves().get(0).getXPath().equals("/TESTPROPERTY3[3]"), "Expected /TESTPROPERTY3[3] but got: " + d.getRemoves().get(0).getXPath());
-            Assert.assertTrue(d.getUpdates().get(0).getXPath().equals("/TESTPROPERTY3[2]"), "Expected /TESTPROPERTY3[2] but got: " + d.getUpdates().get(0).getXPath());
+            assertTrue(d.getAdds().size() == 0, "Expected no adds, but got " + d.getAdds().size());
+            assertTrue(d.getRemoves().size() == 1, "Expected 1 deletes, but got " + d.getRemoves().size());
+            assertTrue(d.getUpdates().size() == 1, "Expected 1 updates, but got " + d.getUpdates().size());
+            assertTrue(d.getRemoves().get(0).getXPath().equals("/TESTPROPERTY3[3]"), "Expected /TESTPROPERTY3[3] but got: " + d.getRemoves().get(0).getXPath());
+            assertTrue(d.getUpdates().get(0).getXPath().equals("/TESTPROPERTY3[2]"), "Expected /TESTPROPERTY3[2] but got: " + d.getUpdates().get(0).getXPath());
 
             test = co.load(pk);
             test.setValue("/TestGroup1/TestProperty1_2", testValue1);
@@ -800,10 +802,10 @@ public class ContentEngineTest {
             test.getGroupData("/TestGroup1").compactPositions(true);
             d = FxDelta.processDelta(org, test);
             System.out.println(d.dump());
-            Assert.assertTrue(d.changes(), "Expected some changes");
-            Assert.assertTrue(d.getAdds().size() == 3, "Expected 3 (group + 2 properties) adds but got " + d.getAdds().size());
-            Assert.assertTrue(d.getRemoves().size() == 0, "Expected 0 deletes but got " + d.getRemoves().size());
-            Assert.assertTrue(d.getUpdates().size() == 0, "Expected 0 updates but got " + d.getUpdates().size());
+            assertTrue(d.changes(), "Expected some changes");
+            assertTrue(d.getAdds().size() == 3, "Expected 3 (group + 2 properties) adds but got " + d.getAdds().size());
+            assertTrue(d.getRemoves().size() == 0, "Expected 0 deletes but got " + d.getRemoves().size());
+            assertTrue(d.getUpdates().size() == 0, "Expected 0 updates but got " + d.getUpdates().size());
         } finally {
             co.remove(pk);
         }
@@ -828,9 +830,9 @@ public class ContentEngineTest {
         org.getRootGroup().removeEmptyEntries();
         org.getRootGroup().compact();
         assertEquals(org.getValue("/TestProperty4[1]"), testValue2);
-        Assert.assertFalse(org.containsValue("/TestProperty4[2]"));
+        assertFalse(org.containsValue("/TestProperty4[2]"));
         assertEquals(org.getValue("/TestGroup1/TestProperty1_3[1]"), testValue3);
-        Assert.assertFalse(org.containsValue("/TestGroup1/TestProperty1_3[4]"));
+        assertFalse(org.containsValue("/TestGroup1/TestProperty1_3[4]"));
     }
 
     /**
@@ -865,17 +867,17 @@ public class ContentEngineTest {
             test = co.load(test.getPk());
             assertEquals(test.getValue(defaultXPath), tmpValue, "Default value should have been overwritten.");
             test.remove(defaultXPath);
-            Assert.assertFalse(test.containsValue(defaultXPath), "Default value should have been removed (before save)");
+            assertFalse(test.containsValue(defaultXPath), "Default value should have been removed (before save)");
             co.save(test);
             test = co.load(test.getPk());
-            Assert.assertFalse(test.containsValue(defaultXPath), "Default value should have been removed (after save with a default multiplicity of 1)");
+            assertFalse(test.containsValue(defaultXPath), "Default value should have been removed (after save with a default multiplicity of 1)");
 
             FxPropertyAssignment pa = (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(TEST_TYPE + defaultXPath);
             ass.save(pa.asEditable().setDefaultMultiplicity(0), false);
             pa = (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(TEST_TYPE + defaultXPath);
             assertEquals(pa.getDefaultMultiplicity(), 0);
             test = co.load(test.getPk());
-            Assert.assertFalse(test.containsValue(defaultXPath), "Default value should have been removed (after save with a default multiplicity of 0)");
+            assertFalse(test.containsValue(defaultXPath), "Default value should have been removed (after save with a default multiplicity of 0)");
         } finally {
             if (pk != null)
                 co.remove(pk);
@@ -897,20 +899,20 @@ public class ContentEngineTest {
         test.setValue("/TestProperty3[2]", testValue2);
         test.setValue("/TestProperty3[3]", testValue3);
         test.remove("/TestProperty3[2]");
-        Assert.assertFalse(test.containsValue("/TestProperty3[3]"));
+        assertFalse(test.containsValue("/TestProperty3[3]"));
         assertEquals(test.getValue("/TestProperty3[2]"), testValue3, "Propery gap should have been closed and [3] is now [2]");
         test.remove("/TestProperty3");
-        Assert.assertFalse(test.containsValue("/TestProperty4[3]"));
+        assertFalse(test.containsValue("/TestProperty4[3]"));
 
         //test with group
         test.setValue("/TestGroup1/TestGroup1_2[1]/TestProperty1_2_1[1]", testValue1);
         test.setValue("/TestGroup1/TestGroup1_2[2]/TestProperty1_2_1[1]", testValue2);
         test.setValue("/TestGroup1/TestGroup1_2[3]/TestProperty1_2_1[1]", testValue3);
         test.remove("/TestGroup1/TestGroup1_2[2]");
-        Assert.assertFalse(test.containsValue("/TestGroup1/TestGroup1_2[3]/TestProperty1_2_1[1]"));
+        assertFalse(test.containsValue("/TestGroup1/TestGroup1_2[3]/TestProperty1_2_1[1]"));
         assertEquals(test.getValue("/TestGroup1/TestGroup1_2[2]/TestProperty1_2_1[1]"), testValue3, "Group gap should have been closed and [3] is now [2]");
         test.remove("/TestGroup1/TestGroup1_2");
-        Assert.assertFalse(test.containsValue("/TestGroup1/TestGroup1_2[1]/TestProperty1_2_1[1]"));
+        assertFalse(test.containsValue("/TestGroup1/TestGroup1_2[1]/TestProperty1_2_1[1]"));
     }
 
     /**

@@ -121,11 +121,34 @@ public class FxReference extends FxValue<ReferencedContent, FxReference> impleme
     /**
      * Constructor
      *
+     * @param multiLanguage   multilanguage value?
+     * @param defaultLanguage the default language
+     * @param value           single initializing value
+     * @since 3.1
+     */
+    public FxReference(boolean multiLanguage, long defaultLanguage, FxPK value) {
+        super(multiLanguage, defaultLanguage, new ReferencedContent(value));
+    }
+
+    /**
+     * Constructor
+     *
      * @param defaultLanguage the default language
      * @param value           single initializing value
      */
     public FxReference(long defaultLanguage, ReferencedContent value) {
         super(defaultLanguage, value);
+    }
+
+    /**
+     * Constructor
+     *
+     * @param defaultLanguage the default language
+     * @param value           single initializing value
+     * @since 3.1
+     */
+    public FxReference(long defaultLanguage, FxPK value) {
+        super(defaultLanguage, new ReferencedContent(value));
     }
 
     /**
@@ -141,10 +164,31 @@ public class FxReference extends FxValue<ReferencedContent, FxReference> impleme
     /**
      * Constructor
      *
+     * @param multiLanguage multilanguage value?
+     * @param value         single initializing value
+     * @since 3.1
+     */
+    public FxReference(boolean multiLanguage, FxPK value) {
+        super(multiLanguage, new ReferencedContent(value));
+    }
+
+    /**
+     * Constructor
+     *
      * @param value single initializing value
      */
     public FxReference(ReferencedContent value) {
         super(value);
+    }
+
+    /**
+     * Constructor
+     *
+     * @param value single initializing value
+     * @since 3.1
+     */
+    public FxReference(FxPK value) {
+        super(new ReferencedContent(value));
     }
 
     /**
