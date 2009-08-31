@@ -37,6 +37,7 @@ import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNode;
 import com.flexive.shared.tree.FxTreeNodeEdit;
+import com.flexive.shared.tree.FxTreeRemoveOp;
 import com.flexive.shared.value.FxReference;
 
 import javax.ejb.Remote;
@@ -65,21 +66,24 @@ public interface TreeEngine {
 
     /**
      * Remove a node and optionally its children.
-     * Referenced content content will only be removed if removedReferencedContent is set to true and the referenced
+     * Referenced contents will only be removed if removedReferencedContent is set to true and the referenced
      * content is not referenced elsewhere.
      * The only exception is if the referenced content is of type FOLDER, then the folder is removed if it is not referenced
      * from anywhere else.
      *
      * @param node                    the node to removed
      * @param removeReferencedContent remove referenced content
-     * @param removeChildren          remove children as well?
+     * @param removeChildren          if true all nodes that are inside the subtree of the given node are
+     *                                deleted as well, if false the subtree is moved one level up (to the parent of the specified
+     *                                node)
      * @throws FxApplicationException on errors
+     * @deprecated use TreeEngine#remove(com.flexive.shared.tree.FxTreeNode, com.flexive.shared.tree.FxTreeRemoveOp, boolean)
      */
     void remove(FxTreeNode node, boolean removeReferencedContent, boolean removeChildren) throws FxApplicationException;
 
     /**
      * Remove a node and optionally its children.
-     * Referenced content content will only be removed if removedReferencedContent is set to true and the referenced
+     * Referenced contents will only be removed if removedReferencedContent is set to true and the referenced
      * content is not referenced elsewhere.
      * The only exception is if the referenced content is of type FOLDER, then the folder is removed if it is not referenced
      * from anywhere else.
@@ -87,10 +91,46 @@ public interface TreeEngine {
      * @param mode                    the tree mode (edit or live)
      * @param nodeId                  the node to removed
      * @param removeReferencedContent remove referenced content
-     * @param removeChildren          remove children as well?
+     * @param removeChildren          if true all nodes that are inside the subtree of the given node are
+     *                                deleted as well, if false the subtree is moved one level up (to the parent of the specified
+     *                                node)
      * @throws FxApplicationException on errors
+     * @deprecated use TreeEngine#remove(com.flexive.shared.tree.FxTreeMode, long, com.flexive.shared.tree.FxTreeRemoveOp, boolean)
      */
     void remove(FxTreeMode mode, long nodeId, boolean removeReferencedContent, boolean removeChildren) throws FxApplicationException;
+
+    /**
+     * Remove a node and optionally its children.
+     * Referenced contents will be removed depending on chosen <code>removeOp</code>.
+     * If the referenced content is of type FOLDER, then the folder is removed if it is not referenced
+     * from anywhere else.
+     *
+     * @param node           the node to be removed
+     * @param removeOp       remove operation to apply
+     * @param removeChildren if true all nodes that are inside the subtree of the given node are
+     *                       deleted as well, if false the subtree is moved one level up (to the parent of the specified
+     *                       node)
+     * @throws FxApplicationException on errors
+     * @since 3.1
+     */
+    void remove(FxTreeNode node, FxTreeRemoveOp removeOp, boolean removeChildren) throws FxApplicationException;
+
+    /**
+     * Remove a node and optionally its children.
+     * Referenced contents will be removed depending on chosen <code>removeOp</code>.
+     * If the referenced content is of type FOLDER, then the folder is removed if it is not referenced
+     * from anywhere else.
+     *
+     * @param mode           the tree mode (edit or live)
+     * @param nodeId         the node to removed
+     * @param removeOp       remove operation to apply
+     * @param removeChildren if true all nodes that are inside the subtree of the given node are
+     *                       deleted as well, if false the subtree is moved one level up (to the parent of the specified
+     *                       node)
+     * @throws FxApplicationException on errors
+     * @since 3.1
+     */
+    void remove(FxTreeMode mode, long nodeId, FxTreeRemoveOp removeOp, boolean removeChildren) throws FxApplicationException;
 
     /**
      * Create tree folders of the given path relative to the parent node, creating all folders
@@ -378,7 +418,7 @@ public interface TreeEngine {
     /**
      * Populate the tree with test data. If no maxLevel is given, a default of 3 is assumed.
      *
-     * @param mode tree mode
+     * @param mode     tree mode
      * @param maxLevel the number of nodes to be created as children of the root node (0 will not create any data, no value will create 3).
      * @throws FxApplicationException on errors
      */

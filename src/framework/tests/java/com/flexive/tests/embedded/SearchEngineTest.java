@@ -51,6 +51,7 @@ import com.flexive.shared.structure.*;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNode;
 import com.flexive.shared.tree.FxTreeNodeEdit;
+import com.flexive.shared.tree.FxTreeRemoveOp;
 import com.flexive.shared.value.*;
 import com.flexive.shared.workflow.Step;
 import com.flexive.shared.workflow.StepDefinition;
@@ -129,7 +130,7 @@ public class SearchEngineTest {
         for (long nodeId : generatedNodeIds) {
             getTreeEngine().remove(
                     FxTreeNodeEdit.createNew("").setId(nodeId).setMode(FxTreeMode.Edit),
-                    false, true);
+                    FxTreeRemoveOp.Unfile, true);
         }
         logout();
     }
@@ -987,7 +988,7 @@ public class SearchEngineTest {
             if (folderNodeId != -1) {
                 try {
                     FxContext.get().runAsSystem();
-                    getTreeEngine().remove(FxTreeNodeEdit.createNew("").setId(folderNodeId), true, true);
+                    getTreeEngine().remove(FxTreeMode.Edit, folderNodeId, FxTreeRemoveOp.RemoveSingleFiled, true);
                 } finally {
                     FxContext.get().stopRunAsSystem();
                 }
@@ -1075,12 +1076,12 @@ public class SearchEngineTest {
             FxContext.get().runAsSystem();
             try {
                 try {
-                    getTreeEngine().remove(getTreeEngine().getNode(FxTreeMode.Edit, nodeId), true, false);
+                    getTreeEngine().remove(getTreeEngine().getNode(FxTreeMode.Edit, nodeId), FxTreeRemoveOp.Remove, false);
                 } catch (FxApplicationException e) {
                     // pass
                 }
                 try {
-                    getTreeEngine().remove(getTreeEngine().getNode(FxTreeMode.Live, nodeId), true, false);
+                    getTreeEngine().remove(getTreeEngine().getNode(FxTreeMode.Live, nodeId), FxTreeRemoveOp.Remove, false);
                 } catch (FxApplicationException e) {
                     // pass
                 }
@@ -1413,7 +1414,7 @@ public class SearchEngineTest {
             queryForCaption(name);
         } finally {
             FxContext.getUserTicket().setLanguage(oldUserLanguage);
-            EJBLookup.getTreeEngine().remove(FxTreeMode.Edit, nodeId, false, false);
+            EJBLookup.getTreeEngine().remove(FxTreeMode.Edit, nodeId, FxTreeRemoveOp.Unfile, false);
         }
     }
 

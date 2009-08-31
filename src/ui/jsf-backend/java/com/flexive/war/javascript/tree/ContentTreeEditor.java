@@ -45,6 +45,7 @@ import static com.flexive.shared.tree.FxTreeMode.Edit;
 import static com.flexive.shared.tree.FxTreeMode.Live;
 import com.flexive.shared.tree.FxTreeNode;
 import com.flexive.shared.tree.FxTreeNodeEdit;
+import com.flexive.shared.tree.FxTreeRemoveOp;
 import com.flexive.war.JsonWriter;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -179,42 +180,8 @@ public class ContentTreeEditor implements Serializable {
      * @throws Exception if an error occured
      */
     public String remove(long nodeId, boolean removeContent, boolean live, boolean deleteChildren) throws Exception {
-        final FxTreeMode treeMode = live ? Live : Edit;
-        if (removeContent) {
-            removeWithContent(treeMode, nodeId, deleteChildren);
-        } else {
-            getTreeEngine().remove(treeMode, nodeId, false, deleteChildren);
-        }
+        getTreeEngine().remove(live ? Live : Edit, nodeId, removeContent ? FxTreeRemoveOp.Remove : FxTreeRemoveOp.Unfile, deleteChildren);
         return "[]";
-    }
-
-    private void removeWithContent(FxTreeMode treeMode, long nodeId, boolean deleteChildren) throws Exception {
-        try {
-            final FxTreeNode node = getTreeEngine().getTree(treeMode, nodeId, deleteChildren ? 999999 : 0);
-
-            // collect all content IDs
-            final List<FxPK> contents = new ArrayList<FxPK>();
-            contents.add(node.getReference());
-            for (FxTreeNode child : node) {
-                contents.add(child.getReference());
-            }
-
-            // remove tree nodes
-            getTreeEngine().remove(node, false, deleteChildren);
-
-            for (FxPK pk : contents) {
-                // manually remove all other nodes (including their children) where this content is referenced
-                for (FxTreeNode refNode : getTreeEngine().getNodesWithReference(treeMode, pk.getId())) {
-                    getTreeEngine().remove(refNode, false, true);
-                }
-                // remove content instance
-                getContentEngine().remove(pk);
-            }
-            
-        } catch (Exception e) {
-            LOG.error("Failed to delete node: " + e, e);
-            throw e;
-        }
     }
 
     public String addReferences(long nodeId, long[] referenceIds) throws Exception {

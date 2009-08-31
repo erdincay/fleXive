@@ -55,6 +55,7 @@ import com.flexive.shared.structure.FxType;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNode;
 import com.flexive.shared.tree.FxTreeNodeEdit;
+import com.flexive.shared.tree.FxTreeRemoveOp;
 import com.flexive.shared.value.FxReference;
 import com.flexive.shared.value.FxValue;
 import com.flexive.shared.value.ReferencedContent;
@@ -869,12 +870,12 @@ public class BeContentEditorBean implements ActionBean, Serializable {
                     ceBean.getContentStorage().get(wrappedContent.getEditorId()).setReset(true);
                 }
 
-                // if no error happend, handle tree
+                // if no error happened, handle tree
                 TreeEngine tree = EJBLookup.getTreeEngine();
                 final List<FxTreeNode> treeNodes = tree.getNodesWithReference(FxTreeMode.Edit, pk.getId());
                 for (FxTreeNode node : getTreeNodes()) {
                     if (node.isMarkForDelete() && !node.isTemporary()) {
-                        tree.remove(node, false, true);
+                        tree.remove(node, FxTreeRemoveOp.Unfile, true);
                     } else if (node.isTemporary()) {
                         boolean assignmentExists = false;
                         for (FxTreeNode child : treeNodes) {

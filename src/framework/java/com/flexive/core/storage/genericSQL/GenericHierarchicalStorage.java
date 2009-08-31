@@ -2311,13 +2311,17 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 ResultSet rs = ps.executeQuery();
                 if (rs.next() && rs.getLong(1) != 0)
                     refuse = true;
-                if (!refuse)
+                long refCount = refuse ? rs.getLong(1) : 0;
+                if (!refuse) {
                     refuse = FxFlatStorageManager.getInstance().checkContentRemoval(con, typeId, id, allForType);
+                    if( refuse )
+                        refCount += FxFlatStorageManager.getInstance().getReferencedContentCount(con, id);
+                }
                 if (refuse) {
                     if (allForType) {
                         throw new FxRemoveException("ex.content.reference.inUse.type", CacheAdmin.getEnvironment().getType(typeId), rs.getLong(1));
                     } else
-                        throw new FxRemoveException("ex.content.reference.inUse.instance", id, rs.getLong(1));
+                        throw new FxRemoveException("ex.content.reference.inUse.instance", id, refCount);
                 }
             } finally {
                 if (ps != null) ps.close();

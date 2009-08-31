@@ -47,6 +47,7 @@ import com.flexive.shared.exceptions.*;
 import com.flexive.shared.tree.FxTreeNodeEdit;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNode;
+import com.flexive.shared.tree.FxTreeRemoveOp;
 import com.flexive.tests.embedded.TestUsers;
 import com.flexive.tests.embedded.FxTestUtils;
 import static com.flexive.tests.embedded.benchmark.FxBenchmarkUtils.getResultLogger;
@@ -109,7 +110,7 @@ public class SearchBenchmark {
             assertTrue(result.getRowCount() == numNodes, "Expected " + numNodes + " rows, got: " + result.getRowCount());
         } finally {
             if (rootNode != -1) {
-                EJBLookup.getTreeEngine().remove(FxTreeNodeEdit.createNew("").setId(rootNode), true, true);
+                EJBLookup.getTreeEngine().remove(FxTreeNodeEdit.createNew("").setId(rootNode), FxTreeRemoveOp.Remove, true);
             }
             FxTestUtils.logout();
         }

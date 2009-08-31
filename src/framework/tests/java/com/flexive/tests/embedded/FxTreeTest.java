@@ -46,6 +46,7 @@ import com.flexive.shared.structure.*;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNode;
 import com.flexive.shared.tree.FxTreeNodeEdit;
+import com.flexive.shared.tree.FxTreeRemoveOp;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.value.FxReference;
 import com.flexive.shared.value.ReferencedContent;
@@ -263,7 +264,7 @@ public class FxTreeTest {
         Assert.assertTrue(node1_2_loaded.getPosition() == 1, "Expected [1] got: [" + node1_2_loaded.getPosition() + "]");
         Assert.assertTrue(node1_3_loaded.getPosition() == 2, "Expected [2] got: [" + node1_3_loaded.getPosition() + "]");
         //delete 1_2 and check positions
-        tree.remove(new FxTreeNodeEdit(node1_2_loaded), true, false);
+        tree.remove(new FxTreeNodeEdit(node1_2_loaded), FxTreeRemoveOp.Remove, false);
         Assert.assertTrue(!tree.exist(mode, id1_2));
         node1_1_loaded = tree.getNode(mode, id1_1);
         node1_3_loaded = tree.getNode(mode, id1_3);
@@ -274,7 +275,7 @@ public class FxTreeTest {
         if (mode == FxTreeMode.Live)
             return; //children are to be removed in live mode
         //delete parent but not children and check if they moved up in hierarchy
-        tree.remove(new FxTreeNodeEdit(node1_loaded), true, false);
+        tree.remove(new FxTreeNodeEdit(node1_loaded), FxTreeRemoveOp.Remove, false);
         node1_1_loaded = tree.getNode(mode, id1_1);
         node1_3_loaded = tree.getNode(mode, id1_3);
         Assert.assertTrue(node1_1_loaded.getParentNodeId() == FxTreeNode.ROOT_NODE);
@@ -287,7 +288,7 @@ public class FxTreeTest {
         Assert.assertTrue(node1_1_loaded.getChildren().get(0).getId() == node1_3_loaded.getId());
         Assert.assertTrue(node1_3_loaded.getPath().equals("/1/3"), "Expected [/1/3] got: [" + node1_3_loaded.getPath() + "]");
         //delete 1_1 with children and check that 1_3 is gone too
-        tree.remove(new FxTreeNodeEdit(node1_1_loaded), true, true);
+        tree.remove(new FxTreeNodeEdit(node1_1_loaded), FxTreeRemoveOp.Remove, true);
         Assert.assertTrue(!tree.exist(mode, id1_3));
         Assert.assertTrue(tree.getNode(mode, FxTreeNode.ROOT_NODE).getTotalChildCount() == 0,
                 "Expected to have 0 children, got: [" + tree.getNode(mode, FxTreeNode.ROOT_NODE).getTotalChildCount() + "]");
@@ -384,7 +385,7 @@ public class FxTreeTest {
         }
 
         // clean up
-        tree.remove(mode, nodes[0], true, true);
+        tree.remove(mode, nodes[0], FxTreeRemoveOp.Remove, true);
 
         // perform tests in live tree: Removing a node from the live tree removes all its children (to avoid
         // inconsistencies with the edit tree)
@@ -414,7 +415,7 @@ public class FxTreeTest {
         assertEquals(tree.getPathById(mode, childNode.getId()), "_");
 
         // clean up
-        tree.remove(mode, nodes[0], true, true);
+        tree.remove(mode, nodes[0], FxTreeRemoveOp.Remove, true);
     }
 
     /**
@@ -482,9 +483,9 @@ public class FxTreeTest {
             Assert.assertEquals(scriptCounter, 4);
             tree.copy(mode, topNode, nodeId, 0);
             Assert.assertEquals(scriptCounter, 7);
-            tree.remove(tree.getNode(mode, topNode), true, true);
+            tree.remove(tree.getNode(mode, topNode), FxTreeRemoveOp.Unfile, true);
             Assert.assertEquals(scriptCounter, 4);
-            tree.remove(tree.getNode(mode, nodeId), true, true);
+            tree.remove(tree.getNode(mode, nodeId), FxTreeRemoveOp.Unfile, true);
             Assert.assertEquals(scriptCounter, 0);
         } finally {
             scripting.remove(siAdd.getId());
@@ -696,7 +697,7 @@ public class FxTreeTest {
         // clean up
         ce.remove(contentPK);
         ty.remove(typeId);
-        tree.remove(mode1, nodes[0], true, true);
+        tree.remove(mode1, nodes[0], FxTreeRemoveOp.Remove, true);
     }
 
     /**
@@ -740,7 +741,7 @@ public class FxTreeTest {
         assertEquals(path, expectedPath2);
 
         // clean up
-        tree.remove(mode, nodes[0], true, true);
+        tree.remove(mode, nodes[0], FxTreeRemoveOp.Remove, true);
     }
 
     /**
@@ -769,7 +770,7 @@ public class FxTreeTest {
             // expected, method throws UnsupportedOperationException
         }
         // clean up
-        tree.remove(mode, nodes[0], true, true);
+        tree.remove(mode, nodes[0], FxTreeRemoveOp.Remove, true);
     }
 
     /**
@@ -798,7 +799,7 @@ public class FxTreeTest {
         assertEquals(ids[3], 1);
 
         // clean up
-        tree.remove(mode, nodes[0], true, true);
+        tree.remove(mode, nodes[0], FxTreeRemoveOp.Remove, true);
     }
 
     /**
@@ -831,7 +832,7 @@ public class FxTreeTest {
         assertEquals(n3.getName(), node3);
 
         //clean up
-        tree.remove(mode, n1.getId(), true, true);
+        tree.remove(mode, n1.getId(), FxTreeRemoveOp.Remove, true);
     }
 
 
@@ -862,7 +863,7 @@ public class FxTreeTest {
         } finally {
             Database.closeObjects(FxTreeTest.class, con, null);
             // clean up
-            tree.remove(mode, nodes[0], true, true);
+            tree.remove(mode, nodes[0], FxTreeRemoveOp.Remove, true);
         }
     }
 
@@ -903,7 +904,7 @@ public class FxTreeTest {
             // clean up
             ce.remove(contentPK);
             ty.remove(typeId);
-            tree.remove(mode, nodes[0], true, true);
+            tree.remove(mode, nodes[0], FxTreeRemoveOp.Remove, true);
         }
     }
 
@@ -930,7 +931,7 @@ public class FxTreeTest {
         } finally {
             Database.closeObjects(FxTreeTest.class, con, null);
             // clean up
-            tree.remove(mode, nodeId, true, true);
+            tree.remove(mode, nodeId, FxTreeRemoveOp.Remove, true);
         }
     }
 

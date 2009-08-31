@@ -54,6 +54,7 @@ import com.flexive.shared.tree.FxTreeMode;
 import static com.flexive.shared.tree.FxTreeMode.Live;
 import com.flexive.shared.tree.FxTreeNode;
 import com.flexive.shared.tree.FxTreeNodeEdit;
+import com.flexive.shared.tree.FxTreeRemoveOp;
 import com.flexive.shared.value.FxReference;
 import com.flexive.shared.value.FxString;
 import org.apache.commons.lang.StringUtils;
@@ -366,9 +367,7 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
      * @param mode                    tree mode to use (Live or Edit tree)
      * @param nodeId                  the node to delete
      * @param deleteReferencedContent delete referenced content
-     * @param deleteChildren          if true all nodes that are inside the subtree of the given node are
-     *                                deleted as well, if false the subtree is moved one level up (to the parent of the specified
-     *                                node)
+     * @param deleteChildren
      * @throws FxApplicationException on errors
      */
     public void remove(FxTreeMode mode, long nodeId, boolean deleteReferencedContent, boolean deleteChildren) throws FxApplicationException {
@@ -391,6 +390,72 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
                     if (node.getReference() != null && contentEngine.getReferencedContentCount(node.getReference()) == 0) {
                         // remove only contents that are not referenced elsewhere
                         contentEngine.remove(node.getReference());
+                    }
+                }
+            }
+            StorageManager.getTreeStorage().checkTreeIfEnabled(con, mode);
+        } catch (FxNotFoundException nf) {
+            // Node does not exist and we wanted to delete it anyway .. so this is no error
+        } catch (FxApplicationException ae) {
+            EJBUtils.rollback(ctx);
+            throw ae;
+        } catch (Throwable t) {
+            EJBUtils.rollback(ctx);
+            throw new FxRemoveException(LOG, t, "ex.tree.delete.failed", nodeId, t.getMessage());
+        } finally {
+            Database.closeObjects(TreeEngineBean.class, con, null);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void remove(FxTreeNode node, boolean removeReferencedContent, boolean removeChildren) throws FxApplicationException {
+        remove(node.getMode(), node.getId(), removeReferencedContent, removeChildren);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void remove(FxTreeNode node, FxTreeRemoveOp removeOp, boolean removeChildren) throws FxApplicationException {
+        remove(node.getMode(), node.getId(), removeOp, removeChildren);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void remove(FxTreeMode mode, long nodeId, FxTreeRemoveOp removeOp, boolean removeChildren) throws FxApplicationException {
+        Connection con = null;
+        if (nodeId < 0) {
+            throw new FxInvalidParameterException("nodeId", "ex.tree.delete.nodeId");
+        }
+        try {
+            FxContext.get().setTreeWasModified();
+            con = Database.getDbConnection();
+            final FxTreeNode subTree;
+            if (removeOp != FxTreeRemoveOp.Unfile) {
+                subTree = removeChildren ? getTree(mode, nodeId, Integer.MAX_VALUE) : getNode(mode, nodeId);
+            } else {
+                subTree = null;
+            }
+            StorageManager.getTreeStorage().removeNode(con, mode, contentEngine, nodeId, removeChildren);
+            if (removeOp != FxTreeRemoveOp.Unfile) {
+                for (FxTreeNode currNode: subTree) {
+                    if (currNode.getReference() != null) {
+                        long refCount = 0;
+                        if (removeOp == FxTreeRemoveOp.RemoveSingleFiled) {
+                            //reference count it only relevant if removeOp is RemoveSingleFiled
+                            refCount = contentEngine.getReferencedContentCount(currNode.getReference());
+                            if (currNode.getId() == nodeId)
+                                refCount++; //include the reference from the already removed node
+                        }
+                        if( removeOp == FxTreeRemoveOp.Remove || (removeOp == FxTreeRemoveOp.RemoveSingleFiled && refCount == 1) ) {
+                            // remove only contents that are not referenced elsewhere
+                            contentEngine.remove(currNode.getReference());
+                        }
                     }
                 }
             }
@@ -809,14 +874,6 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
             }
         }
         return node.getId();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void remove(FxTreeNode node, boolean removeReferencedContent, boolean removeChildren) throws FxApplicationException {
-        remove(node.getMode(), node.getId(), removeReferencedContent, removeChildren);
     }
 
     /**
