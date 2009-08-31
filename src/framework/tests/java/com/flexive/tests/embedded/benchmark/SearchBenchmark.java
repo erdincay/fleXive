@@ -223,7 +223,7 @@ public class SearchBenchmark {
         return new Object[][] {
                 { 1000, false },
                 { 9000, false },   // 10000 instances
-//                { 20000, true }   // 30000 instances
+                { 20000, true }   // 30000 instances
         };
     }
 
