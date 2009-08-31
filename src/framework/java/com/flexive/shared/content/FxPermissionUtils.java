@@ -138,7 +138,26 @@ public class FxPermissionUtils {
      * @throws FxNoAccessException if access denied and exception should be thrown
      */
     public static boolean checkPermission(UserTicket ticket, ACLPermission permission, FxContentSecurityInfo si, boolean throwException) throws FxNoAccessException {
-        if (!si.usePermissions() || ticket.isGlobalSupervisor() || FxContext.get().getRunAsSystem())
+        if (ticket.isGlobalSupervisor() || FxContext.get().getRunAsSystem())
+            return true;
+        final boolean checkLock;
+        switch(permission) {
+            case CREATE:
+            case DELETE:
+            case EDIT:
+                checkLock = true;
+                break;
+            default:
+                checkLock = false;
+        }
+        if( checkLock && si.getLock().isLocked() && !si.getLock().isExpired()) {
+            if( si.getLock().getUserId() != ticket.getUserId() && !ticket.isMandatorSupervisor()) {
+                if( throwException )
+                    throw new FxNoAccessException("ex.lock.content.locked.noAccess", si.getPk());
+                return false;
+            }
+        }
+        if(!si.usePermissions())
             return true;
         boolean typeAllowed = !si.useTypePermissions();
         boolean stepAllowed = !si.useStepPermissions();

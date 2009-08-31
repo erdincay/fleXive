@@ -412,10 +412,15 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             UserTicket ticket = FxContext.getUserTicket();
             FxPermissionUtils.checkMandatorExistance(content.getMandatorId());
             FxPermissionUtils.checkTypeAvailable(type.getId(), false);
+
+            con = Database.getDbConnection();
+            //check edit permission on current version
+            final ContentStorage storage = StorageManager.getContentStorage(content.getPk().getStorageMode());
+            FxContentSecurityInfo si = storage.getContentSecurityInfo(con, content.getPk(), null);
+            FxPermissionUtils.checkPermission(FxContext.getUserTicket(), ACLPermission.EDIT, si, true);
+
             FxPermissionUtils.checkPermission(ticket, ticket.getUserId(), ACLPermission.CREATE, type, step.getAclId(), content.getAclIds(), true);
             //security check end
-            ContentStorage storage = StorageManager.getContentStorage(content.getPk().getStorageMode());
-            con = Database.getDbConnection();
             return storage.contentCreateVersion(con, CacheAdmin.getEnvironment(), null, content);
         } catch (SQLException e) {
             EJBUtils.rollback(ctx);
@@ -992,7 +997,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
         Connection con = null;
         try {
             con = Database.getDbConnection();
-            FxLock newLock =  StorageManager.getLockStorage().extend(con, lock, duration);
+            FxLock newLock = StorageManager.getLockStorage().extend(con, lock, duration);
             FxCachedContent cachedContent = CacheAdmin.getCachedContent(lock.getLockedPK());
             if( cachedContent != null ) {
                 cachedContent.updateLock(newLock);

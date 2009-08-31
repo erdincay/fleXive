@@ -451,7 +451,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             if (sql == null)
                 sql = new StringBuilder(2000);
             ps = con.prepareStatement(CONTENT_DATA_INSERT);
-            createDetailEntries(con, ps, ft, env, sql, pk, content.isMaxVersion(), content.isLiveVersion(), content.getData("/"));
+            createDetailEntries(con, ps, ft, sql, pk, content.isMaxVersion(), content.isLiveVersion(), content.getData("/"));
             ps.executeBatch();
             ft.commitChanges();
             if (CacheAdmin.getEnvironment().getType(content.getTypeId()).isContainsFlatStorageAssignments()) {
@@ -559,7 +559,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             if (sql == null)
                 sql = new StringBuilder(2000);
             ps = con.prepareStatement(CONTENT_DATA_INSERT);
-            createDetailEntries(con, ps, ft, env, sql, pk, content.isMaxVersion(), content.isLiveVersion(), content.getData("/"));
+            createDetailEntries(con, ps, ft, sql, pk, content.isMaxVersion(), content.isLiveVersion(), content.getData("/"));
             ps.executeBatch();
             if (type.isContainsFlatStorageAssignments()) {
                 FxFlatStorage flatStorage = FxFlatStorageManager.getInstance();
@@ -823,7 +823,6 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      * @param con         an open and valid connection
      * @param ps          batch prepared statement for detail inserts
      * @param ft          fulltext indexer
-     * @param env         FxEnvironment
      * @param sql         an optional StringBuffer
      * @param pk          primary key of the content
      * @param maxVersion  is this content the maximum available version?
@@ -833,9 +832,8 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      * @throws FxDbException       on errors
      * @throws FxCreateException   on errors
      */
-    protected void createDetailEntries(Connection con, PreparedStatement ps, FulltextIndexer ft, FxEnvironment env,
-                                       StringBuilder sql, FxPK pk,
-                                       boolean maxVersion, boolean liveVersion, List<FxData> data)
+    protected void createDetailEntries(Connection con, PreparedStatement ps, FulltextIndexer ft, StringBuilder sql,
+                                       FxPK pk, boolean maxVersion, boolean liveVersion, List<FxData> data)
             throws FxNotFoundException, FxDbException, FxCreateException {
         try {
             FxProperty prop;
@@ -847,7 +845,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                         insertPropertyData(prop, data, con, ps, ft, pk, pdata, maxVersion, liveVersion);
                 } else {
                     insertGroupData(con, sql, pk, ((FxGroupData) curr), maxVersion, liveVersion);
-                    createDetailEntries(con, ps, ft, env, sql, pk, maxVersion, liveVersion, ((FxGroupData) curr).getChildren());
+                    createDetailEntries(con, ps, ft, sql, pk, maxVersion, liveVersion, ((FxGroupData) curr).getChildren());
                 }
             }
         } catch (SQLException e) {
@@ -2264,9 +2262,13 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             }
             pk = new FxPK(pk.getId(), version);
             final List<Long> acls = contentACL == ACL.NULL_ACL_ID ? loadContentAclTable(con, pk) : Arrays.asList(contentACL);
-            return new FxContentSecurityInfo(pk, ownerId, previewId, typeId, mandatorId, typePerm, typeACL, stepACL, acls, previewACL, Lists.newArrayList(propertyPerms));
+            return new FxContentSecurityInfo(pk, ownerId, previewId, typeId, mandatorId, typePerm, typeACL, stepACL,
+                    acls, previewACL, Lists.newArrayList(propertyPerms),
+                    StorageManager.getLockStorage().getLock(con, pk));
         } catch (SQLException e) {
             throw new FxLoadException(LOG, e, "ex.db.sqlError", e.getMessage());
+        } catch (FxLockException e) {
+            throw new FxLoadException(e);
         } finally {
             if (ps != null)
                 try {

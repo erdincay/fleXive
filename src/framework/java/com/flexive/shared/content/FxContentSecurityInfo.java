@@ -32,6 +32,7 @@
 package com.flexive.shared.content;
 
 
+import com.flexive.shared.FxLock;
 import org.apache.commons.lang.ArrayUtils;
 
 import java.io.Serializable;
@@ -105,6 +106,11 @@ public class FxContentSecurityInfo implements Serializable {
     private final List<Long> usedPropertyACLs;
 
     /**
+     * Lock of the content
+     */
+    private final FxLock lock;
+
+    /**
      * Constructor
      *
      * @param pk              the primary key this info relates to
@@ -118,36 +124,35 @@ public class FxContentSecurityInfo implements Serializable {
      * @param contentACL      ACL of the content instance
      * @param previewACL      Property ACL of the preview, only relevant for security if <code>previewId</code> &gt; 0
      * @param usedPropertyACL relevant property ACL's
-     * @deprecated  use {@link #FxContentSecurityInfo(FxPK, long, long, long, long, byte, long, long, java.util.List, long, java.util.List)}
+     * @param lock            lock of the content
+     * @deprecated use {@link #FxContentSecurityInfo(FxPK, long, long, long, long, byte, long, long, java.util.List, long, java.util.List, FxLock)}
      */
     @Deprecated
     public FxContentSecurityInfo(FxPK pk, long ownerId, long previewId, long typeId, long mandatorId, byte typePermissions, int typeACL, int stepACL, int contentACL,
-                                 int previewACL,
-                                 long[] usedPropertyACL) {
+                                 int previewACL, long[] usedPropertyACL, FxLock lock) {
         this(pk, ownerId, previewId, typeId, mandatorId, typePermissions, typeACL, stepACL,
-                Arrays.asList((long) contentACL), previewACL, Arrays.asList(ArrayUtils.toObject(usedPropertyACL))
-        );
-    }    
+                Arrays.asList((long) contentACL), previewACL, Arrays.asList(ArrayUtils.toObject(usedPropertyACL)), lock);
+    }
 
     /**
      * Constructor
      *
-     * @param pk              the primary key this info relates to
-     * @param ownerId         owner of the content
-     * @param previewId       Id of preview image, only relevant for security if &gt; 0
-     * @param typeId          id of the used type
-     * @param mandatorId      id of the mandator
-     * @param typePermissions byte encoded type permission handling
-     * @param typeACL         ACL of the type
-     * @param stepACL         ACL of the step
-     * @param contentACLs     ACL(s) of the content instance
-     * @param previewACL      Property ACL of the preview, only relevant for security if <code>previewId</code> &gt; 0
+     * @param pk               the primary key this info relates to
+     * @param ownerId          owner of the content
+     * @param previewId        Id of preview image, only relevant for security if &gt; 0
+     * @param typeId           id of the used type
+     * @param mandatorId       id of the mandator
+     * @param typePermissions  byte encoded type permission handling
+     * @param typeACL          ACL of the type
+     * @param stepACL          ACL of the step
+     * @param contentACLs      ACL(s) of the content instance
+     * @param previewACL       Property ACL of the preview, only relevant for security if <code>previewId</code> &gt; 0
      * @param usedPropertyACLs relevant property ACLs
+     * @param lock             lock of the content
      */
-    public FxContentSecurityInfo(FxPK pk, long ownerId, long previewId, long typeId, long mandatorId, byte typePermissions,
-                                 long typeACL, long stepACL, List<Long> contentACLs,
-                                 long previewACL,
-                                 List<Long> usedPropertyACLs) {
+    public FxContentSecurityInfo(FxPK pk, long ownerId, long previewId, long typeId, long mandatorId,
+                                 byte typePermissions, long typeACL, long stepACL, List<Long> contentACLs,
+                                 long previewACL, List<Long> usedPropertyACLs, FxLock lock) {
         this.pk = pk;
         this.ownerId = ownerId;
         this.previewId = previewId;
@@ -159,6 +164,7 @@ public class FxContentSecurityInfo implements Serializable {
         this.contentACLs = Collections.unmodifiableList(contentACLs);
         this.previewACL = previewACL;
         this.usedPropertyACLs = Collections.unmodifiableList(usedPropertyACLs);
+        this.lock = lock;
     }
 
     /**
@@ -195,6 +201,16 @@ public class FxContentSecurityInfo implements Serializable {
      */
     public long getMandatorId() {
         return mandatorId;
+    }
+
+    /**
+     * Get the lock of the content
+     *
+     * @return lock of the content
+     * @since 3.1
+     */
+    public FxLock getLock() {
+        return lock;
     }
 
     /**
@@ -240,7 +256,7 @@ public class FxContentSecurityInfo implements Serializable {
      * the type
      *
      * @return relevant property ACL's
-     * @deprecated use {@link #getUsedPropertyACLs()} 
+     * @deprecated use {@link #getUsedPropertyACLs()}
      */
     @Deprecated
     public long[] getUsedPropertyACL() {
@@ -276,7 +292,6 @@ public class FxContentSecurityInfo implements Serializable {
     }
 
     /**
-     *
      * @return
      */
     public long getPreviewACL() {

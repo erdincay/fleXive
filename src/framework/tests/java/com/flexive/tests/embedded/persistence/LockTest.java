@@ -132,6 +132,13 @@ public class LockTest {
             } catch (FxLockException e) {
                 //expected
             }
+            co = ce.load(pk);
+            try {
+                co.save();
+                Assert.fail("Saving a locked instance should not be possible!");
+            } catch (FxApplicationException e) {
+                //ok
+            }
             logout();
             login(TestUsers.MANDATOR_SUPERVISOR);
             FxContent co2 = ce.load(pk);
@@ -213,7 +220,15 @@ public class LockTest {
         } catch (FxLockException e) {
             //ok
         }
-        ce.remove(pk); //even if locked by a different user, remove should be possible
+        try {
+            ce.remove(pk); //locked by a different user, remove should fail
+            Assert.fail("Permanent lock: Remove should fail!");
+        } catch(FxApplicationException e) {
+            //ok
+        }
+        logout();
+        login(TestUsers.SUPERVISOR);
+        ce.remove(pk);
         logout();
     }
 }
