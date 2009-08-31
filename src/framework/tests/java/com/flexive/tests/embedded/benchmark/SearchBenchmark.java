@@ -36,6 +36,7 @@ import com.flexive.shared.cmis.search.CmisResultSet;
 import com.flexive.shared.cmis.search.CmisResultRow;
 import static com.flexive.shared.EJBLookup.getContentEngine;
 import com.flexive.shared.content.FxContent;
+import com.flexive.shared.content.FxPK;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.search.query.SqlQueryBuilder;
 import com.flexive.shared.search.query.PropertyValueComparator;
@@ -69,7 +70,7 @@ import java.util.Arrays;
 public class SearchBenchmark {
     private static final String TYPE_VOLUME = "dataVolumeTest";
 
-    public void selectTreePathsBenchmark() throws FxApplicationException, FxLoginFailedException, FxAccountInUseException, FxLogoutFailedException {
+   public void selectTreePathsBenchmark() throws FxApplicationException, FxLoginFailedException, FxAccountInUseException, FxLogoutFailedException {
         final int numNodes = 2000;
         long rootNode = -1;
         try {
@@ -105,12 +106,12 @@ public class SearchBenchmark {
     }
 
     @Test(dataProvider = "dataVolumeInstanceCounts")
-    public void dataVolumeBenchmark(int counts) throws FxApplicationException {
+    public void dataVolumeBenchmark(int counts, boolean cleanup) throws FxApplicationException {
         // create a large number of simple objects
         final FxType type = createDataVolumeType();
         final FxContent prototype = getContentEngine().initialize(TYPE_VOLUME);
         long start = System.currentTimeMillis();
-        for (int i = 0; i < counts; i++) {
+        for (int i = (int) EJBLookup.getTypeEngine().getInstanceCount(type.getId()); i < counts; i++) {
             createDataVolumeContent(prototype, i).save();
         }
         getResultLogger().logTime("query-volume-create-" + counts, start, counts, "instance");
@@ -159,6 +160,15 @@ public class SearchBenchmark {
                     row.getColumn("string03").getString()
             );
         }
+
+        if (cleanup) {
+            FxContext.startRunningAsSystem();
+            try {
+                EJBLookup.getContentEngine().removeForType(type.getId());
+            } finally {
+                FxContext.stopRunningAsSystem();
+            }
+        }
     }
 
     private void checkResult(int rangeStart, int rangeEnd, String rangeDescr, int number01, String string01, String string02, String string03) {
@@ -173,9 +183,9 @@ public class SearchBenchmark {
     @DataProvider(name = "dataVolumeInstanceCounts")
     public Object[][] getVolumeCounts() {
         return new Object[][] {
-                { 1000 },
-                { 9000 },   // 10000 instances
-                { 20000 }   // 30000 instances
+                { 1000, false },
+                { 9000, false },   // 10000 instances
+                { 20000, true }   // 30000 instances
         };
     }
 
