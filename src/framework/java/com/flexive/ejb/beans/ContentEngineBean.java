@@ -288,7 +288,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
                 beforeAssignmentScript = FxScriptEvent.BeforeAssignmentDataCreate;
                 afterAssignmentScript = FxScriptEvent.AfterAssignmentDataCreate;
             } else {
-                FxPermissionUtils.checkPermission(ticket, content.getLifeCycleInfo().getCreatorId(), ACLPermission.EDIT, type, step.getAclId(), content.getAclIds(), true);
+                FxPermissionUtils.checkPermission(ticket, ACLPermission.EDIT, getContentSecurityInfo(content.getPk()), true);
                 beforeAssignmentScript = FxScriptEvent.BeforeAssignmentDataSave;
                 afterAssignmentScript = FxScriptEvent.AfterAssignmentDataSave;
             }
