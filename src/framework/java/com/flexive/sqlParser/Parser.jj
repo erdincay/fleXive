@@ -466,7 +466,7 @@ Condition condition(final FxStatement PI) throws SqlParserException: {
 	ConstantArray arr = null;
 	Value vi1 = null;
 	Value vi2 = null;
-	Condition.Comparator fct = null;
+	Condition.ValueComparator fct = null;
 	Token inNotIn = null;
 	Token symSel = null;
 	Token nullToken = null;
@@ -482,54 +482,54 @@ Condition condition(final FxStatement PI) throws SqlParserException: {
 	}
         |
         <IS_CHILD_OF>  vi1=valueOrSubselect(PI) {
-		return new Condition(PI,vi1,Condition.Comparator.IS_CHILD_OF,null);
+		return new Condition(PI,vi1,Condition.ValueComparator.IS_CHILD_OF,null);
         }
         |
         <IS_DIRECT_CHILD_OF>  vi1=valueOrSubselect(PI) {
-		return new Condition(PI,vi1,Condition.Comparator.IS_DIRECT_CHILD_OF,null);
+		return new Condition(PI,vi1,Condition.ValueComparator.IS_DIRECT_CHILD_OF,null);
         }
 	|
 	vi1=value(PI) inNotIn=<IN_OR_NOTIN> <BRACE_OPEN> arr=constantArray() <BRACE_CLOSE>
 	{
 		return new Condition(PI,vi1,
-		inNotIn.image.equalsIgnoreCase("IN")?Condition.Comparator.IN:Condition.Comparator.NOT_IN,
+		inNotIn.image.equalsIgnoreCase("IN")?Condition.ValueComparator.IN:Condition.ValueComparator.NOT_IN,
 		arr);
 	}
 }
 
 
 
-Condition.Comparator comperator(final FxStatement PI) throws SqlParserException:
+Condition.ValueComparator comperator(final FxStatement PI) throws SqlParserException:
 { String id;String id2=null;Token sep=null; }
 {
   <LIKE>
-  { return Condition.Comparator.LIKE; }
+  { return Condition.ValueComparator.LIKE; }
   | <NOT> <LIKE>
-  { return Condition.Comparator.NOT_LIKE; }
+  { return Condition.ValueComparator.NOT_LIKE; }
   | <EQUALS>
-  { return Condition.Comparator.EQUAL; }
+  { return Condition.ValueComparator.EQUAL; }
   | <MORE_THAN>
-  { return Condition.Comparator.GREATER; }
+  { return Condition.ValueComparator.GREATER; }
   | <LESS_THAN>
-  { return Condition.Comparator.LESS; }
+  { return Condition.ValueComparator.LESS; }
   | <GEQ>
-  { return Condition.Comparator.GREATER_OR_EQUAL; }
+  { return Condition.ValueComparator.GREATER_OR_EQUAL; }
   | <LEQ>
-  { return Condition.Comparator.LESS_OR_EQUAL; }
+  { return Condition.ValueComparator.LESS_OR_EQUAL; }
   | <NOT_GTR>
-  { return Condition.Comparator.NOT_GREATER; }
+  { return Condition.ValueComparator.NOT_GREATER; }
   | <NOT_LSS>
-  { return Condition.Comparator.NOT_LESS; }
+  { return Condition.ValueComparator.NOT_LESS; }
   | <NEQ>
-  { return Condition.Comparator.NOT_EQUAL; }
+  { return Condition.ValueComparator.NOT_EQUAL; }
   | <NEQ2>
-  { return Condition.Comparator.NOT_EQUAL; }
+  { return Condition.ValueComparator.NOT_EQUAL; }
   | <NEAR>
-  { return Condition.Comparator.NEAR;}
+  { return Condition.ValueComparator.NEAR;}
   | <IS>
-  { return Condition.Comparator.IS;}
+  { return Condition.ValueComparator.IS;}
   | <IS_NOT>
-  { return Condition.Comparator.IS_NOT;}
+  { return Condition.ValueComparator.IS_NOT;}
 }
 
 

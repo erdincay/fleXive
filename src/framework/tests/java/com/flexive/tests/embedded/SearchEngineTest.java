@@ -161,6 +161,57 @@ public class SearchEngineTest {
         }
     }
 
+    @Test
+    public void combinedFlatAssignment() throws FxApplicationException {
+        final FxType type = CacheAdmin.getEnvironment().getType(TEST_TYPE);
+        if (!type.isContainsFlatStorageAssignments()) {
+            return;     // test affects only flat storage queries
+        }
+        // use two assignments, if possible on two different flat storage levels
+        FxPropertyAssignment first = null;
+        FxPropertyAssignment second = null;
+        for (FxPropertyAssignment pa : type.getAssignmentsForDataType(FxDataType.String1024)) {
+            if (pa.isFlatStorageEntry()) {
+                if (first == null) {
+                    first = pa;
+                } else if (second == null) {
+                    second = pa;
+                } else if (second.getFlatStorageMapping().getLevel() == first.getFlatStorageMapping().getLevel()) {
+                    // overwrite until second flat storage mapping is on a different level
+                    // (depending on the DB, it is also possible that all assignments fit in one row)
+                    second = pa;
+                }
+            }
+        }
+        if (first == null || second == null) {
+            fail("No suitable assignments found");
+        }
+
+        // get test values
+        //noinspection ConstantConditions
+        final FxResultSet result = new SqlQueryBuilder().select("@pk", "#" + first.getId(), "#" + second.getId()).type(TEST_TYPE).getResult();
+        assertTrue(result.getRowCount() > 0);
+        final FxPK pk = result.getResultRow(0).getPk(1);
+        final Object firstValue = result.getResultRow(0).getValue(2);
+        final Object secondValue = result.getResultRow(0).getValue(3);
+        assertNotNull(firstValue);
+        assertNotNull(secondValue);
+
+        // issue a query on these conditions with AND and OR
+        for (SqlQueryBuilder builder : Arrays.asList(
+                new SqlQueryBuilder().select("@pk").andSub(),
+                new SqlQueryBuilder().select("@pk").orSub()
+        )) {
+            final FxResultSet filterResult = builder  
+                    .condition("#" + first.getId(), PropertyValueComparator.EQ, firstValue)
+                    .condition("#" + second.getId(), PropertyValueComparator.EQ, secondValue)
+                    .getResult();
+            assertTrue(filterResult.getRowCount() > 0);
+            assertTrue(filterResult.collectColumn(1).contains(pk), "Expected PK " + pk + " not returned in result.");
+        }
+    }
+
+
     /**
      * Check if the SQL search for empty string properties works.
      *

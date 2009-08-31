@@ -53,6 +53,7 @@ import static com.flexive.tests.embedded.benchmark.FxBenchmarkUtils.getResultLog
 import static com.flexive.tests.embedded.FxTestUtils.login;
 import org.testng.annotations.Test;
 import org.testng.annotations.DataProvider;
+import org.testng.annotations.BeforeClass;
 import static org.testng.Assert.*;
 import org.apache.commons.lang.math.RandomUtils;
 
@@ -70,6 +71,15 @@ import java.util.Arrays;
 public class SearchBenchmark {
     private static final String TYPE_VOLUME = "dataVolumeTest";
 
+    @BeforeClass
+    public void init() throws FxApplicationException {
+        // warm up search engines
+        for (int i = 0; i < 1000; i++) {
+            new SqlQueryBuilder().type(FxType.FOLDER).condition("id", PropertyValueComparator.GE, 0).getResult();
+            EJBLookup.getCmisSearchEngine().search("SELECT ObjectId FROM folder WHERE id > 0");
+        }
+    }
+    
    public void selectTreePathsBenchmark() throws FxApplicationException, FxLoginFailedException, FxAccountInUseException, FxLogoutFailedException {
         final int numNodes = 2000;
         long rootNode = -1;
@@ -116,7 +126,23 @@ public class SearchBenchmark {
         }
         getResultLogger().logTime("query-volume-create-" + counts, start, counts, "instance");
 
-        // perform a simple FxSQL query
+        // perform a FxSQL query limited by type
+        FxContext.startRunningAsSystem();
+        final long dbInstanceCount = EJBLookup.getTypeEngine().getInstanceCount(type.getId());
+        start = System.currentTimeMillis();
+        assertEquals(
+                new SqlQueryBuilder()
+                        .select("@pk", TYPE_VOLUME + "/string01", TYPE_VOLUME + "/string02", TYPE_VOLUME + "/string03")
+                        .type(TYPE_VOLUME)
+                        .maxRows(Integer.MAX_VALUE)
+                        .getResult()
+                        .getRowCount(),
+                dbInstanceCount,
+                "Type query did not return all results"
+        );
+        getResultLogger().logTime("query-volume-fxsql-type-" + counts, start, 1, "query");
+
+        // perform a simple FxSQL query with a condition
         final int rangeStart = counts / 3;
         final int rangeEnd = rangeStart + 500;
         final String rangeDescr = "[" + rangeStart + "-" + rangeEnd + ")";
@@ -142,7 +168,19 @@ public class SearchBenchmark {
             );
         }
 
-        // perform the same query with CMIS-SQL
+        // select all instances by type with CMIS-SQL
+        start = System.currentTimeMillis();
+        assertEquals(
+                EJBLookup.getCmisSearchEngine().search(
+                        "SELECT ObjectId, string01, string02, string03 FROM " + TYPE_VOLUME,
+                        true, 0, Integer.MAX_VALUE
+                ).getRowCount(),
+                dbInstanceCount,
+                "CMIS query did not return all rows"
+        );
+        getResultLogger().logTime("query-volume-cmissql-type-" + counts, start, 1, "query");
+        
+        // perform a CMIS-SQL query with a condition
         start = System.currentTimeMillis();
         final CmisResultSet cmisResult = EJBLookup.getCmisSearchEngine().search(
                 "SELECT ObjectId, string01, string02, string03, text, number01, date01 "
@@ -185,7 +223,7 @@ public class SearchBenchmark {
         return new Object[][] {
                 { 1000, false },
                 { 9000, false },   // 10000 instances
-                { 20000, true }   // 30000 instances
+//                { 20000, true }   // 30000 instances
         };
     }
 

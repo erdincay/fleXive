@@ -33,7 +33,6 @@ package com.flexive.sqlParser;
 
 import com.flexive.shared.exceptions.FxSqlSearchException;
 import com.flexive.shared.search.query.VersionFilter;
-import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.interfaces.SearchEngine;
 
 import java.io.ByteArrayInputStream;
@@ -594,7 +593,7 @@ public class FxStatement {
         } else {
             Brace parent = br.getParent();
             try {
-                Condition cd = new Condition(this, new Constant("1"), Condition.Comparator.EQUAL, new Constant(alwaysTrue ? "1" : "0"));
+                Condition cd = new Condition(this, new Constant("1"), Condition.ValueComparator.EQUAL, new Constant(alwaysTrue ? "1" : "0"));
                 parent.addElement(cd);
             } catch (Exception exc) {
                 System.err.println("###Y" + exc.getMessage());

@@ -38,12 +38,12 @@ package com.flexive.sqlParser;
  */
 public class Condition implements BraceElement {
 
-    private Comparator comparator;
+    private ValueComparator comparator;
     private Value sLeft;
     private Value sRight;
     private int id;
 
-    public enum Comparator {
+    public enum ValueComparator {
         LIKE("like"),
         NOT_LIKE("not like"),
         EQUAL("="),
@@ -64,7 +64,7 @@ public class Condition implements BraceElement {
 
         private String sql;
 
-        Comparator(String sql) {
+        ValueComparator(String sql) {
             this.sql = sql;
         }
 
@@ -84,7 +84,7 @@ public class Condition implements BraceElement {
      * @param vright the right value
      * @throws SqlParserException if a error occured
      */
-    protected Condition(FxStatement stmt,Value vleft, Comparator comparator,Value vright) throws SqlParserException {
+    protected Condition(FxStatement stmt,Value vleft, ValueComparator comparator,Value vright) throws SqlParserException {
         this.comparator = comparator;
         this.sLeft = vleft;
         this.sRight = vright;
@@ -133,7 +133,7 @@ public class Condition implements BraceElement {
         return this.sRight;
     }
 
-    public Comparator getComperator() {
+    public ValueComparator getComperator() {
         return this.comparator;
     }
 
@@ -152,7 +152,7 @@ public class Condition implements BraceElement {
         if (!(sLeft instanceof Constant  && sRight instanceof Constant)) {
             return false;
         }
-        if (comparator == Comparator.EQUAL) {
+        if (comparator == ValueComparator.EQUAL) {
             return  sLeft.equals(sRight);
         }
         throw new SqlParserException("ex.sqlSearch.connotUseComperator", comparator,(sLeft+" "+ comparator +" "+sRight));
@@ -168,7 +168,7 @@ public class Condition implements BraceElement {
         if (!(sLeft instanceof Constant && sRight instanceof Constant)) {
             return false;
         }
-        if (comparator == Comparator.EQUAL) {
+        if (comparator == ValueComparator.EQUAL) {
             return  !sLeft.equals(sRight);
         }
         throw new SqlParserException("ex.sqlSearch.connotUseComperator", comparator,(sLeft+" "+ comparator +" "+sRight));

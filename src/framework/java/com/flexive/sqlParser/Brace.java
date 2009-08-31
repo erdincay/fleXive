@@ -160,6 +160,28 @@ public class Brace implements BraceElement{
         return (this.type!=null && this.type.equalsIgnoreCase("and"));
     }
 
+    public boolean containsAnd() {
+        return containsType("and");
+    }
+
+    public boolean containsOr() {
+        return containsType("or");
+    }
+
+    private boolean containsType(String type) {
+        if (type.equalsIgnoreCase(this.type)) {
+            return true;
+        }
+        // check all nested braces
+        for (BraceElement element : getElements()) {
+            if (element instanceof Brace) {
+                if (((Brace) element).containsType(type)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
     protected void setType(String value) {
         this.type=value;
