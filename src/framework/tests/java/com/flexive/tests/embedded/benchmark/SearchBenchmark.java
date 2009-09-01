@@ -75,7 +75,7 @@ public class SearchBenchmark {
     @BeforeClass
     public void init() throws FxApplicationException {
         // warm up search engines
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 100; i++) {
             new SqlQueryBuilder().type(FxType.FOLDER).condition("id", PropertyValueComparator.GE, 0).getResult();
             EJBLookup.getCmisSearchEngine().search("SELECT ObjectId FROM folder WHERE id > 0");
         }
@@ -123,7 +123,7 @@ public class SearchBenchmark {
         final FxContent prototype = getContentEngine().initialize(TYPE_VOLUME);
         long start = System.currentTimeMillis();
         for (int i = (int) EJBLookup.getTypeEngine().getInstanceCount(type.getId()); i < counts; i++) {
-            createDataVolumeContent(prototype, i).save();
+            EJBLookup.getContentEngine().save(createDataVolumeContent(prototype, i));
         }
         getResultLogger().logTime("query-volume-create-" + counts, start, counts, "instance");
 
@@ -204,6 +204,7 @@ public class SearchBenchmark {
             FxContext.startRunningAsSystem();
             try {
                 EJBLookup.getContentEngine().removeForType(type.getId());
+                EJBLookup.getTypeEngine().remove(type.getId());
             } finally {
                 FxContext.stopRunningAsSystem();
             }

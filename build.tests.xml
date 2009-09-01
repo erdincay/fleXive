@@ -328,6 +328,7 @@
             <!-- JDK6 classloader policy issue w/jboss5 workaround -->
             <jvmarg value="-Dsun.lang.ClassLoader.allowArraySyntax=true"/>
             <jvmarg value="-Xmx512m"/>
+            <jvmarg value="-server"/>
             <!--Enable the following line for log output-->
             <jvmarg value="-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"/>
             <jvmarg value="-Dlog4j.configuration=testlog4j.xml"/>

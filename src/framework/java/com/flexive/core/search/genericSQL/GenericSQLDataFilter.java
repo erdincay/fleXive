@@ -897,14 +897,8 @@ public class GenericSQLDataFilter extends DataFilter {
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-
-            ConditionTableInfo that = (ConditionTableInfo) o;
-
-            if (flatStorage != that.flatStorage) return false;
-            if (level != that.level) return false;
-            if (multiLang != that.multiLang) return false;
-
-            return true;
+            final ConditionTableInfo that = (ConditionTableInfo) o;
+            return flatStorage == that.flatStorage && level == that.level && multiLang == that.multiLang;
         }
 
         @Override
