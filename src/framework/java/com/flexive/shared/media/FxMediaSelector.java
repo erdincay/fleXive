@@ -372,9 +372,9 @@ public class FxMediaSelector implements Serializable {
     }
 
     /**
-     * Get the requested (pre-scaled) thumbnail size (0..3)
+     * Get the requested (pre-scaled) thumbnail size (0..4)
      *
-     * @return requested (pre-scaled) thumbnail size (0..3)
+     * @return requested (pre-scaled) thumbnail size (0..4)
      */
     public BinaryDescriptor.PreviewSizes getSize() {
         return size;

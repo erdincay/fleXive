@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2008
+ *  Copyright (c) 1999-2009
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -47,9 +47,11 @@ Parameters:
 "File previewFile1",
 "File previewFile2",
 "File previewFile3",
+"File previewFile4",
 "int[] dimensionPreview1",
 "int[] dimensionPreview2",
-"int[] dimensionPreview3"
+"int[] dimensionPreview3",
+"int[] dimensionPreview4"
 */
 if (processed)
     return
@@ -70,14 +72,17 @@ else if (mimeType.endsWith("/gif"))
 previewFile1 = File.createTempFile("PREV1", ext)
 previewFile2 = File.createTempFile("PREV2", ext)
 previewFile3 = File.createTempFile("PREV3", ext)
+previewFile4 = File.createTempFile("PREV4", ext)
 if( meta.asImageMetadata().getWidth() <= 256 && meta.asImageMetadata().getHeight() <= 256 ) {
     dimensionsPreview1 = FxMediaNativeEngine.scale(binaryFile, previewFile1, ext, BinaryDescriptor.PREVIEW1_BOX, BinaryDescriptor.PREVIEW1_BOX)
     dimensionsPreview2 = FxMediaNativeEngine.scale(binaryFile, previewFile2, ext, BinaryDescriptor.PREVIEW2_BOX, BinaryDescriptor.PREVIEW2_BOX)
     dimensionsPreview3 = FxMediaNativeEngine.scale(binaryFile, previewFile3, ext, BinaryDescriptor.PREVIEW3_BOX, BinaryDescriptor.PREVIEW3_BOX)
+    dimensionsPreview4 = FxMediaNativeEngine.scale(binaryFile, previewFile4, ext, BinaryDescriptor.SCREENVIEW_WIDTH, BinaryDescriptor.SCREENVIEW_HEIGHT)
 } else {
     dimensionsPreview1 = FxMediaEngine.scale(binaryFile, previewFile1, ext, BinaryDescriptor.PREVIEW1_BOX, BinaryDescriptor.PREVIEW1_BOX)
     dimensionsPreview2 = FxMediaEngine.scale(binaryFile, previewFile2, ext, BinaryDescriptor.PREVIEW2_BOX, BinaryDescriptor.PREVIEW2_BOX)
     dimensionsPreview3 = FxMediaEngine.scale(binaryFile, previewFile3, ext, BinaryDescriptor.PREVIEW3_BOX, BinaryDescriptor.PREVIEW3_BOX)
+    dimensionsPreview4 = FxMediaEngine.scale(binaryFile, previewFile4, ext, BinaryDescriptor.SCREENVIEW_WIDTH, BinaryDescriptor.SCREENVIEW_HEIGHT)
 }
 processed = true
 useDefaultPreview = false

@@ -51,7 +51,7 @@ public class FxThumbnailURIConfigurator extends FxMediaSelector {
 
     private static final Pattern pPK = Pattern.compile("^pk(\\d+(\\.(\\d+|MAX|LIVE))?|TYPE)");
     private static final Pattern pXPath = Pattern.compile("^xp.+");
-    private static final Pattern pSize = Pattern.compile("s[0123]");
+    private static final Pattern pSize = Pattern.compile("s[01234]");
     private static final Pattern pWidth = Pattern.compile("w\\d+");
     private static final Pattern pHeight = Pattern.compile("h\\d+");
     private static final Pattern pFlipH = Pattern.compile("flip[Hh]");
@@ -86,7 +86,7 @@ public class FxThumbnailURIConfigurator extends FxMediaSelector {
      * <li><code>lang{lang}</code> - 2-digit ISO language code
      * <li><code>lfb{0,1}</code> - language fallback: 0=generate error if language not found, 1=fall back to default language
      * <li><code>e{3 digit error number}u{error url}</code> - URL encoded error url to redirect for http errors specified in {error number}, if no number is given then the url is a fallback for unclassified errors
-     * <li><code>s{0,1,2,3}</code>  - use a predefined image/thumbnail size, 0=default</li>
+     * <li><code>s{0,1,2,3,4}</code>  - use a predefined image/thumbnail size, 0=default</li>
      * <li><code>w{n}</code> - scale to width</li>
      * <li><code>h{n}</code> - scale to height</li>
      * <li><code>rot{90,180,270}</code> - rotate 90, 180 or 270 degrees or any angle but with a larger bounding box (rotate is always executed after flip operations)</li>

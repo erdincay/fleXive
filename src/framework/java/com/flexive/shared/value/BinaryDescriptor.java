@@ -78,6 +78,12 @@ public class BinaryDescriptor implements Serializable {
      * For images: box scaled size for preview 3
      */
     public final static int PREVIEW3_BOX = 232;
+    /**
+     * For images: scaled size for screenviews (1024x768)
+     * @since 3.1
+     */
+    public final static int SCREENVIEW_WIDTH = 1024;
+    public final static int SCREENVIEW_HEIGHT = 768;
 
     /**
      * Enumeration of all available preview sizes.
@@ -86,6 +92,7 @@ public class BinaryDescriptor implements Serializable {
         PREVIEW1(1, PREVIEW1_BOX),
         PREVIEW2(2, PREVIEW2_BOX),
         PREVIEW3(3, PREVIEW3_BOX),
+        SCREENVIEW(4, SCREENVIEW_WIDTH),
         ORIGINAL(0, -1);
 
         private final int blobIndex;

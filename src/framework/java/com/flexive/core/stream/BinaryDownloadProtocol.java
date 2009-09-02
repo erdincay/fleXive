@@ -100,7 +100,7 @@ public class BinaryDownloadProtocol extends StreamProtocol<BinaryDownloadPayload
                         && previewSize == BinaryDescriptor.PreviewSizes.ORIGINAL
                         && !bin.getMimeType().startsWith("image")) {
                     // choose biggest preview size if an image is required, but the binary is no image
-                    bin = loadBinaryDescriptor(dataPacket, BinaryDescriptor.PreviewSizes.PREVIEW3);
+                    bin = loadBinaryDescriptor(dataPacket, BinaryDescriptor.PreviewSizes.SCREENVIEW);
                 }
             } catch (FxNotFoundException e) {
                 LOG.error("Failed to lookup content storage for division #" + dataPacket.getPayload().getDivision() + ": " + e.getLocalizedMessage());
