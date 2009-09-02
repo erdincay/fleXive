@@ -120,9 +120,11 @@ if( docType == Extractor.DocumentType.PDF ) {
         previewFile1 = File.createTempFile("PREV1", ext)
         previewFile2 = File.createTempFile("PREV2", ext)
         previewFile3 = File.createTempFile("PREV3", ext)
+        previewFile4 = File.createTempFile("PREV4", ext)
         dimensionsPreview1 = FxMediaEngine.scale(imgFile, previewFile1, ext, BinaryDescriptor.PREVIEW1_BOX, BinaryDescriptor.PREVIEW1_BOX)
         dimensionsPreview2 = FxMediaEngine.scale(imgFile, previewFile2, ext, BinaryDescriptor.PREVIEW2_BOX, BinaryDescriptor.PREVIEW2_BOX)
         dimensionsPreview3 = FxMediaEngine.scale(imgFile, previewFile3, ext, BinaryDescriptor.PREVIEW3_BOX, BinaryDescriptor.PREVIEW3_BOX)
+        dimensionsPreview4 = FxMediaEngine.scale(imgFile, previewFile4, ext, BinaryDescriptor.SCREENVIEW_WIDTH, BinaryDescriptor.SCREENVIEW_HEIGHT)
         if( !imgFile.delete() )
             imgFile.deleteOnExit()
         useDefaultPreview = false
