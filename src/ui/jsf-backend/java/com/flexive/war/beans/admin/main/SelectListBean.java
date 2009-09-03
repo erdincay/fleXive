@@ -90,6 +90,8 @@ public class SelectListBean implements Serializable {
 
     private int rowsPerPage = 10;
     private int currentPage = 1;
+    private int overviewRows = 10;
+    private int overviewCurrentPage = 1;
     private long editListItemId = UNSELECTED_ID;
     private long moveListItemId = UNSELECTED_ID;
     private boolean editNew = false;
@@ -116,6 +118,46 @@ public class SelectListBean implements Serializable {
 
     public void setCurrentPage(int currentPage) {
         this.currentPage = currentPage;
+    }
+
+    public int getOverviewRows() {
+        return overviewRows;
+    }
+
+    public void setOverviewRows(int overviewRows) {
+        this.overviewRows = overviewRows;
+    }
+
+    public int getOverviewCurrentPage() {
+        return overviewCurrentPage;
+    }
+
+    public void setOverviewCurrentPage(int overviewCurrentPage) {
+        this.overviewCurrentPage = overviewCurrentPage;
+    }
+
+    public boolean isEditNew() {
+        return editNew;
+    }
+
+    public void setEditNew(boolean editNew) {
+        this.editNew = editNew;
+    }
+
+    public Map<Long, Long> getOriginalParents() {
+        return originalParents;
+    }
+
+    public void setOriginalParents(Map<Long, Long> originalParents) {
+        this.originalParents = originalParents;
+    }
+
+    public FxSharedUtils.ItemPositionSorter getSorter() {
+        return sorter;
+    }
+
+    public void setSorter(FxSharedUtils.ItemPositionSorter sorter) {
+        this.sorter = sorter;
     }
 
     /**
@@ -290,6 +332,10 @@ public class SelectListBean implements Serializable {
         return selectList;
     }
 
+    public void setSelectList(FxSelectListEdit selectList) {
+        this.selectList = selectList;
+    }
+
     public void setEditListItemId(long editListItemId) {
         this.editListItemId = editListItemId;
     }
@@ -355,6 +401,10 @@ public class SelectListBean implements Serializable {
         return editListItem;
     }
 
+    public void setEditListItem(FxSelectListItemEdit editListItem) {
+        this.editListItem = editListItem;
+    }
+
     public Long[] getEditListItemChildren() {
         if (editListItem == null)
             return new Long[0];
@@ -391,11 +441,11 @@ public class SelectListBean implements Serializable {
      */
     public List<FxSelectListItemEdit> getItems() {
         List<FxSelectListItemEdit> items = new ArrayList<FxSelectListItemEdit>();
-        for (FxSelectListItemEdit i : selectList.getEditableItems())
-            if (FxJsfUtils.getRequest().getUserTicket().isInRole(Role.SelectListEditor) ||
-                    FxJsfUtils.getRequest().getUserTicket().mayReadACL(i.getAcl().getId(), FxJsfUtils.getRequest().getUserTicket().getUserId()))
-                items.add(i);
-        Collections.sort(items, sorter);
+            for (FxSelectListItemEdit i : selectList.getEditableItems())
+                if (FxJsfUtils.getRequest().getUserTicket().isInRole(Role.SelectListEditor) ||
+                        FxJsfUtils.getRequest().getUserTicket().mayReadACL(i.getAcl().getId(), FxJsfUtils.getRequest().getUserTicket().getUserId()))
+                    items.add(i);
+            Collections.sort(items, sorter);
         return items;
     }
 

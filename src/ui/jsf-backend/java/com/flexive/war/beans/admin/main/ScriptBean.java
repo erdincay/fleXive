@@ -90,6 +90,8 @@ public class ScriptBean implements Serializable {
     private long executionTime;
     private String userLang = "en";
     private String language = "groovy";
+    private int overviewPageNumber = 1;
+    private int overviewRowNumber = 10;
 
     private transient Object result;
     
@@ -254,6 +256,22 @@ public class ScriptBean implements Serializable {
         if (this.id <= 0) {
             this.id = (Long) FxJsfUtils.getSessionAttribute(ID_CACHE_KEY);
         }
+    }
+
+    public int getOverviewPageNumber() {
+        return overviewPageNumber;
+    }
+
+    public void setOverviewPageNumber(int overviewPageNumber) {
+        this.overviewPageNumber = overviewPageNumber;
+    }
+
+    public int getOverviewRowNumber() {
+        return overviewRowNumber;
+    }
+
+    public void setOverviewRowNumber(int overviewRowNumber) {
+        this.overviewRowNumber = overviewRowNumber;
     }
 
     /**

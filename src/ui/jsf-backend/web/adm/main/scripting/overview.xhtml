@@ -1,4 +1,5 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:ui="http://java.sun.com/jsf/facelets"
       xmlns:h="http://java.sun.com/jsf/html"
@@ -11,27 +12,34 @@
 <body>
 
 <ui:composition template="/adm/contentTemplate.xhtml">
+
     <ui:define name="body">
 
         <h:form id="listForm">
+            <t:saveState value="#{scriptBean.overviewPageNumber}"/>
+            <t:saveState value="#{scriptBean.overviewRowNumber}"/>
 
             <adm:tab label="#{fxMessageBean['Script.tabtitle.overview']}" active="true" id="tab1"/>
 
             <h:panelGrid columns="4">
                 #{fxMessageBean['Script.field.scriptScope']}:&nbsp;
-                <h:selectOneListbox id="selectedScriptScope" value="#{scriptBean.selectedScope}" size="1" onchange="submit();">
-                    <f:selectItems value="#{fxSelectBean.scriptScopes}" />
+                <h:selectOneListbox id="selectedScriptScope" value="#{scriptBean.selectedScope}" size="1"
+                                    onchange="submit();">
+                    <f:selectItems value="#{fxSelectBean.scriptScopes}"/>
                 </h:selectOneListbox>
                 #{fxMessageBean['Script.field.event']}:&nbsp;
-                <h:selectOneListbox id="selectedScriptEvent" value="#{scriptBean.selectedScriptEventId}" size="1" onchange="submit();">
-                    <f:selectItems value="#{scriptBean.eventsForScope}" />
+                <h:selectOneListbox id="selectedScriptEvent" value="#{scriptBean.selectedScriptEventId}" size="1"
+                                    onchange="submit();">
+                    <f:selectItems value="#{scriptBean.eventsForScope}"/>
                 </h:selectOneListbox>
             </h:panelGrid>
 
             <br/>
-            <adm:sortableTable id="table">
-                <table id="table">
-                    <thead>
+            <a4j:outputPanel id="scriptOverviewPanel">
+                <adm:sortableTable id="table" onPageChange="DTpageChange" startPage="#{scriptBean.overviewPageNumber}"
+                                   rowsPerPage="#{scriptBean.overviewRowNumber}">
+                    <table id="table">
+                        <thead>
                         <tr>
                             <th class="tblHeader" field="name" dataType="String" align="left">
                                 #{fxMessageBean['Script.field.name']}
@@ -49,41 +57,56 @@
                                 #{fxMessageBean['Script.field.actions']}
                             </th>
                         </tr>
-                    </thead>
-                    <tbody>
+                        </thead>
+                        <tbody>
                         <ui:repeat value="#{scriptBean.scriptsForEvent}" var="item">
                             <tr value="#{item.id}">
-                                <td align="left"><h:outputText value="#{item.name}" /></td>
-                                <td align="left"><h:outputText value="#{item.description}" /></td>
-                                <td align="left"><h:outputText value="#{item.event.name}" /></td>
+                                <td align="left"><h:outputText value="#{item.name}"/></td>
+                                <td align="left"><h:outputText value="#{item.description}"/></td>
+                                <td align="left"><h:outputText value="#{item.event.name}"/></td>
                                 <td align="left"><h:selectBooleanCheckbox value="#{item.active}" disabled="true"/></td>
                                 <td align="left">
-                                    <adm:commandIcon labelKey="Script.button.edit" location="content"
-                                                     icon="edit"  action="editScript"  bean="#{scriptBean}" immediate="true"
-                                                     id="editButton_#{item.id}">
+                                    <!-- edit -->
+                                    <adm:ajaxCommandIcon titleKey="Script.button.edit"
+                                                         icon="edit"
+                                                         action="editScript"
+                                                         bean="#{scriptBean}"
+                                                         reRender="scriptOverviewPanel"
+                                                         id="editButton_#{item.id}">
+
                                         <f:setPropertyActionListener target="#{scriptBean.id}" value="#{item.id}"/>
-                                    </adm:commandIcon>
+                                        <a4j:actionparam name="page" noEscape="true" assignTo="#{scriptBean.overviewPageNumber}" value="currentDTPage"/>
+                                        <a4j:actionparam name="row" noEscape="true" assignTo="#{scriptBean.overviewRowNumber}" value="rowsPerDTPage"/>
+                                    </adm:ajaxCommandIcon>
+                                    <!-- delete -->
                                     <ui:fragment rendered="#{fxSystemBean.isInRole['ScriptManagement']}">
                                         <adm:commandIcon labelKey="Script.button.delete" location="content"
-                                                         icon="delete" action="deleteScript" bean="#{scriptBean}"
-                                                         id="deleteButton_#{item.id}" confirmKey="Script.confirm.delete">
+                                                             icon="delete" action="deleteScript" bean="#{scriptBean}"
+                                                             id="deleteButton_#{item.id}"
+                                                             confirmKey="Script.confirm.delete">
                                             <f:setPropertyActionListener target="#{scriptBean.id}" value="#{item.id}"/>
                                         </adm:commandIcon>
                                     </ui:fragment>
                                     <!-- show run icon only if the script is an independent one (i.e. a not-triggered script) -->
-                                    <ui:fragment rendered="#{item.event.name=='Manual' and item.active and fxSystemBean.isInRole['ScriptExecution']}">
-                                        <adm:commandIcon labelKey="Script.button.run" location="content" icon="run"
-                                                         action="runScript" bean="#{scriptBean}" id="runButton_#{item.id}">
+                                    <ui:fragment
+                                            rendered="#{item.event.name=='Manual' and item.active and fxSystemBean.isInRole['ScriptExecution']}">
+                                        <adm:ajaxCommandIcon titleKey="Script.button.run" icon="run"
+                                                         action="runScript" bean="#{scriptBean}"
+                                                         id="runButton_#{item.id}">
                                             <f:setPropertyActionListener value="#{item.id}" target="#{scriptBean.id}"/>
-                                        </adm:commandIcon>
+                                            <a4j:actionparam name="page" noEscape="true" assignTo="#{scriptBean.overviewPageNumber}" value="currentDTPage"/>
+                                            <a4j:actionparam name="row" noEscape="true" assignTo="#{scriptBean.overviewRowNumber}" value="rowsPerDTPage"/>
+                                        </adm:ajaxCommandIcon>
                                     </ui:fragment>
                                 </td>
                             </tr>
                         </ui:repeat>
-                    </tbody>
-                </table>
-            </adm:sortableTable>
+                        </tbody>
+                    </table>
+                </adm:sortableTable>
+            </a4j:outputPanel>
             <br/>
+
             <ui:fragment rendered="#{fxSystemBean.isInRole['ScriptManagement']}">
                 <adm:commandButton labelKey="Script.button.create" location="both"
                                    icon="new" action="scriptCreate" id="createScriptButton"/>

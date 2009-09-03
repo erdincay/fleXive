@@ -33,6 +33,8 @@
                 <t:saveState id="ssEvent" value="#{scriptBean.sinfo.event}"/>
                 <t:saveState id="ssDescription" value="#{scriptBean.sinfo.description}"/>
                 <t:saveState id="ssCode" value="#{scriptBean.sinfo.code}"/>
+                <t:saveState value="#{scriptBean.overviewPageNumber}"/>
+                <t:saveState value="#{scriptBean.overviewRowNumber}"/>
 
                 <adm:tab label="#{fxMessageBean['Script.tabtitle.edit,#{scriptBean.sinfo.name}']}" active="true"
                          id="tab1"/>

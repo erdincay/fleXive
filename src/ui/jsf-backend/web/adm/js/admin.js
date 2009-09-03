@@ -697,3 +697,13 @@ function getOnClick(id, onClickAction, lockscreen) {
     onClickAction = onClickAction + "document.getElementById('" + linkElement.getAttribute("id") + "').onclick();";
     return eval(onClickAction);
 }
+
+// adm:sortableTable page change / row change utilities - YUI ***********************
+var currentDTPage = 1;
+var rowsPerDTPage = 10;
+
+var DTpageChange = function(event) {
+    rowsPerDTPage = event.newState.rowsPerPage;
+    currentDTPage = event.newValue;
+};
+// **********************************************************************************

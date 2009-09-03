@@ -24,12 +24,23 @@
     <ui:define name="body">
         <c:set var="readonlyList" value="#{not fxSystemBean.isInRole['SelectListEditor']}"/>
         <h:form id="frm" enctype="multipart/form-data">
+
+            <t:saveState value="#{selectListBean.selectListId}"/>
+            <t:saveState value="#{selectListBean.selectList}"/>
+            <t:saveState value="#{selectListBean.editListItem}"/>
+            <t:saveState value="#{selectListBean.editListItemId}"/>
+            <t:saveState value="#{selectListBean.editNew}"/>
+            <t:saveState value="#{selectListBean.originalParents}"/>
+            <t:saveState value="#{selectListBean.sorter}"/>
+            <t:saveState value="#{selectListBean.overviewRows}"/>
+            <t:saveState value="#{selectListBean.overviewCurrentPage}"/>
+
             <adm:tab label="#{fxMessageBean['SelectList.tab.editSelectList,#{selectListBean.selectListName}']}" active="true" id="tab1"/>
 
             <div style="float:right">
                 <fx:fxValueInputLanguageSelect id="updateLanguages"/>
             </div>
-            
+
             <fx:formRow labelKey="SelectList.label.selectList.name" id="name">
                 <h:inputText id="name" value="#{selectListBean.selectListName}" disabled="#{readonlyList}" styleClass="fxValueTextInput"/>
             </fx:formRow>
@@ -66,20 +77,8 @@
 
             <c:set var="readonly" value="#{not (fxSystemBean.isInRole['SelectListEditor'] or selectListBean.mayEditItem[item])}"/>
 
-            <script type="text/javascript">
-            var currentPage = 1;
-            var rowsPerPage = 10;
-            <!--
-            var pageChange = function(event) {
-//                alert('page changed to '+event.newValue+' rpp:'+event.newState.rowsPerPage+' total:'+event.newState.totalRecords);
-                rowsPerPage = event.newState.rowsPerPage;
-                currentPage = event.newValue;
-            };
-            //-->
-            </script>
-
             <a4j:outputPanel id="itemTable">
-                <adm:sortableTable id="table" onPageChange="pageChange" startPage="#{selectListBean.currentPage}"
+                <adm:sortableTable id="table" onPageChange="DTpageChange" startPage="#{selectListBean.currentPage}"
                                    rowsPerPage="#{selectListBean.rowsPerPage}">
                     <table id="table">
                         <thead>
@@ -132,9 +131,9 @@
                                                              reRender="itemTable">
                                             <f:setPropertyActionListener target="#{selectListBean.moveListItemId}"
                                                                          value="#{item.id}"/>
-                                            <a4j:actionparam noEscape="true" name="rowsPerPage_" value="rowsPerPage"
+                                            <a4j:actionparam noEscape="true" name="rowsPerPage_" value="rowsPerDTPage"
                                                              assignTo="#{selectListBean.rowsPerPage}"/>
-                                            <a4j:actionparam noEscape="true" name="currentPage_" value="currentPage"
+                                            <a4j:actionparam noEscape="true" name="currentPage_" value="currentDTPage"
                                                              assignTo="#{selectListBean.currentPage}"/>
                                         </adm:ajaxCommandIcon>
                                         <!-- move down -->
@@ -146,9 +145,9 @@
                                                              reRender="itemTable">
                                             <f:setPropertyActionListener target="#{selectListBean.moveListItemId}"
                                                                          value="#{item.id}"/>
-                                            <a4j:actionparam noEscape="true" name="rowsPerPage_" value="rowsPerPage"
+                                            <a4j:actionparam noEscape="true" name="rowsPerPage_" value="rowsPerDTPage"
                                                              assignTo="#{selectListBean.rowsPerPage}"/>
-                                            <a4j:actionparam noEscape="true" name="currentPage_" value="currentPage"
+                                            <a4j:actionparam noEscape="true" name="currentPage_" value="currentDTPage"
                                                              assignTo="#{selectListBean.currentPage}"/>
                                         </adm:ajaxCommandIcon>
                                         <!-- edit -->
@@ -161,9 +160,9 @@
                                                              reRender="editItemArea,createItemArea">
                                             <f:setPropertyActionListener target="#{selectListBean.editListItemId}"
                                                                          value="#{item.id}"/>
-                                            <a4j:actionparam noEscape="true" name="rowsPerPage_" value="rowsPerPage"
+                                            <a4j:actionparam noEscape="true" name="rowsPerPage_" value="rowsPerDTPage"
                                                              assignTo="#{selectListBean.rowsPerPage}"/>
-                                            <a4j:actionparam noEscape="true" name="currentPage_" value="currentPage"
+                                            <a4j:actionparam noEscape="true" name="currentPage_" value="currentDTPage"
                                                              assignTo="#{selectListBean.currentPage}"/>
                                         </adm:ajaxCommandIcon>
                                         <!-- delete -->
@@ -173,9 +172,9 @@
                                                          rendered="#{selectListBean.mayDeleteItems}" reRender="itemTable">
                                             <f:setPropertyActionListener target="#{selectListBean.listItemId}"
                                                                          value="#{item.id}"/>
-                                            <a4j:actionparam noEscape="true" name="rowsPerPage_" value="rowsPerPage"
+                                            <a4j:actionparam noEscape="true" name="rowsPerPage_" value="rowsPerDTPage"
                                                              assignTo="#{selectListBean.rowsPerPage}"/>
-                                            <a4j:actionparam noEscape="true" name="currentPage_" value="currentPage"
+                                            <a4j:actionparam noEscape="true" name="currentPage_" value="currentDTPage"
                                                              assignTo="#{selectListBean.currentPage}"/>
                                         </adm:ajaxCommandIcon>
                                     </div>
@@ -187,7 +186,7 @@
                 </adm:sortableTable>
                 <fx:yuiSetup/>
             </a4j:outputPanel>
-
+            
             <a4j:outputPanel id="createItemArea" layout="block">
                 <ui:fragment rendered="#{selectListBean.editListItemId == selectListBean.unselectedId}">
                     <adm:ajaxCommandButton id="createItemButton" labelKey="SelectList.label.createItem" icon="new"
@@ -273,9 +272,9 @@
 
                         <adm:ajaxCommandButton labelKey="SelectList.button.cancel"
                                                icon="cancel" bean="#{selectListBean}" action="cancelItemEditing"
-                                               id="cancelItemChanges"
+                                               id="cancelItemChanges" immediate="true"
                                                onclick="#{rich:component('editPanel')}.hide();"
-                                               reRender="editItemArea,createItemArea"/>
+                                               reRender="all,editItemArea,createItemArea"/>
                         <fx:yuiSetup/>
                     </h:form>
                 </ui:fragment>
