@@ -42,6 +42,11 @@
         </fx:formRow>
 
         <!-- ============================================ -->
+        <c:if test="#{accountBean.showOldPassword}">
+            <fx:formRow label="#{fxMessageBean['Account.field.oldPassword']}" id="oldPassword" newLine="false">
+                <h:inputSecret id="oldPassword" value="#{accountBean.oldPassword}" styleClass="fxValueTextInput"/>
+            </fx:formRow>
+        </c:if>
         <fx:formRow label="#{fxMessageBean['Account.field.password']}" id="userPassword" newLine="false">
             <h:inputSecret id="userPassword" value="#{accountBean.password}" styleClass="fxValueTextInput"/>
         </fx:formRow>

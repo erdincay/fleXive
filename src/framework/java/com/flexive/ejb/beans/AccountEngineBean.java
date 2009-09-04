@@ -38,6 +38,7 @@ import com.flexive.core.storage.StorageManager;
 import com.flexive.core.security.LoginLogoutHandler;
 import com.flexive.core.security.UserTicketImpl;
 import com.flexive.core.security.UserTicketStore;
+import com.flexive.core.security.FxDBAuthentication;
 import com.flexive.shared.*;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxPK;
@@ -127,6 +128,21 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
         LoginLogoutHandler.doLogout();
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public boolean loginCheck(String username, String password, UserTicket currentTicket) throws FxLoginFailedException, FxDbException {
+        DataSource ds;
+        boolean checkOK;
+        try {
+            ds = Database.getDataSource();
+            checkOK = FxDBAuthentication.checkLogin(username, password, currentTicket, ds);
+        } catch (Exception exc) {
+            throw new FxLoginFailedException(exc.getMessage(), FxLoginFailedException.TYPE_SQL_ERROR);
+        }
+        return checkOK;
+    }
 
     /**
      * Loads the account data from the database.

@@ -60,6 +60,19 @@ public interface AccountEngine {
             throws FxLoginFailedException, FxAccountInUseException;
 
     /**
+     * Check the password of the currently logged-in user. The match can only be performed if the current UserTicket
+     * matches with the ID of the login account's name
+     *
+     * @param username the user name
+     * @param password the password
+     * @param currentTicket the current UserTicket to check
+     * @return returns true if the password matches
+     * @throws FxLoginFailedException on errors
+     * @throws FxDbException on db errors
+     */
+    boolean loginCheck(String username, String password, UserTicket currentTicket) throws FxLoginFailedException, FxDbException;
+
+    /**
      * Returns all currently active UserTickets.
      *
      * @return all active UserTickets

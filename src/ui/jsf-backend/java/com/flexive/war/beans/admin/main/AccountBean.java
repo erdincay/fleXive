@@ -42,12 +42,11 @@ import com.flexive.faces.messages.FxFacesMsgInfo;
 import com.flexive.shared.*;
 import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.content.FxContent;
-import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.exceptions.FxLoginFailedException;
 import com.flexive.shared.interfaces.AccountEngine;
 import com.flexive.shared.interfaces.UserGroupEngine;
 import com.flexive.shared.security.*;
-import com.flexive.war.FxRequest;
 import com.flexive.war.beans.admin.content.BeContentEditorBean;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.ArrayUtils;
@@ -78,6 +77,8 @@ public class AccountBean implements Serializable {
     private AccountEngine accountInterface;
     private boolean activeFilter = true;
     private boolean validatedFilter = true;
+    private boolean showOldPassword;
+    private String oldPassword = "";
     private String password;
     private String passwordConfirm;
     private AccountEditBean account;
@@ -99,11 +100,10 @@ public class AccountBean implements Serializable {
             return new ArrayList<Role>(0);
         }
         List<Role> res = new ArrayList<Role>(roles.length);
-        for( long r: roles)
+        for (long r : roles)
             res.add(Role.getById(r));
         return res;
     }
-
 
     public static class AccountEditBean extends Account {
         private static final long serialVersionUID = -5550483398375933412L;
@@ -188,6 +188,14 @@ public class AccountBean implements Serializable {
         this.roles = roles;
     }
 
+    public boolean isShowOldPassword() {
+        showOldPassword = FxJsfUtils.getRequest().getUserTicket().getUserId() == account.getId();
+        return showOldPassword;
+    }
+
+    public void setShowOldPassword(boolean showOldPassword) {
+        this.showOldPassword = showOldPassword;
+    }
 
     /**
      * Has the language setting changed?
@@ -266,7 +274,7 @@ public class AccountBean implements Serializable {
         activeFilter = true;
         validatedFilter = true;
         UserTicket ticket = FxContext.getUserTicket();
-        if( !ticket.isGlobalSupervisor() ) {
+        if (!ticket.isGlobalSupervisor()) {
             mandator = CacheAdmin.getFilteredEnvironment().getMandator(ticket.getMandatorId());
         }
         try {
@@ -314,8 +322,8 @@ public class AccountBean implements Serializable {
     public Mandator getMandator() {
         if (this.mandator == null) {
             List<SelectItem> mandators = FxJsfUtils.getManagedBean(SelectBean.class).getMandatorsForEditNoEmpty();
-            if (mandators.size() >0)
-            setMandator(CacheAdmin.getEnvironment().getMandator((Long)mandators.get(0).getValue()));
+            if (mandators.size() > 0)
+                setMandator(CacheAdmin.getEnvironment().getMandator((Long) mandators.get(0).getValue()));
         }
         return mandator;
     }
@@ -330,7 +338,7 @@ public class AccountBean implements Serializable {
     }
 
     public void setMandatorId(long mandatorId) {
-        if( mandatorId == -1)
+        if (mandatorId == -1)
             this.mandator = null;
         else
             this.mandator = CacheAdmin.getEnvironment().getMandator(mandatorId);
@@ -343,6 +351,14 @@ public class AccountBean implements Serializable {
 
     public void setGroupFilter(long groupFilter) {
         this.groupFilter = groupFilter;
+    }
+
+    public String getOldPassword() {
+        return oldPassword;
+    }
+
+    public void setOldPassword(String oldPassword) {
+        this.oldPassword = oldPassword;
     }
 
     public String getPassword() {
@@ -425,11 +441,11 @@ public class AccountBean implements Serializable {
 
     /**
      * Force an initialization of the current user preferences if the bean is not initialized
-     * 
+     *
      * @return dummy
      */
     public String getEditUserPref() {
-        if( this.account == null || this.account.getId() == -1) {
+        if (this.account == null || this.account.getId() == -1) {
             editUserPref();
         }
         return null;
@@ -455,9 +471,9 @@ public class AccountBean implements Serializable {
         return null;
     }
 
-    public String showContactData(){
+    public String showContactData() {
         BeContentEditorBean ceb = (BeContentEditorBean) FxJsfUtils.getManagedBean("beContentEditorBean");
-        ceb.initEditor(this.account.getContactData() ,true);
+        ceb.initEditor(this.account.getContactData(), true);
         return "showContentEditor";
     }
 
@@ -495,14 +511,14 @@ public class AccountBean implements Serializable {
         try {
             ensureAccountIdSet();
             this.account = new AccountEditBean(accountInterface.load(this.accountIdFilter));
-
+            this.showOldPassword = FxJsfUtils.getRequest().getUserTicket().getUserId() == account.getId();
             List<Role> r = accountInterface.getRoles(this.accountIdFilter, RoleLoadMode.FROM_USER_ONLY);
             this.roles = new Long[r.size()];
-            for(int i=0; i<this.roles.length; i++)
+            for (int i = 0; i < this.roles.length; i++)
                 this.roles[i] = r.get(i).getId();
             List<UserGroup> g = accountInterface.getGroups(this.accountIdFilter);
             this.groups = new Long[g.size()];
-            for( int i=0; i<this.groups.length; i++ )
+            for (int i = 0; i < this.groups.length; i++)
                 this.groups[i] = g.get(i).getId();
             return "accountEdit";
         } catch (Throwable t) {
@@ -522,11 +538,11 @@ public class AccountBean implements Serializable {
             setAccountIdFilter(this.account.getId());
             List<Role> r = accountInterface.getRoles(this.accountIdFilter, RoleLoadMode.ALL);
             this.roles = new Long[r.size()];
-            for(int i=0; i<roles.length; i++)
+            for (int i = 0; i < roles.length; i++)
                 roles[i] = r.get(i).getId();
             List<UserGroup> g = accountInterface.getGroups(this.accountIdFilter);
             this.groups = new Long[g.size()];
-            for( int i=0; i<this.groups.length; i++ )
+            for (int i = 0; i < this.groups.length; i++)
                 this.groups[i] = g.get(i).getId();
             this.contactData = null;
             this.contactData = EJBLookup.getContentEngine().load(this.account.getContactData());
@@ -557,7 +573,6 @@ public class AccountBean implements Serializable {
         return "accountOverview";
     }
 
-
     /**
      * save the user settings
      *
@@ -567,8 +582,19 @@ public class AccountBean implements Serializable {
         try {
             String newPasswd = null;
 
-            // Determine if the password must be set
+            // Determine if the password must be set (and check the old one)
             if (password != null && password.trim().length() > 0) {
+                try {
+                    if (StringUtils.isBlank(oldPassword) || !accountInterface.loginCheck(account.getName(), oldPassword, FxJsfUtils.getRequest().getUserTicket())) {
+                        new FxFacesMsgErr("User.err.noOldPasswordMatch").addToContext();
+                        return editUserPref();
+                    }
+                } catch (FxLoginFailedException e) {
+                    new FxFacesMsgErr("User.err.settingsNotSaved").addToContext();
+                    new FxFacesMsgErr(e).addToContext();
+                    return editUserPref();
+                }
+                // actual pw
                 if (!password.equals(passwordConfirm)) {
                     new FxFacesMsgErr("User.err.passwordsDontMatch").addToContext();
                     return editUserPref();
@@ -591,9 +617,28 @@ public class AccountBean implements Serializable {
         return "editUserPref";
     }
 
+    /**
+     * Action method to save the user settings
+     * 
+     * @return edit user page
+     */
     public String saveUser() {
         try {
             String newPasswd = null;
+
+            // check if the old password was entered correctly (only upon setting a new one)
+            if (isShowOldPassword() && (password != null && password.trim().length() > 0)) {
+                try {
+                    if (StringUtils.isBlank(oldPassword) || !accountInterface.loginCheck(account.getName(), oldPassword, FxJsfUtils.getRequest().getUserTicket())) {
+                        new FxFacesMsgErr("User.err.noOldPasswordMatch").addToContext();
+                        return "accountEdit";
+                    }
+                } catch (FxLoginFailedException e) {
+                    new FxFacesMsgErr("User.err.settingsNotSaved").addToContext();
+                    new FxFacesMsgErr(e).addToContext();
+                    return "accountEdit";
+                }
+            }
 
             // Determine if the password must be set
             if (password != null && password.trim().length() > 0) {
@@ -678,7 +723,7 @@ public class AccountBean implements Serializable {
 
         // Assign the given groups to the account
         try {
-            accountInterface.setGroups(this.accountIdFilter,  ArrayUtils.toPrimitive(this.groups));
+            accountInterface.setGroups(this.accountIdFilter, ArrayUtils.toPrimitive(this.groups));
         } catch (Exception exc) {
             new FxFacesMsgErr(exc).addToContext();
         }

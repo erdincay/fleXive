@@ -38,16 +38,14 @@ import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxLanguage;
 import com.flexive.shared.FxSharedUtils;
-import com.flexive.shared.exceptions.FxAccountExpiredException;
-import com.flexive.shared.exceptions.FxAccountInUseException;
-import com.flexive.shared.exceptions.FxApplicationException;
-import com.flexive.shared.exceptions.FxLoginFailedException;
+import com.flexive.shared.exceptions.*;
 import com.flexive.shared.security.AuthenticationSource;
 import com.flexive.shared.security.UserTicket;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.security.auth.login.LoginException;
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -159,7 +157,7 @@ public final class FxDBAuthentication {
                     if (LOG.isInfoEnabled()) LOG.info(aiu);
                     // don't log this as an invalid login attempt - this happens routinely when a session times
                     // out and the cached session data has not been evicted by the maintenance task yet
-                    
+
                     //increaseFailedLoginAttempts(con, id);
                     throw aiu;
                 }
@@ -278,6 +276,59 @@ public final class FxDBAuthentication {
         } finally {
             if (ps != null)
                 ps.close();
+        }
+    }
+
+    /**
+     * @param username the username
+     * @param password the password
+     * @param currentTicket the UserTicket requesting the password match
+     * @param ds thedatasource
+     * @return returns true if the login and password match
+     * @throws FxDbException on db errors
+     * @throws FxLoginFailedException on authentication errors
+     */
+    public static boolean checkLogin(String username, String password, UserTicket currentTicket, DataSource ds) throws FxDbException, FxLoginFailedException {
+        FxContext inf = FxContext.get();
+
+        // Avoid null pointer exceptions
+        if (password == null) password = "";
+        if (username == null) username = "";
+
+        String curSql;
+        PreparedStatement ps = null;
+        Connection con = null;
+        try {
+            // Obtain a database connection
+            con = ds.getConnection();
+            //               1-6 7      8           9              10                 11           12       13      14         15
+            curSql = "SELECT d.*,a.ID,a.IS_ACTIVE,a.IS_VALIDATED,a.ALLOW_MULTILOGIN,a.VALID_FROM,a.VALID_TO,NOW(),a.PASSWORD,a.MANDATOR " +
+                    "FROM " + TBL_ACCOUNTS + " a " +
+                    "LEFT JOIN " +
+                    " (SELECT ID,ISLOGGEDIN,LAST_LOGIN,LAST_LOGIN_FROM,FAILED_ATTEMPTS,AUTHSRC FROM " + TBL_ACCOUNT_DETAILS +
+                    " WHERE APPLICATION=?) d ON a.ID=d.ID WHERE UPPER(a.LOGIN_NAME)=UPPER(?)";
+            ps = con.prepareStatement(curSql);
+            ps.setString(1, inf.getApplicationId());
+            ps.setString(2, username);
+            final ResultSet rs = ps.executeQuery();
+
+            // Anything found
+            if (rs == null || !rs.next())
+                throw new FxLoginFailedException("Invalid user or password", FxLoginFailedException.TYPE_USER_OR_PASSWORD_NOT_DEFINED);
+
+            // check if the hashed password matches the hash stored in the database
+            final long id = rs.getLong(7);
+
+            // current user authorised to perform the check (ticket user id matches db user id?)
+            if(id != currentTicket.getUserId())
+                throw new FxLoginFailedException("User not authorized to perform login check", FxLoginFailedException.TYPE_USER_OR_PASSWORD_NOT_DEFINED);
+
+            return FxSharedUtils.hashPassword(id, password).equals(rs.getString(14));
+
+        } catch (SQLException exc) {
+            throw new FxDbException("Database error: " + exc.getMessage(), FxLoginFailedException.TYPE_SQL_ERROR);
+        } finally {
+            Database.closeObjects(FxDBAuthentication.class, con, ps);
         }
     }
 }

@@ -22,6 +22,7 @@
         </script>
     </c:if>
     <h:form id="frm">
+        <t:saveState id="ssAccount" value="#{accountBean.account}"/>
         <adm:tab label="#{fxMessageBean['User.pref.show,#{accountBean.account.name}']}" active="true" id="tab1"/>
       <!--  <c:if test="#{not empty accountBean.contactData}"> -->
             <adm:tab labelKey="User.pref.contactData" active="false" id="tab2"
@@ -38,6 +39,9 @@
         </fx:formRow>
 
         <!-- ============================================ -->
+        <fx:formRow label="#{fxMessageBean['Account.field.oldPassword']}" id="oldPassword" newLine="false">
+            <h:inputSecret id="oldPassword" value="#{accountBean.oldPassword}"/>
+        </fx:formRow>
         <fx:formRow labelKey="Account.field.password" id="updatePassword" newLine="false">
             <h:inputSecret id="updatePassword" value="#{accountBean.password}"/>
         </fx:formRow>
