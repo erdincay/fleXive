@@ -46,7 +46,7 @@ public class PlainTextLogger extends AbstractResultLogger {
     /** {@inheritDoc} */
     @Override
     protected void logResult(String name, double time, String measurement, String unit) {
-        out.append(new Formatter().format("%.30s: %." + (time < 1.0 ? "5" : "1") + "f%s per %s%n", name, time, unit, measurement));
+        out.append(new Formatter().format("%s: %." + (time < 1.0 ? "5" : "1") + "f%s per %s%n", name, time, unit, measurement));
     }
 
     /** {@inheritDoc} */

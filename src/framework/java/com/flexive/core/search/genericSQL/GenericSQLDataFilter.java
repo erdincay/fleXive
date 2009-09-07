@@ -64,7 +64,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 // NVL --> IFNULL((select sub.id from FX_CONTENT_DATA sub where sub.id=filter.id),1)
 
@@ -164,14 +163,24 @@ public class GenericSQLDataFilter extends DataFilter {
         String sql = null;
         try {
             final String dataSelect;
-            final String securityFilter = getSecurityFilter(ticket);
             if (getStatement().getType() == FxStatement.Type.ALL) {
                 // The statement will not filter the data
+                final String securityFilter = getSecurityFilter(ticket, "data2");
                 final String filters = StringUtils.defaultIfEmpty(securityFilter, "1=1")
-                        + (getStatement().getBriefcaseFilter().length == 0 ? getVersionFilter("data2") : "");
-                dataSelect = "SELECT " + search.getSearchId() + " search_id,id,ver,tdef,created_by FROM " + tableMain + " data2\n"
-                        + (StringUtils.isNotBlank(filters) ? "WHERE " + filters + "\n" : "")
-                        + " LIMIT " + maxRows;
+                        + (getStatement().getBriefcaseFilter().length == 0 ? getVersionFilter("data2") : "")
+                        + getDeactivatedTypesFilter("data2") + getInactiveMandatorsFilter("data2");
+                dataSelect = selectOnMainTable(filters, "data2");
+            } else if (isMainTableQuery(getStatement().getRootBrace())) {
+                // optimize queries that operate only on FX_CONTENT
+                final String securityFilter = getSecurityFilter(ticket, "cd");
+                final String filters = StringUtils.defaultIfEmpty(securityFilter, "1=1")
+                        + (getStatement().getBriefcaseFilter().length == 0 ? getVersionFilter("cd") : "")
+                        + getDeactivatedTypesFilter("cd")
+                        + getInactiveMandatorsFilter("cd") 
+                        + " AND ("
+                        + getOptimizedMainTableConditions(getStatement().getRootBrace())
+                        + ")";
+                dataSelect = selectOnMainTable(filters, "cd");
             } else {
                 // The statement filters the data
                 StringBuilder result = new StringBuilder(5000);
@@ -180,6 +189,7 @@ public class GenericSQLDataFilter extends DataFilter {
                 result.deleteCharAt(0);
                 result.deleteCharAt(result.length() - 1);
                 // Finalize the select
+                final String securityFilter = getSecurityFilter(ticket, "data2");
                 dataSelect = "SELECT * FROM (SELECT DISTINCT " + search.getSearchId() +
                         " search_id,data.id,data.ver,main.tdef,main.created_by \n" +
                         "FROM (" + result.toString() + ") data, " + DatabaseConst.TBL_CONTENT + " main\n" +
@@ -207,9 +217,15 @@ public class GenericSQLDataFilter extends DataFilter {
         }
     }
 
-    private String getSecurityFilter(UserTicket ticket) {
+    private String selectOnMainTable(String filters, String tableAlias) {
+        return "SELECT " + search.getSearchId() + " search_id,id,ver,tdef,created_by FROM " + tableMain + " " + tableAlias + "\n"
+                + (StringUtils.isNotBlank(filters) ? "WHERE " + filters + "\n" : "")
+                + " LIMIT " + search.getFxStatement().getMaxResultRows();
+    }
+
+    private String getSecurityFilter(UserTicket ticket, String tableAlias) {
         return ticket.isGlobalSupervisor() ? "" :
-                "mayReadInstance2(data2.id,data2.ver," + ticket.getUserId() + "," +
+                "mayReadInstance2(" + tableAlias + ".id," + tableAlias + ".ver," + ticket.getUserId() + "," +
                         ticket.getMandatorId() + "," + ticket.isMandatorSupervisor() + "," + ticket.isGlobalSupervisor() + ")\n";
     }
 
@@ -281,6 +297,12 @@ public class GenericSQLDataFilter extends DataFilter {
         } else {
             buildOr(sb, br);
         }
+    }
+
+    private boolean isMainTableQuery(Brace br) throws FxSqlSearchException {
+        final Multimap<String, ConditionTableInfo> tables = getUsedContentTables(br);
+        return (tables.keySet().size() == 1
+                && DatabaseConst.TBL_CONTENT.equals(tables.keySet().iterator().next()));
     }
 
     /**
@@ -383,15 +405,48 @@ public class GenericSQLDataFilter extends DataFilter {
         sb.append(")");
     }
 
+    private String getOptimizedMainTableConditions(Brace br) throws FxSqlSearchException {
+        final ConditionBuilder conditionBuilder = new ConditionBuilder() {
+            public String buildCondition(Brace br, Condition cond) throws FxSqlSearchException {
+                final Pair<String, String> select = getSqlColumnWithValue(br.getStatement(), cond);
+                return select.getFirst()
+                        + cond.getSqlComperator()
+                        + select.getSecond();
+            }
+        };
+        return getPlainConditions(br, conditionBuilder);
+    }
+
     private String getOptimizedFlatStorageSubquery(Brace br, String flatStorageTable) throws FxSqlSearchException {
+        final ConditionBuilder conditionBuilder = new ConditionBuilder() {
+            public String buildCondition(Brace br, Condition cond) throws FxSqlSearchException {
+                return buildPropertyCondition(br.getStatement(), cond, cond.getProperty(), true);
+            }
+        };
         return "(SELECT DISTINCT cd.id, cd.ver, null as lang FROM \n"
                 + flatStorageTable + " cd WHERE "
-                + getOptimizedFlatStorageConditions(br)
+                + getPlainConditions(br, conditionBuilder)
                 + getSubQueryLimit()
                 + ")";
     }
 
-    private String getOptimizedFlatStorageConditions(Brace br) throws FxSqlSearchException {
+    /**
+     * Utility interface for getPlainConditions.
+     */
+    private interface ConditionBuilder {
+        /**
+         * Return the SQL representation of the given condition. Only "native" conditions
+         * (i.e. comparisons, LIKE, etc.) can be supported.
+         *
+         * @param br    the current (sub)condition
+         * @param cond  the condition to be evaluated
+         * @return      the SQL representation of the given condition.
+         * @throws FxSqlSearchException
+         */
+        String buildCondition(Brace br, Condition cond) throws FxSqlSearchException;
+    }
+
+    private String getPlainConditions(Brace br, ConditionBuilder conditionBuilder) throws FxSqlSearchException {
         final StringBuilder out = new StringBuilder();
         boolean first = true;
         for (BraceElement be : br.getElements()) {
@@ -400,13 +455,12 @@ public class GenericSQLDataFilter extends DataFilter {
             }
             if (be instanceof Condition) {
                 // add conditions of the flat storage query
-                final Condition cond = (Condition) be;
                 out.append(
-                        buildPropertyCondition(br.getStatement(), cond, cond.getProperty(), true)
+                        conditionBuilder.buildCondition(br, (Condition) be)
                 );
             } else if (be instanceof Brace) {
                 // recurse
-                out.append('(').append(getOptimizedFlatStorageConditions((Brace) be)).append(')');
+                out.append('(').append(getPlainConditions((Brace) be, conditionBuilder)).append(')');
             } else {
                 throw new IllegalArgumentException("Unexpected brace element " + be);
             }
@@ -427,26 +481,40 @@ public class GenericSQLDataFilter extends DataFilter {
         final Multimap<String, ConditionTableInfo> tables = HashMultimap.create();
         for (BraceElement be : br.getElements()) {
             if (be instanceof Condition) {
-                final PropertyEntry entry = getPropertyResolver().get(getStatement(), ((Condition) be).getProperty());
-                if (entry.getAssignment() != null && entry.getAssignment().isFlatStorageEntry()) {
-                    final FxFlatStorageMapping mapping = entry.getAssignment().getFlatStorageMapping();
-                    tables.put(
-                            mapping.getStorage(),
-                            new ConditionTableInfo(
-                                    true,
-                                    entry.getAssignment().isMultiLang(),
-                                    mapping.getLevel()
-                            )
-                    );
+                final Property prop = ((Condition) be).getProperty();
+                if (prop == null) {
+                    // insert dummy entry that will prevent any table-level optimizations
+                    // because this condition is not mapped to a content table (e.g. tree ops)
+                    tables.put("null table", new ConditionTableInfo(false, false, -1));
+                } else if (prop.isWildcard() || prop.isUserPropsWildcard()) {
+                    tables.put("wildcard property", new ConditionTableInfo(false, false, -1));
                 } else {
-                    tables.put(
-                            entry.getTableType().getTableName(),
-                            new ConditionTableInfo(
-                                    false,
-                                    entry.getAssignment() != null && entry.getAssignment().isMultiLang(),
-                                    -1
-                            )
-                    );
+                    final PropertyEntry entry = getPropertyResolver().get(getStatement(), prop);
+                    if (entry.getProperty() == null) {
+                        // insert dummy entry to prevent table-level optimizations
+                        tables.put("virtual property", new ConditionTableInfo(false, false, -1));
+                    } else {
+                        if (entry.getAssignment() != null && entry.getAssignment().isFlatStorageEntry()) {
+                            final FxFlatStorageMapping mapping = entry.getAssignment().getFlatStorageMapping();
+                            tables.put(
+                                    mapping.getStorage(),
+                                    new ConditionTableInfo(
+                                            true,
+                                            entry.getAssignment().isMultiLang(),
+                                            mapping.getLevel()
+                                    )
+                            );
+                        } else {
+                            tables.put(
+                                    entry.getTableType().getTableName(),
+                                    new ConditionTableInfo(
+                                            false,
+                                            entry.getAssignment() != null && entry.getAssignment().isMultiLang(),
+                                            -1
+                                    )
+                            );
+                        }
+                    }
                 }
             } else if (be instanceof Brace) {
                 tables.putAll(getUsedContentTables((Brace) be));
@@ -646,15 +714,9 @@ public class GenericSQLDataFilter extends DataFilter {
 
 
         // Apply all Functions
-        final Pair<String, String> select = getValueCondition(prop, constant, entry, cond.getComperator());
-        if (select == null) {
-            throw new FxSqlSearchException(LOG, "ex.sqlSearch.reader.unknownPropertyColumnType",
-                    entry.getProperty().getDataType(), prop.getPropertyName());
-        }
-        final String column = prop.getFunctionsStart() + select.getFirst() + prop.getFunctionsEnd();
-        final String value = constant.getFunctionsStart()
-                + (stmt.getIgnoreCase() ? select.getSecond().toUpperCase() : select.getSecond())
-                + constant.getFunctionsEnd();
+        final Pair<String, String> select = getSqlColumnWithValue(stmt, cond);
+        final String column = select.getFirst();
+        final String value = select.getSecond();
 
         // Build the final filter statement
         switch(entry.getTableType()) {
@@ -706,6 +768,27 @@ public class GenericSQLDataFilter extends DataFilter {
             default:
                 throw new FxSqlSearchException(LOG, "ex.sqlSearch.err.unknownPropertyTable", entry.getProperty().getName(), entry.getTableName());
         }
+    }
+
+    private Pair<String, String> getSqlColumnWithValue(FxStatement stmt, Condition cond) throws FxSqlSearchException {
+        final Property prop = cond.getProperty();
+        final Constant constant = cond.getConstant();
+        final PropertyEntry entry = getPropertyResolver().get(stmt, prop);
+        final Pair<String, String> select = getValueCondition(prop, constant, entry, cond.getComperator());
+        if (select == null) {
+            throw new FxSqlSearchException(LOG, "ex.sqlSearch.reader.unknownPropertyColumnType",
+                    entry.getProperty().getDataType(), prop.getPropertyName());
+        }
+        return new Pair<String, String>(
+                prop.getFunctionsStart() + select.getFirst() + prop.getFunctionsEnd(),
+                getConditionValue(stmt, select, constant)
+        );
+    }
+
+    private String getConditionValue(FxStatement stmt, Pair<String, String> select, Constant constant) {
+        return constant.getFunctionsStart()
+                + (stmt.getIgnoreCase() ? select.getSecond().toUpperCase() : select.getSecond())
+                + constant.getFunctionsEnd();
     }
 
     private String isNullSelect(PropertyEntry entry, Property prop, String dataTable, String dataFilter, String dataJoinColumn) {
@@ -867,8 +950,7 @@ public class GenericSQLDataFilter extends DataFilter {
     }
 
     /**
-     * Helper class for {@link com.flexive.core.search.genericSQL.GenericSQLDataFilter#getOptimizedFlatStorageConditions(com.flexive.sqlParser.Brace)}.
-     * Holds information about the attributes required for addressing an assignment in a condition. 
+     * Holds information about the tables required for accessing an assignment in a condition.
      */
     private static class ConditionTableInfo {
         private final boolean flatStorage;
