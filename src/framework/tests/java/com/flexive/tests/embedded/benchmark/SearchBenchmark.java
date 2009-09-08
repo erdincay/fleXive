@@ -31,36 +31,40 @@
  ***************************************************************/
 package com.flexive.tests.embedded.benchmark;
 
-import com.flexive.shared.*;
-import com.flexive.shared.cmis.search.CmisResultSet;
-import com.flexive.shared.cmis.search.CmisResultRow;
+import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.EJBLookup;
 import static com.flexive.shared.EJBLookup.getContentEngine;
+import com.flexive.shared.FxContext;
+import com.flexive.shared.FxLanguage;
+import com.flexive.shared.cmis.search.CmisResultRow;
+import com.flexive.shared.cmis.search.CmisResultSet;
 import com.flexive.shared.content.FxContent;
-import com.flexive.shared.content.FxPK;
-import com.flexive.shared.structure.*;
-import com.flexive.shared.search.query.SqlQueryBuilder;
-import com.flexive.shared.search.query.PropertyValueComparator;
-import com.flexive.shared.search.FxResultSet;
-import com.flexive.shared.search.FxResultRow;
-import com.flexive.shared.value.FxString;
 import com.flexive.shared.exceptions.*;
-import com.flexive.shared.tree.FxTreeNodeEdit;
+import com.flexive.shared.search.FxResultRow;
+import com.flexive.shared.search.FxResultSet;
+import com.flexive.shared.search.query.PropertyValueComparator;
+import com.flexive.shared.search.query.SqlQueryBuilder;
+import com.flexive.shared.structure.FxDataType;
+import com.flexive.shared.structure.FxStructureOption;
+import com.flexive.shared.structure.FxType;
+import com.flexive.shared.structure.FxTypeEdit;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNode;
+import com.flexive.shared.tree.FxTreeNodeEdit;
 import com.flexive.shared.tree.FxTreeRemoveOp;
-import com.flexive.tests.embedded.TestUsers;
+import com.flexive.shared.value.FxString;
 import com.flexive.tests.embedded.FxTestUtils;
+import com.flexive.tests.embedded.TestUsers;
 import static com.flexive.tests.embedded.benchmark.FxBenchmarkUtils.getResultLogger;
-import static com.flexive.tests.embedded.FxTestUtils.login;
-import org.testng.annotations.Test;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.BeforeClass;
-import static org.testng.Assert.*;
 import org.apache.commons.lang.math.RandomUtils;
+import static org.testng.Assert.*;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
 
-import java.util.List;
-import java.util.Date;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Some benchmarks for the {@link com.flexive.shared.interfaces.SearchEngine}.
@@ -80,41 +84,41 @@ public class SearchBenchmark {
             EJBLookup.getCmisSearchEngine().search("SELECT ObjectId FROM folder WHERE id > 0");
         }
     }
-    
-   public void selectTreePathsBenchmark() throws FxApplicationException, FxLoginFailedException, FxAccountInUseException, FxLogoutFailedException {
-        final int numNodes = 2000;
-        long rootNode = -1;
-        try {
-            FxTestUtils.login(TestUsers.SUPERVISOR);
-            // create a lot of nodes
-            long startCreateNode = System.currentTimeMillis();
-            rootNode = EJBLookup.getTreeEngine().save(FxTreeNodeEdit.createNew("selectTreePathsBenchmark"));
-            for (int i = 0; i < numNodes; i++) {
-                final FxString label = new FxString(FxLanguage.ENGLISH, "English label " + i).setTranslation(FxLanguage.GERMAN, "Deutsches Label " + i);
-                EJBLookup.getTreeEngine().save(FxTreeNodeEdit.createNew("test test test " + i)
-                        .setParentNodeId(rootNode).setLabel(label));
-                if (i % 500 == 499) {
-                    getResultLogger().logTime("createTreeNodes[" + (i - 499) + "-" + i + "]", startCreateNode, 500, "tree node");
-                    startCreateNode = System.currentTimeMillis();
+
+    public void selectTreePathsBenchmark() throws FxApplicationException, FxLoginFailedException, FxAccountInUseException, FxLogoutFailedException {
+            final int numNodes = 2000;
+            long rootNode = -1;
+            try {
+                FxTestUtils.login(TestUsers.SUPERVISOR);
+                // create a lot of nodes
+                long startCreateNode = System.currentTimeMillis();
+                rootNode = EJBLookup.getTreeEngine().save(FxTreeNodeEdit.createNew("selectTreePathsBenchmark"));
+                for (int i = 0; i < numNodes; i++) {
+                    final FxString label = new FxString(FxLanguage.ENGLISH, "English label " + i).setTranslation(FxLanguage.GERMAN, "Deutsches Label " + i);
+                    EJBLookup.getTreeEngine().save(FxTreeNodeEdit.createNew("test test test " + i)
+                            .setParentNodeId(rootNode).setLabel(label));
+                    if (i % 500 == 499) {
+                        getResultLogger().logTime("createTreeNodes[" + (i - 499) + "-" + i + "]", startCreateNode, 500, "tree node");
+                        startCreateNode = System.currentTimeMillis();
+                    }
                 }
-            }
 
-            final List<FxTreeNode> children = EJBLookup.getTreeEngine().getTree(FxTreeMode.Edit, rootNode, 1).getChildren();
-            assertTrue(children.size() == numNodes, "Expected " + numNodes + " children of our root node, got: " + children.size());
+                final List<FxTreeNode> children = EJBLookup.getTreeEngine().getTree(FxTreeMode.Edit, rootNode, 1).getChildren();
+                assertTrue(children.size() == numNodes, "Expected " + numNodes + " children of our root node, got: " + children.size());
 
-            // select the tree paths of all linked contents
-            final SqlQueryBuilder builder = new SqlQueryBuilder().select("@pk", "@path").maxRows(numNodes).isChild(rootNode);
-            final long startSearch = System.currentTimeMillis();
-            final FxResultSet result = builder.timeout(1000).getResult();
-            getResultLogger().logTime("selectTreePath", startSearch, numNodes, "row");
-            assertTrue(result.getRowCount() == numNodes, "Expected " + numNodes + " rows, got: " + result.getRowCount());
-        } finally {
-            if (rootNode != -1) {
-                EJBLookup.getTreeEngine().remove(FxTreeNodeEdit.createNew("").setId(rootNode), FxTreeRemoveOp.Remove, true);
+                // select the tree paths of all linked contents
+                final SqlQueryBuilder builder = new SqlQueryBuilder().select("@pk", "@path").maxRows(numNodes).isChild(rootNode);
+                final long startSearch = System.currentTimeMillis();
+                final FxResultSet result = builder.timeout(1000).getResult();
+                getResultLogger().logTime("selectTreePath", startSearch, numNodes, "row");
+                assertTrue(result.getRowCount() == numNodes, "Expected " + numNodes + " rows, got: " + result.getRowCount());
+            } finally {
+                if (rootNode != -1) {
+                    EJBLookup.getTreeEngine().remove(FxTreeNodeEdit.createNew("").setId(rootNode), FxTreeRemoveOp.Remove, true);
+                }
+                FxTestUtils.logout();
             }
-            FxTestUtils.logout();
         }
-    }
 
     @Test(dataProvider = "dataVolumeInstanceCounts")
     public void dataVolumeBenchmark(int counts, boolean cleanup) throws FxApplicationException {
@@ -147,27 +151,38 @@ public class SearchBenchmark {
         final int rangeStart = counts / 3;
         final int rangeEnd = rangeStart + 500;
         final String rangeDescr = "[" + rangeStart + "-" + rangeEnd + ")";
-        final SqlQueryBuilder sqb = new SqlQueryBuilder()
-                .select("@pk", TYPE_VOLUME + "/string01", TYPE_VOLUME + "/string02", TYPE_VOLUME + "/string03", TYPE_VOLUME + "/text", TYPE_VOLUME + "/number01", TYPE_VOLUME + "/date01")
+        final SqlQueryBuilder sqbBase = new SqlQueryBuilder()
+                .select("@pk", TYPE_VOLUME + "/string01", TYPE_VOLUME + "/string02", TYPE_VOLUME + "/string03", TYPE_VOLUME + "/text", TYPE_VOLUME + "/number01", TYPE_VOLUME + "/date01");
+        final SqlQueryBuilder sqb = sqbBase.copy()
                 .andSub()
                 .condition(TYPE_VOLUME + "/number01", PropertyValueComparator.GE, rangeStart)
                 .condition(TYPE_VOLUME + "/number01", PropertyValueComparator.LT, rangeEnd)
-                .closeSub();
+                .closeSub()
+                .timeout(600);
 
         start = System.currentTimeMillis();
-        sqb.timeout(10*60);
+        sqb.timeout(10 * 60);
         final FxResultSet result = sqb.getResult();
         getResultLogger().logTime("query-volume-fxsql-" + counts, start, 1, "query");
 
-        assertEquals(result.getRowCount(), 500);
-        for (FxResultRow row : result.getResultRows()) {
-            checkResult(rangeStart, rangeEnd, rangeDescr,
-                    row.getInt(TYPE_VOLUME + "/number01"),
-                    row.getString(TYPE_VOLUME + "/string01"),
-                    row.getString(TYPE_VOLUME + "/string02"),
-                    row.getString(TYPE_VOLUME + "/string03")
-            );
-        }
+        checkRangeQueryResults(result, rangeStart, rangeEnd, rangeDescr);
+
+        // perform a complex FxSQL query with nested conditions
+        final SqlQueryBuilder sqbComplex = sqbBase.copy()
+                .andSub()
+                .condition(TYPE_VOLUME + "/number01", PropertyValueComparator.GE, rangeStart)
+                .condition(TYPE_VOLUME + "/number01", PropertyValueComparator.LT, rangeEnd)
+                .orSub()
+                .condition(TYPE_VOLUME + "/date01", PropertyValueComparator.NOT_EMPTY, null)
+                .condition(TYPE_VOLUME + "/date02", PropertyValueComparator.NOT_EMPTY, null)
+                .closeSub()
+                .closeSub()
+                .timeout(600);
+
+        start = System.currentTimeMillis();
+        final FxResultSet complexResult = sqbComplex.getResult();
+        getResultLogger().logTime("query-volume-fxsql-complex-" + counts, start, 1, "query");
+        checkRangeQueryResults(complexResult, rangeStart, rangeEnd, rangeDescr);
 
         // select all instances by type with CMIS-SQL
         start = System.currentTimeMillis();
@@ -180,25 +195,26 @@ public class SearchBenchmark {
                 "CMIS query did not return all rows"
         );
         getResultLogger().logTime("query-volume-cmissql-type-" + counts, start, 1, "query");
-        
+
         // perform a CMIS-SQL query with a condition
         start = System.currentTimeMillis();
+        final String baseCmisQuery = "SELECT ObjectId, string01, string02, string03, text, number01, date01 "
+                + " FROM " + TYPE_VOLUME
+                + " WHERE number01 >= " + rangeStart + " AND number01 < " + rangeEnd;
         final CmisResultSet cmisResult = EJBLookup.getCmisSearchEngine().search(
-                "SELECT ObjectId, string01, string02, string03, text, number01, date01 "
-                        + " FROM " + TYPE_VOLUME
-                        + " WHERE number01 >= " + rangeStart + " AND number01 < " + rangeEnd
+                baseCmisQuery
         );
         getResultLogger().logTime("query-volume-cmissql-" + counts, start, 1, "query");
+        checkCmisResult(cmisResult, rangeStart, rangeEnd, rangeDescr);
 
-        assertEquals(cmisResult.getRowCount(), 500);
-        for (CmisResultRow row : cmisResult) {
-            checkResult(rangeStart, rangeEnd, rangeDescr,
-                    row.getColumn("number01").getInt(),
-                    row.getColumn("string01").getString(),
-                    row.getColumn("string02").getString(),
-                    row.getColumn("string03").getString()
-            );
-        }
+        // perform the complex query with CMIS-SQL
+        start = System.currentTimeMillis();
+        final CmisResultSet cmisResultComplex = EJBLookup.getCmisSearchEngine().search(
+                baseCmisQuery
+                        + " AND (date01 IS NOT NULL OR date02 IS NOT NULL)"
+        );
+        getResultLogger().logTime("query-volume-cmissql-complex-" + counts, start, 1, "query");
+        checkCmisResult(cmisResultComplex, rangeStart, rangeEnd, rangeDescr);
 
         if (cleanup) {
             FxContext.startRunningAsSystem();
@@ -211,21 +227,45 @@ public class SearchBenchmark {
         }
     }
 
+    private void checkCmisResult(CmisResultSet cmisResult, int rangeStart, int rangeEnd, String rangeDescr) {
+        assertEquals(cmisResult.getRowCount(), 500);
+        for (CmisResultRow row : cmisResult) {
+            checkResult(rangeStart, rangeEnd, rangeDescr,
+                    row.getColumn("number01").getInt(),
+                    row.getColumn("string01").getString(),
+                    row.getColumn("string02").getString(),
+                    row.getColumn("string03").getString()
+            );
+        }
+    }
+
+    private void checkRangeQueryResults(FxResultSet result, int rangeStart, int rangeEnd, String rangeDescr) {
+        assertEquals(result.getRowCount(), 500);
+        for (FxResultRow row : result.getResultRows()) {
+            checkResult(rangeStart, rangeEnd, rangeDescr,
+                    row.getInt(TYPE_VOLUME + "/number01"),
+                    row.getString(TYPE_VOLUME + "/string01"),
+                    row.getString(TYPE_VOLUME + "/string02"),
+                    row.getString(TYPE_VOLUME + "/string03")
+            );
+        }
+    }
+
     private void checkResult(int rangeStart, int rangeEnd, String rangeDescr, int number01, String string01, String string02, String string03) {
         assertFalse(string01.isEmpty());
         assertFalse(string02.isEmpty());
         assertFalse(string03.isEmpty());
         assertTrue(number01 >= rangeStart && number01 < rangeEnd,
-               "Query returned invalid result: " + number01 + ", expected range: " + rangeDescr
-    );
+                "Query returned invalid result: " + number01 + ", expected range: " + rangeDescr
+        );
     }
 
     @DataProvider(name = "dataVolumeInstanceCounts")
     public Object[][] getVolumeCounts() {
-        return new Object[][] {
-                { 1000, false },
-                { 9000, false },   // 10000 instances
-                { 20000, true }   // 30000 instances
+        return new Object[][]{
+                {1000, false},
+                {9000, false},   // 10000 instances
+                {20000, true}   // 30000 instances
         };
     }
 
