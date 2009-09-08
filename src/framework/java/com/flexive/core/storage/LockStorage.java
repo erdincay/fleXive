@@ -33,8 +33,8 @@ package com.flexive.core.storage;
 
 import com.flexive.shared.FxLock;
 import com.flexive.shared.FxLockType;
-import com.flexive.shared.exceptions.FxLockException;
 import com.flexive.shared.content.FxPK;
+import com.flexive.shared.exceptions.FxLockException;
 
 import java.sql.Connection;
 import java.util.List;
@@ -170,6 +170,21 @@ public interface LockStorage {
      * @return list of all locks from the given user
      */
     List<FxLock> getUserLocks(Connection con, long userId);
+
+    /**
+     * Query locks
+     *
+     * @param con      an open and valid connection
+     * @param lockType type of the locks to return, if <code>null</code> all types will be returned
+     * @param userId   id of the lock owner, if &lt; 0 locks for all users will be returned,
+     *                 if the calling user is not global or mandator supervisor, only locks held by the
+     *                 calling user will be returned
+     * @param typeId   only return locks for contents of this type, if &lt; 0 type is ignored
+     * @param resource name of the locked resources to find, will be ignored if empty or <code>null</code>.
+     *                 Queries will be pre- and postfixed by wildcards (%)
+     * @return matching locks
+     */
+    List<FxLock> getLocks(Connection con, FxLockType lockType, long userId, long typeId, String resource);
 
 
     /**

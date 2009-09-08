@@ -186,6 +186,14 @@
     </managed-bean>
 
     <managed-bean>
+        <managed-bean-name>lockBean</managed-bean-name>
+        <managed-bean-class>
+            com.flexive.war.beans.admin.main.LockBean
+        </managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean>
+
+    <managed-bean>
         <managed-bean-name>languagesBean</managed-bean-name>
         <managed-bean-class>
             com.flexive.war.beans.admin.main.LanguagesBean

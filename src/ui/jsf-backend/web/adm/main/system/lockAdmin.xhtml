@@ -1,0 +1,125 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:jstl="http://java.sun.com/jsp/jstl/functions"
+      xmlns:fx="http://www.flexive.com/jsf/core"
+      xmlns:rich="http://richfaces.org/rich">
+<body>
+<ui:composition template="/adm/contentTemplate.xhtml">
+    <ui:define name="body">
+        <a4j:region id="lockPanel">
+            <h:form id="frm">
+                <t:saveState id="ssList" value="#{lockBean.list}"/>
+                <script type="text/javascript">
+                    <!--
+                    var userAcHandler = new flexive.yui.AutoCompleteHandler(function(query) {
+                        return eval("(" + flexive.util.getJsonRpc().AutoCompleteProvider.userQuery(query) + ")");
+                    });
+                    //-->
+                </script>
+
+                <adm:tab labelKey="Lock.tabtitle.main" active="true" id="tab1"/>
+
+                <fx:formRow id="maxEntries" labelKey="Lock.label.maxEntries">
+                    <h:inputText id="maxEntries" value="#{lockBean.maxEntries}" size="5"/>
+                </fx:formRow>
+                <fx:formRow id="account" labelKey="Lock.label.account">
+                    <fx:fxValueInput value="#{lockBean.accountMatch}" autocompleteHandler="userAcHandler"/>
+                </fx:formRow>
+                <fx:formRow id="typeId" labelKey="Lock.label.type">
+                    <h:selectOneListbox id="typ" value="#{lockBean.type}" size="1" required="false">
+                        <f:selectItems value="#{fxSelectBean.typesWithEmpty}"/>
+                    </h:selectOneListbox>
+                </fx:formRow>
+                <fx:formRow id="lockType" labelKey="Lock.label.lockType">
+                    <h:selectOneListbox id="lockType" value="#{lockBean.lockType}" size="1" required="false">
+                        <f:selectItems value="#{lockBean.availableLockTypes}"/>
+                    </h:selectOneListbox>
+                </fx:formRow>
+                <a4j:outputPanel id="lockResults">
+                <c:set var="list" value="#{lockBean.list}"/>
+                <c:set var="listLength" value="#{jstl:length(list)}"/>
+
+                    #{fxMessageBean['Lock.label.foundEntries,#{listLength}']}<br/>
+                    <adm:sortableTable id="table">
+                        <table id="table">
+                            <thead>
+                            <tr>
+                                <th class="tblHeader" field="lockType" dataType="String">
+                                    #{fxMessageBean['Lock.field.lockType']}
+                                </th>
+                                <th class="tblHeader" field="created" dataType="Date">
+                                    #{fxMessageBean['Lock.field.created']}
+                                </th>
+                                <th class="tblHeader" field="expires" dataType="Date">
+                                    #{fxMessageBean['Lock.field.expires']}
+                                </th>
+                                <th class="tblHeader" field="user" dataType="String">
+                                    #{fxMessageBean['Lock.field.user']}
+                                </th>
+                                <th class="tblHeader" field="target" dataType="String">
+                                    #{fxMessageBean['Lock.field.target']}
+                                </th>
+                                <th class="tblHeader" field="target" dataType="String">
+                                    #{fxMessageBean['Lock.field.action']}
+                                </th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <ui:repeat value="#{list}" var="lock">
+                                <tr value="#{lock.createdTimestamp}">
+                                    <td>
+                                        #{lock.lockType.label}
+                                    </td>
+                                    <td nowrap="nowrap">
+                                        #{lockBean.dateFormat[lock.createdTimestamp]}
+                                    </td>
+                                    <td nowrap="nowrap">
+                                        #{lockBean.dateFormat[lock.expiresTimestamp]}
+                                    </td>
+                                    <td>
+                                        #{fxMapBean.account[lock.userId].name}
+                                    </td>
+                                    <td>
+                                        <ui:fragment rendered="#{lock.contentLock}">
+                                            #{fxMessageBean['Lock.label.target.pk']} #{lock.lockedPK}
+                                        </ui:fragment>
+                                        <ui:fragment rendered="#{lock.resourceLock}">
+                                            #{fxMessageBean['Lock.label.target.resource']} #{lock.lockedResource}
+                                        </ui:fragment>
+                                    </td>
+                                    <td>
+                                        <adm:ajaxCommandIcon id="unlock" reRender="lockResults,table" icon="unlock"
+                                                             bean="#{lockBean}" action="unlock"
+                                                             titleKey="Lock.button.unlock" rendered="#{lock.unlockable}">
+                                            <f:setPropertyActionListener target="#{lockBean.selectedLock}"
+                                                                         value="#{lock}"/>
+                                        </adm:ajaxCommandIcon>
+                                    </td>
+                                </tr>
+                            </ui:repeat>
+                            </tbody>
+                        </table>
+                    </adm:sortableTable>
+                    <fx:yuiSetup/>
+                </a4j:outputPanel>
+
+                <adm:commandButton id="lockQuerySearch" labelKey="Lock.button.query" location="both"
+                                   icon="search" lockscreen="false" bean="#{lockBean}" action="performQuery"/>
+
+
+                <adm:toolbarPluginButtons/>
+
+            </h:form>
+        </a4j:region>
+    </ui:define>
+</ui:composition>
+</body>
+</html>

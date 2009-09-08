@@ -1092,4 +1092,23 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             Database.closeObjects(ContentEngineBean.class, con, null);
         }
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public List<FxLock> getLocks(FxLockType lockType, long userId, long typeId, String resource) throws FxLockException {
+         Connection con = null;
+        try {
+            con = Database.getDbConnection();
+            final LockStorage lockStorage = StorageManager.getLockStorage();
+            return lockStorage.getLocks(con, lockType, userId, typeId, resource);
+        } catch (SQLException e) {
+            throw new FxLockException(e, "ex.db.sqlError", e.getMessage());
+        } catch (FxNotFoundException e) {
+            throw new FxLockException(e);
+        } finally {
+            Database.closeObjects(ContentEngineBean.class, con, null);
+        }
+    }
 }

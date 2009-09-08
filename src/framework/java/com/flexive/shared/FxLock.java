@@ -223,13 +223,13 @@ public class FxLock implements Serializable {
     }
 
     /**
-     * Can this lock be unlocked by the calling user?
+     * Can this lock (probably) be unlocked by the calling user?
      *
      * @return if this lock can be unlocked by the calling user
      */
-    public boolean canUnlock() {
+    public boolean isUnlockable() {
         final UserTicket ticket = FxContext.getUserTicket();
-        return ticket.isGlobalSupervisor() || ticket.isMandatorSupervisor() || ticket.getUserId() == userId;
+        return ticket.isGlobalSupervisor() || ticket.isMandatorSupervisor() || ticket.getUserId() == userId || lockType == FxLockType.Loose;
     }
 
     /**

@@ -32,6 +32,7 @@
 package com.flexive.core.storage.genericSQL;
 
 import com.flexive.core.Database;
+import com.flexive.core.DatabaseConst;
 import static com.flexive.core.DatabaseConst.TBL_LOCK;
 import com.flexive.core.storage.LockStorage;
 import com.flexive.shared.FxContext;
@@ -216,7 +217,6 @@ public class GenericLockStorage implements LockStorage {
         } else
             throw new FxLockException("ex.lock.invalidResource");
         PreparedStatement ps = null;
-        final long now = System.currentTimeMillis();
         try {
             if (obj instanceof FxPK) {
                 //                                1       2        3          4
@@ -429,6 +429,75 @@ public class GenericLockStorage implements LockStorage {
     /**
      * {@inheritDoc}
      */
+    @SuppressWarnings({"ThrowableInstanceNeverThrown"})
+    public List<FxLock> getLocks(Connection con, FxLockType lockType, long userId, long typeId, String resource) {
+        final UserTicket ticket = FxContext.getUserTicket();
+        if (!(ticket.isGlobalSupervisor() || ticket.isMandatorSupervisor()))
+            userId = ticket.getUserId();
+
+        StringBuilder sql = new StringBuilder(500);
+        sql.append("SELECT l.LOCKTYPE,l.CREATED_AT,l.EXPIRES_AT,l.LOCK_ID,l.LOCK_VER,l.LOCK_RESOURCE,l.USER_ID FROM ").append(TBL_LOCK).append(" l");
+        boolean hasWhere = false;
+        if (typeId >= 0) {
+            hasWhere = true;
+            sql.append(", ").append(DatabaseConst.TBL_CONTENT).append(" c");
+            sql.append(" WHERE c.ID=l.LOCK_ID AND c.VER=l.LOCK_VER AND c.TDEF=").append(typeId);
+        }
+        if (lockType != null) {
+            if (!hasWhere) {
+                hasWhere = true;
+                sql.append(" WHERE ");
+            } else
+                sql.append(" AND ");
+            sql.append("l.LOCKTYPE=").append(lockType.getId());
+        }
+        if (userId >= 0) {
+            if (!hasWhere) {
+                hasWhere = true;
+                sql.append(" WHERE ");
+            } else
+                sql.append(" AND ");
+            sql.append("l.USER_ID=").append(userId);
+        }
+        if (!StringUtils.isEmpty(resource)) {
+            if (!hasWhere) {
+                sql.append(" WHERE ");
+            } else
+                sql.append(" AND ");
+            resource = resource.trim();
+            //prevent sql injection, although only callable by global supervisors
+            resource = resource.replace('\'', '_');
+            resource = resource.replace('\"', '_');
+            resource = resource.replace('%', '_');
+            sql.append("l.LOCK_RESOURCE LIKE '%").append(resource).append("%'");
+        }
+        List<FxLock> result = new ArrayList<FxLock>(50);
+        PreparedStatement ps = null;
+        try {
+            ps = con.prepareStatement(sql.toString());
+            ResultSet rs = ps.executeQuery();
+            while (rs != null && rs.next()) {
+                Object res = rs.getString(6);
+                if (rs.wasNull())
+                    res = new FxPK(rs.getLong(4), rs.getInt(5));
+                try {
+                    result.add(new FxLock(FxLockType.getById(rs.getInt(1)), rs.getLong(2), rs.getLong(3), rs.getLong(7), res));
+                } catch (FxLockException e) {
+                    LOG.warn(e);
+                }
+            }
+        } catch (SQLException e) {
+            throw new FxDbException(e, "ex.db.sqlError", e.getMessage()).asRuntimeException();
+        } finally {
+            Database.closeObjects(GenericLockStorage.class, null, ps);
+        }
+        return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     public void removeExpiredLocks(Connection con) {
         PreparedStatement ps = null;
         try {

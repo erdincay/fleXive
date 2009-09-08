@@ -32,13 +32,14 @@
 package com.flexive.shared;
 
 import com.flexive.shared.exceptions.FxLockException;
+import com.flexive.shared.value.FxString;
 
 /**
  * Type of a FxLock
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-public enum FxLockType {
+public enum FxLockType implements ObjectWithLabel {
 
     /**
      * No lock is set
@@ -74,6 +75,13 @@ public enum FxLockType {
      */
     public int getId() {
         return id;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public FxString getLabel() {
+        return FxSharedUtils.getEnumLabel(this);
     }
 
     public static FxLockType getById(int id) throws FxLockException {

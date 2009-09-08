@@ -37,9 +37,15 @@ package com.flexive.faces.components.content;
 import com.flexive.faces.beans.FxContentEditorBean;
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.shared.EJBLookup;
+import com.flexive.shared.FxLockType;
+import com.flexive.shared.FxLock;
+import com.flexive.shared.FxContext;
+import com.flexive.shared.security.UserTicket;
+import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.exceptions.FxLockException;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.value.renderer.FxValueFormatter;
 import com.sun.facelets.FaceletContext;
@@ -244,8 +250,25 @@ public class FxProvideContent extends TagHandler {
                     contentEditor.getContentStorage().put(id, wc);
                 }
             }
-        }
-        catch (FxApplicationException e) {
+            if (wc != null && !wc.isNew() && wc.getGuiSettings().isEditMode()) {
+                //lock the content is in edit mode with a loose lock
+                final ContentEngine ce = EJBLookup.getContentEngine();
+                try {
+                    if (!wc.getContent().isLocked()) {
+                        wc.getContent().updateLock(ce.lock(FxLockType.Loose, wc.getContent().getPk()));
+                    } else {
+                        FxLock lock = wc.getContent().getLock();
+                        final UserTicket ticket = FxContext.getUserTicket();
+                        if (lock.getLockType() == FxLockType.Permanent && lock.getUserId() != ticket.getUserId()) {
+                            new FxFacesMsgErr("ex.lock.content.locked").addToContext();
+                            wc.getGuiSettings().setEditMode(false);
+                        }
+                    }
+                } catch (FxLockException e) {
+                    new FxFacesMsgErr(e).addToContext();
+                }
+            }
+        } catch (FxApplicationException e) {
             new FxFacesMsgErr(e).addToContext(formPrefix + ":" + id + "_" + FxContentEditorBean.MESSAGES_ID);
             error = true;
             //make GuiSettings available, even if an error happened

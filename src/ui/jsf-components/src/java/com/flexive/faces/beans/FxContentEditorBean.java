@@ -222,32 +222,6 @@ public class FxContentEditorBean implements Serializable {
     }
 
     /**
-     * If the content is not locked, lock it with a loose lock
-     *
-     * @return if editing is allowed (locking possible)
-     */
-    public boolean lock() {
-        FxWrappedContent wc = contentStorage.get(editorId);
-        final ContentEngine ce = EJBLookup.getContentEngine();
-        try {
-            if (!wc.getContent().isLocked()) {
-                wc.getContent().updateLock(ce.lock(FxLockType.Loose, wc.getContent().getPk()));
-            } else {
-                FxLock lock = wc.getContent().getLock();
-                final UserTicket ticket = FxContext.getUserTicket();
-                if( lock.getLockType() == FxLockType.Permanent && lock.getUserId() != ticket.getUserId() ) {
-                    new FxFacesMsgErr("ex.lock.content.locked").addToContext();
-                    return false;
-                }
-            }
-            return true;
-        } catch (FxLockException e) {
-            new FxFacesMsgErr(e).addToContext();
-            return false;
-        }
-    }
-
-    /**
      * If the content is locked with a loose lock, unlock it
      */
     public void unlock() {
@@ -440,8 +414,6 @@ public class FxContentEditorBean implements Serializable {
      * JSF-action to enable editing.
      */
     public void enableEdit() {
-        if(!lock())
-            return;
         contentStorage.get(editorId).getGuiSettings().setEditMode(true);
         resetForm(contentStorage.get(editorId).getGuiSettings().getFormPrefix());
     }

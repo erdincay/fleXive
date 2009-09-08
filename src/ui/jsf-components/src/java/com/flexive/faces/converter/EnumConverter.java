@@ -55,7 +55,7 @@ public class EnumConverter implements Converter {
 
     @SuppressWarnings({"unchecked"})
     public static Enum getValue(String value) {
-        if (StringUtils.isBlank(value)) {
+        if (StringUtils.isBlank(value) || "-1".equals(value)) {
             return null;
         }
         String[] values = value.split("::");

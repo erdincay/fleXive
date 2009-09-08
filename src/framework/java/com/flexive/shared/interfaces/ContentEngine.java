@@ -312,6 +312,7 @@ public interface ContentEngine {
     /**
      * Extend an existing lock for the given duration (duration will be added to current expire time).
      * If the lock is expired, a new one will be created.
+     *
      * @param lock     the lock to extend
      * @param duration duration in [ms] to extend the original expire time
      * @return extended lock
@@ -345,4 +346,19 @@ public interface ContentEngine {
      * @throws FxLockException on errors
      */
     void unlock(FxPK pk) throws FxLockException;
+
+    /**
+     * Query locks
+     *
+     * @param lockType type of the locks to return, if <code>null</code> all types will be returned
+     * @param userId   id of the lock owner, if &lt; 0 locks for all users will be returned,
+     *                 if the calling user is not global or mandator supervisor, only locks held by the
+     *                 calling user will be returned
+     * @param typeId   only return locks for contents of this type, if &lt; 0 type is ignored
+     * @param resource name of the locked resources to find, will be ignored if empty or <code>null</code>.
+     *                 Queries will be pre- and postfixed by wildcards (%)
+     * @return matching locks
+     * @throws FxLockException on errors
+     */
+    List<FxLock> getLocks(FxLockType lockType, long userId, long typeId, String resource) throws FxLockException;
 }
