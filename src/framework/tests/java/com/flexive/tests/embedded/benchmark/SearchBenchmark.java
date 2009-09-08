@@ -86,39 +86,39 @@ public class SearchBenchmark {
     }
 
     public void selectTreePathsBenchmark() throws FxApplicationException, FxLoginFailedException, FxAccountInUseException, FxLogoutFailedException {
-            final int numNodes = 2000;
-            long rootNode = -1;
-            try {
-                FxTestUtils.login(TestUsers.SUPERVISOR);
-                // create a lot of nodes
-                long startCreateNode = System.currentTimeMillis();
-                rootNode = EJBLookup.getTreeEngine().save(FxTreeNodeEdit.createNew("selectTreePathsBenchmark"));
-                for (int i = 0; i < numNodes; i++) {
-                    final FxString label = new FxString(FxLanguage.ENGLISH, "English label " + i).setTranslation(FxLanguage.GERMAN, "Deutsches Label " + i);
-                    EJBLookup.getTreeEngine().save(FxTreeNodeEdit.createNew("test test test " + i)
-                            .setParentNodeId(rootNode).setLabel(label));
-                    if (i % 500 == 499) {
-                        getResultLogger().logTime("createTreeNodes[" + (i - 499) + "-" + i + "]", startCreateNode, 500, "tree node");
-                        startCreateNode = System.currentTimeMillis();
-                    }
+        final int numNodes = 2000;
+        long rootNode = -1;
+        try {
+            FxTestUtils.login(TestUsers.SUPERVISOR);
+            // create a lot of nodes
+            long startCreateNode = System.currentTimeMillis();
+            rootNode = EJBLookup.getTreeEngine().save(FxTreeNodeEdit.createNew("selectTreePathsBenchmark"));
+            for (int i = 0; i < numNodes; i++) {
+                final FxString label = new FxString(FxLanguage.ENGLISH, "English label " + i).setTranslation(FxLanguage.GERMAN, "Deutsches Label " + i);
+                EJBLookup.getTreeEngine().save(FxTreeNodeEdit.createNew("test test test " + i)
+                        .setParentNodeId(rootNode).setLabel(label));
+                if (i % 500 == 499) {
+                    getResultLogger().logTime("createTreeNodes[" + (i - 499) + "-" + i + "]", startCreateNode, 500, "tree node");
+                    startCreateNode = System.currentTimeMillis();
                 }
-
-                final List<FxTreeNode> children = EJBLookup.getTreeEngine().getTree(FxTreeMode.Edit, rootNode, 1).getChildren();
-                assertTrue(children.size() == numNodes, "Expected " + numNodes + " children of our root node, got: " + children.size());
-
-                // select the tree paths of all linked contents
-                final SqlQueryBuilder builder = new SqlQueryBuilder().select("@pk", "@path").maxRows(numNodes).isChild(rootNode);
-                final long startSearch = System.currentTimeMillis();
-                final FxResultSet result = builder.timeout(1000).getResult();
-                getResultLogger().logTime("selectTreePath", startSearch, numNodes, "row");
-                assertTrue(result.getRowCount() == numNodes, "Expected " + numNodes + " rows, got: " + result.getRowCount());
-            } finally {
-                if (rootNode != -1) {
-                    EJBLookup.getTreeEngine().remove(FxTreeNodeEdit.createNew("").setId(rootNode), FxTreeRemoveOp.Remove, true);
-                }
-                FxTestUtils.logout();
             }
+
+            final List<FxTreeNode> children = EJBLookup.getTreeEngine().getTree(FxTreeMode.Edit, rootNode, 1).getChildren();
+            assertTrue(children.size() == numNodes, "Expected " + numNodes + " children of our root node, got: " + children.size());
+
+            // select the tree paths of all linked contents
+            final SqlQueryBuilder builder = new SqlQueryBuilder().select("@pk", "@path").maxRows(numNodes).isChild(rootNode);
+            final long startSearch = System.currentTimeMillis();
+            final FxResultSet result = builder.timeout(1000).getResult();
+            getResultLogger().logTime("selectTreePath", startSearch, numNodes, "row");
+            assertTrue(result.getRowCount() == numNodes, "Expected " + numNodes + " rows, got: " + result.getRowCount());
+        } finally {
+            if (rootNode != -1) {
+                EJBLookup.getTreeEngine().remove(FxTreeNodeEdit.createNew("").setId(rootNode), FxTreeRemoveOp.Remove, true);
+            }
+            FxTestUtils.logout();
         }
+    }
 
     @Test(dataProvider = "dataVolumeInstanceCounts")
     public void dataVolumeBenchmark(int counts, boolean cleanup) throws FxApplicationException {
@@ -137,7 +137,7 @@ public class SearchBenchmark {
         start = System.currentTimeMillis();
         assertEquals(
                 new SqlQueryBuilder()
-                        .select("@pk", TYPE_VOLUME + "/string01", TYPE_VOLUME + "/string02", TYPE_VOLUME + "/string03")
+                        .select("@pk", "string01", "string02", "string03")
                         .type(TYPE_VOLUME)
                         .maxRows(Integer.MAX_VALUE)
                         .getResult()
@@ -152,11 +152,11 @@ public class SearchBenchmark {
         final int rangeEnd = rangeStart + 500;
         final String rangeDescr = "[" + rangeStart + "-" + rangeEnd + ")";
         final SqlQueryBuilder sqbBase = new SqlQueryBuilder()
-                .select("@pk", TYPE_VOLUME + "/string01", TYPE_VOLUME + "/string02", TYPE_VOLUME + "/string03", TYPE_VOLUME + "/text", TYPE_VOLUME + "/number01", TYPE_VOLUME + "/date01");
+                .select("@pk", "string01", "string02", "string03", "text", "number01", "date01");
         final SqlQueryBuilder sqb = sqbBase.copy()
                 .andSub()
-                .condition(TYPE_VOLUME + "/number01", PropertyValueComparator.GE, rangeStart)
-                .condition(TYPE_VOLUME + "/number01", PropertyValueComparator.LT, rangeEnd)
+                .condition("number01", PropertyValueComparator.GE, rangeStart)
+                .condition("number01", PropertyValueComparator.LT, rangeEnd)
                 .closeSub()
                 .timeout(600);
 
@@ -170,11 +170,11 @@ public class SearchBenchmark {
         // perform a complex FxSQL query with nested conditions
         final SqlQueryBuilder sqbComplex = sqbBase.copy()
                 .andSub()
-                .condition(TYPE_VOLUME + "/number01", PropertyValueComparator.GE, rangeStart)
-                .condition(TYPE_VOLUME + "/number01", PropertyValueComparator.LT, rangeEnd)
+                .condition("number01", PropertyValueComparator.GE, rangeStart)
+                .condition("number01", PropertyValueComparator.LT, rangeEnd)
                 .orSub()
-                .condition(TYPE_VOLUME + "/date01", PropertyValueComparator.NOT_EMPTY, null)
-                .condition(TYPE_VOLUME + "/date02", PropertyValueComparator.NOT_EMPTY, null)
+                .condition("date01", PropertyValueComparator.NOT_EMPTY, null)
+                .condition("date02", PropertyValueComparator.NOT_EMPTY, null)
                 .closeSub()
                 .closeSub()
                 .timeout(600);
@@ -243,10 +243,10 @@ public class SearchBenchmark {
         assertEquals(result.getRowCount(), 500);
         for (FxResultRow row : result.getResultRows()) {
             checkResult(rangeStart, rangeEnd, rangeDescr,
-                    row.getInt(TYPE_VOLUME + "/number01"),
-                    row.getString(TYPE_VOLUME + "/string01"),
-                    row.getString(TYPE_VOLUME + "/string02"),
-                    row.getString(TYPE_VOLUME + "/string03")
+                    row.getInt("number01"),
+                    row.getString("string01"),
+                    row.getString("string02"),
+                    row.getString("string03")
             );
         }
     }
