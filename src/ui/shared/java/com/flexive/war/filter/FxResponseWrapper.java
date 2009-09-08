@@ -143,7 +143,7 @@ public class FxResponseWrapper extends HttpServletResponseWrapper {
         if (mustRevalidate) sCacheControl += ", must-revalidate";
         setHeader(HTTP_HEADER_CACHE_CONTROL, sCacheControl);
         setHeader(HTTP_HEADER_PRAGMA, "cache");
-        setDateHeader(HTTP_HEADER_EXPIRES, System.currentTimeMillis() + 24 * 3600 * 1000);
+        setDateHeader(HTTP_HEADER_EXPIRES, System.currentTimeMillis() + 30L * 24 * 3600 * 1000);
         setModifiedAtDate(new Date());
     }
 

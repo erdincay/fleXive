@@ -119,7 +119,10 @@
                                         verbose="true"
                                         />
                                 <unzip src="${basedir}/src/izpack/${jetty.zipFile}" dest="${staging.dir}"/>
-
+                                                                                                                                           
+                                <!-- Install our own webdefault.xml -->
+                                <copy file="${basedir}/src/izpack/jetty-webdefault.xml" tofile="${jetty.staging.dir}/etc/webdefault.xml"/>
+                                
                                 <!-- Clean up default installation -->
                                 <delete>
                                     <fileset dir="${jetty.staging.dir}/contexts">
