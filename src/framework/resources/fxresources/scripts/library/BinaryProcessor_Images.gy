@@ -74,6 +74,7 @@ previewFile2 = File.createTempFile("PREV2", ext)
 previewFile3 = File.createTempFile("PREV3", ext)
 previewFile4 = File.createTempFile("PREV4", ext)
 if( meta.asImageMetadata().getWidth() <= 256 && meta.asImageMetadata().getHeight() <= 256 ) {
+    // avoid overhead of launching ImageMagick for small images
     dimensionsPreview1 = FxMediaNativeEngine.scale(binaryFile, previewFile1, ext, BinaryDescriptor.PREVIEW1_BOX, BinaryDescriptor.PREVIEW1_BOX)
     dimensionsPreview2 = FxMediaNativeEngine.scale(binaryFile, previewFile2, ext, BinaryDescriptor.PREVIEW2_BOX, BinaryDescriptor.PREVIEW2_BOX)
     dimensionsPreview3 = FxMediaNativeEngine.scale(binaryFile, previewFile3, ext, BinaryDescriptor.PREVIEW3_BOX, BinaryDescriptor.PREVIEW3_BOX)

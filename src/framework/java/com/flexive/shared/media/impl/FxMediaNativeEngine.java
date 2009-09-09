@@ -73,11 +73,11 @@ public class FxMediaNativeEngine {
     /**
      * Do we run in headless mode?
      */
-    private final static boolean headless;
+    private static final boolean HEADLESS;
 
     static {
         if ("true".equals(System.getProperty("java.awt.headless"))) {
-            headless = true;
+            HEADLESS = true;
         } else {
             // check if graphics environment is available
             boolean caughtException = false;
@@ -86,7 +86,7 @@ public class FxMediaNativeEngine {
             } catch (HeadlessException e) {
                 caughtException = true;
             }
-            headless = caughtException;
+            HEADLESS = caughtException;
         }
     }
 
@@ -102,7 +102,7 @@ public class FxMediaNativeEngine {
      * @throws FxApplicationException on errors
      */
     public static int[] scale(File original, File scaled, String extension, int width, int height) throws FxApplicationException {
-        if (headless && FxMediaImageMagickEngine.IM_AVAILABLE && ".GIF".equals(extension)) {
+        if (HEADLESS && FxMediaImageMagickEngine.IM_AVAILABLE && ".GIF".equals(extension)) {
             //native headless engine can't handle gif transparency ... so if we have IM we use it, else
             //transparent pixels will be black
             return FxMediaImageMagickEngine.scale(original, scaled, extension, width, height);
@@ -150,9 +150,18 @@ public class FxMediaNativeEngine {
         scaleWidth = (int) ((double) scaleWidth * scale);
         scaleHeight = (int) ((double) scaleHeight * scale);
         Image scaledImage;
-        if (headless) {
+        if (HEADLESS) {
             // create a new buffered image, don't rely on a local graphics system (headless mode)
-            bi2 = new BufferedImage(scaleWidth, scaleHeight, BufferedImage.TYPE_INT_ARGB);
+            final int type;
+            if (bi.getType() != BufferedImage.TYPE_CUSTOM) {
+                type = bi.getType();
+            } else if (bi.getAlphaRaster() != null) {
+                // alpha channel available
+                type = BufferedImage.TYPE_INT_ARGB;
+            } else {
+                type = BufferedImage.TYPE_INT_RGB;
+            }
+            bi2 = new BufferedImage(scaleWidth, scaleHeight, type);
         } else {
             GraphicsConfiguration gc = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration();
             bi2 = gc.createCompatibleImage(scaleWidth, scaleHeight, bi.getTransparency());
