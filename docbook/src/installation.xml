@@ -91,6 +91,12 @@
                             file or launch it from the command line with
                             <command>java -jar flexive-installer.jar</command>.
                         </para>
+                        <para>
+                            In a headless environment (a server without a graphics environment),
+                            you cannot use the GUI installer. Launch the console version with
+                            <command>java -jar flexive-installer.jar -console</command>
+                            instead.
+                        </para>
                     </listitem>
                     <listitem>
                         <para>
