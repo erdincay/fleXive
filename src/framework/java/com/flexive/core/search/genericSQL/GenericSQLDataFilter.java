@@ -64,6 +64,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Collection;
 
 // NVL --> IFNULL((select sub.id from FX_CONTENT_DATA sub where sub.id=filter.id),1)
 
@@ -160,7 +162,7 @@ public class GenericSQLDataFilter extends DataFilter {
         final UserTicket ticket = FxContext.getUserTicket();
         final long maxRows = search.getFxStatement().getMaxResultRows();
         Statement stmt = null;
-        String sql = null;
+        String sql;
         try {
             final String dataSelect;
             if (getStatement().getType() == FxStatement.Type.ALL) {
@@ -300,7 +302,7 @@ public class GenericSQLDataFilter extends DataFilter {
     }
 
     private boolean isMainTableQuery(Brace br) throws FxSqlSearchException {
-        final Multimap<String, ConditionTableInfo> tables = getUsedContentTables(br);
+        final Multimap<String, ConditionTableInfo> tables = getUsedContentTables(br, true);
         return (tables.keySet().size() == 1
                 && DatabaseConst.TBL_CONTENT.equals(tables.keySet().iterator().next()));
     }
@@ -315,7 +317,7 @@ public class GenericSQLDataFilter extends DataFilter {
     private void buildOr(StringBuilder sb, Brace br) throws FxSqlSearchException {
         // Start OR
         if (br.getElements().length > 1) {
-            final Multimap<String, ConditionTableInfo> tables = getUsedContentTables(br);
+            final Multimap<String, ConditionTableInfo> tables = getUsedContentTables(br, true);
             // for "OR" we can only always optimize flat storage queries,
             // as long as only one flat storage table is used and we don't have a nested 'and'
             if (tables.keySet().size() == 1
@@ -325,6 +327,34 @@ public class GenericSQLDataFilter extends DataFilter {
                         getOptimizedFlatStorageSubquery(br, tables.keySet().iterator().next())
                 );
                 return;
+            }
+
+            // check if there are two or more queries on the same flat storage that can be grouped
+            try {
+                final Brace grouped = br.groupConditions(new Brace.GroupFunction() {
+                    public Object apply(Condition cond) {
+                        try {
+                            final Pair<String, ConditionTableInfo> pi = getPropertyInfo(cond.getProperty());
+                            return pi.getSecond().isFlatStorage()
+                                    // flat storage entries can be grouped as long as they're on the same table
+                                    ? pi.getFirst()
+                                    // generate a unique ID, the statement will be ignored for grouping
+                                    : "condition" + cond.getId();
+                        } catch (FxSqlSearchException e) {
+                            throw e.asRuntimeException();
+                        }
+                    }
+                });
+                if (grouped != br) {
+                    // reorg happened - process new version
+                    if (LOG.isTraceEnabled()) {
+                        LOG.trace("OR statement reorganized, new statement: " + grouped);
+                    }
+                    buildOr(sb, grouped);
+                    return;
+                }
+            } catch (SqlParserException e) {
+                throw new FxSqlSearchException(e);
             }
         }
 
@@ -360,7 +390,7 @@ public class GenericSQLDataFilter extends DataFilter {
     private void buildAnd(StringBuilder sb, Brace br) throws FxSqlSearchException {
         // Start AND
         if (br.getElements().length > 1) {
-            final Multimap<String, ConditionTableInfo> tables = getUsedContentTables(br);
+            final Multimap<String, ConditionTableInfo> tables = getUsedContentTables(br, true);
             // for "AND" we can only optimize when ALL flatstorage conditions are not multi-lang and on the same level,
             // i.e. that table must have exactly one flat-storage entry
             if (tables.size() == 1 && tables.values().iterator().next().isFlatStorage()) {
@@ -368,6 +398,28 @@ public class GenericSQLDataFilter extends DataFilter {
                         getOptimizedFlatStorageSubquery(br, tables.keySet().iterator().next())
                 );
                 return;
+            }
+            // check if there are two or more flat storage queries in the same level that can be grouped
+            try {
+                final Brace grouped = br.groupConditions(new Brace.GroupFunction() {
+                    public Object apply(Condition cond) {
+                        try {
+                            return getPropertyInfo(cond.getProperty());
+                        } catch (FxSqlSearchException e) {
+                            throw e.asRuntimeException();
+                        }
+                    }
+                });
+                if (grouped != br) {
+                    // reorg happened - process new version
+                    if (LOG.isTraceEnabled()) {
+                        LOG.trace("AND statement reorganized, new statement: " + grouped);
+                    }
+                    buildAnd(sb, grouped);
+                    return;
+                }
+            } catch (SqlParserException e) {
+                throw new FxSqlSearchException(e);
             }
         }
         int pos = 0;
@@ -408,6 +460,12 @@ public class GenericSQLDataFilter extends DataFilter {
     private String getOptimizedMainTableConditions(Brace br) throws FxSqlSearchException {
         final ConditionBuilder conditionBuilder = new ConditionBuilder() {
             public String buildCondition(Brace br, Condition cond) throws FxSqlSearchException {
+                final PropertyResolver.Table tableType = getTableType(br.getStatement(), cond.getProperty());
+                if (tableType != PropertyResolver.Table.T_CONTENT) {
+                    // not a content entry, don't process
+                    return null;
+                }
+                markProcessed(cond);
                 final Pair<String, String> select = getSqlColumnWithValue(br.getStatement(), cond);
                 return select.getFirst()
                         + cond.getSqlComperator()
@@ -420,6 +478,7 @@ public class GenericSQLDataFilter extends DataFilter {
     private String getOptimizedFlatStorageSubquery(Brace br, String flatStorageTable) throws FxSqlSearchException {
         final ConditionBuilder conditionBuilder = new ConditionBuilder() {
             public String buildCondition(Brace br, Condition cond) throws FxSqlSearchException {
+                markProcessed(cond);
                 return buildPropertyCondition(br.getStatement(), cond, cond.getProperty(), true);
             }
         };
@@ -474,53 +533,68 @@ public class GenericSQLDataFilter extends DataFilter {
      * the value information about the modes in which the table is accessed. Depending on the number of
      * different accesses (e.g. multilang/no multilang), a query may or may not be optimized.
      *
-     * @param br    the condition
-     * @return      the table infos
+     * @param br        the condition
+     * @param recurse   whether to process only the given brace, or also all subconditions
+     * @return          the table infos
      */
-    private Multimap<String, ConditionTableInfo> getUsedContentTables(Brace br) throws FxSqlSearchException {
+    private Multimap<String, ConditionTableInfo> getUsedContentTables(Brace br, boolean recurse) throws FxSqlSearchException {
         final Multimap<String, ConditionTableInfo> tables = HashMultimap.create();
         for (BraceElement be : br.getElements()) {
             if (be instanceof Condition) {
-                final Property prop = ((Condition) be).getProperty();
-                if (prop == null) {
-                    // insert dummy entry that will prevent any table-level optimizations
-                    // because this condition is not mapped to a content table (e.g. tree ops)
-                    tables.put("null table", new ConditionTableInfo(false, false, -1));
-                } else if (prop.isWildcard() || prop.isUserPropsWildcard()) {
-                    tables.put("wildcard property", new ConditionTableInfo(false, false, -1));
-                } else {
-                    final PropertyEntry entry = getPropertyResolver().get(getStatement(), prop);
-                    if (entry.getProperty() == null) {
-                        // insert dummy entry to prevent table-level optimizations
-                        tables.put("virtual property", new ConditionTableInfo(false, false, -1));
-                    } else {
-                        if (entry.getAssignment() != null && entry.getAssignment().isFlatStorageEntry()) {
-                            final FxFlatStorageMapping mapping = entry.getAssignment().getFlatStorageMapping();
-                            tables.put(
-                                    mapping.getStorage(),
-                                    new ConditionTableInfo(
-                                            true,
-                                            entry.getAssignment().isMultiLang(),
-                                            mapping.getLevel()
-                                    )
-                            );
-                        } else {
-                            tables.put(
-                                    entry.getTableType().getTableName(),
-                                    new ConditionTableInfo(
-                                            false,
-                                            entry.getAssignment() != null && entry.getAssignment().isMultiLang(),
-                                            -1
-                                    )
-                            );
-                        }
-                    }
-                }
-            } else if (be instanceof Brace) {
-                tables.putAll(getUsedContentTables((Brace) be));
+                final Pair<String, ConditionTableInfo> cti = getPropertyInfo(((Condition) be).getProperty());
+                tables.put(cti.getFirst(), cti.getSecond());
+            } else if (be instanceof Brace && recurse) {
+                tables.putAll(getUsedContentTables((Brace) be, true));
             }
         }
         return tables;
+    }
+
+    /**
+     * Return the storage table and the {@link com.flexive.core.search.genericSQL.GenericSQLDataFilter.ConditionTableInfo}
+     * object for the given condition property.
+     *
+     * @param prop  the condition property
+     * @return      the storage information
+     * @throws FxSqlSearchException if the property could not be resolved
+     */
+    private Pair<String, ConditionTableInfo> getPropertyInfo(Property prop) throws FxSqlSearchException {
+        final Pair<String, ConditionTableInfo> cti;
+        if (prop == null) {
+            // insert dummy entry that will prevent any table-level optimizations
+            // because this condition is not mapped to a content table (e.g. tree ops)
+            cti = Pair.create("null table", new ConditionTableInfo(false, false, -1));
+        } else if (prop.isWildcard() || prop.isUserPropsWildcard()) {
+            cti = Pair.create("wildcard property", new ConditionTableInfo(false, false, -1));
+        } else {
+            final PropertyEntry entry = getPropertyResolver().get(getStatement(), prop);
+            if (entry.getProperty() == null) {
+                // insert dummy entry to prevent table-level optimizations
+                cti = Pair.create("virtual property", new ConditionTableInfo(false, false, -1));
+            } else {
+                if (entry.getAssignment() != null && entry.getAssignment().isFlatStorageEntry()) {
+                    final FxFlatStorageMapping mapping = entry.getAssignment().getFlatStorageMapping();
+                    cti = Pair.create(
+                            mapping.getStorage(),
+                            new ConditionTableInfo(
+                                    true,
+                                    entry.getAssignment().isMultiLang(),
+                                    mapping.getLevel()
+                            )
+                    );
+                } else {
+                    cti = Pair.create(
+                            entry.getTableType().getTableName(),
+                            new ConditionTableInfo(
+                                    false,
+                                    entry.getAssignment() != null && entry.getAssignment().isMultiLang(),
+                                    -1
+                            )
+                    );
+                }
+            }
+        }
+        return cti;
     }
 
     /**
@@ -593,6 +667,7 @@ public class GenericSQLDataFilter extends DataFilter {
      *          if the function failed
      */
     private String getConditionSubQuery(FxStatement stmt, Condition cond) throws FxSqlSearchException {
+        markProcessed(cond);
         final Table tblContent = stmt.getTableByType(Table.TYPE.CONTENT);
         if (tblContent == null) {
             throw new FxSqlSearchException(LOG, "ex.sqlSearch.contentTableMissing");
@@ -659,6 +734,13 @@ public class GenericSQLDataFilter extends DataFilter {
         }
     }
 
+    private void markProcessed(Condition cond) throws FxSqlSearchException {
+        if (cond.isProcessed()) {
+            throw new FxSqlSearchException("ex.sqlSearch.filter.condition.processed", cond);
+        }
+        cond.setProcessed(true);
+    }
+
     /**
      * Perform a fulltext match
      *
@@ -682,8 +764,6 @@ public class GenericSQLDataFilter extends DataFilter {
      */
     private String buildPropertyCondition(FxStatement stmt, Condition cond, Property prop, boolean optimizedFlatStorage)
             throws FxSqlSearchException {
-
-        final Constant constant = cond.getConstant();
         final PropertyEntry entry = getPropertyResolver().get(stmt, prop);
         final String filter;
         if (prop.isAssignment()) {
@@ -939,6 +1019,12 @@ public class GenericSQLDataFilter extends DataFilter {
     private String getLanguageFilter() {
         return search.getSearchLanguage() == null ? "" : " AND lang IN (0," + search.getSearchLanguage().getId() + ") ";
     }
+
+    private PropertyResolver.Table getTableType(FxStatement statement, Property property) throws FxSqlSearchException {
+        final PropertyEntry entry = getPropertyResolver().get(statement, property);
+        return entry != null ? entry.getTableType() : null;
+    }
+
 
     /**
      * {@inheritDoc}

@@ -50,11 +50,46 @@ public class Pair<X, Y> implements Serializable {
         this.second = second;
     }
 
+    /**
+     * Create a new pair.
+     *
+     * @param first     the first value
+     * @param second    the second value
+     * @param <X>       first value type
+     * @param <Y>       second value type
+     * @return          a new Pair
+     * @since           3.1
+     */
+    public static <X, Y> Pair<X, Y> create(X first, Y second) {
+        return new Pair<X, Y>(first, second);
+    }
+
     public X getFirst() {
         return first;
     }
 
     public Y getSecond() {
         return second;
+    }
+
+    @SuppressWarnings({"RedundantIfStatement"})
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Pair pair = (Pair) o;
+
+        if (first != null ? !first.equals(pair.first) : pair.first != null) return false;
+        if (second != null ? !second.equals(pair.second) : pair.second != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = first != null ? first.hashCode() : 0;
+        result = 31 * result + (second != null ? second.hashCode() : 0);
+        return result;
     }
 }

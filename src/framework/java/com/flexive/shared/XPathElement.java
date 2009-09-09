@@ -38,6 +38,7 @@ import org.apache.commons.lang.StringUtils;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Collections;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -48,19 +49,20 @@ import java.util.regex.Pattern;
  */
 public class XPathElement implements Serializable {
     private static final long serialVersionUID = 2037392183607142045L;
-    private static String PK = "@(pk|PK)=(NEW|\\d*\\.(LIVE|MAX|\\d*))";
+    private static final String PK = "@(pk|PK)=(NEW|\\d*\\.(LIVE|MAX|\\d*))";
     /**
      * First element must start with a "/",
      * an XPath element must start with a letter or underscore followed by an optional letter/number/underscore combination
      * and may end with an optional multiplicity like [x] where x is a number
      */
-    private static Pattern XPathPattern = Pattern.compile("([A-Z_][A-Z_0-9 _]*(\\[" + PK + "\\])?)?(/[A-Z][A-Z_0-9]*(\\[[0-9]+\\])?)+");
-    private static Pattern PKPattern = Pattern.compile(PK);
-    private static Pattern doubleSlashPattern = Pattern.compile("/{2,}");
+    private static final Pattern XPathPattern = Pattern.compile("([A-Z_][A-Z_0-9 _]*(\\[" + PK + "\\])?)?(/[A-Z][A-Z_0-9]*(\\[[0-9]+\\])?)+");
+    private static final Pattern PKPattern = Pattern.compile(PK);
+    private static final Pattern doubleSlashPattern = Pattern.compile("/{2,}");
+    private static final List<XPathElement> EMPTY = Collections.unmodifiableList(new ArrayList<XPathElement>(0));
+    
     private String alias;
     private int index;
     private boolean indexDefined;
-    private static final List<XPathElement> EMPTY = new ArrayList<XPathElement>(0);
 
     /**
      * Ctor

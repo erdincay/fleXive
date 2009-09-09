@@ -42,6 +42,7 @@ public class Condition implements BraceElement {
     private Value sLeft;
     private Value sRight;
     private int id;
+    private boolean processed;
 
     public enum ValueComparator {
         LIKE("like"),
@@ -194,5 +195,11 @@ public class Condition implements BraceElement {
         }
     }
 
+    public boolean isProcessed() {
+        return processed;
+    }
 
+    public void setProcessed(boolean processed) {
+        this.processed = processed;
+    }
 }

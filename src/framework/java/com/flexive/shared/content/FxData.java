@@ -79,7 +79,7 @@ public abstract class FxData implements Serializable {
     /**
      * Cached assignment
      */
-    private FxAssignment assignment = null;
+    private transient FxAssignment assignment;
 
     /**
      * Multiplicity of the assignment

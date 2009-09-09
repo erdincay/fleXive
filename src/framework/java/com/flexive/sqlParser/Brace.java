@@ -31,7 +31,12 @@
  ***************************************************************/
 package com.flexive.sqlParser;
 
+import com.google.common.collect.Multimap;
+import com.google.common.collect.HashMultimap;
+
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
 
 /**
  * Brace
@@ -204,13 +209,62 @@ public class Brace implements BraceElement{
         return conditions.get(pos);
     }
 
+    /**
+     * Group the conditions in the current brace using the given function. If no regrouping was performed,
+     * {@code this} is returned, otherwise a new Brace instance is created.
+     *
+     * @param fun   the function to perform the grouping (conditions with equals values will be grouped)
+     * @return      a re-grouped brace, or {@code this} when no actions were performed
+     */
+    public Brace groupConditions(GroupFunction fun) throws SqlParserException {
+        final Multimap<Object, Condition> groupedConditions = HashMultimap.create();
+        for (BraceElement be : conditions) {
+            if (be instanceof Condition) {
+                groupedConditions.put(fun.apply((Condition) be), (Condition) be);
+            }
+        }
+        Brace newBrace = null;
+        final Map<Object,Collection<Condition>> grouped = groupedConditions.asMap();
+        for (Collection<Condition> subConditions : grouped.values()) {
+            if (subConditions.size() > 1 && subConditions.size() < conditions.size()) {
+                // create a subcondition with the grouped conditions, prevent recursion
+                // when all conditions are in the same group
+                final Brace subBrace = new Brace(stmt);
+                subBrace.setType(type);
+                subBrace.addElements(subConditions.toArray(new BraceElement[subConditions.size()]));
 
+                // add subcondition to newBrace
+                if (newBrace == null) {
+                    newBrace = new Brace(stmt);
+                    newBrace.setType(type);
+                }
+                newBrace.addElement(subBrace);
+            }
+        }
+        if (newBrace != null) {
+            // reorg, add rest of the statement
+            for (Collection<Condition> subConditions : grouped.values()) {
+                if (subConditions.size() == 1) {
+                    // add all conditions not added before
+                    newBrace.addElement(subConditions.iterator().next());
+                }
+            }
+            for (BraceElement be : conditions) {
+                if (!(be instanceof Condition)) {
+                    newBrace.addElement(be);
+                }
+            }
+        }
+        return newBrace == null ? this : newBrace;
+    }
+
+    @Override
     public String toString() {
         return "Brace[type="+type+";"+super.toString()+"]";
     }
 
     protected boolean processAndOr(String andOr,boolean insideforcedBrace) throws SqlParserException {
-            if (type!=null && !type.equals(andOr)) {
+            if (type!=null && !type.equalsIgnoreCase(andOr)) {
 				if (insideforcedBrace) {
 					insideforcedBrace=false;
 					stmt.endSubBrace();
@@ -234,5 +288,9 @@ public class Brace implements BraceElement{
 			}
             setType(andOr);
         return insideforcedBrace;
+    }
+
+    public static interface GroupFunction {
+        Object apply(Condition cond);
     }
 }

@@ -33,9 +33,9 @@ package com.flexive.tests.shared;
 
 import org.testng.annotations.Test;
 import org.testng.Assert;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.*;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.ArrayUtils;
 import com.flexive.sqlParser.*;
 import com.flexive.shared.search.query.PropertyValueComparator;
 import com.flexive.shared.search.query.VersionFilter;
@@ -321,6 +321,56 @@ public class SqlParserTest {
         parse("SELECT co.ID /* some \n multiline -- nested \n comment */ FROM content co");
         parse("SELECT co.ID FROM content co WHERE co.property /* some comment */ = /* some comment */ 21");
         parse("SELECT /* some \ncomment */ co.ID FROM /* some \n\ncomment */ content co -- another comment");
+    }
+
+    @Test(groups = {"shared", "search"})
+    public void groupBraceNoReorg() throws SqlParserException {
+        checkNoReorg("id > 0 AND id < 0", new Brace.GroupFunction() {
+            public Object apply(Condition cond) {
+                return 1;   //
+            }
+        });
+        checkNoReorg("id > 0 AND (id < 0 OR id > 0)", new Brace.GroupFunction() {
+            int ctr = 0;
+            public Object apply(Condition cond) {
+                return ctr++;   // all conditions will be in different groups
+            }
+        });
+    }
+
+    @Test(groups = {"shared", "search"})
+    public void groupBraceSimple() throws SqlParserException {
+        final FxStatement stmt = parse("SELECT id WHERE id > 0 and s01 = 'abc' AND s02 = 'def'");
+        assertEquals(stmt.getRootBrace().getElements().length, 3);
+        final Condition s01 = (Condition) stmt.getRootBrace().getElements()[1];
+        final Condition s02 = (Condition) stmt.getRootBrace().getElements()[2];
+        assertEquals(s01.getLValueInfo().getValue().toString(), "s01");
+        assertEquals(s02.getLValueInfo().getValue().toString(), "s02");
+
+        final Brace reorg = stmt.getRootBrace().groupConditions(new Brace.GroupFunction() {
+            public Object apply(Condition cond) {
+                // group s01 and s02
+                return cond.getLValueInfo().getValue().toString().charAt(0) == 's' ? 0 : 1;
+            }
+        });
+        assertNotSame(reorg, stmt.getRootBrace());
+        assertEquals(reorg.getElements().length, 2);
+        assertTrue("and".equalsIgnoreCase(reorg.getType()), "New condition type should be 'and':" + reorg.getType());
+
+        final Brace sub = (Brace) reorg.getElements()[reorg.getElements()[0] instanceof Condition ? 1 : 0];
+        assertEquals(sub.getElements().length, 2);
+        assertTrue("and".equalsIgnoreCase(sub.getType()), "Subcondition type should be 'and' too:" + sub.getType());
+        assertTrue(ArrayUtils.indexOf(sub.getElements(), s01) != -1, "s01 not found in subquery");
+        assertTrue(ArrayUtils.indexOf(sub.getElements(), s02) != -1, "s02 not found in subquery");
+    }
+
+    private void checkNoReorg(String conditions, Brace.GroupFunction fun) throws SqlParserException {
+        final FxStatement stmt = parse("SELECT id WHERE " + conditions);
+        assertEquals(
+                stmt.getRootBrace().groupConditions(fun),
+                stmt.getRootBrace(),
+                "No reorg should happend because all statements are in the same group"
+        );
     }
 
     private void checkStatementCondition(BraceElement element, PropertyValueComparator comp, String lvalue, String rvalue) {
