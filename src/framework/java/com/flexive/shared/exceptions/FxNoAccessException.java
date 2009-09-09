@@ -168,8 +168,8 @@ public class FxNoAccessException extends FxApplicationException {
      * {@inheritDoc}
      */
     @Override
-    public FxNoAccessException setAffectedXPath(String affectedXPath) {
-        super.setAffectedXPath(affectedXPath);
+    public FxNoAccessException setAffectedXPath(String affectedXPath, FxContentExceptionCause cause) {
+        super.setAffectedXPath(affectedXPath, cause);
         return this;
     }
 }

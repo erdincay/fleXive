@@ -2716,7 +2716,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             if (rs != null && rs.next()) {
                 if (uniqueMode == UniqueMode.Instance || rs.getInt(2) > 0)
                     //noinspection ThrowableInstanceNeverThrown
-                    throw new FxConstraintViolationException("ex.content.contraint.unique.xpath", rs.getString(1), uniqueMode).setAffectedXPath(rs.getString(1));
+                    throw new FxConstraintViolationException("ex.content.contraint.unique.xpath", rs.getString(1), uniqueMode).setAffectedXPath(rs.getString(1), FxContentExceptionCause.UniqueConstraintViolated);
             }
         } finally {
             if (s != null)

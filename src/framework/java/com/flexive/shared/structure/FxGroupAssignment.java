@@ -37,10 +37,7 @@ import com.flexive.shared.EJBLookup;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.content.FxData;
 import com.flexive.shared.content.FxGroupData;
-import com.flexive.shared.exceptions.FxCreateException;
-import com.flexive.shared.exceptions.FxInvalidParameterException;
-import com.flexive.shared.exceptions.FxNotFoundException;
-import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.exceptions.*;
 import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.value.FxString;
 
@@ -242,7 +239,7 @@ public class FxGroupAssignment extends FxAssignment implements Serializable {
         try {
             final UserTicket ticket = FxContext.getUserTicket();
             if (!this.getMultiplicity().isValid(index))
-                throw new FxCreateException("ex.content.xpath.index.invalid", index, this.getMultiplicity(), this.getXPath()).setAffectedXPath(parent.getXPathFull()).asRuntimeException();
+                throw new FxCreateException("ex.content.xpath.index.invalid", index, this.getMultiplicity(), this.getXPath()).setAffectedXPath(parent.getXPathFull(), FxContentExceptionCause.InvalidIndex).asRuntimeException();
             thisGroup = new FxGroupData(parent == null ? "" : parent.getXPathPrefix(), this.getAlias(), index, this.getXPath(),
                     XPathElement.stripType(XPathElement.toXPathMult(this.getXPath())), XPathElement.getIndices(getXPath()),
                     this.getId(), this.getMultiplicity(), this.getPosition(), parent, children, this.isSystemInternal());
@@ -257,7 +254,7 @@ public class FxGroupAssignment extends FxAssignment implements Serializable {
                     if (as.getMultiplicity().isRequired()) {
                         if (hasRequired)
                             throw new FxCreateException("ex.content.data.create.oneof.multiple",
-                                    thisGroup.getXPathFull()).setAffectedXPath(thisGroup.getXPathFull()).asRuntimeException();
+                                    thisGroup.getXPathFull()).setAffectedXPath(thisGroup.getXPathFull(), FxContentExceptionCause.InvalidGroupMode).asRuntimeException();
                         hasRequired = true;
                         for (int c = 0; c < as.getMultiplicity().getMin(); c++)
                             thisGroup.getChildren().add(as.createEmptyData(thisGroup, c + 1));

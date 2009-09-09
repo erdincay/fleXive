@@ -166,8 +166,8 @@ public class FxCreateException extends FxApplicationException {
     /**
      * {@inheritDoc}
      */
-    public FxCreateException setAffectedXPath(String affectedXPath) {
-        super.setAffectedXPath(affectedXPath);
+    public FxCreateException setAffectedXPath(String affectedXPath, FxContentExceptionCause cause) {
+        super.setAffectedXPath(affectedXPath, cause);
         return this;
     }
 }

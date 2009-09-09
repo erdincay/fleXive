@@ -1718,7 +1718,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     if (!original.getProperty().mayOverrideMultiLang())
                         //noinspection ThrowableInstanceNeverThrown
                         throw new FxUpdateException("ex.structure.assignment.overrideNotAllowed.multiLang", original.getXPath(),
-                                original.getProperty().getName()).setAffectedXPath(original.getXPath());
+                                original.getProperty().getName()).setAffectedXPath(original.getXPath(), FxContentExceptionCause.MultiLangOverride);
                     StorageManager.getContentStorage(TypeStorageMode.Hierarchical).
                             updateMultilanguageSettings(con, original.getId(), original.isMultiLang(), modified.isMultiLang(), modified.getDefaultLanguage());
                     if (changes)

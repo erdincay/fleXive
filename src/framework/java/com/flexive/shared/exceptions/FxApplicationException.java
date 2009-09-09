@@ -31,10 +31,10 @@
  ***************************************************************/
 package com.flexive.shared.exceptions;
 
+import com.flexive.shared.EJBLookup;
+import com.flexive.shared.FxContext;
 import com.flexive.shared.FxLanguage;
 import com.flexive.shared.LogLevel;
-import com.flexive.shared.FxContext;
-import com.flexive.shared.EJBLookup;
 import com.flexive.shared.security.UserTicket;
 import org.apache.commons.logging.Log;
 
@@ -61,6 +61,7 @@ public class FxApplicationException extends Exception implements FxLocalizedExce
      */
     private boolean messageLogged = false;
     private String affectedXPath = "";
+    private FxContentExceptionCause contentExceptionCause = FxContentExceptionCause.Unknown;
 
     /**
      * Localized exception constructor
@@ -71,6 +72,7 @@ public class FxApplicationException extends Exception implements FxLocalizedExce
         super(converted.message.getKey(), converted);
         this.message = converted.message;
         this.affectedXPath = converted.affectedXPath;
+        this.contentExceptionCause = converted.contentExceptionCause;
         this.messageLogged = converted.isMessageLogged();
     }
 
@@ -105,6 +107,19 @@ public class FxApplicationException extends Exception implements FxLocalizedExce
     }
 
     /**
+     * If an XPath that caused the exception is set, the exception cause is returned
+     *
+     * @return the exception cause
+     * @since 3.1
+     */
+    public FxContentExceptionCause getContentExceptionCause() {
+        if (hasAffectedXPath())
+            return this.contentExceptionCause;
+        else
+            return FxContentExceptionCause.Unknown;
+    }
+
+    /**
      * Is this exception related to an XPath?
      *
      * @return exception related to an XPath
@@ -117,11 +132,14 @@ public class FxApplicationException extends Exception implements FxLocalizedExce
      * Set the affected XPath that caused this Exception to be thrown
      *
      * @param affectedXPath XPath that caused this Exception to be thrown
+     * @param cause         the cause of the exception
      * @return this
      */
-    public FxApplicationException setAffectedXPath(String affectedXPath) {
-        if (affectedXPath != null)
+    public FxApplicationException setAffectedXPath(String affectedXPath, FxContentExceptionCause cause) {
+        if (affectedXPath != null) {
             this.affectedXPath = affectedXPath;
+            this.contentExceptionCause = cause;
+        }
         return this;
     }
 
@@ -134,7 +152,7 @@ public class FxApplicationException extends Exception implements FxLocalizedExce
      */
     private void logMessage(Log log, String message, LogLevel level) {
         this.messageLogged = true;
-        if( FxContext.get() != null && FxContext.get().isTestDivision())
+        if (FxContext.get() != null && FxContext.get().isTestDivision())
             return; //dont log exception traces during automated tests
         final Throwable cause = getCause() != null ? getCause() : this;
         if (level == null)
@@ -328,7 +346,7 @@ public class FxApplicationException extends Exception implements FxLocalizedExce
         Throwable org = this.getCause();
         while (org != null) {
             if (org instanceof FxApplicationException) {
-                if( !this.message.equals(((FxApplicationException) org).message))
+                if (!this.message.equals(((FxApplicationException) org).message))
                     msg.append(((FxApplicationException) org).message.getLocalizedMessage(language));
             }
             org = org.getCause();

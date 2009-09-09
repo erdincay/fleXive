@@ -35,6 +35,7 @@ import com.flexive.shared.FxContext;
 import com.flexive.shared.XPathElement;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxNoAccessException;
+import com.flexive.shared.exceptions.FxContentExceptionCause;
 import com.flexive.shared.structure.FxMultiplicity;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.structure.GroupMode;
@@ -134,12 +135,12 @@ public class FxPropertyData extends FxData {
                 throw new FxInvalidParameterException("value", "ex.content.value.invalid.multilanguage.ass.single", this.getXPathFull()).asRuntimeException();
         }
         if (pa.getProperty().isSystemInternal())
-            throw new FxInvalidParameterException(pa.getAlias(), "ex.content.value.systemInternal").setAffectedXPath(this.getXPathFull()).asRuntimeException();
+            throw new FxInvalidParameterException(pa.getAlias(), "ex.content.value.systemInternal").setAffectedXPath(this.getXPathFull(), FxContentExceptionCause.SysInternalAttempt).asRuntimeException();
         if (!pa.isValid(value))
             throw new FxInvalidParameterException("value", "ex.content.value.invalid",
                     this.getXPathFull(),
                     ((FxPropertyAssignment) this.getAssignment()).getProperty().getDataType(),
-                    value.getValueClass().getCanonicalName()).setAffectedXPath(this.getXPathFull()).asRuntimeException();
+                    value.getValueClass().getCanonicalName()).setAffectedXPath(this.getXPathFull(), FxContentExceptionCause.InvalidValueDatatype).asRuntimeException();
         if (pa.hasParentGroupAssignment() && pa.getParentGroupAssignment().getMode() == GroupMode.OneOf) {
             //check if parent group is a one-of and already some other data set
             for (FxData check : this.getParent().getChildren()) {
@@ -154,9 +155,9 @@ public class FxPropertyData extends FxData {
             return;
         }
         if (this.value instanceof FxNoAccess)
-            throw new FxNoAccessException("ex.content.value.noaccess").setAffectedXPath(this.getXPathFull()).asRuntimeException();
+            throw new FxNoAccessException("ex.content.value.noaccess").setAffectedXPath(this.getXPathFull(), FxContentExceptionCause.NoAccess).asRuntimeException();
         if (this.value.isReadOnly())
-            throw new FxNoAccessException("ex.content.value.readOnly").setAffectedXPath(this.getXPathFull()).asRuntimeException();
+            throw new FxNoAccessException("ex.content.value.readOnly").setAffectedXPath(this.getXPathFull(), FxContentExceptionCause.ReadOnly).asRuntimeException();
         this.value = value;
         this.value.setXPath(this.xpPrefix + this.getXPathFull());
     }
@@ -222,7 +223,7 @@ public class FxPropertyData extends FxData {
                 valid++;
         if (valid < this.getAssignmentMultiplicity().getMin())
             throw new FxInvalidParameterException(this.getAlias(), "ex.content.required.missing", this.getXPath(), valid,
-                    this.getAssignmentMultiplicity().toString()).setAffectedXPath(this.getXPathFull());
+                    this.getAssignmentMultiplicity().toString()).setAffectedXPath(this.getXPathFull(), FxContentExceptionCause.RequiredViolated);
     }
 
     public void checkMaxLength() throws FxInvalidParameterException {
@@ -237,7 +238,7 @@ public class FxPropertyData extends FxData {
         for (long lang :value.getTranslatedLanguages()) {
             if (value.getTranslation(lang).toString().length() >maxLength.getIntValue())
                 throw new FxInvalidParameterException(this.getAlias(), "ex.content.value.invalid.maxLength",
-                        this.getXPath(), getMaxLength().getIntValue(), value.toString(), value.toString().length()).setAffectedXPath(this.getXPathFull());
+                        this.getXPath(), getMaxLength().getIntValue(), value.toString(), value.toString().length()).setAffectedXPath(this.getXPathFull(), FxContentExceptionCause.MaxlengthViolated);
         }
     }
 

@@ -192,8 +192,8 @@ public class FxInvalidParameterException extends FxApplicationException {
      * {@inheritDoc}
      */
     @Override
-    public FxInvalidParameterException setAffectedXPath(String affectedXPath) {
-        super.setAffectedXPath(affectedXPath);
+    public FxInvalidParameterException setAffectedXPath(String affectedXPath, FxContentExceptionCause cause) {
+        super.setAffectedXPath(affectedXPath, cause);
         return this;
     }
 }

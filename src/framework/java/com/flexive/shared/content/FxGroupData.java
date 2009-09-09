@@ -34,10 +34,7 @@ package com.flexive.shared.content;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.XPathElement;
-import com.flexive.shared.exceptions.FxCreateException;
-import com.flexive.shared.exceptions.FxInvalidParameterException;
-import com.flexive.shared.exceptions.FxNoAccessException;
-import com.flexive.shared.exceptions.FxNotFoundException;
+import com.flexive.shared.exceptions.*;
 import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.FxReference;
@@ -293,14 +290,14 @@ public class FxGroupData extends FxData {
                         //check if other assignments exist
                         for (FxData child : this.getChildren()) {
                             if (child.getAssignmentId() != as.getId())
-                                throw new FxCreateException("ex.content.xpath.group.oneof", as.getXPath(), this.getXPathFull()).setAffectedXPath(xPath).asRuntimeException();
+                                throw new FxCreateException("ex.content.xpath.group.oneof", as.getXPath(), this.getXPathFull()).setAffectedXPath(xPath, FxContentExceptionCause.GroupOneOfViolated).asRuntimeException();
                         }
                     }
                     int index = XPathElement.lastElement(xPath).getIndex();
                     if (as.getMultiplicity().isValid(index))
                         return this.addChild(as.createEmptyData(this, index).setPos(pos));
                     else
-                        throw new FxInvalidParameterException("pos", "ex.content.xpath.index.invalid", index, as.getMultiplicity(), this.getXPath()).setAffectedXPath(xPath).asRuntimeException();
+                        throw new FxInvalidParameterException("pos", "ex.content.xpath.index.invalid", index, as.getMultiplicity(), this.getXPath()).setAffectedXPath(xPath, FxContentExceptionCause.InvalidIndex).asRuntimeException();
                 }
             }
         }

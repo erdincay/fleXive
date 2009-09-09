@@ -38,6 +38,7 @@ import com.flexive.shared.content.FxGroupData;
 import com.flexive.shared.content.FxPropertyData;
 import com.flexive.shared.exceptions.FxCreateException;
 import com.flexive.shared.exceptions.FxRuntimeException;
+import com.flexive.shared.exceptions.FxContentExceptionCause;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.value.FxValue;
@@ -333,7 +334,7 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
         if (!this.getMultiplicity().isValid(index))
             //noinspection ThrowableInstanceNeverThrown
             throw new FxCreateException("ex.content.xpath.index.invalid", index, this.getMultiplicity(), this.getXPath()).
-                    setAffectedXPath(parent != null ? parent.getXPathFull() : this.getXPath()).asRuntimeException();
+                    setAffectedXPath(parent != null ? parent.getXPathFull() : this.getXPath(), FxContentExceptionCause.InvalidIndex).asRuntimeException();
         final FxPropertyData data = new FxPropertyData(parent == null ? "" : parent.getXPathPrefix(), this.getAlias(), index, XPath, XPathElement.toXPathMult(XPathFull),
                 XPathElement.getIndices(XPathFull), this.getId(), this.getProperty().getId(), this.getMultiplicity(),
                 this.getPosition(), parent, this.getEmptyValue(), this.isSystemInternal(), this.getOption(FxStructureOption.OPTION_MAXLENGTH));
@@ -352,7 +353,7 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
         if (!this.getMultiplicity().isValid(index))
             //noinspection ThrowableInstanceNeverThrown
             throw new FxCreateException("ex.content.xpath.index.invalid", index, this.getMultiplicity(), this.getXPath()).
-                    setAffectedXPath(parent != null ? parent.getXPathFull() : this.getXPath()).asRuntimeException();
+                    setAffectedXPath(parent != null ? parent.getXPathFull() : this.getXPath(), FxContentExceptionCause.InvalidIndex).asRuntimeException();
         return new FxPropertyData(parent == null ? "" : parent.getXPathPrefix(), this.getAlias(), index, XPath, XPathElement.toXPathMult(XPathFull),
                 XPathElement.getIndices(XPathFull), this.getId(), this.getProperty().getId(), this.getMultiplicity(),
                 this.getPosition(), parent, this.getProperty().getDataType().getRandomValue(rnd, this), this.isSystemInternal(), this.getOption(FxStructureOption.OPTION_MAXLENGTH));
