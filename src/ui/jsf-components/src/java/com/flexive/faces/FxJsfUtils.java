@@ -38,6 +38,7 @@ import com.flexive.faces.components.Thumbnail;
 import com.flexive.faces.model.FxJSFSelectItem;
 import com.flexive.shared.*;
 import com.flexive.shared.search.FxPaths;
+import com.flexive.shared.search.FxResultSet;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.value.FxValue;
 import com.flexive.shared.value.FxBinary;
@@ -180,6 +181,13 @@ public class FxJsfUtils {
             return linkFormatter.format(linkFormat, (FxPK) value);
         } else if (value instanceof FxPaths) {
             return linkFormatter.format(itemLinkFormat, (FxPaths) value);
+        } else if (value instanceof FxResultSet.WrappedLock) {
+            final FxResultSet.WrappedLock wrapped = (FxResultSet.WrappedLock) value;
+            return FxSharedUtils.getMessage(
+                    FxSharedUtils.SHARED_BUNDLE,
+                    "shared.result.lockInfo.user",
+                    wrapped.getUsername(),
+                    wrapped.getLock().getLockType().getLabel()).toString();
         } else {
             return value.toString(); // unsupported type
         }

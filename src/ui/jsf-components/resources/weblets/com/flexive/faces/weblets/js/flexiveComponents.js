@@ -348,11 +348,13 @@ flexive.yui.datatable = new function() {
         if (data[property] && !YAHOO.lang.isArray(data[property])) {
             // only one property for this column, return it
             return data[property];
-        } else {
+        } else if (YAHOO.lang.isArray(data[property])) {
             // one property per column, get column index and return PK
             var elCol = dataTable.getTdEl(element);
             var col = dataTable.getColumn(elCol);
             return data[property][col.getKeyIndex()];
+        } else {
+            return null;
         }
     };
 
@@ -377,7 +379,7 @@ flexive.yui.datatable = new function() {
             }
         } else {
             // get all selected rows (may include rows outside the current page)
-            var rows = resultTable.getSelectedRows();
+            var rows = dataTable.getSelectedRows();
             for (var i = 0; i < rows.length; i++) {
                 selectedPks.push(flexive.util.parsePk(dataTable.getRecord(rows[i]).getData()["pk"]));
             }
@@ -556,10 +558,14 @@ flexive.yui.datatable.ThumbnailView.prototype = {
     getRows: function() {
         // transpose the linear result rows according to the grid size
         var grid = [];
-        var currentRow = { "pk" : [], "permissions": [], "hasBinary": [] };    // the columns of the current row
+        var virtualFields = this.getVirtualFields();
+        var currentRow = {};
+        for (var i = 0; i < virtualFields.length; i++) {
+            currentRow[virtualFields[i]] = [];
+        }
         var currentColumn = 0;
         var textColumnKey = this.result.columns.length > 0 ? this.result.columns[0].key : null;
-        for (var i = 0; i < this.result.rowCount; i++) {
+        for (i = 0; i < this.result.rowCount; i++) {
             var resultRow = this.result.rows[i];
             var data = "";
             if (resultRow.pk != null) {
@@ -582,7 +588,9 @@ flexive.yui.datatable.ThumbnailView.prototype = {
             if (currentColumn >= this.gridColumns) {
                 // grid row completed
                 grid.push(currentRow);
-                currentRow = { "pk" : [], "permissions": [], "hasBinary": [] };
+                for (var j = 0; j < virtualFields.length; j++) {
+                    currentRow[virtualFields[j]] = [];
+                }
                 currentColumn = 0;
             }
             // store column
@@ -590,6 +598,9 @@ flexive.yui.datatable.ThumbnailView.prototype = {
             currentRow.pk.push(resultRow.pk);
             currentRow.permissions.push(resultRow.permissions);
             currentRow.hasBinary.push(resultRow.hasBinary);
+            currentRow.mayLock.push(resultRow.mayLock);
+            currentRow.mayUnlock.push(resultRow.mayUnlock);
+            currentRow.locked.push(resultRow.locked);
             currentColumn++;
         }
         if (currentColumn > 0) {
@@ -598,8 +609,12 @@ flexive.yui.datatable.ThumbnailView.prototype = {
         return grid;
     },
 
+    getVirtualFields: function() {
+        return ["pk", "permissions", "hasBinary", "mayLock", "mayUnlock", "locked"];
+    },
+
     getResponseSchema: function() {
-        var fields = ["pk", "permissions", "hasBinary"];
+        var fields = this.getVirtualFields();
         for (var i = 0; i < this.gridColumns; i++) {
             fields.push("c" + i);
         }

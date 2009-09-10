@@ -298,6 +298,13 @@ public class GenericSQLDataSelector extends DataSelector {
                     " (select coalesce(metadata, '') FROM " + DatabaseConst.TBL_BRIEFCASE_DATA
                     + " WHERE briefcase_id=" + briefcaseFilter[0] + " AND id=" + FILTER_ALIAS + ".id)))";
             result.addItem(sel, resultPos, false);
+        } else if (entry.getType() == PropertyEntry.Type.LOCK) {
+            for (String readColumn : entry.getReadColumns()) {
+                final String sel = "(SELECT " + readColumn
+                        + " FROM " + DatabaseConst.TBL_LOCK
+                        + " WHERE lock_id=" + FILTER_ALIAS + ".id AND lock_ver=" + FILTER_ALIAS + ".ver)";
+                result.addItem(sel, resultPos, false);
+            }
         } else {
             switch (entry.getTableType()) {
                 case T_CONTENT:

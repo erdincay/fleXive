@@ -212,6 +212,27 @@ WHERE #ARTICLE/TITLE LIKE 'Earthquake%']]></programlisting>
             </para>
         </section>
 
+        <section xml:id="css_lock">
+            <title>Lock information</title>
+            <para>
+                To obtain the
+                <link xlink:href="&flexiveJavadocBase;shared/com/flexive/shared/FxLock.html">
+                    <classname>FxLock</classname>
+                </link>
+                instance associated to a content, selected the
+                <glossterm>virtual property</glossterm>
+                <code>@lock</code>.
+
+
+                <programlisting language="sql"><![CDATA[SELECT @pk, @lock]]></programlisting>
+
+                When the content instance is not locked, the
+                <code>@lock</code>
+                column returns
+                <code>null.</code>
+            </para>
+        </section>
+
         <section xml:id="css_tree">
             <title>Tree Search</title>
 

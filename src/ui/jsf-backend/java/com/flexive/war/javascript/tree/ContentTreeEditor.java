@@ -34,8 +34,10 @@
 package com.flexive.war.javascript.tree;
 
 import com.flexive.shared.FxContext;
+import com.flexive.shared.FxLockType;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxUpdateException;
+import com.flexive.shared.exceptions.FxLockException;
 import static com.flexive.shared.EJBLookup.getTreeEngine;
 import static com.flexive.shared.EJBLookup.getContentEngine;
 import com.flexive.shared.content.FxPK;
@@ -206,6 +208,69 @@ public class ContentTreeEditor implements Serializable {
             throw e;
         }
         return "[]";
+    }
+
+    public String lockContent(long contentId, boolean live) throws Exception {
+        getContentEngine().lock(FxLockType.Permanent, new FxPK(contentId, live ? FxPK.LIVE : FxPK.MAX));
+        return "[]";
+    }
+
+    public String unlockContent(long contentId, boolean live) throws Exception {
+        getContentEngine().unlock(new FxPK(contentId, live ? FxPK.LIVE : FxPK.MAX));
+        return "[]";
+    }
+
+    public String lockSubtree(long nodeId, boolean live) throws Exception {
+        performLockSubtree(nodeId, live, new PerformLock());
+        return "[]";
+    }
+
+    public String unlockSubtree(long nodeId, boolean live) throws Exception {
+        performLockSubtree(nodeId, live, new PerformUnlock());
+        return "[]";
+    }
+
+    private int performLockSubtree(long nodeId, boolean live, LockOp lockOp) throws Exception {
+        final FxTreeNode subtree = getTreeEngine().getTree(live ? Live : Edit, nodeId, 9999);
+        int count = 0;
+        for (FxTreeNode node : subtree) {
+            if (lockOp.perform(node.getReference())) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    private static interface LockOp {
+        boolean perform(FxPK pk);
+    }
+
+    private static class PerformLock implements LockOp {
+        public boolean perform(FxPK pk) {
+            try {
+                getContentEngine().lock(FxLockType.Permanent, pk);
+                return true;
+            } catch (FxApplicationException e) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Failed to lock content " + pk + ": " + e.getMessage(), e);
+                }
+                return false;
+            }
+        }
+    }
+    
+    private static class PerformUnlock implements LockOp {
+        public boolean perform(FxPK pk) {
+            try {
+                getContentEngine().unlock(pk);
+                return true;
+            } catch (FxApplicationException e) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Failed to unlock content " + pk + ": " + e.getMessage(), e);
+                }
+                return false;
+            }
+        }
     }
 
     public String activate(long nodeId, boolean includeChildren) throws Exception {

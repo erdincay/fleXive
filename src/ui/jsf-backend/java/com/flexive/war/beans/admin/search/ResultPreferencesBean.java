@@ -407,7 +407,8 @@ public class ResultPreferencesBean implements Serializable {
             virtualGroup.setSelectItems(new SelectItem[]{
                     new SelectItem("@pk", messageBean.getMessage("ResultPreferences.label.property.pk"), null, columnSelected("@pk")),
                     new SelectItem("@path", messageBean.getMessage("ResultPreferences.label.property.path"), null, columnSelected("@path")),
-                    new SelectItem("@permissions", messageBean.getMessage("ResultPreferences.label.property.permissions"), null, columnSelected("@permissions"))
+                    new SelectItem("@permissions", messageBean.getMessage("ResultPreferences.label.property.permissions"), null, columnSelected("@permissions")),
+                    new SelectItem("@lock", messageBean.getMessage("ResultPreferences.label.property.lock"), null, columnSelected("@lock"))
             });
             properties = new ArrayList<SelectItem>(contentProperties.size() + 10);
             properties.add(virtualGroup);

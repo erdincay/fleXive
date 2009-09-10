@@ -58,6 +58,10 @@ public abstract class DataSelector {
      * The delimiter for the encoded binary column returned by the selector.
      */
     private static final String BINARY_DELIM = "||";
+    /**
+     * The delimiter for selecting the lock information
+     */
+    private static final String LOCK_DELIM = BINARY_DELIM;
 
     /**
      * The columns to be selected by the binary selector. The result will be returned in a single
@@ -67,6 +71,11 @@ public abstract class DataSelector {
             Arrays.asList(
                     "ID", "NAME", "BLOBSIZE", "CREATED_AT", "MIMETYPE",
                     "ISIMAGE", "RESOLUTION", "WIDTH", "HEIGHT"
+            )
+    );
+    private static final List<String> LOCK_COLUMNS = Collections.unmodifiableList(
+            Arrays.asList(
+                    "LOCK_ID", "LOCK_VER", "USER_ID", "LOCKTYPE", "CREATED_AT", "EXPIRES_AT"
             )
     );
 

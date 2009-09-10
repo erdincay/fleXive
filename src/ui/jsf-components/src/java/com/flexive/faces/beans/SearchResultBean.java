@@ -215,7 +215,7 @@ public class SearchResultBean implements ActionBean, Serializable {
                     new FxFacesMsgInfo("Briefcase.nfo.created", briefcaseName).addToContext();
                 }
                 final List<String> columns = new ArrayList<String>();
-                columns.addAll(Arrays.asList("@pk", "@permissions", "typedef"));
+                columns.addAll(Arrays.asList("@pk", "@permissions", "@lock", "typedef"));
                 if (getBriefcaseId() != -1) {
                     columns.add("@metadata");
                 }

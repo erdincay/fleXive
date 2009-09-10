@@ -85,7 +85,8 @@ public class ResultPreferencesEngineBean implements ResultPreferencesEngine, Res
                         new ResultColumnInfo(Table.CONTENT, "typedef", "description"),
                         new ResultColumnInfo(Table.CONTENT, "caption", null),
                         new ResultColumnInfo(Table.CONTENT, "modified_at", null),
-                        new ResultColumnInfo(Table.CONTENT, "modified_by", "username")
+                        new ResultColumnInfo(Table.CONTENT, "modified_by", "username"),
+                        new ResultColumnInfo(Table.CONTENT, "@lock", null)
                 ), Arrays.asList(
                         new ResultOrderByInfo(Table.CONTENT, "@pk", null, SortDirection.ASCENDING)
                 ), 25, 100);

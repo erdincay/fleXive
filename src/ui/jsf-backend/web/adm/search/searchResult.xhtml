@@ -45,6 +45,8 @@
                 "SearchResult.button.action.more": "#{fxMessageBean['SearchResult.button.action.more']}",
                 "SearchResult.status.selected": "#{fxMessageBean['SearchResult.status.selected']}",
                 "SearchResult.status.column.reordered": "#{fxMessageBean['SearchResult.status.column.reordered']}",
+                "SearchResult.status.locked": "#{fxMessageBean['SearchResult.status.locked']}",
+                "SearchResult.status.unlocked": "#{fxMessageBean['SearchResult.status.unlocked']}",
                 "Briefcase.status.addedSelection": "#{fxMessageBean['Briefcase.status.addedSelection']}",
                 "Briefcase.status.movedSelection": "#{fxMessageBean['Briefcase.status.movedSelection']}",
                 "Briefcase.dialog.prompt.briefcaseName": "#{fxMessageBean['Briefcase.dialog.prompt.briefcaseName']}",
@@ -103,6 +105,14 @@
                                  eventsQueue="updateResults"
                             />
                 </h:selectOneListbox>
+                <a4j:commandButton reRender="refreshResults"
+                                   id="refresResultsButton"
+                                   style="display:none"
+                                   onclick="setBusyCursor();"
+                                   oncomplete="setDefaultCursor();"
+                >
+                    <f:setPropertyActionListener value="#{true}" target="#{fxSearchResultBean.clearCache}"/>
+                </a4j:commandButton>
 
 
                 <a4j:outputPanel id="refreshResults">
@@ -130,6 +140,8 @@
                         <fx:menuItem id="showScreenview" labelKey="SearchResult.menu.showScreenview" icon="screenview"/>
                         <fx:menuItem id="edit" labelKey="SearchResult.menu.edit" icon="edit"/>
                         <fx:menuItem id="download" labelKey="SearchResult.menu.download" icon="download"/>
+                        <fx:menuItem id="lock" labelKey="SearchResult.menu.lock" icon="lock"/>
+                        <fx:menuItem id="unlock" labelKey="SearchResult.menu.unlock" icon="unlock"/>
                     </fx:menuItemGroup>
 
                     <fx:menuItemGroup>

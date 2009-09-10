@@ -37,6 +37,7 @@ import com.flexive.shared.value.*;
 import com.flexive.shared.*;
 import com.flexive.shared.search.FxPaths;
 import com.flexive.shared.search.FxSQLFunction;
+import com.flexive.shared.search.FxResultSet;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.core.DatabaseConst;
@@ -56,6 +57,7 @@ import java.sql.SQLException;
 import java.util.*;
 import static java.lang.Long.parseLong;
 import static java.lang.Integer.parseInt;
+import java.io.Serializable;
 
 /**
  * <p>
@@ -114,7 +116,13 @@ public class PropertyEntry {
          * Metadata of a briefcase item.
          * @since 3.1
          */
-        METADATA("@metadata");
+        METADATA("@metadata"),
+
+        /**
+         * Lock of a content.
+         * @since 3.1
+         */
+        LOCK("@lock");
 
         private final String propertyName;
 
@@ -162,6 +170,8 @@ public class PropertyEntry {
                     return new PermissionsEntry();
                 case METADATA:
                     return new MetadataEntry();
+                case LOCK:
+                    return new LockEntry();
                 case PROPERTY_REF:
                     throw new FxSqlSearchException(LOG, "ex.sqlSearch.entry.virtual").asRuntimeException();
                 default:
@@ -296,6 +306,76 @@ public class PropertyEntry {
                 // search should never have returned an object without read permissions
                 LOG.error("Search returned an object without read permissions");
                 throw e.asRuntimeException();
+            }
+        }
+
+        private int getIndex(String name) {
+            return ArrayUtils.indexOf(READ_COLUMNS, name);
+        }
+    }
+
+    private static class LockEntry extends PropertyEntry {
+        private static final String[] READ_COLUMNS =
+                new String[] {
+                        // username
+                        "(SELECT u.username FROM " + DatabaseConst.TBL_ACCOUNTS + " u WHERE u.id=user_id)",
+                        // FxLock fields
+                        "LOCK_ID", "LOCK_VER", "USER_ID", "LOCKTYPE", "CREATED_AT", "EXPIRES_AT"
+                };
+
+        private static class WrappedLock implements FxResultSet.WrappedLock, Serializable {
+            private static final long serialVersionUID = -5363754712042272320L;
+
+            private final FxLock lock;
+            private final String username;
+
+            public WrappedLock(FxLock lock, String username) {
+                this.lock = lock;
+                this.username = username;
+            }
+
+            public FxLock getLock() {
+                return lock;
+            }
+
+            public String getUsername() {
+                return username;
+            }
+
+            @Override
+            public String toString() {
+                if (lock == null) {
+                    return "not locked";
+                } else {
+                    return "locked by " + username;
+                }
+            }
+        }
+
+        private LockEntry() {
+            super(Type.LOCK, PropertyResolver.Table.T_CONTENT, READ_COLUMNS, null, false, null);
+        }
+
+        @Override
+        public Object getResultValue(ResultSet rs, long languageId, boolean xpathAvailable, long typeId) throws FxSqlSearchException {
+            try {
+                final long id = rs.getLong(positionInResultSet + getIndex("LOCK_ID"));
+                if (rs.wasNull()) {
+                    return null;    // no lock
+                }
+                final int ver = rs.getInt(positionInResultSet + getIndex("LOCK_VER"));
+                final long userId = rs.getLong(positionInResultSet + getIndex("USER_ID"));
+                final int type = rs.getInt(positionInResultSet + getIndex("LOCKTYPE"));
+                final long createdAt = rs.getLong(positionInResultSet + getIndex("CREATED_AT"));
+                final long expiresAt = rs.getLong(positionInResultSet + getIndex("EXPIRES_AT"));
+                return new WrappedLock(
+                        new FxLock(FxLockType.getById(type), createdAt, expiresAt, userId, new FxPK(id, ver)),
+                        rs.getString(positionInResultSet)
+                );
+            } catch (SQLException e) {
+                throw new FxSqlSearchException(e);
+            } catch (FxLockException e) {
+                throw new FxSqlSearchException(e);
             }
         }
 

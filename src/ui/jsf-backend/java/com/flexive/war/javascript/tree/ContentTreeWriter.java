@@ -38,6 +38,8 @@ import com.flexive.faces.components.tree.dojo.DojoTreeRenderer;
 import com.flexive.faces.javascript.tree.TreeNodeWriter;
 import static com.flexive.faces.javascript.tree.TreeNodeWriter.Node;
 import com.flexive.shared.EJBLookup;
+import com.flexive.shared.FxLockType;
+import com.flexive.shared.FxContext;
 import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.tree.FxTreeMode;
@@ -64,6 +66,8 @@ public class ContentTreeWriter implements Serializable {
     private static final Log LOG = LogFactory.getLog(ContentTreeWriter.class);
 
     private static final String DOCTYPE_NODE = "ContentNode";
+    private static final String DOCTYPE_LOCKED = "Locked";
+    private static final String DOCTYPE_LOCKED_OWN = "LockedOwn";
     private static final String DOCTYPE_CONTENT = "Content_";   // content + type ID
 
     /**
@@ -159,6 +163,10 @@ public class ContentTreeWriter implements Serializable {
         properties.put("widgetId", "node_" + node.getId());
         properties.put("isDirty", liveTreeEnabled && node.isDirty());
         properties.put("mayEdit", node.isMayEdit());
+
+        final boolean locked = isLocked(node);
+        properties.put("locked", locked);
+
         if (node.hasReference()) {
             properties.put("referenceId", node.getReference().getId());
             properties.put("referenceTypeId", node.getReferenceTypeId());
@@ -169,9 +177,15 @@ public class ContentTreeWriter implements Serializable {
             properties.put("actionsDisabled", actionsDisabled);
         }
 
-        final String docType = node.getReferenceTypeId() != -1
-                ? DOCTYPE_CONTENT + node.getReferenceTypeId() 
-                : DOCTYPE_NODE;
+        final String docType;
+        if (locked) {
+            docType = node.getLock().getUserId() == FxContext.getUserTicket().getUserId()
+                    ? DOCTYPE_LOCKED_OWN : DOCTYPE_LOCKED;
+        } else if (node.getReferenceTypeId() != -1) {
+            docType = DOCTYPE_CONTENT + node.getReferenceTypeId();
+        } else {
+            docType = DOCTYPE_NODE;
+        }
         final String label = pathMode ? node.getName() : node.getLabel().getBestTranslation();
         properties.put("nodeText", label);
         if (node.isLeaf()) {
@@ -188,6 +202,11 @@ public class ContentTreeWriter implements Serializable {
             writer.closeChildren();
             writer.closeNode();
         }
+    }
+
+    private boolean isLocked(FxTreeNode node) {
+        return node.getLock() != null
+                && node.getLock().getLockType() != FxLockType.None;
     }
 
     /**
@@ -219,6 +238,10 @@ public class ContentTreeWriter implements Serializable {
                         && node.getId() != FxTreeNode.ROOT_NODE;
         enableAction(actionsDisabled, liveNodeActions, "deactivateNode");
         enableAction(actionsDisabled, liveNodeActions && node.getDirectChildCount() > 0, "deactivateNodeAndChildren");
+        final boolean locked = isLocked(node);
+        enableAction(actionsDisabled, !locked && node.isMayEdit(), "lock");
+        enableAction(actionsDisabled, locked && node.getLock().isUnlockable(), "unlock");
+        enableAction(actionsDisabled, node.getDirectChildCount() > 0, "lockSubtree", "unlockSubtree");
     }
 
     /**

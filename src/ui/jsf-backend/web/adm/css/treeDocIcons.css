@@ -44,6 +44,46 @@
     background-image: url("../images/tree/content.png");
 }
 
+/* Locked content */
+.TreeStateChildrenYes-ExpandOpen .TreeIconLocked {
+    background-image: url("../images/tree/locked.png");
+}
+
+/* Closed folder, children loaded */
+.TreeStateChildrenYes-ExpandClosed  .TreeIconLocked {
+    background-image: url("../images/tree/locked.png");
+}
+
+/* Closed folder, children not loaded but available */
+.TreeStateChildrenNo-ExpandClosed  .TreeIconLocked {
+    background-image: url("../images/tree/locked.png");
+}
+
+/* Leaf node */
+.TreeStateChildrenNo-ExpandLeaf  .TreeIconLocked {
+    background-image: url("../images/tree/locked.png");
+}
+
+/* Locked content */
+.TreeStateChildrenYes-ExpandOpen .TreeIconLockedOwn {
+    background-image: url("../images/tree/locked-own.png");
+}
+
+/* Closed folder, children loaded */
+.TreeStateChildrenYes-ExpandClosed  .TreeIconLockedOwn {
+    background-image: url("../images/tree/locked-own.png");
+}
+
+/* Closed folder, children not loaded but available */
+.TreeStateChildrenNo-ExpandClosed  .TreeIconLockedOwn {
+    background-image: url("../images/tree/locked-own.png");
+}
+
+/* Leaf node */
+.TreeStateChildrenNo-ExpandLeaf  .TreeIconLockedOwn {
+    background-image: url("../images/tree/locked-own.png");
+}
+
 /* Dojo bug workaround */
 .TreeStateChildrenYes-ExpandClosed .TreeIconContent {
     background-image : none !important;

@@ -34,6 +34,7 @@ package com.flexive.tests.embedded;
 import com.flexive.shared.*;
 import static com.flexive.shared.EJBLookup.*;
 import static com.flexive.shared.EJBLookup.getBriefcaseEngine;
+import static com.flexive.shared.EJBLookup.getContentEngine;
 import static com.flexive.shared.FxLanguage.ENGLISH;
 import static com.flexive.shared.FxLanguage.GERMAN;
 import com.flexive.shared.content.FxContent;
@@ -59,6 +60,7 @@ import static com.flexive.tests.embedded.FxTestUtils.login;
 import static com.flexive.tests.embedded.FxTestUtils.logout;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringUtils;
 import org.testng.Assert;
@@ -415,6 +417,42 @@ public class SearchEngineTest {
     }
 
     @Test
+    public void selectLockTest() throws FxApplicationException {
+        // lock some instances
+        final List<FxPK> locked = Lists.newArrayList();
+        try {
+            for (FxPK pk : new SqlQueryBuilder().select("@pk").type(TEST_TYPE).getResult().<FxPK>collectColumn(1)) {
+                if (pk.getId() % 3 == 0) {
+                    getContentEngine().lock(FxLockType.Permanent, pk);
+                    locked.add(pk);
+                }
+            }
+            assertTrue(locked.size() > 0);
+
+            final FxResultSet result = new SqlQueryBuilder().select("@pk", "@lock").type(TEST_TYPE).getResult();
+            assertTrue(result.getRowCount() > 0);
+            for (FxResultRow row : result.getResultRows()) {
+                final FxPK pk = row.getPk(1);
+                final FxLock lock = row.getLock(2);
+                if (lock == null) {
+                    assertFalse(locked.contains(pk));
+                    continue;
+                }
+                assertEquals(lock.getLockedPK(), pk);
+                assertEquals(lock.getLockType(), locked.contains(pk) ? FxLockType.Permanent : FxLockType.None);
+                assertEquals(lock.getUserId(), FxContext.getUserTicket().getUserId());
+                assertTrue(lock.getCreatedDate().getTime() > 0);
+                assertTrue(lock.getExpiresDate().getTime() > 0);
+            }
+        } finally {
+            for (FxPK pk : locked) {
+                getContentEngine().unlock(pk);
+            }
+        }
+    }
+
+
+    @Test
     public void selectBinaryTest() throws FxApplicationException {
         final FxResultSet result = new SqlQueryBuilder().type("image").select("@pk", "imageBinary").getResult();
         assertTrue(result.getRowCount() > 0);
@@ -460,7 +498,8 @@ public class SearchEngineTest {
                 .orderBy(4, SortDirection.DESCENDING)
                 .filterType(TEST_TYPE).getResult(), 4);
         try {
-            new SqlQueryBuilder().select("@pk", "id", "@*").orderBy(8, SortDirection.ASCENDING).getResult();
+            final int columnIndex = 9;  // number of default result preferences in ResultPreferencesEngineBean + 2 selected column + 1
+            new SqlQueryBuilder().select("@pk", "id", "@*").orderBy(columnIndex, SortDirection.ASCENDING).getResult();
             fail("Selected result preference column should not be present in result set");
         } catch (FxApplicationException e) {
             // pass - the exception was thrown by the search engine, so it's a FxApplicationException

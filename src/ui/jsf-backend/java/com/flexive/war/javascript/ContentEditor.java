@@ -34,11 +34,18 @@
 package com.flexive.war.javascript;
 
 import com.flexive.shared.EJBLookup;
+import com.flexive.shared.FxLockType;
+import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.content.FxPK;
+import com.flexive.war.JsonWriter;
+import com.flexive.faces.FxJsfUtils;
+import com.flexive.faces.beans.SearchResultBean;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.Serializable;
+import java.io.StringWriter;
+import java.io.IOException;
 
 /**
  * Content editor actions invoked via JSON/RPC.
@@ -79,4 +86,38 @@ public class ContentEditor implements Serializable {
             throw e;
         }
     }
+
+    public String lockMultiple(String[] pks) throws IOException {
+        int count = 0;
+        for (String pk : pks) {
+            try {
+                EJBLookup.getContentEngine().lock(FxLockType.Permanent, FxPK.fromString(pk));
+                count++;
+            } catch (FxApplicationException e) {
+                // failed to lock, ignore but don't count instance
+            }
+        }
+        return writeUpdateCount(count);
+    }
+
+    public String unlockMultiple(String[] pks) throws IOException {
+        int count = 0;
+        for (String pk : pks) {
+            try {
+                EJBLookup.getContentEngine().unlock(FxPK.fromString(pk));
+                count++;
+            } catch (FxApplicationException e) {
+                // failed to unlock, ignore but don't count instance
+            }
+        }
+        return writeUpdateCount(count);
+    }
+
+    private String writeUpdateCount(int count) throws IOException {
+        StringWriter out = new StringWriter();
+        return new JsonWriter(out).startMap().writeAttribute("count", count)
+                .closeMap().finishResponse().toString();
+    }
+
+
 }

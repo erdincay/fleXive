@@ -37,6 +37,7 @@ import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.value.*;
 import com.flexive.shared.security.PermissionSet;
 import com.flexive.shared.FxReferenceMetaData;
+import com.flexive.shared.FxLock;
 import com.flexive.shared.media.FxMetadata;
 
 import java.util.Arrays;
@@ -95,6 +96,14 @@ public class FxResultRow implements Serializable {
         return (FxPK) getValue(column);
     }
 
+    /**
+     * @since 3.1
+     */
+    public FxLock getLock(int column) {
+        final FxResultSet.WrappedLock wrapped = (FxResultSet.WrappedLock) getValue(column);
+        return wrapped != null ? wrapped.getLock() : null;
+    }
+
     public FxValue getFxValue(int column) {
         return (FxValue) getValue(column);
     }
@@ -114,6 +123,13 @@ public class FxResultRow implements Serializable {
 
     public FxPK getPk(String columnName) {
         return (FxPK) getValue(columnName);
+    }
+
+    /**
+     * @since 3.1
+     */
+    public FxLock getLock(String columnName) {
+        return getLock(getColumnIndex(columnName));
     }
 
     public FxValue getFxValue(String columnName) {

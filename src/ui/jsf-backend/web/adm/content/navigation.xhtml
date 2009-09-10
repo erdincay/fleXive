@@ -105,7 +105,7 @@
 
             // remove the tree node, including all subnodes
             function removeNodeAndChildren(menuItem) {
-                _removeNode(menuItem, "#{fxMessageBean['ContentTree.dialog.confirm.removeNodeAndChildren']}", true); 
+                _removeNode(menuItem, "#{fxMessageBean['ContentTree.dialog.confirm.removeNodeAndChildren']}", true);
             }
 
             function _removeNode(menuItem, confirmMessage, withChildren) {
@@ -195,6 +195,46 @@
             // start inline editing of a tree node
             function editStart(menuItem) {
                 getFxController().editLabelStart(menuItem.getTreeNode());
+            }
+
+            function lockContent(menuItem) {
+                try {
+                    flexive.util.getJsonRpc().ContentTreeEditor.lockContent(getReferenceId(menuItem), treeLiveMode);
+                    parent.showStatusMessage("#{fxMessageBean['ContentTree.status.lockedContent']}".replace("{0}", getReferenceId(menuItem)));
+                    reloadContentTree();
+                } catch (e) {
+                    alertDialog(e.message);
+                }
+            }
+
+            function unlockContent(menuItem) {
+                try {
+                    flexive.util.getJsonRpc().ContentTreeEditor.unlockContent(getReferenceId(menuItem), treeLiveMode);
+                    parent.showStatusMessage("#{fxMessageBean['ContentTree.status.unlockedContent']}".replace("{0}", getReferenceId(menuItem)));
+                    reloadContentTree();
+                } catch (e) {
+                    alertDialog(e.message);
+                }
+            }
+
+            function lockSubtree(menuItem) {
+                try {
+                    flexive.util.getJsonRpc().ContentTreeEditor.lockSubtree(getObjectId(menuItem), treeLiveMode);
+                    parent.showStatusMessage("#{fxMessageBean['ContentTree.status.lockedSubtree']}");
+                    reloadContentTree();
+                } catch (e) {
+                    alertDialog(e.message);
+                }
+            }
+
+            function unlockSubtree(menuItem) {
+                try {
+                    flexive.util.getJsonRpc().ContentTreeEditor.unlockSubtree(getObjectId(menuItem), treeLiveMode);
+                    parent.showStatusMessage("#{fxMessageBean['ContentTree.status.unlockedSubtree']}");
+                    reloadContentTree();
+                } catch (e) {
+                    alertDialog(e.message);
+                }
             }
 
             // activate the tree node
@@ -365,8 +405,12 @@
                 <adm:treeContextMenuItem treeActions="searchSubtree" icon="query" labelKey="ContentTree.menu.querySubTree" clickHandler="querySubTree"/>
                 <adm:treeContextMenuItem treeActions="searchSubtree" icon="searchresults" labelKey="ContentTree.menu.querySubTreeImmediate" clickHandler="querySubTreeImmediate"/>
                 <fx:dojoMenuSeparator/>
-                <adm:treeContextMenuItem icon="createFolder" treeActions="createFolder" labelKey="ContentTree.menu.createNode" clickHandler="createFolder"/>
+                <adm:treeContextMenuItem treeActions="lock" icon="lock" labelKey="ContentTree.menu.lock" clickHandler="lockContent"/>
+                <adm:treeContextMenuItem treeActions="lockSubtree" icon="lock" labelKey="ContentTree.menu.lockSubtree" clickHandler="lockSubtree"/>
+                <adm:treeContextMenuItem treeActions="unlock" icon="unlock" labelKey="ContentTree.menu.unlock" clickHandler="unlockContent"/>
+                <adm:treeContextMenuItem treeActions="unlockSubtree" icon="unlock" labelKey="ContentTree.menu.unlockSubtree" clickHandler="unlockSubtree"/>
                 <fx:dojoMenuSeparator/>
+                <adm:treeContextMenuItem icon="createFolder" treeActions="createFolder" labelKey="ContentTree.menu.createNode" clickHandler="createFolder"/>
                 <adm:treeContextMenuItem icon="new" treeActions="createContent" labelKey="ContentTree.menu.create">
                     <c:forEach var="type" items="#{fxSystemBean.environment.types}">
                         <c:if test="#{type.id > 0}">

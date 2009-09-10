@@ -37,6 +37,8 @@ import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.converter.EnumConverter;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
+import com.flexive.shared.FxLock;
+import com.flexive.shared.FxLockType;
 import static com.flexive.shared.EJBLookup.getResultPreferencesEngine;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxRuntimeException;
@@ -181,6 +183,7 @@ public class YahooResultProvider implements Serializable {
         final int pkColumnIndex = result.getColumnIndex("@pk");
         final int permissionsColumnIndex = result.getColumnIndex("@permissions");
         final int typeColumnIndex = result.getColumnIndex("typedef");
+        final int lockColumnIndex = result.getColumnIndex("@lock");
         final Map<Long, Boolean> typeHasBinary = new HashMap<Long, Boolean>();  // type ID --> has binary property?
         for (FxResultRow row : result.getResultRows()) {
             writer.startMap();
@@ -226,6 +229,22 @@ public class YahooResultProvider implements Serializable {
                 perms |= (permissions.isMayExport() ? 1 : 0) << 4;  // export
                 perms |= (permissions.isMayRelate() ? 1 : 0) << 5;  // relate
                 writer.writeAttribute("permissions", perms);
+            }
+            if (lockColumnIndex != -1) {
+                // add lock information
+                final FxLock lock = row.getLock(lockColumnIndex);
+                final boolean locked = lock != null && lock.getLockType() != FxLockType.None;
+                writer.writeAttribute("locked", locked);
+                final boolean mayEdit = permissionsColumnIndex != -1 && row.getPermissions(permissionsColumnIndex).isMayEdit();
+                if (lock != null) {
+                    writer.writeAttribute(
+                            "mayLock",
+                            !locked && mayEdit
+                    );
+                    writer.writeAttribute("mayUnlock", locked && lock.isUnlockable());
+                } else {
+                    writer.writeAttribute("mayLock", mayEdit);
+                }
             }
             writer.closeMap();
         }
@@ -282,16 +301,27 @@ public class YahooResultProvider implements Serializable {
         }
         // include primary key in attribute pk, if available
         if (result.getColumnIndex("@pk") != -1) {
-            writer.startMap().writeAttribute("key", "pk").closeMap();
+            writeSchemaColumn(writer, "pk");
         }
         if (result.getColumnIndex("@permissions") != -1) {
-            writer.startMap().writeAttribute("key", "permissions").closeMap();
+            writeSchemaColumn(writer, "permissions");
         }
         if (result.getColumnIndex("typedef") != -1) {
-            writer.startMap().writeAttribute("key", "hasBinary").closeMap();
+            writeSchemaColumn(writer, "hasBinary");
+        }
+        if (result.getColumnIndex("@lock") != -1) {
+            writeSchemaColumn(writer, "locked");
+            writeSchemaColumn(writer, "lockedBy");
+            writeSchemaColumn(writer, "lockType");
+            writeSchemaColumn(writer, "mayLock");
+            writeSchemaColumn(writer, "mayUnlock");
         }
         writer.closeArray();
         writer.closeMap();
+    }
+
+    private static void writeSchemaColumn(JsonWriter writer, String columnName) throws IOException {
+        writer.startMap().writeAttribute("key", columnName).closeMap();
     }
 
     private static String getColumnKey(FxResultSet result, int index) {

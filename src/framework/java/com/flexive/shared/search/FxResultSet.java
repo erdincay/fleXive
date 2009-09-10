@@ -32,6 +32,7 @@
 package com.flexive.shared.search;
 
 import com.flexive.shared.content.FxPK;
+import com.flexive.shared.FxLock;
 
 import java.util.List;
 import java.util.Map;
@@ -42,6 +43,14 @@ import java.util.Map;
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public interface FxResultSet {
+    /**
+     * A lock with user name information.
+     * @since 3.1
+     */
+    interface WrappedLock {
+        FxLock getLock();
+        String getUsername();
+    }
 
     /**
      * Returns the time this resultset was created at.

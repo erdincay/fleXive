@@ -17,6 +17,19 @@ function onShowContextMenu() {
         var perms = flexive.yui.datatable.getPermissions(resultTable, this.contextEventTarget);
         var selectedIds = getSelectedIds();
         var pk = tryGetPk(this.contextEventTarget);
+        var pkInSelection = false;
+        for (var i = 0; i < selectedIds.length; i++) {
+            if (selectedIds[i] == pk.id) {
+                pkInSelection = true;
+                break;
+            }
+        }
+        if (selectedIds.length > 0 && !pkInSelection) {
+            // user clicked outside selection
+            resetSelection();
+            selectedIds = [];
+            pkInSelection = false;
+        }
         var hasBinary = flexive.yui.datatable.getRecordValue(resultTable, this.contextEventTarget, "hasBinary") == "true";
         contextMenuPK = pk;
         var noItemUnderCursor = pk == null;
@@ -26,6 +39,9 @@ function onShowContextMenu() {
         flexive.yui.setMenuItem("edit", "disabled", !perms["edit"]);
         flexive.yui.setMenuItem("delete", "disabled", !perms["delete"]);
         flexive.yui.setMenuItem("download", "disabled", !hasBinary);
+        var useCurrentRowInfo = (selectedIds.length == 0 || (selectedIds.length == 1 && selectedIds[0] == pk.id));
+        flexive.yui.setMenuItem("lock", "disabled", flexive.yui.datatable.getRecordValue(resultTable, this.contextEventTarget, "mayLock") != "true" && useCurrentRowInfo);
+        flexive.yui.setMenuItem("unlock", "disabled", flexive.yui.datatable.getRecordValue(resultTable, this.contextEventTarget, "mayUnlock") != "true" && useCurrentRowInfo);
         if (getBriefcaseId() != -1) {
             flexive.yui.setMenuItem("deleteBriefcase", "disabled", noItemUnderCursor);
             flexive.yui.setMenuItem("move_briefcases", "disabled", noSelection && noItemUnderCursor);
@@ -189,10 +205,52 @@ function onContextMenu(type, args) {
         case "download":
             window.location = getBase() + "download/pk" + pk.toString() + "/binary";
             break;
+        case "lock":
+            try {
+                var count = performMultiplePkOperation(pk, flexive.util.getJsonRpc().ContentEditor.lockMultiple);
+                parent.showStatusMessage(MESSAGES["SearchResult.status.locked"].replace("{0}", count));
+                refresh();
+            } catch (e) {
+                alertDialog(e);
+            }
+            break;
+        case "unlock":
+            try {
+                var count = performMultiplePkOperation(pk, flexive.util.getJsonRpc().ContentEditor.unlockMultiple);
+                parent.showStatusMessage(MESSAGES["SearchResult.status.unlocked"].replace("{0}", count));
+                refresh();
+            } catch (e) {
+                alertDialog(e);
+            }
+            break;
         default:
             // ignore, since a custom click handler could have been specified
             //alert("Unknown action: " + menuItem.id);
     }
+}
+
+function performMultiplePkOperation(rowPk, fun) {
+    return eval("(" + fun(getStringArray(getTargetPks(rowPk))) + ")").count;
+}
+
+/**
+ * Returns a list of PKs that the user action should be applied to. If no rows are selected,
+ * rowPk is returned, otherwise the selection is returned.
+ *
+ * @param rowPk the PK of the current row (where the context menu was opened)
+ * @since 3.1
+ */
+function getTargetPks(rowPk) {
+    var selectedPks = getSelectedPks();
+    return selectedPks.length > 0 ? selectedPks : [rowPk];
+}
+
+function getStringArray(objects) {
+    var result = [];
+    for (var i = 0; i < objects.length; i++) {
+        result[i] = objects[i].toString();
+    }
+    return result;
 }
 
 /**
@@ -319,6 +377,10 @@ function reload() {
     document.forms["frm"].submit();
 }
 
+function refresh() {
+    document.getElementById("frm:refresResultsButton").onclick();
+}
+
 function storePk(/* PK */ pk) {
     if (pk != null) {
         document.getElementById("frm:contentEditorId").value = pk.id;
@@ -336,6 +398,13 @@ function editContent(/* PK */ pk) {
     document.getElementById("frm:editButton").onclick();
 }
 
+function resetSelection() {
+    if (getViewType() == "LIST") {
+        resultTable.unselectAllRows();
+    } else {
+        resultTable.unselectAllCells();
+    }
+}
 
 function deleteRowsForPks(pks) {
     var pkStrings = {};
