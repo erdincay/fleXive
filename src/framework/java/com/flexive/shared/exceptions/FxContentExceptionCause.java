@@ -31,6 +31,10 @@
  ***************************************************************/
 package com.flexive.shared.exceptions;
 
+import com.flexive.shared.ObjectWithLabel;
+import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.value.FxString;
+
 /**
  * If an exception is throws by the ContentEngine and it affects data in a FxContent instance, calling
  * getAffectedXPath() returns the XPath and getContentExceptionCause() will return an indicator of the case (this enum)
@@ -38,7 +42,7 @@ package com.flexive.shared.exceptions;
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @since 3.1
  */
-public enum FxContentExceptionCause {
+public enum FxContentExceptionCause implements ObjectWithLabel {
     /**
      * Worst case, nothing is known that caused the exception
      */
@@ -86,5 +90,13 @@ public enum FxContentExceptionCause {
     /**
      * Group mode is not valid (e.g. more than one required property for a one-of rstriction) 
      */
-    InvalidGroupMode,
+    InvalidGroupMode;
+
+
+    /**
+     * {@inheritDoc}
+     */
+    public FxString getLabel() {
+        return FxSharedUtils.getEnumLabel(this);
+    }
 }

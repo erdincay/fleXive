@@ -35,12 +35,15 @@ import com.flexive.core.Database;
 import com.flexive.core.DatabaseConst;
 import static com.flexive.core.DatabaseConst.TBL_LOCK;
 import com.flexive.core.storage.LockStorage;
+import com.flexive.core.storage.StorageManager;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxLock;
 import com.flexive.shared.FxLockType;
+import com.flexive.shared.content.FxContentVersionInfo;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxDbException;
 import com.flexive.shared.exceptions.FxLockException;
+import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.security.UserTicket;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -131,6 +134,32 @@ public class GenericLockStorage implements LockStorage {
     }
 
     /**
+     * Resolve the distinct version of a primary key or throw an exception if no distinct version can be evaluated
+     *
+     * @param con an open and valid connection
+     * @param pk  primary key
+     * @return pk in a distinct version
+     * @throws FxLockException if no distinct version could be evaluated
+     */
+    private FxPK getDistinctPK(Connection con, FxPK pk) throws FxLockException {
+        if (pk.isDistinctVersion())
+            return pk;
+        final FxContentVersionInfo cvi;
+        try {
+            cvi = StorageManager.getContentStorage(pk.getStorageMode()).getContentVersionInfo(con, pk.getId());
+        } catch (FxNotFoundException e) {
+            throw new FxLockException(e);
+        }
+        if (pk.getVersion() == FxPK.LIVE) {
+            if (cvi.hasLiveVersion())
+                return new FxPK(pk.getId(), cvi.getLiveVersion());
+        }
+        if (pk.getVersion() == FxPK.MAX)
+            return new FxPK(pk.getId(), cvi.getMaxVersion());
+        throw new FxLockException("ex.lock.distictPK");
+    }
+
+    /**
      * Internal lock method that acquires a lock for a primary or resource depending of the class of <code>obj</code>
      *
      * @param con      an open and valid connection
@@ -143,8 +172,7 @@ public class GenericLockStorage implements LockStorage {
     @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     protected FxLock _lock(Connection con, FxLockType lockType, Object obj, long duration) throws FxLockException {
         if (obj instanceof FxPK) {
-            if (!((FxPK) obj).isDistinctVersion())
-                throw new FxLockException("ex.lock.distictPK");
+            obj = getDistinctPK(con, (FxPK)obj);
         } else if (obj instanceof String) {
             if (StringUtils.isEmpty((String) obj))
                 throw new FxLockException("ex.lock.invalidResource");
@@ -209,8 +237,7 @@ public class GenericLockStorage implements LockStorage {
     @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     protected FxLock _getLock(Connection con, Object obj) throws FxLockException {
         if (obj instanceof FxPK) {
-            if (!((FxPK) obj).isDistinctVersion())
-                throw new FxLockException("ex.lock.distictPK");
+            obj = getDistinctPK(con, (FxPK)obj);
         } else if (obj instanceof String) {
             if (StringUtils.isEmpty((String) obj))
                 throw new FxLockException("ex.lock.invalidResource");
