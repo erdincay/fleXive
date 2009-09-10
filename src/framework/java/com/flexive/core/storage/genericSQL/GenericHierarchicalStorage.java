@@ -2918,8 +2918,8 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     /**
      * {@inheritDoc}
      */
-    public BinaryInputStream fetchBinary(int divisionId, BinaryDescriptor.PreviewSizes size, long binaryId, int binaryVersion, int binaryQuality) {
-        return binaryStorage.fetchBinary(divisionId, size, binaryId, binaryVersion, binaryQuality);
+    public BinaryInputStream fetchBinary(Connection con, int divisionId, BinaryDescriptor.PreviewSizes size, long binaryId, int binaryVersion, int binaryQuality) {
+        return binaryStorage.fetchBinary(con, divisionId, size, binaryId, binaryVersion, binaryQuality);
     }
 
     /**

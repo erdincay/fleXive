@@ -31,8 +31,10 @@
  ***************************************************************/
 package com.flexive.core.stream;
 
+import com.flexive.core.Database;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.core.storage.binary.BinaryInputStream;
+import com.flexive.core.storage.genericSQL.GenericBinarySQLInputStream;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.media.FxMediaEngine;
 import com.flexive.shared.stream.BinaryDownloadPayload;
@@ -46,6 +48,7 @@ import org.apache.commons.logging.LogFactory;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.sql.SQLException;
 
 /**
  * Stream protocol to download binaries
@@ -127,12 +130,18 @@ public class BinaryDownloadProtocol extends StreamProtocol<BinaryDownloadPayload
     }
 
     private BinaryInputStream loadBinaryDescriptor(DataPacket<BinaryDownloadPayload> dataPacket, BinaryDescriptor.PreviewSizes previewSize) throws FxNotFoundException {
-        return StorageManager.getContentStorage(TypeStorageMode.Hierarchical).fetchBinary(
-                        dataPacket.getPayload().getDivision(),
-                        previewSize,
-                        dataPacket.getPayload().getId(),
-                        dataPacket.getPayload().getVersion(),
-                        dataPacket.getPayload().getQuality());
+        try {
+            return StorageManager.getContentStorage(TypeStorageMode.Hierarchical).fetchBinary(
+                    Database.getDbConnection(dataPacket.getPayload().getDivision()),
+                    dataPacket.getPayload().getDivision(),
+                    previewSize,
+                    dataPacket.getPayload().getId(),
+                    dataPacket.getPayload().getVersion(),
+                    dataPacket.getPayload().getQuality());
+        } catch (SQLException e) {
+            LOG.error(e);
+            return new GenericBinarySQLInputStream(false);
+        }
     }
 
     /**

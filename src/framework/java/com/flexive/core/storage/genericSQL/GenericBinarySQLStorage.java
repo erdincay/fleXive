@@ -142,13 +142,14 @@ public class GenericBinarySQLStorage implements BinaryStorage {
     /**
      * {@inheritDoc}
      */
-    public BinaryInputStream fetchBinary(int divisionId, BinaryDescriptor.PreviewSizes size, long binaryId, int binaryVersion, int binaryQuality) {
-        Connection con = null;
+    public BinaryInputStream fetchBinary(Connection con, int divisionId, BinaryDescriptor.PreviewSizes size, long binaryId, int binaryVersion, int binaryQuality) {
+        Connection _con = con;
         PreparedStatement ps = null;
         String mimeType;
         int datasize;
         try {
-            con = Database.getDbConnection(divisionId);
+            if (_con == null)
+                _con = Database.getDbConnection(divisionId);
             String column = "FBLOB";
             String sizeColumn = "BLOBSIZE";
             switch (size) {
@@ -173,7 +174,7 @@ public class GenericBinarySQLStorage implements BinaryStorage {
             ResultSet rs;
             if (!"FBLOB".equals(column)) {
                 //unless the real content is requested, try to find the correct preview image
-                ps = con.prepareStatement("SELECT PREVIEW_REF FROM " + TBL_CONTENT_BINARY +
+                ps = _con.prepareStatement("SELECT PREVIEW_REF FROM " + TBL_CONTENT_BINARY +
                         " WHERE ID=? AND VER=? AND QUALITY=?");
                 ps.setLong(1, binaryId);
                 ps.setInt(2, binaryVersion);
@@ -186,7 +187,7 @@ public class GenericBinarySQLStorage implements BinaryStorage {
                 }
                 ps.close();
             }
-            ps = con.prepareStatement("SELECT " + column + ",MIMETYPE," + sizeColumn + " FROM " + TBL_CONTENT_BINARY +
+            ps = _con.prepareStatement("SELECT " + column + ",MIMETYPE," + sizeColumn + " FROM " + TBL_CONTENT_BINARY +
                     " WHERE ID=? AND VER=? AND QUALITY=?");
             if (previewId != 0)
                 ps.setLong(1, previewId);
@@ -196,7 +197,7 @@ public class GenericBinarySQLStorage implements BinaryStorage {
             ps.setInt(3, binaryQuality);
             rs = ps.executeQuery();
             if (rs == null || !rs.next()) {
-                Database.closeObjects(GenericBinarySQLInputStream.class, con, ps);
+                Database.closeObjects(GenericBinarySQLInputStream.class, _con, ps);
                 return new GenericBinarySQLInputStream(false);
             }
             InputStream bin = rs.getBinaryStream(1);
@@ -210,30 +211,30 @@ public class GenericBinarySQLStorage implements BinaryStorage {
                     else {
                         if (size == PreviewSizes.SCREENVIEW) {
                             //since screenview is a new preview size, it might not exist in old versions. Fall back to Preview3
-                            Database.closeObjects(GenericBinarySQLInputStream.class, con, ps);
+                            Database.closeObjects(GenericBinarySQLInputStream.class, _con, ps);
                             LOG.warn("Screenview for binary #" + binaryId + " not found! Falling back to Preview3 size.");
-                            return this.fetchBinary(divisionId, PreviewSizes.PREVIEW3, binaryId, binaryVersion, binaryQuality);
+                            return this.fetchBinary(null, divisionId, PreviewSizes.PREVIEW3, binaryId, binaryVersion, binaryQuality);
                         }
                         LOG.error("Binary file #" + binaryId + "[" + size.name() + "] was not found!");
-                        Database.closeObjects(GenericBinarySQLInputStream.class, con, ps);
+                        Database.closeObjects(GenericBinarySQLInputStream.class, _con, ps);
                         return new GenericBinarySQLInputStream(false);
                     }
                 } catch (FileNotFoundException e) {
                     LOG.error("Binary not found on filesystem! Id=" + binaryId + ", version=" + binaryVersion + ", quality=" + binaryQuality + ", size=" + size.name());
-                    Database.closeObjects(GenericBinarySQLInputStream.class, con, ps);
+                    Database.closeObjects(GenericBinarySQLInputStream.class, _con, ps);
                     return new GenericBinarySQLInputStream(false);
                 }
             }
             mimeType = rs.getString(2);
             datasize = rs.getInt(3);
             if (rs.wasNull() && size == PreviewSizes.SCREENVIEW) {
-                Database.closeObjects(GenericBinarySQLInputStream.class, con, ps);
+                Database.closeObjects(GenericBinarySQLInputStream.class, _con, ps);
                 LOG.warn("Screenview for binary #" + binaryId + " not found! Falling back to Preview3 size.");
-                return this.fetchBinary(divisionId, PreviewSizes.PREVIEW3, binaryId, binaryVersion, binaryQuality);
+                return this.fetchBinary(null, divisionId, PreviewSizes.PREVIEW3, binaryId, binaryVersion, binaryQuality);
             }
-            return new GenericBinarySQLInputStream(con, ps, true, bin, mimeType, datasize);
+            return new GenericBinarySQLInputStream(_con, ps, true, bin, mimeType, datasize);
         } catch (SQLException e) {
-            Database.closeObjects(GenericBinarySQLInputStream.class, con, ps);
+            Database.closeObjects(GenericBinarySQLInputStream.class, con == null ? _con : null, ps);
             return new GenericBinarySQLInputStream(false);
         }
     }

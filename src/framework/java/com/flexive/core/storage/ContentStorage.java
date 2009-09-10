@@ -260,6 +260,7 @@ public interface ContentStorage {
     /**
      * Fetch a binary as an InputStream, if the requested binary is not found, return <code>null</code>
      *
+     * @param con           an optional connection that will be used if not <code>null</code>
      * @param divisionId    division
      * @param size          requested preview size (images only)
      * @param binaryId      id
@@ -267,7 +268,7 @@ public interface ContentStorage {
      * @param binaryQuality quality
      * @return BinaryInputStream
      */
-    BinaryInputStream fetchBinary(int divisionId, BinaryDescriptor.PreviewSizes size, long binaryId, int binaryVersion, int binaryQuality);
+    BinaryInputStream fetchBinary(Connection con, int divisionId, BinaryDescriptor.PreviewSizes size, long binaryId, int binaryVersion, int binaryQuality);
 
     /**
      * Create a new or update an existing binary

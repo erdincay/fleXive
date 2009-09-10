@@ -288,7 +288,7 @@ public class FxStreamUtils {
      * @param descriptor binary descriptor
      * @param size       preview size
      * @return  an InputStream for reading the binary.
-     * @throws StreamException on errors
+     * @throws FxStreamException on errors
      * @since 3.1
      */
     public static InputStream getBinaryStream(List<ServerLocation> server, BinaryDescriptor descriptor, BinaryDescriptor.PreviewSizes size) throws FxStreamException {
@@ -305,7 +305,7 @@ public class FxStreamUtils {
      * @param descriptor binary descriptor
      * @param size       preview size
      * @return  an InputStream for reading the binary.
-     * @throws StreamException on errors
+     * @throws FxStreamException on errors
      * @since 3.1
      */
     public static InputStream getBinaryStream(BinaryDescriptor descriptor, BinaryDescriptor.PreviewSizes size) throws FxStreamException {
