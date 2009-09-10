@@ -177,6 +177,16 @@ public class FxStreamUtils {
      */
     public static InetAddress probeNetworkInterfaces() throws UnknownHostException {
         try {
+            final String forcedAddress = System.getProperty("FxStreamIP");
+            if (forcedAddress != null) {
+                try {
+                    InetAddress ad = InetAddress.getByName(forcedAddress);
+                    LOG.info("Binding [fleXive] streamserver to forced address [" + forcedAddress + "] ...");
+                    return ad;
+                } catch (UnknownHostException e) {
+                    LOG.error("Forced [fleXive] streamserver bind address [" + forcedAddress + "] can not be used: " + e.getMessage() + " - probing available network interfaces ...");
+                }
+            }
             Enumeration<NetworkInterface> nifs = NetworkInterface.getNetworkInterfaces();
             NetworkInterface nif;
             InetAddress preferred = null, fallback = null;
@@ -287,7 +297,7 @@ public class FxStreamUtils {
      * @param server     (optional) list of remote stream servers
      * @param descriptor binary descriptor
      * @param size       preview size
-     * @return  an InputStream for reading the binary.
+     * @return an InputStream for reading the binary.
      * @throws FxStreamException on errors
      * @since 3.1
      */
@@ -304,7 +314,7 @@ public class FxStreamUtils {
      *
      * @param descriptor binary descriptor
      * @param size       preview size
-     * @return  an InputStream for reading the binary.
+     * @return an InputStream for reading the binary.
      * @throws FxStreamException on errors
      * @since 3.1
      */
