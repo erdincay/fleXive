@@ -252,8 +252,8 @@ public class FxMediaNativeEngine {
             }
             return new FxImageMetadataImpl(mimeType, file.getName(), metaItems, sii.getWidth(), sii.getHeight(),
                     sii.getFormat().name, sii.getFormatName(), sii.getCompressionAlgorithm(), sii.getPhysicalWidthDpi(),
-                    sii.getPhysicalHeightDpi(), sii.getColorTypeDescription(), sii.getUsesPalette(), sii.getBitsPerPixel(),
-                    sii.getIsProgressive(), sii.getIsTransparent(), Sanselan.getICCProfile(file));
+                    sii.getPhysicalHeightDpi(), sii.getColorTypeDescription(), sii.isUsesPalette(), sii.getBitsPerPixel(),
+                    sii.getIsProgressive(), sii.isTransparent(), Sanselan.getICCProfile(file));
         } catch (Exception e) {
             throw new FxApplicationException("ex.media.identify.error", (file == null ? "unknown" : file.getName()),
                     mimeType, e.getMessage());
