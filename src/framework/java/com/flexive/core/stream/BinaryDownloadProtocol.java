@@ -48,6 +48,7 @@ import org.apache.commons.logging.LogFactory;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.sql.Connection;
 import java.sql.SQLException;
 
 /**
@@ -131,13 +132,17 @@ public class BinaryDownloadProtocol extends StreamProtocol<BinaryDownloadPayload
 
     private BinaryInputStream loadBinaryDescriptor(DataPacket<BinaryDownloadPayload> dataPacket, BinaryDescriptor.PreviewSizes previewSize) throws FxNotFoundException {
         try {
-            return StorageManager.getContentStorage(TypeStorageMode.Hierarchical).fetchBinary(
-                    Database.getDbConnection(dataPacket.getPayload().getDivision()),
+            final Connection con = Database.getDbConnection(dataPacket.getPayload().getDivision());
+            BinaryInputStream o = StorageManager.getContentStorage(TypeStorageMode.Hierarchical).fetchBinary(
+                    con,
                     dataPacket.getPayload().getDivision(),
                     previewSize,
                     dataPacket.getPayload().getId(),
                     dataPacket.getPayload().getVersion(),
                     dataPacket.getPayload().getQuality());
+            if (!o.isBinaryFound())
+                Database.closeObjects(BinaryDownloadProtocol.class, con, null);
+            return o;
         } catch (SQLException e) {
             LOG.error(e);
             return new GenericBinarySQLInputStream(false);

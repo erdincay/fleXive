@@ -216,12 +216,12 @@ public class GenericBinarySQLStorage implements BinaryStorage {
                             return this.fetchBinary(null, divisionId, PreviewSizes.PREVIEW3, binaryId, binaryVersion, binaryQuality);
                         }
                         LOG.error("Binary file #" + binaryId + "[" + size.name() + "] was not found!");
-                        Database.closeObjects(GenericBinarySQLInputStream.class, _con, ps);
+                        Database.closeObjects(GenericBinarySQLInputStream.class, con == null ? _con : null, ps);
                         return new GenericBinarySQLInputStream(false);
                     }
                 } catch (FileNotFoundException e) {
                     LOG.error("Binary not found on filesystem! Id=" + binaryId + ", version=" + binaryVersion + ", quality=" + binaryQuality + ", size=" + size.name());
-                    Database.closeObjects(GenericBinarySQLInputStream.class, _con, ps);
+                    Database.closeObjects(GenericBinarySQLInputStream.class, con == null ? _con : null, ps);
                     return new GenericBinarySQLInputStream(false);
                 }
             }
