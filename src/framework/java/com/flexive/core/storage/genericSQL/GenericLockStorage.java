@@ -320,6 +320,7 @@ public class GenericLockStorage implements LockStorage {
         PreparedStatement ps = null;
         try {
             if (currentLock.isContentLock()) {
+                obj = getDistinctPK(con, (FxPK)obj); //make sure to have a distinct pk
                 ps = con.prepareStatement("DELETE FROM " + TBL_LOCK + " WHERE LOCK_ID=? AND LOCK_VER=?");
                 ps.setLong(1, ((FxPK) obj).getId());
                 ps.setInt(2, ((FxPK) obj).getVersion());
