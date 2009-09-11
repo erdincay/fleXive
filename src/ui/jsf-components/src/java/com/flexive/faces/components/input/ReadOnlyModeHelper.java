@@ -173,7 +173,7 @@ class ReadOnlyModeHelper extends RenderHelper {
 
         final String urlOriginal = FxJsfUtils.getServletContext().getContextPath() +
                 ThumbnailServlet.getLink(pk,
-                        descriptor.isImage() ? BinaryDescriptor.PreviewSizes.ORIGINAL : BinaryDescriptor.PreviewSizes.PREVIEW3,
+                        BinaryDescriptor.PreviewSizes.SCREENVIEW,
                         value.getXPath(), descriptor.getCreationTime(), language);
         link.setValue(urlOriginal);
         link.setRel("lytebox[ce]");

@@ -585,9 +585,16 @@ flexive.yui.datatable.ThumbnailView.prototype = {
                         + this.actionColumnHandler.getActionColumn(resultRow.pk, resultRow.permissions)
                         + "</div>";
             }
+            // add lytebox links
+            if (resultRow.pk != null) {
+                data += "<div style=\"display:none\">"
+                        + " <a rel=\"lytebox[sr]\" href=\"" + flexive.baseUrl + "thumbnail/pk" + resultRow.pk + "/s4"
+                        + "\" title=\"Screenview " + resultRow.pk + "\">Screenview</a></div";
+            }
             if (currentColumn >= this.gridColumns) {
                 // grid row completed
                 grid.push(currentRow);
+                currentRow = {};
                 for (var j = 0; j < virtualFields.length; j++) {
                     currentRow[virtualFields[j]] = [];
                 }

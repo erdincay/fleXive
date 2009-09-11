@@ -145,8 +145,9 @@ function onContextMenu(type, args) {
             break;
         case "showScreenview":
             var a = document.createElement("a");
-            a.href = getBase()+"thumbnail/pk" + pk.id + "." + pk.version + "/so";
-            a.rel = "lytebox";
+            a.href = getBase()+"thumbnail/pk" + pk.id + "." + pk.version + "/s4";
+            // include lytebox class for paging through screenviews
+            a.rel = getViewType() == "THUMBNAILS" ? "lytebox[sr]" : "lytebox";  
             a.title = "Screenview " + pk.id + "." + pk.version;
             myLytebox.start(a, false, false);
             break;
