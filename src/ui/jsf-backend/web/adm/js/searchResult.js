@@ -209,7 +209,10 @@ function onContextMenu(type, args) {
             try {
                 var count = performMultiplePkOperation(pk, flexive.util.getJsonRpc().ContentEditor.lockMultiple);
                 parent.showStatusMessage(MESSAGES["SearchResult.status.locked"].replace("{0}", count));
-                refresh();
+                if (count > 0) {
+                    parent.reloadContentTree();
+                    refresh();
+                }
             } catch (e) {
                 alertDialog(e);
             }
@@ -218,7 +221,10 @@ function onContextMenu(type, args) {
             try {
                 var count = performMultiplePkOperation(pk, flexive.util.getJsonRpc().ContentEditor.unlockMultiple);
                 parent.showStatusMessage(MESSAGES["SearchResult.status.unlocked"].replace("{0}", count));
-                refresh();
+                if (count > 0) {
+                    parent.reloadContentTree();
+                    refresh();
+                }
             } catch (e) {
                 alertDialog(e);
             }

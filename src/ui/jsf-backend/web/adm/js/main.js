@@ -742,6 +742,12 @@ function reloadBriefcases() {
     }
 }
 
+function reloadContentTree() {
+    if (getNavFrameWnd().reloadContentTree) {
+        getNavFrameWnd().reloadContentTree();
+    }
+}
+
 /**
  * DHTML replacement for Javascript's confirm() dialog
  * Don't invoke directly, use confirmDialog(...) from admin.js.
