@@ -522,9 +522,10 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
 
         am.setElementAttributes(acl);
         boolean hasParent = this.getCurrent() instanceof GroupAssignmentNode || this.getCurrent() instanceof GroupNode;
+        // always reload the type
+        type = CacheAdmin.getEnvironment().getType(type.getId());
         if (hasParent) {// set the parent xPath immed. for assignments and reload the type from the cache
             am.parentXPath = getXPathFromStructureName(structureName, true);
-            type = CacheAdmin.getEnvironment().getType(type.getId());
         }
         // name starts lowercase --> create property or property assignment
         if (Character.isLowerCase(structureName.charAt(0))) {
