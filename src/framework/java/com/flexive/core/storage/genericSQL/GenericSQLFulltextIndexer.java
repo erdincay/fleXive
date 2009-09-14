@@ -136,7 +136,7 @@ public class GenericSQLFulltextIndexer implements FulltextIndexer {
                 String idata;
                 try {
                     if (value instanceof FxBinary)
-                        idata = prepare(FxXMLUtils.getElementData(((FxBinary) value).getTranslation(lang).getMetadata(), "compressed"));
+                        idata = prepare(FxXMLUtils.getElementData(((FxBinary) value).getTranslation(lang).getMetadata(), "text"));
                     else
                         idata = prepare(String.valueOf(value.getTranslation(lang)));
                 } catch (Exception e) {
