@@ -64,9 +64,11 @@
 
             function contentTreeClickHandler(node, doubleClick) {
                 if (doubleClick) {
-                    if (node.referenceId && node.referenceId != -1) {
+                    if (node.referenceId && node.referenceId != -1 && !node.isFolder) {
                         // open content editor
                         invokeContentAction("adm/content/contentEditor.jsf", "editInstance", {id: node.referenceId, editMode: false});
+                    } else {
+                        invokeContentAction("adm/search/searchResult.jsf", "nodeSearch", {nodeId: node.objectId, liveMode: treeLiveMode, onlyDirect: true});
                     }
                 } else if (parent.frames["contentFrame"].addTreeNode && !parent.frames["contentFrame"].isContentEditor) {
                     // add to query
@@ -179,6 +181,11 @@
             function querySubTreeImmediate(menuItem) {
                 // submit query
                 invokeContentAction("adm/search/searchResult.jsf", "nodeSearch", {nodeId: getObjectId(menuItem), liveMode: treeLiveMode});
+            }
+
+            function queryFolderImmediate(menuItem) {
+                // submit query
+                invokeContentAction("adm/search/searchResult.jsf", "nodeSearch", {nodeId: getObjectId(menuItem), liveMode: treeLiveMode, onlyDirect: true});
             }
 
             // attach the selected rows from the content frame
@@ -403,7 +410,8 @@
                 <adm:treeContextMenuItem treeActions="editContent" icon="edit" labelKey="ContentTree.menu.edit" clickHandler="editContent"/>
                 <adm:treeContextMenuItem treeActions="rename" icon="rename" labelKey="ContentTree.menu.rename" clickHandler="editStart"/>
                 <adm:treeContextMenuItem treeActions="searchSubtree" icon="query" labelKey="ContentTree.menu.querySubTree" clickHandler="querySubTree"/>
-                <adm:treeContextMenuItem treeActions="searchSubtree" icon="searchresults" labelKey="ContentTree.menu.querySubTreeImmediate" clickHandler="querySubTreeImmediate"/>
+                <adm:treeContextMenuItem treeActions="searchSubtree" icon="searchresults" labelKey="ContentTree.menu.queryFolderImmediate" clickHandler="queryFolderImmediate"/>
+                <adm:treeContextMenuItem treeActions="searchSubtree" icon="" labelKey="ContentTree.menu.querySubTreeImmediate" clickHandler="querySubTreeImmediate"/>
                 <fx:dojoMenuSeparator/>
                 <adm:treeContextMenuItem treeActions="lock" icon="lock" labelKey="ContentTree.menu.lock" clickHandler="lockContent"/>
                 <adm:treeContextMenuItem treeActions="lockSubtree" icon="lock" labelKey="ContentTree.menu.lockSubtree" clickHandler="lockSubtree"/>

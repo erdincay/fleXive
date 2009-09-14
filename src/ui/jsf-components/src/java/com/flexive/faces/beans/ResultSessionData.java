@@ -55,6 +55,7 @@ import java.util.List;
 public class ResultSessionData implements Serializable {
     private static final long serialVersionUID = -3471062917140804393L;
 
+    private String tabTitle;
     private ResultLocation location;
     private SqlQueryBuilder queryBuilder;
     private BinaryDescriptor.PreviewSizes previewSize;
@@ -259,6 +260,15 @@ public class ResultSessionData implements Serializable {
 
     public void setResult(FxResultSet result) {
         this.result = result;
+        saveInSession();
+    }
+
+    public String getTabTitle() {
+        return tabTitle;
+    }
+
+    public void setTabTitle(String tabTitle) {
+        this.tabTitle = tabTitle;
         saveInSession();
     }
 }

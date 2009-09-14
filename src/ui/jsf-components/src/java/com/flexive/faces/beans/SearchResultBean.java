@@ -36,6 +36,11 @@ import com.flexive.faces.javascript.yui.YahooResultProvider;
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.faces.messages.FxFacesMsgInfo;
 import com.flexive.shared.EJBLookup;
+import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.SelectableObject;
+import com.flexive.shared.structure.FxType;
+import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.search.*;
@@ -43,6 +48,7 @@ import com.flexive.shared.search.query.PropertyValueComparator;
 import com.flexive.shared.search.query.SqlQueryBuilder;
 import com.flexive.shared.search.query.VersionFilter;
 import com.flexive.shared.value.BinaryDescriptor;
+import com.google.common.collect.Iterables;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -54,6 +60,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Arrays;
+import java.util.Collection;
 
 public class SearchResultBean implements ActionBean, Serializable {
     private static final long serialVersionUID = -3167186971609121457L;
@@ -106,8 +113,27 @@ public class SearchResultBean implements ActionBean, Serializable {
                 resetFilters();
                 final long id = FxJsfUtils.getLongParameter("nodeId");
                 final boolean liveTree = FxJsfUtils.getBooleanParameter("liveMode", false);
+                final boolean onlyDirect = FxJsfUtils.getBooleanParameter("onlyDirect", false);
+
                 setVersionFilter(liveTree ? VersionFilter.LIVE : VersionFilter.MAX);
-                setQueryBuilder(createSqlQueryBuilder().isChild(id).maxRows(Integer.MAX_VALUE));
+                final SqlQueryBuilder sqb = createSqlQueryBuilder();
+                if (onlyDirect) {
+                    sqb.isDirectChild(id);
+                    // exclude all folder types
+                    final FxType folderType = CacheAdmin.getEnvironment().getType(FxType.FOLDER);
+                    sqb.condition("typedef", PropertyValueComparator.NOT_IN,
+                            FxSharedUtils.getSelectableObjectIdList(
+                                    Iterables.concat(Arrays.asList(folderType), folderType.getDerivedTypes())
+                            )
+                    );
+                } else {
+                    sqb.isChild(id);
+                }
+                setQueryBuilder(sqb.maxRows(Integer.MAX_VALUE));
+                setTabTitle(MessageBean.getInstance().getMessage(
+                        "SearchResult.tabtitle.folder",
+                        EJBLookup.getTreeEngine().getNode(liveTree ? FxTreeMode.Live : FxTreeMode.Edit, id).getLabel()
+                ));
                 show();
             } else if ("typeSearch".equals(action)) {
                 // search for contents of a type
@@ -118,6 +144,10 @@ public class SearchResultBean implements ActionBean, Serializable {
                 resetFilters();
                 final long id = FxJsfUtils.getLongParameter("typeId");
                 setQueryBuilder(createSqlQueryBuilder().type(id).maxRows(Integer.MAX_VALUE));
+                setTabTitle(MessageBean.getInstance().getMessage(
+                        "SearchResult.tabtitle.type",
+                        CacheAdmin.getEnvironment().getType(id).getLabel()
+                ));
                 show();
             } else if ("openBriefcase".equals(action) || "openBriefcaseDetails".equals(action)) {
                 if (StringUtils.isBlank(FxJsfUtils.getParameter("briefcaseId"))) {
@@ -129,6 +159,10 @@ public class SearchResultBean implements ActionBean, Serializable {
                 resetFilters();
                 getSessionData().setBriefcaseId(briefcaseId);
                 setQueryBuilder(createSqlQueryBuilder().filterBriefcase(briefcaseId));
+                setTabTitle(MessageBean.getInstance().getMessage(
+                        "SearchResult.tabtitle.briefcase",
+                        getBriefcase().getName()
+                ));
                 show();
             }
         } catch (Exception e) {
@@ -136,6 +170,14 @@ public class SearchResultBean implements ActionBean, Serializable {
             LOG.error("Failed to parse request parameters: " + e.getMessage(), e);
         }
         return null;
+    }
+
+    public String getTabTitle() {
+        return getSessionData().getTabTitle();
+    }
+
+    public void setTabTitle(String tabTitle) {
+        getSessionData().setTabTitle(tabTitle);
     }
 
     private SqlQueryBuilder createSqlQueryBuilder() {
@@ -277,6 +319,7 @@ public class SearchResultBean implements ActionBean, Serializable {
 
     public void setQueryBuilder(SqlQueryBuilder queryBuilder) {
         getSessionData().setQueryBuilder(queryBuilder);
+        setTabTitle(null);
     }
 
     public void setStartRow(int rowStart) {

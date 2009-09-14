@@ -205,7 +205,7 @@ public class SearchEngineTest {
                 new SqlQueryBuilder().select("@pk").andSub(),
                 new SqlQueryBuilder().select("@pk").orSub()
         )) {
-            final FxResultSet filterResult = builder  
+            final FxResultSet filterResult = builder
                     .condition("#" + first.getId(), PropertyValueComparator.EQ, firstValue)
                     .condition("#" + second.getId(), PropertyValueComparator.EQ, secondValue)
                     .getResult();
@@ -690,6 +690,17 @@ public class SearchEngineTest {
                 assertFalse(row.getPk(1).equals(invRow.getPk(1)), "Row returned by IN and NOT IN: " + row.getPk(1));
             }
         }
+    }
+
+    @Test
+    public void selectScalarInTest() throws FxApplicationException {
+        final FxResultSet result = new SqlQueryBuilder().select("@pk").orSub()
+                .condition("typedef", PropertyValueComparator.IN,
+                        FxSharedUtils.getSelectableObjectIdList(CacheAdmin.getEnvironment().getTypes())
+                )
+                .condition("caption", PropertyValueComparator.IN, Arrays.asList("test1", "test2"))
+                .getResult();
+        assertTrue(result.getRowCount() > 0);
     }
 
     private int getExpectedPartialMatches(FxResultSet result, final List<FxSelectListItem> queryItems) {

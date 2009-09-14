@@ -19,11 +19,12 @@
 
 .previewImage {
     font-weight:bold;
-    float:left;
+    float:right;
+    text-align: center;
+    padding: 15px 5px 5px 0;
 }
 
 .previewImage img {
-    height:50px;
     border:none;
 }
 

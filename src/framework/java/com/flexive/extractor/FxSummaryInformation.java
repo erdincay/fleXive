@@ -240,7 +240,7 @@ public class FxSummaryInformation implements Serializable {
             private FxSummaryInformation fxsi = null;
 
             /**
-             * Proccesses the Summary section.
+             * Processes the Summary section.
              *
              * @param event the summary section event.
              */

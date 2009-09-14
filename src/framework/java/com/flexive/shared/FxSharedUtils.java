@@ -1373,7 +1373,7 @@ public final class FxSharedUtils {
      *
      * @param values the input values
      * @return the IDs of the input values
-     * @deprecated use {@link #getSelectableObjectIdList(java.util.Collection)}
+     * @deprecated use {@link #getSelectableObjectIdList(Iterable)}
      */
     @Deprecated
     public static long[] getSelectableObjectIds(Collection<? extends SelectableObject> values) {
@@ -1392,8 +1392,8 @@ public final class FxSharedUtils {
      * @return the IDs of the input values
      * @since 3.1
      */
-    public static List<Long> getSelectableObjectIdList(Collection<? extends SelectableObject> values) {
-        final List<Long> result = new ArrayList<Long>(values.size());
+    public static List<Long> getSelectableObjectIdList(Iterable<? extends SelectableObject> values) {
+        final List<Long> result = new ArrayList<Long>();
         for (SelectableObject value : values) {
             result.add(value.getId());
         }
@@ -1407,8 +1407,8 @@ public final class FxSharedUtils {
      * @return the IDs of the input values
      * @since 3.1
      */
-    public static List<String> getSelectableObjectNameList(Collection<? extends SelectableObjectWithName> values) {
-        final List<String> result = new ArrayList<String>(values.size());
+    public static List<String> getSelectableObjectNameList(Iterable<? extends SelectableObjectWithName> values) {
+        final List<String> result = new ArrayList<String>();
         for (SelectableObjectWithName value : values) {
             result.add(value.getName());
         }
@@ -1441,7 +1441,7 @@ public final class FxSharedUtils {
      * @return          the elements of {@code values} that match the given {@code ids}.
      * @since 3.1
      */
-    public static <T extends SelectableObject> List<T> filterSelectableObjectsById(Collection<T> values, Collection<Long> ids) {
+    public static <T extends SelectableObject> List<T> filterSelectableObjectsById(Iterable<T> values, Collection<Long> ids) {
         final List<T> result = Lists.newArrayListWithCapacity(ids.size());
         for (T value : values) {
             if (ids.contains(value.getId())) {
@@ -1460,7 +1460,7 @@ public final class FxSharedUtils {
      * @return          the elements of {@code values} that match the given {@code names}.
      * @since 3.1
      */
-    public static <T extends SelectableObjectWithName> List<T> filterSelectableObjectsByName(Collection<T> values, Collection<String> names) {
+    public static <T extends SelectableObjectWithName> List<T> filterSelectableObjectsByName(Iterable<T> values, Collection<String> names) {
         final List<T> result = Lists.newArrayListWithCapacity(names.size());
         for (T value : values) {
             if (names.contains(value.getName())) {

@@ -175,8 +175,12 @@ public class WriteWebletIncludes extends UIOutput {
     }
 
     private void renderWebletInclude(ResponseWriter out, String weblet) throws IOException {
-        out.write(PADDING);
-        out.write(getWebletInclude(weblet));
+        final String include = getWebletInclude(weblet);
+        if (include != null) {
+            // weblet not written yet in current response
+            out.write(PADDING);
+            out.write(include);
+        }
     }
 
     public boolean isHtmlEditor() {

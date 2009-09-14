@@ -849,7 +849,26 @@ public class PropertyEntry {
      *                      for use in a SQL query.
      */
     public Pair<String, String> getComparisonCondition(String constantValue) {
-        String column = getFilterColumn();
+        String value = null;
+        if (StringUtils.isNotBlank(constantValue) && constantValue.charAt(0) == '(' && constantValue.charAt(constantValue.length() - 1) == ')') {
+            // handle multiple values of a tuple, e.g. (1,2,3)
+            final String[] values = StringUtils.split(constantValue.substring(1, constantValue.length() - 1), ',');
+            final List<String> result = Lists.newArrayList();
+            String column = getFilterColumn();
+            for (String scalar : values) {
+                // escape every scalar value
+                final Pair<String, String> escaped = escapeScalarValue(getFilterColumn(), scalar);
+                column = escaped.getFirst();
+                result.add(escaped.getSecond());
+            }
+            return Pair.create(column, "(" + StringUtils.join(result, ',') + ")");
+        } else {
+            // scalar value passed, escape and return
+            return escapeScalarValue(getFilterColumn(), constantValue);
+        }
+    }
+
+    private Pair<String, String> escapeScalarValue(String column, String constantValue) {
         String value = null;
         switch (getProperty().getDataType()) {
             case String1024:
@@ -895,9 +914,6 @@ public class PropertyEntry {
                 if (StringUtils.isNumeric(constantValue)) {
                     //list item id, nothing to lookup
                     value = constantValue;
-                } else if (constantValue.startsWith("(") && constantValue.endsWith(")")) {
-                    // "in" query - pass as-is to SQL backend
-                    value = constantValue;
                 } else {
                     //list item data (of first matching item)
                     value = "" + getProperty().getReferencedList().
@@ -934,7 +950,7 @@ public class PropertyEntry {
                 value = String.valueOf(FxPK.fromString(constantValue).getId());
                 break;
         }
-        return value != null ? new Pair<String, String>(column, value) : null;
+        return value == null ? null : new Pair<String, String>(column, value);
     }
 
 

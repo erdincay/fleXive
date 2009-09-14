@@ -90,27 +90,29 @@ disableTab... false if the <adm:tab/> component should be rendered, true otherwi
                                 <f:selectItems value="#{myContent.possibleWorkflowSteps}"/>
                             </h:selectOneListbox>
                         </fx:formRow>
+
+                        <c:if test="#{not myContent.referenced}">
+                            <fx:formRow labelKey="Content.field.nodes">
+                                <adm:renderTreeNodes srcEditor="#{srcEditor}" readOnly="#{not myContent.guiSettings.editMode}"/>
+                            </fx:formRow>
+                        </c:if>
                     </div>
 
                     <!-- Preview Image -->
                     <ui:fragment rendered="#{myContent.content.previewAvailable}">
                         <div class="previewImage">
+                            <a rel="lytebox" href="thumbnail/pk#{myContent.content.pk.id}.#{myContent.content.pk.version}/s4/ts#{fxSystemBean.currentTimeMillis}">
+                                <img src="thumbnail/pk#{myContent.content.pk.id}.#{myContent.content.pk.version}/s2/ts#{fxSystemBean.currentTimeMillis}"
+                                     alt="#{fxMessageBean['Content.preview.title']}" title="#{fxMessageBean['Content.preview.title']}"/>
+                            </a>
                             <div style="padding-top:6px">
                                 <strong>#{fxMessageBean['Content.field.previewImage']}</strong>
                             </div>
-                            <img src="thumbnail/pk#{myContent.content.pk.id}.#{myContent.content.pk.version}/s2/ts#{fxSystemBean.currentTimeMillis}"
-                                 alt="#{fxMessageBean['Content.preview.title']}" title="#{fxMessageBean['Content.preview.title']}"/>
                         </div>
                     </ui:fragment>
-                    <br clear="all"/>
 
-                    <c:if test="#{not myContent.referenced}">
-                        <fx:formRow labelKey="Content.field.nodes">
-                            <adm:renderTreeNodes srcEditor="#{srcEditor}" readOnly="#{not myContent.guiSettings.editMode}"/>
-                        </fx:formRow>
-                    </c:if>
-                        <!--ie surrounding div height fix-->
-                     <div style="clear:both;height:0"><!-- __ --></div>
+                     <!--ie surrounding div height fix-->
+                    <div style="clear:both;height:0"><!-- __ --></div>
                 </div>
         </ui:define>
 
