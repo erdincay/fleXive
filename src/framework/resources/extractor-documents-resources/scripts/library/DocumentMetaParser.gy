@@ -86,7 +86,7 @@ if( meta.summary ) {
     if( meta.summary.comments )
         process(cmap, 'String|Comments', meta.summary.comments)
     if( meta.summary.createdAt )
-        process(cmap, 'DateTime|CreateDate', meta.summary.createAt)
+        process(cmap, 'DateTime|CreateDate', meta.summary.createdAt)
     if( meta.summary.editTime )
         process(cmap, 'DateTime|EditDate', meta.summary.editTime)
     if( meta.summary.keywords )
