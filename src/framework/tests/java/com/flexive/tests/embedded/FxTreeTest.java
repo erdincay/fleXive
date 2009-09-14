@@ -131,17 +131,6 @@ public class FxTreeTest {
     }
 
     /**
-     * Live tests
-     *
-     * @throws FxApplicationException on errors
-     */
-    @Test
-    public void treeTestLive() throws FxApplicationException {
-        treeCRUD(FxTreeMode.Live);
-        createPath(FxTreeMode.Live);
-    }
-
-    /**
      * Test path creation
      *
      * @param mode FxTreeMode
@@ -965,10 +954,15 @@ public class FxTreeTest {
      * @throws FxApplicationException on errors
      */
     private long[] createTestTree(FxTreeMode mode) throws FxApplicationException {
-        final long[] nodes = tree.createNodes(mode, FxTreeNode.ROOT_NODE, 0, "node_1/node_2/node_3");
-        tree.createNodes(mode, (int) nodes[1], 0, "node_2_1");
-        tree.createNodes(mode, (int) nodes[1], 1, "node_2_2");
-        tree.createNodes(mode, (int) nodes[2], 0, "node_3_1");
+        FxTreeMode _mode = mode;
+        if( mode == FxTreeMode.Live)
+            _mode = FxTreeMode.Edit;
+        final long[] nodes = tree.createNodes(_mode, FxTreeNode.ROOT_NODE, 0, "node_1/node_2/node_3");
+        tree.createNodes(_mode, (int) nodes[1], 0, "node_2_1");
+        tree.createNodes(_mode, (int) nodes[1], 1, "node_2_2");
+        tree.createNodes(_mode, (int) nodes[2], 0, "node_3_1");
+        if( mode == FxTreeMode.Live)
+            tree.activate(_mode, nodes[0], true);
         return nodes;
     }
 

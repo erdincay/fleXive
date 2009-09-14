@@ -221,6 +221,8 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
     private long createNode(long parentNodeId, String name, FxString label,
                             int position, FxPK reference, String template, FxTreeMode mode) throws FxApplicationException {
         Connection con = null;
+        if( mode == FxTreeMode.Live)
+            throw new FxCreateException("ex.tree.create.live");
         try {
             FxContext.get().setTreeWasModified();
             con = Database.getDbConnection();
@@ -246,6 +248,8 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long[] createNodes(FxTreeMode mode, long parentNodeId, int position, String path) throws FxApplicationException {
         Connection con = null;
+        if( mode == FxTreeMode.Live)
+            throw new FxCreateException("ex.tree.create.live");
         try {
             FxContext.get().setTreeWasModified();
             con = Database.getDbConnection();
