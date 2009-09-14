@@ -6,7 +6,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.flexive</groupId>
     <artifactId>sanselan</artifactId>
-    <version>0.98-incubator</version>
+    <version>0.98-SNAPSHOT</version>
     <description>Sanselan image manipulation library</description>
 
     <licenses>

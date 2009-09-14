@@ -98,7 +98,7 @@
         <dependency>
             <groupId>com.flexive</groupId>
             <artifactId>sanselan</artifactId>
-            <version>0.98-incubator</version>
+            <version>0.98-SNAPSHOT</version>
             <optional>false</optional>
         </dependency>
 
