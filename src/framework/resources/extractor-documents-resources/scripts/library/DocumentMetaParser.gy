@@ -95,8 +95,12 @@ if( meta.summary ) {
         process(cmap, 'String|LastEditor', meta.summary.lastModifiedBy)
     if( meta.summary.lastPrintedAt )
         process(cmap, 'DateTime|LastPrinted', meta.summary.lastPrintedAt)
-    if( meta.summary.title )
-        process(cmap, 'MLString|Title', meta.summary.title)
+    if( meta.summary.title ) {
+    	String title = (String)meta.summary.title
+    	if("untitled".equals(title))
+    	  title = (String)binValue.name
+        process(cmap, 'MLString|Title', title)
+    }
     if( meta.summary.lastModifiedAt )
         process(cmap, 'DateTime|LastModified', meta.summary.lastModifiedAt)
     if( meta.summary.pageCount )
@@ -108,7 +112,7 @@ if( meta.summary ) {
     if( meta.summary.encrypted )
         process(cmap, 'Boolean|Encrypted', meta.summary.encrypted)
     if( meta.summary.additionalText )
-        process(cmap, 'String|AdditionalText', meta.summary.additionalText)                
+        process(cmap, 'String|AdditionalText', meta.summary.additionalText)
 } else {
     println "No summary information!"
 }
