@@ -31,6 +31,8 @@
  ***************************************************************/
 package com.flexive.shared.value;
 
+import com.flexive.shared.EJBLookup;
+import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.ObjectWithLabel;
 import com.flexive.shared.exceptions.FxStreamException;
@@ -80,6 +82,7 @@ public class BinaryDescriptor implements Serializable {
     public final static int PREVIEW3_BOX = 232;
     /**
      * For images: scaled size for screenviews (1024x768)
+     *
      * @since 3.1
      */
     public final static int SCREENVIEW_WIDTH = 1024;
@@ -172,7 +175,7 @@ public class BinaryDescriptor implements Serializable {
     private final long creationTime;
     private final String name;
     private final long size;
-    private final String metadata;
+    private String metadata;
     private final String mimeType;
     private final boolean image;
     private final double resolution;
@@ -471,7 +474,15 @@ public class BinaryDescriptor implements Serializable {
      *
      * @return optional metadata (usually XML)
      */
-    public String getMetadata() {
+    public synchronized String getMetadata() {
+        if (metadata != null || this.isNewBinary())
+            return metadata;
+        FxContext.startRunningAsSystem();
+        try {
+            metadata = EJBLookup.getContentEngine().getBinaryMetaData(this.getId());
+        } finally {
+            FxContext.stopRunningAsSystem();
+        }
         return metadata;
     }
 

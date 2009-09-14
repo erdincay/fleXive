@@ -33,8 +33,8 @@ package com.flexive.ejb.beans;
 
 import com.flexive.core.Database;
 import com.flexive.core.LifeCycleInfoImpl;
-import com.flexive.core.flatstorage.FxFlatStorageManager;
 import com.flexive.core.conversion.ConversionEngine;
+import com.flexive.core.flatstorage.FxFlatStorageManager;
 import com.flexive.core.storage.ContentStorage;
 import com.flexive.core.storage.LockStorage;
 import com.flexive.core.storage.StorageManager;
@@ -766,7 +766,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             ContentStorage storage = StorageManager.getContentStorage(pk.getStorageMode());
             con = Database.getDbConnection();
             return storage.getReferencedContentCount(con, pk.getId()) +
-                    (int)FxFlatStorageManager.getInstance().getReferencedContentCount(con, pk.getId());
+                    (int) FxFlatStorageManager.getInstance().getReferencedContentCount(con, pk.getId());
         } catch (FxNotFoundException e) {
             throw new FxLoadException(e);
         } catch (SQLException e) {
@@ -853,6 +853,27 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
+    public String getBinaryMetaData(long id) {
+        if (!FxContext.getUserTicket().isGlobalSupervisor())
+            return "";
+        Connection con = null;
+        try {
+            con = Database.getDbConnection();
+            return StorageManager.getContentStorage(TypeStorageMode.Hierarchical).getBinaryMetaData(con, id);
+        } catch (FxNotFoundException e) {
+            LOG.error(e);
+        } catch (SQLException e) {
+            LOG.error(e);
+        } finally {
+            Database.closeObjects(ContentEngineBean.class, con, null);
+        }
+        return "";
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public FxContent importContent(String xml, boolean newInstance) throws FxApplicationException {
         FxContent co;
         try {
@@ -895,7 +916,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             con = Database.getDbConnection();
             FxLock lock = StorageManager.getLockStorage().lock(con, lockType, pk);
             FxCachedContent cachedContent = CacheAdmin.getCachedContent(pk);
-            if( cachedContent != null ) {
+            if (cachedContent != null) {
                 cachedContent.updateLock(lock);
                 CacheAdmin.cacheContent(cachedContent);
             }
@@ -919,7 +940,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             con = Database.getDbConnection();
             FxLock lock = StorageManager.getLockStorage().lock(con, lockType, pk, duration);
             FxCachedContent cachedContent = CacheAdmin.getCachedContent(pk);
-            if( cachedContent != null ) {
+            if (cachedContent != null) {
                 cachedContent.updateLock(lock);
                 CacheAdmin.cacheContent(cachedContent);
             }
@@ -938,14 +959,14 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public FxLock takeOverLock(FxLock lock) throws FxLockException {
-        if( !lock.isContentLock() )
+        if (!lock.isContentLock())
             return lock;
         Connection con = null;
         try {
             con = Database.getDbConnection();
             FxLock newLock = StorageManager.getLockStorage().takeOver(con, lock);
             FxCachedContent cachedContent = CacheAdmin.getCachedContent(lock.getLockedPK());
-            if( cachedContent != null ) {
+            if (cachedContent != null) {
                 cachedContent.updateLock(newLock);
                 CacheAdmin.cacheContent(cachedContent);
             }
@@ -975,7 +996,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             else
                 newLock = lockStorage.lock(con, FxLockType.Loose, pk);
             FxCachedContent cachedContent = CacheAdmin.getCachedContent(pk);
-            if( cachedContent != null ) {
+            if (cachedContent != null) {
                 cachedContent.updateLock(newLock);
                 CacheAdmin.cacheContent(cachedContent);
             }
@@ -999,7 +1020,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             con = Database.getDbConnection();
             FxLock newLock = StorageManager.getLockStorage().extend(con, lock, duration);
             FxCachedContent cachedContent = CacheAdmin.getCachedContent(lock.getLockedPK());
-            if( cachedContent != null ) {
+            if (cachedContent != null) {
                 cachedContent.updateLock(newLock);
                 CacheAdmin.cacheContent(cachedContent);
             }
@@ -1029,7 +1050,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             else
                 newLock = lockStorage.lock(con, FxLockType.Loose, pk, duration);
             FxCachedContent cachedContent = CacheAdmin.getCachedContent(pk);
-            if( cachedContent != null ) {
+            if (cachedContent != null) {
                 cachedContent.updateLock(newLock);
                 CacheAdmin.cacheContent(cachedContent);
             }
@@ -1052,7 +1073,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
         try {
             con = Database.getDbConnection();
             FxCachedContent cachedContent = CacheAdmin.getCachedContent(pk);
-            if( cachedContent != null )
+            if (cachedContent != null)
                 return cachedContent.getContent().getLock();
             return StorageManager.getLockStorage().getLock(con, pk);
         } catch (SQLException e) {
@@ -1080,7 +1101,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             if (lock.isLocked())
                 lockStorage.unlock(con, pk);
             FxCachedContent cachedContent = CacheAdmin.getCachedContent(pk);
-            if( cachedContent != null ) {
+            if (cachedContent != null) {
                 cachedContent.updateLock(FxLock.noLockPK());
                 CacheAdmin.cacheContent(cachedContent);
             }
@@ -1098,7 +1119,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public List<FxLock> getLocks(FxLockType lockType, long userId, long typeId, String resource) throws FxLockException {
-         Connection con = null;
+        Connection con = null;
         try {
             con = Database.getDbConnection();
             final LockStorage lockStorage = StorageManager.getLockStorage();

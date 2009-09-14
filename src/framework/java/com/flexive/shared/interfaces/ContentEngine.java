@@ -252,6 +252,14 @@ public interface ContentEngine {
     long getBinaryId(FxPK pk, String xpath, FxLanguage language, boolean fallbackToDefault) throws FxApplicationException;
 
     /**
+     * Load binary meta data
+     *
+     * @param id id of the binary
+     * @return metadata
+     */
+    String getBinaryMetaData(long id);
+
+    /**
      * Import a content from XML
      *
      * @param xml         the content as XML

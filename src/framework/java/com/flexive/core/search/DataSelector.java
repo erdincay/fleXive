@@ -159,7 +159,7 @@ public abstract class DataSelector {
      * Select the properties required for selecting a property of type FxBinary.
      *
      * @param idSelect  select to return the binary ID
-     * @return
+     * @return properties required for selecting a property of type FxBinary
      */
     public static String selectBinary(String idSelect) {
         // TODO link version/quality filtering to the main object version

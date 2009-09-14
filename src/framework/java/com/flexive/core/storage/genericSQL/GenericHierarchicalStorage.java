@@ -1797,6 +1797,13 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    public String getBinaryMetaData(Connection con, long binaryId) {
+        return binaryStorage.getBinaryMetaData(con, binaryId);
+    }
+
+    /**
      * Helper method to add a value of a detail entry with a given XPath to the instance being loaded
      *
      * @param root       the root group

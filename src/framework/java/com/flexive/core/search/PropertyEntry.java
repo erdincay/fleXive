@@ -55,8 +55,6 @@ import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.sql.SQLException;
 import java.util.*;
-import static java.lang.Long.parseLong;
-import static java.lang.Integer.parseInt;
 import java.io.Serializable;
 
 /**
@@ -583,7 +581,7 @@ public class PropertyEntry {
      * Return the result value of this property entry in a given result set.
      *
      * @param rs       the SQL result set
-     * @param languageId
+     * @param languageId id of the requested language
      * @param xpathAvailable if the XPath was selected as an additional column for content table entries
      * @param typeId    the result row type ID (if available, otherwise -1)
      * @return the value of this property (column) in the result set

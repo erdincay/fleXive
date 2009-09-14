@@ -84,8 +84,9 @@ public class GenericBinarySQLStorage implements BinaryStorage {
             //       1          2              3          4          5         6
             "DBIN_ID=?,DBIN_VER=?,DBIN_QUALITY=?,DBIN_ACL=? WHERE ID=? AND VER=?";
 
-    //                                                                                                                                                                          1         2             3
-    protected static final String BINARY_DESC_LOAD = "SELECT NAME,BLOBSIZE,XMLMETA,CREATED_AT,MIMETYPE,ISIMAGE,RESOLUTION,WIDTH,HEIGHT FROM " + TBL_CONTENT_BINARY + " WHERE ID=? AND VER=? AND QUALITY=?";
+    //                                                       1    2        3          4        5       6          7     8                                                                  1         2             3
+    protected static final String BINARY_DESC_LOAD = "SELECT NAME,BLOBSIZE,CREATED_AT,MIMETYPE,ISIMAGE,RESOLUTION,WIDTH,HEIGHT FROM " + TBL_CONTENT_BINARY + " WHERE ID=? AND VER=? AND QUALITY=?";
+    protected static final String BINARY_META_LOAD = "SELECT XMLMETA FROM " + TBL_CONTENT_BINARY + " WHERE ID=? AND VER=? AND QUALITY=?";
 
     //    select into xx () select  FBLOB1,FBLOB2,?,?,?
     protected static final String BINARY_TRANSIT_HEADER = "SELECT FBLOB FROM " + TBL_BINARY_TRANSIT + " WHERE BKEY=?";
@@ -277,8 +278,8 @@ public class GenericBinarySQLStorage implements BinaryStorage {
             ps.setInt(3, 1); //ver
             ResultSet rs = ps.executeQuery();
             if (rs != null && rs.next()) {
-                return new BinaryDescriptor(server, id, 1, 1, rs.getLong(4), rs.getString(1), rs.getLong(2), rs.getString(3),
-                        rs.getString(5), rs.getBoolean(6), rs.getDouble(7), rs.getInt(8), rs.getInt(9));
+                return new BinaryDescriptor(server, id, 1, 1, rs.getLong(3), rs.getString(1), rs.getLong(2), null,
+                        rs.getString(4), rs.getBoolean(5), rs.getDouble(6), rs.getInt(7), rs.getInt(8));
             }
         } catch (SQLException e) {
             throw new FxDbException(e, "ex.db.sqlError", e.getMessage());
@@ -291,6 +292,33 @@ public class GenericBinarySQLStorage implements BinaryStorage {
             }
         }
         throw new FxDbException("ex.content.binary.loadDescriptor.failed", id);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getBinaryMetaData(Connection con, long binaryId) {
+        PreparedStatement ps = null;
+        try {
+            ps = con.prepareStatement(BINARY_META_LOAD);
+            ps.setLong(1, binaryId);
+            ps.setInt(2, 1); //ver
+            ps.setInt(3, 1); //ver
+            ResultSet rs = ps.executeQuery();
+            if (rs != null && rs.next()) {
+                return rs.getString(1);
+            }
+        } catch (SQLException e) {
+            LOG.error(e);
+        } finally {
+            try {
+                if (ps != null) ps.close();
+            } catch (SQLException e) {
+                //noinspection ThrowFromFinallyBlock
+                LOG.error(e);
+            }
+        }
+        return "";
     }
 
     /**

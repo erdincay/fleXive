@@ -389,4 +389,13 @@ public interface ContentStorage {
      * @throws FxLoadException on errors
      */
     long getContentTypeId(Connection con, FxPK pk) throws FxLoadException;
+
+    /**
+     * Load binary meta data
+     *
+     * @param con      an open and valid connection
+     * @param binaryId id of the binary
+     * @return meta data
+     */
+    String getBinaryMetaData(Connection con, long binaryId);
 }

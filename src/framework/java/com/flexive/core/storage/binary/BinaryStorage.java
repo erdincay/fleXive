@@ -115,6 +115,15 @@ public interface BinaryStorage {
     BinaryDescriptor loadBinaryDescriptor(List<ServerLocation> server, Connection con, long id) throws FxDbException;
 
     /**
+     * Load binary meta data
+     *
+     * @param con      an open and valid connection
+     * @param binaryId id of the binary
+     * @return meta data
+     */
+    String getBinaryMetaData(Connection con, long binaryId);
+
+    /**
      * Prepare and identify a binary
      *
      * @param con         an open and valid Connection
