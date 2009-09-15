@@ -697,8 +697,10 @@ public class SearchEngineTest {
         final FxResultSet result = new SqlQueryBuilder().select("@pk").orSub()
                 .condition("typedef", PropertyValueComparator.IN,
                         FxSharedUtils.getSelectableObjectIdList(CacheAdmin.getEnvironment().getTypes())
+                        .subList(0, 3)
                 )
                 .condition("caption", PropertyValueComparator.IN, Arrays.asList("test1", "test2"))
+                .maxRows(10)
                 .getResult();
         assertTrue(result.getRowCount() > 0);
     }
