@@ -24,6 +24,12 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     </xsl:template>
 
+    <!-- Force IE7 mode in IE8 (it seems that this must be before other meta tags, or at least before
+         user.head.content is inserted) -->
+    <xsl:template name="system.head.content">
+        <meta http-equiv="X-UA-Compatible" content="IE=7" />
+    </xsl:template>
+
     <xsl:template name="credits.div">
         <div>
             <xsl:apply-templates select="." mode="class.attribute"/>
