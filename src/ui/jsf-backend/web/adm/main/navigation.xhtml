@@ -83,7 +83,7 @@
                 <adm:treeNode id="cmis" icon="content" titleKey="Admin.cmis.root">
                     <adm:treeNode titleKey="Admin.cmis.query" link="/adm/main/cmis/cmisQuery.xhtml"/>
                 </adm:treeNode>
-                
+
                 <adm:treeNode titleKey="Admin.system.configuration" link="/adm/main/system/configuration.jsf" rendered="#{fxSystemBean.isInRole['GlobalSupervisor']}"/>
                 <adm:treeNode titleKey="Admin.system.parameters" link="/adm/main/system/sysParamConfig.jsf" rendered="#{fxSystemBean.isInRole['GlobalSupervisor']}"/>
                 <adm:treeNode titleKey="Admin.system.lockAdmin" link="/adm/main/system/lockAdmin.jsf"/>
@@ -92,6 +92,13 @@
                 <adm:treeNode titleKey="Admin.system.languages" link="/adm/main/system/languages.jsf" rendered="#{fxSystemBean.isInRole['GlobalSupervisor']}"/>
                 <adm:treeNode titleKey="Admin.content.testData" link="/adm/content/createTestData.jsf"/>
             </adm:treeNode>
+
+            <c:if test="#{fxSystemBean.isInRole['WorkflowManagement']}">
+                <adm:treeNode id="export" icon="export" titleKey="Admin.system.importExport">
+                    <adm:treeNode titleKey="Admin.system.export" link="/adm/main/importexport/structureExport.jsf"/>
+                    <adm:treeNode titleKey="Admin.system.import" link="/adm/main/importexport/structureImport.jsf"/>
+                </adm:treeNode>
+            </c:if>
         </adm:tree>
 
         <!--<adm:treeNode id="test" title="YUI Test" link="/adm/test/yui.xhtml"/>-->

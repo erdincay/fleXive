@@ -21,7 +21,7 @@
         </managed-bean-class>
         <managed-bean-scope>application</managed-bean-scope>
     </managed-bean>
-    
+
     <managed-bean>
         <managed-bean-name>navigationMenuBean</managed-bean-name>
         <managed-bean-class>
@@ -60,7 +60,7 @@
     <managed-bean>
         <managed-bean-name>structureImportBean</managed-bean-name>
         <managed-bean-class>
-            com.flexive.war.beans.admin.structure.StructureImportBean
+            com.flexive.war.beans.admin.main.StructureImportBean
         </managed-bean-class>
         <managed-bean-scope>request</managed-bean-scope>
     </managed-bean>
@@ -74,27 +74,27 @@
     </managed-bean>
 
     <managed-bean>
-            <managed-bean-name>typeEditorBean</managed-bean-name>
-            <managed-bean-class>
-                com.flexive.war.beans.admin.structure.TypeEditorBean
-            </managed-bean-class>
-            <managed-bean-scope>session</managed-bean-scope>
+        <managed-bean-name>typeEditorBean</managed-bean-name>
+        <managed-bean-class>
+            com.flexive.war.beans.admin.structure.TypeEditorBean
+        </managed-bean-class>
+        <managed-bean-scope>session</managed-bean-scope>
     </managed-bean>
 
     <managed-bean>
-            <managed-bean-name>groupEditorBean</managed-bean-name>
-            <managed-bean-class>
-                com.flexive.war.beans.admin.structure.GroupEditorBean
-            </managed-bean-class>
-            <managed-bean-scope>session</managed-bean-scope>
+        <managed-bean-name>groupEditorBean</managed-bean-name>
+        <managed-bean-class>
+            com.flexive.war.beans.admin.structure.GroupEditorBean
+        </managed-bean-class>
+        <managed-bean-scope>session</managed-bean-scope>
     </managed-bean>
 
     <managed-bean>
-            <managed-bean-name>structureTreeControllerBean</managed-bean-name>
-            <managed-bean-class>
-                com.flexive.war.beans.admin.structure.StructureTreeControllerBean
-            </managed-bean-class>
-            <managed-bean-scope>request</managed-bean-scope>
+        <managed-bean-name>structureTreeControllerBean</managed-bean-name>
+        <managed-bean-class>
+            com.flexive.war.beans.admin.structure.StructureTreeControllerBean
+        </managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope>
     </managed-bean>
 
     <managed-bean>
@@ -160,7 +160,7 @@
         </managed-bean-class>
         <managed-bean-scope>request</managed-bean-scope>
     </managed-bean>
-    
+
     <managed-bean>
         <managed-bean-name>workflowBean</managed-bean-name>
         <managed-bean-class>
@@ -256,7 +256,7 @@
         <managed-bean-class>com.flexive.war.beans.admin.test.FxNavigationTestBean</managed-bean-class>
         <managed-bean-scope>request</managed-bean-scope>
     </managed-bean>
-    
+
     <managed-bean>
         <managed-bean-name>adminConfigurationBean</managed-bean-name>
         <managed-bean-class>com.flexive.war.beans.admin.AdminConfigurationBean</managed-bean-class>
@@ -267,6 +267,12 @@
         <managed-bean-name>rssProviderBean</managed-bean-name>
         <managed-bean-class>com.flexive.war.beans.admin.RssProviderBean</managed-bean-class>
         <managed-bean-scope>session</managed-bean-scope>
+    </managed-bean>
+
+    <managed-bean>
+        <managed-bean-name>exportBean</managed-bean-name>
+        <managed-bean-class>com.flexive.war.beans.admin.main.StructureExportBean</managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope>
     </managed-bean>
 
     <navigation-rule>
@@ -335,7 +341,7 @@
             <to-view-id>/adm/structure/navigation.xhtml</to-view-id>
         </navigation-case>
 
-         <navigation-case>
+        <navigation-case>
             <from-outcome>structureContent</from-outcome>
             <to-view-id>/adm/structure/content.xhtml</to-view-id>
         </navigation-case>
@@ -446,7 +452,7 @@
             <to-view-id>/adm/main/template/contentTemplateEdit.xhtml</to-view-id>
         </navigation-case>
 
-          <navigation-case>
+        <navigation-case>
             <from-outcome>masterTemplateOverview</from-outcome>
             <to-view-id>/adm/main/template/masterTemplateOverview.xhtml</to-view-id>
         </navigation-case>
@@ -534,7 +540,7 @@
 
         <navigation-case>
             <from-outcome>structureImport</from-outcome>
-            <to-view-id>/adm/structure/structureImport.xhtml</to-view-id>
+            <to-view-id>/adm/main/importexport/structureImport.xhtml</to-view-id>
         </navigation-case>
 
         <navigation-case>
@@ -561,7 +567,7 @@
             <from-outcome>groupEditor</from-outcome>
             <to-view-id>/adm/structure/groupEditor.xhtml</to-view-id>
         </navigation-case>
-        
+
         <navigation-case>
             <from-outcome>groupOptionEditor</from-outcome>
             <to-view-id>/adm/structure/groupOptionEditor.xhtml</to-view-id>
@@ -595,6 +601,16 @@
         <navigation-case>
             <from-outcome>editSelectList</from-outcome>
             <to-view-id>/adm/main/selectList/edit.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>structureExport</from-outcome>
+            <to-view-id>/adm/main/importexport/structureExport.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>structureExportResult</from-outcome>
+            <to-view-id>/adm/main/importexport/structureExportResult.xhtml</to-view-id>
         </navigation-case>
 
     </navigation-rule>

@@ -87,7 +87,7 @@
                 getFxSelector().deselectAll();
                 getFxSelector().select(node);
                 //scroll node into view
-                node.domNode.scrollIntoView(); 
+                node.domNode.scrollIntoView();
                 return node;
             }
 
@@ -113,7 +113,7 @@
                 dojo.widget.byId('structureTree').setChildren(newChildren);
                 //contentPage=null;
             }
-                
+
             function getFxSelector() {
                 return dojo.widget.byId('structureTree').fxSelector;
             }
@@ -615,14 +615,32 @@
             }
 
             function importType(menuItem) {
-                invokeContentAction("adm/structure/structureImport.jsf", "source", "type");
+                invokeContentAction("adm/main/importexport/structureImport.jsf", "source", "type");
+            }
+
+            function exportTypeMenu(menuItem) {
+                try {
+                    invokeContentAction("adm/main/importexport/structureExport.jsf");
+                } catch(ex) {
+                    alertDialog(ex)
+                }
             }
 
             function exportType(menuItem) {
                 try {
                     var menu = dojo.widget.byId("structureTreeMenu");
                     var nodeId = getNodeId(menu.getTreeNode());
-                    loadContentPage( "export/type/" + nodeId);
+                    invokeContentAction("adm/main/importexport/structureExportResult.jsf", "exportType", {typeId: nodeId});
+                } catch(ex) {
+                    alertDialog(ex)
+                }
+            }
+
+            function exportTypeNoDeps(menuItem) {
+                try {
+                    var menu = dojo.widget.byId("structureTreeMenu");
+                    var nodeId = getNodeId(menu.getTreeNode());
+                    invokeContentAction("adm/main/importexport/structureExportResult.jsf", "exportTypeNoDeps", {typeId: nodeId});
                 } catch(ex) {
                     alertDialog(ex)
                 }
@@ -693,12 +711,13 @@
 
                 //paste a copied or cut assignment into a group assignment or type prompting for a different alias
                 //cut: only allowed if not pasting a group into itsself or one of its children
-                setActionDisabled(menu.getTreeNode(), "pasteIntoAs", lackRole || copyNode==null || 
+                setActionDisabled(menu.getTreeNode(), "pasteIntoAs", lackRole || copyNode==null ||
                             (!isType(node.nodeType) && node.nodeType!="Group") || (cutMode && pasteGroupIntoSelf));
-                
+
                 setActionDisabled(menu.getTreeNode(), "pasteSubMenu", lackRole || copyNode==null);
                 setActionDisabled(menu.getTreeNode(), "createTestData", lackRole || !isType(node.nodeType));
                 setActionDisabled(menu.getTreeNode(), "exportType", lackRole || !isType(node.nodeType));
+                setActionDisabled(menu.getTreeNode(), "exportTypeNoDeps", lackRole || !isType(node.nodeType));
                 menu.show_();
             }
 
@@ -745,6 +764,7 @@
                 <adm:treeContextMenuItem icon="open" treeActions="showNode" labelKey="StructureTree.menu.open" clickHandler="showNode"/>
                 <adm:treeContextMenuItem icon="edit" treeActions="editNode" labelKey="StructureTree.menu.edit" clickHandler="editNode"/>
                 <adm:treeContextMenuItem icon="export" treeActions="exportType" labelKey="StructureTree.menu.exportType" clickHandler="exportType"/>
+                <adm:treeContextMenuItem icon="export" treeActions="exportTypeNoDeps" labelKey="StructureTree.menu.exportTypeNoDeps" clickHandler="exportTypeNoDeps"/>
                 <adm:treeContextMenuItem icon="property" treeActions="createProperty" labelKey="StructureTree.menu.createProperty" clickHandler="createProperty"/>
                 <adm:treeContextMenuItem icon="group" treeActions="createGroup" labelKey="StructureTree.menu.createGroup" clickHandler="createGroup" />
                 <adm:treeContextMenuItem icon="fxType" treeActions="createDerivedType" labelKey="StructureTree.menu.createDerivedType" clickHandler="createDerivedType" />
@@ -773,7 +793,7 @@
 
             <adm:jsonRpcCall method="StructureTreeWriter.renderStructureTree" args="-1, true, true"/>
     	</adm:tree>
-    	
+
         <div id="structureTreeContainer">
         </div>
     </ui:define>
@@ -785,6 +805,7 @@
                 <fx:dojoMenuItem rendered="#{fxSystemBean.isInRole['StructureManagement']}" labelKey="StructureTree.menu.createType" icon="windowNew" clickHandler="function(menuItem) { createType(menuItem); }"/>
                 <fx:dojoMenuItem rendered="#{fxSystemBean.isInRole['StructureManagement']}" labelKey="StructureTree.menu.createTypeRelation" icon="fxTypeRelation" clickHandler="function(menuItem) { createTypeRelation(menuItem); }"/>
                 <fx:dojoMenuItem rendered="#{fxSystemBean.isInRole['StructureManagement']}" labelKey="StructureTree.menu.importType" icon="importContent" clickHandler="importType"/>
+                <fx:dojoMenuItem rendered="#{fxSystemBean.isInRole['StructureManagement']}" labelKey="StructureTree.menu.exportType" icon="export" clickHandler="exportTypeMenu"/>
 
                 <fx:dojoMenuSeparator/>
 

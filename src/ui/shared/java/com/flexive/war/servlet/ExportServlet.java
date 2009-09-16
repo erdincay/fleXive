@@ -50,6 +50,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URLDecoder;
+import java.util.List;
+import java.util.ArrayList;
 
 /**
  * XML Export servlet
@@ -58,6 +60,7 @@ import java.net.URLDecoder;
  * <p/>
  * /export/type/name
  * /export/content/pk
+ * /export/exportGroovyScript/StringObj
  * <p/>
  * TODO:
  * /export/tree/startnode
@@ -69,6 +72,7 @@ public class ExportServlet implements Servlet {
     private static final Log LOG = LogFactory.getLog(ExportServlet.class);
 
     public final static String EXPORT_TYPE = "type";
+    public final static String EXPORT_TYPE_GROOVY = "exportGroovyScript";
     public final static String EXPORT_CONTENT = "content";
 
     private final static String BASEURL = "/export/";
@@ -105,9 +109,16 @@ public class ExportServlet implements Servlet {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
         String[] params = URLDecoder.decode(request.getRequestURI().substring(request.getContextPath().length() + BASEURL.length()), "UTF-8").split("/");
+        final List<Long> typeRequests = new ArrayList<Long>(params.length);
+        for (int i = 1; i < params.length; i++) {
+            typeRequests.add(Long.parseLong(params[i]));
+        }
 
-        if (params.length == 2 && EXPORT_TYPE.equals(params[0])) {
-            exportType(request, response, params[1]);
+        if (params.length == 1 && EXPORT_TYPE_GROOVY.equals(params[0])) {
+            exportGroovy(request, response);
+            return;
+        } else if (params.length >= 2 && EXPORT_TYPE.equals(params[0])) {
+            exportType(request, response, typeRequests);
             return;
         } else if (params.length == 2 && EXPORT_CONTENT.equals(params[0])) {
             exportContent(request, response, params[1]);
@@ -121,36 +132,56 @@ public class ExportServlet implements Servlet {
      *
      * @param request  request
      * @param response reponse
-     * @param type     type name
+     * @param types    type name
      * @throws IOException on errors
      */
-    private void exportType(HttpServletRequest request, HttpServletResponse response, String type) throws IOException {
-        if( StringUtils.isNumeric(type)) {
-            try {
-                type = CacheAdmin.getEnvironment().getType(Long.parseLong(type)).getName();
-            } catch (Exception e) {
-                //ignore and try with type as name
-            }
-        }
+    private void exportType(HttpServletRequest request, HttpServletResponse response, List<Long> types) throws IOException {
         final UserTicket ticket = FxContext.getUserTicket();
         if (!ticket.isInRole(Role.StructureManagement)) {
-            LOG.warn("Tried to export type [" + type + "] without being in role StructureManagment!");
+            LOG.warn("Tried to export type(s) [" + types + "] without being in role StructureManagment!");
             response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
         }
-        String xml;
-        try {
-            xml = EJBLookup.getTypeEngine().export(CacheAdmin.getEnvironment().getType(type).getId());
-        } catch (FxApplicationException e) {
-            LOG.error(e);
-            response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
-            return;
+        final StringBuilder xmlBuild = new StringBuilder(1000).append("<export>");
+        for (Long id : types) {
+            try {
+                xmlBuild.append(EJBLookup.getTypeEngine().export(CacheAdmin.getEnvironment().getType(id).getId()))
+                        .append("\n")
+                        .append("<!-- NEXT TYPE -->\n");
+            } catch (FxApplicationException e) {
+                LOG.error(e);
+                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+                return;
+            }
         }
+        xmlBuild.append("</export>");
+        final String xml = xmlBuild.toString();
         response.setContentType("text/xml");
         response.setCharacterEncoding("UTF-8");
-        response.setHeader("Content-Disposition", "attachment; filename=\"" + type + ".xml\";");
+        final String fileName = "xmlExport";
+        response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + ".xml\";");
         try {
             response.getOutputStream().write(xml.getBytes("UTF-8"));
+        } finally {
+            response.getOutputStream().close();
+        }
+    }
+
+    /**
+     * Export types as a Groovy script; request session attribute "groovyScriptCode" set from StructureExportBean
+     *
+     * @param request  request
+     * @param response reponse
+     * @throws IOException on errors
+     */
+    private void exportGroovy(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        final String groovyCode = (String)request.getSession().getAttribute("groovyScriptCode");
+        final String fileName = "structures";
+        response.setContentType("text/plain");
+        response.setCharacterEncoding("UTF-8");
+        response.setHeader("Content-Disposition", "attachment; filename=" + fileName + ".groovy;");
+        try {
+            response.getOutputStream().write(groovyCode.getBytes("UTF-8"));
         } finally {
             response.getOutputStream().close();
         }
@@ -176,7 +207,7 @@ public class ExportServlet implements Servlet {
             response.sendError(HttpServletResponse.SC_FORBIDDEN);
             return;
         } catch (FxApplicationException e) {
-            LOG.warn("Error exporting [" + pk + "]: "+e.getMessage(), e);
+            LOG.warn("Error exporting [" + pk + "]: " + e.getMessage(), e);
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
             return;
         }

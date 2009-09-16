@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+        PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+
+Adds a (nested) datatable component for the structure export; parameters:
+--> template for structureExporterResult.xhtml
+
+tableType: the table type can either be "group" or "type" (adjusts the style) or "typeScript" or "assignmentScript" (adjusts the content :-) ; default: 'type'
+mainTableDataSource: the main datatable's data to be iterated over
+mainTableHeader: key for the table header
+mainTableHeaderLabel: key for the main table's label section (id = hardcoded)
+showDependentOn: set to true if the dependencies should be resolved
+
+-- Nested table: assignments (hint: nested table iterator will always reference "mainVar")
+
+
+nestTableHeader: key for the table header
+nestTableDataSource: the nested table's data to be iterated overl; argument must be preceded by "repeatVar." if nestTableRepeat = true
+nestTableRepeat: boolean value for placing a ui:repeat around the nested table (e.g. for dependency structures); default: false
+nestTableRepeatDS: variable for ui:repeat
+nestAssociatedScripts: variable for associated scripts
+
+<ui:composition>
+
+<c:if test="#{empty tableType}">
+    <c:set var="tableType" value="type"/>
+</c:if>
+
+<c:if test="#{empty nestTableRepeat}">
+    <c:set var="nestTableRepeat" value="false"/>
+</c:if>
+
+
+<c:if test="#{tableType eq 'type' or tableType eq 'group'}">
+    <h:dataTable value="#{mainTableDataSource}" var="mainVar" columnClasses="colPadExp">
+        <f:facet name="header">
+            <h:outputText escape="false"
+                          value="#{fxMessageBean[mainTableHeader]}&lt;br/&gt;&lt;hr/&gt;"/>
+        </f:facet>
+        <h:column>
+            <f:facet name="header">
+                <h:outputText value="#{fxMessageBean['StructureExport.lbl.id']}"/>
+            </f:facet>
+            <h:outputText value="#{mainVar.id}"/>
+        </h:column>
+
+        <h:column>
+            <h:outputText value="  "/>
+        </h:column>
+
+        <h:column>
+            <f:facet name="header">
+                <c:if test="#{tableType eq 'type'}">
+                    <h:outputText value="#{fxMessageBean[mainTableHeaderLabel]}"/>
+                </c:if>
+                <c:if test="#{tableType eq 'group'}">
+                    <h:outputText value="#{fxMessageBean[mainTableHeaderLabel]}" style="color:blue;"/>
+                </c:if>
+            </f:facet>
+            <c:if test="#{tableType eq 'type'}">
+                <h:outputText value="#{mainVar.name}" style="font-weight:bold"/>
+            </c:if>
+            <c:if test="#{tableType eq 'group'}">
+                <h:outputText value="#{mainVar.label}" style="color:blue;"/>
+            </c:if>
+        </h:column>
+
+        <h:column>
+            <h:outputText value="  "/>
+        </h:column>
+
+        <h:column>
+            <!-- assignments table -->
+            <f:facet name="header">
+                <h:outputText value="#{fxMessageBean[nestTableHeader]}"/>
+            </f:facet>
+
+            <c:if test="#{!nestTableRepeat}">
+                <h:dataTable value="#{nestTableDataSource}" var="nestVar" columnClasses="colPadExp">
+                    <h:column>
+                        <f:facet name="header">
+                            <h:outputText value="#{fxMessageBean['StructureExport.lbl.assIds']}"/>
+                        </f:facet>
+                        <h:outputText value="#{nestVar.id}"/>
+                    </h:column>
+
+                    <h:column>
+                        <h:outputText value="  "/>
+                    </h:column>
+
+                    <h:column>
+
+                        <f:facet name="header">
+                            <h:outputText value="#{fxMessageBean['StructureExport.lbl.assLabels']}"/>
+                        </f:facet>
+
+                        <ui:fragment rendered="#{!exportBean.assignmentIsGroupMap[nestVar.id]}">
+                            <h:outputText value="#{nestVar.label}"/>
+                        </ui:fragment>
+
+                        <ui:fragment rendered="#{exportBean.assignmentIsGroupMap[nestVar.id]}">
+                            <h:outputText value="#{nestVar.label}" style="color:blue;"/>
+                        </ui:fragment>
+                    </h:column>
+                </h:dataTable>
+            </c:if>
+
+            <c:if test="#{nestTableRepeat}">
+
+                <ui:repeat var="repeatVar" value="#{nestTableRepeatDS}">
+                    <ui:fragment rendered="#{not empty nestTableDataSource}">
+                        <h:dataTable value="#{nestTableDataSource}" var="nestVar"
+                                     columnClasses="colPadExp">
+
+                            <h:column>
+                                <f:facet name="header">
+                                    <h:outputText value="#{fxMessageBean['StructureExport.lbl.assIds']}"/>
+                                </f:facet>
+                                <h:outputText value="#{nestVar.id}"/>
+                            </h:column>
+
+                            <h:column>
+                                <h:outputText value="  "/>
+                            </h:column>
+
+                            <h:column>
+                                <f:facet name="header">
+                                    <h:outputText value="#{fxMessageBean['StructureExport.lbl.assLabels']}"/>
+                                </f:facet>
+                                <ui:fragment rendered="#{!exportBean.assignmentIsGroupMap[nestVar.id]}">
+                                    <h:outputText value="#{nestVar.label}"/>
+                                </ui:fragment>
+
+                                <ui:fragment rendered="#{exportBean.assignmentIsGroupMap[nestVar.id]}">
+                                    <h:outputText value="#{nestVar.label}" style="color:blue;"/>
+                                </ui:fragment>
+                            </h:column>
+
+                            <h:column>
+                                <ui:fragment rendered="#{showDependentOn}">
+                                    <h:outputText escape="false" value=" #{fxMessageBean['StructureExport.lbl.dependentOn']}: 
+                                    ID: &lt;span style='font-style:normal; color:#8080C0'&gt;#{exportBean.dependentOnMapping[nestVar].id}&lt;/span&gt;
+                                    LABEL: &lt;span style='font-style:normal; color:#8080C0'&gt;#{exportBean.dependentOnMapping[nestVar].label}&lt;/span&gt;"
+                                                  styleClass="depOn"/>
+                                </ui:fragment>
+
+                            </h:column>
+
+                        </h:dataTable>
+                    </ui:fragment>
+                </ui:repeat>
+
+            </c:if>
+        </h:column>
+    </h:dataTable>
+
+</c:if>
+
+<c:if test="#{tableType eq 'typeScript' or tableType eq 'assignmentScript'}">
+
+    <h:dataTable var="mainVar" value="#{mainTableDataSource}" columnClasses="colPadExp"
+                 rendered="#{not empty mainTableDataSource}">
+
+        <f:facet name="header">
+            <h:outputText value="#{fxMessageBean[mainTableHeader]}"/>
+        </f:facet>
+
+        <h:column>
+            <f:facet name="header">
+                <h:outputText value="#{fxMessageBean['StructureExport.lbl.id']}"/>
+            </f:facet>
+            <h:outputText value="#{mainVar.id}"/>
+        </h:column>
+        <h:column>
+            <f:facet name="header">
+                <h:outputText value="#{fxMessageBean[mainTableHeaderLabel]}"/>
+            </f:facet>
+
+            <c:if test="#{tableType eq 'typeScript'}">
+                <h:outputText value="#{mainVar.name}" style="font-weight:bold;"/>
+            </c:if>
+            
+            <c:if test="#{tableType eq 'assignmentScript'}">
+                <h:outputText value="#{mainVar.label}"/>
+            </c:if>
+        </h:column>
+
+        <h:column>
+            <!-- event table -->
+            <h:dataTable var="eventVar" value="#{nestTableDataSource}"
+                         columnClasses="colPadExp">
+
+                <f:facet name="header">
+                    <h:outputText value="#{fxMessageBean['StructureExport.lbl.event']}"/>
+                </f:facet>
+
+                <h:column>
+                    <h:outputText value="#{eventVar}"/>
+                </h:column>
+
+                <h:column>
+                    <!-- associated nested scripts table -->
+                    <h:dataTable var="scriptVar" value="#{nestAssociatedScripts}"
+                                 columnClasses="colPadExp">
+                        <h:column>
+                            <f:facet name="header">
+                                <h:outputText value="#{fxMessageBean['StructureExport.lbl.id']}"/>
+                            </f:facet>
+                            <h:outputText value="#{scriptVar}"/>
+                        </h:column>
+                        <h:column>
+                            <f:facet name="header">
+                                <h:outputText value="#{fxMessageBean['StructureExport.lbl.scriptName']}"/>
+                            </f:facet>
+
+                            <a4j:commandLink id="codeLink" value="#{exportBean.scriptIdNameMap[scriptVar]}"
+                                             onclick="#{rich:component('scriptCodePanel')}.show();"
+                                             action="#{exportBean.renderScriptCode}"
+                                             reRender="scriptCodePanelOutput">
+                                <a4j:actionparam name="currentScriptId" value="#{scriptVar}"
+                                                 assignTo="#{exportBean.currentScriptId}"/>
+                            </a4j:commandLink>
+
+                        </h:column>
+                    </h:dataTable>
+                    <!-- end script table -->
+                </h:column>
+
+            </h:dataTable>
+            <!-- end event table -->
+
+        </h:column>
+
+    </h:dataTable>
+</c:if>
+
+</ui:composition>
+
+</html>
