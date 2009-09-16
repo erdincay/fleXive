@@ -20,6 +20,8 @@ newLine = if a newline should be rendered after the input row (default: true)
 width = overrides the default width (value in pixel, eg width="100")
 relativeWidth = overrides the default width (value in %, eg width="100"), overwrites the width if given
 height = overrides the default height (value in pixel, eg height="80")
+overrideStyle = override the style settings of the outer formRow container div
+overrideInputStyle = override the style settings of the inner div containing the (form) input element
 
 <ui:composition>
 
@@ -32,12 +34,12 @@ height = overrides the default height (value in pixel, eg height="80")
     </c:if>
     <c:if test="#{!empty relativeWidth}">
         <c:if test="#{relativeWidth gt 100}">
-            <c:set var="overrideStyle" value="#{overrideStyle};width:100%"/>
-            <c:set var="overrideInputStyle" value="#{overrideInputStyle};width:20%"/>
+            <c:set var="overrideStyle" value="width:100%; #{overrideStyle}"/>
+            <c:set var="overrideInputStyle" value="width:20%; #{overrideInputStyle}"/>
         </c:if>
         <c:if test="#{relativeWidth le 100}">
-            <c:set var="overrideStyle" value="#{overrideStyle};width:#{relativeWidth}%"/>
-            <c:set var="overrideInputStyle" value="#{overrideInputStyle};width:#{relativeWidth * 0.80}%"/>
+            <c:set var="overrideStyle" value="width:#{relativeWidth}%; #{overrideStyle};"/>
+            <c:set var="overrideInputStyle" value=" width:#{relativeWidth * 0.80}%; #{overrideInputStyle}"/>
         </c:if>
     </c:if>
     <c:if test="#{!empty labelKey}">

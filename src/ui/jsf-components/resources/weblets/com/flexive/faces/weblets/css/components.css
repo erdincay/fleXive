@@ -345,6 +345,7 @@ div.formLabel {
     width: 100%;
     overflow: hidden;
     white-space: normal;
+    padding-top:2px;
 }
 
 div.formInputElement {

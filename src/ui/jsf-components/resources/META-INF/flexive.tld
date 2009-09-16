@@ -63,6 +63,18 @@
             <rtexprvalue>false</rtexprvalue>
             <description>overrides the default height (value in pixel, eg height="80")</description>
         </attribute>
+        <attribute>
+            <name>overrideStyle</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>override the style settings of the outer formRow container div</description>
+        </attribute>
+        <attribute>
+            <name>overrideInputStyle</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>override the style settings of the inner div containing the (form) input element</description>
+        </attribute>
     </tag>
     <tag>
         <name>fxValueInputRow</name>
