@@ -135,7 +135,7 @@ public final class GroovyScriptExporterTools {
 
             // sopts - a map for "simple" GroovyTypeBuilder options
             Map<String, String> sopts = new LinkedHashMap<String, String>();
-            final String aclCategory = type.getACL().getCategory().getLabel().toString().toUpperCase();
+            final String aclCategory = type.getACL().getCategory().getLabel().getBestTranslation(1).toUpperCase();
             sopts.put("acl", "CacheAdmin.environment.getACL(ACLCategory." + aclCategory + ".getDefaultId())");
             sopts.put("languageMode", type.getLanguage() == LanguageMode.Multiple ? "LanguageMode.Multiple" : "LanguageMode.Single");
             sopts.put("trackHistory", type.isTrackHistory() + "");
