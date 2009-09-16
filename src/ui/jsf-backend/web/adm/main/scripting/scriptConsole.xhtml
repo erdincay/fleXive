@@ -58,7 +58,7 @@
                         <adm:ajaxCommandButton id="verifyButton" labelKey="Script.button.verify"
                                                icon="check" bean="#{scriptConsoleBean}"
                                                rendered="#{scriptConsoleBean.verifyButtonEnabled}"
-                                               action="checkScriptSyntax"/>
+                                               action="checkScriptSyntax" reRender="resultPanel"/>
                     </a4j:outputPanel>
                 </fieldset>
 
