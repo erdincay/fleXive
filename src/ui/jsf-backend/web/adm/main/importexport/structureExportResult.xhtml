@@ -36,11 +36,6 @@
                             switchType="client"
                             label="#{fxMessageBean['StructureExport.lbl.exportSummary']}">
 
-        <rich:toolTip for="exportSummary" followMouse="false" direction="top-right" layout="block"
-                      styleClass="tooltip" hideDelay="3000" hideEvent="onmousemove">
-            #{fxMessageBean['StructureExport.lbl.exportSummary.tooltip']}
-        </rich:toolTip>
-
         <!-- type assignments -->
         <ui:include src="/adm/main/importexport/structureExportResultTable.xhtml">
             <ui:param name="mainTableDataSource" value="#{exportBean.exportedTypesList}"/>
@@ -54,11 +49,6 @@
         <rich:simpleTogglePanel id="exportGroups" rendered="#{not empty exportBean.callback.groupAssignments}"
                                 opened="#{exportBean.open_2}"
                                 label="#{fxMessageBean['StructureExport.lbl.groups']}" switchType="client">
-
-            <rich:toolTip for="exportGroups" followMouse="true" direction="top-right" layout="block"
-                          styleClass="tooltip" hideDelay="0" hideEvent="onmouseout">
-                #{fxMessageBean['StructureExport.lbl.groups.tooltip']}
-            </rich:toolTip>
 
             <ui:include src="/adm/main/importexport/structureExportResultTable.xhtml">
                 <ui:param name="tableType" value="group"/>
@@ -84,11 +74,6 @@
                                 switchType="client"
                                 label="#{fxMessageBean['StructureExport.lbl.dependencyStructure']}">
 
-            <rich:toolTip for="dependenciesSummary" followMouse="false" direction="top-right" layout="block"
-                          styleClass="tooltip" hideDelay="2000" hideEvent="onmousemove">
-                #{fxMessageBean['StructureExport.lbl.dependencyStructure.tooltip']}
-            </rich:toolTip>
-
             <ui:include src="/adm/main/importexport/structureExportResultTable.xhtml">
                 <ui:param name="mainTableDataSource" value="#{exportBean.expDepTypeList}"/>
                 <ui:param name="mainTableHeader" value="StructureExport.lbl.typeAssignments"/>
@@ -106,15 +91,10 @@
                                     label="#{fxMessageBean['StructureExport.lbl.groups']}"
                                     switchType="client">
 
-                <rich:toolTip for="depGroupPanel" followMouse="true" direction="top-right" layout="block"
-                              styleClass="tooltip" hideDelay="0" hideEvent="onmouseout">
-                    #{fxMessageBean['StructureExport.lbl.depgroups.tooltip']}
-                </rich:toolTip>
-
                 <ui:include src="/adm/main/importexport/structureExportResultTable.xhtml">
                     <ui:param name="tableType" value="group"/>
                     <ui:param name="mainTableDataSource" value="#{exportBean.expDepGroupList}"/>
-                    <ui:param name="mainTableHeader" value="StructureExport.lbl.groups"/>
+                    <ui:param name="mainTableHeader" value="StructureExport.lbl.groupsDeps"/>
                     <ui:param name="mainTableHeaderLabel" value="StructureExport.lbl.groupName"/>
                     <ui:param name="nestTableHeader" value="StructureExport.lbl.children"/>
                     <ui:param name="nestTableDataSource" value="#{repeatVar.groupAssignments[mainVar]}"/>
@@ -179,14 +159,8 @@
 
         </rich:simpleTogglePanel>
 
-        <rich:toolTip for="scriptTooglePanel" followMouse="true" direction="top-right" layout="block"
-                      styleClass="tooltip" hideDelay="0" hideEvent="onmouseout">
-            #{fxMessageBean['StructureExport.lbl.scripts.tooltip']}
-        </rich:toolTip>
-
     </rich:simpleTogglePanel>
 </a4j:outputPanel>
-
 
 <!-- script code display panel -->
 <rich:modalPanel id="scriptCodePanel" autosized="true">
@@ -214,40 +188,35 @@
                             opened="#{exportBean.open_4}"
                             label="#{fxMessageBean['StructureExport.lbl.exportGroovy']}" switchType="client">
 
-        <rich:toolTip for="dependenciesSummary" followMouse="false" direction="top-right" layout="block"
-                      styleClass="tooltip" hideDelay="2000" hideEvent="onmousemove">
-            #{fxMessageBean['StructureExport.lbl.exportGroovy.tooltip']}
-        </rich:toolTip>
-
         <a4j:outputPanel id="groovyOptionPanel">
             <fx:fieldSet legendKey="StructureExport.lbl.groovyOptions">
                 <fx:formRow id="deleteStructures" labelKey="StructureExport.lbl.addDeleteStructures" newLine="false">
                     <h:selectBooleanCheckbox id="deleteStructures" value="#{exportBean.deleteStructures}">
-                        <a4j:support reRender="codePanel" event="onclick"/>
+                        <a4j:support reRender="codePanel" event="onclick" oncomplete="activateEditArea('frm:groovyCode', true, '#{scriptConsoleBean.userLang}');"/>
                     </h:selectBooleanCheckbox>
                 </fx:formRow>
 
                 <fx:formRow id="importStatements" labelKey="StructureExport.lbl.addImportSatements" newLine="false">
                     <h:selectBooleanCheckbox id="importStatements" value="#{exportBean.generateImportStatements}">
-                        <a4j:support reRender="codePanel" event="onclick"/>
+                        <a4j:support reRender="codePanel" event="onclick" oncomplete="activateEditArea('frm:groovyCode', true, '#{scriptConsoleBean.userLang}');"/>
                     </h:selectBooleanCheckbox>
                 </fx:formRow>
 
                 <fx:formRow id="defaultsOnly" labelKey="StructureExport.lbl.defaultsOnly" newLine="false">
                     <h:selectBooleanCheckbox id="defaultsOnly" value="#{exportBean.defaultsOnly}">
-                        <a4j:support reRender="codePanel" event="onclick"/>
+                        <a4j:support reRender="codePanel" event="onclick" oncomplete="activateEditArea('frm:groovyCode', true, '#{scriptConsoleBean.userLang}');"/>
                     </h:selectBooleanCheckbox>
                 </fx:formRow>
 
                 <fx:formRow id="scriptAssignments" labelKey="StructureExport.lbl.scriptAssignments" newLine="false">
                     <h:selectBooleanCheckbox id="scriptAssignments" value="#{exportBean.generateScriptAssignments}">
-                        <a4j:support reRender="codePanel" event="onclick"/>
+                        <a4j:support reRender="codePanel" event="onclick" oncomplete="activateEditArea('frm:groovyCode', true, '#{scriptConsoleBean.userLang}');"/>
                     </h:selectBooleanCheckbox>
                 </fx:formRow>
 
                 <fx:formRow id="addRoot" labelKey="StructureExport.lbl.addRoot" newLine="false">
                     <h:selectBooleanCheckbox id="addroot" value="#{exportBean.addRoot}">
-                        <a4j:support reRender="codePanel" event="onclick"/>
+                        <a4j:support reRender="codePanel" event="onclick" oncomplete="activateEditArea('frm:groovyCode', true, '#{scriptConsoleBean.userLang}');"/>
                     </h:selectBooleanCheckbox>
                 </fx:formRow>
             </fx:fieldSet>

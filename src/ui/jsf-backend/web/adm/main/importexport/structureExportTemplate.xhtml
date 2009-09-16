@@ -23,16 +23,26 @@
             /*border-top: solid 1px #000000;*/
                 border-bottom: solid 1px #000000; /* Für I.Explorer (Seiten-Hintergrundfarbe!) */
             }
-
             th {
                 padding: 4px;
             }
-
-            .colPadExp {
+            .columnMain {
+                padding-right: 5px;
+                padding-left: 5px;
+                vertical-align: top;
+            }
+            .mainColDiv {
+                padding-top: 5px;
+            }
+            .nestTableDiv {
+                /*padding-top: 1px;*/
                 padding-right: 5px;
                 padding-left: 5px;
             }
-
+            .columnNestTable {
+                padding-right: 5px;
+                padding-left: 5px;
+            }
             .depOn {
                 font-style: italic;
                 padding-left: 20px;
@@ -49,6 +59,14 @@
                 }
             }
         </script>
+        <!-- editArea f. result code -->
+        <script language="javascript" type="text/javascript"
+                src="#{fxSystemBean.contextPath}/adm/js/edit_area/edit_area_full.js">
+        </script>
+        <script type="text/javascript">
+            activateEditArea('frm:groovyCode', true, "#{exportBean.userLang}");
+        </script>
+
     </ui:define>
 
     <ui:define name="body">
@@ -88,6 +106,7 @@
             <t:saveState value="#{exportBean.assignScripts}"/>
             <t:saveState value="#{exportBean.scriptIdNameMap}"/>
             <t:saveState value="#{exportBean.gbean}"/>
+            <t:saveState value="#{exportBean.userLang}"/>
 
             <ui:insert name="content"/>
 

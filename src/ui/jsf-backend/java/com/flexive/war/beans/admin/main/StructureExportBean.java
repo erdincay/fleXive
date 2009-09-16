@@ -102,6 +102,7 @@ public class StructureExportBean {
     private long currentScriptId = -1L;
     private String currentScriptCode;
     private GroovyScriptExporterBean gbean;
+    private String userLang = "en";
 
     // constructor
     public StructureExportBean() {
@@ -704,7 +705,15 @@ public class StructureExportBean {
     public boolean isAddRoot() {
         return gbean.isAddRoot();
     }
-    
+
+    public String getUserLang() {
+        return userLang;
+    }
+
+    public void setUserLang(String userLang) {
+        this.userLang = userLang;
+    }
+
     /**
      * Action method: export groovy script as a file - inits the ExportServlet via its return value
      *
