@@ -1591,9 +1591,9 @@ public final class GroovyScriptExporterTools {
         script.append("currentType = CacheAdmin.getEnvironment().getType(\"")
                 .append(typeName)
                 .append("\")\n\n")
-                .append("scriptCode = \"")
+                .append("scriptCode = \"\"\"")
                 .append(scriptCode)
-                .append("\"\n\n")
+                .append("\"\"\"\n\n")
                 .append("siType = EJBLookup.getScriptingEngine().createScript(FxScriptEvent.")
                 .append(event)
                 .append(", \"")
@@ -1635,9 +1635,9 @@ public final class GroovyScriptExporterTools {
         script.append("currentAssignment = CacheAdmin.getEnvironment().getAssignment(\"")
                 .append(XPath)
                 .append("\")\n\n")
-                .append("scriptCode = \"")
+                .append("scriptCode = \"\"\"")
                 .append(scriptCode)
-                .append("\"\n\n")
+                .append("\"\"\"\n\n")
                 .append("siAss = EJBLookup.getScriptingEngine().createScript(FxScriptEvent.")
                 .append(event)
                 .append(", \"")
@@ -1665,8 +1665,7 @@ public final class GroovyScriptExporterTools {
      */
     private static String processScriptCode(String inputCode) {
         inputCode = inputCode.replaceAll("\"", "\\\\\"");
-        inputCode = inputCode.replaceAll("\n", "\\\\n");
-
+        inputCode = inputCode.replaceAll("\r", "");
         return inputCode;
     }
 }
