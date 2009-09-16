@@ -44,6 +44,7 @@ import java.util.*;
 
 import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.stripToEmpty;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
 import static com.flexive.shared.structure.export.StructureExporterTools.*;
@@ -81,6 +82,12 @@ public final class GroovyScriptExporterTools {
     protected final static String DELHEADER = "// *******************************\n// Delete Content / Types\n// *******************************\n\n";
     protected final static String SCRIPTASSHEADER = "// *******************************\n// Script Assignments\n// *******************************\n\n";
     public final static Log LOG = LogFactory.getLog(GroovyScriptExporterTools.class);
+    protected final static String[] JAVA_KEYWORDS = {"abstract", "continue", "for", "new", "switch", "assert", "default", "goto",
+            "package", "synchronized", "boolean", "do", "if", "private", "this", "break", "double", "implements", "protected",
+            "throw", "byte", "else", "import", "public", "throws", "case", "enum", "instanceof", "return", "transient", "catch",
+            "extends", "int", "short", "try", "char", "final", "interface", "static", "void", "class", "finally", "long", "strictfp",
+            "volatile", "const", "float", "native", "super", "while"};
+    protected final static String[] GROOVY_KEYWORDS = {"as", "def", "in", "property"};
 
     private GroovyScriptExporterTools() {
         // no instantiation
@@ -97,8 +104,9 @@ public final class GroovyScriptExporterTools {
         StringBuilder script = new StringBuilder(500);
         final int tabCount = 1;
 
-        script.append("builder = new GroovyTypeBuilder().")
-                .append(type.getName().toLowerCase())
+        script.append("builder = new GroovyTypeBuilder().");
+        final String typeName = keyWordNameCheck(type.getName(), true);
+        script.append(typeName.toLowerCase())
                 .append("( "); // opening parenthesis + 1x \s
 
         if (!defaultsOnly) {
@@ -142,7 +150,7 @@ public final class GroovyScriptExporterTools {
             sopts.put("useStepPermissions", type.isUseStepPermissions() + "");
             sopts.put("useTypePermissions", type.isUseTypePermissions() + "");
             sopts.put("usePermissions", type.isUsePermissions() + "");
-            if(type.isDerived()) { // take out of !defaultsOnly option?
+            if (type.isDerived()) { // take out of !defaultsOnly option?
                 sopts.put("parentTypeName", "\"" + type.getParent().getName() + "\"");
             }
 
@@ -207,8 +215,8 @@ public final class GroovyScriptExporterTools {
         // NAME
         script.append(Indent.tabs(tabCount));
         tabCount++;
-
-        script.append(prop.getName().toLowerCase())
+        final String propName = keyWordNameCheck(prop.getName().toLowerCase(), true);
+        script.append(propName)
                 .append("( "); // opening parenthesis + 1x \s
 
         if (!defaultsOnly) {
@@ -445,7 +453,8 @@ public final class GroovyScriptExporterTools {
 
         // use the alias as the reference name
         script.append(Indent.tabs(tabCount));
-        script.append(pa.getAlias().toLowerCase())
+        final String propAlias = keyWordNameCheck(pa.getAlias().toLowerCase(), true);
+        script.append(propAlias)
                 .append("( "); // opening parenthesis + 1x \s
 
         // ASSIGNMENT
@@ -737,7 +746,8 @@ public final class GroovyScriptExporterTools {
 
             // NAME
             script.append(Indent.tabs(tabCount));
-            script.append(group.getName().toUpperCase())
+            final String groupName = keyWordNameCheck(group.getName().toUpperCase(), true);
+            script.append(groupName)
                     .append("( "); // opening parenthesis + 1x \s
 
             // CHECK IF THIS GROUP WAS CREATED BEFOREHAND AND ONLY NEEDS TO BE CALLED FOR STRUCTURE CREATION
@@ -816,7 +826,8 @@ public final class GroovyScriptExporterTools {
 
         // name = alias
         script.append(Indent.tabs(tabCount));
-        script.append(ga.getAlias().toUpperCase())
+        final String groupAlias = keyWordNameCheck(ga.getAlias().toUpperCase(), true);
+        script.append(groupAlias)
                 .append("( "); // opening parenthesis + 1x \s
 
         // ASSIGNMENT
@@ -1473,6 +1484,22 @@ public final class GroovyScriptExporterTools {
     }
 
     /**
+     * Checks if a given input String represents a Java or Groovy keyword
+     *
+     * @param input the input String
+     * @param doubleQuotes true = double quotes, false = single quotes
+     * @return returns a quoted version of the same String if input == keyword
+     */
+    private static String keyWordNameCheck(String input, boolean doubleQuotes) {
+        if (ArrayUtils.contains(JAVA_KEYWORDS, input) || ArrayUtils.contains(GROOVY_KEYWORDS, input)) {
+            if(doubleQuotes)
+                return "\"" + input + "\"";
+            return "'" + input + "'";
+        }
+        return input;
+    }
+
+    /**
      * Generate code for the script assignment mappings
      *
      * @param typeScriptMapping       the type script mapping from the StructureExporterCallback
@@ -1488,7 +1515,8 @@ public final class GroovyScriptExporterTools {
         if (typeScriptMapping != null && typeScriptMapping.size() > 0) {
             script.append("\n// SCRIPTS ATTACHED TO TYPE EVENTS\n\n")
                     .append("def FxType currentType\n")
-                    .append("def FxScriptInfo siType\n"); // header f. types
+                    .append("def FxScriptInfo siType\n")
+                    .append("def scriptCode\n"); // header f. types
 
             // traverse types and retrieve the scripts
             for (Long typeId : typeScriptMapping.keySet()) {
@@ -1514,8 +1542,8 @@ public final class GroovyScriptExporterTools {
         if (assignmentScriptMapping != null && assignmentScriptMapping.size() > 0) {
             script.append("\n// SCRIPTS ATTACHED TO ASSIGNMENT EVENTS\n\n")
                     .append("def FxAssignment currentAssignment\n")
-                    .append("def FxScriptInfo siAss\n"); // header f. assignments
-
+                    .append("def FxScriptInfo siAss\n")
+                    .append("def scriptCode\n"); // header f. assignments
             // traverse assignments and retrieve the scripts
             for (Long assId : assignmentScriptMapping.keySet()) {
                 final FxAssignment a = CacheAdmin.getEnvironment().getAssignment(assId);
@@ -1557,22 +1585,25 @@ public final class GroovyScriptExporterTools {
             }
         }
 
+        final String scriptCode = processScriptCode(si.getCode());
+
         // load type in script, then append type name
         script.append("currentType = CacheAdmin.getEnvironment().getType(\"")
                 .append(typeName)
-                .append("\")\n")
+                .append("\")\n\n")
+                .append("scriptCode = \"")
+                .append(scriptCode)
+                .append("\"\n\n")
                 .append("siType = EJBLookup.getScriptingEngine().createScript(FxScriptEvent.")
                 .append(event)
                 .append(", \"")
                 .append(si.getName())
                 .append("\", \"")
                 .append(si.getDescription())
-                .append("\", \"")
-                .append(si.getCode())
-                .append("\")\n")
+                .append("\", scriptCode)\n\n")
                 .append("EJBLookup.getScriptingEngine().createTypeScriptMapping(FxScriptEvent.")
                 .append(event)
-                .append(", si.id, currentType.getId(), ")
+                .append(", siType.id, currentType.getId(), ")
                 .append(si.isActive())
                 .append(", ")
                 .append(derivedUsage)
@@ -1598,19 +1629,22 @@ public final class GroovyScriptExporterTools {
             }
         }
 
+        final String scriptCode = processScriptCode(si.getCode());
+
         // load assignment, then attach script to event and assignment id
         script.append("currentAssignment = CacheAdmin.getEnvironment().getAssignment(\"")
                 .append(XPath)
-                .append("\")\n")
+                .append("\")\n\n")
+                .append("scriptCode = \"")
+                .append(scriptCode)
+                .append("\"\n\n")
                 .append("siAss = EJBLookup.getScriptingEngine().createScript(FxScriptEvent.")
                 .append(event)
                 .append(", \"")
                 .append(si.getName())
                 .append("\", \"")
                 .append(si.getDescription())
-                .append("\", \"")
-                .append(si.getCode())
-                .append("\")\n")
+                .append("\", scriptCode)\n\n")
                 .append("EJBLookup.getScriptingEngine().createAssignmentScriptMapping(FxScriptEvent.")
                 .append(event)
                 .append(", siAss.id, currentAssignment.getId(), ")
@@ -1621,5 +1655,18 @@ public final class GroovyScriptExporterTools {
 
         script.trimToSize();
         return script.toString();
+    }
+
+    /**
+     * Escape special characters from the script code
+     *
+     * @param inputCode the input code
+     * @return returns the escaped text
+     */
+    private static String processScriptCode(String inputCode) {
+        inputCode = inputCode.replaceAll("\"", "\\\\\"");
+        inputCode = inputCode.replaceAll("\n", "\\\\n");
+
+        return inputCode;
     }
 }
