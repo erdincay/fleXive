@@ -76,30 +76,33 @@
                 <fx:formRow id="maxEntries" labelKey="History.label.maxEntries">
                     <h:inputText id="maxEntries" value="#{historyBean.maxEntries}" size="5"/>
                 </fx:formRow>
-                <fx:formRow id="account" labelKey="History.label.account">
-                    <fx:fxValueInput value="#{historyBean.accountMatch}" autocompleteHandler="userAcHandler"/>
-                </fx:formRow>
-                <fx:formRow id="startDate" labelKey="History.label.startDate">
-                    <fx:fxValueInput value="#{historyBean.startDate}"/>
-                </fx:formRow>
-                <fx:formRow id="endDate" labelKey="History.label.endDate">
-                    <fx:fxValueInput value="#{historyBean.endDate}"/>
+                <fx:formRow id="account" labelKey="History.label.account" newLine="false">
+                    <fx:fxValueInput id="account" value="#{historyBean.accountMatch}" autocompleteHandler="userAcHandler"/>
                 </fx:formRow>
                 <fx:formRow id="typeId" labelKey="History.label.type">
                     <h:selectOneListbox id="typ" value="#{historyBean.type}" size="1" required="false">
                         <f:selectItems value="#{fxSelectBean.typesWithEmpty}"/>
                     </h:selectOneListbox>
                 </fx:formRow>
+                <fx:formRow id="startDate" labelKey="History.label.startDate" newLine="false">
+                    <fx:fxValueInput value="#{historyBean.startDate}"/>
+                </fx:formRow>
                 <fx:formRow id="contentId" labelKey="History.label.content">
                     <h:inputText id="contentId" value="#{historyBean.content}" size="5"/>
+                </fx:formRow>
+                <fx:formRow id="endDate" labelKey="History.label.endDate" newLine="false">
+                    <fx:fxValueInput value="#{historyBean.endDate}"/>
                 </fx:formRow>
                 <fx:formRow id="category" labelKey="History.label.category">
                     <h:selectOneListbox id="cat" value="#{historyBean.category}" size="1" required="true">
                         <f:selectItems value="#{historyBean.availableGroups}"/>
                     </h:selectOneListbox>
                 </fx:formRow>
+                <fx:formRow>
+                    <adm:commandButton id="historyQuerySearch" labelKey="History.button.query" location="both"
+                                   icon="search" lockscreen="false" bean="#{historyBean}" action="performQuery"/>
+                </fx:formRow>
                 <br/>
-
 
                 <c:set var="list" value="#{historyBean.list}"/>
                 <c:set var="listLength" value="#{jstl:length(list)}"/>
@@ -142,11 +145,6 @@
                         </tbody>
                     </table>
                 </adm:sortableTable>
-
-                <adm:commandButton id="historyQuerySearch" labelKey="History.button.query" location="both"
-                                   icon="search" lockscreen="false" bean="#{historyBean}" action="performQuery"/>
-
-
 
             <adm:toolbarPluginButtons/>
 

@@ -316,7 +316,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      * @param result    the result list to be populated
      * @since 3.1
      */
-    protected void addDerivedTypes(List<FxType> result) {
+    protected void addDerivedTypes(Collection<FxType> result) {
         for (FxType type : derivedTypes) {
             result.add(type);
             type.addDerivedTypes(result);

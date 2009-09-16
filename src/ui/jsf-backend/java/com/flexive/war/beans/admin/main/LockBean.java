@@ -146,6 +146,9 @@ public class LockBean implements Serializable {
      * @return list of lock entries based on user selections
      */
     public List<FxLock> getList() {
+        if (results == null) {
+            performQuery();
+        }
         return results;
     }
 

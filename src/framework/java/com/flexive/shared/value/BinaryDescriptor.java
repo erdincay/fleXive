@@ -92,10 +92,25 @@ public class BinaryDescriptor implements Serializable {
      * Enumeration of all available preview sizes.
      */
     public static enum PreviewSizes implements ObjectWithLabel {
+        /**
+         * 42x42 thumbnail
+         */
         PREVIEW1(1, PREVIEW1_BOX),
+        /**
+         * 85x85 thumbnail
+         */
         PREVIEW2(2, PREVIEW2_BOX),
+        /**
+         * 232x232 thumbnail
+         */
         PREVIEW3(3, PREVIEW3_BOX),
+        /**
+         * 1024x768 screenview
+         */
         SCREENVIEW(4, SCREENVIEW_WIDTH),
+        /**
+         * The original, unscaled image
+         */
         ORIGINAL(0, -1);
 
         private final int blobIndex;

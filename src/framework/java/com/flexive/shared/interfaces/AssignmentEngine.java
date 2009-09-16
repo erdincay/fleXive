@@ -37,6 +37,7 @@ import com.flexive.shared.structure.*;
 import javax.ejb.Remote;
 import java.util.List;
 import java.util.Map;
+import java.util.Collection;
 
 /**
  * Structure Assignment management

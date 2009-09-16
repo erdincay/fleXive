@@ -10,6 +10,7 @@
         <appversion>${flexive.version}</appversion>
         <url>http://www.flexive.org/</url>
         <javaversion>1.5</javaversion>
+        <appsubpath>flexive-${flexive.version}</appsubpath>
 
         <!-- Pack200 greatly reduces the download size, but it does not seem to work correctly
              for the Jetty and flexive packs -->

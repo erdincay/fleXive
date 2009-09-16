@@ -1,6 +1,8 @@
 body {
     font-family: Verdana, Geneva, Helvetica, Arial, sans-serif;
     font-size: 0.9em;
+    max-width: 1024px;
+    margin: auto;
 }
 
 dd, dl {
@@ -101,6 +103,8 @@ div.example p.title {
     margin: -0.5em -0.5em 0 -0.5em;
     padding: 0.5em;
     border-bottom: 1px solid gray;
+    -moz-border-radius-topleft: 5px;
+    -moz-border-radius-topright: 5px;
 }
 
 /* Standard table style for Docbook tables */

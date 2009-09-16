@@ -1789,6 +1789,10 @@
                                             </para>
                                         </listitem>
                                         <listitem>
+                                            <para><code>SCREENVIEW</code>,
+                                            </para>
+                                        </listitem>
+                                        <listitem>
                                             <para>
                                                 <code>ORIGINAL.</code>
                                             </para>
@@ -2203,7 +2207,7 @@
                 </title>
 
                 <para>
-                    Renders part of the topic tree as nested
+                    Renders part of the content tree as nested
                     <code>&lt;ul></code>
                     elements. These can be styled via CSS to resemble menus or even pop-up menus, or enhanced with
                     JavaScript using YahooUI components.

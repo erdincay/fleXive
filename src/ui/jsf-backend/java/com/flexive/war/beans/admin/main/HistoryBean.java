@@ -178,6 +178,9 @@ public class HistoryBean implements Serializable {
      * @return list of history entries based on user selections
      */
     public List<FxHistory> getList() {
+        if (results == null) {
+            performQuery();
+        }
         return results;
     }
 

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <shortcuts>
-    <programGroup defaultName="flexive" location="applications"/>
+    <programGroup defaultName="flexive ${flexive.version}" location="applications"/>
     <shortcut
             name="fleXive ${flexive.version} server"
             description="Launch a [fleXive] ${flexive.version} server"

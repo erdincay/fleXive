@@ -454,7 +454,7 @@ public class SqlQueryBuilder implements Serializable {
      * @return  this
      * @since 3.1
      */
-    public SqlQueryBuilder select(List<String> columns) {
+    public SqlQueryBuilder select(Collection<String> columns) {
         return select(columns.toArray(new String[columns.size()]));
     }
 

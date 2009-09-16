@@ -31,11 +31,30 @@
     </Address>
 </Person>]]></programlisting>
             With &flexive; we would create a type called
-            <emphasis>Person</emphasis>. Using the
-            <classname>GroovyTypeBuilder</classname>
-            we would execute the following code in the groovy console:
-            <example xml:id="core_content_ex_personType">
-                <title>Creating a "Person" type</title>
+            <emphasis>Person</emphasis>. We can use the Java API or a custom Groovy builder, the GroovyTypeBuilder,
+            which resembles the hierarchic structure of the type more closely.
+
+            <example xml:id="core_content_ex_personType_java">
+                <title>Creating a "Person" type in Java</title>
+                <programlisting xml:id="core_content_ex_personType_java_intro" language="java"><![CDATA[// create an editable type instance
+final FxTypeEdit type = FxTypeEdit.createNew("Person").save();
+
+// create and save a new property for our person type
+type.addProperty("name", FxDataType.String1024);
+// create, modify, and save a new property for our person type
+type.addProperty("phone", FxDataType.String1024).setMultiplicity(new FxMultiplicity(1, 2)).save();
+
+// create a new group
+type.addGroup("Address");
+// add a new property for this group
+type.addProperty("Address/street", FxDataType.String1024);
+
+// the structures have been created and can now be used for creating contents
+]]></programlisting>
+            </example>
+
+            <example xml:id="core_content_ex_personType_groovy">
+                <title>Creating a "Person" type in Groovy</title>
                 <programlisting xml:id="core_content_groovy_intro" language="groovy"><![CDATA[import com.flexive.shared.scripting.groovy.*
 import com.flexive.shared.value.*
 import com.flexive.shared.security.*
