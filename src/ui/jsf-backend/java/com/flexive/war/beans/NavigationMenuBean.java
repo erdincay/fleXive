@@ -53,15 +53,12 @@ public class NavigationMenuBean implements Serializable {
     private static final long serialVersionUID = -6121812208084408559L;
 
     private static List<Item> items = new ArrayList<Item>(10);
-    private static int adminTabIdx =-1;
 
     static {
         addItem("Admin.tab.content", "adm/content.jsf", "adm/content/navigation.jsf", "contentNavigation", true);
         addItem("Admin.tab.structure", "adm/content.jsf", "adm/structure/navigation.jsf", "structureNavigation", true);
         addItem("Admin.tab.briefcase", "adm/main/briefcase/bcOverview.jsf", "adm/briefcase/navigation.jsf", "briefcaseNavigation", true);
         addItem("Admin.tab.admin", "adm/main/userGroup/overview.jsf", "adm/main/navigation.jsf", "mainNavigation", false);
-        adminTabIdx = items.size()-1;
-        //addItem("menu4","content4.jsf","content/navigation.jsf","contentNavigation",false);
     }
 
     private int activeIdx = 0;
@@ -168,13 +165,7 @@ public class NavigationMenuBean implements Serializable {
 
 
     public List getItems() {
-        if (isHasAdminAccess())
             return items;
-        else  {
-            List<Item> restrictedItems = new ArrayList<Item>(items);
-            restrictedItems.remove(adminTabIdx);
-            return restrictedItems;
-        }
     }
 
     public List getTopItems() {
@@ -203,5 +194,4 @@ public class NavigationMenuBean implements Serializable {
     public String toggleMenu() {
         return items.get(activeIdx).getNavigationTarget();
     }
-
 }
