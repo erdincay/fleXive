@@ -597,7 +597,7 @@ function linearSearch(searchItem, targetArray, regEx) {
  * @param id the form's id
  * @param init boolean value whether the EditArea should be initialised
  */
-function activateEditArea(id, init, userLang, syntax) {
+function activateEditArea(id, init, userLang, syntax, displayToggle) {
     if (init) {
         if (userLang == null)
             userLang = "en";
@@ -605,6 +605,8 @@ function activateEditArea(id, init, userLang, syntax) {
             syntax = "js";
         if (syntax == "groovy" || syntax == "gy")
             syntax = "js";
+        if(displayToggle == null)
+            displayToggle = "onload";
 
         parent.contentFrameObj.contentWindow.editAreaLoader.init({
             id : id,
@@ -614,7 +616,8 @@ function activateEditArea(id, init, userLang, syntax) {
             font_size: 8,
             allow_resize: "both",
             change_callback: "editAreaChange",
-            plugins: "executeScript"
+            plugins: "executeScript",
+            display: displayToggle
         });
     }
 }

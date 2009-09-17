@@ -64,7 +64,7 @@
                 src="#{fxSystemBean.contextPath}/adm/js/edit_area/edit_area_full.js">
         </script>
         <script type="text/javascript">
-            activateEditArea('frm:groovyCode', true, "#{exportBean.userLang}");
+            activateEditArea('frm:groovyCode', true, "#{exportBean.userLang}", null, "#{exportBean.toggleEditor}");
         </script>
 
     </ui:define>
@@ -107,6 +107,7 @@
             <t:saveState value="#{exportBean.scriptIdNameMap}"/>
             <t:saveState value="#{exportBean.gbean}"/>
             <t:saveState value="#{exportBean.userLang}"/>
+            <t:saveState value="#{exportBean.toggleEditor}"/>
 
             <ui:insert name="content"/>
 

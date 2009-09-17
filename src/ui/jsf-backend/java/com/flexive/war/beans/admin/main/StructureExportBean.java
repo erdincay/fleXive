@@ -103,6 +103,7 @@ public class StructureExportBean {
     private String currentScriptCode;
     private GroovyScriptExporterBean gbean;
     private String userLang = "en";
+    private String toggleEditor = "onload";
 
     // constructor
     public StructureExportBean() {
@@ -217,8 +218,8 @@ public class StructureExportBean {
             if (showScripts)
                 populateScriptVars();
 
-            // init the groovy export by passing the callback
-            gbean.setCallback(callback);
+            // init the groovy export by passing the callback, reset first
+            gbean.resetExporter().setCallback(callback);
 
             return "structureExportResult";
         }
@@ -783,5 +784,13 @@ public class StructureExportBean {
      */
     public void copy2clipboard() {
         // remains void
+    }
+
+    public String getToggleEditor() {
+        return toggleEditor;
+    }
+
+    public void setToggleEditor(String toggleEditor) {
+        this.toggleEditor = toggleEditor;
     }
 }

@@ -192,31 +192,31 @@
             <fx:fieldSet legendKey="StructureExport.lbl.groovyOptions">
                 <fx:formRow id="deleteStructures" labelKey="StructureExport.lbl.addDeleteStructures" newLine="false">
                     <h:selectBooleanCheckbox id="deleteStructures" value="#{exportBean.deleteStructures}">
-                        <a4j:support reRender="codePanel" event="onclick" oncomplete="activateEditArea('frm:groovyCode', true, '#{scriptConsoleBean.userLang}');"/>
+                        <a4j:support reRender="codePanel" event="onclick" oncomplete="activateEditArea('frm:groovyCode', true, '#{scriptConsoleBean.userLang}', null, '#{exportBean.toggleEditor}');"/>
                     </h:selectBooleanCheckbox>
                 </fx:formRow>
 
                 <fx:formRow id="importStatements" labelKey="StructureExport.lbl.addImportSatements" newLine="false">
                     <h:selectBooleanCheckbox id="importStatements" value="#{exportBean.generateImportStatements}">
-                        <a4j:support reRender="codePanel" event="onclick" oncomplete="activateEditArea('frm:groovyCode', true, '#{scriptConsoleBean.userLang}');"/>
+                        <a4j:support reRender="codePanel" event="onclick" oncomplete="activateEditArea('frm:groovyCode', true, '#{scriptConsoleBean.userLang}', null, '#{exportBean.toggleEditor}');"/>
                     </h:selectBooleanCheckbox>
                 </fx:formRow>
 
                 <fx:formRow id="defaultsOnly" labelKey="StructureExport.lbl.defaultsOnly" newLine="false">
                     <h:selectBooleanCheckbox id="defaultsOnly" value="#{exportBean.defaultsOnly}">
-                        <a4j:support reRender="codePanel" event="onclick" oncomplete="activateEditArea('frm:groovyCode', true, '#{scriptConsoleBean.userLang}');"/>
+                        <a4j:support reRender="codePanel" event="onclick" oncomplete="activateEditArea('frm:groovyCode', true, '#{scriptConsoleBean.userLang}', null, '#{exportBean.toggleEditor}');"/>
                     </h:selectBooleanCheckbox>
                 </fx:formRow>
 
                 <fx:formRow id="scriptAssignments" labelKey="StructureExport.lbl.scriptAssignments" newLine="false">
                     <h:selectBooleanCheckbox id="scriptAssignments" value="#{exportBean.generateScriptAssignments}">
-                        <a4j:support reRender="codePanel" event="onclick" oncomplete="activateEditArea('frm:groovyCode', true, '#{scriptConsoleBean.userLang}');"/>
+                        <a4j:support reRender="codePanel" event="onclick" oncomplete="activateEditArea('frm:groovyCode', true, '#{scriptConsoleBean.userLang}', null, '#{exportBean.toggleEditor}');"/>
                     </h:selectBooleanCheckbox>
                 </fx:formRow>
 
                 <fx:formRow id="addRoot" labelKey="StructureExport.lbl.addRoot" newLine="false">
                     <h:selectBooleanCheckbox id="addroot" value="#{exportBean.addRoot}">
-                        <a4j:support reRender="codePanel" event="onclick" oncomplete="activateEditArea('frm:groovyCode', true, '#{scriptConsoleBean.userLang}');"/>
+                        <a4j:support reRender="codePanel" event="onclick" oncomplete="activateEditArea('frm:groovyCode', true, '#{scriptConsoleBean.userLang}', null, '#{exportBean.toggleEditor}');"/>
                     </h:selectBooleanCheckbox>
                 </fx:formRow>
             </fx:fieldSet>

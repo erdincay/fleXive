@@ -143,4 +143,14 @@ public class GroovyScriptExporterBean {
         reset = true; // must be adjusted s.t. code can be regenerated
         this.defaultsOnly = defaultsOnly;
     }
+
+    /**
+     * Call this method to clear the exporter (in order to regenerate code)
+     *
+     * @return this itself for chained calls
+     */
+    public GroovyScriptExporterBean resetExporter() {
+        exporter = null;
+        return this;
+    }
 }
