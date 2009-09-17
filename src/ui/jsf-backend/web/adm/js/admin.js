@@ -597,7 +597,7 @@ function linearSearch(searchItem, targetArray, regEx) {
  * @param id the form's id
  * @param init boolean value whether the EditArea should be initialised
  */
-function activateEditArea(id, init, userLang, syntax, displayToggle) {
+function activateEditArea(id, init, userLang, syntax, displayToggle, toggleOnFunction, toggleOffFunction) {
     if (init) {
         if (userLang == null)
             userLang = "en";
@@ -607,6 +607,10 @@ function activateEditArea(id, init, userLang, syntax, displayToggle) {
             syntax = "js";
         if(displayToggle == null)
             displayToggle = "onload";
+        if(toggleOnFunction == null)
+            toggleOnFunction = "eaToggleOnAdmin";
+        if(toggleOffFunction == null)
+            toggleOffFunction = "eaToggleOffAdmin";
 
         parent.contentFrameObj.contentWindow.editAreaLoader.init({
             id : id,
@@ -617,13 +621,15 @@ function activateEditArea(id, init, userLang, syntax, displayToggle) {
             allow_resize: "both",
             change_callback: "editAreaChange",
             plugins: "executeScript",
-            display: displayToggle
+            display: displayToggle,
+            EA_toggle_on_callback: toggleOnFunction,
+            EA_toggle_off_callback: toggleOffFunction
         });
     }
 }
 
 /**
- * Helper function for the EditArea onchange callback, sets the value
+ * EDITAREA: Helper function for the EditArea onchange callback, sets the value
  * of the textarea html element
  * @param id the form id
  */
@@ -632,6 +638,23 @@ function editAreaChange(id) {
     if (contentFrame.getElementById(id) != null) {
         contentFrame.getElementById(id).value = parent.contentFrameObj.contentWindow.editAreaLoader.getValue(id);
     }
+}
+
+// EDITAREA: hold the current toggle state of the editArea
+var eaToggleState = "onload";
+
+/**
+ * EDITAREA: the toggle on callback function
+ */
+function eaToggleOnAdmin() {
+    eaToggleState = "onload";
+}
+
+/**
+ * EDITAREA: the toggle off callback function
+ */
+function eaToggleOffAdmin() {
+    eaToggleState = "later";
 }
 
 /**

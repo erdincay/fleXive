@@ -6,13 +6,15 @@
       xmlns:f="http://java.sun.com/jsf/core"
       xmlns:c="http://java.sun.com/jstl/core"
       xmlns:fn="http://java.sun.com/jsp/jstl/functions"
-      xmlns:t="http://myfaces.apache.org/tomahawk">
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:a4j="http://richfaces.org/a4j">
 
 Adds a TAB to the [fleXive] backend tab-bar.
 This is done by creating a invisible jsf command link, and then copying and usingthe the onclick even of this command
 link on the tab bar.
 
 Parameters:
+id          - the tab's id
 label       - the tab label
 labelKey    - the message key for the tab label (overrides label)
 bean        - JSF bean for invoking the action
@@ -20,6 +22,8 @@ action      - name of the action to be invoked
 lockscreen  - if false, the screen will not be locked when clicking on this tab
 immediate   - if clicking on the tab should skip JSF validation and update model phases
 rendered    - if the tab should be rendered
+ajax        - renders an a4j:commandLink instead of the standard h:commandLink
+active      - true activates the tab
 
 <ui:composition>
     <c:if test="#{rendered != false}">
@@ -36,9 +40,20 @@ rendered    - if the tab should be rendered
             <c:set var="lockscreen" value="#{not immediate}"/>
         </c:if>
 
-        <h:commandLink style="display:none" id="#{id}" action="#{bean[action]}" immediate="#{immediate}" onclick="#{lockscreen ? 'parent.lockScreen();' : ''}">
-           #{label}
-        </h:commandLink>
+        <c:if test="#{empty ajax or !ajax}">
+            <h:commandLink style="display:none" id="#{id}" action="#{bean[action]}" immediate="#{immediate}"
+                           onclick="#{lockscreen ? 'parent.lockScreen();' : ''}">
+                #{label}
+                <ui:insert/>
+            </h:commandLink>
+        </c:if>
+        <c:if test="#{ajax}">
+            <a4j:commandLink style="display:none" id="#{id}" action="#{bean[action]}" immediate="#{immediate}"
+                           onclick="#{lockscreen ? 'parent.lockScreen();' : ''}">
+                #{label}
+                <ui:insert/>
+            </a4j:commandLink>
+        </c:if>
 
         <script type="text/javascript" language="javascript">
             parent.addTab('#{fxSystemBean.response.id}',this,'#{id}','#{fxSystemBean.escapeForJavaScript[label]}','',#{active});

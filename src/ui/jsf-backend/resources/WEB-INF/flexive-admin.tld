@@ -415,6 +415,67 @@
     <tag>
       <name>tab</name>
       <body-content>JSP</body-content>
+      <description>Adds a TAB to the [fleXive] backend tab-bar</description>
+      <attribute>
+        <name>id</name>
+        <required>false</required>
+        <rtexprvalue>false</rtexprvalue>
+        <description>the tab's id (id of the commandLink)</description>
+      </attribute>
+      <attribute>
+        <name>label</name>
+        <required>false</required>
+        <rtexprvalue>false</rtexprvalue>
+        <description>the TAB label</description>
+      </attribute>
+      <attribute>
+        <name>active</name>
+        <required>false</required>
+        <rtexprvalue>false</rtexprvalue>
+        <description>true activates the tab</description>
+      </attribute>
+      <attribute>
+        <name>labelKey</name>
+        <required>false</required>
+        <rtexprvalue>false</rtexprvalue>
+        <description>the message key for the tab label (overrides label</description>
+      </attribute>
+      <attribute>
+        <name>bean</name>
+        <required>false</required>
+        <rtexprvalue>false</rtexprvalue>
+        <description>JSF bean for invoking the action</description>
+      </attribute>
+      <attribute>
+        <name>action</name>
+        <required>false</required>
+        <rtexprvalue>false</rtexprvalue>
+        <description>name of the action to be invoked</description>
+      </attribute>
+      <attribute>
+        <name>lockscreen</name>
+        <required>false</required>
+        <rtexprvalue>false</rtexprvalue>
+        <description>if false, the screen will not be locked when clicking on this tab</description>
+      </attribute>
+      <attribute>
+        <name>immediate</name>
+        <required>false</required>
+        <rtexprvalue>false</rtexprvalue>
+        <description>if clicking on the tab should skip JSF validation and update model phases</description>
+      </attribute>
+      <attribute>
+        <name>rendered</name>
+        <required>false</required>
+        <rtexprvalue>false</rtexprvalue>
+        <description>if the tab should be rendered</description>
+      </attribute>
+      <attribute>
+        <name>ajax</name>
+        <required>false</required>
+        <rtexprvalue>false</rtexprvalue>
+        <description>renders an a4j:commandLink instead of the standard h:commandLink</description>
+      </attribute>
     </tag>
     <tag>
       <name>dynTab</name>

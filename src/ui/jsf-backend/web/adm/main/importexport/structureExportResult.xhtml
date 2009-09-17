@@ -18,10 +18,14 @@
 <ui:define name="content">
 
 <adm:tab label="#{fxMessageBean['StructureExport.tabtitle.main']}" active="false" id="tab1"
-         bean="#{exportBean}" action="showMainTab" rendered="true" lockscreen="false"/>
+         bean="#{exportBean}" action="showMainTab" rendered="true" lockscreen="false" ajax="true">
+    <a4j:actionparam name="editAreaToggle" noEscape="true" assignTo="#{exportBean.toggleEditor}"
+                     value="eaToggleState"/>
+</adm:tab>
 
 <adm:tab label="#{fxMessageBean['StructureExport.tabtitle.export']}" active="true" id="tab2"
          bean="#{exportBean}" action="showResultTab" rendered="true" lockscreen="false"/>
+
 
 <a4j:outputPanel id="msgPanel1" ajaxRendered="true">
     <h:outputText value="#{fxMessageBean['StructureExport.msg.noresult']}"
@@ -224,7 +228,9 @@
 
         <a4j:outputPanel id="codePanel" ajaxRendered="true" layout="block">
             <fx:resizable>
-                <h:inputTextarea id="groovyCode" rows="30" cols="100" value="#{exportBean.scriptCode}"/>
+                <h:inputTextarea id="groovyCode" rows="30" cols="100" value="#{exportBean.scriptCode}">
+
+                    </h:inputTextarea>
             </fx:resizable>
         </a4j:outputPanel>
 
