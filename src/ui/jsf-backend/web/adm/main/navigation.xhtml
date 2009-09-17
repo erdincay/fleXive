@@ -70,6 +70,13 @@
                 <adm:treeNode titleKey="Admin.selectlists.selectList.create" link="/adm/main/selectList/create.jsf" rendered="#{fxSystemBean.isInRole['SelectListEditor']}"/>
             </adm:treeNode>
 
+            <c:if test="#{fxSystemBean.isInRole['StructureManagement']}">
+                <adm:treeNode id="export" icon="export" titleKey="Admin.system.importExport">
+                    <adm:treeNode titleKey="Admin.system.export" link="/adm/main/importexport/structureExport.jsf"/>
+                    <adm:treeNode titleKey="Admin.system.import" link="/adm/main/importexport/structureImport.jsf"/>
+                </adm:treeNode>
+            </c:if>
+
             <adm:treeNode id="system" icon="system" titleKey="Admin.system.root">
                 <adm:treeNode id="search" icon="find" titleKey="Admin.sqlSearch.root">
                     <adm:treeNode titleKey="Admin.sqlSearch.query" link="/adm/main/sqlsearch/search.jsf" />
@@ -92,13 +99,6 @@
                 <adm:treeNode titleKey="Admin.system.languages" link="/adm/main/system/languages.jsf" rendered="#{fxSystemBean.isInRole['GlobalSupervisor']}"/>
                 <adm:treeNode titleKey="Admin.content.testData" link="/adm/content/createTestData.jsf"/>
             </adm:treeNode>
-
-            <c:if test="#{fxSystemBean.isInRole['WorkflowManagement']}">
-                <adm:treeNode id="export" icon="export" titleKey="Admin.system.importExport">
-                    <adm:treeNode titleKey="Admin.system.export" link="/adm/main/importexport/structureExport.jsf"/>
-                    <adm:treeNode titleKey="Admin.system.import" link="/adm/main/importexport/structureImport.jsf"/>
-                </adm:treeNode>
-            </c:if>
         </adm:tree>
 
         <!--<adm:treeNode id="test" title="YUI Test" link="/adm/test/yui.xhtml"/>-->

@@ -777,4 +777,11 @@ public class StructureExportBean {
     public void setGbean(GroovyScriptExporterBean gbean) {
         this.gbean = gbean;
     }
+
+    /**
+     * (dummy) Action method f. the copy2clipboard js function
+     */
+    public void copy2clipboard() {
+        // remains void
+    }
 }

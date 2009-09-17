@@ -244,6 +244,10 @@
                            labelKey="StructureExport.btn.downloadGroovy"
                            buttonDisabled="#{!exportBean.exportPerformed}" icon="down"/>
 
+    <adm:ajaxCommandButton id="testcopy" labelKey="StructureExport.btn.copyClipboard" bean="#{exportBean}" action="copy2clipboard"
+                           onclick="copy2clipboard(getPreElementContent('frm:groovyCode'),'#{fxMessageBean['StructureExport.btn.copyClipboard.error']}', '#{fxMessageBean['StructureExport.btn.copyClipboard.success']}');"
+                           buttonDisabled="#{!exportBean.exportPerformed}" icon="down"/>
+
 </a4j:outputPanel>
 
 </ui:define>
