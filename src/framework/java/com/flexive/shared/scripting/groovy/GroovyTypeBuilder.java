@@ -126,7 +126,7 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
     private final static String[] PROPERTY_NONOPTION_KEYS = {
             "DATATYPE", "MULTIPLICITY", "NAME", "DESCRIPTION", "LABEL", "HINT", "ACL", "ASSIGNMENT",
             "ALIAS", "DEFAULTMULTIPLICITY", "DEFAULTVALUE", "OVERRIDEMULTILANG", "MULTILANG", "GROUPMODE",
-            "OVERRIDEACL", "OVERRIDEMULTIPLICITY", "OVERRIDEINOVERVIEW", "OVERRIDEMAXLENGTH",
+            "OVERRIDEACL", "OVERRIDEMULTIPLICITY", "OVERRIDEINOVERVIEW", "OVERRIDEMAXLENGTH", "INOVERVIEW",
             "OVERRIDEMULTILINE", "OVERRIDESEARCHABLE", "OVERRIDEUSEHTMLEDITOR", "SEARCHABLE",
             "DEFAULTLANGUAGE", "PARENTGROUPASSIGNMENT", "ENABLED", "USEHTMLEDITOR", "MAXLENGTH",
             "FULLTEXTINDEXED", "UNIQUEMODE", "AUTOUNIQUEPROPERTYNAME", "REFERENCEDLIST", "REFERENCEDTYPE"
@@ -139,7 +139,7 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
     private final static String[] ASSIGNMENT_NONOPTION_KEYS = {
             "DATATYPE", "MULTIPLICITY", "NAME", "DESCRIPTION", "LABEL", "HINT", "ACL", "ASSIGNMENT",
             "ALIAS", "DEFAULTMULTIPLICITY", "DEFAULTVALUE", "OVERRIDEMULTILANG", "MULTILANG", "GROUPMODE",
-            "OVERRIDEACL", "OVERRIDEMULTIPLICITY", "OVERRIDEINOVERVIEW", "OVERRIDEMAXLENGTH",
+            "OVERRIDEACL", "OVERRIDEMULTIPLICITY", "OVERRIDEINOVERVIEW", "OVERRIDEMAXLENGTH", "INOVERVIEW",
             "OVERRIDEMULTILINE", "OVERRIDESEARCHABLE", "OVERRIDEUSEHTMLEDITOR", "SEARCHABLE",
             "DEFAULTLANGUAGE", "PARENTGROUPASSIGNMENT", "ENABLED", "USEHTMLEDITOR", "MAXLENGTH",
             "FULLTEXTINDEXED", "UNIQUEMODE", "AUTOUNIQUEPROPERTYNAME", "REFERENCEDLIST", "REFERENCEDTYPE"
@@ -506,7 +506,7 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
 
             // AttributeMapper
             am.setStructureAttributes(acl);
-            
+
             try { // root node, create type
                 final FxTypeEdit type = FxTypeEdit.createNew(structureName, am.label, am.acl,
                         am.parentTypeName != null ? CacheAdmin.getEnvironment().getType(am.parentTypeName) : null);
@@ -897,7 +897,7 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
          */
         AttributeMapper setStructureAttributes(ACL generalACL) {
             // set acl if generalACL != null
-            if(generalACL != null)
+            if (generalACL != null)
                 acl = generalACL;
 
             if (attributes.get("acl") instanceof ACL) {
@@ -1003,7 +1003,7 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
                 hint.setTranslation(FxLanguage.DEFAULT_ID, hint.getBestTranslation());
 
             // set the acl if generalACL != null
-            if(generalACL != null)
+            if (generalACL != null)
                 acl = generalACL;
 
             if (attributes.get("acl") instanceof ACL) {
@@ -1011,7 +1011,7 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
             } else if (attributes.get("acl") instanceof String) {
                 final String aclString = (String) FxSharedUtils.get(attributes, "acl", "Default Structure ACL");
                 acl = CacheAdmin.getEnvironment().getACL(aclString);
-            } else if(!attributes.containsKey("acl") && generalACL == null) {
+            } else if (!attributes.containsKey("acl") && generalACL == null) {
                 acl = CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()); // default
             }
 
@@ -1127,7 +1127,7 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
             }
 
             if (attributes.containsKey("maxLength")) {
-                if (maxLength != pa.getMaxLength())
+                if (maxLength != pa.getMaxLength() && maxLength != -1)
                     pa.setMaxLength(maxLength);
             }
 
@@ -1214,9 +1214,13 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
             if (attributes.containsKey("fullTextIndexed"))
                 property.setFulltextIndexed(fullTextIndexed);
             if (attributes.containsKey("multilang"))
-                property.setMultiLang(multilang);
+                if (multilang) { // only set if "true", prop default fallback otherwise
+                    property.setMultiLang(multilang);
+                }
             if (attributes.containsKey("overrideMultilang"))
-                property.setOverrideMultiLang(overrideMultilang);
+                if (overrideMultilang) { // only set if "true", prop default fallback otherwise
+                    property.setOverrideMultiLang(overrideMultilang);
+                }
             if (attributes.containsKey("overrideACL"))
                 property.setOverrideACL(overrideACL);
             if (attributes.containsKey("overrideMultiplicity"))
@@ -1239,14 +1243,17 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
                 property.setMultiLine(multiline);
             if (attributes.containsKey("maxLength")) {
                 try {
-                    property.setMaxLength(maxLength);
+                    if (maxLength != -1) {
+                        property.setMaxLength(maxLength);
+                    }
                 } catch (FxInvalidParameterException e) {
                     throw e.asRuntimeException();
                 }
             }
             if (attributes.containsKey("overrideMaxLength"))
-                property.setOverrideMaxLength(overrideMaxLength);
-
+                if (overrideMaxLength) { // only set this property if set to true, will fall back to prop default
+                    property.setOverrideMaxLength(overrideMaxLength);
+                }
             if (defaultValue != null)
                 property.setDefaultValue(defaultValue);
             if (attributes.containsKey("uniqueMode"))

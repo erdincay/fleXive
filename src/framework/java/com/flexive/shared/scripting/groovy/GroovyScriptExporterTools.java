@@ -245,7 +245,9 @@ public final class GroovyScriptExporterTools {
             sopts.put("overrideSearchable", prop.mayOverrideSearchable() + "");
             sopts.put("overrideUseHtmlEditor", prop.mayOverrideUseHTMLEditor() + "");
             sopts.put("overrideMultilang", prop.mayOverrideMultiLang() + "");
-            sopts.put("maxLength", prop.getMaxLength() + "");
+            if(prop.getMaxLength() != 0) {// means that maxLength is not set
+                sopts.put("maxLength", prop.getMaxLength() + "");
+            }
             sopts.put("searchable", prop.isSearchable() + "");
             sopts.put("fullTextIndexed", prop.isFulltextIndexed() + "");
             sopts.put("multiline", prop.isMultiLine() + "");
