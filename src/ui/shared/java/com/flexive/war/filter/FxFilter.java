@@ -120,12 +120,12 @@ public class FxFilter implements Filter {
             performDivisionServices();
             initializeJsonRpc(request.getSession());
 
-            if (!isWebdav && FxWebDavUtils.isWebDavPropertyMethod((HttpServletRequest) servletRequest)) {
+            /*if (!isWebdav && FxWebDavUtils.isWebDavPropertyMethod((HttpServletRequest) servletRequest)) {
                 // This is an invalid webdav request - send a not allowed flag and kill the session immediatly
                 ((HttpServletResponse) servletResponse).sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
                 ((HttpServletRequest) servletRequest).getSession().invalidate();
                 return;
-            }
+            }*/
 
             // Cache data for jsp,jsf,and xhtml pages only
             /* TODO: fix/implements response caching.
