@@ -15,32 +15,78 @@
 
 <ui:composition template="/adm/contentTemplate.xhtml">
 
-    <ui:define name="body">
-        <c:if test="#{structureImportBean.loadType}">
-            <script type="text/javascript">
-                parent.getStructureNavFrame().doTreeAction("RELOAD_SELECT_TYPE", #{structureImportBean.typeId});
-            </script>
-        </c:if>
+    <ui:define name="head">
+        <script language="javascript" type="text/javascript"
+                src="#{fxSystemBean.contextPath}/adm/js/edit_area/edit_area_full.js">
+        </script>
+        <script type="text/javascript">
+            activateEditArea('frm:pasteArea', true, "#{structureImportBean.userLang}");
+        </script>
+    </ui:define>
 
+    <ui:define name="body">
         <h:form id="frm" enctype="multipart/form-data">
 
-            <adm:tab label="#{fxMessageBean['StructureEditor.tabtitle.import']}" active="true" id="tabChoose"/>
+            <adm:tab label="#{fxMessageBean['StructureImport.tabtitle.import']}" active="true" id="tabChoose"/>
             <c:if test="#{empty structureImportBean.parseRequestParameters}"/>
 
-            <fx:formRow labelKey="StructureEditor.field.importUpload" id="upload">
-                <t:inputFileUpload id="upload" value="#{structureImportBean.uploadContent}"/>
-            </fx:formRow>
+            <a4j:outputPanel id="togglePanel" layout="block" ajaxRendered="true">
+                <fx:fieldSet id="uploadType" legendKey="StructureImport.chooseUploadType">
+                    <fx:formRow labelKey="StructureImport.lbl.groovyImport" id="groovyImport"
+                                width="600" height="20" overrideInputStyle="width:250px;">
+                        <h:selectBooleanCheckbox id="groovyImport" value="#{structureImportBean.groovyImport}">
+                            <a4j:support event="onclick" reRender="buttonPanel, resultPanel, togglePanel"
+                                         oncomplete="activateEditArea('frm:pasteArea', true, '#{structureImportBean.userLang}');"/>
+                        </h:selectBooleanCheckbox>
+                        <h:outputText style="color:red; padding-left:10px; padding-bottom:5px"
+                                      value="#{fxMessageBean['StructureImport.lbl.xmlImport']}"
+                                      rendered="#{!structureImportBean.groovyImport}"/>
+                    </fx:formRow>
 
-            <fx:formRow labelKey="StructureEditor.field.importPaste" id="paste">
-                <h:inputTextarea id="paste" rows="10" cols="80" value="#{structureImportBean.pasteContent}"
-                                 readonly="false"/>
-            </fx:formRow>
+                </fx:fieldSet>
+            </a4j:outputPanel>
+
+            <fx:fieldSet id="fileUpload" legendKey="StructureImport.field.importUpload">
+                <t:inputFileUpload id="fileUpload" value="#{structureImportBean.uploadContent}"/>
+            </fx:fieldSet>
+
+            <a4j:outputPanel id="pastePanel" ajaxRendered="true" layout="block">
+                <fx:fieldSet id="uploadType" legendKey="StructureImport.field.importPaste">
+                    <h:inputTextarea id="pasteArea" rows="20" cols="100" value="#{structureImportBean.pasteContent}"
+                                     readonly="false"/>
+                    
+                    <br/>
+
+                    <a4j:outputPanel id="verifyPanel" layout="block">
+                        <adm:ajaxCommandButton id="verifyButton" labelKey="Script.button.verify"
+                                               icon="check" bean="#{structureImportBean}"
+                                               buttonDisabled="#{!structureImportBean.groovyImport}"
+                                               action="checkScriptSyntax" reRender="resultPanel, uploadPanel"
+                                               oncomplete="activateEditArea('frm:pasteArea', true, '#{structureImportBean.userLang}');"/>
+                    </a4j:outputPanel>
+                </fx:fieldSet>
+
+
+            </a4j:outputPanel>
 
             <br/><br/>
-            <adm:commandButton labelKey="StructureEditor.button.import" location="both"
-                               bean="#{structureImportBean}"
+
+            <adm:commandButton labelKey="StructureImport.button.import" location="both"
+                               bean="#{structureImportBean}" lockscreen="true"
                                icon="paste" action="importType" id="importButton"/>
             <adm:toolbarPluginButtons/>
+
+            <br/><br/>
+
+            <a4j:outputPanel id="resultPanel" layout="block">
+                <pre>#{structureImportBean.result}</pre>
+                    <span style="color:gray;font-style:italic;">
+                        <a4j:outputPanel id="executionTime" layout="block"
+                                         rendered="#{not empty scriptConsoleBean.result}">
+                            #{fxMessageBean['ScriptConsole.label.executionTime, #{scriptConsoleBean.executionTime}']}
+                        </a4j:outputPanel>
+                    </span>
+            </a4j:outputPanel>
 
         </h:form>
     </ui:define>

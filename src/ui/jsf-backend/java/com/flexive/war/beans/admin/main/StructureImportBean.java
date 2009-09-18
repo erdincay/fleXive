@@ -33,18 +33,22 @@ package com.flexive.war.beans.admin.main;
 
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.beans.ActionBean;
+import com.flexive.faces.beans.MessageBean;
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.faces.messages.FxFacesMsgInfo;
 import com.flexive.shared.EJBLookup;
+import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.FxContext;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxRuntimeException;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.myfaces.custom.fileupload.UploadedFile;
 
 import java.io.IOException;
 import java.io.Serializable;
+import java.io.StringWriter;
+import java.io.PrintWriter;
+import java.util.Formatter;
 
 /**
  * Structure import
@@ -55,14 +59,17 @@ import java.io.Serializable;
 public class StructureImportBean implements ActionBean, Serializable {
     private static final long serialVersionUID = 1763704615519844541L;
 
-    private static final Log LOG = LogFactory.getLog(StructureImportBean.class);
-
     private UploadedFile uploadContent;
     private String pasteContent;
     private String source;
-    private boolean loadType;
-    private long typeId;
+    private boolean groovyImport = true;
+    private transient Object result;
+    private long executionTime;
+    private String userLang = "en";
 
+    /**
+     * {@inheritDoc}
+     */
     public String getParseRequestParameters() throws FxApplicationException {
         String action = FxJsfUtils.getParameter("action");
         if (StringUtils.isBlank(action)) {
@@ -97,52 +104,108 @@ public class StructureImportBean implements ActionBean, Serializable {
         this.pasteContent = pasteContent;
     }
 
-    public boolean isLoadType() {
-        return loadType;
+    public String getUserLang() {
+        userLang = FxContext.getUserTicket().getLanguage().getIso2digit();
+        return userLang;
     }
 
-    public void setLoadType(boolean loadType) {
-        this.loadType = loadType;
+    public void setUserLang(String userLang) {
+        this.userLang = userLang;
     }
 
-    public long getTypeId() {
-        return typeId;
+    public Object getResult() {
+        return result;
     }
 
-    public void setTypeId(long typeId) {
-        this.typeId = typeId;
+    public void setResult(Object result) {
+        this.result = result;
     }
 
+    public long getExecutionTime() {
+        return executionTime;
+    }
+
+    public void setExecutionTime(long executionTime) {
+        this.executionTime = executionTime;
+    }
+
+    /**
+     * Action method for the Groovy script / xml type import
+     *
+     * @return returns the structureImport page
+     */
     public String importType() {
         boolean ok = false;
         long id = -1;
-        if (uploadContent != null && uploadContent.getSize() > 0) {
-            try {
-                id = performTypeImport(new String(uploadContent.getBytes(), "UTF-8"));
-                ok = id > 0;
-            } catch (IOException e) {
-                new FxFacesMsgErr("Content.err.Exception", e.getMessage()).addToContext();
+
+        if (groovyImport) { // call the Groovy console
+            if (uploadContent != null && uploadContent.getSize() > 0) {
+                try {
+                    ok = groovyUpload(new String(uploadContent.getBytes(), "UTF-8"));
+                } catch (IOException e) {
+                    new FxFacesMsgErr("Content.err.Exception", e.getMessage()).addToContext();
+                }
+            } else if (!StringUtils.isBlank(pasteContent)) {
+                ok = groovyUpload(pasteContent);
+            } else {
+                new FxFacesMsgErr("Script.err.noCodeProvided").addToContext();
             }
-        } else if (!StringUtils.isEmpty(pasteContent)) {
-            id = performTypeImport(pasteContent);
-            ok = id > 0;
-        } else {
-            new FxFacesMsgInfo("Content.nfo.import.noData").addToContext();
-            ok = false;
+        } else { // XML import
+            if (uploadContent != null && uploadContent.getSize() > 0) {
+                try {
+                    // remove <export></export> tags
+                    final String upload = new String(uploadContent.getBytes(), "UTF-8").replace("<export>", "").replace("</export", "");
+                    id = performTypeImport(upload);
+                    ok = id > 0;
+                } catch (IOException e) {
+                    new FxFacesMsgErr("Content.err.Exception", e.getMessage()).addToContext();
+                }
+            } else if (!StringUtils.isEmpty(pasteContent)) {
+                // remove <export></export> tags
+                id = performTypeImport(pasteContent.replace("<export>", "").replace("</export", ""));
+                ok = id > 0;
+            } else {
+                new FxFacesMsgInfo("Content.nfo.import.noData").addToContext();
+                ok = false;
+            }
         }
-        if (ok) {
-//            TypeEditorBean tedit = (TypeEditorBean)FxJsfUtils.getManagedBean("typeEditorBean");
-//            tedit.editType(id);
-//            tedit.setReloadStructureTree(true);
-//            return "typeEditor";
-            setLoadType(true);
-            setTypeId(id);
+
+        if (ok && !groovyImport) {
+            final String typeName = "\"" + CacheAdmin.getEnvironment().getType(id).getName() + "\"";
+            result = MessageBean.getInstance().getMessage("StructureImport.msg.importOK") + typeName;
+        } else if (ok && groovyImport) {
+            result = MessageBean.getInstance().getMessage("StructureImport.msg.groovyImportOK") + result;
         }
+
         return "structureImport";
     }
 
     /**
-     * Perform the actual import
+     * Refactorisation of the groovy upload
+     *
+     * @param code the script code
+     * @return returns true if the import / running the script went ok
+     */
+    private boolean groovyUpload(String code) {
+        final String fileName = "importConsole.groovy";
+        long start = System.currentTimeMillis();
+
+        try {
+            result = ScriptConsoleBean.runScript(code, fileName, false);
+            return true;
+        } catch (Throwable t) {
+            final StringWriter writer = new StringWriter();
+            t.printStackTrace(new PrintWriter(writer));
+            final String msg = t.getCause() != null ? t.getCause().getMessage() : t.getMessage();
+            result = new Formatter().format("Exception caught: %s%n%s", msg, writer.getBuffer());
+            return false;
+        } finally {
+            executionTime = System.currentTimeMillis() - start;
+        }
+    }
+
+    /**
+     * Perform the actual import for types in XML format
      *
      * @param typeXML type as XML
      * @return if > 0 the id, else its an error
@@ -157,5 +220,29 @@ public class StructureImportBean implements ActionBean, Serializable {
             new FxFacesMsgErr(e).addToContext();
             return -1;
         }
+    }
+
+    public boolean isGroovyImport() {
+        return groovyImport;
+    }
+
+    public void setGroovyImport(boolean groovyImport) {
+        this.groovyImport = groovyImport;
+    }
+
+    /**
+     * Verifies the syntax of a given groovy script
+     */
+    public void checkScriptSyntax() {
+        if (uploadContent != null && uploadContent.getSize() > 0) {
+            try {
+                ScriptBean.checkScriptSyntax("dummyName.groovy", new String(uploadContent.getBytes(), "UTF-8"));
+            } catch (IOException e) {
+                new FxFacesMsgErr("Content.err.Exception", e.getMessage()).addToContext();
+            }
+        } else
+            ScriptBean.checkScriptSyntax("dummyName.groovy", pasteContent);
+
+        result = null; // reset
     }
 }

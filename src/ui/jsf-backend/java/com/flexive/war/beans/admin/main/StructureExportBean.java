@@ -708,6 +708,7 @@ public class StructureExportBean {
     }
 
     public String getUserLang() {
+        userLang = FxContext.getUserTicket().getLanguage().getIso2digit();
         return userLang;
     }
 
