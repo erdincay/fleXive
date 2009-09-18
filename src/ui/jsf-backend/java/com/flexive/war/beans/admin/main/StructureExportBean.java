@@ -699,12 +699,12 @@ public class StructureExportBean {
         return gbean.isDefaultsOnly();
     }
 
-    public void setAddRoot(boolean addRoot) {
-        gbean.setAddRoot(addRoot);
+    public void setAddSystemTypes(boolean addSystemTypes) {
+        gbean.setAddSystemTypes(addSystemTypes);
     }
 
-    public boolean isAddRoot() {
-        return gbean.isAddRoot();
+    public boolean isAddSystemTypes() {
+        return gbean.isAddSystemTypes();
     }
 
     public String getUserLang() {

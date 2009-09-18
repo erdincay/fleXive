@@ -36,6 +36,7 @@ import com.flexive.shared.structure.FxAssignment;
 import com.flexive.shared.structure.FxGroupAssignment;
 import com.flexive.shared.structure.export.StructureExporterCallback;
 import com.flexive.shared.exceptions.FxInvalidStateException;
+import com.flexive.shared.CacheAdmin;
 
 import java.util.*;
 
@@ -56,7 +57,7 @@ import org.apache.commons.logging.Log;
  * generateScriptAssignments: set to true if the script code should contain script assignments found during the export<br/>
  * defaultsOnly: set to true if the structure creation code should only contain the assignment names (using GroovyTypeBuilder defaults)<br/><br/>
  * addRoot: add the ROOT node to the generated script code
- *
+ * <p/>
  * run(..) methods:<br/>
  * run() .. generates the script code (use setters for options)<br/>
  * run(boolean reset) .. create the script code and optionally (reset = true will regenerate the script code if the run(...) method was invoked
@@ -78,21 +79,12 @@ public class GroovyScriptExporter {
     private boolean generateDeleteCode = false;
     private boolean generateScriptAssignments = false;
     private boolean defaultsOnly = false;
-    private boolean addRoot = false;
+    private boolean addSystemTypes = false;
     private static final Log LOG = LogFactory.getLog(GroovyScriptExporter.class);
+    private Set<FxType> filteredTypes;
 
     public GroovyScriptExporter(StructureExporterCallback callback) {
         this.callback = callback;
-    }
-
-    /**
-     * Perform script code generation (default settings)
-     *
-     * @return the GroovyScriptExporter itself for chained calls
-     */
-    public GroovyScriptExporter run() {
-        generateScriptCode(false);
-        return this;
     }
 
     /**
@@ -113,17 +105,18 @@ public class GroovyScriptExporter {
      * @param generateDeleteCode        set to true to add structure / instance deletion code
      * @param generateScriptAssignments set to true to add script events for types / assignments
      * @param defaultsOnly              set to true if the script export should disregard any existing options and use the defaults only
-     * @param addRoot                   set to true if the script export should include the ROOT type
+     * @param addSystemTypes            set to true if the script export should include the [fleXive] system types
      * @param reset                     set to true in order to regenerate any code
      * @return the GroovyScriptExporter itself for chained calls
      */
     public GroovyScriptExporter run(boolean generateImportStatements, boolean generateDeleteCode, boolean generateScriptAssignments,
-                                    boolean defaultsOnly, boolean addRoot, boolean reset) {
+                                    boolean defaultsOnly, boolean addSystemTypes, boolean reset) {
         this.generateImportStatements = generateImportStatements;
         this.generateDeleteCode = generateDeleteCode;
         this.generateScriptAssignments = generateScriptAssignments;
         this.defaultsOnly = defaultsOnly;
-        this.addRoot = addRoot;
+        this.addSystemTypes = addSystemTypes;
+        filteredTypes = filterExportTypes();
         generateScriptCode(reset);
         return this;
     }
@@ -151,12 +144,20 @@ public class GroovyScriptExporter {
     private void createScriptAssignmentCode(boolean reset) {
         if (callback.getTypeScriptMapping().size() > 0 || callback.getAssignmentScriptMapping().size() > 0) {
             if (scriptAssignments == null || reset) {
-                scriptAssignments = new StringBuilder(5000);
+                final Map<Long, Map<String, List<Long>>> typeScriptMapping = filterScriptAssignments(
+                        callback.getTypeScriptMapping(), true);
+                final Map<Long, Map<String, List<Long>>> assignmentScriptMapping = filterScriptAssignments(
+                        callback.getTypeScriptMapping(), false);
 
-                scriptAssignments.append(GroovyScriptExporterTools.SCRIPTASSHEADER)
-                        .append(GroovyScriptExporterTools.createScriptAssignments(callback.getTypeScriptMapping(),
-                                callback.getAssignmentScriptMapping()));
-                scriptAssignments.trimToSize();
+                final boolean s1 = typeScriptMapping.size() > 0;
+                final boolean s2 = assignmentScriptMapping.size() > 0;
+                if (s1 || s2) {
+                    scriptAssignments = new StringBuilder(5000);
+                    scriptAssignments.append(GroovyScriptExporterTools.SCRIPTASSHEADER)
+                            .append(GroovyScriptExporterTools.createScriptAssignments(typeScriptMapping, assignmentScriptMapping));
+                    scriptAssignments.trimToSize();
+                } else if(reset) // delete any existing script code
+                    scriptAssignments = null;
             }
         }
     }
@@ -187,7 +188,6 @@ public class GroovyScriptExporter {
     public void setGenerateImportStatements(boolean generateImportStatements) {
         this.generateImportStatements = generateImportStatements;
     }
-
 
     public String getImportStatements() {
         return importStatements;
@@ -221,12 +221,12 @@ public class GroovyScriptExporter {
         this.generateScriptAssignments = generateScriptAssignments;
     }
 
-    public boolean isAddRoot() {
-        return addRoot;
+    public boolean isAddSystemTypes() {
+        return addSystemTypes;
     }
 
-    public void setAddRoot(boolean addRoot) {
-        this.addRoot = addRoot;
+    public void setAddSystemTypes(boolean addSystemTypes) {
+        this.addSystemTypes = addSystemTypes;
     }
 
     /**
@@ -358,21 +358,54 @@ public class GroovyScriptExporter {
 
     /**
      * Filter out the ROOT type for the Groovy script export
+     *
      * @return returns the set of exported types depending on 'addRoot'
      */
     private Set<FxType> filterExportTypes() {
-        final Set<FxType> types;
-        if(addRoot) {
-            types = callback.getTypeAssignments().keySet();
-        } else {
-            final Set<FxType> tmp = callback.getTypeAssignments().keySet();
-            types = new LinkedHashSet<FxType>(); // guarantee order f. export
-            for(FxType t : tmp) {
-                if(!t.getName().equalsIgnoreCase("ROOT"))
-                    types.add(t);
+        if (addSystemTypes)
+            return callback.getTypeAssignments().keySet();
+
+        final Set<FxType> filteredTypes;
+
+        final Set<FxType> tmp = callback.getTypeAssignments().keySet();
+        filteredTypes = new LinkedHashSet<FxType>(); // guarantee order f. export
+        for (FxType t : tmp) {
+            if (!GroovyScriptExporterTools.isSystemType(t.getName()))
+                filteredTypes.add(t);
+        }
+
+        return filteredTypes;
+    }
+
+    /**
+     * Filters out any script assignments which belong to a given Set of filtered types
+     *
+     * @param scriptAssignments the Map if script assignments
+     * @param isTypeList        true if the input map are type assignments, false otherwise
+     * @return returns a filtered map if script assignments
+     */
+    private Map<Long, Map<String, List<Long>>> filterScriptAssignments(Map<Long, Map<String, List<Long>>> scriptAssignments,
+                                                                       boolean isTypeList) {
+
+        if (addSystemTypes)
+            return scriptAssignments;
+
+        Map<Long, Map<String, List<Long>>> out = new HashMap<Long, Map<String, List<Long>>>();
+        for (Long id : scriptAssignments.keySet()) {
+            final long mapMainId;
+            // determine the correct type id
+            if (isTypeList)
+                mapMainId = id;
+            else {
+                mapMainId = CacheAdmin.getEnvironment().getAssignment(id).getAssignedType().getId();
+            }
+            for (FxType t : filteredTypes) {
+                if (t.getId() == mapMainId) {
+                    out.put(id, scriptAssignments.get(id));
+                }
             }
         }
 
-        return types;
+        return out;
     }
 }

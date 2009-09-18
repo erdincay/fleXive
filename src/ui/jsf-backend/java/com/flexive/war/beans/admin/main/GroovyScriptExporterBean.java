@@ -49,7 +49,7 @@ public class GroovyScriptExporterBean {
     private boolean generateImportStatements = true;
     private boolean defaultsOnly = false;
     private boolean generateScriptAssignments = true;
-    private boolean addRoot = false;
+    private boolean addSystemTypes = false;
     private boolean reset;
 
     /**
@@ -83,9 +83,9 @@ public class GroovyScriptExporterBean {
      */
     private void generateCode() {
         if (exporter == null)
-            exporter = new GroovyScriptExporter(callback).run(generateImportStatements, deleteStructures, generateScriptAssignments, defaultsOnly, addRoot, reset);
+            exporter = new GroovyScriptExporter(callback).run(generateImportStatements, deleteStructures, generateScriptAssignments, defaultsOnly, addSystemTypes, reset);
         else
-            exporter.run(generateImportStatements, deleteStructures, generateScriptAssignments, defaultsOnly, addRoot, reset);
+            exporter.run(generateImportStatements, deleteStructures, generateScriptAssignments, defaultsOnly, addSystemTypes, reset);
 
         scriptCode = exporter.getScriptCode();
         reset = false; // reset reset
@@ -127,13 +127,13 @@ public class GroovyScriptExporterBean {
         this.generateScriptAssignments = generateScriptAssignments;
     }
 
-    public boolean isAddRoot() {
-        return addRoot;
+    public boolean isAddSystemTypes() {
+        return addSystemTypes;
     }
 
-    public void setAddRoot(boolean addRoot) {
+    public void setAddSystemTypes(boolean addSystemTypes) {
         reset = true;
-        this.addRoot = addRoot;
+        this.addSystemTypes = addSystemTypes;
     }
 
     /**

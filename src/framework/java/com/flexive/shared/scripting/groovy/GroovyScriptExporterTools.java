@@ -68,6 +68,13 @@ public final class GroovyScriptExporterTools {
         }
     }
 
+    /**
+     * Enumeration of SYSTEM TYPES which can optionally be ignored
+     */
+    protected enum IgnoreTypes {
+        FOLDER, ROOT, IMAGE, ARTICLE, CONTACTDATA, DOCUMENTFILE
+    }
+
     protected final static StringBuilder GROOVYPACKAGEIMPORTS = new StringBuilder("import com.flexive.shared.*\nimport com.flexive.shared.interfaces.*")
             .append("\nimport com.flexive.shared.value.*\nimport com.flexive.shared.content.*")
             .append("\nimport com.flexive.shared.search.*\nimport com.flexive.shared.tree.*")
@@ -91,6 +98,20 @@ public final class GroovyScriptExporterTools {
 
     private GroovyScriptExporterTools() {
         // no instantiation
+    }
+
+    /**
+     * Iterates throught the enum IgnoreTypes
+     *
+     * @param typeName the type's name
+     * @return returns true if the type is a system type
+     */
+    public static boolean isSystemType(String typeName) {
+        for (IgnoreTypes i : IgnoreTypes.values()) {
+            if (typeName.equals(i.toString()))
+                return true;
+        }
+        return false;
     }
 
     /**
@@ -245,7 +266,7 @@ public final class GroovyScriptExporterTools {
             sopts.put("overrideSearchable", prop.mayOverrideSearchable() + "");
             sopts.put("overrideUseHtmlEditor", prop.mayOverrideUseHTMLEditor() + "");
             sopts.put("overrideMultilang", prop.mayOverrideMultiLang() + "");
-            if(prop.getMaxLength() != 0) {// means that maxLength is not set
+            if (prop.getMaxLength() != 0) {// means that maxLength is not set
                 sopts.put("maxLength", prop.getMaxLength() + "");
             }
             sopts.put("searchable", prop.isSearchable() + "");
@@ -1488,13 +1509,13 @@ public final class GroovyScriptExporterTools {
     /**
      * Checks if a given input String represents a Java or Groovy keyword
      *
-     * @param input the input String
+     * @param input        the input String
      * @param doubleQuotes true = double quotes, false = single quotes
      * @return returns a quoted version of the same String if input == keyword
      */
     private static String keyWordNameCheck(String input, boolean doubleQuotes) {
         if (ArrayUtils.contains(JAVA_KEYWORDS, input) || ArrayUtils.contains(GROOVY_KEYWORDS, input)) {
-            if(doubleQuotes)
+            if (doubleQuotes)
                 return "\"" + input + "\"";
             return "'" + input + "'";
         }
@@ -1512,7 +1533,6 @@ public final class GroovyScriptExporterTools {
                                                  Map<Long, Map<String, List<Long>>> assignmentScriptMapping) {
 
         final StringBuilder script = new StringBuilder(5000);
-
         // TYPE SCRIPTS
         if (typeScriptMapping != null && typeScriptMapping.size() > 0) {
             script.append("\n// SCRIPTS ATTACHED TO TYPE EVENTS\n\n")
@@ -1590,7 +1610,8 @@ public final class GroovyScriptExporterTools {
         final String scriptCode = processScriptCode(si.getCode());
 
         // load type in script, then append type name
-        script.append("currentType = CacheAdmin.getEnvironment().getType(\"")
+        script.append("\n// ***** SCRIPT START ***** \n")
+                .append("currentType = CacheAdmin.getEnvironment().getType(\"")
                 .append(typeName)
                 .append("\")\n\n")
                 .append("scriptCode = \"\"\"")
@@ -1609,7 +1630,7 @@ public final class GroovyScriptExporterTools {
                 .append(si.isActive())
                 .append(", ")
                 .append(derivedUsage)
-                .append(")\n\n");
+                .append(")\n***** SCRIPT END *****\n");
 
         return script.toString();
     }
@@ -1634,7 +1655,8 @@ public final class GroovyScriptExporterTools {
         final String scriptCode = processScriptCode(si.getCode());
 
         // load assignment, then attach script to event and assignment id
-        script.append("currentAssignment = CacheAdmin.getEnvironment().getAssignment(\"")
+        script.append("\n// ***** SCRIPT START ***** \n")
+                .append("currentAssignment = CacheAdmin.getEnvironment().getAssignment(\"")
                 .append(XPath)
                 .append("\")\n\n")
                 .append("scriptCode = \"\"\"")
@@ -1653,7 +1675,7 @@ public final class GroovyScriptExporterTools {
                 .append(si.isActive())
                 .append(", ")
                 .append(derivedUsage)
-                .append(")\n\n");
+                .append(")\n***** SCRIPT END *****\n");
 
         script.trimToSize();
         return script.toString();
