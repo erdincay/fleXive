@@ -593,7 +593,7 @@ function linearSearch(searchItem, targetArray, regEx) {
 }
 
 /**
- * Activates the EditArea js plugin
+ * EDITAREA: Activates the EditArea js plugin
  * @param id the form's id
  * @param init boolean value whether the EditArea should be initialised
  */

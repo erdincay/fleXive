@@ -103,7 +103,7 @@ public class StructureExportBean {
     private String currentScriptCode;
     private GroovyScriptExporterBean gbean;
     private String userLang = "en";
-    private String toggleEditor = "onload";
+    private String toggleEditor = "later";
 
     // constructor
     public StructureExportBean() {
