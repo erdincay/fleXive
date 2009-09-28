@@ -1,6 +1,6 @@
 -- DROP SCHEMA IF EXISTS flexiveConfiguration;
 -- CREATE SCHEMA flexiveConfiguration;
-SET SCHEMA flexiveConfiguration;
+-- SET SCHEMA flexiveConfiguration;
 
 --  Main configuration table
 

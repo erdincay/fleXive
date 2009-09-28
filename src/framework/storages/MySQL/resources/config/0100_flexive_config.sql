@@ -1,7 +1,3 @@
-DROP SCHEMA IF EXISTS flexiveConfiguration;
-CREATE SCHEMA flexiveConfiguration;
-USE flexiveConfiguration;
-
 --  Main configuration table
 
 CREATE TABLE FXS_CONFIGURATION (

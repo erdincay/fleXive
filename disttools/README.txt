@@ -2,7 +2,7 @@
 ====================
 
 Thank you for using [fleXive]. This directory contains all [fleXive] 
-libraries,  administration backend application and an Ant-based build 
+libraries, the administration backend application and an Ant-based build 
 system for your projects.
 
 A complete description of the [fleXive] distribution can be found in 

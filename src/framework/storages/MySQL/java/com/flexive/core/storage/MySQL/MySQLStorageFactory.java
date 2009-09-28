@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2008
+ *  Copyright (c) 1999-2009
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -36,24 +36,28 @@ import static com.flexive.core.DatabaseConst.TBL_SELECTLIST_ITEM;
 import com.flexive.core.search.DataFilter;
 import com.flexive.core.search.DataSelector;
 import com.flexive.core.search.SqlSearch;
-import com.flexive.core.search.cmis.impl.sql.SqlDialect;
 import com.flexive.core.search.cmis.impl.CmisSqlQuery;
+import com.flexive.core.search.cmis.impl.sql.MySQL.MySqlDialect;
+import com.flexive.core.search.cmis.impl.sql.SqlDialect;
 import com.flexive.core.search.genericSQL.GenericSQLDataFilter;
 import com.flexive.core.search.genericSQL.GenericSQLDataSelector;
-import com.flexive.core.search.cmis.impl.sql.MySQL.MySqlDialect;
 import com.flexive.core.storage.*;
 import com.flexive.core.storage.genericSQL.GenericLockStorage;
+import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.exceptions.FxSqlSearchException;
-import com.flexive.shared.structure.TypeStorageMode;
-import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.interfaces.ContentEngine;
+import com.flexive.shared.structure.FxEnvironment;
+import com.flexive.shared.structure.TypeStorageMode;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Factory for the MySQL storage
@@ -81,6 +85,10 @@ public class MySQLStorageFactory implements DBStorage {
             LOG.error(e);
             return false;
         }
+    }
+
+    public boolean createSchema(String schema, boolean dropIfExists, String jdbcURL, String jdbcDriver, String user, String password) {
+        return true;
     }
 
     /**
@@ -198,4 +206,137 @@ public class MySQLStorageFactory implements DBStorage {
         // 1582 Example error: Duplicate entry 'ABSTRACT' for key 'UK_TYPEPROPS_NAME'
         return (sqlErr == 1062 || sqlErr == 1582);
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Connection getConnection(String database, String schema, String jdbcURL, String jdbcURLParameters,
+                                    String user, String password, boolean createDB, boolean createSchema,
+                                    boolean dropIfExist) throws Exception {
+        Connection con = null;
+        Statement stmt = null;
+        try {
+            String db = schema;
+            if (StringUtils.isBlank(db))
+                db = database;
+            if (StringUtils.isBlank(db))
+                throw new IllegalArgumentException("No database or schema name specified!");
+            System.out.println("Using schema [" + db + "] for " + VENDOR);
+            String url = jdbcURL;
+            if (StringUtils.isBlank(url))
+                throw new IllegalArgumentException("No JDBC URL provided!");
+            url = url.trim();
+            if (!StringUtils.isBlank(jdbcURLParameters)) {
+                String p = jdbcURLParameters.trim();
+                if (!(url.endsWith("?") || p.startsWith("?")))
+                    p = "?" + (p.charAt(0) == '&' ? p.substring(1) : p);
+                url = url + p;
+            }
+            try {
+                Class.forName("com.mysql.jdbc.Driver").newInstance();
+            } catch (ClassNotFoundException e) {
+                System.err.println("MySQL JDBC Driver not found in classpath!");
+                return null;
+            }
+            System.out.println("Connecting using JDBC URL " + url);
+            con = DriverManager.getConnection(url, user, password);
+            stmt = con.createStatement();
+            int cnt = 0;
+            if (dropIfExist)
+                cnt += stmt.executeUpdate("DROP DATABASE IF EXISTS " + db);
+            if (createDB)
+                cnt += stmt.executeUpdate("CREATE DATABASE IF NOT EXISTS " + db);
+            //set db as the default schema
+            if (stmt.execute("USE " + db))
+                cnt++;
+            if (cnt > 0)
+                System.out.println("Executed " + cnt + " statements");
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+            if (stmt != null)
+                stmt.close();
+        }
+        return con;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean initConfiguration(Connection con, String schema, boolean dropIfExist) throws Exception {
+        Map<String, String> scripts = FxSharedUtils.getStorageScriptResources(getStorageVendor());
+        List<String> s = new ArrayList<String>();
+        s.addAll(scripts.keySet());
+        Collections.sort(s);
+        Statement stmt;
+        stmt = con.createStatement();
+        int cnt = 0;
+        if (StringUtils.isBlank(schema))
+            throw new IllegalArgumentException("No schema name specified!");
+        schema = schema.trim();
+        try {
+            if (dropIfExist) {
+                cnt += stmt.executeUpdate("DROP DATABASE IF EXISTS " + schema);
+                cnt += stmt.executeUpdate("CREATE DATABASE IF NOT EXISTS " + schema);
+            }
+            cnt += stmt.executeUpdate("USE " + schema);
+
+            for (String script : s) {
+                if (script.startsWith("config/")) {
+                    System.out.println("Executing " + script + " ...");
+                    cnt += new FxSharedUtils.SQLExecutor(con, scripts.get(script), script.startsWith("SP") ? "|" : ";",
+                            false, true, System.out).
+                            execute();
+                }
+            }
+        } finally {
+            if (stmt != null)
+                stmt.close();
+        }
+        if (cnt > 0)
+            System.out.println("Executed " + cnt + " statements");
+        return cnt > 0;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean initDivision(Connection con, String schema, boolean dropIfExist) throws Exception {
+        Map<String, String> scripts = FxSharedUtils.getStorageScriptResources(getStorageVendor());
+        List<String> s = new ArrayList<String>();
+        s.addAll(scripts.keySet());
+        Collections.sort(s);
+        Statement stmt;
+        stmt = con.createStatement();
+        int cnt = 0;
+        if (StringUtils.isBlank(schema))
+            throw new IllegalArgumentException("No schema name specified!");
+        schema = schema.trim();
+        try {
+            if (dropIfExist) {
+                cnt += stmt.executeUpdate("DROP DATABASE IF EXISTS " + schema);
+                cnt += stmt.executeUpdate("CREATE DATABASE IF NOT EXISTS " + schema);
+            }
+            cnt += stmt.executeUpdate("USE " + schema);
+
+            for (String script : s) {
+                if (script.indexOf('/') == -1 || script.startsWith("tree/")) {
+                    System.out.println("Executing " + script + " ...");
+                    cnt += new FxSharedUtils.SQLExecutor(con, scripts.get(script),
+                            script.startsWith("SP") || script.startsWith("tree/") ? "|" : ";",
+                            false, true, System.out).
+                            execute();
+                }
+            }
+        } finally {
+            if (stmt != null)
+                stmt.close();
+        }
+        if (cnt > 0)
+            System.out.println("Executed " + cnt + " statements");
+        return cnt > 0;
+    }
+
+
 }

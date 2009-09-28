@@ -91,6 +91,14 @@ public class StorageManager {
         return storage;
     }
 
+    public static DBStorage getStorageImpl(String vendor) {
+        DBStorage storage = storages.get(vendor);
+        if (storage == null)
+            //noinspection ThrowableInstanceNeverThrown
+            throw new FxDbException("ex.db.storage.undefined", vendor).asRuntimeException();
+        return storage;
+    }
+
     /**
      * Get the storage implementation for the db vendor of the requested division data
      *

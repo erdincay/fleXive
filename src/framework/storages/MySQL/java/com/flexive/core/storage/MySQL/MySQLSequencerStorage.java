@@ -1,7 +1,6 @@
 package com.flexive.core.storage.MySQL;
 
 import com.flexive.core.Database;
-import com.flexive.core.DatabaseConst;
 import com.flexive.core.storage.SequencerStorage;
 import com.flexive.core.storage.genericSQL.GenericSequencerStorage;
 import com.flexive.shared.CustomSequencer;

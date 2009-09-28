@@ -48,12 +48,16 @@ import com.flexive.shared.exceptions.FxSqlSearchException;
 import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.structure.TypeStorageMode;
+import com.flexive.shared.FxSharedUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * Factory for the MySQL storage
@@ -195,5 +199,137 @@ public class H2StorageFactory implements DBStorage {
         final int sqlErr = Database.getSqlErrorCode(exc);
         //see http://h2database.com/javadoc/org/h2/constant/ErrorCode.html
         return sqlErr == 23001;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public Connection getConnection(String database, String schema, String jdbcURL, String jdbcURLParameters,
+                                    String user, String password, boolean createDB, boolean createSchema,
+                                    boolean dropIfExist) throws Exception {
+        Connection con = null;
+        Statement stmt = null;
+        try {
+            if (StringUtils.isBlank(database))
+                throw new IllegalArgumentException("No database name (path) specified!");
+            if (StringUtils.isBlank(schema))
+                throw new IllegalArgumentException("No database schema specified!");
+            String url = jdbcURL + database;
+            if (!StringUtils.isBlank(jdbcURLParameters))
+                url = url + jdbcURLParameters.trim();
+            schema = schema.trim();
+//            url = url + ";SCHEMA=" + schema;
+            System.out.println("Using schema [" + schema + "], database [" + database + "] for " + VENDOR);
+
+            if (StringUtils.isBlank(url))
+                throw new IllegalArgumentException("No JDBC URL provided!");
+            url = url.trim();
+
+            try {
+                Class.forName("org.h2.Driver").newInstance();
+            } catch (ClassNotFoundException e) {
+                System.err.println("H2 JDBC Driver not found in classpath!");
+                return null;
+            }
+            System.out.println("Connecting using JDBC URL " + url);
+            con = DriverManager.getConnection(url, user, password);
+            stmt = con.createStatement();
+            int cnt = 0;
+            if (dropIfExist)
+                cnt += stmt.executeUpdate("DROP SCHEMA IF EXISTS " + schema);
+            if (createDB)
+                cnt += stmt.executeUpdate("CREATE SCHEMA IF NOT EXISTS " + schema);
+            //set as the default schema
+            if (stmt.execute("SET SCHEMA " + schema))
+                cnt++;
+            if (cnt > 0)
+                System.out.println("Executed " + cnt + " statements");
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+            if (stmt != null)
+                stmt.close();
+        }
+        return con;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean initConfiguration(Connection con, String schema, boolean dropIfExist) throws Exception {
+        Map<String, String> scripts = FxSharedUtils.getStorageScriptResources(getStorageVendor());
+        List<String> s = new ArrayList<String>();
+        s.addAll(scripts.keySet());
+        Collections.sort(s);
+        Statement stmt;
+        stmt = con.createStatement();
+        int cnt = 0;
+        if (StringUtils.isBlank(schema))
+            throw new IllegalArgumentException("No schema name specified!");
+        schema = schema.trim();
+        try {
+            if (dropIfExist) {
+                System.out.println("Resetting configuration schema "+schema);
+                cnt += stmt.executeUpdate("DROP SCHEMA IF EXISTS " + schema);
+                cnt += stmt.executeUpdate("CREATE SCHEMA IF NOT EXISTS " + schema);
+            }
+            cnt += stmt.executeUpdate("SET SCHEMA " + schema);
+
+            for (String script : s) {
+                if (script.startsWith("config/")) {
+                    System.out.println("Executing " + script + " ...");
+                    cnt += new FxSharedUtils.SQLExecutor(con, scripts.get(script), script.startsWith("SP") ? "|" : ";",
+                            false, true, System.out).
+                            execute();
+                }
+            }
+        } finally {
+            if (stmt != null)
+                stmt.close();
+        }
+        if (cnt > 0)
+            System.out.println("Executed " + cnt + " statements");
+        return cnt > 0;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean initDivision(Connection con, String schema, boolean dropIfExist) throws Exception {
+        Map<String, String> scripts = FxSharedUtils.getStorageScriptResources(getStorageVendor());
+        List<String> s = new ArrayList<String>();
+        s.addAll(scripts.keySet());
+        Collections.sort(s);
+        Statement stmt;
+        stmt = con.createStatement();
+        int cnt = 0;
+        if (StringUtils.isBlank(schema))
+            throw new IllegalArgumentException("No schema name specified!");
+        schema = schema.trim();
+        try {
+            if (dropIfExist) {
+                System.out.println("Resetting division schema "+schema);
+                cnt += stmt.executeUpdate("DROP SCHEMA IF EXISTS " + schema);
+                cnt += stmt.executeUpdate("CREATE SCHEMA IF NOT EXISTS " + schema);
+            }
+            cnt += stmt.executeUpdate("SET SCHEMA " + schema);
+
+            for (String script : s) {
+                if (script.indexOf('/') == -1 || script.startsWith("tree/")) {
+                    System.out.println("Executing " + script + " ...");
+                    cnt += new FxSharedUtils.SQLExecutor(con, scripts.get(script),
+                            script.startsWith("SP") || script.startsWith("tree/") ? "|" : ";",
+                            false, true, System.out).
+                            execute();
+                }
+            }
+        } finally {
+            if (stmt != null)
+                stmt.close();
+        }
+        if (cnt > 0)
+            System.out.println("Executed " + cnt + " statements");
+        return cnt > 0;
     }
 }

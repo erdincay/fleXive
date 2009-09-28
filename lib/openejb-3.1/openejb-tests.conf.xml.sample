@@ -3,7 +3,7 @@
     <!-- MySQL settings -->
     <Resource id="jdbc/flexiveConfiguration" type="DataSource">
         JdbcDriver com.mysql.jdbc.Driver
-        JdbcUrl jdbc:mysql://localhost/flexiveConfiguration
+        JdbcUrl jdbc:mysql://localhost/flexiveTestConfiguration
         UserName root
         Password a
     </Resource>
@@ -17,13 +17,13 @@
     <!--
     <Resource id="jdbc/flexiveConfiguration" type="DataSource">
         JdbcDriver org.h2.Driver
-        JdbcUrl jdbc:h2:tcp://localhost:9092/~/flexiveConfiguration;SCHEMA=flexiveConfiguration;LOCK_TIMEOUT=10000;MVCC=TRUE;TRACE_LEVEL_FILE=0
+        JdbcUrl jdbc:h2:tcp://localhost:9092/~/flexive;SCHEMA=flexiveTestConfiguration;LOCK_TIMEOUT=10000;MVCC=TRUE;TRACE_LEVEL_FILE=0
         UserName sa
         Password
     </Resource>
     <Resource id="jdbc/flexiveTest" type="DataSource">
         JdbcDriver org.h2.Driver
-        JdbcUrl jdbc:h2:tcp://localhost:9092/~/flexiveTest;SCHEMA=flexiveTest;LOCK_TIMEOUT=10000;MVCC=TRUE;TRACE_LEVEL_FILE=0
+        JdbcUrl jdbc:h2:tcp://localhost:9092/~/flexive;SCHEMA=flexiveTest;LOCK_TIMEOUT=10000;MVCC=TRUE;TRACE_LEVEL_FILE=0
         UserName sa
         Password
     </Resource>

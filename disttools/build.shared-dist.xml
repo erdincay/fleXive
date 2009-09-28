@@ -10,13 +10,12 @@
             properties['database.port'] = properties['database.'+properties['database.vendor']+'.port']
             properties['database.username'] = properties['database.'+properties['database.vendor']+'.username']
             properties['database.password'] = properties['database.'+properties['database.vendor']+'.password']
-            properties['database.schema.root'] = properties['database.'+properties['database.vendor']+'.schema.root']
+            properties['database.database'] = properties['database.'+properties['database.vendor']+'.database']
+            properties['database.schema.division'] = properties['database.'+properties['database.vendor']+'.schema.division']
             properties['database.schema.config'] = properties['database.'+properties['database.vendor']+'.schema.config']
-            properties['database.driver'] = properties['database.'+properties['database.vendor']+'.driver']
             properties['database.url.base'] = properties['database.'+properties['database.vendor']+'.url.base']
             properties['database.url.parameters'] = properties['database.'+properties['database.vendor']+'.url.parameters']
         </groovy>
-        <extractDatabaseSchemas storagesDirProp="dist.lib.dir" destdirprop="database.src.dir"/>
     </target>
 
     <!-- Database setup tasks -->
@@ -32,15 +31,28 @@ you must shutdown flexive before the update and then restart flexive.
 
 [fleXive] is using ${database.vendor} database settings... (this can be changed in database.properties)            
         </echo>
-        <input taskname="flexive" addproperty="schema.name" defaultvalue="flexive"
+        <input taskname="flexive" addproperty="schema.division" defaultvalue="flexive"
                message="Please enter the database schema you want to create or reset:"/>
-        <division-setup database="${schema.name}"/>
+        <java fork="true" classname="com.flexive.tools.db.DBSetup">
+            <classpath>
+                <fileset dir="${dist.lib.dir}" includes="*.jar"/>
+                <fileset dir="${dist.extlib.dir}" includes="*.jar"/>
+            </classpath>
+            <arg line="${database.vendor} ${database.database} ${database.schema.config} ${schema.division} false true ${database.username} ${database.password} ${database.url.base} ${database.url.parameters}"/>
+        </java>
+
     </target>
 
     <target name="db.config.create"
             description="(Re-)Initialize the global division configuration database. The database connection properties are retrieved from database.properties."
             depends="db.prepare">
-        <globalconfig-setup/>
+        <java fork="true" classname="com.flexive.tools.db.DBSetup">
+            <classpath>
+                <fileset dir="${dist.lib.dir}" includes="*.jar"/>
+                <fileset dir="${dist.extlib.dir}" includes="*.jar"/>
+            </classpath>
+            <arg line="${database.vendor} ${database.database} ${database.schema.config} ${database.schema.division} true false ${database.username} ${database.password} ${database.url.base} ${database.url.parameters}"/>
+        </java>
     </target>
 
     <target name="deploy.jetty"

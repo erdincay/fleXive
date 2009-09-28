@@ -187,4 +187,43 @@ public interface DBStorage {
      * @return true if the SqlError is a unique constraint violation
      */
     boolean isUniqueConstraintViolation(Exception exc);
+
+    /**
+     * Get a connection to the database using provided parameters and (re)create the database and/or schema
+     *
+     * @param database          name of the database
+     * @param schema            name of the schema
+     * @param jdbcURL           JDBC connect URL
+     * @param jdbcURLParameters optional JDBC URL parameters
+     * @param user              name of the db user
+     * @param password          password
+     * @param createDB          create the database?
+     * @param createSchema      create the schema?
+     * @param dropIfExist       drop the database if it exists?
+     * @return an open connection to the database with the schema set as default
+     * @throws Exception on errors
+     */
+    Connection getConnection(String database, String schema, String jdbcURL, String jdbcURLParameters, String user, String password, boolean createDB, boolean createSchema, boolean dropIfExist) throws Exception;
+
+    /**
+     * Initialize a configuration schema
+     *
+     * @param con         an open and valid connection to the database
+     * @param schema      the schema to create
+     * @param dropIfExist drop the schema if it exists?
+     * @return success
+     * @throws Exception on errors
+     */
+    boolean initConfiguration(Connection con, String schema, boolean dropIfExist) throws Exception;
+
+    /**
+     * Initialize a division
+     *
+     * @param con         an open and valid connection to the database
+     * @param schema      the schema to create
+     * @param dropIfExist drop the schema if it exists?
+     * @return success
+     * @throws Exception on errors
+     */
+    boolean initDivision(Connection con, String schema, boolean dropIfExist) throws Exception;
 }

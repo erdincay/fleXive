@@ -107,8 +107,8 @@
     <target name="init" unless="init.done">
         <groovy src="buildTasks.groovy"/>
         <groovy>
-            if (!properties['database.vendor']) {
-                println "Missing database.vendor property in build.properties!"
+            if (!properties['database.vendor'] || !properties['database.'+properties['database.vendor']+'.schema.division']) {
+                println "Missing database.vendor or database.[vendor].schema.division property in build.properties!"
                 println "You might have an outdated build.properties file. Please copy build.properties.sample to build.properties!"
                 ant.fail()
             }
@@ -117,9 +117,9 @@
             properties['database.port'] = properties['database.'+properties['database.vendor']+'.port']
             properties['database.username'] = properties['database.'+properties['database.vendor']+'.username']
             properties['database.password'] = properties['database.'+properties['database.vendor']+'.password']
-            properties['database.schema.root'] = properties['database.'+properties['database.vendor']+'.schema.root']
+            properties['database.database'] = properties['database.'+properties['database.vendor']+'.database']
+            properties['database.schema.division'] = properties['database.'+properties['database.vendor']+'.schema.division']
             properties['database.schema.config'] = properties['database.'+properties['database.vendor']+'.schema.config']
-            properties['database.driver'] = properties['database.'+properties['database.vendor']+'.driver']
             properties['database.url.base'] = properties['database.'+properties['database.vendor']+'.url.base']
             properties['database.url.parameters'] = properties['database.'+properties['database.vendor']+'.url.parameters']
         </groovy>
@@ -220,7 +220,8 @@
 		<mkdir dir="${invalid.path}"/>
         <javac-call srcdir="${flexive.src.framework.dir}"
                     destdir="${build.framework.classes.dir}"
-                    includes="com/flexive/tools/**/*.java">
+                    includes="com/flexive/tools/**/*.java"
+                    excludes="com/flexive/tools/db/**">
             <classpath refid="classpath.build.framework"/>
         </javac-call>
         <jar jarfile="${flexive.build.framework.jar.dir}/flexive-ant.jar">
@@ -544,7 +545,24 @@
 		</emma>
 	</target>
 
-    <target name="jar.storages" depends="jar.ejb">
+    <target  name="jar.dbsetup" depends="jar.framework.shared">
+        <javac-call srcdir="${flexive.src.framework.dir}"
+                    destdir="${build.framework.classes.dir}"
+                    includes="com/flexive/tools/db/**/*.java">
+            <classpath refid="classpath.build.framework"/>
+        </javac-call>
+        <jar jarfile="${flexive.build.framework.jar.dir}/flexive-dbsetup.jar">
+            <manifest>
+                <attribute name="Class-Path" value="flexive-shared.jar flexive-ejb.jar"/>
+                <attribute name="Main-Class" value="com.flexive.tools.db.DBSetup"/>
+            </manifest>
+            <fileset dir="${build.framework.classes.dir}">
+                <include name="com/flexive/tools/db/**/*"/>
+            </fileset>
+        </jar>
+    </target>
+
+    <target name="jar.storages" depends="jar.ejb,jar.dbsetup">
         <buildStorage vendor="MySQL"
                       srcdir="${flexive.base.framework.dir}/storages/MySQL"
                       builddir="${build.storages.dir}/MySQL"
@@ -643,24 +661,32 @@
         <echo message="Skipping database update!"/>
     </target>
 
-    <target name="db.extractScripts" description="Extract sql script from used storage archive" depends="jar.storages">
-        <extractDatabaseSchemas
-                storagesdirprop="flexive.build.framework.jar.dir"
-                destdirprop="flexive.build.framework.sqlResources.dir"
-        />
+    <target name="db.update" description="Update database" depends="init, jar.dbsetup, jar.storages" unless="db.noupdate">
+        <echo taskname="flexive">[fleXive] is using ${database.vendor} database settings... (this can be changed in build.properties)</echo>
+        <input taskname="flexive" addproperty="schema.config" defaultvalue="${database.schema.config}"
+               message="Please enter the database configuration schema you want to create or reset:"/>
+        <input taskname="flexive" addproperty="schema.division" defaultvalue="${database.schema.division}"
+               message="Please enter the database division schema you want to create or reset:"/>
+        <java fork="true" classname="com.flexive.tools.db.DBSetup">
+            <classpath>
+                <path path="${flexive.build.framework.dir}/classes"/>
+                <fileset dir="${flexive.build.framework.jar.dir}" includes="*.jar"/>
+                <fileset dir="${flexive.lib.dir}" includes="*.jar"/>
+            </classpath>
+            <arg line="${database.vendor} ${database.database} ${schema.config} ${schema.division} true true ${database.username} ${database.password} ${database.url.base} ${database.url.parameters}"/>
+        </java>
     </target>
 
-    <target name="db.update" description="Update database" depends="init, db.extractScripts" unless="db.noupdate">
+    <target name="db.update.test" description="Update test database (configuration database has to exist!)" depends="init, jar.dbsetup, jar.storages" unless="db.noupdate">
         <echo taskname="flexive">[fleXive] is using ${database.vendor} database settings... (this can be changed in build.properties)</echo>
-        <input taskname="flexive" addproperty="schema.name" defaultvalue="flexive"
-               message="Please enter the database schema you want to create or reset:"/>
-        <division-setup database="${schema.name}"/>
-        <globalconfig-setup />
-    </target>
-
-    <target name="db.update.test" description="Update test database" depends="init, db.extractScripts" unless="db.noupdate">
-        <echo taskname="flexive">[fleXive] is using ${database.vendor} database settings... (this can be changed in build.properties)</echo>
-        <division-setup database="flexiveTest"/>
+        <java fork="true" classname="com.flexive.tools.db.DBSetup">
+            <classpath>
+                <path path="${flexive.build.framework.dir}/classes"/>
+                <fileset dir="${flexive.build.framework.jar.dir}" includes="*.jar"/>
+                <fileset dir="${flexive.lib.dir}" includes="*.jar"/>
+            </classpath>
+            <arg line="${database.vendor} ${database.database} ${schema.config} flexiveTest false true ${database.username} ${database.password} ${database.url.base} ${database.url.parameters}"/>
+        </java>
     </target>
 
     <target name="db.flatstorage.create" depends="init">
@@ -733,6 +759,7 @@
         <copy file="${flexive.build.framework.jar.dir}/flexive-ejb.jar" tofile="${flexive.dist.lib.dir}/flexive-ejb.jar"/>
         <copy file="${flexive.build.framework.jar.dir}/flexive-storage-H2.jar" tofile="${flexive.dist.lib.dir}/flexive-storage-H2.jar"/>
         <copy file="${flexive.build.framework.jar.dir}/flexive-storage-MySQL.jar" tofile="${flexive.dist.lib.dir}/flexive-storage-MySQL.jar"/>
+        <copy file="${flexive.build.framework.jar.dir}/flexive-dbsetup.jar" tofile="${flexive.dist.lib.dir}/flexive-dbsetup.jar"/>
         <copy file="${flexive.lib.dir}/flexive-flatstorage.jar" tofile="${flexive.dist.lib.dir}/flexive-flatstorage.jar"/>
 
         <!-- Copy backend administration to applications folder -->
@@ -794,14 +821,16 @@ database.MySQL.host=localhost
 database.MySQL.port=3306
 # The user name and password to be used for creating flexive database structures
 database.MySQL.username=root
+# if the password is not set, use "()" to set it to empty
 database.MySQL.password=a
 # The root schema where the flexive schemas can be dropped and created
-database.MySQL.schema.root=mysql
-database.MySQL.schema.config=mysql
-# JDBC Driver
-database.MySQL.driver=com.mysql.jdbc.Driver
+database.MySQL.database=flexive
+# division schema
+database.MySQL.schema.division=flexive
+# configuration schema
+database.MySQL.schema.config=flexiveConfiguration
 # JDBC base URL, will be appended by the database name and the url parameters
-database.MySQL.url.base=jdbc:mysql://$${database.MySQL.host}:$${database.MySQL.port}/
+database.MySQL.url.base=jdbc:mysql://${database.MySQL.host}:${database.MySQL.port}/
 # Optional URL parameters to append to the JDBC connect string
 database.MySQL.url.parameters=?useUnicode=true&amp;characterEncoding=UTF-8
 
@@ -813,12 +842,18 @@ database.H2.host=localhost
 database.H2.port=9092
 # The user name and password to be used for creating flexive database structures
 database.H2.username=sa
-database.H2.password=
-database.H2.schema.root=flexive
+# if the password is not set, use "()" to set it to empty
+database.H2.password=()
+# database to use
+database.H2.database=~/flexive
+# division schema
+database.H2.schema.division=flexive
+# configuration schema
 database.H2.schema.config=flexiveConfiguration
-database.H2.driver=org.h2.Driver
-database.H2.url.base=jdbc:h2:tcp://$${database.H2.host}:$${database.H2.port}/~/
-database.H2.url.parameters=;SCHEMA=@DATABASE@;MVCC=TRUE
+# JDBC base URL, will be appended by the database name and the url parameters
+database.H2.url.base=jdbc:h2:tcp://${database.H2.host}:${database.H2.port}/
+# Optional URL parameters to append to the JDBC connect string
+database.H2.url.parameters=;MVCC=TRUE
 
 
 #select the database vendor to use

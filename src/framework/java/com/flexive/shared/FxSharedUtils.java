@@ -48,17 +48,20 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.*;
-import java.net.URL;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.InetAddress;
+import java.net.JarURLConnection;
+import java.net.URL;
 import java.net.UnknownHostException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.sql.*;
 import java.text.Collator;
 import java.util.*;
 import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.util.jar.JarInputStream;
-import java.lang.reflect.Method;
-import java.lang.reflect.InvocationTargetException;
 
 /**
  * Flexive shared utility functions.
@@ -102,8 +105,6 @@ public final class FxSharedUtils {
 
     private static List<String> drops;
     private static List<FxDropApplication> dropApplications;
-
-    public static MessageDigest digest = null;
 
     /**
      * Are JDK 6+ extensions allowed to be run on the current VM?
@@ -158,7 +159,7 @@ public final class FxSharedUtils {
      * @since 3.1
      */
     public static String getHostName() {
-        if( hostname != null )
+        if (hostname != null)
             return hostname;
         String _hostname;
         try {
@@ -182,11 +183,11 @@ public final class FxSharedUtils {
      * @since 3.1
      */
     public static String getApplicationServerName() {
-        if( appserver != null )
+        if (appserver != null)
             return appserver;
         if (System.getProperty("product.name") != null) {
             // Glassfish / Sun AS
-            String ver =  System.getProperty("product.name");
+            String ver = System.getProperty("product.name");
             if (System.getProperty("com.sun.jbi.domain.name") != null)
                 ver += " (Domain: " + System.getProperty("com.sun.jbi.domain.name") + ")";
             appserver = ver;
@@ -197,18 +198,18 @@ public final class FxSharedUtils {
                 Method m = cls.getMethod("getInstance");
                 Object v = m.invoke(null);
                 Method pr = cls.getMethod("getProperties");
-                Map props = (Map)pr.invoke(v);
+                Map props = (Map) pr.invoke(v);
                 String ver = "JBoss";
-                if( props.containsKey("version.major") && props.containsKey("version.minor")) {
-                    if( props.containsKey("version.name"))
-                        ver = ver + " [" + props.get("version.name")+"]";
-                    ver = ver + " "+props.get("version.major") + "." + props.get("version.minor");
-                    if( props.containsKey("version.revision"))
+                if (props.containsKey("version.major") && props.containsKey("version.minor")) {
+                    if (props.containsKey("version.name"))
+                        ver = ver + " [" + props.get("version.name") + "]";
+                    ver = ver + " " + props.get("version.major") + "." + props.get("version.minor");
+                    if (props.containsKey("version.revision"))
                         ver = ver + "." + props.get("version.revision");
-                    if( props.containsKey("version.tag"))
+                    if (props.containsKey("version.tag"))
                         ver = ver + " " + props.get("version.tag");
-                    if( props.containsKey("build.day"))
-                        ver = ver + " built "+props.get("build.day");
+                    if (props.containsKey("build.day"))
+                        ver = ver + " built " + props.get("build.day");
                 }
                 appserver = ver;
             } catch (ClassNotFoundException e) {
@@ -261,7 +262,7 @@ public final class FxSharedUtils {
                 Method m = cls.getMethod("getVersion");
                 gVersion = " " + String.valueOf(m.invoke(null));
                 m = cls.getMethod("getBuildDate");
-                gVersion = gVersion + " ("+String.valueOf(m.invoke(null))+")";
+                gVersion = gVersion + " (" + String.valueOf(m.invoke(null)) + ")";
             } catch (ClassNotFoundException e) {
                 //ignore
             } catch (NoSuchMethodException e) {
@@ -271,7 +272,7 @@ public final class FxSharedUtils {
             } catch (IllegalAccessException e) {
                 //ignore
             }
-            appserver = "Apache Geronimo "+gVersion;
+            appserver = "Apache Geronimo " + gVersion;
         } else {
             appserver = "unknown";
         }
@@ -302,7 +303,7 @@ public final class FxSharedUtils {
      * @param searchPattern the pattern to be examined as a String
      * @param isFile        if true, the searchPattern is treated as a file name, if false, the searchPattern will be treated as a path
      * @return Returns all entries found for the given search pattern as a Map<String, String>, or null if no matches were found
-     * @throws IOException  on I/O errors
+     * @throws IOException on I/O errors
      */
     public static Map<String, String> getContentsFromJarStream(JarInputStream jarStream, String searchPattern, boolean isFile) throws IOException {
         Map<String, String> jarContents = new HashMap<String, String>();
@@ -345,7 +346,7 @@ public final class FxSharedUtils {
 
     /**
      * Reads the content of a given entry in a Jar file (JarInputStream) and returns it as a String
-     * 
+     *
      * @param jarStream the given JarInputStream
      * @param entry     the given entry in the jar file
      * @return the entry's content as a String
@@ -363,7 +364,7 @@ public final class FxSharedUtils {
                 offset += readBytes;
             }
             if (offset != entry.getSize()) {
-                throw new IOException("Failed to read complete script code for script: "+ entry.getName());
+                throw new IOException("Failed to read complete script code for script: " + entry.getName());
             }
             fileContent = new String(buffer, "UTF-8").trim();
         } else {
@@ -534,6 +535,37 @@ public final class FxSharedUtils {
 
 
     /**
+     * Add all resources found in the resource subfolder for the requested vendor to the map (key=script name, value=script code)
+     *
+     * @param storageVendor requested vendor
+     * @return map with key=script name and value=script code
+     */
+    public static Map<String, String> getStorageScriptResources(String storageVendor) {
+        Map<String, String> result = new HashMap<String, String>(100);
+        try {
+            Enumeration<URL> u = Thread.currentThread().getContextClassLoader().getResources("resources/patch-" + storageVendor);
+            while (u.hasMoreElements()) {
+                URL url = u.nextElement();
+                JarURLConnection juc = (JarURLConnection) url.openConnection();
+                JarFile jarFile = juc.getJarFile();
+                Enumeration<JarEntry> je = jarFile.entries();
+                while (je.hasMoreElements()) {
+                    JarEntry curr = je.nextElement();
+                    if (!curr.getName().startsWith("resource") || curr.getName().endsWith("/"))
+                        continue;
+                    final String name = curr.getName().substring(curr.getName().indexOf('/') + 1);
+                    String code = loadFromInputStream(jarFile.getInputStream(curr), (int) curr.getSize());
+                    result.put(name, code);
+                }
+
+            }
+        } catch (IOException e) {
+            LOG.error(e);
+        }
+        return result;
+    }
+
+    /**
      * Return the index of the given column name. If <code>name</code> has no
      * prefix (e.g. "co."), then only a suffix match is performed (e.g.
      * "name" matches "co.name" or "abc.name", whichever comes first.)
@@ -644,7 +676,7 @@ public final class FxSharedUtils {
     /**
      * Helperclass holding the result of the <code>executeCommand</code> method
      *
-     * @see FxSharedUtils#executeCommand(String, String[])
+     * @see FxSharedUtils#executeCommand(String, String...)
      */
     public static final class ProcessResult {
         private String commandLine;
@@ -906,7 +938,7 @@ public final class FxSharedUtils {
     /**
      * Returns true if this instance is a -SNAPSHOT version.
      *
-     * @return   true if this instance is a -SNAPSHOT version.
+     * @return true if this instance is a -SNAPSHOT version.
      * @since 3.1
      */
     public static boolean isSnapshotVersion() {
@@ -1097,7 +1129,7 @@ public final class FxSharedUtils {
      * (compile-time parameter flexive.translatedLocales set in flexive.properties).
      *
      * @param localeIsoCode the locale ISO code, e.g. "en" or "de"
-     * @return  true if the given locale is localized (at least for some messages).
+     * @return true if the given locale is localized (at least for some messages).
      * @since 3.1
      */
     public static boolean isTranslatedLocale(String localeIsoCode) {
@@ -1113,8 +1145,8 @@ public final class FxSharedUtils {
      * Returns the list of translated locales, as specified in flexive.properties
      * (flexive.translatedLocales).
      *
-     * @return  the list of translated locales, in lowercase
-     * @since   3.1
+     * @return the list of translated locales, in lowercase
+     * @since 3.1
      */
     public static List<String> getTranslatedLocales() {
         return translatedLocales;
@@ -1435,10 +1467,10 @@ public final class FxSharedUtils {
     /**
      * Return the elements of {@code values} that match the given {@code ids}.
      *
-     * @param values    the values to be search
-     * @param ids       the required IDs
-     * @param <T>       the value type
-     * @return          the elements of {@code values} that match the given {@code ids}.
+     * @param values the values to be search
+     * @param ids    the required IDs
+     * @param <T>    the value type
+     * @return the elements of {@code values} that match the given {@code ids}.
      * @since 3.1
      */
     public static <T extends SelectableObject> List<T> filterSelectableObjectsById(Iterable<T> values, Collection<Long> ids) {
@@ -1454,10 +1486,10 @@ public final class FxSharedUtils {
     /**
      * Return the elements of {@code values} that match the given {@code names}.
      *
-     * @param values    the values to be search
-     * @param names     the required IDs
-     * @param <T>       the value type
-     * @return          the elements of {@code values} that match the given {@code names}.
+     * @param values the values to be search
+     * @param names  the required IDs
+     * @param <T>    the value type
+     * @return the elements of {@code values} that match the given {@code names}.
      * @since 3.1
      */
     public static <T extends SelectableObjectWithName> List<T> filterSelectableObjectsByName(Iterable<T> values, Collection<String> names) {
@@ -1509,7 +1541,7 @@ public final class FxSharedUtils {
         }
     }
 
-     /**
+    /**
      * Comparator for sorting {@link SelectableObjectWithLabel} instances by label.
      */
     public static class SelectableObjectWithLabelSorter implements Comparator<SelectableObjectWithLabel>, Serializable {
@@ -1526,6 +1558,126 @@ public final class FxSharedUtils {
 
         public int compare(FxSelectListItem i1, FxSelectListItem i2) {
             return Integer.valueOf(i1.getPosition()).compareTo(i2.getPosition());
+        }
+    }
+
+    /**
+     * An SQL executor, similar to ant's sql task
+     */
+    public static class SQLExecutor {
+        private Connection con;
+        private Statement stmt = null;
+        private String code;
+        private int count = 0;
+        private String delimiter;
+        private boolean keepformat;
+        private boolean rowDelimiter;
+        private PrintStream out;
+
+        /**
+         * Ctor
+         *
+         * @param con          an open and valid connection
+         * @param code         the source sql code
+         * @param delimiter    delimiter to use
+         * @param rowDelimiter is the delimiter or row delimiter?
+         * @param keepformat   keep original format?
+         * @param out          stream for messages
+         */
+        public SQLExecutor(Connection con, String code, String delimiter, boolean rowDelimiter, boolean keepformat, PrintStream out) {
+            this.con = con;
+            this.code = code;
+            this.delimiter = delimiter;
+            this.rowDelimiter = rowDelimiter;
+            this.keepformat = keepformat;
+            this.out = out;
+        }
+
+        /**
+         * Main execute method, returns number of updates
+         *
+         * @return number of updates
+         * @throws SQLException on errors
+         * @throws IOException  on errors
+         */
+        public int execute() throws SQLException, IOException {
+            stmt = con.createStatement();
+            try {
+                StringBuffer sql = new StringBuffer();
+                String line;
+                BufferedReader in = new BufferedReader(new StringReader(code));
+
+                while ((line = in.readLine()) != null) {
+                    line = line.trim();
+                    if (line.startsWith("//") || line.startsWith("--"))
+                        continue;
+                    StringTokenizer st = new StringTokenizer(line);
+                    if (st.hasMoreTokens()) {
+                        String token = st.nextToken();
+                        if ("REM".equalsIgnoreCase(token))
+                            continue;
+                    }
+                    sql.append("\n").append(line);
+                    if (!keepformat && line.indexOf("--") >= 0)
+                        sql.append("\n");
+                    if (!rowDelimiter && StringUtils.endsWith(sql.toString(), delimiter)
+                            || (rowDelimiter && line.equals(delimiter))) {
+                        execute(sql.substring(0, sql.length() - delimiter.length()));
+                        sql.replace(0, sql.length(), "");
+                    }
+                }
+                if (sql.length() > 0)
+                    execute(sql.toString());
+            } finally {
+                if (stmt != null)
+                    stmt.close();
+            }
+            return count;
+        }
+
+        /**
+         * Execute a single SQL statement
+         *
+         * @param sql statement
+         * @throws SQLException on errors
+         */
+        private void execute(String sql) throws SQLException {
+            if ("".equals(sql.trim()))
+                return;
+
+            ResultSet rs = null;
+            try {
+                count++;
+
+                boolean ret;
+                stmt.execute(sql);
+                rs = stmt.getResultSet();
+                do {
+                    ret = stmt.getMoreResults();
+                    if (ret) {
+                        rs = stmt.getResultSet();
+                    }
+                } while (ret);
+
+                @SuppressWarnings({"ThrowableResultOfMethodCallIgnored"}) SQLWarning warning = con.getWarnings();
+                while (warning != null) {
+                    out.println("Warning: " + warning);
+                    warning = warning.getNextWarning();
+                }
+                con.clearWarnings();
+            } catch (SQLException e) {
+                out.println("Failed to execute: " + sql);
+                throw e;
+            } finally {
+                if (rs != null) {
+                    try {
+                        rs.close();
+                    } catch (SQLException e) {
+                        //ignore
+                    }
+                }
+            }
+
         }
     }
 }

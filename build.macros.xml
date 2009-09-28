@@ -48,87 +48,6 @@
         </sequential>
     </macrodef>
 
-    <!-- ==================== Database maintenance macros ==================== -->
-    <macrodef name="sql-call"
-              description="Executes nested SQL statements. The database host, user and password are configured with the properties database.host, database.port, database.username, database.password">
-        <attribute name="database"/>
-        <attribute name="url"/>
-        <attribute name="includes" default="N/A"/>
-        <attribute name="excludes" default=""/>
-        <attribute name="delimiter" default=";"/>
-        <element name="args" optional="true" implicit="true"/>
-        <sequential >
-            <sql driver="${database.driver}" url="@{url}"
-                userid="${database.username}" password="${database.password}" delimiter="@{delimiter}">
-                <classpath refid="${database.classpathref}"/>
-                <args/>
-                <sort>
-                    <fileset dir="${database.src.dir}" includes="@{includes}" excludes="@{excludes}"/>
-                </sort>
-            </sql>
-        </sequential>
-    </macrodef>
-
-    <macrodef name="division-setup" description="Creates all database structures for the given database name">
-        <attribute name="database" description="The database name"/>
-        <sequential >
-            <groovy>
-                <arg value="@{database}"/>
-                if( "H2".equals(properties['database.vendor']) ) {
-                    //special case for H2: the URL needs to contain the schema which is the database name
-                    //to be created
-                    properties['database.url.create'] = properties['database.url.base'] + args[0]    
-                } else
-                    properties['database.url.create'] = properties['database.url.base']
-            </groovy>
-            <!-- call with no url parameters to allow schema creation -->
-            <sql-call database="${database.schema.root}" url="${database.url.create}">
-                <transaction >
-                    DROP SCHEMA IF EXISTS @{database};
-                    CREATE SCHEMA @{database};
-                </transaction>
-            </sql-call>
-            <!-- Replace URL parameters @DATABASE@ with @{Database}-->
-            <groovy>
-                <arg value="@{database}"/>
-                properties['db.url.full'] = properties['database.url.base']+args[0]+properties['database.url.parameters']
-                properties['db.url.full'] = properties['db.url.full'].replace("@DATABASE@", args[0])
-            </groovy>
-            <sql-call database="${database.schema.root}" includes="*.sql" excludes="SP*.sql"
-                    url="${db.url.full}"/>
-            <!-- Stored procedures setup -->
-            <sql-call database="@{database}" delimiter="|" includes="SP*.sql"
-                    url="${db.url.full}"/>
-            <sql-call database="@{database}" delimiter="|" includes="tree/*.sql"
-                    url="${db.url.full}"/>
-
-            <echo taskname="flexive">Successfully initialized a flexive division at ${database.url.base}@{database}</echo>
-        </sequential>
-    </macrodef>
-
-    <macrodef name="globalconfig-setup" description="The global configuration setup.">
-        <sequential >
-            <groovy>
-                <arg value="@{database}"/>
-                if( "H2".equals(properties['database.vendor']) ) {
-                    //special case for H2: the URL needs to contain the schema which is the database name
-                    //to be created
-                    properties['database.url.create'] = properties['database.url.base'] + 'flexiveConfiguration'
-                } else
-                    properties['database.url.create'] = properties['database.url.base']
-            </groovy>
-            <!-- Create global configuration -->
-            <sql-call database="${database.schema.config}"  url="${database.url.create}">
-                <transaction >
-                    DROP SCHEMA IF EXISTS flexiveConfiguration;
-                    CREATE SCHEMA flexiveConfiguration;
-                </transaction>
-            </sql-call>
-            <sql-call database="flexiveConfiguration" includes="config/*.sql"  url="${database.url.base}flexiveConfiguration"/>
-            <echo taskname="flexive">Successfully initialized a the flexive configuration database at ${database.url.base}flexiveConfiguration</echo>
-        </sequential>
-    </macrodef>
-
     <!-- ==================== UI plugin/component macros ==================== -->
 
     <macrodef name="buildPluginJar" description="Package a plugin JAR file">
@@ -279,34 +198,6 @@
                 <jvmarg value="-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"/>
                 <jvmarg value="-Dlog4j.configuration=flatStorageLog4j.xml"/>
             </java>
-        </sequential>
-    </macrodef>
-
-    <!-- Extract the SQL schemas of a storage engine -->
-    <macrodef name="extractDatabaseSchemas" description="Extract the SQL schemas of the current storage engine">
-        <attribute name="storagesDirProp" description="Property that contains the directory of the storage engine for the current database vendor"/>
-        <attribute name="destDirProp" description="Poperty that contains the target directory"/>
-        <sequential >
-            <groovy>
-                String jar = "flexive-storage-"+properties['database.vendor']+".jar"
-                String embeddedPath = project.properties['@{storagesDirProp}']
-                String destPath = project.properties['@{destDirProp}']
-                File jarFile = new File(embeddedPath+File.separatorChar+jar)
-                if(!jarFile.exists()) {
-                    //either provide a fallback here or just fail
-                    ant.fail(message:"Could not find storage implementation jar file $jar!")
-                }
-                if(new File(destPath).exists())
-                    ant.delete(dir: destPath)
-                ant.unzip(src:jarFile.absolutePath, dest:destPath) {
-                    patternset() {
-                        include(name:"**/*sql")
-                    }
-                    filtermapper() {
-                        replacestring(from:"resources/",to:"")
-                    }
-                }
-            </groovy>
         </sequential>
     </macrodef>
 </project>
