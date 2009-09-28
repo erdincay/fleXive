@@ -156,7 +156,7 @@
                             </thead>
                             <c:forEach var="drop" items="#{fxSystemBean.dropApplicationsWithContext}">
                                 <tr>
-                                    <td><a href="#{fxSystemBean.serverBase}/#{drop.contextRoot}" target="#{drop.name}">#{drop.displayName}</a></td>
+                                    <td><a href="#{fxSystemBean.serverBase}/#{drop.contextRoot}#{empty drop.contextRoot ? '': '/'}" target="#{drop.name}">#{drop.displayName}</a></td>
                                 </tr>
                             </c:forEach>
                         </table>
