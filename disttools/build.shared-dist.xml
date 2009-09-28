@@ -33,7 +33,7 @@ you must shutdown flexive before the update and then restart flexive.
         </echo>
         <input taskname="flexive" addproperty="schema.division" defaultvalue="flexive"
                message="Please enter the database schema you want to create or reset:"/>
-        <java fork="true" classname="com.flexive.tools.db.DBSetup">
+        <java fork="true" classname="com.flexive.tools.db.DBSetup" failonerror="true">
             <classpath>
                 <fileset dir="${dist.lib.dir}" includes="*.jar"/>
                 <fileset dir="${dist.extlib.dir}" includes="*.jar"/>
@@ -46,7 +46,7 @@ you must shutdown flexive before the update and then restart flexive.
     <target name="db.config.create"
             description="(Re-)Initialize the global division configuration database. The database connection properties are retrieved from database.properties."
             depends="db.prepare">
-        <java fork="true" classname="com.flexive.tools.db.DBSetup">
+        <java fork="true" classname="com.flexive.tools.db.DBSetup" failonerror="true">
             <classpath>
                 <fileset dir="${dist.lib.dir}" includes="*.jar"/>
                 <fileset dir="${dist.extlib.dir}" includes="*.jar"/>

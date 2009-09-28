@@ -667,7 +667,7 @@
                message="Please enter the database configuration schema you want to create or reset:"/>
         <input taskname="flexive" addproperty="schema.division" defaultvalue="${database.schema.division}"
                message="Please enter the database division schema you want to create or reset:"/>
-        <java fork="true" classname="com.flexive.tools.db.DBSetup">
+        <java fork="true" classname="com.flexive.tools.db.DBSetup" failonerror="true">
             <classpath>
                 <path path="${flexive.build.framework.dir}/classes"/>
                 <fileset dir="${flexive.build.framework.jar.dir}" includes="*.jar"/>
@@ -679,8 +679,9 @@
 
     <target name="db.update.test" description="Update test database (configuration database has to exist!)" depends="init, jar.dbsetup, jar.storages" unless="db.noupdate">
         <echo taskname="flexive">[fleXive] is using ${database.vendor} database settings... (this can be changed in build.properties)</echo>
-        <java fork="true" classname="com.flexive.tools.db.DBSetup">
+        <java fork="true" classname="com.flexive.tools.db.DBSetup" failonerror="true">
             <classpath>
+                <path refid="build.classpath.testng"/>
                 <path path="${flexive.build.framework.dir}/classes"/>
                 <fileset dir="${flexive.build.framework.jar.dir}" includes="*.jar"/>
                 <fileset dir="${flexive.lib.dir}" includes="*.jar"/>
