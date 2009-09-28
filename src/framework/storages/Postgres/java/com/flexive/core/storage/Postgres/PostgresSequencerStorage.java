@@ -29,7 +29,8 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the file!
  ***************************************************************/
-package com.flexive.core.storage.MySQL;
+
+package com.flexive.core.storage.Postgres;
 
 import com.flexive.core.Database;
 import com.flexive.core.storage.SequencerStorage;
@@ -50,14 +51,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Concrete MySQL sequencer storage implementation
+ * Concrete Postgres sequencer storage implementation
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-public class MySQLSequencerStorage extends GenericSequencerStorage {
-    private static final Log LOG = LogFactory.getLog(MySQLSequencerStorage.class);
+public class PostgresSequencerStorage extends GenericSequencerStorage {
+    private static final Log LOG = LogFactory.getLog(PostgresSequencerStorage.class);
 
-    private static final MySQLSequencerStorage instance = new MySQLSequencerStorage();
+    private static final PostgresSequencerStorage instance = new PostgresSequencerStorage();
 
     /**
      * Singleton getter
@@ -150,7 +151,7 @@ public class MySQLSequencerStorage extends GenericSequencerStorage {
         } catch (SQLException exc) {
             throw new FxCreateException(LOG, exc, "ex.sequencer.fetch.failedMsg", name, exc.getMessage());
         } finally {
-            Database.closeObjects(MySQLSequencerStorage.class, con, ps);
+            Database.closeObjects(PostgresSequencerStorage.class, con, ps);
         }
     }
 
@@ -179,7 +180,7 @@ public class MySQLSequencerStorage extends GenericSequencerStorage {
         } catch (SQLException exc) {
             throw new FxCreateException(LOG, exc, "ex.sequencer.create.failed", name);
         } finally {
-            Database.closeObjects(MySQLSequencerStorage.class, con, ps);
+            Database.closeObjects(PostgresSequencerStorage.class, con, ps);
         }
     }
 
@@ -201,7 +202,7 @@ public class MySQLSequencerStorage extends GenericSequencerStorage {
         } catch (SQLException exc) {
             throw new FxCreateException(LOG, exc, "ex.sequencer.remove.failed", name);
         } finally {
-            Database.closeObjects(MySQLSequencerStorage.class, con, ps);
+            Database.closeObjects(PostgresSequencerStorage.class, con, ps);
         }
     }
 
@@ -222,7 +223,7 @@ public class MySQLSequencerStorage extends GenericSequencerStorage {
         } catch (SQLException exc) {
             throw new FxDbException(LOG, exc, "ex.db.sqlError", exc.getMessage());
         } finally {
-            Database.closeObjects(MySQLSequencerStorage.class, con, ps);
+            Database.closeObjects(PostgresSequencerStorage.class, con, ps);
         }
     }
 
@@ -242,7 +243,7 @@ public class MySQLSequencerStorage extends GenericSequencerStorage {
         } catch (SQLException exc) {
             throw new FxDbException(LOG, exc, "ex.db.sqlError", exc.getMessage());
         } finally {
-            Database.closeObjects(MySQLSequencerStorage.class, con, ps);
+            Database.closeObjects(PostgresSequencerStorage.class, con, ps);
         }
         return res;
     }
@@ -262,7 +263,7 @@ public class MySQLSequencerStorage extends GenericSequencerStorage {
         } catch (SQLException exc) {
             throw new FxDbException(LOG, exc, "ex.db.sqlError", exc.getMessage());
         } finally {
-            Database.closeObjects(MySQLSequencerStorage.class, con, ps);
+            Database.closeObjects(PostgresSequencerStorage.class, con, ps);
         }
     }
 }

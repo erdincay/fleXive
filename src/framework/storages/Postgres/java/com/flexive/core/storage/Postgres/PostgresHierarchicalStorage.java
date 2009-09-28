@@ -29,7 +29,7 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the file!
  ***************************************************************/
-package com.flexive.core.storage.MySQL;
+package com.flexive.core.storage.Postgres;
 
 import com.flexive.core.DatabaseConst;
 import com.flexive.core.storage.ContentStorage;
@@ -46,20 +46,20 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 /**
- * MySQL implementation of hierarchical content handling
+ * Postgres implementation of hierarchical content handling
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-public class MySQLHierarchicalStorage extends GenericHierarchicalStorage {
+public class PostgresHierarchicalStorage extends GenericHierarchicalStorage {
 
-    private static final Log LOG = LogFactory.getLog(MySQLHierarchicalStorage.class);
+    private static final Log LOG = LogFactory.getLog(PostgresHierarchicalStorage.class);
 
-    private static final MySQLHierarchicalStorage instance = new MySQLHierarchicalStorage();
+    private static final PostgresHierarchicalStorage instance = new PostgresHierarchicalStorage();
 
     /**
      * Ctor
      */
-    public MySQLHierarchicalStorage() {
+    public PostgresHierarchicalStorage() {
         super(new GenericBinarySQLStorage());
     }
 

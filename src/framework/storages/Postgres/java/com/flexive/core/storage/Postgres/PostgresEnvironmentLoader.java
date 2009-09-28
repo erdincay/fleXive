@@ -29,19 +29,19 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the file!
  ***************************************************************/
-package com.flexive.core.storage.MySQL;
+package com.flexive.core.storage.Postgres;
 
 import com.flexive.core.storage.EnvironmentLoader;
 import com.flexive.core.storage.genericSQL.GenericEnvironmentLoader;
 
 /**
- * concrete environment loader implementation for MySQL
+ * concrete environment loader implementation for Postgres
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-public class MySQLEnvironmentLoader extends GenericEnvironmentLoader {
+public class PostgresEnvironmentLoader extends GenericEnvironmentLoader {
 
-    private static final MySQLEnvironmentLoader instance = new MySQLEnvironmentLoader();
+    private static final PostgresEnvironmentLoader instance = new PostgresEnvironmentLoader();
 
     public static EnvironmentLoader getInstance() {
         return instance;

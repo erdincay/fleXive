@@ -29,7 +29,7 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the file!
  ***************************************************************/
-package com.flexive.core.search.cmis.impl.sql.H2;
+package com.flexive.core.search.cmis.impl.sql.Postgres;
 
 import com.flexive.core.DatabaseConst;
 import com.flexive.core.search.cmis.impl.CmisSqlQuery;
@@ -37,6 +37,7 @@ import com.flexive.core.search.cmis.impl.ResultScore;
 import com.flexive.core.search.cmis.impl.sql.ColumnIndex;
 import com.flexive.core.search.cmis.impl.sql.SelectedTableVisitor;
 import com.flexive.core.search.cmis.impl.sql.SqlMapperFactory;
+import static com.flexive.core.search.cmis.impl.sql.generic.GenericSqlDialect.FILTER_ALIAS;
 import com.flexive.core.search.cmis.impl.sql.generic.mapper.condition.GenericContainsCondition;
 import com.flexive.core.search.cmis.model.ContainsCondition;
 import com.flexive.shared.FxFormatUtils;
@@ -45,51 +46,48 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * H2 fulltext search implementation. Currently this is a dummy implementation that does not
- * utilize fulltext indices, and always returns "1.0" when the fulltext SCORE() is selected.
+ * Postgres fulltext query/scoring provider. The values returned by SCORE() are not normalized, thus the
+ * {@link com.flexive.shared.cmis.search.CmisResultSet} must apply normalization when the entire result is loaded.
  *
- * @author Daniel Lichtenberger, UCS
+ * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
+ * @since 3.1
  */
-public class H2ContainsCondition extends GenericContainsCondition {
-    private static final H2ContainsCondition INSTANCE = new H2ContainsCondition();
+public class PostgresContainsCondition extends GenericContainsCondition {
+    private static final PostgresContainsCondition INSTANCE = new PostgresContainsCondition();
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String selectColumn(SqlMapperFactory sqlMapperFactory, CmisSqlQuery query, ResultScore column, long languageId, boolean xpath, boolean includeResultAlias, ColumnIndex index) {
-        // check if we have a fulltext query
-        findContainsCondition(query);
-        // since H2 doesn't support scoring, we always return 1.0 and don't select from the result
+        final ContainsCondition contains = findContainsCondition(query);
         index.increment();
-        return "1.0";
+        return "(SELECT MAX(" + getFulltextMatch("ftsub", contains) + ") FROM "
+                + DatabaseConst.TBL_CONTENT_DATA_FT + " ftsub "
+                + "WHERE ftsub.id=" + FILTER_ALIAS + "." + contains.getTableReference().getIdFilterColumn()
+                + "  AND ftsub.ver=" + FILTER_ALIAS + "." + contains.getTableReference().getVersionFilterColumn() + ") "
+                + (includeResultAlias ? column.getResultSetAlias() : "");
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Object decodeResultValue(SqlMapperFactory factory, ResultSet rs, ResultScore column, long languageId) throws SQLException {
-        return 1.0;
+        return rs.getDouble(column.getColumnStart());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getConditionSql(SqlMapperFactory sqlMapperFactory, ContainsCondition condition, SelectedTableVisitor joinedTables) {
         final String alias = joinedTables.getTableAlias(condition.getTableReference());
+        final String cond = getFulltextMatch(alias, condition);
+        // TODO: assignment filter
         return "(SELECT DISTINCT " + joinedTables.getSelectForSingleTable(condition.getTableReference()) + " FROM "
-                + DatabaseConst.TBL_CONTENT_DATA_FT + " " + alias + " "
-                + "WHERE value LIKE "
-                + FxFormatUtils.escapeForSql("%" + condition.getExpression().toUpperCase() + "%")
-                + sqlMapperFactory.getSqlDialect().limitSubquery()
-                + ")";
-
+                + DatabaseConst.TBL_CONTENT_DATA_FT + " " + alias + " "  
+                + "WHERE " + cond + sqlMapperFactory.getSqlDialect().limitSubquery() + ")";
     }
 
-    public static H2ContainsCondition getInstance() {
+    public static PostgresContainsCondition getInstance() {
         return INSTANCE;
     }
+
+    private String getFulltextMatch(String tableAlias, ContainsCondition condition) {
+        return "MATCH(" + tableAlias + ".value) AGAINST (" + FxFormatUtils.escapeForSql(condition.getExpression()) + ")";
+    }
+
 }
