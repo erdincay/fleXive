@@ -95,7 +95,7 @@
                                 <configuration>
                                     <url>jdbc:h2:${basedir}/h2/flexiveConfiguration</url>
 
-                                    <sqlCommand>DROP SCHEMA IF EXISTS flexiveConfiguration; CREATE SCHEMA flexiveConfiguration</sqlCommand>
+                                    <sqlCommand>DROP SCHEMA IF EXISTS flexiveConfiguration; CREATE SCHEMA flexiveConfiguration; SET SCHEMA flexiveConfiguration;</sqlCommand>
 
                                     <orderFile>ascending</orderFile>
                                     <fileset>
