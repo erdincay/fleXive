@@ -85,7 +85,7 @@ class DocumentType {
         addProperty("Pages", "Number of pages", "Seitenanzahl", "", FxMultiplicity.MULT_0_1, FxDataType.Number)
         addProperty("RevNumber", "Revision number", "Revisionsnummer", "", FxMultiplicity.MULT_0_1, FxDataType.String1024)
         addProperty("Words", "Count of words", "Wortanzahl", "", FxMultiplicity.MULT_0_1, FxDataType.Number)
-        addProperty("Encrypted", "Encrypted", "Verschl\u00fcsselt", "", FxMultiplicity.MULT_1_1, FxDataType.Boolean)
+        addProperty("Encrypted", "Encrypted", "Verschl\u00fcsselt", "", FxMultiplicity.MULT_0_1, FxDataType.Boolean)
         addProperty("AdditionalText", "Additional text", "Zus\u00e4tzlicher Text", "", FxMultiplicity.MULT_0_1, FxDataType.Text, true)
         addProperty("Description", "Description", "Beschreibung", "", FxMultiplicity.MULT_0_1, FxDataType.Text, true)
     }
