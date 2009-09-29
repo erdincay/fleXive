@@ -31,21 +31,20 @@
  ***************************************************************/
 package com.flexive.war.beans.admin.main;
 
+import com.flexive.faces.messages.FxFacesMsgErr;
+import com.flexive.faces.model.FxJSFSelectItem;
 import com.flexive.shared.*;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxLockException;
+import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.value.FxString;
-import com.flexive.faces.messages.FxFacesMsgErr;
-import com.flexive.faces.beans.MessageBean;
-import com.flexive.faces.model.FxJSFSelectItem;
+import org.apache.commons.lang.StringUtils;
 
 import javax.faces.model.SelectItem;
 import java.io.Serializable;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
-
-import org.apache.commons.lang.StringUtils;
 
 /**
  * Lock administration bean
@@ -203,4 +202,24 @@ public class LockBean implements Serializable {
         }
     }
 
+    /**
+     * Extend the duration of a loose lock by 10 minutes, extend a permanent lock by 1 hour
+     */
+    public void extendLock() {
+        if(selectedLock == null || !selectedLock.isContentLock())
+            return;
+
+        final ContentEngine ce = EJBLookup.getContentEngine();
+        final FxLockType t = selectedLock.getLockType();
+
+        try {
+            if (t == FxLockType.Loose)
+                ce.extendLock(selectedLock.getLockedPK(), 10 * 60 * 1000);
+            else if (t == FxLockType.Permanent)
+                ce.extendLock(selectedLock.getLockedPK(), 60 * 60 * 1000);
+            performQuery();
+        } catch (FxLockException e) {
+            new FxFacesMsgErr(e.getCause()).addToContext();
+        }
+    }
 }

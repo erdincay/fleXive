@@ -99,9 +99,13 @@
                                         <adm:ajaxCommandIcon id="unlock" reRender="lockResults,table" icon="unlock"
                                                              bean="#{lockBean}" action="unlock"
                                                              titleKey="Lock.button.unlock" rendered="#{lock.unlockable}">
-                                            <f:setPropertyActionListener target="#{lockBean.selectedLock}"
-                                                                         value="#{lock}"/>
+                                            <f:setPropertyActionListener target="#{lockBean.selectedLock}" value="#{lock}"/>
                                         </adm:ajaxCommandIcon>
+                                        <adm:ajaxCommandIcon id="extend" reRender="lockResults, table" icon="timeExtend"
+                                                             bean="#{lockBean}" action="extendLock"
+                                                             titleKey="Lock.button.extendLock" rendered="#{lock.contentLock}">
+                                            <f:setPropertyActionListener target="#{lockBean.selectedLock}" value="#{lock}"/>
+                                         </adm:ajaxCommandIcon>
                                     </td>
                                 </tr>
                             </ui:repeat>
