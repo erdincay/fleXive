@@ -39,21 +39,22 @@ import com.flexive.faces.components.content.FxWrappedContent;
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.faces.messages.FxFacesMsgInfo;
 import com.flexive.shared.*;
-import com.flexive.shared.security.UserTicket;
+import com.flexive.shared.content.*;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxLockException;
+import com.flexive.shared.interfaces.ContentEngine;
+import com.flexive.shared.security.ACLAssignment;
+import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.value.FxReference;
 import com.flexive.shared.value.ReferencedContent;
-import com.flexive.shared.content.*;
-import com.flexive.shared.interfaces.ContentEngine;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.ArrayList;
 
 /**
  * Backing bean for the content editor component.
@@ -66,8 +67,8 @@ public class FxContentEditorBean implements Serializable {
     private static final long serialVersionUID = 4667553874041738594L;
     private static final Log LOG = LogFactory.getLog(FxContentEditorBean.class);
 
-    private static final String BEAN_NAME="fxContentEditorBean";
-    private static final String EDITOR_REFERENCE_PREFIX ="_reference_";
+    private static final String BEAN_NAME = "fxContentEditorBean";
+    private static final String EDITOR_REFERENCE_PREFIX = "_reference_";
     private String editorId;
     private FxData element;
     // String containing comma separated xpaths indicating which elements to add
@@ -92,6 +93,8 @@ public class FxContentEditorBean implements Serializable {
     public static final String MESSAGES_ID = "ceMessages";
     // affected xpath for error messages
     private String affectedXPath;
+    // remaining time on the lock
+    private String remainingLockTime;
 
     public String getMessagesId() {
         return MESSAGES_ID;
@@ -160,7 +163,7 @@ public class FxContentEditorBean implements Serializable {
      */
     public void _delete() throws FxApplicationException {
         // remove referencing contents from storage
-        for (FxWrappedContent c: getReferencingContents(editorId)) {
+        for (FxWrappedContent c : getReferencingContents(editorId)) {
             contentStorage.remove(c.getEditorId());
         }
         String formPrefix = contentStorage.get(editorId).getGuiSettings().getFormPrefix();
@@ -192,12 +195,25 @@ public class FxContentEditorBean implements Serializable {
     }
 
     /**
-     * Saves the content.
+     * Action method: Saves the content.
      */
     public void save() {
         String formPrefix = contentStorage.get(editorId).getGuiSettings().getFormPrefix();
+        final UserTicket ticket = FxContext.getUserTicket();
         try {
-            _save(false);
+            boolean ownerChange = false;
+            // no owner change check if the current user is a supervisor
+            if (!ticket.isGlobalSupervisor() || !ticket.isMandatorSupervisor()) {
+                ownerChange = checkOwnerChange();
+            }
+
+            if (ownerChange) {
+                contentStorage.get(editorId).getGuiSettings().setTakeOver(true);
+                new FxFacesMsgErr("ContentEditor.msg.takeOver.warning").addToContext();
+
+            } else {
+                _save(false);
+            }
         } catch (Throwable t) {
             addErrorMessage(t, formPrefix);
         }
@@ -207,7 +223,7 @@ public class FxContentEditorBean implements Serializable {
     }
 
     /**
-     * Saves the content in a new version.
+     * Action method: Saves the content in a new version.
      */
     public void saveInNewVersion() {
         String formPrefix = contentStorage.get(editorId).getGuiSettings().getFormPrefix();
@@ -222,18 +238,75 @@ public class FxContentEditorBean implements Serializable {
     }
 
     /**
-     * If the content is locked with a loose lock, unlock it
+     * Action method: edit the content in a new (max) version
      */
-    public void unlock() {
-        FxWrappedContent wc = contentStorage.get(editorId);
-        final ContentEngine ce = EJBLookup.getContentEngine();
+    public void enableEditInNewVersion() {
+        final UserTicket ticket = FxContext.getUserTicket();
+        final FxContent content = contentStorage.get(editorId).getContent();
+        ContentEngine ce = EJBLookup.getContentEngine();
+        final FxContent currentContent = contentStorage.get(editorId).getContent();
+
         try {
-            if (wc.getContent().isLocked() && wc.getContent().getLock().getLockType() == FxLockType.Loose) {
-                ce.unlock(wc.getContent().getPk());
-                wc.getContent().updateLock(FxLock.noLockPK());
+            // this will work as a supervisor
+            if (ticket.isGlobalSupervisor() || ticket.isMandatorSupervisor()) {
+                final FxPK newPK = ce.createNewVersion(currentContent);
+                // store new content in contentStorage and enable edit
+                contentStorage.get(editorId).setContent(ce.load(newPK));
+                contentStorage.get(editorId).getGuiSettings().setEditMode(true);
+
+            } else {
+                // we need to unlock the current content, create a new version,
+                // "return" the lock to the original user and then take over the newly created version lock
+                final FxPK oldPK = content.getPk();
+                final long oldUserId = content.getLock().getUserId();
+                ce.unlock(oldPK);
+                final FxPK newPK = ce.createNewVersion(currentContent);
+                // apply loose lock to the content of the old version for the "old" user id
+                content.updateLock(new FxLock(FxLockType.Loose, System.currentTimeMillis(), System.currentTimeMillis() + 600000, oldUserId, oldPK));
+                ce.save(content);
+                // load new content
+                contentStorage.get(editorId).setContent(ce.load(newPK));
+                contentStorage.get(editorId).getGuiSettings().setEditMode(true);
             }
-        } catch (FxLockException e) {
-            new FxFacesMsgErr(e).addToContext();
+        } catch (FxApplicationException e) {
+            new FxFacesMsgErr(e.getCause()).addToContext();
+        }
+        resetForm(contentStorage.get(editorId).getGuiSettings().getFormPrefix());
+    }
+
+    /**
+     * If the content is locked with a loose lock, unlock it
+     * If the content is locked with a permanent lock, unlock it if the privileges match
+     */
+    public void unLock() {
+        // reload first in case it was unlocked already
+        reloadContent();
+        FxWrappedContent wc = contentStorage.get(editorId);
+        if (wc.getContent().isLocked()) {
+
+            final FxLock lock = contentStorage.get(editorId).getContent().getLock();
+            final ContentEngine ce = EJBLookup.getContentEngine();
+            final UserTicket ticket = FxContext.getUserTicket();
+            final boolean editMode = contentStorage.get(editorId).getGuiSettings().isEditMode();
+            // if in edit mode, only remove permanent locks
+            try {
+                if ((editMode && lock.getLockType() == FxLockType.Permanent) || (!editMode && lock.getLockType() == FxLockType.Permanent)) {
+                    // check user priviledges
+                    if (lock.getUserId() == ticket.getUserId() || ticket.isGlobalSupervisor() || ticket.isMandatorSupervisor()) {
+                        ce.unlock(wc.getContent().getPk());
+                        wc.getContent().updateLock(FxLock.noLockPK());
+                    } else
+                        new FxFacesMsgErr("ContentEditor.msg.no.unlock").addToContext();
+                } else if (!editMode && lock.getLockType() == FxLockType.Loose) {
+                    if (lock.getUserId() == ticket.getUserId() || ticket.isGlobalSupervisor() || ticket.isMandatorSupervisor()) {
+                        ce.unlock(wc.getContent().getPk());
+                        wc.getContent().updateLock(FxLock.noLockPK());
+                    } else
+                        new FxFacesMsgErr("ContentEditor.msg.no.unlock").addToContext();
+                }
+            } catch (FxLockException e) {
+                new FxFacesMsgErr(e).addToContext();
+            }
         }
     }
 
@@ -242,11 +315,12 @@ public class FxContentEditorBean implements Serializable {
      *
      * @param newVersion true if the data should be saved in a new version.
      * @return returns the new pk, or null on errors
+     * @throws FxApplicationException on errors
      */
     public FxPK _save(boolean newVersion) throws FxApplicationException {
         try {
-            FxPK pk=null;
-            String formPrefix = "";
+            FxPK pk;
+            String formPrefix;
             FxWrappedContent parent;
             FxWrappedContent oldContent = contentStorage.get(editorId);
             formPrefix = oldContent.getGuiSettings().getFormPrefix();
@@ -260,8 +334,10 @@ public class FxContentEditorBean implements Serializable {
             //if content is not referenced put modified content into storage
             if (parent == null) {
                 contentStorage.put(editorId, new FxWrappedContent(co.load(pk), editorId, oldContent.getGuiSettings(), false));
-            }
-            else {
+                // reset all values to the states we need f. FxProvideContent
+                setGuiLockOptions(true, false, false, false);
+                contentStorage.get(editorId).getGuiSettings().setEditMode(true);
+            } else {
                 // if content was referenced, update reference and remove from storage
                 FxPropertyData propData = parent.getContent().getPropertyData(parent.getIdGenerator().decode(parent.getGuiSettings().getOpenedReferenceId()));
                 propData.setValue(new FxReference(false, new ReferencedContent(pk)));
@@ -294,50 +370,50 @@ public class FxContentEditorBean implements Serializable {
     }
 
     public void _deleteCurrentVersion() throws FxApplicationException {
-         // remove referencing contents from storage
-            for (FxWrappedContent c: getReferencingContents(editorId)) {
-                contentStorage.remove(c.getEditorId());
-            }
-            FxPK oldPk = contentStorage.get(editorId).getContent().getPk();
-            FxWrappedContent oldContent = contentStorage.get(editorId);
-            // close opened references
-            oldContent.getGuiSettings().setOpenedReferenceId(null);
-            String formPrefix = oldContent.getGuiSettings().getFormPrefix();
-            //remove version
-            EJBLookup.getContentEngine().removeVersion(oldPk);
-            // create new pk with maximum available version
-            FxPK newPk = new FxPK(oldPk.getId(), FxPK.MAX);
-            FxContent content = EJBLookup.getContentEngine().load(newPk);
-            FxWrappedContent parent = getParentContent(editorId);
-            // put maximum available version into content storage
-            getContentStorage().put(editorId, new FxWrappedContent(content, editorId, oldContent.getGuiSettings(), parent!=null));
-            // if content was referenced, update reference
-            if (parent != null) {
-                FxPropertyData propData = parent.getContent().getPropertyData(parent.getIdGenerator().decode(parent.getGuiSettings().getOpenedReferenceId()));
-                propData.setValue(new FxReference(false, new ReferencedContent(content.getPk())));
-            }
-            new FxFacesMsgInfo("Content.nfo.deletedVersion", oldPk).addToContext(formPrefix + ":" + editorId + "_" + MESSAGES_ID);
+        // remove referencing contents from storage
+        for (FxWrappedContent c : getReferencingContents(editorId)) {
+            contentStorage.remove(c.getEditorId());
+        }
+        FxPK oldPk = contentStorage.get(editorId).getContent().getPk();
+        FxWrappedContent oldContent = contentStorage.get(editorId);
+        // close opened references
+        oldContent.getGuiSettings().setOpenedReferenceId(null);
+        String formPrefix = oldContent.getGuiSettings().getFormPrefix();
+        //remove version
+        EJBLookup.getContentEngine().removeVersion(oldPk);
+        // create new pk with maximum available version
+        FxPK newPk = new FxPK(oldPk.getId(), FxPK.MAX);
+        FxContent content = EJBLookup.getContentEngine().load(newPk);
+        FxWrappedContent parent = getParentContent(editorId);
+        // put maximum available version into content storage
+        getContentStorage().put(editorId, new FxWrappedContent(content, editorId, oldContent.getGuiSettings(), parent != null));
+        // if content was referenced, update reference
+        if (parent != null) {
+            FxPropertyData propData = parent.getContent().getPropertyData(parent.getIdGenerator().decode(parent.getGuiSettings().getOpenedReferenceId()));
+            propData.setValue(new FxReference(false, new ReferencedContent(content.getPk())));
+        }
+        new FxFacesMsgInfo("Content.nfo.deletedVersion", oldPk).addToContext(formPrefix + ":" + editorId + "_" + MESSAGES_ID);
     }
 
-     /**
+    /**
      * JSF-Action to edit/create a referenced content.
      */
     public void createReference() {
         String formPrefix = "";
         try {
-             formPrefix = contentStorage.get(editorId).getGuiSettings().getFormPrefix();
-             String referenceId = contentStorage.get(editorId).getIdGenerator().get(element);
-             // set opened reference
-             contentStorage.get(editorId).getGuiSettings().setOpenedReferenceId(referenceId);
-             // create wrapped content for referenced type and put into storage
-             long typeId = CacheAdmin.getFilteredEnvironment().getProperty(((FxPropertyData)element).getPropertyId()).getReferencedType().getId();
-             String referenceEditorId = EDITOR_REFERENCE_PREFIX+editorId;
-             FxWrappedContent.GuiSettings guiSettings= FxWrappedContent.GuiSettings.createGuiSettingsForReference(
-                     contentStorage.get(editorId).getGuiSettings(), true);
-             FxWrappedContent wc = new FxWrappedContent(EJBLookup.getContentEngine().initialize(typeId),
-                                referenceEditorId, guiSettings, true);
-             contentStorage.put(referenceEditorId, wc);
-            }
+            formPrefix = contentStorage.get(editorId).getGuiSettings().getFormPrefix();
+            String referenceId = contentStorage.get(editorId).getIdGenerator().get(element);
+            // set opened reference
+            contentStorage.get(editorId).getGuiSettings().setOpenedReferenceId(referenceId);
+            // create wrapped content for referenced type and put into storage
+            long typeId = CacheAdmin.getFilteredEnvironment().getProperty(((FxPropertyData) element).getPropertyId()).getReferencedType().getId();
+            String referenceEditorId = EDITOR_REFERENCE_PREFIX + editorId;
+            FxWrappedContent.GuiSettings guiSettings = FxWrappedContent.GuiSettings.createGuiSettingsForReference(
+                    contentStorage.get(editorId).getGuiSettings(), true);
+            FxWrappedContent wc = new FxWrappedContent(EJBLookup.getContentEngine().initialize(typeId),
+                    referenceEditorId, guiSettings, true);
+            contentStorage.put(referenceEditorId, wc);
+        }
         catch (Throwable t) {
             addErrorMessage(t, formPrefix);
         }
@@ -349,21 +425,21 @@ public class FxContentEditorBean implements Serializable {
     public void editReference() {
         String formPrefix = "";
         try {
-             formPrefix = contentStorage.get(editorId).getGuiSettings().getFormPrefix();
-             String referenceId = contentStorage.get(editorId).getIdGenerator().get(element);
-             // set opened reference
-             contentStorage.get(editorId).getGuiSettings().setOpenedReferenceId(referenceId);
-             // create wrapped content for referenced pk and put into storage
-             ReferencedContent ref = ((FxReference)((FxPropertyData)element).getValue()).getBestTranslation();
-             FxPK pk = new FxPK(ref.getId(), ref.getVersion());
-             String referenceEditorId = EDITOR_REFERENCE_PREFIX+editorId;
-             FxWrappedContent.GuiSettings guiSettings= FxWrappedContent.GuiSettings.createGuiSettingsForReference(
-                     contentStorage.get(editorId).getGuiSettings(), true);
-             guiSettings.setDisableDelete(true);
-             FxWrappedContent wc = new FxWrappedContent(EJBLookup.getContentEngine().load(pk),
-                                referenceEditorId, guiSettings, true);
-             contentStorage.put(referenceEditorId, wc);
-            }
+            formPrefix = contentStorage.get(editorId).getGuiSettings().getFormPrefix();
+            String referenceId = contentStorage.get(editorId).getIdGenerator().get(element);
+            // set opened reference
+            contentStorage.get(editorId).getGuiSettings().setOpenedReferenceId(referenceId);
+            // create wrapped content for referenced pk and put into storage
+            ReferencedContent ref = ((FxReference) ((FxPropertyData) element).getValue()).getBestTranslation();
+            FxPK pk = new FxPK(ref.getId(), ref.getVersion());
+            String referenceEditorId = EDITOR_REFERENCE_PREFIX + editorId;
+            FxWrappedContent.GuiSettings guiSettings = FxWrappedContent.GuiSettings.createGuiSettingsForReference(
+                    contentStorage.get(editorId).getGuiSettings(), true);
+            guiSettings.setDisableDelete(true);
+            FxWrappedContent wc = new FxWrappedContent(EJBLookup.getContentEngine().load(pk),
+                    referenceEditorId, guiSettings, true);
+            contentStorage.put(referenceEditorId, wc);
+        }
         catch (Throwable t) {
             addErrorMessage(t, formPrefix);
         }
@@ -381,23 +457,64 @@ public class FxContentEditorBean implements Serializable {
     }
 
     /**
-     * JSF-action to cancel editing.
+     * Action method: JSF-action to cancel editing. Saves the content first, then releases the (loose lock) and cancels the edit
+     * form
+     */
+    public void saveAndCancel() {
+        final UserTicket ticket = FxContext.getUserTicket();
+        final String formPrefix = contentStorage.get(editorId).getGuiSettings().getFormPrefix();
+        try {
+            boolean ownerChange = false;
+            // no owner change check if the current user is a supervisor
+            if (!ticket.isGlobalSupervisor() || !ticket.isMandatorSupervisor()) {
+                ownerChange = checkOwnerChange();
+            }
+
+            if (ownerChange) {
+                contentStorage.get(editorId).getGuiSettings().setTakeOver(true);
+                new FxFacesMsgErr("ContentEditor.msg.takeOver.warning").addToContext();
+
+            } else {
+                _save(false);
+            }
+        } catch (Throwable t) {
+            addErrorMessage(t, formPrefix);
+        }
+        cancel();
+    }
+
+    /**
+     * Action method: cancel editing only
+     * Retain lock if locked by another person
      */
     public void cancel() {
-        String formPrefix = "";
+        // ! do not reload since we want exactly the version which is in the contentStorage for the current user
+        // reloadContent();
+        final String formPrefix = contentStorage.get(editorId).getGuiSettings().getFormPrefix();
         try {
-            unlock();
-             // remove referencing contents from storage
-            for (FxWrappedContent c: getReferencingContents(editorId)) {
-                contentStorage.remove(c.getEditorId());
-            }
-            formPrefix = contentStorage.get(editorId).getGuiSettings().getFormPrefix();
-            // check if the content is referenced by an existing content
-            FxWrappedContent parent = getParentContent(editorId);
-            if (parent != null) {
-                parent.getGuiSettings().setOpenedReferenceId(null);
-            }
-            else {
+            // unlock only if the current user also acquired the lock
+            // and only unlock the current version AND only remove a loose lock
+            // do not remove a loose lock if the content was taken over by another user
+            if (!checkOwnerChange()) {
+                final UserTicket ticket = FxContext.getUserTicket();
+                final FxLock lock = contentStorage.get(editorId).getContent().getLock();
+                ContentEngine ce = EJBLookup.getContentEngine();
+                if (ticket.getUserId() == contentStorage.get(editorId).getContent().getLock().getUserId()) {
+                    if (lock.getLockType() == FxLockType.Loose)
+                        ce.unlock(contentStorage.get(editorId).getContent().getPk());
+                }
+                // remove referencing contents from storage
+                for (FxWrappedContent c : getReferencingContents(editorId)) {
+                    contentStorage.remove(c.getEditorId());
+                }
+                // check if the content is referenced by an existing content
+                FxWrappedContent parent = getParentContent(editorId);
+                if (parent != null) {
+                    parent.getGuiSettings().setOpenedReferenceId(null);
+                } else {
+                    contentStorage.get(editorId).setReset(true);
+                }
+            } else {
                 contentStorage.get(editorId).setReset(true);
             }
         }
@@ -409,13 +526,260 @@ public class FxContentEditorBean implements Serializable {
         }
     }
 
-
     /**
-     * JSF-action to enable editing.
+     * Action method: JSF-action to enable editing. Always edits the latest / MAX version of a given content
      */
     public void enableEdit() {
-        contentStorage.get(editorId).getGuiSettings().setEditMode(true);
+        /** Another user might have pushed the edit button at the same time the content was loaded
+         * Hence we need to check if the cached content needs to be updated
+         */
+        reloadContent();
+
+        if (contentStorage.get(editorId).getContent().isLocked()
+                && !contentStorage.get(editorId).getGuiSettings().isLockedContentOverride()) {
+            determineLockTakeOver();
+        }
+
+        if (contentStorage.get(editorId).getGuiSettings().isCannotTakeOverPermLock()) {
+
+            contentStorage.get(editorId).getGuiSettings().setEditMode(false);
+            new FxFacesMsgErr("ContentEditor.msg.cannotTakeOverPermLock").addToContext();
+
+        } else if (contentStorage.get(editorId).getGuiSettings().isAskLockedMode()) {
+            contentStorage.get(editorId).getGuiSettings().setEditMode(false);
+        } else {
+            contentStorage.get(editorId).getGuiSettings().setEditMode(true);
+        }
         resetForm(contentStorage.get(editorId).getGuiSettings().getFormPrefix());
+    }
+
+    /**
+     * Sets the relevant FxWrappedContent option if a locked instance is encountered
+     */
+    private void determineLockTakeOver() {
+        final UserTicket ticket = FxContext.getUserTicket();
+        final FxContent content = contentStorage.get(editorId).getContent();
+        final FxLock lock = content.getLock();
+
+        if (lock.getUserId() == ticket.getUserId()) {
+            // set the override and edit
+            setGuiLockOptions(true, false, false, false);
+
+        } else if (ticket.isGlobalSupervisor() || ticket.isMandatorSupervisor() || currentUserInContentACLList(ticket, content.getAclIds())) {
+
+            if (lock.getLockType() == FxLockType.Loose) { // sets the correct boolean for the msg display
+                setGuiLockOptions(false, true, true, false);
+
+            } else if (lock.getLockType() == FxLockType.Permanent && (ticket.isGlobalSupervisor() || ticket.isMandatorSupervisor())) {
+                setGuiLockOptions(false, true, true, false);
+
+            } else { // not allowed to override (either permanent lock or loose and user is not in ACL)
+                setGuiLockOptions(false, false, false, true);
+            }
+        }
+    }
+
+    /**
+     * Action method: Set the override option for content editing depending on the user privileges
+     */
+    public void lockOverride() {
+        reloadContent(); // get latest version first
+        final UserTicket ticket = FxContext.getUserTicket();
+        final FxContent content = contentStorage.get(editorId).getContent();
+        final FxLock lock = content.getLock();
+        ContentEngine ce = EJBLookup.getContentEngine();
+        /**
+         * Take over lock IF
+         * [(supervisor or in instance ACL) && lock == loose] OR [supervisor && lock == permanent]
+         */
+        if (((ticket.isGlobalSupervisor() || ticket.isMandatorSupervisor() || currentUserInContentACLList(ticket, content.getAclIds())
+                || lock.getUserId() == ticket.getUserId()) && lock.getLockType() == FxLockType.Loose)
+                || ((ticket.isGlobalSupervisor() || ticket.isMandatorSupervisor()) && lock.getLockType() == FxLockType.Permanent)) {
+
+            setGuiLockOptions(true, false, false, false);
+            final FxPK pk = contentStorage.get(editorId).getContent().getPk();
+            // first unlock, then update the content lock with a loose lock and subsequently update the FxWrappedContent
+            try {
+                ce.unlock(pk);
+                ce.lock(FxLockType.Loose, pk);
+                contentStorage.get(editorId).setContent(ce.load(pk));
+            } catch (FxLockException e) {
+                new FxFacesMsgErr(e.getCause()).addToContext();
+            } catch (FxApplicationException e) {
+                new FxFacesMsgErr(e.getCause()).addToContext();
+            }
+        }
+        enableEdit();
+    }
+
+    /**
+     * Action method: "Cancel" action: do not do anything if a locked content is encountered by the user
+     */
+    public void noLockOverride() {
+        setGuiLockOptions(false, false, false, false);
+        contentStorage.get(editorId).getGuiSettings().setEditMode(false);
+        resetForm(contentStorage.get(editorId).getGuiSettings().getFormPrefix());
+    }
+
+    /**
+     * Set the FxWrappedContent GUI lock options
+     *
+     * @param lockedContentOverride  set to true if the lock should be overridden
+     * @param askLockedMode          set to true if an override question should be displayed
+     * @param askCreateNewVersion    set to true if a create new version question should be displayed
+     * @param cannotTakeOverPermLock set to true if a "cannot override permanent lock" message should be displayed
+     */
+    private void setGuiLockOptions(boolean lockedContentOverride, boolean askLockedMode, boolean askCreateNewVersion,
+                                   boolean cannotTakeOverPermLock) {
+        contentStorage.get(editorId).getGuiSettings().setLockedContentOverride(lockedContentOverride);
+        contentStorage.get(editorId).getGuiSettings().setAskLockedMode(askLockedMode);
+        contentStorage.get(editorId).getGuiSettings().setAskCreateNewVersion(askCreateNewVersion);
+        contentStorage.get(editorId).getGuiSettings().setCannotTakeOverPermLock(cannotTakeOverPermLock);
+    }
+
+    /**
+     * Reloads the content from the contentEngine and updates the FxWrappedContent instance
+     */
+    private void reloadContent() {
+        final FxPK pk = contentStorage.get(editorId).getContent().getPk();
+        try {
+            final FxContent repContent = EJBLookup.getContentEngine().load(pk);
+            contentStorage.get(editorId).setContent(repContent); // update
+        } catch (FxApplicationException e) {
+            new FxFacesMsgErr(e.getCause()).addToContext();
+        }
+    }
+
+    /**
+     * Action method: acquire a permanent lock on the current version of the content
+     */
+    public void acquirePermLock() {
+        reloadContent();
+        final FxPK pk = contentStorage.get(editorId).getContent().getPk();
+        ContentEngine ce = EJBLookup.getContentEngine();
+        final FxContent content = contentStorage.get(editorId).getContent();
+        final FxLock lock = contentStorage.get(editorId).getContent().getLock();
+        final UserTicket ticket = FxContext.getUserTicket();
+
+        if ((ticket.isGlobalSupervisor() || ticket.isMandatorSupervisor() || currentUserInContentACLList(ticket, content.getAclIds()))
+                && (lock.getLockType() != FxLockType.Permanent)) {
+            try {
+                contentStorage.get(editorId).getContent().updateLock(ce.lock(FxLockType.Permanent, pk));
+            } catch (FxLockException e) {
+                new FxFacesMsgErr(e.getCause()).addToContext();
+            }
+        } else {
+            new FxFacesMsgErr("ContentEditor.msg.no.permLock").addToContext();
+        }
+    }
+
+    /**
+     * Action method: extend the loose lock by 10 minutes
+     */
+    public void extendLock() {
+        if (checkOwnerChange()) {
+            contentStorage.get(editorId).getGuiSettings().setTakeOver(true);
+            new FxFacesMsgErr("ContentEditor.msg.takeOver.warning").addToContext();
+            new FxFacesMsgErr("ContentEditor.msg.no.extend").addToContext();
+        } else {
+            reloadContent();
+            final FxPK pk = contentStorage.get(editorId).getContent().getPk();
+            ContentEngine ce = EJBLookup.getContentEngine();
+            final FxLock lock = contentStorage.get(editorId).getContent().getLock();
+            final UserTicket ticket = FxContext.getUserTicket();
+
+            if (ticket.getUserId() == lock.getUserId() || ticket.isGlobalSupervisor() || ticket.isMandatorSupervisor()) {
+                try { // extend by ten minutes
+                    if (lock.getLockType() == FxLockType.Loose)
+                        contentStorage.get(editorId).getContent().updateLock(ce.extendLock(pk, 10 * 60 * 1000));
+                    else if (lock.getLockType() == FxLockType.Permanent)
+                        contentStorage.get(editorId).getContent().updateLock(ce.extendLock(pk, 60 * 60 * 1000));
+                } catch (FxLockException e) {
+                    new FxFacesMsgErr(e.getCause()).addToContext();
+                }
+                computeRemainingLockTime();
+            } else {
+                new FxFacesMsgErr("ContentEditor.msg.no.extend").addToContext();
+            }
+        }
+    }
+
+    /**
+     * Action method: compute the time remaining for a given lock
+     */
+    public void computeRemainingLockTime() {
+        if (checkOwnerChange()) {
+            contentStorage.get(editorId).getGuiSettings().setTakeOver(true);
+            new FxFacesMsgErr("ContentEditor.msg.takeOver.warning").addToContext();
+        } else
+            reloadContent();
+
+        final FxLock lock = contentStorage.get(editorId).getContent().getLock();
+
+        if (lock.getLockType() != FxLockType.None && !lock.isExpired()) {
+            final long currentLockTime = lock.getDuration() / 1000;
+
+            final String format = String.format("%%0%dd", 2);
+            final String seconds = String.format(format, currentLockTime % 60);
+            final String minutes = String.format(format, (currentLockTime % 3600) / 60);
+            final String hours = String.format(format, currentLockTime / 3600);
+            remainingLockTime = hours + ":" + minutes + ":" + seconds;
+
+        } else if (lock.isExpired()) {
+            remainingLockTime = "expired";
+        }
+    }
+
+    public String getRemainingLockTime() {
+        return remainingLockTime;
+    }
+
+    public void setRemainingLockTime(String remainingLockTime) {
+        this.remainingLockTime = remainingLockTime;
+    }
+
+    /**
+     * Checks if a UserTicket contains at least one of a given List of (content) ACLs
+     *
+     * @param ticket        the UserTicket
+     * @param contentACLIds a List of (content) ACL ids
+     * @return returns true if a match can be found
+     */
+    private static boolean currentUserInContentACLList(UserTicket ticket, List<Long> contentACLIds) {
+        for (Long id : contentACLIds) {
+            for (ACLAssignment a : ticket.getACLAssignments()) {
+                if (a.getAclId() == id)
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Checks whether the currently opened content had it's lock revoked by another user
+     * and displays the appropriate message
+     *
+     * @return returns true if the owner (lock) of the currently opened content changed
+     */
+    private boolean checkOwnerChange() {
+        boolean hasNewOwner = false;
+        ContentEngine ce = EJBLookup.getContentEngine();
+        final FxContent currentContent = contentStorage.get(editorId).getContent();
+        final FxLock currentLock = currentContent.getLock();
+
+        try {
+            final FxContent repContent = ce.load(currentContent.getPk());
+            final FxLock repLock = repContent.getLock();
+
+            if (currentLock.getUserId() != repLock.getUserId()) {
+                hasNewOwner = true;
+            }
+        } catch (FxApplicationException e) {
+            new FxFacesMsgErr(e.getCause()).addToContext();
+        }
+
+        return hasNewOwner;
     }
 
     /**
@@ -600,8 +964,8 @@ public class FxContentEditorBean implements Serializable {
     }
 
     private void setAffectedXPath(FxApplicationException e) {
-         if (!StringUtils.isEmpty(e.getAffectedXPath()))
-            this.affectedXPath = editorId+":"+FxJsfUtils.encodeJSFIdentifier(e.getAffectedXPath());
+        if (!StringUtils.isEmpty(e.getAffectedXPath()))
+            this.affectedXPath = editorId + ":" + FxJsfUtils.encodeJSFIdentifier(e.getAffectedXPath());
     }
 
     /**
@@ -610,7 +974,7 @@ public class FxContentEditorBean implements Serializable {
      * @return managed bean name.
      */
     public static String getBeanName() {
-        return BEAN_NAME;   
+        return BEAN_NAME;
     }
 
     public String getEditorReferencePrefix() {
@@ -623,7 +987,7 @@ public class FxContentEditorBean implements Serializable {
      *
      * @param editorId editor/(==storage) id of the content.
      * @return the parent content, if the content with the specified id is a referenced content,
-     * otherwise null.
+     *         otherwise null.
      */
     public FxWrappedContent getParentContent(String editorId) {
         FxWrappedContent parent = null;
@@ -631,7 +995,7 @@ public class FxContentEditorBean implements Serializable {
             String strippedId = editorId.substring(EDITOR_REFERENCE_PREFIX.length());
             for (String key : contentStorage.keySet()) {
                 if (strippedId.startsWith(key)) {
-                    parent= contentStorage.get(key);
+                    parent = contentStorage.get(key);
                     break;
                 }
             }
@@ -641,11 +1005,11 @@ public class FxContentEditorBean implements Serializable {
 
     public List<FxWrappedContent> getReferencingContents(String editorId) {
         List<FxWrappedContent> result = new ArrayList<FxWrappedContent>(2);
-        boolean found=true;
+        boolean found = true;
         String refEditorId = editorId;
         while (found) {
-            refEditorId = EDITOR_REFERENCE_PREFIX+refEditorId;
-            FxWrappedContent wc = contentStorage.containsKey(refEditorId) ? contentStorage.get(refEditorId) :null;
+            refEditorId = EDITOR_REFERENCE_PREFIX + refEditorId;
+            FxWrappedContent wc = contentStorage.containsKey(refEditorId) ? contentStorage.get(refEditorId) : null;
             if (wc == null)
                 found = false;
             else

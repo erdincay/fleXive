@@ -261,6 +261,15 @@ public class FxWrappedContent implements Serializable {
     }
 
     /**
+     * (re-)Set the content (in case it needs to be updated)
+
+     * @param content the FxContent
+     */
+    public void setContent(FxContent content) {
+        this.content = content;
+    }
+
+    /**
      * Returns if multiple ACLs for this content's type are allowed.
      *
      * @return if multiple ACLs for this content's type are allowed
@@ -503,13 +512,25 @@ public class FxWrappedContent implements Serializable {
         // form prefix
         private String formPrefix;
         private String openedReferenceId;
+        // LOCKS
+        private boolean askLockedMode;
+        private boolean lockedContentOverride;
+        private boolean cannotTakeOverPermLock;
+        private boolean askCreateNewVersion;
+        private String lockStatus;
+        private boolean contentLocked;
+        private boolean looseLock;
+        private boolean permLock;
+        private boolean takeOver;
 
         public GuiSettings(boolean editMode, boolean disableAcl, boolean disableWorkflow,
                            boolean disableEdit, boolean disableDelete, boolean disableVersion,
                            boolean disableCompact, boolean disableSave, boolean disableCancel,
                            boolean disableButtons, boolean disableAddAssignment, boolean disableRemoveAssignment,
                            boolean disablePositionAssignment, boolean disableMessages, String formPrefix,
-                           String reRender, FxValueFormatter valueFormatter) {
+                           String reRender, FxValueFormatter valueFormatter, boolean askLockedMode,
+                           boolean lockedContentOverride, boolean cannotTakeOverPermLock, boolean askCreateNewVersion,
+                           String lockStatus, boolean contentLocked, boolean looseLock, boolean permLock, boolean takeOver) {
             this.editMode = editMode;
             this.disableAcl = disableAcl;
             this.disableWorkflow = disableWorkflow;
@@ -527,6 +548,15 @@ public class FxWrappedContent implements Serializable {
             this.formPrefix = formPrefix;
             this.reRender = reRender;
             this.valueFormatter = valueFormatter;
+            this.askLockedMode = askLockedMode;
+            this.lockedContentOverride = lockedContentOverride;
+            this.cannotTakeOverPermLock = cannotTakeOverPermLock;
+            this.askCreateNewVersion = askCreateNewVersion;
+            this.lockStatus = lockStatus;
+            this.contentLocked = contentLocked;
+            this.looseLock = looseLock;
+            this.permLock = permLock;
+            this.takeOver = takeOver;
         }
 
         public static GuiSettings createGuiSettingsForReference(GuiSettings guiSettings, boolean editMode) {
@@ -535,7 +565,10 @@ public class FxWrappedContent implements Serializable {
                     guiSettings.isDisableCompact(), guiSettings.isDisableSave(), guiSettings.isDisableCancel(),
                     guiSettings.isDisableButtons(), guiSettings.isDisableAddAssignment(),
                     guiSettings.isDisableRemoveAssignment(), guiSettings.isDisablePositionAssignment(),
-                    guiSettings.isDisableMessages(), guiSettings.formPrefix, guiSettings.reRender, guiSettings.valueFormatter);
+                    guiSettings.isDisableMessages(), guiSettings.formPrefix, guiSettings.reRender, guiSettings.valueFormatter,
+                    guiSettings.isAskLockedMode(), guiSettings.isLockedContentOverride(),
+                    guiSettings.isCannotTakeOverPermLock(), guiSettings.isAskCreateNewVersion(), guiSettings.getLockStatus(),
+                    guiSettings.isContentLocked(), guiSettings.isLooseLock(), guiSettings.isPermLock(), guiSettings.isTakeOver());
         }
 
 
@@ -681,6 +714,78 @@ public class FxWrappedContent implements Serializable {
 
         public void setValueFormatter(FxValueFormatter valueFormatter) {
             this.valueFormatter = valueFormatter;
+        }
+        // LOCKS
+        public boolean isAskLockedMode() {
+            return askLockedMode;
+        }
+
+        public void setAskLockedMode(boolean askLockedMode) {
+            this.askLockedMode = askLockedMode;
+        }
+
+        public boolean isLockedContentOverride() {
+            return lockedContentOverride;
+        }
+
+        public void setLockedContentOverride(boolean lockedContentOverride) {
+            this.lockedContentOverride = lockedContentOverride;
+        }
+
+        public boolean isCannotTakeOverPermLock() {
+            return cannotTakeOverPermLock;
+        }
+
+        public void setCannotTakeOverPermLock(boolean cannotTakeOverPermLock) {
+            this.cannotTakeOverPermLock = cannotTakeOverPermLock;
+        }
+
+        public boolean isAskCreateNewVersion() {
+            return askCreateNewVersion;
+        }
+
+        public void setAskCreateNewVersion(boolean askCreateNewVersion) {
+            this.askCreateNewVersion = askCreateNewVersion;
+        }
+
+        public String getLockStatus() {
+            return lockStatus;
+        }
+
+        public void setLockStatus(String lockStatus) {
+            this.lockStatus = lockStatus;
+        }
+
+        public boolean isContentLocked() {
+            return contentLocked;
+        }
+
+        public void setContentLocked(boolean contentLocked) {
+            this.contentLocked = contentLocked;
+        }
+
+        public boolean isLooseLock() {
+            return looseLock;
+        }
+
+        public void setLooseLock(boolean looseLock) {
+            this.looseLock = looseLock;
+        }
+
+        public boolean isPermLock() {
+            return permLock;
+        }
+
+        public void setPermLock(boolean permLock) {
+            this.permLock = permLock;
+        }
+
+        public boolean isTakeOver() {
+            return takeOver;
+        }
+
+        public void setTakeOver(boolean takeOver) {
+            this.takeOver = takeOver;
         }
     }
 

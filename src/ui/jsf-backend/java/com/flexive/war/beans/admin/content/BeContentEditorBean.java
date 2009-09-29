@@ -41,16 +41,16 @@ import com.flexive.faces.components.content.FxWrappedContent;
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.faces.messages.FxFacesMsgInfo;
 import com.flexive.shared.*;
-import com.flexive.shared.search.FxResultRow;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxContentVersionInfo;
 import com.flexive.shared.content.FxDelta;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
-import com.flexive.shared.exceptions.FxLockException;
-import com.flexive.shared.interfaces.TreeEngine;
 import com.flexive.shared.interfaces.ContentEngine;
+import com.flexive.shared.interfaces.TreeEngine;
+import com.flexive.shared.search.FxResultRow;
 import com.flexive.shared.security.LifeCycleInfo;
+import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNode;
@@ -830,11 +830,96 @@ public class BeContentEditorBean implements ActionBean, Serializable {
     }
 
     /**
-     * Saves the data.
+     * Action method: Saves the data.
      */
     public void save() {
-        _save(false);
+        final UserTicket ticket = FxContext.getUserTicket();
+        boolean ownerChange = false;
+        // no owner change check if the current user is a supervisor
+        if (!ticket.isGlobalSupervisor() || !ticket.isMandatorSupervisor()) {
+            ownerChange = checkOwnerChange();
+        }
+
+        if (ownerChange) {
+            wrappedContent.getGuiSettings().setTakeOver(true);
+            new FxFacesMsgErr("ContentEditor.msg.takeOver.warning").addToContext();
+
+        } else {
+            _save(false);
+        }
         FxJsfUtils.resetFaceletsComponent(FORM_ID + ":" + EDITOR_ID);
+    }
+
+    /**
+     * Action method: save the content and cancel editing (remove loose lock)
+     */
+    public void saveAndCancel() {
+        final UserTicket ticket = FxContext.getUserTicket();
+        final String formPrefix = wrappedContent.getGuiSettings().getFormPrefix();
+        try {
+            boolean ownerChange = false;
+            // no owner change check if the current user is a supervisor
+            if (!ticket.isGlobalSupervisor() || !ticket.isMandatorSupervisor()) {
+                ownerChange = checkOwnerChange();
+            }
+
+            if (ownerChange) {
+                wrappedContent.getGuiSettings().setTakeOver(true);
+                new FxFacesMsgErr("ContentEditor.msg.takeOver.warning").addToContext();
+
+            } else {
+                _save(false);
+            }
+        } catch (Throwable t) {
+            new FxFacesMsgErr(t).addToContext();
+        }
+        cancel();
+    }
+
+    /**
+     * Checks whether the currently opened content had it's lock revoked by another user
+     * and displays the appropriate message
+     *
+     * @return returns true if the owner (lock) of the currently opened content changed
+     */
+    private boolean checkOwnerChange() {
+        boolean hasNewOwner = false;
+        ContentEngine ce = EJBLookup.getContentEngine();
+        final FxContent currentContent = wrappedContent.getContent();
+        final FxLock currentLock = currentContent.getLock();
+
+        try {
+            final FxContent repContent = ce.load(currentContent.getPk());
+            final FxLock repLock = repContent.getLock();
+
+            if (currentLock.getUserId() != repLock.getUserId()) {
+                hasNewOwner = true;
+            }
+        } catch (FxApplicationException e) {
+            new FxFacesMsgErr(e.getCause()).addToContext();
+        }
+
+        return hasNewOwner;
+    }
+
+    /**
+     * Action method: override a content's lock
+     *
+     * @return returns the current page
+     */
+    public String lockOverride() {
+        ((FxContentEditorBean) FxJsfUtils.getManagedBean("fxContentEditorBean")).lockOverride();
+        return getEditorPage();
+    }
+
+    /**
+     * Action method: edit the content in a new (max) version
+     *
+     * @return returns the current page
+     */
+    public String enableEditInNewVersion() {
+        ((FxContentEditorBean) FxJsfUtils.getManagedBean("fxContentEditorBean")).enableEditInNewVersion();
+        return getEditorPage();
     }
 
     /**
@@ -914,9 +999,49 @@ public class BeContentEditorBean implements ActionBean, Serializable {
         }
     }
 
+    /**
+     * Action method: enable edit mode
+     *
+     * @return returns the current view
+     */
     public String enableEdit() {
         ((FxContentEditorBean) FxJsfUtils.getManagedBean("fxContentEditorBean")).enableEdit();
         return null;
+    }
+
+    /**
+     * Action method: acquire a permanent lock on a content
+     */
+    public void acquirePermLock() {
+        ((FxContentEditorBean) FxJsfUtils.getManagedBean("fxContentEditorBean")).acquirePermLock();
+    }
+
+    /**
+     * Action method: unlock a content
+     */
+    public void unLock() {
+        ((FxContentEditorBean) FxJsfUtils.getManagedBean("fxContentEditorBean")).unLock();
+    }
+
+    /**
+     * Action method: compute the remaining lock duration
+     */
+    public void computeRemainingLockTime() {
+        ((FxContentEditorBean) FxJsfUtils.getManagedBean("fxContentEditorBean")).computeRemainingLockTime();
+    }
+
+    /**
+     * Action method: extend the lock duration
+     */
+    public void extendLock() {
+        ((FxContentEditorBean) FxJsfUtils.getManagedBean("fxContentEditorBean")).extendLock();
+    }
+
+    /**
+     * Action method: cancel the lock override, resets form and gui settings
+     */
+    public void noLockOverride() {
+        ((FxContentEditorBean) FxJsfUtils.getManagedBean("fxContentEditorBean")).noLockOverride();
     }
 
     /**

@@ -273,9 +273,16 @@ function ajaxButtonRequest() {
 /**
  * Call this for the BE application ajax requests in the content editor component
  */
-function beAjaxButtonRequest() {
+function beAjaxButtonRequest(reloadContentTree) {
     regAjaxComponentInToolbar(true);
     flexive.yui.load();
+    if(reloadContentTree) {
+        ceReloadTree();
+    }
+}
+
+function ceReloadTree() {
+    window.parent.getContentNavFrame().reloadContentTree();
 }
 
 /**

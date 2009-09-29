@@ -29,6 +29,17 @@
                 var isContentEditor = true;
             </script>
 
+            <!-- separate js function call for the BE app -->
+            <c:set var="jsfunc" value="beAjaxButtonRequest(true);"/>
+            <c:if test="#{beContentEditorBean.browserAsString=='IE'}">
+                <c:set var="jsfunc" value="flexive.yui.load(); ceReloadTree();"/>
+            </c:if>
+
+            <!-- reload the tree on a page reload -->
+            <script type="text/javascript">
+                ceReloadTree();
+            </script>
+
             <c:if test="#{empty beContentEditorBean.parseRequestParameters}"/>
             <adm:saveContentEditorState/>
 

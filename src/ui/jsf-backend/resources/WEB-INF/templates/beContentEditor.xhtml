@@ -15,15 +15,11 @@ disableTab... false if the <adm:tab/> component should be rendered, true otherwi
 
 <ui:composition>
     <c:set var="srcEditor" value="#{beContentEditorBean}"/>
-    <fx:contentEditor typeId="#{srcEditor.typeId == -1 ? null : srcEditor.typeId}"
-                      pk="#{srcEditor.pk}"
-                      var="myContent"
-                      content="#{srcEditor.content}"
-                      editorId="#{srcEditor.editorId}" formPrefix="#{srcEditor.formId}"
-                      editMode="#{srcEditor.editMode}" disableMessages="true"
-                      valueFormatter="#{srcEditor.valueFormatter}"
-                      reRender="#{srcEditor.editorId}"
-                      reset="#{srcEditor.reset}">
+    <fx:contentEditor typeId="#{srcEditor.typeId == -1 ? null : srcEditor.typeId}" pk="#{srcEditor.pk}" var="myContent"
+                      content="#{srcEditor.content}" editorId="#{srcEditor.editorId}" formPrefix="#{srcEditor.formId}"
+                      editMode="#{srcEditor.editMode}" disableMessages="true" valueFormatter="#{srcEditor.valueFormatter}"
+                      reRender="#{srcEditor.editorId}" reset="#{srcEditor.reset}">
+
         <!-- replace default content settings -->
         <ui:define name="contentSettings">
             <!-- Content editor tabs -->
@@ -209,23 +205,143 @@ disableTab... false if the <adm:tab/> component should be rendered, true otherwi
         </ui:define>
 
         <ui:define name="cancelButton">
+            <adm:commandButton id="#{editorId}_saveAndCancelButton" labelKey="ContentEditor.button.saveAndCancel"
+                          location="#{empty myContent.guiSettings.openedReferenceId
+                                         and not myContent.referenced ? 'both' : 'content'}"
+                          bean="#{srcEditor}" icon="save" action="saveAndCancel"
+                          onclick="flexive.contentEditor.saveGroupFolding('#{srcEditor.formId}');ceReloadTree();">
+                 <f:setPropertyActionListener value="#{myContent}" target="#{srcEditor.wrappedContent}"/>
+                 <!-- set properties for fxContentEditorBean -->
+                <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
+                <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
+            </adm:commandButton>
             <adm:commandButton id="#{editorId}_cancelButton" labelKey="Content.button.cancel"
                           location="#{empty myContent.guiSettings.openedReferenceId
                                          and not myContent.referenced ? 'both' : 'content'}"
                           bean="#{srcEditor}" confirmKey="Content.confirm.abort"
-                          icon="cancel" action="cancel" onclick="flexive.contentEditor.saveGroupFolding('#{srcEditor.formId}');">
+                          icon="cancel" action="cancel" onclick="flexive.contentEditor.saveGroupFolding('#{srcEditor.formId}');ceReloadTree();">
                  <f:setPropertyActionListener value="#{myContent}" target="#{srcEditor.wrappedContent}"/>
                  <!-- set properties for fxContentEditorBean -->
                 <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
                 <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
             </adm:commandButton>
         </ui:define>
+        <!-- acquire permanent lock -->
+        <ui:define name="permLockButton">
+            <adm:ajaxCommandButton id="#{editorId}_permLockButton" labelKey="ContentEditor.button.acquirePermLock" bean="#{srcEditor}"
+                                   icon="lock" action="acquirePermLock" onclick="flexive.contentEditor.saveGroupFolding('#{srcEditor.formId}');"
+                                   oncomplete="#{jsfunc}">
+                 <f:setPropertyActionListener value="#{myContent}" target="#{srcEditor.wrappedContent}"/>
+                 <!-- set properties for fxContentEditorBean -->
+                <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
+                <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
+            </adm:ajaxCommandButton>
+        </ui:define>
+        <!-- unlock content -->
+        <ui:define name="unlockButton">
+            <adm:ajaxCommandButton id="#{editorId}_unlockButton" labelKey="ContentEditor.button.unlock" bean="#{srcEditor}"
+                                   icon="unlock" action="unLock" onclick="flexive.contentEditor.saveGroupFolding('#{srcEditor.formId}');"
+                                   oncomplete="#{jsfunc}">
+                 <f:setPropertyActionListener value="#{myContent}" target="#{srcEditor.wrappedContent}"/>
+                 <!-- set properties for fxContentEditorBean -->
+                <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
+                <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
+            </adm:ajaxCommandButton>
+        </ui:define>
+        <!-- remaining lock time button -->
+        <ui:define name="lockTimeButton">
+            <adm:ajaxCommandButton id="#{editorId}_lockTimeButton" labelKey="ContentEditor.button.remainingTime" bean="#{srcEditor}"
+                                   icon="time" action="computeRemainingLockTime" onclick="flexive.contentEditor.saveGroupFolding('#{srcEditor.formId}');"
+                                   oncomplete="#{jsfunc}">
+                 <f:setPropertyActionListener value="#{myContent}" target="#{srcEditor.wrappedContent}"/>
+                 <!-- set properties for fxContentEditorBean -->
+                <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
+                <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
+            </adm:ajaxCommandButton>
+        </ui:define>
+        <!-- extend lock time button -->
+        <ui:define name="extendLockTimeButton">
+            <adm:ajaxCommandButton id="#{editorId}_extendLockTimeButton" labelKey="ContentEditor.button.extendLock" bean="#{srcEditor}"
+                                   icon="timeExtend" action="extendLock" onclick="flexive.contentEditor.saveGroupFolding('#{srcEditor.formId}');"
+                                   oncomplete="#{jsfunc}">
+                 <f:setPropertyActionListener value="#{myContent}" target="#{srcEditor.wrappedContent}"/>
+                 <!-- set properties for fxContentEditorBean -->
+                <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
+                <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
+            </adm:ajaxCommandButton>
+        </ui:define>
+        <!-- lock time display panel -->
+        <ui:define name="lockTimePanel">
+            <c:set var="divPosition" value="position:absolute; margin-top:40px"/>
+            <c:if test="#{_ceContent.guiSettings.editMode}">
+                <c:set var="divPosition" value="position:absolute; margin-top:60px"/>
+            </c:if>
+            <a4j:outputPanel id="remainingTime" rendered="#{not empty __ceBean.remainingLockTime}" layout="block"
+                             style="#{divPosition}">
+                <c:if test="#{_ceContent.guiSettings.permLock}">
+                    <h:outputText value="#{fxMessageBean['ContentEditor.msg.permLockTimeRemaining']}"/>
+                </c:if>
+                <c:if test="#{_ceContent.guiSettings.looseLock}">
+                    <h:outputText value="#{fxMessageBean['ContentEditor.msg.looseLockTimeRemaining']}"/>
+                </c:if>
+                <h:outputText value=" #{__ceBean.remainingLockTime}"/>
+            </a4j:outputPanel>
+        </ui:define>
+        <!-- editLockedContentButtons -->
+        <ui:define name="editLockedContentButtons">
+            <br/><br/><br/>
+            <div>
+                <c:if test="#{_ceContent.guiSettings.looseLock}">
+                    <h:outputText escape="false" value=" #{fxMessageBean['ContentEditor.msg.looseLock']} "/>
+                </c:if>
+                <c:if test="#{_ceContent.guiSettings.permLock}">
+                    <h:outputText escape="false" value=" #{fxMessageBean['ContentEditor.msg.permLock']} "/>
+                </c:if>
+            </div>
+            <adm:ajaxCommandButton id="#{editorId}_askLockOverrideButtonYes" labelKey="ContentEditor.button.lockOverrideYes"
+                                   bean="#{srcEditor}" icon="ok" action="lockOverride" oncomplete="#{jsfunc}" reRender="#{__ce_reRender}">
+                <f:setPropertyActionListener value="#{myContent}" target="#{srcEditor.wrappedContent}"/>
+                 <!-- set properties for fxContentEditorBean -->
+                <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
+                <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
+            </adm:ajaxCommandButton>
+            <adm:ajaxCommandButton id="#{editorId}_askLockOverrideButtonNo" labelKey="ContentEditor.button.lockOverrideNo"
+                                   bean="#{srcEditor}" icon="cancel" action="noLockOverride" oncomplete="#{jsfunc}">
+                <f:setPropertyActionListener value="#{myContent}" target="#{srcEditor.wrappedContent}"/>
+                 <!-- set properties for fxContentEditorBean -->
+                <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
+                <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
+            </adm:ajaxCommandButton>
+        </ui:define>
 
+        <!-- editLockedContentNewVersionButtons -->
+        <ui:define name="editLockedContentNewVersionButtons">
+            <br/><br/><br/>
+            <div>
+                <h:outputText value=" #{fxMessageBean['ContentEditor.msg.askCreateNewVersion']} "/>
+            </div>
+            <adm:ajaxCommandButton id="#{editorId}_askNewVersionButtonYes" labelKey="ContentEditor.button.askCreateNewVersionYes"
+                                   bean="#{srcEditor}" icon="ok" action="enableEditInNewVersion" oncomplete="#{jsfunc}" reRender="#{__ce_reRender}">
+                <f:setPropertyActionListener value="#{myContent}" target="#{srcEditor.wrappedContent}"/>
+                 <!-- set properties for fxContentEditorBean -->
+                <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
+                <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
+            </adm:ajaxCommandButton>
+            <adm:ajaxCommandButton id="#{editorId}_askNewVersionButtonNo" labelKey="ContentEditor.button.askCreateNewVersionNo"
+                                   bean="#{srcEditor}" icon="cancel" action="cancel" oncomplete="#{jsfunc}">
+                <f:setPropertyActionListener value="#{myContent}" target="#{srcEditor.wrappedContent}"/>
+                 <!-- set properties for fxContentEditorBean -->
+                <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
+                <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
+            </adm:ajaxCommandButton>
+        </ui:define>
+
+        <!-- additional buttons -->
         <ui:define name="additionalButtons">
             <ui:fragment rendered="#{not myContent.new and myContent.content.permissions.mayExport
                 and empty myContent.guiSettings.openedReferenceId}">
                 <adm:commandButton id="#{editorId}_exportButton" labelKey="Content.button.export"
-                                    lockscreen="false" location="#{empty myContent.guiSettings.openedReferenceId
+                                lockscreen="false" location="#{empty myContent.guiSettings.openedReferenceId
                                          and not myContent.referenced ? 'both' : 'content'}"
                                icon="export" separator="#{not myContent.referenced ? 'before' : ''}"
                                onclick="exportContent('#{myContent.content.pk}');return false;"

@@ -35,17 +35,18 @@
 package com.flexive.faces.components.content;
 
 import com.flexive.faces.beans.FxContentEditorBean;
+import com.flexive.faces.beans.MessageBean;
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.shared.EJBLookup;
-import com.flexive.shared.FxLockType;
-import com.flexive.shared.FxLock;
 import com.flexive.shared.FxContext;
-import com.flexive.shared.security.UserTicket;
-import com.flexive.shared.interfaces.ContentEngine;
+import com.flexive.shared.FxLock;
+import com.flexive.shared.FxLockType;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxLockException;
+import com.flexive.shared.interfaces.ContentEngine;
+import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.value.renderer.FxValueFormatter;
 import com.sun.facelets.FaceletContext;
@@ -54,8 +55,6 @@ import com.sun.facelets.el.VariableMapperWrapper;
 import com.sun.facelets.tag.TagConfig;
 import com.sun.facelets.tag.TagHandler;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import javax.el.ELException;
 import javax.el.VariableMapper;
@@ -86,7 +85,7 @@ import java.util.HashMap;
  * compile-time, which enables us to render the content's groups
  * and properties recursively with Facelets-templates, which would
  * be impossible at render-time.
- *
+ * <p/>
  * <p/>
  * Attributes:<br/>
  * <b>editorId</b> (required)...   Id of the content editor component (must be unique in a view,
@@ -102,22 +101,22 @@ import java.util.HashMap;
  * <b>reset</b> (optional)...      True if the content for the given editor id should be reset (==removed from content storage and reinitilaized with given attributes, default:false).<br/>
  * <b>reRender</b> (optional)...   JSF-component id to rerender after AJAX-requests (useful for multiple content ediors in the same view).<br/>
  * <b>valueFormatter</b> (optional)...  A custom FxValueFormatter for the rendering of FxValues in the content editor template.<br/>
- * <b>disableAcl</b> (optional, default: flase)... True if ACL selectbox should not be rendered.<br/>
- * <b>disableWorkflow</b> (optional, default: flase)... True if workflow selct box should not be rendered.<br/>
- * <b>disableEdit</b> (optional, default: flase)... True if "edit" button should not be rendered.<br/>
- * <b>disableDelete</b> (optional, default: flase)... True if "delete" button should not be rendered.<br/>
- * <b>disableVersion</b> (optional, default: flase)... True if "save in new version" button and "delete version" button should not be rendered.<br/>
- * <b>disableCompact</b> (optional, default: flase)... True if "compact" button should not be rendered.<br/>
- * <b>disableSave</b> (optional, default: flase)... True if "save" button should not be rendered.<br/>
- * <b>disableCancel</b> (optional, default: flase)... True if "cancel" button should not be rendered.<br/>
- * <b>disableButtons</b> (optional, default: flase)... True if no buttons should be rendered.<br/>
- * <b>disableAddAssignment</b> (optional, default: flase)... True if icons for adding/inserting assignments should not be rendered.<br/>
- * <b>disableRemoveAssignment</b> (optional, default: flase)... True if icons for removing assignments should not be rendered.<br/>
- * <b>disablePositionAssignment</b> (optional, default: flase)... True if icons for positioning assignments should not be rendered.<br/>
- * <b>disableMessages</b> (optional, default: flase)... True if the &lt;h:messages/&gt; tag inside the content editor should not be rendered.<br/>
+ * <b>disableAcl</b> (optional, default: false)... True if ACL selectbox should not be rendered.<br/>
+ * <b>disableWorkflow</b> (optional, default: false)... True if workflow selct box should not be rendered.<br/>
+ * <b>disableEdit</b> (optional, default: false)... True if "edit" button should not be rendered.<br/>
+ * <b>disableDelete</b> (optional, default: false)... True if "delete" button should not be rendered.<br/>
+ * <b>disableVersion</b> (optional, default: false)... True if "save in new version" button and "delete version" button should not be rendered.<br/>
+ * <b>disableCompact</b> (optional, default: false)... True if "compact" button should not be rendered.<br/>
+ * <b>disableSave</b> (optional, default: false)... True if "save" button should not be rendered.<br/>
+ * <b>disableCancel</b> (optional, default: false)... True if "cancel" button should not be rendered.<br/>
+ * <b>disableButtons</b> (optional, default: false)... True if no buttons should be rendered.<br/>
+ * <b>disableAddAssignment</b> (optional, default: false)... True if icons for adding/inserting assignments should not be rendered.<br/>
+ * <b>disableRemoveAssignment</b> (optional, default: false)... True if icons for removing assignments should not be rendered.<br/>
+ * <b>disablePositionAssignment</b> (optional, default: false)... True if icons for positioning assignments should not be rendered.<br/>
+ * <b>disableMessages</b> (optional, default: false)... True if the &lt;h:messages/&gt; tag inside the content editor should not be rendered.<br/>
  */
 public class FxProvideContent extends TagHandler {
-    private static final Log LOG = LogFactory.getLog(FxProvideContent.class);
+    // private static final Log LOG = LogFactory.getLog(FxProvideContent.class);
 
     public FxProvideContent(TagConfig tagConfig) {
         super(tagConfig);
@@ -148,7 +147,7 @@ public class FxProvideContent extends TagHandler {
         final String reRender = isAttributeSet(ctx, "reRender") ? getAttribute("reRender").getValue(ctx) : null;
         final FxValueFormatter valueFormatter = isAttributeSet(ctx, "valueFormatter") ? (FxValueFormatter) getAttribute("valueFormatter").getObject(ctx, FxValueFormatter.class) : null;
         // retrieve content editor bean
-        final FxContentEditorBean contentEditor = (FxContentEditorBean) ctx.getExpressionFactory().createValueExpression(ctx, "#{"+FxContentEditorBean.getBeanName()+"}", FxContentEditorBean.class).getValue(ctx);
+        final FxContentEditorBean contentEditor = (FxContentEditorBean) ctx.getExpressionFactory().createValueExpression(ctx, "#{" + FxContentEditorBean.getBeanName() + "}", FxContentEditorBean.class).getValue(ctx);
         //disable ACL selection
         final Boolean disableAcl = isAttributeSet(ctx, "disableAcl") && Boolean.valueOf(getAttribute("disableAcl").getValue(ctx));
         //disable WF-Step selection
@@ -167,13 +166,24 @@ public class FxProvideContent extends TagHandler {
         final Boolean disablePositionAssignment = isAttributeSet(ctx, "disablePositionAssignment") && Boolean.valueOf(getAttribute("disablePositionAssignment").getValue(ctx));
         //disable rendering of "h:messages" inside the template
         final Boolean disableMessages = isAttributeSet(ctx, "disableMessages") && Boolean.valueOf(getAttribute("disableMessages").getValue(ctx));
+        // LOCKS
+        final Boolean askLockedMode = isAttributeSet(ctx, "askLockedMode") && Boolean.valueOf(getAttribute("askLockMode").getValue(ctx));
+        final Boolean lockedContentOverride = isAttributeSet(ctx, "lockedContentOverride") && Boolean.valueOf(getAttribute("lockedContentOverride").getValue(ctx));
+        final Boolean cannotTakeOverPermLock = isAttributeSet(ctx, "cannotTakeOverPermLock") && Boolean.valueOf(getAttribute("cannotTakeOverPermLock").getValue(ctx));
+        final Boolean askCreateNewVersion = isAttributeSet(ctx, "askCreateNewVersion") && Boolean.valueOf(getAttribute("askCreateNewVersion").getValue(ctx));
+        final String lockStatus = isAttributeSet(ctx, "lockStatus") ? getAttribute("lockStatus").getValue(ctx) : null;
+        final Boolean contentLocked = isAttributeSet(ctx, "contentLocked") && Boolean.valueOf(getAttribute("contentLocked").getValue(ctx));
+        final Boolean looseLock = isAttributeSet(ctx, "looseLock") && Boolean.valueOf(getAttribute("looseLock").getValue(ctx));
+        final Boolean permLock = isAttributeSet(ctx, "permLock") && Boolean.valueOf(getAttribute("permLock").getValue(ctx));
+        final Boolean takeOver = isAttributeSet(ctx, "takeOver") && Boolean.valueOf(getAttribute("takeOver").getValue(ctx));
 
         //encapsulate gui-relevant attributes in wrapper object
-        FxWrappedContent.GuiSettings guiSettings = new FxWrappedContent.GuiSettings(editMode, disableAcl, disableWorkflow,
-                disableEdit, disableDelete, disableVersion, disableCompact,
-                disableSave, disableCancel, disableButtons, disableAddAssignment,
-                disableRemoveAssignment, disablePositionAssignment, disableMessages, formPrefix,
-                reRender, valueFormatter);
+        FxWrappedContent.GuiSettings guiSettings = new FxWrappedContent.GuiSettings(editMode, disableAcl,
+                disableWorkflow, disableEdit, disableDelete, disableVersion, disableCompact, disableSave,
+                disableCancel, disableButtons, disableAddAssignment, disableRemoveAssignment,
+                disablePositionAssignment, disableMessages, formPrefix, reRender, valueFormatter, askLockedMode,
+                lockedContentOverride, cannotTakeOverPermLock, askCreateNewVersion, lockStatus, contentLocked, looseLock,
+                permLock, takeOver);
 
         if (contentEditor.getContentStorage() == null) {
             contentEditor.setContentStorage(new HashMap<String, FxWrappedContent>(3));
@@ -253,21 +263,27 @@ public class FxProvideContent extends TagHandler {
             if (wc != null && !wc.isNew() && wc.getGuiSettings().isEditMode()) {
                 //lock the content is in edit mode with a loose lock
                 final ContentEngine ce = EJBLookup.getContentEngine();
+                final UserTicket ticket = FxContext.getUserTicket();
+                final FxLock lock = wc.getContent().getLock();
                 try {
                     if (!wc.getContent().isLocked()) {
                         wc.getContent().updateLock(ce.lock(FxLockType.Loose, wc.getContent().getPk()));
-                    } else {
-                        FxLock lock = wc.getContent().getLock();
-                        final UserTicket ticket = FxContext.getUserTicket();
-                        if (lock.getLockType() == FxLockType.Permanent && lock.getUserId() != ticket.getUserId()) {
-                            new FxFacesMsgErr("ex.lock.content.locked").addToContext();
-                            wc.getGuiSettings().setEditMode(false);
-                        }
+
+                    } else if (lock.getUserId() != ticket.getUserId() && !wc.getGuiSettings().isAskLockedMode()
+                            && !wc.getGuiSettings().isLockedContentOverride() && !wc.getGuiSettings().isTakeOver()) {
+                        new FxFacesMsgErr("ex.lock.content.locked").addToContext();
+                        wc.getGuiSettings().setEditMode(false);
                     }
                 } catch (FxLockException e) {
                     new FxFacesMsgErr(e).addToContext();
                 }
+
+                setLockStatusMessage(wc);
+
+            } else if ((wc != null && !wc.isNew())) {
+                setLockStatusMessage(wc);
             }
+
         } catch (FxApplicationException e) {
             new FxFacesMsgErr(e).addToContext(formPrefix + ":" + id + "_" + FxContentEditorBean.MESSAGES_ID);
             error = true;
@@ -290,7 +306,7 @@ public class FxProvideContent extends TagHandler {
         try {
             ctx.setVariableMapper(mapper);
             // make bean and id value available
-            mapper.setVariable("__ceBean", ctx.getExpressionFactory().createValueExpression(ctx, "#{"+FxContentEditorBean.getBeanName()+"}", FxContentEditorBean.class));
+            mapper.setVariable("__ceBean", ctx.getExpressionFactory().createValueExpression(ctx, "#{" + FxContentEditorBean.getBeanName() + "}", FxContentEditorBean.class));
             // make the content instance available internally
             mapper.setVariable("_ceContent", ctx.getExpressionFactory().createValueExpression(wc, FxWrappedContent.class));
             // make the content instance available for user
@@ -303,6 +319,54 @@ public class FxProvideContent extends TagHandler {
             ctx.setVariableMapper(origMapper);
             //signify that one content editor has already been rendered in this form
             ctx.getFacesContext().getExternalContext().getRequestMap().put(formPrefix + "__ceRendered", true);
+        }
+    }
+
+    /**
+     * Set the lock status and the related lock status message
+     *
+     * @param wc the FxWrappedContent
+     */
+    private static void setLockStatusMessage(FxWrappedContent wc) {
+        final FxLock lock = wc.getContent().getLock();
+        final UserTicket ticket = FxContext.getUserTicket();
+
+        if (lock.getLockType() == FxLockType.Permanent) {
+            if (ticket.getUserId() == lock.getUserId()) {
+                setLockStatus(wc, false, true, true, false, "ContentEditor.msg.permLockYou");
+            } else {
+                setLockStatus(wc, false, true, true, false, "ContentEditor.msg.permLockOther");
+            }
+        } else if (lock.getLockType() == FxLockType.Loose) {
+            if (ticket.getUserId() == lock.getUserId() && !wc.getGuiSettings().isTakeOver()) {
+                setLockStatus(wc, true, false, true, false, "ContentEditor.msg.looseLockYou");
+            } else {
+                setLockStatus(wc, true, false, true, false, "ContentEditor.msg.looseLockOther");
+            }
+        } else { // None
+            setLockStatus(wc, false, false, false, false, "");
+        }
+    }
+
+    /**
+     * @param wc the FxWrappedContent
+     * @param looseLock true if the content is loosely locked
+     * @param permLock true if the content is permanently locked
+     * @param contentLocked true if the content is locked (perm or loose)
+     * @param takeOver true if the content was taken over by another user
+     * @param messageKey the message key for the lockStatus message
+     */
+    private static void setLockStatus(FxWrappedContent wc, boolean looseLock, boolean permLock, boolean contentLocked,
+                                      boolean takeOver, String messageKey) {
+        wc.getGuiSettings().setLooseLock(looseLock);
+        wc.getGuiSettings().setPermLock(permLock);
+        wc.getGuiSettings().setContentLocked(contentLocked);
+        wc.getGuiSettings().setTakeOver(takeOver);
+
+        if (StringUtils.isBlank(messageKey)) {
+            wc.getGuiSettings().setLockStatus("");
+        } else {
+            wc.getGuiSettings().setLockStatus(MessageBean.getInstance().getMessage(messageKey));
         }
     }
 }
