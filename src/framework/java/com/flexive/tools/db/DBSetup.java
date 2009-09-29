@@ -74,6 +74,7 @@ public class DBSetup {
             return;
         }
         Connection con = null;
+        int returnCode = 0;
         try {
             if (createConfig) {
                 try {
@@ -81,6 +82,7 @@ public class DBSetup {
                     storage.initConfiguration(con, schemaConfig, true);
                 } catch (Exception e) {
                     System.err.println("Error setting up configuration: " + e.getMessage());
+                    returnCode = 1;
                 }
             }
             if (createDivision) {
@@ -90,6 +92,7 @@ public class DBSetup {
                     storage.initDivision(con, schemaDivision, true);
                 } catch (Exception e) {
                     System.err.println("Error setting up division: " + e.getMessage());
+                    returnCode = 1;
                 } finally {
                     try {
                         if (con != null)
@@ -106,6 +109,7 @@ public class DBSetup {
             } catch (SQLException e) {
                 //ignore
             }
-        } 
+        }
+        System.exit(returnCode);
     }
 }
