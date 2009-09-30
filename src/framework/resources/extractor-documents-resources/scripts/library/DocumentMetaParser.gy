@@ -54,7 +54,7 @@ if( binValue.metadata == null || binValue.metadata.length() < 20) {
         content.setValue("/ENCRYPTED", new FxBoolean(false, false))
     return content
 }
-println "Meta data (first 20 chars): ${binValue.metadata.substring(0,20)}...";
+//println "Meta data (first 20 chars): ${binValue.metadata.substring(0,20)}...";
 def meta = new XmlSlurper().parseText(binValue.metadata);
 def cmap = [:]
 
@@ -70,7 +70,7 @@ void process(cmap,key,rawvalue)  {
     cmap[key] += ' '+value
 }
 
-println "Document name: "+binValue.name
+//println "Document name: "+binValue.name
 def java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy:MM:dd HH:mm:ss")
 //println "Text: $meta.text"
 //println "Meta: $meta"
@@ -114,7 +114,7 @@ if( meta.summary ) {
     if( meta.summary.additionalText )
         process(cmap, 'String|AdditionalText', meta.summary.additionalText)
 } else {
-    println "No summary information!"
+    //println "No summary information!"
 }
 
 cmap.each() {key, value ->

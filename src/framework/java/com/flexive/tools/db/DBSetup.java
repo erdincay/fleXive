@@ -71,7 +71,7 @@ public class DBSetup {
         DBStorage storage = StorageManager.getStorageImpl(args[0]);
         if (storage == null) {
             System.err.println("No matching storage implementation found!");
-            return;
+            System.exit(1);
         }
         Connection con = null;
         int returnCode = 0;

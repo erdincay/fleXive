@@ -17,7 +17,7 @@
     <!--
     <Resource id="jdbc/flexiveConfiguration" type="DataSource">
         JdbcDriver org.h2.Driver
-        JdbcUrl jdbc:h2:tcp://localhost:9092/~/flexive;SCHEMA=flexiveTestConfiguration;LOCK_TIMEOUT=10000;MVCC=TRUE;TRACE_LEVEL_FILE=0
+        JdbcUrl jdbc:h2:tcp://localhost:9092/~/flexive;SCHEMA=flexiveConfiguration;LOCK_TIMEOUT=10000;MVCC=TRUE;TRACE_LEVEL_FILE=0
         UserName sa
         Password
     </Resource>

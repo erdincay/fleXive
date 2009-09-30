@@ -33,19 +33,23 @@ package com.flexive.extractor;
 
 import org.pdfbox.pdmodel.PDDocument;
 import org.pdfbox.util.PDFTextStripper;
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.PrintWriter;
+import java.io.IOException;
 
 
 public class PdfExtractor {
+    private static final Log LOG = LogFactory.getLog(PdfExtractor.class);
 
     /**
      * Extracts the text informations from the pdf file.
      *
      * @param in the input stream to read from
-     * @return the extraxted informations, or null if no text extraction was possible
+     * @return the extracted information, or null if no text extraction was possible
      */
     public ExtractedData extract(final InputStream in) {
         ByteArrayOutputStream baos=null;
@@ -56,7 +60,12 @@ public class PdfExtractor {
             writer= new PrintWriter(baos);
             document = PDDocument.load( in );
             PDFTextStripper stripper = new PDFTextStripper();
-            stripper.writeText( document, writer );
+            try {
+                stripper.writeText( document, writer );
+            } catch (IOException e) {
+                // usually because text extraction is not allowed
+                LOG.warn("Failed to extract text from PDF file: " + e.getMessage());
+            }
             FxSummaryInformation fxsi = new FxSummaryInformation(document);
             writer.write(fxsi.getFTIndexInformations());
             writer.flush();
