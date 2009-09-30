@@ -474,7 +474,7 @@ public class StructureExporter implements StructureExporterCallback {
                     if (allAssIds.contains(sme.getId())) {
                         final String event = sme.getScriptEvent().getName();
 
-                        // if we have an entry for the relevant type already
+                        // if we have an entry for the relevant assignment already
                         if (assignmentScriptMapping.containsKey(sAssId)) {
                             final Map<String, List<Long>> eventScriptMapTmp = assignmentScriptMapping.get(sAssId);
                             // see if we have an entry for the given event

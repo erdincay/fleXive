@@ -32,30 +32,31 @@
 
 package com.flexive.war.beans.admin.main;
 
-import com.flexive.shared.structure.export.StructureExporterCallback;
-import com.flexive.shared.structure.export.StructureExporter;
-import com.flexive.shared.structure.FxType;
-import com.flexive.shared.structure.FxGroupAssignment;
-import com.flexive.shared.structure.FxAssignment;
-import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.FxContext;
-import com.flexive.shared.security.UserTicket;
-import com.flexive.shared.security.Role;
-import com.flexive.shared.tree.FxTreeNode;
-import com.flexive.shared.exceptions.FxInvalidStateException;
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.messages.FxFacesMsgErr;
-
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.io.IOException;
-
+import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.FxContext;
+import com.flexive.shared.exceptions.FxInvalidStateException;
+import com.flexive.shared.security.Role;
+import com.flexive.shared.security.UserTicket;
+import com.flexive.shared.structure.FxAssignment;
+import com.flexive.shared.structure.FxGroupAssignment;
+import com.flexive.shared.structure.FxType;
+import com.flexive.shared.structure.export.StructureExporter;
+import com.flexive.shared.structure.export.StructureExporterCallback;
+import com.flexive.shared.tree.FxTreeNode;
 import org.apache.commons.lang.StringUtils;
 
+import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import javax.faces.context.FacesContext;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * Bean to access the StructureExporterCallback interface / GroovyScriptExporter
@@ -693,6 +694,14 @@ public class StructureExportBean {
 
     public void setGenerateScriptAssignments(boolean generateScriptAssignments) {
         gbean.setGenerateScriptAssignments(generateScriptAssignments);
+    }
+
+    public boolean isScriptOverride() {
+        return gbean.isScriptOverride();
+    }
+
+    public void setScriptOverride(boolean scriptOverride) {
+        gbean.setScriptOverride(scriptOverride);
     }
 
     public boolean isDefaultsOnly() {

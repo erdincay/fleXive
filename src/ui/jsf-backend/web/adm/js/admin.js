@@ -612,8 +612,12 @@ function activateEditArea(id, init, userLang, syntax, displayToggle, toggleOnFun
             syntax = "js";
         if (syntax == "groovy" || syntax == "gy")
             syntax = "js";
-        if(displayToggle == null)
+        if(displayToggle == null) {
             displayToggle = "onload";
+            eaToggleOnAdmin();
+        } else {
+            eaToggleState = displayToggle;
+        }
         if(toggleOnFunction == null)
             toggleOnFunction = "eaToggleOnAdmin";
         if(toggleOffFunction == null)
@@ -648,7 +652,7 @@ function editAreaChange(id) {
 }
 
 // EDITAREA: hold the current toggle state of the editArea
-var eaToggleState = "onload";
+var eaToggleState = "";
 
 /**
  * EDITAREA: the toggle on callback function

@@ -32,22 +32,22 @@
 
 package com.flexive.shared.scripting.groovy;
 
-import com.flexive.shared.structure.*;
-import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.scripting.FxScriptInfo;
 import com.flexive.shared.scripting.FxScriptMapping;
 import com.flexive.shared.scripting.FxScriptMappingEntry;
+import com.flexive.shared.structure.*;
+import static com.flexive.shared.structure.export.StructureExporterTools.DATATYPES;
+import static com.flexive.shared.structure.export.StructureExporterTools.DATATYPESSIMPLE;
 import com.flexive.shared.value.FxValue;
-
-import java.util.*;
-
+import org.apache.commons.lang.ArrayUtils;
 import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.stripToEmpty;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
-import static com.flexive.shared.structure.export.StructureExporterTools.*;
+import org.apache.commons.logging.LogFactory;
+
+import java.util.*;
 
 /**
  * Tools and utilities for the GroovyScriptExporter
@@ -1527,18 +1527,25 @@ public final class GroovyScriptExporterTools {
      *
      * @param typeScriptMapping       the type script mapping from the StructureExporterCallback
      * @param assignmentScriptMapping the assignment script mapping from the StructureExporterCallback
+     * @param scriptOverride          set to true to generate script override code (overwrite script if it exists)
      * @return returns the Groovy code as a String
      */
     public static String createScriptAssignments(Map<Long, Map<String, List<Long>>> typeScriptMapping,
-                                                 Map<Long, Map<String, List<Long>>> assignmentScriptMapping) {
+                                                 Map<Long, Map<String, List<Long>>> assignmentScriptMapping,
+                                                 boolean scriptOverride) {
 
         final StringBuilder script = new StringBuilder(5000);
+        script.append("def scriptCode\n");
+
+        if (scriptOverride) {
+            script.append("\n// SCRIPT OVERRIDE ********\nboolean scriptOverride = true\n// ************************\n");
+        }
+
         // TYPE SCRIPTS
         if (typeScriptMapping != null && typeScriptMapping.size() > 0) {
             script.append("\n// SCRIPTS ATTACHED TO TYPE EVENTS\n\n")
                     .append("def FxType currentType\n")
-                    .append("def FxScriptInfo siType\n")
-                    .append("def scriptCode\n"); // header f. types
+                    .append("def FxScriptInfo siType\n");
 
             // traverse types and retrieve the scripts
             for (Long typeId : typeScriptMapping.keySet()) {
@@ -1554,7 +1561,7 @@ public final class GroovyScriptExporterTools {
                     // traverse the script ids, retrieve the scripts and write out the code
                     for (Long scriptId : scriptsForEvent) {
                         final FxScriptInfo si = CacheAdmin.getEnvironment().getScript(scriptId);
-                        script.append(writeTypeScriptCode(event, si, typeName));
+                        script.append(writeTypeScriptCode(event, si, typeName, scriptOverride));
                     }
                 }
             }
@@ -1564,8 +1571,7 @@ public final class GroovyScriptExporterTools {
         if (assignmentScriptMapping != null && assignmentScriptMapping.size() > 0) {
             script.append("\n// SCRIPTS ATTACHED TO ASSIGNMENT EVENTS\n\n")
                     .append("def FxAssignment currentAssignment\n")
-                    .append("def FxScriptInfo siAss\n")
-                    .append("def scriptCode\n"); // header f. assignments
+                    .append("def FxScriptInfo siAss\n");
             // traverse assignments and retrieve the scripts
             for (Long assId : assignmentScriptMapping.keySet()) {
                 final FxAssignment a = CacheAdmin.getEnvironment().getAssignment(assId);
@@ -1580,7 +1586,7 @@ public final class GroovyScriptExporterTools {
                     // traverse the script ids, retrieve the scripts and write out the code
                     for (Long scriptId : scriptsForEvent) {
                         final FxScriptInfo si = CacheAdmin.getEnvironment().getScript(scriptId);
-                        script.append(writeAssignmentScriptCode(event, si, XPath));
+                        script.append(writeAssignmentScriptCode(event, si, XPath, scriptOverride));
                     }
                 }
             }
@@ -1591,12 +1597,13 @@ public final class GroovyScriptExporterTools {
     }
 
     /**
-     * @param event    the script event
-     * @param si       the FxScriptInfo
-     * @param typeName the type's name
+     * @param event          the script event
+     * @param si             the FxScriptInfo
+     * @param typeName       the type's name
+     * @param scriptOverride set to true if a given script should be overwritten
      * @return returns the script assignment as a Groovy script
      */
-    private static String writeTypeScriptCode(String event, FxScriptInfo si, String typeName) {
+    private static String writeTypeScriptCode(String event, FxScriptInfo si, String typeName, boolean scriptOverride) {
         final StringBuilder script = new StringBuilder(500);
         final FxScriptMapping sm = CacheAdmin.getEnvironment().getScriptMapping(si.getId());
         boolean derivedUsage = false;
@@ -1616,32 +1623,33 @@ public final class GroovyScriptExporterTools {
                 .append("\")\n\n")
                 .append("scriptCode = \"\"\"")
                 .append(scriptCode)
-                .append("\"\"\"\n\n")
-                .append("siType = EJBLookup.getScriptingEngine().createScript(FxScriptEvent.")
-                .append(event)
-                .append(", \"")
-                .append(si.getName())
-                .append("\", \"")
-                .append(si.getDescription())
-                .append("\", scriptCode)\n\n")
-                .append("EJBLookup.getScriptingEngine().createTypeScriptMapping(FxScriptEvent.")
+                .append("\"\"\"\n\n");
+
+        if (scriptOverride) {
+            script.append(createScriptOverrideCode(si, event, true));
+        } else {
+            script.append(createScriptEJBLookup(si, event, true));
+        }
+
+        script.append("EJBLookup.getScriptingEngine().createTypeScriptMapping(FxScriptEvent.")
                 .append(event)
                 .append(", siType.id, currentType.getId(), ")
                 .append(si.isActive())
                 .append(", ")
                 .append(derivedUsage)
-                .append(")\n***** SCRIPT END *****\n");
+                .append(")\n// ***** SCRIPT END *****\n");
 
         return script.toString();
     }
 
     /**
-     * @param event the event
-     * @param si    the FxScriptInfo
-     * @param XPath the XPath of the affected assignment
+     * @param event          the event
+     * @param si             the FxScriptInfo
+     * @param XPath          the XPath of the affected assignment
+     * @param scriptOverride set to true if a given script should be overwritten
      * @return the script assignment code as a Groovy script
      */
-    private static String writeAssignmentScriptCode(String event, FxScriptInfo si, String XPath) {
+    private static String writeAssignmentScriptCode(String event, FxScriptInfo si, String XPath, boolean scriptOverride) {
         final StringBuilder script = new StringBuilder(500);
         final FxScriptMapping sm = CacheAdmin.getEnvironment().getScriptMapping(si.getId());
         boolean derivedUsage = false;
@@ -1653,7 +1661,6 @@ public final class GroovyScriptExporterTools {
         }
 
         final String scriptCode = processScriptCode(si.getCode());
-
         // load assignment, then attach script to event and assignment id
         script.append("\n// ***** SCRIPT START ***** \n")
                 .append("currentAssignment = CacheAdmin.getEnvironment().getAssignment(\"")
@@ -1661,21 +1668,21 @@ public final class GroovyScriptExporterTools {
                 .append("\")\n\n")
                 .append("scriptCode = \"\"\"")
                 .append(scriptCode)
-                .append("\"\"\"\n\n")
-                .append("siAss = EJBLookup.getScriptingEngine().createScript(FxScriptEvent.")
-                .append(event)
-                .append(", \"")
-                .append(si.getName())
-                .append("\", \"")
-                .append(si.getDescription())
-                .append("\", scriptCode)\n\n")
-                .append("EJBLookup.getScriptingEngine().createAssignmentScriptMapping(FxScriptEvent.")
+                .append("\"\"\"\n\n");
+
+        if (scriptOverride) {
+            script.append(createScriptOverrideCode(si, event, false));
+        } else {
+            script.append(createScriptEJBLookup(si, event, false));
+        }
+
+        script.append("EJBLookup.getScriptingEngine().createAssignmentScriptMapping(FxScriptEvent.")
                 .append(event)
                 .append(", siAss.id, currentAssignment.getId(), ")
                 .append(si.isActive())
                 .append(", ")
                 .append(derivedUsage)
-                .append(")\n***** SCRIPT END *****\n");
+                .append(")\n// ***** SCRIPT END *****\n");
 
         script.trimToSize();
         return script.toString();
@@ -1691,5 +1698,56 @@ public final class GroovyScriptExporterTools {
         inputCode = inputCode.replaceAll("\"", "\\\\\"");
         inputCode = inputCode.replaceAll("\r", "");
         return inputCode;
+    }
+
+    /**
+     * Create script code
+     *
+     * @param si     FxScriptInfo
+     * @param event  event name
+     * @param isType true if type assignment, false otherwise
+     * @return returns the code as a String
+     */
+    private static String createScriptEJBLookup(FxScriptInfo si, String event, boolean isType) {
+        StringBuilder script = new StringBuilder(50);
+        if (isType)
+            script.append("siType = EJBLookup.getScriptingEngine().createScript(FxScriptEvent.");
+        else
+            script.append("siAss = EJBLookup.getScriptingEngine().createScript(FxScriptEvent.");
+
+        script.append(event)
+                .append(", \"")
+                .append(si.getName())
+                .append("\", \"")
+                .append(si.getDescription())
+                .append("\", scriptCode)\n");
+
+        script.trimToSize();
+        return script.toString();
+    }
+
+    /**
+     * Creates the script override code (incl. boolean switch)
+     *
+     * @param si     FxScriptInfo
+     * @param event  event name
+     * @param isType true if type assignment, false otherwise
+     * @return returns the script code as a String
+     */
+    private static String createScriptOverrideCode(FxScriptInfo si, String event, boolean isType) {
+        StringBuilder script = new StringBuilder(100);
+        script.append("if(scriptOverride && CacheAdmin.getEnvironment().scriptExists(\"")
+                .append(si.getName())
+                .append("\")) {\n")
+                .append("\tscriptId = CacheAdmin.getEnvironment().getScript(\"")
+                .append(si.getName())
+                .append("\").getId()\n")
+                .append("\tEJBLookup.getScriptingEngine().updateScriptCode(scriptId, scriptCode)\n")
+                .append("} else {\n\t")
+                .append(createScriptEJBLookup(si, event, isType))
+                .append("}\n");
+
+        script.trimToSize();
+        return script.toString();
     }
 }

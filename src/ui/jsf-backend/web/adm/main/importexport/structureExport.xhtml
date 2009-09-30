@@ -25,79 +25,141 @@
 
         <a4j:outputPanel id="dependencyPanel">
             <fx:fieldSet legendKey="StructureExport.lbl.ignoreDependenciesFieldset">
-                <fx:formRow id="ignoreDependencies" labelKey="StructureExport.lbl.ignoreDependencies" newLine="false">
-                    <h:selectBooleanCheckbox id="ignoreDependencies" value="#{exportBean.exportWithOutDependencies}"/>
-                </fx:formRow>
-                <fx:formRow id="showScripts" labelKey="StructureExport.lbl.showScripts">
-                    <h:selectBooleanCheckbox id="showScripts" value="#{exportBean.showScripts}"/>
-                </fx:formRow>
+                <table id="dependencyOptions" class="fxFont">
+                    <tbody>
+                        <tr>
+                            <td>
+                                <fx:formRow overrideInputStyle="float:none" id="ignoreDependencies" labelKey="StructureExport.lbl.ignoreDependencies" newLine="false">
+                                    <h:selectBooleanCheckbox id="ignoreDependencies" value="#{exportBean.exportWithOutDependencies}"/>
+                                </fx:formRow>
+                            </td>
+                            <td>
+                                <fx:formRow overrideInputStyle="float:none" id="showScripts" labelKey="StructureExport.lbl.showScripts">
+                                    <h:selectBooleanCheckbox id="showScripts" value="#{exportBean.showScripts}"/>
+                                </fx:formRow>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </fx:fieldSet>
         </a4j:outputPanel>
 
         <a4j:outputPanel id="groovyOptionPanel">
             <fx:fieldSet legendKey="StructureExport.lbl.groovyOptions">
-                <fx:formRow id="deleteStructures" labelKey="StructureExport.lbl.addDeleteStructures" newLine="false">
-                    <h:selectBooleanCheckbox id="deleteStructures" value="#{exportBean.deleteStructures}"/>
-                </fx:formRow>
-
-                <fx:formRow id="importStatements" labelKey="StructureExport.lbl.addImportSatements" newLine="false">
-                    <h:selectBooleanCheckbox id="importStatements" value="#{exportBean.generateImportStatements}"/>
-                </fx:formRow>
-
-                <fx:formRow id="defaultsOnly" labelKey="StructureExport.lbl.defaultsOnly" newLine="false">
-                    <h:selectBooleanCheckbox id="defaultsOnly" value="#{exportBean.defaultsOnly}"/>
-                </fx:formRow>
-
-                <fx:formRow id="scriptAssignments" labelKey="StructureExport.lbl.scriptAssignments" newLine="false">
-                    <h:selectBooleanCheckbox id="scriptAssignments" value="#{exportBean.generateScriptAssignments}"/>
-                </fx:formRow>
-
-                <fx:formRow id="addSystemTypes" labelKey="StructureExport.lbl.addSystemTypes" newLine="false">
-                    <h:selectBooleanCheckbox id="addSystemTypes" value="#{exportBean.addSystemTypes}"/>
-                </fx:formRow>
+                <table id="scriptOptions" class="fxFont">
+                    <tbody>
+                        <tr>
+                            <td>
+                                <fx:formRow overrideInputStyle="float:none" id="deleteStructures" labelKey="StructureExport.lbl.addDeleteStructures" newLine="false">
+                                    <h:selectBooleanCheckbox id="deleteStructures" value="#{exportBean.deleteStructures}"/>
+                                </fx:formRow>
+                            </td>
+                            <td>
+                                <fx:formRow overrideInputStyle="float:none" id="importStatements" labelKey="StructureExport.lbl.addImportSatements" newLine="false">
+                                    <h:selectBooleanCheckbox id="importStatements" value="#{exportBean.generateImportStatements}"/>
+                                </fx:formRow>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <fx:formRow overrideInputStyle="float:none" id="defaultsOnly" labelKey="StructureExport.lbl.defaultsOnly" newLine="false">
+                                    <h:selectBooleanCheckbox id="defaultsOnly" value="#{exportBean.defaultsOnly}"/>
+                                </fx:formRow>
+                            </td>
+                            <td>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <fx:formRow overrideInputStyle="float:none" id="scriptAssignments" labelKey="StructureExport.lbl.scriptAssignments" newLine="false">
+                                    <h:selectBooleanCheckbox id="scriptAssignments" value="#{exportBean.generateScriptAssignments}">
+                                        <a4j:support event="onclick" reRender="overrideSwitch" oncomplete="flexive.yui.processOnYahoo();"/>
+                                    </h:selectBooleanCheckbox>
+                                </fx:formRow>
+                            </td>
+                            <td>
+                                <a4j:outputPanel id="overrideSwitch" ajaxRendered="true">
+                                    <fx:formRow overrideInputStyle="float:none" id="scriptOverrideSwitch" labelKey="StructureExport.lbl.scriptOverride" newLine="false">
+                                        <h:selectBooleanCheckbox id="scriptOverrideSwitch" value="#{exportBean.scriptOverride}" disabled="#{not exportBean.generateScriptAssignments}"/>
+                                    </fx:formRow>
+                                </a4j:outputPanel>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <fx:formRow overrideInputStyle="float:none" id="addSystemTypes" labelKey="StructureExport.lbl.addSystemTypes" newLine="false">
+                                    <h:selectBooleanCheckbox id="addSystemTypes" value="#{exportBean.addSystemTypes}"/>
+                                </fx:formRow>
+                            </td>
+                            <td>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </fx:fieldSet>
         </a4j:outputPanel>
 
         <a4j:outputPanel id="typePanel">
             <fx:fieldSet legendKey="StructureExport.lbl.typesDisplay">
-                <fx:formRow id="showAllTypes" labelKey="StructureExport.lbl.all">
-                    <h:selectBooleanCheckbox id="showAllTypes" value="#{exportBean.showAllTypes}">
-                        <a4j:support reRender="typeOverview" event="onclick"
-                                     oncomplete="flexive.yui.processOnYahoo();"/>
-                    </h:selectBooleanCheckbox>
-                </fx:formRow>
-
-                <fx:formRow id="showBaseTypes" labelKey="StructureExport.lbl.base">
-                    <h:selectBooleanCheckbox id="showBaseTypes" value="#{exportBean.showBaseTypes}">
-                        <a4j:support reRender="typeOverview" event="onclick"
-                                     oncomplete="flexive.yui.processOnYahoo();"/>
-                    </h:selectBooleanCheckbox>
-                </fx:formRow>
-
-                <fx:formRow id="showDerivedTypes" labelKey="StructureExport.lbl.derived">
-                    <h:selectBooleanCheckbox id="showDerivedTypes" value="#{exportBean.showDerivedTypes}">
-                        <a4j:support reRender="typeOverview" event="onclick"
-                                     oncomplete="flexive.yui.processOnYahoo();"/>
-                    </h:selectBooleanCheckbox>
-                </fx:formRow>
-
-                <fx:formRow id="showRelations" labelKey="StructureExport.lbl.relations">
-                    <h:selectBooleanCheckbox id="showRelations" value="#{exportBean.showRelations}" disabled="true">
-                        <a4j:support reRender="typeOverview" event="onclick"
-                                     oncomplete="flexive.yui.processOnYahoo();"/>
-                    </h:selectBooleanCheckbox>
-                </fx:formRow>
+                <table id="dependencyOptions" class="fxFont">
+                    <tbody>
+                        <tr>
+                            <td>
+                                <fx:formRow overrideInputStyle="float:none" id="showAllTypes"
+                                            labelKey="StructureExport.lbl.all">
+                                    <h:selectBooleanCheckbox id="showAllTypes" value="#{exportBean.showAllTypes}">
+                                        <a4j:support reRender="typeOverview" event="onclick" oncomplete="flexive.yui.processOnYahoo();"/>
+                                    </h:selectBooleanCheckbox>
+                                </fx:formRow>
+                            </td>
+                            <td>
+                                <fx:formRow overrideInputStyle="float:none" id="showBaseTypes"
+                                            labelKey="StructureExport.lbl.base">
+                                    <h:selectBooleanCheckbox id="showBaseTypes" value="#{exportBean.showBaseTypes}">
+                                        <a4j:support reRender="typeOverview" event="onclick" oncomplete="flexive.yui.processOnYahoo();"/>
+                                    </h:selectBooleanCheckbox>
+                                </fx:formRow>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                               <fx:formRow overrideInputStyle="float:none" id="showDerivedTypes" labelKey="StructureExport.lbl.derived">
+                                    <h:selectBooleanCheckbox id="showDerivedTypes" value="#{exportBean.showDerivedTypes}">
+                                        <a4j:support reRender="typeOverview" event="onclick" oncomplete="flexive.yui.processOnYahoo();"/>
+                                    </h:selectBooleanCheckbox>
+                                </fx:formRow>
+                            </td>
+                            <td>
+                                <fx:formRow overrideInputStyle="float:none" id="showRelations" labelKey="StructureExport.lbl.relations">
+                                    <h:selectBooleanCheckbox id="showRelations" value="#{exportBean.showRelations}" disabled="true">
+                                        <a4j:support reRender="typeOverview" event="onclick" oncomplete="flexive.yui.processOnYahoo();"/>
+                                    </h:selectBooleanCheckbox>
+                                </fx:formRow>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </fx:fieldSet>
         </a4j:outputPanel>
 
         <a4j:outputPanel id="markallpanel" layout="block">
             <fx:fieldSet legendKey="StructureExport.lbl.markallhd">
-                <fx:formRow id="markall" labelKey="StructureExport.lbl.markall">
-                    <h:selectBooleanCheckbox id="markall" value="#{exportBean.allTypesMarked}">
-                        <a4j:support reRender="typeOverview" event="onclick" oncomplete="flexive.yui.processOnYahoo();"
-                                     action="#{exportBean.markAllTypes}"/>
-                    </h:selectBooleanCheckbox>
-                </fx:formRow>
+                <table id="dependencyOptions" class="fxFont">
+                    <tbody>
+                        <tr>
+                            <td>
+                               <fx:formRow overrideInputStyle="float:none" id="markall" labelKey="StructureExport.lbl.markall">
+                                    <h:selectBooleanCheckbox id="markall" value="#{exportBean.allTypesMarked}">
+                                        <a4j:support reRender="typeOverview" event="onclick" oncomplete="flexive.yui.processOnYahoo();"
+                                                     action="#{exportBean.markAllTypes}"/>
+                                    </h:selectBooleanCheckbox>
+                                </fx:formRow>
+                            </td>
+                            <td>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </fx:fieldSet>
         </a4j:outputPanel>
 
@@ -131,18 +193,14 @@
                                 <h:outputText value="#{type.name}"/>
                             </td>
                             <td align="left">
-                                <h:outputText escape="false"
-                                              value="#{fxMessageBean['StructureExport.tbl.isBase']}&lt;br/&gt;"
+                                <h:outputText escape="false" value="#{fxMessageBean['StructureExport.tbl.isBase']}&lt;br/&gt;"
                                               rendered="#{type.parent eq null and type.mode != 'Relation'}"/>
-                                <h:outputText escape="false"
-                                              value="#{fxMessageBean['StructureExport.tbl.isDerived']}&lt;br/&gt;"
+                                <h:outputText escape="false" value="#{fxMessageBean['StructureExport.tbl.isDerived']}&lt;br/&gt;"
                                               rendered="#{type.parent ne null}"/>
-                                <h:outputText value="#{fxMessageBean['StructureExport.tbl.isRelation']}"
-                                              rendered="#{type.mode eq 'Relation'}"/>
+                                <h:outputText value="#{fxMessageBean['StructureExport.tbl.isRelation']}" rendered="#{type.mode eq 'Relation'}"/>
                             </td>
                             <td align="left">
-                                <h:selectBooleanCheckbox value="#{exportBean.exportIds[type.id]}"
-                                                         disabled="#{type.mode eq 'Relation'}"/>
+                                <h:selectBooleanCheckbox value="#{exportBean.exportIds[type.id]}" disabled="#{type.mode eq 'Relation'}"/>
                             </td>
                         </tr>
                     </ui:repeat>
@@ -153,13 +211,11 @@
 
         <br/>
 
-        <adm:ajaxCommandButton id="exportButton" bean="#{exportBean}" action="export"
-                               labelKey="StructureExport.btn.export" icon="export"
+        <adm:ajaxCommandButton id="exportButton" bean="#{exportBean}" action="export" labelKey="StructureExport.btn.export" icon="export"
                                oncomplete="flexive.yui.processOnYahoo();"/>
 
         <div id="xmlexport">
-            <adm:ajaxCommandButton id="exportButtonXML" bean="#{exportBean}" action="exportAsXML"
-                                   labelKey="StructureExport.btn.exportXML" icon="export"
+            <adm:ajaxCommandButton id="exportButtonXML" bean="#{exportBean}" action="exportAsXML" labelKey="StructureExport.btn.exportXML" icon="export"
                                    oncomplete="exportType('#{exportBean.typeIdsXML}'); flexive.yui.processOnYahoo();"/>
 
         </div>

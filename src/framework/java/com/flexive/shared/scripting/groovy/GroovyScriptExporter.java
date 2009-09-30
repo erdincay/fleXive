@@ -31,18 +31,17 @@
 
 package com.flexive.shared.scripting.groovy;
 
-import com.flexive.shared.structure.FxType;
+import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.exceptions.FxInvalidStateException;
 import com.flexive.shared.structure.FxAssignment;
 import com.flexive.shared.structure.FxGroupAssignment;
+import com.flexive.shared.structure.FxType;
 import com.flexive.shared.structure.export.StructureExporterCallback;
-import com.flexive.shared.exceptions.FxInvalidStateException;
-import com.flexive.shared.CacheAdmin;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.util.*;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
 
 /**
  * GroovyScriptExporter - generate Groovy structure creation code from a given StructureExporterCallback instance
@@ -78,6 +77,7 @@ public class GroovyScriptExporter {
     private boolean generateImportStatements = false;
     private boolean generateDeleteCode = false;
     private boolean generateScriptAssignments = false;
+    private boolean scriptOverride = false;
     private boolean defaultsOnly = false;
     private boolean addSystemTypes = false;
     private static final Log LOG = LogFactory.getLog(GroovyScriptExporter.class);
@@ -104,16 +104,18 @@ public class GroovyScriptExporter {
      * @param generateImportStatements  set to true to add package imports
      * @param generateDeleteCode        set to true to add structure / instance deletion code
      * @param generateScriptAssignments set to true to add script events for types / assignments
+     * @param scriptOverride            set to true to add script override code (overwrite event script if it exists)
      * @param defaultsOnly              set to true if the script export should disregard any existing options and use the defaults only
      * @param addSystemTypes            set to true if the script export should include the [fleXive] system types
      * @param reset                     set to true in order to regenerate any code
      * @return the GroovyScriptExporter itself for chained calls
      */
     public GroovyScriptExporter run(boolean generateImportStatements, boolean generateDeleteCode, boolean generateScriptAssignments,
-                                    boolean defaultsOnly, boolean addSystemTypes, boolean reset) {
+                                    boolean scriptOverride, boolean defaultsOnly, boolean addSystemTypes, boolean reset) {
         this.generateImportStatements = generateImportStatements;
         this.generateDeleteCode = generateDeleteCode;
         this.generateScriptAssignments = generateScriptAssignments;
+        this.scriptOverride = scriptOverride;
         this.defaultsOnly = defaultsOnly;
         this.addSystemTypes = addSystemTypes;
         filteredTypes = filterExportTypes();
@@ -147,16 +149,16 @@ public class GroovyScriptExporter {
                 final Map<Long, Map<String, List<Long>>> typeScriptMapping = filterScriptAssignments(
                         callback.getTypeScriptMapping(), true);
                 final Map<Long, Map<String, List<Long>>> assignmentScriptMapping = filterScriptAssignments(
-                        callback.getTypeScriptMapping(), false);
+                        callback.getAssignmentScriptMapping(), false);
 
                 final boolean s1 = typeScriptMapping.size() > 0;
                 final boolean s2 = assignmentScriptMapping.size() > 0;
                 if (s1 || s2) {
                     scriptAssignments = new StringBuilder(5000);
                     scriptAssignments.append(GroovyScriptExporterTools.SCRIPTASSHEADER)
-                            .append(GroovyScriptExporterTools.createScriptAssignments(typeScriptMapping, assignmentScriptMapping));
+                            .append(GroovyScriptExporterTools.createScriptAssignments(typeScriptMapping, assignmentScriptMapping, scriptOverride));
                     scriptAssignments.trimToSize();
-                } else if(reset) // delete any existing script code
+                } else if (reset) // delete any existing script code
                     scriptAssignments = null;
             }
         }
@@ -227,6 +229,14 @@ public class GroovyScriptExporter {
 
     public void setAddSystemTypes(boolean addSystemTypes) {
         this.addSystemTypes = addSystemTypes;
+    }
+
+    public boolean isScriptOverride() {
+        return scriptOverride;
+    }
+
+    public void setScriptOverride(boolean scriptOverride) {
+        this.scriptOverride = scriptOverride;
     }
 
     /**
