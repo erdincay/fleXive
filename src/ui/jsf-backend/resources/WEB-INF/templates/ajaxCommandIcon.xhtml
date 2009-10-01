@@ -27,6 +27,7 @@ of the icon to be displayed (i.e. /flexive/images/myIcon.png)
 eventsQueue - ajax events queue
 rendered - [optional] flag to supress rendering of the whole component
 iconDisabled - [optional] flag to disable the component
+oncomplete - [optional] the oncomplete event of the command link
 
 <ui:composition>
     <c:if test="#{empty id}">
@@ -68,7 +69,7 @@ iconDisabled - [optional] flag to disable the component
 
             <a4j:commandLink id="#{id}" reRender="#{reRender}" eventsQueue="#{eventsQueue}" onclick="#{onclick}"
                              action="#{bean[action]}" immediate="#{immediate}"
-                             disabled="#{iconDisabled}">
+                             disabled="#{iconDisabled}" oncomplete="#{oncomplete}">
                 <ui:insert/>
 
                 <ui:fragment rendered="#{!iconDisabled or empty iconDisabled or iconDisabled == null}">
