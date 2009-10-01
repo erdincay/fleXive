@@ -280,7 +280,7 @@ public class FxContentEditorBean implements Serializable {
      */
     public void unLock() {
         // reload first in case it was unlocked already
-        reloadContent();
+        reloadContent(false);
         FxWrappedContent wc = contentStorage.get(editorId);
         if (wc.getContent().isLocked()) {
 
@@ -533,7 +533,7 @@ public class FxContentEditorBean implements Serializable {
         /** Another user might have pushed the edit button at the same time the content was loaded
          * Hence we need to check if the cached content needs to be updated
          */
-        reloadContent();
+        reloadContent(false);
 
         if (contentStorage.get(editorId).getContent().isLocked()
                 && !contentStorage.get(editorId).getGuiSettings().isLockedContentOverride()) {
@@ -583,7 +583,7 @@ public class FxContentEditorBean implements Serializable {
      * Action method: Set the override option for content editing depending on the user privileges
      */
     public void lockOverride() {
-        reloadContent(); // get latest version first
+        reloadContent(false); // get latest version first
         final UserTicket ticket = FxContext.getUserTicket();
         final FxContent content = contentStorage.get(editorId).getContent();
         final FxLock lock = content.getLock();
@@ -639,12 +639,18 @@ public class FxContentEditorBean implements Serializable {
 
     /**
      * Reloads the content from the contentEngine and updates the FxWrappedContent instance
+     *
+     * @param updateLockOnly set to true if only the content's lock should be updated from the repository
      */
-    private void reloadContent() {
+    private void reloadContent(boolean updateLockOnly) {
         final FxPK pk = contentStorage.get(editorId).getContent().getPk();
         try {
             final FxContent repContent = EJBLookup.getContentEngine().load(pk);
-            contentStorage.get(editorId).setContent(repContent); // update
+            if (updateLockOnly) { // update lock only
+                contentStorage.get(editorId).getContent().updateLock(repContent.getLock());
+            } else {  // update content
+                contentStorage.get(editorId).setContent(repContent);
+            }
         } catch (FxApplicationException e) {
             new FxFacesMsgErr(e.getCause()).addToContext();
         }
@@ -654,7 +660,7 @@ public class FxContentEditorBean implements Serializable {
      * Action method: acquire a permanent lock on the current version of the content
      */
     public void acquirePermLock() {
-        reloadContent();
+        reloadContent(false);
         final FxPK pk = contentStorage.get(editorId).getContent().getPk();
         ContentEngine ce = EJBLookup.getContentEngine();
         final FxContent content = contentStorage.get(editorId).getContent();
@@ -682,7 +688,7 @@ public class FxContentEditorBean implements Serializable {
             new FxFacesMsgErr("ContentEditor.msg.takeOver.warning").addToContext();
             new FxFacesMsgErr("ContentEditor.msg.no.extend").addToContext();
         } else {
-            reloadContent();
+            reloadContent(true);
             final FxPK pk = contentStorage.get(editorId).getContent().getPk();
             ContentEngine ce = EJBLookup.getContentEngine();
             final FxLock lock = contentStorage.get(editorId).getContent().getLock();
@@ -711,8 +717,9 @@ public class FxContentEditorBean implements Serializable {
         if (checkOwnerChange()) {
             contentStorage.get(editorId).getGuiSettings().setTakeOver(true);
             new FxFacesMsgErr("ContentEditor.msg.takeOver.warning").addToContext();
+//        }
         } else
-            reloadContent();
+            reloadContent(true);
 
         final FxLock lock = contentStorage.get(editorId).getContent().getLock();
 
