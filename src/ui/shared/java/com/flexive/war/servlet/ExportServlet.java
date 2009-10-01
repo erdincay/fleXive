@@ -34,24 +34,23 @@ package com.flexive.war.servlet;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
-import com.flexive.shared.content.FxPK;
 import com.flexive.shared.content.FxContent;
-import com.flexive.shared.interfaces.ContentEngine;
+import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxNoAccessException;
+import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.security.Role;
 import com.flexive.shared.security.UserTicket;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.commons.lang.StringUtils;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.net.URLDecoder;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * XML Export servlet
@@ -109,9 +108,13 @@ public class ExportServlet implements Servlet {
         HttpServletRequest request = (HttpServletRequest) servletRequest;
         HttpServletResponse response = (HttpServletResponse) servletResponse;
         String[] params = URLDecoder.decode(request.getRequestURI().substring(request.getContextPath().length() + BASEURL.length()), "UTF-8").split("/");
+
+        // do not check the type requests if we are dealing with a content export
         final List<Long> typeRequests = new ArrayList<Long>(params.length);
-        for (int i = 1; i < params.length; i++) {
-            typeRequests.add(Long.parseLong(params[i]));
+        if (!EXPORT_CONTENT.equals(params[0])) {
+            for (int i = 1; i < params.length; i++) {
+                typeRequests.add(Long.parseLong(params[i]));
+            }
         }
 
         if (params.length == 1 && EXPORT_TYPE_GROOVY.equals(params[0])) {
