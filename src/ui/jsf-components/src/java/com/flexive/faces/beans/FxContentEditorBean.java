@@ -495,7 +495,7 @@ public class FxContentEditorBean implements Serializable {
             // unlock only if the current user also acquired the lock
             // and only unlock the current version AND only remove a loose lock
             // do not remove a loose lock if the content was taken over by another user
-            if (!checkOwnerChange()) {
+            if (!checkOwnerChange() && !contentStorage.get(editorId).getContent().getPk().isNew()) {
                 final UserTicket ticket = FxContext.getUserTicket();
                 final FxLock lock = contentStorage.get(editorId).getContent().getLock();
                 ContentEngine ce = EJBLookup.getContentEngine();
@@ -774,6 +774,9 @@ public class FxContentEditorBean implements Serializable {
         ContentEngine ce = EJBLookup.getContentEngine();
         final FxContent currentContent = contentStorage.get(editorId).getContent();
         final FxLock currentLock = currentContent.getLock();
+
+        if(currentContent.getPk().isNew())
+            return false;
 
         try {
             final FxContent repContent = ce.load(currentContent.getPk());

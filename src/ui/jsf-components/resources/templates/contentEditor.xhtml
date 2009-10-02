@@ -81,7 +81,7 @@
                 </c:if>
 
                 <ui:insert name="insertTop">
-                    <ui:fragment rendered="#{not empty _ceContent.guiSettings.lockStatus}">
+                    <ui:fragment rendered="#{not empty _ceContent.guiSettings.lockStatus and not _ceContent.new}">
                         <h:outputText value="#{_ceContent.guiSettings.lockStatus}" style="font-weight:bold"/>
                         <br/><br/>
                     </ui:fragment>
@@ -314,7 +314,7 @@
                         </ui:fragment>
 
                         <!-- permanent lock button -->
-                        <ui:fragment rendered="#{!_ceContent.guiSettings.permLock and !_ceContent.guiSettings.looseLock}">
+                        <ui:fragment rendered="#{not _ceContent.guiSettings.permLock and not _ceContent.guiSettings.looseLock and not _ceContent.new}">
                             <ui:insert name="permLockButton">
                                 <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.acquirePermLock']}"
                                         title="#{fxMessageBean['ContentEditor.button.acquirePermLock.title']}"
@@ -326,7 +326,7 @@
                             </ui:insert>
                         </ui:fragment>
                         <!-- unlock button -->
-                        <ui:fragment rendered="#{(_ceContent.guiSettings.looseLock and !_ceContent.guiSettings.editMode)
+                        <ui:fragment rendered="#{(_ceContent.guiSettings.looseLock and not _ceContent.guiSettings.editMode and not _ceContent.new)
                                                 or _ceContent.guiSettings.permLock}">
                             <ui:insert name="unlockButton">
                                 <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.unlock']}"
@@ -340,7 +340,7 @@
                         </ui:fragment>
                         <!-- extend lock features -->
                         <ui:fragment rendered="#{_ceContent.guiSettings.contentLocked}">
-                            <ui:fragment rendered="#{_ceContent.guiSettings.looseLock or _ceContent.guiSettings.permLock}">
+                            <ui:fragment rendered="#{_ceContent.guiSettings.looseLock or _ceContent.guiSettings.permLock and not _ceContent.new}">
                                 <!-- show  remaining lock time -->
                                 <ui:insert name="lockTimeButton">
                                     <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.remainingTime']}"

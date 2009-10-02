@@ -91,72 +91,74 @@ disableTab... false if the <adm:tab/> component should be rendered, true otherwi
                         </fx:formRow>
 
                         <!-- locks -->
-                        <fx:formRow labelKey="ContentEditor.field.lockAdmin">
-                            <ui:fragment rendered="#{!_ceContent.guiSettings.permLock and !_ceContent.guiSettings.looseLock}">
-                                <adm:ajaxCommandIcon id="#{editorId}_permLockButton" titleKey="ContentEditor.button.acquirePermLock.title"
-                                                     bean="#{srcEditor}" icon="lock" action="acquirePermLock"
-                                                     onclick="flexive.contentEditor.saveGroupFolding('#{srcEditor.formId}');"
-                                                     oncomplete="#{jsfunc}">
-                                    <f:setPropertyActionListener value="#{myContent}" target="#{srcEditor.wrappedContent}"/>
-                                    <!-- set properties for fxContentEditorBean -->
-                                    <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
-                                    <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
-                                </adm:ajaxCommandIcon>
-                            </ui:fragment>
-                            <ui:fragment rendered="#{_ceContent.guiSettings.contentLocked}">
-                                <!-- lock status message -->
-                                <ui:fragment rendered="#{not empty _ceContent.guiSettings.lockStatus}">
-                                    <div style="float:left; padding-top:5px; padding-right:5px;">
-                                        <h:outputText value="#{_ceContent.guiSettings.lockStatus}" style="font-weight:bold"/>
-                                    </div>
+                        <ui:fragment rendered="#{not _ceContent.new}">
+                            <fx:formRow labelKey="ContentEditor.field.lockAdmin">
+                                <ui:fragment rendered="#{not _ceContent.guiSettings.permLock and not _ceContent.guiSettings.looseLock}">
+                                    <adm:ajaxCommandIcon id="#{editorId}_permLockButton" titleKey="ContentEditor.button.acquirePermLock.title"
+                                                         bean="#{srcEditor}" icon="lock" action="acquirePermLock"
+                                                         onclick="flexive.contentEditor.saveGroupFolding('#{srcEditor.formId}');"
+                                                         oncomplete="#{jsfunc}">
+                                        <f:setPropertyActionListener value="#{myContent}" target="#{srcEditor.wrappedContent}"/>
+                                        <!-- set properties for fxContentEditorBean -->
+                                        <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
+                                        <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
+                                    </adm:ajaxCommandIcon>
                                 </ui:fragment>
-                                <c:set var="buttonStyle" value="float:left;"/>
-                                <c:if test="#{fxSystemBean.browserAsString=='IE'}">
-                                    <c:set var="buttonStyle" value=""/>
-                                </c:if>
-                                <div style="#{buttonStyle}">
-                                    <adm:ajaxCommandIcon id="#{editorId}_lockTimeButton2" titleKey="ContentEditor.button.remainingTime" bean="#{srcEditor}"
-                                                           icon="time" action="computeRemainingLockTime" onclick="flexive.contentEditor.saveGroupFolding('#{srcEditor.formId}');"
-                                                           oncomplete="#{jsfunc}">
-                                         <f:setPropertyActionListener value="#{myContent}" target="#{srcEditor.wrappedContent}"/>
-                                         <!-- set properties for fxContentEditorBean -->
-                                        <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
-                                        <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
-                                    </adm:ajaxCommandIcon>
-                                    <adm:ajaxCommandIcon id="#{editorId}_extendLockTimeButton"
-                                                         titleKey="ContentEditor.button.extendLock" bean="#{srcEditor}"
-                                                         icon="timeExtend" action="extendLock"
-                                                         onclick="flexive.contentEditor.saveGroupFolding('#{srcEditor.formId}');"
-                                                         oncomplete="#{jsfunc}">
-                                        <f:setPropertyActionListener value="#{myContent}" target="#{srcEditor.wrappedContent}"/>
-                                        <!-- set properties for fxContentEditorBean -->
-                                        <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
-                                        <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
-                                    </adm:ajaxCommandIcon>
-                                    <adm:ajaxCommandIcon id="#{editorId}_unlockButton"
-                                                         titleKey="ContentEditor.button.unlock" bean="#{srcEditor}"
-                                                         icon="unlock" action="unLock"
-                                                         onclick="flexive.contentEditor.saveGroupFolding('#{srcEditor.formId}');"
-                                                         oncomplete="#{jsfunc}">
-                                        <f:setPropertyActionListener value="#{myContent}" target="#{srcEditor.wrappedContent}"/>
-                                        <!-- set properties for fxContentEditorBean -->
-                                        <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
-                                        <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
-                                    </adm:ajaxCommandIcon>
-                                </div>
+                                <ui:fragment rendered="#{_ceContent.guiSettings.contentLocked}">
+                                    <!-- lock status message -->
+                                    <ui:fragment rendered="#{not empty _ceContent.guiSettings.lockStatus and not _ceContent.new}">
+                                        <div style="float:left; padding-top:5px; padding-right:5px;">
+                                            <h:outputText value="#{_ceContent.guiSettings.lockStatus}" style="font-weight:bold"/>
+                                        </div>
+                                    </ui:fragment>
+                                    <c:set var="buttonStyle" value="float:left;"/>
+                                    <c:if test="#{fxSystemBean.browserAsString=='IE'}">
+                                        <c:set var="buttonStyle" value=""/>
+                                    </c:if>
+                                    <div style="#{buttonStyle}">
+                                        <adm:ajaxCommandIcon id="#{editorId}_lockTimeButton" titleKey="ContentEditor.button.remainingTime" bean="#{srcEditor}"
+                                                               icon="time" action="computeRemainingLockTime" onclick="flexive.contentEditor.saveGroupFolding('#{srcEditor.formId}');"
+                                                               oncomplete="#{jsfunc}">
+                                             <f:setPropertyActionListener value="#{myContent}" target="#{srcEditor.wrappedContent}"/>
+                                             <!-- set properties for fxContentEditorBean -->
+                                            <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
+                                            <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
+                                        </adm:ajaxCommandIcon>
+                                        <adm:ajaxCommandIcon id="#{editorId}_extendLockTimeButton"
+                                                             titleKey="ContentEditor.button.extendLock" bean="#{srcEditor}"
+                                                             icon="timeExtend" action="extendLock"
+                                                             onclick="flexive.contentEditor.saveGroupFolding('#{srcEditor.formId}');"
+                                                             oncomplete="#{jsfunc}">
+                                            <f:setPropertyActionListener value="#{myContent}" target="#{srcEditor.wrappedContent}"/>
+                                            <!-- set properties for fxContentEditorBean -->
+                                            <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
+                                            <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
+                                        </adm:ajaxCommandIcon>
+                                        <adm:ajaxCommandIcon id="#{editorId}_unlockButton"
+                                                             titleKey="ContentEditor.button.unlock" bean="#{srcEditor}"
+                                                             icon="unlock" action="unLock"
+                                                             onclick="flexive.contentEditor.saveGroupFolding('#{srcEditor.formId}');"
+                                                             oncomplete="#{jsfunc}">
+                                            <f:setPropertyActionListener value="#{myContent}" target="#{srcEditor.wrappedContent}"/>
+                                            <!-- set properties for fxContentEditorBean -->
+                                            <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
+                                            <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
+                                        </adm:ajaxCommandIcon>
+                                    </div>
 
-                                <!-- lock duration panel -->
-                                <a4j:outputPanel id="remainingTime" rendered="#{not empty __ceBean.remainingLockTime}" layout="block">
-                                    <c:if test="#{_ceContent.guiSettings.permLock}">
-                                        <h:outputText value="#{fxMessageBean['ContentEditor.msg.permLockTimeRemaining']}"/>
-                                    </c:if>
-                                    <c:if test="#{_ceContent.guiSettings.looseLock}">
-                                        <h:outputText value="#{fxMessageBean['ContentEditor.msg.looseLockTimeRemaining']}"/>
-                                    </c:if>
-                                    <h:outputText value=" #{__ceBean.remainingLockTime}"/>
-                                </a4j:outputPanel>
-                            </ui:fragment>
-                        </fx:formRow>
+                                    <!-- lock duration panel -->
+                                    <a4j:outputPanel id="remainingTime" rendered="#{not empty __ceBean.remainingLockTime}" layout="block">
+                                        <c:if test="#{_ceContent.guiSettings.permLock}">
+                                            <h:outputText value="#{fxMessageBean['ContentEditor.msg.permLockTimeRemaining']}"/>
+                                        </c:if>
+                                        <c:if test="#{_ceContent.guiSettings.looseLock}">
+                                            <h:outputText value="#{fxMessageBean['ContentEditor.msg.looseLockTimeRemaining']}"/>
+                                        </c:if>
+                                        <h:outputText value=" #{__ceBean.remainingLockTime}"/>
+                                    </a4j:outputPanel>
+                                </ui:fragment>
+                            </fx:formRow>
+                        </ui:fragment>
 
                         <c:if test="#{not myContent.referenced}">
                             <fx:formRow labelKey="Content.field.nodes">
