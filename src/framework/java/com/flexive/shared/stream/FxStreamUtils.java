@@ -332,8 +332,10 @@ public class FxStreamUtils {
      * @throws FxStreamException on errors
      */
     public static void downloadBinary(List<ServerLocation> server, OutputStream stream, BinaryDescriptor descriptor, BinaryDescriptor.PreviewSizes size) throws FxStreamException {
-        if (descriptor.getSize() <= 0 || stream == null)
+        if (stream == null)
             throw new FxStreamException("ex.stream.download.param.missing");
+        if (descriptor.getSize() <= 0)
+            return; //no need to request a 0-byte stream
         StreamClient client = null;
         try {
             client = requestBinary(server, descriptor, size);

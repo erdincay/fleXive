@@ -151,6 +151,7 @@ public class FxValueInputRenderer extends Renderer {
      * @param input   the FxValueInput component @return the FxValue used as input for the component.
      * @return the FxValue stored in the input component
      */
+    @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     public static FxValue getFxValue(FacesContext context, UIInput input) {
         Object o = input.getSubmittedValue() != null ? input.getSubmittedValue() : input.getValue();
         if (o == null) {
@@ -222,15 +223,14 @@ public class FxValueInputRenderer extends Renderer {
                 try {
                     upload.processDecodes(context);
                     final UploadedFile file = (UploadedFile) upload.getSubmittedValue();
-                    if (file != null && file.getSize() > 0) {
-                        //noinspection unchecked
-
+                    if (file != null && file.getSize() >= 0 && !StringUtils.isEmpty(file.getName())) {
                         String name = file.getName();
                         if (name.indexOf('\\') > 0)
                             name = name.substring(name.lastIndexOf('\\') + 1);
                         value.setTranslation(languageId, new BinaryDescriptor(name, file.getSize(), file.getInputStream()));
                     }
                 } catch (Exception e) {
+                    //noinspection ThrowableInstanceNeverThrown
                     throw new FxUpdateException(LOG, e, "ex.jsf.valueInput.file.upload.io", e).asRuntimeException();
                 }
             }

@@ -102,7 +102,16 @@ public class BinaryUploadProtocol extends StreamProtocol<BinaryUploadPayload> {
             if (LOG.isDebugEnabled()) LOG.debug("Receive started at " + new Date(System.currentTimeMillis()));
             this.handle = RandomStringUtils.randomAlphanumeric(32);
             this.division = dataPacket.getPayload().getDivision();
-            return new DataPacket<BinaryUploadPayload>(new BinaryUploadPayload(handle), false, true);
+            if( this.expectedLength == 0 ) {
+                //create an empty transit entry
+                try {
+                    System.out.println("creating empty...");
+                    pout = StorageManager.getContentStorage(TypeStorageMode.Hierarchical).receiveTransitBinary(division, handle, expectedLength, timeToLive);
+                } catch (Exception e) {
+                    LOG.error(e);
+                }
+            }
+            return new DataPacket<BinaryUploadPayload>(new BinaryUploadPayload(handle), false, this.expectedLength > 0);
         } else {
             cleanup();
         }
