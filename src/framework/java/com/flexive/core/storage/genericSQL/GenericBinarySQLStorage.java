@@ -90,8 +90,8 @@ public class GenericBinarySQLStorage implements BinaryStorage {
 
     //    select into xx () select  FBLOB1,FBLOB2,?,?,?
     protected static final String BINARY_TRANSIT_HEADER = "SELECT FBLOB FROM " + TBL_BINARY_TRANSIT + " WHERE BKEY=?";
-    //                                                                   1           2         3         4         5
-    protected static final String BINARY_TRANSIT_PREVIEW_SIZES = "SELECT PREVIEW_REF,PREV1SIZE,PREV2SIZE,PREV3SIZE,PREV4SIZE FROM " + TBL_BINARY_TRANSIT + " WHERE BKEY=?";
+    //                                                                   1                   2         3         4         5
+    protected static final String BINARY_TRANSIT_PREVIEW_SIZES = "SELECT PREVIEW_REF IS NULL,PREV1SIZE,PREV2SIZE,PREV3SIZE,PREV4SIZE FROM " + TBL_BINARY_TRANSIT + " WHERE BKEY=?";
 
     protected static final String BINARY_TRANSIT = "INSERT INTO " + TBL_CONTENT_BINARY + "(ID,VER,QUALITY,FBLOB,NAME,BLOBSIZE,XMLMETA,CREATED_AT,MIMETYPE,PREVIEW_REF,ISIMAGE,RESOLUTION,WIDTH,HEIGHT,PREV1_WIDTH,PREV1_HEIGHT,PREV2_WIDTH,PREV2_HEIGHT,PREV3_WIDTH,PREV3_HEIGHT,PREV4_WIDTH,PREV4_HEIGHT,PREV1SIZE,PREV2SIZE,PREV3SIZE,PREV4SIZE,PREV1,PREV2,PREV3,PREV4) " +
             //      1 2 3       4 5 6     7                                         8             9 0 1 2
@@ -393,13 +393,12 @@ public class GenericBinarySQLStorage implements BinaryStorage {
                 ResultSet rs = ps.executeQuery();
                 if (!rs.next())
                     throw new FxDbException("ex.content.binary.transitNotFound", binary.getHandle());
-                long previewRef = rs.getLong(1);
-                if (!(!rs.wasNull() && previewRef >= 0)) {
+                if (rs.getBoolean(1)) {
                     //if previews are not referenced, check thresholds
-                    storePrev1FS = (prev1Length = rs.getLong(2)) >= dbPreviewThreshold;
-                    storePrev2FS = (prev2Length = rs.getLong(3)) >= dbPreviewThreshold;
-                    storePrev3FS = (prev3Length = rs.getLong(4)) >= dbPreviewThreshold;
-                    storePrev4FS = (prev4Length = rs.getLong(5)) >= dbPreviewThreshold;
+                    storePrev1FS = (prev1Length = rs.getLong(2)) >= dbPreviewThreshold && !rs.wasNull();
+                    storePrev2FS = (prev2Length = rs.getLong(3)) >= dbPreviewThreshold && !rs.wasNull();
+                    storePrev3FS = (prev3Length = rs.getLong(4)) >= dbPreviewThreshold && !rs.wasNull();
+                    storePrev4FS = (prev4Length = rs.getLong(5)) >= dbPreviewThreshold && !rs.wasNull();
                 }
             }
             if (ps != null)
