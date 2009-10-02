@@ -46,20 +46,19 @@ import com.flexive.shared.interfaces.ScriptingEngine;
 import com.flexive.shared.scripting.*;
 import com.flexive.shared.security.Role;
 import com.flexive.shared.security.UserTicket;
+import groovy.lang.GroovyShell;
+import org.apache.commons.lang.StringUtils;
 
 import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
 import javax.faces.model.SelectItem;
 import javax.script.ScriptEngineFactory;
 import javax.script.ScriptEngineManager;
-import java.sql.SQLException;
-import java.util.*;
-import java.io.StringWriter;
 import java.io.PrintWriter;
 import java.io.Serializable;
-
-import groovy.lang.GroovyShell;
-import org.apache.commons.lang.StringUtils;
+import java.io.StringWriter;
+import java.sql.SQLException;
+import java.util.*;
 
 /**
  * JSF scripting bean

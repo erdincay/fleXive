@@ -30,8 +30,8 @@
             </script>
 
             <!-- separate js function call for the BE app -->
-            <c:set var="jsfunc" value="beAjaxButtonRequest(true);"/>
-            <c:if test="#{beContentEditorBean.browserAsString=='IE'}">
+            <c:set var="jsfunc" value="beCeAjaxButtonRequest(true);"/>
+            <c:if test="#{fxSystemBean.browserAsString=='IE'}">
                 <c:set var="jsfunc" value="flexive.yui.load(); ceReloadTree();"/>
             </c:if>
 

@@ -1140,11 +1140,4 @@ public class BeContentEditorBean implements ActionBean, Serializable {
             }
         };
     }
-
-    /**
-     * @return the browser the client is using
-     */
-    public String getBrowserAsString() {
-        return String.valueOf(FxJsfUtils.getRequest().getBrowser());
-    }
 }

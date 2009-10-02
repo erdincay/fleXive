@@ -22,8 +22,8 @@
         <!-- separate js function call for the BE app -->
         <c:set var="jsfunc" value="flexive.yui.load();"/>
         <c:if test="#{beContentEditorBean.beBeanInUse}">
-            <c:set var="jsfunc" value="beAjaxButtonRequest();"/>
-            <c:if test="#{beContentEditorBean.browserAsString=='IE'}">
+            <c:set var="jsfunc" value="beCeAjaxButtonRequest(false);"/>
+            <c:if test="#{fxSystemBean.browserAsString=='IE'}">
                 <c:set var="jsfunc" value="flexive.yui.load();"/>
             </c:if>
         </c:if>
