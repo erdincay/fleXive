@@ -97,7 +97,9 @@ public class FxAuthenticationHandler {
             }
         }
         //fallback
-        LOG.info("Authenticating user [" + loginname + "] against the database.");
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Authenticating user [" + loginname + "] against the database.");
+        }
         return FxDBAuthentication.login(loginname, password, callback);
     }
 
@@ -124,7 +126,9 @@ public class FxAuthenticationHandler {
         }
         if (!scriptCalled) {
             //fallback
-            LOG.info("Logging out user [" + ticket.getUserName() + "] from the database.");
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Logging out user [" + ticket.getUserName() + "] from the database.");
+            }
             FxDBAuthentication.logout(ticket);
         }
     }
