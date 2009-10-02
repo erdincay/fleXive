@@ -70,7 +70,7 @@ public abstract class DataSelector {
     private static final List<String> BINARY_COLUMNS = Collections.unmodifiableList(
             Arrays.asList(
                     "ID", "NAME", "BLOBSIZE", "CREATED_AT", "MIMETYPE",
-                    "ISIMAGE", "RESOLUTION", "WIDTH", "HEIGHT"
+                    "ISIMAGE", "RESOLUTION", "WIDTH", "HEIGHT", "MD5SUM"
             )
     );
     private static final List<String> LOCK_COLUMNS = Collections.unmodifiableList(
@@ -195,7 +195,8 @@ public abstract class DataSelector {
                 "1".equals(getBinaryValue(values, "ISIMAGE")),
                 Double.parseDouble(getBinaryValue(values, "RESOLUTION")),
                 java.lang.Integer.parseInt(getBinaryValue(values, "WIDTH")),
-                java.lang.Integer.parseInt(getBinaryValue(values, "HEIGHT"))
+                java.lang.Integer.parseInt(getBinaryValue(values, "HEIGHT")),
+                getBinaryValue(values, "MD5SUM")
         );
     }
 }

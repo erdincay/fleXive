@@ -105,7 +105,6 @@ public class BinaryUploadProtocol extends StreamProtocol<BinaryUploadPayload> {
             if( this.expectedLength == 0 ) {
                 //create an empty transit entry
                 try {
-                    System.out.println("creating empty...");
                     pout = StorageManager.getContentStorage(TypeStorageMode.Hierarchical).receiveTransitBinary(division, handle, expectedLength, timeToLive);
                 } catch (Exception e) {
                     LOG.error(e);

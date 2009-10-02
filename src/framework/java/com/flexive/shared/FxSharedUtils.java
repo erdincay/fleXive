@@ -50,6 +50,7 @@ import org.apache.commons.logging.LogFactory;
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.JarURLConnection;
 import java.net.URL;
@@ -674,6 +675,39 @@ public final class FxSharedUtils {
     }
 
     /**
+     * Calculate an MD5 checksum for a file
+     *
+     * @param file file to calculate checksum for
+     * @return MD5 checksum (16 characters)
+     */
+    public static String getMD5Sum(File file) {
+        InputStream is = null;
+        String md5sum = "unknown";
+        try {
+            MessageDigest digest = MessageDigest.getInstance("MD5");
+            is = new FileInputStream(file);
+            byte[] buffer = new byte[8192];
+            int read;
+            while ((read = is.read(buffer)) > 0)
+                digest.update(buffer, 0, read);
+            BigInteger bigInt = new BigInteger(1, digest.digest());
+            md5sum = bigInt.toString(16);
+        } catch (IOException e) {
+            LOG.error("Unable calculate MD5 checksum!", e);
+        } catch (NoSuchAlgorithmException e) {
+            LOG.error("No MD5 algorithm found!", e);
+        } finally {
+            try {
+                if (is != null)
+                    is.close();
+            } catch (IOException e) {
+                //ignore
+            }
+        }
+        return md5sum;
+    }
+
+    /**
      * Helperclass holding the result of the <code>executeCommand</code> method
      *
      * @see FxSharedUtils#executeCommand(String, String...)
@@ -783,6 +817,7 @@ public final class FxSharedUtils {
      * @param arguments arguments to pass to the command (one argument per String!)
      * @return result
      */
+
     public static ProcessResult executeCommand(String command, String... arguments) {
         Runtime r = Runtime.getRuntime();
         String[] cmd = new String[arguments.length + (WINDOWS ? 3 : 1)];

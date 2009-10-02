@@ -272,6 +272,16 @@ abstract class RenderHelper {
             if (value instanceof FxBinary && !value.isEmpty()) {
                 final ResponseWriter writer = facesContext.getResponseWriter();
                 final BinaryDescriptor descriptor = ((FxBinary) value).getTranslation(language);
+
+                if (!descriptor.isNewBinary() && !"unknown".equals(descriptor.getMd5sum())) {
+                    writer.startElement("br", null);
+                    writer.endElement("br");
+                    writer.startElement("span", null);
+                    writer.writeAttribute("class", "binaryDescription", null);
+                    writer.writeText("MD5:" + descriptor.getMd5sum(), null);
+                    writer.endElement("span");
+                }
+
                 writer.startElement("br", null);
                 writer.endElement("br");
 

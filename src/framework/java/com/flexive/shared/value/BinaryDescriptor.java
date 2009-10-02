@@ -196,6 +196,7 @@ public class BinaryDescriptor implements Serializable {
     private final double resolution;
     private final int width;
     private final int height;
+    private String md5sum = "unknown";
 
     /**
      * Constructor for a new empty binary
@@ -238,6 +239,35 @@ public class BinaryDescriptor implements Serializable {
         this.resolution = 0;
         this.width = -1;
         this.height = -1;
+    }
+
+    /**
+     * Constructor for new Binaries in identifyAndTransferTransitBinary process ..
+     *
+     * @param handle   handle
+     * @param name     name of the binary
+     * @param size     size in bytes
+     * @param mimeType MIME type
+     * @param metadata xml meta data
+     * @param md5sum   MD5 checksum
+     */
+    public BinaryDescriptor(String handle, String name, long size, String mimeType, String metadata, String md5sum) {
+        this.handle = handle;
+        this.newBinary = true;
+        this.name = name;
+        this.size = size;
+        this.metadata = metadata;
+        this.mimeType = mimeType;
+        this.server = null;
+        this.id = -1;
+        this.version = -1;
+        this.quality = -1;
+        this.creationTime = -1;
+        this.image = false;
+        this.resolution = 0;
+        this.width = -1;
+        this.height = -1;
+        this.md5sum = md5sum;
     }
 
     /**
@@ -348,8 +378,9 @@ public class BinaryDescriptor implements Serializable {
      * @param resolution   resoltion (if image and detected)
      * @param width        width (if image and detected)
      * @param height       height (if image and detected)
+     * @param md5sum       MD5 checksum of the binary
      */
-    public BinaryDescriptor(List<ServerLocation> server, long id, int version, int quality, long creationTime, String name, long size, String metadata, String mimeType, boolean image, double resolution, int width, int height) {
+    public BinaryDescriptor(List<ServerLocation> server, long id, int version, int quality, long creationTime, String name, long size, String metadata, String mimeType, boolean image, double resolution, int width, int height, String md5sum) {
         this.newBinary = false;
         this.server = server;
         this.id = id;
@@ -365,6 +396,7 @@ public class BinaryDescriptor implements Serializable {
         this.width = width;
         this.height = height;
         this.handle = null;
+        this.md5sum = md5sum;
     }
 
     /**
@@ -485,6 +517,16 @@ public class BinaryDescriptor implements Serializable {
     }
 
     /**
+     * Get the MD5 checksum of the binary, only available after a binary has been loaded from the storage!
+     *
+     * @return MD5 checksum of the binary
+     * @since 3.1
+     */
+    public String getMd5sum() {
+        return md5sum;
+    }
+
+    /**
      * Getter for optional metadata (usually XML)
      *
      * @return optional metadata (usually XML)
@@ -564,7 +606,8 @@ public class BinaryDescriptor implements Serializable {
                 !(this.getMimeType() == null && b.getMimeType() != null) &&
                 !(b.getMimeType() == null && this.getMimeType() != null) &&
                 !(this.handle != null && !this.handle.equals(b.handle)) &&
-                !(this.id != -1 && this.id != b.id);
+                !(this.id != -1 && this.id != b.id) &&
+                !(this.md5sum != null && !this.md5sum.equals(b.md5sum));
     }
 
     /**

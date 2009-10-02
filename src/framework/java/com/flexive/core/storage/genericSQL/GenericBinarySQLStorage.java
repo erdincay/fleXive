@@ -84,8 +84,8 @@ public class GenericBinarySQLStorage implements BinaryStorage {
             //       1          2              3          4          5         6
             "DBIN_ID=?,DBIN_VER=?,DBIN_QUALITY=?,DBIN_ACL=? WHERE ID=? AND VER=?";
 
-    //                                                       1    2        3          4        5       6          7     8                                                                  1         2             3
-    protected static final String BINARY_DESC_LOAD = "SELECT NAME,BLOBSIZE,CREATED_AT,MIMETYPE,ISIMAGE,RESOLUTION,WIDTH,HEIGHT FROM " + TBL_CONTENT_BINARY + " WHERE ID=? AND VER=? AND QUALITY=?";
+    //                                                       1    2        3          4        5       6          7     8      9                                                            1         2             3
+    protected static final String BINARY_DESC_LOAD = "SELECT NAME,BLOBSIZE,CREATED_AT,MIMETYPE,ISIMAGE,RESOLUTION,WIDTH,HEIGHT,MD5SUM FROM " + TBL_CONTENT_BINARY + " WHERE ID=? AND VER=? AND QUALITY=?";
     protected static final String BINARY_META_LOAD = "SELECT XMLMETA FROM " + TBL_CONTENT_BINARY + " WHERE ID=? AND VER=? AND QUALITY=?";
 
     //    select into xx () select  FBLOB1,FBLOB2,?,?,?
@@ -93,12 +93,12 @@ public class GenericBinarySQLStorage implements BinaryStorage {
     //                                                                   1                   2         3         4         5
     protected static final String BINARY_TRANSIT_PREVIEW_SIZES = "SELECT PREVIEW_REF IS NULL,PREV1SIZE,PREV2SIZE,PREV3SIZE,PREV4SIZE FROM " + TBL_BINARY_TRANSIT + " WHERE BKEY=?";
 
-    protected static final String BINARY_TRANSIT = "INSERT INTO " + TBL_CONTENT_BINARY + "(ID,VER,QUALITY,FBLOB,NAME,BLOBSIZE,XMLMETA,CREATED_AT,MIMETYPE,PREVIEW_REF,ISIMAGE,RESOLUTION,WIDTH,HEIGHT,PREV1_WIDTH,PREV1_HEIGHT,PREV2_WIDTH,PREV2_HEIGHT,PREV3_WIDTH,PREV3_HEIGHT,PREV4_WIDTH,PREV4_HEIGHT,PREV1SIZE,PREV2SIZE,PREV3SIZE,PREV4SIZE,PREV1,PREV2,PREV3,PREV4) " +
+    protected static final String BINARY_TRANSIT = "INSERT INTO " + TBL_CONTENT_BINARY + "(ID,VER,QUALITY,FBLOB,NAME,BLOBSIZE,XMLMETA,CREATED_AT,MIMETYPE,PREVIEW_REF,ISIMAGE,RESOLUTION,WIDTH,HEIGHT,PREV1_WIDTH,PREV1_HEIGHT,PREV2_WIDTH,PREV2_HEIGHT,PREV3_WIDTH,PREV3_HEIGHT,PREV4_WIDTH,PREV4_HEIGHT,PREV1SIZE,PREV2SIZE,PREV3SIZE,PREV4SIZE,MD5SUM,PREV1,PREV2,PREV3,PREV4) " +
             //      1 2 3       4 5 6     7                                         8             9 0 1 2
-            "SELECT ?,?,?,FBLOB,?,?,?," + StorageManager.getTimestampFunction() + ",?,PREVIEW_REF,?,?,?,?,PREV1_WIDTH,PREV1_HEIGHT,PREV2_WIDTH,PREV2_HEIGHT,PREV3_WIDTH,PREV3_HEIGHT,PREV4_WIDTH,PREV4_HEIGHT,PREV1SIZE,PREV2SIZE,PREV3SIZE,PREV4SIZE";
-    protected static final String BINARY_TRANSIT_FILESYSTEM = "INSERT INTO " + TBL_CONTENT_BINARY + "(ID,VER,QUALITY,FBLOB,NAME,BLOBSIZE,XMLMETA,CREATED_AT,MIMETYPE,PREVIEW_REF,ISIMAGE,RESOLUTION,WIDTH,HEIGHT,PREV1_WIDTH,PREV1_HEIGHT,PREV2_WIDTH,PREV2_HEIGHT,PREV3_WIDTH,PREV3_HEIGHT,PREV4_WIDTH,PREV4_HEIGHT,PREV1SIZE,PREV2SIZE,PREV3SIZE,PREV4SIZE,PREV1,PREV2,PREV3,PREV4) " +
+            "SELECT ?,?,?,FBLOB,?,?,?," + StorageManager.getTimestampFunction() + ",?,PREVIEW_REF,?,?,?,?,PREV1_WIDTH,PREV1_HEIGHT,PREV2_WIDTH,PREV2_HEIGHT,PREV3_WIDTH,PREV3_HEIGHT,PREV4_WIDTH,PREV4_HEIGHT,PREV1SIZE,PREV2SIZE,PREV3SIZE,PREV4SIZE,?";
+    protected static final String BINARY_TRANSIT_FILESYSTEM = "INSERT INTO " + TBL_CONTENT_BINARY + "(ID,VER,QUALITY,FBLOB,NAME,BLOBSIZE,XMLMETA,CREATED_AT,MIMETYPE,PREVIEW_REF,ISIMAGE,RESOLUTION,WIDTH,HEIGHT,PREV1_WIDTH,PREV1_HEIGHT,PREV2_WIDTH,PREV2_HEIGHT,PREV3_WIDTH,PREV3_HEIGHT,PREV4_WIDTH,PREV4_HEIGHT,PREV1SIZE,PREV2SIZE,PREV3SIZE,PREV4SIZE,MD5SUM,PREV1,PREV2,PREV3,PREV4) " +
             //      1 2 3 4 5 6 7     8                                         9             0 1 2 3                                                                                                                                                  
-            "SELECT ?,?,?,?,?,?,?," + StorageManager.getTimestampFunction() + ",?,PREVIEW_REF,?,?,?,?,PREV1_WIDTH,PREV1_HEIGHT,PREV2_WIDTH,PREV2_HEIGHT,PREV3_WIDTH,PREV3_HEIGHT,PREV4_WIDTH,PREV4_HEIGHT,PREV1SIZE,PREV2SIZE,PREV3SIZE,PREV4SIZE";
+            "SELECT ?,?,?,?,?,?,?," + StorageManager.getTimestampFunction() + ",?,PREVIEW_REF,?,?,?,?,PREV1_WIDTH,PREV1_HEIGHT,PREV2_WIDTH,PREV2_HEIGHT,PREV3_WIDTH,PREV3_HEIGHT,PREV4_WIDTH,PREV4_HEIGHT,PREV1SIZE,PREV2SIZE,PREV3SIZE,PREV4SIZE,?";
 
     protected static final String BINARY_TRANSIT_PREVIEW_WHERE = " FROM " + TBL_BINARY_TRANSIT + " WHERE BKEY=?";
     //                                                                                                   1              2               3        4              5               6        7              8               9        10             11              12           13           14           15           16           17
@@ -279,7 +279,7 @@ public class GenericBinarySQLStorage implements BinaryStorage {
             ResultSet rs = ps.executeQuery();
             if (rs != null && rs.next()) {
                 return new BinaryDescriptor(server, id, 1, 1, rs.getLong(3), rs.getString(1), rs.getLong(2), null,
-                        rs.getString(4), rs.getBoolean(5), rs.getDouble(6), rs.getInt(7), rs.getInt(8));
+                        rs.getString(4), rs.getBoolean(5), rs.getDouble(6), rs.getInt(7), rs.getInt(8), rs.getString(9));
             }
         } catch (SQLException e) {
             throw new FxDbException(e, "ex.db.sqlError", e.getMessage());
@@ -380,7 +380,7 @@ public class GenericBinarySQLStorage implements BinaryStorage {
                 }
             }
             created = new BinaryDescriptor(CacheAdmin.getStreamServers(), id, version, quality, java.lang.System.currentTimeMillis(),
-                    binary.getName(), binary.getSize(), binary.getMetadata(), binary.getMimeType(), isImage, resolution, width, height);
+                    binary.getName(), binary.getSize(), binary.getMetadata(), binary.getMimeType(), isImage, resolution, width, height, binary.getMd5sum());
             //we can copy the blob directly into the binary table if the database is used for transit and the final binary is
             //stored in the filesystem
             final boolean copyBlob = dbTransit && dbStorage;
@@ -459,6 +459,7 @@ public class GenericBinarySQLStorage implements BinaryStorage {
             ps.setDouble(cnt++, created.getResolution());
             ps.setInt(cnt++, created.getWidth());
             ps.setInt(cnt++, created.getHeight());
+            ps.setString(cnt++, created.getMd5sum());
             ps.setString(cnt, binary.getHandle());
             ps.executeUpdate();
             if (removeTransitFile && binaryTransit != null) {
@@ -579,6 +580,7 @@ public class GenericBinarySQLStorage implements BinaryStorage {
         int[] dimensionsPreview4 = {0, 0};
         String metaData = "<empty/>";
         ResultSet rs = null;
+        String md5sum = "";
         try {
             binaryTransitFileInfo = getBinaryTransitFileInfo(binary);
             boolean processed = false;
@@ -678,6 +680,7 @@ public class GenericBinarySQLStorage implements BinaryStorage {
                 ps.setString(2, binary.getHandle());
                 ps.executeUpdate();
             }
+            md5sum = FxSharedUtils.getMD5Sum(binaryTransitFileInfo.getBinaryTransitFile());
         } catch (IOException e) {
             LOG.error("Stream reading failed:" + e.getMessage(), e);
         } catch (SQLException e) {
@@ -710,7 +713,7 @@ public class GenericBinarySQLStorage implements BinaryStorage {
             }
         }
         return new BinaryDescriptor(binary.getHandle(), binary.getName(), binary.getSize(),
-                binaryTransitFileInfo.getMimeType(), metaData);
+                binaryTransitFileInfo.getMimeType(), metaData, md5sum);
     }
 
     /**
