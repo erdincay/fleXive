@@ -1032,6 +1032,7 @@ CREATE INDEX FXI_LOCK_EXPIRES ON FXS_LOCK(EXPIRES_AT);
 -- SQL Search
 -- -------------------------
 -- TODO DL: there seems no equivalent to memory tables in postgres, might have to use a maintenance routine to wipe this table
+-- In postgreSQL there is TEMPORARY or TEMP -- see : http://www.postgresql.org/docs/8.2/static/sql-createtable.html
 CREATE TABLE FXS_SEARCHCACHE_MEMORY (
   SEARCH_ID BIGINT NOT NULL,
   ID BIGINT NOT NULL,
