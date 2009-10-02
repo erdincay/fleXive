@@ -55,6 +55,8 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 
 /**
  * Backing bean for the content editor component.
@@ -95,6 +97,7 @@ public class FxContentEditorBean implements Serializable {
     private String affectedXPath;
     // remaining time on the lock
     private String remainingLockTime;
+    private String expiresTime;
 
     public String getMessagesId() {
         return MESSAGES_ID;
@@ -717,7 +720,6 @@ public class FxContentEditorBean implements Serializable {
         if (checkOwnerChange()) {
             contentStorage.get(editorId).getGuiSettings().setTakeOver(true);
             new FxFacesMsgErr("ContentEditor.msg.takeOver.warning").addToContext();
-//        }
         } else
             reloadContent(true);
 
@@ -727,10 +729,13 @@ public class FxContentEditorBean implements Serializable {
             final long currentLockTime = lock.getDuration() / 1000;
 
             final String format = String.format("%%0%dd", 2);
-            final String seconds = String.format(format, currentLockTime % 60);
-            final String minutes = String.format(format, (currentLockTime % 3600) / 60);
-            final String hours = String.format(format, currentLockTime / 3600);
+            String seconds = String.format(format, currentLockTime % 60);
+            String minutes = String.format(format, (currentLockTime % 3600) / 60);
+            String hours = String.format(format, currentLockTime / 3600);
             remainingLockTime = hours + ":" + minutes + ":" + seconds;
+
+            final DateFormat out = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            expiresTime = out.format(lock.getExpiresTimestamp());
 
         } else if (lock.isExpired()) {
             remainingLockTime = "expired";
@@ -743,6 +748,14 @@ public class FxContentEditorBean implements Serializable {
 
     public void setRemainingLockTime(String remainingLockTime) {
         this.remainingLockTime = remainingLockTime;
+    }
+
+    public String getExpiresTime() {
+        return expiresTime;
+    }
+
+    public void setExpiresTime(String expiresTime) {
+        this.expiresTime = expiresTime;
     }
 
     /**

@@ -147,14 +147,15 @@ disableTab... false if the <adm:tab/> component should be rendered, true otherwi
                                     </div>
 
                                     <!-- lock duration panel -->
-                                    <a4j:outputPanel id="remainingTime" rendered="#{not empty __ceBean.remainingLockTime}" layout="block">
+                                    <a4j:outputPanel id="remainingTime" rendered="#{not empty __ceBean.remainingLockTime and not empty __ceBean.expiresTime}"
+                                                     layout="block">
                                         <c:if test="#{_ceContent.guiSettings.permLock}">
                                             <h:outputText value="#{fxMessageBean['ContentEditor.msg.permLockTimeRemaining']}"/>
                                         </c:if>
                                         <c:if test="#{_ceContent.guiSettings.looseLock}">
                                             <h:outputText value="#{fxMessageBean['ContentEditor.msg.looseLockTimeRemaining']}"/>
                                         </c:if>
-                                        <h:outputText value=" #{__ceBean.remainingLockTime}"/>
+                                        <h:outputText value=" #{__ceBean.remainingLockTime} #{fxMessageBean['ContentEditor.msg.expiresAt']} #{__ceBean.expiresTime}"/>
                                     </a4j:outputPanel>
                                 </ui:fragment>
                             </fx:formRow>
