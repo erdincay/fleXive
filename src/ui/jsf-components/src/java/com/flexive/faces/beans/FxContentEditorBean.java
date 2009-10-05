@@ -43,7 +43,6 @@ import com.flexive.shared.content.*;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxLockException;
 import com.flexive.shared.interfaces.ContentEngine;
-import com.flexive.shared.security.ACLAssignment;
 import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.value.FxReference;
 import com.flexive.shared.value.ReferencedContent;
@@ -283,14 +282,14 @@ public class FxContentEditorBean implements Serializable {
      */
     public void unLock() {
         // reload first in case it was unlocked already
-        reloadContent(false);
+        reloadContent(true);
         FxWrappedContent wc = contentStorage.get(editorId);
         if (wc.getContent().isLocked()) {
 
-            final FxLock lock = contentStorage.get(editorId).getContent().getLock();
+            final FxLock lock = wc.getContent().getLock();
             final ContentEngine ce = EJBLookup.getContentEngine();
             final UserTicket ticket = FxContext.getUserTicket();
-            final boolean editMode = contentStorage.get(editorId).getGuiSettings().isEditMode();
+            final boolean editMode = wc.getGuiSettings().isEditMode();
             // if in edit mode, only remove permanent locks
             try {
                 if ((editMode && lock.getLockType() == FxLockType.Permanent) || (!editMode && lock.getLockType() == FxLockType.Permanent)) {
@@ -301,14 +300,14 @@ public class FxContentEditorBean implements Serializable {
                     } else
                         new FxFacesMsgErr("ContentEditor.msg.no.unlock").addToContext();
                 } else if (!editMode && lock.getLockType() == FxLockType.Loose) {
-                    if (lock.getUserId() == ticket.getUserId() || ticket.isGlobalSupervisor() || ticket.isMandatorSupervisor()) {
+                    if (FxPermissionUtils.currentUserInContentACLList(ticket, wc.getContent().getAclIds()) || ticket.isGlobalSupervisor() || ticket.isMandatorSupervisor()) {
                         ce.unlock(wc.getContent().getPk());
                         wc.getContent().updateLock(FxLock.noLockPK());
                     } else
                         new FxFacesMsgErr("ContentEditor.msg.no.unlock").addToContext();
                 }
             } catch (FxLockException e) {
-                new FxFacesMsgErr(e).addToContext();
+                new FxFacesMsgErr("ContentEditor.err.lock", e.getMessage()).addToContext();
             }
         }
     }
@@ -568,7 +567,7 @@ public class FxContentEditorBean implements Serializable {
             // set the override and edit
             setGuiLockOptions(true, false, false, false);
 
-        } else if (ticket.isGlobalSupervisor() || ticket.isMandatorSupervisor() || currentUserInContentACLList(ticket, content.getAclIds())) {
+        } else if (ticket.isGlobalSupervisor() || ticket.isMandatorSupervisor() || FxPermissionUtils.currentUserInContentACLList(ticket, content.getAclIds())) {
 
             if (lock.getLockType() == FxLockType.Loose) { // sets the correct boolean for the msg display
                 setGuiLockOptions(false, true, true, false);
@@ -584,18 +583,27 @@ public class FxContentEditorBean implements Serializable {
 
     /**
      * Action method: Set the override option for content editing depending on the user privileges
+     * This method takes over the existing lock, creates a loose lock and enables the edit mode
      */
-    public void lockOverride() {
+    public void lockOverrideAndEdit() {
         reloadContent(false); // get latest version first
+        lockOverrideRef(true);
+        enableEdit();
+    }
+
+    /**
+     * Take over an existing lock
+     *
+     * @param takeOverLoose set to true if the content should be loosely locked, false if the existing locktype should be created for the current user
+     */
+    private void lockOverrideRef(boolean takeOverLoose) {
         final UserTicket ticket = FxContext.getUserTicket();
         final FxContent content = contentStorage.get(editorId).getContent();
         final FxLock lock = content.getLock();
         ContentEngine ce = EJBLookup.getContentEngine();
-        /**
-         * Take over lock IF
-         * [(supervisor or in instance ACL) && lock == loose] OR [supervisor && lock == permanent]
-         */
-        if (((ticket.isGlobalSupervisor() || ticket.isMandatorSupervisor() || currentUserInContentACLList(ticket, content.getAclIds())
+        // TODO: take over = true = use same locktype
+        // take over = false == use loose lock
+        if (((ticket.isGlobalSupervisor() || ticket.isMandatorSupervisor() || FxPermissionUtils.currentUserInContentACLList(ticket, content.getAclIds())
                 || lock.getUserId() == ticket.getUserId()) && lock.getLockType() == FxLockType.Loose)
                 || ((ticket.isGlobalSupervisor() || ticket.isMandatorSupervisor()) && lock.getLockType() == FxLockType.Permanent)) {
 
@@ -603,16 +611,28 @@ public class FxContentEditorBean implements Serializable {
             final FxPK pk = contentStorage.get(editorId).getContent().getPk();
             // first unlock, then update the content lock with a loose lock and subsequently update the FxWrappedContent
             try {
+                final FxLockType lockType;
+                if(takeOverLoose) {
+                    lockType = FxLockType.Loose;
+                } else {
+                    lockType = lock.getLockType();
+                }
                 ce.unlock(pk);
-                ce.lock(FxLockType.Loose, pk);
+                ce.lock(lockType, pk);
                 contentStorage.get(editorId).setContent(ce.load(pk));
             } catch (FxLockException e) {
-                new FxFacesMsgErr(e.getCause()).addToContext();
+                new FxFacesMsgErr("ContentEditor.err.lock", e.getMessage()).addToContext();
             } catch (FxApplicationException e) {
-                new FxFacesMsgErr(e.getCause()).addToContext();
+                new FxFacesMsgErr("ContentEditor.err.lock", e.getMessage()).addToContext();
             }
         }
-        enableEdit();
+    }
+
+    /**
+     * Action method: Override an existing lock while preserving the FxLockType for the current user
+     */
+    public void lockOverride() {
+        lockOverrideRef(false);
     }
 
     /**
@@ -661,24 +681,54 @@ public class FxContentEditorBean implements Serializable {
 
     /**
      * Action method: acquire a permanent lock on the current version of the content
+     * Converts a loose lock to a permanent lock
      */
     public void acquirePermLock() {
-        reloadContent(false);
+        reloadContent(true);
         final FxPK pk = contentStorage.get(editorId).getContent().getPk();
         ContentEngine ce = EJBLookup.getContentEngine();
         final FxContent content = contentStorage.get(editorId).getContent();
-        final FxLock lock = contentStorage.get(editorId).getContent().getLock();
         final UserTicket ticket = FxContext.getUserTicket();
-
-        if ((ticket.isGlobalSupervisor() || ticket.isMandatorSupervisor() || currentUserInContentACLList(ticket, content.getAclIds()))
-                && (lock.getLockType() != FxLockType.Permanent)) {
+        // only allow this if (supervisor OR (content unlocked AND user in ACL) OR (content = loosely locked && user in ACL)
+        if ((ticket.isGlobalSupervisor() || ticket.isMandatorSupervisor())
+                || ((!content.isLocked() || content.getLock().getLockType() == FxLockType.Loose)
+                && FxPermissionUtils.currentUserInContentACLList(ticket, content.getAclIds()))) {
             try {
-                contentStorage.get(editorId).getContent().updateLock(ce.lock(FxLockType.Permanent, pk));
+                if(content.isLocked()) {
+                    ce.unlock(pk);
+                }
+                content.updateLock(ce.lock(FxLockType.Permanent, pk));
             } catch (FxLockException e) {
-                new FxFacesMsgErr(e.getCause()).addToContext();
+                new FxFacesMsgErr("ContentEditor.err.lock", e.getMessage()).addToContext();
             }
         } else {
             new FxFacesMsgErr("ContentEditor.msg.no.permLock").addToContext();
+        }
+    }
+
+    /**
+     * Action method: acquire a loose lock on the current version of the content
+     * Converts a permanent lock to a loose lock
+     */
+    public void acquireLooseLock() {
+        reloadContent(true);
+        final FxPK pk = contentStorage.get(editorId).getContent().getPk();
+        ContentEngine ce = EJBLookup.getContentEngine();
+        final FxContent content = contentStorage.get(editorId).getContent();
+        final FxLock lock = content.getLock();
+        final UserTicket ticket = FxContext.getUserTicket();
+        // allow this if (supervisor OR user in ACL)
+        if (ticket.isGlobalSupervisor() || ticket.isMandatorSupervisor() || FxPermissionUtils.currentUserInContentACLList(ticket, content.getAclIds())) {
+            try {
+                if(content.isLocked()) {
+                    ce.unlock(pk);
+                }
+                content.updateLock(ce.lock(FxLockType.Loose, pk));
+            } catch (FxLockException e) {
+                new FxFacesMsgErr("ContentEditor.err.lock", e.getMessage()).addToContext();
+            }
+        } else {
+            new FxFacesMsgErr("ContentEditor.msg.no.looseLock").addToContext();
         }
     }
 
@@ -704,7 +754,7 @@ public class FxContentEditorBean implements Serializable {
                     else if (lock.getLockType() == FxLockType.Permanent)
                         contentStorage.get(editorId).getContent().updateLock(ce.extendLock(pk, 60 * 60 * 1000));
                 } catch (FxLockException e) {
-                    new FxFacesMsgErr(e.getCause()).addToContext();
+                    new FxFacesMsgErr("ContentEditor.err.lock", e.getMessage()).addToContext();
                 }
                 computeRemainingLockTime();
             } else {
@@ -756,24 +806,6 @@ public class FxContentEditorBean implements Serializable {
 
     public void setExpiresTime(String expiresTime) {
         this.expiresTime = expiresTime;
-    }
-
-    /**
-     * Checks if a UserTicket contains at least one of a given List of (content) ACLs
-     *
-     * @param ticket        the UserTicket
-     * @param contentACLIds a List of (content) ACL ids
-     * @return returns true if a match can be found
-     */
-    private static boolean currentUserInContentACLList(UserTicket ticket, List<Long> contentACLIds) {
-        for (Long id : contentACLIds) {
-            for (ACLAssignment a : ticket.getACLAssignments()) {
-                if (a.getAclId() == id)
-                    return true;
-            }
-        }
-
-        return false;
     }
 
     /**

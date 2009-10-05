@@ -1017,6 +1017,13 @@ public class BeContentEditorBean implements ActionBean, Serializable {
     }
 
     /**
+     * Action method: acquire a loose lock on a content
+     */
+    public void acquireLooseLock() {
+        ((FxContentEditorBean) FxJsfUtils.getManagedBean("fxContentEditorBean")).acquireLooseLock();
+    }
+
+    /**
      * Action method: unlock a content
      */
     public void unLock() {

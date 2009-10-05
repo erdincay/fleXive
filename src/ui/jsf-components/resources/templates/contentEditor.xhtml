@@ -24,8 +24,10 @@
         disablePositionAssignment="#{disablePositionAssignment}" disableMessages="#{disableMessages}"
         reRender="#{reRender}" reset="#{reset}" askLockedMode="#{askLockedMode}"
         lockedContentOverride="#{lockedContentOverride}" cannotTakeOverPermLock="#{cannotTakeOverPermLock}"
-        askCreateNewVersion="#{askCreateNewVersion}" lockStatus="#{lockStatus}"
-        contentLocked="#{contentLocked}" looseLock="#{looseLock}" permLock="#{permLock}" takeOver="#{takeOver}">
+        askCreateNewVersion="#{askCreateNewVersion}" lockStatus="#{lockStatus}" lockStatusTooltip="#{lockStatusTooltip}"
+        contentLocked="#{contentLocked}" looseLock="#{looseLock}" permLock="#{permLock}" takeOver="#{takeOver}"
+        userMayTakeover="#{userMayTakeover}" userMayUnlock="#{userMayUnlock}" userMayLooseLock="#{userMayLooseLock}"
+        userMayPermLock="#{userMayPermLock}">
 
         <c:if test="#{not _ceContent.guiSettings.disableMessages and __ceError}">
                 <!-- error messages outside of container output panel
@@ -82,7 +84,8 @@
 
                 <ui:insert name="insertTop">
                     <ui:fragment rendered="#{not empty _ceContent.guiSettings.lockStatus and not _ceContent.new}">
-                        <h:outputText value="#{_ceContent.guiSettings.lockStatus}" style="font-weight:bold"/>
+                        <h:outputText value="#{fxMessageBean['ContentEditor.field.lockAdmin']}: #{_ceContent.guiSettings.lockStatus}"
+                                      title="#{_ceContent.guiSettings.lockStatusTooltip}"/>
                         <br/><br/>
                     </ui:fragment>
                 </ui:insert>
@@ -298,7 +301,7 @@
                                 </ui:insert>
                             </ui:fragment>
                         </ui:fragment>
-
+                        <!-- delete button -->
                         <ui:fragment rendered="#{_ceContent.content.permissions.mayDelete
                             and not _ceContent.guiSettings.disableDelete and empty _ceContent.guiSettings.openedReferenceId}">
                             <ui:insert name="deleteButton">
@@ -312,9 +315,34 @@
                                </a4j:commandButton>
                             </ui:insert>
                         </ui:fragment>
-
+                        <!-- take over lock button -->
+                        <ui:fragment rendered="#{_ceContent.guiSettings.userMayTakeover and not _ceContent.new}">
+                            <ui:insert name="takeoverButton">
+                                <a4j:commandButton id="#{editorId}_overrideButton" value="#{fxMessageBean['ContentEditor.button.lockOverride']}"
+                                                   title="#{fxMessageBean['ContentEditor.button.lockOverride.title']}"
+                                                   action="#{__ceBean.lockOverride}" reRender="#{__ce_reRender}"
+                                                   status="#{_ceContent.editorId}_status">
+                                    <f:setPropertyActionListener value="#{myContent}" target="#{srcEditor.wrappedContent}"/>
+                                    <!-- set properties for fxContentEditorBean -->
+                                    <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
+                                    <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
+                                </a4j:commandButton>
+                            </ui:insert>
+                        </ui:fragment>
+                        <!-- loose lock button -->
+                        <ui:fragment rendered="#{not _ceContent.guiSettings.looseLock and not _ceContent.new and _ceContent.guiSettings.userMayLooseLock}">
+                            <ui:insert name="looseLockButton">
+                                <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.acquireLooseLock']}"
+                                        title="#{fxMessageBean['ContentEditor.button.acquirePermLock.title']}"
+                                        action="#{__ceBean.acquireLooseLock}" reRender="#{__ce_reRender}"
+                                        status="#{_ceContent.editorId}_status">
+                                    <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
+                                    <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
+                                </a4j:commandButton>
+                            </ui:insert>
+                        </ui:fragment>
                         <!-- permanent lock button -->
-                        <ui:fragment rendered="#{not _ceContent.guiSettings.permLock and not _ceContent.guiSettings.looseLock and not _ceContent.new}">
+                        <ui:fragment rendered="#{not _ceContent.guiSettings.permLock and not _ceContent.new and _ceContent.guiSettings.userMayPermLock}">
                             <ui:insert name="permLockButton">
                                 <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.acquirePermLock']}"
                                         title="#{fxMessageBean['ContentEditor.button.acquirePermLock.title']}"
@@ -326,9 +354,9 @@
                             </ui:insert>
                         </ui:fragment>
                         <!-- unlock button -->
-                        <ui:fragment rendered="#{(_ceContent.guiSettings.looseLock and not _ceContent.guiSettings.editMode and not _ceContent.new)
-                                                or _ceContent.guiSettings.permLock}">
-                            <ui:insert name="unlockButton">
+                        <ui:fragment rendered="#{(_ceContent.guiSettings.looseLock and not _ceContent.guiSettings.editMode and not _ceContent.new
+                                                  and _ceContent.guiSettings.userMayUnlock) or _ceContent.guiSettings.permLock}">
+                        <ui:insert name="unlockButton">
                                 <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.unlock']}"
                                         title="#{fxMessageBean['ContentEditor.button.unlock.title']}"
                                         action="#{__ceBean.unLock}" reRender="#{__ce_reRender}"
@@ -380,14 +408,14 @@
                         <ui:insert name="editLockedContentButtons">
                             <br/><br/>
                             <c:if test="#{_ceContent.guiSettings.looseLock}">
-                                <h:outputText escape="false" value=" #{fxMessageBean['ContentEditor.msg.looseLock']} "/>
+                                <h:outputText escape="false" value=" #{fxMessageBean['ContentEditor.msg.looseLock.takeover']} "/>
                             </c:if>
                             <c:if test="#{_ceContent.guiSettings.permLock}">
-                                <h:outputText escape="false" value=" #{fxMessageBean['ContentEditor.msg.permLock']} "/>
+                                <h:outputText escape="false" value=" #{fxMessageBean['ContentEditor.msg.permLock.takeover']} "/>
                             </c:if>
                             <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.lockOverrideYes']}"
                                                title="#{fxMessageBean['ContentEditor.button.lockOverrideYes.title']}"
-                                               action="#{__ceBean.lockOverride}" reRender="#{__ce_reRender}"
+                                               action="#{__ceBean.lockOverrideAndEdit}" reRender="#{__ce_reRender}"
                                                status="#{_ceContent.editorId}_status">
                                 <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
                                 <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>

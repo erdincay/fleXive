@@ -518,10 +518,15 @@ public class FxWrappedContent implements Serializable {
         private boolean cannotTakeOverPermLock;
         private boolean askCreateNewVersion;
         private String lockStatus;
+        private String lockStatusTooltip;
         private boolean contentLocked;
         private boolean looseLock;
         private boolean permLock;
         private boolean takeOver;
+        private boolean userMayTakeover;
+        private boolean userMayUnlock;
+        private boolean userMayLooseLock;
+        private boolean userMayPermLock;
 
         public GuiSettings(boolean editMode, boolean disableAcl, boolean disableWorkflow,
                            boolean disableEdit, boolean disableDelete, boolean disableVersion,
@@ -530,7 +535,9 @@ public class FxWrappedContent implements Serializable {
                            boolean disablePositionAssignment, boolean disableMessages, String formPrefix,
                            String reRender, FxValueFormatter valueFormatter, boolean askLockedMode,
                            boolean lockedContentOverride, boolean cannotTakeOverPermLock, boolean askCreateNewVersion,
-                           String lockStatus, boolean contentLocked, boolean looseLock, boolean permLock, boolean takeOver) {
+                           String lockStatus, String lockStatusTooltip, boolean contentLocked, boolean looseLock,
+                           boolean permLock, boolean takeOver, boolean userMayTakeover, boolean userMayUnlock,
+                           boolean userMayLooseLock, boolean userMayPermLock) {
             this.editMode = editMode;
             this.disableAcl = disableAcl;
             this.disableWorkflow = disableWorkflow;
@@ -553,10 +560,15 @@ public class FxWrappedContent implements Serializable {
             this.cannotTakeOverPermLock = cannotTakeOverPermLock;
             this.askCreateNewVersion = askCreateNewVersion;
             this.lockStatus = lockStatus;
+            this.lockStatusTooltip = lockStatusTooltip;
             this.contentLocked = contentLocked;
             this.looseLock = looseLock;
             this.permLock = permLock;
             this.takeOver = takeOver;
+            this.userMayTakeover = userMayTakeover;
+            this.userMayUnlock = userMayUnlock;
+            this.userMayLooseLock = userMayLooseLock;
+            this.userMayPermLock = userMayPermLock;
         }
 
         public static GuiSettings createGuiSettingsForReference(GuiSettings guiSettings, boolean editMode) {
@@ -568,7 +580,9 @@ public class FxWrappedContent implements Serializable {
                     guiSettings.isDisableMessages(), guiSettings.formPrefix, guiSettings.reRender, guiSettings.valueFormatter,
                     guiSettings.isAskLockedMode(), guiSettings.isLockedContentOverride(),
                     guiSettings.isCannotTakeOverPermLock(), guiSettings.isAskCreateNewVersion(), guiSettings.getLockStatus(),
-                    guiSettings.isContentLocked(), guiSettings.isLooseLock(), guiSettings.isPermLock(), guiSettings.isTakeOver());
+                    guiSettings.getLockStatusTooltip(), guiSettings.isContentLocked(), guiSettings.isLooseLock(),
+                    guiSettings.isPermLock(), guiSettings.isTakeOver(), guiSettings.isUserMayTakeover(), guiSettings.isUserMayUnlock(),
+                    guiSettings.isUserMayLooseLock(), guiSettings.isUserMayPermLock());
         }
 
 
@@ -756,6 +770,14 @@ public class FxWrappedContent implements Serializable {
             this.lockStatus = lockStatus;
         }
 
+        public String getLockStatusTooltip() {
+            return lockStatusTooltip;
+        }
+
+        public void setLockStatusTooltip(String lockStatusTooltip) {
+            this.lockStatusTooltip = lockStatusTooltip;
+        }
+
         public boolean isContentLocked() {
             return contentLocked;
         }
@@ -786,6 +808,38 @@ public class FxWrappedContent implements Serializable {
 
         public void setTakeOver(boolean takeOver) {
             this.takeOver = takeOver;
+        }
+
+        public boolean isUserMayTakeover() {
+            return userMayTakeover;
+        }
+
+        public void setUserMayTakeover(boolean userMayTakeover) {
+            this.userMayTakeover = userMayTakeover;
+        }
+
+        public boolean isUserMayUnlock() {
+            return userMayUnlock;
+        }
+
+        public void setUserMayUnlock(boolean userMayUnlock) {
+            this.userMayUnlock = userMayUnlock;
+        }
+
+        public boolean isUserMayLooseLock() {
+            return userMayLooseLock;
+        }
+
+        public void setUserMayLooseLock(boolean userMayLooseLock) {
+            this.userMayLooseLock = userMayLooseLock;
+        }
+
+        public boolean isUserMayPermLock() {
+            return userMayPermLock;
+        }
+
+        public void setUserMayPermLock(boolean userMayPermLock) {
+            this.userMayPermLock = userMayPermLock;
         }
     }
 

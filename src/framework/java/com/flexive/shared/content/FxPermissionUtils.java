@@ -534,4 +534,21 @@ public class FxPermissionUtils {
         if (!m.isActive())
             throw new FxNotFoundException("ex.structure.mandator.notFound.notActive", m.getName(), id);
     }
+
+    /**
+     * Checks if a UserTicket contains at least one of a given List of (content) ACLs
+     *
+     * @param ticket        the UserTicket
+     * @param contentACLIds a List of (content) ACL ids
+     * @return returns true if a match can be found
+     */
+    public static boolean currentUserInContentACLList(UserTicket ticket, List<Long> contentACLIds) {
+        for (Long id : contentACLIds) {
+            for (ACLAssignment a : ticket.getACLAssignments()) {
+                if (a.getAclId() == id)
+                    return true;
+            }
+        }
+        return false;
+    }
 }

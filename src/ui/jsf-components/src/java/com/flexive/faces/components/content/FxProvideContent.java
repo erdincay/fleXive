@@ -43,6 +43,7 @@ import com.flexive.shared.FxLock;
 import com.flexive.shared.FxLockType;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxPK;
+import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxLockException;
 import com.flexive.shared.interfaces.ContentEngine;
@@ -172,18 +173,23 @@ public class FxProvideContent extends TagHandler {
         final Boolean cannotTakeOverPermLock = isAttributeSet(ctx, "cannotTakeOverPermLock") && Boolean.valueOf(getAttribute("cannotTakeOverPermLock").getValue(ctx));
         final Boolean askCreateNewVersion = isAttributeSet(ctx, "askCreateNewVersion") && Boolean.valueOf(getAttribute("askCreateNewVersion").getValue(ctx));
         final String lockStatus = isAttributeSet(ctx, "lockStatus") ? getAttribute("lockStatus").getValue(ctx) : null;
+        final String lockStatusTooltip = isAttributeSet(ctx, "lockStatusTooltip") ? getAttribute("lockStatusTooltip").getValue(ctx) : null;
         final Boolean contentLocked = isAttributeSet(ctx, "contentLocked") && Boolean.valueOf(getAttribute("contentLocked").getValue(ctx));
         final Boolean looseLock = isAttributeSet(ctx, "looseLock") && Boolean.valueOf(getAttribute("looseLock").getValue(ctx));
         final Boolean permLock = isAttributeSet(ctx, "permLock") && Boolean.valueOf(getAttribute("permLock").getValue(ctx));
         final Boolean takeOver = isAttributeSet(ctx, "takeOver") && Boolean.valueOf(getAttribute("takeOver").getValue(ctx));
+        final Boolean userMayTakeover = isAttributeSet(ctx, "userMayTakeover") && Boolean.valueOf(getAttribute("userMayTakeover").getValue(ctx));
+        final Boolean userMayUnlock = isAttributeSet(ctx, "userMayUnlock") && Boolean.valueOf(getAttribute("userMayUnlock").getValue(ctx));
+        final Boolean userMayLooseLock = isAttributeSet(ctx, "userMayLooseLock") && Boolean.valueOf(getAttribute("userMayLooseLock").getValue(ctx));
+        final Boolean userMayPermLock = isAttributeSet(ctx, "userMayPermLock") && Boolean.valueOf(getAttribute("userMayPermLock").getValue(ctx));
 
         //encapsulate gui-relevant attributes in wrapper object
         FxWrappedContent.GuiSettings guiSettings = new FxWrappedContent.GuiSettings(editMode, disableAcl,
                 disableWorkflow, disableEdit, disableDelete, disableVersion, disableCompact, disableSave,
                 disableCancel, disableButtons, disableAddAssignment, disableRemoveAssignment,
                 disablePositionAssignment, disableMessages, formPrefix, reRender, valueFormatter, askLockedMode,
-                lockedContentOverride, cannotTakeOverPermLock, askCreateNewVersion, lockStatus, contentLocked, looseLock,
-                permLock, takeOver);
+                lockedContentOverride, cannotTakeOverPermLock, askCreateNewVersion, lockStatus, lockStatusTooltip,
+                contentLocked, looseLock, permLock, takeOver, userMayTakeover, userMayUnlock, userMayLooseLock, userMayPermLock);
 
         if (contentEditor.getContentStorage() == null) {
             contentEditor.setContentStorage(new HashMap<String, FxWrappedContent>(3));
@@ -333,18 +339,19 @@ public class FxProvideContent extends TagHandler {
 
         if (lock.getLockType() == FxLockType.Permanent) {
             if (ticket.getUserId() == lock.getUserId()) {
-                setLockStatus(wc, false, true, true, false, "ContentEditor.msg.permLockYou");
+                setLockStatus(wc, false, true, true, false, "ContentEditor.msg.permLock",
+                        "ContentEditor.msg.permLock.tooltip", "ContentEditor.msg.lockYou.tooltip");
             } else {
-                setLockStatus(wc, false, true, true, false, "ContentEditor.msg.permLockOther");
+                setLockStatus(wc, false, true, true, false, "ContentEditor.msg.permLock", "ContentEditor.msg.permLock.tooltip", "ContentEditor.msg.lockOther.tooltip");
             }
         } else if (lock.getLockType() == FxLockType.Loose) {
             if (ticket.getUserId() == lock.getUserId() && !wc.getGuiSettings().isTakeOver()) {
-                setLockStatus(wc, true, false, true, false, "ContentEditor.msg.looseLockYou");
+                setLockStatus(wc, true, false, true, false, "ContentEditor.msg.looseLock", "ContentEditor.msg.looseLock.tooltip", "ContentEditor.msg.lockYou.tooltip");
             } else {
-                setLockStatus(wc, true, false, true, false, "ContentEditor.msg.looseLockOther");
+                setLockStatus(wc, true, false, true, false, "ContentEditor.msg.looseLock", "ContentEditor.msg.looseLock.tooltip", "ContentEditor.msg.lockOther.tooltip");
             }
         } else { // None
-            setLockStatus(wc, false, false, false, false, "");
+            setLockStatus(wc, false, false, false, false, "ContentEditor.msg.noLock", "ContentEditor.msg.noLock.tooltip",  "");
         }
     }
 
@@ -354,19 +361,62 @@ public class FxProvideContent extends TagHandler {
      * @param permLock true if the content is permanently locked
      * @param contentLocked true if the content is locked (perm or loose)
      * @param takeOver true if the content was taken over by another user
-     * @param messageKey the message key for the lockStatus message
+     * @param messageKeyLS the message key for the lockStatus message
+     * @param messageKeyLST the message key for the lockStatusTooltip message
+     * @param messageKeyLOWNER the message key for the lock owner ("you" or "another user")
      */
     private static void setLockStatus(FxWrappedContent wc, boolean looseLock, boolean permLock, boolean contentLocked,
-                                      boolean takeOver, String messageKey) {
+                                      boolean takeOver, String messageKeyLS, String messageKeyLST,
+                                      String messageKeyLOWNER) {
         wc.getGuiSettings().setLooseLock(looseLock);
         wc.getGuiSettings().setPermLock(permLock);
         wc.getGuiSettings().setContentLocked(contentLocked);
         wc.getGuiSettings().setTakeOver(takeOver);
 
-        if (StringUtils.isBlank(messageKey)) {
+        if (StringUtils.isBlank(messageKeyLS)) {
             wc.getGuiSettings().setLockStatus("");
         } else {
-            wc.getGuiSettings().setLockStatus(MessageBean.getInstance().getMessage(messageKey));
+            wc.getGuiSettings().setLockStatus(MessageBean.getInstance().getMessage(messageKeyLS));
+        }
+
+        if (StringUtils.isBlank(messageKeyLST)) {
+            wc.getGuiSettings().setLockStatusTooltip("");
+        } else {
+            String msg = MessageBean.getInstance().getMessage(messageKeyLST);
+            if(!StringUtils.isBlank(messageKeyLOWNER)) {
+                msg = msg + ". " + MessageBean.getInstance().getMessage(messageKeyLOWNER);
+            }
+            wc.getGuiSettings().setLockStatusTooltip(msg);
+        }
+
+        // set the userMayTakeover flag & button display privileges (may unlock, loose lock, permlock)
+        final UserTicket ticket = FxContext.getUserTicket();
+        final FxLock lock = wc.getContent().getLock();
+
+        if ((ticket.isGlobalSupervisor() || ticket.isMandatorSupervisor()) && ticket.getUserId() != lock.getUserId()
+                && lock.getLockType() != FxLockType.None) {
+            wc.getGuiSettings().setUserMayTakeover(true);
+            wc.getGuiSettings().setUserMayUnlock(true);
+            wc.getGuiSettings().setUserMayLooseLock(true);
+            wc.getGuiSettings().setUserMayPermLock(true);
+            // "normal" user can only override loose locks and if in the same acl
+        } else if (FxPermissionUtils.currentUserInContentACLList(ticket, wc.getContent().getAclIds())
+                && lock.getLockType() == FxLockType.Loose && ticket.getUserId() != lock.getUserId()) {
+            wc.getGuiSettings().setUserMayTakeover(true);
+            wc.getGuiSettings().setUserMayUnlock(true);
+            wc.getGuiSettings().setUserMayLooseLock(false);
+            wc.getGuiSettings().setUserMayPermLock(true);
+        } else if(FxPermissionUtils.currentUserInContentACLList(ticket, wc.getContent().getAclIds())
+            && lock.getLockType() == FxLockType.Permanent && ticket.getUserId() != lock.getUserId()) {
+            wc.getGuiSettings().setUserMayTakeover(false);
+            wc.getGuiSettings().setUserMayUnlock(false);
+            wc.getGuiSettings().setUserMayLooseLock(false);
+            wc.getGuiSettings().setUserMayPermLock(false);
+        } else { // content is not locked
+            wc.getGuiSettings().setUserMayTakeover(false);
+            wc.getGuiSettings().setUserMayUnlock(true);
+            wc.getGuiSettings().setUserMayLooseLock(true);
+            wc.getGuiSettings().setUserMayPermLock(true);
         }
     }
 }
