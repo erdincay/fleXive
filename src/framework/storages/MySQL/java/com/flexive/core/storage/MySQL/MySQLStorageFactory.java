@@ -210,6 +210,13 @@ public class MySQLStorageFactory implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    public boolean escapeSchema() {
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public Connection getConnection(String database, String schema, String jdbcURL, String jdbcURLParameters,
                                     String user, String password, boolean createDB, boolean createSchema,
                                     boolean dropIfExist) throws Exception {
@@ -246,9 +253,6 @@ public class MySQLStorageFactory implements DBStorage {
                 cnt += stmt.executeUpdate("DROP DATABASE IF EXISTS " + db);
             if (createDB)
                 cnt += stmt.executeUpdate("CREATE DATABASE IF NOT EXISTS " + db);
-            //set db as the default schema
-            if (stmt.execute("USE " + db))
-                cnt++;
             if (cnt > 0)
                 System.out.println("Executed " + cnt + " statements");
         } catch (SQLException e) {

@@ -66,7 +66,7 @@ import java.util.Map;
  */
 public class PostgresStorageFactory implements DBStorage {
     private static final Log LOG = LogFactory.getLog(PostgresStorageFactory.class);
-    private final static String VENDOR = "Postgres";
+    private final static String VENDOR = "PostgreSQL";
 
     /**
      * {@inheritDoc}
@@ -210,6 +210,13 @@ public class PostgresStorageFactory implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    public boolean escapeSchema() {
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public Connection getConnection(String database, String schema, String jdbcURL, String jdbcURLParameters,
                                     String user, String password, boolean createDB, boolean createSchema,
                                     boolean dropIfExist) throws Exception {
@@ -238,8 +245,18 @@ public class PostgresStorageFactory implements DBStorage {
             int cnt = 0;
             if (dropIfExist)
                 cnt += stmt.executeUpdate("DROP DATABASE IF EXISTS " + database);
-            if (createDB)
-                cnt += stmt.executeUpdate("CREATE DATABASE " + database);
+            if (createDB) {
+                //first check if it already exists
+                ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM PG_CATALOG.PG_DATABASE WHERE DATNAME='" + database + "'");
+                boolean exists = rs != null && rs.next() && rs.getInt(1) > 0;
+                if (rs != null)
+                    rs.close();
+                if (!exists) {
+                    cnt += stmt.executeUpdate("CREATE DATABASE " + database);
+                    System.out.println("Created database [" + database + "].");
+                } else
+                    System.out.println("Database [" + database + "] already exists. Skipping create.");
+            }
 
             if (!jdbcURL.endsWith("/" + database)) {
                 //(re)connect to that database as there seems to be no way to change the database from a sql statement
@@ -278,11 +295,11 @@ public class PostgresStorageFactory implements DBStorage {
         schema = schema.trim();
         try {
             if (dropIfExist) {
-                System.out.println("creating schema "+schema);
+                System.out.println("(Re)creating schema " + schema);
                 cnt += stmt.executeUpdate("DROP SCHEMA IF EXISTS \"" + schema + "\" CASCADE");
-                cnt += stmt.executeUpdate("CREATE SCHEMA \"" + schema+"\"");
+                cnt += stmt.executeUpdate("CREATE SCHEMA \"" + schema + "\"");
             }
-            cnt += stmt.executeUpdate("SET search_path TO \"" + schema+"\"");
+            cnt += stmt.executeUpdate("SET search_path TO \"" + schema + "\"");
 
             for (String script : s) {
                 if (script.startsWith("config/")) {
@@ -317,7 +334,7 @@ public class PostgresStorageFactory implements DBStorage {
         schema = schema.trim();
         try {
             if (dropIfExist) {
-                System.out.println("creating schema "+schema);
+                System.out.println("(Re)creating schema " + schema);
                 cnt += stmt.executeUpdate("DROP SCHEMA IF EXISTS " + schema + " CASCADE");
                 cnt += stmt.executeUpdate("CREATE SCHEMA " + schema);
             }

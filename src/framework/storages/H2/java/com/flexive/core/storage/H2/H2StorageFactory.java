@@ -43,21 +43,22 @@ import com.flexive.core.search.cmis.impl.sql.H2.H2Dialect;
 import com.flexive.core.search.cmis.impl.sql.SqlDialect;
 import com.flexive.core.storage.*;
 import com.flexive.core.storage.genericSQL.GenericLockStorage;
+import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.exceptions.FxSqlSearchException;
 import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.structure.TypeStorageMode;
-import com.flexive.shared.FxSharedUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.lang.reflect.Method;
 import java.sql.*;
-import java.util.Map;
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Factory for the MySQL storage
@@ -204,11 +205,17 @@ public class H2StorageFactory implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    public boolean escapeSchema() {
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public Connection getConnection(String database, String schema, String jdbcURL, String jdbcURLParameters,
                                     String user, String password, boolean createDB, boolean createSchema,
                                     boolean dropIfExist) throws Exception {
-        Connection con = null;
-        Statement stmt = null;
+        Connection con;
         try {
             if (StringUtils.isBlank(database))
                 throw new IllegalArgumentException("No database name (path) specified!");
@@ -218,7 +225,6 @@ public class H2StorageFactory implements DBStorage {
             if (!StringUtils.isBlank(jdbcURLParameters))
                 url = url + jdbcURLParameters.trim();
             schema = schema.trim();
-//            url = url + ";SCHEMA=" + schema;
             System.out.println("Using schema [" + schema + "], database [" + database + "] for " + VENDOR);
 
             if (StringUtils.isBlank(url))
@@ -231,25 +237,28 @@ public class H2StorageFactory implements DBStorage {
                 System.err.println("H2 JDBC Driver not found in classpath!");
                 return null;
             }
+            if (dropIfExist) {
+                Method m = Class.forName("org.h2.tools.DeleteDbFiles").getMethod("execute", String.class, String.class, boolean.class);
+                String path;
+                String db;
+                if (database.lastIndexOf('/') != -1) {
+                    path = database.substring(0, database.lastIndexOf('/'));
+                    db = database.substring(database.lastIndexOf('/') + 1);
+                } else if (database.lastIndexOf('\\') != -1) {
+                    path = database.substring(0, database.lastIndexOf('\\'));
+                    db = database.substring(database.lastIndexOf('\\') + 1);
+                } else {
+                    System.err.println("Could not extract path and database name from [" + database + "]");
+                    return null;
+                }
+                System.out.println("Dropping Database ... Path: [" + path + "], DB: [" + db + "]");
+                m.invoke(null, path, db, false);
+            }
             System.out.println("Connecting using JDBC URL " + url);
             con = DriverManager.getConnection(url, user, password);
-            stmt = con.createStatement();
-            int cnt = 0;
-            if (dropIfExist)
-                cnt += stmt.executeUpdate("DROP SCHEMA IF EXISTS " + schema);
-            if (createDB)
-                cnt += stmt.executeUpdate("CREATE SCHEMA IF NOT EXISTS " + schema);
-            //set as the default schema
-            if (stmt.execute("SET SCHEMA " + schema))
-                cnt++;
-            if (cnt > 0)
-                System.out.println("Executed " + cnt + " statements");
         } catch (SQLException e) {
             e.printStackTrace();
             return null;
-        } finally {
-            if (stmt != null)
-                stmt.close();
         }
         return con;
     }
@@ -270,7 +279,7 @@ public class H2StorageFactory implements DBStorage {
         schema = schema.trim();
         try {
             if (dropIfExist) {
-                System.out.println("Resetting configuration schema "+schema);
+                System.out.println("Resetting configuration schema " + schema);
                 cnt += stmt.executeUpdate("DROP SCHEMA IF EXISTS " + schema);
                 cnt += stmt.executeUpdate("CREATE SCHEMA IF NOT EXISTS " + schema);
             }
@@ -309,7 +318,7 @@ public class H2StorageFactory implements DBStorage {
         schema = schema.trim();
         try {
             if (dropIfExist) {
-                System.out.println("Resetting division schema "+schema);
+                System.out.println("Resetting division schema " + schema);
                 cnt += stmt.executeUpdate("DROP SCHEMA IF EXISTS " + schema);
                 cnt += stmt.executeUpdate("CREATE SCHEMA IF NOT EXISTS " + schema);
             }

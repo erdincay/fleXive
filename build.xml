@@ -562,7 +562,7 @@
         </jar>
     </target>
 
-    <target name="jar.storages" depends="jar.ejb,jar.dbsetup">
+    <target name="jar.storages" depends="jar.ejb,jar.dbsetup,jar.h2.storedprocedures">
         <buildStorage vendor="MySQL"
                       srcdir="${flexive.base.framework.dir}/storages/MySQL"
                       builddir="${build.storages.dir}/MySQL"
@@ -678,7 +678,7 @@
                 <fileset dir="${flexive.build.framework.jar.dir}" includes="*.jar"/>
                 <fileset dir="${flexive.lib.dir}" includes="*.jar"/>
             </classpath>
-            <arg line="${database.vendor} ${database.database} ${schema.config} ${schema.division} true true ${database.username} ${database.password} ${database.url.base} ${database.url.parameters}"/>
+            <arg line="${database.vendor} ${database.database} ${schema.config} ${schema.division} true true true ${database.username} ${database.password} ${database.url.base} ${database.url.parameters}"/>
         </java>
     </target>
 
@@ -691,7 +691,7 @@
                 <fileset dir="${flexive.build.framework.jar.dir}" includes="*.jar"/>
                 <fileset dir="${flexive.lib.dir}" includes="*.jar"/>
             </classpath>
-            <arg line="${database.vendor} ${database.database} ${schema.config} flexiveTest false true ${database.username} ${database.password} ${database.url.base} ${database.url.parameters}"/>
+            <arg line="${database.vendor} ${database.database} ${schema.config} flexiveTest false false true ${database.username} ${database.password} ${database.url.base} ${database.url.parameters}"/>
         </java>
     </target>
 
@@ -765,6 +765,7 @@
         <copy file="${flexive.build.framework.jar.dir}/flexive-ejb.jar" tofile="${flexive.dist.lib.dir}/flexive-ejb.jar"/>
         <copy file="${flexive.build.framework.jar.dir}/flexive-storage-H2.jar" tofile="${flexive.dist.lib.dir}/flexive-storage-H2.jar"/>
         <copy file="${flexive.build.framework.jar.dir}/flexive-storage-MySQL.jar" tofile="${flexive.dist.lib.dir}/flexive-storage-MySQL.jar"/>
+        <copy file="${flexive.build.framework.jar.dir}/flexive-storage-Postgres.jar" tofile="${flexive.dist.lib.dir}/flexive-storage-Postgres.jar"/>
         <copy file="${flexive.build.framework.jar.dir}/flexive-dbsetup.jar" tofile="${flexive.dist.lib.dir}/flexive-dbsetup.jar"/>
         <copy file="${flexive.lib.dir}/flexive-flatstorage.jar" tofile="${flexive.dist.lib.dir}/flexive-flatstorage.jar"/>
 

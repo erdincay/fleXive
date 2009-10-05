@@ -115,6 +115,26 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
 
         static volatile List<FxScriptRunInfo> runOnceInfos = null;
 
+        static Script checkoutScript(long scriptId, FxScriptInfo si) throws FxInvalidParameterException {
+            Script script = LocalScriptingCache.groovyScriptCache.get(scriptId);
+            if (script == null) {
+                try {
+                    GroovyShell shell = new GroovyShell();
+                    script = shell.parse(CacheAdmin.getEnvironment().getScript(scriptId).getCode());
+                } catch (CompilationFailedException e) {
+                    throw new FxInvalidParameterException(si.getName(), "ex.general.scripting.compileFailed", si.getName(), e.getMessage());
+                } catch (Throwable t) {
+                    throw new FxInvalidParameterException(si.getName(), "ex.general.scripting.exception", si.getName(), t.getMessage());
+                }
+                LocalScriptingCache.groovyScriptCache.putIfAbsent(scriptId, script);
+            }
+            return null;
+        }
+
+        static void checkinScript(long scriptId, Script script) {
+
+        }
+
         /**
          * Execute a script.
          * This method does not check the calling user's role nor does it cache scripts.

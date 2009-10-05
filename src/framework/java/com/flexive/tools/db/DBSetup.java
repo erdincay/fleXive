@@ -44,29 +44,30 @@ import java.sql.SQLException;
  * <needed jdbc drivers>, commons-lang-2.4.jar, commons-logging.jar, flexive-storage-*.jar, flexive-shared.jar, flexive-ejb.jar
  * <p/>
  * Example commandline for MySQL (execute in build/framework/jar):
- * java -classpath ../../../lib/mysql-connector-java-5.0.8-bin.jar:../../lib/commons-lang-2.4.jar:../../lib/commons-logging.jar:flexive-dbsetup.jar com.flexive.tools.db.DBSetup MySQL fxConf fxConf fxDiv true true root a jdbc:mysql://127.0.0.1:3306/ ?useUnicode=true\&characterEncoding=UTF-8
+ * java -classpath ../../../lib/mysql-connector-java-5.0.8-bin.jar:../../lib/commons-lang-2.4.jar:../../lib/commons-logging.jar:flexive-dbsetup.jar com.flexive.tools.db.DBSetup MySQL fxConf fxConf fxDiv true true true root a jdbc:mysql://127.0.0.1:3306/ ?useUnicode=true\&characterEncoding=UTF-8
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public class DBSetup {
 
     public static void main(String[] args) {
-        if (!(args.length == 9 || args.length == 10)) {
-            System.err.println("Usage: " + DBSetup.class.getCanonicalName() + " vendor database schemaConfig schemaDivision createConfig createDivision user password URL [URLParameter]");
+        if (!(args.length == 10 || args.length == 11)) {
+            System.err.println("Usage: " + DBSetup.class.getCanonicalName() + " vendor database schemaConfig schemaDivision recreateDB createConfig createDivision user password URL [URLParameter]");
             return;
         }
         final String vendor = args[0];
         final String db = args[1];
         final String schemaConfig = args[2];
         final String schemaDivision = args[3];
-        final boolean createConfig = Boolean.valueOf(args[4]);
-        final boolean createDivision = Boolean.valueOf(args[5]);
-        final String user = args[6];
-        String pwd = args[7];
+        final boolean recreateDB = Boolean.valueOf(args[4]);
+        final boolean createConfig = Boolean.valueOf(args[5]);
+        final boolean createDivision = Boolean.valueOf(args[6]);
+        final String user = args[7];
+        String pwd = args[8];
         if ("()".equals(pwd)) //marker for empty password
             pwd = "";
-        final String jdbcURL = args[8];
-        final String jdbcParams = (args.length == 9 ? null : args[9]);
+        final String jdbcURL = args[9];
+        final String jdbcParams = (args.length == 10 ? null : args[10]);
         System.out.println("Setting up database for vendor: " + vendor + " (config:" + schemaConfig + ",division:" + schemaDivision + ")");
         DBStorage storage = StorageManager.getStorageImpl(args[0]);
         if (storage == null) {
@@ -78,7 +79,7 @@ public class DBSetup {
         try {
             if (createConfig) {
                 try {
-                    con = storage.getConnection(db, schemaConfig, jdbcURL, jdbcParams, user, pwd, createConfig, createConfig, true);
+                    con = storage.getConnection(db, schemaConfig, jdbcURL, jdbcParams, user, pwd, createConfig, createConfig, recreateDB);
                     storage.initConfiguration(con, schemaConfig, true);
                 } catch (Exception e) {
                     System.err.println("Error setting up configuration: " + e.getMessage());
@@ -88,7 +89,7 @@ public class DBSetup {
             if (createDivision) {
                 try {
                     if (con == null)
-                        con = storage.getConnection(db, schemaDivision, jdbcURL, jdbcParams, user, pwd, createDivision, createDivision, true);
+                        con = storage.getConnection(db, schemaDivision, jdbcURL, jdbcParams, user, pwd, createDivision, createDivision, recreateDB);
                     storage.initDivision(con, schemaDivision, true);
                 } catch (Exception e) {
                     System.err.println("Error setting up division: " + e.getMessage());

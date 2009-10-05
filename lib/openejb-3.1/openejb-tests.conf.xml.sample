@@ -28,6 +28,21 @@
         Password
     </Resource>
     -->
+    <!-- Postgres settings -->
+    <!--
+    <Resource id="jdbc/flexiveConfiguration" type="DataSource">
+        JdbcDriver org.postgresql.Driver
+        JdbcUrl jdbc:postgresql://localhost:5432/flexive?schema=flexiveConfiguration
+        UserName postgres
+        Password a
+    </Resource>
+    <Resource id="jdbc/flexiveTest" type="DataSource">
+        JdbcDriver org.postgresql.Driver
+        JdbcUrl jdbc:postgresql://localhost:5432/flexive?schema=flexiveTest
+        UserName postgres
+        Password a
+    </Resource>
+    -->
     <SecurityService id="Default Security Service"/>
     <Deployments jar="../../build/framework/jar/flexive-ejb.jar"/>
     <!--TransactionService id="Default Transaction Manager"/-->

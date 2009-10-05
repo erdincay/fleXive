@@ -31,6 +31,8 @@ you must shutdown flexive before the update and then restart flexive.
 
 [fleXive] is using ${database.vendor} database settings... (this can be changed in database.properties)            
         </echo>
+        <input taskname="flexive" addproperty="database.dropdb" defaultvalue="false"
+               message="Do you want to drop the database if it exists [true|false]:"/>
         <input taskname="flexive" addproperty="schema.division" defaultvalue="flexive"
                message="Please enter the database schema you want to create or reset:"/>
         <java fork="true" classname="com.flexive.tools.db.DBSetup" failonerror="true">
@@ -38,7 +40,7 @@ you must shutdown flexive before the update and then restart flexive.
                 <fileset dir="${dist.lib.dir}" includes="*.jar"/>
                 <fileset dir="${dist.extlib.dir}" includes="*.jar"/>
             </classpath>
-            <arg line="${database.vendor} ${database.database} ${database.schema.config} ${schema.division} false true ${database.username} ${database.password} ${database.url.base} ${database.url.parameters}"/>
+            <arg line="${database.vendor} ${database.database} ${database.schema.config} ${schema.division} ${database.dropdb} false true ${database.username} ${database.password} ${database.url.base} ${database.url.parameters}"/>
         </java>
 
     </target>
@@ -46,12 +48,14 @@ you must shutdown flexive before the update and then restart flexive.
     <target name="db.config.create"
             description="(Re-)Initialize the global division configuration database. The database connection properties are retrieved from database.properties."
             depends="db.prepare">
+        <input taskname="flexive" addproperty="database.dropdb" defaultvalue="false"
+               message="Do you want to drop the database if it exists [true|false]:"/>
         <java fork="true" classname="com.flexive.tools.db.DBSetup" failonerror="true">
             <classpath>
                 <fileset dir="${dist.lib.dir}" includes="*.jar"/>
                 <fileset dir="${dist.extlib.dir}" includes="*.jar"/>
             </classpath>
-            <arg line="${database.vendor} ${database.database} ${database.schema.config} ${database.schema.division} true false ${database.username} ${database.password} ${database.url.base} ${database.url.parameters}"/>
+            <arg line="${database.vendor} ${database.database} ${database.schema.config} ${database.schema.division} ${database.dropdb} true false ${database.username} ${database.password} ${database.url.base} ${database.url.parameters}"/>
         </java>
     </target>
 

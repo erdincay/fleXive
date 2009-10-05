@@ -189,6 +189,13 @@ public interface DBStorage {
     boolean isUniqueConstraintViolation(Exception exc);
 
     /**
+     * When the database schema is used in queries, do we have to escape it? (eg postgres requires this)
+     *
+     * @return database schema needs to be escaped
+     */
+    boolean escapeSchema();
+
+    /**
      * Get a connection to the database using provided parameters and (re)create the database and/or schema
      *
      * @param database          name of the database

@@ -142,7 +142,7 @@ public final class DatabaseConst {
     /**
      * Global configuration table
      */
-    public static final String TBL_GLOBAL_CONFIG = getConfigSchema() + "FXS_CONFIGURATION";
+    public static final String TBL_GLOBAL_CONFIG = "FXS_CONFIGURATION";
     /**
      * User configuration table
      */
@@ -284,8 +284,8 @@ public final class DatabaseConst {
             else {
                 System.out.println("[Database] ConfigSchema set to [" + configSchema + "]");
             }
-            if (!configSchema.endsWith("."))
-                configSchema += ".";
+            if (configSchema.endsWith(".")) //remove trailing "."
+                configSchema = configSchema.substring(0, configSchema.length() - 1);
             if (".".equals(configSchema)) configSchema = "";
             return configSchema;
         }

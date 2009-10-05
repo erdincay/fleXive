@@ -32,13 +32,18 @@
 package com.flexive.ejb.beans.configuration;
 
 import com.flexive.core.Database;
+import com.flexive.core.DatabaseConst;
 import static com.flexive.core.DatabaseConst.TBL_GLOBAL_CONFIG;
+import com.flexive.core.storage.StorageManager;
 import com.flexive.ejb.mbeans.FxCache;
-import com.flexive.shared.*;
+import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.FxContext;
+import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.SimpleCacheStats;
 import com.flexive.shared.cache.FxCacheException;
 import com.flexive.shared.configuration.DivisionData;
-import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.configuration.ParameterScope;
+import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxLoadException;
 import com.flexive.shared.exceptions.FxNoAccessException;
@@ -154,11 +159,27 @@ public class GlobalConfigurationEngineBean extends GenericConfigurationImpl impl
     }
 
     /**
+     * Get the global configuration table name including the correct escaped schema
+     *
+     * @param con an open and valid connection to determine the correct storage vendor
+     * @return global configuration table name including the correct escaped schema
+     */
+    private String getConfigurationTable(Connection con) {
+        try {
+            if (StorageManager.getStorageImpl(con.getMetaData().getDatabaseProductName()).escapeSchema())
+                return "\"" + DatabaseConst.getConfigSchema() + "\"." + TBL_GLOBAL_CONFIG;
+        } catch (SQLException e) {
+            LOG.warn(e);
+        }
+        return DatabaseConst.getConfigSchema() + "." + TBL_GLOBAL_CONFIG;
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
     protected PreparedStatement getSelectStatement(Connection conn, String path, String key) throws SQLException {
-        String sql = "SELECT cvalue FROM " + TBL_GLOBAL_CONFIG + " WHERE cpath=? and ckey=?";
+        String sql = "SELECT cvalue FROM " + getConfigurationTable(conn) + " WHERE cpath=? and ckey=?";
         PreparedStatement stmt = conn.prepareStatement(sql);
         stmt.setString(1, path);
         stmt.setString(2, key);
@@ -170,7 +191,7 @@ public class GlobalConfigurationEngineBean extends GenericConfigurationImpl impl
      */
     @Override
     protected PreparedStatement getSelectStatement(Connection conn, String path) throws SQLException {
-        String sql = "SELECT ckey, cvalue FROM " + TBL_GLOBAL_CONFIG + " WHERE cpath=?";
+        String sql = "SELECT ckey, cvalue FROM " + getConfigurationTable(conn) + " WHERE cpath=?";
         PreparedStatement stmt = conn.prepareStatement(sql);
         stmt.setString(1, path);
         return stmt;
@@ -191,7 +212,7 @@ public class GlobalConfigurationEngineBean extends GenericConfigurationImpl impl
             throw new FxNoAccessException("ex.configuration.update.perm.global");
         }
         // TODO: support className/getAll() in global configuration?
-        String sql = "UPDATE " + TBL_GLOBAL_CONFIG + " SET cvalue=? WHERE cpath=? AND ckey=?";
+        String sql = "UPDATE " + getConfigurationTable(conn) + " SET cvalue=? WHERE cpath=? AND ckey=?";
         PreparedStatement stmt = conn.prepareStatement(sql);
         stmt.setString(1, value);
         stmt.setString(2, path);
@@ -209,7 +230,7 @@ public class GlobalConfigurationEngineBean extends GenericConfigurationImpl impl
             throw new FxNoAccessException("ex.configuration.update.perm.global");
         }
         // TODO: support className/getAll() in global configuration?
-        String sql = "INSERT INTO " + TBL_GLOBAL_CONFIG + "(cpath, ckey, cvalue) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO " + getConfigurationTable(conn) + "(cpath, ckey, cvalue) VALUES (?, ?, ?)";
         PreparedStatement stmt = conn.prepareStatement(sql);
         stmt.setString(1, path);
         stmt.setString(2, key);
@@ -226,7 +247,7 @@ public class GlobalConfigurationEngineBean extends GenericConfigurationImpl impl
         if (!isAuthorized()) {
             throw new FxNoAccessException("ex.configuration.delete.perm.global");
         }
-        String sql = "DELETE FROM " + TBL_GLOBAL_CONFIG + " WHERE cpath=? "
+        String sql = "DELETE FROM " + getConfigurationTable(conn) + " WHERE cpath=? "
                 + (key != null ? " AND ckey=?" : "");
         PreparedStatement stmt = conn.prepareStatement(sql);
         stmt.setString(1, path);
@@ -282,7 +303,7 @@ public class GlobalConfigurationEngineBean extends GenericConfigurationImpl impl
     public DivisionData[] getDivisions() throws FxApplicationException {
         final long timestamp = getTimestamp();
         if (divisions.isEmpty() || divisionsTimestamp.get() < timestamp) {
-            synchronized(divisions) {
+            synchronized (divisions) {
                 if (divisions.isEmpty()) {
                     divisionsTimestamp.set(timestamp);
                     final int[] divisionIds = getDivisionIds();
@@ -451,10 +472,10 @@ public class GlobalConfigurationEngineBean extends GenericConfigurationImpl impl
         FxCacheMBean cache = CacheAdmin.getInstance();
         try {
             // clear local caches
-            synchronized(divisions) {
+            synchronized (divisions) {
                 divisions.clear();
             }
-            synchronized(domainCache) {
+            synchronized (domainCache) {
                 domainCache.clear();
             }
             // clear shared cache
@@ -549,7 +570,7 @@ public class GlobalConfigurationEngineBean extends GenericConfigurationImpl impl
     /**
      * Return the timestamp of the last modification on the division data table.
      *
-     * @return  the timestamp of the last modification on the division data table.
+     * @return the timestamp of the last modification on the division data table.
      */
     private long getTimestamp() {
         Long timestamp;
