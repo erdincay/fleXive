@@ -75,6 +75,7 @@ public class MySQLHierarchicalStorage extends GenericHierarchicalStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void lockTables(Connection con, long id, int version) throws FxRuntimeException {
         try {
             PreparedStatement ps = null;

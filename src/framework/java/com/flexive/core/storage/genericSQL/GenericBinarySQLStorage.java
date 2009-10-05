@@ -59,6 +59,7 @@ import static com.flexive.shared.value.BinaryDescriptor.SYS_UNKNOWN;
 import com.flexive.shared.value.FxBinary;
 import com.flexive.stream.ServerLocation;
 import org.apache.commons.lang.StringUtils;
+import static org.apache.commons.lang.StringUtils.defaultString;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -371,9 +372,9 @@ public class GenericBinarySQLStorage implements BinaryStorage {
             boolean isImage = binary.getMimeType().startsWith("image/");
             if (isImage) {
                 try {
-                    width = Integer.parseInt(FxXMLUtils.getElementData(binary.getMetadata(), "width"));
-                    height = Integer.parseInt(FxXMLUtils.getElementData(binary.getMetadata(), "height"));
-                    resolution = Double.parseDouble(FxXMLUtils.getElementData(binary.getMetadata(), "xResolution"));
+                    width = Integer.parseInt(defaultString(FxXMLUtils.getElementData(binary.getMetadata(), "width"), "0"));
+                    height = Integer.parseInt(defaultString(FxXMLUtils.getElementData(binary.getMetadata(), "height"), "0"));
+                    resolution = Double.parseDouble(defaultString(FxXMLUtils.getElementData(binary.getMetadata(), "xResolution"), "0"));
                 } catch (NumberFormatException e) {
                     //ignore
                     LOG.warn(e, e);

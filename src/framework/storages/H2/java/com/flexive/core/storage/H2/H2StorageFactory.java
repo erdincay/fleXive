@@ -205,6 +205,15 @@ public class H2StorageFactory implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    public boolean isDeadlock(Exception exc) {
+        final int sqlErr = Database.getSqlErrorCode(exc);
+        //see http://h2database.com/javadoc/org/h2/constant/ErrorCode.html
+        return sqlErr == 40001;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public boolean escapeSchema() {
         return false;
     }

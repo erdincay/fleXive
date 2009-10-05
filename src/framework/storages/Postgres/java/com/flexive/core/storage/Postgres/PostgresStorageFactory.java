@@ -210,6 +210,14 @@ public class PostgresStorageFactory implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    public boolean isDeadlock(Exception exc) {
+        // TODO
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public boolean escapeSchema() {
         return true;
     }
@@ -357,6 +365,5 @@ public class PostgresStorageFactory implements DBStorage {
             System.out.println("Executed " + cnt + " statements");
         return cnt > 0;
     }
-
 
 }

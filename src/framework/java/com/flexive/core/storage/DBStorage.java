@@ -189,6 +189,15 @@ public interface DBStorage {
     boolean isUniqueConstraintViolation(Exception exc);
 
     /**
+     * Returns true if the given SqlException indicates a deadlock.
+     *
+     * @param exc the exception
+     * @return  true if the given SqlException indicates a deadlock.
+     * @since 3.1
+     */
+    boolean isDeadlock(Exception exc);
+
+    /**
      * When the database schema is used in queries, do we have to escape it? (eg postgres requires this)
      *
      * @return database schema needs to be escaped

@@ -210,6 +210,15 @@ public class MySQLStorageFactory implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    public boolean isDeadlock(Exception exc) {
+        //see http://dev.mysql.com/doc/refman/5.0/en/error-messages-server.html
+        final int errorCode = Database.getSqlErrorCode(exc);
+        return errorCode == 1213 || errorCode == 1479;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public boolean escapeSchema() {
         return false;
     }
@@ -341,6 +350,5 @@ public class MySQLStorageFactory implements DBStorage {
             System.out.println("Executed " + cnt + " statements");
         return cnt > 0;
     }
-
 
 }

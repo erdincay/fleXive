@@ -31,23 +31,21 @@
  ***************************************************************/
 package com.flexive.core.storage.genericSQL;
 
+import com.flexive.core.Database;
 import com.flexive.core.storage.FxTreeNodeInfo;
 import com.flexive.core.storage.FxTreeNodeInfoSpreaded;
 import com.flexive.core.storage.StorageManager;
-import com.flexive.core.Database;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.content.FxPermissionUtils;
-import com.flexive.shared.exceptions.FxApplicationException;
-import com.flexive.shared.exceptions.FxNotFoundException;
-import com.flexive.shared.exceptions.FxTreeException;
-import com.flexive.shared.exceptions.FxUpdateException;
+import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.interfaces.SequencerEngine;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNode;
 import com.flexive.shared.value.FxString;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -55,8 +53,10 @@ import org.apache.commons.logging.LogFactory;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.*;
-import java.util.Stack;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Stack;
 
 /**
  * Generic tree storage implementation using a spreaded nested set tree
@@ -80,6 +80,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
     private static final String TREE_EDIT_MAXRIGHT = "SELECT MAX(RGT) FROM " + getTable(FxTreeMode.Edit) +
             //            1
             " WHERE PARENT=?";
+    private static final Object LOCK_REORG = new Object();
 
 
     /**
@@ -248,6 +249,23 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
      * @throws FxTreeException if the function fails
      */
     public long reorganizeSpace(Connection con, SequencerEngine seq,
+                                   FxTreeMode sourceMode, FxTreeMode destMode,
+                                   long nodeId, boolean includeNodeId, BigDecimal overrideSpacing, BigDecimal overrideLeft,
+                                   FxTreeNodeInfo insertParent, int insertPosition, BigDecimal insertSpace, BigDecimal insertBoundaries[],
+                                   int depthDelta, Long destinationNode, boolean createMode, boolean createKeepIds) throws FxTreeException {
+        try {
+            synchronized (LOCK_REORG) {
+                acquireSubtreeLocks(con, sourceMode, null, null);
+                return _reorganizeSpace(con, seq, sourceMode, destMode, nodeId, includeNodeId, overrideSpacing,
+                        overrideLeft, insertParent, insertPosition, insertSpace, insertBoundaries,
+                        depthDelta, destinationNode, createMode, createKeepIds);
+            }
+        } catch (FxDbException e) {
+            throw new FxTreeException(e);
+        }
+    }
+    
+    protected long _reorganizeSpace(Connection con, SequencerEngine seq,
                                 FxTreeMode sourceMode, FxTreeMode destMode,
                                 long nodeId, boolean includeNodeId, BigDecimal overrideSpacing, BigDecimal overrideLeft,
                                 FxTreeNodeInfo insertParent, int insertPosition, BigDecimal insertSpace, BigDecimal insertBoundaries[],
@@ -444,8 +462,10 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
                         + time + " ms (spaceLen="+spacing + ")");
             }
             return firstCreatedNodeId;
-        } catch (Throwable e) {
-            throw new FxTreeException(LOG, e, "ex.tree.reorganize.failed", counter, left, right, e.getMessage());
+        } catch (FxApplicationException e) {
+            throw e instanceof FxTreeException ? (FxTreeException) e : new FxTreeException(e);
+        } catch (Exception e) {
+            throw new FxTreeException(e);
         } finally {
             try {
                 if (stmt != null) stmt.close();
@@ -496,6 +516,10 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
 
         BigDecimal left = leftBoundary.add(spacing).add(BigDecimal.ONE);
         BigDecimal right = left.add(spacing).add(BigDecimal.ONE);
+
+        acquireSubtreeLocks(con, mode, left, right);
+        // TODO: should really be the following because we also touch parentNodeId, but this locks up under concurrent requests
+        //acquireSubtreeLocks(con, mode, left, right, parentNodeId);
 
         NodeCreateInfo nci = getNodeCreateInfo(mode, seq, ce, nodeId, name, label, reference);
 
@@ -961,6 +985,70 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
             try {
                 if (stmt2 != null) stmt2.close();
             } catch (Exception exc) {/*ignore*/}
+        }
+    }
+
+    protected void acquireSubtreeLocks(Connection con, FxTreeMode mode, BigDecimal left, BigDecimal right, long... nodeIds) throws FxDbException {
+        while (!lockSubtree(con, getTable(mode), left, right, nodeIds)) {
+            if (LOG.isInfoEnabled()) {
+                LOG.info("Failed to lock " + getTable(mode) + ", waiting 100ms and retrying...");
+            }
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                // ignore
+            }
+        }
+    }
+
+    /**
+     * Lock part of the tree for updates.
+     *
+     * @param con   the connection to be used
+     * @param left  the left boundary (exclusive)
+     * @param right the right boundary (exclusive)
+     * @return      if the lock succeeded
+     * @since       3.1
+     */
+    protected boolean lockSubtree(Connection con, String table, BigDecimal left, BigDecimal right, long... nodeIds) throws FxDbException {
+        PreparedStatement stmt = null;
+        try {
+
+            final List<String> conditions = new ArrayList<String>();
+            final boolean bounded = left != null && right != null;
+
+            // lock tree region
+            if (bounded) {
+                conditions.add("LFT <= ? AND RGT >= ?");
+            }
+            // lock individual nodes
+            if (nodeIds != null && nodeIds.length > 0) {
+                conditions.add("ID IN ("
+                        + StringUtils.join(Arrays.asList(ArrayUtils.toObject(nodeIds)), ',') 
+                        + ")");
+            }
+
+            stmt = con.prepareStatement("SELECT id FROM " + table
+                    + (conditions.isEmpty() ? "" : " WHERE ")
+                    + StringUtils.join(conditions, " OR ")
+                    + " FOR UPDATE");
+            if (bounded) {
+                stmt.setBigDecimal(1, left);
+                stmt.setBigDecimal(2, right);
+            }
+            stmt.executeQuery();
+            return true;
+        } catch (SQLException e) {
+            if (StorageManager.getStorageImpl().isDeadlock(e)) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Deadlock detected while locking tree tables.");
+                }
+                return false;
+            } else {
+                throw new FxDbException(e);
+            }
+        } finally {
+            Database.closeObjects(GenericTreeStorageSpreaded.class, null, stmt);
         }
     }
 }
