@@ -10,7 +10,8 @@
             properties['database.port'] = properties['database.'+properties['database.vendor']+'.port']
             properties['database.username'] = properties['database.'+properties['database.vendor']+'.username']
             properties['database.password'] = properties['database.'+properties['database.vendor']+'.password']
-            properties['database.database'] = properties['database.'+properties['database.vendor']+'.database']
+            properties['database.database.division'] = properties['database.'+properties['database.vendor']+'.database.division']
+            properties['database.database.config'] = properties['database.'+properties['database.vendor']+'.database.config']
             properties['database.schema.division'] = properties['database.'+properties['database.vendor']+'.schema.division']
             properties['database.schema.config'] = properties['database.'+properties['database.vendor']+'.schema.config']
             properties['database.url.base'] = properties['database.'+properties['database.vendor']+'.url.base']
@@ -40,7 +41,7 @@ you must shutdown flexive before the update and then restart flexive.
                 <fileset dir="${dist.lib.dir}" includes="*.jar"/>
                 <fileset dir="${dist.extlib.dir}" includes="*.jar"/>
             </classpath>
-            <arg line="${database.vendor} ${database.database} ${database.schema.config} ${schema.division} ${database.dropdb} false true ${database.username} ${database.password} ${database.url.base} ${database.url.parameters}"/>
+            <arg line="${database.vendor} ${database.database.division} ${database.schema.division} division true true ${database.dropdb} ${database.username} ${database.password} ${database.url.base} ${database.url.parameters}"/>
         </java>
 
     </target>
@@ -55,7 +56,7 @@ you must shutdown flexive before the update and then restart flexive.
                 <fileset dir="${dist.lib.dir}" includes="*.jar"/>
                 <fileset dir="${dist.extlib.dir}" includes="*.jar"/>
             </classpath>
-            <arg line="${database.vendor} ${database.database} ${database.schema.config} ${database.schema.division} ${database.dropdb} true false ${database.username} ${database.password} ${database.url.base} ${database.url.parameters}"/>
+            <arg line="${database.vendor} ${database.database.config} ${database.schema.config} config true true ${database.dropdb} ${database.username} ${database.password} ${database.url.base} ${database.url.parameters}"/>
         </java>
     </target>
 
