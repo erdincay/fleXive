@@ -46,6 +46,8 @@ database.MySQL.database.test=flexive
 database.MySQL.schema.division=flexive
 # configuration schema
 database.MySQL.schema.config=flexiveConfiguration
+# test schema
+database.MySQL.schema.test=flexiveText
 # JDBC base URL, will be appended by the database name and the url parameters
 database.MySQL.url.base=jdbc:mysql://${database.MySQL.host}:${database.MySQL.port}/
 # Optional URL parameters to append to the JDBC connect string
@@ -71,6 +73,8 @@ database.H2.database.test=~/flexive
 database.H2.schema.division=flexive
 # configuration schema
 database.H2.schema.config=flexiveConfiguration
+# test schema
+database.H2.schema.config=flexiveTest
 # JDBC base URL, will be appended by the database name and the url parameters
 database.H2.url.base=jdbc:h2:tcp://${database.H2.host}:${database.H2.port}/
 # Optional URL parameters to append to the JDBC connect string
