@@ -243,6 +243,7 @@ public class UserGroupBean implements Serializable {
             ensureIdSet();
             groupEngine.remove(id);
             this.groupLists.clear();
+            new FxFacesMsgInfo("UserGroup.nfo.deleted").addToContext();
         } catch (Exception exc) {
             new FxFacesMsgErr(exc).addToContext();
         }
@@ -287,6 +288,7 @@ public class UserGroupBean implements Serializable {
             // Update the role assignments
             try {
                 groupEngine.setRoles(this.id, ArrayUtils.toPrimitive(getRoles()));
+                new FxFacesMsgInfo("UserGroup.nfo.updated", name).addToContext();
             } catch (Exception exc) {
                 new FxFacesMsgErr(exc).addToContext();
             }
