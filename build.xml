@@ -117,9 +117,12 @@
             properties['database.port'] = properties['database.'+properties['database.vendor']+'.port']
             properties['database.username'] = properties['database.'+properties['database.vendor']+'.username']
             properties['database.password'] = properties['database.'+properties['database.vendor']+'.password']
-            properties['database.database'] = properties['database.'+properties['database.vendor']+'.database']
+            properties['database.database.division'] = properties['database.'+properties['database.vendor']+'.database.division']
+            properties['database.database.config'] = properties['database.'+properties['database.vendor']+'.database.config']
+            properties['database.database.test'] = properties['database.'+properties['database.vendor']+'.database.test']
             properties['database.schema.division'] = properties['database.'+properties['database.vendor']+'.schema.division']
             properties['database.schema.config'] = properties['database.'+properties['database.vendor']+'.schema.config']
+            properties['database.schema.test'] = properties['database.'+properties['database.vendor']+'.schema.test']
             properties['database.url.base'] = properties['database.'+properties['database.vendor']+'.url.base']
             properties['database.url.parameters'] = properties['database.'+properties['database.vendor']+'.url.parameters']
         </groovy>
@@ -666,21 +669,39 @@
         <echo message="Skipping database update!"/>
     </target>
 
-    <target name="db.update" description="Update database" depends="init, jar.dbsetup, jar.storages" unless="db.noupdate">
-        <echo taskname="flexive">[fleXive] is using ${database.vendor} database settings... (this can be changed in build.properties)</echo>
+    <target name="db.update.config" description="Update config database" depends="init, jar.dbsetup, jar.storages" unless="db.noupdate">
+        <echo taskname="flexive">Setting up configuration database for vendor ${database.vendor} ... (this can be changed in build.properties)</echo>
+        <input taskname="flexive" addproperty="db.config" defaultvalue="${database.database.config}"
+               message="Please enter the configuration database (will be created if it does not exist):"/>
         <input taskname="flexive" addproperty="schema.config" defaultvalue="${database.schema.config}"
-               message="Please enter the database configuration schema you want to create or reset:"/>
-        <input taskname="flexive" addproperty="schema.division" defaultvalue="${database.schema.division}"
-               message="Please enter the database division schema you want to create or reset:"/>
+               message="Please enter the configuration schema you want to create or reset:"/>
         <java fork="true" classname="com.flexive.tools.db.DBSetup" failonerror="true">
             <classpath>
                 <path path="${flexive.build.framework.dir}/classes"/>
                 <fileset dir="${flexive.build.framework.jar.dir}" includes="*.jar"/>
                 <fileset dir="${flexive.lib.dir}" includes="*.jar"/>
             </classpath>
-            <arg line="${database.vendor} ${database.database} ${schema.config} ${schema.division} true true true ${database.username} ${database.password} ${database.url.base} ${database.url.parameters}"/>
+            <arg line="${database.vendor} ${db.config} ${schema.config} config true true false ${database.username} ${database.password} ${database.url.base} ${database.url.parameters}"/>
         </java>
     </target>
+
+    <target name="db.update.division" description="Update division database" depends="init, jar.dbsetup, jar.storages" unless="db.noupdate">
+        <echo taskname="flexive">Setting up division database for vendor ${database.vendor} ... (this can be changed in build.properties)</echo>
+        <input taskname="flexive" addproperty="db.division" defaultvalue="${database.database.division}"
+               message="Please enter the division database (will be created if it does not exist):"/>
+        <input taskname="flexive" addproperty="schema.division" defaultvalue="${database.schema.division}"
+               message="Please enter the division schema you want to create or reset:"/>
+        <java fork="true" classname="com.flexive.tools.db.DBSetup" failonerror="true">
+            <classpath>
+                <path path="${flexive.build.framework.dir}/classes"/>
+                <fileset dir="${flexive.build.framework.jar.dir}" includes="*.jar"/>
+                <fileset dir="${flexive.lib.dir}" includes="*.jar"/>
+            </classpath>
+            <arg line="${database.vendor} ${database.database.division} ${schema.division} division true true false ${database.username} ${database.password} ${database.url.base} ${database.url.parameters}"/>
+        </java>
+    </target>
+
+    <target name="db.update" description="Update config and division database" depends="db.update.config, db.update.division" unless="db.noupdate"/>
 
     <target name="db.update.test" description="Update test database (configuration database has to exist!)" depends="init, jar.dbsetup, jar.storages" unless="db.noupdate">
         <echo taskname="flexive">[fleXive] is using ${database.vendor} database settings... (this can be changed in build.properties)</echo>
@@ -691,7 +712,7 @@
                 <fileset dir="${flexive.build.framework.jar.dir}" includes="*.jar"/>
                 <fileset dir="${flexive.lib.dir}" includes="*.jar"/>
             </classpath>
-            <arg line="${database.vendor} ${database.database} ${schema.config} flexiveTest false false true ${database.username} ${database.password} ${database.url.base} ${database.url.parameters}"/>
+            <arg line="${database.vendor} ${database.database.test} ${database.schema.test} division true true false ${database.username} ${database.password} ${database.url.base} ${database.url.parameters}"/>
         </java>
     </target>
 
@@ -830,12 +851,18 @@ database.MySQL.port=3306
 database.MySQL.username=root
 # if the password is not set, use "()" to set it to empty
 database.MySQL.password=a
-# The root schema where the flexive schemas can be dropped and created
-database.MySQL.database=flexive
+# division database to use
+database.MySQL.database.division=flexive
+# configuration database to use
+database.MySQL.database.config=flexive
+# test database to use
+database.MySQL.database.test=flexive
 # division schema
 database.MySQL.schema.division=flexive
 # configuration schema
 database.MySQL.schema.config=flexiveConfiguration
+# test schema
+database.MySQL.schema.test=flexiveTest
 # JDBC base URL, will be appended by the database name and the url parameters
 database.MySQL.url.base=jdbc:mysql://${database.MySQL.host}:${database.MySQL.port}/
 # Optional URL parameters to append to the JDBC connect string
@@ -851,12 +878,18 @@ database.H2.port=9092
 database.H2.username=sa
 # if the password is not set, use "()" to set it to empty
 database.H2.password=()
-# database to use
-database.H2.database=~/flexive
+# division database to use
+database.H2.database.division=~/flexive
+# configuration database to use
+database.H2.database.config=~/flexive
+# test database to use
+database.H2.database.test=~/flexive
 # division schema
 database.H2.schema.division=flexive
 # configuration schema
 database.H2.schema.config=flexiveConfiguration
+# test schema
+database.H2.schema.test=flexiveTest            
 # JDBC base URL, will be appended by the database name and the url parameters
 database.H2.url.base=jdbc:h2:tcp://${database.H2.host}:${database.H2.port}/
 # Optional URL parameters to append to the JDBC connect string
@@ -872,12 +905,18 @@ database.PostgreSQL.port=5432
 database.PostgreSQL.username=postgres
 # if the password is not set, use "()" to set it to empty
 database.PostgreSQL.password=a
-# database to use
-database.PostgreSQL.database=flexive
+# division database to use
+database.PostgreSQL.database.division=flexive
+# configuration database to use
+database.PostgreSQL.database.config=flexiveConfiguration
+# test database to use
+database.PostgreSQL.database.test=flexiveTest
 # division schema
-database.PostgreSQL.schema.division=flexive
+database.PostgreSQL.schema.division=public
 # configuration schema
-database.PostgreSQL.schema.config=flexiveConfiguration
+database.PostgreSQL.schema.config=public
+# test division schema
+database.PostgreSQL.schema.test=public
 # JDBC base URL, will be appended by the database name and the url parameters
 database.PostgreSQL.url.base=jdbc:postgresql://${database.PostgreSQL.host}:${database.PostgreSQL.port}/
 # Optional URL parameters to append to the JDBC connect string

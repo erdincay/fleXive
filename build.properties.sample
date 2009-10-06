@@ -36,8 +36,12 @@ database.MySQL.port=3306
 database.MySQL.username=root
 # if the password is not set, use "()" to set it to empty
 database.MySQL.password=a
-# The root schema where the flexive schemas can be dropped and created
-database.MySQL.database=flexive
+# division database to use
+database.MySQL.database.division=flexive
+# configuration database to use
+database.MySQL.database.config=flexive
+# test database to use
+database.MySQL.database.test=flexive
 # division schema
 database.MySQL.schema.division=flexive
 # configuration schema
@@ -57,8 +61,12 @@ database.H2.port=9092
 database.H2.username=sa
 # if the password is not set, use "()" to set it to empty
 database.H2.password=()
-# database to use
-database.H2.database=~/flexive
+# division database to use
+database.H2.database.division=~/flexive
+# configuration database to use
+database.H2.database.config=~/flexive
+# test database to use
+database.H2.database.test=~/flexive
 # division schema
 database.H2.schema.division=flexive
 # configuration schema
@@ -78,12 +86,18 @@ database.PostgreSQL.port=5432
 database.PostgreSQL.username=postgres
 # if the password is not set, use "()" to set it to empty
 database.PostgreSQL.password=a
-# database to use
-database.PostgreSQL.database=flexive
+# division database to use
+database.PostgreSQL.database.division=flexive
+# configuration database to use
+database.PostgreSQL.database.config=flexiveConfiguration
+# test database to use
+database.PostgreSQL.database.test=flexiveTest
 # division schema
-database.PostgreSQL.schema.division=flexive
+database.PostgreSQL.schema.division=public
 # configuration schema
-database.PostgreSQL.schema.config=flexiveConfiguration
+database.PostgreSQL.schema.config=public
+# test division schema
+database.PostgreSQL.schema.test=public
 # JDBC base URL, will be appended by the database name and the url parameters
 database.PostgreSQL.url.base=jdbc:postgresql://${database.PostgreSQL.host}:${database.PostgreSQL.port}/
 # Optional URL parameters to append to the JDBC connect string

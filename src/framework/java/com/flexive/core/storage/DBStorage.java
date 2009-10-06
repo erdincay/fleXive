@@ -215,11 +215,11 @@ public interface DBStorage {
      * @param password          password
      * @param createDB          create the database?
      * @param createSchema      create the schema?
-     * @param dropIfExist       drop the database if it exists?
+     * @param dropDBIfExist     drop the database if it exists?
      * @return an open connection to the database with the schema set as default
      * @throws Exception on errors
      */
-    Connection getConnection(String database, String schema, String jdbcURL, String jdbcURLParameters, String user, String password, boolean createDB, boolean createSchema, boolean dropIfExist) throws Exception;
+    Connection getConnection(String database, String schema, String jdbcURL, String jdbcURLParameters, String user, String password, boolean createDB, boolean createSchema, boolean dropDBIfExist) throws Exception;
 
     /**
      * Initialize a configuration schema

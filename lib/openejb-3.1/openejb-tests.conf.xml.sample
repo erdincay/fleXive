@@ -32,13 +32,13 @@
     <!--
     <Resource id="jdbc/flexiveConfiguration" type="DataSource">
         JdbcDriver org.postgresql.Driver
-        JdbcUrl jdbc:postgresql://localhost:5432/flexive?searchpath=flexiveConfiguration
+        JdbcUrl jdbc:postgresql://localhost:5432/flexiveConfiguration
         UserName postgres
         Password a
     </Resource>
     <Resource id="jdbc/flexiveTest" type="DataSource">
         JdbcDriver org.postgresql.Driver
-        JdbcUrl jdbc:postgresql://localhost:5432/flexive?searchpath=flexiveTest
+        JdbcUrl jdbc:postgresql://localhost:5432/flexiveTest
         UserName postgres
         Password a
     </Resource>

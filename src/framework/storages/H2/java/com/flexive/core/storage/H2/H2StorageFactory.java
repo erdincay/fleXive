@@ -223,7 +223,7 @@ public class H2StorageFactory implements DBStorage {
      */
     public Connection getConnection(String database, String schema, String jdbcURL, String jdbcURLParameters,
                                     String user, String password, boolean createDB, boolean createSchema,
-                                    boolean dropIfExist) throws Exception {
+                                    boolean dropDBIfExist) throws Exception {
         Connection con;
         try {
             if (StringUtils.isBlank(database))
@@ -246,7 +246,7 @@ public class H2StorageFactory implements DBStorage {
                 System.err.println("H2 JDBC Driver not found in classpath!");
                 return null;
             }
-            if (dropIfExist) {
+            if (dropDBIfExist) {
                 Method m = Class.forName("org.h2.tools.DeleteDbFiles").getMethod("execute", String.class, String.class, boolean.class);
                 String path;
                 String db;

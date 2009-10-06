@@ -52,23 +52,28 @@ public class DBSetup {
 
     public static void main(String[] args) {
         if (!(args.length == 10 || args.length == 11)) {
-            System.err.println("Usage: " + DBSetup.class.getCanonicalName() + " vendor database schemaConfig schemaDivision recreateDB createConfig createDivision user password URL [URLParameter]");
+//          System.err.println("Usage: " + DBSetup.class.getCanonicalName() + " vendor database schemaConfig schemaDivision recreateDB createConfig createDivision user password URL [URLParameter]");
+            System.err.println("Usage: " + DBSetup.class.getCanonicalName() + " vendor database schema [config|division] createDB createSchema dropDBIfExist user password URL [URLParameter]");
             return;
         }
         String vendor = args[0];
         final String db = args[1];
-        final String schemaConfig = args[2];
-        final String schemaDivision = args[3];
-        final boolean recreateDB = Boolean.valueOf(args[4]);
-        final boolean createConfig = Boolean.valueOf(args[5]);
-        final boolean createDivision = Boolean.valueOf(args[6]);
+        final String schema = args[2];
+        final String schemaType = args[3].toLowerCase();
+        if (!("config".equals(schemaType) || "division".equals(schemaType))) {
+            System.err.println("Invalid schema type: [" + schemaType + "]! Valid values are [config] or [division]!");
+            return;
+        }
+        final boolean createDB = Boolean.valueOf(args[4]);
+        final boolean createSchema = Boolean.valueOf(args[5]);
+        final boolean dropDBIfExist = Boolean.valueOf(args[6]);
         final String user = args[7];
         String pwd = args[8];
         if ("()".equals(pwd)) //marker for empty password
             pwd = "";
         final String jdbcURL = args[9];
         final String jdbcParams = (args.length == 10 ? null : args[10]);
-        System.out.println("Setting up database for vendor: " + vendor + " (config:" + schemaConfig + ",division:" + schemaDivision + ")");
+        System.out.println("Setting up " + schemaType + " database [" + db + "] for vendor: " + vendor + " (schema: [" + schema + "])");
         DBStorage storage = StorageManager.getStorageImpl(vendor);
         if (storage == null) {
             System.err.println("No matching storage implementation found!");
@@ -77,20 +82,20 @@ public class DBSetup {
         Connection con = null;
         int returnCode = 0;
         try {
-            if (createConfig) {
+            if ("config".equals(schemaType)) {
                 try {
-                    con = storage.getConnection(db, schemaConfig, jdbcURL, jdbcParams, user, pwd, createConfig, createConfig, recreateDB);
-                    storage.initConfiguration(con, schemaConfig, true);
+                    con = storage.getConnection(db, schema, jdbcURL, jdbcParams, user, pwd, createDB, createSchema, dropDBIfExist);
+                    storage.initConfiguration(con, schema, createSchema);
                 } catch (Exception e) {
                     System.err.println("Error setting up configuration: " + e.getMessage());
                     returnCode = 1;
                 }
             }
-            if (createDivision) {
+            if ("division".equals(schemaType)) {
                 try {
                     if (con == null)
-                        con = storage.getConnection(db, schemaDivision, jdbcURL, jdbcParams, user, pwd, createDivision, createDivision, recreateDB);
-                    storage.initDivision(con, schemaDivision, true);
+                        con = storage.getConnection(db, schema, jdbcURL, jdbcParams, user, pwd, createDB, createSchema, dropDBIfExist);
+                    storage.initDivision(con, schema, createSchema);
                 } catch (Exception e) {
                     System.err.println("Error setting up division: " + e.getMessage());
                     returnCode = 1;

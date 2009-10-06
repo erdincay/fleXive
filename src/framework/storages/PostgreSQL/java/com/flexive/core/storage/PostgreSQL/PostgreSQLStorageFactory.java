@@ -252,7 +252,7 @@ public class PostgreSQLStorageFactory implements DBStorage {
             stmt = con.createStatement();
             int cnt = 0;
             if (dropIfExist)
-                cnt += stmt.executeUpdate("DROP DATABASE IF EXISTS " + database);
+                cnt += stmt.executeUpdate("DROP DATABASE IF EXISTS \"" + database + "\"");
             if (createDB) {
                 //first check if it already exists
                 ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM PG_CATALOG.PG_DATABASE WHERE DATNAME='" + database + "'");
@@ -260,7 +260,7 @@ public class PostgreSQLStorageFactory implements DBStorage {
                 if (rs != null)
                     rs.close();
                 if (!exists) {
-                    cnt += stmt.executeUpdate("CREATE DATABASE " + database);
+                    cnt += stmt.executeUpdate("CREATE DATABASE \"" + database + "\"");
                     System.out.println("Created database [" + database + "].");
                 } else
                     System.out.println("Database [" + database + "] already exists. Skipping create.");
