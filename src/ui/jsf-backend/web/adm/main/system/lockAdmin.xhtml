@@ -14,9 +14,14 @@
 <body>
 <ui:composition template="/adm/contentTemplate.xhtml">
     <ui:define name="body">
+        <c:set var="checkBoxStyle" value="padding-bottom:4px; float:left"/>
+        <c:if test="#{fxSystemBean.browserAsString == 'IE'}">
+            <c:set var="checkBoxStyle" value="padding-top:3px; float:left"/>
+        </c:if>
         <a4j:region id="lockPanel">
             <h:form id="frm">
-                <t:saveState id="ssList" value="#{lockBean.list}"/>
+                <t:saveState value="#{lockBean.list}"/>
+                
                 <script type="text/javascript">
                     <!--
                     var userAcHandler = new flexive.yui.AutoCompleteHandler(function(query) {
@@ -43,9 +48,27 @@
                         <f:selectItems value="#{lockBean.availableLockTypes}"/>
                     </h:selectOneListbox>
                 </fx:formRow>
+                <br/><br/>
+                <a4j:outputPanel id="lockOptionPanel">
+                    <fx:fieldSet legendKey="Lock.field.lockOptions">
+                        <fx:formRow id="markAllBox" labelKey="Lock.label.markAllBox">
+                            <h:selectBooleanCheckbox id="markAllBox" value="#{lockBean.allMarked}">
+                                <a4j:support event="onclick" reRender="lockResults" action="#{lockBean.markAll}"/>
+                            </h:selectBooleanCheckbox>
+                        </fx:formRow>
+                        <!-- unlock / extend selected buttons -->
+                        <adm:ajaxCommandButton id="unlockSelected" labelKey="Lock.button.unlockSelected"
+                                               bean="#{lockBean}" action="unlockSelected" reRender="lockOptionPanel, lockResults"
+                                               icon="unlock"/>
+                        <adm:ajaxCommandButton id="extendSelected" labelKey="Lock.button.extendSelected"
+                                               bean="#{lockBean}" action="extendSelected" reRender="lockOptionPanel, lockResults"
+                                               icon="timeExtend"/>
+                    </fx:fieldSet>
+                </a4j:outputPanel>
+
                 <a4j:outputPanel id="lockResults">
-                <c:set var="list" value="#{lockBean.list}"/>
-                <c:set var="listLength" value="#{jstl:length(list)}"/>
+                    <c:set var="list" value="#{lockBean.list}"/>
+                    <c:set var="listLength" value="#{jstl:length(list)}"/>
 
                     #{fxMessageBean['Lock.label.foundEntries,#{listLength}']}<br/>
                     <adm:sortableTable id="table">
@@ -79,10 +102,10 @@
                                         #{lock.lockType.label}
                                     </td>
                                     <td nowrap="nowrap">
-                                        #{lockBean.dateFormat[lock.createdTimestamp]}
+                                        <h:outputText value="#{lockBean.dateFormat[lock.createdTimestamp]}" title="#{lockBean.readableDateFormat[lock.createdTimestamp]}"/>
                                     </td>
                                     <td nowrap="nowrap">
-                                        #{lockBean.dateFormat[lock.expiresTimestamp]}
+                                        <h:outputText value="#{lockBean.dateFormat[lock.expiresTimestamp]}"  title="#{lockBean.readableDateFormat[lock.expiresTimestamp]}"/>
                                     </td>
                                     <td>
                                         #{fxMapBean.account[lock.userId].name}
@@ -96,16 +119,22 @@
                                         </ui:fragment>
                                     </td>
                                     <td>
-                                        <adm:ajaxCommandIcon id="unlock" reRender="lockResults,table" icon="unlock"
-                                                             bean="#{lockBean}" action="unlock"
-                                                             titleKey="Lock.button.unlock" rendered="#{lock.unlockable}">
-                                            <f:setPropertyActionListener target="#{lockBean.selectedLock}" value="#{lock}"/>
-                                        </adm:ajaxCommandIcon>
-                                        <adm:ajaxCommandIcon id="extend" reRender="lockResults, table" icon="timeExtend"
-                                                             bean="#{lockBean}" action="extendLock"
-                                                             titleKey="Lock.button.extendLock" rendered="#{lock.contentLock}">
-                                            <f:setPropertyActionListener target="#{lockBean.selectedLock}" value="#{lock}"/>
-                                         </adm:ajaxCommandIcon>
+                                        <div style="float:left">
+                                            <adm:ajaxCommandIcon id="unlock" reRender="lockResults,table" icon="unlock"
+                                                                 bean="#{lockBean}" action="unlock"
+                                                                 titleKey="Lock.button.unlock" rendered="#{lock.unlockable}">
+                                                <f:setPropertyActionListener target="#{lockBean.selectedLock}" value="#{lock}"/>
+                                            </adm:ajaxCommandIcon>
+                                            <adm:ajaxCommandIcon id="extend" reRender="lockResults, table" icon="timeExtend"
+                                                                 bean="#{lockBean}" action="extendLock"
+                                                                 titleKey="Lock.button.extendLock" rendered="#{lock.contentLock}">
+                                                <f:setPropertyActionListener target="#{lockBean.selectedLock}" value="#{lock}"/>
+                                             </adm:ajaxCommandIcon>
+                                        </div>
+                                        <div style="#{checkBoxStyle}">
+                                            <h:selectBooleanCheckbox id="mark" value="#{lockBean.markedLocks[lock.lockedPK]}" title="#{fxMessageBean['Lock.msg.mark']}">
+                                            </h:selectBooleanCheckbox>
+                                        </div>
                                     </td>
                                 </tr>
                             </ui:repeat>
@@ -117,7 +146,6 @@
 
                 <adm:commandButton id="lockQuerySearch" labelKey="Lock.button.query" location="both"
                                    icon="search" lockscreen="false" bean="#{lockBean}" action="performQuery"/>
-
 
                 <adm:toolbarPluginButtons/>
 
