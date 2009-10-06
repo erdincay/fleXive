@@ -55,7 +55,7 @@ public class DBSetup {
             System.err.println("Usage: " + DBSetup.class.getCanonicalName() + " vendor database schemaConfig schemaDivision recreateDB createConfig createDivision user password URL [URLParameter]");
             return;
         }
-        final String vendor = args[0];
+        String vendor = args[0];
         final String db = args[1];
         final String schemaConfig = args[2];
         final String schemaDivision = args[3];
@@ -69,7 +69,7 @@ public class DBSetup {
         final String jdbcURL = args[9];
         final String jdbcParams = (args.length == 10 ? null : args[10]);
         System.out.println("Setting up database for vendor: " + vendor + " (config:" + schemaConfig + ",division:" + schemaDivision + ")");
-        DBStorage storage = StorageManager.getStorageImpl(args[0]);
+        DBStorage storage = StorageManager.getStorageImpl(vendor);
         if (storage == null) {
             System.err.println("No matching storage implementation found!");
             System.exit(1);

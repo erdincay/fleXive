@@ -573,11 +573,11 @@
                       builddir="${build.storages.dir}/H2"
                       classpathref="classpath.build.plugin"
                       jarfile="${flexive.build.framework.jar.dir}/flexive-storage-H2.jar"/>
-        <buildStorage vendor="Postgres"
-                      srcdir="${flexive.base.framework.dir}/storages/Postgres"
-                      builddir="${build.storages.dir}/Postgres"
+        <buildStorage vendor="PostgreSQL"
+                      srcdir="${flexive.base.framework.dir}/storages/PostgreSQL"
+                      builddir="${build.storages.dir}/PostgreSQL"
                       classpathref="classpath.build.plugin"
-                      jarfile="${flexive.build.framework.jar.dir}/flexive-storage-Postgres.jar"/>
+                      jarfile="${flexive.build.framework.jar.dir}/flexive-storage-PostgreSQL.jar"/>
     </target>
 
     <target name="jar.tests" depends="tests.compile.all">
@@ -765,7 +765,7 @@
         <copy file="${flexive.build.framework.jar.dir}/flexive-ejb.jar" tofile="${flexive.dist.lib.dir}/flexive-ejb.jar"/>
         <copy file="${flexive.build.framework.jar.dir}/flexive-storage-H2.jar" tofile="${flexive.dist.lib.dir}/flexive-storage-H2.jar"/>
         <copy file="${flexive.build.framework.jar.dir}/flexive-storage-MySQL.jar" tofile="${flexive.dist.lib.dir}/flexive-storage-MySQL.jar"/>
-        <copy file="${flexive.build.framework.jar.dir}/flexive-storage-Postgres.jar" tofile="${flexive.dist.lib.dir}/flexive-storage-Postgres.jar"/>
+        <copy file="${flexive.build.framework.jar.dir}/flexive-storage-PostgreSQL.jar" tofile="${flexive.dist.lib.dir}/flexive-storage-PostgreSQL.jar"/>
         <copy file="${flexive.build.framework.jar.dir}/flexive-dbsetup.jar" tofile="${flexive.dist.lib.dir}/flexive-dbsetup.jar"/>
         <copy file="${flexive.lib.dir}/flexive-flatstorage.jar" tofile="${flexive.dist.lib.dir}/flexive-flatstorage.jar"/>
 
@@ -862,31 +862,30 @@ database.H2.url.base=jdbc:h2:tcp://${database.H2.host}:${database.H2.port}/
 # Optional URL parameters to append to the JDBC connect string
 database.H2.url.parameters=;MVCC=TRUE
 
-# Postgres database settings
+# PostgreSQL database settings
 
 # The server host or IP
-database.Postgres.host=localhost
+database.PostgreSQL.host=localhost
 # The server port
-database.Postgres.port=5432
+database.PostgreSQL.port=5432
 # The user name and password to be used for creating flexive database structures
-database.Postgres.username=postgres
+database.PostgreSQL.username=postgres
 # if the password is not set, use "()" to set it to empty
-database.Postgres.password=a
+database.PostgreSQL.password=a
 # database to use
-database.Postgres.database=flexive
+database.PostgreSQL.database=flexive
 # division schema
-database.Postgres.schema.division=flexive
+database.PostgreSQL.schema.division=flexive
 # configuration schema
-database.Postgres.schema.config=flexiveConfiguration
+database.PostgreSQL.schema.config=flexiveConfiguration
 # JDBC base URL, will be appended by the database name and the url parameters
-database.Postgres.driver=org.postgresql.Driver
-database.Postgres.url.base=jdbc:postgresql://${database.Postgres.host}:${database.Postgres.port}/
+database.PostgreSQL.url.base=jdbc:postgresql://${database.PostgreSQL.host}:${database.PostgreSQL.port}/
 # Optional URL parameters to append to the JDBC connect string
-database.Postgres.url.parameters=
+database.PostgreSQL.url.parameters=
 
 #select the database vendor to use
 #database.vendor=H2
-#database.vendor=Postgres
+#database.vendor=PostgreSQL
 database.vendor=MySQL
         </echo>
 
