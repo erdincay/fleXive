@@ -47,7 +47,7 @@ database.MySQL.schema.division=flexive
 # configuration schema
 database.MySQL.schema.config=flexiveConfiguration
 # test schema
-database.MySQL.schema.test=flexiveText
+database.MySQL.schema.test=flexiveTest
 # JDBC base URL, will be appended by the database name and the url parameters
 database.MySQL.url.base=jdbc:mysql://${database.MySQL.host}:${database.MySQL.port}/
 # Optional URL parameters to append to the JDBC connect string
