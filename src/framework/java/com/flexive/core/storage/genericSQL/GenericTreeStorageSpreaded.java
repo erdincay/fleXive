@@ -45,7 +45,7 @@ import com.flexive.shared.structure.FxType;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNode;
 import com.flexive.shared.value.FxString;
-import org.apache.commons.lang.ArrayUtils;
+import com.google.common.collect.Iterables;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -53,10 +53,9 @@ import org.apache.commons.logging.LogFactory;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Stack;
+import java.util.Arrays;
 
 /**
  * Generic tree storage implementation using a spreaded nested set tree
@@ -195,7 +194,6 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
      * @throws FxApplicationException on errors
      */
     public BigDecimal makeSpace(Connection con, SequencerEngine seq, FxTreeMode mode, long nodeId, int position, final int additional) throws FxApplicationException {
-
         FxTreeNodeInfoSpreaded nodeInfo = (FxTreeNodeInfoSpreaded) getTreeNodeInfo(con, mode, nodeId);
         BigDecimal boundaries[] = getBoundaries(con, nodeInfo, position);
 
@@ -255,7 +253,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
                                    int depthDelta, Long destinationNode, boolean createMode, boolean createKeepIds) throws FxTreeException {
         try {
             synchronized (LOCK_REORG) {
-                acquireLocksForUpdate(con, sourceMode, null, null, true, true);
+                acquireLocksForUpdate(con, sourceMode);
                 return _reorganizeSpace(con, seq, sourceMode, destMode, nodeId, includeNodeId, overrideSpacing,
                         overrideLeft, insertParent, insertPosition, insertSpace, insertBoundaries,
                         depthDelta, destinationNode, createMode, createKeepIds);
@@ -310,8 +308,10 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
         try {
             final long start = System.currentTimeMillis();
             String createProps = createMode ? ",PARENT,REF,NAME,TEMPLATE" : "";
-            String sql = " SELECT ID,TOTAL_CHILDCOUNT,CHILDCOUNT, LFT LFTORD,RGT,DEPTH" + createProps +
-                    " FROM (SELECT ID,TOTAL_CHILDCOUNT,CHILDCOUNT,LFT,RGT,DEPTH" + createProps + " FROM " + getTable(sourceMode) + " WHERE " +
+            String sql = " SELECT ID," +
+                    "(SELECT COUNT(*) FROM " + getTable(sourceMode) + " WHERE LFT > NODE.LFT AND RGT < NODE.RGT)," +
+                    "CHILDCOUNT, LFT LFTORD,RGT,DEPTH" + createProps +
+                    " FROM (SELECT ID,CHILDCOUNT,LFT,RGT,DEPTH" + createProps + " FROM " + getTable(sourceMode) + " WHERE " +
                     "LFT>" + includeNode + nodeInfo.getLeft() + " AND LFT<" + includeNode + nodeInfo.getRight() + ") NODE " +
                     "ORDER BY LFTORD ASC";
             stmt = con.createStatement();
@@ -319,9 +319,9 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
             if (createMode) {
                 //                                                                 1  2      3     4     5   6        7   8
                 ps = con.prepareStatement("INSERT INTO " + getTable(destMode) + " (ID,PARENT,DEPTH,DIRTY,REF,TEMPLATE,LFT,RGT," +
-                        //9               10         11   12
-                        "TOTAL_CHILDCOUNT,CHILDCOUNT,NAME,MODIFIED_AT) " +
-                        "VALUES (?,?,?,?,?,?,?,?,?,?,?,?)");
+                        //9           10    11
+                        "CHILDCOUNT,NAME,MODIFIED_AT) " +
+                        "VALUES (?,?,?,?,?,?,?,?,?,?,?)");
             } else {
                 ps = con.prepareStatement("UPDATE " + getTable(sourceMode) + " SET LFT=?,RGT=?,DEPTH=? WHERE ID=?");
             }
@@ -424,10 +424,9 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
 //                    System.out.println("=> id:"+newId+" left:"+left+" right:"+right);
                     ps.setBigDecimal(7, left);
                     ps.setBigDecimal(8, right);
-                    ps.setInt(9, total_childs);
-                    ps.setInt(10, direct_childs);
-                    ps.setString(11, name);
-                    ps.setLong(12, System.currentTimeMillis());
+                    ps.setInt(9, direct_childs);
+                    ps.setString(10, name);
+                    ps.setLong(11, System.currentTimeMillis());
                     ps.addBatch();
                 } else {
                     ps.setBigDecimal(1, left);
@@ -435,8 +434,8 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
                     ps.setInt(3, depth + depthDelta);
                     ps.setLong(4, id);
                     ps.addBatch();
-                    ps.executeBatch();
-                    ps.clearBatch();
+//                    ps.executeBatch();
+//                    ps.clearBatch();
                 }
 
                 // Prepare variables for the next node
@@ -517,7 +516,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
         final BigDecimal left = leftBoundary.add(spacing).add(BigDecimal.ONE);
         final BigDecimal right = left.add(spacing).add(BigDecimal.ONE);
 
-        acquireLocksForUpdate(con, mode, left, right, true, false);
+        acquireLocksForUpdate(con, parentNode, false);
 
         NodeCreateInfo nci = getNodeCreateInfo(mode, seq, ce, nodeId, name, label, reference);
 
@@ -525,9 +524,9 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
         PreparedStatement ps = null;
         try {
             ps = con.prepareStatement("INSERT INTO " + getTable(mode) + " (ID,PARENT,DEPTH,DIRTY,REF,LFT,RGT," +
-                    "TOTAL_CHILDCOUNT,CHILDCOUNT,NAME,MODIFIED_AT,TEMPLATE) VALUES " +
+                    "CHILDCOUNT,NAME,MODIFIED_AT,TEMPLATE) VALUES " +
                     "(" + nci.id + "," + parentNodeId + "," + (parentNode.getDepth() + 1) +
-                    ",?," + nci.reference.getId() + ",?,?,0,0,?," + StorageManager.getTimestampFunction() + ",?)");
+                    ",?," + nci.reference.getId() + ",?,?,0,?," + StorageManager.getTimestampFunction() + ",?)");
             ps.setBoolean(1, mode != FxTreeMode.Live);
             ps.setBigDecimal(2, left);
             ps.setBigDecimal(3, right);
@@ -540,13 +539,6 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
             ps.executeUpdate();
             ps.close();
 
-            // Update all affected childcounts
-            ps = con.prepareStatement("UPDATE " + getTable(mode) + " SET TOTAL_CHILDCOUNT=TOTAL_CHILDCOUNT+1 WHERE " +
-                    " LFT<? AND RGT>?");
-            ps.setBigDecimal(1, left);
-            ps.setBigDecimal(2, right);
-            ps.executeUpdate();
-            ps.close();
             //update the parents childcount
             ps = con.prepareStatement("UPDATE " + getTable(mode) + " SET CHILDCOUNT=CHILDCOUNT+1 WHERE ID=" + parentNodeId);
             ps.executeUpdate();
@@ -588,6 +580,8 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
         FxTreeNodeInfo node = getTreeNodeInfo(con, mode, nodeId);
         FxTreeNodeInfoSpreaded destinationNode = (FxTreeNodeInfoSpreaded) getTreeNodeInfo(con, mode, newParentId);
         final FxTreeNodeInfo parent = getTreeNodeInfo(con, mode, node.getParentId());
+
+        acquireLocksForUpdate(con, mode, Arrays.asList(nodeId, newParentId, node.getParentId()));
 
         final long currentPos = node.getPosition();
 
@@ -647,20 +641,19 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
 
             // Update the childcount of the new and old parent if needed + set dirty flag
             if (getsNewParent) {
-                // Reload the nodes to obtain the new boundary and spacing informations
-                destinationNode = (FxTreeNodeInfoSpreaded) getTreeNodeInfo(con, mode, newParentId);
                 node = getTreeNodeInfo(con, mode, nodeId);
-                FxTreeNodeInfo nodeOldParent = getTreeNodeInfo(con, mode, oldParent);
                 stmt = con.createStatement();
-                stmt.addBatch("UPDATE " + getTable(mode) + " SET TOTAL_CHILDCOUNT=TOTAL_CHILDCOUNT+" + (node.getTotalChildCount() + 1) +
-                        " WHERE (LFT<=" + destinationNode.getLeft() + " AND RGT>=" + destinationNode.getRight() + ")");
-                stmt.addBatch("UPDATE " + getTable(mode) + " SET TOTAL_CHILDCOUNT=TOTAL_CHILDCOUNT-" + (node.getTotalChildCount() + 1) +
-                        " WHERE (LFT<=" + nodeOldParent.getLeft() + " AND RGT>=" + nodeOldParent.getRight() + ")");
                 stmt.addBatch("UPDATE " + getTable(mode) + " SET CHILDCOUNT=CHILDCOUNT+1 WHERE ID=" + newParentId);
                 stmt.addBatch("UPDATE " + getTable(mode) + " SET CHILDCOUNT=CHILDCOUNT-1 WHERE ID=" + oldParent);
                 if (mode != FxTreeMode.Live) {
-                    stmt.addBatch("UPDATE " + getTable(mode) + " SET DIRTY=TRUE WHERE LFT>=" + node.getLeft() + " AND " +
-                            "RGT<=" + node.getRight());
+                    final List<Long> newChildren = selectNodeIds(con, mode, node.getLeft(), node.getRight());
+                    acquireLocksForUpdate(con, mode, newChildren);
+
+                    for (List<Long> part : Iterables.partition(newChildren, SQL_IN_PARTSIZE)) {
+                        stmt.addBatch("UPDATE " + getTable(mode) + " SET DIRTY=TRUE" +
+                                " WHERE ID IN (" + StringUtils.join(part, ',') + ")");
+                    }
+                    
                     stmt.addBatch("UPDATE " + getTable(mode) + " SET DIRTY=TRUE WHERE ID IN(" + oldParent + "," + newParentId + ")");
                 }
                 stmt.executeBatch();
@@ -693,6 +686,8 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
         // Reload the node to obtain the new boundary and spacing informations
         final FxTreeNodeInfoSpreaded destinationNode = (FxTreeNodeInfoSpreaded) getTreeNodeInfo(con, mode, dstParentNodeId);
 
+        acquireLocksForUpdate(con, mode, Arrays.asList(srcNodeId, sourceNode.getParentId(),  dstParentNodeId));
+
         // Copy the data
         BigDecimal boundaries[] = getBoundaries(con, destinationNode, dstPosition);
         int depthDelta = (destinationNode.getDepth() + 1) - sourceNode.getDepth();
@@ -703,8 +698,6 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
         try {
             // Update the childcount of the new parents
             stmt = con.createStatement();
-            stmt.addBatch("UPDATE " + getTable(mode) + " SET TOTAL_CHILDCOUNT=TOTAL_CHILDCOUNT+" + (sourceNode.getTotalChildCount() + 1) +
-                    " WHERE (LFT<=" + destinationNode.getLeft() + " AND RGT>=" + destinationNode.getRight() + ")");
             stmt.addBatch("UPDATE " + getTable(mode) + " SET CHILDCOUNT=CHILDCOUNT+1 WHERE ID=" + dstParentNodeId);
             stmt.executeBatch();
 
@@ -763,6 +756,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
                         "JOIN (SELECT ID FROM " + getTable(FxTreeMode.Live) + " WHERE PARENT=" + nodeId + ") b USING (ID) WHERE b.ID IS NULL");
                 while (rs != null && rs.next()) {
                     long deleteId = rs.getLong(1);
+                    acquireLocksForUpdate(con, FxTreeMode.Live, Arrays.asList(deleteId));
                     stmt2.addBatch(StorageManager.getReferentialIntegrityChecksStatement(false));
                     try {
                         stmt2.addBatch("DELETE FROM " + getTable(FxTreeMode.Live) + " WHERE ID=" + deleteId);
@@ -865,8 +859,6 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
         try {
             // Update the childcount of the new parents
             stmt = con.createStatement();
-            stmt.addBatch("UPDATE " + getTable(FxTreeMode.Live) + " SET TOTAL_CHILDCOUNT=TOTAL_CHILDCOUNT+" + (sourceNode.getTotalChildCount() + 1) +
-                    " WHERE (LFT<=" + destinationNode.getLeft() + " AND RGT>=" + destinationNode.getRight() + ")");
             stmt.addBatch("UPDATE " + getTable(FxTreeMode.Live) + " SET CHILDCOUNT=CHILDCOUNT+1 WHERE ID=" + destination);
             stmt.addBatch("UPDATE " + getTable(mode) + " SET DIRTY=FALSE WHERE LFT>=" + sourceNode.getLeft() + " AND RGT<=" + sourceNode.getRight());
             stmt.executeBatch();
@@ -890,8 +882,8 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
         stmt.execute(StorageManager.getReferentialIntegrityChecksStatement(false));
         try {
             stmt.executeUpdate("DELETE FROM " + getTable(mode));
-            stmt.executeUpdate("INSERT INTO " + getTable(mode) + " (ID,NAME,MODIFIED_AT,DIRTY,PARENT,DEPTH,CHILDCOUNT,TOTAL_CHILDCOUNT,REF,TEMPLATE,LFT,RGT) " +
-                    "VALUES (" + ROOT_NODE + ",'Root'," + StorageManager.getTimestampFunction() + ",FALSE,NULL,1,0,0," + rootPK.getId() +
+            stmt.executeUpdate("INSERT INTO " + getTable(mode) + " (ID,NAME,MODIFIED_AT,DIRTY,PARENT,DEPTH,CHILDCOUNT,REF,TEMPLATE,LFT,RGT) " +
+                    "VALUES (" + ROOT_NODE + ",'Root'," + StorageManager.getTimestampFunction() + ",FALSE,NULL,1,0," + rootPK.getId() +
                     ",NULL,1," + MAX_RIGHT + ")");
         } finally {
             stmt.executeUpdate(StorageManager.getReferentialIntegrityChecksStatement(true));
@@ -938,16 +930,6 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
                         throw new FxTreeException(LOG, "ex.tree.check.failed", mode, "#" + id + " out of bounds (left)");
                 }
 
-                // Total child count check
-                stmt2 = con.createStatement();
-                rs2 = stmt2.executeQuery("SELECT COUNT(*) FROM " +
-                        getTable(mode) + " WHERE LFT>" + node.getLeft() + " AND RGT<" + node.getRight());
-                rs2.next();
-                int totalChilds = rs2.getInt(1);
-                if (totalChilds != node.getTotalChildCount())
-                    throw new FxTreeException(LOG, "ex.tree.check.failed", mode, "#" + id + " invalid total child count [" + totalChilds + "!=" + node.getTotalChildCount() + "]");
-                stmt2.close();
-
                 // Direct child count check
                 stmt2 = con.createStatement();
                 rs2 = stmt2.executeQuery("SELECT COUNT(*) FROM " + getTable(mode) + " WHERE PARENT=" + id);
@@ -955,9 +937,6 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
                 int directChilds = rs2.getInt(1);
                 if (directChilds != node.getDirectChildCount())
                     throw new FxTreeException(LOG, "ex.tree.check.failed", mode, "#" + id + " invalid direct child count [" + directChilds + "!=" + node.getDirectChildCount() + "]");
-                if (directChilds > node.getTotalChildCount())
-                    throw new FxTreeException(LOG, "ex.tree.check.failed", mode, "#" + id +
-                            " more direct than total children! [direct:" + directChilds + ">total:" + node.getTotalChildCount() + "]");
                 stmt2.close();
 
                 // Depth check
@@ -986,42 +965,32 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
         }
     }
 
+
     /**
      * {@inheritDoc}
      */
     @Override
-    protected boolean lockForUpdate(Connection con, String table, BigDecimal left, BigDecimal right,
-                                    boolean lockParents, boolean lockChildren) throws FxDbException {
+    protected boolean lockForUpdate(Connection con, String table, Iterable<Long> nodeIds) throws FxDbException {
+        if (nodeIds == null || !nodeIds.iterator().hasNext()) {
+            return tryLock(con, table, null);
+        }
+
+        // process nodes in partitions since some DBMS choke on large IN conditions
+        for (List<Long> part : Iterables.partition(nodeIds, 500)) {
+            if (!tryLock(con, table, part)) {
+                return false;   // deadlock detected
+            }
+        }
+        return true;    // sucess
+    }
+
+    private boolean tryLock(Connection con, String table, List<Long> part) throws FxDbException {
         PreparedStatement stmt = null;
         try {
-
-            final List<String> conditions = new ArrayList<String>();
-            int bounded = 0;   // number of tree bound conditions
-
-            // lock tree region
-            if (left != null && right != null) {
-                if (!lockParents || !lockChildren) {
-                    // specify range locks, unless the whole tree should be locked (both parameters are true)
-                    if (lockParents) {
-                        conditions.add("LFT <= ? AND RGT >= ?");
-                        bounded++;
-                    }
-                    if (lockChildren) {
-                        conditions.add("LFT >= ? AND RGT <= ?");
-                        bounded++;
-                    }
-                }
-            }
-
-            stmt = con.prepareStatement("SELECT id FROM " + table
-                    + (conditions.isEmpty() ? ""
-                    : " WHERE (" + StringUtils.join(conditions, ") OR (") + ")")
+            stmt = con.prepareStatement("SELECT id FROM " + table + " t "
+                    + (part == null || part.isEmpty() ? ""
+                    : " WHERE id IN (" + StringUtils.join(part, ',') + ")")
                     + " FOR UPDATE");
-
-            for (int i = 0; i < bounded; i++) {
-                stmt.setBigDecimal(1 + i*2, left);
-                stmt.setBigDecimal(2 + i*2, right);
-            }
             stmt.executeQuery();
 
             return true;

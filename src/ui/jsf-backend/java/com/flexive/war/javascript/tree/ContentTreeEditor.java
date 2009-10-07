@@ -102,9 +102,9 @@ public class ContentTreeEditor implements Serializable {
         try {
             // add subnode count
             final FxTreeNode node = getTreeEngine().getNode(Edit, nodeId);
-            int totalChildren = node.getTotalChildCount();
-            if (totalChildren > 0) {
-                title += " [" + totalChildren + "]";
+            int childCount = node.getDirectChildCount();
+            if (childCount > 0) {
+                title += " [" + childCount + "]";
             }
 
             // add dirty flag

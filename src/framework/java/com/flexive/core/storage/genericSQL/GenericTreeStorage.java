@@ -58,6 +58,7 @@ import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNode;
 import com.flexive.shared.value.FxString;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Iterables;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -74,6 +75,9 @@ import java.math.BigDecimal;
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public abstract class GenericTreeStorage implements TreeStorage {
+    /** Partition size to be used for large IN(...) queries to workaround limitations of DBMS drivers */
+    protected static final int SQL_IN_PARTSIZE = 500;
+
     /**
      * Information to be processed when creating a new node (return value helper)
      */
@@ -99,6 +103,8 @@ public abstract class GenericTreeStorage implements TreeStorage {
 
     private static final Log LOG = LogFactory.getLog(GenericTreeStorage.class);
 
+    private static final String TREE_TOTAL_COUNT_LIVE = "(SELECT COUNT(*) FROM " + getTable(FxTreeMode.Live) + " WHERE LFT > t.LFT AND RGT < t.RGT)";
+    private static final String TREE_TOTAL_COUNT_EDIT = "(SELECT COUNT(*) FROM " + getTable(FxTreeMode.Edit) + " WHERE LFT > t.LFT AND RGT < t.RGT)";
     //                                                         1   2   3      4
     protected static final String TREE_LIVE_NODEINFO = "SELECT LFT,RGT,PARENT,TOTAL_CHILDCOUNT," +
             //                                                                        5
@@ -107,7 +113,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
             "(SELECT RGT FROM " + getTable(FxTreeMode.Live) + " WHERE ID=NODE.PARENT) PARENTRIGHT," +
             //7    8          9   10       11          12   13                               14  15   16  17   18         19
             "DEPTH,CHILDCOUNT,REF,TEMPLATE,MODIFIED_AT,NAME,tree_getPosition(TRUE,ID,PARENT),ACL,TDEF,VER,STEP,CREATED_BY,MANDATOR " +
-            "FROM (SELECT t.LFT,t.RGT,t.PARENT,t.DEPTH,t.TOTAL_CHILDCOUNT,t.CHILDCOUNT,t.REF,t.TEMPLATE,t.MODIFIED_AT,t.NAME,t.ID,c.ACL,c.TDEF,c.VER,c.STEP,c.CREATED_BY,c.MANDATOR FROM " +
+            "FROM (SELECT t.LFT,t.RGT,t.PARENT,t.DEPTH," + TREE_TOTAL_COUNT_LIVE + " TOTAL_CHILDCOUNT,t.CHILDCOUNT,t.REF,t.TEMPLATE,t.MODIFIED_AT,t.NAME,t.ID,c.ACL,c.TDEF,c.VER,c.STEP,c.CREATED_BY,c.MANDATOR FROM " +
             getTable(FxTreeMode.Live) + " t, " + TBL_CONTENT + " c WHERE t.ID=? AND c.ID=t.REF AND c.ISLIVE_VER=1) NODE";
 
     protected static final String TREE_NODEINFO_ACLS =
@@ -123,21 +129,21 @@ public abstract class GenericTreeStorage implements TreeStorage {
             "(SELECT RGT FROM " + getTable(FxTreeMode.Edit) + " WHERE ID=NODE.PARENT) PARENTRIGHT," +
             //7    8          9   10       11          12   13                                14  15   16  17   18         19
             "DEPTH,CHILDCOUNT,REF,TEMPLATE,MODIFIED_AT,NAME,tree_getPosition(FALSE,ID,PARENT),ACL,TDEF,VER,STEP,CREATED_BY,MANDATOR " +
-            "FROM (SELECT t.LFT,t.RGT,t.PARENT,t.DEPTH,t.TOTAL_CHILDCOUNT,t.CHILDCOUNT,t.REF,t.TEMPLATE,t.MODIFIED_AT,t.NAME,t.ID,c.ACL,c.TDEF,c.VER,c.STEP,c.CREATED_BY,c.MANDATOR FROM " +
+            "FROM (SELECT t.LFT,t.RGT,t.PARENT,t.DEPTH," + TREE_TOTAL_COUNT_EDIT + " TOTAL_CHILDCOUNT,t.CHILDCOUNT,t.REF,t.TEMPLATE,t.MODIFIED_AT,t.NAME,t.ID,c.ACL,c.TDEF,c.VER,c.STEP,c.CREATED_BY,c.MANDATOR FROM " +
             getTable(FxTreeMode.Edit) + " t, " + TBL_CONTENT + " c WHERE t.ID=? AND c.ID=t.REF AND c.ISMAX_VER=1) NODE";
 
     //                                                        1    2     3       4                  5            6      7        8       9          10          11                                         12    13     14    15     16           17       18        19         20           21           22           23            24
-    private static final String TREE_LIVE_GETNODE = "SELECT t.ID,t.REF,t.DEPTH,t.TOTAL_CHILDCOUNT,t.CHILDCOUNT,t.NAME,t.PARENT,t.DIRTY,t.TEMPLATE,t.MODIFIED_AT,tree_getPosition(TRUE,t.ID,t.PARENT) POS,c.ACL,c.TDEF,c.VER,c.STEP,c.CREATED_BY,c.MANDATOR,l.USER_ID,l.LOCKTYPE,l.CREATED_AT,l.EXPIRES_AT,c.CREATED_AT,c.MODIFIED_BY,c.MODIFIED_AT " +
+    private static final String TREE_LIVE_GETNODE = "SELECT t.ID,t.REF,t.DEPTH," + TREE_TOTAL_COUNT_LIVE + ",t.CHILDCOUNT,t.NAME,t.PARENT,t.DIRTY,t.TEMPLATE,t.MODIFIED_AT,tree_getPosition(TRUE,t.ID,t.PARENT) POS,c.ACL,c.TDEF,c.VER,c.STEP,c.CREATED_BY,c.MANDATOR,l.USER_ID,l.LOCKTYPE,l.CREATED_AT,l.EXPIRES_AT,c.CREATED_AT,c.MODIFIED_BY,c.MODIFIED_AT " +
             "FROM " + getTable(FxTreeMode.Live) + " t, " + TBL_CONTENT + " c LEFT JOIN " + TBL_LOCK + " l ON (l.LOCK_ID=c.ID AND l.LOCK_VER=c.VER)WHERE t.ID=? AND c.ID=t.REF AND c.ISLIVE_VER=1";
     //                                                        1    2     3       4                  5            6      7        8       9          10          11                                          12    13     14    15     16           17       18        19         20           21           22           23            24
-    private static final String TREE_EDIT_GETNODE = "SELECT t.ID,t.REF,t.DEPTH,t.TOTAL_CHILDCOUNT,t.CHILDCOUNT,t.NAME,t.PARENT,t.DIRTY,t.TEMPLATE,t.MODIFIED_AT,tree_getPosition(FALSE,t.ID,t.PARENT) POS,c.ACL,c.TDEF,c.VER,c.STEP,c.CREATED_BY,c.MANDATOR,l.USER_ID,l.LOCKTYPE,l.CREATED_AT,l.EXPIRES_AT,c.CREATED_AT,c.MODIFIED_BY,c.MODIFIED_AT " +
+    private static final String TREE_EDIT_GETNODE = "SELECT t.ID,t.REF,t.DEPTH," + TREE_TOTAL_COUNT_EDIT + ",t.CHILDCOUNT,t.NAME,t.PARENT,t.DIRTY,t.TEMPLATE,t.MODIFIED_AT,tree_getPosition(FALSE,t.ID,t.PARENT) POS,c.ACL,c.TDEF,c.VER,c.STEP,c.CREATED_BY,c.MANDATOR,l.USER_ID,l.LOCKTYPE,l.CREATED_AT,l.EXPIRES_AT,c.CREATED_AT,c.MODIFIED_BY,c.MODIFIED_AT " +
             "FROM " + getTable(FxTreeMode.Edit) + " t, " + TBL_CONTENT + " c LEFT JOIN " + TBL_LOCK + " l ON (l.LOCK_ID=c.ID AND l.LOCK_VER=c.VER) WHERE t.ID=? AND c.ID=t.REF AND c.ISMAX_VER=1";
 
     //                                                            1    2     3       4                  5            6      7        8       9          10          11                                         12    13     14    15     16           17       18        19         20           21           22           23            24
-    private static final String TREE_LIVE_GETNODE_REF = "SELECT t.ID,t.REF,t.DEPTH,t.TOTAL_CHILDCOUNT,t.CHILDCOUNT,t.NAME,t.PARENT,t.DIRTY,t.TEMPLATE,t.MODIFIED_AT,tree_getPosition(TRUE,t.ID,t.PARENT) POS,c.ACL,c.TDEF,c.VER,c.STEP,c.CREATED_BY,c.MANDATOR,l.USER_ID,l.LOCKTYPE,l.CREATED_AT,l.EXPIRES_AT,c.CREATED_AT,c.MODIFIED_BY,c.MODIFIED_AT " +
+    private static final String TREE_LIVE_GETNODE_REF = "SELECT t.ID,t.REF,t.DEPTH," + TREE_TOTAL_COUNT_LIVE + ",t.CHILDCOUNT,t.NAME,t.PARENT,t.DIRTY,t.TEMPLATE,t.MODIFIED_AT,tree_getPosition(TRUE,t.ID,t.PARENT) POS,c.ACL,c.TDEF,c.VER,c.STEP,c.CREATED_BY,c.MANDATOR,l.USER_ID,l.LOCKTYPE,l.CREATED_AT,l.EXPIRES_AT,c.CREATED_AT,c.MODIFIED_BY,c.MODIFIED_AT " +
             "FROM " + getTable(FxTreeMode.Live) + " t, " + TBL_CONTENT + " c LEFT JOIN " + TBL_LOCK + " l ON (l.LOCK_ID=c.ID AND l.LOCK_VER=c.VER) WHERE t.REF=? AND c.ID=t.REF AND c.ISLIVE_VER=1";
     //                                                            1    2     3       4                  5            6      7        8       9          10          11                                          12    13     14    15     16           17       18        19         20           21           22           23            24
-    private static final String TREE_EDIT_GETNODE_REF = "SELECT t.ID,t.REF,t.DEPTH,t.TOTAL_CHILDCOUNT,t.CHILDCOUNT,t.NAME,t.PARENT,t.DIRTY,t.TEMPLATE,t.MODIFIED_AT,tree_getPosition(FALSE,t.ID,t.PARENT) POS,c.ACL,c.TDEF,c.VER,c.STEP,c.CREATED_BY,c.MANDATOR,l.USER_ID,l.LOCKTYPE,l.CREATED_AT,l.EXPIRES_AT,c.CREATED_AT,c.MODIFIED_BY,c.MODIFIED_AT " +
+    private static final String TREE_EDIT_GETNODE_REF = "SELECT t.ID,t.REF,t.DEPTH," + TREE_TOTAL_COUNT_EDIT + ",t.CHILDCOUNT,t.NAME,t.PARENT,t.DIRTY,t.TEMPLATE,t.MODIFIED_AT,tree_getPosition(FALSE,t.ID,t.PARENT) POS,c.ACL,c.TDEF,c.VER,c.STEP,c.CREATED_BY,c.MANDATOR,l.USER_ID,l.LOCKTYPE,l.CREATED_AT,l.EXPIRES_AT,c.CREATED_AT,c.MODIFIED_BY,c.MODIFIED_AT " +
             "FROM " + getTable(FxTreeMode.Edit) + " t, " + TBL_CONTENT + " c LEFT JOIN " + TBL_LOCK + " l ON (l.LOCK_ID=c.ID AND l.LOCK_VER=c.VER)WHERE t.REF=? AND c.ID=t.REF AND c.ISMAX_VER=1";
 
     //1=id
@@ -268,7 +274,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
         long currentParent = parentNodeId;
         scanner.useDelimiter("/");
         if (parentNodeId != -1) {
-            acquireLocksForUpdate(con, getTreeNodeInfo(con, mode, parentNodeId), true, false);
+            acquireLocksForUpdate(con, getTreeNodeInfo(con, mode, parentNodeId), false);
         }
         while (scanner.hasNext()) {
             String name = scanner.next();
@@ -836,7 +842,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
                     "),n.NAME)"
                     : "tree_getPosition(TRUE,n.ID,n.PARENT)";
             //                     1    2     3       4                  5            6      7        8       9          10              11              12    13     14    15     16           17       18        19         20           21           22           23            24
-            String sql = "SELECT n.ID,n.REF,n.DEPTH,n.TOTAL_CHILDCOUNT,n.CHILDCOUNT,n.NAME,n.PARENT,n.DIRTY,n.TEMPLATE,n.MODIFIED_AT," + label_pos + ",c.ACL,c.TDEF,c.VER,c.STEP,c.CREATED_BY,c.MANDATOR,l.USER_ID,l.LOCKTYPE,l.CREATED_AT,l.EXPIRES_AT,c.CREATED_AT,c.MODIFIED_BY,c.MODIFIED_AT " +
+            String sql = "SELECT n.ID,n.REF,n.DEPTH,-1 TOTAL_CHILDCOUNT,n.CHILDCOUNT,n.NAME,n.PARENT,n.DIRTY,n.TEMPLATE,n.MODIFIED_AT," + label_pos + ",c.ACL,c.TDEF,c.VER,c.STEP,c.CREATED_BY,c.MANDATOR,l.USER_ID,l.LOCKTYPE,l.CREATED_AT,l.EXPIRES_AT,c.CREATED_AT,c.MODIFIED_BY,c.MODIFIED_AT " +
                     "FROM " + getTable(mode) + " r, " + getTable(mode) + " n, " + TBL_CONTENT + " c LEFT JOIN " + TBL_LOCK + " l ON (l.LOCK_ID=c.ID AND l.LOCK_VER=c.VER) WHERE r.ID=" + nodeId + " AND n.LFT>=r.LFT AND n.LFT<=r.RGT AND n.DEPTH<=(r.DEPTH+" + depth + ") AND c.ID=n.REF AND c." + version + " ORDER BY n.LFT";
 
             ps = con.createStatement();
@@ -1032,36 +1038,32 @@ public abstract class GenericTreeStorage implements TreeStorage {
     protected abstract void wipeTree(FxTreeMode mode, Statement stmt, FxPK rootPK) throws SQLException;
 
     /**
-     * Lock (part of) a tree for updates. This lock all nodes affected by a update, i.e. the folders where
-     * the child counds have to be updated.
+     * Lock tree nodes for updates.
      *
      * @param con       an existing connection
      * @param table     the table name to be locked
-     * @param left      tree boundary
-     * @param right     tree boundary
+     * @param nodeIds   the node ID(s) to be locked. If null or empty, the entire table will be locked.
      * @return          true if a lock could be required, false if the DBMS indicated a deadlock
      * @throws FxDbException    on non-deadlock DB errors
      */
-    protected abstract boolean lockForUpdate(Connection con, String table, BigDecimal left, BigDecimal right, boolean lockParents, boolean lockChildren) throws FxDbException; 
+    protected abstract boolean lockForUpdate(Connection con, String table, Iterable<Long> nodeIds) throws FxDbException;
 
     /**
-     * Acquire update locks for updating the node information of a tree defined with LEFT and RIGHT.
-     * Additionally lock specific node IDs, if present. To lock the entire tree, pass {@code null}
-     * for the left and right parameters.
+     * Acquire update locks for updating tree nodes. To lock the entire tree, pass {@code null}
+     * or an empty list for {@code nodeIds}.
      * <p>
-     * If the subtree could not be locked due to a rollback by the DBMS, the method waits for a 
+     * If (some of) the nodes could not be locked due to a rollback by the DBMS, the method waits for a
      * short period of time before it tries to acquire the lock again. Non-deadlock exceptions
      * are not caught and are thrown to the caller.
      * </p>
      *
      * @param con       an existing connection
      * @param mode      the tree mode
-     * @param left      tree boundary
-     * @param right     tree boundary
+     * @param nodeIds   the tree node IDs
      * @throws FxDbException    on database errors
      */
-    protected void acquireLocksForUpdate(Connection con, FxTreeMode mode, BigDecimal left, BigDecimal right, boolean lockParents, boolean lockChildren) throws FxDbException {
-        while (!lockForUpdate(con, getTable(mode), left, right, lockParents, lockChildren)) {
+    protected void acquireLocksForUpdate(Connection con, FxTreeMode mode, Iterable<Long> nodeIds) throws FxDbException {
+        while (!lockForUpdate(con, getTable(mode), nodeIds)) {
             if (LOG.isInfoEnabled()) {
                 LOG.info("Failed to lock " + getTable(mode) + ", waiting 100ms and retrying...");
             }
@@ -1081,17 +1083,37 @@ public abstract class GenericTreeStorage implements TreeStorage {
      * are not caught and are thrown to the called.
      * </p>
      *
-     * @param con       an existing connection
-     * @param nodeInfo  the
+     * @param con               an existing connection
+     * @param nodeInfo          the node to be locked
+     * @param lockParent        if the node's parent should also be locked
      * @throws FxDbException    on database errors
      */
-    protected void acquireLocksForUpdate(Connection con, FxTreeNodeInfo nodeInfo, boolean lockParents, boolean lockChildren) throws FxDbException {
-        acquireLocksForUpdate(con, nodeInfo.getMode(),
-                toBigDecimal(nodeInfo.getLeft()),
-                toBigDecimal(nodeInfo.getRight()),
-                lockParents,
-                lockChildren
+    protected void acquireLocksForUpdate(Connection con, FxTreeNodeInfo nodeInfo, boolean lockParent) throws FxDbException {
+        final List<Long> ids = new ArrayList<Long>(2);
+        ids.add(nodeInfo.getId());
+        if (lockParent) {
+            ids.add(nodeInfo.getParentId());
+        }
+        acquireLocksForUpdate(con,
+                nodeInfo.getMode(),
+                ids
         );
+    }
+
+    /**
+     * Acquire update locks for the entire node tree.
+     * <p>
+     * If the node could not be locked due to a rollback by the DBMS, the method waits for a
+     * short period of time before it tries to acquire the lock again. Non-deadlock exceptions
+     * are not caught and are thrown to the called.
+     * </p>
+     *
+     * @param con       an existing connection
+     * @param mode      the tree mode (edit or live)
+     * @throws FxDbException    on database errors
+     */
+    protected void acquireLocksForUpdate(Connection con, FxTreeMode mode) throws FxDbException {
+        acquireLocksForUpdate(con, mode, null);
     }
 
     private BigDecimal toBigDecimal(Number value) {
@@ -1108,7 +1130,6 @@ public abstract class GenericTreeStorage implements TreeStorage {
         if (nodeId == FxTreeNode.ROOT_NODE)
             throw new FxNoAccessException("ex.tree.delete.root");
         FxTreeNodeInfo nodeInfo = getTreeNodeInfo(con, mode, nodeId);
-        acquireLocksForUpdate(con, nodeInfo, true, true);
         ScriptingEngine scripting = EJBLookup.getScriptingEngine();
         final List<Long> scriptBeforeIds = scripting.getByScriptEvent(FxScriptEvent.BeforeTreeNodeRemoved);
         final List<Long> scriptAfterIds = scripting.getByScriptEvent(FxScriptEvent.AfterTreeNodeRemoved);
@@ -1117,16 +1138,19 @@ public abstract class GenericTreeStorage implements TreeStorage {
         try {
             stmt = con.createStatement();
 
-            final String INSIDE_NODE = " LFT>=" + nodeInfo.getLeft() + " AND RGT<=" + nodeInfo.getRight() + " ";
-            long childNodeDelta;
             stmt.addBatch(StorageManager.getReferentialIntegrityChecksStatement(false));
             List<FxPK> references = new ArrayList<FxPK>(50);
             UserTicket ticket = FxContext.getUserTicket();
 
+            // lock all affected rows
+            final List<Long> removeNodeIds = selectNodeIds(con, mode, nodeInfo.getLeft(), nodeInfo.getRight());
+            removeNodeIds.add(nodeId);
+            acquireLocksForUpdate(con, mode, Iterables.concat(removeNodeIds, Arrays.asList(nodeInfo.getParentId())));
+
             if (removeChildren) {
-                childNodeDelta = nodeInfo.getTotalChildCount() + 1;
                 //FX-102: edit permission checks on references
-                ResultSet rs = stmt.executeQuery("SELECT DISTINCT REF FROM " + getTable(mode) + " WHERE " + INSIDE_NODE);
+                ResultSet rs = stmt.executeQuery("SELECT DISTINCT REF FROM " + getTable(mode) + " WHERE "
+                        + " LFT>=" + nodeInfo.getLeft() + " AND RGT<=" + nodeInfo.getRight() + " ");
                 while (rs != null && rs.next()) {
                     try {
                         if (ce != null)
@@ -1138,10 +1162,9 @@ public abstract class GenericTreeStorage implements TreeStorage {
                 }
                 // call BeforeTreeNodeRemoved scripts
                 if (scriptBeforeIds.size() > 0 || scriptAfterIds.size() > 0) {
-                    rs = stmt.executeQuery("SELECT DISTINCT ID FROM " + getTable(mode) + " WHERE " + INSIDE_NODE);
                     final FxScriptBinding binding = new FxScriptBinding();
-                    while (rs != null && rs.next()) {
-                        final FxTreeNode n = getNode(con, mode, rs.getLong(1));
+                    for (long removedId : removeNodeIds) {
+                        final FxTreeNode n = getNode(con, mode, removedId);
                         if (removedNodes != null)
                             removedNodes.add(n);
                         for (long scriptId : scriptBeforeIds) {
@@ -1150,9 +1173,15 @@ public abstract class GenericTreeStorage implements TreeStorage {
                         }
                     }
                 }
-                stmt.addBatch("DELETE FROM " + getTable(mode) + " WHERE " + INSIDE_NODE);
+                for (List<Long> removeIds : Iterables.partition(removeNodeIds, SQL_IN_PARTSIZE)) {
+                    stmt.addBatch(
+                            "DELETE FROM " + getTable(mode)
+                            + " WHERE id IN ("
+                            + StringUtils.join(removeIds, ',')
+                            + ")"
+                    );
+                }
             } else {
-                childNodeDelta = 1;
                 //FX-102: edit permission checks on references
                 try {
                     if (ce != null)
@@ -1162,13 +1191,14 @@ public abstract class GenericTreeStorage implements TreeStorage {
                     //ignore, might have been removed meanwhile
                 }
                 stmt.addBatch("UPDATE " + getTable(mode) + " SET PARENT=" + nodeInfo.getParentId() + " WHERE PARENT=" + nodeId);
-                stmt.addBatch("UPDATE " + getTable(mode) + " SET DEPTH=DEPTH-1,DIRTY=" + (mode != FxTreeMode.Live) + " WHERE " + INSIDE_NODE);
+                for (List<Long> part : Iterables.partition(removeNodeIds, SQL_IN_PARTSIZE)) {
+                    stmt.addBatch("UPDATE " + getTable(mode) + " SET DEPTH=DEPTH-1,DIRTY=" + (mode != FxTreeMode.Live)
+                            + " WHERE id IN (" + StringUtils.join(part, ',') + ")");
+                }
                 stmt.addBatch("DELETE FROM " + getTable(mode) + " WHERE ID=" + nodeId);
             }
 
             // Update the childcount of the parents
-            stmt.addBatch("UPDATE " + getTable(mode) + " SET TOTAL_CHILDCOUNT=TOTAL_CHILDCOUNT-" + childNodeDelta +
-                    " WHERE (LFT<" + nodeInfo.getLeft() + " AND RGT>" + nodeInfo.getRight() + ")");
             if (removeChildren) {
                 stmt.addBatch("UPDATE " + getTable(mode) + " SET CHILDCOUNT=CHILDCOUNT-1 WHERE ID=" + nodeInfo.getParentId());
             } else {
@@ -1186,8 +1216,13 @@ public abstract class GenericTreeStorage implements TreeStorage {
                 //check if a node with the same id that has been removed in the live tree exists in the edit tree,
                 //the node and all its children will be flagged as dirty in the edit tree
                 FxTreeNodeInfo editNode = getTreeNodeInfo(con, FxTreeMode.Edit, nodeId);
-                stmt.addBatch("UPDATE " + getTable(FxTreeMode.Edit) + " SET DIRTY=TRUE WHERE LFT>=" +
-                        editNode.getLeft() + " AND RGT<=" + editNode.getRight());
+                final List<Long> editNodeIds = selectNodeIds(con, FxTreeMode.Edit, editNode.getLeft(), editNode.getRight());
+                acquireLocksForUpdate(con, FxTreeMode.Edit, editNodeIds);
+
+                for (List<Long> part : Iterables.partition(editNodeIds, SQL_IN_PARTSIZE)) {
+                    stmt.addBatch("UPDATE " + getTable(FxTreeMode.Edit) + " SET DIRTY=TRUE" +
+                            " WHERE ID IN ("  + StringUtils.join(part, ',') + ")");
+                }
 //                stmt.addBatch("UPDATE " + getTable(FxTreeMode.Edit) + " SET DIRTY=TRUE WHERE ID=" + editNode.getId());
             }
             stmt.executeBatch();
@@ -1223,6 +1258,23 @@ public abstract class GenericTreeStorage implements TreeStorage {
             } catch (Exception exc) {
                 //ignore
             }
+        }
+    }
+
+    protected List<Long> selectNodeIds(Connection con, FxTreeMode mode, Number left, Number right) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement("SELECT id FROM " + getTable(mode) + " WHERE lft > ? AND rgt < ?");
+            stmt.setBigDecimal(1, toBigDecimal(left));
+            stmt.setBigDecimal(2, toBigDecimal(right));
+            final ResultSet rs = stmt.executeQuery();
+            final List<Long> ids = new ArrayList<Long>();
+            while (rs.next()) {
+                ids.add(rs.getLong(1));
+            }
+            return ids;
+        } finally {
+            Database.closeObjects(GenericTreeStorage.class, null, stmt);
         }
     }
 
@@ -1271,7 +1323,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
     public void activateAll(Connection con, FxTreeMode mode) throws FxTreeException {
         Statement stmt = null;
         try {
-            acquireLocksForUpdate(con, mode, null,  null, true, true);
+            acquireLocksForUpdate(con, FxTreeMode.Live);
             stmt = con.createStatement();
             stmt.addBatch(StorageManager.getReferentialIntegrityChecksStatement(false));
             stmt.addBatch("DELETE FROM " + getTable(FxTreeMode.Live));
@@ -1498,7 +1550,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
             try {
                 stmt = con.createStatement();
                 ResultSet rs = stmt.executeQuery("SELECT DISTINCT ID FROM " + getTable(FxTreeMode.Edit) + " WHERE REF=" + id);
-                StringBuilder sb = new StringBuilder(500);
+                StringBuilder sb = new StringBuilder(SQL_IN_PARTSIZE);
                 while (rs != null && rs.next()) {
                     if (sb.length() > 0)
                         sb.append(",");

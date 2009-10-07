@@ -194,7 +194,7 @@ public class ContentTreeWriter implements Serializable {
             if (node.getChildren().size() == 0 && node.getDirectChildCount() > 0) {
                 properties.put("isFolder", true);
             }
-            writer.startNode(new Node(String.valueOf(node.getId()), label + " [" + node.getTotalChildCount() + "]",
+            writer.startNode(new Node(String.valueOf(node.getId()), label + " [" + node.getDirectChildCount() + "]",
                     docType, properties));
             writer.startChildren();
             for (FxTreeNode child : node.getChildren())

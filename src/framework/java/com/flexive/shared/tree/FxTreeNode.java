@@ -329,7 +329,16 @@ public class FxTreeNode implements Serializable, SelectableObjectWithLabel, Sele
     }
 
     /**
-     * Get the number of child nodes attached to this node and all subchildren
+     * Get the number of child nodes attached to this node and all subchildren.
+     * <p>
+     * <strong>Warning:</strong>
+     * From version 3.1 onwards, the total child count is no longer stored in the database
+     * to improve performance for concurrent tree updates. Thus it is calculated on-the-fly
+     * only when <strong>individual</strong> nodes are loaded. Most notably, it is not calculated
+     * when fetching a (sub-)tree via
+     * {@link com.flexive.shared.interfaces.TreeEngine#getTree(FxTreeMode, long, int)},
+     * in this case, it is always -1.
+     * </p>
      *
      * @return the number of child nodes attached to this node and all subchildren
      */

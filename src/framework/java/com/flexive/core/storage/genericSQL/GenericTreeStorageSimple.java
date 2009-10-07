@@ -52,7 +52,6 @@ import org.apache.commons.logging.LogFactory;
 
 import java.sql.*;
 import java.util.List;
-import java.math.BigDecimal;
 
 /**
  * Generic tree storage implementation using a simple nested set tree
@@ -70,7 +69,7 @@ public class GenericTreeStorageSimple extends GenericTreeStorage {
         stmt.execute(StorageManager.getReferentialIntegrityChecksStatement(false));
         try {
             stmt.executeUpdate("DELETE FROM " + getTable(mode));
-            stmt.executeUpdate("INSERT INTO " + getTable(mode) + " (ID,NAME,MODIFIED_AT,DIRTY,PARENT,DEPTH,CHILDCOUNT,TOTAL_CHILDCOUNT,REF,TEMPLATE,LFT,RGT) " +
+            stmt.executeUpdate("INSERT INTO " + getTable(mode) + " (ID,NAME,MODIFIED_AT,DIRTY,PARENT,DEPTH,CHILDCOUNT,REF,TEMPLATE,LFT,RGT) " +
                     "VALUES (" + ROOT_NODE + ",'Root'," + StorageManager.getTimestampFunction() + ",FALSE,NULL,1,0,0," + rootPK.getId() +
                     ",NULL,1,2)");
         } finally {
@@ -204,7 +203,7 @@ public class GenericTreeStorageSimple extends GenericTreeStorage {
             ps.close();
             //insert the new node
             ps = con.prepareStatement("INSERT INTO " + getTable(mode) + " (ID,PARENT,DEPTH,DIRTY,REF,LFT,RGT," +
-                    "TOTAL_CHILDCOUNT,CHILDCOUNT,NAME,MODIFIED_AT,TEMPLATE) VALUES " +
+                    "CHILDCOUNT,NAME,MODIFIED_AT,TEMPLATE) VALUES " +
                     "(" + nci.id + "," + parentNodeId + "," + (parentNode.getDepth() + 1) +
                     ",?," + nci.reference.getId() + ",?,?,0,0,?," + StorageManager.getTimestampFunction() + ",?)");
             ps.setBoolean(1, mode != FxTreeMode.Live);
@@ -219,11 +218,6 @@ public class GenericTreeStorageSimple extends GenericTreeStorage {
             ps.executeUpdate();
             ps.close();
 
-            // Update all affected childcounts
-            ps = con.prepareStatement("UPDATE " + getTable(mode) + " SET TOTAL_CHILDCOUNT=TOTAL_CHILDCOUNT+1 WHERE " +
-                    " LFT<" + left + " AND RGT>" + right);
-            ps.executeUpdate();
-            ps.close();
             //update the parents childcount
             ps = con.prepareStatement("UPDATE " + getTable(mode) + " SET CHILDCOUNT=CHILDCOUNT+1 WHERE ID=" + parentNodeId);
             ps.executeUpdate();
@@ -358,10 +352,6 @@ public class GenericTreeStorageSimple extends GenericTreeStorage {
                 FxTreeNodeInfo nodeOldParent = getTreeNodeInfo(con, mode, node.getParentId());
                 node = getTreeNodeInfo(con, mode, nodeId);
                 stmt = con.createStatement();
-                stmt.addBatch("UPDATE " + getTable(mode) + " SET TOTAL_CHILDCOUNT=TOTAL_CHILDCOUNT+" + (node.getTotalChildCount() + 1) +
-                        " WHERE (LFT<" + node.getLeft().longValue() + " AND RGT>" + node.getRight().longValue() + ")");
-                stmt.addBatch("UPDATE " + getTable(mode) + " SET TOTAL_CHILDCOUNT=TOTAL_CHILDCOUNT-" + (node.getTotalChildCount() + 1) +
-                        " WHERE (LFT<=" + nodeOldParent.getLeft() + " AND RGT>=" + nodeOldParent.getRight() + ")");
                 stmt.addBatch("UPDATE " + getTable(mode) + " SET CHILDCOUNT=CHILDCOUNT+1 WHERE ID=" + newParentId);
                 stmt.addBatch("UPDATE " + getTable(mode) + " SET CHILDCOUNT=CHILDCOUNT-1 WHERE ID=" + nodeOldParent.getId());
                 if (mode != FxTreeMode.Live) {
@@ -500,7 +490,7 @@ public class GenericTreeStorageSimple extends GenericTreeStorage {
      * {@inheritDoc}
      */
     @Override
-    protected boolean lockForUpdate(Connection con, String table, BigDecimal left, BigDecimal right, boolean lockParents, boolean lockChildren) throws FxDbException {
+    protected boolean lockForUpdate(Connection con, String table, Iterable<Long> nodeIds) throws FxDbException {
         return true;    // NOP
     }
 }
