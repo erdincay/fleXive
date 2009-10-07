@@ -65,6 +65,7 @@ import org.apache.commons.logging.LogFactory;
 
 import java.sql.*;
 import java.util.*;
+import java.math.BigDecimal;
 
 /**
  * Generic tree storage implementation for nested set model trees
@@ -266,6 +267,9 @@ public abstract class GenericTreeStorage implements TreeStorage {
         final Scanner scanner = new Scanner(path);
         long currentParent = parentNodeId;
         scanner.useDelimiter("/");
+        if (parentNodeId != -1) {
+            acquireLocksForUpdate(con, getTreeNodeInfo(con, mode, parentNodeId), true, false);
+        }
         while (scanner.hasNext()) {
             String name = scanner.next();
             final FxString label = new FxString(true, name);
@@ -1028,6 +1032,73 @@ public abstract class GenericTreeStorage implements TreeStorage {
     protected abstract void wipeTree(FxTreeMode mode, Statement stmt, FxPK rootPK) throws SQLException;
 
     /**
+     * Lock (part of) a tree for updates. This lock all nodes affected by a update, i.e. the folders where
+     * the child counds have to be updated.
+     *
+     * @param con       an existing connection
+     * @param table     the table name to be locked
+     * @param left      tree boundary
+     * @param right     tree boundary
+     * @return          true if a lock could be required, false if the DBMS indicated a deadlock
+     * @throws FxDbException    on non-deadlock DB errors
+     */
+    protected abstract boolean lockForUpdate(Connection con, String table, BigDecimal left, BigDecimal right, boolean lockParents, boolean lockChildren) throws FxDbException; 
+
+    /**
+     * Acquire update locks for updating the node information of a tree defined with LEFT and RIGHT.
+     * Additionally lock specific node IDs, if present. To lock the entire tree, pass {@code null}
+     * for the left and right parameters.
+     * <p>
+     * If the subtree could not be locked due to a rollback by the DBMS, the method waits for a 
+     * short period of time before it tries to acquire the lock again. Non-deadlock exceptions
+     * are not caught and are thrown to the caller.
+     * </p>
+     *
+     * @param con       an existing connection
+     * @param mode      the tree mode
+     * @param left      tree boundary
+     * @param right     tree boundary
+     * @throws FxDbException    on database errors
+     */
+    protected void acquireLocksForUpdate(Connection con, FxTreeMode mode, BigDecimal left, BigDecimal right, boolean lockParents, boolean lockChildren) throws FxDbException {
+        while (!lockForUpdate(con, getTable(mode), left, right, lockParents, lockChildren)) {
+            if (LOG.isInfoEnabled()) {
+                LOG.info("Failed to lock " + getTable(mode) + ", waiting 100ms and retrying...");
+            }
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                // ignore
+            }
+        }
+    }
+
+    /**
+     * Acquire update locks for a node and all of its parents and/or children.
+     * <p>
+     * If the subtree could not be locked due to a rollback by the DBMS, the method waits for a
+     * short period of time before it tries to acquire the lock again. Non-deadlock exceptions
+     * are not caught and are thrown to the called.
+     * </p>
+     *
+     * @param con       an existing connection
+     * @param nodeInfo  the
+     * @throws FxDbException    on database errors
+     */
+    protected void acquireLocksForUpdate(Connection con, FxTreeNodeInfo nodeInfo, boolean lockParents, boolean lockChildren) throws FxDbException {
+        acquireLocksForUpdate(con, nodeInfo.getMode(),
+                toBigDecimal(nodeInfo.getLeft()),
+                toBigDecimal(nodeInfo.getRight()),
+                lockParents,
+                lockChildren
+        );
+    }
+
+    private BigDecimal toBigDecimal(Number value) {
+        return value instanceof BigDecimal ? (BigDecimal) value : new BigDecimal(value.toString());
+    }
+
+    /**
      * {@inheritDoc}
      */
     public void removeNode(Connection con, FxTreeMode mode, ContentEngine ce, long nodeId, boolean removeChildren) throws FxApplicationException {
@@ -1037,6 +1108,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
         if (nodeId == FxTreeNode.ROOT_NODE)
             throw new FxNoAccessException("ex.tree.delete.root");
         FxTreeNodeInfo nodeInfo = getTreeNodeInfo(con, mode, nodeId);
+        acquireLocksForUpdate(con, nodeInfo, true, true);
         ScriptingEngine scripting = EJBLookup.getScriptingEngine();
         final List<Long> scriptBeforeIds = scripting.getByScriptEvent(FxScriptEvent.BeforeTreeNodeRemoved);
         final List<Long> scriptAfterIds = scripting.getByScriptEvent(FxScriptEvent.AfterTreeNodeRemoved);
@@ -1144,7 +1216,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
                 }
             }
         } catch (SQLException exc) {
-            throw new FxRemoveException(LOG, "ex.tree.delete.failed", nodeId, exc.getMessage());
+            throw new FxRemoveException(LOG, exc, "ex.tree.delete.failed", nodeId, exc.getMessage());
         } finally {
             try {
                 if (stmt != null) stmt.close();
@@ -1199,6 +1271,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
     public void activateAll(Connection con, FxTreeMode mode) throws FxTreeException {
         Statement stmt = null;
         try {
+            acquireLocksForUpdate(con, mode, null,  null, true, true);
             stmt = con.createStatement();
             stmt.addBatch(StorageManager.getReferentialIntegrityChecksStatement(false));
             stmt.addBatch("DELETE FROM " + getTable(FxTreeMode.Live));
@@ -1372,8 +1445,8 @@ public abstract class GenericTreeStorage implements TreeStorage {
             removeNode(con, nodeInfo.getMode(), null, nodeInfo.getId(), false);
             return folderPK;
         }
-        //if the referenced content is a foder, remove it without removing its children in edit mode and remove it with children in live mode
-        if (FxType.FOLDER.equals(CacheAdmin.getEnvironment().getType(typeId).getName())) {
+        //if the referenced content is a folder, remove it without removing its children in edit mode and remove it with children in live mode
+        if (CacheAdmin.getEnvironment().getType(typeId).isDerivedFrom(FxType.FOLDER)) {
             removeNode(con, nodeInfo.getMode(), null, nodeInfo.getId(), nodeInfo.getMode() == FxTreeMode.Live);
             return folderPK;
         }

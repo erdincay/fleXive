@@ -40,6 +40,7 @@ import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.exceptions.FxTreeException;
+import com.flexive.shared.exceptions.FxDbException;
 import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.interfaces.SequencerEngine;
 import com.flexive.shared.structure.FxType;
@@ -51,6 +52,7 @@ import org.apache.commons.logging.LogFactory;
 
 import java.sql.*;
 import java.util.List;
+import java.math.BigDecimal;
 
 /**
  * Generic tree storage implementation using a simple nested set tree
@@ -492,5 +494,13 @@ public class GenericTreeStorageSimple extends GenericTreeStorage {
                 if (stmt2 != null) stmt2.close();
             } catch (Exception exc) {/*ignore*/}
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected boolean lockForUpdate(Connection con, String table, BigDecimal left, BigDecimal right, boolean lockParents, boolean lockChildren) throws FxDbException {
+        return true;    // NOP
     }
 }

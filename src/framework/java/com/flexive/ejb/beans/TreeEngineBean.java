@@ -374,6 +374,7 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
      * @param deleteChildren
      * @throws FxApplicationException on errors
      */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void remove(FxTreeMode mode, long nodeId, boolean deleteReferencedContent, boolean deleteChildren) throws FxApplicationException {
         Connection con = null;
         if (nodeId < 0) {

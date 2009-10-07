@@ -277,6 +277,46 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
     }
 
     /**
+     * Is this FxType derived from the given type?
+     *
+     * @param typeId    the parent type
+     * @return          true if this type is derived (direct or transitive) from {@code typeId}
+     *                  or when this type's ID is {@code typeId}
+     * @since           3.1
+     */
+    public boolean isDerivedFrom(long typeId) {
+        if (id == typeId || id == FxType.ROOT_ID) {
+            return true;
+        }
+        for (FxType type = parent; type != null; type = type.getParent()) {
+            if (type.getId() == typeId) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Is this FxType derived from the given type?
+     *
+     * @param typeName  the type name
+     * @return          true if this type is derived (direct or transitive) from {@code typeName}
+     *                  or when the typeName refers to this type
+     * @since           3.1
+     */
+    public boolean isDerivedFrom(String typeName) {
+        if (name.equalsIgnoreCase(typeName) || "Root".equalsIgnoreCase(typeName)) {
+            return true;
+        }
+        for (FxType type = parent; type != null; type = type.getParent()) {
+            if (type.getName().equalsIgnoreCase(typeName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * If this FxType is derived from another FxType get the 'super' FxType
      *
      * @return FxType this one is derived from or <code>null</code>

@@ -255,7 +255,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
                                    int depthDelta, Long destinationNode, boolean createMode, boolean createKeepIds) throws FxTreeException {
         try {
             synchronized (LOCK_REORG) {
-                acquireSubtreeLocks(con, sourceMode, null, null);
+                acquireLocksForUpdate(con, sourceMode, null, null, true, true);
                 return _reorganizeSpace(con, seq, sourceMode, destMode, nodeId, includeNodeId, overrideSpacing,
                         overrideLeft, insertParent, insertPosition, insertSpace, insertBoundaries,
                         depthDelta, destinationNode, createMode, createKeepIds);
@@ -514,12 +514,10 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
             throw new FxTreeException("ex.tree.create.noSpace", parentNodeId);
         }
 
-        BigDecimal left = leftBoundary.add(spacing).add(BigDecimal.ONE);
-        BigDecimal right = left.add(spacing).add(BigDecimal.ONE);
+        final BigDecimal left = leftBoundary.add(spacing).add(BigDecimal.ONE);
+        final BigDecimal right = left.add(spacing).add(BigDecimal.ONE);
 
-        acquireSubtreeLocks(con, mode, left, right);
-        // TODO: should really be the following because we also touch parentNodeId, but this locks up under concurrent requests
-        //acquireSubtreeLocks(con, mode, left, right, parentNodeId);
+        acquireLocksForUpdate(con, mode, left, right, true, false);
 
         NodeCreateInfo nci = getNodeCreateInfo(mode, seq, ce, nodeId, name, label, reference);
 
@@ -988,55 +986,44 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
         }
     }
 
-    protected void acquireSubtreeLocks(Connection con, FxTreeMode mode, BigDecimal left, BigDecimal right, long... nodeIds) throws FxDbException {
-        while (!lockSubtree(con, getTable(mode), left, right, nodeIds)) {
-            if (LOG.isInfoEnabled()) {
-                LOG.info("Failed to lock " + getTable(mode) + ", waiting 100ms and retrying...");
-            }
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                // ignore
-            }
-        }
-    }
-
     /**
-     * Lock part of the tree for updates.
-     *
-     * @param con   the connection to be used
-     * @param left  the left boundary (exclusive)
-     * @param right the right boundary (exclusive)
-     * @return      if the lock succeeded
-     * @since       3.1
+     * {@inheritDoc}
      */
-    protected boolean lockSubtree(Connection con, String table, BigDecimal left, BigDecimal right, long... nodeIds) throws FxDbException {
+    @Override
+    protected boolean lockForUpdate(Connection con, String table, BigDecimal left, BigDecimal right,
+                                    boolean lockParents, boolean lockChildren) throws FxDbException {
         PreparedStatement stmt = null;
         try {
 
             final List<String> conditions = new ArrayList<String>();
-            final boolean bounded = left != null && right != null;
+            int bounded = 0;   // number of tree bound conditions
 
             // lock tree region
-            if (bounded) {
-                conditions.add("LFT <= ? AND RGT >= ?");
-            }
-            // lock individual nodes
-            if (nodeIds != null && nodeIds.length > 0) {
-                conditions.add("ID IN ("
-                        + StringUtils.join(Arrays.asList(ArrayUtils.toObject(nodeIds)), ',') 
-                        + ")");
+            if (left != null && right != null) {
+                if (!lockParents || !lockChildren) {
+                    // specify range locks, unless the whole tree should be locked (both parameters are true)
+                    if (lockParents) {
+                        conditions.add("LFT <= ? AND RGT >= ?");
+                        bounded++;
+                    }
+                    if (lockChildren) {
+                        conditions.add("LFT >= ? AND RGT <= ?");
+                        bounded++;
+                    }
+                }
             }
 
             stmt = con.prepareStatement("SELECT id FROM " + table
-                    + (conditions.isEmpty() ? "" : " WHERE ")
-                    + StringUtils.join(conditions, " OR ")
+                    + (conditions.isEmpty() ? ""
+                    : " WHERE (" + StringUtils.join(conditions, ") OR (") + ")")
                     + " FOR UPDATE");
-            if (bounded) {
-                stmt.setBigDecimal(1, left);
-                stmt.setBigDecimal(2, right);
+
+            for (int i = 0; i < bounded; i++) {
+                stmt.setBigDecimal(1 + i*2, left);
+                stmt.setBigDecimal(2 + i*2, right);
             }
             stmt.executeQuery();
+
             return true;
         } catch (SQLException e) {
             if (StorageManager.getStorageImpl().isDeadlock(e)) {
