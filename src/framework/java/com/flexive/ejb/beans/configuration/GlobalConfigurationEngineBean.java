@@ -159,19 +159,23 @@ public class GlobalConfigurationEngineBean extends GenericConfigurationImpl impl
     }
 
     /**
-     * Get the global configuration table name including the correct escaped schema
+     * Get the global configuration table name including the correct schema
      *
      * @param con an open and valid connection to determine the correct storage vendor
-     * @return global configuration table name including the correct escaped schema
+     * @return global configuration table name including the escaped schema
      */
     private String getConfigurationTable(Connection con) {
         try {
-            if (StorageManager.getStorageImpl(con.getMetaData().getDatabaseProductName()).escapeSchema())
-                return "\"" + DatabaseConst.getConfigSchema() + "\"." + TBL_GLOBAL_CONFIG;
+            if (StorageManager.getStorageImpl(con.getMetaData().getDatabaseProductName()).requiresConfigSchema()) {
+                if (DatabaseConst.getConfigSchema().endsWith("."))
+                    return DatabaseConst.getConfigSchema() + TBL_GLOBAL_CONFIG;
+                else
+                    return DatabaseConst.getConfigSchema() + "." + TBL_GLOBAL_CONFIG;
+            }
         } catch (SQLException e) {
             LOG.warn(e);
         }
-        return DatabaseConst.getConfigSchema() + "." + TBL_GLOBAL_CONFIG;
+        return TBL_GLOBAL_CONFIG;
     }
 
     /**

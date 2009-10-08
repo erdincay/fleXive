@@ -964,11 +964,14 @@ public abstract class GenericTreeStorage implements TreeStorage {
             FxPK rootPK;
 
             FxTreeMode rootCheckMode = mode == FxTreeMode.Live ? FxTreeMode.Edit : FxTreeMode.Live;
+            Savepoint sp = null;
             try {
+                sp = con.setSavepoint();
                 rootPK = getTreeNodeInfo(con, rootCheckMode, FxTreeNode.ROOT_NODE).getReference();
+                con.releaseSavepoint(sp);
             } catch (FxApplicationException e) {
                 LOG.info("No root node found. Creating a new one.");
-
+                con.rollback(sp);
                 //create the root folder instance
                 FxType type = CacheAdmin.getEnvironment().getType(FxType.FOLDER);
                 FxContent content = ce.initialize(type.getId());

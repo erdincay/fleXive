@@ -747,23 +747,22 @@ public class GenericBinarySQLStorage implements BinaryStorage {
                 ps.setString(1, binary.getHandle());
 
                 rs = ps.executeQuery();
-                if (rs.next()) {
-                    try {
-                        header = rs.getBlob(1).getBytes(1, 48);
-                    } catch (Throwable t) {
-                        // ignore, header might be smaller than 48
-                    }
-                } else {
+                if (!rs.next()) {
                     throw new FxApplicationException(LOG, "ex.content.binary.transitNotFound", binary.getHandle());
                 }
 
                 binaryTransitFile = File.createTempFile("FXBIN_", "_TEMP");
-                in = rs.getBlob(1).getBinaryStream();
+                in = rs.getBinaryStream(1);
                 fos = new FileOutputStream(binaryTransitFile);
                 byte[] buffer = new byte[4096];
                 int read;
-                while ((read = in.read(buffer)) != -1)
+                while ((read = in.read(buffer)) != -1) {
+                    if( header == null && read  > 0) {
+                        header = new byte[read > 48 ? 48 : read];
+                        System.arraycopy(buffer, 0, header, 0, read > 48 ? 48 : read);
+                    }
                     fos.write(buffer, 0, read);
+                }
                 fos.close();
                 fos = null;
                 in.close();

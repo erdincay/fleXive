@@ -43,10 +43,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -60,6 +57,19 @@ public class PostgreSQLSequencerStorage extends GenericSequencerStorage {
 
     private static final PostgreSQLSequencerStorage instance = new PostgreSQLSequencerStorage();
 
+    private final static String TBL_PG_SEQUENCES = "PG_CLASS";
+    private final static String PG_SEQ_PREFIX = "FXSEQ_";
+    private final static String SQL_NEXT = "SELECT CURRVAL(?), NEXTVAL(?)";
+    private final static String SQL_CREATE = "CREATE SEQUENCE ";
+    private final static String SQL_DELETE = "DROP SEQUENCE " + PG_SEQ_PREFIX;
+    private final static String SQL_EXIST = "SELECT COUNT(*) FROM " + TBL_PG_SEQUENCES + " WHERE RELKIND='S' AND UPPER(RELNAME)=?";
+    private final static String SQL_GET_INFO = "SELECT IS_CYCLED, LAST_VALUE FROM ";
+    private final static String SQL_GET_USER = "SELECT SUBSTR(UPPER(s.RELNAME)," + (PG_SEQ_PREFIX.length() + 1) + ") FROM " +
+            TBL_PG_SEQUENCES + " s WHERE s.RELKIND='S' AND s.RELNAME NOT LIKE '" + PG_SEQ_PREFIX + "SYS_%' AND s.RELNAME LIKE '" + PG_SEQ_PREFIX + "%' ORDER BY s.RELNAME ASC";
+
+    private static final String NOROLLOVER = "NO CYCLE";
+    private static final String ROLLOVER = "CYCLE";
+
     /**
      * Singleton getter
      *
@@ -70,32 +80,10 @@ public class PostgreSQLSequencerStorage extends GenericSequencerStorage {
     }
 
     /**
-     * Maximum possible id
-     */
-    public final static long MAX_ID = ((long) Integer.MAX_VALUE) * 2 - 50;
-
-    /**
-     * Global sequencer table
-     *
-     * @see com.flexive.shared.interfaces.SequencerEngine
-     */
-    public static final String TBL_SEQUENCE = "FXS_SEQUENCE";
-
-    private final static String SQL_CREATE = "INSERT INTO " + TBL_SEQUENCE + "(ID,NAME,ROLLOVER)VALUES(?,?,?)";
-    private final static String SQL_DELETE = "DELETE FROM " + TBL_SEQUENCE + " WHERE NAME=?";
-    private final static String SQL_EXIST = "SELECT COUNT(*) FROM " + TBL_SEQUENCE + " WHERE NAME=?";
-    private final static String SQL_GET_USER = "SELECT NAME,ROLLOVER,ID FROM " + TBL_SEQUENCE + " WHERE NAME NOT LIKE 'SYS_%' ORDER BY NAME ASC";
-
-    private final static String SQL_NEXT = "UPDATE " + TBL_SEQUENCE + " SET ID=LAST_INSERT_ID(ID+1) WHERE NAME=?";
-    private final static String SQL_RESET = "UPDATE " + TBL_SEQUENCE + " SET ID=0 WHERE NAME=?";
-    private final static String SQL_GETID = "SELECT LAST_INSERT_ID()";
-    private final static String SQL_GET_ROLLOVER = "SELECT ROLLOVER FROM " + TBL_SEQUENCE + " WHERE NAME=?";
-
-    /**
      * {@inheritDoc}
      */
     public long getMaxId() {
-        return MAX_ID;
+        return 9223372036854775807L;
     }
 
     /**
@@ -107,47 +95,15 @@ public class PostgreSQLSequencerStorage extends GenericSequencerStorage {
         try {
             // Obtain a database connection
             con = Database.getDbConnection();
-
-            // Prepare the new id
-            ps = con.prepareStatement(SQL_NEXT);
-            ps.setString(1, name);
-            ps.executeUpdate();
-            if (ps.getUpdateCount() == 0)
-                throw new FxCreateException(LOG, "ex.sequencer.typeUnknown", name);
-            ps.close();
-
-            // Get the new id
-            ps = con.prepareStatement(SQL_GETID);
+            //TODO: catch exhausted!
+            ps = con.prepareStatement("SELECT NEXTVAL(?)");
+            ps.setString(1, PG_SEQ_PREFIX + name);
             ResultSet rs = ps.executeQuery();
-            long newId;
-            if (rs == null || !rs.next())
+            if (rs != null && rs.next()) {
+//                System.out.println("==> FETCH FOR " + name+ " => "+rs.getLong(1));
+                return rs.getLong(1);
+            } else
                 throw new FxCreateException(LOG, "ex.sequencer.fetch.failed", name);
-            newId = rs.getLong(1);
-            if (rs.wasNull())
-                throw new FxCreateException(LOG, "ex.sequencer.fetch.failed", name);
-            if (newId >= MAX_ID) {
-                if (!name.startsWith("SYS_")) {
-                    //get allowRollover setting
-                    ps.close();
-                    ps = con.prepareStatement(SQL_GET_ROLLOVER);
-                    ps.setString(1, name);
-                    ResultSet rso = ps.executeQuery();
-                    if (rso == null || !rso.next())
-                        throw new FxCreateException(LOG, "ex.sequencer.fetch.failed", name);
-                    allowRollover = rso.getBoolean(1);
-                }
-                if (!allowRollover)
-                    throw new FxCreateException("ex.sequencer.exhausted", name);
-                ps.close();
-                ps = con.prepareStatement(SQL_RESET);
-                ps.setString(1, name);
-                ps.executeUpdate();
-                if (ps.getUpdateCount() == 0)
-                    throw new FxCreateException(LOG, "ex.sequencer.typeUnknown", name);
-                newId = 0;
-            }
-            // Return new id
-            return newId;
         } catch (SQLException exc) {
             throw new FxCreateException(LOG, exc, "ex.sequencer.fetch.failedMsg", name, exc.getMessage());
         } finally {
@@ -166,21 +122,15 @@ public class PostgreSQLSequencerStorage extends GenericSequencerStorage {
             throw new FxCreateException(LOG, "ex.sequencer.create.invalid.name", name);
 
         Connection con = null;
-        PreparedStatement ps = null;
+        Statement stmt = null;
         try {
             con = Database.getDbConnection();
-
-            ps = con.prepareStatement(SQL_CREATE);
-            ps.setLong(1, startNumber);
-            ps.setString(2, name);
-            ps.setBoolean(3, allowRollover);
-            ps.executeUpdate();
-            if (ps.getUpdateCount() == 0)
-                throw new FxCreateException(LOG, "ex.sequencer.create.failed", name);
+            stmt = con.createStatement();
+            stmt.executeUpdate(SQL_CREATE + PG_SEQ_PREFIX + name + " START " + startNumber + " INCREMENT BY 1 " + (allowRollover ? ROLLOVER : NOROLLOVER));
         } catch (SQLException exc) {
             throw new FxCreateException(LOG, exc, "ex.sequencer.create.failed", name);
         } finally {
-            Database.closeObjects(PostgreSQLSequencerStorage.class, con, ps);
+            Database.closeObjects(PostgreSQLSequencerStorage.class, con, stmt);
         }
     }
 
@@ -191,18 +141,15 @@ public class PostgreSQLSequencerStorage extends GenericSequencerStorage {
         if (!sequencerExists(name))
             throw new FxCreateException(LOG, "ex.sequencer.remove.notFound", name);
         Connection con = null;
-        PreparedStatement ps = null;
+        Statement stmt = null;
         try {
             con = Database.getDbConnection();
-            ps = con.prepareStatement(SQL_DELETE);
-            ps.setString(1, name);
-            ps.executeUpdate();
-            if (ps.getUpdateCount() == 0)
-                throw new FxCreateException(LOG, "ex.sequencer.remove.failed", name);
+            stmt = con.createStatement();
+            stmt.executeUpdate(SQL_DELETE + name);
         } catch (SQLException exc) {
-            throw new FxCreateException(LOG, exc, "ex.sequencer.remove.failed", name);
+            throw new FxCreateException(LOG, exc, "ex.sequencer.remove.failed", name, exc.getMessage());
         } finally {
-            Database.closeObjects(PostgreSQLSequencerStorage.class, con, ps);
+            Database.closeObjects(PostgreSQLSequencerStorage.class, con, stmt);
         }
     }
 
@@ -217,7 +164,7 @@ public class PostgreSQLSequencerStorage extends GenericSequencerStorage {
         try {
             con = Database.getDbConnection();
             ps = con.prepareStatement(SQL_EXIST);
-            ps.setString(1, name.trim().toUpperCase());
+            ps.setString(1, PG_SEQ_PREFIX + name.trim().toUpperCase());
             ResultSet rs = ps.executeQuery();
             return !(rs == null || !rs.next()) && rs.getInt(1) != 0;
         } catch (SQLException exc) {
@@ -234,15 +181,26 @@ public class PostgreSQLSequencerStorage extends GenericSequencerStorage {
         List<CustomSequencer> res = new ArrayList<CustomSequencer>(20);
         Connection con = null;
         PreparedStatement ps = null;
+        Statement s = null;
         try {
             con = Database.getDbConnection();
             ps = con.prepareStatement(SQL_GET_USER);
+            s = con.createStatement();
             ResultSet rs = ps.executeQuery();
-            while (rs != null && rs.next())
-                res.add(new CustomSequencer(rs.getString(1), rs.getBoolean(2), rs.getLong(3)));
+            while (rs != null && rs.next()) {
+                ResultSet rsi = s.executeQuery(SQL_GET_INFO + rs.getString(1));
+                res.add(new CustomSequencer(rs.getString(1), rsi.getBoolean(1), rsi.getLong(2)));
+                rsi.close();
+            }
         } catch (SQLException exc) {
             throw new FxDbException(LOG, exc, "ex.db.sqlError", exc.getMessage());
         } finally {
+            try {
+                if (s != null)
+                    s.close();
+            } catch (SQLException e) {
+                LOG.error(e);
+            }
             Database.closeObjects(PostgreSQLSequencerStorage.class, con, ps);
         }
         return res;
@@ -256,9 +214,8 @@ public class PostgreSQLSequencerStorage extends GenericSequencerStorage {
         PreparedStatement ps = null;
         try {
             con = Database.getDbConnection();
-            ps = con.prepareStatement("UPDATE " + TBL_SEQUENCE + " SET ID=? WHERE NAME=?");
-            ps.setLong(1, newId);
-            ps.setString(2, name);
+            ps = con.prepareStatement("SETVAL(" + PG_SEQ_PREFIX + name + ",?,TRUE)");
+            ps.setLong(1, newId + 1);
             ps.executeUpdate();
         } catch (SQLException exc) {
             throw new FxDbException(LOG, exc, "ex.db.sqlError", exc.getMessage());

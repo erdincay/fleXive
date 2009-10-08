@@ -149,8 +149,8 @@ public class H2StorageFactory implements DBStorage {
     /**
      * {@inheritDoc}
      */
-    public String getIfFunction() {
-        return "CASEWHEN";
+    public String getIfFunction(String condition, String exprtrue, String exprfalse) {
+        return "CASEWHEN(" + condition + "," + exprtrue + "," + exprfalse + ")";
     }
 
     /**
@@ -214,7 +214,7 @@ public class H2StorageFactory implements DBStorage {
     /**
      * {@inheritDoc}
      */
-    public boolean escapeSchema() {
+    public boolean requiresConfigSchema() {
         return false;
     }
 

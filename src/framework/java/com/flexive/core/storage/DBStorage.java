@@ -137,9 +137,12 @@ public interface DBStorage {
     /**
      * Get a database vendor specific "IF" function
      *
+     * @param condition the condition to check
+     * @param exprtrue  expression if condition is true
+     * @param exprfalse expression if condition is false
      * @return database vendor specific "IF" function
      */
-    String getIfFunction();
+    String getIfFunction(String condition, String exprtrue, String exprfalse);
 
     /**
      * Get the database vendor specific statement to enable or disable referential integrity checks
@@ -192,17 +195,18 @@ public interface DBStorage {
      * Returns true if the given SqlException indicates a deadlock.
      *
      * @param exc the exception
-     * @return  true if the given SqlException indicates a deadlock.
+     * @return true if the given SqlException indicates a deadlock.
      * @since 3.1
      */
     boolean isDeadlock(Exception exc);
 
     /**
-     * When the database schema is used in queries, do we have to escape it? (eg postgres requires this)
+     * When accessing the global configuration - does the config table has to be prefixed with the schema?
+     * (eg in postgres no schemas are supported for JDBC URL's hence it is not required)
      *
-     * @return database schema needs to be escaped
+     * @return access to configuration tables require the configuration schema to be prepended
      */
-    boolean escapeSchema();
+    boolean requiresConfigSchema();
 
     /**
      * Get a connection to the database using provided parameters and (re)create the database and/or schema

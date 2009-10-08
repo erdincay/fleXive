@@ -152,8 +152,8 @@ public class MySQLStorageFactory implements DBStorage {
     /**
      * {@inheritDoc}
      */
-    public String getIfFunction() {
-        return "IF";
+    public String getIfFunction(String condition, String exprtrue, String exprfalse) {
+        return "IF(" + condition + "," + exprtrue + "," + exprfalse + ")";
     }
 
     /**
@@ -219,7 +219,7 @@ public class MySQLStorageFactory implements DBStorage {
     /**
      * {@inheritDoc}
      */
-    public boolean escapeSchema() {
+    public boolean requiresConfigSchema() {
         return false;
     }
 

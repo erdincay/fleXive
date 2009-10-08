@@ -152,8 +152,8 @@ public class PostgreSQLStorageFactory implements DBStorage {
     /**
      * {@inheritDoc}
      */
-    public String getIfFunction() {
-        return "IF";
+    public String getIfFunction(String condition, String exprtrue, String exprfalse) {
+        return "(CASE WHEN(" + condition + ")THEN(" + exprtrue + ")ELSE (" + exprfalse + ")END)";
     }
 
     /**
@@ -175,51 +175,52 @@ public class PostgreSQLStorageFactory implements DBStorage {
      * {@inheritDoc}
      */
     public String getTimestampFunction() {
-        return "UNIX_TIMESTAMP()*1000";
+        return "TIMEMILLIS(NOW())";
     }
 
     /**
      * {@inheritDoc}
      */
     public boolean isForeignKeyViolation(Exception exc) {
-        final int errorCode = Database.getSqlErrorCode(exc);
-        //see http://dev.mysql.com/doc/refman/5.0/en/error-messages-server.html
-        return errorCode == 1451 || errorCode == 1217;
+        if( !(exc instanceof SQLException))
+            return false;
+        //see http://www.postgresql.org/docs/8.4/interactive/errcodes-appendix.html
+        return "23503".equals(((SQLException)exc).getSQLState());
     }
 
     /**
      * {@inheritDoc}
      */
     public boolean isQueryTimeout(Exception e) {
-        final int errorCode = Database.getSqlErrorCode(e);
-        //see http://dev.mysql.com/doc/refman/5.0/en/error-messages-server.html
-        return errorCode == 1317 || errorCode == 1028
-                || e.getClass().getName().equals("com.mysql.jdbc.exceptions.MySQLTimeoutException");
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public boolean isUniqueConstraintViolation(Exception exc) {
-        final int sqlErr = Database.getSqlErrorCode(exc);
-        //see http://dev.mysql.com/doc/refman/5.1/en/error-messages-server.html
-        // 1582 Example error: Duplicate entry 'ABSTRACT' for key 'UK_TYPEPROPS_NAME'
-        return (sqlErr == 1062 || sqlErr == 1582);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public boolean isDeadlock(Exception exc) {
-        // TODO
+        //not supported out of the box. see: http://stackoverflow.com/questions/1175173/jdbc-postgres-query-with-a-timeout
         return false;
     }
 
     /**
      * {@inheritDoc}
      */
-    public boolean escapeSchema() {
-        return true;
+    public boolean isUniqueConstraintViolation(Exception exc) {
+        if( !(exc instanceof SQLException))
+            return false;
+        //see http://www.postgresql.org/docs/8.4/interactive/errcodes-appendix.html
+        return "23505".equals(((SQLException)exc).getSQLState());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean isDeadlock(Exception exc) {
+        if( !(exc instanceof SQLException))
+            return false;
+        //see http://www.postgresql.org/docs/8.4/interactive/errcodes-appendix.html
+        return "40P01".equals(((SQLException)exc).getSQLState());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean requiresConfigSchema() {
+        return false;
     }
 
     /**

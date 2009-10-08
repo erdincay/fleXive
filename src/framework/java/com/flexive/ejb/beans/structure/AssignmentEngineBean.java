@@ -39,6 +39,7 @@ import com.flexive.core.flatstorage.FxFlatStorageManager;
 import com.flexive.core.storage.ContentStorage;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.core.structure.StructureLoader;
+import com.flexive.ejb.beans.EJBUtils;
 import com.flexive.shared.*;
 import com.flexive.shared.cache.FxCacheException;
 import com.flexive.shared.configuration.SystemParameters;
@@ -53,7 +54,6 @@ import com.flexive.shared.value.FxBinary;
 import com.flexive.shared.value.FxReference;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.value.FxValue;
-import com.flexive.ejb.beans.EJBUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -64,7 +64,6 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Collection;
 
 /**
  * Structure Assignment management
@@ -188,16 +187,21 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             else {
                 int counter = 0;
                 boolean isok = false;
+                Savepoint sp = null;
                 while (!isok && counter < 200) { //200 tries max
                     try {
                         if (counter > 0) {
                             ps.setString(2, property.getName() + "_" + counter);
                         }
+                        sp = con.setSavepoint();
                         ps.executeUpdate();
+                        con.releaseSavepoint(sp);
                         isok = true;
                     } catch (SQLException e) {
                         if (!StorageManager.isUniqueConstraintViolation(e) || counter >= 200)
                             throw e;
+                        if(sp != null)
+                            con.rollback(sp);
                     }
                     counter++;
                 }
@@ -1987,11 +1991,13 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 return rs.getInt(1);
             throw new FxCreateException("ex.structure.position.failed", typeId, parentGroupAssignment == null ? FxAssignment.NO_PARENT : parentGroupAssignment.getId(), desiredPos);
         }
-        sql.append("SELECT ").append(StorageManager.getIfFunction()).append("((SELECT COUNT(ID) FROM ").append(TBL_STRUCT_ASSIGNMENTS).
-                //                             1                 2         3
-                        append(" WHERE TYPEDEF=? AND PARENTGROUP=? AND POS=?)>0,(SELECT IFNULL(MAX(POS)+1,0) FROM ").
-                //                                                            4                 5  6
-                        append(TBL_STRUCT_ASSIGNMENTS).append(" WHERE TYPEDEF=? AND PARENTGROUP=?),?)");
+        sql.append("SELECT ").append(StorageManager.getIfFunction(
+                //                                                                   1                 2         3
+                "(SELECT COUNT(ID) FROM " + TBL_STRUCT_ASSIGNMENTS + " WHERE TYPEDEF=? AND PARENTGROUP=? AND POS=?)>0",
+                //                                                                                4                 5
+                "(SELECT COALESCE(MAX(POS)+1,0) FROM " + TBL_STRUCT_ASSIGNMENTS + " WHERE TYPEDEF=? AND PARENTGROUP=?)",
+                //6
+                "?"));
         try {
             ps = con.prepareStatement(sql.toString());
             ps.setLong(1, typeId);
@@ -2391,7 +2397,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             rs.next();
             count = rs.getLong(1);
             ps.close();
-            if(EJBLookup.getDivisionConfigurationEngine().isFlatStorageEnabled()) {
+            if (EJBLookup.getDivisionConfigurationEngine().isFlatStorageEnabled()) {
                 //also examine flat storage entries
                 count += FxFlatStorageManager.getInstance().getPropertyInstanceCount(con, propertyId);
             }
@@ -2421,7 +2427,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             rs.next();
             count = rs.getLong(1);
             ps.close();
-            if(EJBLookup.getDivisionConfigurationEngine().isFlatStorageEnabled()) {
+            if (EJBLookup.getDivisionConfigurationEngine().isFlatStorageEnabled()) {
                 //also examine flat storage entries
                 count += FxFlatStorageManager.getInstance().getAssignmentInstanceCount(con, assignmentId);
             }

@@ -203,10 +203,13 @@ public class StorageManager {
     /**
      * Get a database vendor specific "IF" function
      *
+     * @param condition the condition to check
+     * @param exprtrue  expression if condition is true
+     * @param exprfalse expression if condition is false
      * @return database vendor specific "IF" function
      */
-    public static String getIfFunction() {
-        return getStorageImpl().getIfFunction();
+    public static String getIfFunction(String condition, String exprtrue, String exprfalse) {
+        return getStorageImpl().getIfFunction(condition, exprtrue, exprfalse);
     }
 
     /**
