@@ -31,16 +31,15 @@
  ***************************************************************/
 package com.flexive.core.storage.PostgreSQL;
 
-import com.flexive.core.Database;
 import static com.flexive.core.DatabaseConst.TBL_SELECTLIST_ITEM;
 import com.flexive.core.search.DataFilter;
 import com.flexive.core.search.DataSelector;
+import com.flexive.core.search.PostgreSQL.PostgreSQLDataFilter;
+import com.flexive.core.search.PostgreSQL.PostgreSQLDataSelector;
 import com.flexive.core.search.SqlSearch;
 import com.flexive.core.search.cmis.impl.CmisSqlQuery;
 import com.flexive.core.search.cmis.impl.sql.PostgreSQL.PostgreSQLDialect;
 import com.flexive.core.search.cmis.impl.sql.SqlDialect;
-import com.flexive.core.search.genericSQL.GenericSQLDataFilter;
-import com.flexive.core.search.genericSQL.GenericSQLDataSelector;
 import com.flexive.core.storage.*;
 import com.flexive.core.storage.genericSQL.GenericLockStorage;
 import com.flexive.shared.FxSharedUtils;
@@ -87,10 +86,6 @@ public class PostgreSQLStorageFactory implements DBStorage {
         }
     }
 
-    public boolean createSchema(String schema, boolean dropIfExists, String jdbcURL, String jdbcDriver, String user, String password) {
-        return true;
-    }
-
     /**
      * {@inheritDoc}
      */
@@ -132,14 +127,14 @@ public class PostgreSQLStorageFactory implements DBStorage {
      * {@inheritDoc}
      */
     public DataSelector getDataSelector(SqlSearch search) throws FxSqlSearchException {
-        return new GenericSQLDataSelector(search);
+        return new PostgreSQLDataSelector(search);
     }
 
     /**
      * {@inheritDoc}
      */
     public DataFilter getDataFilter(Connection con, SqlSearch search) throws FxSqlSearchException {
-        return new GenericSQLDataFilter(con, search);
+        return new PostgreSQLDataFilter(con, search);
     }
 
     /**
@@ -160,7 +155,7 @@ public class PostgreSQLStorageFactory implements DBStorage {
      * {@inheritDoc}
      */
     public String getReferentialIntegrityChecksStatement(boolean enable) {
-        return "SET FOREIGN_KEY_CHECKS=" + (enable ? 1 : 0);
+        return "SET CONSTRAINTS ALL " + (enable ? "DEFERRED" : "IMMEDIATE");
     }
 
     /**

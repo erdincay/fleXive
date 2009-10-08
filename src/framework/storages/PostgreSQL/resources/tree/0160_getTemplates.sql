@@ -1,4 +1,4 @@
-Create OR REPLACE function getTemplates(nodeId INTEGER,live boolean)
+Create OR REPLACE function getTemplates(nodeId BIGINT,live boolean)
 returns text AS $$ -- deterministic reads sql data
 DECLARE
 -- template --> _template (keyword)
@@ -14,8 +14,6 @@ DECLARE
     WHERE node.lft>=parent.lft and node.lft<=parent.rgt AND node.id=nodeId
     ORDER BY parent.lft desc;
 BEGIN
-  EXCEPTION WHEN SQLSTATE '02000' THEN done = true;
-
   IF live THEN
     OPEN curLive;
   ELSE
@@ -29,12 +27,15 @@ BEGIN
     ELSE
       FETCH cur INTO _template;
     END IF;
+    IF NOT FOUND THEN
+      done = TRUE;
+    END IF;
 
     IF template IS NOT NULL THEN
       IF result!='' THEN
-        result = concat(result,",");
+        result = result||',';
       END IF;
-      result = concat(result,_template);
+      result = result||_template;
     END IF;
 
   END LOOP;

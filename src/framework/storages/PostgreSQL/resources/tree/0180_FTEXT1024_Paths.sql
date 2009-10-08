@@ -9,49 +9,53 @@
 --       false: read from the edit tree,
 --       null:  read from both trees (paths will be returned double if contained in both trees)
 -- --------------------------------------------------------------------------------------------
-Create OR REPLACE function tree_FTEXT1024_Paths(_contentId INTEGER,
-	_lang INTEGER,_tprop INTEGER,_live boolean)
+CREATE OR REPLACE FUNCTION tree_FTEXT1024_Paths(_contentId BIGINT,
+	_lang BIGINT,_tprop BIGINT,_live BOOLEAN)
 returns text AS $$ -- CHARSET UTF8 deterministic reads sql data
 DECLARE
-  _result text default '';
-  _path text;
+  _result TEXT DEFAULT '';
+  _path TEXT;
   done BOOLEAN DEFAULT FALSE;
   curLive CURSOR FOR
-     select tree_FTEXT1024_Chain(id,_lang,_tprop,true) _chain from FXS_TREE_LIVE where ref=_contentId order by _chain;
+     SELECT tree_FTEXT1024_Chain(id,_lang,_tprop,true) _chain FROM FXS_TREE_LIVE WHERE ref=_contentId ORDER BY _chain;
   curMax CURSOR FOR
-     select tree_FTEXT1024_Chain(id,_lang,_tprop,false) _chain from FXS_TREE where ref=_contentId order by _chain;
+     SELECT tree_FTEXT1024_Chain(id,_lang,_tprop,false) _chain FROM FXS_TREE WHERE ref=_contentId ORDER BY _chain;
 BEGIN
-  EXCEPTION WHEN SQLSTATE '02000' THEN done = true;
-
-  IF (_live=true or _live is null) THEN
+  IF (_live=true OR _live IS NULL) THEN
     OPEN curLive;
     WHILE NOT done LOOP
       FETCH curLive INTO _path;
-      if NOT done THEN
-        if (_result!='') then
+      IF NOT FOUND THEN
+        done = TRUE;
+      END IF;
+      IF NOT done THEN
+        IF (_result!='') THEN
           _result = concat(_result,"\n");
-        end if;
+        END IF;
           _result = concat(_result,_path);
       END IF;
     END LOOP;
     CLOSE curLive;
   END IF;
 
-  IF (_live=false or _live is null) THEN
+  IF (_live=false OR _live IS NULL) THEN
     done=false;
     OPEN curMax;
     WHILE NOT done LOOP
       FETCH curMax INTO _path;
-      if NOT done THEN
-        if (_result!='') then
+      IF NOT FOUND THEN
+        done = TRUE;
+      END IF;
+      IF NOT done THEN
+        IF (_result!='') THEN
           _result = concat(_result,"\n");
-        end if;
+        END IF;
           _result = concat(_result,_path);
       END IF;
     END LOOP;
     CLOSE curMax;
   END IF;
 
-  return _result;
+  RETURN _result;
 END;
 $$ LANGUAGE 'plpgsql';

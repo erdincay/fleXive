@@ -24,16 +24,17 @@ DECLARE
       rgt<=(select rgt from FXS_TREE_LIVE where id=_root) order by lft;
 
 BEGIN
-  EXCEPTION WHEN SQLSTATE '02000' THEN done = true;
-
   IF (_live=true or _live is null) THEN
     OPEN curLive;
     WHILE NOT done LOOP
       FETCH curLive INTO _ref;
-      if (_ref=_nodeId) then
+      IF NOT FOUND THEN
+        done = TRUE;
+      END IF;
+      IF (_ref=_nodeId) THEN
         _pos = _count;
         done = true;
-      end if;
+      END IF;
       _count = _count+1;
     END LOOP;
     CLOSE curLive;
@@ -41,15 +42,18 @@ BEGIN
     OPEN curEdit;
     WHILE NOT done LOOP
       FETCH curEdit INTO _ref;
-      if (_ref=_nodeId) then
+      IF NOT FOUND THEN
+        done = TRUE;
+      END IF;
+      IF (_ref=_nodeId) THEN
         _pos = _count;
         done = true;
-      end if;
+      END IF;
       _count = _count+1;
     END LOOP;
     CLOSE curEdit;
   END IF;
 
-  return _pos;
+  RETURN _pos;
 END;
 $$ LANGUAGE 'plpgsql';

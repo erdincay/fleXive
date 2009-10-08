@@ -31,30 +31,15 @@
  ***************************************************************/
 package com.flexive.core.search.cmis.impl.sql.PostgreSQL;
 
-import com.flexive.core.Database;
 import com.flexive.core.search.cmis.impl.CmisSqlQuery;
-import com.flexive.core.search.cmis.impl.ResultColumn;
-import com.flexive.core.search.cmis.impl.ResultColumnReference;
 import com.flexive.core.search.cmis.impl.ResultScore;
 import com.flexive.core.search.cmis.impl.sql.Capabilities;
-import com.flexive.core.search.cmis.impl.sql.SelectedTableVisitor;
-import com.flexive.core.search.cmis.impl.sql.generic.GenericConditionTableBuilder;
-import com.flexive.core.search.cmis.impl.sql.generic.GenericInnerJoinConditionTableBuilder;
 import com.flexive.core.search.cmis.impl.sql.generic.GenericSqlDialect;
-import com.flexive.core.search.cmis.impl.sql.mapper.ConditionColumnMapper;
 import com.flexive.core.search.cmis.impl.sql.mapper.ConditionMapper;
 import com.flexive.core.search.cmis.impl.sql.mapper.ResultColumnMapper;
-import com.flexive.core.search.cmis.model.ColumnReference;
 import com.flexive.core.search.cmis.model.ContainsCondition;
-import com.flexive.core.search.cmis.model.Selectable;
 import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.structure.FxEnvironment;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
 
 /**
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
@@ -62,15 +47,14 @@ import java.sql.Statement;
  * @since 3.1
  */
 public class PostgreSQLDialect extends GenericSqlDialect {
-    private static final Log LOG = LogFactory.getLog(PostgreSQLDialect.class);
+//    private static final Log LOG = LogFactory.getLog(PostgreSQLDialect.class);
 
     /**
-     * MySQL capabilities.
+     * PostgreSQL capabilities.
      */
     private static final Capabilities CAPABILITIES = new Capabilities() {
-
         public boolean supportsFulltextScoring() {
-            return true;
+            return false;
         }
 
         public boolean normalizedFulltextScore() {
@@ -80,7 +64,6 @@ public class PostgreSQLDialect extends GenericSqlDialect {
         public boolean supportsPaging() {
             return true;
         }
-
     };
 
     public PostgreSQLDialect(FxEnvironment environment, ContentEngine contentEngine, CmisSqlQuery query, boolean returnPrimitives) {
@@ -100,42 +83,6 @@ public class PostgreSQLDialect extends GenericSqlDialect {
      * {@inheritDoc}
      */
     @Override
-    public void prepareConnection(Connection con) throws SQLException {
-        super.prepareConnection(con);
-        for (ResultColumn column : query.getUserColumns()) {
-            if (column.getSelectedObject() instanceof Selectable
-                    && ((Selectable) column.getSelectedObject()).isMultivalued()) {
-
-                // multivalued queries use GROUP_CONCAT, which is limited to 1024 characters
-                // by default - increase limit to maximum allowed packet size
-                Statement stmt = null;
-                try {
-                    if (LOG.isTraceEnabled()) {
-                        LOG.trace("Multivalued properties with PostgreSQL: SET group_concat_max_len := @@max_allowed_packet");
-                    }
-                    stmt = con.createStatement();
-                    stmt.executeQuery("SET group_concat_max_len := @@max_allowed_packet");
-                    break;
-                } finally {
-                    Database.closeObjects(PostgreSQLDialect.class, null, stmt);
-                }
-
-            }
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected GenericConditionTableBuilder createConditionNodeVisitor(StringBuilder out, SelectedTableVisitor joinedTables) {
-        return new GenericInnerJoinConditionTableBuilder(this, out, joinedTables);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public ConditionMapper<ContainsCondition> conditionContain() {
         return PostgreSQLContainsCondition.getInstance();
     }
@@ -146,16 +93,6 @@ public class PostgreSQLDialect extends GenericSqlDialect {
     @Override
     public ResultColumnMapper<ResultScore> selectScore() {
         return PostgreSQLContainsCondition.getInstance();
-    }
-
-    @Override
-    public ResultColumnMapper<ResultColumnReference> selectColumnReference() {
-        return PostgreSQLColumnReference.getInstance();
-    }
-
-    @Override
-    public ConditionColumnMapper<ColumnReference> filterColumnReference() {
-        return PostgreSQLColumnReference.getInstance();
     }
 
     /**

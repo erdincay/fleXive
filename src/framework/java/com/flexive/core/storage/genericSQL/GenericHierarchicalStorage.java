@@ -156,7 +156,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     protected static final String CONTENT_VER_CALC = "SELECT MAX(VER) AS MAX_VER, COALESCE((SELECT s.VER FROM " +
             TBL_CONTENT + " s WHERE s.STEP=(SELECT w.ID FROM " + TBL_STEP + " w, " + TBL_STRUCT_TYPES + " t WHERE w.STEPDEF=" +
             StepDefinition.LIVE_STEP_ID + " AND w.WORKFLOW=t.WORKFLOW AND t.ID=c.TDEF) AND s.ID=c.ID),-1) AS LIVE_VER FROM " + TBL_CONTENT +
-            " c WHERE c.ID=? GROUP BY c.ID";
+            " c WHERE c.ID=? GROUP BY c.ID,c.TDEF";
     protected static final String CONTENT_VER_UPDATE_1 = "UPDATE " + TBL_CONTENT + " SET MAX_VER=?, LIVE_VER=? WHERE ID=?";
     protected static final String CONTENT_VER_UPDATE_2 = "UPDATE " + TBL_CONTENT + " SET ISMAX_VER=(MAX_VER=VER), ISLIVE_VER=(LIVE_VER=VER) WHERE ID=?";
     protected static final String CONTENT_VER_UPDATE_3 = "UPDATE " + TBL_CONTENT_DATA + " SET ISMAX_VER=(VER=?), ISLIVE_VER=(VER=?) WHERE ID=?";

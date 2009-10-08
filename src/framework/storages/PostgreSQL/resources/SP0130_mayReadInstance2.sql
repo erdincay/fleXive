@@ -9,17 +9,17 @@
  * @param GLOBAL_SUPERVISOR    true if the user is a global supervisor
  * @return                     true if read permission is granted
  **/
-CREATE OR REPLACE function mayReadInstance2(_contentId BIGINT,_contentVersion INTEGER, _userId INTEGER,
-  _USER_MANDATOR INTEGER, MANDATOR_SUPERVISOR BOOLEAN,GLOBAL_SUPERVISOR BOOLEAN)
+CREATE OR REPLACE function mayReadInstance2(_contentId BIGINT,_contentVersion INTEGER, _userId BIGINT,
+  _USER_MANDATOR BIGINT, MANDATOR_SUPERVISOR BOOLEAN,GLOBAL_SUPERVISOR BOOLEAN)
 returns BOOLEAN AS $$ -- TODO deterministic reads sql data
-  DECLARE GRP_OWNER INTEGER default 2;
+  DECLARE GRP_OWNER BIGINT default 2;
   DECLARE _result text default '';
   DECLARE done BOOLEAN DEFAULT FALSE;
-  DECLARE _createdBy INTEGER;
-  DECLARE _userGroup INTEGER;
-  DECLARE _instanceMandator INTEGER;
+  DECLARE _createdBy BIGINT;
+  DECLARE _userGroup BIGINT;
+  DECLARE _instanceMandator BIGINT;
   DECLARE _role INTEGER;
-  DECLARE _type INTEGER;
+  DECLARE _type BIGINT;
   DECLARE _read BOOLEAN;
   DECLARE _securityMode INTEGER;
   -- Instance
@@ -61,8 +61,6 @@ returns BOOLEAN AS $$ -- TODO deterministic reads sql data
     ass.usergroup in (select usergroup from FXS_USERGROUPMEMBERS where account=_userId union select GRP_OWNER) and
     ass.acl=contentACLs.acl;
 BEGIN
-	EXCEPTION WHEN SQLSTATE '02000' THEN done = true;
-
   -- ------------------------------------------------------------------------------------------
   -- GLOBAL SUPERVISOR ------------------------------------------------------------------------
   -- ------------------------------------------------------------------------------------------
@@ -77,6 +75,9 @@ BEGIN
   OPEN cur;
   WHILE NOT done LOOP
     FETCH cur INTO _createdBy,_userGroup,_read,_type,_instanceMandator,_securityMode;
+    IF NOT FOUND THEN
+      done = TRUE;
+    END IF;
       IF (_securityMode & 1 = 0) THEN
         IPREAD=true;    /* content permissions are disabled */
       END IF;

@@ -1,8 +1,8 @@
-Create OR REPLACE function getTemplate(nodeId INTEGER, live boolean)
+Create OR REPLACE function getTemplate(nodeId BIGINT, live boolean)
 returns INTEGER AS $$ --deterministic reads sql data
 DECLARE
 -- TODO teplate --> _template (keyword)
-  _template INTEGER default null;
+  _template BIGINT default null;
   done BOOLEAN DEFAULT FALSE;
   cur CURSOR FOR
     SELECT parent.template FROM FXS_TREE AS node, FXS_TREE AS parent
@@ -13,8 +13,6 @@ DECLARE
     WHERE node.lft>=parent.lft and node.lft<=parent.rgt AND node.id=nodeId
     ORDER BY parent.lft desc;
 BEGIN
-  EXCEPTION WHEN SQLSTATE '02000' THEN done = true;
-
   IF live THEN
     OPEN curLive;
   ELSE
@@ -27,6 +25,9 @@ BEGIN
       FETCH curLive INTO _template;
     ELSE
       FETCH cur INTO _template;
+    END IF;
+    IF NOT FOUND THEN
+      done = TRUE;
     END IF;
 
     IF template IS NOT NULL THEN

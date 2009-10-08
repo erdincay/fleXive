@@ -5,7 +5,7 @@
  * @param _userId          the user to retrieve the permissions for
  * @return                 true if read permission is granted
  **/
-Create OR REPLACE function mayReadInstance(_contentId INTEGER,_contentVersion INTEGER,_userId INTEGER)
+Create OR REPLACE function mayReadInstance(_contentId BIGINT,_contentVersion INTEGER,_userId BIGINT)
 returns BOOLEAN AS $$ -- TODO deterministic reads sql data
   DECLARE codedPerms varchar(6) default '';
 BEGIN

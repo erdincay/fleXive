@@ -24,14 +24,7 @@ BEGIN
   WHILE NOT done LOOP
     FETCH cur INTO ct,val,nodeId;
     if NOT done THEN
-      result = concat(result,"\n");
-      result = concat(result,repeat('-',ct));
-      result = concat(result,nodeId);
-      result = concat(result,":");
-      result = concat(result,val);
-      result = concat(result,'[level=');
-      result = concat(result,ct);
-      result = concat(result,']');
+      result = result||"\n"||repeat('-',ct)||nodeId||':'||val||'[level='||ct||']';
     END IF;
   END LOOP;
   CLOSE cur;

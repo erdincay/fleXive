@@ -8,21 +8,21 @@
 --  *                         1=right granted, 0=right denied
 --  *                         Example: '110000' for READ and EDIT granted, everything else denied
 --  **/drop function if exists permissions(_contentId INTEGER,_contentVersion INTEGER,_userId INTEGER);
-Create OR REPLACE function permissions(_contentId INTEGER,_contentVersion INTEGER,_userId INTEGER) returns varchar(6) AS $$
+CREATE OR REPLACE function permissions(_contentId BIGINT,_contentVersion INTEGER,_userId BIGINT) returns varchar(6) AS $$
 --deterministic reads sql data
 --BEGIN
   DECLARE
-	GRP_OWNER INTEGER default 2;
+	GRP_OWNER BIGINT default 2;
 	_result text default '';
   DECLARE done BOOLEAN DEFAULT FALSE;
   DECLARE GLOBAL_SUPERVISOR BOOLEAN DEFAULT FALSE;
   DECLARE MANDATOR_SUPERVISOR BOOLEAN DEFAULT FALSE;
-  DECLARE _createdBy INTEGER;
-  DECLARE _userGroup INTEGER;
-  DECLARE _instanceMandator INTEGER;
-  DECLARE _USER_MANDATOR INTEGER default 0;
+  DECLARE _createdBy BIGINT;
+  DECLARE _userGroup BIGINT;
+  DECLARE _instanceMandator BIGINT;
+  DECLARE _USER_MANDATOR BIGINT default 0;
   DECLARE _role INTEGER;
-  DECLARE _type INTEGER;
+  DECLARE _type BIGINT;
   DECLARE _edit BOOLEAN;
   DECLARE _delete BOOLEAN;
   DECLARE _export BOOLEAN;
@@ -86,7 +86,6 @@ Create OR REPLACE function permissions(_contentId INTEGER,_contentVersion INTEGE
 
 
 BEGIN
-  EXCEPTION WHEN SQLSTATE '02000' THEN done = true;
   -- ------------------------------------------------------------------------------------------
   -- READ USER MANDATOR -----------------------------------------------------------------------
   -- ------------------------------------------------------------------------------------------
@@ -98,6 +97,9 @@ BEGIN
   OPEN curRole;
   WHILE NOT done LOOP
     FETCH curRole INTO _role;
+    IF NOT FOUND THEN
+      done = TRUE;
+    END IF;
     IF (_role=1) THEN GLOBAL_SUPERVISOR=true; END IF;
     IF (_role=2) THEN MANDATOR_SUPERVISOR=true; END IF;
   END LOOP;
@@ -117,6 +119,9 @@ BEGIN
   OPEN cur;
   WHILE NOT done LOOP
     FETCH cur INTO _createdBy,_userGroup,_edit,_delete,_export,_rel,_read,_create,_type,_instanceMandator;
+    IF NOT FOUND THEN
+      done = TRUE;
+    END IF;
       CASE _type
           WHEN 1 /*Content*/ THEN
             IF (_userGroup!=GRP_OWNER or (_userGroup=GRP_OWNER and _createdBy=_userId)) THEN
@@ -169,12 +174,7 @@ BEGIN
   -- ------------------------------------------------------------------------------------------
   -- BUILD RESULT -----------------------------------------------------------------------------
   -- ------------------------------------------------------------------------------------------
-  _result = concat(_result,PREAD);
-  _result = concat(_result,PEDIT);
-  _result = concat(_result,PREMOVE);
-  _result = concat(_result,PCREATE);
-  _result = concat(_result,PEXPORT);
-  _result = concat(_result,PREL);
+  _result = _result||PREAD||PEDIT||PREMOVE||PCREATE||PEXPORT||PREL;
 
   return _result;
 END;

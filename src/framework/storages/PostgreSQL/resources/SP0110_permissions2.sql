@@ -10,17 +10,17 @@
  * @param GLOBAL_SUPERVISOR    true if the user is a global supervisor
  * @return                     true if read permission is granted
  **/
-Create OR REPLACE function permissions2(_contentId INTEGER,_contentVersion INTEGER,_userId INTEGER ,
-  _USER_MANDATOR INTEGER,MANDATOR_SUPERVISOR BOOLEAN,GLOBAL_SUPERVISOR BOOLEAN)
+Create OR REPLACE function permissions2(_contentId BIGINT,_contentVersion INTEGER,_userId BIGINT ,
+  _USER_MANDATOR BIGINT,MANDATOR_SUPERVISOR BOOLEAN,GLOBAL_SUPERVISOR BOOLEAN)
 returns varchar(6) AS $$--deterministic reads sql data
-  DECLARE GRP_OWNER INTEGER default 2;
+  DECLARE GRP_OWNER BIGINT default 2;
   DECLARE _result text default '';
   DECLARE done BOOLEAN DEFAULT FALSE;
-  DECLARE _createdBy INTEGER;
-  DECLARE _userGroup INTEGER;
-  DECLARE _instanceMandator INTEGER;
+  DECLARE _createdBy BIGINT;
+  DECLARE _userGroup BIGINT;
+  DECLARE _instanceMandator BIGINT;
   DECLARE _role INTEGER;
-  DECLARE _type INTEGER;
+  DECLARE _type BIGINT;
   DECLARE _edit BOOLEAN;
   DECLARE _delete BOOLEAN;
   DECLARE _export BOOLEAN;
@@ -71,7 +71,6 @@ returns varchar(6) AS $$--deterministic reads sql data
     ass.usergroup in (select usergroup from FXS_USERGROUPMEMBERS where account=_userId union select GRP_OWNER from FXS_USERGROUPMEMBERS) and
     (ass.acl=dat.acl or ass.acl=dat.typeAcl or ass.acl=dat.stepAcl);
 BEGIN
-EXCEPTION WHEN SQLSTATE '02000' THEN done = true;
 -- ------------------------------------------------------------------------------------------
   -- GLOBAL SUPERVISOR ------------------------------------------------------------------------
   -- ------------------------------------------------------------------------------------------
@@ -86,6 +85,9 @@ EXCEPTION WHEN SQLSTATE '02000' THEN done = true;
   OPEN cur;
   WHILE NOT done LOOP
     FETCH cur INTO _createdBy,_userGroup,_edit,_delete,_export,_rel,_read,_create,_type,_instanceMandator;
+    IF NOT FOUND THEN
+      done = TRUE;
+    END IF;
       CASE _type
           WHEN 1 /*Content*/ THEN
             IF (_userGroup!=GRP_OWNER or (_userGroup=GRP_OWNER and _createdBy=_userId)) THEN
@@ -120,7 +122,7 @@ EXCEPTION WHEN SQLSTATE '02000' THEN done = true;
   -- MANDATOR SUPERVISOR ----------------------------------------------------------------------
   -- ------------------------------------------------------------------------------------------
   IF (MANDATOR_SUPERVISOR and _USER_MANDATOR=_instanceMandator) THEN
-	return '111111';
+	RETURN '111111';
   END IF;
 
   -- ------------------------------------------------------------------------------------------
@@ -138,12 +140,7 @@ EXCEPTION WHEN SQLSTATE '02000' THEN done = true;
   -- ------------------------------------------------------------------------------------------
   -- BUILD RESULT -----------------------------------------------------------------------------
   -- ------------------------------------------------------------------------------------------
-  _result = concat(_result,PREAD);
-  _result = concat(_result,PEDIT);
-  _result = concat(_result,PREMOVE);
-  _result = concat(_result,PCREATE);
-  _result = concat(_result,PEXPORT);
-  _result = concat(_result,PREL);
+  _result = _result||PREAD||PEDIT||PREMOVE||PCREATE||PEXPORT||PREL;
 
   return _result;
 END;

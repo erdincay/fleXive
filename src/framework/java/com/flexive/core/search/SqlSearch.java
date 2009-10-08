@@ -257,9 +257,7 @@ public class SqlSearch {
                 LOG.debug("Select SQL: " + selectSql);
             }
 
-            stmt = con.createStatement();
-            stmt.executeUpdate("SET @rownr=1");
-            stmt.close();
+            df.setVariable(con, "rownr", "1");
 
             stmt = con.createStatement();
             if (df.isQueryTimeoutSupported())

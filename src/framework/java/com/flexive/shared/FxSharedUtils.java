@@ -1598,6 +1598,10 @@ public final class FxSharedUtils {
 
     /**
      * An SQL executor, similar to ant's sql task
+     * An important addition are raw blocks:
+     * lines starting with '-- @START@' indicate the start of a raw block and lines starting with '-- @END@'
+     * indicate the end of a raw block.
+     * Raw blocks are passed "as is" to the database as one string
      */
     public static class SQLExecutor {
         private Connection con;
@@ -1641,11 +1645,26 @@ public final class FxSharedUtils {
                 StringBuffer sql = new StringBuffer();
                 String line;
                 BufferedReader in = new BufferedReader(new StringReader(code));
-
+                boolean inRawBlock = false;
                 while ((line = in.readLine()) != null) {
                     line = line.trim();
-                    if (line.startsWith("//") || line.startsWith("--"))
+                    if( inRawBlock ) {
+                        if (line.startsWith("--") && line.indexOf("@END@") > 0) {
+                            inRawBlock = false;
+                            if (sql.length() > 0) {
+//                                System.out.println("Executing raw block:\n" + sql.toString());
+                                execute(sql.toString());
+                                sql.replace(0, sql.length(), "");
+                            }
+                        } else
+                            sql.append(line).append('\n');
                         continue;
+                    }
+                    if (line.startsWith("//") || line.startsWith("--")) {
+                        if( line.indexOf("@START@") > 0 )
+                            inRawBlock = true;
+                        continue;
+                    }
                     StringTokenizer st = new StringTokenizer(line);
                     if (st.hasMoreTokens()) {
                         String token = st.nextToken();

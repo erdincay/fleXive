@@ -130,4 +130,13 @@ public abstract class DataFilter {
      */
     public abstract boolean isQueryTimeoutSupported();
 
+    /**
+     * Set a sql variable
+     *
+     * @param con      an open and valid connection
+     * @param variable name of the variable
+     * @param value    value to set
+     * @throws SQLException on errors
+     */
+    public abstract void setVariable(Connection con, String variable, String value) throws SQLException;
 }

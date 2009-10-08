@@ -1,5 +1,5 @@
 -- Get the path (excluding the root node) for a node
-Create OR REPLACE function tree_idToPath(nodeId INTEGER,live boolean)
+Create OR REPLACE function tree_idToPath(nodeId BIGINT,live boolean)
 returns text AS $$ -- deterministic reads sql data
 DECLARE
    result text;
@@ -15,8 +15,6 @@ DECLARE
     ORDER BY parent.lft;
 
 BEGIN
-  EXCEPTION WHEN SQLSTATE '02000' THEN done = true;
-
   IF nodeId=1 THEN
     return '/';
   END IF;
@@ -35,10 +33,11 @@ BEGIN
     ELSE
       FETCH cur INTO name;
     END IF;
-
+    IF NOT FOUND THEN
+      done = TRUE;
+    END IF;
     if NOT done THEN
-      result = concat(result,"/");
-      result = concat(result,name);
+      result = result||'/'||name;
     END IF;
   END LOOP;
 

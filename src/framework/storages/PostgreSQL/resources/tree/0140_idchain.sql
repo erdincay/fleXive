@@ -1,15 +1,13 @@
 -- Get a chain of id's for the given node (from the root node) like /1/4/42 for node 42
-Create OR REPLACE function tree_idchain(nodeId INTEGER ,live boolean)
+Create OR REPLACE function tree_idchain(nodeId BIGINT ,live boolean)
 returns text AS $$ -- deterministic reads sql data
 DECLARE
   _result text default '';
-  _id INTEGER default null;
+  _id BIGINT default null;
   done BOOLEAN DEFAULT FALSE;
-  _nodeId INTEGER default nodeId;
+  _nodeId BIGINT default nodeId;
 
 BEGIN
-  EXCEPTION WHEN SQLSTATE '02000' THEN done = true;
-
   IF _nodeId=1 THEN
     return '/1';
   END IF;
@@ -22,15 +20,16 @@ BEGIN
     ELSE
       select parent into _id from FXS_TREE where id=_nodeId;
     END IF;
-
+    IF NOT FOUND THEN
+      done = TRUE;
+    END IF;
     IF _id IS NOT NULL THEN
 --
-      _result = concat(_nodeId,_result);
-      _result = concat("/",_result);
+      _result = '/'||_nodeId||_result;
     END IF;
 
     IF _id=1 THEN
-      _result = concat("/1",_result);
+      _result = "/1"||_result;
     END IF;
 
     _nodeId = _id;

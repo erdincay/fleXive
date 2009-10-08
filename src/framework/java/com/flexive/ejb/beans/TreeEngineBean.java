@@ -226,11 +226,14 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
         try {
             FxContext.get().setTreeWasModified();
             con = Database.getDbConnection();
+            boolean ok = false;
             try {
-                return StorageManager.getTreeStorage().createNode(con, seq, contentEngine, mode, -1,
+                long nodeId =  StorageManager.getTreeStorage().createNode(con, seq, contentEngine, mode, -1,
                         parentNodeId, name, label, position, reference, template);
+                ok = true;
+                return nodeId;
             } finally {
-                if( !ctx.getRollbackOnly() )
+                if( ok && !ctx.getRollbackOnly() )
                     StorageManager.getTreeStorage().checkTreeIfEnabled(con, mode);
             }
         } catch (FxApplicationException ae) {
@@ -253,6 +256,7 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
         try {
             FxContext.get().setTreeWasModified();
             con = Database.getDbConnection();
+            boolean ok = false;
             try {
                 long[] nodes = StorageManager.getTreeStorage().createNodes(con, seq, contentEngine, mode, parentNodeId, path, position);
                 // call scripts
@@ -265,9 +269,10 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
                     for (long scriptId : scriptIds)
                         scripting.runScript(scriptId, binding);
                 }
+                ok = true;
                 return nodes;
             } finally {
-                if( !ctx.getRollbackOnly() )
+                if( ok && !ctx.getRollbackOnly() )
                     StorageManager.getTreeStorage().checkTreeIfEnabled(con, mode);
             }
         } catch (FxApplicationException ae) {
