@@ -407,7 +407,7 @@ disableTab... false if the <adm:tab/> component should be rendered, true otherwi
                 </c:if>
             </div>
             <adm:ajaxCommandButton id="#{editorId}_askLockOverrideButtonYes" labelKey="ContentEditor.button.lockOverrideYes"
-                                   bean="#{srcEditor}" icon="ok" action="lockOverride" oncomplete="#{jsfunc}" reRender="#{__ce_reRender}">
+                                   bean="#{srcEditor}" icon="ok" action="lockOverrideAndEdit" oncomplete="#{jsfunc}" reRender="#{__ce_reRender}">
                 <f:setPropertyActionListener value="#{myContent}" target="#{srcEditor.wrappedContent}"/>
                  <!-- set properties for fxContentEditorBean -->
                 <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>

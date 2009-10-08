@@ -814,7 +814,7 @@ public class FxContentEditorBean implements Serializable {
      *
      * @return returns true if the owner (lock) of the currently opened content changed
      */
-    private boolean checkOwnerChange() {
+    public boolean checkOwnerChange() {
         boolean hasNewOwner = false;
         ContentEngine ce = EJBLookup.getContentEngine();
         final FxContent currentContent = contentStorage.get(editorId).getContent();

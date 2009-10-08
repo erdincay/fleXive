@@ -882,24 +882,8 @@ public class BeContentEditorBean implements ActionBean, Serializable {
      *
      * @return returns true if the owner (lock) of the currently opened content changed
      */
-    private boolean checkOwnerChange() {
-        boolean hasNewOwner = false;
-        ContentEngine ce = EJBLookup.getContentEngine();
-        final FxContent currentContent = wrappedContent.getContent();
-        final FxLock currentLock = currentContent.getLock();
-
-        try {
-            final FxContent repContent = ce.load(currentContent.getPk());
-            final FxLock repLock = repContent.getLock();
-
-            if (currentLock.getUserId() != repLock.getUserId()) {
-                hasNewOwner = true;
-            }
-        } catch (FxApplicationException e) {
-            new FxFacesMsgErr(e.getCause()).addToContext();
-        }
-
-        return hasNewOwner;
+    public boolean checkOwnerChange() {
+        return ((FxContentEditorBean) FxJsfUtils.getManagedBean("fxContentEditorBean")).checkOwnerChange();
     }
 
     /**
@@ -909,6 +893,16 @@ public class BeContentEditorBean implements ActionBean, Serializable {
      */
     public String lockOverride() {
         ((FxContentEditorBean) FxJsfUtils.getManagedBean("fxContentEditorBean")).lockOverride();
+        return getEditorPage();
+    }
+
+    /**
+     * Action method: override a content's lock and enter edit mode
+     *
+     * @return returns the current page
+     */
+    public String lockOverrideAndEdit() {
+        ((FxContentEditorBean) FxJsfUtils.getManagedBean("fxContentEditorBean")).lockOverrideAndEdit();
         return getEditorPage();
     }
 
