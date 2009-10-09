@@ -371,14 +371,14 @@ public interface TreeStorage {
      * Populate the tree with test data.
      * This function takes quite some time to complete
      *
-     * @param con  an open and valid connection
-     * @param seq  reference to the sequencer
-     * @param ce   reference to the content engine
-     * @param mode tree mode
-     * @param maxLevel the number of nodes to be created as children of the rootnode (0 will not create any test data)
+     * @param con             an open and valid connection
+     * @param seq             reference to the sequencer
+     * @param ce              reference to the content engine
+     * @param mode            tree mode
+     * @param maxNodeChildren the number of nodes to be created as children of the rootnode (0 will not create any test data)
      * @throws FxApplicationException on errors
      */
-    void populate(Connection con, SequencerEngine seq, ContentEngine ce, FxTreeMode mode, int maxLevel) throws FxApplicationException;
+    void populate(Connection con, SequencerEngine seq, ContentEngine ce, FxTreeMode mode, int maxNodeChildren) throws FxApplicationException;
 
     /**
      * Callback when a content is removed to replace it with a folder or remove the node(s)

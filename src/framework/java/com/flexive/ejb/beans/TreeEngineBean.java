@@ -890,12 +890,21 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void populate(FxTreeMode mode, int... maxLevel) throws FxApplicationException {
-        final int defLevel = 3; // "default" of 3 data population nodes
+    public void populate(FxTreeMode mode) throws FxApplicationException {
+        final int maxNodeChildren = 3; // "default" of 3 data population nodes
+        populate(mode, maxNodeChildren);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void populate(FxTreeMode mode, int maxNodeChildren) throws FxApplicationException {
+
         Connection con = null;
         try {
             con = Database.getDbConnection();
-            StorageManager.getTreeStorage().populate(con, seq, contentEngine, mode, (maxLevel.length > 0 ? maxLevel[0] : defLevel));
+            StorageManager.getTreeStorage().populate(con, seq, contentEngine, mode, maxNodeChildren);
             FxContext.get().setTreeWasModified();
         } catch (FxApplicationException ae) {
             EJBUtils.rollback(ctx);

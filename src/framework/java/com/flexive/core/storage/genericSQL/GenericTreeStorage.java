@@ -1383,10 +1383,10 @@ public abstract class GenericTreeStorage implements TreeStorage {
     /**
      * {@inheritDoc}
      */
-    public void populate(Connection con, SequencerEngine seq, ContentEngine ce, FxTreeMode mode, int maxLevel) throws FxApplicationException {
+    public void populate(Connection con, SequencerEngine seq, ContentEngine ce, FxTreeMode mode, int maxNodeChildren) throws FxApplicationException {
         try {
-            for (int i = 0; i < maxLevel; i++) {
-                LOG.info("Creating level [" + (i + 1) + "/" + maxLevel + "]");
+            for (int i = 0; i < maxNodeChildren; i++) {
+                LOG.info("Creating level [" + (i + 1) + "/" + maxNodeChildren + "]");
                 String name = "Level2_[" + i + "]";
                 FxString desc = new FxString(true, "Level2 Node " + i);
                 long newIdLevel1 = createNode(con, seq, ce, mode, -1, ROOT_NODE, name, desc, 0, null, null);
@@ -1400,7 +1400,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
                         createNode(con, seq, ce, mode, -1, newIdLevel2, name3, desc3, 0, null, null);
                     }
                 }
-                LOG.info("Created level [" + (i + 1) + "/" + maxLevel + "]");
+                LOG.info("Created level [" + (i + 1) + "/" + maxNodeChildren + "]");
             }
         } catch (Exception e) {
             throw new FxApplicationException(LOG, e, "ex.tree.populate", mode.name(), e.getMessage());

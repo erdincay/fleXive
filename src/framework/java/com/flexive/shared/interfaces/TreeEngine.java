@@ -416,11 +416,19 @@ public interface TreeEngine {
     //----------------------
 
     /**
-     * Populate the tree with test data. If no maxLevel is given, a default of 3 is assumed.
+     * Populate the tree with test data with a default 3 child nodes (folder sub-levels)
      *
-     * @param mode     tree mode
-     * @param maxLevel the number of nodes to be created as children of the root node (0 will not create any data, no value will create 3).
+     * @param mode tree mode
      * @throws FxApplicationException on errors
      */
-    void populate(FxTreeMode mode, int... maxLevel) throws FxApplicationException;
+    void populate(FxTreeMode mode) throws FxApplicationException;
+
+    /**
+     * Populate the tree with test data with a given maximum number of node children (folder sub-levels)
+     *
+     * @param mode            tree mode
+     * @param maxNodeChildren the number of nodes to be created as children of the root node (0 will not create any data, no value will create 3).
+     * @throws FxApplicationException on errors
+     */
+    void populate(FxTreeMode mode, int maxNodeChildren) throws FxApplicationException;
 }
