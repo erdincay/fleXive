@@ -400,13 +400,13 @@ public class FxProvideContent extends TagHandler {
             wc.getGuiSettings().setUserMayLooseLock(true);
             wc.getGuiSettings().setUserMayPermLock(true);
             // "normal" user can only override loose locks and if in the same acl
-        } else if (FxPermissionUtils.currentUserInContentACLList(ticket, wc.getContent().getAclIds())
+        } else if (FxPermissionUtils.currentUserInACLList(ticket, wc.getContent().getAclIds())
                 && lock.getLockType() == FxLockType.Loose && ticket.getUserId() != lock.getUserId()) {
             wc.getGuiSettings().setUserMayTakeover(true);
             wc.getGuiSettings().setUserMayUnlock(true);
             wc.getGuiSettings().setUserMayLooseLock(false);
             wc.getGuiSettings().setUserMayPermLock(true);
-        } else if(FxPermissionUtils.currentUserInContentACLList(ticket, wc.getContent().getAclIds())
+        } else if(FxPermissionUtils.currentUserInACLList(ticket, wc.getContent().getAclIds())
             && lock.getLockType() == FxLockType.Permanent && ticket.getUserId() != lock.getUserId()) {
             wc.getGuiSettings().setUserMayTakeover(false);
             wc.getGuiSettings().setUserMayUnlock(false);

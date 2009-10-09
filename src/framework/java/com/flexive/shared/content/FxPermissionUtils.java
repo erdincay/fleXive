@@ -539,11 +539,11 @@ public class FxPermissionUtils {
      * Checks if a UserTicket contains at least one of a given List of (content) ACLs
      *
      * @param ticket        the UserTicket
-     * @param contentACLIds a List of (content) ACL ids
+     * @param ACLIds a List of (content) ACL ids
      * @return returns true if a match can be found
      */
-    public static boolean currentUserInContentACLList(UserTicket ticket, List<Long> contentACLIds) {
-        for (Long id : contentACLIds) {
+    public static boolean currentUserInACLList(UserTicket ticket, List<Long> ACLIds) {
+        for (Long id : ACLIds) {
             for (ACLAssignment a : ticket.getACLAssignments()) {
                 if (a.getAclId() == id)
                     return true;

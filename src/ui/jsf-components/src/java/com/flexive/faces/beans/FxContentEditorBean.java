@@ -300,7 +300,7 @@ public class FxContentEditorBean implements Serializable {
                     } else
                         new FxFacesMsgErr("ContentEditor.msg.no.unlock").addToContext();
                 } else if (!editMode && lock.getLockType() == FxLockType.Loose) {
-                    if (FxPermissionUtils.currentUserInContentACLList(ticket, wc.getContent().getAclIds()) || ticket.isGlobalSupervisor() || ticket.isMandatorSupervisor()) {
+                    if (FxPermissionUtils.currentUserInACLList(ticket, wc.getContent().getAclIds()) || ticket.isGlobalSupervisor() || ticket.isMandatorSupervisor()) {
                         ce.unlock(wc.getContent().getPk());
                         wc.getContent().updateLock(FxLock.noLockPK());
                     } else
@@ -567,7 +567,7 @@ public class FxContentEditorBean implements Serializable {
             // set the override and edit
             setGuiLockOptions(true, false, false, false);
 
-        } else if (ticket.isGlobalSupervisor() || ticket.isMandatorSupervisor() || FxPermissionUtils.currentUserInContentACLList(ticket, content.getAclIds())) {
+        } else if (ticket.isGlobalSupervisor() || ticket.isMandatorSupervisor() || FxPermissionUtils.currentUserInACLList(ticket, content.getAclIds())) {
 
             if (lock.getLockType() == FxLockType.Loose) { // sets the correct boolean for the msg display
                 setGuiLockOptions(false, true, true, false);
@@ -603,7 +603,7 @@ public class FxContentEditorBean implements Serializable {
         ContentEngine ce = EJBLookup.getContentEngine();
         // TODO: take over = true = use same locktype
         // take over = false == use loose lock
-        if (((ticket.isGlobalSupervisor() || ticket.isMandatorSupervisor() || FxPermissionUtils.currentUserInContentACLList(ticket, content.getAclIds())
+        if (((ticket.isGlobalSupervisor() || ticket.isMandatorSupervisor() || FxPermissionUtils.currentUserInACLList(ticket, content.getAclIds())
                 || lock.getUserId() == ticket.getUserId()) && lock.getLockType() == FxLockType.Loose)
                 || ((ticket.isGlobalSupervisor() || ticket.isMandatorSupervisor()) && lock.getLockType() == FxLockType.Permanent)) {
 
@@ -692,7 +692,7 @@ public class FxContentEditorBean implements Serializable {
         // only allow this if (supervisor OR (content unlocked AND user in ACL) OR (content = loosely locked && user in ACL)
         if ((ticket.isGlobalSupervisor() || ticket.isMandatorSupervisor())
                 || ((!content.isLocked() || content.getLock().getLockType() == FxLockType.Loose)
-                && FxPermissionUtils.currentUserInContentACLList(ticket, content.getAclIds()))) {
+                && FxPermissionUtils.currentUserInACLList(ticket, content.getAclIds()))) {
             try {
                 if(content.isLocked()) {
                     ce.unlock(pk);
@@ -718,7 +718,7 @@ public class FxContentEditorBean implements Serializable {
         final FxLock lock = content.getLock();
         final UserTicket ticket = FxContext.getUserTicket();
         // allow this if (supervisor OR user in ACL)
-        if (ticket.isGlobalSupervisor() || ticket.isMandatorSupervisor() || FxPermissionUtils.currentUserInContentACLList(ticket, content.getAclIds())) {
+        if (ticket.isGlobalSupervisor() || ticket.isMandatorSupervisor() || FxPermissionUtils.currentUserInACLList(ticket, content.getAclIds())) {
             try {
                 if(content.isLocked()) {
                     ce.unlock(pk);
