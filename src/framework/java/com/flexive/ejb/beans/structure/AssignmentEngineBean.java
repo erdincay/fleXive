@@ -185,27 +185,42 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             if (!property.isAutoUniquePropertyName())
                 ps.executeUpdate();
             else {
-                int counter = 0;
-                boolean isok = false;
-                Savepoint sp = null;
-                final boolean needSavePoints = StorageManager.isRollbackOnConstraintViolation();
-                while (!isok && counter < 200) { //200 tries max
-                    try {
-                        if (counter > 0) {
-                            ps.setString(2, property.getName() + "_" + counter);
+                //fetch used property names
+                Statement stmt = null;
+                try {
+                    stmt = con.createStatement();
+                    ResultSet rs = stmt.executeQuery("SELECT NAME FROM " + TBL_STRUCT_PROPERTIES + " WHERE NAME LIKE '" +
+                            property.getName() + "_%' OR NAME='" + property.getName() + "' ORDER BY NAME DESC");
+                    if (rs.next()) {
+                        String last = rs.getString(1);
+                        boolean found = true;
+                        //since postgres handles underscores as wildcards, find the first relevant entry
+                        if (!(last.equals(property.getName()) || last.startsWith(property.getName() + "_"))) {
+                            found = false;
+                            while (rs.next()) {
+                                last = rs.getString(1);
+                                if (last.equals(property.getName()) || last.startsWith(property.getName() + "_")) {
+                                    found = true;
+                                    break;
+                                }
+                            }
                         }
-                        if (needSavePoints) sp = con.setSavepoint();
-                        ps.executeUpdate();
-                        if (needSavePoints) con.releaseSavepoint(sp);
-                        isok = true;
-                    } catch (SQLException e) {
-                        if (!StorageManager.isUniqueConstraintViolation(e) || counter >= 200)
-                            throw e;
-                        if(needSavePoints && sp != null)
-                            con.rollback(sp);
+                        if (found) {
+                            String autoName;
+                            if (last.indexOf(property.getName() + "_") == -1)
+                                autoName = property.getName() + "_1";
+                            else
+                                autoName = property.getName() + "_" +
+                                        (Integer.parseInt(last.substring(last.lastIndexOf("_") + 1)) + 1);
+                            ps.setString(2, autoName);
+                            LOG.info("Assigning unique property name [" + autoName + "] to [" + type.getName() + "." + property.getName() + "]");
+                        }
                     }
-                    counter++;
+                } finally {
+                    if( stmt != null )
+                        stmt.close();
                 }
+                ps.executeUpdate();
             }
             Database.storeFxString(new FxString[]{property.getLabel(), property.getHint()},
                     con, TBL_STRUCT_PROPERTIES, new String[]{"DESCRIPTION", "HINT"}, "ID", newPropertyId);
@@ -2217,28 +2232,48 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             SQLException lastEx = null;
             if (disableAssignment)
                 ps.setBoolean(1, false);
-            while (removed > 0) {
-                removed = 0;
-                for (FxAssignment rm : affectedAssignments) {
-                    ps.setLong(disableAssignment ? 2 : 1, rm.getId());
+
+
+            if(StorageManager.isRollbackOnConstraintViolation()) {
+                Statement stmt = null;
+                try {
+                    stmt = con.createStatement();
                     try {
-                        ps.executeUpdate();
-                        removed++;
-                    } catch (SQLException e) {
-                        lastEx = e;
-                        remaining.add(rm);
+                        stmt.execute(StorageManager.getReferentialIntegrityChecksStatement(true));
+                        for (FxAssignment rm : affectedAssignments) {
+                            ps.setLong(disableAssignment ? 2 : 1, rm.getId());
+                            ps.executeUpdate();
+                        }
+                    } finally {
+                        stmt.execute(StorageManager.getReferentialIntegrityChecksStatement(false));
                     }
+                } finally {
+                    if (stmt != null)
+                        stmt.close();
                 }
-                affectedAssignments.clear();
-                if (disableAssignment)
-                    break;
-                affectedAssignments.addAll(remaining);
-                remaining.clear();
+            } else {
+                while (removed > 0) {
+                    removed = 0;
+                    for (FxAssignment rm : affectedAssignments) {
+                        ps.setLong(disableAssignment ? 2 : 1, rm.getId());
+                        try {
+                            ps.executeUpdate();
+                            removed++;
+                        } catch (SQLException e) {
+                            lastEx = e;
+                            remaining.add(rm);
+                        }
+                    }
+                    affectedAssignments.clear();
+                    if (disableAssignment)
+                        break;
+                    affectedAssignments.addAll(remaining);
+                    remaining.clear();
+                }
+
+                if (affectedAssignments.size() > 0)
+                    throw lastEx;
             }
-
-            if (affectedAssignments.size() > 0)
-                throw lastEx;
-
             FxStructureUtils.removeOrphanedProperties(con);
             FxStructureUtils.removeOrphanedGroups(con);
             StructureLoader.reload(con);

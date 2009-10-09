@@ -459,7 +459,7 @@ public class FxCache implements FxCacheMBean, DynamicMBean {
                 LOG.warn("Tried to call [" + actionName + "] which is not implemented!");
             }
         } catch (Exception e) {
-            LOG.error("Failed to invoke MBean op: " + e.getMessage(), e);
+            LOG.error("Failed to invoke MBean op: " + e.getMessage());
             throw new MBeanException(e);
         }
         return null;  //To change body of implemented methods use File | Settings | File Templates.

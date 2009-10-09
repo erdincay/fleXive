@@ -162,8 +162,8 @@ public class PostgreSQLStorageFactory implements DBStorage {
      * {@inheritDoc}
      */
     public String getSelectListItemReferenceFixStatement() {
-        return "UPDATE " + TBL_SELECTLIST_ITEM + " i1, " + TBL_SELECTLIST_ITEM +
-                " i2 SET i1.PARENTID=? WHERE i1.PARENTID=i2.ID AND i2.LISTID=?";
+        return "UPDATE " + TBL_SELECTLIST_ITEM + " SET PARENTID=? WHERE PARENTID IN (SELECT p.ID FROM " +
+                TBL_SELECTLIST_ITEM + " p WHERE p.LISTID=?)";
     }
 
     /**

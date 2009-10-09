@@ -65,7 +65,7 @@ public class PostgreSQLSequencerStorage extends GenericSequencerStorage {
     private final static String SQL_EXIST = "SELECT COUNT(*) FROM " + TBL_PG_SEQUENCES + " WHERE RELKIND='S' AND UPPER(RELNAME)=?";
     private final static String SQL_GET_INFO = "SELECT IS_CYCLED, LAST_VALUE FROM ";
     private final static String SQL_GET_USER = "SELECT SUBSTR(UPPER(s.RELNAME)," + (PG_SEQ_PREFIX.length() + 1) + ") FROM " +
-            TBL_PG_SEQUENCES + " s WHERE s.RELKIND='S' AND s.RELNAME NOT LIKE '" + PG_SEQ_PREFIX + "SYS_%' AND s.RELNAME LIKE '" + PG_SEQ_PREFIX + "%' ORDER BY s.RELNAME ASC";
+            TBL_PG_SEQUENCES + " s WHERE s.RELKIND='S' AND UPPER(s.RELNAME) NOT LIKE '" + PG_SEQ_PREFIX + "SYS_%' AND UPPER(s.RELNAME) LIKE '" + PG_SEQ_PREFIX + "%' ORDER BY s.RELNAME ASC";
 
     private static final String NOROLLOVER = "NO CYCLE";
     private static final String ROLLOVER = "CYCLE";
@@ -126,7 +126,8 @@ public class PostgreSQLSequencerStorage extends GenericSequencerStorage {
         try {
             con = Database.getDbConnection();
             stmt = con.createStatement();
-            stmt.executeUpdate(SQL_CREATE + PG_SEQ_PREFIX + name + " START " + startNumber + " INCREMENT BY 1 " + (allowRollover ? ROLLOVER : NOROLLOVER));
+            stmt.executeUpdate(SQL_CREATE + PG_SEQ_PREFIX + name + " START " + startNumber + " MINVALUE 0 INCREMENT BY 1 " + (allowRollover ? ROLLOVER : NOROLLOVER));
+            fetchId(name, allowRollover); //get one number to have same behaviour as other db's
         } catch (SQLException exc) {
             throw new FxCreateException(LOG, exc, "ex.sequencer.create.failed", name);
         } finally {
@@ -188,7 +189,8 @@ public class PostgreSQLSequencerStorage extends GenericSequencerStorage {
             s = con.createStatement();
             ResultSet rs = ps.executeQuery();
             while (rs != null && rs.next()) {
-                ResultSet rsi = s.executeQuery(SQL_GET_INFO + rs.getString(1));
+                ResultSet rsi = s.executeQuery(SQL_GET_INFO + PG_SEQ_PREFIX+rs.getString(1));
+                rsi.next();
                 res.add(new CustomSequencer(rs.getString(1), rsi.getBoolean(1), rsi.getLong(2)));
                 rsi.close();
             }

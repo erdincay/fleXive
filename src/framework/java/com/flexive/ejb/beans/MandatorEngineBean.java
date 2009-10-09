@@ -339,7 +339,7 @@ public class MandatorEngineBean implements MandatorEngine, MandatorEngineLocal {
             }
             con = Database.getDbConnection();
             //                                                  1
-            sql = "DELETE FROM " + TBL_GROUP + " WHERE MANDATOR=? AND AUTOMANDATOR=TRUE";
+            sql = "DELETE FROM " + TBL_GROUP + " WHERE MANDATOR=? AND AUTOMANDATOR=1";
             ps = con.prepareStatement(sql);
             ps.setLong(1, mandatorId);
             ps.executeUpdate();

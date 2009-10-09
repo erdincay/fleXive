@@ -121,28 +121,20 @@ public class StepEngineBean implements StepEngine, StepEngineLocal {
                 throw new FxCreateException("ex.stepdefinition.load.notFound", step.getStepDefinitionId());
             }
 
-            // Create the step
-            long newStepId = seq.getId(FxSystemSequencer.STEP);
-            try {
-                stmt = con.createStatement();
+            //check if that step already exists
+            long newStepId;
+            stmt = con.createStatement();
+            sql = "SELECT ID FROM " + TBL_STEP + " WHERE STEPDEF=" + step.getStepDefinitionId() + " AND WORKFLOW=" + step.getWorkflowId();
+            ResultSet rs = stmt.executeQuery(sql);
+            if (rs != null && rs.next()) {
+                // return existing step ID as "new step ID"
+                newStepId = rs.getLong(1);
+            } else {
+                // Create the step
+                newStepId = seq.getId(FxSystemSequencer.STEP);
                 sql = "INSERT INTO " + TBL_STEP + " (ID, STEPDEF, WORKFLOW, ACL) VALUES (" + newStepId + ","
                         + step.getStepDefinitionId() + "," + step.getWorkflowId() + "," + step.getAclId() + ")";
                 stmt.executeUpdate(sql);
-            } catch (SQLException exc) {
-                // Ignore unique constraint.
-                if (!StorageManager.isUniqueConstraintViolation(exc)) {
-                    throw exc;
-                }
-                // get existing workflow, return its ID
-                sql = "SELECT ID FROM " + TBL_STEP + " WHERE STEPDEF="
-                        + step.getStepDefinitionId() + " AND WORKFLOW=" + step.getWorkflowId();
-                ResultSet rs = stmt.executeQuery(sql);
-                if (rs != null && rs.next()) {
-                    // return existing step ID as "new step ID"
-                    newStepId = rs.getLong(1);
-                } else {
-                    throw new FxCreateException(LOG, "ex.step.exists.load", exc, exc.getMessage());
-                }
             }
 
             // Refresh all UserTicket that are affected.

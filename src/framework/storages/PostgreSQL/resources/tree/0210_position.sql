@@ -25,10 +25,10 @@ DECLARE
 BEGIN
   IF NOT live THEN
     OPEN curEdit;
-   WHILE NOT done LOOP
+    WHILE NOT done LOOP
       FETCH curEdit INTO currentId;
       IF NOT FOUND THEN
-        RETURN 0;
+        done = TRUE;
       END IF;
       IF NOT done THEN
         _count = _count + 1;
@@ -44,7 +44,7 @@ BEGIN
     WHILE NOT done LOOP
       FETCH curLive INTO currentId;
       IF NOT FOUND THEN
-        RETURN 0;
+        done = TRUE;
       END IF;
       IF NOT done THEN
         _count = _count + 1;

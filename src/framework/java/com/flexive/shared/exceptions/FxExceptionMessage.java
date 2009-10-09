@@ -34,6 +34,7 @@ package com.flexive.shared.exceptions;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxLanguage;
 import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.cache.FxCacheException;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -88,9 +89,8 @@ public class FxExceptionMessage implements Serializable {
         try {
             locale = EJBLookup.getLanguageEngine().load(localeId);
         } catch (FxApplicationException e) {
-            String msg = "[Invalid locale id (" + localeId + ") requested for " + key + "!]";
-            LOG.warn(msg);
-            return msg;
+            LOG.warn("[Invalid locale id (" + localeId + ") requested for " + key + "!]: "+e.getMessage());
+            return getLocalizedMessage(FxLanguage.DEFAULT);
         }
         return getLocalizedMessage(locale.getId(), locale.getIso2digit());
     }

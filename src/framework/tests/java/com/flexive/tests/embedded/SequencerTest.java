@@ -51,7 +51,7 @@ import java.util.List;
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-@Test(groups = {"ejb", "structure"})
+@Test(groups = {"ejb", "structure", "sequencer"})
 public class SequencerTest {
 
     private SequencerEngine id;
@@ -102,7 +102,7 @@ public class SequencerTest {
         Assert.assertTrue(g2.get(2).getName().equals(seq3), "Expected " + seq3 + " got " + g2.get(2).getName());
         Assert.assertTrue(g2.get(0).isAllowRollover());
         Assert.assertTrue(g2.get(1).isAllowRollover());
-        Assert.assertTrue(!g2.get(2).isAllowRollover());
+        Assert.assertFalse(g2.get(2).isAllowRollover());
         id.removeSequencer(seq1);
         id.removeSequencer(seq2);
         id.removeSequencer(seq3);

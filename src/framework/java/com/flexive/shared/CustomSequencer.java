@@ -88,4 +88,32 @@ public class CustomSequencer implements Serializable {
     public long getCurrentNumber() {
         return currentNumber;
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        CustomSequencer that = (CustomSequencer) o;
+
+        if (allowRollover != that.allowRollover) return false;
+        if (currentNumber != that.currentNumber) return false;
+        if (!name.equals(that.name)) return false;
+
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode() {
+        int result = name.hashCode();
+        result = 31 * result + (allowRollover ? 1 : 0);
+        result = 31 * result + (int) (currentNumber ^ (currentNumber >>> 32));
+        return result;
+    }
 }
