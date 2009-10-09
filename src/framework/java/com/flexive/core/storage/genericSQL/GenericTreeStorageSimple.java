@@ -128,7 +128,7 @@ public class GenericTreeStorageSimple extends GenericTreeStorage {
     public FxTreeNodeInfo getTreeNodeInfo(Connection con, FxTreeMode mode, long nodeId) throws FxApplicationException {
         PreparedStatement ps = null;
         try {
-            ps = con.prepareStatement(mode == FxTreeMode.Live ? TREE_LIVE_NODEINFO : TREE_EDIT_NODEINFO);
+            ps = con.prepareStatement(prepareSql(mode, mode == FxTreeMode.Live ? TREE_LIVE_NODEINFO : TREE_EDIT_NODEINFO));
             ps.setLong(1, nodeId);
             ResultSet rs = ps.executeQuery();
             if (rs == null || !rs.next())

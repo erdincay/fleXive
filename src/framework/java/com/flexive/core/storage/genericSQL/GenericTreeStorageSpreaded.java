@@ -47,6 +47,7 @@ import com.flexive.shared.tree.FxTreeNode;
 import com.flexive.shared.value.FxString;
 import com.google.common.collect.Iterables;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -70,6 +71,10 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
     protected static final BigDecimal THREE = new BigDecimal(3);
     protected static final BigDecimal GO_UP = new BigDecimal(1024);
     protected static final BigDecimal MAX_RIGHT = new BigDecimal("18446744073709551615");
+
+    /** The maximum spacing for new nodes. Lower means less space reorgs for flat lists, but more reorgs for
+     * deeply nested trees.*/
+    protected static final BigDecimal DEFAULT_NODE_SPACING = new BigDecimal(10000);
 //    protected static final BigDecimal MAX_RIGHT = new BigDecimal("1000");
 //    protected static final BigDecimal GO_UP = new BigDecimal(10);
 
@@ -80,7 +85,6 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
             //            1
             " WHERE PARENT=?";
     private static final Object LOCK_REORG = new Object();
-
 
     /**
      * {@inheritDoc}
@@ -95,7 +99,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
                 throw new FxNotFoundException("ex.tree.node.notFound", nodeId, mode);
             BigDecimal maxRight = rs.getBigDecimal(1);
             ps.close();
-            ps = con.prepareStatement(mode == FxTreeMode.Live ? TREE_LIVE_NODEINFO : TREE_EDIT_NODEINFO);
+            ps = con.prepareStatement(prepareSql(mode, mode == FxTreeMode.Live ? TREE_LIVE_NODEINFO : TREE_EDIT_NODEINFO));
             ps.setLong(1, nodeId);
             rs = ps.executeQuery();
             if (rs == null || !rs.next())
@@ -291,7 +295,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
         if (overrideSpacing != null && overrideSpacing.compareTo(spacing) < 0) {
             spacing = overrideSpacing;
         } else {
-            if (spacing.compareTo(GO_UP) < 0) {
+            if (spacing.compareTo(GO_UP) < 0 && !createMode) {
                 return reorganizeSpace(con, seq, sourceMode, destMode, nodeInfo.getParentId(), includeNodeId, overrideSpacing, overrideLeft, insertParent,
                         insertPosition, insertSpace, insertBoundaries, depthDelta, destinationNode, createMode, createKeepIds);
             }
@@ -309,7 +313,11 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
             final long start = System.currentTimeMillis();
             String createProps = createMode ? ",PARENT,REF,NAME,TEMPLATE" : "";
             String sql = " SELECT ID," +
-                    "(SELECT COUNT(*) FROM " + getTable(sourceMode) + " WHERE LFT > NODE.LFT AND RGT < NODE.RGT)," +
+                    StorageManager.getIfFunction(       // compute total child count only when the node has children
+                            "CHILDCOUNT = 0",
+                            "0",
+                            "(SELECT COUNT(*) FROM " + getTable(sourceMode) + " WHERE LFT > NODE.LFT AND RGT < NODE.RGT)"
+                    ) + ", " +
                     "CHILDCOUNT, LFT LFTORD,RGT,DEPTH" + createProps +
                     " FROM (SELECT ID,CHILDCOUNT,LFT,RGT,DEPTH" + createProps + " FROM " + getTable(sourceMode) + " WHERE " +
                     "LFT>" + includeNode + nodeInfo.getLeft() + " AND LFT<" + includeNode + nodeInfo.getRight() + ") NODE " +
@@ -512,6 +520,11 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
         if (spacing.compareTo(BigDecimal.ZERO) <= 0/*less than*/) {
             throw new FxTreeException("ex.tree.create.noSpace", parentNodeId);
         }
+
+        // try to use space more efficiently for flat structures, otherwise the first node of a folder
+        // will get a third of the subtree space, the second one ninth, and so on.
+        // Maxspacing indicates the number of nodes (*2) we expect to put in this node before space reorg
+        spacing = spacing.compareTo(DEFAULT_NODE_SPACING) > 0 ? DEFAULT_NODE_SPACING : spacing;
 
         final BigDecimal left = leftBoundary.add(spacing).add(BigDecimal.ONE);
         final BigDecimal right = left.add(spacing).add(BigDecimal.ONE);
@@ -733,6 +746,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
         if (mode == FxTreeMode.Live) //Live tree can not be activated!
             return;
         long ids[] = getIdChain(con, mode, nodeId);
+        acquireLocksForUpdate(con, mode, Arrays.asList(ArrayUtils.toObject(ids)));
         for (long id : ids) {
             if (id == ROOT_NODE) continue;
             FxTreeNode srcNode = getNode(con, mode, id);
@@ -810,6 +824,23 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
         // Make sure the path up to the root node is activated
         activateNode(con, seq, ce, mode, sourceNode.getParentId());
 
+        try {
+            // lock edit tree
+            acquireLocksForUpdate(
+                    con,
+                    mode,
+                    selectNodeIds(con, mode, sourceNode.getLeft(), sourceNode.getRight())
+            );
+            // lock live tree
+            acquireLocksForUpdate(
+                    con,
+                    FxTreeMode.Live,
+                    selectNodeIds(con, mode, sourceNode.getLeft(), sourceNode.getRight())
+            );
+        } catch (SQLException e) {
+            throw new FxDbException(e);
+        }
+
         //***************************************************************
         //* Cleanup all affected nodes
         //***************************************************************
@@ -855,6 +886,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
         // Copy the data
         BigDecimal boundaries[] = getBoundaries(con, destinationNode, position);
         int depthDelta = (destinationNode.getDepth() + 1) - sourceNode.getDepth();
+
         reorganizeSpace(con, seq, mode, FxTreeMode.Live, sourceNode.getId(), true, spacing,
                 boundaries[0], null, 0, null, null, depthDelta, destination, true, true);
 

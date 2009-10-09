@@ -105,6 +105,8 @@ public abstract class GenericTreeStorage implements TreeStorage {
 
     private static final String TREE_TOTAL_COUNT_LIVE = "(SELECT COUNT(*) FROM " + getTable(FxTreeMode.Live) + " WHERE LFT > t.LFT AND RGT < t.RGT)";
     private static final String TREE_TOTAL_COUNT_EDIT = "(SELECT COUNT(*) FROM " + getTable(FxTreeMode.Edit) + " WHERE LFT > t.LFT AND RGT < t.RGT)";
+    /** Placeholder for dynamic child count */
+    protected static final String COMPUTE_TOTAL_CHILDCOUNT = "__TOTAL_CHILD_COUNT";
     //                                                         1   2   3      4
     protected static final String TREE_LIVE_NODEINFO = "SELECT LFT,RGT,PARENT,TOTAL_CHILDCOUNT," +
             //                                                                        5
@@ -113,7 +115,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
             "(SELECT RGT FROM " + getTable(FxTreeMode.Live) + " WHERE ID=NODE.PARENT) PARENTRIGHT," +
             //7    8          9   10       11          12   13                               14  15   16  17   18         19
             "DEPTH,CHILDCOUNT,REF,TEMPLATE,MODIFIED_AT,NAME,tree_getPosition(TRUE,ID,PARENT),ACL,TDEF,VER,STEP,CREATED_BY,MANDATOR " +
-            "FROM (SELECT t.LFT,t.RGT,t.PARENT,t.DEPTH," + TREE_TOTAL_COUNT_LIVE + " TOTAL_CHILDCOUNT,t.CHILDCOUNT,t.REF,t.TEMPLATE,t.MODIFIED_AT,t.NAME,t.ID,c.ACL,c.TDEF,c.VER,c.STEP,c.CREATED_BY,c.MANDATOR FROM " +
+            "FROM (SELECT t.LFT,t.RGT,t.PARENT,t.DEPTH," + COMPUTE_TOTAL_CHILDCOUNT + ",t.CHILDCOUNT,t.REF,t.TEMPLATE,t.MODIFIED_AT,t.NAME,t.ID,c.ACL,c.TDEF,c.VER,c.STEP,c.CREATED_BY,c.MANDATOR FROM " +
             getTable(FxTreeMode.Live) + " t, " + TBL_CONTENT + " c WHERE t.ID=? AND c.ID=t.REF AND c.ISLIVE_VER=TRUE) NODE";
 
     protected static final String TREE_NODEINFO_ACLS =
@@ -129,7 +131,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
             "(SELECT RGT FROM " + getTable(FxTreeMode.Edit) + " WHERE ID=NODE.PARENT) PARENTRIGHT," +
             //7    8          9   10       11          12   13                                14  15   16  17   18         19
             "DEPTH,CHILDCOUNT,REF,TEMPLATE,MODIFIED_AT,NAME,tree_getPosition(FALSE,ID,PARENT),ACL,TDEF,VER,STEP,CREATED_BY,MANDATOR " +
-            "FROM (SELECT t.LFT,t.RGT,t.PARENT,t.DEPTH," + TREE_TOTAL_COUNT_EDIT + " TOTAL_CHILDCOUNT,t.CHILDCOUNT,t.REF,t.TEMPLATE,t.MODIFIED_AT,t.NAME,t.ID,c.ACL,c.TDEF,c.VER,c.STEP,c.CREATED_BY,c.MANDATOR FROM " +
+            "FROM (SELECT t.LFT,t.RGT,t.PARENT,t.DEPTH," + COMPUTE_TOTAL_CHILDCOUNT + ",t.CHILDCOUNT,t.REF,t.TEMPLATE,t.MODIFIED_AT,t.NAME,t.ID,c.ACL,c.TDEF,c.VER,c.STEP,c.CREATED_BY,c.MANDATOR FROM " +
             getTable(FxTreeMode.Edit) + " t, " + TBL_CONTENT + " c WHERE t.ID=? AND c.ID=t.REF AND c.ISMAX_VER=TRUE) NODE";
 
     //                                                        1    2     3       4                  5            6      7        8       9          10          11                                         12    13     14    15     16           17       18        19         20           21           22           23            24
@@ -1670,4 +1672,30 @@ public abstract class GenericTreeStorage implements TreeStorage {
      *          on errors
      */
     public abstract void checkTree(Connection con, FxTreeMode mode) throws FxApplicationException;
+
+    /**
+     * Replace dynamic placeholders in the given select statement.
+     *
+     * @param sql       the SQL statement
+     * @return          the final SQL statement
+     * @since           3.1
+     */
+    protected String prepareSql(FxTreeMode mode, String sql) {
+        String result = sql;
+        if (sql.contains(COMPUTE_TOTAL_CHILDCOUNT)) {
+            // compute total child count of a node only when childcount > 0
+            result = sql.replace(
+                    COMPUTE_TOTAL_CHILDCOUNT,
+                    StorageManager.getIfFunction(
+                            "CHILDCOUNT = 0",
+                            "0",
+                            mode == FxTreeMode.Live ? TREE_TOTAL_COUNT_LIVE : TREE_TOTAL_COUNT_EDIT
+                    )
+                    + " TOTAL_CHILDCOUNT"
+            );
+        }
+        return result;
+    }
+
+
 }
