@@ -178,6 +178,23 @@ public class H2StorageFactory implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    public String concat(String... text) {
+        if( text.length == 0)
+            return "";
+        if( text.length == 1)
+            return text[0];
+        StringBuilder sb = new StringBuilder(500);
+        for (int i = 0; i < text.length; i++) {
+            if (i > 0 && i < text.length)
+                sb.append("||");
+            sb.append(text[i]);
+        }
+        return sb.toString();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public boolean isForeignKeyViolation(Exception exc) {
         final int errorCode = Database.getSqlErrorCode(exc);
         //see http://h2database.com/javadoc/org/h2/constant/ErrorCode.html#c23002
@@ -191,6 +208,13 @@ public class H2StorageFactory implements DBStorage {
         final int errorCode = Database.getSqlErrorCode(e);
         //see http://h2database.com/javadoc/org/h2/constant/ErrorCode.html
         return errorCode == 90051;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean isRollbackOnConstraintViolation() {
+        return false;
     }
 
     /**

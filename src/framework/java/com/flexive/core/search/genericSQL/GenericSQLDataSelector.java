@@ -35,6 +35,7 @@ import com.flexive.core.DatabaseConst;
 import static com.flexive.core.DatabaseConst.TBL_CONTENT;
 import static com.flexive.core.DatabaseConst.TBL_CONTENT_ACLS;
 import com.flexive.core.search.*;
+import com.flexive.core.storage.StorageManager;
 import com.flexive.shared.FxArrayUtils;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSharedUtils;
@@ -199,8 +200,7 @@ public class GenericSQLDataSelector extends DataSelector {
                 columns.add(filterProperties(column));
             }
         }
-        columns.add("concat(concat(concat(concat(concat(t.name,'[@pk=')," + filterProperties("id") + "),'.'),"
-                + filterProperties("ver") + "),']') xpathPref");
+        columns.add(StorageManager.concat("t.name","'[@pk='",filterProperties("id"),"'.'",filterProperties("ver"),"']'")+" xpathPref");
         // order by starts after the internal selected columns
         int orderByPos = columns.size() + 1;
 
@@ -293,10 +293,13 @@ public class GenericSQLDataSelector extends DataSelector {
                 throw new FxSqlSearchException("ex.sqlSearch.briefcase.metadata.ambiguous");
             }
             // result column: "id metadata"
-            final String sel = "concat(" + FILTER_ALIAS + ".id," +
+            /*final String sel = "concat(" + FILTER_ALIAS + ".id," +
                     " concat(' '," +
-                    " (select coalesce(metadata, '') FROM " + DatabaseConst.TBL_BRIEFCASE_DATA
-                    + " WHERE briefcase_id=" + briefcaseFilter[0] + " AND id=" + FILTER_ALIAS + ".id)))";
+                    " (SELECT COALESCE(metadata, '') FROM " + DatabaseConst.TBL_BRIEFCASE_DATA
+                    + " WHERE briefcase_id=" + briefcaseFilter[0] + " AND id=" + FILTER_ALIAS + ".id)))";*/
+            final String sel = StorageManager.concat(FILTER_ALIAS + ".id", "' '",
+                    "(SELECT COALESCE(metadata, '') FROM " + DatabaseConst.TBL_BRIEFCASE_DATA
+                    + " WHERE briefcase_id=" + briefcaseFilter[0] + " AND id=" + FILTER_ALIAS + ".id)");
             result.addItem(sel, resultPos, false);
         } else if (entry.getType() == PropertyEntry.Type.LOCK) {
             for (String readColumn : entry.getReadColumns()) {
@@ -347,7 +350,8 @@ public class GenericSQLDataSelector extends DataSelector {
                         final String val = getContentDataSubselect(column, entry, false);
                         result.addItem(val, resultPos, false);
                     }
-                    String xpath = "concat(filter.xpathPref," + getContentDataSubselect("XPATHMULT", entry, true) + ")";
+//                    String xpath = "concat(filter.xpathPref," + getContentDataSubselect("XPATHMULT", entry, true) + ")";
+                    String xpath = StorageManager.concat("filter.xpathPref", getContentDataSubselect("XPATHMULT", entry, true));
                     result.addItem(xpath, resultPos, true);
                     break;
                 case T_CONTENT_DATA_FLAT:

@@ -176,11 +176,28 @@ public class PostgreSQLStorageFactory implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    public String concat(String... text) {
+        if( text.length == 0)
+            return "";
+        if( text.length == 1)
+            return text[0];
+        StringBuilder sb = new StringBuilder(500);
+        for (int i = 0; i < text.length; i++) {
+            if (i > 0 && i < text.length)
+                sb.append("||");
+            sb.append(text[i]);
+        }
+        return sb.toString();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public boolean isForeignKeyViolation(Exception exc) {
-        if( !(exc instanceof SQLException))
+        if (!(exc instanceof SQLException))
             return false;
         //see http://www.postgresql.org/docs/8.4/interactive/errcodes-appendix.html
-        return "23503".equals(((SQLException)exc).getSQLState());
+        return "23503".equals(((SQLException) exc).getSQLState());
     }
 
     /**
@@ -194,21 +211,28 @@ public class PostgreSQLStorageFactory implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    public boolean isRollbackOnConstraintViolation() {
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public boolean isUniqueConstraintViolation(Exception exc) {
-        if( !(exc instanceof SQLException))
+        if (!(exc instanceof SQLException))
             return false;
         //see http://www.postgresql.org/docs/8.4/interactive/errcodes-appendix.html
-        return "23505".equals(((SQLException)exc).getSQLState());
+        return "23505".equals(((SQLException) exc).getSQLState());
     }
 
     /**
      * {@inheritDoc}
      */
     public boolean isDeadlock(Exception exc) {
-        if( !(exc instanceof SQLException))
+        if (!(exc instanceof SQLException))
             return false;
         //see http://www.postgresql.org/docs/8.4/interactive/errcodes-appendix.html
-        return "40P01".equals(((SQLException)exc).getSQLState());
+        return "40P01".equals(((SQLException) exc).getSQLState());
     }
 
     /**
@@ -340,9 +364,9 @@ public class PostgreSQLStorageFactory implements DBStorage {
             if (dropIfExist) {
                 System.out.println("(Re)creating schema " + schema);
                 cnt += stmt.executeUpdate("DROP SCHEMA IF EXISTS \"" + schema + "\" CASCADE");
-                cnt += stmt.executeUpdate("CREATE SCHEMA \"" + schema+"\"");
+                cnt += stmt.executeUpdate("CREATE SCHEMA \"" + schema + "\"");
             }
-            cnt += stmt.executeUpdate("SET search_path TO \"" + schema+"\"");
+            cnt += stmt.executeUpdate("SET search_path TO \"" + schema + "\"");
 
             for (String script : s) {
                 if (script.indexOf('/') == -1 || script.startsWith("tree/")) {

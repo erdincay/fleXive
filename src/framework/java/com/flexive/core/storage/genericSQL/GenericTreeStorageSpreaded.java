@@ -708,8 +708,10 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
 
                 int copyOfNr = getCopyOfCount(con, mode, copyOfPrefix, dstParentNodeId, firstCreatedNodeId);
                 // Make sure the name is unique
-                stmt.executeUpdate("UPDATE " + getTable(mode) + " SET NAME=CONCAT(CONCAT('" + copyOfPrefix + "',NAME),'(" +
-                        copyOfNr + ")') WHERE ID=" + firstCreatedNodeId);
+                /*stmt.executeUpdate("UPDATE " + getTable(mode) + " SET NAME=CONCAT(CONCAT('" + copyOfPrefix + "',NAME),'(" +
+                        copyOfNr + ")') WHERE ID=" + firstCreatedNodeId);*/
+                stmt.executeUpdate("UPDATE " + getTable(mode) + " SET NAME=" + StorageManager.concat("'" + copyOfPrefix + "'", "NAME", "(" + String.valueOf(copyOfNr) + ")") +
+                        " WHERE ID=" + firstCreatedNodeId);
             }
 
         } catch (SQLException exc) {

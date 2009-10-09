@@ -181,6 +181,27 @@ public class MySQLStorageFactory implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    public String concat(String... text) {
+        if( text.length == 0)
+            return "";
+        if( text.length == 1)
+            return text[0];
+        StringBuilder sb = new StringBuilder(500);
+        for (int i = 1; i < text.length; i++)
+            sb.append("CONCAT(");
+        for (int i = 0; i < text.length; i++) {
+            if (i > 0)
+                sb.append(',');
+            sb.append(text[i]);
+            if (i > 0)
+                sb.append(')');
+        }
+        return sb.toString();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public boolean isForeignKeyViolation(Exception exc) {
         final int errorCode = Database.getSqlErrorCode(exc);
         //see http://dev.mysql.com/doc/refman/5.0/en/error-messages-server.html
@@ -195,6 +216,13 @@ public class MySQLStorageFactory implements DBStorage {
         //see http://dev.mysql.com/doc/refman/5.0/en/error-messages-server.html
         return errorCode == 1317 || errorCode == 1028
                 || e.getClass().getName().equals("com.mysql.jdbc.exceptions.MySQLTimeoutException");
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean isRollbackOnConstraintViolation() {
+        return false;
     }
 
     /**

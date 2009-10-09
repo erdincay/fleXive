@@ -167,6 +167,14 @@ public interface DBStorage {
     String getTimestampFunction();
 
     /**
+     * Get a database vendor specific concat statement
+     *
+     * @param text array of text to concatenate
+     * @return concatenated text statement
+     */
+    String concat(String... text);
+
+    /**
      * Returns true if the SqlError is a foreign key violation.
      *
      * @param exc the exception
@@ -182,6 +190,13 @@ public interface DBStorage {
      * @since 3.1
      */
     boolean isQueryTimeout(Exception e);
+
+    /**
+     * Does the database rollback a connection if it encounters a constraint violation? (eg Postgres does...)
+     *
+     * @return database rollbacks a connection if it encounters a constraint violation
+     */
+    boolean isRollbackOnConstraintViolation();
 
     /**
      * Returns true if the SqlError is a unique constraint violation.

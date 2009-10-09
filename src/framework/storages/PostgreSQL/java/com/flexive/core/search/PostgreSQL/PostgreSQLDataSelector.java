@@ -53,6 +53,6 @@ public class PostgreSQLDataSelector extends GenericSQLDataSelector {
 
     @Override
     public String getCounterStatement(String counter) {
-        return "1";
+        return "1 as " + counter;
     }
 }

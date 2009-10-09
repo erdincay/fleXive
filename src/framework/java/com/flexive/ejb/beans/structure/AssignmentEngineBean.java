@@ -188,19 +188,20 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 int counter = 0;
                 boolean isok = false;
                 Savepoint sp = null;
+                final boolean needSavePoints = StorageManager.isRollbackOnConstraintViolation();
                 while (!isok && counter < 200) { //200 tries max
                     try {
                         if (counter > 0) {
                             ps.setString(2, property.getName() + "_" + counter);
                         }
-                        sp = con.setSavepoint();
+                        if (needSavePoints) sp = con.setSavepoint();
                         ps.executeUpdate();
-                        con.releaseSavepoint(sp);
+                        if (needSavePoints) con.releaseSavepoint(sp);
                         isok = true;
                     } catch (SQLException e) {
                         if (!StorageManager.isUniqueConstraintViolation(e) || counter >= 200)
                             throw e;
-                        if(sp != null)
+                        if(needSavePoints && sp != null)
                             con.rollback(sp);
                     }
                     counter++;

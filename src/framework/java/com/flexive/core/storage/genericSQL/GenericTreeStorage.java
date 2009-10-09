@@ -965,13 +965,14 @@ public abstract class GenericTreeStorage implements TreeStorage {
 
             FxTreeMode rootCheckMode = mode == FxTreeMode.Live ? FxTreeMode.Edit : FxTreeMode.Live;
             Savepoint sp = null;
+            final boolean needSavePoints = StorageManager.isRollbackOnConstraintViolation();
             try {
-                sp = con.setSavepoint();
+                if (needSavePoints) sp = con.setSavepoint();
                 rootPK = getTreeNodeInfo(con, rootCheckMode, FxTreeNode.ROOT_NODE).getReference();
-                con.releaseSavepoint(sp);
+                if (needSavePoints) con.releaseSavepoint(sp);
             } catch (FxApplicationException e) {
-                LOG.info("No root node found. Creating a new one.");
-                con.rollback(sp);
+                LOG.info("Creating a new root node for the " + mode.name() + " tree.");
+                if (needSavePoints && sp != null) con.rollback(sp);
                 //create the root folder instance
                 FxType type = CacheAdmin.getEnvironment().getType(FxType.FOLDER);
                 FxContent content = ce.initialize(type.getId());
@@ -1361,7 +1362,8 @@ public abstract class GenericTreeStorage implements TreeStorage {
             // Update the childcount of the new parents
             stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT COUNT(*) FROM " + getTable(mode) + " WHERE PARENT=" + parentNodeId + " AND NAME LIKE " +
-                    "(SELECT CONCAT(CONCAT('" + copyOfPrefix + "%',NAME),'%') FROM " + getTable(mode) + " WHERE ID=" + nodeId + ")");
+//                    "(SELECT CONCAT(CONCAT('" + copyOfPrefix + "%',NAME),'%') FROM " + getTable(mode) + " WHERE ID=" + nodeId + ")");
+                    "(SELECT " + StorageManager.concat("'" + copyOfPrefix + "%'", "NAME", "'%'") + " FROM " + getTable(mode) + " WHERE ID=" + nodeId + ")");
             int result = 0;
             if (rs.next()) {
                 result = rs.getInt(1);

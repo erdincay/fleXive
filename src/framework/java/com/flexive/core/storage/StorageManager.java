@@ -263,6 +263,15 @@ public class StorageManager {
     }
 
     /**
+     * Does the database rollback a connection if it encounters a constraint violation? (eg Postgres does...)
+     *
+     * @return database rollbacks a connection if it encounters a constraint violation
+     */
+    public static boolean isRollbackOnConstraintViolation() {
+        return getStorageImpl().isRollbackOnConstraintViolation();
+    }
+
+    /**
      * Get the DataSelector for the sql searchengine based on the used DB
      *
      * @param con       the connection to use
@@ -283,5 +292,15 @@ public class StorageManager {
      */
     public static DataSelector getDataSelector(SqlSearch sqlSearch) throws FxSqlSearchException {
         return getStorageImpl().getDataSelector(sqlSearch);
+    }
+
+    /**
+     * Get a database vendor specific concat statement
+     *
+     * @param text array of text to concatenate
+     * @return concatenated text statement
+     */
+    public static String concat(String... text) {
+        return getStorageImpl().concat(text);
     }
 }
