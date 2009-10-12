@@ -504,6 +504,10 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
     private long _createNode(Connection con, SequencerEngine seq, ContentEngine ce, FxTreeMode mode, long parentNodeId, String name,
                              FxString label, int position, FxPK reference, String data, long nodeId)
             throws FxApplicationException {
+
+        // acquire exclusive lock for parent node 
+        acquireLocksForUpdate(con, mode, Arrays.asList(parentNodeId));
+
 //        makeSpace(con, seq/*irrelevant*/, mode, parentNodeId, position/*irrelevant*/, 1);
         FxTreeNodeInfoSpreaded parentNode = (FxTreeNodeInfoSpreaded) getTreeNodeInfo(con, mode, parentNodeId);
         BigDecimal boundaries[] = getBoundaries(con, parentNode, position);
@@ -528,8 +532,6 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
 
         final BigDecimal left = leftBoundary.add(spacing).add(BigDecimal.ONE);
         final BigDecimal right = left.add(spacing).add(BigDecimal.ONE);
-
-        acquireLocksForUpdate(con, parentNode, false);
 
         NodeCreateInfo nci = getNodeCreateInfo(mode, seq, ce, nodeId, name, label, reference);
 

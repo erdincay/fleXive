@@ -2362,6 +2362,10 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             ps.setLong(1, pk.getId());
             ps.executeUpdate();
         } catch (SQLException e) {
+            if (LOG.isWarnEnabled()) {
+                // log information about removed content
+                LOG.warn("Failed to remove " + pk + " due to a SQL error: " + e.getMessage());
+            }
             throw new FxRemoveException(LOG, e, "ex.db.sqlError", e.getMessage());
         } catch (FxApplicationException e) {
             throw new FxRemoveException(e);

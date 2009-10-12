@@ -84,7 +84,7 @@ public class FxTreeTest {
         scripting = EJBLookup.getScriptingEngine();
         ce = EJBLookup.getContentEngine();
         ty = EJBLookup.getTypeEngine();
-        EJBLookup.getDivisionConfigurationEngine().put(SystemParameters.TREE_CHECKS_ENABLED, true);
+        enableTreeChecks();
     }
 
     @AfterClass
@@ -92,11 +92,19 @@ public class FxTreeTest {
         try {
             tree.clear(FxTreeMode.Live);
             tree.clear(FxTreeMode.Edit);
-            EJBLookup.getDivisionConfigurationEngine().put(SystemParameters.TREE_CHECKS_ENABLED, false);
+            disableTreeChecks();
         } catch (FxApplicationException e) {
             //ignore
         }
         logout();
+    }
+
+    private void enableTreeChecks() throws FxApplicationException {
+        EJBLookup.getDivisionConfigurationEngine().put(SystemParameters.TREE_CHECKS_ENABLED, true);
+    }
+
+    private void disableTreeChecks() throws FxApplicationException {
+        EJBLookup.getDivisionConfigurationEngine().put(SystemParameters.TREE_CHECKS_ENABLED, false);
     }
 
     /**
@@ -414,15 +422,31 @@ public class FxTreeTest {
      */
     @Test
     public void massCreateTest() throws FxApplicationException {
-        FxTreeMode mode = FxTreeMode.Edit;
-        tree.clear(mode);
-        String path = "/t1/t2/t3/t4/t5/t6/t7/t8/t9/t10";
-        for (int i = 0; i < 3; i++) {
-            path = path + "/f" + (i + 1);
-            tree.createNodes(mode, FxTreeNode.ROOT_NODE, 0, path);
-            FxTreeNode parent = tree.getNode(mode, tree.getIdByPath(mode, path));
-            createSubNodes(parent, 40);
+        disableTreeChecks();    // disable to improve performance
+        try {
+            FxTreeMode mode = FxTreeMode.Edit;
+            tree.clear(mode);
+            String path = "/t1/t2/t3/t4/t5/t6/t7/t8/t9/t10";
+            for (int i = 0; i < 3; i++) {
+                path = path + "/f" + (i + 1);
+                tree.createNodes(mode, FxTreeNode.ROOT_NODE, 0, path);
+                FxTreeNode parent = tree.getNode(mode, tree.getIdByPath(mode, path));
+                createSubNodes(parent, 40);
+            }
+            // check consistency
+            enableTreeChecks();
+            triggerTreeCheck(mode);
+        } finally {
+            enableTreeChecks();
         }
+    }
+
+    private void triggerTreeCheck(FxTreeMode mode) throws FxApplicationException {
+        final long testId = tree.save(FxTreeNodeEdit.createNew("test").setParentNodeId(FxTreeNode.ROOT_NODE));
+        if (FxTreeMode.Live == mode) {
+            tree.activate(FxTreeMode.Edit, testId, false);
+        }
+        tree.remove(FxTreeMode.Edit, testId, FxTreeRemoveOp.Remove, false);
     }
 
     /**
@@ -798,30 +822,38 @@ public class FxTreeTest {
      */
     @Test
     public void populateTest() throws FxApplicationException {
-        // create the testdata in the live tree, assert that names of the root nodes
-        FxTreeMode mode = FxTreeMode.Live;
-        tree.clear(mode);
-        FxTreeNode n1, n2, n3;
-        int maxLevel = 1;
-        final String node1 = "Level2_0_";
-        final String node2 = "Level3_0_9_";
-        final String node3 = "Level4_0_9_99_";
-
+        disableTreeChecks();
         try {
-            tree.populate(mode, maxLevel);
-        } catch (FxApplicationException e) {
-            fail(e.getMessage());
+            // create the testdata in the live tree, assert that names of the root nodes
+            FxTreeMode mode = FxTreeMode.Live;
+            tree.clear(mode);
+            FxTreeNode n1, n2, n3;
+            int maxLevel = 1;
+            final String node1 = "Level2_0_";
+            final String node2 = "Level3_0_9_";
+            final String node3 = "Level4_0_9_99_";
+
+            try {
+                tree.populate(mode, maxLevel);
+            } catch (FxApplicationException e) {
+                fail(e.getMessage());
+            }
+            n1 = tree.findChild(mode, 1, node1);
+            n2 = tree.findChild(mode, n1.getId(), node2);
+            n3 = tree.findChild(mode, n2.getId(), node3);
+
+            assertEquals(n1.getName(), node1);
+            assertEquals(n2.getName(), node2);
+            assertEquals(n3.getName(), node3);
+
+            //clean up
+            tree.remove(mode, n1.getId(), FxTreeRemoveOp.Remove, true);
+
+            enableTreeChecks();
+            triggerTreeCheck(mode);
+        } finally {
+            enableTreeChecks();
         }
-        n1 = tree.findChild(mode, 1, node1);
-        n2 = tree.findChild(mode, n1.getId(), node2);
-        n3 = tree.findChild(mode, n2.getId(), node3);
-
-        assertEquals(n1.getName(), node1);
-        assertEquals(n2.getName(), node2);
-        assertEquals(n3.getName(), node3);
-
-        //clean up
-        tree.remove(mode, n1.getId(), FxTreeRemoveOp.Remove, true);
     }
 
 
