@@ -213,6 +213,15 @@ public class StorageManager {
     }
 
     /**
+     * Get the database vendor specific operator to query regular expressions
+     *
+     * @return database vendor specific operator to query regular expressions
+     */
+    public static String getRegExpOperator() {
+        return getStorageImpl().getRegExpOperator();
+    }
+
+    /**
      * Get the database vendor specific statement to enable or disable referential integrity checks
      *
      * @param enable enable or disable checks?

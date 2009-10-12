@@ -31,16 +31,16 @@
  ***************************************************************/
 package com.flexive.ejb.beans.structure;
 
+import static com.flexive.core.DatabaseConst.*;
+import com.flexive.shared.structure.FxAssignment;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
-
-import static com.flexive.core.DatabaseConst.*;
-import static com.flexive.core.DatabaseConst.TBL_PROPERTY_OPTIONS;
-import static com.flexive.core.DatabaseConst.TBL_STRUCT_ASSIGNMENTS;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Server side utility methods for structures
@@ -95,5 +95,44 @@ class FxStructureUtils {
             if (stmt != null)
                 stmt.close();
         }
+    }
+
+    public static List<FxAssignment> resolveRemoveDependencies(List<FxAssignment> assignments) {
+        if (assignments.size() <= 1)
+            return assignments;
+        List<FxAssignment> res = new ArrayList<FxAssignment>(assignments.size());
+        //1st pass: filter base assignments dependencies from the same list
+        for (FxAssignment as : assignments) {
+            if (res.size() == 0) {
+                res.add(as); //first
+                continue;
+            }
+            int pos = -1;
+            for (int i = 0; i < res.size(); i++) {
+                FxAssignment check = res.get(i);
+                if (as.getBaseAssignmentId() == check.getId() || as.hasParentGroupAssignment() && as.getParentGroupAssignment().getId() == check.getId()) {
+                    if (pos == -1 || pos > i)
+                        pos = i;
+                }
+            }
+            if (pos < 0)
+                res.add(as);
+            else
+                res.add(pos, as);
+        }
+        /*for(FxAssignment as: assignments) {
+            if( as.getBaseAssignmentId() == 0) {
+                res.add(as); //no base at all
+                continue;
+            }
+            for(FxAssignment as2: assignments) {
+                if( as2.getId() == as.getBaseAssignmentId()) {
+                    res.add(as); //"as" is base
+                    break;
+                }
+            }
+
+        }*/
+        return res;
     }
 }

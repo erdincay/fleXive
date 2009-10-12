@@ -143,7 +143,7 @@ class GenericSQLForeignTableSelector implements FieldSelector {
             // select label from translation table
             statement.delete(0, statement.length());
             final long lang = FxContext.getUserTicket().getLanguage().getId();
-            statement.append(("ifnull(\n" +
+            statement.append(("COALESCE(\n" +
                     getLabelSelect() + "lang=" + lang + " limit 1) ,\n" +
                     getLabelSelect() + "deflang=true limit 1) \n" +
                     ")"));

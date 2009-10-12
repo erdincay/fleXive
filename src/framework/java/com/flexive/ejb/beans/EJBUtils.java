@@ -50,7 +50,8 @@ public class EJBUtils {
      * @param ctx   the session context
      */
     public static void rollback(SessionContext ctx) {
-        ctx.setRollbackOnly();
+        if( !ctx.getRollbackOnly())
+            ctx.setRollbackOnly();
         // notify environment cache that the thread-local environment may have changed
         CacheAdmin.environmentChanged();
     }

@@ -159,6 +159,13 @@ public class MySQLStorageFactory implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    public String getRegExpOperator() {
+        return "REGEXP";
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public String getReferentialIntegrityChecksStatement(boolean enable) {
         return "SET FOREIGN_KEY_CHECKS=" + (enable ? 1 : 0);
     }

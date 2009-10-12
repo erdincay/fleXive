@@ -156,6 +156,13 @@ public class H2StorageFactory implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    public String getRegExpOperator() {
+        return "REGEXP";
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public String getReferentialIntegrityChecksStatement(boolean enable) {
         return "SET REFERENTIAL_INTEGRITY " + (enable ? "TRUE" : "FALSE");
     }

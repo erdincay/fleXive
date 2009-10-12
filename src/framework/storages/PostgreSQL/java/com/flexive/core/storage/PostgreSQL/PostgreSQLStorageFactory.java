@@ -154,6 +154,13 @@ public class PostgreSQLStorageFactory implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    public String getRegExpOperator() {
+        return "~";
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public String getReferentialIntegrityChecksStatement(boolean enable) {
         return "SET CONSTRAINTS ALL " + (enable ? "DEFERRED" : "IMMEDIATE");
     }

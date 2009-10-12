@@ -38,14 +38,14 @@ BEGIN
 
     IF _live THEN
       SELECT id INTO _result FROM FXS_TREE_LIVE node WHERE
-          ifnull(ifnull(
+          COALESCE(COALESCE(
            (SELECT f.FTEXT1024 FROM FX_CONTENT_DATA f WHERE f.tprop=_tprop AND lang IN (_lang,0) AND f.ISMAX_VER=TRUE AND f.id=node.ref LIMIT 1),
            (SELECT f.FTEXT1024 FROM FX_CONTENT_DATA f WHERE f.tprop=_tprop AND ismldef=TRUE AND f.ISMAX_VER=TRUE AND f.id=node.ref LIMIT 1)
           ),node.name) =_current
         and parent=_result;
     ELSE
       select id into _result from FXS_TREE node where
-          ifnull(ifnull(
+          COALESCE(COALESCE(
            (SELECT f.FTEXT1024 FROM FX_CONTENT_DATA f WHERE f.tprop=_tprop AND lang IN (_lang,0) AND f.ISMAX_VER=TRUE AND f.id=node.ref LIMIT 1),
            (SELECT f.FTEXT1024 FROM FX_CONTENT_DATA f WHERE f.tprop=_tprop AND ismldef=TRUE AND f.ISMAX_VER=TRUE AND f.id=node.ref LIMIT 1)
           ),node.name)=_current

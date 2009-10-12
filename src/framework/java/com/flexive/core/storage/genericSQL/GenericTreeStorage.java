@@ -836,7 +836,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
             long captionProperty = EJBLookup.getConfigurationEngine().get(SystemParameters.TREE_CAPTION_PROPERTY);
             String version = mode == FxTreeMode.Live ? "ISLIVE_VER=TRUE" : "ISMAX_VER=TRUE";
             String label_pos = loadPartial
-                    ? "IFNULL(IFNULL(" +
+                    ? "COALESCE(COALESCE(" +
                     "(SELECT f.FTEXT1024 FROM " + TBL_CONTENT_DATA + " f WHERE f.TPROP=" +
                     captionProperty + " AND LANG IN(" + partialLoadLanguage.getId() + ",0)AND f." + version + " AND f.ID=n.REF LIMIT 1)," +
                     "(SELECT f.FTEXT1024 from " + TBL_CONTENT_DATA + " f where f.tprop=" +

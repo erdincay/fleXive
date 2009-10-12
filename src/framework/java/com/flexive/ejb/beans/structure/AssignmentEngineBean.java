@@ -771,6 +771,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
     /**
      * {@inheritDoc}
      */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void removeGroup(long groupId) throws FxApplicationException {
         List<FxGroupAssignment> assignments = CacheAdmin.getEnvironment().getGroupAssignments(groupId, true);
         if (assignments.size() == 0)
@@ -2227,53 +2228,16 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     psBinaryRemove.close();
             }
 
-            List<FxAssignment> remaining = new ArrayList<FxAssignment>(affectedAssignments.size());
-            int removed = 1;
-            SQLException lastEx = null;
             if (disableAssignment)
                 ps.setBoolean(1, false);
 
-
-            if(StorageManager.isRollbackOnConstraintViolation()) {
-                Statement stmt = null;
-                try {
-                    stmt = con.createStatement();
-                    try {
-                        stmt.execute(StorageManager.getReferentialIntegrityChecksStatement(true));
-                        for (FxAssignment rm : affectedAssignments) {
-                            ps.setLong(disableAssignment ? 2 : 1, rm.getId());
-                            ps.executeUpdate();
-                        }
-                    } finally {
-                        stmt.execute(StorageManager.getReferentialIntegrityChecksStatement(false));
-                    }
-                } finally {
-                    if (stmt != null)
-                        stmt.close();
-                }
-            } else {
-                while (removed > 0) {
-                    removed = 0;
-                    for (FxAssignment rm : affectedAssignments) {
-                        ps.setLong(disableAssignment ? 2 : 1, rm.getId());
-                        try {
-                            ps.executeUpdate();
-                            removed++;
-                        } catch (SQLException e) {
-                            lastEx = e;
-                            remaining.add(rm);
-                        }
-                    }
-                    affectedAssignments.clear();
-                    if (disableAssignment)
-                        break;
-                    affectedAssignments.addAll(remaining);
-                    remaining.clear();
-                }
-
-                if (affectedAssignments.size() > 0)
-                    throw lastEx;
+            if (affectedAssignments.size() > 1)
+                affectedAssignments = FxStructureUtils.resolveRemoveDependencies(affectedAssignments);
+            for (FxAssignment rm : affectedAssignments) {
+                ps.setLong(disableAssignment ? 2 : 1, rm.getId());
+                ps.executeUpdate();
             }
+
             FxStructureUtils.removeOrphanedProperties(con);
             FxStructureUtils.removeOrphanedGroups(con);
             StructureLoader.reload(con);

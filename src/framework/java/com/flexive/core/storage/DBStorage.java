@@ -145,6 +145,13 @@ public interface DBStorage {
     String getIfFunction(String condition, String exprtrue, String exprfalse);
 
     /**
+     * Get the database vendor specific operator to query regular expressions
+     *
+     * @return database vendor specific operator to query regular expressions
+     */
+    String getRegExpOperator();
+
+    /**
      * Get the database vendor specific statement to enable or disable referential integrity checks
      *
      * @param enable enable or disable checks?

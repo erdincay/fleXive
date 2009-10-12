@@ -428,7 +428,8 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
                 //update all xpaths affected
                 ps.close();
                 sql.setLength(0);
-                sql.append("UPDATE ").append(TBL_STRUCT_ASSIGNMENTS).append(" SET XPATH=REPLACE(XPATH, ?, ?) WHERE TYPEDEF=? AND XPATH REGEXP ?");
+                sql.append("UPDATE ").append(TBL_STRUCT_ASSIGNMENTS).append(" SET XPATH=REPLACE(XPATH, ?, ?) WHERE TYPEDEF=? AND XPATH ")
+                        .append(StorageManager.getRegExpOperator()).append(" ?");
                 ps = con.prepareStatement(sql.toString());
                 ps.setString(1, orgType.getName() + "/");
                 ps.setString(2, type.getName() + "/");

@@ -216,7 +216,7 @@ public class PostgreSQLSequencerStorage extends GenericSequencerStorage {
         PreparedStatement ps = null;
         try {
             con = Database.getDbConnection();
-            ps = con.prepareStatement("SELECT SETVAL('" + PG_SEQ_PREFIX + name + "',?,TRUE)");
+            ps = con.prepareStatement("SELECT SETVAL('" + PG_SEQ_PREFIX + name + "',?,FALSE)");
             ps.setLong(1, newId + 1);
             ps.execute();
         } catch (SQLException exc) {
