@@ -95,10 +95,22 @@ public class CmisSearchEngineBean implements CmisSearchEngine, CmisSearchEngineL
             }
             return result;
         } catch (SQLException e) {
-            if (sql == null) {
-                throw new FxCmisQueryException(LOG, e, "ex.cmis.search.query.general", e.getMessage());
+            if (StorageManager.isDeadlock(e)) {
+                if (LOG.isInfoEnabled()) {
+                    LOG.info("Deadlock detected during search query, waiting 100ms and retrying...");
+                }
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e2) {
+                    // nop
+                }
+                return search(query, returnPrimitiveValues, startRow, maxRows);
             } else {
-                throw new FxCmisQueryException(LOG, e, "ex.cmis.search.query.withSql", e.getMessage(), sql);
+                if (sql == null) {
+                    throw new FxCmisQueryException(LOG, e, "ex.cmis.search.query.general", e.getMessage());
+                } else {
+                    throw new FxCmisQueryException(LOG, e, "ex.cmis.search.query.withSql", e.getMessage(), sql);
+                }
             }
         } finally {
             Database.closeObjects(CmisSearchEngineBean.class, con, stmt);

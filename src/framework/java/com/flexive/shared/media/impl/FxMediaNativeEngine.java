@@ -167,7 +167,7 @@ public class FxMediaNativeEngine {
             bi2 = gc.createCompatibleImage(scaleWidth, scaleHeight, bi.getTransparency());
         }
         Graphics2D g = bi2.createGraphics();
-        if (scale < 0.3) {
+        if (scale < 0.3 && Math.max(scaleWidth, scaleHeight) < 500) {
             scaledImage = bi.getScaledInstance(scaleWidth, scaleHeight, Image.SCALE_SMOOTH);
             new ImageIcon(scaledImage).getImage();
             g.drawImage(scaledImage, 0, 0, scaleWidth, scaleHeight, null);

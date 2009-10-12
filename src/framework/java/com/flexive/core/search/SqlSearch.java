@@ -325,6 +325,16 @@ public class SqlSearch {
                             + query + "\n\nSQL:\n" + selectSql);
                 }
                 throw new FxSqlSearchException(exc, "ex.sqlSearch.query.timeout", params.getQueryTimeout());
+            } else if (StorageManager.isDeadlock(exc)) {
+                if (LOG.isInfoEnabled()) {
+                    LOG.info("Deadlock detected during query executing, waiting 100ms and retrying...");
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        // ignore
+                    }
+                    return executeQuery();
+                }
             }
             throw new FxSqlSearchException(LOG, exc, "ex.sqlSearch.failed", exc.getMessage(), query, selectSql);
         } catch (Exception e) {

@@ -263,6 +263,17 @@ public class StorageManager {
     }
 
     /**
+     * Returns true if the given exception was caused by a DB deadlock.
+     *
+     * @param e the exception to be examined
+     * @return true if the given exception was caused by a DB deadlock
+     * @since 3.1
+     */
+    public static boolean isDeadlock(Exception e) {
+        return getStorageImpl().isDeadlock(e);
+    }
+
+    /**
      * Does the database rollback a connection if it encounters a constraint violation? (eg Postgres does...)
      *
      * @return database rollbacks a connection if it encounters a constraint violation
