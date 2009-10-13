@@ -1633,4 +1633,37 @@ class GroovyTypeBuilderTest {
             aclEngine.remove(aclId);
         }
     }
+
+    /**
+     * Tests the GTB "flatten" option
+     */
+    @Test (groups = ["ejb", "scripting", "structure"])
+    def flatStorageTest() {
+        try {
+            new GroovyTypeBuilder().builderTest() {
+                flprop1()
+                flprop1(flatten: false)
+                flprop2()
+                flprop2(flatten: true)
+            }
+
+            def t = environment().getType("BUILDERTEST")
+            Assert.assertFalse(getPropertyAssignment(t, "BUILDERTEST/FLPROP1").isFlatStorageEntry())
+            Assert.assertTrue(getPropertyAssignment(t, "BUILDERTEST/FLPROP2").isFlatStorageEntry())
+
+            // reverse the settings
+            def builder = new GroovyTypeBuilder("BUILDERTEST")
+            builder {
+                flprop1(flatten: true)
+                flprop2(flatten: false)
+            }
+
+            t = environment().getType("BUILDERTEST")
+            Assert.assertTrue(getPropertyAssignment(t, "BUILDERTEST/FLPROP1").isFlatStorageEntry())
+            Assert.assertFalse(getPropertyAssignment(t, "BUILDERTEST/FLPROP2").isFlatStorageEntry())
+
+        } finally {
+            removeTestType()
+        }
+    }
 }

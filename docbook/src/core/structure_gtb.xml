@@ -1308,6 +1308,22 @@ builder {
                             Property assignment can be searched
                         </td>
                     </tr>
+                    <tr>
+                        <td>
+                            flatten
+                        </td>
+                        <td>
+                            <classname>Boolean</classname>
+                        </td>
+                        <td>
+                            Example: create a property "someprop" and activate the hierarchical storage mode
+                            for its assignment:
+                            <code>new GroovyTypeBuilder().aTypeName() { someprop() someprop(flatten:false) }</code>
+                        </td>
+                        <td>
+                            Activates or deactivates the flatstorage for a given property assignment
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </section>

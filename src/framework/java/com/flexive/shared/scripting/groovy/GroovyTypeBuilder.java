@@ -127,7 +127,7 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
             "DATATYPE", "MULTIPLICITY", "NAME", "DESCRIPTION", "LABEL", "HINT", "ACL", "ASSIGNMENT",
             "ALIAS", "DEFAULTMULTIPLICITY", "DEFAULTVALUE", "OVERRIDEMULTILANG", "MULTILANG", "GROUPMODE",
             "OVERRIDEACL", "OVERRIDEMULTIPLICITY", "OVERRIDEINOVERVIEW", "OVERRIDEMAXLENGTH", "INOVERVIEW",
-            "OVERRIDEMULTILINE", "OVERRIDESEARCHABLE", "OVERRIDEUSEHTMLEDITOR", "SEARCHABLE",
+            "OVERRIDEMULTILINE", "OVERRIDESEARCHABLE", "OVERRIDEUSEHTMLEDITOR", "SEARCHABLE", "FLATTEN",
             "DEFAULTLANGUAGE", "PARENTGROUPASSIGNMENT", "ENABLED", "USEHTMLEDITOR", "MAXLENGTH",
             "FULLTEXTINDEXED", "UNIQUEMODE", "AUTOUNIQUEPROPERTYNAME", "REFERENCEDLIST", "REFERENCEDTYPE"
     };
@@ -140,7 +140,7 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
             "DATATYPE", "MULTIPLICITY", "NAME", "DESCRIPTION", "LABEL", "HINT", "ACL", "ASSIGNMENT",
             "ALIAS", "DEFAULTMULTIPLICITY", "DEFAULTVALUE", "OVERRIDEMULTILANG", "MULTILANG", "GROUPMODE",
             "OVERRIDEACL", "OVERRIDEMULTIPLICITY", "OVERRIDEINOVERVIEW", "OVERRIDEMAXLENGTH", "INOVERVIEW",
-            "OVERRIDEMULTILINE", "OVERRIDESEARCHABLE", "OVERRIDEUSEHTMLEDITOR", "SEARCHABLE",
+            "OVERRIDEMULTILINE", "OVERRIDESEARCHABLE", "OVERRIDEUSEHTMLEDITOR", "SEARCHABLE", "FLATTEN",
             "DEFAULTLANGUAGE", "PARENTGROUPASSIGNMENT", "ENABLED", "USEHTMLEDITOR", "MAXLENGTH",
             "FULLTEXTINDEXED", "UNIQUEMODE", "AUTOUNIQUEPROPERTYNAME", "REFERENCEDLIST", "REFERENCEDTYPE"
     };
@@ -864,7 +864,7 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
         FxValue defaultValue;
         Boolean useInstancePermissions, useStepPermissions, useTypePermissions, usePropertyPermissions,
                 usePermissions, overrideMultilang, multilang, overrideACL, overrideMultiplicity, overrideInOverview,
-                overrideMaxLength, overrideMultiline, overrideSearchable, overrideHTMLEditor, searchable,
+                overrideMaxLength, overrideMultiline, overrideSearchable, overrideHTMLEditor, searchable, flatten,
                 inOverview, useHTMLEditor, multiline, enabled, trackHistory, fullTextIndexed, autoUniquePropertyName;
         Integer maxLength;
         FxType referencedType;
@@ -1071,6 +1071,8 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
             fullTextIndexed = (Boolean) FxSharedUtils.get(attributes, "fullTextIndexed", true);
             autoUniquePropertyName = (Boolean) FxSharedUtils.get(attributes, "autoUniquePropertyName", true);
             uniqueMode = (UniqueMode) FxSharedUtils.get(attributes, "uniqueMode", UniqueMode.Type);
+            // flatten default won't be set, dependends on FX configuration
+            flatten = (Boolean) FxSharedUtils.get(attributes, "flatten", true);
 
             return this;
         }
@@ -1139,6 +1141,14 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
             if (attributes.containsKey("searchable")) {
                 if (searchable != pa.isSearchable())
                     pa.setSearchable(searchable);
+            }
+
+            if(attributes.containsKey("flatten")) {
+                if(!pa.isFlatStorageEntry() && flatten) {
+                    EJBLookup.getAssignmentEngine().flattenAssignment(pa);
+                } else if(pa.isFlatStorageEntry() && !flatten) {
+                    EJBLookup.getAssignmentEngine().unflattenAssignment(pa);
+                }
             }
 
             // set non-generic property-assignment options
