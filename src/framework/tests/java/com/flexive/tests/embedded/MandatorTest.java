@@ -254,7 +254,7 @@ public class MandatorTest {
         Assert.assertTrue(CacheAdmin.getEnvironment().getMandator(testMandator).isActive(), "Expected mandator to be active!");
         FxContent co_act1 = ce.initialize(testType, testMandator, -1, type.getWorkflow().getSteps().get(0).getId(), FxLanguage.DEFAULT_ID);
         FxPK pk = ce.save(co_act1);
-        EJBLookup.getTreeEngine().getNode(FxTreeMode.Edit, FxTreeNode.ROOT_NODE).getTotalChildCount();
+        EJBLookup.getTreeEngine().getNode(FxTreeMode.Edit, FxTreeNode.ROOT_NODE).getDirectChildCount();
         long folder = EJBLookup.getTreeEngine().save(FxTreeNodeEdit.createNew("MandatorTestFolder"));
         long node_root = EJBLookup.getTreeEngine().save(FxTreeNodeEdit.createNew("MandatorTestRoot").setReference(pk));
         EJBLookup.getTreeEngine().save(FxTreeNodeEdit.createNew("MandatorTestChild").setReference(pk).setParentNodeId(folder));

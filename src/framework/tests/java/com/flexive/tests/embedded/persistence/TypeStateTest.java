@@ -242,7 +242,7 @@ public class TypeStateTest extends StructureTestBase {
         type.save(CacheAdmin.getEnvironment().getType(testType).asEditable().setState(TypeState.Available));
         FxContent co_act1 = co.initialize(testType);
         FxPK pk = co.save(co_act1);
-        EJBLookup.getTreeEngine().getNode(FxTreeMode.Edit, FxTreeNode.ROOT_NODE).getTotalChildCount();
+        EJBLookup.getTreeEngine().getNode(FxTreeMode.Edit, FxTreeNode.ROOT_NODE);
         long folder = EJBLookup.getTreeEngine().save(FxTreeNodeEdit.createNew("TypeStateTestFolder"));
         long node_root = EJBLookup.getTreeEngine().save(FxTreeNodeEdit.createNew("TypeStateTestRoot").setReference(pk));
         EJBLookup.getTreeEngine().save(FxTreeNodeEdit.createNew("TypeStateTestChild").setReference(pk).setParentNodeId(folder));

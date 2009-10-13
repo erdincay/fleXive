@@ -66,7 +66,7 @@ public class FxTreeNodeEdit extends FxTreeNode implements Serializable {
         super(node.getMode(), node.getLock(), node.getId(), node.getParentNodeId(), node.getReference(),
                 node.getReferenceLifeCycleInfo(), node.getReferenceTypeId(),
                 node.getACLIds(), node.getName(), node.getPath(), node.getLabel(), node.getPosition(), node.getChildren(),
-                node.getChildIds(), node.getDepth(), node.getTotalChildCount(), node.getDirectChildCount(),
+                node.getChildIds(), node.getDepth(), node.getDirectChildCount(),
                 node.isLeaf(), node.isDirty(), node.getModifiedAt(), node.getData(), true, true, true, true, true);
         this.isNew = false;
         this.newName = node.getName();
@@ -83,7 +83,7 @@ public class FxTreeNodeEdit extends FxTreeNode implements Serializable {
         super(FxTreeMode.Edit, FxLock.noLockPK(), (System.currentTimeMillis() * -1), ROOT_NODE,
                 FxPK.createNewPK(), new FxContentVersionInfo.NewLifeCycleInfoImpl(), 0L,
                 Arrays.asList(ACLCategory.INSTANCE.getDefaultId()), name, "", new FxString(false, name), Integer.MAX_VALUE,
-                new ArrayList<FxTreeNode>(0), new ArrayList<Long>(0), 0, 0, 0, true, true,
+                new ArrayList<FxTreeNode>(0), new ArrayList<Long>(0), 0, 0, true, true,
                 System.currentTimeMillis(), "", true, true, true, true, true);
         this.isNew = true;
     }
@@ -98,7 +98,7 @@ public class FxTreeNodeEdit extends FxTreeNode implements Serializable {
         super(FxTreeMode.Edit, FxLock.noLockPK(), (System.currentTimeMillis() * -1), parentNode,
                 FxPK.createNewPK(), new FxContentVersionInfo.NewLifeCycleInfoImpl(), 0L,
                 Arrays.asList(ACLCategory.INSTANCE.getDefaultId()), name, "", new FxString(false, name), Integer.MAX_VALUE,
-                new ArrayList<FxTreeNode>(0), new ArrayList<Long>(0), 0, 0, 0, true, true,
+                new ArrayList<FxTreeNode>(0), new ArrayList<Long>(0), 0, 0, true, true,
                 System.currentTimeMillis(), "", true, true, true, true, true);
         this.isNew = true;
     }
@@ -114,7 +114,7 @@ public class FxTreeNodeEdit extends FxTreeNode implements Serializable {
         FxTreeNodeEdit edit = new FxTreeNode(parentNode.getMode(), FxLock.noLockPK(), (System.currentTimeMillis() * -1), parentNode.getId(),
                 FxPK.createNewPK(), new FxContentVersionInfo.NewLifeCycleInfoImpl(), 0L, parentNode.getACLIds(), "", "",
                 new FxString(parentNode.getLabel().isMultiLanguage(), ""), Integer.MAX_VALUE,
-                new ArrayList<FxTreeNode>(0), new ArrayList<Long>(0), 0, 0, 0, true, true,
+                new ArrayList<FxTreeNode>(0), new ArrayList<Long>(0), 0, 0, true, true,
                 System.currentTimeMillis(), "", true, true, true, true, true).asEditable();
         edit.isNew = true;
         return edit;
@@ -130,7 +130,7 @@ public class FxTreeNodeEdit extends FxTreeNode implements Serializable {
         FxTreeNodeEdit edit = new FxTreeNode(FxTreeMode.Edit, FxLock.noLockPK(), (System.currentTimeMillis() * -1), ROOT_NODE,
                 FxPK.createNewPK(), new FxContentVersionInfo.NewLifeCycleInfoImpl(), 0L,
                 Arrays.asList(ACLCategory.INSTANCE.getDefaultId()), name, "", new FxString(false, name), Integer.MAX_VALUE,
-                new ArrayList<FxTreeNode>(0), new ArrayList<Long>(0), 0, 0, 0, true, true,
+                new ArrayList<FxTreeNode>(0), new ArrayList<Long>(0), 0, 0, true, true,
                 System.currentTimeMillis(), "", true, true, true, true, true).asEditable();
         edit.isNew = true;
         return edit;

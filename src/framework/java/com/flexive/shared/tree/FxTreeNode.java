@@ -74,7 +74,6 @@ public class FxTreeNode implements Serializable, SelectableObjectWithLabel, Sele
     private long modifiedAt;
     protected String data;
     private int depth;
-    private int totalChildCount;
     private int directChildCount;
     private boolean leaf;
     private boolean mayEdit, mayDelete, mayRelate, mayExport, mayCreate;
@@ -114,7 +113,6 @@ public class FxTreeNode implements Serializable, SelectableObjectWithLabel, Sele
      * @param children               child nodes (only available if loaded with <code>#getTree</code>)
      * @param childIds               ids of the child nodes (only available if loaded with <code>#getTree</code>)
      * @param depth                  depth of this node relative to the root node
-     * @param totalChildCount        total number of children
      * @param directChildCount       number of children attached to this node directly
      * @param leaf                   is this node a leaf?
      * @param dirty                  dirty flag
@@ -129,7 +127,7 @@ public class FxTreeNode implements Serializable, SelectableObjectWithLabel, Sele
     public FxTreeNode(FxTreeMode mode, FxLock lock, long id, long parentNodeId, FxPK reference, LifeCycleInfo referenceLifeCycleInfo,
                       long referenceTypeId, List<Long> acls, String name, String path,
                       FxString label, int position, List<FxTreeNode> children, List<Long> childIds, int depth,
-                      int totalChildCount, int directChildCount, boolean leaf, boolean dirty, long modifiedAt,
+                      int directChildCount, boolean leaf, boolean dirty, long modifiedAt,
                       String data, boolean mayEdit, boolean mayCreate, boolean mayDelete, boolean mayRelate, boolean mayExport) {
         this.path = FxFormatUtils.escapeTreePath(path);
         this.label = label;
@@ -149,7 +147,6 @@ public class FxTreeNode implements Serializable, SelectableObjectWithLabel, Sele
         this.modifiedAt = modifiedAt;
         this.data = data;
         this.depth = depth;
-        this.totalChildCount = totalChildCount;
         this.directChildCount = directChildCount;
         this.leaf = leaf;
         this.temporary = false;
@@ -326,24 +323,6 @@ public class FxTreeNode implements Serializable, SelectableObjectWithLabel, Sele
      */
     public int getDepth() {
         return depth;
-    }
-
-    /**
-     * Get the number of child nodes attached to this node and all subchildren.
-     * <p>
-     * <strong>Warning:</strong>
-     * From version 3.1 onwards, the total child count is no longer stored in the database
-     * to improve performance for concurrent tree updates. Thus it is calculated on-the-fly
-     * only when <strong>individual</strong> nodes are loaded. Most notably, it is not calculated
-     * when fetching a (sub-)tree via
-     * {@link com.flexive.shared.interfaces.TreeEngine#getTree(FxTreeMode, long, int)},
-     * in this case, it is always -1.
-     * </p>
-     *
-     * @return the number of child nodes attached to this node and all subchildren
-     */
-    public int getTotalChildCount() {
-        return totalChildCount;
     }
 
     /**
@@ -530,7 +509,7 @@ public class FxTreeNode implements Serializable, SelectableObjectWithLabel, Sele
         return new FxTreeNode(FxTreeMode.Edit, FxLock.noLockPK(), nodeId, 0, FxPK.createNewPK(),
                 new FxContentVersionInfo.NewLifeCycleInfoImpl(), 0L,
                 Arrays.asList(ACLCategory.INSTANCE.getDefaultId()), "Error", message, new FxString(false, "Error"),
-                Integer.MAX_VALUE, new ArrayList<FxTreeNode>(0), new ArrayList<Long>(0), 0, 0, 0, true, true,
+                Integer.MAX_VALUE, new ArrayList<FxTreeNode>(0), new ArrayList<Long>(0), 0, 0, true, true,
                 System.currentTimeMillis(), "", true, true, true, true, true);
     }
 
@@ -573,7 +552,7 @@ public class FxTreeNode implements Serializable, SelectableObjectWithLabel, Sele
                 FxPK.createNewPK(), new FxContentVersionInfo.NewLifeCycleInfoImpl(), 0L,
                 Arrays.asList(ACLCategory.INSTANCE.getDefaultId()), "@@TMP", "",
                 new FxString(parentNode.getLabel().isMultiLanguage(), ""), Integer.MAX_VALUE,
-                new ArrayList<FxTreeNode>(0), new ArrayList<Long>(0), 0, 0, 0, true, true,
+                new ArrayList<FxTreeNode>(0), new ArrayList<Long>(0), 0, 0, true, true,
                 System.currentTimeMillis(), "", true, true, true, true, true).flagTemporary();
         n.path = parentNode.getPath() + (parentNode.getPath().endsWith("/") ? "" : "/") + "*";
         return n;

@@ -177,16 +177,16 @@ public class FxTreeTest {
     private void treeCRUD(FxTreeMode mode) throws FxApplicationException {
         //clear the tree
         tree.clear(mode);
-        Assert.assertTrue(tree.getNode(mode, FxTreeNode.ROOT_NODE).getTotalChildCount() == 0,
-                "Expected to have 0 children, got: [" + tree.getNode(mode, FxTreeNode.ROOT_NODE).getTotalChildCount() + "]");
+        Assert.assertTrue(tree.getNode(mode, FxTreeNode.ROOT_NODE).getDirectChildCount() == 0,
+                "Expected to have 0 children, got: [" + tree.getNode(mode, FxTreeNode.ROOT_NODE).getDirectChildCount() + "]");
         //create new node
         FxTreeNodeEdit node1 = FxTreeNodeEdit.createNew(getNodeName(1));
         node1.setLabel(getNodeLabel(1));
         node1.setMode(mode);
         long id1 = tree.save(node1);
         Assert.assertTrue(tree.exist(mode, id1));
-        Assert.assertTrue(tree.getNode(mode, FxTreeNode.ROOT_NODE).getTotalChildCount() == 1,
-                "Expected to have 1 child, got: [" + tree.getNode(mode, FxTreeNode.ROOT_NODE).getTotalChildCount() + "]");
+        Assert.assertTrue(tree.getNode(mode, FxTreeNode.ROOT_NODE).getDirectChildCount() == 1,
+                "Expected to have 1 child, got: [" + tree.getNode(mode, FxTreeNode.ROOT_NODE).getDirectChildCount() + "]");
         //load and check if all well
         FxTreeNode node1_loaded = tree.getNode(mode, id1);
         Assert.assertTrue(node1_loaded.getName().equals(node1.getName()));
@@ -228,8 +228,9 @@ public class FxTreeTest {
         FxTreeNodeEdit node1_3 = FxTreeNodeEdit.createNewChildNode(node1_loaded).setName("3").setLabel(getNodeLabel(3)).setMode(mode);
         long id1_3 = tree.save(node1_3);
         FxTreeNode node1_3_loaded = tree.getNode(mode, id1_3);
-        Assert.assertTrue(tree.getNode(mode, FxTreeNode.ROOT_NODE).getTotalChildCount() == 4,
-                "Expected to have 4 children, got: [" + tree.getNode(mode, FxTreeNode.ROOT_NODE).getTotalChildCount() + "]");
+        
+        // TODO: check total child count with TreeEngine#getTotalChildCount (FX-690)
+
         //verify positions - should be 1-2-3
         Assert.assertTrue(node1_1_loaded.getPosition() == 0, "Expected [0] got: [" + node1_1_loaded.getPosition() + "]");
         Assert.assertTrue(node1_2_loaded.getPosition() == 1, "Expected [1] got: [" + node1_2_loaded.getPosition() + "]");
@@ -267,8 +268,9 @@ public class FxTreeTest {
         node1_3_loaded = tree.getNode(mode, id1_3);
         Assert.assertTrue(node1_1_loaded.getPosition() == 0, "Expected [0] got: [" + node1_1_loaded.getPosition() + "]");
         Assert.assertTrue(node1_3_loaded.getPosition() == 1, "Expected [1] got: [" + node1_3_loaded.getPosition() + "]");
-        Assert.assertTrue(tree.getNode(mode, FxTreeNode.ROOT_NODE).getTotalChildCount() == 3,
-                "Expected to have 3 children, got: [" + tree.getNode(mode, FxTreeNode.ROOT_NODE).getTotalChildCount() + "]");
+
+        // TODO: check total child count with TreeEngine#getTotalChildCount (FX-690)
+
         if (mode == FxTreeMode.Live)
             return; //children are to be removed in live mode
         //delete parent but not children and check if they moved up in hierarchy
@@ -287,8 +289,8 @@ public class FxTreeTest {
         //delete 1_1 with children and check that 1_3 is gone too
         tree.remove(new FxTreeNodeEdit(node1_1_loaded), FxTreeRemoveOp.Remove, true);
         Assert.assertTrue(!tree.exist(mode, id1_3));
-        Assert.assertTrue(tree.getNode(mode, FxTreeNode.ROOT_NODE).getTotalChildCount() == 0,
-                "Expected to have 0 children, got: [" + tree.getNode(mode, FxTreeNode.ROOT_NODE).getTotalChildCount() + "]");
+        Assert.assertTrue(tree.getNode(mode, FxTreeNode.ROOT_NODE).getDirectChildCount() == 0,
+                "Expected to have 0 children, got: [" + tree.getNode(mode, FxTreeNode.ROOT_NODE).getDirectChildCount() + "]");
         tree.clear(mode);
 
         //test changing a referenced content
