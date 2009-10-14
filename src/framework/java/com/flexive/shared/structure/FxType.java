@@ -581,6 +581,40 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
     }
 
     /**
+     * Get all assignments (groups and properties) that are attached to a type
+     *
+     * @return all assignments for the type
+     */
+    public List<FxAssignment> getAllAssignments() {
+        final List<FxAssignment> result = new ArrayList<FxAssignment>(assignedProperties.size() + assignedGroups.size() * 5);
+        result.addAll(assignedProperties);
+        result.addAll(assignedGroups);
+        result.addAll(recGroupAssignmentSearch(assignedGroups));
+        return result;
+    }
+
+    /**
+     * Recursive search through a list of GroupAssignments, returns all child assignments
+     *
+     * @param groupAssignments the List of FxGroupAssignments
+     * @return returns a list of FxAssignments
+     */
+    private static List<FxAssignment> recGroupAssignmentSearch(List<FxGroupAssignment> groupAssignments) {
+        if (groupAssignments.size() == 0)
+            return new ArrayList<FxAssignment>(0);
+
+        final List<FxAssignment> out = new ArrayList<FxAssignment>(groupAssignments.size() * 5); //  = new ArrayList<FxAssignment>(ga.getAllChildAssignments().size());
+        for (FxGroupAssignment ga : groupAssignments) {
+            if (ga.getAllChildAssignments().size() > 0)
+                out.addAll(ga.getAllChildAssignments());
+            if (ga.getAssignedGroups().size() > 0) {
+                out.addAll(recGroupAssignmentSearch(ga.getAssignedGroups()));
+            }
+        }
+        return out;
+    }
+
+    /**
      * Do unique properties for this type exist?
      *
      * @return if unique properties for this type exist
