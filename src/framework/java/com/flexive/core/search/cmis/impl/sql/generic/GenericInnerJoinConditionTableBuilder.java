@@ -156,8 +156,8 @@ public class GenericInnerJoinConditionTableBuilder extends GenericConditionTable
             }
             if (firstTableSubCondition == null) {
                 // if firstTableSubCondition is null, the corresponding join table is never selected
-                columns.add("null AS " + reference.getIdFilterColumn());
-                columns.add("null AS " + reference.getVersionFilterColumn());
+                columns.add(factory.getSqlDialect().getEmptyId() + " AS " + reference.getIdFilterColumn());
+                columns.add(factory.getSqlDialect().getEmptyVersion() + " AS " + reference.getVersionFilterColumn());
             } else {
                 columns.add(firstTableSubCondition + "." + reference.getIdFilterColumn());
                 columns.add(firstTableSubCondition + "." + reference.getVersionFilterColumn());

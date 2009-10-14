@@ -34,6 +34,7 @@ package com.flexive.core.search.PostgreSQL;
 import com.flexive.core.search.SqlSearch;
 import com.flexive.core.search.genericSQL.GenericSQLDataFilter;
 import com.flexive.shared.exceptions.FxSqlSearchException;
+import com.flexive.shared.FxFormatUtils;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -71,6 +72,22 @@ public class PostgreSQLDataFilter extends GenericSQLDataFilter {
      */
     @Override
     public void setVariable(Statement stmt, String variable, String value) throws SQLException {
-        //not support by postgres
+        //not supported by postgres
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected String fulltextMatch(String column, String expr) {
+        return column + " @@ plainto_tsquery(" + FxFormatUtils.escapeForSql(expr) + ")";
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected String getEmptyLanguage() {
+        return "CAST(null AS INTEGER)";
     }
 }

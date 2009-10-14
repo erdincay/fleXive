@@ -92,12 +92,12 @@ class GenericSQLForeignTableSelector implements FieldSelector {
                         columnType = FxDataType.String1024;
                         break;
                     case java.sql.Types.BOOLEAN:
+                    case java.sql.Types.BIT:
                         columnType = FxDataType.Boolean;
                         break;
                     case java.sql.Types.TINYINT:
                     case java.sql.Types.SMALLINT:
                     case java.sql.Types.INTEGER:
-                    case java.sql.Types.BIT:
                         columnType = FxDataType.Number;
                         break;
                     case java.sql.Types.DECIMAL:

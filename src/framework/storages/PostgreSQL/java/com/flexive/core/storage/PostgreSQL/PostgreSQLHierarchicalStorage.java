@@ -33,10 +33,12 @@ package com.flexive.core.storage.PostgreSQL;
 
 import com.flexive.core.DatabaseConst;
 import com.flexive.core.storage.ContentStorage;
+import com.flexive.core.storage.FulltextIndexer;
 import com.flexive.core.storage.genericSQL.GenericHierarchicalStorage;
 import com.flexive.core.storage.genericSQL.GenericBinarySQLStorage;
 import com.flexive.shared.exceptions.FxDbException;
 import com.flexive.shared.exceptions.FxRuntimeException;
+import com.flexive.shared.content.FxPK;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -74,6 +76,7 @@ public class PostgreSQLHierarchicalStorage extends GenericHierarchicalStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public void lockTables(Connection con, long id, int version) throws FxRuntimeException {
         try {
             PreparedStatement ps = null;
@@ -103,5 +106,12 @@ public class PostgreSQLHierarchicalStorage extends GenericHierarchicalStorage {
         } catch (SQLException e) {
             throw new FxDbException(LOG, e, "ex.db.sqlError", e.getMessage()).asRuntimeException();
         }
+    }
+
+    @Override
+    protected FulltextIndexer getFulltextIndexer(FxPK pk, Connection con) {
+        final PostgreSQLFulltextIndexer fti = new PostgreSQLFulltextIndexer();
+        fti.init(pk, con);
+        return fti;
     }
 }

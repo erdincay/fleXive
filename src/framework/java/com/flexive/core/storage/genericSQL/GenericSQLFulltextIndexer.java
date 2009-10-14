@@ -81,16 +81,16 @@ public class GenericSQLFulltextIndexer implements FulltextIndexer {
         this.con = con;
         if (pk != null) {
             try {
-                psu = con.prepareStatement(CONTENT_FULLTEXT_UPDATE);
+                psu = con.prepareStatement(getUpdateSql());
                 psu.setLong(2, pk.getId());
                 psu.setInt(3, pk.getVersion());
-                psi = con.prepareStatement(CONTENT_FULLTEXT_INSERT);
+                psi = con.prepareStatement(getInsertSql());
                 psi.setLong(1, pk.getId());
                 psi.setInt(2, pk.getVersion());
-                psd_all = con.prepareStatement(CONTENT_FULLTEXT_DELETE_ALL);
+                psd_all = con.prepareStatement(getDeleteAllSql());
                 psd_all.setLong(1, pk.getId());
                 psd_all.setInt(2, pk.getVersion());
-                psd = con.prepareStatement(CONTENT_FULLTEXT_DELETE);
+                psd = con.prepareStatement(getDeleteSql());
                 psd.setLong(1, pk.getId());
                 psd.setInt(2, pk.getVersion());
             } catch (SQLException e) {
@@ -106,6 +106,22 @@ public class GenericSQLFulltextIndexer implements FulltextIndexer {
             psd = null;
             psd_all = null;
         }
+    }
+
+    protected String getDeleteSql() {
+        return CONTENT_FULLTEXT_DELETE;
+    }
+
+    protected String getDeleteAllSql() {
+        return CONTENT_FULLTEXT_DELETE_ALL;
+    }
+
+    protected String getInsertSql() {
+        return CONTENT_FULLTEXT_INSERT;
+    }
+
+    protected String getUpdateSql() {
+        return CONTENT_FULLTEXT_UPDATE;
     }
 
     /**

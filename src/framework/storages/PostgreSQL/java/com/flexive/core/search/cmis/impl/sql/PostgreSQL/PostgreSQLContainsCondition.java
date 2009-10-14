@@ -60,7 +60,8 @@ public class PostgreSQLContainsCondition extends GenericContainsCondition {
     public String selectColumn(SqlMapperFactory sqlMapperFactory, CmisSqlQuery query, ResultScore column, long languageId, boolean xpath, boolean includeResultAlias, ColumnIndex index) {
         final ContainsCondition contains = findContainsCondition(query);
         index.increment();
-        return "(SELECT MAX(" + getFulltextMatch("ftsub", contains) + ") FROM "
+        // select normalized rank - http://www.postgresql.org/docs/8.3/static/textsearch-controls.html#TEXTSEARCH-RANKING
+        return "(SELECT MAX(ts_rank_cd(value," + getFulltextCondition(contains) + ", 32)) FROM "
                 + DatabaseConst.TBL_CONTENT_DATA_FT + " ftsub "
                 + "WHERE ftsub.id=" + FILTER_ALIAS + "." + contains.getTableReference().getIdFilterColumn()
                 + "  AND ftsub.ver=" + FILTER_ALIAS + "." + contains.getTableReference().getVersionFilterColumn() + ") "
@@ -87,7 +88,11 @@ public class PostgreSQLContainsCondition extends GenericContainsCondition {
     }
 
     private String getFulltextMatch(String tableAlias, ContainsCondition condition) {
-        return "MATCH(" + tableAlias + ".value) AGAINST (" + FxFormatUtils.escapeForSql(condition.getExpression()) + ")";
+        return tableAlias + ".value @@ " + getFulltextCondition(condition);
+    }
+
+    private String getFulltextCondition(ContainsCondition condition) {
+        return "plainto_tsquery(" + FxFormatUtils.escapeForSql(condition.getExpression()) + ")";
     }
 
 }

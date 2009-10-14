@@ -88,8 +88,8 @@ public class GenericSelectedTableVisitor implements SelectedTableVisitor {
             } else {
                 // select null placeholders to create uniform result sets
                 result.add(
-                        "null AS " + entry.getKey().getIdFilterColumn() + ", "
-                                + "null AS " + entry.getKey().getVersionFilterColumn()
+                        sqlDialect.getEmptyId() + " AS " + entry.getKey().getIdFilterColumn() + ", "
+                                + sqlDialect.getEmptyVersion() + " AS " + entry.getKey().getVersionFilterColumn()
                 );
             }
         }

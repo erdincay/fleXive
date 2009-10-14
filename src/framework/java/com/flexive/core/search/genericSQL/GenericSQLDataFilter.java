@@ -482,11 +482,20 @@ public class GenericSQLDataFilter extends DataFilter {
                 return buildPropertyCondition(br.getStatement(), cond, cond.getProperty(), true);
             }
         };
-        return "(SELECT DISTINCT cd.id, cd.ver, null as lang FROM \n"
+        return "(SELECT DISTINCT cd.id, cd.ver, " + getEmptyLanguage() + " as lang FROM \n"
                 + flatStorageTable + " cd WHERE "
                 + getPlainConditions(br, conditionBuilder)
                 + getSubQueryLimit()
                 + ")";
+    }
+
+    /**
+     * Return the SQL value for an empty language field (e.g. "null").
+     *
+     * @return  the SQL value for an empty language field (e.g. "null").
+     */
+    protected String getEmptyLanguage() {
+        return "null";
     }
 
     /**
@@ -649,7 +658,7 @@ public class GenericSQLDataFilter extends DataFilter {
         else
             typeFilter = types; //empty
         final String versionFilter = " AND cd." + (mode.equals(FxTreeMode.Edit) ? "ismax_ver" : "islive_ver") + "=true";
-        return "(SELECT DISTINCT cd.id,cd.ver,null AS lang FROM " + tableMain + " cd WHERE " +
+        return "(SELECT DISTINCT cd.id,cd.ver," + getEmptyLanguage() + " AS lang FROM " + tableMain + " cd WHERE " +
                 "cd.id IN (SELECT ref FROM " + GenericTreeStorage.getTable(mode) + " WHERE " +
                 "LFT>" + nodeInfo.getLeft() + " AND RGT<" + nodeInfo.getRight() + " AND ref IS NOT NULL " +
                 (direct ? " AND depth=" + (nodeInfo.getDepth() + 1) : "") +
@@ -801,7 +810,7 @@ public class GenericSQLDataFilter extends DataFilter {
         // Build the final filter statement
         switch(entry.getTableType()) {
             case T_CONTENT:
-                return (" (SELECT DISTINCT cd.id,cd.ver,null AS lang FROM " + tableMain + " cd WHERE " +
+                return (" (SELECT DISTINCT cd.id,cd.ver," + getEmptyLanguage() + " AS lang FROM " + tableMain + " cd WHERE " +
                         column +
                         cond.getSqlComperator() +
                         value +
@@ -872,7 +881,7 @@ public class GenericSQLDataFilter extends DataFilter {
     }
 
     private String isNullSelect(PropertyEntry entry, Property prop, String dataTable, String dataFilter, String dataJoinColumn) {
-        return "(SELECT DISTINCT ct.id, ct.ver, null AS lang FROM " + tableMain + " ct\n" +
+        return "(SELECT DISTINCT ct.id, ct.ver, " + getEmptyLanguage() + " AS lang FROM " + tableMain + " ct\n" +
                 "LEFT JOIN " + dataTable + " da ON (ct.id=da.id AND ct.ver=da.ver AND " + dataFilter + ")\n" +
                 "WHERE da." + dataJoinColumn + " IS NULL " +
                 getVersionFilter("ct") +
@@ -890,8 +899,10 @@ public class GenericSQLDataFilter extends DataFilter {
                 && (cond.getComperator() == ValueComparator.IN || cond.getComperator() == ValueComparator.NOT_IN)) {
             // IN/NOT IN for SelectMany: ensure that ALL listed options are matched by an object, otherwise
             // the result would get very noisy when many options are selected
-            return " GROUP BY " + tableAlias + ".id, " + tableAlias + ".ver, " + tableAlias + ".lang " +
-                    "HAVING COUNT(*) = " +
+            return " GROUP BY " + tableAlias + ".id, " + tableAlias + ".ver, " + tableAlias + ".lang" +
+                    // group by fint when it's selected
+                    (cond.getComperator() == ValueComparator.NOT_IN ? (", " + tableAlias + ".fint") : "") +
+                    " HAVING COUNT(*) = " +
                     (cond.getComperator() == ValueComparator.IN
                             // IN: match number of IDs
                             ? value.split(",").length

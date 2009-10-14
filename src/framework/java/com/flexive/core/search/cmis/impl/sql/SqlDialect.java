@@ -185,4 +185,19 @@ public interface SqlDialect {
      * @return                  the result column that selects the type ID for the given table  
      */
     ResultColumn getTypeIdColumn(TableReference tableReference);
+
+    /**
+     * Return the SQL representation of an empty ID (e.g. "null").
+     *
+     * @return  the SQL representation of an empty ID (e.g. "null").
+     */
+    String getEmptyId();
+
+
+    /**
+     * Return the SQL representation of an empty version (e.g. "null").
+     *
+     * @return  the SQL representation of an empty version (e.g. "null").
+     */
+    String getEmptyVersion();
 }

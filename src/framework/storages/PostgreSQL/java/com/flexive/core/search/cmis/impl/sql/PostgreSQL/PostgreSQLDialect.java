@@ -35,7 +35,9 @@ import com.flexive.core.search.cmis.impl.CmisSqlQuery;
 import com.flexive.core.search.cmis.impl.ResultRowNumber;
 import com.flexive.core.search.cmis.impl.ResultScore;
 import com.flexive.core.search.cmis.impl.sql.Capabilities;
+import com.flexive.core.search.cmis.impl.sql.SelectedTableVisitor;
 import com.flexive.core.search.cmis.impl.sql.generic.GenericSqlDialect;
+import com.flexive.core.search.cmis.impl.sql.generic.GenericConditionTableBuilder;
 import com.flexive.core.search.cmis.impl.sql.mapper.ConditionMapper;
 import com.flexive.core.search.cmis.impl.sql.mapper.ResultColumnMapper;
 import com.flexive.core.search.cmis.model.ContainsCondition;
@@ -55,11 +57,11 @@ public class PostgreSQLDialect extends GenericSqlDialect {
      */
     private static final Capabilities CAPABILITIES = new Capabilities() {
         public boolean supportsFulltextScoring() {
-            return false;
+            return true;
         }
 
         public boolean normalizedFulltextScore() {
-            return false;
+            return true;
         }
 
         public boolean supportsPaging() {
@@ -112,4 +114,19 @@ public class PostgreSQLDialect extends GenericSqlDialect {
         return CAPABILITIES;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getEmptyVersion() {
+        return "CAST(null AS INTEGER)";
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getEmptyId() {
+        return "CAST (null AS BIGINT)";
+    }
 }

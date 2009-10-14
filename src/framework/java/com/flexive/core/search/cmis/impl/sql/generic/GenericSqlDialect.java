@@ -927,4 +927,18 @@ public class GenericSqlDialect implements SqlMapperFactory, SqlDialect {
     public String limitSubquery() {
         return SUBQUERY_LIMIT == -1 ? "" : " LIMIT " + SUBQUERY_LIMIT + " ";
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getEmptyId() {
+        return "null";
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getEmptyVersion() {
+        return "null";
+    }
 }

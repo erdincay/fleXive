@@ -129,6 +129,7 @@ public class MySqlDialect extends GenericSqlDialect {
      */
     @Override
     protected GenericConditionTableBuilder createConditionNodeVisitor(StringBuilder out, SelectedTableVisitor joinedTables) {
+        // MySQL doesn't support intersect, so we always use the inner join version
         return new GenericInnerJoinConditionTableBuilder(this, out, joinedTables);
     }
 
