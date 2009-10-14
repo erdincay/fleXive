@@ -230,7 +230,7 @@ public class SqlSearch {
             // If specified create a briefcase with the found data
             long createdBriefcaseId = -1;
             if (params.getWillCreateBriefcase()) {
-                createdBriefcaseId = copyToBriefcase(con, ds);
+                createdBriefcaseId = copyToBriefcase(con, ds, df);
             }
 
             final UserTicket ticket = FxContext.getUserTicket();
@@ -257,11 +257,11 @@ public class SqlSearch {
                 LOG.debug("Select SQL: " + selectSql);
             }
 
-            df.setVariable(con, "rownr", "1");
 
             stmt = con.createStatement();
             if (df.isQueryTimeoutSupported())
                 stmt.setQueryTimeout(params.getQueryTimeout());
+            df.setVariable(stmt, "rownr", "1");
             // Fetch the result
             ResultSet rs = stmt.executeQuery(selectSql);
             int dbSearchTime = (int) (java.lang.System.currentTimeMillis() - startTime);
@@ -389,24 +389,26 @@ public class SqlSearch {
      *
      * @param con connection
      * @param ds  DataSelector
+     * @param df DataFilter
      * @return briefcase id
      * @throws FxSqlSearchException on errors
      */
-    private long copyToBriefcase(Connection con, DataSelector ds) throws FxSqlSearchException {
+    private long copyToBriefcase(Connection con, DataSelector ds, DataFilter df) throws FxSqlSearchException {
         FxSQLSearchParams.BriefcaseCreationData bcd = params.getBriefcaseCreationData();
         Statement stmt = null;
         try {
             // Create the briefcase
             long bid = briefcase.create(bcd.getName(), bcd.getDescription(), bcd.getAclId());
             stmt = con.createStatement();
-            stmt.addBatch("SET @pos=0;");
+            df.setVariable(stmt, "pos", "0");
+//            stmt.addBatch("SET @pos=0;");
             String sSql = "insert into " + DatabaseConst.TBL_BRIEFCASE_DATA +
                     "(BRIEFCASE_ID,POS,ID,AMOUNT) " +
                     "(select " + bid + "," + ds.getCounterStatement("pos") + ",data.id,1 from " +
                     "(SELECT DISTINCT data2.id FROM " + getCacheTable() + " data2 WHERE data2.search_id="
                     + getSearchId() + ") data)";
-            stmt.addBatch(sSql);
-            stmt.executeBatch();
+//            stmt.addBatch(sSql);
+            stmt.execute(sSql);
             return bid;
         } catch (Throwable t) {
             throw new FxSqlSearchException(LOG, t, "ex.sqlSearch.err.failedToBuildBriefcase", bcd.getName());

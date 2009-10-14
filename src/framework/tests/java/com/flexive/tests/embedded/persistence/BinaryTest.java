@@ -51,6 +51,8 @@ import static com.flexive.tests.embedded.FxTestUtils.login;
 import static com.flexive.tests.embedded.FxTestUtils.logout;
 import com.flexive.tests.embedded.TestUsers;
 import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -65,6 +67,7 @@ import java.io.*;
  */
 @Test(groups = {"ejb", "content", "binary"})
 public class BinaryTest {
+    private static final Log LOG = LogFactory.getLog(BinaryTest.class);
 
     private static String IMAGE_TYPE = "Image";
 
@@ -209,6 +212,9 @@ public class BinaryTest {
             Assert.assertTrue(FxFileUtils.fileCompare(comp, tmp), "Files do not match!");
             FxFileUtils.removeFile(tmp);
             FxFileUtils.removeFile(comp);
+        } catch(Exception e) {
+            LOG.error(e);
+            e.printStackTrace();
         } finally {
             if (pk != null)
                 co.remove(pk);

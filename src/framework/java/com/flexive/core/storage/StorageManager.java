@@ -323,4 +323,15 @@ public class StorageManager {
     public static String concat(String... text) {
         return getStorageImpl().concat(text);
     }
+
+    /**
+     * Get a database vendor specific concat_ws statement
+     *
+     * @param delimiter the delimiter to use
+     * @param text      array of text to concatenate
+     * @return concatenated text statement
+     */
+    public static String concat_ws(String delimiter, String... text) {
+        return getStorageImpl().concat_ws(delimiter, text);
+    }
 }

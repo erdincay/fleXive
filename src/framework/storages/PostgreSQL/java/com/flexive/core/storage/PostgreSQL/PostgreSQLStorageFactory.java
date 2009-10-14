@@ -200,6 +200,23 @@ public class PostgreSQLStorageFactory implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    public String concat_ws(String delimiter, String... text) {
+        if( text.length == 0)
+            return "";
+        if( text.length == 1)
+            return text[0];
+        StringBuilder sb = new StringBuilder(500);
+        for (int i = 0; i < text.length; i++) {
+            if (i > 0 && i < text.length)
+                sb.append("||'").append(delimiter).append("'||");
+            sb.append(text[i]);
+        }
+        return sb.toString();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public boolean isForeignKeyViolation(Exception exc) {
         if (!(exc instanceof SQLException))
             return false;

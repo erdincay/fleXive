@@ -5,12 +5,12 @@
 -- @param _nodeId the node to retrieve the position for
 -- @param _live   if true the live tree is queried, if false the edit tree
 -- --------------------------------------------------------------------------------------------
-Create OR REPLACE function tree_nodeIndex(_root INTEGER,_nodeId INTEGER,_live boolean)
+Create OR REPLACE function tree_nodeIndex(_root BIGINT,_nodeId BIGINT,_live boolean)
 returns int AS $$ -- deterministic reads sql data
 DECLARE
   _pos   INTEGER default -1;
   _count INTEGER default 0;
-  _ref   INTEGER default null;
+  _ref   BIGINT default null;
   done BOOLEAN DEFAULT FALSE;
 
   curEdit CURSOR FOR

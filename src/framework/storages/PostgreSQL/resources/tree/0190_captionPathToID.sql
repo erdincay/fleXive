@@ -23,18 +23,19 @@ DECLARE
   notfound BOOLEAN DEFAULT FALSE;
   _path TEXT DEFAULT path;
 BEGIN
-  -- remove trailing '/'
-  IF RIGHT(_path,1)='/' THEN
-    _path = SUBSTRING(_path,1,CHAR_LENGTH(_path)-1);
+  _path = path;
+
+-- remove trailing '/'
+  IF substring(_path FROM length(_path)) = '/' THEN
+    _path = substring(_path,1,length(_path)-1);
   END IF;
 
   WHILE NOT done LOOP
-    -- TODO: value --> _value + last --> _last (keyword)
-    SELECT SUBSTRING(last,2),SUBSTRING(_value,CHAR_LENGTH(_last)+1)
-    INTO _current,_path FROM(
-    SELECT input.value _value,SUBSTRING_INDEX(input.value,'/',2) _last FROM
-      (SELECT _path _value FROM dual) input
-    ) parsed;
+    SELECT split_part(_path,'/',1) INTO _current;
+    SELECT substring(_path, length(_current)+2) INTO _path;
+    IF NOT FOUND THEN
+      notfound = TRUE;
+    END IF;
 
     IF _live THEN
       SELECT id INTO _result FROM FXS_TREE_LIVE node WHERE

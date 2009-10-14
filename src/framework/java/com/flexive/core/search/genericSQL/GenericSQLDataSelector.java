@@ -243,7 +243,7 @@ public class GenericSQLDataSelector extends DataSelector {
 
         // Evaluate the order by, then limit the result by the desired range if needed
         if (search.getStartIndex() > 0 && search.getFetchRows() < Integer.MAX_VALUE) {
-            return "SELECT * FROM (" + sql + ") tmp LIMIT " + search.getStartIndex() + "," + search.getFetchRows();
+            return "SELECT * FROM (" + sql + ") tmp LIMIT " +  search.getFetchRows() + " OFFSET " + search.getStartIndex();
         }
         return sql.toString();
 

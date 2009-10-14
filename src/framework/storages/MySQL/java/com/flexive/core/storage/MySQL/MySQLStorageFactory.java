@@ -209,6 +209,22 @@ public class MySQLStorageFactory implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    public String concat_ws(String delimiter, String... text) {
+        if( text.length == 0)
+            return "";
+        if( text.length == 1)
+            return text[0];
+        StringBuilder sb = new StringBuilder(500);
+        sb.append("CONCAT_WS('").append(delimiter).append("'");
+        for (int i = 0; i < text.length; i++)
+            sb.append(',').append(text[i]);
+        sb.append(')');
+        return sb.toString();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public boolean isForeignKeyViolation(Exception exc) {
         final int errorCode = Database.getSqlErrorCode(exc);
         //see http://dev.mysql.com/doc/refman/5.0/en/error-messages-server.html

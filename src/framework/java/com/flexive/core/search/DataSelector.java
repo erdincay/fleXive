@@ -31,6 +31,7 @@
  ***************************************************************/
 package com.flexive.core.search;
 
+import com.flexive.core.storage.StorageManager;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxSqlSearchException;
 import com.flexive.shared.value.BinaryDescriptor;
@@ -67,11 +68,13 @@ public abstract class DataSelector {
      * The columns to be selected by the binary selector. The result will be returned in a single
      * string column, the entries delimited by {@link #BINARY_DELIM}.
      */
+
+    private static final String[] BINARY_COLUMNS_ARRAY = {
+            "ID", "NAME", "BLOBSIZE", "CREATED_AT", "MIMETYPE",
+            "ISIMAGE", "RESOLUTION", "WIDTH", "HEIGHT", "MD5SUM"
+    };
     private static final List<String> BINARY_COLUMNS = Collections.unmodifiableList(
-            Arrays.asList(
-                    "ID", "NAME", "BLOBSIZE", "CREATED_AT", "MIMETYPE",
-                    "ISIMAGE", "RESOLUTION", "WIDTH", "HEIGHT", "MD5SUM"
-            )
+            Arrays.asList(BINARY_COLUMNS_ARRAY)
     );
     private static final List<String> LOCK_COLUMNS = Collections.unmodifiableList(
             Arrays.asList(
@@ -163,9 +166,8 @@ public abstract class DataSelector {
      */
     public static String selectBinary(String idSelect) {
         // TODO link version/quality filtering to the main object version
-        return "(SELECT CONCAT_WS('" + BINARY_DELIM + "'," +
-                StringUtils.join(BINARY_COLUMNS, ',') + ") " +
-                "FROM " + DatabaseConst.TBL_CONTENT_BINARY + " " +
+        return "(SELECT " + StorageManager.concat_ws(BINARY_DELIM, BINARY_COLUMNS_ARRAY) +
+                " FROM " + DatabaseConst.TBL_CONTENT_BINARY + " " +
                 "WHERE id=" + idSelect + " " +
                 " AND ver=1 AND quality=1)";
     }

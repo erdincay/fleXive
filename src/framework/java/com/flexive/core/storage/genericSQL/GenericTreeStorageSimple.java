@@ -182,7 +182,7 @@ public class GenericTreeStorageSimple extends GenericTreeStorage {
                 left = parentNode.getRight().longValue();
             } else {
                 //inbetween - calculate needed left/right slot
-                ps = con.prepareStatement("SELECT RGT FROM " + getTable(mode) + " WHERE PARENT=? ORDER BY LFT LIMIT " + position + ",1");
+                ps = con.prepareStatement("SELECT RGT FROM " + getTable(mode) + " WHERE PARENT=? ORDER BY LFT LIMIT 1 OFFSET " + position);
                 ps.setLong(1, parentNodeId);
                 ResultSet rs = ps.executeQuery();
                 if (rs == null || !rs.next()) {
@@ -246,7 +246,7 @@ public class GenericTreeStorageSimple extends GenericTreeStorage {
     protected FxTreeNodeInfo getTreeNodeInfoAt(Connection con, FxTreeMode mode, FxTreeNodeInfo parentNode, int position) throws FxApplicationException {
         PreparedStatement ps = null;
         try {
-            ps = con.prepareStatement("SELECT ID FROM " + getTable(mode) + " WHERE LFT>? AND RGT<? LIMIT " + position + ",1");
+            ps = con.prepareStatement("SELECT ID FROM " + getTable(mode) + " WHERE LFT>? AND RGT<? LIMIT 1 OFFSET " + position);
             ps.setLong(1, parentNode.getLeft().longValue());
             ps.setLong(2, parentNode.getRight().longValue());
             ResultSet rs = ps.executeQuery();

@@ -859,8 +859,9 @@ public class GenericBinarySQLStorage implements BinaryStorage {
                 for (Long id : binaries) {
                     ps.setLong(1, id);
                     try {
-                        ps.executeUpdate();
+                        ps.executeUpdate(); //TODO savepoints, calc usage, etc for postgres!
                     } catch (SQLException e) {
+                        LOG.warn("In use: "+id);
                         //ok, might still be in use elsewhere
                     }
                 }

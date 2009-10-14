@@ -14,8 +14,8 @@ BEGIN
     _path = substring(_path,1,length(_path)-1);
   END IF;
   WHILE NOT done LOOP
-  SELECT split_part(_path,'/',1) INTO _current;
-  SELECT substring(_path, length(_current)+2) INTO _path;
+    SELECT split_part(_path,'/',1) INTO _current;
+    SELECT substring(_path, length(_current)+2) INTO _path;
     IF NOT FOUND THEN
       notfound = TRUE;
     END IF;

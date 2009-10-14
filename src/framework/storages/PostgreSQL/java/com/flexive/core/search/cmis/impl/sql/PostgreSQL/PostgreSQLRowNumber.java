@@ -29,48 +29,34 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the file!
  ***************************************************************/
-package com.flexive.core.search.PostgreSQL;
+package com.flexive.core.search.cmis.impl.sql.PostgreSQL;
 
-import com.flexive.core.search.SqlSearch;
-import com.flexive.core.search.genericSQL.GenericSQLDataFilter;
-import com.flexive.shared.exceptions.FxSqlSearchException;
-
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
+import com.flexive.core.search.cmis.impl.CmisSqlQuery;
+import com.flexive.core.search.cmis.impl.ResultRowNumber;
+import com.flexive.core.search.cmis.impl.sql.ColumnIndex;
+import com.flexive.core.search.cmis.impl.sql.SqlMapperFactory;
+import com.flexive.core.search.cmis.impl.sql.generic.mapper.select.GenericRowNumber;
 
 /**
- * PostgreSQL specific data filter
+ * Selects a (automatically calculated) row number that can be used for sorting and paging.
  *
- * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+ * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
+ * @since 3.1
  */
-public class PostgreSQLDataFilter extends GenericSQLDataFilter {
-
-    /**
-     * Ctor
-     *
-     * @param con    open and valid connection
-     * @param search SqlSearch object
-     * @throws FxSqlSearchException on errors
-     */
-    public PostgreSQLDataFilter(Connection con, SqlSearch search) throws FxSqlSearchException {
-        super(con, search);
-    }
+public class PostgreSQLRowNumber extends GenericRowNumber {
+    private static final PostgreSQLRowNumber INSTANCE = new PostgreSQLRowNumber();
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public boolean isQueryTimeoutSupported() {
-        return false;
+    public String selectColumn(SqlMapperFactory sqlMapperFactory, CmisSqlQuery query, ResultRowNumber rowNum, long languageId, boolean xpath, boolean includeResultAlias, ColumnIndex index) {
+        index.increment();
+        return "1 " + (includeResultAlias ? "as "+rowNum.getResultSetAlias() : "");
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void setVariable(Statement stmt, String variable, String value) throws SQLException {
-        //not support by postgres
+    public static PostgreSQLRowNumber getInstance() {
+        return INSTANCE;
     }
 }

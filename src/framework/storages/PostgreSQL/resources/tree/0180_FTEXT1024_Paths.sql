@@ -30,9 +30,9 @@ BEGIN
       END IF;
       IF NOT done THEN
         IF (_result!='') THEN
-          _result = concat(_result,"\n");
+          _result = _result || "\n";
         END IF;
-          _result = concat(_result,_path);
+          _result = _result || _path;
       END IF;
     END LOOP;
     CLOSE curLive;
@@ -48,9 +48,9 @@ BEGIN
       END IF;
       IF NOT done THEN
         IF (_result!='') THEN
-          _result = concat(_result,"\n");
+          _result = _result || "\n";
         END IF;
-          _result = concat(_result,_path);
+          _result = _result || _path;
       END IF;
     END LOOP;
     CLOSE curMax;

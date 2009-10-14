@@ -32,6 +32,7 @@
 package com.flexive.core.search.cmis.impl.sql.PostgreSQL;
 
 import com.flexive.core.search.cmis.impl.CmisSqlQuery;
+import com.flexive.core.search.cmis.impl.ResultRowNumber;
 import com.flexive.core.search.cmis.impl.ResultScore;
 import com.flexive.core.search.cmis.impl.sql.Capabilities;
 import com.flexive.core.search.cmis.impl.sql.generic.GenericSqlDialect;
@@ -72,10 +73,10 @@ public class PostgreSQLDialect extends GenericSqlDialect {
 
     @Override
     protected String limitQuery(String sql) {
-        return sql + " LIMIT "
+        return sql + " OFFSET "
                 + query.getStartRow()
                 + (query.getMaxRows() != -1
-                ? ", " + (query.getStartRow() + query.getMaxRows())
+                ? " LIMIT " + (query.getStartRow() + query.getMaxRows())
                 : "");
     }
 
@@ -93,6 +94,14 @@ public class PostgreSQLDialect extends GenericSqlDialect {
     @Override
     public ResultColumnMapper<ResultScore> selectScore() {
         return PostgreSQLContainsCondition.getInstance();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ResultColumnMapper<ResultRowNumber> selectRowNumber() {
+        return PostgreSQLRowNumber.getInstance();
     }
 
     /**

@@ -37,6 +37,7 @@ import com.flexive.sqlParser.FxStatement;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.List;
 
 /**
@@ -133,10 +134,10 @@ public abstract class DataFilter {
     /**
      * Set a sql variable
      *
-     * @param con      an open and valid connection
+     * @param stmt     statement to use
      * @param variable name of the variable
      * @param value    value to set
      * @throws SQLException on errors
      */
-    public abstract void setVariable(Connection con, String variable, String value) throws SQLException;
+    public abstract void setVariable(Statement stmt, String variable, String value) throws SQLException;
 }

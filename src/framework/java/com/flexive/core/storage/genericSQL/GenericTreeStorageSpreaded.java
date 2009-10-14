@@ -155,7 +155,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
             ResultSet rs = stmt.executeQuery("SELECT * FROM (" +
                     "SELECT LFT,RGT FROM " + getTable(node.getMode()) + " WHERE PARENT=" + node.getId() +
                     " ORDER BY LFT ASC) SUB " +
-                    " LIMIT " + ((position == 0) ? 0 : position - 1) + ",2");
+                    " LIMIT 2 OFFSET " + ((position == 0) ? 0 : position - 1));
             if (rs.next()) {
                 if (position == 0) {
                     /* first position */

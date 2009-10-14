@@ -2352,7 +2352,6 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             //sync with tree
             StorageManager.getTreeStorage().contentRemoved(con, pk.getId(), false);
             ft.removeAllVersions();
-            binaryStorage.removeBinariesForPK(con, pk);
             ps = con.prepareStatement(CONTENT_DATA_REMOVE);
             ps.setLong(1, pk.getId());
             ps.executeUpdate();
@@ -2361,6 +2360,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             ps = con.prepareStatement(CONTENT_MAIN_REMOVE);
             ps.setLong(1, pk.getId());
             ps.executeUpdate();
+            binaryStorage.removeBinariesForPK(con, pk);
         } catch (SQLException e) {
             if (LOG.isWarnEnabled()) {
                 // log information about removed content

@@ -29,7 +29,7 @@ BEGIN
     END IF;
 
     IF _id=1 THEN
-      _result = "/1"||_result;
+      _result = '/'||'1'||_result;
     END IF;
 
     _nodeId = _id;

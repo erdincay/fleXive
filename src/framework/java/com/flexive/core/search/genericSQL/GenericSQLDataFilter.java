@@ -1039,15 +1039,8 @@ public class GenericSQLDataFilter extends DataFilter {
      * {@inheritDoc}
      */
     @Override
-    public void setVariable(Connection con, String variable, String value) throws SQLException {
-        Statement stmt = null;
-        try {
-            stmt = con.createStatement();
-            stmt.executeUpdate("SET @rownr=1");
-        } finally {
-            if (stmt != null)
-                stmt.close();
-        }
+    public void setVariable(Statement stmt, String variable, String value) throws SQLException {
+        stmt.executeUpdate("SET @" + variable + "=" + value);
     }
 
     /**

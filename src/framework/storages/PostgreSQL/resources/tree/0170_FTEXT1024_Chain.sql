@@ -1,6 +1,6 @@
 -- Get a chain of nodes with their caption from the root node plus additional information
 -- Result format: /<node name>:<nodeId>:<refId>:<typeDefId>/...
-Create OR REPLACE function tree_FTEXT1024_Chain(nodeId BIGINT,_lang INTEGER,_tprop BIGINT,_live boolean)
+Create OR REPLACE function tree_FTEXT1024_Chain(nodeId BIGINT,_lang BIGINT,_tprop BIGINT,_live boolean)
 returns text AS $$-- CHARSET UTF8 deterministic reads sql data
 DECLARE
   _result text default '';
