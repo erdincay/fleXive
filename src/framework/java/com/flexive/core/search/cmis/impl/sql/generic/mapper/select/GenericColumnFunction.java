@@ -69,7 +69,7 @@ public class GenericColumnFunction implements ResultColumnMapper<ResultColumnFun
                         : "")
                         + ") "
                         // add optional alias
-                        + (includeResultAlias ? column.getResultColumn().getResultSetAlias() : "");
+                        + (includeResultAlias ? " AS " + column.getResultColumn().getResultSetAlias() : "");
     }
 
     /**

@@ -53,7 +53,7 @@ public class PostgreSQLRowNumber extends GenericRowNumber {
     @Override
     public String selectColumn(SqlMapperFactory sqlMapperFactory, CmisSqlQuery query, ResultRowNumber rowNum, long languageId, boolean xpath, boolean includeResultAlias, ColumnIndex index) {
         index.increment();
-        return "1 " + (includeResultAlias ? "as "+rowNum.getResultSetAlias() : "");
+        return "1 " + (includeResultAlias ? "AS "+rowNum.getResultSetAlias() : "");
     }
 
     public static PostgreSQLRowNumber getInstance() {

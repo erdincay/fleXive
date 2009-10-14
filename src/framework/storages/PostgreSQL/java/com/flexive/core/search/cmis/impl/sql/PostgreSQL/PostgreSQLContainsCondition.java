@@ -64,7 +64,7 @@ public class PostgreSQLContainsCondition extends GenericContainsCondition {
                 + DatabaseConst.TBL_CONTENT_DATA_FT + " ftsub "
                 + "WHERE ftsub.id=" + FILTER_ALIAS + "." + contains.getTableReference().getIdFilterColumn()
                 + "  AND ftsub.ver=" + FILTER_ALIAS + "." + contains.getTableReference().getVersionFilterColumn() + ") "
-                + (includeResultAlias ? column.getResultSetAlias() : "");
+                + (includeResultAlias ? " AS " + column.getResultSetAlias() : "");
     }
 
     @Override

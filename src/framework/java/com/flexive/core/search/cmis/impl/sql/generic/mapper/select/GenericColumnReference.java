@@ -108,7 +108,7 @@ public class GenericColumnReference implements ResultColumnMapper<ResultColumnRe
                                 // add unique suffix if more than one column is selected,
                                 // but first column is exposed as the "official" value (for sorting)
                                 // (don't add the alias for binaries yet, because the select will be wrapped)
-                                " " + column.getResultSetAlias()
+                                " AS " + column.getResultSetAlias()
                                         + (readColumns.length > 1 && ctr++ > 0 ? "_" + ctr : "")
 
                                 : ""    // skip alias
@@ -145,7 +145,7 @@ public class GenericColumnReference implements ResultColumnMapper<ResultColumnRe
         if (!xpath && assignment != null && assignment.getProperty().getDataType() == FxDataType.Binary) {
             // select string-coded form of the BLOB properties
             select = DataSelector.selectBinary(columns.get(0))
-                    + (includeResultAlias ? " " + column.getResultSetAlias() : "");
+                    + (includeResultAlias ? " AS " + column.getResultSetAlias() : "");
         }
         return select;
 

@@ -193,7 +193,7 @@ public class GenericSQLDataFilter extends DataFilter {
                 // Finalize the select
                 final String securityFilter = getSecurityFilter(ticket, "data2");
                 dataSelect = "SELECT * FROM (SELECT DISTINCT " + search.getSearchId() +
-                        " search_id,data.id,data.ver,main.tdef,main.created_by \n" +
+                        " AS search_id,data.id,data.ver,main.tdef,main.created_by \n" +
                         "FROM (" + result.toString() + ") data, " + DatabaseConst.TBL_CONTENT + " main\n" +
                         "WHERE data.ver=main.ver AND data.id=main.id) data2\n"
                         + (StringUtils.isNotBlank(securityFilter) ? "WHERE " + securityFilter : "") +
@@ -220,7 +220,7 @@ public class GenericSQLDataFilter extends DataFilter {
     }
 
     private String selectOnMainTable(String filters, String tableAlias) {
-        return "SELECT " + search.getSearchId() + " search_id,id,ver,tdef,created_by FROM " + tableMain + " " + tableAlias + "\n"
+        return "SELECT " + search.getSearchId() + " AS search_id,id,ver,tdef,created_by FROM " + tableMain + " " + tableAlias + "\n"
                 + (StringUtils.isNotBlank(filters) ? "WHERE " + filters + "\n" : "")
                 + " LIMIT " + search.getFxStatement().getMaxResultRows();
     }
@@ -649,7 +649,7 @@ public class GenericSQLDataFilter extends DataFilter {
         else
             typeFilter = types; //empty
         final String versionFilter = " AND cd." + (mode.equals(FxTreeMode.Edit) ? "ismax_ver" : "islive_ver") + "=true";
-        return "(SELECT DISTINCT cd.id,cd.ver,null lang FROM " + tableMain + " cd WHERE " +
+        return "(SELECT DISTINCT cd.id,cd.ver,null AS lang FROM " + tableMain + " cd WHERE " +
                 "cd.id IN (SELECT ref FROM " + GenericTreeStorage.getTable(mode) + " WHERE " +
                 "LFT>" + nodeInfo.getLeft() + " AND RGT<" + nodeInfo.getRight() + " AND ref IS NOT NULL " +
                 (direct ? " AND depth=" + (nodeInfo.getDepth() + 1) : "") +
@@ -801,7 +801,7 @@ public class GenericSQLDataFilter extends DataFilter {
         // Build the final filter statement
         switch(entry.getTableType()) {
             case T_CONTENT:
-                return (" (SELECT DISTINCT cd.id,cd.ver,null lang FROM " + tableMain + " cd WHERE " +
+                return (" (SELECT DISTINCT cd.id,cd.ver,null AS lang FROM " + tableMain + " cd WHERE " +
                         column +
                         cond.getSqlComperator() +
                         value +

@@ -167,7 +167,7 @@ public class GenericSQLDataSelector extends DataSelector {
                 if (ssv.isSorted() && item.isOrderBy()) {
                     select.append(",").append(FILTER_ALIAS).append(".").append(item.getAlias()).append("\n");
                 } else {
-                    select.append(",").append(item.getSelect()).append(" ").append(item.getAlias()).append("\n");
+                    select.append(",").append(item.getSelect()).append(" AS ").append(item.getAlias()).append("\n");
                 }
             }
         }
@@ -200,7 +200,7 @@ public class GenericSQLDataSelector extends DataSelector {
                 columns.add(filterProperties(column));
             }
         }
-        columns.add(StorageManager.concat("t.name","'[@pk='",filterProperties("id"),"'.'",filterProperties("ver"),"']'")+" xpathPref");
+        columns.add(StorageManager.concat("t.name","'[@pk='",filterProperties("id"),"'.'",filterProperties("ver"),"']'")+" AS xpathPref");
         // order by starts after the internal selected columns
         int orderByPos = columns.size() + 1;
 
@@ -214,7 +214,7 @@ public class GenericSQLDataSelector extends DataSelector {
                 for (SubSelectValues.Item item : ssv.getItems()) {
                     if (item.isOrderBy()) {
                         // select item from order by
-                        sql.append(",").append(item.getSelect()).append(" ").append(item.getAlias()).append("\n");
+                        sql.append(",").append(item.getSelect()).append(" AS ").append(item.getAlias()).append("\n");
                         // add index
                         orderByNumbers.add(orderByPos + " " + (ssv.isSortedAscending() ? "asc" : "desc"));
                     } else {

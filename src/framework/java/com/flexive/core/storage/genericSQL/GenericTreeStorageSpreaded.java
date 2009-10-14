@@ -318,7 +318,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
                             "0",
                             "(SELECT COUNT(*) FROM " + getTable(sourceMode) + " WHERE LFT > NODE.LFT AND RGT < NODE.RGT)"
                     ) + ", " +
-                    "CHILDCOUNT, LFT LFTORD,RGT,DEPTH" + createProps +
+                    "CHILDCOUNT, LFT AS LFTORD,RGT,DEPTH" + createProps +
                     " FROM (SELECT ID,CHILDCOUNT,LFT,RGT,DEPTH" + createProps + " FROM " + getTable(sourceMode) + " WHERE " +
                     "LFT>" + includeNode + nodeInfo.getLeft() + " AND LFT<" + includeNode + nodeInfo.getRight() + ") NODE " +
                     "ORDER BY LFTORD ASC";

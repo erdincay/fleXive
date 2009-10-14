@@ -27,10 +27,10 @@ BEGIN
     -- --------------------------------------------------------------
     IF _live THEN
     -- TODO LIMIT x, y --> LIMIT y OFFSET x
-      select parent,ref,name,COALESCE((select tdef from FX_CONTENT where id=ref and ismax_ver=true limit 1),-1) tdef
+      select parent,ref,name,COALESCE((select tdef from FX_CONTENT where id=ref and ismax_ver=true limit 1),-1) AS tdef
       into _id,_ref,_nodeName,_tdef from FXS_TREE_LIVE where id=_nodeId;
     ELSE
-      select parent,ref,name,COALESCE((select tdef from FX_CONTENT where id=ref and ismax_ver=true limit 1),-1) tdef
+      select parent,ref,name,COALESCE((select tdef from FX_CONTENT where id=ref and ismax_ver=true limit 1),-1) AS tdef
       into _id,_ref,_nodeName,_tdef from FXS_TREE where id=_nodeId;
     END IF;
     IF NOT FOUND THEN

@@ -35,7 +35,7 @@ returns BOOLEAN AS $$ -- TODO deterministic reads sql data
   select
     dat.created_by,ass.usergroup,ass.PREAD,acl.cat_type,dat.mandator,dat.securityMode
   from
-    (select con.mandator,con.created_by,con.acl,stp.acl stepAcl,typ.acl typeAcl,typ.security_mode securityMode
+    (select con.mandator,con.created_by,con.acl,stp.acl AS stepAcl,typ.acl AS typeAcl,typ.security_mode AS securityMode
 	from FX_CONTENT con,FXS_TYPEDEF typ, FXS_WF_STEPS stp where con.id=_contentId and con.ver=_contentVersion and
 	con.tdef=typ.id and stp.id=con.step) dat,
     FXS_ACLASSIGNMENTS ass,
@@ -50,7 +50,7 @@ returns BOOLEAN AS $$ -- TODO deterministic reads sql data
   select
     dat.created_by,ass.usergroup,ass.PREAD,acl.cat_type,dat.mandator,dat.securityMode
   from
-    (select con.mandator,con.created_by,con.acl,stp.acl stepAcl,typ.acl typeAcl,typ.security_mode securityMode
+    (select con.mandator,con.created_by,con.acl,stp.acl AS stepAcl,typ.acl AS typeAcl,typ.security_mode AS securityMode
 	from FX_CONTENT con,FXS_TYPEDEF typ, FXS_WF_STEPS stp where con.id=_contentId and con.ver=_contentVersion and
 	con.tdef=typ.id and stp.id=con.step) dat,
     (select ca.acl from FX_CONTENT_ACLS ca where ca.id=_contentId and ca.ver=_contentVersion) contentACLs,
@@ -87,18 +87,19 @@ BEGIN
       IF (_securityMode & 4 = 0) THEN
         SPREAD=true;  /* workflow step permissions are disabled */
       END IF;
-      CASE _type
-          WHEN 1 /*Content*/ THEN
-            IF (_userGroup!=GRP_OWNER OR (_userGroup=GRP_OWNER AND _createdBy=_userId)) THEN
-              IF (_read)   THEN IPREAD=true;   END IF;
-            END IF;
-          WHEN 2 /*Type*/ THEN
-              IF (_read)   THEN TPREAD=true;   END IF;
-          WHEN 3 /*Workflow Step*/ THEN
-              IF (_read)   THEN SPREAD=true;   END IF;
-          ELSE
-  	    done=true;
-      END CASE;
+
+      IF (_type = 1) /*Content*/ THEN
+        IF (_userGroup!=GRP_OWNER OR (_userGroup=GRP_OWNER AND _createdBy=_userId)) THEN
+          IF (_read)   THEN IPREAD=true;   END IF;
+        END IF;
+      ELSIF (_type = 2) /*Type*/ THEN
+        IF (_read)   THEN TPREAD=true;   END IF;
+      ELSIF (_type = 3) /*Workflow Step*/ THEN
+        IF (_read)   THEN SPREAD=true;   END IF;
+      ELSE
+          done=true;
+      END IF;
+
       IF (IPREAD and TPREAD and SPREAD) THEN
         CLOSE cur;
         RETURN TRUE;    /* break out early */

@@ -17,9 +17,9 @@ DECLARE
   _path TEXT;
   done BOOLEAN DEFAULT FALSE;
   curLive CURSOR FOR
-     SELECT tree_FTEXT1024_Chain(id,_lang,_tprop,true) _chain FROM FXS_TREE_LIVE WHERE ref=_contentId ORDER BY _chain;
+     SELECT tree_FTEXT1024_Chain(id,_lang,_tprop,true) AS _chain FROM FXS_TREE_LIVE WHERE ref=_contentId ORDER BY _chain;
   curMax CURSOR FOR
-     SELECT tree_FTEXT1024_Chain(id,_lang,_tprop,false) _chain FROM FXS_TREE WHERE ref=_contentId ORDER BY _chain;
+     SELECT tree_FTEXT1024_Chain(id,_lang,_tprop,false) AS _chain FROM FXS_TREE WHERE ref=_contentId ORDER BY _chain;
 BEGIN
   IF (_live=true OR _live IS NULL) THEN
     OPEN curLive;

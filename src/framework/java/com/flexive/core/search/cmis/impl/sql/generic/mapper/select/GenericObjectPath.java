@@ -62,7 +62,7 @@ public class GenericObjectPath implements ResultColumnMapper<ResultColumnReferen
                 + GenericSqlDialect.FILTER_ALIAS + "." + tableRef.getIdFilterColumn() + ","
                 + languageId + ","
                 + captionId + ",false))" // TODO: LIVE/EDIT
-                + (includeResultAlias ? " " + column.getResultSetAlias() : "");
+                + (includeResultAlias ? " AS " + column.getResultSetAlias() : "");
     }
 
     public Object decodeResultValue(SqlMapperFactory factory, ResultSet rs, ResultColumnReference column, long languageId) throws SQLException {

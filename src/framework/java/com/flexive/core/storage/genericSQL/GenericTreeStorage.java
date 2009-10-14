@@ -110,9 +110,9 @@ public abstract class GenericTreeStorage implements TreeStorage {
     //                                                         1   2   3      4
     protected static final String TREE_LIVE_NODEINFO = "SELECT LFT,RGT,PARENT,TOTAL_CHILDCOUNT," +
             //                                                                        5
-            "(SELECT LFT FROM " + getTable(FxTreeMode.Live) + " WHERE ID=NODE.PARENT) PARENTLEFT, " +
+            "(SELECT LFT FROM " + getTable(FxTreeMode.Live) + " WHERE ID=NODE.PARENT) AS PARENTLEFT, " +
             //                                                                        6
-            "(SELECT RGT FROM " + getTable(FxTreeMode.Live) + " WHERE ID=NODE.PARENT) PARENTRIGHT," +
+            "(SELECT RGT FROM " + getTable(FxTreeMode.Live) + " WHERE ID=NODE.PARENT) AS PARENTRIGHT," +
             //7    8          9   10       11          12   13                               14  15   16  17   18         19
             "DEPTH,CHILDCOUNT,REF,TEMPLATE,MODIFIED_AT,NAME,tree_getPosition(TRUE,ID,PARENT),ACL,TDEF,VER,STEP,CREATED_BY,MANDATOR " +
             "FROM (SELECT t.LFT,t.RGT,t.PARENT,t.DEPTH," + COMPUTE_TOTAL_CHILDCOUNT + ",t.CHILDCOUNT,t.REF,t.TEMPLATE,t.MODIFIED_AT,t.NAME,t.ID,c.ACL,c.TDEF,c.VER,c.STEP,c.CREATED_BY,c.MANDATOR FROM " +
@@ -126,26 +126,26 @@ public abstract class GenericTreeStorage implements TreeStorage {
     //                                                       1   2   3      4
     protected static final String TREE_EDIT_NODEINFO = "SELECT LFT,RGT,PARENT,TOTAL_CHILDCOUNT," +
             //                                                                        5
-            "(SELECT LFT FROM " + getTable(FxTreeMode.Edit) + " WHERE ID=NODE.PARENT) PARENTLEFT, " +
+            "(SELECT LFT FROM " + getTable(FxTreeMode.Edit) + " WHERE ID=NODE.PARENT) AS PARENTLEFT, " +
             //                                                                        6
-            "(SELECT RGT FROM " + getTable(FxTreeMode.Edit) + " WHERE ID=NODE.PARENT) PARENTRIGHT," +
+            "(SELECT RGT FROM " + getTable(FxTreeMode.Edit) + " WHERE ID=NODE.PARENT) AS PARENTRIGHT," +
             //7    8          9   10       11          12   13                                14  15   16  17   18         19
             "DEPTH,CHILDCOUNT,REF,TEMPLATE,MODIFIED_AT,NAME,tree_getPosition(FALSE,ID,PARENT),ACL,TDEF,VER,STEP,CREATED_BY,MANDATOR " +
             "FROM (SELECT t.LFT,t.RGT,t.PARENT,t.DEPTH," + COMPUTE_TOTAL_CHILDCOUNT + ",t.CHILDCOUNT,t.REF,t.TEMPLATE,t.MODIFIED_AT,t.NAME,t.ID,c.ACL,c.TDEF,c.VER,c.STEP,c.CREATED_BY,c.MANDATOR FROM " +
             getTable(FxTreeMode.Edit) + " t, " + TBL_CONTENT + " c WHERE t.ID=? AND c.ID=t.REF AND c.ISMAX_VER=TRUE) NODE";
 
     //                                                        1    2     3       4                             5            6      7        8       9          10          11                                         12    13     14    15     16           17       18        19         20           21           22           23            24             25
-    private static final String TREE_LIVE_GETNODE = "SELECT t.ID,t.REF,t.DEPTH," + TREE_TOTAL_COUNT_LIVE + ",t.CHILDCOUNT,t.NAME,t.PARENT,t.DIRTY,t.TEMPLATE,t.MODIFIED_AT,tree_getPosition(TRUE,t.ID,t.PARENT) POS,c.ACL,c.TDEF,c.VER,c.STEP,c.CREATED_BY,c.MANDATOR,l.USER_ID,l.LOCKTYPE,l.CREATED_AT,l.EXPIRES_AT,c.CREATED_AT,c.MODIFIED_BY,c.MODIFIED_AT,tree_idToPath(t.id, true) " +
+    private static final String TREE_LIVE_GETNODE = "SELECT t.ID,t.REF,t.DEPTH," + TREE_TOTAL_COUNT_LIVE + ",t.CHILDCOUNT,t.NAME,t.PARENT,t.DIRTY,t.TEMPLATE,t.MODIFIED_AT,tree_getPosition(TRUE,t.ID,t.PARENT) AS POS,c.ACL,c.TDEF,c.VER,c.STEP,c.CREATED_BY,c.MANDATOR,l.USER_ID,l.LOCKTYPE,l.CREATED_AT,l.EXPIRES_AT,c.CREATED_AT,c.MODIFIED_BY,c.MODIFIED_AT,tree_idToPath(t.id, true) " +
             "FROM " + getTable(FxTreeMode.Live) + " t, " + TBL_CONTENT + " c LEFT JOIN " + TBL_LOCK + " l ON (l.LOCK_ID=c.ID AND l.LOCK_VER=c.VER)WHERE t.ID=? AND c.ID=t.REF AND c.ISLIVE_VER=TRUE";
     //                                                        1    2     3     4   5            6      7        8       9          10          11                                          12    13     14    15     16           17       18        19         20           21           22           23            24             25
-    private static final String TREE_EDIT_GETNODE = "SELECT t.ID,t.REF,t.DEPTH,0,t.CHILDCOUNT,t.NAME,t.PARENT,t.DIRTY,t.TEMPLATE,t.MODIFIED_AT,tree_getPosition(FALSE,t.ID,t.PARENT) POS,c.ACL,c.TDEF,c.VER,c.STEP,c.CREATED_BY,c.MANDATOR,l.USER_ID,l.LOCKTYPE,l.CREATED_AT,l.EXPIRES_AT,c.CREATED_AT,c.MODIFIED_BY,c.MODIFIED_AT,tree_idToPath(t.id, false) " +
+    private static final String TREE_EDIT_GETNODE = "SELECT t.ID,t.REF,t.DEPTH,0,t.CHILDCOUNT,t.NAME,t.PARENT,t.DIRTY,t.TEMPLATE,t.MODIFIED_AT,tree_getPosition(FALSE,t.ID,t.PARENT) AS POS,c.ACL,c.TDEF,c.VER,c.STEP,c.CREATED_BY,c.MANDATOR,l.USER_ID,l.LOCKTYPE,l.CREATED_AT,l.EXPIRES_AT,c.CREATED_AT,c.MODIFIED_BY,c.MODIFIED_AT,tree_idToPath(t.id, false) " +
             "FROM " + getTable(FxTreeMode.Edit) + " t, " + TBL_CONTENT + " c LEFT JOIN " + TBL_LOCK + " l ON (l.LOCK_ID=c.ID AND l.LOCK_VER=c.VER) WHERE t.ID=? AND c.ID=t.REF AND c.ISMAX_VER=TRUE";
 
     //                                                            1    2     3     4  5            6      7        8       9          10          11                                         12    13     14    15     16           17       18        19         20           21           22           23            24
-    private static final String TREE_LIVE_GETNODE_REF = "SELECT t.ID,t.REF,t.DEPTH,0,t.CHILDCOUNT,t.NAME,t.PARENT,t.DIRTY,t.TEMPLATE,t.MODIFIED_AT,tree_getPosition(TRUE,t.ID,t.PARENT) POS,c.ACL,c.TDEF,c.VER,c.STEP,c.CREATED_BY,c.MANDATOR,l.USER_ID,l.LOCKTYPE,l.CREATED_AT,l.EXPIRES_AT,c.CREATED_AT,c.MODIFIED_BY,c.MODIFIED_AT " +
+    private static final String TREE_LIVE_GETNODE_REF = "SELECT t.ID,t.REF,t.DEPTH,0,t.CHILDCOUNT,t.NAME,t.PARENT,t.DIRTY,t.TEMPLATE,t.MODIFIED_AT,tree_getPosition(TRUE,t.ID,t.PARENT) AS POS,c.ACL,c.TDEF,c.VER,c.STEP,c.CREATED_BY,c.MANDATOR,l.USER_ID,l.LOCKTYPE,l.CREATED_AT,l.EXPIRES_AT,c.CREATED_AT,c.MODIFIED_BY,c.MODIFIED_AT " +
             "FROM " + getTable(FxTreeMode.Live) + " t, " + TBL_CONTENT + " c LEFT JOIN " + TBL_LOCK + " l ON (l.LOCK_ID=c.ID AND l.LOCK_VER=c.VER) WHERE t.REF=? AND c.ID=t.REF AND c.ISLIVE_VER=TRUE";
     //                                                            1    2     3     4  5            6      7        8       9          10          11                                          12    13     14    15     16           17       18        19         20           21           22           23            24
-    private static final String TREE_EDIT_GETNODE_REF = "SELECT t.ID,t.REF,t.DEPTH,0,t.CHILDCOUNT,t.NAME,t.PARENT,t.DIRTY,t.TEMPLATE,t.MODIFIED_AT,tree_getPosition(FALSE,t.ID,t.PARENT) POS,c.ACL,c.TDEF,c.VER,c.STEP,c.CREATED_BY,c.MANDATOR,l.USER_ID,l.LOCKTYPE,l.CREATED_AT,l.EXPIRES_AT,c.CREATED_AT,c.MODIFIED_BY,c.MODIFIED_AT " +
+    private static final String TREE_EDIT_GETNODE_REF = "SELECT t.ID,t.REF,t.DEPTH,0,t.CHILDCOUNT,t.NAME,t.PARENT,t.DIRTY,t.TEMPLATE,t.MODIFIED_AT,tree_getPosition(FALSE,t.ID,t.PARENT) AS POS,c.ACL,c.TDEF,c.VER,c.STEP,c.CREATED_BY,c.MANDATOR,l.USER_ID,l.LOCKTYPE,l.CREATED_AT,l.EXPIRES_AT,c.CREATED_AT,c.MODIFIED_BY,c.MODIFIED_AT " +
             "FROM " + getTable(FxTreeMode.Edit) + " t, " + TBL_CONTENT + " c LEFT JOIN " + TBL_LOCK + " l ON (l.LOCK_ID=c.ID AND l.LOCK_VER=c.VER)WHERE t.REF=? AND c.ID=t.REF AND c.ISMAX_VER=TRUE";
 
     //1=id
@@ -844,7 +844,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
                     "),n.NAME)"
                     : "tree_getPosition(TRUE,n.ID,n.PARENT)";
             //                     1    2     3       4                  5            6      7        8       9          10              11              12    13     14    15     16           17       18        19         20           21           22           23            24
-            String sql = "SELECT n.ID,n.REF,n.DEPTH,-1 TOTAL_CHILDCOUNT,n.CHILDCOUNT,n.NAME,n.PARENT,n.DIRTY,n.TEMPLATE,n.MODIFIED_AT," + label_pos + ",c.ACL,c.TDEF,c.VER,c.STEP,c.CREATED_BY,c.MANDATOR,l.USER_ID,l.LOCKTYPE,l.CREATED_AT,l.EXPIRES_AT,c.CREATED_AT,c.MODIFIED_BY,c.MODIFIED_AT " +
+            String sql = "SELECT n.ID,n.REF,n.DEPTH,-1 AS TOTAL_CHILDCOUNT,n.CHILDCOUNT,n.NAME,n.PARENT,n.DIRTY,n.TEMPLATE,n.MODIFIED_AT," + label_pos + ",c.ACL,c.TDEF,c.VER,c.STEP,c.CREATED_BY,c.MANDATOR,l.USER_ID,l.LOCKTYPE,l.CREATED_AT,l.EXPIRES_AT,c.CREATED_AT,c.MODIFIED_BY,c.MODIFIED_AT " +
                     "FROM " + getTable(mode) + " r, " + getTable(mode) + " n, " + TBL_CONTENT + " c LEFT JOIN " + TBL_LOCK + " l ON (l.LOCK_ID=c.ID AND l.LOCK_VER=c.VER) WHERE r.ID=" + nodeId + " AND n.LFT>=r.LFT AND n.LFT<=r.RGT AND n.DEPTH<=(r.DEPTH+" + depth + ") AND c.ID=n.REF AND c." + version + " ORDER BY n.LFT";
 
             ps = con.createStatement();
@@ -1691,7 +1691,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
                             "0",
                             mode == FxTreeMode.Live ? TREE_TOTAL_COUNT_LIVE : TREE_TOTAL_COUNT_EDIT
                     )
-                    + " TOTAL_CHILDCOUNT"
+                    + " AS TOTAL_CHILDCOUNT"
             );
         }
         return result;
