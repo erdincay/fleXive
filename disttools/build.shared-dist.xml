@@ -3,19 +3,30 @@
 
     <target name="db.prepare" description="Prepare database specific properties">
         <groovy>
-            if( !properties['database.vendor'] )
-                ant.fail(taskname: "flexive", message: "Missing database.vendor property in database.properties!")
+            void setParam(String name) {
+                try {
+                    properties['database.'+name] = properties['database.'+properties['database.vendor']+'.'+name]
+                } catch(Exception e) {
+                    if(!properties['database.vendor'])
+                        println "Please specify a database vendor in build.properties! Missing entry: [database.vendor]!"
+                    else
+                        println "Failed to set parameter [database.$name]: Missing entry [database.${properties['database.vendor']}.$name] in build.properties?"
+                    ant.fail("Could not configure database settings!")
+                }
+            }
             //setup database properties based on the selected database vendor
-            properties['database.host'] = properties['database.'+properties['database.vendor']+'.host']
-            properties['database.port'] = properties['database.'+properties['database.vendor']+'.port']
-            properties['database.username'] = properties['database.'+properties['database.vendor']+'.username']
-            properties['database.password'] = properties['database.'+properties['database.vendor']+'.password']
-            properties['database.database.division'] = properties['database.'+properties['database.vendor']+'.database.division']
-            properties['database.database.config'] = properties['database.'+properties['database.vendor']+'.database.config']
-            properties['database.schema.division'] = properties['database.'+properties['database.vendor']+'.schema.division']
-            properties['database.schema.config'] = properties['database.'+properties['database.vendor']+'.schema.config']
-            properties['database.url.base'] = properties['database.'+properties['database.vendor']+'.url.base']
-            properties['database.url.parameters'] = properties['database.'+properties['database.vendor']+'.url.parameters']
+            setParam('host')
+            setParam('port')
+            setParam('username')
+            setParam('password')
+            setParam('database.division')
+            setParam('database.config')
+            setParam('database.test')
+            setParam('schema.division')
+            setParam('schema.config')
+            setParam('schema.test')
+            setParam('url.base')
+            setParam('url.parameters')
         </groovy>
     </target>
 

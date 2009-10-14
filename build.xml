@@ -107,24 +107,30 @@
     <target name="init" unless="init.done">
         <groovy src="buildTasks.groovy"/>
         <groovy>
-            if (!properties['database.vendor'] || !properties['database.'+properties['database.vendor']+'.schema.division']) {
-                println "Missing database.vendor or database.[vendor].schema.division property in build.properties!"
-                println "You might have an outdated build.properties file. Please copy build.properties.sample to build.properties!"
-                ant.fail()
+            void setParam(String name) {
+                try {
+                    properties['database.'+name] = properties['database.'+properties['database.vendor']+'.'+name]
+                } catch(Exception e) {
+                    if(!properties['database.vendor'])
+                        println "Please specify a database vendor in build.properties! Missing entry: [database.vendor]!"
+                    else
+                        println "Failed to set parameter [database.$name]: Missing entry [database.${properties['database.vendor']}.$name] in build.properties?"
+                    ant.fail("Could not configure database settings!")
+                }
             }
             //setup database properties based on the selected database vendor
-            properties['database.host'] = properties['database.'+properties['database.vendor']+'.host']
-            properties['database.port'] = properties['database.'+properties['database.vendor']+'.port']
-            properties['database.username'] = properties['database.'+properties['database.vendor']+'.username']
-            properties['database.password'] = properties['database.'+properties['database.vendor']+'.password']
-            properties['database.database.division'] = properties['database.'+properties['database.vendor']+'.database.division']
-            properties['database.database.config'] = properties['database.'+properties['database.vendor']+'.database.config']
-            properties['database.database.test'] = properties['database.'+properties['database.vendor']+'.database.test']
-            properties['database.schema.division'] = properties['database.'+properties['database.vendor']+'.schema.division']
-            properties['database.schema.config'] = properties['database.'+properties['database.vendor']+'.schema.config']
-            properties['database.schema.test'] = properties['database.'+properties['database.vendor']+'.schema.test']
-            properties['database.url.base'] = properties['database.'+properties['database.vendor']+'.url.base']
-            properties['database.url.parameters'] = properties['database.'+properties['database.vendor']+'.url.parameters']
+            setParam('host')
+            setParam('port')
+            setParam('username')
+            setParam('password')
+            setParam('database.division')
+            setParam('database.config')
+            setParam('database.test')
+            setParam('schema.division')
+            setParam('schema.config')
+            setParam('schema.test')
+            setParam('url.base')
+            setParam('url.parameters')
         </groovy>
         <!-- Ensure init is called only once because the groovy task cannot be redefined -->
         <property name="init.done" value="true"/>
