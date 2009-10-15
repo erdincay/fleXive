@@ -5,7 +5,7 @@
         Glassfish MySQL datasource configuration
 
         To add these datasource, start Glassfish v2, and execute
-        ${glassfish.home}/bin/asadmin add-resources /path/to/flexive-ds-postgresql.xml
+        ${glassfish.home}/bin/asadmin add-resources /path/to/flexive-postgresql-ds.xml
 
         Please make sure mysql-connector-java-<version>-bin.jar is located in /domains/domain1/lib/ext (adapt the path to match your domain)
     -->

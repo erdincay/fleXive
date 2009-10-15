@@ -5,7 +5,7 @@
         Glassfish H2 datasource configuration
 
         To add these datasource, start Glassfish v2, and execute
-        ${glassfish.home}/bin/asadmin add-resources /path/to/flexive-ds-h2.xml
+        ${glassfish.home}/bin/asadmin add-resources /path/to/flexive-h2-ds.xml
 
         Please make sure h2.jar is located in /domains/domain1/lib/ext (adapt the path to match your domain)
     -->

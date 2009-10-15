@@ -337,7 +337,7 @@
                             <xi:include href="listings/installation_flexive-ds_config_flexiveConfiguration.xml"/>
                             <filename>flexive-ds.xml</filename>
                             <programlisting language="xml">
-                                <xi:include href="../../src/framework/resources/jboss/flexive-ds.xml" parse="text"/>
+                                <xi:include href="../../src/framework/resources/jboss/flexive-mysql-ds.xml" parse="text"/>
                             </programlisting>
 
                             If you are using H2 please apply the following settings:
@@ -694,7 +694,7 @@ database.vendor=MySQL]]></programlisting>
                 and update your database connection settings:
             </para>
             <programlisting language="xml">
-                <xi:include parse="text" href="../../src/framework/resources/glassfish/flexive-ds.xml"/>
+                <xi:include parse="text" href="../../src/framework/resources/glassfish/flexive-mysql-ds.xml"/>
             </programlisting>
             <para>
                 Respectively apply these settings for H2:
