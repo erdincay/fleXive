@@ -45,6 +45,7 @@ import org.quartz.impl.SchedulerRepository;
 import org.quartz.impl.StdSchedulerFactory;
 import org.quartz.impl.jdbcjobstore.JobStoreCMT;
 import org.quartz.impl.jdbcjobstore.StdJDBCDelegate;
+import org.quartz.impl.jdbcjobstore.PostgreSQLDelegate;
 import org.quartz.simpl.SimpleThreadPool;
 
 import java.util.Properties;
@@ -101,9 +102,16 @@ public class FxQuartz {
                 FxQuartzConnectionProviderNonTX.class.getCanonicalName());
         props.put("org.quartz.dataSource.fxQuartzDS.divisionId", String.valueOf(currCtx.getDivisionId()));
         props.put(StdSchedulerFactory.PROP_JOB_STORE_CLASS, JobStoreCMT.class.getCanonicalName());
-        /*
-        props.put("org.quartz.jobStore.driverDelegateClass", StdJDBCDelegate.class.getCanonicalName());
-        props.put("org.quartz.jobStore.dataSource", "fxQuartzDS");
+
+        final String driverDelegateClass;
+        if ("PostgreSQL".equalsIgnoreCase(FxContext.get().getDivisionData().getDbVendor())) {
+            driverDelegateClass = PostgreSQLDelegate.class.getCanonicalName();
+        } else {
+            driverDelegateClass = StdJDBCDelegate.class.getCanonicalName(); 
+        }
+        props.put("org.quartz.jobStore.driverDelegateClass", driverDelegateClass);
+
+        /*props.put("org.quartz.jobStore.dataSource", "fxQuartzDS");
         try {
             props.put("org.quartz.dataSource.fxQuartzDS.jndiURL", Database.getDivisionData().getDataSource());
         } catch (SQLException e) {

@@ -24,7 +24,7 @@ public class App {
     public static void main(String[] args) throws FxApplicationException {
         FxContext.initializeSystem(1, "consoleapp");
 
-        System.out.println(FxSharedUtils.getFlexiveEditionFull());
+        System.out.println(FxSharedUtils.getFlexiveEditionFull() + " " + FxSharedUtils.getFlexiveVersion());
         System.out.println("Hello [fleXive] World - calling example EJB, listing available content:");
         boolean hasInstances = false;
         for (Map.Entry<FxType, Integer> entry

@@ -5,7 +5,7 @@
         Glassfish MySQL datasource configuration
 
         To add these datasource, start Glassfish v2, and execute
-        ${glassfish.home}/bin/asadmin add-resources /path/to/flexive-ds.xml
+        ${glassfish.home}/bin/asadmin add-resources /path/to/flexive-ds-postgresql.xml
 
         Please make sure mysql-connector-java-<version>-bin.jar is located in /domains/domain1/lib/ext (adapt the path to match your domain)
     -->
@@ -14,11 +14,15 @@
     
     <jdbc-connection-pool
         name="flexiveConfiguration"
-        datasource-classname="com.mysql.jdbc.jdbc2.optional.MysqlXADataSource"
+        datasource-classname="org.postgresql.xa.PGXADataSource"
         res-type="javax.sql.XADataSource">
-        <property name="user" value="root"/>
-        <property name="password" value="a"/>
-        <property name="url" value="jdbc:mysql://localhost:3306/flexiveConfiguration?useUnicode=true&amp;characterEncoding=utf8&amp;characterResultSets=utf8"/>
+        
+        <property name="ServerName" value="localhost"/>
+        <property name="PortNumber" value="5432"/>
+
+        <property name="DatabaseName" value="flexiveConfiguration"/>
+        <property name="User" value="postgres"/>
+        <property name="Password" value="a"/>
     </jdbc-connection-pool>
 
     <jdbc-resource pool-name="flexiveConfiguration" jndi-name="jdbc/flexiveConfiguration" enabled="true" object-type="user"/>
@@ -28,11 +32,14 @@
 
     <jdbc-connection-pool
         name="flexiveDivision1"
-        datasource-classname="com.mysql.jdbc.jdbc2.optional.MysqlXADataSource"
+        datasource-classname="org.postgresql.xa.PGXADataSource"
         res-type="javax.sql.XADataSource">
-        <property name="user" value="root"/>
-        <property name="password" value="a"/>
-        <property name="url" value="jdbc:mysql://localhost:3306/flexive?useUnicode=true&amp;characterEncoding=utf8&amp;characterResultSets=utf8"/>
+        <property name="ServerName" value="localhost"/>
+        <property name="PortNumber" value="5432"/>
+
+        <property name="DatabaseName" value="flexive"/>
+        <property name="User" value="postgres"/>
+        <property name="Password" value="a"/>
     </jdbc-connection-pool>
 
     <jdbc-resource pool-name="flexiveDivision1" jndi-name="jdbc/flexiveDivision1" enabled="true" object-type="user"/>
@@ -41,11 +48,14 @@
 
     <jdbc-connection-pool
         name="flexiveDivision1NoTX"
-        datasource-classname="com.mysql.jdbc.jdbc2.optional.MysqlDataSource"
+        datasource-classname="org.postgresql.ds.PGPoolingDataSource"
         res-type="javax.sql.DataSource">
-        <property name="user" value="root"/>
+        <property name="serverName" value="localhost"/>
+        <property name="portNumber" value="5432"/>
+
+        <property name="databaseName" value="flexive"/>
+        <property name="user" value="postgres"/>
         <property name="password" value="a"/>
-        <property name="url" value="jdbc:mysql://localhost:3306/flexive?useUnicode=true&amp;characterEncoding=utf8&amp;characterResultSets=utf8"/>
     </jdbc-connection-pool>
 
     <jdbc-resource pool-name="flexiveDivision1NoTX" jndi-name="jdbc/flexiveDivision1NoTX" enabled="true" object-type="user"/>

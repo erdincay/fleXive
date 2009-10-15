@@ -1,4 +1,24 @@
---CREATE LANGUAGE plpgsql;
+-- safe installation of plpgsql language - http://andreas.scherbaum.la/blog/archives/346-create-language-if-not-exist.html
+
+CREATE OR REPLACE FUNCTION public.create_plpgsql_language ()
+        RETURNS TEXT
+        AS $$ CREATE LANGUAGE plpgsql; SELECT 'language plpgsql created'::TEXT; $$
+LANGUAGE 'sql';
+
+
+SELECT CASE WHEN
+              (SELECT true::BOOLEAN
+                 FROM pg_language
+                WHERE lanname='plpgsql')
+            THEN
+              (SELECT 'language already installed'::TEXT)
+            ELSE
+              (SELECT public.create_plpgsql_language())
+            END;
+
+DROP FUNCTION public.create_plpgsql_language ();
+
+
 CREATE OR REPLACE FUNCTION TIMEMILLIS(TIMESTAMP WITH TIME ZONE) RETURNS BIGINT
     AS 'SELECT CAST(TRUNC(EXTRACT(EPOCH FROM $1)*1000) AS BIGINT);'
     LANGUAGE SQL;
