@@ -162,7 +162,7 @@ public class PostgreSQLStorageFactory implements DBStorage {
      * {@inheritDoc}
      */
     public String getReferentialIntegrityChecksStatement(boolean enable) {
-        return "SET CONSTRAINTS ALL " + (enable ? "DEFERRED" : "IMMEDIATE");
+        return "SET CONSTRAINTS ALL " + (enable ? "IMMEDIATE" : "DEFERRED");
     }
 
     /**

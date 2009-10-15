@@ -260,7 +260,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
             synchronized (LOCK_REORG) {
                 acquireLocksForUpdate(con, sourceMode);
                 stmt = con.createStatement();
-                stmt.execute(StorageManager.getReferentialIntegrityChecksStatement(true));
+                stmt.execute(StorageManager.getReferentialIntegrityChecksStatement(false));
                 return _reorganizeSpace(con, seq, sourceMode, destMode, nodeId, includeNodeId, overrideSpacing,
                         overrideLeft, insertParent, insertPosition, insertSpace, insertBoundaries,
                         depthDelta, destinationNode, createMode, createKeepIds);
@@ -273,7 +273,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
             if(stmt != null) {
                 try {
                     try {
-                        stmt.execute(StorageManager.getReferentialIntegrityChecksStatement(false));
+                        stmt.execute(StorageManager.getReferentialIntegrityChecksStatement(true));
                     } catch (SQLException e) {
                         LOG.error(e);
                     }
@@ -792,21 +792,22 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
             try {
                 stmt = con.createStatement();
                 stmt2 = con.createStatement();
-                ResultSet rs = stmt.executeQuery("SELECT DISTINCT a.ID FROM (SELECT ID FROM " + getTable(FxTreeMode.Live) + " WHERE PARENT=" +
-                        nodeId + ") a LEFT " +
-                        "JOIN (SELECT ID FROM " + getTable(FxTreeMode.Live) + " WHERE PARENT=" + nodeId + ") b USING (ID) WHERE b.ID IS NULL");
-                while (rs != null && rs.next()) {
-                    long deleteId = rs.getLong(1);
-                    acquireLocksForUpdate(con, FxTreeMode.Live, Arrays.asList(deleteId));
-                    stmt2.addBatch(StorageManager.getReferentialIntegrityChecksStatement(false));
-                    try {
+                stmt2.execute(StorageManager.getReferentialIntegrityChecksStatement(false));
+                try {
+                    ResultSet rs = stmt.executeQuery("SELECT DISTINCT a.ID FROM (SELECT ID FROM " + getTable(FxTreeMode.Live) + " WHERE PARENT=" +
+                            nodeId + ") a LEFT " +
+                            "JOIN (SELECT ID FROM " + getTable(FxTreeMode.Live) + " WHERE PARENT=" + nodeId + ") b USING (ID) WHERE b.ID IS NULL");
+                    while (rs != null && rs.next()) {
+                        long deleteId = rs.getLong(1);
+                        acquireLocksForUpdate(con, FxTreeMode.Live, Arrays.asList(deleteId));
                         stmt2.addBatch("DELETE FROM " + getTable(FxTreeMode.Live) + " WHERE ID=" + deleteId);
-                    } finally {
-                        stmt2.addBatch(StorageManager.getReferentialIntegrityChecksStatement(true));
+
                     }
+                    stmt2.addBatch("UPDATE " + getTable(FxTreeMode.Live) + " SET MODIFIED_AT=" + System.currentTimeMillis());
+                    stmt2.executeBatch();
+                } finally {
+                    stmt2.execute(StorageManager.getReferentialIntegrityChecksStatement(true));
                 }
-                stmt2.addBatch("UPDATE " + getTable(FxTreeMode.Live) + " SET MODIFIED_AT=" + System.currentTimeMillis());
-                stmt2.executeBatch();
             } catch (SQLException e) {
                 throw new FxTreeException("ex.tree.activate.failed", nodeId, false, e.getMessage());
             } finally {

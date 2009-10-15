@@ -1143,7 +1143,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
         List<FxTreeNode> removedNodes = scriptAfterIds.size() > 0 ? new ArrayList<FxTreeNode>(100) : null;
         try {
             stmt = con.createStatement();
-            stmt.execute(StorageManager.getReferentialIntegrityChecksStatement(true));
+            stmt.execute(StorageManager.getReferentialIntegrityChecksStatement(false));
             List<FxPK> references = new ArrayList<FxPK>(50);
             UserTicket ticket = FxContext.getUserTicket();
 
@@ -1263,7 +1263,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
             try {
                 if (stmt != null) {
                     try {
-                        stmt.execute(StorageManager.getReferentialIntegrityChecksStatement(false));
+                        stmt.execute(StorageManager.getReferentialIntegrityChecksStatement(true));
                     } catch (SQLException e) {
                         LOG.error(e);
                     }
