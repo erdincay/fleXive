@@ -5,9 +5,9 @@
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.flexive</groupId>
-    <artifactId>flexive-mysql</artifactId>
+    <artifactId>flexive-postgresql</artifactId>
     <version>@FLEXIVE_VERSION@</version>
-    <description>Flexive MySQL storage driver</description>
+    <description>Flexive PostgreSQL storage driver</description>
 
     <licenses>
         <license>
@@ -26,10 +26,10 @@
     </organization>
     <scm>
         <connection>scm:svn:http://svn.flexive.org/repository/flexive/@FLEXIVE_BRANCH@</connection>
-        <url>http://source.flexive.org/browse/fleXive/@FLEXIVE_BRANCH@/src/framework/storages/MySQL</url>
+        <url>http://source.flexive.org/browse/fleXive/@FLEXIVE_BRANCH@/src/framework/storages/PostgreSQL</url>
     </scm>
 
     <dependencies>
-        <!-- No dependencies, the MySQL JDBC driver has to be supplied by the container -->
+        <!-- No dependencies, the PostgreSQL JDBC driver has to be supplied by the container -->
     </dependencies>
 </project>

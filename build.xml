@@ -963,6 +963,7 @@ database.vendor=MySQL
                              prefix="com/flexive/sqlParser/" packagenames="com.flexive.sqlParser.*"/>
         <maven-build-sources artifactId="flexive-h2" label="[fleXive] H2 database support" srcdir="${flexive.base.framework.dir}/storages/H2/java"/>
         <maven-build-sources artifactId="flexive-mysql" label="[fleXive] MySQL database support" srcdir="${flexive.base.framework.dir}/storages/MySQL/java"/>
+        <maven-build-sources artifactId="flexive-postgresql" label="[fleXive] PostgreSQL database support" srcdir="${flexive.base.framework.dir}/storages/PostgreSQL/java"/>
 
     </target>
 
@@ -1017,9 +1018,11 @@ database.vendor=MySQL
 
         <copy file="${flexive.build.framework.jar.dir}/flexive-storage-H2.jar" tofile="${flexive.build.repo.dir}/flexive-h2.jar"/>
         <copy file="${flexive.build.framework.jar.dir}/flexive-storage-MySQL.jar" tofile="${flexive.build.repo.dir}/flexive-mysql.jar"/>
+        <copy file="${flexive.build.framework.jar.dir}/flexive-storage-PostgreSQL.jar" tofile="${flexive.build.repo.dir}/flexive-postgresql.jar"/>
 
         <maven-deploy-with-sources path="${flexive.build.repo.dir}" name="flexive-h2"/>
         <maven-deploy-with-sources path="${flexive.build.repo.dir}" name="flexive-mysql"/>
+        <maven-deploy-with-sources path="${flexive.build.repo.dir}" name="flexive-postgresql"/>
 
         <maven-deploy file="${flexive.base.build.dir}/ui/flexive.war" pom="flexive-backend-war.pom"/>
 

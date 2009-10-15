@@ -1,6 +1,7 @@
 package ${package};
 
 import com.flexive.shared.EJBLookup;
+import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.structure.FxType;
@@ -23,6 +24,7 @@ public class App {
     public static void main(String[] args) throws FxApplicationException {
         FxContext.initializeSystem(1, "consoleapp");
 
+        System.out.println(FxSharedUtils.getFlexiveEditionFull());
         System.out.println("Hello [fleXive] World - calling example EJB, listing available content:");
         boolean hasInstances = false;
         for (Map.Entry<FxType, Integer> entry
@@ -40,6 +42,7 @@ public class App {
         for (FxScriptRunInfo info : EJBLookup.getScriptingEngine().getRunOnceInformation()) {
             if (!info.isSuccessful()) {
                 System.err.println("Failed to execute runonce script " + info.getName());
+                System.exit(1);
             }
         }
 

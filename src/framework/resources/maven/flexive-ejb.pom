@@ -47,6 +47,13 @@
 
         <dependency>
             <groupId>com.flexive</groupId>
+            <artifactId>flexive-postgresql</artifactId>
+            <version>@FLEXIVE_VERSION@</version>
+            <optional>false</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>com.flexive</groupId>
             <artifactId>flexive-flatstorage</artifactId>
             <version>@FLEXIVE_VERSION@</version>
             <optional>false</optional>
