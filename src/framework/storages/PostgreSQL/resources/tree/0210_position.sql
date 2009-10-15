@@ -18,7 +18,7 @@ RETURNS INT AS $$ -- DETERMINISTIC READS SQL DATA
 DECLARE
   _count INTEGER DEFAULT 0;
   done BOOLEAN DEFAULT 0;
-  found BOOLEAN DEFAULT FALSE;
+  _found BOOLEAN DEFAULT FALSE;
   currentId BIGINT DEFAULT 0;
   curEdit CURSOR FOR SELECT ID FROM FXS_TREE WHERE PARENT=parentId ORDER BY LFT;
   curLive CURSOR FOR SELECT ID FROM FXS_TREE_LIVE WHERE PARENT=parentId ORDER BY LFT;
@@ -34,7 +34,7 @@ BEGIN
         _count = _count + 1;
         IF currentId = nodeId THEN
           done = TRUE;
-          found =  TRUE;
+          _found =  TRUE;
         END IF;
       END IF;
     END LOOP;
@@ -50,14 +50,14 @@ BEGIN
         _count = _count + 1;
         IF currentId = nodeId THEN
           done = TRUE;
-          found = TRUE;
+          _found = TRUE;
         END IF;
       END IF;
     END LOOP;
     CLOSE curLive;
   END IF;
 
-  IF found THEN
+  IF _found THEN
     return _count - 1;
   ELSE
     return 0;

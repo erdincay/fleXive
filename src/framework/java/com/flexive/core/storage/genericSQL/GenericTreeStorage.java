@@ -966,15 +966,15 @@ public abstract class GenericTreeStorage implements TreeStorage {
             FxPK rootPK;
 
             FxTreeMode rootCheckMode = mode == FxTreeMode.Live ? FxTreeMode.Edit : FxTreeMode.Live;
-            Savepoint sp = null;
-            final boolean needSavePoints = StorageManager.isRollbackOnConstraintViolation();
+//            Savepoint sp = null;
+//            final boolean needSavePoints = StorageManager.isRollbackOnConstraintViolation();
             try {
-                if (needSavePoints) sp = con.setSavepoint();
+//                if (needSavePoints) sp = con.setSavepoint();
                 rootPK = getTreeNodeInfo(con, rootCheckMode, FxTreeNode.ROOT_NODE).getReference();
-                if (needSavePoints) con.releaseSavepoint(sp);
+//                if (needSavePoints) con.releaseSavepoint(sp);
             } catch (FxApplicationException e) {
                 LOG.info("Creating a new root node for the " + mode.name() + " tree.");
-                if (needSavePoints && sp != null) con.rollback(sp);
+//                if (needSavePoints && sp != null) con.rollback(sp);
                 //create the root folder instance
                 FxType type = CacheAdmin.getEnvironment().getType(FxType.FOLDER);
                 FxContent content = ce.initialize(type.getId());
@@ -1143,8 +1143,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
         List<FxTreeNode> removedNodes = scriptAfterIds.size() > 0 ? new ArrayList<FxTreeNode>(100) : null;
         try {
             stmt = con.createStatement();
-
-            stmt.addBatch(StorageManager.getReferentialIntegrityChecksStatement(false));
+            stmt.execute(StorageManager.getReferentialIntegrityChecksStatement(true));
             List<FxPK> references = new ArrayList<FxPK>(50);
             UserTicket ticket = FxContext.getUserTicket();
 
@@ -1217,7 +1216,6 @@ public abstract class GenericTreeStorage implements TreeStorage {
                 stmt.addBatch("UPDATE " + getTable(mode) + " SET DIRTY=TRUE WHERE ID=" + nodeInfo.getParentId());
             }
 
-            stmt.addBatch(StorageManager.getReferentialIntegrityChecksStatement(true));
             if (mode == FxTreeMode.Live && exists(con, FxTreeMode.Edit, nodeId)) {
                 //check if a node with the same id that has been removed in the live tree exists in the edit tree,
                 //the node and all its children will be flagged as dirty in the edit tree
@@ -1257,10 +1255,20 @@ public abstract class GenericTreeStorage implements TreeStorage {
                 }
             }
         } catch (SQLException exc) {
-            throw new FxRemoveException(LOG, exc, "ex.tree.delete.failed", nodeId, exc.getMessage());
+            String next = "";
+            if(exc.getNextException() != null ) 
+                next = " next:"+exc.getNextException().getMessage();
+            throw new FxRemoveException(LOG, exc, "ex.tree.delete.failed", nodeId, exc.getMessage()+next);
         } finally {
             try {
-                if (stmt != null) stmt.close();
+                if (stmt != null) {
+                    try {
+                        stmt.execute(StorageManager.getReferentialIntegrityChecksStatement(false));
+                    } catch (SQLException e) {
+                        LOG.error(e);
+                    }
+                    stmt.close();
+                }
             } catch (Exception exc) {
                 //ignore
             }

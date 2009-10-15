@@ -25,11 +25,14 @@ DECLARE
 BEGIN
   _path = path;
 
--- remove trailing '/'
+  -- remove trailing '/'
   IF substring(_path FROM length(_path)) = '/' THEN
     _path = substring(_path,1,length(_path)-1);
   END IF;
-
+  -- remove leading '/'
+  IF substring(_path,1,1)='/' THEN
+    _path = substring(_path,2,length(_path));
+  END IF;
   WHILE NOT done LOOP
     SELECT split_part(_path,'/',1) INTO _current;
     SELECT substring(_path, length(_current)+2) INTO _path;

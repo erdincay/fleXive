@@ -255,15 +255,33 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
                                    long nodeId, boolean includeNodeId, BigDecimal overrideSpacing, BigDecimal overrideLeft,
                                    FxTreeNodeInfo insertParent, int insertPosition, BigDecimal insertSpace, BigDecimal insertBoundaries[],
                                    int depthDelta, Long destinationNode, boolean createMode, boolean createKeepIds) throws FxTreeException {
+        Statement stmt = null;
         try {
             synchronized (LOCK_REORG) {
                 acquireLocksForUpdate(con, sourceMode);
+                stmt = con.createStatement();
+                stmt.execute(StorageManager.getReferentialIntegrityChecksStatement(true));
                 return _reorganizeSpace(con, seq, sourceMode, destMode, nodeId, includeNodeId, overrideSpacing,
                         overrideLeft, insertParent, insertPosition, insertSpace, insertBoundaries,
                         depthDelta, destinationNode, createMode, createKeepIds);
             }
         } catch (FxDbException e) {
             throw new FxTreeException(e);
+        } catch (SQLException e) {
+            throw new FxTreeException(LOG, e, "ex.db.sqlError", e.getMessage());
+        } finally {
+            if(stmt != null) {
+                try {
+                    try {
+                        stmt.execute(StorageManager.getReferentialIntegrityChecksStatement(false));
+                    } catch (SQLException e) {
+                        LOG.error(e);
+                    }
+                    stmt.close();
+                } catch (SQLException e) {
+                    LOG.error(e);
+                }
+            }
         }
     }
     
@@ -471,6 +489,11 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
             return firstCreatedNodeId;
         } catch (FxApplicationException e) {
             throw e instanceof FxTreeException ? (FxTreeException) e : new FxTreeException(e);
+        } catch(SQLException e) {
+            String next = "";
+            if(e.getNextException() != null )
+                next = " next:"+e.getNextException().getMessage();
+            throw new FxTreeException(LOG, e, "ex.tree.reorganize.failed", counter, left, right, e.getMessage()+next);
         } catch (Exception e) {
             throw new FxTreeException(e);
         } finally {

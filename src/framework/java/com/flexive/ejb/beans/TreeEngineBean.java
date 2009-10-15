@@ -532,23 +532,20 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
     public long copy(FxTreeMode mode, long source, long destination, int destinationPosition) throws FxApplicationException {
         FxContext.get().setTreeWasModified();
         Connection con = null;
+        boolean success = false;
         try {
             con = Database.getDbConnection();
-            try {
-                long nodeId = StorageManager.getTreeStorage().copy(con, seq, mode, source, destination, destinationPosition, false, "CopyOf_");
-                // call scripts
-                final List<Long> scriptIds = scripting.getByScriptEvent(FxScriptEvent.AfterTreeNodeAdded);
-                if (scriptIds.size() == 0)
-                    return nodeId;
-                FxTreeNode parent = getTree(mode, nodeId, 1000);
-                final FxScriptBinding binding = new FxScriptBinding();
-                for (long scriptId : scriptIds)
-                    executeScript(scriptId, parent, binding);
+            long nodeId = StorageManager.getTreeStorage().copy(con, seq, mode, source, destination, destinationPosition, false, "CopyOf_");
+            // call scripts
+            final List<Long> scriptIds = scripting.getByScriptEvent(FxScriptEvent.AfterTreeNodeAdded);
+            if (scriptIds.size() == 0)
                 return nodeId;
-            } finally {
-                if( !ctx.getRollbackOnly() )
-                    StorageManager.getTreeStorage().checkTreeIfEnabled(con, mode);
-            }
+            FxTreeNode parent = getTree(mode, nodeId, 1000);
+            final FxScriptBinding binding = new FxScriptBinding();
+            for (long scriptId : scriptIds)
+                executeScript(scriptId, parent, binding);
+            success = true;
+            return nodeId;
         } catch (FxApplicationException ae) {
             EJBUtils.rollback(ctx);
             throw ae;
@@ -556,6 +553,8 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
             EJBUtils.rollback(ctx);
             throw new FxUpdateException(LOG, t, "ex.tree.copy.failed", source, destination, destinationPosition);
         } finally {
+            if (success)
+                StorageManager.getTreeStorage().checkTreeIfEnabled(con, mode);
             Database.closeObjects(TreeEngineBean.class, con, null);
         }
     }
