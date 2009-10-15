@@ -15,7 +15,7 @@
         <!-- Copy the flexive core and shared libs to ${ear.dir}/lib -->
         <copy todir="${ear.dir}/lib">
             <fileset dir="${dist.lib.dir}" includes="*.jar"
-                     excludes="flexive-web-shared.jar,flexive-tests.jar,flexive-webdav.jar,flexive-ejb.jar"/>
+                     excludes="flexive-web-shared.jar,flexive-tests.jar,flexive-ejb.jar"/>
             <fileset dir="${dist.extlib.dir}" excludes="${extlib.excludes},tomahawk*.jar,weblets-impl*.jar">
                 <include name="*"/>
                 <exclude name="richfaces*.jar"/>

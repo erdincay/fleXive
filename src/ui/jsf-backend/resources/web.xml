@@ -222,28 +222,6 @@
 
 
     <servlet>
-        <servlet-name>FlexiveWebDav</servlet-name>
-        <servlet-class>com.flexive.war.servlet.WebDavCfgServlet</servlet-class>
-        <init-param>
-            <param-name>debug</param-name>
-            <param-value>1</param-value>
-        </init-param>
-        <init-param>
-            <param-name>listings</param-name>
-            <param-value>true</param-value>
-        </init-param>
-        <init-param>
-            <param-name>readonly</param-name>
-            <param-value>false</param-value>
-        </init-param>
-        <init-param>
-            <param-name>FxDavContext</param-name>
-            <param-value>com.flexive.war.webdav.FxDavFileSystemContext</param-value>
-        </init-param>
-        <load-on-startup>1</load-on-startup>
-    </servlet>
-
-    <servlet>
         <servlet-name>FacesServlet</servlet-name>
         <servlet-class>javax.faces.webapp.FacesServlet</servlet-class>
         <load-on-startup>1</load-on-startup>
@@ -270,12 +248,6 @@
     <servlet-mapping>
         <servlet-name>TestRunner</servlet-name>
         <url-pattern>/testRunner/*</url-pattern>
-    </servlet-mapping>
-
-    <!-- WebDav -->
-    <servlet-mapping>
-        <servlet-name>FlexiveWebDav</servlet-name>
-        <url-pattern>/webdav/*</url-pattern>
     </servlet-mapping>
 
     <!-- JSF Mappings -->

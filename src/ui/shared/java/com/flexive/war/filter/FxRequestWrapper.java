@@ -34,7 +34,6 @@ package com.flexive.war.filter;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.security.UserTicket;
 import com.flexive.war.FxRequest;
-import com.flexive.war.webdav.FxWebDavUtils;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
@@ -53,13 +52,12 @@ public class FxRequestWrapper extends HttpServletRequestWrapper implements FxReq
     private String requestUriNoContext = null;
     private FxSessionWrapper sessionWrapper;
     private String pageType;
-    private boolean isWebdavRequest = false;
     private String realRequestUriNoContext = null;
     private BrowserDetect browserDetect;
 
 
     public boolean isWebDavMethod() {
-        return FxWebDavUtils.isWebDavMethod(this.getMethod());
+        return false;
     }
 
     @Override
@@ -89,33 +87,17 @@ public class FxRequestWrapper extends HttpServletRequestWrapper implements FxReq
      *
      * @param httpServletRequest the servlet request
      * @param divisionId         the division id
-     * @param isWebdav           true if this is a webdav request
      */
-    protected FxRequestWrapper(final HttpServletRequest httpServletRequest, final int divisionId, boolean isWebdav) {
+    protected FxRequestWrapper(final HttpServletRequest httpServletRequest, final int divisionId) {
         super(httpServletRequest);
         // Setup internal variables
         this.timestamp = System.currentTimeMillis();
         this.request = httpServletRequest;
         this.division = divisionId;
-        this.isWebdavRequest = isWebdav;
         this.requestUriNoContext = request.getRequestURI().substring(request.getContextPath().length());
-        if (isWebdav) {
-            // Cut away servlet path, eg. "/webdav/"
-            this.requestUriNoContext = this.requestUriNoContext.substring(request.getServletPath().length());
-        }
         int lastDotIdx = requestUriNoContext.lastIndexOf('.');
         this.pageType = (lastDotIdx == -1) ? "" : this.requestUriNoContext.substring(lastDotIdx + 1).toLowerCase();
     }
-
-    /**
-     * Returns true if this request is a webdav request.
-     *
-     * @return true if this request is a webdav request
-     */
-    public boolean isWebdavRequest() {
-        return isWebdavRequest;
-    }
-
 
     /**
      * Returns the page type (eg 'jsp', 'fx', 'gif', ..) always as lowercase string.

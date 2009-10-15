@@ -31,13 +31,12 @@
  ***************************************************************/
 package com.flexive.war.filter;
 
+import com.flexive.core.flatstorage.FxFlatStorageManager;
+import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSharedUtils;
-import com.flexive.shared.EJBLookup;
-import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.configuration.DivisionData;
-import com.flexive.war.webdav.FxWebDavUtils;
-import com.flexive.core.flatstorage.FxFlatStorageManager;
+import com.flexive.shared.exceptions.FxApplicationException;
 import com.metaparadigm.jsonrpc.JSONRPCBridge;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -47,8 +46,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * The main [fleXive] servlet filter. Its main responsibility is to provide the
@@ -108,24 +107,16 @@ public class FxFilter implements Filter {
             return;
         }
         try {
-            final boolean isWebdav = FxWebDavUtils.isWebDavRequest((HttpServletRequest) servletRequest);
             // Generate a FlexRequestWrapper which stores additional informations
             final FxRequestWrapper request = servletRequest instanceof FxRequestWrapper
                     ? (FxRequestWrapper) servletRequest
-                    : new FxRequestWrapper((HttpServletRequest) servletRequest, divisionId, isWebdav);
+                    : new FxRequestWrapper((HttpServletRequest) servletRequest, divisionId);
 
             // create thread-local FxContext variable for the current user
-            FxContext.storeInfos(request, request.isDynamicContent(), divisionId, isWebdav);
+            FxContext.storeInfos(request, request.isDynamicContent(), divisionId, false);
 
             performDivisionServices();
             initializeJsonRpc(request.getSession());
-
-            /*if (!isWebdav && FxWebDavUtils.isWebDavPropertyMethod((HttpServletRequest) servletRequest)) {
-                // This is an invalid webdav request - send a not allowed flag and kill the session immediatly
-                ((HttpServletResponse) servletResponse).sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
-                ((HttpServletRequest) servletRequest).getSession().invalidate();
-                return;
-            }*/
 
             // Cache data for jsp,jsf,and xhtml pages only
             /* TODO: fix/implements response caching.

@@ -454,7 +454,6 @@
 			<fileset dir="${build.ui.classes.dir}">
                 <include name="com/flexive/war/**/*"/>
                 <include name="org/apache/myfaces/webapp/filter/**/*"/>
-                <exclude name="com/flexive/war/webdav/**"/>
 			</fileset>
             <fileset dir="${build.ui.meta.dir}">
                 <include name="ApplicationMessages*.properties"/>
@@ -482,12 +481,6 @@
 				<filter value="+com.flexive.war.*" />
 			</instr>
 		</emma>
-		<!-- assemble the flexive-webdav jar -->
-		<jar jarfile="${build.ui.jar.dir}/flexive-webdav.jar">
-			<fileset dir="${build.ui.shared.classes.dir}">
-				<include name="com/flexive/war/webdav/**"/>
-			</fileset>
-		</jar>
 		<war warfile="${flexive.base.build.dir}/ui/flexive.war" webxml="${resources.ui.jsf.dir}/web.xml" keepcompression="yes">
 			<!-- jsp,html,.. files -->
 			<fileset dir="${flexive.web.ui.shared.dir}">
@@ -1142,21 +1135,6 @@ database.vendor=MySQL
         </zip>
 
         <copy file="${flexive.base.build.dir}/${dist.src.file}" toFile="${flexive.base.build.dir}/flexive-src.zip"/>
-    </target>
-
-    <target name="jar.webdavOnly">
-        <javac-call
-                srcdir="${flexive.src.ui.shared.dir}/com/flexive/war/webdav"
-                destdir="${build.framework.classes.dir}">
-            <classpath refid="classpath.build.framework"/>
-		</javac-call>
-        <mkdir dir="${build.ui.jar.dir}"/>
-        <jar jarfile="${build.ui.jar.dir}/flexive-webdav.jar">
-            <fileset dir="${build.ui.shared.classes.dir}">
-				<include name="com/flexive/war/webdav/**"/>
-			</fileset>
-        </jar>
-        <delete dir="${build.framework.classes.dir}/com/flexive/war/webdav"/>
     </target>
 
     <!-- ============================= Plugin targets ================================ -->
