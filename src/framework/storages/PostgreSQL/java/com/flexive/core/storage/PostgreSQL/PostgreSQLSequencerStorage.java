@@ -49,6 +49,7 @@ import java.util.List;
 
 /**
  * Concrete Postgres sequencer storage implementation
+ * see http://www.postgresql.org/docs/current/static/functions-sequence.html
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
@@ -59,7 +60,7 @@ public class PostgreSQLSequencerStorage extends GenericSequencerStorage {
 
     private final static String TBL_PG_SEQUENCES = "PG_CLASS";
     private final static String PG_SEQ_PREFIX = "FXSEQ_";
-    private final static String SQL_NEXT = "SELECT CURRVAL(?), NEXTVAL(?)";
+//    private final static String SQL_NEXT = "SELECT CURRVAL(?), NEXTVAL(?)";
     private final static String SQL_CREATE = "CREATE SEQUENCE ";
     private final static String SQL_DELETE = "DROP SEQUENCE " + PG_SEQ_PREFIX;
     private final static String SQL_EXIST = "SELECT COUNT(*) FROM " + TBL_PG_SEQUENCES + " WHERE RELKIND='S' AND UPPER(RELNAME)=?";
@@ -216,8 +217,8 @@ public class PostgreSQLSequencerStorage extends GenericSequencerStorage {
         PreparedStatement ps = null;
         try {
             con = Database.getDbConnection();
-            ps = con.prepareStatement("SELECT SETVAL('" + PG_SEQ_PREFIX + name + "',?,FALSE)");
-            ps.setLong(1, newId + 1);
+            ps = con.prepareStatement("SELECT SETVAL('" + PG_SEQ_PREFIX + name + "',?,TRUE)");
+            ps.setLong(1, newId);
             ps.execute();
         } catch (SQLException exc) {
             throw new FxDbException(LOG, exc, "ex.db.sqlError", exc.getMessage());
