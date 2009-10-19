@@ -608,7 +608,7 @@ public class StructureExporter implements StructureExporterCallback {
     /**
      * A class to store result objects (from the GenericStructureExporter)
      */
-    class ResultObject {
+    static class ResultObject {
         private Map<FxType, List<FxAssignment>> typeAssignments;
         private Map<FxGroupAssignment, List<FxAssignment>> groupAssignments;
         private Map<Long, List<Long>> cachedDependencies;

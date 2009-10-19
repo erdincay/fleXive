@@ -38,16 +38,14 @@ import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.faces.messages.FxFacesMsgInfo;
 import com.flexive.faces.messages.FxFacesMsgWarn;
 import com.flexive.faces.model.FxResultSetDataModel;
-import com.flexive.shared.EJBLookup;
+import static com.flexive.shared.EJBLookup.getSearchEngine;
 import com.flexive.shared.content.FxPK;
-import com.flexive.shared.interfaces.SearchEngine;
 import com.flexive.shared.search.FxResultSet;
 import com.flexive.shared.search.FxSQLSearchParams;
 import com.flexive.shared.search.ResultViewType;
 import com.flexive.shared.search.AdminResultLocations;
 import com.flexive.war.beans.admin.content.BeContentEditorBean;
 
-import javax.faces.event.ActionEvent;
 import javax.faces.model.SelectItem;
 import java.util.ArrayList;
 import java.util.List;
@@ -67,7 +65,6 @@ public class SqlSearchBean implements Serializable {
     private String query;
     private FxResultSet queryResult;
     private FxResultSetDataModel dataModel;
-    private SearchEngine sqlSearchInterface;
     private long briefcaseAclId;
     private String briefcaseDescription;
     private String briefcaseName;
@@ -97,7 +94,6 @@ public class SqlSearchBean implements Serializable {
     }
 
     public SqlSearchBean() {
-        sqlSearchInterface = EJBLookup.getSearchEngine();
         createBriefcase = false;
     }
 
@@ -205,10 +201,10 @@ public class SqlSearchBean implements Serializable {
                     return;
                 }
                 sp.saveResultInBriefcase(briefcaseName, briefcaseDescription, briefcaseAclId);
-                queryResult = sqlSearchInterface.search(query, 0, Integer.MAX_VALUE, sp);
+                queryResult = getSearchEngine().search(query, 0, Integer.MAX_VALUE, sp);
                 new FxFacesMsgInfo("Briefcase.nfo.created", briefcaseName).addToContext();
             } else {
-                queryResult = sqlSearchInterface.search(this.query, 0, -1, sp, AdminResultLocations.DEFAULT, viewType);
+                queryResult = getSearchEngine().search(this.query, 0, -1, sp, AdminResultLocations.DEFAULT, viewType);
             }
             if (queryResult.getColumnIndex("@pk") == -1) {
                 new FxFacesMsgWarn("SqlSearch.warn.noPk").addToContext();

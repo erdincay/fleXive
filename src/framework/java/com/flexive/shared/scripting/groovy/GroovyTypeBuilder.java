@@ -844,7 +844,8 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
      * and provides setters for types, properties (and assignments) and groups (and assignments),
      * and getters for all available type / property / group (and their assignments) attributes
      */
-    private static class AttributeMapper {
+    private static class AttributeMapper implements Serializable {
+        private static final long serialVersionUID = 7668001777714962189L;
 
         // type and prop/group attributes
         final Map<String, Object> attributes;

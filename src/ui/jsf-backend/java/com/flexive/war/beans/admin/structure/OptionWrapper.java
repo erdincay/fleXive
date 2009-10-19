@@ -393,7 +393,8 @@ public class OptionWrapper implements Serializable {
     /**
      *  Wraps the GUI relevant information of FxStructureOption Objects and provides convenient setters and getters
      */
-    public static class WrappedOption {
+    public static class WrappedOption implements Serializable {
+        private static final long serialVersionUID = -2746571577512522976L;
 
         private String key;
         private String value;

@@ -105,7 +105,6 @@ public class FxGroupAssignmentConverter extends FxAssignmentConverter {
         FxMultiplicity grpMult = null;
         FxString grpLabel = null;
         FxString grpHint = null;
-        List<FxStructureOption> grpOptions = null;
 
         if (!isDerived) {
             //read the group information
@@ -119,7 +118,8 @@ public class FxGroupAssignmentConverter extends FxAssignmentConverter {
             grpMult = FxMultiplicity.fromString(reader.getAttribute("multiplicity"));
             grpLabel = (FxString) ConversionEngine.getFxValue("label", this, reader, ctx);
             grpHint = (FxString) ConversionEngine.getFxValue("hint", this, reader, ctx);
-            grpOptions = super.unmarshallOptions(reader, ctx);
+            //grpOptions = super.unmarshallOptions(reader, ctx);
+            super.unmarshallOptions(reader, ctx);
             reader.moveUp();
         }
 
@@ -165,6 +165,8 @@ public class FxGroupAssignmentConverter extends FxAssignmentConverter {
                         long aid = assignmentEngine.save(gedit, false);
                         env = CacheAdmin.getEnvironment();
                         grp = ((FxGroupAssignment) env.getAssignment(aid)).asEditable();
+                    } else {
+                        throw new IllegalStateException("Internal error - reused group not found: " + data.getAlias());
                     }
                 } else {
                     groupId = assignmentEngine.createGroup(

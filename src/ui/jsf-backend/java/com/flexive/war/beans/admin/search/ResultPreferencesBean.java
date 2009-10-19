@@ -109,7 +109,7 @@ public class ResultPreferencesBean implements Serializable {
     private List<SelectItem> types;
 
     // access current selected columns directly from datatable component 
-    private WrappedHtmlDataTable selectedColumnsTable = null;
+    private transient WrappedHtmlDataTable selectedColumnsTable;
 
 
     public ResultPreferencesBean() {
@@ -579,7 +579,13 @@ public class ResultPreferencesBean implements Serializable {
     }
 
     public void setSelectedColumnsTable(HtmlDataTable selectedColumnsTable) {
-        this.selectedColumnsTable = (WrappedHtmlDataTable) selectedColumnsTable;
+        if (selectedColumnsTable instanceof WrappedHtmlDataTable) {
+            this.selectedColumnsTable = (WrappedHtmlDataTable) selectedColumnsTable;
+        } else {
+            throw new IllegalArgumentException("Invalid data table class: "
+                    + (selectedColumnsTable != null ? selectedColumnsTable.getClass().getCanonicalName() : "null")
+            );
+        }
     }
 
     /**

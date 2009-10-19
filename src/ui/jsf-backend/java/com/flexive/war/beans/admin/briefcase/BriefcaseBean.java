@@ -37,18 +37,17 @@ import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.beans.ResultSessionData;
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.faces.messages.FxFacesMsgInfo;
-import com.flexive.shared.EJBLookup;
+import static com.flexive.shared.EJBLookup.getBriefcaseEngine;
+import static com.flexive.shared.EJBLookup.getSearchEngine;
 import com.flexive.shared.exceptions.FxApplicationException;
-import com.flexive.shared.interfaces.BriefcaseEngine;
-import com.flexive.shared.interfaces.SearchEngine;
 import com.flexive.shared.search.AdminResultLocations;
 import com.flexive.shared.search.Briefcase;
 import com.flexive.shared.search.BriefcaseEdit;
 import com.flexive.shared.search.FxResultSet;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.io.Serializable;
 
 /**
  * Management of Briefcases.
@@ -59,18 +58,13 @@ import java.io.Serializable;
 public class BriefcaseBean implements Serializable {
     private static final long serialVersionUID = 476640267963403730L;
 
-    private BriefcaseEngine briefcaseEng;
     private List<Briefcase> list;
     private FxResultSet queryResult;
-    private SearchEngine sqlSearchInterface;
-    //    private static final String ID_CACHE_KEY = BriefcaseBean.class+"_id";
-    //    private long id;
     private BriefcaseEdit briefcase;
     private long aclId;
     private ResultSessionData sessionData;
 
     public BriefcaseBean() {
-        briefcaseEng = EJBLookup.getBriefcaseEngine();
         briefcase = new BriefcaseEdit();
     }
 
@@ -83,7 +77,7 @@ public class BriefcaseBean implements Serializable {
         try {
             if (list == null) {
                 // Load only once per request
-                list = briefcaseEng.loadAll(true);
+                list = getBriefcaseEngine().loadAll(true);
             }
             return list;
         } catch (Throwable t) {
@@ -116,7 +110,7 @@ public class BriefcaseBean implements Serializable {
 
     public String save() {
         try {
-            briefcaseEng.modify(getId(), briefcase.getName(), briefcase.getDescription(), briefcase.getAcl());
+            getBriefcaseEngine().modify(getId(), briefcase.getName(), briefcase.getDescription(), briefcase.getAcl());
             new FxFacesMsgInfo("Briefcase.nfo.updateSuccessfull", briefcase.getName()).addToContext();
         } catch (Exception exc) {
             new FxFacesMsgErr(exc).addToContext();
@@ -126,12 +120,9 @@ public class BriefcaseBean implements Serializable {
 
     public String load() {
         try {
-            briefcase = briefcaseEng.load(getId()).asEditable();
+            briefcase = getBriefcaseEngine().load(getId()).asEditable();
             aclId = briefcase.getAcl();
-            if (sqlSearchInterface == null) {
-                sqlSearchInterface = EJBLookup.getSearchEngine();
-            }
-            queryResult = sqlSearchInterface.search("select m.id,m.version from content m filter briefcase=" + getId());
+            queryResult = getSearchEngine().search("select m.id,m.version from content m filter briefcase=" + getId());
             return "briefcaseDetail";
         } catch (Exception exc) {
             queryResult = null;
@@ -180,8 +171,8 @@ public class BriefcaseBean implements Serializable {
     public String delete() {
         try {
             long _id = getId();
-            String name = briefcaseEng.load(_id).getName();
-            briefcaseEng.remove(_id);
+            String name = getBriefcaseEngine().load(_id).getName();
+            getBriefcaseEngine().remove(_id);
             new FxFacesMsgInfo("Briefcase.nfo.deleteSuccessfull", name).addToContext();
         } catch (Throwable t) {
             new FxFacesMsgErr(t).addToContext();

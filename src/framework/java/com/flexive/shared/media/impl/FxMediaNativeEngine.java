@@ -205,8 +205,6 @@ public class FxMediaNativeEngine {
      * @return ImageFormat (fallback to GIF if unknown)
      */
     public static ImageFormat getImageFormatByMimeType(String mimeType) {
-        String mime = mimeType == null ? "image/gif" : mimeType.toLowerCase();
-        ImageFormat iFormat;
         if ("image/jpeg".equals(mimeType))
             return ImageFormat.IMAGE_FORMAT_JPEG;
         else if ("image/jpg".equals(mimeType))

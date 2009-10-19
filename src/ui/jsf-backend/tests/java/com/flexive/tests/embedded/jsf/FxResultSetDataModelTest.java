@@ -105,7 +105,7 @@ public class FxResultSetDataModelTest extends AbstractSqlQueryTest {
 	}
 
     private void testLazyPartialResult(SqlQueryBuilder builder, final int startIndex, final int maxRows) throws FxApplicationException {
-		FxResultSetDataModel model = new FxResultSetDataModel(EJBLookup.getSearchEngine(), builder, startIndex, maxRows);
+		FxResultSetDataModel model = new FxResultSetDataModel(builder, startIndex, maxRows);
 		FxResultSet refResult = getRows(startIndex, maxRows);
         // trigger load
 //		model.setRowIndex(startIndex - 1);

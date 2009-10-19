@@ -32,6 +32,7 @@
 package com.flexive.faces.model;
 
 import javax.faces.model.DataModel;
+import java.io.Serializable;
 
 /**
  * Organizes a linear DataModel in a 2D grid. Used for thumbnail gallerys.
@@ -39,7 +40,9 @@ import javax.faces.model.DataModel;
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-public class FxGridDataModel extends DataModel {
+public class FxGridDataModel extends DataModel implements Serializable {
+    private static final long serialVersionUID = -4884058521577844424L;
+
     private final int columns;
     private DataModel dataModel;
     private int rowIndex = -1;

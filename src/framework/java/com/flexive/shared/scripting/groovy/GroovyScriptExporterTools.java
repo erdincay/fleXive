@@ -89,7 +89,7 @@ public final class GroovyScriptExporterTools {
     protected final static String DELHEADER = "// *******************************\n// Delete Content / Types\n// *******************************\n\n";
     protected final static String SCRIPTASSHEADER = "// *******************************\n// Script Assignments\n// *******************************\n\n";
     public final static Log LOG = LogFactory.getLog(GroovyScriptExporterTools.class);
-    protected final static String[] JAVA_KEYWORDS = {"abstract", "continue", "for", "new", "switch", "assert", "default", "goto",
+    protected static final String[] JAVA_KEYWORDS = {"abstract", "continue", "for", "new", "switch", "assert", "default", "goto",
             "package", "synchronized", "boolean", "do", "if", "private", "this", "break", "double", "implements", "protected",
             "throw", "byte", "else", "import", "public", "throws", "case", "enum", "instanceof", "return", "transient", "catch",
             "extends", "int", "short", "try", "char", "final", "interface", "static", "void", "class", "finally", "long", "strictfp",

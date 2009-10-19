@@ -655,7 +655,9 @@ public class TypeEditorBean implements Serializable {
      *  Simple wrapper class for FxTypeRelation with convenient getters and setters
      * for GUI operations
      */
-    public class WrappedRelation {
+    public class WrappedRelation implements Serializable {
+        private static final long serialVersionUID = -8901675069947220566L;
+
         private long sourceId;
         private long destId;
         protected long maxSource;

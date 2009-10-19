@@ -2153,8 +2153,8 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             PreparedStatement psDataFT = null;
             PreparedStatement psBinaryGet = null;
             PreparedStatement psBinaryRemove = null;
-            PreparedStatement psPropertyOptionRemove;
-            PreparedStatement psGroupOptionRemove;
+            PreparedStatement psPropertyOptionRemove = null;
+            PreparedStatement psGroupOptionRemove = null;
             try {
                 sql.setLength(0);
                 sql.append("DELETE FROM ").append(TBL_STRUCT_ASSIGNMENTS).append(ML).append(" WHERE ID=?");
@@ -2216,16 +2216,13 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     psData.executeBatch();
                 }
             } finally {
-                if (psML != null)
-                    psML.close();
-                if (psData != null)
-                    psData.close();
-                if (psDataFT != null)
-                    psDataFT.close();
-                if (psBinaryGet != null)
-                    psBinaryGet.close();
-                if (psBinaryRemove != null)
-                    psBinaryRemove.close();
+                Database.closeObjects(AssignmentEngineBean.class, null, psML);
+                Database.closeObjects(AssignmentEngineBean.class, null, psData);
+                Database.closeObjects(AssignmentEngineBean.class, null, psDataFT);
+                Database.closeObjects(AssignmentEngineBean.class, null, psBinaryGet);
+                Database.closeObjects(AssignmentEngineBean.class, null, psBinaryRemove);
+                Database.closeObjects(AssignmentEngineBean.class, null, psGroupOptionRemove);
+                Database.closeObjects(AssignmentEngineBean.class, null, psPropertyOptionRemove);
             }
 
             if (disableAssignment)

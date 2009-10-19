@@ -389,7 +389,7 @@ public class GenericStructureExporter {
      * A class to analyse (circular / mutual) dependencies and derived assignments of types
      * i.e. mutual property / group reuse
      */
-    class DependencyAnalyser {
+    static class DependencyAnalyser {
 
         private Map<Long, List<Long>> dependencies; // = new HashMap<Long, List<Long>>();
         private Map<Long, Long> dependentOnMapping; // key=assignment id, value=depends on this base assignment id (derived from it)

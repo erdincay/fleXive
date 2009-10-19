@@ -855,7 +855,6 @@ public class BeContentEditorBean implements ActionBean, Serializable {
      */
     public void saveAndCancel() {
         final UserTicket ticket = FxContext.getUserTicket();
-        final String formPrefix = wrappedContent.getGuiSettings().getFormPrefix();
         try {
             boolean ownerChange = false;
             // no owner change check if the current user is a supervisor

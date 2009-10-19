@@ -715,7 +715,6 @@ public class FxContentEditorBean implements Serializable {
         final FxPK pk = contentStorage.get(editorId).getContent().getPk();
         ContentEngine ce = EJBLookup.getContentEngine();
         final FxContent content = contentStorage.get(editorId).getContent();
-        final FxLock lock = content.getLock();
         final UserTicket ticket = FxContext.getUserTicket();
         // allow this if (supervisor OR user in ACL)
         if (ticket.isGlobalSupervisor() || ticket.isMandatorSupervisor() || FxPermissionUtils.currentUserInACLList(ticket, content.getAclIds())) {

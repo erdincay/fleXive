@@ -33,6 +33,7 @@ package com.flexive.shared.configuration;
 
 import java.util.Map;
 import java.util.HashMap;
+import java.io.Serializable;
 
 /**
  * Provides a type-safe collection of parameters and their values.
@@ -40,7 +41,8 @@ import java.util.HashMap;
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-public class ParameterMap {
+public class ParameterMap implements Serializable {
+    private static final long serialVersionUID = 8967060355709280515L;
     private Map<Parameter, Object> values;
 
     public <T> void put(Parameter<T> parameter, T value) {

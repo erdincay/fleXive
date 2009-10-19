@@ -35,29 +35,35 @@ package com.flexive.war.beans.admin.main;
 
 
 import com.flexive.faces.FxJsfUtils;
-import com.flexive.faces.model.FxJSFSelectItem;
 import com.flexive.faces.beans.SelectBean;
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.faces.messages.FxFacesMsgInfo;
-import com.flexive.shared.*;
+import com.flexive.faces.model.FxJSFSelectItem;
+import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.EJBLookup;
+import static com.flexive.shared.EJBLookup.getAccountEngine;
+import com.flexive.shared.FxContext;
+import com.flexive.shared.FxLanguage;
 import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxLoginFailedException;
-import com.flexive.shared.interfaces.AccountEngine;
 import com.flexive.shared.interfaces.UserGroupEngine;
 import com.flexive.shared.security.*;
 import com.flexive.war.beans.admin.content.BeContentEditorBean;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.faces.component.UISelectBoolean;
 import javax.faces.model.SelectItem;
-import java.text.SimpleDateFormat;
-import java.util.*;
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Hashtable;
+import java.util.List;
 
 /**
  * Management of accounts.
@@ -69,12 +75,11 @@ public class AccountBean implements Serializable {
     private static final long serialVersionUID = -5857559146644805299L;
     private static final Log LOG = LogFactory.getLog(AccountBean.class);
 
-    private UISelectBoolean activeFilterCheckbox;
-    private UISelectBoolean validatedFilterCheckbox;
+    private transient UISelectBoolean activeFilterCheckbox;
+    private transient UISelectBoolean validatedFilterCheckbox;
 
     private long groupFilter = -1;
     private long accountIdFilter = -1;
-    private AccountEngine accountInterface;
     private boolean activeFilter = true;
     private boolean validatedFilter = true;
     private boolean showOldPassword;
@@ -257,7 +262,6 @@ public class AccountBean implements Serializable {
      * Constructor.
      */
     public AccountBean() {
-        accountInterface = EJBLookup.getAccountEngine();
         listCache = new Hashtable<String, List<Account>>(5);
         resetFilter();
     }
@@ -485,7 +489,7 @@ public class AccountBean implements Serializable {
     public String deleteUser() {
         try {
             ensureAccountIdSet();
-            accountInterface.remove(accountIdFilter);
+            getAccountEngine().remove(accountIdFilter);
             new FxFacesMsgInfo("User.nfo.deleted").addToContext();
             listCache.clear();
             resetFilter();
@@ -510,13 +514,13 @@ public class AccountBean implements Serializable {
     public String editUser() {
         try {
             ensureAccountIdSet();
-            this.account = new AccountEditBean(accountInterface.load(this.accountIdFilter));
+            this.account = new AccountEditBean(getAccountEngine().load(this.accountIdFilter));
             this.showOldPassword = FxJsfUtils.getRequest().getUserTicket().getUserId() == account.getId();
-            List<Role> r = accountInterface.getRoles(this.accountIdFilter, RoleLoadMode.FROM_USER_ONLY);
+            List<Role> r = getAccountEngine().getRoles(this.accountIdFilter, RoleLoadMode.FROM_USER_ONLY);
             this.roles = new Long[r.size()];
             for (int i = 0; i < this.roles.length; i++)
                 this.roles[i] = r.get(i).getId();
-            List<UserGroup> g = accountInterface.getGroups(this.accountIdFilter);
+            List<UserGroup> g = getAccountEngine().getGroups(this.accountIdFilter);
             this.groups = new Long[g.size()];
             for (int i = 0; i < this.groups.length; i++)
                 this.groups[i] = g.get(i).getId();
@@ -534,13 +538,13 @@ public class AccountBean implements Serializable {
      */
     public String editUserPref() {
         try {
-            this.account = new AccountEditBean(accountInterface.load(FxContext.getUserTicket().getUserId()));
+            this.account = new AccountEditBean(getAccountEngine().load(FxContext.getUserTicket().getUserId()));
             setAccountIdFilter(this.account.getId());
-            List<Role> r = accountInterface.getRoles(this.accountIdFilter, RoleLoadMode.ALL);
+            List<Role> r = getAccountEngine().getRoles(this.accountIdFilter, RoleLoadMode.ALL);
             this.roles = new Long[r.size()];
             for (int i = 0; i < roles.length; i++)
                 roles[i] = r.get(i).getId();
-            List<UserGroup> g = accountInterface.getGroups(this.accountIdFilter);
+            List<UserGroup> g = getAccountEngine().getGroups(this.accountIdFilter);
             this.groups = new Long[g.size()];
             for (int i = 0; i < this.groups.length; i++)
                 this.groups[i] = g.get(i).getId();
@@ -585,7 +589,7 @@ public class AccountBean implements Serializable {
             // Determine if the password must be set (and check the old one)
             if (password != null && password.trim().length() > 0) {
                 try {
-                    if (StringUtils.isBlank(oldPassword) || !accountInterface.loginCheck(account.getName(), oldPassword, FxJsfUtils.getRequest().getUserTicket())) {
+                    if (StringUtils.isBlank(oldPassword) || !getAccountEngine().loginCheck(account.getName(), oldPassword, FxJsfUtils.getRequest().getUserTicket())) {
                         new FxFacesMsgErr("User.err.noOldPasswordMatch").addToContext();
                         return editUserPref();
                     }
@@ -601,7 +605,7 @@ public class AccountBean implements Serializable {
                 }
                 newPasswd = password;
             }
-            accountInterface.updateUser(this.accountIdFilter, newPasswd, null, null, this.account.getEmail(), this.account.getLanguage().getId());
+            getAccountEngine().updateUser(this.accountIdFilter, newPasswd, null, null, this.account.getEmail(), this.account.getLanguage().getId());
             languageChanged = true; //currently a "fake" ...
             // update user configuration
             if (getDefaultInputLanguage() != null) {
@@ -629,7 +633,7 @@ public class AccountBean implements Serializable {
             // check if the old password was entered correctly (only upon setting a new one)
             if (isShowOldPassword() && (password != null && password.trim().length() > 0)) {
                 try {
-                    if (StringUtils.isBlank(oldPassword) || !accountInterface.loginCheck(account.getName(), oldPassword, FxJsfUtils.getRequest().getUserTicket())) {
+                    if (StringUtils.isBlank(oldPassword) || !getAccountEngine().loginCheck(account.getName(), oldPassword, FxJsfUtils.getRequest().getUserTicket())) {
                         new FxFacesMsgErr("User.err.noOldPasswordMatch").addToContext();
                         return "accountEdit";
                     }
@@ -650,21 +654,21 @@ public class AccountBean implements Serializable {
             }
 
             // Update the user
-            accountInterface.update(this.accountIdFilter, newPasswd, null, null, null, this.account.getEmail(),
+            getAccountEngine().update(this.accountIdFilter, newPasswd, null, null, null, this.account.getEmail(),
                     this.account.isValidated(), this.account.isActive(), this.account.getValidFrom(),
                     this.account.getValidTo(), this.account.getLanguage().getId(), this.account.getDescription(),
                     this.account.isAllowMultiLogin(), this.account.getContactData().getId());
             new FxFacesMsgInfo("User.nfo.saved").addToContext();
             // Assign the given groups to the account
             try {
-                accountInterface.setGroups(this.accountIdFilter, ArrayUtils.toPrimitive(this.groups));
+                getAccountEngine().setGroups(this.accountIdFilter, ArrayUtils.toPrimitive(this.groups));
             } catch (Exception exc) {
                 new FxFacesMsgErr(exc).addToContext();
             }
 
             // Assign the given roles to the account
             try {
-                accountInterface.setRoles(this.accountIdFilter, getRoles());
+                getAccountEngine().setRoles(this.accountIdFilter, getRoles());
             } catch (Exception exc) {
                 new FxFacesMsgErr(exc).addToContext();
             }
@@ -713,8 +717,8 @@ public class AccountBean implements Serializable {
 
         // Create the new account itself
         try {
-            setAccountIdFilter(accountInterface.create(account, password));
-            account = new AccountEditBean(accountInterface.load(this.accountIdFilter));
+            setAccountIdFilter(getAccountEngine().create(account, password));
+            account = new AccountEditBean(getAccountEngine().load(this.accountIdFilter));
             new FxFacesMsgInfo("User.nfo.saved", account.getName()).addToContext();
         } catch (Exception exc) {
             new FxFacesMsgErr(exc).addToContext();
@@ -723,14 +727,14 @@ public class AccountBean implements Serializable {
 
         // Assign the given groups to the account
         try {
-            accountInterface.setGroups(this.accountIdFilter, ArrayUtils.toPrimitive(this.groups));
+            getAccountEngine().setGroups(this.accountIdFilter, ArrayUtils.toPrimitive(this.groups));
         } catch (Exception exc) {
             new FxFacesMsgErr(exc).addToContext();
         }
 
         // Assign the given roles to the account
         try {
-            accountInterface.setRoles(this.accountIdFilter, getRoles());
+            getAccountEngine().setRoles(this.accountIdFilter, getRoles());
         } catch (Exception exc) {
             new FxFacesMsgErr(exc).addToContext();
         }
@@ -769,7 +773,7 @@ public class AccountBean implements Serializable {
                     StringUtils.join(ArrayUtils.toObject(userGroupIds), ',');
             List<Account> result = listCache.get(cacheKey);
             if (result == null) {
-                result = accountInterface.loadAll(account.getName(), account.getLoginName(),
+                result = getAccountEngine().loadAll(account.getName(), account.getLoginName(),
                         account.getEmail(), isActiveFilter() ? true : null, isValidatedFilter() ? true : null, _mandatorFilter,
                         null, userGroupIds, 0, -1);
                 listCache.put(cacheKey, result);

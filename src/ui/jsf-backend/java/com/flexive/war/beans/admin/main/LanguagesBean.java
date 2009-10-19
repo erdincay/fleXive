@@ -33,10 +33,9 @@
  ***************************************************************/
 package com.flexive.war.beans.admin.main;
 
-import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxLanguage;
+import static com.flexive.shared.EJBLookup.getLanguageEngine;
 import com.flexive.shared.exceptions.FxApplicationException;
-import com.flexive.shared.interfaces.LanguageEngine;
 import com.flexive.faces.messages.FxFacesMsgErr;
 
 import java.util.List;
@@ -52,15 +51,9 @@ public class LanguagesBean implements Serializable {
     private static final long serialVersionUID = 3076818793559505451L;
 
     private boolean ignoreUsage;
-    private LanguageEngine lang;
     private List<FxLanguage> available = null;
     private List<FxLanguage> disabled = null;
     private FxLanguage language;
-
-    public LanguagesBean() {
-        lang = EJBLookup.getLanguageEngine();
-        language = null;
-    }
 
     public boolean isIgnoreUsage() {
         return ignoreUsage;
@@ -72,13 +65,13 @@ public class LanguagesBean implements Serializable {
 
     public List<FxLanguage> getAvailable() throws FxApplicationException {
         if (available == null)
-            available = lang.loadAvailable(true);
+            available = getLanguageEngine().loadAvailable(true);
         return available;
     }
 
     public List<FxLanguage> getDisabled() throws FxApplicationException {
         if (disabled == null)
-            disabled = lang.loadDisabled();
+            disabled = getLanguageEngine().loadDisabled();
         return disabled;
     }
 
@@ -177,7 +170,7 @@ public class LanguagesBean implements Serializable {
      */
     public String saveSettings() {
         try {
-            lang.setAvailable(available, ignoreUsage);
+            getLanguageEngine().setAvailable(available, ignoreUsage);
         } catch (FxApplicationException e) {
             new FxFacesMsgErr(e).addToContext();
         }

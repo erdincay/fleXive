@@ -37,9 +37,8 @@ import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.faces.messages.FxFacesMsgInfo;
 import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.EJBLookup;
+import static com.flexive.shared.EJBLookup.getMandatorEngine;
 import com.flexive.shared.exceptions.FxApplicationException;
-import com.flexive.shared.interfaces.MandatorEngine;
 import com.flexive.shared.security.Mandator;
 
 import java.util.*;
@@ -60,14 +59,12 @@ public class MandatorBean implements Serializable {
     private boolean active = false;
     private String name;
     private Mandator mandator;
-    private MandatorEngine mandatorInterface;
 
     private static final String ID_CACHE_KEY = MandatorBean.class + "_id";
 
     // constructor
     public MandatorBean() {
         this.mandatorsById = new Hashtable<Long, Mandator>();
-        this.mandatorInterface = EJBLookup.getMandatorEngine();
         this.mandator = new Mandator();
     }
 
@@ -181,7 +178,7 @@ public class MandatorBean implements Serializable {
             return "mandatorCreate";
         }
         try {
-            setId(mandatorInterface.create(mandator.getName(), mandator.isActive()));
+            setId(getMandatorEngine().create(mandator.getName(), mandator.isActive()));
             setMandator(CacheAdmin.getEnvironment().getMandator(id));
             // make sure the variable holding the mandator data will be updated by setting it to null
             updateMandatorList();
@@ -206,7 +203,7 @@ public class MandatorBean implements Serializable {
 
         try {
             String name = CacheAdmin.getEnvironment().getMandator(id).getName();
-            mandatorInterface.remove(id);
+            getMandatorEngine().remove(id);
             // make sure the variable holding the mandator data will be updated by setting it to null
             updateMandatorList();
             new FxFacesMsgInfo("Mandator.nfo.deleted", name).addToContext();
@@ -234,13 +231,13 @@ public class MandatorBean implements Serializable {
             // check if the value changed - if yes, call the corresponding method to activate or deactivate the mandator
             if (active != mandator.isActive()) {
                 if (mandator.isActive()) {
-                    mandatorInterface.activate(id);
+                    getMandatorEngine().activate(id);
                 } else {
-                    mandatorInterface.deactivate(id);
+                    getMandatorEngine().deactivate(id);
                 }
             }
             if (!name.equals(mandator.getName())) {
-                mandatorInterface.changeName(id, mandator.getName());
+                getMandatorEngine().changeName(id, mandator.getName());
             }
             // make sure the variable holding the mandator data will be updated by setting it to null
             updateMandatorList();

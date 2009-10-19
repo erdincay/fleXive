@@ -64,6 +64,7 @@ import java.util.*;
  * getters and setters for enhanced GUI display for editing purposes.
  */
 public class FxWrappedContent implements Serializable {
+    private static final long serialVersionUID = 953525425575421144L;
     private static final Log LOG = LogFactory.getLog(FxWrappedContent.class);
 
     // actual content instance

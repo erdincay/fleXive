@@ -329,7 +329,6 @@ public class SelectBean implements Serializable {
      */
 
     public List<SelectItem> getSelectListsWithEmpty() {
-        UserTicket ticket = FxJsfUtils.getRequest().getUserTicket();
         List<FxSelectList> selectLists = CacheAdmin.getFilteredEnvironment().getSelectLists();
         ArrayList<SelectItem> result = new ArrayList<SelectItem>(selectLists.size() + 1);
         result.add(new FxJSFSelectItem());

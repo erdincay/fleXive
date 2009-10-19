@@ -38,11 +38,10 @@ import com.flexive.faces.beans.MessageBean;
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.faces.messages.FxFacesMsgInfo;
 import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSharedUtils;
+import static com.flexive.shared.EJBLookup.getScriptingEngine;
 import com.flexive.shared.exceptions.FxApplicationException;
-import com.flexive.shared.interfaces.ScriptingEngine;
 import com.flexive.shared.scripting.*;
 import com.flexive.shared.security.Role;
 import com.flexive.shared.security.UserTicket;
@@ -75,7 +74,6 @@ public class ScriptBean implements Serializable {
     private String code;
     private boolean active;
     private FxScriptInfoEdit sinfo;
-    private ScriptingEngine scriptInterface;
     private FxScriptMapping mapping;
     private Map<Long, String> typeMappingNames;
     private Map<Long, String> assignmentMappingNames;
@@ -99,7 +97,6 @@ public class ScriptBean implements Serializable {
 
     // constructor
     public ScriptBean() {
-        this.scriptInterface = EJBLookup.getScriptingEngine();
         this.sinfo = new FxScriptInfo().asEditable();
     }
 
@@ -192,7 +189,7 @@ public class ScriptBean implements Serializable {
         ensureScriptIdSet();
         setSinfo(CacheAdmin.getEnvironment().getScript(id).asEditable());
         try {
-            this.mapping = scriptInterface.loadScriptMapping(id);
+            this.mapping = getScriptingEngine().loadScriptMapping(id);
             this.typeMappingNames = new HashMap<Long, String>();
             // we need the type names for the user interface and the type ids for the links
             for (FxScriptMappingEntry entry : this.mapping.getMappedTypes()) {
@@ -288,7 +285,7 @@ public class ScriptBean implements Serializable {
 
         ensureScriptIdSet();
         try {
-            scriptInterface.remove(id);
+            getScriptingEngine().remove(id);
             // display updated script list  -->handled via a4j now
             //updateScriptList();  -->handled via a4j now
             new FxFacesMsgInfo("Script.nfo.deleted").addToContext();
@@ -313,7 +310,7 @@ public class ScriptBean implements Serializable {
 
         ensureScriptIdSet();
         try {
-            scriptInterface.runScript(id);
+            getScriptingEngine().runScript(id);
             new FxFacesMsgInfo("Script.nfo.executed", CacheAdmin.getEnvironment().getScript(id).getName()).addToContext();
         } catch (FxApplicationException e) {
             new FxFacesMsgErr(e).addToContext();
@@ -380,7 +377,7 @@ public class ScriptBean implements Serializable {
         }
 
         try {
-            setId(scriptInterface.createScript(sinfo.getEvent(), sinfo.getName(), sinfo.getDescription(), sinfo.getCode()).getId());
+            setId(getScriptingEngine().createScript(sinfo.getEvent(), sinfo.getName(), sinfo.getDescription(), sinfo.getCode()).getId());
             setSinfo(CacheAdmin.getEnvironment().getScript(id).asEditable());
             // display updated script list
             //updateScriptList();
@@ -408,7 +405,7 @@ public class ScriptBean implements Serializable {
         ensureScriptIdSet();
 
         try {
-            scriptInterface.updateScriptInfo(id, sinfo.getEvent(), sinfo.getName(), sinfo.getDescription(), sinfo.getCode(), sinfo.isActive());
+            getScriptingEngine().updateScriptInfo(id, sinfo.getEvent(), sinfo.getName(), sinfo.getDescription(), sinfo.getCode(), sinfo.isActive());
             //updateScriptList(); needed (see mandators) ???
             new FxFacesMsgInfo("Script.nfo.updated").addToContext();
             return null;
@@ -455,7 +452,7 @@ public class ScriptBean implements Serializable {
     public List<WrappedRunOnceInfo> getRunOnceInformation() {
         List<WrappedRunOnceInfo> runInfo = new ArrayList<WrappedRunOnceInfo>();
         try {
-            for (FxScriptRunInfo ri : EJBLookup.getScriptingEngine().getRunOnceInformation())
+            for (FxScriptRunInfo ri : getScriptingEngine().getRunOnceInformation())
                 runInfo.add(new WrappedRunOnceInfo(ri));
         }
         catch (Throwable t) {

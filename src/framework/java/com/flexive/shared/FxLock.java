@@ -190,7 +190,7 @@ public class FxLock implements Serializable {
     public Date getCreatedDate() {
         if (createdDate == null)
             createdDate = new Date(created);
-        return createdDate;
+        return (Date) createdDate.clone();
     }
 
     /**
@@ -210,7 +210,7 @@ public class FxLock implements Serializable {
     public Date getExpiresDate() {
         if (expiresDate == null)
             expiresDate = new Date(expires);
-        return expiresDate;
+        return (Date) expiresDate.clone();
     }
 
     /**

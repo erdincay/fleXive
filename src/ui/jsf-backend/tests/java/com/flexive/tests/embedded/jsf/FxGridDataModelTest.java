@@ -124,7 +124,7 @@ public class FxGridDataModelTest extends AbstractSqlQueryTest {
     }
 
     private void testLazyGridResult(int startRow) throws FxApplicationException {
-        FxResultSetDataModel model = new FxResultSetDataModel(EJBLookup.getSearchEngine(), getSelectAllBuilder(),
+        FxResultSetDataModel model = new FxResultSetDataModel(getSelectAllBuilder(),
                 0, 10);
         FxGridDataModel gridModel = new FxGridDataModel(model, 5);    // 5x2 grid (with lazy loading)
         assertAvailableRows(gridModel, 2, startRow / 5);

@@ -41,12 +41,17 @@ import com.flexive.shared.search.FxResultSet;
 import com.flexive.shared.search.FxSQLSearchParams;
 import com.flexive.shared.search.query.SqlQueryBuilder;
 import com.flexive.shared.security.ACL;
+import com.flexive.shared.EJBLookup;
+import static com.flexive.shared.EJBLookup.getSearchEngine;
 import org.apache.commons.lang.StringUtils;
 
 import javax.faces.model.DataModel;
 import java.util.List;
+import java.io.Serializable;
 
-public class FxResultSetDataModel extends DataModel {
+public class FxResultSetDataModel extends DataModel implements Serializable {
+    private static final long serialVersionUID = -3476884537673965415L;
+
     protected FxResultSet result = null;
     private int rowIndex = -1;
 
@@ -54,7 +59,6 @@ public class FxResultSetDataModel extends DataModel {
     private SqlQueryBuilder queryBuilder = null;
     private int startRow = -1;
     private int fetchRows = -1;
-    private SearchEngine searchEngine = null;
     private int rowCount = -1;    // externally cached number of result rows to prevent unnecessary db access
     private int gridColumns = 1;    // result rows per output (datatable) row
 
@@ -90,11 +94,9 @@ public class FxResultSetDataModel extends DataModel {
      * @param startRow     the first row to be fetched (if not accessed via UIData)
      * @param fetchRows    the default number of rows to be fetched when the first row is accessed
      *                     (should match the number of rows accessed, e.g. in the UI)
-     * @param searchEngine the search engine
      */
-    public FxResultSetDataModel(SearchEngine searchEngine, SqlQueryBuilder queryBuilder,
+    public FxResultSetDataModel(SqlQueryBuilder queryBuilder,
                                 int startRow, int fetchRows) {
-        this.searchEngine = searchEngine;
         this.queryBuilder = queryBuilder;
         this.startRow = startRow;
         this.fetchRows = fetchRows;
@@ -260,9 +262,6 @@ public class FxResultSetDataModel extends DataModel {
             return;
         }
         // fetch rows beginning at index
-        if (searchEngine == null) {
-            throw new FxInvalidParameterException("searchEngine", "ex.sqlSearch.dataModel.searchEngine.empty").asRuntimeException();
-        }
         /*if (queryBuilder == null) {
             throw new FxInvalidParameterException("searchEngine", "ex.sqlSearch.dataModel.queryBuilder.empty").asRuntimeException();
         } */
@@ -272,7 +271,7 @@ public class FxResultSetDataModel extends DataModel {
                 params.saveResultInBriefcase(briefcaseName, briefcaseDescription, briefcaseAcl);
             }
             params.setCacheMode(cacheMode);
-            result = searchEngine.search(queryBuilder.getQuery(), index, fetchRows, params, queryBuilder.getLocation(), queryBuilder.getViewType());
+            result = getSearchEngine().search(queryBuilder.getQuery(), index, fetchRows, params, queryBuilder.getLocation(), queryBuilder.getViewType());
         } catch (FxApplicationException e) {
             result = new FxEmptyResultSet();
             // suppress exception to allow page to be rendered normally, but add a JSF error message

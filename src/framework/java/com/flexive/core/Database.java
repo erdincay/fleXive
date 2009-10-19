@@ -385,10 +385,11 @@ public final class Database {
      * @return the error code if the given exception is an SQLException, or -1 otherwise.
      */
     public static int getSqlErrorCode(Exception e) {
-        if (!(e instanceof SQLException)) {
+        if (e instanceof SQLException) {
+            return ((SQLException) e).getErrorCode();
+        } else {
             return -1;
         }
-        return ((SQLException) e).getErrorCode();
     }
 
     /**

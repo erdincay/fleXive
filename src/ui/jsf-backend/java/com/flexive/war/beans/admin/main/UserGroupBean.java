@@ -37,12 +37,11 @@ import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.faces.messages.FxFacesMsgInfo;
 import com.flexive.shared.EJBLookup;
-import com.flexive.shared.FxArrayUtils;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSharedUtils;
+import static com.flexive.shared.EJBLookup.getAccountEngine;
+import static com.flexive.shared.EJBLookup.getUserGroupEngine;
 import com.flexive.shared.exceptions.FxApplicationException;
-import com.flexive.shared.interfaces.AccountEngine;
-import com.flexive.shared.interfaces.UserGroupEngine;
 import com.flexive.shared.security.*;
 import static com.google.common.collect.Lists.newArrayList;
 
@@ -65,8 +64,6 @@ public class UserGroupBean implements Serializable {
     private String color = null;
     private long mandator = -1;
     private long id = -1;
-    private AccountEngine accountEngine;
-    private UserGroupEngine groupEngine;
     private Long[] roles = new Long[0];
     private Hashtable<Long, List<UserGroup>> groupLists;
     private long createdGroupId = -1;
@@ -112,7 +109,7 @@ public class UserGroupBean implements Serializable {
 
     public List<Account> getMembers() throws FxApplicationException {
         if ((members == null || members.isEmpty()) && id != -1) {
-            members = newArrayList(EJBLookup.getAccountEngine().getAssignedUsers(id, 0, -1));
+            members = newArrayList(getAccountEngine().getAssignedUsers(id, 0, -1));
             Collections.sort(members, new FxSharedUtils.SelectableObjectSorter());
         }
         if (members == null) {
@@ -142,8 +139,6 @@ public class UserGroupBean implements Serializable {
 
     public UserGroupBean() {
         try {
-            this.groupEngine = EJBLookup.getUserGroupEngine();
-            this.accountEngine = EJBLookup.getAccountEngine();
             this.groupLists = new Hashtable<Long, List<UserGroup>>(5);
         } catch (Exception exc) {
             new FxFacesMsgErr(exc).addToContext();
@@ -170,7 +165,7 @@ public class UserGroupBean implements Serializable {
             // Load an cache within the result
             List<UserGroup> result = groupLists.get(mandatorId);
             if (result == null) {
-                result = groupEngine.loadAll(mandatorId);
+                result = getUserGroupEngine().loadAll(mandatorId);
                 groupLists.put(mandatorId, result);
             }
             return result;
@@ -191,7 +186,7 @@ public class UserGroupBean implements Serializable {
         return FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<Long, Long>() {
             public Long get(Object key) {
                 try {
-                    return accountEngine.getAssignedUsersCount((Long) key, false);
+                    return getAccountEngine().getAssignedUsersCount((Long) key, false);
                 } catch (FxApplicationException e) {
                     return 0L;
                 }
@@ -211,16 +206,16 @@ public class UserGroupBean implements Serializable {
             if (!ticket.isGlobalSupervisor()) {
                 mandatorId = ticket.getMandatorId();
             }
-            this.setId(groupEngine.create(name, color, mandatorId));
+            this.setId(getUserGroupEngine().create(name, color, mandatorId));
             this.createdGroupId = this.id;
             new FxFacesMsgInfo("UserGroup.nfo.created", name).addToContext();
 
             // Assign the given roles to the group
             try {
-                groupEngine.setRoles(this.id, ArrayUtils.toPrimitive(roles));
+                getUserGroupEngine().setRoles(this.id, ArrayUtils.toPrimitive(roles));
             } catch (Exception exc) {
                 new FxFacesMsgErr(exc).addToContext();
-                color = groupEngine.load(id).getColor();
+                color = getUserGroupEngine().load(id).getColor();
                 return "userGroupEdit";
             }
 
@@ -241,7 +236,7 @@ public class UserGroupBean implements Serializable {
     public String delete() {
         try {
             ensureIdSet();
-            groupEngine.remove(id);
+            getUserGroupEngine().remove(id);
             this.groupLists.clear();
             new FxFacesMsgInfo("UserGroup.nfo.deleted").addToContext();
         } catch (Exception exc) {
@@ -258,11 +253,11 @@ public class UserGroupBean implements Serializable {
     public String edit() {
         try {
             ensureIdSet();
-            UserGroup grp = groupEngine.load(id);
+            UserGroup grp = getUserGroupEngine().load(id);
             this.color = grp.getColor();
             this.name = grp.getName();
             this.mandator = grp.getMandatorId();
-            this.roles = Role.toIdArray(groupEngine.getRoles(grp.getId()));
+            this.roles = Role.toIdArray(getUserGroupEngine().getRoles(grp.getId()));
         } catch (Exception exc) {
             new FxFacesMsgErr(exc).addToContext();
         }
@@ -284,10 +279,10 @@ public class UserGroupBean implements Serializable {
     public String update() {
         try {
             // Update group data
-            groupEngine.update(id, name, color);
+            getUserGroupEngine().update(id, name, color);
             // Update the role assignments
             try {
-                groupEngine.setRoles(this.id, ArrayUtils.toPrimitive(getRoles()));
+                getUserGroupEngine().setRoles(this.id, ArrayUtils.toPrimitive(getRoles()));
                 new FxFacesMsgInfo("UserGroup.nfo.updated", name).addToContext();
             } catch (Exception exc) {
                 new FxFacesMsgErr(exc).addToContext();

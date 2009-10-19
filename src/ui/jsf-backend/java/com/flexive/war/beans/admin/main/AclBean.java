@@ -36,14 +36,14 @@ package com.flexive.war.beans.admin.main;
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.faces.messages.FxFacesMsgInfo;
-import com.flexive.shared.EJBLookup;
-import com.flexive.shared.FxContext;
 import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.interfaces.ACLEngine;
-import com.flexive.shared.interfaces.UserGroupEngine;
-import com.flexive.shared.security.*;
+import static com.flexive.shared.EJBLookup.getAclEngine;
+import com.flexive.shared.FxContext;
+import com.flexive.shared.security.ACL;
+import com.flexive.shared.security.ACLAssignment;
+import com.flexive.shared.security.ACLCategory;
+import com.flexive.shared.security.UserTicket;
 
-import javax.faces.event.ActionEvent;
 import javax.faces.model.SelectItem;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -61,8 +61,6 @@ public class AclBean implements Serializable {
     private long id;
     private long mandator;
     private ACL acl = null;
-    private ACLEngine aclEngine;
-    private UserGroupEngine groupEngine;
     private List<ACLAssignmentEdit> assignments;
     private long assignmentId;
     private static final String ID_CACHE_KEY = AclBean.class + "_id";
@@ -100,8 +98,6 @@ public class AclBean implements Serializable {
     }
 
     public AclBean() {
-        this.aclEngine = EJBLookup.getAclEngine();
-        this.groupEngine = EJBLookup.getUserGroupEngine();
         this.acl = new ACL();
     }
 
@@ -179,7 +175,7 @@ public class AclBean implements Serializable {
     public String delete() {
         try {
             ensureIdSet();
-            aclEngine.remove(id);
+            getAclEngine().remove(id);
         } catch (Exception exc) {
             new FxFacesMsgErr(exc).addToContext();
         }
@@ -197,7 +193,7 @@ public class AclBean implements Serializable {
         if (_ids != null && _ids.length > 0) {
             for (long _id : _ids) {
                 try {
-                    aclEngine.remove(_id);
+                    getAclEngine().remove(_id);
                     delCount++;
                 } catch (Exception exc) {
                     new FxFacesMsgErr(exc).addToContext();
@@ -224,7 +220,7 @@ public class AclBean implements Serializable {
             // create the acl
             final UserTicket ticket = FxContext.getUserTicket();
             long mandatorId = (ticket.isGlobalSupervisor()) ? getMandator() : ticket.getMandatorId();
-            setId(aclEngine.create(acl.getName(), acl.getLabel(), mandatorId,
+            setId(getAclEngine().create(acl.getName(), acl.getLabel(), mandatorId,
                     acl.getColor(), acl.getDescription(), acl.getCategory()));
             new FxFacesMsgInfo("ACL.nfo.created", acl.getName()).addToContext();
             // load and display the acl
@@ -243,8 +239,8 @@ public class AclBean implements Serializable {
     public String edit() {
         try {
             ensureIdSet();
-            acl = aclEngine.load(id);
-            final List<ACLAssignment> _assignments = aclEngine.loadAssignments(id);
+            acl = getAclEngine().load(id);
+            final List<ACLAssignment> _assignments = getAclEngine().loadAssignments(id);
             assignments = new ArrayList<ACLAssignmentEdit>(_assignments.size() + 5);
             for (ACLAssignment ass : _assignments)
                 assignments.add(new ACLAssignmentEdit(ass));
@@ -275,8 +271,8 @@ public class AclBean implements Serializable {
                         ass.getMayRelate(), ass.getMayDelete(), ass.getMayExport(),
                         ass.getMayCreate(), ass.getACLCategory(), ass.getLifeCycleInfo()));
             }
-            aclEngine.update(id, acl.getName(), acl.getLabel(), acl.getColor(), acl.getDescription(), list);
-            this.acl = aclEngine.load(id);
+            getAclEngine().update(id, acl.getName(), acl.getLabel(), acl.getColor(), acl.getDescription(), list);
+            this.acl = getAclEngine().load(id);
             new FxFacesMsgInfo("ACL.nfo.saved", acl.getName()).addToContext();
         } catch (Exception exc) {
             new FxFacesMsgErr(exc).addToContext();
@@ -302,6 +298,8 @@ public class AclBean implements Serializable {
      * for the jsf frontend.
      */
     public static class ACLAssignmentEdit extends ACLAssignment implements Serializable {
+        private static final long serialVersionUID = -7468423774542760311L;
+
         private static long ID_GEN;
         private long id;
         private long group;
@@ -336,15 +334,6 @@ public class AclBean implements Serializable {
         public void setGroup(long group) {
             this.group = group;
             this.setGroupId(group);
-        }
-
-        /**
-         * Helper funcion, return the group interface of the ACL beans itself.
-         *
-         * @return the group interface
-         */
-        private UserGroupEngine getGroupEngine() {
-            return ((AclBean) FxJsfUtils.getManagedBean("aclBean")).groupEngine;
         }
     }
 }
