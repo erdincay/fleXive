@@ -36,6 +36,7 @@ import com.flexive.core.storage.StorageManager;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Arrays;
 
 /**
  * Database setup tool
@@ -53,7 +54,9 @@ public class DBSetup {
     public static void main(String[] args) {
         if (!(args.length == 10 || args.length == 11)) {
 //          System.err.println("Usage: " + DBSetup.class.getCanonicalName() + " vendor database schemaConfig schemaDivision recreateDB createConfig createDivision user password URL [URLParameter]");
+            System.err.println("Invalid parameters: " + Arrays.asList(args));
             System.err.println("Usage: " + DBSetup.class.getCanonicalName() + " vendor database schema [config|division] createDB createSchema dropDBIfExist user password URL [URLParameter]");
+            System.exit(1);
             return;
         }
         String vendor = args[0];

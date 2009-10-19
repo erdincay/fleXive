@@ -680,7 +680,17 @@
                 <fileset dir="${flexive.build.framework.jar.dir}" includes="*.jar"/>
                 <fileset dir="${flexive.lib.dir}" includes="*.jar"/>
             </classpath>
-            <arg line="${database.vendor} ${db.config} ${schema.config} config true true false ${database.username} ${database.password} ${database.url.base} ${database.url.parameters}"/>
+            <arg value="${database.vendor}"/>
+            <arg value="${db.config}"/>
+            <arg value="${schema.config}"/>
+            <arg value="config"/>
+            <arg value="true"/>
+            <arg value="true"/>
+            <arg value="false"/>
+            <arg value="${database.username}"/>
+            <arg value="${database.password}"/>
+            <arg value="${database.url.base}"/>
+            <arg value="${database.url.parameters}"/>
         </java>
     </target>
 
@@ -696,7 +706,17 @@
                 <fileset dir="${flexive.build.framework.jar.dir}" includes="*.jar"/>
                 <fileset dir="${flexive.lib.dir}" includes="*.jar"/>
             </classpath>
-            <arg line="${database.vendor} ${database.database.division} ${schema.division} division true true false ${database.username} ${database.password} ${database.url.base} ${database.url.parameters}"/>
+            <arg value="${database.vendor}"/>
+            <arg value="${database.database.division}"/>
+            <arg value="${schema.division}"/>
+            <arg value="division"/>
+            <arg value="true"/>
+            <arg value="true"/>
+            <arg value="false"/>
+            <arg value="${database.username}"/>
+            <arg value="${database.password}"/>
+            <arg value="${database.url.base}"/>
+            <arg value="${database.url.parameters}"/>
         </java>
     </target>
 
@@ -711,7 +731,17 @@
                 <fileset dir="${flexive.build.framework.jar.dir}" includes="*.jar"/>
                 <fileset dir="${flexive.lib.dir}" includes="*.jar"/>
             </classpath>
-            <arg line="${database.vendor} ${database.database.test} ${database.schema.test} division true true false ${database.username} ${database.password} ${database.url.base} ${database.url.parameters}"/>
+            <arg value="${database.vendor}"/>
+            <arg value="${database.database.test}"/>
+            <arg value="${database.schema.test}"/>
+            <arg value="division"/>
+            <arg value="true"/>
+            <arg value="true"/>
+            <arg value="false"/>
+            <arg value="${database.username}"/>
+            <arg value="${database.password}"/>
+            <arg value="${database.url.base}"/>
+            <arg value="${database.url.parameters}"/>
         </java>
     </target>
 

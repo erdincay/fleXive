@@ -52,7 +52,17 @@ you must shutdown flexive before the update and then restart flexive.
                 <fileset dir="${dist.lib.dir}" includes="*.jar"/>
                 <fileset dir="${dist.extlib.dir}" includes="*.jar"/>
             </classpath>
-            <arg line="${database.vendor} ${database.database.division} ${database.schema.division} division true true ${database.dropdb} ${database.username} ${database.password} ${database.url.base} ${database.url.parameters}"/>
+            <arg value="${database.vendor}"/>
+            <arg value="${database.database.division}"/>
+            <arg value="${database.schema.division}"/>
+            <arg value="division"/>
+            <arg value="true"/>
+            <arg value="true"/>
+            <arg value="${database.dropdb}"/>
+            <arg value="${database.username}"/>
+            <arg value="${database.password}"/>
+            <arg value="${database.url.base}"/>
+            <arg value="${database.url.parameters}"/>
         </java>
 
     </target>
@@ -67,7 +77,17 @@ you must shutdown flexive before the update and then restart flexive.
                 <fileset dir="${dist.lib.dir}" includes="*.jar"/>
                 <fileset dir="${dist.extlib.dir}" includes="*.jar"/>
             </classpath>
-            <arg line="${database.vendor} ${database.database.config} ${database.schema.config} config true true ${database.dropdb} ${database.username} ${database.password} ${database.url.base} ${database.url.parameters}"/>
+            <arg value="${database.vendor}"/>
+            <arg value="${database.database.config}"/>
+            <arg value="${database.schema.config}"/>
+            <arg value="config"/>
+            <arg value="true"/>
+            <arg value="true"/>
+            <arg value="${database.dropdb}"/>
+            <arg value="${database.username}"/>
+            <arg value="${database.password}"/>
+            <arg value="${database.url.base}"/>
+            <arg value="${database.url.parameters}"/>
         </java>
     </target>
 
