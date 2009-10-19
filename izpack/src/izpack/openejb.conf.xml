@@ -22,7 +22,7 @@
     -->
     <Resource id="jdbc/flexiveConfiguration" type="DataSource"><![CDATA[
         JdbcDriver org.h2.Driver
-        JdbcUrl jdbc:h2:../database/h2/flexiveConfiguration;SCHEMA=flexiveConfiguration;LOCK_TIMEOUT=10000;MVCC=TRUE;TRACE_LEVEL_FILE=0
+        JdbcUrl jdbc:h2:../database/h2/flexive;SCHEMA=flexiveConfiguration;LOCK_TIMEOUT=10000;MVCC=TRUE;TRACE_LEVEL_FILE=0
         UserName sa
         Password
     ]]></Resource>

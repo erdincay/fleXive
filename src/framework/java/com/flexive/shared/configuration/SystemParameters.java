@@ -120,11 +120,11 @@ public class SystemParameters {
     /**
      * Path on the current nodes filesystem for binary transit files
      */
-    public static final Parameter<String> NODE_TRANSIT_PATH = ParameterFactory.newInstance(String.class, NODE_CONFIG, "nodeTransitPath", "~/flexive/transit");
+    public static final Parameter<String> NODE_TRANSIT_PATH = ParameterFactory.newInstance(String.class, NODE_CONFIG, "nodeTransitPath", "flexive-storage/transit");
     /**
      * Path on the current nodes filesystem for binary files
      */
-    public static final Parameter<String> NODE_BINARY_PATH = ParameterFactory.newInstance(String.class, NODE_CONFIG, "nodeBinaryPath", "~/flexive/binaries");
+    public static final Parameter<String> NODE_BINARY_PATH = ParameterFactory.newInstance(String.class, NODE_CONFIG, "nodeBinaryPath", "flexive-storage/binaries");
     /**
      * Download URL for exports
      */

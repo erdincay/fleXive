@@ -210,8 +210,9 @@ public class FxBinaryUtils {
         File result = new File(baseDir.getAbsolutePath() + File.separatorChar +
                 String.valueOf(binaryId) + "_" + String.valueOf(version) + "_" + String.valueOf(quality) + "_" + String.valueOf(blobIndex) +
                 BINARY_EXT);
-        if (!result.createNewFile())
-            throw new IOException("Failed to create file " + result.getAbsolutePath());
+        if (!result.createNewFile()) {
+            throw new IOException("Failed to create file " + result.getAbsolutePath() + " (file already exists).");
+        }
         FxContext c = FxContext.get();
         @SuppressWarnings({"unchecked"}) List<String> createdFiles = (List<String>) c.getAttribute(CTX_FXBINARY_TX);
         if (createdFiles == null)

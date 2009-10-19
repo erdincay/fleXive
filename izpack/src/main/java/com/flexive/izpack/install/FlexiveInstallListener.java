@@ -49,10 +49,11 @@ public class FlexiveInstallListener implements InstallerListener {
         handler.nextStep("Initializing database schemas", step, 3);
 
         handler.progress(0, "Creating configuration schema");
+        project.setProperty("database.dropdb", "false");
         project.executeTarget("db.config.create");
 
         handler.progress(1, "Creating main [fleXive] schema");
-        project.setProperty("schema.name", "flexive");
+        project.setProperty("schema.division", "flexive");
         project.executeTarget("db.create");
     }
 

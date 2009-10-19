@@ -149,6 +149,7 @@ public class FxFileUtils {
         try {
             sourceChannel = new FileInputStream(source).getChannel();
             destinationChannel = new FileOutputStream(destination).getChannel();
+            // don't use transferTo because it fails for large files under windows - http://bugs.sun.com/view_bug.do?bug_id=6431344
             return copyNIOChannel(sourceChannel, destinationChannel) == source.length() &&
                     destination.length() == source.length();
         } catch (IOException e) {
