@@ -34,14 +34,12 @@ package com.flexive.tools.ant;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Task;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Arrays;
 
 /**
  * ANT task to build an index file (line seperated) for a script directory to be used by
@@ -83,6 +81,21 @@ public class ScriptIndexBuilderTask extends Task {
         /*if (file.exists()) {
             System.err.println("Warning: " + file.getName() + " already exists! Overwriting!");
         }*/
+        if (file.exists()) {
+            // check if the contents are equal
+            try {
+                final byte[] newBytes = contents.getBytes("UTF-8");
+                final byte[] oldBytes = new byte[newBytes.length + 10];
+                final int read = Math.max(new FileInputStream(file).read(oldBytes), 0);
+                if (read == newBytes.length && new String(oldBytes, 0, read).equals(contents)) {
+                    // identical bytes, same length, don't rewrite file
+                    //System.out.println("No changes for " + file.getPath());
+                    return true;
+                }
+            } catch (IOException e) {
+                System.err.println("Failed to read old file contents (ignored): " + e.getMessage());
+            }
+        }
         FileOutputStream out = null;
         try {
             out = new FileOutputStream(file);

@@ -43,6 +43,8 @@ import com.flexive.stream.ServerLocation;
 import java.io.*;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
+
 /**
  * Descriptor for binaries (immutable).
  * Qualities and Versions are currently only planned features but not yet functional.
@@ -51,6 +53,8 @@ import java.util.List;
  */
 public class BinaryDescriptor implements Serializable {
     private static final long serialVersionUID = -416186902840155773L;
+
+    private static final String MIME_TYPE_UNKNOWN = "unknown/unknown";
 
     public final static int SYS_UNKNOWN = -1;
     public final static int SYS_NOACCESS = -2;
@@ -549,7 +553,7 @@ public class BinaryDescriptor implements Serializable {
      * @return mime type (if available)
      */
     public String getMimeType() {
-        return mimeType;
+        return StringUtils.defaultString(mimeType, MIME_TYPE_UNKNOWN);
     }
 
     /**
@@ -623,6 +627,6 @@ public class BinaryDescriptor implements Serializable {
      */
     @Override
     public String toString() {
-        return this.getName() + " " + (this.mimeType == null ? "unknown/unknown" : this.mimeType);
+        return this.getName() + " " + (this.mimeType == null ? MIME_TYPE_UNKNOWN : this.mimeType);
     }
 }
