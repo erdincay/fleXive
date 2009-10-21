@@ -1990,9 +1990,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                                 }
                                 //check if the property changed is a FQN
                                 if (prop.getId() == fqnPropertyId) {
-                                    FxValue val = ((FxPropertyData) change.getNewData()).getValue();
-                                    if (!val.isEmpty() && val instanceof FxString)
-                                        StorageManager.getTreeStorage().syncFQNName(con, pk.getId(), content.isMaxVersion(), content.isLiveVersion(), (String) val.getBestTranslation());
+                                    syncFQNName(con, content, pk, change);
                                 }
                             }
                         }
@@ -2017,10 +2015,15 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                         if (change.isGroup())
                             insertGroupData(con, sql, pk, (FxGroupData) change.getNewData(), content.isMaxVersion(), content.isLiveVersion());
                         else {
-                            insertPropertyData(env.getProperty(((FxPropertyData) change.getNewData()).getPropertyId()),
+                            final FxProperty prop = env.getProperty(((FxPropertyData) change.getNewData()).getPropertyId());
+                            insertPropertyData(prop,
                                     content.getData("/"), con, ps_insert, null, pk, ((FxPropertyData) change.getNewData()),
                                     content.isMaxVersion(), content.isLiveVersion());
                             ft.index(change);
+                            //check if the property changed is a FQN
+                            if (prop.getId() == fqnPropertyId) {
+                                syncFQNName(con, content, pk, change);
+                            }
                         }
                     }
                 }
@@ -2119,6 +2122,13 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             ft.cleanup();
         }
         return content.getPk();
+    }
+
+    private void syncFQNName(Connection con, FxContent content, FxPK pk, FxDelta.FxDeltaChange change) throws FxApplicationException {
+        FxValue val = ((FxPropertyData) change.getNewData()).getValue();
+        if (!val.isEmpty() && val instanceof FxString) {
+            StorageManager.getTreeStorage().syncFQNName(con, pk.getId(), content.isMaxVersion(), content.isLiveVersion(), (String) val.getBestTranslation());
+        }
     }
 
     private void enableDetailUniqueChecks(Connection con) throws SQLException {
