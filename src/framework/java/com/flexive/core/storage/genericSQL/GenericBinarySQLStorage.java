@@ -108,8 +108,8 @@ public class GenericBinarySQLStorage implements BinaryStorage {
 
     protected static final String CONTENT_BINARY_TRANSIT_CLEANUP = "DELETE FROM " + TBL_BINARY_TRANSIT + " WHERE EXPIRE<?";
     protected static final String CONTENT_BINARY_REMOVE_ID = "DELETE FROM " + TBL_CONTENT_BINARY + " WHERE ID=?";
-    protected static final String CONTENT_BINARY_REMOVE_GET = "SELECT DISTINCT FBLOB FROM " + TBL_CONTENT_DATA + " WHERE ID=?";
-    protected static final String CONTENT_BINARY_REMOVE_TYPE_GET = "SELECT DISTINCT FBLOB FROM " + TBL_CONTENT_DATA + " d, " + TBL_CONTENT + " c WHERE d.ID=c.ID and c.TDEF=?";
+    protected static final String CONTENT_BINARY_REMOVE_GET = "SELECT DISTINCT FBLOB FROM " + TBL_CONTENT_DATA + " WHERE FBLOB IS NOT NULL AND ID=?";
+    protected static final String CONTENT_BINARY_REMOVE_TYPE_GET = "SELECT DISTINCT FBLOB FROM " + TBL_CONTENT_DATA + " d, " + TBL_CONTENT + " c WHERE FBLOB IS NOT NULL AND d.ID=c.ID and c.TDEF=?";
     protected static final String CONTENT_BINARY_REMOVE_RESETDATA_ID = "UPDATE " + TBL_CONTENT_DATA + " SET FBLOB=NULL WHERE ID=?";
     protected static final String CONTENT_BINARY_REMOVE_RESETDATA_TYPE = "UPDATE " + TBL_CONTENT_DATA + " SET FBLOB=NULL WHERE ID IN (SELECT DISTINCT ID FROM " + TBL_CONTENT + " WHERE TDEF=?)";
 
@@ -862,6 +862,7 @@ public class GenericBinarySQLStorage implements BinaryStorage {
                         ps.executeUpdate(); //TODO savepoints, calc usage, etc for postgres!
                     } catch (SQLException e) {
                         LOG.warn("In use: "+id);
+                        // TODO: fails on postgres because the transaction will be rolled back
                         //ok, might still be in use elsewhere
                     }
                 }
@@ -912,6 +913,7 @@ public class GenericBinarySQLStorage implements BinaryStorage {
                     try {
                         ps.executeUpdate();
                     } catch (SQLException e) {
+                        // TODO: fails on postgres because the transaction will be rolled back
                         //ok, might still be in use elsewhere
                     }
                 }
@@ -960,6 +962,7 @@ public class GenericBinarySQLStorage implements BinaryStorage {
                     try {
                         ps.executeUpdate();
                     } catch (SQLException e) {
+                        // TODO: fails on postgres because the transaction will be rolled back
                         //ok, might still be in use elsewhere
                     }
                 }
