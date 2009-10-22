@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app
+   xmlns="http://java.sun.com/xml/ns/javaee"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+   metadata-complete="true"
+   version="2.5">
+    
+    <display-name>[fleXive] WebDAV application</display-name>
+
+    <filter>
+        <filter-name>FxFilter</filter-name>
+        <filter-class>com.flexive.war.filter.FxFilter</filter-class>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>FxFilter</filter-name>
+        <servlet-name>milton</servlet-name>
+    </filter-mapping>
+
+    <servlet>
+        <servlet-name>milton</servlet-name>
+        <servlet-class>com.bradmcevoy.http.MiltonServlet</servlet-class>
+
+        <init-param>
+            <param-name>resource.factory.class</param-name>
+            <param-value>com.flexive.cmis.webdav.FlexiveResourceFactory</param-value>
+        </init-param>
+        <init-param>
+            <param-name>response.handler.class</param-name>
+            <param-value>com.bradmcevoy.http.MsOfficeResponseHandler</param-value>
+        </init-param>
+        <init-param>
+            <param-name>not.found.url</param-name>
+            <param-value>/404.jsp</param-value>
+        </init-param>
+        
+        <!-- Filter providing authentication and the connection for the duration of a request -->
+        <init-param>
+            <param-name>filter_0</param-name>
+            <param-value>com.flexive.chemistry.webdav.AuthenticationFilter</param-value>
+        </init-param>
+
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>milton</servlet-name>
+        <url-pattern>/*</url-pattern>
+    </servlet-mapping>
+
+</web-app>

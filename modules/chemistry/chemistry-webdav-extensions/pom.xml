@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<project>
+    <parent>
+        <groupId>org.apache.chemistry</groupId>
+        <artifactId>chemistry-parent</artifactId>
+        <version>0.1-SNAPSHOT</version>
+    </parent>
+
+    <properties>
+        <chemistry.version>0.1-SNAPSHOT</chemistry.version>
+    </properties>
+
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.flexive.chemistry</groupId>
+    <artifactId>chemistry-webdav-extensions</artifactId>
+    <name>chemistry-webdav-extensions</name>
+    <version>${chemistry.version}</version>
+    <url>http://incubator.apache.org/chemistry/</url>
+
+   <dependencies>
+        <dependency>
+            <groupId>org.apache.chemistry</groupId>
+            <artifactId>chemistry-api</artifactId>
+        </dependency>
+    </dependencies>
+
+</project>

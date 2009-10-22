@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app
+   xmlns="http://java.sun.com/xml/ns/javaee"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+   metadata-complete="true"
+   version="2.5">
+    <display-name>[fleXive] CMIS/AtomPub application</display-name>
+
+    <filter>
+        <filter-name>FxFilter</filter-name>
+        <filter-class>com.flexive.war.filter.FxFilter</filter-class>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>FxFilter</filter-name>
+        <servlet-name>CMISServlet</servlet-name>
+    </filter-mapping>
+
+    <servlet>
+        <servlet-name>CMISServlet</servlet-name>
+        <servlet-class>com.flexive.cmis.atompub.FlexiveCMISServlet</servlet-class>
+    </servlet>
+
+    <!-- Access the repository under /srv/repository -->
+    <servlet-mapping>
+        <servlet-name>CMISServlet</servlet-name>
+        <url-pattern>/cmis/*</url-pattern>
+    </servlet-mapping>
+
+</web-app>

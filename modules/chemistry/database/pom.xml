@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <parent>
+        <artifactId>chemistry-spi-reactor</artifactId>
+        <groupId>com.flexive.cmis</groupId>
+        <version>${spi.version}</version>
+    </parent>
+
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.flexive.cmis</groupId>
+    <artifactId>database</artifactId>
+    <packaging>pom</packaging>
+    <version>1.0-SNAPSHOT</version>
+    <name>test database</name>
+
+
+    <!--
+        Define the flexive-db-setup-h2 profile for database setup.
+    -->
+    <profiles>
+        <profile>
+            <id>flexive-db-setup-h2</id>
+            <!--
+                Activate the profile automatically when the database files are missing.
+
+                Unfortunately, we have to hardcode the module path since this is usually invoked
+                from the parent project and Maven 2.0.x does not support "module-relative" paths
+                for file-based profile activation.
+
+                This means that the profile is always activated when this POM is invoked directly. 
+
+                http://jira.codehaus.org/browse/MNG-2363
+                http://jira.codehaus.org/browse/MNG-3140
+            -->
+            <activation>
+                <file>
+                    <missing>database/h2/flexive.data.db</missing>
+                </file>
+            </activation>
+            <build>
+                <plugins>
+                    <!-- Extract schema artifact -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>unpack-schemas</id>
+                                <phase>compile</phase>
+                                <goals>
+                                    <goal>unpack</goal>
+                                </goals>
+                                <configuration>
+                                    <stripVersion>true</stripVersion>
+                                    <artifactItems>
+                                        <artifactItem>
+                                            <groupId>com.flexive</groupId>
+                                            <artifactId>flexive-sql-schemas</artifactId>
+                                            <version>${flexive.version}</version>
+                                            <overWrite>true</overWrite>
+                                            <outputDirectory>target/sql-schemas</outputDirectory>
+                                        </artifactItem>
+                                    </artifactItems>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <!-- Run SQL setup scripts -->
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>sql-maven-plugin</artifactId>
+                        <version>1.3</version>
+
+                        <!--
+                        <configuration>
+                            <driver>com.mysql.jdbc.Driver</driver>
+                            <url>jdbc:mysql://localhost/flexiveConfiguration</url>
+                            <username>root</username>
+                            <password>a</password>
+                        </configuration>
+                        -->
+                        <configuration>
+                            <driver>org.h2.Driver</driver>
+                            <username>sa</username>
+                            <password></password>
+                            <url>jdbc:h2:${basedir}/h2/flexive</url>
+                        </configuration>
+
+                        <executions>
+
+                            <execution>
+                                <id>create-configuration-schema</id>
+                                <phase>compile</phase>
+                                <goals>
+                                    <goal>execute</goal>
+                                </goals>
+                                <configuration>
+                                    <url>jdbc:h2:${basedir}/h2/flexiveConfiguration</url>
+
+                                    <sqlCommand>DROP SCHEMA IF EXISTS flexiveConfiguration; CREATE SCHEMA flexiveConfiguration; SET SCHEMA flexiveConfiguration;</sqlCommand>
+
+                                    <orderFile>ascending</orderFile>
+                                    <fileset>
+                                        <basedir>${basedir}/target/sql-schemas/com/flexive/schemas/H2</basedir>
+                                        <includes>
+                                            <include>config/*.sql</include>
+                                        </includes>
+                                    </fileset>
+
+                                </configuration>
+                            </execution>
+
+                            <execution>
+                                <id>create-data-schema</id>
+                                <phase>compile</phase>
+                                <goals>
+                                    <goal>execute</goal>
+                                </goals>
+                                <configuration>
+                                    <url>jdbc:h2:${basedir}/h2/flexive</url>
+
+                                    <sqlCommand>DROP SCHEMA IF EXISTS flexive; CREATE SCHEMA flexive; SET SCHEMA flexive</sqlCommand>
+
+                                    <orderFile>ascending</orderFile>
+                                    <fileset>
+                                        <basedir>${basedir}/target/sql-schemas/com/flexive/schemas/H2</basedir>
+                                        <includes>
+                                            <include>*.sql</include>
+                                            <include>tree/*.sql</include>
+                                        </includes>
+                                        <excludes>
+                                            <exclude>SP*.sql</exclude>
+                                        </excludes>
+                                    </fileset>
+                                </configuration>
+                            </execution>
+                        </executions>
+
+                        <dependencies>
+                            <!--
+                            <dependency>
+                                <groupId>mysql</groupId>
+                                <artifactId>mysql-connector-java</artifactId>
+                                <version>5.0.8</version>
+                            </dependency>
+                            -->
+                            <dependency>
+                                <groupId>com.h2database</groupId>
+                                <artifactId>h2</artifactId>
+                                <version>${h2.version}</version>
+                            </dependency>
+
+                            <dependency>
+                                <groupId>com.flexive</groupId>
+                                <artifactId>flexive-h2</artifactId>
+                                <version>${flexive.version}</version>
+                            </dependency>
+                        </dependencies>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>

@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<project>
+    <parent>
+        <groupId>org.apache.chemistry</groupId>
+        <artifactId>chemistry-parent</artifactId>
+        <version>0.1-SNAPSHOT</version>
+    </parent>
+
+    <properties>
+        <chemistry.version>0.1-SNAPSHOT</chemistry.version>
+    </properties>
+
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.flexive.chemistry</groupId>
+    <artifactId>chemistry-webdav-tests</artifactId>
+    <name>chemistry-webdav-tests</name>
+    <version>${chemistry.version}</version>
+
+    <url>http://incubator.apache.org/chemistry/</url>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.flexive.chemistry</groupId>
+            <artifactId>chemistry-webdav</artifactId>
+            <version>${chemistry.version}</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.apache.chemistry</groupId>
+            <artifactId>chemistry-tests</artifactId>
+            <version>${chemistry.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>compile</scope>
+            <!-- use same version as chemistry-parent -->
+        </dependency>
+    </dependencies>
+</project>
