@@ -7,7 +7,7 @@
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.flexive.cmis</groupId>
+    <groupId>com.flexive</groupId>
     <artifactId>flexive-webdav-webapp</artifactId>
     <packaging>war</packaging>
     <name>[fleXive] WebDAV interface based on Chemistry/CMIS</name>
