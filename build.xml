@@ -748,9 +748,9 @@
     <target name="db.flatstorage.create" depends="init">
         <input taskname="flexive" addproperty="flatstorage.url" defaultValue="${database.url.base}flexive"
                 message="Connection URL:"/>
-        <input taskname="flexive" addproperty="flatstorage.schema" defaultValue="FLEXIVE"
+        <input taskname="flexive" addproperty="flatstorage.schema" defaultValue="${database.schema.division}"
                message="Database schema:"/>
-        <input taskname="flexive" addproperty="flatstorage.tableName" defaultValue="FX_CONTENT_DATA_FLAT"
+        <input taskname="flexive" addproperty="flatstorage.tableName" defaultValue="FX_FLAT_STORAGE"
                message="Table name:"/>
         <input taskname="flexive" addproperty="flatstorage.nstring" defaultValue="20"
                message="STRING columns:"/>
