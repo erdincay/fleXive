@@ -2362,6 +2362,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             //sync with tree
             StorageManager.getTreeStorage().contentRemoved(con, pk.getId(), false);
             ft.removeAllVersions();
+            binaryStorage.removeBinaries(con, BinaryStorage.SelectOperation.SelectId, pk, -1L);
             ps = con.prepareStatement(CONTENT_DATA_REMOVE);
             ps.setLong(1, pk.getId());
             ps.executeUpdate();
@@ -2370,7 +2371,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             ps = con.prepareStatement(CONTENT_MAIN_REMOVE);
             ps.setLong(1, pk.getId());
             ps.executeUpdate();
-            binaryStorage.removeBinariesForPK(con, pk);
+
         } catch (SQLException e) {
             if (LOG.isWarnEnabled()) {
                 // log information about removed content
@@ -2415,7 +2416,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             if (cvi.hasLiveVersion() && cvi.getLiveVersion() == ver)
                 StorageManager.getTreeStorage().contentRemoved(con, pk.getId(), true);
             ft.remove();
-            binaryStorage.removeBinariesForVersion(con, new FxPK(pk.getId(), ver));
+            binaryStorage.removeBinaries(con, BinaryStorage.SelectOperation.SelectVersion, pk, -1L);
             ps = con.prepareStatement(CONTENT_DATA_REMOVE_VER);
             ps.setLong(1, pk.getId());
             ps.setInt(2, ver);
@@ -2465,7 +2466,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             ps.close();
 
             ft.removeType(type.getId());
-            binaryStorage.removeBinariesForType(con, type.getId());
+            binaryStorage.removeBinaries(con, BinaryStorage.SelectOperation.SelectType, null, type.getId());
             ps = con.prepareStatement(CONTENT_DATA_REMOVE_TYPE);
             ps.setLong(1, type.getId());
             ps.executeUpdate();

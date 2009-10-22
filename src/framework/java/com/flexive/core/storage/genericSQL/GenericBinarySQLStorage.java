@@ -111,7 +111,9 @@ public class GenericBinarySQLStorage implements BinaryStorage {
     protected static final String CONTENT_BINARY_REMOVE_GET = "SELECT DISTINCT FBLOB FROM " + TBL_CONTENT_DATA + " WHERE FBLOB IS NOT NULL AND ID=?";
     protected static final String CONTENT_BINARY_REMOVE_TYPE_GET = "SELECT DISTINCT FBLOB FROM " + TBL_CONTENT_DATA + " d, " + TBL_CONTENT + " c WHERE FBLOB IS NOT NULL AND d.ID=c.ID and c.TDEF=?";
     protected static final String CONTENT_BINARY_REMOVE_RESETDATA_ID = "UPDATE " + TBL_CONTENT_DATA + " SET FBLOB=NULL WHERE ID=?";
+    protected static final String CONTENT_BINARY_REMOVE_RESET_ID = "UPDATE " + TBL_CONTENT + " SET DBIN_ID=-1 WHERE ID=?";
     protected static final String CONTENT_BINARY_REMOVE_RESETDATA_TYPE = "UPDATE " + TBL_CONTENT_DATA + " SET FBLOB=NULL WHERE ID IN (SELECT DISTINCT ID FROM " + TBL_CONTENT + " WHERE TDEF=?)";
+    protected static final String CONTENT_BINARY_REMOVE_RESET_TYPE = "UPDATE " + TBL_CONTENT + " SET DBIN_ID=-1 WHERE ID IN (SELECT DISTINCT ID FROM " + TBL_CONTENT + " WHERE TDEF=?)";
 
     /**
      * {@inheritDoc}
@@ -757,7 +759,7 @@ public class GenericBinarySQLStorage implements BinaryStorage {
                 byte[] buffer = new byte[4096];
                 int read;
                 while ((read = in.read(buffer)) != -1) {
-                    if( header == null && read  > 0) {
+                    if (header == null && read > 0) {
                         header = new byte[read > 48 ? 48 : read];
                         System.arraycopy(buffer, 0, header, 0, read > 48 ? 48 : read);
                     }
@@ -837,12 +839,28 @@ public class GenericBinarySQLStorage implements BinaryStorage {
     /**
      * {@inheritDoc}
      */
-    public void removeBinariesForPK(Connection con, FxPK pk) throws FxApplicationException {
+    public void removeBinaries(Connection con, SelectOperation remOp, FxPK pk, long typeId) throws FxApplicationException {
         PreparedStatement ps = null;
         List<Long> binaries = null;
         try {
-            ps = con.prepareStatement(CONTENT_BINARY_REMOVE_GET);
-            ps.setLong(1, pk.getId());
+            //query affected binary id's
+            switch (remOp) {
+                case SelectId:
+                    ps = con.prepareStatement(CONTENT_BINARY_REMOVE_GET);
+                    ps.setLong(1, pk.getId());
+                    break;
+                case SelectVersion:
+                    ps = con.prepareStatement(CONTENT_BINARY_REMOVE_GET + " AND VER=?");
+                    ps.setLong(1, pk.getId());
+                    ps.setInt(2, pk.getVersion());
+                    break;
+                case SelectType:
+                    ps = con.prepareStatement(CONTENT_BINARY_REMOVE_TYPE_GET);
+                    ps.setLong(1, typeId);
+                    break;
+                default:
+                    return;
+            }
             ResultSet rs = ps.executeQuery();
             while (rs != null && rs.next()) {
                 if (binaries == null)
@@ -850,127 +868,43 @@ public class GenericBinarySQLStorage implements BinaryStorage {
                 binaries.add(rs.getLong(1));
             }
             ps.close();
-            ps = con.prepareStatement(CONTENT_BINARY_REMOVE_RESETDATA_ID);
-            ps.setLong(1, pk.getId());
-            ps.executeUpdate();
-            ps.close();
-            if (binaries != null) {
-                ps = con.prepareStatement(CONTENT_BINARY_REMOVE_ID);
-                for (Long id : binaries) {
-                    ps.setLong(1, id);
-                    try {
-                        ps.executeUpdate(); //TODO savepoints, calc usage, etc for postgres!
-                    } catch (SQLException e) {
-                        LOG.warn("In use: "+id);
-                        // TODO: fails on postgres because the transaction will be rolled back
-                        //ok, might still be in use elsewhere
-                    }
-                }
-                ps.close();
-                int divisionId = FxContext.get().getDivisionId();
-                for (Long id : binaries)
-                    FxBinaryUtils.removeBinary(divisionId, id);
-            }
-        } catch (SQLException e) {
-            throw new FxDbException(e, "ex.db.sqlError", e.getMessage());
-        } finally {
-            try {
-                if (ps != null)
-                    ps.close();
-            } catch (SQLException e) {
-                //noinspection ThrowFromFinallyBlock
-                throw new FxDbException(e, "ex.db.sqlError", e.getMessage());
-            }
-        }
-    }
 
-    /**
-     * {@inheritDoc}
-     */
-    public void removeBinariesForVersion(Connection con, FxPK pk) throws FxApplicationException {
-        PreparedStatement ps = null;
-        List<Long> binaries = null;
-        try {
-            ps = con.prepareStatement(CONTENT_BINARY_REMOVE_GET + " AND VER=?");
-            ps.setLong(1, pk.getId());
-            ps.setInt(2, pk.getVersion());
-            ResultSet rs = ps.executeQuery();
-            while (rs != null && rs.next()) {
-                if (binaries == null)
-                    binaries = new ArrayList<Long>(20);
-                binaries.add(rs.getLong(1));
-            }
-            ps.close();
-            ps = con.prepareStatement(CONTENT_BINARY_REMOVE_RESETDATA_ID + " AND VER=?");
-            ps.setLong(1, pk.getId());
-            ps.setInt(2, pk.getVersion());
-            ps.executeUpdate();
-            ps.close();
-            if (binaries != null) {
-                ps = con.prepareStatement(CONTENT_BINARY_REMOVE_ID);
-                for (Long id : binaries) {
-                    ps.setLong(1, id);
-                    try {
-                        ps.executeUpdate();
-                    } catch (SQLException e) {
-                        // TODO: fails on postgres because the transaction will be rolled back
-                        //ok, might still be in use elsewhere
-                    }
-                }
-                ps.close();
-                int divisionId = FxContext.get().getDivisionId();
-                for (Long id : binaries)
-                    FxBinaryUtils.removeBinary(divisionId, id);
-            }
-        } catch (SQLException e) {
-            throw new FxDbException(e, "ex.db.sqlError", e.getMessage());
-        } finally {
-            try {
-                if (ps != null)
+            //reset data
+            switch (remOp) {
+                case SelectId:
+                    ps = con.prepareStatement(CONTENT_BINARY_REMOVE_RESETDATA_ID);
+                    ps.setLong(1, pk.getId());
+                    ps.executeUpdate();
                     ps.close();
-            } catch (SQLException e) {
-                //noinspection ThrowFromFinallyBlock
-                throw new FxDbException(e, "ex.db.sqlError", e.getMessage());
+                    ps = con.prepareStatement(CONTENT_BINARY_REMOVE_RESET_ID);
+                    ps.setLong(1, pk.getId());
+                    ps.executeUpdate();
+                    break;
+                case SelectVersion:
+                    ps = con.prepareStatement(CONTENT_BINARY_REMOVE_RESETDATA_ID + " AND VER=?");
+                    ps.setLong(1, pk.getId());
+                    ps.setInt(2, pk.getVersion());
+                    ps.executeUpdate();
+                    ps.close();
+                    ps = con.prepareStatement(CONTENT_BINARY_REMOVE_RESET_ID + " AND VER=?");
+                    ps.setLong(1, pk.getId());
+                    ps.setInt(2, pk.getVersion());
+                    ps.executeUpdate();
+                    break;
+                case SelectType:
+                    ps = con.prepareStatement(CONTENT_BINARY_REMOVE_RESETDATA_TYPE);
+                    ps.setLong(1, typeId);
+                    ps.executeUpdate();
+                    ps.close();
+                    ps = con.prepareStatement(CONTENT_BINARY_REMOVE_RESET_TYPE);
+                    ps.setLong(1, typeId);
+                    ps.executeUpdate();
+                    break;
+                default:
+                    return;
             }
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public void removeBinariesForType(Connection con, long typeId) throws FxApplicationException {
-        PreparedStatement ps = null;
-        List<Long> binaries = null;
-        try {
-            ps = con.prepareStatement(CONTENT_BINARY_REMOVE_TYPE_GET);
-            ps.setLong(1, typeId);
-            ResultSet rs = ps.executeQuery();
-            while (rs != null && rs.next()) {
-                if (binaries == null)
-                    binaries = new ArrayList<Long>(20);
-                binaries.add(rs.getLong(1));
-            }
-            ps.close();
-            ps = con.prepareStatement(CONTENT_BINARY_REMOVE_RESETDATA_TYPE);
-            ps.setLong(1, typeId);
-            ps.executeUpdate();
-            ps.close();
-            if (binaries != null) {
-                ps = con.prepareStatement(CONTENT_BINARY_REMOVE_ID);
-                for (Long id : binaries) {
-                    ps.setLong(1, id);
-                    try {
-                        ps.executeUpdate();
-                    } catch (SQLException e) {
-                        // TODO: fails on postgres because the transaction will be rolled back
-                        //ok, might still be in use elsewhere
-                    }
-                }
-                ps.close();
-                int divisionId = FxContext.get().getDivisionId();
-                for (Long id : binaries)
-                    FxBinaryUtils.removeBinary(divisionId, id);
-            }
+            if (binaries != null)
+                removeBinaries(con, binaries);
         } catch (SQLException e) {
             throw new FxDbException(e, "ex.db.sqlError", e.getMessage());
         } finally {
@@ -1010,6 +944,71 @@ public class GenericBinarySQLStorage implements BinaryStorage {
                 } catch (SQLException e) {
                     //ignore
                 }
+        }
+    }
+
+    /**
+     * Get the usage count of a binary
+     *
+     * @param ps valid prepared statement for the usage query
+     * @param id id of the binary
+     * @return usage count
+     * @throws SQLException on errors
+     */
+    private long getUsageCount(PreparedStatement ps, long id) throws SQLException {
+        ps.setLong(1, id);
+        ResultSet rs = ps.executeQuery();
+        if (rs != null && rs.next())
+            return rs.getLong(1);
+        return 0;
+    }
+
+    /**
+     * Remove the given list of binaries if they are not in use
+     *
+     * @param con      an open and valid connection
+     * @param binaries list of binaries to remove
+     * @throws SQLException on errors
+     */
+    protected void removeBinaries(Connection con, List<Long> binaries) throws SQLException {
+        PreparedStatement psRemove = null;
+        PreparedStatement psUsage1 = null;
+        PreparedStatement psUsage2 = null;
+        PreparedStatement psUsage3 = null;
+        PreparedStatement psUsage4 = null;
+        try {
+            psRemove = con.prepareStatement(CONTENT_BINARY_REMOVE_ID);
+            psUsage1 = con.prepareStatement("SELECT COUNT(*) FROM " + TBL_CONTENT + " WHERE DBIN_ID=?");
+            psUsage2 = con.prepareStatement("SELECT COUNT(*) FROM " + TBL_CONTENT_DATA + " WHERE FBLOB=?");
+            psUsage3 = con.prepareStatement("SELECT COUNT(*) FROM " + TBL_SELECTLIST_ITEM + " WHERE DBIN_ID=?");
+            psUsage4 = con.prepareStatement("SELECT COUNT(*) FROM " + TBL_CONTENT_BINARY + " WHERE PREVIEW_REF=?");
+            int divisionId = FxContext.get().getDivisionId();
+            long cnt1, cnt2, cnt3, cnt4;
+            for (Long id : binaries) {
+                cnt2 = cnt3 = cnt4 = 0;
+                cnt1 = getUsageCount(psUsage1, id);
+                if (cnt1 <= 0) cnt2 = getUsageCount(psUsage2, id);
+                if (cnt2 == 0) cnt3 = getUsageCount(psUsage3, id);
+                if (cnt3 == 0) cnt4 = getUsageCount(psUsage4, id);
+                if (cnt1 + cnt2 + cnt3 + cnt4 > 0) {
+                    if (LOG.isDebugEnabled())
+                        LOG.debug("Binary #" + id + " is in use! (content:" + cnt1 + ",content_data:" + cnt2 + ",selectlist:" + cnt3 + ",binary:" + cnt4 + ") - only the first usage is calculated, rest is set to 0!");
+                    continue;
+                } else {
+                    if (LOG.isDebugEnabled()) LOG.debug("Removing binary #" + id);
+                }
+
+                psRemove.setLong(1, id);
+                psRemove.executeUpdate();
+                FxBinaryUtils.removeBinary(divisionId, id);
+            }
+        } finally {
+            Database.closeObjects(GenericBinarySQLStorage.class, null, psRemove);
+            Database.closeObjects(GenericBinarySQLStorage.class, null, psUsage1);
+            Database.closeObjects(GenericBinarySQLStorage.class, null, psUsage2);
+            Database.closeObjects(GenericBinarySQLStorage.class, null, psUsage3);
+            Database.closeObjects(GenericBinarySQLStorage.class, null, psUsage4);
+
         }
     }
 }

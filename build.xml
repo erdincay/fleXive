@@ -565,21 +565,19 @@
     </target>
 
     <target name="jar.storages" depends="jar.ejb,jar.dbsetup,jar.h2.storedprocedures">
-        <buildStorage vendor="MySQL"
-                      srcdir="${flexive.base.framework.dir}/storages/MySQL"
-                      builddir="${build.storages.dir}/MySQL"
-                      classpathref="classpath.build.plugin"
-                      jarfile="${flexive.build.framework.jar.dir}/flexive-storage-MySQL.jar"/>
-        <buildStorage vendor="H2"
-                      srcdir="${flexive.base.framework.dir}/storages/H2"
-                      builddir="${build.storages.dir}/H2"
-                      classpathref="classpath.build.plugin"
-                      jarfile="${flexive.build.framework.jar.dir}/flexive-storage-H2.jar"/>
-        <buildStorage vendor="PostgreSQL"
-                      srcdir="${flexive.base.framework.dir}/storages/PostgreSQL"
-                      builddir="${build.storages.dir}/PostgreSQL"
-                      classpathref="classpath.build.plugin"
-                      jarfile="${flexive.build.framework.jar.dir}/flexive-storage-PostgreSQL.jar"/>
+        <groovy>
+            new File(properties['flexive.base.framework.dir']+"/storages").eachDir() { File dir ->
+                if(dir.name.startsWith(".")) //skip .svn
+                    return
+                m = project.createTask("buildStorage")
+                m.setDynamicAttribute("vendor", dir.name)
+                m.setDynamicAttribute("srcdir", dir.absolutePath)
+                m.setDynamicAttribute("builddir", properties['build.storages.dir']+"/"+dir.name)
+                m.setDynamicAttribute("classpathref", "classpath.build.plugin")
+                m.setDynamicAttribute("jarfile", properties['flexive.build.framework.jar.dir']+"/flexive-storage-"+dir.name+".jar")
+                m.perform()
+            }
+        </groovy>
     </target>
 
     <target name="jar.tests" depends="tests.compile.all">
@@ -813,9 +811,9 @@
             <fileset dir="${build.ui.jar.dir}" includes="*.jar" excludes="flexive-backend.jar,flexive-plugin-*.jar"/>
         </copy>
         <copy file="${flexive.build.framework.jar.dir}/flexive-ejb.jar" tofile="${flexive.dist.lib.dir}/flexive-ejb.jar"/>
-        <copy file="${flexive.build.framework.jar.dir}/flexive-storage-H2.jar" tofile="${flexive.dist.lib.dir}/flexive-storage-H2.jar"/>
-        <copy file="${flexive.build.framework.jar.dir}/flexive-storage-MySQL.jar" tofile="${flexive.dist.lib.dir}/flexive-storage-MySQL.jar"/>
-        <copy file="${flexive.build.framework.jar.dir}/flexive-storage-PostgreSQL.jar" tofile="${flexive.dist.lib.dir}/flexive-storage-PostgreSQL.jar"/>
+        <copy todir="${flexive.dist.lib.dir}">
+            <fileset dir="${flexive.build.framework.jar.dir}" includes="flexive-storage-*.jar"/>
+        </copy>
         <copy file="${flexive.build.framework.jar.dir}/flexive-dbsetup.jar" tofile="${flexive.dist.lib.dir}/flexive-dbsetup.jar"/>
         <copy file="${flexive.lib.dir}/flexive-flatstorage.jar" tofile="${flexive.dist.lib.dir}/flexive-flatstorage.jar"/>
 

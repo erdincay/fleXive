@@ -55,6 +55,24 @@ import java.util.Map;
 public interface BinaryStorage {
 
     /**
+     * Select operation for binaries
+     */
+    public enum SelectOperation {
+        /**
+         * Select binaries for all versions of a content
+         */
+        SelectId,
+        /**
+         * Select binaries for a specific version of a content
+         */
+        SelectVersion,
+        /**
+         * Select all binaries for a specific type
+         */
+        SelectType
+    }
+
+    /**
      * Receive a binary transit
      *
      * @param divisionId   division
@@ -165,34 +183,16 @@ public interface BinaryStorage {
     void updateBinaryPreview(Connection con, long id, int version, int quality, int preview, int width, int height, long length, InputStream binary) throws FxApplicationException;
 
     /**
-     * Remove all binary entries for the given primary key (all versions!).
-     * Binary references will be set to <code>0</code> to maintain integrity
+     * Remove binaries for a content, a specific content version or a type depending on remOp
+     * Binary references will be set to <code>null</code> to maintain integrity
      *
-     * @param con an open and valid connection
-     * @param pk  primary key
+     * @param con      an open and valid connection
+     * @param remOp    what to remove
+     * @param pk       primary key if content removal
+     * @param typeId   type id for type removal
      * @throws FxApplicationException on errors
      */
-    void removeBinariesForPK(Connection con, FxPK pk) throws FxApplicationException;
-
-    /**
-     * Remove all binary entries for the given primary key (only specified version).
-     * Binary references will be set to <code>0</code> to maintain integrity
-     *
-     * @param con an open and valid connection
-     * @param pk  primary key
-     * @throws FxApplicationException on errors
-     */
-    void removeBinariesForVersion(Connection con, FxPK pk) throws FxApplicationException;
-
-    /**
-     * Remove all binary entries for the given type.
-     * Binary references will be set to <code>0</code> to maintain integrity
-     *
-     * @param con    an open and valid connection
-     * @param typeId id of the type
-     * @throws FxApplicationException on errors
-     */
-    void removeBinariesForType(Connection con, long typeId) throws FxApplicationException;
+    void removeBinaries(Connection con, SelectOperation remOp, FxPK pk, long typeId) throws FxApplicationException;
 
     /**
      * Remove all binaries in the transit space that have expired

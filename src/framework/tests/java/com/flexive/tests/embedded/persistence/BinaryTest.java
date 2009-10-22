@@ -212,6 +212,9 @@ public class BinaryTest {
             Assert.assertTrue(FxFileUtils.fileCompare(comp, tmp), "Files do not match!");
             FxFileUtils.removeFile(tmp);
             FxFileUtils.removeFile(comp);
+            //create a new version and remove the first
+            FxPK pkV2 = co.createNewVersion(loaded);
+            co.removeVersion(pkV2);
         } catch(Exception e) {
             LOG.error(e);
             e.printStackTrace();
