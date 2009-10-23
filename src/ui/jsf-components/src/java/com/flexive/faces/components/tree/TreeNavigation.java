@@ -340,7 +340,7 @@ public class TreeNavigation extends UIOutput implements NamingContainer {
             
             // encode item facet
             final UIComponent item = getFacet("item");
-            item.setId(item.getId());   // force re-calculation of client ID
+            FxJsfComponentUtils.clearCachedClientIds(item);
             item.encodeAll(context);
 
             removeVar(context, oldValue);
@@ -373,7 +373,7 @@ public class TreeNavigation extends UIOutput implements NamingContainer {
             for (FxTreeNode child: node.getChildren()) {
                 final Object oldValue = provideVar(context, child);
                 final UIComponent item = getFacet("item");
-                item.setId(item.getId());   // force re-calculation of client ID
+                FxJsfComponentUtils.clearCachedClientIds(item);
                 if (PhaseId.APPLY_REQUEST_VALUES.equals(phase)) {
                     item.processDecodes(context);
                 } else if (PhaseId.UPDATE_MODEL_VALUES.equals(phase)) {

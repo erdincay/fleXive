@@ -514,4 +514,18 @@ public class FxJsfComponentUtils {
         }
         return false;
     }
+
+    /**
+     * Resets the cache client ID for the given component and its children.
+     *
+     * @param component the component
+     * @since 3.1
+     */
+    public static void clearCachedClientIds(UIComponent component) {
+        component.setId(component.getId());
+        final Iterator<UIComponent> iter = component.getFacetsAndChildren();
+        while (iter.hasNext()) {
+            clearCachedClientIds(iter.next());
+        }
+    }
 }
