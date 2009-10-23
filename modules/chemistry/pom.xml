@@ -5,7 +5,7 @@
     <properties>
         <flexive.version>3.1-SNAPSHOT</flexive.version>
         <spi.version>${flexive.version}</spi.version>
-        <chemistry.version>0.1-SNAPSHOT</chemistry.version>
+        <chemistry.version>0.62-SNAPSHOT</chemistry.version>
         <h2.version>1.1.117</h2.version>
         <openejb.version>3.1</openejb.version>
         <gmaven.version>1.0-rc-5</gmaven.version>
