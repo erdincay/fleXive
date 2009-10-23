@@ -375,7 +375,7 @@ public class TreeNavigation extends UIOutput implements NamingContainer {
                 final UIComponent item = getFacet("item");
                 item.setId(item.getId());   // force re-calculation of client ID
                 if (PhaseId.APPLY_REQUEST_VALUES.equals(phase)) {
-                    item.decode(context);
+                    item.processDecodes(context);
                 } else if (PhaseId.UPDATE_MODEL_VALUES.equals(phase)) {
                     item.processUpdates(context);
                 } else if (PhaseId.PROCESS_VALIDATIONS.equals(phase)) {
