@@ -216,7 +216,7 @@ public class TreeNavigation extends UIOutput implements NamingContainer {
             if (nodeId == -1) {
                 return null;
             }
-            if (treeCache != null && treeCache.getId() == nodeId && !FxContext.get().getTreeWasModified()) {
+            if (treeCache != null && treeCache.getId() == nodeId && !FxContext.get().getTreeWasModified() && treeCache.getMode() == mode) {
                 return treeCache;
             }
             return treeCache = EJBLookup.getTreeEngine().getTree(mode, nodeId, getDepth());
