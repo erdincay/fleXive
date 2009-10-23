@@ -113,7 +113,7 @@ public class GenericBinarySQLStorage implements BinaryStorage {
     protected static final String CONTENT_BINARY_REMOVE_RESETDATA_ID = "UPDATE " + TBL_CONTENT_DATA + " SET FBLOB=NULL WHERE ID=?";
     protected static final String CONTENT_BINARY_REMOVE_RESET_ID = "UPDATE " + TBL_CONTENT + " SET DBIN_ID=-1 WHERE ID=?";
     protected static final String CONTENT_BINARY_REMOVE_RESETDATA_TYPE = "UPDATE " + TBL_CONTENT_DATA + " SET FBLOB=NULL WHERE ID IN (SELECT DISTINCT ID FROM " + TBL_CONTENT + " WHERE TDEF=?)";
-    protected static final String CONTENT_BINARY_REMOVE_RESET_TYPE = "UPDATE " + TBL_CONTENT + " SET DBIN_ID=-1 WHERE ID IN (SELECT DISTINCT ID FROM " + TBL_CONTENT + " WHERE TDEF=?)";
+    protected static final String CONTENT_BINARY_REMOVE_RESET_TYPE = "UPDATE " + TBL_CONTENT + " SET DBIN_ID=-1 WHERE ID IN (SELECT DISTINCT c.ID FROM " + TBL_CONTENT + " c WHERE c.TDEF=?)";
 
     /**
      * {@inheritDoc}
