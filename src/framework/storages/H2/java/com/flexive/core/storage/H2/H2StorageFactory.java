@@ -209,8 +209,8 @@ public class H2StorageFactory implements DBStorage {
             return text[0];
         StringBuilder sb = new StringBuilder(500);
         sb.append("CONCAT_WS('").append(delimiter).append("'");
-        for (int i = 0; i < text.length; i++)
-            sb.append(',').append(text[i]);
+        for (String s : text)
+            sb.append(',').append(s);
         sb.append(')');
         return sb.toString();
     }
