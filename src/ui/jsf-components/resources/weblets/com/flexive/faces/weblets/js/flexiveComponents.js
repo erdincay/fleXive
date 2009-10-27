@@ -690,6 +690,171 @@ flexive.yui.AutoCompleteHandler.prototype = {
     }
 };
 
+/**
+ * Yahoo UI replacements for standard javascript dialogs (confirm, alert, prompt). These dialogs are
+ * shown in a DHTML layer and do not cause issues with popup blockers, in contrast to plain
+ * javascript dialogs (e.g. in IE7).
+ *
+ * <p>To use them, you need to include the 'container' module of YUI:</p>
+ * <code>flexive.yui.require("container");</code>
+ */
+flexive.yui.dialogs = new function() {
+
+    /**
+     * DHTML replacement for Javascript's confirm() dialog. Note that this dialog returns immediately,
+     * any actions that should be executed after the user pressed a button need to be passed
+     * in the function parameter(s).
+     *
+     * @param message       the message to be displayed
+     * @param title         the dialog title
+     * @param yesButton     the text to be displayed for the "yes" button
+     * @param noButton      the text to be displayed for the "no" button
+     * @param onConfirmed   the function to be executed when the user confirmed the message
+     * @param onCancel      the function to be executed when the user did not confirm (optional)
+     */
+    this.showConfirmDialog = function(/* String */ message, /* String */ title, /* String */ yesButton, /* String */ noButton,
+                                /* fn */ onConfirmed, /* fn */ onCancel) {
+        var handleConfirm = function() {
+            dialog.disableButtons();
+            if (onConfirmed) onConfirmed();
+            dialog.hide();
+            dialog.destroy();
+        };
+        var handleCancel = function() {
+            dialog.disableButtons();
+            if (onCancel) onCancel();
+            dialog.hide();
+            dialog.destroy();
+        };
+        var dialog = new YAHOO.widget.SimpleDialog("dlg", {
+            width: Math.min(message.length + 5, 40) + "em",
+            fixedcenter:true,
+            modal:true,
+            visible:false,
+            draggable:true,
+            constraintoviewport: true,
+            buttons:  [   { text: yesButton,
+                            handler: handleConfirm,
+                            isDefault:true },
+                          { text: noButton,
+                            handler: handleCancel }
+                      ]
+        });
+        dialog.disableButtons = function() {
+            this.getButtons()[0].disabled = true;
+            this.getButtons()[1].disabled = true;
+        };
+        dialog.setHeader(title);
+        dialog.setBody(message);
+        dialog.cfg.setProperty("icon",YAHOO.widget.SimpleDialog.ICON_WARN);
+        dialog.cfg.queueProperty("keylisteners", [
+            // bind escape key to cancel button
+            new YAHOO.util.KeyListener(document, { keys: 27 }, { fn: handleCancel, scope: dialog, correctScope:true })
+        ]);
+        dialog.render(document.body);
+        dialog.show();
+    };
+
+    /**
+     * DHTML replacement for Javascript's alert() dialog. Note that this dialog returns immediately,
+     * any actions that should be executed after the user pressed a button need to be passed
+     * in the function parameter(s).
+     *
+     * @param message   the message to be displayed
+     * @param title     the dialog title
+     * @param okButton  the OK button text
+     */
+    this.showAlertDialog = function(/*String */ message, /* String */ title, /* String */ okButton, /* fn */ onConfirm) {
+        var dialog = new YAHOO.widget.SimpleDialog("dlg", {
+            width: Math.min(message.length + 5, 40) + "em",
+            fixedcenter:true,
+            modal:true,
+            visible:false,
+            draggable:true,
+            constraintoviewport: true,
+            buttons:  [   { text: okButton,
+                            handler: function() { dialog.hide(); dialog.destroy(); if (onConfirm) onConfirm(); },
+                            isDefault:true } ]
+        });
+        dialog.setHeader(title);
+        dialog.setBody(message);
+        dialog.cfg.setProperty("icon",YAHOO.widget.SimpleDialog.ICON_INFO);
+        dialog.render(document.body);
+        dialog.show();
+    };
+
+    /**
+     * DHTML replacement for Javascript's prompt() dialog. Note that this dialog returns immediately,
+     * any actions that should be executed after the user pressed a button need to be passed
+     * in the function parameter(s).
+     *
+     * @param message       the message to be displayed
+     * @param defaultValue  the default input value
+     * @param title         the dialog title
+     * @param submitButton  the text to be displayed for the "submit" button
+     * @param cancelButton  the text to be displayed for the "cancel" button
+     * @param onSuccess     the function to be executed when the user confirmed the input (takes input as first parameter)
+     * @param onCancel      the function to be executed when the user did not confirm (optional)
+     */
+    this.showPromptDialog = function(/* String */ message, /* String */ defaultValue, /* String */ title, /* String */ submitButton, /* String */ cancelButton,
+                                     /* fn */ onSuccess, /* fn */ onCancel) {
+        var e = document.getElementById("__fxPromptDialog");
+        if (e == null) {
+            // create dialog
+            e = document.createElement("div");
+            e.setAttribute("id", "__fxPromptDialog");
+            e.setAttribute("style", "display: none");
+            e.innerHTML = "<div id=\"__fxPromptTitle\" class=\"hd\"></div>"
+                    + "<div class=\"bd\"><form name=\"__promptForm\" action=\"#\">"
+                    + "<label for=\"__fxPromptInput\"><span id=\"__fxPromptLabel\"> </span></label>"
+                    + "<input id=\"__fxPromptInput\" name=\"promptInput\" type=\"text\" size=\"25\"/>"
+                    + "</form></div>";
+            document.body.appendChild(e);
+        }
+        document.getElementById("__fxPromptLabel").innerHTML = message;
+        document.getElementById("__fxPromptInput").value = defaultValue != null ? defaultValue : "";
+        document.getElementById("__fxPromptTitle").innerHTML = title;
+
+        if (e.dialog == null) {
+            var handleSubmit = function() {
+                if (e.onSuccess) {
+                    e.onSuccess(document.getElementById("__fxPromptInput").value);
+                }
+                e.dialog.hide();
+            };
+            e.dialog = new YAHOO.widget.Dialog("__fxPromptDialog", {
+                width: "40em",
+                fixedcenter:true,
+                modal:true,
+                visible:false,
+                draggable:true,
+                postmethod: "none",
+                constraintoviewport: true,
+                buttons:  [   { text: submitButton,
+                                handler: handleSubmit,
+                                isDefault:true },
+                              { text: cancelButton,
+                                handler:function() { e.dialog.hide();  if (e.onCancel) e.onCancel(); }
+                              }
+                          ]
+            });
+            e.dialog.cfg.queueProperty("keylisteners", [
+                // bind enter key to submit button
+                new YAHOO.util.KeyListener(e, { keys: 13 }, { fn: handleSubmit, scope: e.dialog, correctScope:true }),
+                // bind escape key to cancel button
+                new YAHOO.util.KeyListener(e, { keys: 27 }, { fn: function() { e.dialog.hide(); }, scope: e.dialog, correctScope:true })
+            ]);
+
+
+            document.getElementById("__fxPromptDialog").style.display = "block";
+            e.dialog.render();
+        }
+        e.onSuccess = onSuccess;
+        e.onCancel = onCancel;
+        e.dialog.show();
+    };
+};
+
 flexive.input = new function() {
     this.fxValueInputList = [];   // a global list of all registered FxValueInput elements on the current page
 

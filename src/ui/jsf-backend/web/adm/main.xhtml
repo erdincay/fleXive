@@ -57,16 +57,6 @@
 
 <body onload="init();" onmouseup="endDrag();" class="yui-skin-sam">
 
-<div id="promptDialog" style="display: none;">
-    <div class="hd">#{fxMessageBean['Global.dialog.prompt.title']}</div>
-    <div class="bd">
-        <form name="promptForm" action="#">
-            <label for="promptInput"><span id="promptLabel"> </span></label>
-            <input id="promptInput" name="promptInput" type="text" size="25"/>
-        </form>
-    </div>
-</div>
-
 <ui:fragment rendered="#{!fxSystemBean.newInstallation}">
     <div id="loading"><br/><br/>
         <center>&nbsp;&nbsp;&nbsp;#{fxMessageBean['Global.banner.loading']}</center>

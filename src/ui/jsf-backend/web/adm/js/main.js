@@ -757,45 +757,14 @@ function reloadContentTree() {
  * @param onCancel      the function to be executed when the user did not confirm (optional)
  */
 function _confirmDialog(message, onConfirmed, onCancel) {
-    var handleConfirm = function() {
-        dialog.disableButtons();
-        onConfirmed();
-        dialog.hide();
-        dialog.destroy();
-    };
-    var handleCancel = function() {
-        dialog.disableButtons();
-        if (onCancel) onCancel();
-        dialog.hide();
-        dialog.destroy();
-    };
-    var dialog = new YAHOO.widget.SimpleDialog("dlg", {
-	    width: Math.min(message.length + 5, 40) + "em",
-	    fixedcenter:true,
-	    modal:true,
-	    visible:false,
-	    draggable:true,
-        constraintoviewport: true,
-        buttons:  [   { text: messages["Global.dialog.confirm.yes"],
-	                    handler: handleConfirm,
-                        isDefault:true },
-                      { text: messages["Global.dialog.confirm.no"],
-                        handler: handleCancel }
-                  ]
-    });
-    dialog.disableButtons = function() {
-        this.getButtons()[0].disabled = true;
-        this.getButtons()[1].disabled = true;
-    };
-    dialog.setHeader(messages["Global.dialog.confirm.title"]);
-	dialog.setBody(message);
-	dialog.cfg.setProperty("icon",YAHOO.widget.SimpleDialog.ICON_WARN);
-    dialog.cfg.queueProperty("keylisteners", [
-        // bind escape key to cancel button
-        new YAHOO.util.KeyListener(document, { keys: 27 }, { fn: handleCancel, scope: dialog, correctScope:true })
-    ]);
-    dialog.render(document.body);
-    dialog.show();
+    flexive.yui.dialogs.showConfirmDialog(
+            message,
+            messages["Global.dialog.confirm.title"],
+            messages["Global.dialog.confirm.yes"],
+            messages["Global.dialog.confirm.no"],
+            onConfirmed,
+            onCancel
+    );
 }
 
 /**
@@ -805,22 +774,12 @@ function _confirmDialog(message, onConfirmed, onCancel) {
  * @param message       the message to be displayed
  */
 function _alertDialog(message) {
-    var dialog = new YAHOO.widget.SimpleDialog("dlg", {
-	    width: Math.min(message.length + 5, 40) + "em",
-	    fixedcenter:true,
-	    modal:true,
-	    visible:false,
-	    draggable:true,
-        constraintoviewport: true,
-        buttons:  [   { text: messages["Global.dialog.alert.ok"],
-	                    handler: function() { dialog.hide(); dialog.destroy(); },
-                        isDefault:true } ]
-    });
-	dialog.setHeader(messages["Global.dialog.alert.title"]);
-	dialog.setBody(message);
-	dialog.cfg.setProperty("icon",YAHOO.widget.SimpleDialog.ICON_INFO);
-    dialog.render(document.body);
-    dialog.show();
+    flexive.yui.dialogs.showAlertDialog(
+            message,
+            messages["Global.dialog.alert.title"],
+            messages["Global.dialog.alert.ok"],
+            null    /* confirm fn */
+    );
 }
 
 /**
@@ -832,43 +791,15 @@ function _alertDialog(message) {
  * @param onSuccess     the function to be executed when the user entered a valid value. The input value is passed in the first parameter.
  */
 function _promptDialog(message, defaultValue, onSuccess) {
-    var e = document.getElementById("promptDialog");
-    document.getElementById("promptLabel").innerHTML = message;
-    document.getElementById("promptInput").value = defaultValue != null ? defaultValue : "";
-
-    if (e.dialog == null) {
-        var handleSubmit = function() {
-            e.onSuccess(document.getElementById("promptInput").value);
-            e.dialog.hide();
-        };
-        e.dialog = new YAHOO.widget.Dialog("promptDialog", {
-            width: "40em",
-            fixedcenter:true,
-            modal:true,
-            visible:false,
-            draggable:true,
-            postmethod: "none",
-            constraintoviewport: true,
-            buttons:  [   { text: messages["Global.dialog.prompt.submit"],
-                            handler: handleSubmit,
-                            isDefault:true },
-                          { text: messages["Global.dialog.prompt.cancel"],
-                            handler:function() { e.dialog.hide(); } }
-                      ]
-        });
-        e.dialog.cfg.queueProperty("keylisteners", [
-            // bind enter key to submit button
-            new YAHOO.util.KeyListener(e, { keys: 13 }, { fn: handleSubmit, scope: e.dialog, correctScope:true }),
-            // bind escape key to cancel button
-            new YAHOO.util.KeyListener(e, { keys: 27 }, { fn: function() { e.dialog.hide(); }, scope: e.dialog, correctScope:true })
-        ]);
-
-
-        document.getElementById("promptDialog").style.display = "block";
-        e.dialog.render();
-    }
-    e.onSuccess = onSuccess;
-    e.dialog.show();
+    flexive.yui.dialogs.showPromptDialog(
+            message,
+            defaultValue,
+            messages['Global.dialog.prompt.title'],
+            messages["Global.dialog.prompt.submit"],
+            messages["Global.dialog.prompt.cancel"],
+            onSuccess,
+            null    /* onCancel */
+    );
 }
 
 // A simple clipboard for content objects
