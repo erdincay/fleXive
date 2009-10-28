@@ -158,7 +158,7 @@ builder {
     ssn("8392")
     email("sandra.locke@gmx.net")
 }
-def sandraPk = builder.getContent().save().pk
+def sandraPk = EJBLookup.contentEngine.save(builder.getContent())
 
 // SSN 7294 has no match in CMIS_PERSON_DATA
 builder = new GroovyContentBuilder("CMIS_PERSON")
@@ -166,13 +166,13 @@ builder {
     name("Alex Cervais")
     ssn("7294")
 }
-builder.getContent().save()
+EJBLookup.contentEngine.save(builder.getContent())
 builder = new GroovyContentBuilder("CMIS_PERSON")
 builder {
     name("Martin Black")
     ssn("5241")
 }
-builder.getContent().save()
+EJBLookup.contentEngine.save(builder.getContent())
 
 builder = new GroovyContentBuilder("CMIS_PERSON_DATA")
 builder {
@@ -180,7 +180,7 @@ builder {
     entryDate(new FxDate(false, new Date(2008, 2, 10)))
     annualSalary(new FxLargeNumber(false, 50000))
 }
-builder.getContent().save()
+EJBLookup.contentEngine.save(builder.getContent())
 builder {
     ssn("8392")
     entryDate(new FxDate(false, new Date(2003, 5, 13)))
@@ -192,7 +192,7 @@ builder {
     entryDate(new FxDate(false, new Date(2001, 3, 24)))
     annualSalary(new FxLargeNumber(false, 75000))
 }
-builder.getContent().save()
+EJBLookup.contentEngine.save(builder.getContent())
 
 builder = new GroovyContentBuilder("CMIS_AUDIT_LOG")
 builder {
@@ -200,12 +200,12 @@ builder {
     date(new FxDateTime(false, new Date(new Date().getTime() - 3600L*1000)))
     activity("Logged in")
 }
-builder.getContent().save()
+EJBLookup.contentEngine.save(builder.getContent())
 builder {
     date(new FxDateTime(false, new Date(new Date().getTime() - 32L*60*1000)))
     activity("Logged out")
 }
-builder.getContent().save()
+EJBLookup.contentEngine.save(builder.getContent())
 builder {
     person(new FxReference(false, new ReferencedContent(sandraPk)))
     date(new FxDateTime(false, new Date(new Date().getTime() - 28*60*1000)))
@@ -216,7 +216,7 @@ builder {
     date(new FxDateTime(false, new Date(new Date().getTime() - 22*60*1000)))
     activity("Updated contact #912.1")
 }
-builder.getContent().save()
+EJBLookup.contentEngine.save(builder.getContent())
 
 // create some hierarchical data
 EJBLookup.contentEngine.initialize("cmis_type_a").setValue("/astring", "A").save()
@@ -249,7 +249,7 @@ builder {
     dateTime(new FxDateTime(false, new Date(new Date().getTime() - 24L*24*3600*1000)))
     dateTime(new FxDateTime(false, new Date(new Date().getTime() - 11L*24*3600*1000)))
 }
-builder.getContent().save()
+EJBLookup.contentEngine.save(builder.getContent())
 
 //create test type + data
 
@@ -335,9 +335,9 @@ instanceCount.times { int counter ->
         step.stepDefinitionId == StepDefinition.EDIT_STEP_ID
     }
     // create some versions
+    dbContent.setStepId(editStep.id)
     (counter % 5).times {
-        dbContent.setStepId(editStep.id)
-        dbContent = contentEngine.load(contentEngine.createNewVersion(dbContent))
+        contentEngine.createNewVersion(dbContent)
         instances++
     }
 }
