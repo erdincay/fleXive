@@ -67,6 +67,8 @@ import java.util.Map;
 public class MySQLStorageFactory implements DBStorage {
     private static final Log LOG = LogFactory.getLog(MySQLStorageFactory.class);
     private final static String VENDOR = "MySQL";
+    final static String TRUE = "TRUE";
+    final static String FALSE = "FALSE";
 
     /**
      * {@inheritDoc}
@@ -148,6 +150,27 @@ public class MySQLStorageFactory implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    public String getBooleanTrueExpression() {
+        return TRUE;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getBooleanFalseExpression() {
+        return FALSE;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String escapeReservedWords(String query) {
+        return query; //nothing to escape
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public String getIfFunction(String condition, String exprtrue, String exprfalse) {
         return "IF(" + condition + "," + exprtrue + "," + exprfalse + ")";
     }
@@ -216,6 +239,13 @@ public class MySQLStorageFactory implements DBStorage {
             sb.append(',').append(s);
         sb.append(')');
         return sb.toString();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getFromDual() {
+        return "";
     }
 
     /**

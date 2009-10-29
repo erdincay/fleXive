@@ -667,18 +667,20 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
             for (Mandator m : missing) {
                 sql = "INSERT INTO " + TBL_GROUP + " " +
                         "(ID,MANDATOR,AUTOMANDATOR,ISSYSTEM,NAME,COLOR,CREATED_BY,CREATED_AT,MODIFIED_BY,MODIFIED_AT) VALUES (" +
-                        "?,?," + m.getId() + ",TRUE,?,?,?,?,?,?)";
+                        "?,?,?,?,?,?,?,?,?,?)";
                 if (ps == null)
                     ps = con.prepareStatement(sql);
                 long gid = seq.getId(FxSystemSequencer.GROUP);
                 ps.setLong(1, gid);
                 ps.setLong(2, m.getId());
-                ps.setString(3, "Everyone (" + m.getName() + ")");
-                ps.setString(4, "#00AA00");
-                ps.setLong(5, 0);
-                ps.setLong(6, NOW);
+                ps.setLong(3, m.getId());
+                ps.setBoolean(4, true); //ISSYSTEM
+                ps.setString(5, "Everyone (" + m.getName() + ")");
+                ps.setString(6, "#00AA00");
                 ps.setLong(7, 0);
                 ps.setLong(8, NOW);
+                ps.setLong(9, 0);
+                ps.setLong(10, NOW);
                 ps.executeUpdate();
                 sql = "INSERT INTO " + TBL_ASSIGN_GROUPS + " (ACCOUNT,USERGROUP) (SELECT a.ID, " + gid +
                         " FROM " + TBL_ACCOUNTS + " a WHERE a.MANDATOR=" + m.getId() + " AND a.ID!=" + Account.NULL_ACCOUNT + ")";

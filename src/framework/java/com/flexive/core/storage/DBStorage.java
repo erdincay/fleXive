@@ -135,6 +135,28 @@ public interface DBStorage {
     SqlDialect getCmisSqlDialect(FxEnvironment environment, ContentEngine contentEngine, CmisSqlQuery query, boolean returnPrimitives);
 
     /**
+     * Get the boolean <code>true</code> expression string for the database vendor
+     *
+     * @return the boolean <code>true</code> expression string for the database vendor
+     */
+    String getBooleanTrueExpression();
+
+    /**
+     * Get the boolean <code>false</code> expression string for the database vendor
+     *
+     * @return the boolean <code>false</code> expression string for the database vendor
+     */
+    String getBooleanFalseExpression();
+
+    /**
+     * Escape reserved words properly if needed
+     *
+     * @param query the query to escape
+     * @return escaped query
+     */
+    String escapeReservedWords(String query);
+
+    /**
      * Get a database vendor specific "IF" function
      *
      * @param condition the condition to check
@@ -189,6 +211,13 @@ public interface DBStorage {
      * @return concatenated text statement
      */
     String concat_ws(String delimiter, String... text);
+
+    /**
+     * If a database needs a " ... from dual" to generate valid queries, it is returned here
+     *
+     * @return from dual (or equivalent) if needed
+     */
+    String getFromDual();
 
     /**
      * Returns true if the SqlError is a foreign key violation.

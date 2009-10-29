@@ -55,7 +55,7 @@ import org.testng.Assert;
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-@Test(groups = {"ejb", "structure"})
+@Test(groups = {"ejb", "structure", "uniquemode"})
 public class UniqueModeTest extends StructureTestBase {
 
     // TYPE_A > TYPE_B > TYPE_C

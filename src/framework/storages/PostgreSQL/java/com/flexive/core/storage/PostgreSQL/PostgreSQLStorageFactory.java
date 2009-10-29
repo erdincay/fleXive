@@ -66,6 +66,8 @@ import java.util.Map;
 public class PostgreSQLStorageFactory implements DBStorage {
     private static final Log LOG = LogFactory.getLog(PostgreSQLStorageFactory.class);
     private final static String VENDOR = "PostgreSQL";
+    final static String TRUE = "TRUE";
+    final static String FALSE = "FALSE";
 
     /**
      * {@inheritDoc}
@@ -147,6 +149,27 @@ public class PostgreSQLStorageFactory implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    public String getBooleanTrueExpression() {
+        return TRUE;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getBooleanFalseExpression() {
+        return FALSE;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String escapeReservedWords(String query) {
+        return query; //nothing to escape
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public String getIfFunction(String condition, String exprtrue, String exprfalse) {
         return "(CASE WHEN(" + condition + ")THEN(" + exprtrue + ")ELSE (" + exprfalse + ")END)";
     }
@@ -212,6 +235,13 @@ public class PostgreSQLStorageFactory implements DBStorage {
             sb.append(text[i]);
         }
         return sb.toString();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getFromDual() {
+        return "";
     }
 
     /**

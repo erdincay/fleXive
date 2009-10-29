@@ -33,6 +33,8 @@ package com.flexive.ejb.beans;
 
 import com.flexive.core.Database;
 import static com.flexive.core.DatabaseConst.TBL_HISTORY;
+
+import com.flexive.core.storage.StorageManager;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxHistory;
 import com.flexive.shared.FxLanguage;
@@ -111,7 +113,7 @@ public class HistoryTrackerEngineBean implements HistoryTrackerEngine, HistoryTr
         try {
             final UserTicket ticket = FxContext.getUserTicket();
             con = Database.getDbConnection();
-            ps = con.prepareStatement(HISTORY_INSERT);
+            ps = con.prepareStatement(StorageManager.escapeReservedWords(HISTORY_INSERT));
             ps.setLong(1, ticket.getUserId());
             ps.setString(2, ticket.getLoginName());
 
@@ -162,7 +164,7 @@ public class HistoryTrackerEngineBean implements HistoryTrackerEngine, HistoryTr
         PreparedStatement ps = null;
         try {
             con = Database.getDbConnection();
-            ps = con.prepareStatement(HISTORY_SELECT + " WHERE PKID=? ORDER BY TIMESTP");
+            ps = con.prepareStatement(StorageManager.escapeReservedWords(HISTORY_SELECT) + " WHERE PKID=? ORDER BY TIMESTP");
             ps.setLong(1, contentId);
             ResultSet rs = ps.executeQuery();
             boolean loadData = FxContext.getUserTicket().isGlobalSupervisor();
@@ -192,7 +194,7 @@ public class HistoryTrackerEngineBean implements HistoryTrackerEngine, HistoryTr
             if (accountMatch != null) query += " AND ACCOUNT=" + accountMatch;
             if (typeMatch != null) query += " AND TYPEID=" + Long.valueOf(typeMatch);
             if (contentMatch != null) query += " AND PKID=" + Long.valueOf(contentMatch);
-            ps = con.prepareStatement(HISTORY_SELECT + " WHERE TIMESTP>=? AND TIMESTP<=? AND ACTION_KEY LIKE ? " + query + " ORDER BY TIMESTP DESC");
+            ps = con.prepareStatement(StorageManager.escapeReservedWords(HISTORY_SELECT) + " WHERE TIMESTP>=? AND TIMESTP<=? AND ACTION_KEY LIKE ? " + query + " ORDER BY TIMESTP DESC");
             ps.setLong(1, startDate == null ? 0 : startDate.getTime());
             ps.setLong(2, endDate == null ? Long.MAX_VALUE - 1 : endDate.getTime());
             ps.setString(3, (StringUtils.isEmpty(keyMatch) ? "" : keyMatch) + "%");

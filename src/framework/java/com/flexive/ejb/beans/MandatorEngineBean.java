@@ -120,17 +120,19 @@ public class MandatorEngineBean implements MandatorEngine, MandatorEngineLocal {
             ps.close();
             sql = "INSERT INTO " + TBL_GROUP + " " +
                     "(ID,MANDATOR,AUTOMANDATOR,ISSYSTEM,NAME,COLOR,CREATED_BY,CREATED_AT,MODIFIED_BY,MODIFIED_AT) VALUES (" +
-                    "?,?," + newId + ",TRUE,?,?,?,?,?,?)";
+                    "?,?,?,?,?,?,?,?,?,?)";
             ps = con.prepareStatement(sql);
             long gid = seq.getId(FxSystemSequencer.GROUP);
             ps.setLong(1, gid);
             ps.setLong(2, newId);
-            ps.setString(3, "Everyone (" + name.trim() + ")");
-            ps.setString(4, "#00AA00");
-            ps.setLong(5, 0);
-            ps.setLong(6, NOW);
+            ps.setLong(3, newId);
+            ps.setBoolean(4, true);
+            ps.setString(5, "Everyone (" + name.trim() + ")");
+            ps.setString(6, "#00AA00");
             ps.setLong(7, 0);
             ps.setLong(8, NOW);
+            ps.setLong(9, 0);
+            ps.setLong(10, NOW);
             ps.executeUpdate();
             StructureLoader.addMandator(FxContext.get().getDivisionId(), new Mandator(newId, name.trim(), -1, active,
                     new LifeCycleInfoImpl(ticket.getUserId(), NOW, ticket.getUserId(), NOW)));

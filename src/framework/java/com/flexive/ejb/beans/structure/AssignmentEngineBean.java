@@ -155,10 +155,10 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                             append("(ID,NAME,DEFMINMULT,DEFMAXMULT,MAYOVERRIDEMULT,DATATYPE,REFTYPE," +
                             //8                9   10             11      12
                             "ISFULLTEXTINDEXED,ACL,MAYOVERRIDEACL,REFLIST,UNIQUEMODE," +
-                            //           13
+                            //13         14
                             "SYSINTERNAL,DEFAULT_VALUE)VALUES(" +
                             "?,?,?,?,?," +
-                            "?,?,?,?,?,?,?,FALSE,?)");
+                            "?,?,?,?,?,?,?,?,?)");
             ps = con.prepareStatement(sql.toString());
             ps.setLong(1, newPropertyId);
             ps.setString(2, property.getName());
@@ -178,10 +178,11 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             else
                 ps.setNull(11, java.sql.Types.NUMERIC);
             ps.setInt(12, property.getUniqueMode().getId());
+            ps.setBoolean(13, false);
             if (_def == null)
-                ps.setNull(13, java.sql.Types.VARCHAR);
+                ps.setNull(14, java.sql.Types.VARCHAR);
             else
-                ps.setString(13, _def);
+                ps.setString(14, _def);
             if (!property.isAutoUniquePropertyName())
                 ps.executeUpdate();
             else {
@@ -234,12 +235,8 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             ps.setLong(2, typeId);
             ResultSet rs = ps.executeQuery();
             long pos = 0;
-            if (rs != null && rs.next()) {
-                if (rs.wasNull())
-                    pos = 0; //actually impossible to happen
-                else
-                    pos = rs.getLong(1);
-            }
+            if (rs != null && rs.next())
+                pos = rs.getLong(1);
             ps.close();
             storeOptions(con, TBL_PROPERTY_OPTIONS, "ID", newPropertyId, null, property.getOptions());
             sql.setLength(0);
@@ -704,12 +701,8 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             ps.setLong(2, typeId);
             ResultSet rs = ps.executeQuery();
             long pos = 0;
-            if (rs != null && rs.next()) {
-                if (rs.wasNull())
-                    pos = 0;
-                else
-                    pos = rs.getLong(1);
-            }
+            if (rs != null && rs.next())
+                pos = rs.getLong(1);
             ps.close();
             storeOptions(con, TBL_GROUP_OPTIONS, "ID", newGroupId, null, group.getOptions());
             sql.setLength(0);
@@ -2014,7 +2007,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 //                                                                                4                 5
                 "(SELECT COALESCE(MAX(POS)+1,0) FROM " + TBL_STRUCT_ASSIGNMENTS + " WHERE TYPEDEF=? AND PARENTGROUP=?)",
                 //6
-                "?"));
+                "?")).append(StorageManager.getFromDual());
         try {
             ps = con.prepareStatement(sql.toString());
             ps.setLong(1, typeId);

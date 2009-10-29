@@ -163,12 +163,12 @@ public final class Database {
     }
 
     /**
-     * Retrieves a database connection.
+     * Retrieves a DataSource.
      *
      * @param divisionId the division id
      * @param useTX      request transaction support?
-     * @return a database connection
-     * @throws SQLException If no connection could be retrieved
+     * @return a DataSource
+     * @throws SQLException If no DataSource could be retrieved
      */
     private static DataSource getDataSource(int divisionId, boolean useTX) throws SQLException {
         // Check division
@@ -228,6 +228,14 @@ public final class Database {
         }
     }
 
+    /**
+     * Retrieves a DataSource by its name.
+     *
+     * @param dataSourceName name of the DataSource
+     * @return a DataSource
+     * @throws SQLException If no DataSource could be retrieved
+     * @throws NamingException on lookup errors
+     */
     public static synchronized DataSource getDataSource(String dataSourceName) throws NamingException, SQLException {
         if (dataSourcesByName.containsKey(dataSourceName)) {
             return dataSourcesByName.get(dataSourceName);
@@ -323,6 +331,12 @@ public final class Database {
         }
     }
 
+    /**
+     * Get a list of possible JNDI datasource lookup strings
+     *
+     * @param dataSourceName name of the requested datasource
+     * @return list of possible JNDI lookup strings for the datasource
+     */
     private static String[] getPossibleJndiNames(String dataSourceName) {
         return new String[]{
                 dataSourceName,

@@ -116,6 +116,16 @@ public class GenericBinarySQLStorage implements BinaryStorage {
     protected static final String CONTENT_BINARY_REMOVE_RESET_TYPE = "UPDATE " + TBL_CONTENT + " SET DBIN_ID=-1 WHERE TDEF=?";
 
     /**
+     * Are statements like "insert into ... select ?,... from ..." allowed where ? directly sets the binary stream?
+     *
+     * @return if such a statement is allowed
+     */
+    protected boolean blobInsertSelectAllowed() {
+        return true;
+    }
+
+
+    /**
      * {@inheritDoc}
      */
     public OutputStream receiveTransitBinary(int divisionId, String handle, long expectedSize, long ttl) throws SQLException, IOException {
@@ -128,9 +138,10 @@ public class GenericBinarySQLStorage implements BinaryStorage {
                 con = Database.getDbConnection(divisionId);
                 try {
                     //create a dummy entry
-                    ps = con.prepareStatement("INSERT INTO " + DatabaseConst.TBL_BINARY_TRANSIT + " (BKEY,FBLOB,TFER_DONE,EXPIRE) VALUES(?,NULL,TRUE,?)");
+                    ps = con.prepareStatement("INSERT INTO " + DatabaseConst.TBL_BINARY_TRANSIT + " (BKEY,FBLOB,TFER_DONE,EXPIRE) VALUES(?,NULL,?,?)");
                     ps.setString(1, handle);
-                    ps.setLong(2, System.currentTimeMillis() + ttl);
+                    ps.setBoolean(2, true);
+                    ps.setLong(3, System.currentTimeMillis() + ttl);
                     ps.executeUpdate();
                 } finally {
                     Database.closeObjects(GenericBinarySQLStorage.class, con, ps);
@@ -433,12 +444,18 @@ public class GenericBinarySQLStorage implements BinaryStorage {
                     throw new FxDbException("ex.content.binary.transitNotFound", binary.getHandle());
             }
 
+            boolean needExplicitBlobInsert = false;
             if (!copyBlob) {
                 //we do not perform a simple blob copy operation in the database
                 if (dbStorage) {
                     //binary is stored in database -> copy it from the transit file (might be a temp. file)
-                    fis = new FileInputStream(binaryTransit);
-                    ps.setBinaryStream(4, fis, (int) binaryTransit.length());
+                    if (blobInsertSelectAllowed()) {
+                        fis = new FileInputStream(binaryTransit);
+                        ps.setBinaryStream(4, fis, (int) binaryTransit.length());
+                    } else {
+                        ps.setNull(4, java.sql.Types.BINARY);
+                        needExplicitBlobInsert = true;
+                    }
                 } else {
                     //binary is stored on the filesystem -> copy transit file to binary storage file
                     try {
@@ -465,6 +482,16 @@ public class GenericBinarySQLStorage implements BinaryStorage {
             ps.setString(cnt++, created.getMd5sum());
             ps.setString(cnt, binary.getHandle());
             ps.executeUpdate();
+            if (needExplicitBlobInsert) {
+                ps.close();
+                ps = con.prepareStatement("UPDATE " + TBL_CONTENT_BINARY + " SET FBLOB=? WHERE ID=? AND VER=? AND QUALITY=?");
+                fis = new FileInputStream(binaryTransit);
+                ps.setBinaryStream(1, fis, (int) binaryTransit.length());
+                ps.setLong(2, created.getId());
+                ps.setInt(3, created.getVersion()); //version
+                ps.setInt(4, created.getQuality()); //quality
+                ps.executeUpdate();
+            }
             if (removeTransitFile && binaryTransit != null) {
                 //transit file was a temp. file -> got to clean up
                 FxFileUtils.removeFile(binaryTransit);

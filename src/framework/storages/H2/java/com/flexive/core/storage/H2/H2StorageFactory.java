@@ -68,6 +68,8 @@ import java.util.Map;
 public class H2StorageFactory implements DBStorage {
     private static final Log LOG = LogFactory.getLog(H2StorageFactory.class);
     private final static String VENDOR = "H2";
+    final static String TRUE = "TRUE";
+    final static String FALSE = "FALSE";
 
     /**
      * {@inheritDoc}
@@ -149,6 +151,27 @@ public class H2StorageFactory implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    public String getBooleanTrueExpression() {
+        return TRUE;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getBooleanFalseExpression() {
+        return FALSE;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String escapeReservedWords(String query) {
+        return query; //nothing to escape
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public String getIfFunction(String condition, String exprtrue, String exprfalse) {
         return "CASEWHEN(" + condition + "," + exprtrue + "," + exprfalse + ")";
     }
@@ -213,6 +236,13 @@ public class H2StorageFactory implements DBStorage {
             sb.append(',').append(s);
         sb.append(')');
         return sb.toString();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getFromDual() {
+        return "";
     }
 
     /**

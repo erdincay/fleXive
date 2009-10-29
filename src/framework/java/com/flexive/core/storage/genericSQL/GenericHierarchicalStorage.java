@@ -119,14 +119,14 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
 
     //single insert statement for content data
     protected static final String CONTENT_DATA_INSERT = "INSERT INTO " + TBL_CONTENT_DATA +
-            //1  2   3   4    5      6     7         8     9      10          11        12                 13      14    15          16
+            //1  2   3   4    5      6     7         8     9      10          11        12         13      14      15    16          17
             "(ID,VER,POS,LANG,ASSIGN,XPATH,XPATHMULT,XMULT,XINDEX,PARENTXMULT,ISMAX_VER,ISLIVE_VER,ISGROUP,ISMLDEF,TPROP,PARENTXPATH,XDEPTH," +
-            //17     18   19     20     21    22    23     24   25      26
+            //18     19   20     21     22    23    24     25   26      27
             "FSELECT,FREF,FDATE1,FDATE2,FBLOB,FCLOB,UFCLOB,FINT,FBIGINT,FTEXT1024," +
-            //27        28      29     30
+            //28        29      30     31
             "UFTEXT1024,FDOUBLE,FFLOAT,FBOOL)" +
-            //                              ISGROUP     16
-            "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,false,?,?,?,?," +
+            //                              ISGROUP 17
+            "VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?," +
             "?,?,?,?,?,?,?,?,?,?," +
             "?,?,?,?)";
 
@@ -195,12 +195,12 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
 
     //prepared statement positions
     protected final static int INSERT_LANG_POS = 4;
-    protected final static int INSERT_ISDEF_LANG_POS = 13;
+    protected final static int INSERT_ISDEF_LANG_POS = 14;
     //position of first value
-    protected final static int INSERT_VALUE_POS = 16;
+    protected final static int INSERT_VALUE_POS = 17;
     //position of last value
-    protected final static int INSERT_END_POS = 30;
-    //position of the id field (start of the wqhere clause) for detail updates
+    protected final static int INSERT_END_POS = 31;
+    //position of the id field (start of the where clause) for detail updates
     protected final static int UPDATE_ID_POS = 17;
     protected final static int UPDATE_POS_POS = 1;
     protected final static int UPDATE_MLDEF_POS = 2;
@@ -219,52 +219,52 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         detailColumnInsertPosHash = new HashMap<FxDataType, int[]>(20);
         detailColumnUpdatePosHash = new HashMap<FxDataType, int[]>(20);
         detailColumnNameHash.put(FxDataType.Binary, array("FBLOB"));
-        detailColumnInsertPosHash.put(FxDataType.Binary, array(21));
+        detailColumnInsertPosHash.put(FxDataType.Binary, array(22));
         detailColumnUpdatePosHash.put(FxDataType.Binary, array(7));
         detailColumnNameHash.put(FxDataType.Boolean, array("FBOOL"));
-        detailColumnInsertPosHash.put(FxDataType.Boolean, array(30));
+        detailColumnInsertPosHash.put(FxDataType.Boolean, array(31));
         detailColumnUpdatePosHash.put(FxDataType.Boolean, array(16));
         detailColumnNameHash.put(FxDataType.Date, array("FDATE1"));
-        detailColumnInsertPosHash.put(FxDataType.Date, array(19));
+        detailColumnInsertPosHash.put(FxDataType.Date, array(20));
         detailColumnUpdatePosHash.put(FxDataType.Date, array(5));
         detailColumnNameHash.put(FxDataType.DateRange, array("FDATE1", "FDATE2"));
-        detailColumnInsertPosHash.put(FxDataType.DateRange, array(19, 20));
+        detailColumnInsertPosHash.put(FxDataType.DateRange, array(20, 21));
         detailColumnUpdatePosHash.put(FxDataType.DateRange, array(5, 6));
         detailColumnNameHash.put(FxDataType.DateTime, array("FDATE1"));
-        detailColumnInsertPosHash.put(FxDataType.DateTime, array(19));
+        detailColumnInsertPosHash.put(FxDataType.DateTime, array(20));
         detailColumnUpdatePosHash.put(FxDataType.DateTime, array(5));
         detailColumnNameHash.put(FxDataType.DateTimeRange, array("FDATE1", "FDATE2"));
-        detailColumnInsertPosHash.put(FxDataType.DateTimeRange, array(19, 20));
+        detailColumnInsertPosHash.put(FxDataType.DateTimeRange, array(20, 21));
         detailColumnUpdatePosHash.put(FxDataType.DateTimeRange, array(5, 6));
         detailColumnNameHash.put(FxDataType.Double, array("FDOUBLE"));
-        detailColumnInsertPosHash.put(FxDataType.Double, array(28));
+        detailColumnInsertPosHash.put(FxDataType.Double, array(29));
         detailColumnUpdatePosHash.put(FxDataType.Double, array(14));
         detailColumnNameHash.put(FxDataType.Float, array("FFLOAT"));
-        detailColumnInsertPosHash.put(FxDataType.Float, array(29));
+        detailColumnInsertPosHash.put(FxDataType.Float, array(30));
         detailColumnUpdatePosHash.put(FxDataType.Float, array(15));
         detailColumnNameHash.put(FxDataType.LargeNumber, array("FBIGINT"));
-        detailColumnInsertPosHash.put(FxDataType.LargeNumber, array(25));
+        detailColumnInsertPosHash.put(FxDataType.LargeNumber, array(26));
         detailColumnUpdatePosHash.put(FxDataType.LargeNumber, array(11));
         detailColumnNameHash.put(FxDataType.Number, array("FINT"));
-        detailColumnInsertPosHash.put(FxDataType.Number, array(24));
+        detailColumnInsertPosHash.put(FxDataType.Number, array(25));
         detailColumnUpdatePosHash.put(FxDataType.Number, array(10));
         detailColumnNameHash.put(FxDataType.Reference, array("FREF"));
-        detailColumnInsertPosHash.put(FxDataType.Reference, array(18));
+        detailColumnInsertPosHash.put(FxDataType.Reference, array(19));
         detailColumnUpdatePosHash.put(FxDataType.Reference, array(4));
         detailColumnNameHash.put(FxDataType.String1024, array("FTEXT1024"));
-        detailColumnInsertPosHash.put(FxDataType.String1024, array(26));
+        detailColumnInsertPosHash.put(FxDataType.String1024, array(27));
         detailColumnUpdatePosHash.put(FxDataType.String1024, array(12));
         detailColumnNameHash.put(FxDataType.Text, array("FCLOB"));
-        detailColumnInsertPosHash.put(FxDataType.Text, array(22));
+        detailColumnInsertPosHash.put(FxDataType.Text, array(23));
         detailColumnUpdatePosHash.put(FxDataType.Text, array(8));
         detailColumnNameHash.put(FxDataType.HTML, array("FCLOB", "FBOOL", "UFCLOB"));
-        detailColumnInsertPosHash.put(FxDataType.HTML, array(22, 30, 23));
+        detailColumnInsertPosHash.put(FxDataType.HTML, array(23, 31, 24));
         detailColumnUpdatePosHash.put(FxDataType.HTML, array(8, 16, 9));
         detailColumnNameHash.put(FxDataType.SelectOne, array("FSELECT"));
-        detailColumnInsertPosHash.put(FxDataType.SelectOne, array(17));
+        detailColumnInsertPosHash.put(FxDataType.SelectOne, array(18));
         detailColumnUpdatePosHash.put(FxDataType.SelectOne, array(3));
         detailColumnNameHash.put(FxDataType.SelectMany, array("FSELECT", "FTEXT1024"/*comma separated list of selected id's*/, "FINT" /*number of selected options*/));
-        detailColumnInsertPosHash.put(FxDataType.SelectMany, array(17, 26/*comma separated list of selected id's*/, 24/*number of selected options*/));
+        detailColumnInsertPosHash.put(FxDataType.SelectMany, array(18, 27/*comma separated list of selected id's*/, 25/*number of selected options*/));
         detailColumnUpdatePosHash.put(FxDataType.SelectMany, array(3, 12/*comma separated list of selected id's*/, 10/*number of selected options*/));
 
         mainColumnHash = new HashMap<Long, String[]>(20);
@@ -378,9 +378,9 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             return -1;
         switch (prop.getDataType()) {
             case String1024:
-                return insert ? 27 : 13; //UFTEXT1024
+                return insert ? 28 : 13; //UFTEXT1024
             case Text:
-                return insert ? 23 : 9; //UFCLOB
+                return insert ? 24 : 9; //UFCLOB
             default:
                 return -1;
         }
@@ -900,7 +900,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             return;
         }
         clearPreparedStatement(ps, INSERT_VALUE_POS, INSERT_END_POS);
-        ps.setLong(17, 0); //FSELECT has to be set to 0 and not null
+        ps.setLong(18, 0); //FSELECT has to be set to 0 and not null
 
         ps.setLong(1, pk.getId());
         ps.setInt(2, pk.getVersion());
@@ -914,9 +914,10 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         ps.setString(10, getParentGroupXMult(xmult));
         ps.setBoolean(11, isMaxVer);
         ps.setBoolean(12, isLiveVer);
-        ps.setLong(14, prop.getId());
-        ps.setString(15, XPathElement.stripType(data.getParent().getXPathFull()));
-        ps.setInt(16, data.getIndices().length);
+        ps.setBoolean(13, false); //ISGROUP
+        ps.setLong(15, prop.getId());
+        ps.setString(16, XPathElement.stripType(data.getParent().getXPathFull()));
+        ps.setInt(17, data.getIndices().length);
 
         if (!data.getValue().isMultiLanguage()) {
             ps.setBoolean(INSERT_LANG_POS, true);

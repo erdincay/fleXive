@@ -1101,6 +1101,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
         if (name != null) name = name.toUpperCase();
         if (loginName != null) loginName = loginName.toUpperCase();
 
+        final String TRUE = StorageManager.getBooleanTrueExpression();
         String curSql = "SELECT " + "" +
                 (isCountOnly ? "COUNT(*)" :
                         //   1      2         3              4            5        6
@@ -1116,8 +1117,8 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
                 ((name != null && name.length() > 0) ? " AND UPPER(usr.USERNAME) LIKE '%" + name + "%'" : "") +
                 ((loginName != null && loginName.length() > 0) ? " AND UPPER(usr.LOGIN_NAME) LIKE '%" + loginName + "%'" : "") +
                 ((email != null && email.length() > 0) ? " AND UPPER(usr.EMAIL) LIKE '%" + email + "%'" : "") +
-                ((isActive != null) ? " AND usr.IS_ACTIVE" + (isActive ? "=" : "<>") + "TRUE" : "") +
-                ((isConfirmed != null) ? " AND usr.IS_VALIDATED" + (isConfirmed ? "=" : "<>") + "TRUE" : "") +
+                ((isActive != null) ? " AND usr.IS_ACTIVE" + (isActive ? "=" : "<>") + TRUE : "") +
+                ((isConfirmed != null) ? " AND usr.IS_VALIDATED" + (isConfirmed ? "=" : "<>") + TRUE : "") +
 
                 // Group link
                 ((!filterByGrp) ? "" :

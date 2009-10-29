@@ -43,6 +43,21 @@
         Password a
     </Resource>
     -->
+    <!-- Oracle XE settings -->
+    <!--
+    <Resource id="jdbc/flexiveConfiguration" type="DataSource">
+        JdbcDriver oracle.jdbc.OracleDriver
+        JdbcUrl jdbc:oracle:thin:@localhost:1521/XE
+        UserName flexiveConfiguration
+        Password a
+    </Resource>
+    <Resource id="jdbc/flexiveTest" type="DataSource">
+        JdbcDriver oracle.jdbc.OracleDriver
+        JdbcUrl jdbc:oracle:thin:@localhost:1521/XE
+        UserName flexiveTest
+        Password a
+    </Resource>
+    -->
     <SecurityService id="Default Security Service"/>
     <Deployments jar="../../build/framework/jar/flexive-ejb.jar"/>
     <!--TransactionService id="Default Transaction Manager"/-->

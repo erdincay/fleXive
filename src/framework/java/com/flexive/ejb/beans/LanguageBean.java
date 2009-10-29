@@ -33,6 +33,8 @@ package com.flexive.ejb.beans;
 
 import com.flexive.core.Database;
 import static com.flexive.core.DatabaseConst.*;
+
+import com.flexive.core.storage.StorageManager;
 import com.flexive.core.structure.StructureLoader;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxContext;
@@ -196,7 +198,8 @@ public class LanguageBean implements LanguageEngine, LanguageEngineLocal {
     private synchronized List<FxLanguage> loadAll(boolean used, boolean add2cache) {
         String sql = "SELECT l.LANG_CODE, l.ISO_CODE, t.LANG, t.DESCRIPTION FROM " + TBL_LANG + " l, " +
                 TBL_LANG + ML + " t " +
-                "WHERE t.LANG_CODE=l.LANG_CODE AND l.INUSE=" + used + " ORDER BY l.DISPPOS ASC, l.LANG_CODE ASC";
+                "WHERE t.LANG_CODE=l.LANG_CODE AND l.INUSE=" + StorageManager.getBooleanExpression(used) +
+                " ORDER BY l.DISPPOS ASC, l.LANG_CODE ASC";
         Connection con = null;
         Statement stmt = null;
         List<FxLanguage> alLang = new ArrayList<FxLanguage>(140);

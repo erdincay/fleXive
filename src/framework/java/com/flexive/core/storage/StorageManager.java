@@ -91,6 +91,13 @@ public class StorageManager {
         return storage;
     }
 
+    /**
+     * Get the DBStorage for the named vendor.
+     * If not found a RuntimeException will be thrown
+     *
+     * @param vendor named vendor
+     * @return DBStorage
+     */
     public static DBStorage getStorageImpl(String vendor) {
         DBStorage storage = storages.get(vendor);
         if (storage == null)
@@ -189,6 +196,44 @@ public class StorageManager {
      */
     public static SqlDialect getCmisSqlDialect(FxEnvironment environment, ContentEngine contentEngine, CmisSqlQuery query, boolean returnPrimitives) {
         return getStorageImpl().getCmisSqlDialect(environment, contentEngine, query, returnPrimitives);
+    }
+
+    /**
+     * Get the database vendor specific Boolean expression
+     *
+     * @param flag the flag to get the expression for
+     * @return database vendor specific Boolean expression for <code>flag</code>
+     */
+    public static String getBooleanExpression(boolean flag) {
+        return flag ? getBooleanTrueExpression() : getBooleanFalseExpression();
+    }
+
+    /**
+     * Get the boolean <code>true</code> expression string for the used database vendor
+     *
+     * @return the boolean <code>true</code> expression string for the used database vendor
+     */
+    public static String getBooleanTrueExpression() {
+       return getStorageImpl().getBooleanTrueExpression();
+    }
+
+    /**
+     * Get the boolean <code>false</code> expression string for the used database vendor
+     *
+     * @return the boolean <code>false</code> expression string for the used database vendor
+     */
+    public static String getBooleanFalseExpression() {
+       return getStorageImpl().getBooleanFalseExpression(); 
+    }
+
+    /**
+     * Escape reserved words properly if needed
+     *
+     * @param query the query to escape
+     * @return escaped query
+     */
+    public static String escapeReservedWords(String query) {
+        return getStorageImpl().escapeReservedWords(query);
     }
 
     /**
@@ -333,5 +378,14 @@ public class StorageManager {
      */
     public static String concat_ws(String delimiter, String... text) {
         return getStorageImpl().concat_ws(delimiter, text);
+    }
+
+    /**
+     * If a database needs a " ... from dual" to generate valid queries, it is returned here
+     *
+     * @return from dual (or equivalent) if needed
+     */
+    public static String getFromDual() {
+        return getStorageImpl().getFromDual();
     }
 }
