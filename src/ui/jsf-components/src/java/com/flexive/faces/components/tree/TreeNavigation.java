@@ -4,6 +4,8 @@ import com.flexive.faces.FxJsfComponentUtils;
 import com.flexive.faces.javascript.FxJavascriptUtils;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
+import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNode;
@@ -23,6 +25,8 @@ import javax.faces.event.FacesEvent;
 import javax.faces.event.FacesListener;
 import javax.faces.event.PhaseId;
 import java.io.IOException;
+import java.util.Set;
+import java.util.HashSet;
 
 /**
  * <p>The flexive tree navigation component. Renders part of the topic tree as
@@ -114,6 +118,7 @@ public class TreeNavigation extends UIOutput implements NamingContainer {
     private Integer depth;
     private String menuOptions;
     private String treeOptions;
+    private Long baseTypeId;
 
     private transient String selectedPathCache;
     private transient FxTreeNode treeCache;
@@ -301,6 +306,7 @@ public class TreeNavigation extends UIOutput implements NamingContainer {
     private class Renderer {
         protected final ResponseWriter out;
         protected final FacesContext context;
+        protected final Set<Long> validTypeIds;
 
         public Renderer(FacesContext context) {
             this.context = context;
@@ -310,6 +316,20 @@ public class TreeNavigation extends UIOutput implements NamingContainer {
             }
             if (getVar() == null) {
                 throw new IllegalArgumentException("Required attribute \"var\" not specified.");
+            }
+            // store all type IDs that should be filtered
+            if (getBaseTypeId() == -1) {
+                // all types
+                this.validTypeIds = null;
+            } else {
+                // only render the base type and all derived types
+                this.validTypeIds = new HashSet<Long>();
+                validTypeIds.add(getBaseTypeId());
+                validTypeIds.addAll(
+                        FxSharedUtils.getSelectableObjectIdList(
+                            CacheAdmin.getEnvironment().getType(getBaseTypeId()).getDerivedTypes(true)
+                        )
+                );
             }
         }
 
@@ -321,6 +341,9 @@ public class TreeNavigation extends UIOutput implements NamingContainer {
             out.startElement("ul", null);
             out.writeAttribute("class", CSS_TREE, null);
             for (FxTreeNode child : node.getChildren()) {
+                if (validTypeIds != null && !validTypeIds.contains(child.getReferenceTypeId())) {
+                    continue;   // type filter not matched
+                }
                 out.startElement("li", null);
                 out.writeAttribute("class", getElementClass(child), null);
 
@@ -559,6 +582,32 @@ public class TreeNavigation extends UIOutput implements NamingContainer {
         this.treeOptions = treeOptions;
     }
 
+    public long getBaseTypeId() {
+        if (baseTypeId == null) {
+            // check baseTypeId attribute
+            long id = FxJsfComponentUtils.getLongValue(this, "baseTypeId", -1);
+            if (id != -1) {
+                return id;
+            }
+            
+            // check baseTypeName attribute
+            String name = FxJsfComponentUtils.getStringValue(this, "baseTypeName", null);
+            if (name != null) {
+                return CacheAdmin.getEnvironment().getType(name).getId();
+            }
+            return -1;
+        }
+        return baseTypeId;
+    }
+
+    public void setBaseTypeId(long baseTypeId) {
+        this.baseTypeId = baseTypeId;
+    }
+
+    public void setBaseTypeName(String baseTypeName) {
+        this.baseTypeId = CacheAdmin.getEnvironment().getType(baseTypeName).getId();
+    }
+
     public String getVar() {
         if (var == null) {
             return FxJsfComponentUtils.getStringValue(this, "var");
@@ -650,7 +699,7 @@ public class TreeNavigation extends UIOutput implements NamingContainer {
 
     @Override
     public Object saveState(FacesContext context) {
-        final Object[] state = new Object[11];
+        final Object[] state = new Object[12];
         state[0] = super.saveState(context);
         state[1] = mode;
         state[2] = nodeId;
@@ -662,6 +711,7 @@ public class TreeNavigation extends UIOutput implements NamingContainer {
         state[8] = treeOptions;
         state[9] = selectedNodeId;
         state[10] = selectedPath;
+        state[11] = baseTypeId;
         return state;
     }
 
@@ -679,5 +729,6 @@ public class TreeNavigation extends UIOutput implements NamingContainer {
         this.treeOptions = (String) state[8];
         this.selectedNodeId = (Long) state[9];
         this.selectedPath = (String) state[10];
+        this.baseTypeId = (Long) state[11];
     }
 }

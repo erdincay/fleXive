@@ -2315,6 +2315,15 @@
                                 </para>
                             </listitem>
                         </varlistentry>
+                        <varlistentry>
+                            <term>baseTypeId/baseTypeName</term>
+                            <listitem>
+                                <para>
+                                    An optional type filter for the rendered nodes. Only nodes whose reference
+                                    is of the given type (or a subtype of the given type) are rendered.
+                                </para>
+                            </listitem>
+                        </varlistentry>
                     </variablelist>
                 </section>
 
