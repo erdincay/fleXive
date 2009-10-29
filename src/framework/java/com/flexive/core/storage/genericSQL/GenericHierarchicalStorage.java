@@ -566,6 +566,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 flatStorage.setPropertyData(con, pk, content.getTypeId(), content.getStepId(),
                         content.isMaxVersion(), content.isLiveVersion(), flatStorage.getFlatPropertyData(content.getRootGroup()));
             }
+            syncFQNName(con, content, pk, null);
             checkUniqueConstraints(con, env, sql, pk, content.getTypeId());
             binaryStorage.updateContentBinaryEntry(con, pk, content.getBinaryPreviewId(), content.getBinaryPreviewACL());
             ft.commitChanges();
@@ -2126,7 +2127,18 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     }
 
     private void syncFQNName(Connection con, FxContent content, FxPK pk, FxDelta.FxDeltaChange change) throws FxApplicationException {
-        FxValue val = ((FxPropertyData) change.getNewData()).getValue();
+        FxValue val;
+        if (change != null) {
+            val = ((FxPropertyData) change.getNewData()).getValue();
+        } else {
+            //check if there is a FQN property and sync that one (used when creating a new version)
+            long fqnPropertyId = EJBLookup.getConfigurationEngine().get(SystemParameters.TREE_FQN_PROPERTY);
+            List<FxPropertyData> pd = content.getPropertyData(fqnPropertyId, false);
+            if( pd.size() > 0 )
+                val = pd.get(0).getValue();
+            else
+                return;
+        }
         if (!val.isEmpty() && val instanceof FxString) {
             StorageManager.getTreeStorage().syncFQNName(con, pk.getId(), content.isMaxVersion(), content.isLiveVersion(), (String) val.getBestTranslation());
         }
