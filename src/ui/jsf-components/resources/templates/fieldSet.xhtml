@@ -14,12 +14,16 @@ Basic [fleXive3] form group (fieldset).
 Parameters:
 legend = label of the fieldset (usually displayed in the top border)
 legendKey = message key for the label (if specified, the legend attribute is ignored)
-width = overrides the default width of the fieldset, which also affects any nested form rows
+width = width in px, overrides the default width of the fieldset, which also affects any nested form rows
+relativeWidth = width in %, overrides the default width of the fieldset, which also affects any nested form rows
 
 <ui:composition>
 
 <c:if test="#{!empty width}">
     <c:set var="overrideStyle" value="#{overrideStyle};width:#{width}px"/>
+</c:if>
+<c:if test="#{!empty relativeWidth}">
+    <c:set var="overrideStyle" value="#{overrideStyle};width:#{relativeWidth}%"/>
 </c:if>
 <c:if test="#{!empty legendKey}">
     <c:set var="legend" value="#{fxMessageBean[legendKey]}"/>

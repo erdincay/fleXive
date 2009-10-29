@@ -241,7 +241,14 @@
             <name>width</name>
             <required>false</required>
             <rtexprvalue>false</rtexprvalue>
-            <description>overrides the default width of the fieldset, which also affects any nested form rows
+            <description>width in px, overrides the default width of the fieldset, which also affects any nested form rows
+            </description>
+        </attribute>
+        <attribute>
+            <name>relativeWidth</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>width in %, overrides the default width of the fieldset, which also affects any nested form rows
             </description>
         </attribute>
     </tag>
