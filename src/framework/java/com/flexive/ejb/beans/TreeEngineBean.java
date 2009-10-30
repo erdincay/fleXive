@@ -801,7 +801,7 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
                 return node;
             }
         }
-        throw new FxNotFoundException(LOG, "ex.tree.nodeNotFound.name", name, mode, nodeId);
+        throw new FxNotFoundException("ex.tree.nodeNotFound.name", name, mode, nodeId);
     }
 
     /**
@@ -812,7 +812,7 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
         for (FxTreeNode node : getTree(mode, nodeId, 1).getChildren())
             if (node.getReference().getId() == referenceId)
                 return node;
-        throw new FxNotFoundException(LOG, "ex.tree.nodeNotFound.reference", referenceId, mode, nodeId);
+        throw new FxNotFoundException("ex.tree.nodeNotFound.reference", referenceId, mode, nodeId);
     }
 
     /**
