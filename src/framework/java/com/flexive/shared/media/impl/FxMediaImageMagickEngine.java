@@ -78,11 +78,11 @@ public class FxMediaImageMagickEngine {
             if (ver.length == 3) {
                 int i = 0, j = 0, k = 0;
                 try {
-                    i = Integer.parseInt(ver[0]);
-                    j = Integer.parseInt(ver[1]);
-                    k = Integer.parseInt(ver[2]);
+                    i = safeFormatIMNumber(ver[0]);
+                    j = safeFormatIMNumber(ver[1]);
+                    k = safeFormatIMNumber(ver[2]);
                 } catch (NumberFormatException e) {
-                    LOG.error(e);
+                    LOG.error("Could not format: " + IM_VERSION, e);
                 }
                 IM_MAJOR = i;
                 IM_MINOR = j;
@@ -99,6 +99,23 @@ public class FxMediaImageMagickEngine {
             IM_SUB = 0;
         }
         IM_IDENTIFY_POSSIBLE = IM_AVAILABLE && (IM_MAJOR > 6 || (IM_MAJOR == 6 && IM_MINOR >= 3));
+    }
+
+    /**
+     * Format numbers like 1-0
+     *
+     * @param s number string to format
+     * @return formatted number
+     */
+    private static int safeFormatIMNumber(String s) {
+        try {
+            return Integer.parseInt(s);
+        } catch (NumberFormatException e) {
+            if (s.indexOf('-') > 0) {
+                return Integer.parseInt(s.substring(0, s.indexOf('-')));
+            }
+            throw e;
+        }
     }
 
     // Name of the identify executeable
@@ -252,7 +269,7 @@ public class FxMediaImageMagickEngine {
                 lastLevel = level;
             }
         } catch (Exception e) {
-            LOG.error("Error at [" + curr + "]:" + e.getMessage());
+            LOG.error("Error at [" + curr + "]:" + e.getMessage(), e);
         }
         writer.writeEndDocument();
         writer.flush();
