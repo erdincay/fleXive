@@ -89,9 +89,11 @@
   <component name="ProjectFileVersion" converted="true" />
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/src/framework/resources/sql/H2/StoredProcedures/H2StoreProcedures.iml" filepath="$PROJECT_DIR$/src/framework/resources/sql/H2/StoredProcedures/H2StoreProcedures.iml" />
       <module fileurl="file://$PROJECT_DIR$/docbook/docbook.iml" filepath="$PROJECT_DIR$/docbook/docbook.iml" />
       <module fileurl="file://$PROJECT_DIR$/src/framework/resources/framework.iml" filepath="$PROJECT_DIR$/src/framework/resources/framework.iml" />
+      <module fileurl="file://$PROJECT_DIR$/src/framework/storages/H2/flexive-storage-H2.iml" filepath="$PROJECT_DIR$/src/framework/storages/H2/flexive-storage-H2.iml" />
+      <module fileurl="file://$PROJECT_DIR$/src/framework/storages/MySQL/flexive-storage-MySQL.iml" filepath="$PROJECT_DIR$/src/framework/storages/MySQL/flexive-storage-MySQL.iml" />
+      <module fileurl="file://$PROJECT_DIR$/src/framework/storages/PostgreSQL/flexive-storage-PostgreSQL.iml" filepath="$PROJECT_DIR$/src/framework/storages/PostgreSQL/flexive-storage-PostgreSQL.iml" />
       <module fileurl="file://$PROJECT_DIR$/src/ui/jsf-feedbackPlugin/jsf-feedbackPlugin.iml" filepath="$PROJECT_DIR$/src/ui/jsf-feedbackPlugin/jsf-feedbackPlugin.iml" />
       <module fileurl="file://$PROJECT_DIR$/src/examples/products/products.iml" filepath="$PROJECT_DIR$/src/examples/products/products.iml" />
       <module fileurl="file://$PROJECT_DIR$/root.iml" filepath="$PROJECT_DIR$/root.iml" />

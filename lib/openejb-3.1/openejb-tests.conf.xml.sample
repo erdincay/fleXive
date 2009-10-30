@@ -3,7 +3,7 @@
     <!-- MySQL settings -->
     <Resource id="jdbc/flexiveConfiguration" type="DataSource">
         JdbcDriver com.mysql.jdbc.Driver
-        JdbcUrl jdbc:mysql://localhost/flexiveTestConfiguration
+        JdbcUrl jdbc:mysql://localhost/flexiveConfiguration
         UserName root
         Password a
     </Resource>

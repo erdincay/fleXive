@@ -327,7 +327,7 @@
             <jvmarg value="-Djava.net.preferIPv4Stack=true"/>
             <!-- JDK6 classloader policy issue w/jboss5 workaround -->
             <jvmarg value="-Dsun.lang.ClassLoader.allowArraySyntax=true"/>
-            <jvmarg value="-Xmx512m"/>
+            <jvmarg value="-Xmx768m"/>
             <jvmarg value="-server"/>
             <!--Enable the following line for log output-->
             <jvmarg value="-Dorg.apache.commons.logging.Log=org.apache.commons.logging.impl.Log4JLogger"/>
