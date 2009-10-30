@@ -781,7 +781,7 @@ CREATE TABLE FXS_TYPE_OPT (
   FOREIGN KEY (ID) REFERENCES FXS_TYPEDEF(ID)
   	ON DELETE RESTRICT ON UPDATE RESTRICT
 );
-COMMENT ON TALBE FXS_TYPE_OPT IS 'Options for types';
+COMMENT ON TABLE FXS_TYPE_OPT IS 'Options for types';
 
 -- -------------------------
 -- Property/Assignment Options
