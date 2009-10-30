@@ -12,7 +12,9 @@
       xmlns:weblet="http://weblets.dev.java.net/tags_jsp2">
 
 <ui:composition>
-    <t:saveState value="#{beContentEditorBean.beBeanInUse}"/>
+    <c:if test="#{not empty beContentEditorBean}">
+        <t:saveState value="#{beContentEditorBean.beBeanInUse}"/>
+    </c:if>
     <!-- jsf-id of parent element that would need a "reRender" on a4j action.
     unfortunately not working together with resetFaceletsComponent, so not used atm,
     instead the whole form is rerenderd -->
@@ -21,7 +23,7 @@
     <c:if test="#{_ceContent.guiSettings.editMode}">
         <!-- separate js function call for the BE app -->
         <c:set var="jsfunc" value="flexive.yui.load();"/>
-        <c:if test="#{beContentEditorBean.beBeanInUse}">
+        <c:if test="#{not empty beContentEditorBean and beContentEditorBean.beBeanInUse}">
             <c:set var="jsfunc" value="beCeAjaxButtonRequest(false);"/>
             <c:if test="#{fxSystemBean.browserAsString=='IE'}">
                 <c:set var="jsfunc" value="flexive.yui.load();"/>
