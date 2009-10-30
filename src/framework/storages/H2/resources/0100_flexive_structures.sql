@@ -698,6 +698,20 @@ CREATE TABLE FXS_ASSIGNMENTS_T (
 COMMENT ON TABLE FXS_ASSIGNMENTS_T IS 'Assignments translations';
 
 -- -------------------------
+-- TYPE Options
+-- -------------------------
+CREATE TABLE FXS_TYPE_OPT (
+  OPTKEY VARCHAR(32),
+  ID BIGINT NOT NULL,
+  PASSEDON BOOLEAN,
+  MAYOVERRIDE BOOLEAN,
+  OPTVALUE TEXT,
+  FOREIGN KEY (ID) REFERENCES FXS_TYPEDEF(ID)
+  	ON DELETE RESTRICT ON UPDATE RESTRICT
+);
+COMMENT ON TABLE FXS_TYPE_OPT IS 'Options for types';
+
+-- -------------------------
 -- Property/Assignment Options
 -- -------------------------
 CREATE TABLE FXS_PROP_OPT (

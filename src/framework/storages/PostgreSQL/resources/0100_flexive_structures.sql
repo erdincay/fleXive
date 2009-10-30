@@ -770,6 +770,20 @@ COMMENT ON COLUMN FXS_ASSIGNMENTS_T.HINT IS 'Hint messages for GUIs';
 COMMENT ON COLUMN FXS_ASSIGNMENTS_T.HINT_MLD IS 'When true, this is the default language.';
 
 -- -------------------------
+-- TYPE Options
+-- -------------------------
+CREATE TABLE FXS_TYPE_OPT (
+  OPTKEY VARCHAR(32),
+  ID BIGINT NOT NULL,
+  PASSEDON BOOLEAN,
+  MAYOVERRIDE BOOLEAN,
+  OPTVALUE TEXT,
+  FOREIGN KEY (ID) REFERENCES FXS_TYPEDEF(ID)
+  	ON DELETE RESTRICT ON UPDATE RESTRICT
+);
+COMMENT ON TALBE FXS_TYPE_OPT IS 'Options for types';
+
+-- -------------------------
 -- Property/Assignment Options
 -- -------------------------
 CREATE TABLE FXS_PROP_OPT (

@@ -792,6 +792,22 @@ COMMENT='Assignments translations'
 ROW_FORMAT=FIXED;
 
 -- -------------------------
+-- TYPE Options
+-- -------------------------
+CREATE TABLE FXS_TYPE_OPT (
+  OPTKEY VARCHAR(32),
+  ID INTEGER UNSIGNED NOT NULL,
+  MAYOVERRIDE BOOLEAN,
+  PASSEDON BOOLEAN,
+  OPTVALUE TEXT,
+  FOREIGN KEY TYPE_PROPERTY_ID(ID) REFERENCES FXS_TYPEDEF(ID)
+  	ON DELETE RESTRICT ON UPDATE RESTRICT
+)
+ENGINE = InnoDB
+DEFAULT CHARSET = LATIN1
+COMMENT = 'Options for types';
+
+-- -------------------------
 -- Property/Assignment Options
 -- -------------------------
 CREATE TABLE FXS_PROP_OPT (
