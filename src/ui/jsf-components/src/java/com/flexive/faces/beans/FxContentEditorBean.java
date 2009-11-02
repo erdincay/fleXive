@@ -271,7 +271,7 @@ public class FxContentEditorBean implements Serializable {
                 contentStorage.get(editorId).getGuiSettings().setEditMode(true);
             }
         } catch (FxApplicationException e) {
-            new FxFacesMsgErr(e.getCause()).addToContext();
+            new FxFacesMsgErr(e.getCause() != null ? e.getCause() : e).addToContext();
         }
         resetForm(contentStorage.get(editorId).getGuiSettings().getFormPrefix());
     }
@@ -675,7 +675,7 @@ public class FxContentEditorBean implements Serializable {
                 contentStorage.get(editorId).setContent(repContent);
             }
         } catch (FxApplicationException e) {
-            new FxFacesMsgErr(e.getCause()).addToContext();
+            new FxFacesMsgErr(e.getCause() != null ? e.getCause() : e).addToContext();
         }
     }
 
@@ -830,7 +830,7 @@ public class FxContentEditorBean implements Serializable {
                 hasNewOwner = true;
             }
         } catch (FxApplicationException e) {
-            new FxFacesMsgErr(e.getCause()).addToContext();
+            new FxFacesMsgErr(e.getCause() != null ? e.getCause() : e).addToContext();
         }
 
         return hasNewOwner;

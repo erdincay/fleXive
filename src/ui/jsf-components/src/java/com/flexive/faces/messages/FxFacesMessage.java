@@ -137,7 +137,9 @@ public class FxFacesMessage extends FacesMessage implements Serializable {
      * @param setSummary set the summaray to the message of the exception
      */
     private void processException(Throwable exc, boolean setDetail, boolean setSummary) {
-
+        if (exc == null) {
+            return; // don't fail if a null exception was set
+        }
         // Try to find a FX__ type within the exception stack
         Throwable tmp = exc;
         while (!isFxThrowable(tmp) && tmp.getCause() != null) {
