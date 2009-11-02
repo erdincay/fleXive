@@ -247,8 +247,8 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
             // Obtain a database connection
             con = Database.getDbConnection();
             stmt = con.createStatement();
-            stmt.addBatch("delete from " + TBL_BRIEFCASE_DATA + " where briefcase_id=" + id);
-            stmt.addBatch("delete from " + DatabaseConst.TBL_BRIEFCASE + " where id=" + id);
+            stmt.addBatch("DELETE FROM " + TBL_BRIEFCASE_DATA + " WHERE briefcase_id=" + id);
+            stmt.addBatch("DELETE FROM " + DatabaseConst.TBL_BRIEFCASE + " WHERE id=" + id);
             stmt.executeBatch();
         } catch (SQLException exc) {
             throw new FxLoadException(LOG, exc, "ex.briefcase.deleteFailed", br.getName());
@@ -672,12 +672,12 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
         try {
             // Obtain a database connection
             con = Database.getDbConnection();
-            sql = "select " +
+            sql = "SELECT " +
                     //1,   2,  3        ,  4         , 5 ,    6        7         8              9      ,  10    , 11
                     "ID,NAME,DESCRIPTION,SOURCE_QUERY,ACL,CREATED_BY,CREATED_AT,MODIFIED_BY,MODIFIED_AT,MANDATOR,ICON_ID, " +
                     // 12
-                    "(SELECT COUNT(*) FROM " + TBL_BRIEFCASE_DATA + " bd WHERE bd.briefcase_id=b.id) AS size " +
-                    "from " + DatabaseConst.TBL_BRIEFCASE + " b where ";
+                    "(SELECT COUNT(*) FROM " + TBL_BRIEFCASE_DATA + " bd WHERE bd.briefcase_id=b.id) AS \"size\"" +
+                    "FROM " + DatabaseConst.TBL_BRIEFCASE + " b WHERE ";
             sql += getSqlAccessFilter(null, includeShared, ACLPermission.READ);
             if (idFilter != null) {
                 sql += " and id=" + idFilter;

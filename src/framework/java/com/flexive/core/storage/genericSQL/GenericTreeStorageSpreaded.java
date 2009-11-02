@@ -32,6 +32,7 @@
 package com.flexive.core.storage.genericSQL;
 
 import com.flexive.core.Database;
+import com.flexive.core.storage.DBStorage;
 import com.flexive.core.storage.FxTreeNodeInfo;
 import com.flexive.core.storage.FxTreeNodeInfoSpreaded;
 import com.flexive.core.storage.StorageManager;
@@ -922,7 +923,8 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
             // Update the childcount of the new parents
             stmt = con.createStatement();
             stmt.addBatch("UPDATE " + getTable(FxTreeMode.Live) + " SET CHILDCOUNT=CHILDCOUNT+1 WHERE ID=" + destination);
-            stmt.addBatch("UPDATE " + getTable(mode) + " SET DIRTY=FALSE WHERE LFT>=" + sourceNode.getLeft() + " AND RGT<=" + sourceNode.getRight());
+            stmt.addBatch("UPDATE " + getTable(mode) + " SET DIRTY=" + StorageManager.getBooleanFalseExpression() +
+                    " WHERE LFT>=" + sourceNode.getLeft() + " AND RGT<=" + sourceNode.getRight());
             stmt.executeBatch();
             stmt.close();
         } catch (SQLException exc) {
@@ -941,14 +943,15 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
      */
     @Override
     protected void wipeTree(FxTreeMode mode, Statement stmt, FxPK rootPK) throws SQLException {
-        stmt.execute(StorageManager.getReferentialIntegrityChecksStatement(false));
+        DBStorage storage = StorageManager.getStorageImpl();
+        stmt.execute(storage.getReferentialIntegrityChecksStatement(false));
         try {
             stmt.executeUpdate("DELETE FROM " + getTable(mode));
             stmt.executeUpdate("INSERT INTO " + getTable(mode) + " (ID,NAME,MODIFIED_AT,DIRTY,PARENT,DEPTH,CHILDCOUNT,REF,TEMPLATE,LFT,RGT) " +
-                    "VALUES (" + ROOT_NODE + ",'Root'," + StorageManager.getTimestampFunction() + ",FALSE,NULL,1,0," + rootPK.getId() +
-                    ",NULL,1," + MAX_RIGHT + ")");
+                    "VALUES (" + ROOT_NODE + ",'Root'," + storage.getTimestampFunction() + "," +
+                    storage.getBooleanFalseExpression() + ",NULL,1,0," + rootPK.getId() + ",NULL,1," + MAX_RIGHT + ")");
         } finally {
-            stmt.executeUpdate(StorageManager.getReferentialIntegrityChecksStatement(true));
+            stmt.executeUpdate(storage.getReferentialIntegrityChecksStatement(true));
         }
     }
 

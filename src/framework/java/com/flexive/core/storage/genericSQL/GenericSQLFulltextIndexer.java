@@ -58,7 +58,6 @@ import java.sql.SQLException;
 public class GenericSQLFulltextIndexer implements FulltextIndexer {
     protected static final Log LOG = LogFactory.getLog(GenericSQLFulltextIndexer.class);
 
-    protected static final String CONTENT_DATA_FT_REMOVE_VERSION = "DELETE FROM " + TBL_CONTENT_DATA_FT + " WHERE ID=? AND VER=?";
     protected static final String CONTENT_DATA_FT_REMOVE = "DELETE FROM " + TBL_CONTENT_DATA_FT + " WHERE ID=?";
     protected static final String CONTENT_DATA_FT_REMOVE_TYPE = "DELETE FROM " + TBL_CONTENT_DATA_FT + " WHERE ASSIGN IN (SELECT DISTINCT ID FROM " + DatabaseConst.TBL_STRUCT_ASSIGNMENTS + " WHERE TYPEDEF=?)";
 
@@ -108,18 +107,38 @@ public class GenericSQLFulltextIndexer implements FulltextIndexer {
         }
     }
 
+    /**
+     * Get the delete statement, allows storage specific implementations to provide different statements
+     *
+     * @return delete statement
+     */
     protected String getDeleteSql() {
         return CONTENT_FULLTEXT_DELETE;
     }
 
+    /**
+     * Get the delete all statement, allows storage specific implementations to provide different statements
+     *
+     * @return delete all statement
+     */
     protected String getDeleteAllSql() {
         return CONTENT_FULLTEXT_DELETE_ALL;
     }
 
+    /**
+     * Get the insert statement, allows storage specific implementations to provide different statements
+     *
+     * @return insert statement
+     */
     protected String getInsertSql() {
         return CONTENT_FULLTEXT_INSERT;
     }
 
+    /**
+     * Get the update statement, allows storage specific implementations to provide different statements
+     *
+     * @return update statement
+     */
     protected String getUpdateSql() {
         return CONTENT_FULLTEXT_UPDATE;
     }

@@ -41,6 +41,7 @@ import com.flexive.core.flatstorage.FxFlatStorageLoadColumn;
 import com.flexive.core.flatstorage.FxFlatStorageLoadContainer;
 import com.flexive.core.flatstorage.FxFlatStorageManager;
 import com.flexive.core.storage.ContentStorage;
+import com.flexive.core.storage.DBStorage;
 import com.flexive.core.storage.FulltextIndexer;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.core.storage.binary.BinaryInputStream;
@@ -1278,9 +1279,9 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             sql.setLength(0);
         try {
             sql.append("INSERT INTO ").append(TBL_CONTENT_DATA).
-                    //                1  2   3   4    5      6     7         8            9           10        11         12
-                            append(" (ID,VER,POS,LANG,ASSIGN,XPATH,XPATHMULT,XMULT,XINDEX,PARENTXMULT,ISMAX_VER,ISLIVE_VER,PARENTXPATH,ISGROUP,ISMLDEF,XDEPTH");
-            sql.append(")VALUES(?,?,?,?,?,?,?,?,").append(groupData.getIndex()).append(",?,?,?,?,true,false,").append(groupData.getIndices().length).append(")");
+                    //                1  2   3   4    5      6     7         8     9      10          11        12         13          14      15      16     17
+                            append(" (ID,VER,POS,LANG,ASSIGN,XPATH,XPATHMULT,XMULT,XINDEX,PARENTXMULT,ISMAX_VER,ISLIVE_VER,PARENTXPATH,ISGROUP,ISMLDEF,XDEPTH,FSELECT");
+            sql.append(")VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
 
             ps = con.prepareStatement(sql.toString());
             ps.setLong(1, pk.getId());
@@ -1290,12 +1291,17 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             ps.setLong(5, groupData.getAssignmentId());
             ps.setString(6, groupData.getXPath() + "/");
             ps.setString(7, groupData.getXPathFull() + "/");
-            String xmult = StringUtils.join(ArrayUtils.toObject(groupData.getIndices()), ',');
+            final String xmult = StringUtils.join(ArrayUtils.toObject(groupData.getIndices()), ',');
             ps.setString(8, xmult);
-            ps.setString(9, getParentGroupXMult(xmult));
-            ps.setBoolean(10, isMaxVer);
-            ps.setBoolean(11, isLiveVer);
-            ps.setString(12, groupData.getParent().getXPathFull());
+            ps.setInt(9, groupData.getIndex());
+            ps.setString(10, getParentGroupXMult(xmult));
+            ps.setBoolean(11, isMaxVer);
+            ps.setBoolean(12, isLiveVer);
+            ps.setString(13, groupData.getParent().getXPathFull());
+            ps.setBoolean(14, true);
+            ps.setBoolean(15, false);
+            ps.setString(16, String.valueOf(groupData.getIndices().length));
+            ps.setLong(17, 0); //FSELECT
             ps.executeUpdate();
         } finally {
             if (ps != null)
