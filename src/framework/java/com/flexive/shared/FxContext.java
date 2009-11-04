@@ -50,6 +50,7 @@ import java.net.URLDecoder;
 import java.util.Locale;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Collections;
 
 /**
  * The [fleXive] context - user session specific data like UserTickets, etc.
@@ -601,6 +602,16 @@ public class FxContext implements Serializable {
      */
     public Object getAttribute(Object key) {
         return attributes.get(key);
+    }
+
+    /**
+     * Return a (unmodifiable) map of all attributes stored in the context.
+     *
+     * @return  a (unmodifiable) map of all attributes stored in the context.
+     * @since 3.1
+     */
+    public Map<Object, Object> getAttributeMap() {
+        return Collections.unmodifiableMap(attributes);
     }
 
     /**
