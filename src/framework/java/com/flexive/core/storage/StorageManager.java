@@ -214,7 +214,7 @@ public class StorageManager {
      * @return the boolean <code>true</code> expression string for the used database vendor
      */
     public static String getBooleanTrueExpression() {
-       return getStorageImpl().getBooleanTrueExpression();
+        return getStorageImpl().getBooleanTrueExpression();
     }
 
     /**
@@ -223,7 +223,7 @@ public class StorageManager {
      * @return the boolean <code>false</code> expression string for the used database vendor
      */
     public static String getBooleanFalseExpression() {
-       return getStorageImpl().getBooleanFalseExpression(); 
+        return getStorageImpl().getBooleanFalseExpression();
     }
 
     /**
@@ -387,5 +387,28 @@ public class StorageManager {
      */
     public static String getFromDual() {
         return getStorageImpl().getFromDual();
+    }
+
+    /**
+     * Get database vendor specific limit statement
+     *
+     * @param hasWhereClause does the query already contain a where clause?
+     * @param limit          limit
+     * @return limit statement
+     */
+    public static String getLimit(boolean hasWhereClause, long limit) {
+        return getStorageImpl().getLimit(hasWhereClause, limit);
+    }
+
+    /**
+     * Get database vendor specific limit/offset statement
+     *
+     * @param hasWhereClause does the query already contain a where clause?
+     * @param limit          limit
+     * @param offset         offset
+     * @return limit/offset statement
+     */
+    public static String getLimitOffset(boolean hasWhereClause, long limit, long offset) {
+        return getStorageImpl().getLimitOffset(hasWhereClause, limit, offset);
     }
 }

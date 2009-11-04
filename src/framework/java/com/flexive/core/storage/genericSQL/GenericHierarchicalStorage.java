@@ -41,7 +41,6 @@ import com.flexive.core.flatstorage.FxFlatStorageLoadColumn;
 import com.flexive.core.flatstorage.FxFlatStorageLoadContainer;
 import com.flexive.core.flatstorage.FxFlatStorageManager;
 import com.flexive.core.storage.ContentStorage;
-import com.flexive.core.storage.DBStorage;
 import com.flexive.core.storage.FulltextIndexer;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.core.storage.binary.BinaryInputStream;
@@ -166,8 +165,8 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     protected static final String CONTENT_STEP_DEPENDENCIES = "UPDATE " + TBL_CONTENT + " SET STEP=? WHERE STEP=? AND ID=? AND VER<>?";
 
 
-    protected static final String CONTENT_REFERENCE_LIVE = "SELECT VER, ACL, STEP, TDEF, CREATED_BY FROM " + TBL_CONTENT + " WHERE ID=? AND ISLIVE_VER=TRUE";
-    protected static final String CONTENT_REFERENCE_MAX = "SELECT VER, ACL, STEP, TDEF, CREATED_BY FROM " + TBL_CONTENT + " WHERE ID=? AND ISMAX_VER=TRUE";
+    protected static final String CONTENT_REFERENCE_LIVE = "SELECT VER, ACL, STEP, TDEF, CREATED_BY FROM " + TBL_CONTENT + " WHERE ID=? AND ISLIVE_VER=?";
+    protected static final String CONTENT_REFERENCE_MAX = "SELECT VER, ACL, STEP, TDEF, CREATED_BY FROM " + TBL_CONTENT + " WHERE ID=? AND ISMAX_VER=?";
     protected static final String CONTENT_REFERENCE_CAPTION = "SELECT FTEXT1024 FROM " + TBL_CONTENT_DATA + " WHERE ID=? AND VER=? AND TPROP=?";
     protected static final String CONTENT_REFERENCE_BYTYPE = "SELECT COUNT(DISTINCT d.ID) FROM " + TBL_CONTENT + " c, " +
             TBL_CONTENT_DATA + " d, " + TBL_STRUCT_ASSIGNMENTS + " a, " + TBL_STRUCT_PROPERTIES + " p " +
@@ -191,8 +190,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
 
     protected static final String CONTENT_ACLS_LOAD = "SELECT ACL FROM " + TBL_CONTENT_ACLS + " WHERE ID=? AND VER=?";
     protected static final String CONTENT_ACLS_CLEAR = "DELETE FROM " + TBL_CONTENT_ACLS + " WHERE ID=? AND VER=?";
-    protected static final String CONTENT_ACL_INSERT_BASE = "INSERT INTO " + TBL_CONTENT_ACLS + "(ID, VER, ACL) VALUES ";
-    protected static final String CONTENT_ACL_INSERT_VALUES = "(?, ?, ?)";
+    protected static final String CONTENT_ACL_INSERT = "INSERT INTO " + TBL_CONTENT_ACLS + "(ID, VER, ACL) VALUES (?, ?, ?)";
 
     //prepared statement positions
     protected final static int INSERT_LANG_POS = 4;
@@ -520,7 +518,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             ps.setLong(3, id);
             ps.executeUpdate();
             if (type.isContainsFlatStorageAssignments())
-                FxFlatStorageManager.getInstance().syncContentStats(con, type.getId(), id, max_ver, live_ver);
+                syncContentStats(con, type.getId(), id, max_ver, live_ver);
         } catch (SQLException e) {
             throw new FxUpdateException(LOG, e, "ex.db.sqlError", e.getMessage());
         } finally {
@@ -533,6 +531,19 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         }
     }
 
+    /**
+     * Synchronize content stats to flat storage
+     *
+     * @param con an open and valid Connection
+     * @param typeId type id
+     * @param id content id
+     * @param max_ver max. version
+     * @param live_ver live version
+     * @throws SQLException on errors
+     */
+    protected void syncContentStats(Connection con, long typeId, long id, int max_ver, int live_ver) throws SQLException {
+        FxFlatStorageManager.getInstance().syncContentStats(con, typeId, id, max_ver, live_ver);
+    }
 
     /**
      * {@inheritDoc}
@@ -795,24 +806,15 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 return; // ACL saved in main table
             }
             
-            final StringBuilder sql = new StringBuilder();
-            sql.append(CONTENT_ACL_INSERT_BASE);
-
-            // add a value tuple (?,?,?) for every ACL
-            sql.append(StringUtils.join(
-                    Collections.nCopies(aclIds.size(), CONTENT_ACL_INSERT_VALUES),
-                    ',')
-            );
-
-            // build insert for all ACLs
-            ps = con.prepareStatement(sql.toString());
-            int index = 1;
+            //insert ACLs
+            ps = con.prepareStatement(CONTENT_ACL_INSERT);
             for (long aclId : aclIds) {
-                ps.setLong(index++, pk.getId());
-                ps.setInt(index++, pk.getVersion());
-                ps.setLong(index++, aclId);
+                ps.setLong(1, pk.getId());
+                ps.setInt(2, pk.getVersion());
+                ps.setLong(3, aclId);
+                ps.addBatch();
             }
-            ps.executeUpdate();
+            ps.executeBatch();
 
         } finally {
             Database.closeObjects(GenericHierarchicalStorage.class, null, ps);
@@ -1300,7 +1302,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             ps.setString(13, groupData.getParent().getXPathFull());
             ps.setBoolean(14, true);
             ps.setBoolean(15, false);
-            ps.setString(16, String.valueOf(groupData.getIndices().length));
+            ps.setInt(16, groupData.getIndices().length);
             ps.setLong(17, 0); //FSELECT
             ps.executeUpdate();
         } finally {
@@ -1703,6 +1705,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         try {
             ps = con.prepareStatement(sql);
             ps.setLong(1, referencedId);
+            ps.setBoolean(2, true);
             ResultSet rs = ps.executeQuery();
             if (rs != null && rs.next()) {
                 referencedVersion = rs.getInt(1);
@@ -1714,6 +1717,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 ps.close();
                 ps = con.prepareStatement(CONTENT_REFERENCE_MAX);
                 ps.setLong(1, referencedId);
+                ps.setBoolean(2, true);
                 rs = ps.executeQuery();
                 if (rs != null && rs.next()) {
                     referencedVersion = rs.getInt(1);

@@ -251,6 +251,20 @@ public class MySQLStorageFactory implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    public String getLimit(boolean hasWhereClause, long limit) {
+        return " LIMIT " + limit;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getLimitOffset(boolean hasWhereClause, long limit, long offset) {
+        return " LIMIT " + limit + " OFFSET " + offset;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public boolean isForeignKeyViolation(Exception exc) {
         final int errorCode = Database.getSqlErrorCode(exc);
         //see http://dev.mysql.com/doc/refman/5.0/en/error-messages-server.html

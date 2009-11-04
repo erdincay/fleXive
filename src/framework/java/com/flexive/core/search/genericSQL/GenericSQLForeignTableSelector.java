@@ -35,6 +35,8 @@ import com.flexive.core.Database;
 import com.flexive.core.DatabaseConst;
 import com.flexive.core.search.FieldSelector;
 import com.flexive.core.search.PropertyEntry;
+import com.flexive.core.storage.DBStorage;
+import com.flexive.core.storage.StorageManager;
 import com.flexive.shared.exceptions.FxSqlSearchException;
 import com.flexive.shared.structure.FxDataType;
 import com.flexive.shared.FxSharedUtils;
@@ -80,13 +82,17 @@ class GenericSQLForeignTableSelector implements FieldSelector {
         try {
             con = Database.getDbConnection();
             stmt = con.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT * FROM " + tableName + " LIMIT 0");
+            ResultSet rs = stmt.executeQuery("SELECT * FROM " + tableName + StorageManager.getLimit(false, 0));
             ResultSetMetaData md = rs.getMetaData();
             for (int pos = 1; pos <= md.getColumnCount(); pos++) {
                 String columnName = md.getColumnName(pos);
                 FxDataType columnType;
                 switch (md.getColumnType(pos)) {
                     case java.sql.Types.CHAR:
+                        if (md.getPrecision(pos) == 1) {
+                            columnType = FxDataType.Boolean; //oracle
+                            break;
+                        }
                     case java.sql.Types.VARCHAR:
                     case java.sql.Types.LONGVARCHAR:
                         columnType = FxDataType.String1024;
@@ -143,9 +149,10 @@ class GenericSQLForeignTableSelector implements FieldSelector {
             // select label from translation table
             statement.delete(0, statement.length());
             final long lang = FxContext.getUserTicket().getLanguage().getId();
+            DBStorage storage = StorageManager.getStorageImpl();
             statement.append(("COALESCE(\n" +
-                    getLabelSelect() + "lang=" + lang + " limit 1) ,\n" +
-                    getLabelSelect() + "deflang=true limit 1) \n" +
+                    getLabelSelect() + "lang=" + lang + storage.getLimit(true, 1) + ") ,\n" +
+                    getLabelSelect() + "deflang=" + storage.getBooleanTrueExpression() + " " + storage.getLimit(true, 1) + ") \n" +
                     ")"));
             entry.overrideDataType(FxDataType.String1024);
             return;
@@ -156,14 +163,14 @@ class GenericSQLForeignTableSelector implements FieldSelector {
             throw new FxSqlSearchException(LOG, "ex.sqlSearch.query.undefinedField", prop.getField(), prop.getPropertyName(),
                     getAllowedFields());
         } else {
-            statement.insert(0, "(select " + prop.getField() + " from " + tableName + " where " + linksOn + "=").append(")");
+            statement.insert(0, "(SELECT " + prop.getField() + " FROM " + tableName + " WHERE " + linksOn + "=").append(")");
             entry.overrideDataType(type);
         }
     }
 
     protected String getLabelSelect() {
-        return "(select labels." + translatedColumn + " from " + tableName + "_T labels, " + DatabaseConst.TBL_CONTENT + " ct where ct.id=filter.id and " +
-                    "ct.ver=filter.ver and ct." + mainColumn + "=labels.id and ";
+        return "(SELECT labels." + translatedColumn + " FROM " + tableName + "_T labels, " + DatabaseConst.TBL_CONTENT + " ct WHERE ct.id=filter.id AND " +
+                    "ct.ver=filter.ver AND ct." + mainColumn + "=labels.id AND ";
     }
 
 

@@ -469,7 +469,11 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
             String name = rs.getString(2);
             int cat = rs.getInt(3);
             String desc = rs.getString(4);
+            if (rs.wasNull())
+                desc = "";
             String color = rs.getString(5);
+            if (rs.wasNull())
+                color = "";
             FxString label = Database.loadFxString(con, TBL_ACLS, "LABEL", "ID=" + id);
             String sMandator = environment.getMandator(mandatorId).getName();
             ACL theACL = new ACL(id, name, label, mandatorId, sMandator, desc, color, ACLCategory.getById(cat),

@@ -247,6 +247,20 @@ public class PostgreSQLStorageFactory implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    public String getLimit(boolean hasWhereClause, long limit) {
+        return " LIMIT " + limit;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getLimitOffset(boolean hasWhereClause, long limit, long offset) {
+        return " LIMIT " + limit + " OFFSET " + offset;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public boolean isForeignKeyViolation(Exception exc) {
         if (!(exc instanceof SQLException))
             return false;

@@ -220,6 +220,25 @@ public interface DBStorage {
     String getFromDual();
 
     /**
+     * Get databas evendor specific limit statement
+     *
+     * @param hasWhereClause does the query already contain a where clause?
+     * @param limit          limit
+     * @return limit statement
+     */
+    String getLimit(boolean hasWhereClause, long limit);
+
+    /**
+     * Get database vendor specific limit/offset statement
+     *
+     * @param hasWhereClause does the query already contain a where clause?
+     * @param limit          limit
+     * @param offset         offset
+     * @return limit/offset statement
+     */
+    String getLimitOffset(boolean hasWhereClause, long limit, long offset);
+
+    /**
      * Returns true if the SqlError is a foreign key violation.
      *
      * @param exc the exception

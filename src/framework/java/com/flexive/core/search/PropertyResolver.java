@@ -201,6 +201,7 @@ public class PropertyResolver {
                         break;
                     case java.sql.Types.BIT:
                     case java.sql.Types.BOOLEAN:
+                    case java.sql.Types.CHAR: //oracle    
                         dt = FxDataType.Boolean;
                         break;
                     default:

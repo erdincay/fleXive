@@ -34,6 +34,7 @@ package com.flexive.core.search.genericSQL;
 import com.flexive.core.Database;
 import com.flexive.core.DatabaseConst;
 import com.flexive.core.search.*;
+import com.flexive.core.storage.DBStorage;
 import com.flexive.core.storage.FxTreeNodeInfo;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.core.storage.genericSQL.GenericTreeStorage;
@@ -105,10 +106,12 @@ public class GenericSQLDataFilter extends DataFilter {
     private int foundEntryCount;
     private boolean truncated;
     private Connection con;
+    final private DBStorage storage;
 
     public GenericSQLDataFilter(Connection con, SqlSearch search) throws FxSqlSearchException {
         super(con, search);
         this.con = con;
+        this.storage = StorageManager.getStorageImpl();
         final long[] briefcaseIds = getStatement().getBriefcaseFilter();
         if (briefcaseIds.length == 0) {
             tableMain = DatabaseConst.TBL_CONTENT;
@@ -196,9 +199,10 @@ public class GenericSQLDataFilter extends DataFilter {
                         " AS search_id,data.id,data.ver,main.tdef,main.created_by \n" +
                         "FROM (" + result.toString() + ") data, " + DatabaseConst.TBL_CONTENT + " main\n" +
                         "WHERE data.ver=main.ver AND data.id=main.id) data2\n"
-                        + (StringUtils.isNotBlank(securityFilter) ? "WHERE " + securityFilter : "") +
+                        + (StringUtils.isNotBlank(securityFilter)
                         // Limit by the specified max items
-                        "LIMIT " + maxRows;
+                        ? "WHERE " + securityFilter + storage.getLimit(true, maxRows)
+                        : storage.getLimit(false, maxRows));
             }
             // Find all matching data enties and store them
             sql = "INSERT INTO " + search.getCacheTable() + " " + dataSelect;
@@ -221,8 +225,9 @@ public class GenericSQLDataFilter extends DataFilter {
 
     private String selectOnMainTable(String filters, String tableAlias) {
         return "SELECT " + search.getSearchId() + " AS search_id,id,ver,tdef,created_by FROM " + tableMain + " " + tableAlias + "\n"
-                + (StringUtils.isNotBlank(filters) ? "WHERE " + filters + "\n" : "")
-                + " LIMIT " + search.getFxStatement().getMaxResultRows();
+                + (StringUtils.isNotBlank(filters)
+                ? "WHERE " + filters + storage.getLimit(true, search.getFxStatement().getMaxResultRows())+"\n"
+                : storage.getLimit(false, search.getFxStatement().getMaxResultRows()));
     }
 
     private String getSecurityFilter(UserTicket ticket, String tableAlias) {
@@ -641,7 +646,7 @@ public class GenericSQLDataFilter extends DataFilter {
 
         final FxTreeNodeInfo nodeInfo;
         try {
-            nodeInfo = StorageManager.getTreeStorage().getTreeNodeInfo(con, mode, parentNode);
+            nodeInfo = storage.getTreeStorage().getTreeNodeInfo(con, mode, parentNode);
         } catch (FxApplicationException e) {
             throw new FxSqlSearchException(LOG, e, "ex.sqlSearch.filter.loadTreeNode", parentNode, e.getMessage());
         }
@@ -987,9 +992,9 @@ public class GenericSQLDataFilter extends DataFilter {
         if (getStatement().getVersionFilter() == VersionFilter.ALL) {
             return "";
         } else if (getStatement().getVersionFilter() == VersionFilter.LIVE) {
-            return " AND " + tbl + "islive_ver=TRUE ";
+            return " AND " + tbl + "islive_ver=" + storage.getBooleanTrueExpression() + " ";
         } else {
-            return " AND " + tbl + "ismax_ver=TRUE ";
+            return " AND " + tbl + "ismax_ver=" + storage.getBooleanTrueExpression() + " ";
         }
     }
 
@@ -1024,7 +1029,7 @@ public class GenericSQLDataFilter extends DataFilter {
     }
 
     protected String getSubQueryLimit() {
-        return SUBQUERY_LIMIT == -1 ? "" : " LIMIT " + SUBQUERY_LIMIT + " ";
+        return SUBQUERY_LIMIT == -1 ? "" : storage.getLimit(true, SUBQUERY_LIMIT) + " ";
     }
 
     private String getLanguageFilter() {

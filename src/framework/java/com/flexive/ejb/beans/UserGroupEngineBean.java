@@ -221,7 +221,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
 
         Connection con = null;
         Statement stmt = null;
-        PreparedStatement pstmt = null;
+        PreparedStatement ps = null;
         String sql = null;
         try {
 
@@ -239,22 +239,23 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
             // Create the new group
             sql = "INSERT INTO " + TBL_GROUP + " " +
                     "(ID,MANDATOR,AUTOMANDATOR,ISSYSTEM,NAME,COLOR,CREATED_BY,CREATED_AT,MODIFIED_BY,MODIFIED_AT) VALUES (" +
-                    "?,?,NULL,FALSE,?,?,?,?,?,?)";
+                    "?,?,?,?,?,?,?,?,?,?)";
             final long NOW = System.currentTimeMillis();
-            pstmt = con.prepareStatement(sql);
-            pstmt.setLong(1, groupId);
-            pstmt.setLong(2, mandatorId);
-            pstmt.setString(3, name);
-            pstmt.setString(4, color);
-            pstmt.setLong(5, ticket.getUserId());
-            pstmt.setLong(6, NOW);
-            pstmt.setLong(7, ticket.getUserId());
-            pstmt.setLong(8, NOW);
-            pstmt.executeUpdate();
+            ps = con.prepareStatement(sql);
+            ps.setLong(1, groupId);
+            ps.setLong(2, mandatorId);
+            ps.setNull(3, java.sql.Types.NUMERIC);
+            ps.setBoolean(4, false);
+            ps.setString(5, name);
+            ps.setString(6, color);
+            ps.setLong(7, ticket.getUserId());
+            ps.setLong(8, NOW);
+            ps.setLong(9, ticket.getUserId());
+            ps.setLong(10, NOW);
+            ps.executeUpdate();
 
             // Return the new id
             return groupId;
-
         } catch (SQLException exc) {
             final boolean uniqueConstraintViolation = StorageManager.isUniqueConstraintViolation(exc);
             EJBUtils.rollback(ctx);
@@ -268,7 +269,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
                 throw ce;
             }
         } finally {
-            Database.closeObjects(UserGroupEngineBean.class, null, pstmt);
+            Database.closeObjects(UserGroupEngineBean.class, null, ps);
             Database.closeObjects(UserGroupEngineBean.class, con, stmt);
         }
     }
