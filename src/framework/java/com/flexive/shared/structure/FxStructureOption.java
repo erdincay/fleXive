@@ -58,6 +58,12 @@ public class FxStructureOption implements Serializable {
     public final static String OPTION_HTML_EDITOR = "HTML.EDITOR";
     public final static String OPTION_SEARCHABLE = "SEARCHABLE";
     public final static String OPTION_MAXLENGTH = "MAXLENGTH";
+    /**
+     * Force an explicit select box with all existing instances for FxReference properties.
+     *
+     * @since 3.1 
+     */
+    public static final String OPTION_REFERENCE_SELECTONE = "REFERENCE.SELECTONE";
 
     public final static String OPTION_MULTILINE = "MULTILINE";
     public final static String VALUE_TRUE = "1";

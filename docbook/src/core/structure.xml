@@ -1350,6 +1350,15 @@
                             If the value is greater than 1 it determines the number of rows.
                         </td>
                     </tr>
+                    <tr>
+                        <td>
+                            REFERENCE.SELECTONE
+                        </td>
+                        <td>
+                            Render a select list with all valid choices for reference properties
+                            (properties referencing other contents).
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </para>

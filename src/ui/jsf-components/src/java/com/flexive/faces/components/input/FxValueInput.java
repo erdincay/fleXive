@@ -35,15 +35,23 @@ import com.flexive.faces.FxJsfComponentUtils;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.XPathElement;
-import com.flexive.shared.structure.FxProperty;
-import com.flexive.shared.structure.FxPropertyAssignment;
+import com.flexive.shared.EJBLookup;
+import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.cmis.search.CmisResultSet;
+import com.flexive.shared.cmis.search.CmisResultRow;
+import com.flexive.shared.structure.*;
 import com.flexive.shared.value.FxReference;
 import com.flexive.shared.value.FxValue;
+import com.flexive.shared.value.FxString;
+import com.flexive.shared.value.ReferencedContent;
 import com.flexive.shared.value.mapper.IdentityInputMapper;
 import com.flexive.shared.value.mapper.InputMapper;
 import com.flexive.shared.value.mapper.NumberQueryInputMapper;
+import com.flexive.shared.value.mapper.FxPkSelectOneInputMapper;
 import com.flexive.shared.value.renderer.FxValueFormatter;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
 import com.flexive.war.servlet.DownloadServlet;
 
 import javax.faces.component.UIInput;
@@ -60,12 +68,16 @@ import java.io.IOException;
  * @version $Rev$
  */
 public class FxValueInput extends UIInput {
+    private static final Log LOG = LogFactory.getLog(FxValueInput.class);
+    
     /**
      * The JSF component type for a FxValue component.
      */
     public static final String COMPONENT_TYPE = "flexive.FxValueInput";
     
     private static final String REQ_ID_COUNTER = "REQ_FXVALUEINPUT_ID";
+    /** Request context key for caching the list of allowed reference values */
+    private static final String REQ_REFERENCE_ITEMS = "EditModeHelper_References_";
 
     private Boolean disableMultiLanguage;
     private Long externalId;   // an optional external id for identifying this input (ignoring the clientId)
@@ -285,7 +297,7 @@ public class FxValueInput extends UIInput {
             if (inputMapper == null) {
                 final FxValue fxValue = FxValueInputRenderer.getFxValue(FacesContext.getCurrentInstance(), this);
                 if (fxValue instanceof FxReference && StringUtils.isNotBlank(fxValue.getXPath())) {
-                    // force reference mapper with autocompletion
+                    // fetch property from assignment
                     final FxProperty property;
                     if (!XPathElement.isValidXPath(fxValue.getXPath())) {
                         //if not a valid xpath, we might have a property
@@ -295,15 +307,94 @@ public class FxValueInput extends UIInput {
                             inputMapper = new IdentityInputMapper();    // use dummy mapper
                             return inputMapper;
                         }
-                    } else
+                    } else {
                         property = ((FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(fxValue.getXPath())).getProperty();
-                    inputMapper = new NumberQueryInputMapper.ReferenceQueryInputMapper(property);
+                    }
+
+                    if (property.getOption(FxStructureOption.OPTION_REFERENCE_SELECTONE).isValueTrue()) {
+                        // render a select list with *all* valid choices (i.e. all instances visible to the user)
+                        inputMapper = new FxPkSelectOneInputMapper(getValidReferenceList(property));
+                    } else {
+                        // render a text input with an auto suggest box
+                        inputMapper = new NumberQueryInputMapper.ReferenceQueryInputMapper(property);
+                    }
                 } else {
                     inputMapper = new IdentityInputMapper();    // use dummy mapper
                 }
             }
         }
         return inputMapper;
+    }
+
+    /**
+     * Return a select list with all valid references for a reference property.
+     *
+     * @param property  a reference property (with datatype FxReference)
+     * @return  a select list with all valid references for a reference property.
+     */
+    private FxSelectList getValidReferenceList(FxProperty property) {
+        if (property.getDataType() != FxDataType.Reference) {
+            throw new IllegalArgumentException("Invalid data type for reference selectlist: " + property.getDataType());
+        }
+        
+        // cache list for the given type in request since this involves an EJB call
+        final String cacheId = REQ_REFERENCE_ITEMS + property.getReferencedType().getName();
+        if (FxContext.get().getAttribute(cacheId) == null) {
+            // retrieve items
+            final FxSelectList list = new FxSelectList("");
+            try {
+                final CmisResultSet result = EJBLookup.getCmisSearchEngine().search(
+                        "SELECT id, Name FROM " + property.getReferencedType().getName()
+                        + " ORDER BY Name"
+                );
+                // create selectlist items
+                for (CmisResultRow row : result) {
+                    new FxSelectListItem(
+                            row.getColumn(1).getLong(),
+                            row.getColumn(2).getString(),
+                            list,
+                            -1,
+                            new FxString(false, row.getColumn(2).getString())
+                    );
+                }
+            } catch (FxApplicationException e) {
+                if (LOG.isErrorEnabled()) {
+                    LOG.error("Failed to determine list of references for " + property.getName() + ": " + e.getMessage(), e);
+                }
+            }
+
+            // cache in request
+            FxContext.get().setAttribute(cacheId, list);
+        }
+
+        final FxSelectList list = (FxSelectList) FxContext.get().getAttribute(cacheId);
+
+        // check if the current value is in the list. If not, create a dummy element to avoid accidental change of the value
+        final FxReference fxValue = (FxReference) FxValueInputRenderer.getFxValue(FacesContext.getCurrentInstance(), this);
+        if (!fxValue.isEmpty()) {
+            for (long languageId : fxValue.getTranslatedLanguages()) {
+                final ReferencedContent reference = fxValue.getTranslation(languageId);
+                boolean found = false;
+                for (FxSelectListItem item : list.getItems()) {
+                    if (item.getId() == reference.getId()) {
+                        found = true;
+                        break;
+                    }
+                }
+                // reference not visible to current user, add dummy entry. This changes the cache list instance too,
+                // so it *may* affect other reference inputs that actually have a valid value.
+                if (!found) {
+                    new FxSelectListItem(
+                            reference.getId(),
+                            String.valueOf(reference.getId()),
+                            list,
+                            -1,
+                            new FxString(false, String.valueOf(reference.getId()))
+                    );
+                }
+            }
+        }
+        return list;
     }
 
     public void setInputMapper(InputMapper inputMapper) {

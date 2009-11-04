@@ -37,17 +37,21 @@ import com.flexive.faces.beans.UserConfigurationBean;
 import static com.flexive.faces.components.input.FxValueInputRenderer.*;
 import com.flexive.faces.javascript.FxJavascriptUtils;
 import static com.flexive.faces.javascript.FxJavascriptUtils.*;
-import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.FxFormatUtils;
-import com.flexive.shared.FxLanguage;
-import com.flexive.shared.XPathElement;
+import com.flexive.shared.*;
+import com.flexive.shared.cmis.search.CmisResultSet;
+import com.flexive.shared.cmis.search.CmisResultRow;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
+import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.*;
+import com.flexive.shared.value.mapper.FxPkSelectOneInputMapper;
 import com.flexive.war.FxRequest;
 import com.flexive.war.JsonWriter;
 import com.flexive.war.servlet.ThumbnailServlet;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.LogFactory;
+import org.apache.commons.logging.Log;
 import org.apache.myfaces.custom.date.HtmlInputDate;
 import org.apache.myfaces.custom.fileupload.HtmlInputFileUpload;
 
@@ -104,6 +108,7 @@ class EditModeHelper extends RenderHelper {
                 useHTMLEditor = p.getOption(FxStructureOption.OPTION_HTML_EDITOR).isValueTrue();
             }
         }
+
         if (useHTMLEditor && !(value instanceof FxString))
             useHTMLEditor = false; //prevent showing HTML editor for non-string types
 
