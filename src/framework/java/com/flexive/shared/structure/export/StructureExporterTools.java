@@ -32,13 +32,13 @@
 
 package com.flexive.shared.structure.export;
 
-import com.flexive.shared.structure.*;
 import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.XPathElement;
 import com.flexive.shared.scripting.FxScriptEvent;
+import com.flexive.shared.structure.*;
+import static org.apache.commons.lang.ArrayUtils.toObject;
 
 import java.util.*;
-
-import static org.apache.commons.lang.ArrayUtils.toObject;
 
 /**
  * Tool methods to create Groovy Script code from given structures
@@ -228,8 +228,20 @@ public final class StructureExporterTools {
      * @return returns true if the xPath should be ignored
      */
     public static boolean isSystemProperty(String xPath) {
+        // safeguard: remove type from XPath
+        xPath = XPathElement.stripType(xPath);
+        String[] x = xPath.split("/");
+        if(x.length > 3)
+            return false;
+        if(x.length == 2 && "".equals(x[0])) {
+            xPath = x[1];
+        }
+        if(x.length == 1) {
+            xPath = x[1];
+        }
+        
         for (IgnoreProps i : IgnoreProps.values()) {
-            if (xPath.contains(i.toString()))
+            if(i.toString().equals(xPath))
                 return true;
         }
         return false;
