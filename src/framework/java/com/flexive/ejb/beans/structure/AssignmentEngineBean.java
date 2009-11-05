@@ -200,9 +200,17 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                             found = false;
                             while (rs.next()) {
                                 last = rs.getString(1);
-                                if (last.equals(property.getName()) || last.startsWith(property.getName() + "_")) {
+                                if( last.equals(property.getName()) ) {
                                     found = true;
                                     break;
+                                } else if (last.startsWith(property.getName() + "_")) {
+                                    try {
+                                        Integer.parseInt(last.substring(last.lastIndexOf("_") + 1));
+                                        found = true;
+                                        break;
+                                    } catch (NumberFormatException e) {
+                                        //ignore since its a different property that contains an underscore
+                                    }
                                 }
                             }
                         }
