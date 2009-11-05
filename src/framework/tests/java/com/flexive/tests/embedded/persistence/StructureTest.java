@@ -31,11 +31,12 @@
  ***************************************************************/
 package com.flexive.tests.embedded.persistence;
 
-import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxLanguage;
+
 import static com.flexive.shared.CacheAdmin.getEnvironment;
 import static com.flexive.shared.EJBLookup.getTypeEngine;
+
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.exceptions.*;
@@ -47,14 +48,19 @@ import com.flexive.shared.structure.*;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.value.FxSelectOne;
 import com.flexive.shared.value.FxValue;
+
 import static com.flexive.tests.embedded.FxTestUtils.login;
 import static com.flexive.tests.embedded.FxTestUtils.logout;
+
 import com.flexive.tests.embedded.TestUsers;
 import com.google.common.collect.Lists;
+import org.apache.commons.lang.RandomStringUtils;
 import org.testng.Assert;
+
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
+
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -561,8 +567,9 @@ public class StructureTest {
     @Test(groups = {"ejb", "structure"})
     public void instanceMultiplicityTest() throws FxApplicationException {
         SelectListEngine se = EJBLookup.getSelectListEngine();
-        long typeId = createTestTypeAndProp("STRUCTTESTTYPE", "TESTPROP", true);
-        long typeIdRefTest = createTestTypeAndProp("STRUCTTESTTYPE_TWO", "", false);
+        final String TYPE_NAME = "STRUCTTESTTYPE_" + RandomStringUtils.random(16, true, true);
+        long typeId = createTestTypeAndProp(TYPE_NAME, "TESTPROP", true);
+        long typeIdRefTest = createTestTypeAndProp(TYPE_NAME + "_TWO", "", false);
         long selListId = -1;
         try { // test setting some of property attributes (for db update coverage)
             FxProperty p = env().getProperty("TESTPROP");
@@ -593,7 +600,7 @@ public class StructureTest {
             assertTrue(p.mayOverrideMultiLang());
 
             // test property assignments
-            FxPropertyAssignment assProp = (FxPropertyAssignment) env().getAssignment("STRUCTTESTTYPE/TESTPROP");
+            FxPropertyAssignment assProp = (FxPropertyAssignment) env().getAssignment(TYPE_NAME + "/TESTPROP");
             FxPropertyAssignmentEdit assEdit = assProp.asEditable();
             assEdit.setACL(propACL);
             assEdit.setMultiLang(true);
@@ -602,7 +609,7 @@ public class StructureTest {
             assEdit.setDefaultValue(new FxSelectOne(true, defItem));
             ae.save(assEdit, false);
 
-            assProp = (FxPropertyAssignment) env().getAssignment("STRUCTTESTTYPE/TESTPROP");
+            assProp = (FxPropertyAssignment) env().getAssignment(TYPE_NAME + "/TESTPROP");
             assertEquals(assProp.getACL(), propACL);
             assertTrue(assProp.isMultiLang());
             assertEquals(assProp.getLabel().toString(), "assignment_label_123456");
@@ -621,11 +628,11 @@ public class StructureTest {
             }
         }
         // remaining tests for multiplicity settings etc.
-        typeId = createTestTypeAndProp("STRUCTTESTTYPE", "TESTPROP", true);
+        typeId = createTestTypeAndProp(TYPE_NAME, "TESTPROP", true);
         FxPK contentPK1 = createTestContent(typeId, "/TESTPROP", "Testdata 1");
         FxPK contentPK2 = createTestContent(typeId, "/TESTPROP", "Testdata 2");
         try {
-            FxPropertyAssignmentEdit assEdit = ((FxPropertyAssignment) env().getAssignment("STRUCTTESTTYPE/TESTPROP")).asEditable();
+            FxPropertyAssignmentEdit assEdit = ((FxPropertyAssignment) env().getAssignment(TYPE_NAME + "/TESTPROP")).asEditable();
             FxProperty p = env().getProperty("TESTPROP");
             // we should have two assignments for our testprop
             assertEquals(ae.getAssignmentInstanceCount(assEdit.getId()), 2);
@@ -671,7 +678,7 @@ public class StructureTest {
             pEdit.setOverrideMultiplicity(true); // reset
             pEdit.setMultiplicity(new FxMultiplicity(0, 2));
             ae.save(pEdit);
-            assEdit = ((FxPropertyAssignment) env().getAssignment("STRUCTTESTTYPE/TESTPROP")).asEditable();
+            assEdit = ((FxPropertyAssignment) env().getAssignment(TYPE_NAME + "/TESTPROP")).asEditable();
             assEdit.setMultiplicity(new FxMultiplicity(0, 2));
             ae.save(assEdit, false);
             // create an additional content instance for the same assignment
@@ -735,7 +742,7 @@ public class StructureTest {
             ae.save(assEdit, false);
 
 
-            assEdit = ((FxPropertyAssignment) env().getAssignment("STRUCTTESTTYPE/TESTPROP")).asEditable();
+            assEdit = ((FxPropertyAssignment) env().getAssignment(TYPE_NAME + "/TESTPROP")).asEditable();
             assertEquals(assEdit.getMultiplicity().getMin(), 0);
             assertEquals(assEdit.getMultiplicity().getMax(), 5);
 

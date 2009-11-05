@@ -260,10 +260,12 @@ public class StorageManager {
     /**
      * Get the database vendor specific operator to query regular expressions
      *
+     * @param column column to match
+     * @param regexp regexp to match the column against
      * @return database vendor specific operator to query regular expressions
      */
-    public static String getRegExpOperator() {
-        return getStorageImpl().getRegExpOperator();
+    public static String getRegExpLikeOperator(String column, String regexp) {
+        return getStorageImpl().getRegExpLikeOperator(column, regexp);
     }
 
     /**

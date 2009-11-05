@@ -1149,7 +1149,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                         for (int i1 = 0; i1 < sm.getSelected().size(); i1++) {
                             FxSelectListItem item = sm.getSelected().get(i1);
                             if (i1 > 0)
-                                ps.executeUpdate();
+                                ps.addBatch(); //TODO: ???
                             ps.setLong(pos[0], item.getId());
                             ps.setString(pos[1], sm.getSelectedIdsList());
                             ps.setLong(pos[2], sm.getSelectedIds().size());
@@ -2394,7 +2394,6 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             ps = con.prepareStatement(CONTENT_MAIN_REMOVE);
             ps.setLong(1, pk.getId());
             ps.executeUpdate();
-
         } catch (SQLException e) {
             if (LOG.isWarnEnabled()) {
                 // log information about removed content

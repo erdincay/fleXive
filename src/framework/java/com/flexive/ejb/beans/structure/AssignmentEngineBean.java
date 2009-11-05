@@ -2283,7 +2283,8 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 //            ps.setLong(3, types.getId());
                 count += ps.executeUpdate();
                 //        }
-                LOG.info("Updated " + count + " assignments to become the new base assignment");
+                if (count > 0)
+                    LOG.info("Updated " + count + " assignments to become the new base assignment");
                 /* sql.setLength(0);
                 //now fix 'deeper' inherited assignments
                 for(FxType types: assignment.getAssignedType().getDerivedTypes() ) {

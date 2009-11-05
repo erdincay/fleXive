@@ -169,9 +169,11 @@ public interface DBStorage {
     /**
      * Get the database vendor specific operator to query regular expressions
      *
+     * @param column column to match
+     * @param regexp regexp to match the column against
      * @return database vendor specific operator to query regular expressions
      */
-    String getRegExpOperator();
+    String getRegExpLikeOperator(String column, String regexp);
 
     /**
      * Get the database vendor specific statement to enable or disable referential integrity checks

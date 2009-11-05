@@ -136,10 +136,10 @@ public abstract class GenericTreeStorage implements TreeStorage {
             getTable(FxTreeMode.Edit) + " t, " + TBL_CONTENT + " c WHERE t.ID=? AND c.ID=t.REF AND c.ISMAX_VER=?) NODE";
 
     //                                                        1    2     3       4                             5            6      7        8       9          10          11                                         12    13     14    15     16           17       18        19         20           21           22           23            24             25
-    private static final String TREE_LIVE_GETNODE = "SELECT t.ID,t.REF,t.DEPTH," + TREE_TOTAL_COUNT_LIVE + ",t.CHILDCOUNT,t.NAME,t.PARENT,t.DIRTY,t.TEMPLATE,t.MODIFIED_AT,tree_getPosition(?,t.ID,t.PARENT) AS POS,c.ACL,c.TDEF,c.VER,c.STEP,c.CREATED_BY,c.MANDATOR,l.USER_ID,l.LOCKTYPE,l.CREATED_AT,l.EXPIRES_AT,c.CREATED_AT,c.MODIFIED_BY,c.MODIFIED_AT,tree_idToPath(t.id, true) " +
+    private static final String TREE_LIVE_GETNODE = "SELECT t.ID,t.REF,t.DEPTH," + TREE_TOTAL_COUNT_LIVE + ",t.CHILDCOUNT,t.NAME,t.PARENT,t.DIRTY,t.TEMPLATE,t.MODIFIED_AT,tree_getPosition(?,t.ID,t.PARENT) AS POS,c.ACL,c.TDEF,c.VER,c.STEP,c.CREATED_BY,c.MANDATOR,l.USER_ID,l.LOCKTYPE,l.CREATED_AT,l.EXPIRES_AT,c.CREATED_AT,c.MODIFIED_BY,c.MODIFIED_AT,tree_idToPath(t.id, ?) " +
             "FROM " + getTable(FxTreeMode.Live) + " t, " + TBL_CONTENT + " c LEFT JOIN " + TBL_LOCK + " l ON (l.LOCK_ID=c.ID AND l.LOCK_VER=c.VER)WHERE t.ID=? AND c.ID=t.REF AND c.ISLIVE_VER=?";
     //                                                        1    2     3     4   5            6      7        8       9          10          11                                          12    13     14    15     16           17       18        19         20           21           22           23            24             25
-    private static final String TREE_EDIT_GETNODE = "SELECT t.ID,t.REF,t.DEPTH,0,t.CHILDCOUNT,t.NAME,t.PARENT,t.DIRTY,t.TEMPLATE,t.MODIFIED_AT,tree_getPosition(?,t.ID,t.PARENT) AS POS,c.ACL,c.TDEF,c.VER,c.STEP,c.CREATED_BY,c.MANDATOR,l.USER_ID,l.LOCKTYPE,l.CREATED_AT,l.EXPIRES_AT,c.CREATED_AT,c.MODIFIED_BY,c.MODIFIED_AT,tree_idToPath(t.id, false) " +
+    private static final String TREE_EDIT_GETNODE = "SELECT t.ID,t.REF,t.DEPTH,0,t.CHILDCOUNT,t.NAME,t.PARENT,t.DIRTY,t.TEMPLATE,t.MODIFIED_AT,tree_getPosition(?,t.ID,t.PARENT) AS POS,c.ACL,c.TDEF,c.VER,c.STEP,c.CREATED_BY,c.MANDATOR,l.USER_ID,l.LOCKTYPE,l.CREATED_AT,l.EXPIRES_AT,c.CREATED_AT,c.MODIFIED_BY,c.MODIFIED_AT,tree_idToPath(t.id, ?) " +
             "FROM " + getTable(FxTreeMode.Edit) + " t, " + TBL_CONTENT + " c LEFT JOIN " + TBL_LOCK + " l ON (l.LOCK_ID=c.ID AND l.LOCK_VER=c.VER) WHERE t.ID=? AND c.ID=t.REF AND c.ISMAX_VER=?";
 
     //                                                            1    2     3     4  5            6      7        8       9          10          11                                         12    13     14    15     16           17       18        19         20           21           22           23            24
@@ -679,8 +679,9 @@ public abstract class GenericTreeStorage implements TreeStorage {
         try {
             ps = con.prepareStatement(prepareSql(mode, mode == FxTreeMode.Live ? TREE_LIVE_GETNODE : TREE_EDIT_GETNODE));
             ps.setBoolean(1, mode == FxTreeMode.Live);
-            ps.setLong(2, nodeId);
-            ps.setBoolean(3, true);
+            ps.setBoolean(2, mode == FxTreeMode.Live);
+            ps.setLong(3, nodeId);
+            ps.setBoolean(4, true);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
                 long _id = rs.getLong(1);
@@ -843,15 +844,16 @@ public abstract class GenericTreeStorage implements TreeStorage {
 //        long nodes = 0;
         try {
             final long captionProperty = EJBLookup.getConfigurationEngine().get(SystemParameters.TREE_CAPTION_PROPERTY);
-            final String TRUE = StorageManager.getBooleanTrueExpression();
-            final String FALSE = StorageManager.getBooleanFalseExpression();
+            final DBStorage storage = StorageManager.getStorageImpl();
+            final String TRUE = storage.getBooleanTrueExpression();
+            final String FALSE = storage.getBooleanFalseExpression();
             final String version = mode == FxTreeMode.Live ? "ISLIVE_VER=" + TRUE : "ISMAX_VER=" + TRUE;
             String label_pos = loadPartial
                     ? "COALESCE(COALESCE(" +
                     "(SELECT f.FTEXT1024 FROM " + TBL_CONTENT_DATA + " f WHERE f.TPROP=" +
-                    captionProperty + " AND LANG IN(" + partialLoadLanguage.getId() + ",0)AND f." + version + " AND f.ID=n.REF LIMIT 1)," +
+                    captionProperty + " AND LANG IN(" + partialLoadLanguage.getId() + ",0)AND f." + version + " AND f.ID=n.REF " + storage.getLimit(true, 1) + ")," +
                     "(SELECT f.FTEXT1024 from " + TBL_CONTENT_DATA + " f where f.tprop=" +
-                    captionProperty + " AND ISMLDEF=" + TRUE + " AND f." + version + " AND f.ID=n.REF LIMIT 1)" +
+                    captionProperty + " AND ISMLDEF=" + TRUE + " AND f." + version + " AND f.ID=n.REF " + storage.getLimit(true, 1) + ")" +
                     "),n.NAME)"
                     : "tree_getPosition(" + (mode == FxTreeMode.Live ? TRUE : FALSE) + ",n.ID,n.PARENT)";
             //                     1    2     3       4                  5            6      7        8       9          10              11              12    13     14    15     16           17       18        19         20           21           22           23            24

@@ -179,8 +179,8 @@ public class H2StorageFactory implements DBStorage {
     /**
      * {@inheritDoc}
      */
-    public String getRegExpOperator() {
-        return "REGEXP";
+    public String getRegExpLikeOperator(String column, String regexp) {
+        return column + " REGEXP " + regexp;
     }
 
     /**

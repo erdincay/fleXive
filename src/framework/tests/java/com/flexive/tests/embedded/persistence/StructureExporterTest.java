@@ -803,7 +803,6 @@ public class StructureExporterTest {
                     for (FxGroupAssignment ga : t.getAssignedGroups())
                         ae.removeAssignment(ga.getId());
                     te.remove(i);
-                    System.out.println(" ----- > > > StructureExporterTest: REMOVED TYPE WITH ID " + i);
                 }
             }
         }

@@ -177,8 +177,8 @@ public class PostgreSQLStorageFactory implements DBStorage {
     /**
      * {@inheritDoc}
      */
-    public String getRegExpOperator() {
-        return "~";
+    public String getRegExpLikeOperator(String column, String regexp) {
+        return column + " ~ " + regexp;
     }
 
     /**

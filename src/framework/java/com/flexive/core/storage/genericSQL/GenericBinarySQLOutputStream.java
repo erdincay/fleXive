@@ -127,10 +127,11 @@ public class GenericBinarySQLOutputStream extends PipedOutputStream implements R
         Connection con = null;
         try {
             con = Database.getNonTXDataSource(divisionId).getConnection();
-            ps = con.prepareStatement("INSERT INTO " + DatabaseConst.TBL_BINARY_TRANSIT + " (BKEY,FBLOB,TFER_DONE,EXPIRE) VALUES(?,?,FALSE,?)");
+            ps = con.prepareStatement("INSERT INTO " + DatabaseConst.TBL_BINARY_TRANSIT + " (BKEY,FBLOB,TFER_DONE,EXPIRE) VALUES(?,?,?,?)");
             ps.setString(1, handle);
             ps.setBinaryStream(2, pipe, (int) expectedSize);
-            ps.setLong(3, System.currentTimeMillis() + ttl);
+            ps.setBoolean(3, false);
+            ps.setLong(4, System.currentTimeMillis() + ttl);
             long time = System.currentTimeMillis();
             ps.executeUpdate();
             if (LOG.isDebugEnabled())

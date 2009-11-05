@@ -343,7 +343,7 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
     private int[] getRelationCount(Connection con, long relTypeId, long srcTypeId, long dstTypeId) throws SQLException {
         PreparedStatement ps = null;
         try {
-            ps = con.prepareStatement("SELECT COUNT(r.ID), COUNT(s.ID), COUNT(d.ID) FROM " + TBL_CONTENT + " r, " + TBL_CONTENT + " s, " + TBL_CONTENT + " d WHERE r.TDEF=? AND s.ID=r.RELSRC_ID AND d.ID=r.RELDST_ID AND s.TDEF=? AND d.TDEF=?;");
+            ps = con.prepareStatement("SELECT COUNT(r.ID), COUNT(s.ID), COUNT(d.ID) FROM " + TBL_CONTENT + " r, " + TBL_CONTENT + " s, " + TBL_CONTENT + " d WHERE r.TDEF=? AND s.ID=r.RELSRC_ID AND d.ID=r.RELDST_ID AND s.TDEF=? AND d.TDEF=?");
             ps.setLong(1, relTypeId);
             ps.setLong(2, srcTypeId);
             ps.setLong(3, dstTypeId);
@@ -369,7 +369,7 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
     private void removeRelationEntries(Connection con, long relTypeId, long srcTypeId, long dstTypeId) throws SQLException, FxApplicationException {
         PreparedStatement ps = null;
         try {
-            ps = con.prepareStatement("SELECT DISTINCT r.ID FROM " + TBL_CONTENT + " r, " + TBL_CONTENT + " s, " + TBL_CONTENT + " d WHERE r.TDEF=? AND s.ID=r.RELSRC_ID AND d.ID=r.RELDST_ID AND s.TDEF=? AND d.TDEF=?;");
+            ps = con.prepareStatement("SELECT DISTINCT r.ID FROM " + TBL_CONTENT + " r, " + TBL_CONTENT + " s, " + TBL_CONTENT + " d WHERE r.TDEF=? AND s.ID=r.RELSRC_ID AND d.ID=r.RELDST_ID AND s.TDEF=? AND d.TDEF=?");
             ps.setLong(1, relTypeId);
             ps.setLong(2, srcTypeId);
             ps.setLong(3, dstTypeId);
@@ -428,8 +428,9 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
                 //update all xpaths affected
                 ps.close();
                 sql.setLength(0);
-                sql.append("UPDATE ").append(TBL_STRUCT_ASSIGNMENTS).append(" SET XPATH=REPLACE(XPATH, ?, ?) WHERE TYPEDEF=? AND XPATH ")
-                        .append(StorageManager.getRegExpOperator()).append(" ?");
+                sql.append("UPDATE ").append(TBL_STRUCT_ASSIGNMENTS)
+                        .append(" SET XPATH=REPLACE(XPATH, ?, ?) WHERE TYPEDEF=? AND ")
+                        .append(StorageManager.getRegExpLikeOperator("XPATH", "?"));
                 ps = con.prepareStatement(sql.toString());
                 ps.setString(1, orgType.getName() + "/");
                 ps.setString(2, type.getName() + "/");

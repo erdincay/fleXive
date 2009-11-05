@@ -35,6 +35,7 @@ import com.flexive.core.DatabaseConst;
 import static com.flexive.core.DatabaseConst.TBL_CONTENT;
 import static com.flexive.core.DatabaseConst.TBL_CONTENT_ACLS;
 import com.flexive.core.search.*;
+import com.flexive.core.storage.DBStorage;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.shared.FxArrayUtils;
 import com.flexive.shared.FxContext;
@@ -243,7 +244,7 @@ public class GenericSQLDataSelector extends DataSelector {
 
         // Evaluate the order by, then limit the result by the desired range if needed
         if (search.getStartIndex() > 0 && search.getFetchRows() < Integer.MAX_VALUE) {
-            return "SELECT * FROM (" + sql + ") tmp LIMIT " +  search.getFetchRows() + " OFFSET " + search.getStartIndex();
+            return "SELECT * FROM (" + sql + ") tmp " + StorageManager.getLimitOffset(false, search.getFetchRows(), search.getStartIndex());
         }
         return sql.toString();
 
@@ -321,7 +322,7 @@ public class GenericSQLDataSelector extends DataSelector {
                                     " UNION " +
                                     "SELECT acl FROM " + TBL_CONTENT_ACLS + " suba" +
                                     " WHERE suba.id = " + FILTER_ALIAS + ".id AND suba.ver = " + FILTER_ALIAS + ".ver" +
-                                    " LIMIT 1" +
+                                    StorageManager.getLimit(true, 1) +
                                     ")",
                                     resultPos,
                                     false
@@ -371,7 +372,7 @@ public class GenericSQLDataSelector extends DataSelector {
                                     + " OR " + mapping.getColumn() + "_mld=true)"
                                     + " ORDER BY " + mapping.getColumn() + "_mld"
                                     : "")
-                                    + " LIMIT 1"
+                                    + StorageManager.getLimit(true, 1)
                                     + ")";
                     result.addItem(sel, resultPos, false);
                     break;
@@ -418,6 +419,7 @@ public class GenericSQLDataSelector extends DataSelector {
      * @return the subselect for FX_CONTENT_DATA.
      */
     protected String getContentDataSubselect(String column, PropertyEntry entry, boolean xpath) {
+        final DBStorage storage = StorageManager.getStorageImpl();
         String select = "(SELECT " + SUBSEL_ALIAS + "." + column +
             " FROM " + DatabaseConst.TBL_CONTENT_DATA + " " +
             SUBSEL_ALIAS + " WHERE " +
@@ -431,10 +433,10 @@ public class GenericSQLDataSelector extends DataSelector {
                     + ")"
                     : "TPROP=" + entry.getProperty().getId()) + " AND " +
             "(" + SUBSEL_ALIAS + ".lang=" + search.getLanguage().getId() +
-            " OR " + SUBSEL_ALIAS + ".ismldef=true)" +
+                " OR " + SUBSEL_ALIAS + ".ismldef=" + storage.getBooleanTrueExpression() + ")" +
             // fetch exact language match before default
             " ORDER BY " + SUBSEL_ALIAS + ".ismldef " +
-            " LIMIT 1 " + ")";
+            storage.getLimit(true, 1) + ")";
         if (!xpath && entry.getProperty().getDataType() == FxDataType.Binary) {
             // select string-coded form of the BLOB properties
             select = selectBinary(select);

@@ -171,6 +171,7 @@ public class PropertyEntry {
                 case LOCK:
                     return new LockEntry();
                 case PROPERTY_REF:
+                    //noinspection ThrowableInstanceNeverThrown
                     throw new FxSqlSearchException(LOG, "ex.sqlSearch.entry.virtual").asRuntimeException();
                 default:
                     throw new IllegalStateException();
@@ -594,15 +595,19 @@ public class PropertyEntry {
         try {
             switch (overrideDataType == null ? property.getDataType() : overrideDataType) {
                 case DateTime:
-                    if (rs.getMetaData().getColumnType(pos) == java.sql.Types.BIGINT) {
-                        result = new FxDateTime(multilanguage, FxLanguage.SYSTEM_ID, new Date(rs.getLong(pos)));
-                        break;
-                    }
-                    Timestamp dttstp = rs.getTimestamp(pos);
-                    Date _dtdate = dttstp != null ? new Date(dttstp.getTime()) : null;
-                    result = new FxDateTime(multilanguage, FxLanguage.SYSTEM_ID, _dtdate);
-                    if (dttstp == null) {
-                        result.setEmpty(FxLanguage.SYSTEM_ID);
+                    switch(rs.getMetaData().getColumnType(pos)) {
+                        case java.sql.Types.BIGINT:
+                        case java.sql.Types.DECIMAL:
+                        case java.sql.Types.NUMERIC:
+                        case java.sql.Types.INTEGER:
+                            result = new FxDateTime(multilanguage, FxLanguage.SYSTEM_ID, new Date(rs.getLong(pos)));
+                            break;
+                        default:
+                            Timestamp dttstp = rs.getTimestamp(pos);
+                            Date _dtdate = dttstp != null ? new Date(dttstp.getTime()) : null;
+                            result = new FxDateTime(multilanguage, FxLanguage.SYSTEM_ID, _dtdate);
+                            if (dttstp == null)
+                                result.setEmpty(FxLanguage.SYSTEM_ID);
                     }
                     break;
                 case Date:
@@ -849,7 +854,6 @@ public class PropertyEntry {
      *                      for use in a SQL query.
      */
     public Pair<String, String> getComparisonCondition(String constantValue) {
-        String value = null;
         if (StringUtils.isNotBlank(constantValue) && constantValue.charAt(0) == '(' && constantValue.charAt(constantValue.length() - 1) == ')') {
             // handle multiple values of a tuple, e.g. (1,2,3)
             final String[] values = StringUtils.split(constantValue.substring(1, constantValue.length() - 1), ',');

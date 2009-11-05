@@ -225,10 +225,11 @@ public final class FxDBAuthentication {
 
             // EJBLookup user in the database, combined with a update statement to make sure
             // nothing changes between the lookup/set ISLOGGEDIN flag.
-            curSql = "UPDATE " + TBL_ACCOUNT_DETAILS + " SET ISLOGGEDIN=FALSE WHERE ID=? AND APPLICATION=?";
+            curSql = "UPDATE " + TBL_ACCOUNT_DETAILS + " SET ISLOGGEDIN=? WHERE ID=? AND APPLICATION=?";
             ps = con.prepareStatement(curSql);
-            ps.setLong(1, ticket.getUserId());
-            ps.setString(2, inf.getApplicationId());
+            ps.setBoolean(1, false);
+            ps.setLong(2, ticket.getUserId());
+            ps.setString(3, inf.getApplicationId());
 
             // Not more than one row should be affected, or the logout failed
             final int rowCount = ps.executeUpdate();
