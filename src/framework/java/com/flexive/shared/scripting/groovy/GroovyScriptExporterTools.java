@@ -1063,6 +1063,7 @@ public final class GroovyScriptExporterTools {
             langs = a.getHint().getTranslatedLanguages();
             defLang = a.getHint().getDefaultLanguage();
             String hintAsString = a.getHint().toString();
+            hintAsString = hintAsString.replaceAll("\\\"", "\\\\\"");
             if (isBlank(hintAsString) || "null".equals(hintAsString))
                 hintAsString = "";
             script.append(Indent.tabs(tabCount));
@@ -1077,6 +1078,7 @@ public final class GroovyScriptExporterTools {
                 for (long id : langs) {
                     if (id != defLang) {
                         hintAsString = a.getHint().getBestTranslation(id);
+                        hintAsString = hintAsString.replaceAll("\\\"", "\\\\\"");
                         if (isBlank(hintAsString) || "null".equals(hintAsString))
                             hintAsString = "";
                         script.append(".setTranslation(")
