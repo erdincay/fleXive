@@ -43,6 +43,7 @@ import com.flexive.core.search.cmis.impl.sql.H2.H2Dialect;
 import com.flexive.core.search.cmis.impl.sql.SqlDialect;
 import com.flexive.core.storage.*;
 import com.flexive.core.storage.genericSQL.GenericLockStorage;
+import com.flexive.shared.FxFormatUtils;
 import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.exceptions.FxSqlSearchException;
@@ -55,10 +56,8 @@ import org.apache.commons.logging.LogFactory;
 
 import java.lang.reflect.Method;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.Date;
 
 /**
  * Factory for the MySQL storage
@@ -264,6 +263,13 @@ public class H2StorageFactory implements DBStorage {
      */
     public String getLimitOffset(boolean hasWhereClause, long limit, long offset) {
         return " LIMIT " + limit + " OFFSET " + offset;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String formatDateCondition(Date date) {
+        return "'" + FxFormatUtils.getDateTimeFormat().format(date) + "'";
     }
 
     /**

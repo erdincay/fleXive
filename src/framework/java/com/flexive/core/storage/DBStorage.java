@@ -44,6 +44,7 @@ import com.flexive.shared.structure.TypeStorageMode;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.util.Date;
 
 /**
  * Database vendor specific storage
@@ -247,6 +248,14 @@ public interface DBStorage {
      * @return limit/offset statement
      */
     String getLimitOffset(boolean hasWhereClause, long limit, long offset);
+
+    /**
+     * Format a date to be used in a query condition (properly escaped)
+     *
+     * @param date the date to format
+     * @return formatted date
+     */
+    String formatDateCondition(Date date);
 
     /**
      * Returns true if the SqlError is a foreign key violation.

@@ -472,8 +472,9 @@ public abstract class GenericTreeStorage implements TreeStorage {
         Statement ps = null;
         try {
             ps = con.createStatement();
+            DBStorage storage = StorageManager.getStorageImpl();
             ResultSet rs = ps.executeQuery("SELECT tree_pathToID(" + startNode + ",'" + path + "'," +
-                    (mode == FxTreeMode.Live) + ")" + StorageManager.getFromDual());
+                    storage.getBooleanExpression(mode == FxTreeMode.Live) + ")" + storage.getFromDual());
             long result = -1;
             if (rs.next()) {
                 result = rs.getLong(1);
@@ -508,9 +509,10 @@ public abstract class GenericTreeStorage implements TreeStorage {
         try {
             ps = con.createStatement();
             ResultSet rs;
+            DBStorage storage = StorageManager.getStorageImpl();
             rs = ps.executeQuery("SELECT tree_captionPathToID(" + startNode + ",'" + path + "'," +
                     EJBLookup.getConfigurationEngine().get(SystemParameters.TREE_CAPTION_PROPERTY) + ",1," +
-                    (mode == FxTreeMode.Live) + ")");
+                    storage.getBooleanExpression(mode == FxTreeMode.Live) + ")" + storage.getFromDual());
             long result = -1;
             if (rs.next()) {
                 result = rs.getLong(1);
@@ -541,7 +543,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
         PreparedStatement ps = null;
         ResultSet rs;
         try {
-            ps = con.prepareStatement("SELECT tree_FTEXT1024_Chain(?,?,?,?)");
+            ps = con.prepareStatement("SELECT tree_FTEXT1024_Chain(?,?,?,?)" + StorageManager.getFromDual());
             ps.setInt(2, (int) language.getId());
             ps.setLong(3, labelPropertyId);
             ps.setBoolean(4, mode == FxTreeMode.Live);
@@ -603,8 +605,10 @@ public abstract class GenericTreeStorage implements TreeStorage {
     public String getPathById(Connection con, FxTreeMode mode, long id) throws FxTreeException {
         Statement ps = null;
         try {
+            DBStorage storage = StorageManager.getStorageImpl();
             ps = con.createStatement();
-            ResultSet rs = ps.executeQuery("SELECT tree_idToPath(" + id + "," + (mode == FxTreeMode.Live) + ")");
+            ResultSet rs = ps.executeQuery("SELECT tree_idToPath(" + id + "," +
+                    storage.getBooleanExpression(mode == FxTreeMode.Live) + ")" + storage.getFromDual());
             String result = null;
             if (rs.next()) {
                 result = rs.getString(1);
@@ -629,7 +633,9 @@ public abstract class GenericTreeStorage implements TreeStorage {
         Statement ps = null;
         try {
             ps = con.createStatement();
-            ResultSet rs = ps.executeQuery("SELECT tree_idchain(" + id + "," + (mode == FxTreeMode.Live) + ")");
+            DBStorage storage = StorageManager.getStorageImpl();
+            ResultSet rs = ps.executeQuery("SELECT tree_idchain(" + id + "," +
+                    storage.getBooleanExpression(mode == FxTreeMode.Live) + ")" + storage.getFromDual());
             String result = "";
             if (rs.next()) {
                 result = rs.getString(1);

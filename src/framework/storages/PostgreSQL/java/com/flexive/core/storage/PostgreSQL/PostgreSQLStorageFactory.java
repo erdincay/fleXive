@@ -42,6 +42,7 @@ import com.flexive.core.search.cmis.impl.sql.PostgreSQL.PostgreSQLDialect;
 import com.flexive.core.search.cmis.impl.sql.SqlDialect;
 import com.flexive.core.storage.*;
 import com.flexive.core.storage.genericSQL.GenericLockStorage;
+import com.flexive.shared.FxFormatUtils;
 import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.exceptions.FxSqlSearchException;
@@ -53,10 +54,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Factory for the PostgreSQL storage
@@ -263,6 +261,13 @@ public class PostgreSQLStorageFactory implements DBStorage {
      */
     public String getLimitOffset(boolean hasWhereClause, long limit, long offset) {
         return " LIMIT " + limit + " OFFSET " + offset;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String formatDateCondition(java.util.Date date) {
+        return "'" + FxFormatUtils.getDateTimeFormat().format(date) + "'";
     }
 
     /**

@@ -31,6 +31,7 @@
  ***************************************************************/
 package com.flexive.core.search;
 
+import com.flexive.core.storage.DBStorage;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.value.*;
@@ -849,11 +850,12 @@ public class PropertyEntry {
     /**
      * Returns a (column, value) pair for a SQL comparison condition against the given constant value.
      *
+     * @param storage used storage implementation
      * @param constantValue the value to be compared, as returned by the SQL parser
      * @return              (column, value) for the comparison condition. The value is already escaped
      *                      for use in a SQL query.
      */
-    public Pair<String, String> getComparisonCondition(String constantValue) {
+    public Pair<String, String> getComparisonCondition(DBStorage storage, String constantValue) {
         if (StringUtils.isNotBlank(constantValue) && constantValue.charAt(0) == '(' && constantValue.charAt(constantValue.length() - 1) == ')') {
             // handle multiple values of a tuple, e.g. (1,2,3)
             final String[] values = StringUtils.split(constantValue.substring(1, constantValue.length() - 1), ',');
@@ -861,18 +863,18 @@ public class PropertyEntry {
             String column = getFilterColumn();
             for (String scalar : values) {
                 // escape every scalar value
-                final Pair<String, String> escaped = escapeScalarValue(getFilterColumn(), scalar);
+                final Pair<String, String> escaped = escapeScalarValue(storage, getFilterColumn(), scalar);
                 column = escaped.getFirst();
                 result.add(escaped.getSecond());
             }
             return Pair.create(column, "(" + StringUtils.join(result, ',') + ")");
         } else {
             // scalar value passed, escape and return
-            return escapeScalarValue(getFilterColumn(), constantValue);
+            return escapeScalarValue(storage, getFilterColumn(), constantValue);
         }
     }
 
-    private Pair<String, String> escapeScalarValue(String column, String constantValue) {
+    private Pair<String, String> escapeScalarValue(DBStorage storage, String column, String constantValue) {
         String value = null;
         switch (getProperty().getDataType()) {
             case String1024:
@@ -932,7 +934,7 @@ public class PropertyEntry {
                 if (constantValue == null) {
                     value = "NULL";
                 } else {
-                    value = "'" + FxFormatUtils.getDateTimeFormat().format(FxFormatUtils.toDate(constantValue)) + "'";
+                    value = storage.formatDateCondition(FxFormatUtils.toDate(constantValue));
                 }
                 break;
             case DateTime:
@@ -946,7 +948,7 @@ public class PropertyEntry {
                     if (isDateMillisColumn(getFilterColumn())) {
                         value = String.valueOf(date.getTime());
                     } else {
-                        value = "'" + FxFormatUtils.getDateTimeFormat().format(date) + "'";
+                        value = storage.formatDateCondition(date);
                     }
                 }
                 break;

@@ -255,10 +255,9 @@ public class GenericSelectedTableVisitor implements SelectedTableVisitor {
      * @return  the SQL to return the column value that is used for joining this table.
      */
     protected String joinTableColumn(ColumnReference column) {
-        return tableAliasPrefix
-                + column.getTableReference().getAlias() + "."
-                + column.getConditionColumnMapper(sqlDialect.getSqlMapperFactory())
-                .getConditionColumn(sqlDialect.getSqlMapperFactory(), column, null);
+        return column.getConditionColumnMapper(sqlDialect.getSqlMapperFactory())
+                .getConditionColumn(sqlDialect.getSqlMapperFactory(), column,
+                        tableAliasPrefix + column.getTableReference().getAlias());
     }
 
 }

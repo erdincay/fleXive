@@ -67,12 +67,12 @@ public class H2Dialect extends GenericSqlDialect {
     }
 
     @Override
-    protected String limitQuery(String sql) {
-        return sql + " LIMIT "
-                + query.getStartRow()
-                + (query.getMaxRows() != -1
-                ? ", " + (query.getStartRow() + query.getMaxRows())
-                : "");
+    protected String limitAndOrderQuery(StringBuilder sql) {
+        buildOrderBy(sql);
+        sql.append(" LIMIT ").append(query.getStartRow());
+        if (query.getMaxRows() != -1)
+            sql.append(", ").append((query.getStartRow() + query.getMaxRows()));
+        return sql.toString();
     }
 
     @Override

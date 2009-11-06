@@ -138,9 +138,7 @@ public class GenericSqlDialect implements SqlMapperFactory, SqlDialect {
         buildFilterSelect(out);
         out.append(") ").append(FILTER_ALIAS);
 
-        buildOrderBy(out);
-
-        return limitQuery(out.toString());
+        return limitAndOrderQuery(out);
     }
 
     /**
@@ -151,9 +149,10 @@ public class GenericSqlDialect implements SqlMapperFactory, SqlDialect {
      *         When query limits were applied {@link com.flexive.core.search.cmis.impl.sql.Capabilities#supportsPaging()}
      *         must return true.
      */
-    protected String limitQuery(String sql) {
-        // nothing to do, default dialect does not support SQL query paging
-        return sql;
+    protected String limitAndOrderQuery(StringBuilder sql) {
+        // nothing to limit, default dialect does not support SQL query paging
+        buildOrderBy(sql);
+        return sql.toString();
     }
 
     /**
@@ -527,9 +526,9 @@ public class GenericSqlDialect implements SqlMapperFactory, SqlDialect {
         // add constraints based on the CMIS query conditions
         final GenericConditionTableBuilder visitor = createConditionNodeVisitor(out, subTables);
         query.getStatement().getRootCondition().accept(visitor);
-        out.append(" __conditions");
+        out.append(" cmis_cond");
 
-        return joinedTables.outerJoin("__conditions", subTables);
+        return joinedTables.outerJoin("cmis_cond", subTables);
     }
 
     /**

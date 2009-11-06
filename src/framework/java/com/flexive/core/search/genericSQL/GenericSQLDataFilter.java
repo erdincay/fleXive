@@ -961,7 +961,7 @@ public class GenericSQLDataFilter extends DataFilter {
                 throw new FxSqlSearchException(LOG, "ex.sqlSearch.reader.type.invalidOperator",
                         entry.getProperty().getDataType(), comparator);
         }
-        return value != null ? new Pair<String, String>(column, value) : entry.getComparisonCondition(constant.getValue());
+        return value != null ? new Pair<String, String>(column, value) : entry.getComparisonCondition(storage, constant.getValue());
     }
 
     /**

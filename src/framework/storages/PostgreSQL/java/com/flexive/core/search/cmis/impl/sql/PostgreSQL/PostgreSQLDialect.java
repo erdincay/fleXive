@@ -35,9 +35,7 @@ import com.flexive.core.search.cmis.impl.CmisSqlQuery;
 import com.flexive.core.search.cmis.impl.ResultRowNumber;
 import com.flexive.core.search.cmis.impl.ResultScore;
 import com.flexive.core.search.cmis.impl.sql.Capabilities;
-import com.flexive.core.search.cmis.impl.sql.SelectedTableVisitor;
 import com.flexive.core.search.cmis.impl.sql.generic.GenericSqlDialect;
-import com.flexive.core.search.cmis.impl.sql.generic.GenericConditionTableBuilder;
 import com.flexive.core.search.cmis.impl.sql.mapper.ConditionMapper;
 import com.flexive.core.search.cmis.impl.sql.mapper.ResultColumnMapper;
 import com.flexive.core.search.cmis.model.ContainsCondition;
@@ -74,12 +72,13 @@ public class PostgreSQLDialect extends GenericSqlDialect {
     }
 
     @Override
-    protected String limitQuery(String sql) {
-        return sql + " OFFSET "
-                + query.getStartRow()
-                + (query.getMaxRows() != -1
-                ? " LIMIT " + (query.getStartRow() + query.getMaxRows())
-                : "");
+    protected String limitAndOrderQuery(StringBuilder sql) {
+        buildOrderBy(sql);
+        if (query.getMaxRows() != -1)
+            sql.append(" LIMIT ").append((query.getStartRow() + query.getMaxRows()));
+        if( query.getStartRow() != 0)
+            sql.append(" OFFSET ").append(query.getStartRow());
+        return sql.toString();
     }
 
     /**

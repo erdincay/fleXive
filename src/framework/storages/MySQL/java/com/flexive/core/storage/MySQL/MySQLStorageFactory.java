@@ -43,6 +43,7 @@ import com.flexive.core.search.genericSQL.GenericSQLDataFilter;
 import com.flexive.core.search.genericSQL.GenericSQLDataSelector;
 import com.flexive.core.storage.*;
 import com.flexive.core.storage.genericSQL.GenericLockStorage;
+import com.flexive.shared.FxFormatUtils;
 import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.exceptions.FxSqlSearchException;
@@ -54,10 +55,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Factory for the MySQL storage
@@ -267,6 +265,13 @@ public class MySQLStorageFactory implements DBStorage {
      */
     public String getLimitOffset(boolean hasWhereClause, long limit, long offset) {
         return " LIMIT " + limit + " OFFSET " + offset;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String formatDateCondition(java.util.Date date) {
+        return "'" + FxFormatUtils.getDateTimeFormat().format(date) + "'";
     }
 
     /**
