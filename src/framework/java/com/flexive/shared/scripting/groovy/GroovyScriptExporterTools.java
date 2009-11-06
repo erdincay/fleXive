@@ -1106,7 +1106,7 @@ public final class GroovyScriptExporterTools {
         Map<String, String> opts = new HashMap<String, String>();
         for (FxStructureOption o : element.getOptions()) {
             if (o.isSet())
-                opts.put("\"" + o.getKey() + "\"", o.getValue());
+                opts.put("\"" + o.getKey() + "\"", "\"" + o.getValue() + "\"");
         }
         return opts;
     }
@@ -1121,9 +1121,8 @@ public final class GroovyScriptExporterTools {
         Map<String, String> opts = new HashMap<String, String>();
         for (FxStructureOption o : a.getOptions()) {
             if (o.isSet())
-                opts.put("\"" + o.getKey() + "\"", o.getValue());
+                opts.put("\"" + o.getKey() + "\"", "\"" + o.getValue() + "\"");
         }
-
         return opts;
     }
 
