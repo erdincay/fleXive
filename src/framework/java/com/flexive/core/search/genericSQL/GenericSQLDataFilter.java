@@ -165,7 +165,7 @@ public class GenericSQLDataFilter extends DataFilter {
         final UserTicket ticket = FxContext.getUserTicket();
         final long maxRows = search.getFxStatement().getMaxResultRows();
         Statement stmt = null;
-        String sql;
+        String sql = null;
         try {
             final String dataSelect;
             if (getStatement().getType() == FxStatement.Type.ALL) {
@@ -215,6 +215,7 @@ public class GenericSQLDataFilter extends DataFilter {
             stmt.executeUpdate(sql);
             analyzeResult();
         } catch (SQLException exc) {
+            LOG.error("Failed to execute (" + exc.getMessage() + "): " + sql);
             throw exc;
         } catch (Exception e) {
             throw new FxSqlSearchException(LOG, e, "ex.sqlSearch.failedToBuildDataFilter", e.getMessage(), search.getQuery());
@@ -230,7 +231,7 @@ public class GenericSQLDataFilter extends DataFilter {
                 : storage.getLimit(false, search.getFxStatement().getMaxResultRows()));
     }
 
-    private String getSecurityFilter(UserTicket ticket, String tableAlias) {
+    protected String getSecurityFilter(UserTicket ticket, String tableAlias) {
         return ticket.isGlobalSupervisor() ? "" :
                 "mayReadInstance2(" + tableAlias + ".id," + tableAlias + ".ver," + ticket.getUserId() + "," +
                         ticket.getMandatorId() + "," + ticket.isMandatorSupervisor() + "," + ticket.isGlobalSupervisor() + ")\n";

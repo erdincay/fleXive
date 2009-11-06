@@ -158,7 +158,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
             ResultSet rs = stmt.executeQuery("SELECT * FROM (" +
                     "SELECT LFT,RGT FROM " + getTable(node.getMode()) + " WHERE PARENT=" + node.getId() +
                     " ORDER BY LFT ASC) SUB " +
-                    " LIMIT 2 OFFSET " + ((position == 0) ? 0 : position - 1));
+                    StorageManager.getLimitOffset(false,2,(position == 0) ? 0 : position - 1));
             if (rs.next()) {
                 if (position == 0) {
                     /* first position */
@@ -744,15 +744,13 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
 
             if (deepReferenceCopy) {
                 //TODO: clone all references of this node and all children
-                if (true)
-                    throw new FxApplicationException("ex.general.notImplemented", "Deep reference copy of tree nodes");
-
+                throw new FxApplicationException("ex.general.notImplemented", "Deep reference copy of tree nodes");
+/*
                 int copyOfNr = getCopyOfCount(con, mode, copyOfPrefix, dstParentNodeId, firstCreatedNodeId);
                 // Make sure the name is unique
-                /*stmt.executeUpdate("UPDATE " + getTable(mode) + " SET NAME=CONCAT(CONCAT('" + copyOfPrefix + "',NAME),'(" +
-                        copyOfNr + ")') WHERE ID=" + firstCreatedNodeId);*/
                 stmt.executeUpdate("UPDATE " + getTable(mode) + " SET NAME=" + StorageManager.concat("'" + copyOfPrefix + "'", "NAME", "(" + String.valueOf(copyOfNr) + ")") +
                         " WHERE ID=" + firstCreatedNodeId);
+*/
             }
 
         } catch (SQLException exc) {

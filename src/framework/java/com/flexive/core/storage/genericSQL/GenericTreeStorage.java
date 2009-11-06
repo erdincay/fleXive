@@ -473,7 +473,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
         try {
             ps = con.createStatement();
             ResultSet rs = ps.executeQuery("SELECT tree_pathToID(" + startNode + ",'" + path + "'," +
-                    (mode == FxTreeMode.Live) + ")");
+                    (mode == FxTreeMode.Live) + ")" + StorageManager.getFromDual());
             long result = -1;
             if (rs.next()) {
                 result = rs.getLong(1);

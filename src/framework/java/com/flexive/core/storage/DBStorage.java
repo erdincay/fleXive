@@ -135,6 +135,14 @@ public interface DBStorage {
     SqlDialect getCmisSqlDialect(FxEnvironment environment, ContentEngine contentEngine, CmisSqlQuery query, boolean returnPrimitives);
 
     /**
+     * Get the database vendor specific Boolean expression
+     *
+     * @param flag the flag to get the expression for
+     * @return database vendor specific Boolean expression for <code>flag</code>
+     */
+    String getBooleanExpression(boolean flag);
+
+    /**
      * Get the boolean <code>true</code> expression string for the database vendor
      *
      * @return the boolean <code>true</code> expression string for the database vendor

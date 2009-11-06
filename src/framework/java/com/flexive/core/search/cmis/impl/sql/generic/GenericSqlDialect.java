@@ -42,6 +42,8 @@ import com.flexive.core.search.cmis.impl.sql.mapper.ConditionMapper;
 import com.flexive.core.search.cmis.impl.sql.mapper.ResultColumnMapper;
 import com.flexive.core.search.cmis.model.*;
 import com.flexive.core.DatabaseConst;
+import com.flexive.core.storage.DBStorage;
+import com.flexive.core.storage.StorageManager;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.Pair;
@@ -540,8 +542,10 @@ public class GenericSqlDialect implements SqlMapperFactory, SqlDialect {
         }
         if (!contentTable) {
             // not selected from content table, main table properties for optimized security filter are not available
+            final DBStorage storage = StorageManager.getStorageImpl();
             return "mayReadInstance2(" + tableAlias + ".id," + tableAlias + ".ver," + ticket.getUserId() + ","
-                    + ticket.getMandatorId() + "," + ticket.isMandatorSupervisor() + "," + ticket.isGlobalSupervisor() + ")";
+                    + ticket.getMandatorId() + "," + storage.getBooleanExpression(ticket.isMandatorSupervisor()) +
+                    "," + storage.getBooleanExpression(ticket.isGlobalSupervisor()) + ")="+storage.getBooleanTrueExpression();
         }
         // create security filters per type - the conditions will be joined with "OR"
         // property permissions are not handled by this filter, this is the responsibility of the

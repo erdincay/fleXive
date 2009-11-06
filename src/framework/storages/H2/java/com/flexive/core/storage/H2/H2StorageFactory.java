@@ -151,6 +151,13 @@ public class H2StorageFactory implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    public String getBooleanExpression(boolean flag) {
+        return flag ? TRUE : FALSE;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public String getBooleanTrueExpression() {
         return TRUE;
     }
