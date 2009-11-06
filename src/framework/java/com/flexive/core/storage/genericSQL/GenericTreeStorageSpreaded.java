@@ -313,7 +313,9 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
         }
 
         BigDecimal spacing = nodeInfo.getDefaultSpacing();
-        if (overrideSpacing != null && overrideSpacing.compareTo(spacing) < 0) {
+        if (overrideSpacing != null && (overrideSpacing.compareTo(spacing) < 0 || overrideLeft != null)) {
+            // override spacing unless it is greater OR overrideLeft is specified (in that case we
+            // have to use the spacing for valid tree ranges)  
             spacing = overrideSpacing;
         } else {
             if (spacing.compareTo(GO_UP) < 0 && !createMode) {
@@ -373,6 +375,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
             }
 
             //System.out.println("Spacing:"+SPACING);
+            int position = 0;
             while (rs.next()) {
                 //System.out.println("------------------");
                 id = rs.getLong(1);
@@ -417,15 +420,12 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
                     nextLeft = right;
                 }
 
-                //System.out.println(id+": "+left+"--"+right);
-                if (insertBoundaries != null) {
+                if (insertBoundaries != null && position == insertPosition) {
+                    // insert gap at requested position
                     if (_lft.compareTo(insertBoundaries[0]) > 0) {
                         left = left.add(insertSpace);
-                        //System.out.println("Adding space to left");
-                    }
-                    if (_rgt.compareTo(insertBoundaries[0]) > 0) {
                         right = right.add(insertSpace);
-                        //System.out.println("Adding space to right");
+                        nextLeft = nextLeft.add(insertSpace);
                     }
                 }
 
@@ -471,6 +471,9 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
                 left = nextLeft;
                 lastDepth = depth;
                 counter++;
+                if (depth == nodeInfo.getDepth() + 1) {
+                    position++; // count position in root folder
+                }
 
                 // Execute batch every 10000 items to avoid out of memory
                 if (counter % 10000 == 0) {
@@ -556,7 +559,10 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
         // Maxspacing indicates the number of nodes (*2) we expect to put in this node before space reorg
         spacing = spacing.compareTo(DEFAULT_NODE_SPACING) > 0 ? DEFAULT_NODE_SPACING : spacing;
 
-        final BigDecimal left = leftBoundary.add(spacing).add(BigDecimal.ONE);
+//        final BigDecimal left = leftBoundary.add(spacing).add(BigDecimal.ONE);
+        // don't add gap to left boundary (doesn't seem to have any benefits since that space is lost
+        // unless the tree is reorganized anyway
+        final BigDecimal left = leftBoundary.add(BigDecimal.ONE);
         final BigDecimal right = left.add(spacing).add(BigDecimal.ONE);
 
         NodeCreateInfo nci = getNodeCreateInfo(mode, seq, ce, nodeId, name, label, reference);
