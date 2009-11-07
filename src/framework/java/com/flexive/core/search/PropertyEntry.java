@@ -32,6 +32,7 @@
 package com.flexive.core.search;
 
 import com.flexive.core.storage.DBStorage;
+import com.flexive.core.storage.StorageManager;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.value.*;
@@ -512,13 +513,14 @@ public class PropertyEntry {
 
         this.readColumns = getReadColumns(storage, property);
         if (assignment != null && assignment.isFlatStorageEntry()) {
+            final String column = StorageManager.getStorageImpl().escapeFlatStorageColumn(assignment.getFlatStorageMapping().getColumn());
             this.filterColumn = !ignoreCase
                     || (this.property.getDataType() != FxDataType.String1024
                     && this.property.getDataType() != FxDataType.Text
                     && this.property.getDataType() != FxDataType.HTML)
-                    ? assignment.getFlatStorageMapping().getColumn()
+                    ? column
                     // calculate upper-case function for text queries
-                    : "upper(" + assignment.getFlatStorageMapping().getColumn() + ")";
+                    : "UPPER(" + column + ")";
         } else {
             String fcol = ignoreCase ? storage.getQueryUppercaseColumn(this.property) : this.readColumns[0];
             if (fcol == null) {

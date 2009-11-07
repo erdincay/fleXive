@@ -33,7 +33,6 @@ package com.flexive.core.storage.MySQL;
 
 import com.flexive.core.DatabaseConst;
 import com.flexive.core.storage.ContentStorage;
-import com.flexive.core.storage.binary.BinaryStorage;
 import com.flexive.core.storage.genericSQL.GenericHierarchicalStorage;
 import com.flexive.core.storage.genericSQL.GenericBinarySQLStorage;
 import com.flexive.shared.exceptions.FxDbException;
@@ -103,6 +102,7 @@ public class MySQLHierarchicalStorage extends GenericHierarchicalStorage {
             if (LOG.isDebugEnabled())
                 LOG.debug("Locked instances of id #" + id + (version > 0 ? " and version #" + version : " (all versions)"));
         } catch (SQLException e) {
+            //noinspection ThrowableInstanceNeverThrown
             throw new FxDbException(LOG, e, "ex.db.sqlError", e.getMessage()).asRuntimeException();
         }
     }

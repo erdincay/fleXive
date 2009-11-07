@@ -273,6 +273,13 @@ public class PostgreSQLStorageFactory implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    public String escapeFlatStorageColumn(String column) {
+        return column;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public boolean isForeignKeyViolation(Exception exc) {
         if (!(exc instanceof SQLException))
             return false;

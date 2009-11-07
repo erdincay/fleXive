@@ -258,6 +258,14 @@ public interface DBStorage {
     String formatDateCondition(Date date);
 
     /**
+     * Correctly escape a flat storage column if needed
+     *
+     * @param column name of the column
+     * @return escaped column (if needed)
+     */
+    String escapeFlatStorageColumn(String column);
+
+    /**
      * Returns true if the SqlError is a foreign key violation.
      *
      * @param exc the exception

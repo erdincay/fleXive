@@ -33,6 +33,7 @@ package com.flexive.core.search;
 
 import com.flexive.core.Database;
 import com.flexive.core.DatabaseConst;
+import com.flexive.core.storage.DBStorage;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.shared.*;
 import com.flexive.shared.exceptions.FxApplicationException;
@@ -79,6 +80,7 @@ public class SqlSearch {
     private final BriefcaseEngine briefcase;
     private final TreeEngine treeEngine;
 
+    private DBStorage storage;
     private FxStatement statement;
     private FxType typeFilter;
     private PropertyResolver pr;
@@ -136,7 +138,7 @@ public class SqlSearch {
         this.searchLanguage = searchLanguage;
         this.location = location;
         this.viewType = viewType;
-
+        this.storage = StorageManager.getStorageImpl();
     }
 
     /**
@@ -155,6 +157,15 @@ public class SqlSearch {
      */
     public FxLanguage getLanguage() {
         return language;
+    }
+
+    /**
+     * Get the used storage implementation
+     *
+     * @return used storage implementation
+     */
+    public DBStorage getStorage() {
+        return storage;
     }
 
     /**

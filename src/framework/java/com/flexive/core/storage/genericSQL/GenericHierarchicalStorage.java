@@ -142,7 +142,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             "WHERE ID=? AND VER=? AND LANG=? AND ASSIGN=? AND XPATHMULT=?";
 
     //                                                                                                       1         2
-    protected static final String CONTENT_DATA_REMOVE_VERSION = "DELETE FROM " + TBL_CONTENT_DATA + " WHERE ID=? AND VER=?";
+//    protected static final String CONTENT_DATA_REMOVE_VERSION = "DELETE FROM " + TBL_CONTENT_DATA + " WHERE ID=? AND VER=?";
 
     //security info main query
     protected static final String SECURITY_INFO_MAIN = "SELECT DISTINCT c.ACL, t.ACL, s.ACL, t.SECURITY_MODE, t.ID, c.DBIN_ID, c.DBIN_ACL, c.CREATED_BY, c.MANDATOR, c.ver FROM " +
@@ -348,6 +348,15 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      */
     public abstract void lockTables(Connection con, long id, int version) throws FxRuntimeException;
 
+    /**
+     * Use batch updates for changes in content data entries?
+     *
+     * @return if batch updates should be used for changes in content data entries
+     */
+    protected boolean batchContentDataChanges() {
+        return true;
+    }
+
 
     /**
      * {@inheritDoc}
@@ -390,7 +399,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      */
     public String getQueryUppercaseColumn(FxProperty property) {
         if (!property.isSystemInternal() && property.getDataType() == FxDataType.HTML)
-            return "UPPER(UFCLOB)";
+            return "UPPER(TO_CHAR(UFCLOB))";
         return getUppercaseColumn(property);
     }
 
@@ -451,7 +460,8 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 sql = new StringBuilder(2000);
             ps = con.prepareStatement(CONTENT_DATA_INSERT);
             createDetailEntries(con, ps, ft, sql, pk, content.isMaxVersion(), content.isLiveVersion(), content.getData("/"));
-            ps.executeBatch();
+            if (batchContentDataChanges())
+                ps.executeBatch();
             ft.commitChanges();
             if (CacheAdmin.getEnvironment().getType(content.getTypeId()).isContainsFlatStorageAssignments()) {
                 FxFlatStorage flatStorage = FxFlatStorageManager.getInstance();
@@ -572,7 +582,8 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 sql = new StringBuilder(2000);
             ps = con.prepareStatement(CONTENT_DATA_INSERT);
             createDetailEntries(con, ps, ft, sql, pk, content.isMaxVersion(), content.isLiveVersion(), content.getData("/"));
-            ps.executeBatch();
+            if (batchContentDataChanges())
+                ps.executeBatch();
             if (type.isContainsFlatStorageAssignments()) {
                 FxFlatStorage flatStorage = FxFlatStorageManager.getInstance();
                 flatStorage.setPropertyData(con, pk, content.getTypeId(), content.getStepId(),
@@ -795,7 +806,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 }
             }
             if (!newEntry) {
-                // first remove all ACLs, then update them (TODO: check if update is necessary)
+                // first remove all ACLs, then update them
                 ps = con.prepareStatement(CONTENT_ACLS_CLEAR);
                 ps.setLong(1, pk.getId());
                 ps.setInt(2, pk.getVersion());
@@ -967,7 +978,10 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         if (change.isGroup()) {
             ps.setInt(UPDATE_ID_POS + 2, (int) FxLanguage.SYSTEM_ID);
             ps.setBoolean(UPDATE_MLDEF_POS, true);
-            ps.addBatch();
+            if (batchContentDataChanges())
+                ps.addBatch();
+            else
+                ps.executeUpdate();
             return;
         }
 
@@ -1148,8 +1162,12 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
 
                         for (int i1 = 0; i1 < sm.getSelected().size(); i1++) {
                             FxSelectListItem item = sm.getSelected().get(i1);
-                            if (i1 > 0)
-                                ps.addBatch(); //TODO: ???
+                            if (i1 > 0) {
+                                if (batchContentDataChanges())
+                                    ps.addBatch();
+                                else
+                                    ps.executeUpdate();
+                            }
                             ps.setLong(pos[0], item.getId());
                             ps.setString(pos[1], sm.getSelectedIdsList());
                             ps.setLong(pos[2], sm.getSelectedIds().size());
@@ -1166,7 +1184,16 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                     default:
                         throw new FxDbException(LOG, "ex.db.notImplemented.store", prop.getDataType().getName());
                 }
-                ps.addBatch();
+                if (batchContentDataChanges())
+                    ps.addBatch();
+                else {
+                    try {
+                        ps.executeUpdate();
+                    } catch (SQLException e) {
+                        LOG.error(prop.getName(), e);
+                        throw e;
+                    }
+                }
             }
         } else {
             switch (prop.getDataType()) {
@@ -1345,7 +1372,6 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             else
                 ps.setString(4, data.getXPathFull());
             ps.executeUpdate();
-            String xmult = StringUtils.join(ArrayUtils.toObject(data.getIndices()), ',');
         } finally {
             if (ps != null)
                 ps.close();
@@ -2039,8 +2065,10 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                         }
                     }
                 }
-                ps_update.executeBatch();
-                ps_insert.executeBatch();
+                if (batchContentDataChanges()) {
+                    ps_update.executeBatch();
+                    ps_insert.executeBatch();
+                }
             } finally {
                 if (ps_update != null) ps_update.close();
                 if (ps_insert != null) ps_insert.close();

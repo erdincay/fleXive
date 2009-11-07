@@ -889,7 +889,7 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
 //            ps.executeUpdate();
 //            ps.close();
 //            sql.setLength(0);
-            ps = con.prepareStatement(sql.toString());
+//            ps = con.prepareStatement(sql.toString());
             sql.append("DELETE FROM ").append(TBL_STRUCT_ASSIGNMENTS).append(" WHERE TYPEDEF=? AND ID=?");
             ps = con.prepareStatement(sql.toString());
             ps.setLong(1, type.getId());

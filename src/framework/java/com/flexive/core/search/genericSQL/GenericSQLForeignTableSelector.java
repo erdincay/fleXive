@@ -132,7 +132,7 @@ class GenericSQLForeignTableSelector implements FieldSelector {
             }
 
         } catch (Throwable t) {
-            FxSqlSearchException ex = new FxSqlSearchException(LOG, "ex.sqlSearch.fieldSelector.initializeFailed",
+            @SuppressWarnings({"ThrowableInstanceNeverThrown"}) FxSqlSearchException ex = new FxSqlSearchException(LOG, "ex.sqlSearch.fieldSelector.initializeFailed",
                     tableName, t.getMessage());
             LOG.error(ex.getMessage(), ex);
             throw ex.asRuntimeException();

@@ -34,9 +34,7 @@ package com.flexive.core.search.genericSQL;
 import com.flexive.core.Database;
 import com.flexive.core.DatabaseConst;
 import com.flexive.core.search.*;
-import com.flexive.core.storage.DBStorage;
 import com.flexive.core.storage.FxTreeNodeInfo;
-import com.flexive.core.storage.StorageManager;
 import com.flexive.core.storage.genericSQL.GenericTreeStorage;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSharedUtils;
@@ -51,7 +49,9 @@ import com.flexive.shared.structure.FxDataType;
 import com.flexive.shared.structure.FxFlatStorageMapping;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.sqlParser.*;
+
 import static com.flexive.sqlParser.Condition.ValueComparator;
+
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import org.apache.commons.lang.ArrayUtils;
@@ -65,8 +65,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Collection;
 
 // NVL --> IFNULL((select sub.id from FX_CONTENT_DATA sub where sub.id=filter.id),1)
 
@@ -91,7 +89,7 @@ public class GenericSQLDataFilter extends DataFilter {
 
 //    private static final String NO_MATCH = "(SELECT DISTINCT null id,null ver,null lang FROM dual where 1=2)";
 
-    /** 
+    /**
      * The maximum rows returned by a subquery (property or assignement search)
      * Deliberately set to -1 by default to guarantee correct results - if the query gets too
      * slow, it will timeout anyway.
@@ -106,12 +104,10 @@ public class GenericSQLDataFilter extends DataFilter {
     private int foundEntryCount;
     private boolean truncated;
     private Connection con;
-    final private DBStorage storage;
 
     public GenericSQLDataFilter(Connection con, SqlSearch search) throws FxSqlSearchException {
         super(con, search);
         this.con = con;
-        this.storage = StorageManager.getStorageImpl();
         final long[] briefcaseIds = getStatement().getBriefcaseFilter();
         if (briefcaseIds.length == 0) {
             tableMain = DatabaseConst.TBL_CONTENT;
@@ -181,7 +177,7 @@ public class GenericSQLDataFilter extends DataFilter {
                 final String filters = StringUtils.defaultIfEmpty(securityFilter, "1=1")
                         + (getStatement().getBriefcaseFilter().length == 0 ? getVersionFilter("cd") : "")
                         + getDeactivatedTypesFilter("cd")
-                        + getInactiveMandatorsFilter("cd") 
+                        + getInactiveMandatorsFilter("cd")
                         + " AND ("
                         + getOptimizedMainTableConditions(getStatement().getRootBrace())
                         + ")";
@@ -201,8 +197,8 @@ public class GenericSQLDataFilter extends DataFilter {
                         "WHERE data.ver=main.ver AND data.id=main.id) data2\n"
                         + (StringUtils.isNotBlank(securityFilter)
                         // Limit by the specified max items
-                        ? "WHERE " + securityFilter + storage.getLimit(true, maxRows)
-                        : storage.getLimit(false, maxRows));
+                        ? "WHERE " + securityFilter + search.getStorage().getLimit(true, maxRows)
+                        : search.getStorage().getLimit(false, maxRows));
             }
             // Find all matching data enties and store them
             sql = "INSERT INTO " + search.getCacheTable() + " " + dataSelect;
@@ -227,8 +223,8 @@ public class GenericSQLDataFilter extends DataFilter {
     private String selectOnMainTable(String filters, String tableAlias) {
         return "SELECT " + search.getSearchId() + " AS search_id,id,ver,tdef,created_by FROM " + tableMain + " " + tableAlias + "\n"
                 + (StringUtils.isNotBlank(filters)
-                ? "WHERE " + filters + storage.getLimit(true, search.getFxStatement().getMaxResultRows())+"\n"
-                : storage.getLimit(false, search.getFxStatement().getMaxResultRows()));
+                ? "WHERE " + filters + search.getStorage().getLimit(true, search.getFxStatement().getMaxResultRows()) + "\n"
+                : search.getStorage().getLimit(false, search.getFxStatement().getMaxResultRows()));
     }
 
     protected String getSecurityFilter(UserTicket ticket, String tableAlias) {
@@ -498,7 +494,7 @@ public class GenericSQLDataFilter extends DataFilter {
     /**
      * Return the SQL value for an empty language field (e.g. "null").
      *
-     * @return  the SQL value for an empty language field (e.g. "null").
+     * @return the SQL value for an empty language field (e.g. "null").
      */
     protected String getEmptyLanguage() {
         return "null";
@@ -512,10 +508,10 @@ public class GenericSQLDataFilter extends DataFilter {
          * Return the SQL representation of the given condition. Only "native" conditions
          * (i.e. comparisons, LIKE, etc.) can be supported.
          *
-         * @param br    the current (sub)condition
-         * @param cond  the condition to be evaluated
-         * @return      the SQL representation of the given condition.
-         * @throws FxSqlSearchException
+         * @param br   the current (sub)condition
+         * @param cond the condition to be evaluated
+         * @return the SQL representation of the given condition.
+         * @throws FxSqlSearchException on errors
          */
         String buildCondition(Brace br, Condition cond) throws FxSqlSearchException;
     }
@@ -548,9 +544,10 @@ public class GenericSQLDataFilter extends DataFilter {
      * the value information about the modes in which the table is accessed. Depending on the number of
      * different accesses (e.g. multilang/no multilang), a query may or may not be optimized.
      *
-     * @param br        the condition
-     * @param recurse   whether to process only the given brace, or also all subconditions
-     * @return          the table infos
+     * @param br      the condition
+     * @param recurse whether to process only the given brace, or also all subconditions
+     * @return the table infos
+     * @throws FxSqlSearchException on errors
      */
     private Multimap<String, ConditionTableInfo> getUsedContentTables(Brace br, boolean recurse) throws FxSqlSearchException {
         final Multimap<String, ConditionTableInfo> tables = HashMultimap.create();
@@ -569,8 +566,8 @@ public class GenericSQLDataFilter extends DataFilter {
      * Return the storage table and the {@link com.flexive.core.search.genericSQL.GenericSQLDataFilter.ConditionTableInfo}
      * object for the given condition property.
      *
-     * @param prop  the condition property
-     * @return      the storage information
+     * @param prop the condition property
+     * @return the storage information
      * @throws FxSqlSearchException if the property could not be resolved
      */
     private Pair<String, ConditionTableInfo> getPropertyInfo(Property prop) throws FxSqlSearchException {
@@ -647,7 +644,7 @@ public class GenericSQLDataFilter extends DataFilter {
 
         final FxTreeNodeInfo nodeInfo;
         try {
-            nodeInfo = storage.getTreeStorage().getTreeNodeInfo(con, mode, parentNode);
+            nodeInfo = search.getStorage().getTreeStorage().getTreeNodeInfo(con, mode, parentNode);
         } catch (FxApplicationException e) {
             throw new FxSqlSearchException(LOG, e, "ex.sqlSearch.filter.loadTreeNode", parentNode, e.getMessage());
         }
@@ -663,7 +660,8 @@ public class GenericSQLDataFilter extends DataFilter {
             typeFilter = " AND cd.tdef NOT IN(" + types + ")";
         else
             typeFilter = types; //empty
-        final String versionFilter = " AND cd." + (mode.equals(FxTreeMode.Edit) ? "ismax_ver" : "islive_ver") + "=true";
+        final String versionFilter = " AND cd." + (mode.equals(FxTreeMode.Edit) ? "ismax_ver" : "islive_ver") + "=" +
+                search.getStorage().getBooleanTrueExpression();
         return "(SELECT DISTINCT cd.id,cd.ver," + getEmptyLanguage() + " AS lang FROM " + tableMain + " cd WHERE " +
                 "cd.id IN (SELECT ref FROM " + GenericTreeStorage.getTable(mode) + " WHERE " +
                 "LFT>" + nodeInfo.getLeft() + " AND RGT<" + nodeInfo.getRight() + " AND ref IS NOT NULL " +
@@ -770,10 +768,10 @@ public class GenericSQLDataFilter extends DataFilter {
     /**
      * Helper function.
      *
-     * @param stmt the statement
-     * @param cond the condition
-     * @param prop the property
-     * @param optimizedFlatStorage  if only the flat storage condition should be returned (used for optimization)
+     * @param stmt                 the statement
+     * @param cond                 the condition
+     * @param prop                 the property
+     * @param optimizedFlatStorage if only the flat storage condition should be returned (used for optimization)
      * @return the subquery
      * @throws FxSqlSearchException if a error occured
      */
@@ -814,7 +812,7 @@ public class GenericSQLDataFilter extends DataFilter {
         final String value = select.getSecond();
 
         // Build the final filter statement
-        switch(entry.getTableType()) {
+        switch (entry.getTableType()) {
             case T_CONTENT:
                 return (" (SELECT DISTINCT cd.id,cd.ver," + getEmptyLanguage() + " AS lang FROM " + tableMain + " cd WHERE " +
                         column +
@@ -846,8 +844,8 @@ public class GenericSQLDataFilter extends DataFilter {
                 final String condition =
                         SearchUtils.getFlatStorageAssignmentFilter(search.getEnvironment(), "cd", entry.getAssignment()) +
                                 " AND " + comparison +
-                        getVersionFilter("cd") +
-                        getLanguageFilter();
+                                getVersionFilter("cd") +
+                                getLanguageFilter();
 
                 if (optimizedFlatStorage) {
                     // don't do a subselect, only return the condition
@@ -855,7 +853,7 @@ public class GenericSQLDataFilter extends DataFilter {
                 } else {
                     return " (SELECT DISTINCT cd.id, cd.ver, cd.lang " +
                             "FROM " + mapping.getStorage() + " cd " +
-                            "WHERE " 
+                            "WHERE "
                             + condition
                             + getSubQueryLimit()
                             + ")";
@@ -928,7 +926,7 @@ public class GenericSQLDataFilter extends DataFilter {
                     // exact match, so we use the text column that stores the comma-separated list of selected items
                     column = "FTEXT1024";
                     value = "'" + StringUtils.join(constant.iterator(), ',') + "'";
-                } else if (comparator != ValueComparator.IN && comparator != ValueComparator.NOT_IN){
+                } else if (comparator != ValueComparator.IN && comparator != ValueComparator.NOT_IN) {
                     throw new FxSqlSearchException(LOG, "ex.sqlSearch.reader.type.invalidOperator",
                             entry.getProperty().getDataType(), comparator);
                 }
@@ -961,7 +959,7 @@ public class GenericSQLDataFilter extends DataFilter {
                 throw new FxSqlSearchException(LOG, "ex.sqlSearch.reader.type.invalidOperator",
                         entry.getProperty().getDataType(), comparator);
         }
-        return value != null ? new Pair<String, String>(column, value) : entry.getComparisonCondition(storage, constant.getValue());
+        return value != null ? new Pair<String, String>(column, value) : entry.getComparisonCondition(search.getStorage(), constant.getValue());
     }
 
     /**
@@ -993,9 +991,9 @@ public class GenericSQLDataFilter extends DataFilter {
         if (getStatement().getVersionFilter() == VersionFilter.ALL) {
             return "";
         } else if (getStatement().getVersionFilter() == VersionFilter.LIVE) {
-            return " AND " + tbl + "islive_ver=" + storage.getBooleanTrueExpression() + " ";
+            return " AND " + tbl + "islive_ver=" + search.getStorage().getBooleanTrueExpression() + " ";
         } else {
-            return " AND " + tbl + "ismax_ver=" + storage.getBooleanTrueExpression() + " ";
+            return " AND " + tbl + "ismax_ver=" + search.getStorage().getBooleanTrueExpression() + " ";
         }
     }
 
@@ -1029,8 +1027,9 @@ public class GenericSQLDataFilter extends DataFilter {
             return ""; //empty
     }
 
+    @SuppressWarnings({"ConstantConditions"})
     protected String getSubQueryLimit() {
-        return SUBQUERY_LIMIT == -1 ? "" : storage.getLimit(true, SUBQUERY_LIMIT) + " ";
+        return SUBQUERY_LIMIT == -1 ? "" : search.getStorage().getLimit(true, SUBQUERY_LIMIT) + " ";
     }
 
     private String getLanguageFilter() {
@@ -1096,7 +1095,7 @@ public class GenericSQLDataFilter extends DataFilter {
 
         @Override
         public int hashCode() {
-            int result =  flatStorage ? 1 : 0;
+            int result = flatStorage ? 1 : 0;
             result = 31 * result + (multiLang ? 1 : 0);
             result = 31 * result + level;
             return result;
