@@ -399,7 +399,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      */
     public String getQueryUppercaseColumn(FxProperty property) {
         if (!property.isSystemInternal() && property.getDataType() == FxDataType.HTML)
-            return "UPPER(TO_CHAR(UFCLOB))";
+            return "UPPER(UFCLOB)";
         return getUppercaseColumn(property);
     }
 
