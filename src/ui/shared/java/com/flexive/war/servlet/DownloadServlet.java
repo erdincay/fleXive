@@ -105,7 +105,7 @@ public class DownloadServlet implements Servlet {
             final FxTreeMode treeMode = "edit".equals(parts[1]) ? FxTreeMode.Edit : FxTreeMode.Live;
             final long nodeId;
             try {
-                nodeId = EJBLookup.getTreeEngine().getIdByFQNPath(treeMode, FxTreeNode.ROOT_NODE, "/" + parts[2].replace(".", "_"));
+                nodeId = EJBLookup.getTreeEngine().getIdByFQNPath(treeMode, FxTreeNode.ROOT_NODE, "/" + parts[2]);
             } catch (FxApplicationException e) {
                 FxServletUtils.sendErrorMessage(response, "Failed to resolve file path: " + e.getMessage());
                 return;
