@@ -55,16 +55,17 @@ public class FxRequestWrapper extends HttpServletRequestWrapper implements FxReq
     private String realRequestUriNoContext = null;
     private BrowserDetect browserDetect;
 
-
-    public boolean isWebDavMethod() {
-        return false;
-    }
-
+    /**
+     * {@inheritDoc} *
+     */
     @Override
     public HttpSession getSession() {
         return this.getSession(true);
     }
 
+    /**
+     * {@inheritDoc} *
+     */
     @Override
     public HttpSession getSession(boolean b) {
         if (sessionWrapper == null) {
@@ -190,9 +191,7 @@ public class FxRequestWrapper extends HttpServletRequestWrapper implements FxReq
     }
 
     /**
-     * Returns true if the request is a dynamic content.
-     *
-     * @return true if the request is a dynamic content
+     * {@inheritDoc} *
      */
     public boolean isDynamicContent() {
         // list only resources that are known to be static, otherwise we'll run into troubles
@@ -272,12 +271,18 @@ public class FxRequestWrapper extends HttpServletRequestWrapper implements FxReq
         }
     }
 
+    /**
+     * {@inheritDoc} *
+     */
     @Override
     public String getCharacterEncoding() {
         return request.getCharacterEncoding();
     }
 
 
+    /**
+     * {@inheritDoc} *
+     */
     @Override
     public Map getParameterMap() {
         return request.getParameterMap();

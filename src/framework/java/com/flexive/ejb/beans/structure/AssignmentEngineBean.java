@@ -195,8 +195,9 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     if (rs.next()) {
                         String last = rs.getString(1);
                         boolean found = true;
+                        final boolean differentProp = last.lastIndexOf('_') > 0 && !StringUtils.isNumeric(last.substring(last.lastIndexOf("_") + 1));
                         //since postgres handles underscores as wildcards, find the first relevant entry
-                        if (!(last.equals(property.getName()) || last.startsWith(property.getName() + "_"))) {
+                        if (differentProp || !(last.equals(property.getName()) || last.startsWith(property.getName() + "_"))) {
                             found = false;
                             while (rs.next()) {
                                 last = rs.getString(1);
@@ -204,12 +205,10 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                                     found = true;
                                     break;
                                 } else if (last.startsWith(property.getName() + "_")) {
-                                    try {
-                                        Integer.parseInt(last.substring(last.lastIndexOf("_") + 1));
+                                    if (StringUtils.isNumeric(last.substring(last.lastIndexOf("_") + 1))) {
+                                        //ignore since its a different property that contains an underscore
                                         found = true;
                                         break;
-                                    } catch (NumberFormatException e) {
-                                        //ignore since its a different property that contains an underscore
                                     }
                                 }
                             }

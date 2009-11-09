@@ -43,7 +43,7 @@
                 <tr><td colspan="3" height="45">
                     <div style="padding-left:20px;padding-right:20px;">
                         <adm:messages />
-                        <ui:fragment rendered="#{(fxSystemBean.browser != 'IE' or fxSystemBean.browserVersion lt 7.0) and fxSystemBean.browser != 'FIREFOX'}">
+                        <ui:fragment rendered="#{!fxSystemBean.isSupportedBackendBrowserVersion}">
                             <span class="errorMessage">
                                 #{fxMessageBean['Login.error.unsupportedBrowser']}
                             </span>

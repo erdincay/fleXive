@@ -31,19 +31,15 @@
  ***************************************************************/
 package com.flexive.war;
 
-import com.flexive.shared.exceptions.FxAccountInUseException;
-import com.flexive.shared.exceptions.FxLoginFailedException;
-import com.flexive.shared.exceptions.FxLogoutFailedException;
 import com.flexive.shared.security.UserTicket;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Map;
 
 public interface FxRequest extends HttpServletRequest {
 
     // All recognized browsers
     enum Browser {
-        KONQUEROR, IE, FIREFOX, MOZILLA, SAFARI, OPERA, CHROME, GALEON, EPIPHANY, CAMINO, UNKNOWN
+        KONQUEROR, IE, FIREFOX, SHIRETOKO, MOZILLA, SAFARI, OPERA, CHROME, GALEON, EPIPHANY, CAMINO, UNKNOWN
     }
 
     // All recognized operating systems
@@ -110,7 +106,10 @@ public interface FxRequest extends HttpServletRequest {
      */
     String getRequestURIWithoutContext();
 
-    boolean isWebDavMethod();
-
+    /**
+     * Returns true if the request is a dynamic content.
+     *
+     * @return true if the request is a dynamic content
+     */
     boolean isDynamicContent();
 }

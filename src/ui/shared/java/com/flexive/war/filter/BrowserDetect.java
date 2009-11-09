@@ -60,6 +60,7 @@ public class BrowserDetect {
         ids.put(Browser.OPERA, "opera");    // check opera before MSIE
         ids.put(Browser.IE, "msie");
         ids.put(Browser.FIREFOX, "firefox");
+        ids.put(Browser.SHIRETOKO, "shiretoko"); //firefox alphas
         ids.put(Browser.SAFARI, "safari");
         ids.put(Browser.KONQUEROR, "konqueror");
         ids.put(Browser.CHROME, "chrome");

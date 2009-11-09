@@ -287,6 +287,24 @@ public class SystemBean implements Serializable {
     }
 
     /**
+     * Check if the backend supports the current browser
+     *
+     * @return backend support the current browser
+     */
+    public boolean getIsSupportedBackendBrowserVersion() {
+        final FxRequest req = FxJsfUtils.getRequest();
+        switch( req.getBrowser() ) {
+            case FIREFOX:
+            case SHIRETOKO:
+                return req.getBrowserVersion() > 2.0d;
+            case IE:
+                return req.getBrowserVersion() > 7.0d;
+            default:
+                return false;
+        }
+    }
+
+    /**
      * Returns the browser version that the client is using
      *
      * @return the browser version the client is using

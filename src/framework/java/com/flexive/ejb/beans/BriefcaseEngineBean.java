@@ -688,12 +688,15 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
             while (rs != null && rs.next()) {
                 final long id = rs.getLong(1);
                 final String name = rs.getString(2);
-                final String desc = rs.getString(3);
-                final String src = rs.getString(4);
+                String desc = rs.getString(3);
+                if( rs.wasNull() )
+                    desc = "";
+                String src = rs.getString(4);
+                if( rs.wasNull() )
+                    src = "";
                 long acl = rs.getLong(5);
-                if (rs.wasNull()) {
+                if (rs.wasNull())
                     acl = -1;
-                }
                 final LifeCycleInfo lc = LifeCycleInfoImpl.load(rs, 6, 7, 8, 9);
                 final long mandator = rs.getLong(10);
                 final long iconId = rs.getLong(11);

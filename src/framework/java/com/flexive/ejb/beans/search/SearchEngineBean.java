@@ -34,6 +34,7 @@ package com.flexive.ejb.beans.search;
 import com.flexive.core.Database;
 import com.flexive.core.DatabaseConst;
 import com.flexive.core.search.SqlSearch;
+import com.flexive.core.storage.StorageManager;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.configuration.Parameter;
@@ -127,7 +128,7 @@ public class SearchEngineBean implements SearchEngine, SearchEngineLocal {
         Statement stmt = null;
         try {
             con = Database.getDbConnection();
-            String contentFilter = live ? " where ISLIVE_VER=true " : "";
+            String contentFilter = live ? " where ISLIVE_VER=" + StorageManager.getBooleanTrueExpression() + " " : "";
             String sSql = "select max(modified_at) from\n" +
                     "(select\n" +
                     "(select max(modified_at) from " + DatabaseConst.TBL_CONTENT + contentFilter + ") AS modified_at\n" +
