@@ -589,7 +589,6 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 flatStorage.setPropertyData(con, pk, content.getTypeId(), content.getStepId(),
                         content.isMaxVersion(), content.isLiveVersion(), flatStorage.getFlatPropertyData(content.getRootGroup()));
             }
-            syncFQNName(con, content, pk, null);
             checkUniqueConstraints(con, env, sql, pk, content.getTypeId());
             binaryStorage.updateContentBinaryEntry(con, pk, content.getBinaryPreviewId(), content.getBinaryPreviewACL());
             ft.commitChanges();
@@ -612,15 +611,19 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             throw new FxCreateException(e);
         }
 
+        final FxContent newVersion;
+        try {
+            newVersion = contentLoad(con, pk, env, sql);
+            syncFQNName(con, newVersion, pk, null);
+        } catch (FxApplicationException e) {
+            throw new FxCreateException(e);
+        }
+
         if (type.isTrackHistory()) {
-            try {
-                sql.setLength(0);
-                EJBLookup.getHistoryTrackerEngine().track(type, pk,
-                        ConversionEngine.getXStream().toXML(contentLoad(con, pk, env, sql)),
-                        "history.content.created.version", pk.getVersion());
-            } catch (FxApplicationException e) {
-                LOG.error(e);
-            }
+            sql.setLength(0);
+            EJBLookup.getHistoryTrackerEngine().track(type, pk,
+                    ConversionEngine.getXStream().toXML(newVersion),
+                    "history.content.created.version", pk.getVersion());
         }
 
         return pk;
