@@ -31,17 +31,18 @@
  ***************************************************************/
 package com.flexive.war.servlet;
 
+import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxSharedUtils;
-import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.XPathElement;
-import com.flexive.shared.structure.FxType;
-import com.flexive.shared.structure.FxPropertyAssignment;
-import com.flexive.shared.structure.FxDataType;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.structure.FxType;
+import com.flexive.shared.tree.FxTreeMode;
+import com.flexive.shared.tree.FxTreeNode;
 import com.flexive.shared.value.BinaryDescriptor;
+import org.apache.commons.lang.StringUtils;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
@@ -51,13 +52,12 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 
-import org.apache.commons.lang.StringUtils;
-
 /**
  * <p>Provides streaming downloads for all binary objects ({@link com.flexive.shared.value.FxBinary FxBinary}).
- * The requested value is identified by its XPath.</p>
+ * The requested value is identified by its XPath or by a unique tree path.</p>
  * <p>Link format:</p>
  * <pre>/download/pk{n.m}/xpath/filename.ext</pre>
+ * <pre>/download/tree/[edit,live]/fqn-path</pre>
  * <p>
  * When no XPath is provided, the first mandatory binary property of the instance's type is chosen.
  * </p>
@@ -91,18 +91,58 @@ public class DownloadServlet implements Servlet {
         String uri = FxServletUtils.stripSessionId(
                 URLDecoder.decode(request.getRequestURI().substring(request.getContextPath().length() + BASEURL.length()), "UTF-8")
         );
-        // get PK
-        if (!uri.startsWith("pk")) {
-            FxServletUtils.sendErrorMessage(response, "Invalid download getResult: " + uri);
-            return;
-        }
         final FxPK pk;
-        try {
-            pk = FxPK.fromString(uri.substring(2, uri.indexOf('/')));
-        } catch (IllegalArgumentException e) {
-            FxServletUtils.sendErrorMessage(response, "Invalid primary key in getResult: " + uri);
-            return;
+        String xpath = null;
+        if (uri.startsWith("tree")) {
+            // get PK via tree path
+            final String[] parts = StringUtils.split(uri, "/", 3);
+            if (parts.length != 3 || !"tree".equals(parts[0])) {
+                FxServletUtils.sendErrorMessage(response, "Invalid download request: " + uri);
+                return;
+            }
+
+            // get tree node by FQN path
+            final FxTreeMode treeMode = "edit".equals(parts[1]) ? FxTreeMode.Edit : FxTreeMode.Live;
+            final long nodeId;
+            try {
+                nodeId = EJBLookup.getTreeEngine().getIdByFQNPath(treeMode, FxTreeNode.ROOT_NODE, "/" + parts[2].replace(".", "_"));
+            } catch (FxApplicationException e) {
+                FxServletUtils.sendErrorMessage(response, "Failed to resolve file path: " + e.getMessage());
+                return;
+            }
+            if (nodeId == -1) {
+                response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                return;
+            }
+
+            // use content associated with tree node
+            try {
+                pk = EJBLookup.getTreeEngine().getNode(treeMode, nodeId).getReference();
+            } catch (FxApplicationException e) {
+                FxServletUtils.sendErrorMessage(response, "Failed to load tree node " + nodeId + ": " + e.getMessage());
+                return;
+            }
+        } else {
+            // get PK
+            if (!uri.startsWith("pk")) {
+                FxServletUtils.sendErrorMessage(response, "Invalid download request: " + uri);
+                return;
+            }
+            try {
+                pk = FxPK.fromString(uri.substring(2, uri.indexOf('/')));
+            } catch (IllegalArgumentException e) {
+                FxServletUtils.sendErrorMessage(response, "Invalid primary key in download request: " + uri);
+                return;
+            }
+
+            // extract xpath
+            try {
+                xpath = FxSharedUtils.decodeXPath(uri.substring(uri.indexOf('/') + 1, uri.lastIndexOf('/')));
+            } catch (IndexOutOfBoundsException e) {
+                // no XPath provided, use default binary XPath
+            }
         }
+
         // load content
         final FxContent content;
         try {
@@ -111,24 +151,18 @@ public class DownloadServlet implements Servlet {
             FxServletUtils.sendErrorMessage(response, "Failed to load content: " + e.getMessage());
             return;
         }
-        // extract xpath
-        String xpath = null;
-        try {
-            xpath = FxSharedUtils.decodeXPath(uri.substring(uri.indexOf('/') + 1, uri.lastIndexOf('/')));
-        } catch (IndexOutOfBoundsException e) {
-            // no XPath provided, check if a mandatory binary property exists
+
+        if (xpath == null) {
+            // get default binary XPath from type
             final FxType type = CacheAdmin.getEnvironment().getType(content.getTypeId());
-            for (FxPropertyAssignment assignment : type.getAllProperties()) {
-                if (assignment.getProperty().getDataType() == FxDataType.Binary && assignment.getMultiplicity().getMin() >= 1) {
-                    xpath = assignment.getXPath();
-                    break;
-                }
-            }
-            if (xpath == null) {
-                FxServletUtils.sendErrorMessage(response, "Invalid xpath/filename in getResult: " + uri);
+            if (type.getMainBinaryAssignment() != null) {
+                xpath = type.getMainBinaryAssignment().getXPath();
+            } else {
+                FxServletUtils.sendErrorMessage(response, "Invalid xpath/filename in download request: " + uri);
                 return;
             }
         }
+
         // get binary descriptor
         final BinaryDescriptor descriptor;
         try {
