@@ -67,7 +67,7 @@ import java.util.concurrent.ConcurrentMap;
 public class StructureExportBean {
 
     private StructureExporterCallback callback;
-    private boolean exportWithOutDependencies = false; // default: export w/ dependencies
+    private boolean exportWithoutDependencies = false; // default: export w/ dependencies
     private List<FxType> typeList;
     private List<FxType> exportedTypesList;
     private Map<Long, Boolean> assignmentIsGroupMap; // dump all assignment ids in there to see whether they are goups
@@ -122,6 +122,9 @@ public class StructureExportBean {
                 // no action requested
                 return;
             }
+            if(exportIds.size() > 0)
+                    exportIds = new ConcurrentHashMap<Long, Boolean>();
+
             if ("exportType".equals(action)) {
                 final long typeId = FxJsfUtils.getLongParameter("typeId", FxTreeNode.ROOT_NODE);
                 exportIds.put(typeId, true);
@@ -129,7 +132,7 @@ public class StructureExportBean {
             } else if ("exportTypeNoDeps".equals(action)) {
                 final long typeId = FxJsfUtils.getLongParameter("typeId", FxTreeNode.ROOT_NODE);
                 exportIds.put(typeId, true);
-                exportWithOutDependencies = true;
+                setExportWithoutDependencies(true);
                 export();
             }
         } catch (Exception e) {
@@ -162,15 +165,15 @@ public class StructureExportBean {
         if (markedIds.size() > 0) {
             exportedTypesList = new ArrayList<FxType>();
             if (markedIds.size() == 1) {
-                callback = StructureExporter.newInstance(markedIds.get(0), exportWithOutDependencies);
+                callback = StructureExporter.newInstance(markedIds.get(0), exportWithoutDependencies);
                 exportPerformed = true;
             } else {
-                callback = StructureExporter.newInstance(markedIds, exportWithOutDependencies);
+                callback = StructureExporter.newInstance(markedIds, exportWithoutDependencies);
                 exportPerformed = true;
             }
 
             // check dependencies
-            if (!exportWithOutDependencies) {
+            if (!exportWithoutDependencies) {
                 if (callback.getHasDependencies()) {
                     hasDependencies = true;
                     try {
@@ -391,12 +394,13 @@ public class StructureExportBean {
         this.callback = callback;
     }
 
-    public boolean isExportWithOutDependencies() {
-        return exportWithOutDependencies;
+    public boolean isExportWithoutDependencies() {
+        return exportWithoutDependencies;
     }
 
-    public void setExportWithOutDependencies(boolean exportWithOutDependencies) {
-        this.exportWithOutDependencies = exportWithOutDependencies;
+    public void setExportWithoutDependencies(boolean exportWithoutDependencies) {
+        this.exportWithoutDependencies = exportWithoutDependencies;
+        gbean.setWithoutDependencies(exportWithoutDependencies);
     }
 
     /**

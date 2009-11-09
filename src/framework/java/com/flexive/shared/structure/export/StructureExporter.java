@@ -54,6 +54,7 @@ import java.util.*;
  */
 public class StructureExporter implements StructureExporterCallback {
     private Map<FxType, List<FxAssignment>> dependencies;
+    private List<Long> differingDerivedAssignments;
     private long typeId = -1;
     private boolean isMultiTypeCall = false;
     private List<Long> typeIds;
@@ -202,6 +203,17 @@ public class StructureExporter implements StructureExporterCallback {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public List<Long> getDifferingDerivedAssignments() throws FxInvalidStateException {
+        if(!getHasDependencies() && !dependencyStructureInitialised)
+            throw new FxInvalidStateException("StructureExport.ex.noDependencies");
+
+        return differingDerivedAssignments;
+    }
+
+    /**
      * Lazy initialiser for the dependencyStructure. Derived types' dependencies on their parent types
      * are filtered out
      */
@@ -225,14 +237,24 @@ public class StructureExporter implements StructureExporterCallback {
                 }
             }
 
-            // DERIVED TYPES: remove all dependencies on the parent type
+            // DERIVED TYPES: remove all dependencies on the parent type, unless the assignment differs
+            // from the "original"
             if (type.isDerived()) {
+                if(differingDerivedAssignments == null)
+                    differingDerivedAssignments = new ArrayList<Long>(0);
+
                 final long parentTypeId = type.getParent().getId();
                 final List<FxAssignment> filteredWhiteList = new ArrayList<FxAssignment>();
                 for (FxAssignment a : whiteList) {
                     final long baseAssignmentId = StructureExporterTools.getBaseTypeId(a);
                     if (baseAssignmentId != parentTypeId) {
                         filteredWhiteList.add(a);
+                    } else {
+                        if(AssignmentDifferenceAnalyser.analyse(a, true).size() > 0) {
+                            if(!differingDerivedAssignments.contains(a.getId()))
+                                differingDerivedAssignments.add(a.getId());
+                            filteredWhiteList.add(a);
+                        }
                     }
                 }
                 whiteList = new ArrayList<FxAssignment>(filteredWhiteList);

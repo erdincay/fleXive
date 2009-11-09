@@ -455,12 +455,64 @@ public class StructureExporterTest {
     }
 
     /**
+     * Test if differing derived assignments are recognised by the structure exporter (for derived types)
+     *
+     * @throws FxApplicationException on errors
+     */
+    public void derivedAssignmentDiffTest() throws FxApplicationException {
+        FxTypeEdit parent = null;
+        FxTypeEdit derived = null;
+        long parentId = -1;
+        long derivedId = -1;
+        try {
+            parent = FxTypeEdit.createNew("PARENTTYPE01");
+            parent.save();
+            parent = CacheAdmin.getEnvironment().getType("PARENTTYPE01").asEditable();
+            parent.addProperty("prop1", FxDataType.String1024);
+            parentId = parent.getId();
+
+            derived = FxTypeEdit.createNew("DERIVEDTYPE01", "PARENTTYPE01");
+            derived.save();
+            derived = CacheAdmin.getEnvironment().getType("DERIVEDTYPE01").asEditable();
+            derivedId = derived.getId();
+
+            // change the assignment's multiplicity
+            FxPropertyAssignmentEdit ed = ((FxPropertyAssignment)CacheAdmin.getEnvironment().getAssignment("DERIVEDTYPE01/PROP1")).asEditable();
+            ed.setMultiplicity(new FxMultiplicity(0, 3));
+            ae.save(ed, false);
+
+            final StructureExporterCallback callback = StructureExporter.newInstance(derived.getId(), false);
+
+            Assert.assertTrue(callback.getHasDependencies());
+            final List<StructureExporterCallback> dependencyStructures = callback.getDependencyStructures();
+            Assert.assertEquals(dependencyStructures.size(), 1);
+            final List<Long> differingDerivedAssignments = callback.getDifferingDerivedAssignments();
+            Assert.assertEquals(differingDerivedAssignments.size(), 1);
+
+            final StructureExporterCallback cb = dependencyStructures.get(0);
+            FxType derivedType = CacheAdmin.getEnvironment().getType("DERIVEDTYPE01");
+            final List<FxAssignment> l = cb.getTypeAssignments().get(derivedType);
+            
+            Assert.assertTrue(l.size() == 1);
+            long fromTypeAssignment = l.get(0).getId();
+            long fromDiffAssignment = differingDerivedAssignments.get(0);
+            Assert.assertEquals(fromTypeAssignment, fromDiffAssignment);
+
+        } finally {
+            if (derivedId != -1)
+                te.remove(derivedId);
+            if(parentId != -1)
+                te.remove(parentId);
+        }
+    }
+
+    /**
      * Tests the export of multiple types
      *
      * @throws FxApplicationException on errors
      */
     public void multipleTypesExportTest() throws FxApplicationException {
-        
+        // TODO:
     }
 
     /**
@@ -853,4 +905,5 @@ public class StructureExporterTest {
     /**
      * GroovyScriptExporterTests follow here
      */
+    // TODO: GroovyScriptExporterTests
 }

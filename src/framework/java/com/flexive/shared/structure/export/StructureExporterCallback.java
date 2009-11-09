@@ -195,4 +195,14 @@ public interface StructureExporterCallback {
      * @return Returns the script mappings for each assignment: assignment id (key) --> event (key) --> script ids (value List)
      */
     Map<Long, Map<String, List<Long>>> getAssignmentScriptMapping();
+
+    /**
+     * This method retrieve all derived assignments from a given DERIVED type whose properties differ (e.g. multiplicity) from
+     * its parent assignment.
+     * PREREQUISITES: getHasDependencies() must return true, dependencyStructures must have been initialised!
+     *
+     * @return the list derived assignments whose properties differ from their respective base assignments, or an empty list if no differences were found
+     * @throws FxInvalidStateException if export conditions are not met
+     */
+    List<Long> getDifferingDerivedAssignments() throws FxInvalidStateException;
 }

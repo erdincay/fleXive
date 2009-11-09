@@ -29,7 +29,6 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the file!
  ***************************************************************/
-
 package com.flexive.shared.structure.export;
 
 import com.flexive.shared.structure.*;
@@ -377,12 +376,10 @@ public class GenericStructureExporter {
      * Populates the typesChecked map with all connected FxType ids and "false" (- called and altered in #run() )
      */
     private void populateTypesChecked() {
-//        if (typesChecked.size() < 1) {
         for (Long key : dependencies.keySet()) {
             if (!typesChecked.containsKey(key)) // only add the new ones
                 typesChecked.put(key, false);
         }
-//        }
     }
 
     /**

@@ -40,6 +40,7 @@ import com.flexive.shared.scripting.FxScriptMappingEntry;
 import com.flexive.shared.structure.*;
 import static com.flexive.shared.structure.export.StructureExporterTools.DATATYPES;
 import static com.flexive.shared.structure.export.StructureExporterTools.DATATYPESSIMPLE;
+import com.flexive.shared.structure.export.AssignmentDifferenceAnalyser;
 import com.flexive.shared.value.FxValue;
 import org.apache.commons.lang.ArrayUtils;
 import static org.apache.commons.lang.StringUtils.isBlank;
@@ -50,7 +51,7 @@ import org.apache.commons.logging.LogFactory;
 import java.util.*;
 
 /**
- * Tools and utilities for the GroovyScriptExporter
+ * Tools and utilities for GroovyScriptExporter code generation
  *
  * @author Christopher Blasnik (c.blasnik@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
@@ -194,15 +195,18 @@ public final class GroovyScriptExporterTools {
     /**
      * Contains the logic to generate the script code for a a type's assignments
      *
-     * @param type             a given type
-     * @param assignments      a List of the given types immediate assignments
-     * @param groupAssignments the Map of GroupAssignments (keys) and their child assignments (List of values)
-     * @param defaultsOnly     only use the defaults provided by the GroovyTypeBuilder
-     * @param callOnlyGroups   a List of FxGroupAssignments for which no options should be generated
+     * @param type                        a given type
+     * @param assignments                 a List of the given types immediate assignments
+     * @param groupAssignments            the Map of GroupAssignments (keys) and their child assignments (List of values)
+     * @param defaultsOnly                only use the defaults provided by the GroovyTypeBuilder
+     * @param callOnlyGroups              a List of FxGroupAssignments for which no options should be generated
+     * @param withoutDependencies         true of assignment:xpath statements should not be generated
+     * @param differingDerivedAssignments the List of assignment ids for derived assignments differing from their base assignments
      * @return the script code
      */
     public static String createTypeAssignments(FxType type, List<FxAssignment> assignments, Map<FxGroupAssignment,
-            List<FxAssignment>> groupAssignments, boolean defaultsOnly, List<FxGroupAssignment> callOnlyGroups) {
+            List<FxAssignment>> groupAssignments, boolean defaultsOnly, List<FxGroupAssignment> callOnlyGroups,
+                                               boolean withoutDependencies, List<Long> differingDerivedAssignments) {
 
         if (assignments != null && assignments.size() > 0) {
             final StringBuilder script = new StringBuilder(2000);
@@ -213,7 +217,7 @@ public final class GroovyScriptExporterTools {
 
             // assignment walk-through
             final int tabCount = 1;
-            script.append(createChildAssignments(assignments, groupAssignments, defaultsOnly, callOnlyGroups, tabCount));
+            script.append(createChildAssignments(assignments, groupAssignments, defaultsOnly, callOnlyGroups, tabCount, withoutDependencies, differingDerivedAssignments));
 
             script.append("}\n\n"); // closing curly brackets
             return script.toString();
@@ -224,12 +228,15 @@ public final class GroovyScriptExporterTools {
     /**
      * Write the script code to create a property from a given FxPropertyAssignment
      *
-     * @param pa           the FxPropertyAssignment to be scripted
-     * @param defaultsOnly use only default settings provided by the GTB, no analysis of assignments will be performed
-     * @param tabCount     the number of tabs to be added to the code's left hand side
+     * @param pa                          the FxPropertyAssignment to be scripted
+     * @param defaultsOnly                use only default settings provided by the GTB, no analysis of assignments will be performed
+     * @param tabCount                    the number of tabs to be added to the code's left hand side
+     * @param withoutDependencies         true = do not create assignment:xpath code
+     * @param differingDerivedAssignments the List of assignment ids for derived assignments differing from their base assignments
      * @return returns the partial script as a StringBuilder instance
      */
-    public static String createProperty(FxPropertyAssignment pa, boolean defaultsOnly, int tabCount) {
+    public static String createProperty(FxPropertyAssignment pa, boolean defaultsOnly, int tabCount, boolean withoutDependencies,
+                                        List<Long> differingDerivedAssignments) {
         final FxProperty prop = pa.getProperty();
         StringBuilder script = new StringBuilder(1000);
 
@@ -449,7 +456,7 @@ public final class GroovyScriptExporterTools {
         if (!defaultsOnly) {
             final List<String> differences = AssignmentDifferenceAnalyser.analyse(pa, false);
             if (differences.size() > 0) {
-                script.append(updatePropertyAssignment(pa, false, differences, defaultsOnly, --tabCount));
+                script.append(updatePropertyAssignment(pa, false, differences, defaultsOnly, --tabCount, withoutDependencies, differingDerivedAssignments));
             }
         }
         script.trimToSize();
@@ -461,15 +468,18 @@ public final class GroovyScriptExporterTools {
      * <p/>
      * "acl", "defaultValue", "hint", "label", "multilang", "multiline", "multiplicity"
      *
-     * @param pa           the FxPropertyAssignment to be updated
-     * @param isDerived    the Assignment is derived
-     * @param differences  the List of differences (map keys f. the builder)
-     * @param defaultsOnly use only default settings provided by the GTB, no analysis of assignments will be performed
-     * @param tabCount     the number of tabs to be added to the code's left hand side
+     * @param pa                          the FxPropertyAssignment to be updated
+     * @param isDerived                   the Assignment is derived
+     * @param differences                 the List of differences (map keys f. the builder)
+     * @param defaultsOnly                use only default settings provided by the GTB, no analysis of assignments will be performed
+     * @param tabCount                    the number of tabs to be added to the code's left hand side
+     * @param withoutDependencies         true = do not create assignment:xPath code
+     * @param differingDerivedAssignments the List of assignment ids for derived assignments differing from their base assignments
      * @return returns the partial script as a StringBuilder instance
      */
     public static String updatePropertyAssignment(FxPropertyAssignment pa, boolean isDerived, List<String> differences,
-                                                  boolean defaultsOnly, int tabCount) {
+                                                  boolean defaultsOnly, int tabCount, boolean withoutDependencies,
+                                                  List<Long> differingDerivedAssignments) {
         StringBuilder script = new StringBuilder(500);
         final FxProperty prop = pa.getProperty();
         final String dataType = pa.getProperty().getDataType() + "";
@@ -481,14 +491,14 @@ public final class GroovyScriptExporterTools {
                 .append("( "); // opening parenthesis + 1x \s
 
         // ASSIGNMENT
-        if (isDerived) {
+        if (isDerived && !withoutDependencies && !differingDerivedAssignments.contains(pa.getId())) {
             final String assignmentPath = CacheAdmin.getEnvironment().getAssignment(pa.getBaseAssignmentId()).getXPath();
             script.append("assignment: \"")
                     .append(assignmentPath)
                     .append("\",");
         }
 
-        if (!defaultsOnly) {
+        if (!defaultsOnly && differences.size() > 0) {
             tabCount++;
             script.append("\n");
             // label and hint
@@ -749,19 +759,21 @@ public final class GroovyScriptExporterTools {
     /**
      * Write the script code to create a group
      *
-     * @param ga               the FxGroupAssignment to be scripted
-     * @param childAssignments a List of child assignments for the given group
-     * @param groupAssignments the map of FxGroupAssignments (keys) and their respective Lists of FxAssignments (values)
-     * @param isDerived        set to "true" if the assignment to be written is derived from another property
-     * @param defaultsOnly     use only default settings provided by the GTB, no analysis of assignments will be performed
-     * @param callOnlyGroups   a List of FxGroupAssignments for which no options should be generated
-     * @param tabCount         the number of tabs to be added to the code's left hand side
+     * @param ga                          the FxGroupAssignment to be scripted
+     * @param childAssignments            a List of child assignments for the given group
+     * @param groupAssignments            the map of FxGroupAssignments (keys) and their respective Lists of FxAssignments (values)
+     * @param isDerived                   set to "true" if the assignment to be written is derived from another property
+     * @param defaultsOnly                use only default settings provided by the GTB, no analysis of assignments will be performed
+     * @param callOnlyGroups              a List of FxGroupAssignments for which no options should be generated
+     * @param tabCount                    the number of tabs to be added to the code's left hand side
+     * @param withoutDependencies         true = do not create assignment:xpath code
+     * @param differingDerivedAssignments the List of assignment ids for derived assignments differing from their base assignments
      * @return returns the partial script as a String
      */
     public static String createGroup(FxGroupAssignment ga, List<FxAssignment> childAssignments,
                                      Map<FxGroupAssignment, List<FxAssignment>> groupAssignments,
                                      boolean isDerived, boolean defaultsOnly, List<FxGroupAssignment> callOnlyGroups,
-                                     int tabCount) {
+                                     int tabCount, boolean withoutDependencies, List<Long> differingDerivedAssignments) {
         final StringBuilder script = new StringBuilder(200);
 
         if (!isDerived) {
@@ -811,18 +823,18 @@ public final class GroovyScriptExporterTools {
                 final List<String> differences = AssignmentDifferenceAnalyser.analyse(ga, false);
                 if (differences.size() > 0) {
                     script.append("\n"); // closing parenthesis
-                    script.append(updateGroupAssignment(ga, false, differences, defaultsOnly, tabCount));
+                    script.append(updateGroupAssignment(ga, false, differences, defaultsOnly, tabCount, withoutDependencies, differingDerivedAssignments));
                 }
             }
         } else { // DERIVED GROUP ASSIGNMENTS
             final List<String> differences = AssignmentDifferenceAnalyser.analyse(ga, true);
-            script.append(updateGroupAssignment(ga, true, differences, defaultsOnly, tabCount));
+            script.append(updateGroupAssignment(ga, true, differences, defaultsOnly, tabCount, withoutDependencies, differingDerivedAssignments));
         }
 
         // add child assignments ******************************
         if (childAssignments != null && childAssignments.size() > 0) {
             script.append("{\n"); // closing parenthesis and curly bracket
-            script.append(createChildAssignments(childAssignments, groupAssignments, defaultsOnly, callOnlyGroups, ++tabCount));
+            script.append(createChildAssignments(childAssignments, groupAssignments, defaultsOnly, callOnlyGroups, ++tabCount, withoutDependencies, differingDerivedAssignments));
             script.append(Indent.tabs(--tabCount));
             script.append("}"); // closing curly bracket
         }
@@ -835,15 +847,17 @@ public final class GroovyScriptExporterTools {
     /**
      * Write the script code to create a group assignment
      *
-     * @param ga           the FxGroupAssignment to be scripted
-     * @param isDerived    the Assignment is derived
-     * @param differences  the List of differences (map keys f. the builder)
-     * @param defaultsOnly use only default settings provided by the GTB, no analysis of assignments will be performed
-     * @param tabCount     the number of tabs to be added to the code's left hand side
+     * @param ga                          the FxGroupAssignment to be scripted
+     * @param isDerived                   the Assignment is derived
+     * @param differences                 the List of differences (map keys f. the builder)
+     * @param defaultsOnly                use only default settings provided by the GTB, no analysis of assignments will be performed
+     * @param tabCount                    the number of tabs to be added to the code's left hand side
+     * @param withoutDependencies         true = do not create assignment:xpath code
+     * @param differingDerivedAssignments the List of assignment ids for derived assignments differing from their base assignments
      * @return returns the partial script as a String
      */
     public static String updateGroupAssignment(FxGroupAssignment ga, boolean isDerived, List<String> differences,
-                                               boolean defaultsOnly, int tabCount) {
+                                               boolean defaultsOnly, int tabCount, boolean withoutDependencies, List<Long> differingDerivedAssignments) {
         StringBuilder script = new StringBuilder(200);
         final FxGroup group = ga.getGroup();
 
@@ -854,14 +868,14 @@ public final class GroovyScriptExporterTools {
                 .append("( "); // opening parenthesis + 1x \s
 
         // ASSIGNMENT
-        if (isDerived) {
+        if (isDerived && !withoutDependencies && !differingDerivedAssignments.contains(ga.getId())) {
             final String assignmentPath = CacheAdmin.getEnvironment().getAssignment(ga.getBaseAssignmentId()).getXPath();
             script.append("assignment: \"")
                     .append(assignmentPath)
                     .append("\",");
         }
 
-        if (!defaultsOnly) {
+        if (!defaultsOnly && differences.size() > 0) {
             tabCount++;
             script.append("\n");
             // label and hint
@@ -911,16 +925,19 @@ public final class GroovyScriptExporterTools {
      * The method's first call comes from #generateTypeAssignments"
      * This method is subsequently called from #createGroup
      *
-     * @param childAssignments the List of FxAssignments (children of a given group)
-     * @param groupAssignments the map of FxGroupAssignments (keys) and their respective Lists of FxAssignments (values)
-     * @param defaultsOnly     use only default settings provided by the GTB, no analysis of assignments will be performed
-     * @param callOnlyGroups   a List of FxGroupAssignments for which no options should be generated
-     * @param tabCount         the number of tabs to be added to the code's left hand side
+     * @param childAssignments            the List of FxAssignments (children of a given group)
+     * @param groupAssignments            the map of FxGroupAssignments (keys) and their respective Lists of FxAssignments (values)
+     * @param defaultsOnly                use only default settings provided by the GTB, no analysis of assignments will be performed
+     * @param callOnlyGroups              a List of FxGroupAssignments for which no options should be generated
+     * @param tabCount                    the number of tabs to be added to the code's left hand side
+     * @param withoutDependencies         true = do not create assignment:xpath code
+     * @param differingDerivedAssignments the List of assignment ids for derived assignments differing from their base assignments
      * @return returns the script code or an empty String if the childassigments list is empty
      */
     public static String createChildAssignments(List<FxAssignment> childAssignments,
                                                 Map<FxGroupAssignment, List<FxAssignment>> groupAssignments, boolean defaultsOnly,
-                                                List<FxGroupAssignment> callOnlyGroups, int tabCount) {
+                                                List<FxGroupAssignment> callOnlyGroups, int tabCount, boolean withoutDependencies,
+                                                List<Long> differingDerivedAssignments) {
         final StringBuilder script = new StringBuilder(2000);
 
         if (childAssignments != null && childAssignments.size() > 0) {
@@ -929,16 +946,17 @@ public final class GroovyScriptExporterTools {
                 // PROPERTIES
                 if (a instanceof FxPropertyAssignment) {
                     if (isDerived) {
+                        // if(differingDerivedAssignments != null && !differingDerivedAssignments.contains(a.getId()))
                         final List<String> differences = AssignmentDifferenceAnalyser.analyse(a, true);
-                        script.append(updatePropertyAssignment((FxPropertyAssignment) a, true, differences, defaultsOnly, tabCount));
+                        script.append(updatePropertyAssignment((FxPropertyAssignment) a, true, differences, defaultsOnly, tabCount, withoutDependencies, differingDerivedAssignments));
                     } else {
-                        script.append(createProperty((FxPropertyAssignment) a, defaultsOnly, tabCount));
+                        script.append(createProperty((FxPropertyAssignment) a, defaultsOnly, tabCount, withoutDependencies, differingDerivedAssignments));
                     }
                     // GROUPS
                 } else if (a instanceof FxGroupAssignment) {
                     // retrieve the child assignments for the given group and pass them on
                     final List<FxAssignment> currentChildren = groupAssignments.get((FxGroupAssignment) a);
-                    script.append(createGroup((FxGroupAssignment) a, currentChildren, groupAssignments, isDerived, defaultsOnly, callOnlyGroups, tabCount));
+                    script.append(createGroup((FxGroupAssignment) a, currentChildren, groupAssignments, isDerived, defaultsOnly, callOnlyGroups, tabCount, withoutDependencies, differingDerivedAssignments));
                 }
             }
         }
@@ -1124,332 +1142,6 @@ public final class GroovyScriptExporterTools {
                 opts.put("\"" + o.getKey() + "\"", "\"" + o.getValue() + "\"");
         }
         return opts;
-    }
-
-    /**
-     * Difference Analyser - Records any differences between a base property / group and an FxAssignment (if within the
-     * same type)
-     * The analysis will always return the (GTB) values of the property's / group's assignments which differ from the base
-     * (i.e. --> write "base" first, then change the assignment if different)
-     */
-    static class AssignmentDifferenceAnalyser {
-
-        static List<String> analyse(FxAssignment a, boolean isDerived) {
-            if (a instanceof FxPropertyAssignment) {
-                if (isDerived)
-                    return derivedPropComparison((FxPropertyAssignment) a);
-                else
-                    return propComparison((FxPropertyAssignment) a);
-
-            } else if (a instanceof FxGroupAssignment) {
-                if (isDerived)
-                    return derivedGroupComparison((FxGroupAssignment) a);
-                else
-                    return groupComparison((FxGroupAssignment) a);
-            }
-            return null;
-        }
-
-        /**
-         * Performs a comparison between a given FxPropertyAssignment and its base property
-         *
-         * @param pa the FxPropertyAssignment
-         * @return returns a List of String containing the builder map keys of differences
-         */
-        private static List<String> propComparison(FxPropertyAssignment pa) {
-            final FxProperty prop = pa.getProperty();
-            final List<String> result = new ArrayList<String>();
-
-            if (prop.getACL() != pa.getACL())
-                result.add("acl");
-
-            final FxValue propDefault = prop.getDefaultValue();
-            final FxValue paDefault = pa.getDefaultValue();
-            if (propDefault != null && paDefault != null) {
-                if (!propDefault.getBestTranslation().equals(paDefault.getBestTranslation()))
-                    result.add("defaultValue");
-            } else if (propDefault == null && paDefault != null) {
-                result.add("defaultValue");
-            }
-
-            final String propHint = prop.getHint().getDefaultTranslation();
-            final String paHint = pa.getHint().getDefaultTranslation();
-            if (propHint != null && paHint != null) {
-                if (!propHint.equals(paHint))
-                    result.add("hint");
-            } else if (propHint == null && paHint != null) {
-                result.add("hint");
-            }
-
-            if (!prop.getLabel().getDefaultTranslation().equals(pa.getLabel().getDefaultTranslation()))
-                result.add("label");
-
-            if (prop.getMultiLines() != pa.getMultiLines())
-                result.add("multiline");
-
-            final int min = pa.getMultiplicity().getMin();
-            final int max = pa.getMultiplicity().getMax();
-            if (prop.getMultiplicity().getMin() != min
-                    || prop.getMultiplicity().getMax() != max)
-                result.add("multiplicity");
-
-            if (prop.isMultiLang() != pa.isMultiLang())
-                result.add("multilang");
-
-            if (prop.getMaxLength() != pa.getMaxLength())
-                result.add("maxLength");
-
-            if (prop.isInOverview() != pa.isInOverview())
-                result.add("inOverview");
-
-            if (prop.isSearchable() != pa.isSearchable()) {
-                result.add("searchable");
-            }
-
-            if (prop.isUseHTMLEditor() != pa.isUseHTMLEditor()) {
-                result.add("useHtmlEditor");
-            }
-
-            // FxStructureOption differences
-            List<FxStructureOption> propOptions = prop.getOptions();
-            List<FxStructureOption> aOptions = pa.getOptions();
-
-            Outer:
-            for (FxStructureOption propOpt : propOptions) {
-                for (FxStructureOption aOpt : aOptions) {
-                    if (propOpt.getKey().equals(aOpt.getKey())) {
-                        if (aOpt.getIntValue() != propOpt.getIntValue()) {
-                            result.add("structureoptions");
-                            break Outer;
-                        }
-                    } else {
-                        if (!propOptions.contains(aOpt)) {
-                            result.add("structureoptions");
-                            break Outer;
-                        }
-                    }
-                }
-            }
-
-            return result;
-        }
-
-        /**
-         * Compares a given FxPropertyAssignment with the settings of the assignment it was derived from
-         *
-         * @param pa the given FxPropertyAssignment
-         * @return the List of builder map keys which are different
-         */
-        private static List<String> derivedPropComparison(FxPropertyAssignment pa) {
-            final List<String> result = new ArrayList<String>();
-
-            final FxPropertyAssignment base = (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(pa.getBaseAssignmentId());
-
-            if (base.getACL() != pa.getACL())
-                result.add("acl");
-
-            final FxValue baseDefault = base.getDefaultValue();
-            final FxValue paDefault = pa.getDefaultValue();
-            if (baseDefault != null && paDefault != null) {
-                if (!baseDefault.getBestTranslation().equals(paDefault.getBestTranslation()))
-                    result.add("defaultValue");
-            } else if (baseDefault == null && paDefault != null) {
-                result.add("defaultValue");
-            }
-
-            final String baseHint = base.getHint().getDefaultTranslation();
-            final String paHint = pa.getHint().getDefaultTranslation();
-            if (baseHint != null && paHint != null) {
-                if (!baseHint.equals(paHint))
-                    result.add("hint");
-            } else if (baseHint == null && paHint != null) {
-                result.add("hint");
-            }
-
-            if (!base.getLabel().getDefaultTranslation().equals(pa.getLabel().getDefaultTranslation()))
-                result.add("label");
-
-            if (base.getMultiLines() != pa.getMultiLines())
-                result.add("multiline");
-
-            final int min = pa.getMultiplicity().getMin();
-            final int max = pa.getMultiplicity().getMax();
-            if (base.getMultiplicity().getMin() != min
-                    || base.getMultiplicity().getMax() != max)
-                result.add("multiplicity");
-
-            if (base.isMultiLang() != pa.isMultiLang())
-                result.add("multilang");
-
-            if (base.getMaxLength() != pa.getMaxLength())
-                result.add("maxLength");
-
-            if (base.isInOverview() != pa.isInOverview())
-                result.add("inOverview");
-
-            if (base.isSearchable() != pa.isSearchable()) {
-                result.add("searchable");
-            }
-
-            if (base.isUseHTMLEditor() != pa.isUseHTMLEditor()) {
-                result.add("useHtmlEditor");
-            }
-
-            // comparisons unique to assignments
-            if (base.getDefaultMultiplicity() != pa.getDefaultMultiplicity()) {
-                result.add("defaultMultiplicity");
-            }
-
-            if (!base.getAlias().equalsIgnoreCase(pa.getAlias())) {
-                result.add("alias");
-            }
-
-            if (base.isEnabled() != pa.isEnabled()) {
-                result.add("enabled");
-            }
-
-            if (base.getDefaultLanguage() != pa.getDefaultLanguage()) {
-                result.add("defaultLanguage");
-            }
-
-            // FxStructureOption differences
-            List<FxStructureOption> propOptions = base.getOptions();
-            List<FxStructureOption> aOptions = pa.getOptions();
-
-            Outer:
-            for (FxStructureOption propOpt : propOptions) {
-                for (FxStructureOption aOpt : aOptions) {
-                    if (propOpt.getKey().equals(aOpt.getKey())) {
-                        if (aOpt.getIntValue() != propOpt.getIntValue()) {
-                            result.add("structureoptions");
-                            break Outer;
-                        }
-                    } else {
-                        if (!propOptions.contains(aOpt)) {
-                            result.add("structureoptions");
-                            break Outer;
-                        }
-                    }
-                }
-            }
-
-            return result;
-
-        }
-
-        /**
-         * Performs a comparison between a given FxGroupAssignment and its base group
-         *
-         * @param ga the FxGroupAssignment
-         * @return returns a List of String containing the builder map keys of differences
-         */
-        private static List<String> groupComparison(FxGroupAssignment ga) {
-            final FxGroup group = ga.getGroup();
-            List<String> result = new ArrayList<String>();
-
-            final String groupHint = group.getHint().getDefaultTranslation();
-            final String gaHint = ga.getHint().getDefaultTranslation();
-            if (groupHint != null && gaHint != null) {
-                if (!groupHint.equals(gaHint))
-                    result.add("hint");
-            } else if (groupHint == null && gaHint != null) {
-                result.add("hint");
-            }
-
-            if (!group.getLabel().getDefaultTranslation().equals(ga.getLabel().getDefaultTranslation()))
-                result.add("label");
-
-            final int min = ga.getMultiplicity().getMin();
-            final int max = ga.getMultiplicity().getMax();
-            if (group.getMultiplicity().getMin() != min
-                    || group.getMultiplicity().getMax() != max)
-                result.add("multiplicity");
-
-            List<FxStructureOption> groupOptions = group.getOptions();
-            List<FxStructureOption> aOptions = ga.getOptions();
-
-            Outer:
-            for (FxStructureOption groupOpt : groupOptions) {
-                for (FxStructureOption aOpt : aOptions) {
-                    if (groupOpt.getKey().equals(aOpt.getKey())) {
-                        if (aOpt.getIntValue() != groupOpt.getIntValue()) {
-                            result.add("structureoptions");
-                            break Outer;
-                        }
-                    } else {
-                        if (!groupOptions.contains(aOpt)) {
-                            result.add("structureoptions");
-                            break Outer;
-                        }
-                    }
-                }
-            }
-
-            return result;
-        }
-
-        /**
-         * Compares a given FxGroupAssignment with the settings of the assignment it was derived from
-         *
-         * @param ga the given FxPropertyAssignment
-         * @return the List of builder map keys which are different
-         */
-        private static List<String> derivedGroupComparison(FxGroupAssignment ga) {
-            final List<String> result = new ArrayList<String>();
-            final FxGroupAssignment base = (FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment(ga.getBaseAssignmentId());
-
-            final String groupHint = base.getHint().getDefaultTranslation();
-            final String gaHint = ga.getHint().getDefaultTranslation();
-            if (groupHint != null && gaHint != null) {
-                if (!groupHint.equals(gaHint))
-                    result.add("hint");
-            } else if (groupHint == null && gaHint != null) {
-                result.add("hint");
-            }
-
-            if (!base.getLabel().getDefaultTranslation().equals(ga.getLabel().getDefaultTranslation()))
-                result.add("label");
-
-            final int min = ga.getMultiplicity().getMin();
-            final int max = ga.getMultiplicity().getMax();
-            if (base.getMultiplicity().getMin() != min
-                    || base.getMultiplicity().getMax() != max)
-                result.add("multiplicity");
-
-            if (base.getDefaultMultiplicity() != ga.getDefaultMultiplicity())
-                result.add("defaultMultiplicity");
-
-            if (!base.getAlias().equalsIgnoreCase(ga.getAlias()))
-                result.add("alias");
-
-            if (base.isEnabled() != ga.isEnabled())
-                result.add("enabled");
-
-            if (base.getMode().getId() != ga.getMode().getId())
-                result.add("groupMode");
-
-            List<FxStructureOption> groupOptions = base.getOptions();
-            List<FxStructureOption> aOptions = ga.getOptions();
-
-            Outer:
-            for (FxStructureOption groupOpt : groupOptions) {
-                for (FxStructureOption aOpt : aOptions) {
-                    if (groupOpt.getKey().equals(aOpt.getKey())) {
-                        if (aOpt.getIntValue() != groupOpt.getIntValue()) {
-                            result.add("structureoptions");
-                            break Outer;
-                        }
-                    } else {
-                        if (!groupOptions.contains(aOpt)) {
-                            result.add("structureoptions");
-                            break Outer;
-                        }
-                    }
-                }
-            }
-
-            return result;
-        }
     }
 
     /**

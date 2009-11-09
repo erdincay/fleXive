@@ -51,6 +51,7 @@ public class GroovyScriptExporterBean {
     private boolean generateScriptAssignments = true;
     private boolean scriptOverride = true;
     private boolean addSystemTypes = false;
+    private boolean withoutDependencies = false;
     private boolean reset;
 
     /**
@@ -84,9 +85,9 @@ public class GroovyScriptExporterBean {
      */
     private void generateCode() {
         if (exporter == null)
-            exporter = new GroovyScriptExporter(callback).run(generateImportStatements, deleteStructures, generateScriptAssignments, scriptOverride, defaultsOnly, addSystemTypes, reset);
+            exporter = new GroovyScriptExporter(callback).run(generateImportStatements, deleteStructures, generateScriptAssignments, scriptOverride, defaultsOnly, addSystemTypes, withoutDependencies, reset);
         else
-            exporter.run(generateImportStatements, deleteStructures, generateScriptAssignments, scriptOverride, defaultsOnly, addSystemTypes, reset);
+            exporter.run(generateImportStatements, deleteStructures, generateScriptAssignments, scriptOverride, defaultsOnly, addSystemTypes, withoutDependencies, reset);
 
         scriptCode = exporter.getScriptCode();
         reset = false; // reset reset
@@ -143,6 +144,14 @@ public class GroovyScriptExporterBean {
     public void setAddSystemTypes(boolean addSystemTypes) {
         reset = true;
         this.addSystemTypes = addSystemTypes;
+    }
+
+    public boolean isWithoutDependencies() {
+        return withoutDependencies;
+    }
+
+    public void setWithoutDependencies(boolean withoutDependencies) {
+        this.withoutDependencies = withoutDependencies;
     }
 
     /**
