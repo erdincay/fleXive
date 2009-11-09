@@ -613,19 +613,17 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
 
         final FxContent newVersion;
         try {
+            sql.setLength(0);
             newVersion = contentLoad(con, pk, env, sql);
             syncFQNName(con, newVersion, pk, null);
         } catch (FxApplicationException e) {
             throw new FxCreateException(e);
         }
-
-        if (type.isTrackHistory()) {
-            sql.setLength(0);
+        
+        if (type.isTrackHistory())
             EJBLookup.getHistoryTrackerEngine().track(type, pk,
                     ConversionEngine.getXStream().toXML(newVersion),
                     "history.content.created.version", pk.getVersion());
-        }
-
         return pk;
     }
 

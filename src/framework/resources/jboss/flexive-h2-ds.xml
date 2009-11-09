@@ -63,7 +63,7 @@
         <jndi-name>jdbc/flexiveConfiguration</jndi-name>
         <xa-datasource-class>org.h2.jdbcx.JdbcDataSource</xa-datasource-class>
         <!-- Note: "&amp;" has to be used instead of "&" for parameters -->
-        <xa-datasource-property name="URL">jdbc:h2:tcp://localhost:9092/~/flexiveConfiguration;MVCC=TRUE</xa-datasource-property>
+        <xa-datasource-property name="URL">jdbc:h2:tcp://localhost:9092/~/flexive;SCHEMA=flexiveConfiguration;MVCC=TRUE</xa-datasource-property>
         <user-name>sa</user-name>
         <!--<password></password>-->
 
