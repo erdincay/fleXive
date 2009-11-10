@@ -449,6 +449,7 @@
 		<findbugs output="xml:withMessages" home="${findbugs.dir}"
 		    outputFile="${findbugs.report.dir}/out.xml" workhard="false"
             excludeFilter="${findbugs.dir}/excludeFilters.xml"
+            timeout="1200000"
 		    jvmargs="-Xmx768M -server" failOnError="true">
         	<sourcePath path="${flexive.src.framework.dir}"/>
         	<sourcePath path="${flexive.src.framework.dir}/storages/H2/java"/>
