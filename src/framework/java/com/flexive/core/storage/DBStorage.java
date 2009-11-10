@@ -250,6 +250,14 @@ public interface DBStorage {
     String getLimitOffset(boolean hasWhereClause, long limit, long offset);
 
     /**
+     * Get the statement to get the last content change timestamp
+     *
+     * @param live live version included?
+     * @return statement to get the last content change timestamp
+     */
+    String getLastContentChangeStatement(boolean live);
+
+    /**
      * Format a date to be used in a query condition (properly escaped)
      *
      * @param date the date to format

@@ -32,6 +32,8 @@
 package com.flexive.core.storage.PostgreSQL;
 
 import static com.flexive.core.DatabaseConst.TBL_SELECTLIST_ITEM;
+
+import com.flexive.core.DatabaseConst;
 import com.flexive.core.search.DataFilter;
 import com.flexive.core.search.DataSelector;
 import com.flexive.core.search.PostgreSQL.PostgreSQLDataFilter;
@@ -261,6 +263,19 @@ public class PostgreSQLStorageFactory implements DBStorage {
      */
     public String getLimitOffset(boolean hasWhereClause, long limit, long offset) {
         return " LIMIT " + limit + " OFFSET " + offset;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getLastContentChangeStatement(boolean live) {
+        String contentFilter = live ? " WHERE ISLIVE_VER=true " : "";
+        return "SELECT MAX(modified_at) FROM\n" +
+                "(SELECT\n" +
+                "(SELECT MAX(modified_at) FROM " + DatabaseConst.TBL_CONTENT + contentFilter + ") AS modified_at\n" +
+                (live ? "\nUNION\n(SELECT MAX(modified_at) FROM " + DatabaseConst.TBL_TREE + "_LIVE)\n" : "") +
+                "\nUNION\n(SELECT MAX(modified_at) FROM " + DatabaseConst.TBL_TREE + ")\n" +
+                ") changes";
     }
 
     /**

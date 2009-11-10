@@ -32,7 +32,10 @@
 package com.flexive.core.storage.H2;
 
 import com.flexive.core.Database;
+
 import static com.flexive.core.DatabaseConst.TBL_SELECTLIST_ITEM;
+
+import com.flexive.core.DatabaseConst;
 import com.flexive.core.search.DataFilter;
 import com.flexive.core.search.DataSelector;
 import com.flexive.core.search.H2.H2SQLDataFilter;
@@ -215,9 +218,9 @@ public class H2StorageFactory implements DBStorage {
      * {@inheritDoc}
      */
     public String concat(String... text) {
-        if( text.length == 0)
+        if (text.length == 0)
             return "";
-        if( text.length == 1)
+        if (text.length == 1)
             return text[0];
         StringBuilder sb = new StringBuilder(500);
         for (int i = 0; i < text.length; i++) {
@@ -232,9 +235,9 @@ public class H2StorageFactory implements DBStorage {
      * {@inheritDoc}
      */
     public String concat_ws(String delimiter, String... text) {
-        if( text.length == 0)
+        if (text.length == 0)
             return "";
-        if( text.length == 1)
+        if (text.length == 1)
             return text[0];
         StringBuilder sb = new StringBuilder(500);
         sb.append("CONCAT_WS('").append(delimiter).append("'");
@@ -263,6 +266,19 @@ public class H2StorageFactory implements DBStorage {
      */
     public String getLimitOffset(boolean hasWhereClause, long limit, long offset) {
         return " LIMIT " + limit + " OFFSET " + offset;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getLastContentChangeStatement(boolean live) {
+        String contentFilter = live ? " WHERE ISLIVE_VER=true " : "";
+        return "SELECT MAX(modified_at) FROM\n" +
+                "(SELECT\n" +
+                "(SELECT MAX(modified_at) FROM " + DatabaseConst.TBL_CONTENT + contentFilter + ") AS modified_at\n" +
+                (live ? "\nUNION\n(SELECT MAX(modified_at) FROM " + DatabaseConst.TBL_TREE + "_LIVE)\n" : "") +
+                "\nUNION\n(SELECT MAX(modified_at) FROM " + DatabaseConst.TBL_TREE + ")\n" +
+                ") changes";
     }
 
     /**

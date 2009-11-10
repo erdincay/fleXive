@@ -128,18 +128,12 @@ public class SearchEngineBean implements SearchEngine, SearchEngineLocal {
         Statement stmt = null;
         try {
             con = Database.getDbConnection();
-            String contentFilter = live ? " where ISLIVE_VER=" + StorageManager.getBooleanTrueExpression() + " " : "";
-            String sSql = "select max(modified_at) from\n" +
-                    "(select\n" +
-                    "(select max(modified_at) from " + DatabaseConst.TBL_CONTENT + contentFilter + ") AS modified_at\n" +
-                    (live ? "\nunion\n(select max(modified_at) from " + DatabaseConst.TBL_TREE + "_LIVE)\n" : "") +
-                    "\nunion\n(select max(modified_at) from " + DatabaseConst.TBL_TREE + ")\n" +
-                    ") changes";
             stmt = con.createStatement();
-            ResultSet rs = stmt.executeQuery(sSql);
+            ResultSet rs = stmt.executeQuery(StorageManager.getLastContentChangeStatement(live));
             rs.next();
             return rs.getLong(1);
         } catch (Exception e) {
+            //noinspection ThrowableInstanceNeverThrown
             throw new FxLoadException(LOG, e, "ex.sqlSearch.lastContentChange", e).asRuntimeException();
         } finally {
             Database.closeObjects(this.getClass(), con, stmt);

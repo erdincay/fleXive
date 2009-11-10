@@ -413,4 +413,14 @@ public class StorageManager {
     public static String getLimitOffset(boolean hasWhereClause, long limit, long offset) {
         return getStorageImpl().getLimitOffset(hasWhereClause, limit, offset);
     }
+
+    /**
+     * Get the statement to get the last content change timestamp
+     *
+     * @param live live version included?
+     * @return statement to get the last content change timestamp
+     */
+    public static String getLastContentChangeStatement(boolean live) {
+        return getStorageImpl().getLastContentChangeStatement(live);
+    }
 }
