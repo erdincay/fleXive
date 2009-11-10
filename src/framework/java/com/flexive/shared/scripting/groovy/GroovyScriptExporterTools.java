@@ -307,7 +307,7 @@ public final class GroovyScriptExporterTools {
                     // SELECT LIST DATATYPES
                     if ("SelectOne".equals(dataType) || "SelectMany".equals(dataType)) {
                         final String refListName = "CacheAdmin.getEnvironment().getSelectList(\"" + prop.getReferencedList().getName();
-                        sopts.put("REFERENCEDLIST", refListName + "\"),\n");
+                        sopts.put("referencedList", refListName + "\"),\n");
                         final FxSelectList list = prop.getReferencedList();
                         if ("SelectOne".equals(dataType)) {
                             for (FxSelectListItem item : list.getItems()) {
@@ -586,7 +586,7 @@ public final class GroovyScriptExporterTools {
                         if ("SelectOne".equals(dataType) || "SelectMany".equals(dataType)) {
                             final FxSelectList list = pa.getProperty().getReferencedList();
                             final String refListName = "CacheAdmin.getEnvironment().getSelectList(\"" + list.getName();
-                            sopts.put("REFERENCEDLIST", refListName + "\"),\n");
+                            sopts.put("referencedList", refListName + "\"),\n");
 
                             if ("SelectOne".equals(dataType)) {
                                 for (FxSelectListItem item : list.getItems()) {
