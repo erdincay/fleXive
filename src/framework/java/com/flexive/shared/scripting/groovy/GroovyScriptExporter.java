@@ -120,7 +120,7 @@ public class GroovyScriptExporter {
         this.scriptOverride = scriptOverride;
         this.defaultsOnly = defaultsOnly;
         this.addSystemTypes = addSystemTypes;
-        filteredTypes = filterExportTypes();
+        filteredTypes = filterExportTypes(this.callback);
         this.withoutDependencies = withoutDependencies;
         generateScriptCode(reset);
         return this;
@@ -134,7 +134,7 @@ public class GroovyScriptExporter {
     private void createDeleteCode(boolean reset) {
         if (deleteCode == null || reset) {
             deleteCode = new StringBuilder(1000);
-            final Set<FxType> types = filterExportTypes();
+            final Set<FxType> types = filterExportTypes(this.callback);
             deleteCode.append(GroovyScriptExporterTools.DELHEADER)
                     .append(GroovyScriptExporterTools.createDeleteCode(new ArrayList<FxType>(types)));
             deleteCode.trimToSize();
@@ -324,10 +324,10 @@ public class GroovyScriptExporter {
 
                         for (StructureExporterCallback cb : dependencyStructures) {
                             List<FxGroupAssignment> callbackGroups;
-                            if (callback.getGroupAssignments() == null)
+                            if (cb.getGroupAssignments() == null)
                                 callbackGroups = null;
                             else
-                                callbackGroups = new ArrayList<FxGroupAssignment>(callback.getGroupAssignments().keySet());
+                                callbackGroups = new ArrayList<FxGroupAssignment>(cb.getGroupAssignments().keySet());
 
                             writeTypeAssignments(cb, false, callbackGroups, differingDerivedAssignments);
                         }
@@ -361,7 +361,7 @@ public class GroovyScriptExporter {
     private void writeTypeAssignments(StructureExporterCallback callback, boolean createType, List<FxGroupAssignment> callOnlyGroups,
                                       List<Long> differingDerivedAssignments) {
         // walk through the type assignments and create the types (and their immediate assignments)
-        final Set<FxType> types = filterExportTypes();
+        final Set<FxType> types = filterExportTypes(callback);
         final Map<FxGroupAssignment, List<FxAssignment>> groupAssignments = callback.getGroupAssignments();
 
         // types / immed. assignments & groups
@@ -377,15 +377,16 @@ public class GroovyScriptExporter {
     /**
      * Filter out the ROOT type for the Groovy script export
      *
+     * @param cb the StructureExporterCallback inst.
      * @return returns the set of exported types depending on 'addRoot'
      */
-    private Set<FxType> filterExportTypes() {
+    private Set<FxType> filterExportTypes(StructureExporterCallback cb) {
         if (addSystemTypes)
-            return callback.getTypeAssignments().keySet();
+            return cb.getTypeAssignments().keySet();
 
         final Set<FxType> filteredTypes;
 
-        final Set<FxType> tmp = callback.getTypeAssignments().keySet();
+        final Set<FxType> tmp = cb.getTypeAssignments().keySet();
         filteredTypes = new LinkedHashSet<FxType>(); // guarantee order f. export
         for (FxType t : tmp) {
             if (!GroovyScriptExporterTools.isSystemType(t.getName()))

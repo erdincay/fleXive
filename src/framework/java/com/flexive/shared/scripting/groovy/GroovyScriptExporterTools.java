@@ -38,9 +38,10 @@ import com.flexive.shared.scripting.FxScriptInfo;
 import com.flexive.shared.scripting.FxScriptMapping;
 import com.flexive.shared.scripting.FxScriptMappingEntry;
 import com.flexive.shared.structure.*;
+import com.flexive.shared.structure.export.AssignmentDifferenceAnalyser;
+import com.flexive.shared.structure.export.StructureExporterTools;
 import static com.flexive.shared.structure.export.StructureExporterTools.DATATYPES;
 import static com.flexive.shared.structure.export.StructureExporterTools.DATATYPESSIMPLE;
-import com.flexive.shared.structure.export.AssignmentDifferenceAnalyser;
 import com.flexive.shared.value.FxValue;
 import org.apache.commons.lang.ArrayUtils;
 import static org.apache.commons.lang.StringUtils.isBlank;
@@ -48,7 +49,10 @@ import static org.apache.commons.lang.StringUtils.stripToEmpty;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Tools and utilities for GroovyScriptExporter code generation
@@ -208,7 +212,25 @@ public final class GroovyScriptExporterTools {
             List<FxAssignment>> groupAssignments, boolean defaultsOnly, List<FxGroupAssignment> callOnlyGroups,
                                                boolean withoutDependencies, List<Long> differingDerivedAssignments) {
 
-        if (assignments != null && assignments.size() > 0) {
+        // check if any of the given assignments is derived and present in the differingDerivedAssignments list
+        boolean createTypeAssignments = false;
+        if (assignments != null) {
+            // at least 1 non- derived OR at least one derived assignment which is in the differingAssignments list must be found
+            for (FxAssignment a : assignments) {
+                if (a.isDerivedAssignment() && StructureExporterTools.getBaseTypeId(a) != type.getId()) {
+                    if ((differingDerivedAssignments != null && differingDerivedAssignments.contains(a.getId())) || !withoutDependencies) {
+                        createTypeAssignments = true;
+                        break;
+                    }
+                } else {
+                    createTypeAssignments = true;
+                    break;
+                }
+            }
+        }
+
+        if ((assignments != null && assignments.size() > 0 && (createTypeAssignments || withoutDependencies))
+                || (callOnlyGroups != null && callOnlyGroups.size() > 0)) {
             final StringBuilder script = new StringBuilder(2000);
             script.append("builder = new GroovyTypeBuilder(\"")
                     .append(type.getName())
@@ -486,12 +508,21 @@ public final class GroovyScriptExporterTools {
 
         // use the alias as the reference name
         script.append(Indent.tabs(tabCount));
-        final String propAlias = keyWordNameCheck(pa.getAlias().toLowerCase(), true);
-        script.append(propAlias)
-                .append("( "); // opening parenthesis + 1x \s
+        boolean createProp = false;
+        if (!isDerived
+                || (isDerived && differingDerivedAssignments != null && !differingDerivedAssignments.contains(pa.getId()))
+                || (isDerived && differences.size() > 0)
+                || (isDerived && !withoutDependencies))
+            createProp = true;
 
+        if (createProp) {
+            final String propAlias = keyWordNameCheck(pa.getAlias().toLowerCase(), true);
+            script.append(propAlias)
+                    .append("( "); // opening parenthesis + 1x \s
+
+        }
         // ASSIGNMENT
-        if (isDerived && !withoutDependencies && !differingDerivedAssignments.contains(pa.getId())) {
+        if (isDerived && !withoutDependencies || (isDerived && !withoutDependencies && differingDerivedAssignments != null && !differingDerivedAssignments.contains(pa.getId()))) {
             final String assignmentPath = CacheAdmin.getEnvironment().getAssignment(pa.getBaseAssignmentId()).getXPath();
             script.append("assignment: \"")
                     .append(assignmentPath)
@@ -731,8 +762,10 @@ public final class GroovyScriptExporterTools {
         script.trimToSize();
         if (script.indexOf(",", script.length() - 1) != -1) // remove last "," if written
             script.delete(script.length() - 1, script.length());
-        script.append(")\n"); // closing parenthesis
 
+        if(createProp)
+            script.append(")\n"); // closing parenthesis
+        
         return script.toString();
     }
 
@@ -776,9 +809,8 @@ public final class GroovyScriptExporterTools {
                                      int tabCount, boolean withoutDependencies, List<Long> differingDerivedAssignments) {
         final StringBuilder script = new StringBuilder(200);
 
-        if (!isDerived) {
+        if (!isDerived || withoutDependencies) {
             final FxGroup group = ga.getGroup();
-
             // NAME
             script.append(Indent.tabs(tabCount));
             final String groupName = keyWordNameCheck(group.getName().toUpperCase(), true);
@@ -822,7 +854,6 @@ public final class GroovyScriptExporterTools {
             if (!defaultsOnly) {
                 final List<String> differences = AssignmentDifferenceAnalyser.analyse(ga, false);
                 if (differences.size() > 0) {
-                    script.append("\n"); // closing parenthesis
                     script.append(updateGroupAssignment(ga, false, differences, defaultsOnly, tabCount, withoutDependencies, differingDerivedAssignments));
                 }
             }
@@ -834,6 +865,11 @@ public final class GroovyScriptExporterTools {
         // add child assignments ******************************
         if (childAssignments != null && childAssignments.size() > 0) {
             script.append("{\n"); // closing parenthesis and curly bracket
+            // if childAssignments != null && size() == 0, then we are calling for derived groups in derived types
+            // --> remove current group from groupAssignments to avoid infinite recursions
+            if (differingDerivedAssignments != null && differingDerivedAssignments.size() > 0) {
+                groupAssignments.remove(ga);
+            }
             script.append(createChildAssignments(childAssignments, groupAssignments, defaultsOnly, callOnlyGroups, ++tabCount, withoutDependencies, differingDerivedAssignments));
             script.append(Indent.tabs(--tabCount));
             script.append("}"); // closing curly bracket
@@ -863,12 +899,21 @@ public final class GroovyScriptExporterTools {
 
         // name = alias
         script.append(Indent.tabs(tabCount));
-        final String groupAlias = keyWordNameCheck(ga.getAlias().toUpperCase(), true);
-        script.append(groupAlias)
-                .append("( "); // opening parenthesis + 1x \s
+        boolean createGroup = false;
+        if (!isDerived
+                || (isDerived && differingDerivedAssignments != null && !differingDerivedAssignments.contains(ga.getId()))
+                || (isDerived && differences.size() > 0)
+                || (isDerived && !withoutDependencies))
+            createGroup = true;
 
+        if (createGroup) {
+            // script.append("\n");
+            final String groupAlias = keyWordNameCheck(ga.getAlias().toUpperCase(), true);
+            script.append(groupAlias)
+                    .append("( "); // opening parenthesis + 1x \s
+        }
         // ASSIGNMENT
-        if (isDerived && !withoutDependencies && !differingDerivedAssignments.contains(ga.getId())) {
+        if (isDerived && !withoutDependencies || (isDerived && !withoutDependencies && differingDerivedAssignments != null && !differingDerivedAssignments.contains(ga.getId()))) {
             final String assignmentPath = CacheAdmin.getEnvironment().getAssignment(ga.getBaseAssignmentId()).getXPath();
             script.append("assignment: \"")
                     .append(assignmentPath)
@@ -915,7 +960,9 @@ public final class GroovyScriptExporterTools {
         script.trimToSize();
         if (script.indexOf(",", script.length() - 1) != -1)
             script.delete(script.length() - 1, script.length());
-        script.append(") "); // closing parenthesis + 1x \s
+
+        if(createGroup)
+            script.append(") "); // closing parenthesis + 1x \s
 
         return script.toString();
     }
@@ -939,14 +986,13 @@ public final class GroovyScriptExporterTools {
                                                 List<FxGroupAssignment> callOnlyGroups, int tabCount, boolean withoutDependencies,
                                                 List<Long> differingDerivedAssignments) {
         final StringBuilder script = new StringBuilder(2000);
-
+        // "ordinary assignments"
         if (childAssignments != null && childAssignments.size() > 0) {
             for (FxAssignment a : childAssignments) {
                 final boolean isDerived = a.isDerivedAssignment();
                 // PROPERTIES
                 if (a instanceof FxPropertyAssignment) {
-                    if (isDerived) {
-                        // if(differingDerivedAssignments != null && !differingDerivedAssignments.contains(a.getId()))
+                    if (isDerived && !withoutDependencies) {
                         final List<String> differences = AssignmentDifferenceAnalyser.analyse(a, true);
                         script.append(updatePropertyAssignment((FxPropertyAssignment) a, true, differences, defaultsOnly, tabCount, withoutDependencies, differingDerivedAssignments));
                     } else {
@@ -958,6 +1004,14 @@ public final class GroovyScriptExporterTools {
                     final List<FxAssignment> currentChildren = groupAssignments.get((FxGroupAssignment) a);
                     script.append(createGroup((FxGroupAssignment) a, currentChildren, groupAssignments, isDerived, defaultsOnly, callOnlyGroups, tabCount, withoutDependencies, differingDerivedAssignments));
                 }
+            }
+        }
+        // changed assignmnets within (derived) groups OF DERIVED types
+        if (childAssignments != null && childAssignments.size() == 0 && groupAssignments != null && groupAssignments.size() > 0 && differingDerivedAssignments != null && differingDerivedAssignments.size() > 0) {
+            for (FxGroupAssignment ga : groupAssignments.keySet()) {
+                final boolean isDerived = ga.isDerivedAssignment();
+                final List<FxAssignment> currentChildren = groupAssignments.get((FxGroupAssignment) ga);
+                script.append(createGroup((FxGroupAssignment) ga, currentChildren, groupAssignments, isDerived, defaultsOnly, callOnlyGroups, tabCount, withoutDependencies, differingDerivedAssignments));
             }
         }
 
