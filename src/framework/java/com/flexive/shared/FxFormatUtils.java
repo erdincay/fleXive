@@ -221,7 +221,7 @@ public final class FxFormatUtils {
             }
             if (inTag)
                 continue;
-            if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == '/')
+            if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == '/' || c == '.')
                 sb.append(c);
             else {
                 if ((i > 0 && path.charAt(i - 1) != '_') || i == 0)
@@ -235,10 +235,6 @@ public final class FxFormatUtils {
 
     public static String toString(Date date) {
         return getDateFormat().format(date);
-    }
-
-    private static SimpleDateFormat getGermanDateFormat() {
-        return new SimpleDateFormat("dd.MM.yyyy", Locale.ENGLISH);
     }
 
     /**
