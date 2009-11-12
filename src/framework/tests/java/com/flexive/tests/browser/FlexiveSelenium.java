@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2008
+ *  Copyright (c) 1999-2009
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -33,6 +33,7 @@ package com.flexive.tests.browser;
 
 import com.thoughtworks.selenium.CommandProcessor;
 import com.thoughtworks.selenium.DefaultSelenium;
+import com.thoughtworks.selenium.SeleniumException;
 
 /**
  * Flexive-specific extensions to the DefaultSelenium class.
@@ -84,5 +85,64 @@ public class FlexiveSelenium extends DefaultSelenium {
 
     public ContextMenu getContextMenu(String id) {
         return new ContextMenu(id);
+    }
+
+    public String getHtmlSource() {
+        return getHTMLSource("<table>", "<table ", "</table>", "<tr>", "<tr ", "</tr>", "<td>", "<td ", "</td>", "<div>", "<div ", "</div>", "<input ", "</input>");
+    }
+
+    private String getHtmlSource_() {
+        if (!new Throwable().getStackTrace()[1].toString().contains("getHTMLSource"))  {
+            System.out.println("[WARNING] : use getHtmlSource(String ... reps) instead" );
+        }
+        String src = super.getHtmlSource();
+        String tmpSrc;
+        int trys = 10;
+        int hash = src.hashCode();
+        int tmpHash;
+        while (trys-->0) {
+            sleep(200);
+            tmpSrc = super.getHtmlSource();
+            tmpHash = tmpSrc.hashCode();
+            if (hash == tmpHash)
+                break;
+            src = tmpSrc;
+            hash = tmpHash;
+        }
+
+        return src;
+    }
+
+    public String getHTMLSource(String ... reps) {
+        return AbstractBackendBrowserTest.correctHTML(getHtmlSource_(), reps);
+    }
+
+    public void waitForPageToLoad(String sec) {
+        try {
+            super.waitForPageToLoad(sec);
+        } catch (SeleniumException se) {
+            if (se.getMessage().contains("Timed out after 30000ms")) {
+                System.err.println("[ERROR] : " + se.getMessage() + " --> ignoring");
+                return;
+            }
+            throw new SeleniumException("Location : \"" + super.getLocation() + "\" ==> " + se.getMessage());
+        }
+    }
+
+    public String getEval(String script) {
+        try {
+            return super.getEval(script);
+        } catch (SeleniumException se) {
+            System.err.println("[ERROR] : " + se.getMessage() + " @ \"" + script + "\"");
+            throw se;
+        }
+    }
+
+    private void sleep(int i) {
+        try {
+            Thread.sleep(i);
+        } catch (InterruptedException e) {
+            // ignore it...
+        }
     }
 }

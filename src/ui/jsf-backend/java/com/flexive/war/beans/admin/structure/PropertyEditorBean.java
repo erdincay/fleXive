@@ -984,12 +984,16 @@ public class PropertyEditorBean implements ActionBean, Serializable {
             try {
                 applyPropertyChanges();
                 long assignmentId;
-                if (parentType != null)
+                if (parentType != null) {
                     assignmentId = EJBLookup.getAssignmentEngine().createProperty(parentType.getId(), property, parentXPath);
-                else
+                }
+                else {
                     assignmentId = EJBLookup.getAssignmentEngine().createProperty(property, parentXPath);
+                }
                 StructureTreeControllerBean s = (StructureTreeControllerBean) FxJsfUtils.getManagedBean("structureTreeControllerBean");
                 s.addAction(StructureTreeControllerBean.ACTION_RELOAD_OPEN_ASSIGNMENT, assignmentId, "");
+                // TODO messages were not shown... (when successfull)
+                new FxFacesMsgInfo("PropertyEditor.message.info.created").addToContext();
             } catch (Throwable t) {
                 new FxFacesMsgErr(t).addToContext();
             }

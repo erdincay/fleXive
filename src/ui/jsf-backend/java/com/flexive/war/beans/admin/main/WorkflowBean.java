@@ -97,6 +97,7 @@ public class WorkflowBean implements Serializable {
         try {
             workflow.setId(EJBLookup.getWorkflowEngine().create(workflow));
             workflowId = workflow.getId();
+            new FxFacesMsgInfo("Workflow.nfo.created", workflow.getName()).addToContext();
             return edit();
         } catch (Exception e) {
             new FxFacesMsgErr(e).addToContext();

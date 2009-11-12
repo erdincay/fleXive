@@ -176,6 +176,7 @@ public class AclBean implements Serializable {
         try {
             ensureIdSet();
             getAclEngine().remove(id);
+            new FxFacesMsgInfo("ACL.nfo.deleted").addToContext();
         } catch (Exception exc) {
             new FxFacesMsgErr(exc).addToContext();
         }

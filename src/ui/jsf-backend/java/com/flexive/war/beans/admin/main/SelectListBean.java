@@ -571,6 +571,7 @@ public class SelectListBean implements Serializable {
             list.setOnlySameLevelSelect(selectListOnlySameLevelSelect);
             selectListId = EJBLookup.getSelectListEngine().save(list);
             reset();
+            new FxFacesMsgInfo("SelectList.nfo.created").addToContext();
             return initEditing();
         }
         catch (Throwable t) {
@@ -605,6 +606,7 @@ public class SelectListBean implements Serializable {
         try {
             FxPermissionUtils.checkRole(FxJsfUtils.getRequest().getUserTicket(), Role.SelectListEditor);
             EJBLookup.getSelectListEngine().remove(CacheAdmin.getEnvironment().getSelectList(selectListId));
+            new FxFacesMsgInfo("SelectList.nfo.deleted").addToContext();
         }
         catch (Throwable t) {
             new FxFacesMsgErr(t).addToContext();

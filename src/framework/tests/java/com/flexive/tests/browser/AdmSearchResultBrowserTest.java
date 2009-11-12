@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2008
+ *  Copyright (c) 1999-2009
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -32,6 +32,7 @@
 package com.flexive.tests.browser;
 
 import org.testng.Assert;
+import static org.testng.Assert.fail;
 import org.testng.annotations.Test;
 
 /**
@@ -41,34 +42,128 @@ import org.testng.annotations.Test;
  * @version $Rev$
  */
 public class AdmSearchResultBrowserTest extends AbstractBackendBrowserTest {
+    private static final boolean[] SKIP_TEST_S = calcSkips();
+
+    /**
+     * build the skip array, an array in which every test-method have an entry which
+     * indicates if a method should be skiped
+     * @return the skip-array
+     */
+    private static boolean [] calcSkips() {
+        boolean [] skipList = new boolean [2];
+        for (int i = 0; i < skipList.length; i++){
+            skipList[i] = !AbstractBackendBrowserTest.isForceAll();
+        }
+//        skipList[2] = false;
+        return skipList;
+    }
+
+    /**
+     * only used if selenium browser must be setup for every class
+     * @return <code>true</code> if all elements in the skip-array are true
+     */
+    protected boolean doSkip() {
+        for (boolean cur : SKIP_TEST_S) {
+            if (!cur) return false;
+        }
+        return true;
+    }
     /**
      * Submit a quick fulltext search, switch to thumbnails, open first result row
      */
     @Test(groups = "browser")
     public void fulltextSearch() {
+        if (SKIP_TEST_S[0]) {
+            skipMe();
+            return;
+        }
+//        System.out.println(new Throwable().getStackTrace()[0]);
+//        if (true) return;
+//        try {throw new Throwable();}catch (Throwable t) {t.printStackTrace();}
         try {
             loginSupervisor();
+            Thread.sleep(2000);
+            logout();
+            loginSupervisor();
 
-            submitQuicksearch("test caption");
-            thumbnailView();
+//            submitQuicksearch("test caption");
+            demoSearch();
+//            thumbnailView();
 
+//            System.out.println(getSearchResultContextMenu().toString());
             // load first result row in edit mode through the context menu
-            getSearchResultContextMenu().openAt("row0").clickOption("edit");
-            selenium.waitForPageToLoad("30000");
+//            selectFrame(Frame.Content);
+            Thread.sleep(3000);
+            getSearchResultContextMenu().openAt("yui-rec0");
+//            selenium.click("more_link_9.1");
+//            selenium.waitForPageToLoad("30000");
+            selenium.click("link=Edit");
+//            selenium.waitForPageToLoad("30000");
 
             // save content
-            selenium.click("frm:saveButton_icon");
-            selenium.waitForPageToLoad("30000");
+            long start = System.currentTimeMillis();
+            int trys = 100;
+            while (trys-->0) {
+                Thread.sleep(100);
+                try {
+                    selenium.click("link=Save");
+                    break;
+                } catch (Throwable t) {
+
+                }
+            }
+            if (trys == 0) {
+                selenium.click("link=Save");
+            }
+            start = System.currentTimeMillis() - start;
+//            start *= -1;
+            System.out.println(start + " ms");
+//            Thread.sleep(3000);
+//            selenium.waitForPageToLoad("30000");
+        } catch (Throwable t) {
+            t.printStackTrace();
+//            try {
+//                for (int i = 0; i < 10; i++){
+//                    System.out.println(10 - i);
+//                    Thread.sleep(1000);
+//
+//                }
+//            } catch (InterruptedException e) {
+//            }
+            fail();
         } finally {
             logout();
         }
     }
 
+    private void demoSearch() {
+//        selenium.waitForPageToLoad("30000");
+        navigateTo(NavigationTab.Search);
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+        }
+        navigateTo(NavigationTab.Search);
+        final String result = selenium.getEval(WND + ".openQuery('Demo query')");
+//        System.out.println(result);
+        selectFrame(Frame.Content);
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+        }
+        selenium.click("link=Search");
+        selenium.waitForPageToLoad("30000");
+    }
+
     /**
      * Submit a quick search, then do basic row selection tasks in list and thumbnail mode.
      */
-    @Test(groups = "browser")
-    public void searchResultRowSelection() {
+//    @Test(groups = "browser")
+    private void searchResultRowSelection() {
+        if (SKIP_TEST_S[1]) {
+//            skipMe();
+            return;
+        }
         try {
             loginSupervisor();
             submitQuicksearch("test caption");
@@ -84,6 +179,7 @@ public class AdmSearchResultBrowserTest extends AbstractBackendBrowserTest {
         }
     }
 
+
     private void selectRowRange(int firstRow, int lastRow) {
         // select a row range
         selenium.click("row" + firstRow);
@@ -95,11 +191,6 @@ public class AdmSearchResultBrowserTest extends AbstractBackendBrowserTest {
         // check selection range
         Assert.assertEquals(Integer.parseInt(selenium.getEval("this.browserbot.getCurrentWindow().rowSelection.getSelected().length")),
                 (lastRow - firstRow + 1));
-    }
-
-
-    private FlexiveSelenium.ContextMenu getSearchResultContextMenu() {
-        return selenium.getContextMenu("frm:searchResults_resultMenu");
     }
 
     private void thumbnailView() {

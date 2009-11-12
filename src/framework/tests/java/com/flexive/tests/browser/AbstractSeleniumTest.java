@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2008
+ *  Copyright (c) 1999-2009
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -70,11 +70,16 @@ public abstract class AbstractSeleniumTest {
      * The base URL for all tests
      */
     public static final String PROP_BASEURL = "tests.browser.selenium.baseUrl";
+    /**
+     * The startcommand of the browser
+     */
+    public static final String PROP_BROWSER_START = "tests.browser.selenium.browserStart";
 
     protected String initialUrl;
     protected final String configName;
     protected final Properties defaultProperties;
-    protected FlexiveSelenium selenium;
+
+    private static FlexiveSelenium selenium;
     protected HttpCommandProcessor commandProcessor;
 
     /**
@@ -138,14 +143,45 @@ public abstract class AbstractSeleniumTest {
         }
         final int port = Integer.parseInt(properties.getProperty(PROP_PORT, "80"));
         final String host = properties.getProperty(PROP_HOST, "localhost");
+        final String browserStart = properties.getProperty(PROP_BROWSER_START, "*firefox");
         if (LOG.isInfoEnabled()) {
             LOG.info("Connecting to Selenium Server at " + host + ":" + port + "...");
             LOG.info("Base URL: " + this.initialUrl);
         }
-        commandProcessor = new HttpCommandProcessor(host, port, "*firefox", initialUrl);
+
+        /**
+         *
+         *
+         *  *firefox
+         *mock
+         *firefoxproxy
+         *pifirefox
+         *chrome
+         *iexploreproxy
+         *iexplore
+         *firefox3
+         *safariproxy
+         *googlechrome
+         *konqueror
+         *firefox2
+         *safari
+         *piiexplore
+         *firefoxchrome
+         *opera
+         *iehta
+         */
+//        commandProcessor = new HttpCommandProcessor(host, port, "*iexploreproxy", initialUrl);
+        commandProcessor = new HttpCommandProcessor(host, port, browserStart, initialUrl);
         selenium = new FlexiveSelenium(commandProcessor);
+        LOG.info("using browser : " + browserStart.substring(1));
         selenium.start();
         selenium.createCookie(FxSharedUtils.COOKIE_FORCE_TEST_DIVISION + "=true", "path=/");
+        try {
+            LOG.info(selenium.getCookie());
+        } catch (Throwable t) {
+            LOG.error(t.getMessage());
+        }
+//        LOG.error("Create Test-cookie DISABLED!!!");
     }
 
     /**
@@ -156,4 +192,58 @@ public abstract class AbstractSeleniumTest {
     public void afterClass() {
         selenium.stop();
     }
+
+    protected void clickAndWait(String clickTarget) {
+        clickAndWait_(clickTarget, 30000);
+    }
+
+    protected void clickAndWait(String clickTarget, int ms) {
+        clickAndWait_(clickTarget, ms);
+    }
+
+    /**
+     * Clicks multiple times (in case of timeout) on a link
+     * <p/>
+     * to have always the right stacktrace
+     *
+     * @param clickTarget
+     * @param ms
+     */
+    private void clickAndWait_(String clickTarget, int ms) {
+        int trys = 20;
+        ms >>= 3;
+        boolean error = false;
+        String code = "";
+        int errLeft = 5;
+        while (trys-- > 0) {
+            try {
+                selenium.click(clickTarget);
+                selenium.waitForPageToLoad("" + ms);
+                if (error) {
+                    System.err.println("you ment \"" + clickTarget + "\", but I corrected it for you! [" + code + "]");
+                }
+                break;
+            } catch (Throwable t) {
+                if (t.getMessage().endsWith(" not found") && errLeft-- <= 0 && !error) {
+                    clickTarget = "link=" + clickTarget;
+                    error = true;
+                    code = "" + t.getStackTrace()[4];
+                }
+                sleep(200);
+            }
+        }
+    }
+
+    protected void sleep(long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            // ignore it
+        }
+    }
+
+    public static FlexiveSelenium getSeleniumInstance() {
+        return selenium;
+    }
+
 }

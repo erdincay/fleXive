@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2008
+ *  Copyright (c) 1999-2009
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -31,8 +31,11 @@
  ***************************************************************/
 package com.flexive.tests.browser;
 
-import static org.testng.Assert.assertTrue;
-import org.testng.annotations.Test;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import static org.testng.Assert.fail;
+
+import java.util.ArrayList;
 
 /**
  * <p>
@@ -43,9 +46,42 @@ import org.testng.annotations.Test;
  * @version $Rev$
  */
 public class AdmBasicBrowserTest extends AbstractBackendBrowserTest {
+    private ArrayList<String> notFounds = new ArrayList<String>();
+    private boolean allOk = true;
+    private static final Log LOG = LogFactory.getLog(AdmBasicBrowserTest.class);
+    private final static boolean[] SKIP_TEST_S = calcSkips();
+
+    /**
+     * build the skip array, an array in which every test-method have an entry which
+     * indicates if a method should be skiped
+     *
+     * @return the skip-array
+     */
+    private static boolean[] calcSkips() {
+        boolean[] skipList = new boolean[3];
+        for (int i = 0; i < skipList.length; i++) {
+            skipList[i] = !AbstractBackendBrowserTest.isForceAll();
+//            skipList[i] = false;
+        }
+//        skipList[0] = false;
+        return skipList;
+    }
+
+    /**
+     * only used if selenium browser must be setup for every class
+     *
+     * @return <code>true</code> if all elements in the skip-array are true
+     */
+    protected boolean doSkip() {
+        for (boolean cur : SKIP_TEST_S) {
+            if (!cur) return false;
+        }
+        return true;
+    }
+
     /**
      * All admin pages.
-     *
+     * <p/>
      * To get the list of admin pages, execute
      * <pre>grep -o "\"\/.*jsf\"" src/ui/jsf/web/adm/main/navigation.xhtml</pre>
      */
@@ -81,62 +117,114 @@ public class AdmBasicBrowserTest extends AbstractBackendBrowserTest {
     /**
      * Logs in into the backend, then logs out again.
      */
-    @Test(groups = "browser")
     public void loginLogout() {
-        loginSupervisor();
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            // ignore
+        if (SKIP_TEST_S[0]) {
+            skipMe();
+            return;
         }
+        loginSupervisor();
         logout();
     }
 
     /**
      * Clicks on all navigation tabs.
      */
-    @Test(groups = "browser")
     public void basicNavigation() {
+        if (SKIP_TEST_S[1]) {
+            skipMe();
+            return;
+        }
         try {
             loginSupervisor();
+            notFounds.clear();
+            allOk = true;
+//            System.out.println(new Throwable().getStackTrace()[0]);
 
             // search/briefcase tab
             navigateTo(NavigationTab.Search);
-            assertTrue(selenium.isTextPresent("Search queries"));
-            assertTrue(selenium.isTextPresent("Create new Briefcase"));
+//            navigateTo(NavigationTab.Search);
+            testIfNavigationTabTextPresent("Search queries");
+            testIfNavigationTabTextPresent("Briefcases");
 
             // admin tab
             navigateTo(NavigationTab.Administration);
-            assertTrue(selenium.isTextPresent("Accounts"));
-            assertTrue(selenium.isTextPresent("Groups"));
+            testIfNavigationTabTextPresent("Accounts");
+            testIfNavigationTabTextPresent("User groups");
+            testIfNavigationTabTextPresent("Mandators");
+            testIfNavigationTabTextPresent("Access control lists");
+            testIfNavigationTabTextPresent("Workflows");
+            testIfNavigationTabTextPresent("Scripts");
+            testIfNavigationTabTextPresent("Selectlists");
+            testIfNavigationTabTextPresent("Import / Export");
+            testIfNavigationTabTextPresent("System");
+//            testIfNavigationTabTextPresent("");
 
             // structure tab
             navigateTo(NavigationTab.Structure);
-            assertTrue(selenium.isTextPresent("ROOT"));
-            assertTrue(selenium.isTextPresent("ACL"));
-            assertTrue(selenium.isTextPresent("Workflow Step"));
+            testIfNavigationTabTextPresent("ROOT");
+            testIfNavigationTabTextPresent("ACL");
+            testIfNavigationTabTextPresent("Workflow Step");
 
             // content tab
             navigateTo(NavigationTab.Content);
-            assertTrue(selenium.isTextPresent("Root ["));
+            testIfNavigationTabTextPresent("Root [");
+
         } finally {
             logout();
+            if (!allOk) {
+//                System.out.println("ERROR : ");
+                for (String s : notFounds) {
+//                    System.out.println(s);
+                    if (s.startsWith("-")) {
+                        LOG.error(s.substring(1));
+                    } else {
+                        LOG.info(s.substring(1));
+                    }
+                }
+                fail();
+            }
         }
+    }
+
+    private void testIfNavigationTabTextPresent(String text) {
+        allOk &= testIfNavigationTabTextPresent(text, notFounds);
     }
 
     /**
      * Load all admin pages.
      */
-    @Test(groups = "browser")
     public void loadAdminPages() {
+        if (SKIP_TEST_S[2]) {
+            skipMe();
+            return;
+        }
         try {
             loginSupervisor();
+            notFounds.clear();
+            allOk = true;
             navigateTo(NavigationTab.Administration);
-            for (String page: ADMIN_PAGES) {
-                loadContentPage(page);
+            for (String page : ADMIN_PAGES) {
+                try {
+                    loadContentPage(page);
+                    notFounds.add("+\tpage \"" + page + "\" found");
+                } catch (Throwable t) {
+                    notFounds.add("-\tpage \"" + page + "\" NOT found");
+                    allOk = false;
+                }
             }
         } finally {
             logout();
+            if (!allOk) {
+//                System.out.println("ERROR : ");
+                for (String s : notFounds) {
+                    if (s.startsWith("-")) {
+                        LOG.error(s.substring(1));
+                    } else {
+                        LOG.info(s.substring(1));
+                    }
+                }
+                fail();
+            }
         }
     }
 }
