@@ -144,7 +144,7 @@ disableTab... false if the <adm:tab/> component should be rendered, true otherwi
                                 </ui:fragment>
                                 <!-- lock duration & extension -->
                                 <ui:fragment rendered="#{_ceContent.guiSettings.contentLocked}">
-                                    <div id="lockTimeAndUnlock" style="#{buttonStyle}">
+                                    <div id="#{editorId}_lockTimeAndUnlock" style="#{buttonStyle}">
                                         <!-- lock duration -->
                                         <adm:ajaxCommandIcon id="#{editorId}_lockTimeButton" titleKey="ContentEditor.button.remainingTime" bean="#{srcEditor}"
                                                                icon="time" action="computeRemainingLockTime" onclick="flexive.contentEditor.saveGroupFolding('#{srcEditor.formId}');"
@@ -180,7 +180,7 @@ disableTab... false if the <adm:tab/> component should be rendered, true otherwi
                                         </ui:fragment>
                                     </div>
                                     <!-- lock duration panel -->
-                                    <a4j:outputPanel id="lockDurationPanel" rendered="#{not empty __ceBean.remainingLockTime and not empty __ceBean.expiresTime}">
+                                    <a4j:outputPanel id="#{editorId}_lockDurationPanel" rendered="#{not empty __ceBean.remainingLockTime and not empty __ceBean.expiresTime}">
                                         <br/><br/>
                                         <c:if test="#{_ceContent.guiSettings.permLock}">
                                             <h:outputText value="#{fxMessageBean['ContentEditor.msg.permLockTimeRemaining']}"/>

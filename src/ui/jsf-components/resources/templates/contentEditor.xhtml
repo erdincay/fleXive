@@ -455,7 +455,7 @@
                 <!-- remaining lock time panel -->
                 <ui:fragment rendered="#{_ceContent.guiSettings.contentLocked}">
                     <ui:insert name="lockTimePanel">
-                        <a4j:outputPanel id="remainingTime" rendered="#{not empty __ceBean.remainingLockTime}" layout="block">
+                        <a4j:outputPanel id="#{_ceContent.editorId}_remainingTime" rendered="#{not empty __ceBean.remainingLockTime}" layout="block">
                             <br/><br/>
                             <c:if test="#{_ceContent.guiSettings.permLock}">
                                 <h:outputText escape="false" value="#{fxMessageBean['ContentEditor.msg.permLockTimeRemaining']}"/>
