@@ -73,6 +73,7 @@ public class Thumbnail extends UIOutput {
     private int rot = 0;
     private boolean flipH = false;
     private boolean flipV = false;
+    private String forceVersion;
     private String previewSize = BinaryDescriptor.PreviewSizes.PREVIEW2.name();
 
     public Thumbnail() {
@@ -98,6 +99,14 @@ public class Thumbnail extends UIOutput {
         } else {
             throw new FxInvalidParameterException("pk", "ex.jsf.thumbnail.empty").asRuntimeException();
         }
+        
+        // override with forceVersion
+        if ("max".equalsIgnoreCase(getForceVersion())) {
+            selector.setPK(new FxPK(selector.getPK().getId(), FxPK.MAX));
+        } else if ("live".equalsIgnoreCase(getForceVersion())) {
+            selector.setPK(new FxPK(selector.getPK().getId(), FxPK.LIVE));
+        }
+
         selector.setSize(previewSize);
         if( width != -1 )
             selector.setScaleWidth(width);
@@ -205,9 +214,20 @@ public class Thumbnail extends UIOutput {
         this.flipV = flipV;
     }
 
+    public String getForceVersion() {
+        if (forceVersion == null) {
+            return FxJsfComponentUtils.getStringValue(this, "forceVersion");
+        }
+        return forceVersion;
+    }
+
+    public void setForceVersion(String forceVersion) {
+        this.forceVersion = forceVersion;
+    }
+
     @Override
     public Object saveState(FacesContext context) {
-        final Object[] state = new Object[10];
+        final Object[] state = new Object[11];
         state[0] = super.saveState(context);
         state[1] = pk;
         state[2] = binary;
@@ -218,6 +238,7 @@ public class Thumbnail extends UIOutput {
         state[7] = rot;
         state[8] = flipH;
         state[9] = flipV;
+        state[10] = forceVersion;
         return state;
     }
 
@@ -234,5 +255,6 @@ public class Thumbnail extends UIOutput {
         rot = (Integer)state[7];
         flipH = (Boolean)state[8];
         flipV = (Boolean)state[9];
+        forceVersion = (String) state[10];
     }
 }

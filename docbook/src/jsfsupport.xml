@@ -1727,7 +1727,7 @@
                 <section xml:id="jcl_fx_thumbnail_synopsis">
                     <title>Synopsis</title>
                     <para>
-                        <programlisting language="xhtml"><![CDATA[<fx:thumbnail (pk="fxpk" | binary="fxbinary")/>
+                        <programlisting language="xhtml"><![CDATA[<fx:thumbnail (pk="fxpk" | binary="fxbinary") [forceVersion="max|live"]/>
 ]]></programlisting>
                     </para>
                 </section>
@@ -1798,6 +1798,18 @@
                                             </para>
                                         </listitem>
                                     </itemizedlist>
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>forceVersion</term>
+                            <listitem>
+                                <para>
+                                    If set to
+                                    <code>max</code>
+                                    or
+                                    <code>live</code>,
+                                    it overrides the version information in the PK or binary descriptor.
                                 </para>
                             </listitem>
                         </varlistentry>
