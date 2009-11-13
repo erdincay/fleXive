@@ -918,6 +918,18 @@
                             </varlistentry>
                         </variablelist>
                     </para>
+                    <para>
+                        <variablelist>
+                            <varlistentry>
+                                <term>disableReferenceEditor</term>
+                                <listitem>
+                                    <para>
+                                        True if the inline editor controls for references should not be rendered (default: false).
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+                        </variablelist>
+                    </para>
                 </section>
 
                 <section xml:id="jcl_fx_contentEditor_customization">

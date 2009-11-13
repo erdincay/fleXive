@@ -54,7 +54,7 @@
                                          containerDivClass="fxContentEditor_value"
                                          onchange="#{element.value.class eq 'class com.flexive.shared.value.FxBinary' ? 'flexive.contentEditor.fileInputChanged()' : ''}"
                                          valueFormatter="#{_ceContent.guiSettings.valueFormatter}"/>
-                        <ui:fragment rendered="#{element.value.class eq 'class com.flexive.shared.value.FxReference' and _ceContent.guiSettings.editMode}">
+                        <ui:fragment rendered="#{element.value.class eq 'class com.flexive.shared.value.FxReference' and _ceContent.guiSettings.editMode and not _ceContent.guiSettings.disableReferenceEditor}">
                             <ui:insert name="editReferenceButton">
                                 <a4j:commandLink reRender="#{__ce_reRender}" action="#{__ceBean.editReference}"
                                                  eventsQueue="ceQueue" onclick="flexive.contentEditor.preSubmit();"

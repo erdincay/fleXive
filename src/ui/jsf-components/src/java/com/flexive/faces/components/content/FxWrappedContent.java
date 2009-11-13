@@ -528,6 +528,7 @@ public class FxWrappedContent implements Serializable {
         private boolean userMayUnlock;
         private boolean userMayLooseLock;
         private boolean userMayPermLock;
+        private boolean disableReferenceEditor;
 
         public GuiSettings(boolean editMode, boolean disableAcl, boolean disableWorkflow,
                            boolean disableEdit, boolean disableDelete, boolean disableVersion,
@@ -538,7 +539,7 @@ public class FxWrappedContent implements Serializable {
                            boolean lockedContentOverride, boolean cannotTakeOverPermLock, boolean askCreateNewVersion,
                            String lockStatus, String lockStatusTooltip, boolean contentLocked, boolean looseLock,
                            boolean permLock, boolean takeOver, boolean userMayTakeover, boolean userMayUnlock,
-                           boolean userMayLooseLock, boolean userMayPermLock) {
+                           boolean userMayLooseLock, boolean userMayPermLock, boolean disableReferenceEditor) {
             this.editMode = editMode;
             this.disableAcl = disableAcl;
             this.disableWorkflow = disableWorkflow;
@@ -570,6 +571,7 @@ public class FxWrappedContent implements Serializable {
             this.userMayUnlock = userMayUnlock;
             this.userMayLooseLock = userMayLooseLock;
             this.userMayPermLock = userMayPermLock;
+            this.disableReferenceEditor = disableReferenceEditor;
         }
 
         public static GuiSettings createGuiSettingsForReference(GuiSettings guiSettings, boolean editMode) {
@@ -583,7 +585,8 @@ public class FxWrappedContent implements Serializable {
                     guiSettings.isCannotTakeOverPermLock(), guiSettings.isAskCreateNewVersion(), guiSettings.getLockStatus(),
                     guiSettings.getLockStatusTooltip(), guiSettings.isContentLocked(), guiSettings.isLooseLock(),
                     guiSettings.isPermLock(), guiSettings.isTakeOver(), guiSettings.isUserMayTakeover(), guiSettings.isUserMayUnlock(),
-                    guiSettings.isUserMayLooseLock(), guiSettings.isUserMayPermLock());
+                    guiSettings.isUserMayLooseLock(), guiSettings.isUserMayPermLock(),
+                    guiSettings.isDisableReferenceEditor());
         }
 
 
@@ -841,6 +844,14 @@ public class FxWrappedContent implements Serializable {
 
         public void setUserMayPermLock(boolean userMayPermLock) {
             this.userMayPermLock = userMayPermLock;
+        }
+
+        public boolean isDisableReferenceEditor() {
+            return disableReferenceEditor;
+        }
+
+        public void setDisableReferenceEditor(boolean disableReferenceEditor) {
+            this.disableReferenceEditor = disableReferenceEditor;
         }
     }
 

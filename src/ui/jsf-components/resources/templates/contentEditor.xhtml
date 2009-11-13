@@ -27,7 +27,7 @@
         askCreateNewVersion="#{askCreateNewVersion}" lockStatus="#{lockStatus}" lockStatusTooltip="#{lockStatusTooltip}"
         contentLocked="#{contentLocked}" looseLock="#{looseLock}" permLock="#{permLock}" takeOver="#{takeOver}"
         userMayTakeover="#{userMayTakeover}" userMayUnlock="#{userMayUnlock}" userMayLooseLock="#{userMayLooseLock}"
-        userMayPermLock="#{userMayPermLock}">
+        userMayPermLock="#{userMayPermLock}" disableReferenceEditor="#{disableReferenceEditor}">
 
         <c:if test="#{not _ceContent.guiSettings.disableMessages and __ceError}">
                 <!-- error messages outside of container output panel

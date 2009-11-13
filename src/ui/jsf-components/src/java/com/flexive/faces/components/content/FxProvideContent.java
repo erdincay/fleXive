@@ -167,6 +167,7 @@ public class FxProvideContent extends TagHandler {
         final Boolean disablePositionAssignment = isAttributeSet(ctx, "disablePositionAssignment") && Boolean.valueOf(getAttribute("disablePositionAssignment").getValue(ctx));
         //disable rendering of "h:messages" inside the template
         final Boolean disableMessages = isAttributeSet(ctx, "disableMessages") && Boolean.valueOf(getAttribute("disableMessages").getValue(ctx));
+        final Boolean disableReferenceEditor = isAttributeSet(ctx, "disableReferenceEditor") && Boolean.valueOf(getAttribute("disableReferenceEditor").getValue(ctx));
         // LOCKS
         final Boolean askLockedMode = isAttributeSet(ctx, "askLockedMode") && Boolean.valueOf(getAttribute("askLockMode").getValue(ctx));
         final Boolean lockedContentOverride = isAttributeSet(ctx, "lockedContentOverride") && Boolean.valueOf(getAttribute("lockedContentOverride").getValue(ctx));
@@ -189,7 +190,8 @@ public class FxProvideContent extends TagHandler {
                 disableCancel, disableButtons, disableAddAssignment, disableRemoveAssignment,
                 disablePositionAssignment, disableMessages, formPrefix, reRender, valueFormatter, askLockedMode,
                 lockedContentOverride, cannotTakeOverPermLock, askCreateNewVersion, lockStatus, lockStatusTooltip,
-                contentLocked, looseLock, permLock, takeOver, userMayTakeover, userMayUnlock, userMayLooseLock, userMayPermLock);
+                contentLocked, looseLock, permLock, takeOver, userMayTakeover, userMayUnlock, userMayLooseLock, userMayPermLock,
+                disableReferenceEditor);
 
         if (contentEditor.getContentStorage() == null) {
             contentEditor.setContentStorage(new HashMap<String, FxWrappedContent>(3));

@@ -615,7 +615,7 @@ flexiveResultThumbnails > table,
     width: 100px;
 }
 
-.fxContentEditor_moveUpIcon {
+a.fxContentEditor_moveUpIcon {
     cursor: pointer;
     background: url(../images/contentEditor/up.png) no-repeat;
     border: 0;
@@ -626,7 +626,7 @@ flexiveResultThumbnails > table,
     width: 17px;
 }
 
-.fxContentEditor_moveDownIcon {
+a.fxContentEditor_moveDownIcon {
     cursor: pointer;
     background: url("../images/contentEditor/down.png") no-repeat;
     border: 0;
@@ -637,7 +637,7 @@ flexiveResultThumbnails > table,
     margin-right: 3px;
 }
 
-.fxContentEditor_addIcon {
+a.fxContentEditor_addIcon {
     cursor: pointer;
     background: url("../images/contentEditor/add.png") no-repeat;
     border: 0;
@@ -660,7 +660,7 @@ flexiveResultThumbnails > table,
     opacity: .25;
 }
 
-.fxContentEditor_removeIcon {
+a.fxContentEditor_removeIcon {
     cursor: pointer;
     background: url("../images/contentEditor/remove.png") no-repeat;
     border: 0;
@@ -729,7 +729,7 @@ flexiveResultThumbnails > table,
     margin-right: 3px;
 }
 
-.fxContentEditor_newReferenceIcon {
+a.fxContentEditor_newReferenceIcon {
     cursor: pointer;
     background: url("../images/contentEditor/new.png") no-repeat;
     border: 0;
@@ -740,7 +740,7 @@ flexiveResultThumbnails > table,
     margin-right: 3px;
 }
 
-.fxContentEditor_editReferenceIcon {
+a.fxContentEditor_editReferenceIcon {
     cursor: pointer;
     background: url("../images/contentEditor/edit.png") no-repeat;
     border: 0;
