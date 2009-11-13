@@ -32,6 +32,7 @@
 package com.flexive.core.storage.genericSQL;
 
 import com.flexive.core.Database;
+import com.flexive.core.DatabaseConst;
 import com.flexive.core.storage.DBStorage;
 import com.flexive.core.storage.FxTreeNodeInfo;
 import com.flexive.core.storage.FxTreeNodeInfoSpreaded;
@@ -881,26 +882,35 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
         // First we clear all affected nodes in the live tree, since we will copy them from the edit tree.
         // We also need to delete all nodes that are children of the specified node in the edit tree, since they
         // were moved into our new subtree.
-        Statement stmt = null;
+
+        // get node in live tree (with current bounds)
+        FxTreeNodeInfo oldDestNode = null;
         try {
-            String sql = "SELECT ID FROM " + getTable(FxTreeMode.Live) +
-                    " WHERE (LFT>=" + sourceNode.getLeft() + " AND RGT<=" + sourceNode.getRight() + ") OR ID=" + nodeId;
-            stmt = con.createStatement();
-            ResultSet rs = stmt.executeQuery(sql);
-            while (rs.next()) {
-                try {
-                    removeNode(con, FxTreeMode.Live, ce, rs.getLong(1), true);
-                } catch (FxNotFoundException nf) {
-                    // node is not live yet - thats ok
-                }
+            oldDestNode = getTreeNodeInfo(con, FxTreeMode.Live, nodeId);
+        } catch (FxNotFoundException e ) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Activated node " + nodeId + " not yet present in Live tree.");
             }
-            stmt.close();
-        } catch (SQLException exc) {
-            throw new FxTreeException("ex.tree.activate.failed", nodeId, true, exc.getMessage());
-        } finally {
+        }
+        Statement stmt = null;
+        if (oldDestNode != null) {
             try {
-                if (stmt != null) stmt.close();
-            } catch (Exception exc) {/*ignore*/}
+                String sql = "SELECT ID FROM " + getTable(FxTreeMode.Live) +
+                        " WHERE (LFT>=" + sourceNode.getLeft() + " AND RGT<=" + sourceNode.getRight() + ") OR ID=" + nodeId;
+                stmt = con.createStatement();
+                ResultSet rs = stmt.executeQuery(sql);
+                while (rs.next()) {
+                    // explicitly remove all nodes
+                    removeNode(con, FxTreeMode.Live, ce, rs.getLong(1), false);
+                }
+                stmt.close();
+            } catch (SQLException exc) {
+                throw new FxTreeException("ex.tree.activate.failed", nodeId, true, exc.getMessage());
+            } finally {
+                try {
+                    if (stmt != null) stmt.close();
+                } catch (Exception exc) {/*ignore*/}
+            }
         }
 
         //***************************************************************
@@ -976,7 +986,14 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
         Statement stmt2 = null;
         try {
             stmt = con.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT ID FROM " + getTable(mode));
+            final String sql;
+            if (mode == FxTreeMode.Live) {
+                sql = "SELECT t.ID FROM " + getTable(mode) + " t, " + DatabaseConst.TBL_CONTENT + " c "
+                        + " WHERE c.id=t.ref AND c.islive_ver=" + StorageManager.getBooleanTrueExpression();
+            } else {
+                sql = "SELECT ID FROM " + getTable(mode);
+            }
+            ResultSet rs = stmt.executeQuery(sql);
             long nodes = 0;
             while (rs.next()) {
                 Long id = rs.getLong(1);
