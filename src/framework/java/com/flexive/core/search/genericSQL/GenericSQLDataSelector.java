@@ -32,8 +32,10 @@
 package com.flexive.core.search.genericSQL;
 
 import com.flexive.core.DatabaseConst;
+
 import static com.flexive.core.DatabaseConst.TBL_CONTENT;
 import static com.flexive.core.DatabaseConst.TBL_CONTENT_ACLS;
+
 import com.flexive.core.search.*;
 import com.flexive.shared.FxArrayUtils;
 import com.flexive.shared.FxContext;
@@ -199,7 +201,7 @@ public class GenericSQLDataSelector extends DataSelector {
                 columns.add(filterProperties(column));
             }
         }
-        columns.add(search.getStorage().concat("t.name","'[@pk='",filterProperties("id"),"'.'",filterProperties("ver"),"']'")+" AS xpathPref");
+        columns.add(search.getStorage().concat("t.name", "'[@pk='", filterProperties("id"), "'.'", filterProperties("ver"), "']'") + " AS xpathPref");
         // order by starts after the internal selected columns
         int orderByPos = columns.size() + 1;
 
@@ -274,12 +276,16 @@ public class GenericSQLDataSelector extends DataSelector {
         } else if (entry.getType() == PropertyEntry.Type.NODE_POSITION) {
             long root = FxContext.get().getNodeId();
             if (root == -1) root = FxTreeNode.ROOT_NODE;
-            final String sel = "(select tree_nodeIndex(" + root + "," + FILTER_ALIAS + ".id,false))";   // TODO: LIVE/EDIT
+            final String sel = "(select tree_nodeIndex(" + root + "," + FILTER_ALIAS + ".id," +
+                    // TODO: LIVE/EDIT
+                    search.getStorage().getBooleanFalseExpression() + ")" + search.getStorage().getFromDual() + ")";
             result.addItem(sel, resultPos, false);
         } else if (entry.getType() == PropertyEntry.Type.PATH) {
             final long propertyId = search.getEnvironment().getProperty("CAPTION").getId();
             final String sel = "(select tree_FTEXT1024_Paths(" + FILTER_ALIAS + ".id," +
-                    search.getLanguage().getId() + "," + propertyId + ",false))"; // TODO: LIVE/EDIT
+                    search.getLanguage().getId() + "," + propertyId + "," +
+                    // TODO: LIVE/EDIT
+                    search.getStorage().getBooleanFalseExpression() + ")" + search.getStorage().getFromDual() + ")";
             result.addItem(sel, resultPos, false);
         } else if (entry.getType() == PropertyEntry.Type.METADATA) {
             // TODO: support for tree node metadata?
@@ -298,7 +304,7 @@ public class GenericSQLDataSelector extends DataSelector {
                     + " WHERE briefcase_id=" + briefcaseFilter[0] + " AND id=" + FILTER_ALIAS + ".id)))";*/
             final String sel = search.getStorage().concat(FILTER_ALIAS + ".id", "' '",
                     "(SELECT COALESCE(metadata, '') FROM " + DatabaseConst.TBL_BRIEFCASE_DATA
-                    + " WHERE briefcase_id=" + briefcaseFilter[0] + " AND id=" + FILTER_ALIAS + ".id)");
+                            + " WHERE briefcase_id=" + briefcaseFilter[0] + " AND id=" + FILTER_ALIAS + ".id)");
             result.addItem(sel, resultPos, false);
         } else if (entry.getType() == PropertyEntry.Type.LOCK) {
             for (String readColumn : entry.getReadColumns()) {
@@ -314,14 +320,14 @@ public class GenericSQLDataSelector extends DataSelector {
                         if ("ACL".equalsIgnoreCase(column)) {
                             result.addItem(
                                     "(SELECT acl FROM " + TBL_CONTENT + " subc" +
-                                    " WHERE subc.id = " + FILTER_ALIAS + ".id " +
-                                    " AND subc.ver = " + FILTER_ALIAS + ".ver " +
-                                    " AND subc.acl != " + ACL.NULL_ACL_ID +
-                                    " UNION " +
-                                    "SELECT acl FROM " + TBL_CONTENT_ACLS + " suba" +
-                                    " WHERE suba.id = " + FILTER_ALIAS + ".id AND suba.ver = " + FILTER_ALIAS + ".ver" +
-                                    search.getStorage().getLimit(true, 1) +
-                                    ")",
+                                            " WHERE subc.id = " + FILTER_ALIAS + ".id " +
+                                            " AND subc.ver = " + FILTER_ALIAS + ".ver " +
+                                            " AND subc.acl != " + ACL.NULL_ACL_ID +
+                                            " UNION " +
+                                            "SELECT acl FROM " + TBL_CONTENT_ACLS + " suba" +
+                                            " WHERE suba.id = " + FILTER_ALIAS + ".id AND suba.ver = " + FILTER_ALIAS + ".ver" +
+                                            search.getStorage().getLimit(true, 1) +
+                                            ")",
                                     resultPos,
                                     false
                             );
@@ -355,23 +361,7 @@ public class GenericSQLDataSelector extends DataSelector {
                     break;
                 case T_CONTENT_DATA_FLAT:
                     final FxFlatStorageMapping mapping = entry.getAssignment().getFlatStorageMapping();
-                    final String sel =
-                            "(SELECT " + mapping.getColumn() + " FROM " + mapping.getStorage()
-                                    + " WHERE id=" + FILTER_ALIAS + ".id AND ver=" + FILTER_ALIAS + ".ver"
-                                    + " AND "
-                                    + SearchUtils.getFlatStorageAssignmentFilter(
-                                    search.getEnvironment(),
-                                    "",
-                                    entry.getAssignment()
-                            )
-                                    + (entry.getAssignment().isMultiLang()
-                                    ? " AND " + mapping.getColumn() + " IS NOT NULL"
-                                    + " AND (lang=" + search.getLanguage().getId()
-                                    + " OR " + mapping.getColumn() + "_mld=true)"
-                                    + " ORDER BY " + mapping.getColumn() + "_mld"
-                                    : "")
-                                    + search.getStorage().getLimit(true, 1)
-                                    + ")";
+                    final String sel = getFlatStorageColumnSelect(entry, mapping);
                     result.addItem(sel, resultPos, false);
                     break;
                 default:
@@ -380,6 +370,32 @@ public class GenericSQLDataSelector extends DataSelector {
         }
 
         return result.prepare(this, prop, entry);
+    }
+
+    /**
+     * Get a column select statement for a flatstorage column
+     *
+     * @param entry   entry to select
+     * @param mapping flatstorage mapping
+     * @return select statement
+     */
+    protected String getFlatStorageColumnSelect(PropertyEntry entry, FxFlatStorageMapping mapping) {
+        return "(SELECT " + mapping.getColumn() + " FROM " + mapping.getStorage()
+                + " WHERE id=" + FILTER_ALIAS + ".id AND ver=" + FILTER_ALIAS + ".ver"
+                + " AND "
+                + SearchUtils.getFlatStorageAssignmentFilter(
+                search.getEnvironment(),
+                "",
+                entry.getAssignment()
+        )
+                + (entry.getAssignment().isMultiLang()
+                ? " AND " + mapping.getColumn() + " IS NOT NULL"
+                + " AND (lang=" + search.getLanguage().getId()
+                + " OR " + mapping.getColumn() + "_mld=true)"
+                + " ORDER BY " + mapping.getColumn() + "_mld"
+                : "")
+                + search.getStorage().getLimit(true, 1)
+                + ")";
     }
 
     /**
@@ -418,22 +434,22 @@ public class GenericSQLDataSelector extends DataSelector {
      */
     protected String getContentDataSubselect(String column, PropertyEntry entry, boolean xpath) {
         String select = "(SELECT " + SUBSEL_ALIAS + "." + column +
-            " FROM " + DatabaseConst.TBL_CONTENT_DATA + " " +
-            SUBSEL_ALIAS + " WHERE " +
-            SUBSEL_ALIAS + ".id=" +
-            FILTER_ALIAS + ".id AND " +
-            SUBSEL_ALIAS + ".ver=" +
-            FILTER_ALIAS + ".ver AND " +
-            (entry.isAssignment()
-                    ? "ASSIGN IN ("
-                    + StringUtils.join(FxSharedUtils.getSelectableObjectIdList(entry.getAssignmentWithDerived()), ',')
-                    + ")"
-                    : "TPROP=" + entry.getProperty().getId()) + " AND " +
-            "(" + SUBSEL_ALIAS + ".lang=" + search.getLanguage().getId() +
+                " FROM " + DatabaseConst.TBL_CONTENT_DATA + " " +
+                SUBSEL_ALIAS + " WHERE " +
+                SUBSEL_ALIAS + ".id=" +
+                FILTER_ALIAS + ".id AND " +
+                SUBSEL_ALIAS + ".ver=" +
+                FILTER_ALIAS + ".ver AND " +
+                (entry.isAssignment()
+                        ? "ASSIGN IN ("
+                        + StringUtils.join(FxSharedUtils.getSelectableObjectIdList(entry.getAssignmentWithDerived()), ',')
+                        + ")"
+                        : "TPROP=" + entry.getProperty().getId()) + " AND " +
+                "(" + SUBSEL_ALIAS + ".lang=" + search.getLanguage().getId() +
                 " OR " + SUBSEL_ALIAS + ".ismldef=" + search.getStorage().getBooleanTrueExpression() + ")" +
-            // fetch exact language match before default
-            " ORDER BY " + SUBSEL_ALIAS + ".ismldef " +
-            search.getStorage().getLimit(true, 1) + ")";
+                // fetch exact language match before default
+                " ORDER BY " + SUBSEL_ALIAS + ".ismldef " +
+                search.getStorage().getLimit(true, 1) + ")";
         if (!xpath && entry.getProperty().getDataType() == FxDataType.Binary) {
             // select string-coded form of the BLOB properties
             select = selectBinary(select);

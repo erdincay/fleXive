@@ -15,6 +15,6 @@
     </weblet>
     <weblet-mapping>
         <weblet-name>feedback_plugin.weblet</weblet-name>
-        <url-pattern>/flexive-web-resources/*</url-pattern>
+        <url-pattern>/feedback-plugin-resources/*</url-pattern>
     </weblet-mapping>
 </weblets-config>

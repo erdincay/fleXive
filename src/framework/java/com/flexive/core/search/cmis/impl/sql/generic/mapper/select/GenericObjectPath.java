@@ -39,6 +39,8 @@ import com.flexive.core.search.cmis.impl.sql.ColumnIndex;
 import com.flexive.core.search.cmis.impl.sql.generic.GenericSqlDialect;
 import com.flexive.core.search.cmis.model.TableReference;
 import com.flexive.core.search.PropertyEntry;
+import com.flexive.core.storage.DBStorage;
+import com.flexive.core.storage.StorageManager;
 import com.flexive.shared.structure.FxDataType;
 import com.flexive.shared.exceptions.FxSqlSearchException;
 
@@ -58,10 +60,11 @@ public class GenericObjectPath implements ResultColumnMapper<ResultColumnReferen
         final TableReference tableRef = column.getSelectedObject().getTableReference();
         final long captionId = sqlMapperFactory.getSqlDialect().getEnvironment().getProperty("CAPTION").getId();
         index.increment();
+        final DBStorage storage = StorageManager.getStorageImpl();
         return "(SELECT TREE_FTEXT1024_PATHS("
                 + GenericSqlDialect.FILTER_ALIAS + "." + tableRef.getIdFilterColumn() + ","
                 + languageId + ","
-                + captionId + ",false))" // TODO: LIVE/EDIT
+                + captionId + "," + storage.getBooleanFalseExpression() + ")" + storage.getFromDual() + ")" // TODO: LIVE/EDIT
                 + (includeResultAlias ? " AS " + column.getResultSetAlias() : "");
     }
 

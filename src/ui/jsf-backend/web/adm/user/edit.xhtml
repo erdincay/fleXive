@@ -39,13 +39,13 @@
         </fx:formRow>
 
         <!-- ============================================ -->
-        <fx:formRow label="#{fxMessageBean['Account.field.oldPassword']}" id="oldPassword" newLine="false">
+        <fx:formRow label="#{fxMessageBean['Account.field.oldPassword']}" id="oldPassword" newLine="true">
             <h:inputSecret id="oldPassword" value="#{accountBean.oldPassword}"/>
         </fx:formRow>
-        <fx:formRow labelKey="Account.field.password" id="updatePassword" newLine="false">
+        <fx:formRow labelKey="Account.field.password" id="updatePassword">
             <h:inputSecret id="updatePassword" value="#{accountBean.password}"/>
         </fx:formRow>
-        <fx:formRow labelKey="Account.field.retypePassword" id="passwordConfirm">
+        <fx:formRow labelKey="Account.field.retypePassword" id="passwordConfirm" newLine="false">
             <h:inputSecret id="passwordConfirm" value="#{accountBean.passwordConfirm}"/>
         </fx:formRow>
 

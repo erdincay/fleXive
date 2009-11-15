@@ -80,7 +80,7 @@ public class GenericInColumnReferenceCondition extends AbstractColumnReferenceCo
     }
 
     @Override
-    protected String getGroupBy(TableReference table, InCondition condition) {
+    protected String getGroupBy(TableReference table, String tableAlias, InCondition condition) {
         return isSelectMany(condition)
                 ? "GROUP BY " + table.getIdFilterColumn()
                 + ", " + table.getVersionFilterColumn()
@@ -91,7 +91,7 @@ public class GenericInColumnReferenceCondition extends AbstractColumnReferenceCo
                 : "";
     }
 
-    private boolean isSelectMany(InCondition condition) {
+    protected boolean isSelectMany(InCondition condition) {
         return condition.getColumnReference().getPropertyEntry().getProperty().getDataType() == FxDataType.SelectMany;
     }
 

@@ -58,9 +58,8 @@
         <element name="jar-elements" optional="true"/>
         <sequential>
             <makeMessages srcdir="@{srcdir}/resources/messages" dest="@{builddir}/PluginMessages"/>
-            <buildScriptIndex dir="@{srcdir}/resources/scripts"/>
             <copy todir="@{builddir}/component-config/@{name}">
-                <fileset dir="@{srcdir}/resources" includes="META-INF/**/*,templates/**/*"/>
+                <fileset dir="@{srcdir}/resources" includes="META-INF/**/*,templates/**/*,flexive-application.properties"/>
                 <fileset dir="@{builddir}" includes="*.properties"/>
                 <filterset >
                     <filter token="FLEXIVE_VERSION" value="${flexive.version}"/>
@@ -72,7 +71,7 @@
                 <fileset dir="@{srcdir}/resources/weblets" includes="**/*"/>
                 <fileset dir="@{srcdir}/web" includes="**/*"/>
 
-                <zipfileset dir="@{srcdir}/resources/scripts" prefix="@{name}Resources/scripts" includes="**/*"/>
+                <zipfileset dir="@{srcdir}/resources/scripts" prefix="scripts" includes="**/*"/>
                 <jar-elements/>
             </jar>
         </sequential>

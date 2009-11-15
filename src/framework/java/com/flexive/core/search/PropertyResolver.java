@@ -90,7 +90,7 @@ public class PropertyResolver {
     }
 
     private static final Log LOG = LogFactory.getLog(PropertyResolver.class);
-    private static Map<String, FxDataType> CONTENT_PROPS = null;
+    private static Map<String, FxDataType> CONTENT_PROPS = null; //TODO: static?!?
 
     private ContentStorage hierarchicalStorage;
     private Map<String, PropertyEntry> cache = new HashMap<String, PropertyEntry>(50);
@@ -180,12 +180,12 @@ public class PropertyResolver {
                 final int type = rsmd.getColumnType(i + 1);
                 final FxDataType dt;
                 switch (type) {
+                    case java.sql.Types.NUMERIC:
                     case java.sql.Types.BIGINT:
                         if ("CREATED_AT".equals(columnName) || "MODIFIED_AT".equals(columnName)) {
                             dt = FxDataType.DateTime;
                             break;
                         }
-                    case java.sql.Types.NUMERIC:
                         dt = FxDataType.LargeNumber;
                         break;
                     case java.sql.Types.INTEGER:

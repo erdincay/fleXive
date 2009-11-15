@@ -112,9 +112,13 @@ class GenericSQLForeignTableSelector implements FieldSelector {
                     case java.sql.Types.FLOAT:
                         columnType = FxDataType.Float;
                         break;
+                    case java.sql.Types.NUMERIC:
                     case java.sql.Types.BIGINT:
                         if ("CREATED_AT".equalsIgnoreCase(columnName) || "MODIFIED_AT".equalsIgnoreCase(columnName))
                             columnType = FxDataType.DateTime;
+                        else if( "CAT_TYPE".equals(columnName) && "FXS_ACL".equals(tableName)) {
+                            columnType = FxDataType.Number;
+                        }
                         else
                             columnType = FxDataType.LargeNumber;
                         break;
@@ -126,6 +130,7 @@ class GenericSQLForeignTableSelector implements FieldSelector {
                         columnType = FxDataType.DateTime;
                         break;
                     default:
+                        System.out.println("Assigning String to " + tableName + "." + columnName + " found type=" + md.getColumnType(pos));
                         columnType = FxDataType.String1024;
                 }
                 columns.put(columnName.toUpperCase(), columnType);

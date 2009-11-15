@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2008
+ *  Copyright (c) 1999-2009
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -31,11 +31,9 @@
  ***************************************************************/
 package com.flexive.faces.beans.plugin;
 
-import net.java.dev.weblets.FacesWebletUtils;
 
 import javax.faces.context.FacesContext;
 
-import com.flexive.faces.beans.MessageBean;
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.shared.FxSharedUtils;
 

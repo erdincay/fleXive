@@ -95,7 +95,7 @@ public abstract class AbstractColumnReferenceCondition<T extends Condition> impl
                         + dialect.getTypeFilter("tdef", table.getReferencedTypes()) + ")"
                 // TODO: add version filter
                 : "")
-                + getGroupBy(table, condition)
+                + getGroupBy(table, tableAlias, condition)
                 + dialect.limitSubquery()
                 + ")";
     }
@@ -109,7 +109,7 @@ public abstract class AbstractColumnReferenceCondition<T extends Condition> impl
         return null;
     }
 
-    protected String getGroupBy(TableReference table, T condition) {
+    protected String getGroupBy(TableReference table, String tableAlias, T condition) {
         return "";
     }
 

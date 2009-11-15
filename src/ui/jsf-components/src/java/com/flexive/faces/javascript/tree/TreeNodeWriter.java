@@ -33,7 +33,11 @@ package com.flexive.faces.javascript.tree;
 
 import com.flexive.faces.javascript.RelativeUriMapper;
 import com.flexive.war.JsonWriter;
+import net.java.dev.weblets.FacesWebletUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
+import javax.faces.context.FacesContext;
 import java.io.IOException;
 import java.io.Writer;
 import java.io.Serializable;
@@ -48,6 +52,7 @@ import java.util.Map.Entry;
  * @version $Rev$
  */
 public class TreeNodeWriter {
+    private static final Log LOG = LogFactory.getLog(TreeNodeWriter.class);
     private final static Map<String, Object> EMPTY_MAP = new HashMap<String, Object>();
 
     /**
@@ -63,6 +68,11 @@ public class TreeNodeWriter {
          */
         public static final String TITLE_CLASS_NODE = "treeNodeV3Node";
 
+        /**
+         * Icons starting with WEBLET_ICON will be rendered using the given resource from the weblet
+         */
+        private static final String WEBLET_ICON = "weblet:";
+
         private String id;
         private String title;
         private String titleClass;
@@ -75,6 +85,7 @@ public class TreeNodeWriter {
          * Create a node without style infos. Formatting is based on the CSS class(es)
          * corresponding to docType.
          *
+         * @param id         the node id
          * @param title      the node title
          * @param docType    the document type
          * @param properties optional properties
@@ -126,6 +137,17 @@ public class TreeNodeWriter {
         public String getLink() {
             return link;
         }
+
+        /**
+         * Format a weblet icon resource
+         *
+         * @param weblet   name of the weblet
+         * @param iconPath path of the icon within the plugins weblet directory
+         * @return formatted weblet icon resource
+         */
+        public static String formatWebletIcon(String weblet, String iconPath) {
+            return TreeNodeWriter.Node.WEBLET_ICON + weblet + ":" + iconPath;
+        }
     }
 
     /**
@@ -146,7 +168,7 @@ public class TreeNodeWriter {
 
         /** {@inheritDoc} */
         public String format(Node node, RelativeUriMapper uriMapper) {
-            return node.title;
+            return node.getTitle();
         }
     };
 
@@ -160,12 +182,24 @@ public class TreeNodeWriter {
 
         /** {@inheritDoc} */
         public String format(Node node, RelativeUriMapper uriMapper) {
-            final String title = "<div class=\"" + node.titleClass + "\">" + node.title + "</div>";
-            if (node.icon == null) {
+            final String title = "<div class=\"" + node.getTitleClass() + "\">" + node.getTitle() + "</div>";
+            if (node.getIcon() == null) {
                 return title;
             } else {
-                final String icon = ICON_PATH + node.icon + ".png";
-                return "<img src=\"" + uriMapper.getAbsoluteUri(icon) + "\" class=\"" + ICON_CLASS + "\">" + title;
+                if (node.getIcon().startsWith(Node.WEBLET_ICON)) {
+                    //render the icon from a weblet resource
+                    String[] data = node.getIcon().split(":");
+                    if (data.length == 3) {
+                        final String uri = FacesWebletUtils.getURL(FacesContext.getCurrentInstance(), data[1], data[2]);
+                        return "<img src=\"" + uri + "\" class=\"" + ICON_CLASS + "\">" + title;
+                    } else {
+                        LOG.error("Invalid weblet icon descriptor [" + node.getIcon() + "]! Expected format: " + Node.WEBLET_ICON + ":weblet:path_to_icon");
+                        return title;
+                    }
+                } else {
+                    final String icon = ICON_PATH + node.getIcon() + ".png";
+                    return "<img src=\"" + uriMapper.getAbsoluteUri(icon) + "\" class=\"" + ICON_CLASS + "\">" + title;
+                }
             }
         }
     };
@@ -184,9 +218,9 @@ public class TreeNodeWriter {
             }
             if (style.length() > 0) {
                 // add dirty node style
-                return "<span class=\"" + style + "\">" + node.title + "</span>";
+                return "<span class=\"" + style + "\">" + node.getTitle() + "</span>";
             } else {
-                return node.title;
+                return node.getTitle();
             }
         }
     };
@@ -200,6 +234,7 @@ public class TreeNodeWriter {
      * Create a new TreeNodeWriter using an existing JsonWriter.
      *
      * @param out       the JsonWriter instance to be used
+     * @param uriMapper URI Mapper to use
      * @param formatter the default formatter to be used
      * @throws IOException if the output could not be written
      */
@@ -214,6 +249,7 @@ public class TreeNodeWriter {
      * Create a new TreeNodeWriter for the given output writer.
      *
      * @param out       an output writer.
+     * @param uriMapper URI Mapper to use
      * @param formatter the default node formatter to be used
      * @throws IOException if the output could not be written
      */
@@ -242,11 +278,11 @@ public class TreeNodeWriter {
     public void startNode(Node node) throws IOException {
         out.startMap();
         out.writeAttribute("title", formatter.format(node, uriMapper));
-        if (node.docType != null) {
-            out.writeAttribute("nodeDocType", node.docType);
+        if (node.getDocType() != null) {
+            out.writeAttribute("nodeDocType", node.getDocType());
         }
-        if (node.link != null) {
-            out.writeAttribute("link", node.link);
+        if (node.getLink() != null) {
+            out.writeAttribute("link", node.getLink());
         }
         for (Entry<String, ?> entry : node.properties.entrySet()) {
             out.writeAttribute(entry.getKey(), entry.getValue());
@@ -255,7 +291,7 @@ public class TreeNodeWriter {
 
     /**
      * Close a node previously opened with
-     * {@link TreeNodeWriter#startNode(TreeNodeWriter.Node)}.
+     * {@link TreeNodeWriter#startNode(com.flexive.faces.javascript.tree.TreeNodeWriter.Node)}.
      *
      * @throws IOException if the output could not be written
      */
@@ -276,7 +312,7 @@ public class TreeNodeWriter {
 
     /**
      * Prepare the current node (created with
-     * {@link TreeNodeWriter#startNode(TreeNodeWriter.Node)})
+     * {@link TreeNodeWriter#startNode(com.flexive.faces.javascript.tree.TreeNodeWriter.Node)}
      * for appending of nested child nodes.
      *
      * @throws IOException if the output could not be written
@@ -293,8 +329,8 @@ public class TreeNodeWriter {
      *
      * @throws IOException if the output could not be written
      */
-	public void closeChildren() throws IOException {
-		out.closeArray();
-	}
-	
+    public void closeChildren() throws IOException {
+        out.closeArray();
+    }
+
 }
