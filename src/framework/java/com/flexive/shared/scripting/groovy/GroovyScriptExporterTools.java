@@ -34,6 +34,7 @@ package com.flexive.shared.scripting.groovy;
 
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.content.FxPK;
 import com.flexive.shared.scripting.FxScriptInfo;
 import com.flexive.shared.scripting.FxScriptMapping;
 import com.flexive.shared.scripting.FxScriptMappingEntry;
@@ -418,14 +419,13 @@ public final class GroovyScriptExporterTools {
                                     .append("\")))");
                         }
                     } else if ("Reference".equals(dataType)) {
-                        final long pk = Long.parseLong(defaultValue.substring(0, defaultValue.indexOf(".")));
-                        final int version = Integer.parseInt(defaultValue.substring(defaultValue.indexOf(".") + 1));
+                        final FxPK pk = FxPK.fromString(defaultValue);
                         out.append("new FxReference(")
                                 .append(multiLang)
                                 .append(", new ReferencedContent(")
-                                .append(pk)
+                                .append(pk.getId())
                                 .append(", ")
-                                .append(version)
+                                .append(pk.getVersion())
                                 .append("))");
 
                     } else if ("InlineReference".equals(dataType)) {
@@ -706,14 +706,13 @@ public final class GroovyScriptExporterTools {
                                         .append("\")))");
                             }
                         } else if ("Reference".equals(dataType)) {
-                            final long pk = Long.parseLong(defaultValue.substring(0, defaultValue.indexOf(".")));
-                            final int version = Integer.parseInt(defaultValue.substring(defaultValue.indexOf(".") + 1));
+                            final FxPK pk = FxPK.fromString(defaultValue);
                             out.append("new FxReference(")
                                     .append(multiLang)
                                     .append(", new ReferencedContent(")
-                                    .append(pk)
+                                    .append(pk.getId())
                                     .append(", ")
-                                    .append(version)
+                                    .append(pk.getVersion())
                                     .append("))");
 
                         } else if ("InlineReference".equals(dataType)) {
