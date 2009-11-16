@@ -900,8 +900,11 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
                 stmt = con.createStatement();
                 ResultSet rs = stmt.executeQuery(sql);
                 while (rs.next()) {
-                    // explicitly remove all nodes
-                    removeNode(con, FxTreeMode.Live, ce, rs.getLong(1), false);
+                    try {
+                        removeNode(con, FxTreeMode.Live, ce, rs.getLong(1), true /* always forced true in live mode */);
+                    } catch (FxNotFoundException e) {
+                        // removed by previous call
+                    }
                 }
                 stmt.close();
             } catch (SQLException exc) {
