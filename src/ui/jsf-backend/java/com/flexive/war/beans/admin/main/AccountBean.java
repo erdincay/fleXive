@@ -294,7 +294,7 @@ public class AccountBean implements Serializable {
     public boolean isActiveFilter() {
         if (activeFilterCheckbox != null && activeFilterCheckbox.getSubmittedValue() != null) {
             // use submitted value during postbacks to apply the correct filters
-            return Boolean.parseBoolean((String) activeFilterCheckbox.getSubmittedValue());
+            return Boolean.parseBoolean(activeFilterCheckbox.getSubmittedValue().toString());
         }
         return activeFilter;
     }
@@ -306,7 +306,7 @@ public class AccountBean implements Serializable {
     public boolean isValidatedFilter() {
         if (validatedFilterCheckbox != null && validatedFilterCheckbox.getSubmittedValue() != null) {
             // use submitted value during postbacks to apply the correct filters
-            return Boolean.parseBoolean((String) validatedFilterCheckbox.getSubmittedValue());
+            return Boolean.parseBoolean(validatedFilterCheckbox.getSubmittedValue().toString());
         }
         return validatedFilter;
     }
