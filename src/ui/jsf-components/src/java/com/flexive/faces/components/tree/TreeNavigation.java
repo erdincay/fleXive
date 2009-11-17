@@ -27,6 +27,7 @@ import javax.faces.event.PhaseId;
 import java.io.IOException;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.Iterator;
 
 /**
  * <p>The flexive tree navigation component. Renders part of the topic tree as
@@ -122,6 +123,7 @@ public class TreeNavigation extends UIOutput implements NamingContainer {
 
     private transient String selectedPathCache;
     private transient FxTreeNode treeCache;
+    private transient long treeCacheBaseTypeId;
 
     public TreeNavigation() {
         setRendererType(null);
@@ -221,12 +223,47 @@ public class TreeNavigation extends UIOutput implements NamingContainer {
             if (nodeId == -1) {
                 return null;
             }
-            if (treeCache != null && treeCache.getId() == nodeId && !FxContext.get().getTreeWasModified() && treeCache.getMode() == mode) {
+            if (treeCache != null && treeCache.getId() == nodeId && treeCacheBaseTypeId == getBaseTypeId()
+                    && !FxContext.get().getTreeWasModified() && treeCache.getMode() == mode) {
                 return treeCache;
             }
-            return treeCache = EJBLookup.getTreeEngine().getTree(mode, nodeId, getDepth());
+            treeCache = EJBLookup.getTreeEngine().getTree(mode, nodeId, getDepth());
+            treeCacheBaseTypeId = getBaseTypeId();
+
+            // remove all filtered type IDs when a filter was specified
+            if (getBaseTypeId() != -1) {
+                final Set<Long> validTypeIds = new HashSet<Long>();
+                validTypeIds.add(getBaseTypeId());
+                validTypeIds.addAll(
+                        FxSharedUtils.getSelectableObjectIdList(
+                            CacheAdmin.getEnvironment().getType(getBaseTypeId()).getDerivedTypes(true)
+                        )
+                );
+                removeInvalidChildren(treeCache, validTypeIds);
+            }
+
+            return treeCache;
         } catch (FxApplicationException e) {
             throw e.asRuntimeException();
+        }
+    }
+
+    /**
+     * Remove all child nodes of {@code node} whose type is not in {@code validTypeIds}.
+     *
+     * @param node          the parent node
+     * @param validTypeIds  the valid type IDs
+     */
+    private void removeInvalidChildren(FxTreeNode node, Set<Long> validTypeIds) {
+        final Iterator<FxTreeNode> iterator = node.getChildren().iterator();
+        while (iterator.hasNext()) {
+            final FxTreeNode child = iterator.next();
+            if (!validTypeIds.contains(child.getReferenceTypeId())) {
+                iterator.remove();
+            }
+            if (child.getDirectChildCount() > 0) {
+                removeInvalidChildren(child, validTypeIds);
+            }
         }
     }
 
@@ -306,7 +343,6 @@ public class TreeNavigation extends UIOutput implements NamingContainer {
     private class Renderer {
         protected final ResponseWriter out;
         protected final FacesContext context;
-        protected final Set<Long> validTypeIds;
 
         public Renderer(FacesContext context) {
             this.context = context;
@@ -317,20 +353,6 @@ public class TreeNavigation extends UIOutput implements NamingContainer {
             if (getVar() == null) {
                 throw new IllegalArgumentException("Required attribute \"var\" not specified.");
             }
-            // store all type IDs that should be filtered
-            if (getBaseTypeId() == -1) {
-                // all types
-                this.validTypeIds = null;
-            } else {
-                // only render the base type and all derived types
-                this.validTypeIds = new HashSet<Long>();
-                validTypeIds.add(getBaseTypeId());
-                validTypeIds.addAll(
-                        FxSharedUtils.getSelectableObjectIdList(
-                            CacheAdmin.getEnvironment().getType(getBaseTypeId()).getDerivedTypes(true)
-                        )
-                );
-            }
         }
 
         public void renderTree(FxTreeNode node) throws IOException {
@@ -340,10 +362,8 @@ public class TreeNavigation extends UIOutput implements NamingContainer {
         protected void renderSubtree(FxTreeNode node) throws IOException {
             out.startElement("ul", null);
             out.writeAttribute("class", CSS_TREE, null);
+
             for (FxTreeNode child : node.getChildren()) {
-                if (validTypeIds != null && !validTypeIds.contains(child.getReferenceTypeId())) {
-                    continue;   // type filter not matched
-                }
                 out.startElement("li", null);
                 out.writeAttribute("class", getElementClass(child), null);
 
