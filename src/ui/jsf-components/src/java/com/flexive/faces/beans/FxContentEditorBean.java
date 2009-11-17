@@ -329,7 +329,6 @@ public class FxContentEditorBean implements Serializable {
             String msg = oldContent.getContent().getPk().isNew() ? "ContentEditor.nfo.created" : "ContentEditor.nfo.updated";
             //Store the content
             ContentEngine co = EJBLookup.getContentEngine();
-            co.prepareSave(oldContent.getContent());
             pk = newVersion ? co.createNewVersion(oldContent.getContent()) : co.save(oldContent.getContent());
             new FxFacesMsgInfo(msg, pk.getId()).addToContext(formPrefix + ":" + editorId + "_" + MESSAGES_ID);
             parent = getParentContent(editorId);

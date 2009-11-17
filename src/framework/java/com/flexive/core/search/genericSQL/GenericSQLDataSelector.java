@@ -238,8 +238,8 @@ public class GenericSQLDataSelector extends DataSelector {
 
         if (!supportsCounterAfterOrderBy()) {
             // insert outer SELECT
-            sql.insert(0, "SELECT " + getCounterStatement("rownr") + ", * FROM (");
-            sql.append(")");
+            sql.insert(0, "SELECT " + getCounterStatement("rownr") + ", x.* FROM (");
+            sql.append(") x ");
         }
 
         // Evaluate the order by, then limit the result by the desired range if needed

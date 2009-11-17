@@ -296,7 +296,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
                 FxPermissionUtils.checkPropertyPermissions(content, ACLPermission.CREATE);
             //security check end
 
-            storage.prepareSave(con, content);
+            content = prepareSave(con, storage, content);
 
             FxScriptBinding binding = null;
             long[] typeScripts;
@@ -420,8 +420,9 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             FxPermissionUtils.checkPermission(FxContext.getUserTicket(), ACLPermission.EDIT, si, true);
 
             FxPermissionUtils.checkPermission(ticket, ticket.getUserId(), ACLPermission.CREATE, type, step.getAclId(), content.getAclIds(), true);
+            FxContent prepared = prepareSave(con, storage, content);
             //security check end
-            return storage.contentCreateVersion(con, CacheAdmin.getEnvironment(), null, content);
+            return storage.contentCreateVersion(con, CacheAdmin.getEnvironment(), null, prepared);
         } catch (SQLException e) {
             EJBUtils.rollback(ctx);
             throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
@@ -444,31 +445,9 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public FxContent prepareSave(FxContent content) throws FxApplicationException {
         Connection con = null;
-        PreparedStatement ps = null;
         try {
-            ContentStorage storage = StorageManager.getContentStorage(content.getPk().getStorageMode());
             con = Database.getDbConnection();
-            storage.prepareSave(con, content);
-            FxScriptBinding binding = null;
-            long[] scripts;
-            //scripting before start
-            scripts = CacheAdmin.getEnvironment().getType(content.getTypeId()).getScriptMapping(
-                    content.getPk().isNew()
-                            ? FxScriptEvent.PrepareContentCreate
-                            : FxScriptEvent.PrepareContentSave);
-            if (scripts != null)
-                for (long script : scripts) {
-                    if (binding == null)
-                        binding = new FxScriptBinding();
-                    binding.setVariable("content", content);
-                    Object result = scripting.runScript(script, binding).getResult();
-                    if (result != null && result instanceof FxContent) {
-//                        System.out.println("setting result");
-                        content = (FxContent) result;
-                    }
-                }
-            //scripting before end
-            return content;
+            return prepareSave(con, StorageManager.getContentStorage(content.getPk().getStorageMode()), content);
         } catch (FxNotFoundException e) {
             EJBUtils.rollback(ctx);
             throw new FxCreateException(e);
@@ -479,8 +458,42 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             EJBUtils.rollback(ctx);
             throw new FxCreateException(e);
         } finally {
-            Database.closeObjects(ContentEngineBean.class, con, ps);
+            Database.closeObjects(ContentEngineBean.class, con, null);
         }
+    }
+
+    /**
+     * Prepare a content for a save or create operation (resolves binaries for script processing, etc.).
+     *
+     * @param con     an open and valid connection
+     * @param storage content storage to use
+     * @param content the content to prepare
+     * @return the prepared content
+     * @throws FxApplicationException on errors
+     * @throws SQLException           on errors
+     */
+    protected FxContent prepareSave(Connection con, ContentStorage storage, FxContent content) throws FxApplicationException, SQLException {
+        storage.prepareSave(con, content);
+        FxScriptBinding binding = null;
+        long[] scripts;
+        //scripting before start
+        scripts = CacheAdmin.getEnvironment().getType(content.getTypeId()).getScriptMapping(
+                content.getPk().isNew()
+                        ? FxScriptEvent.PrepareContentCreate
+                        : FxScriptEvent.PrepareContentSave);
+        if (scripts != null)
+            for (long script : scripts) {
+                if (binding == null)
+                    binding = new FxScriptBinding();
+                binding.setVariable("content", content);
+                Object result = scripting.runScript(script, binding).getResult();
+                if (result != null && result instanceof FxContent) {
+//                        System.out.println("setting result");
+                    content = (FxContent) result;
+                }
+            }
+        //scripting before end
+        return content;
     }
 
 
