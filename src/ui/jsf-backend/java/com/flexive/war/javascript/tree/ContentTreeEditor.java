@@ -182,7 +182,15 @@ public class ContentTreeEditor implements Serializable {
      * @throws Exception if an error occured
      */
     public String remove(long nodeId, boolean removeContent, boolean live, boolean deleteChildren) throws Exception {
-        getTreeEngine().remove(live ? Live : Edit, nodeId, removeContent ? FxTreeRemoveOp.RemoveSingleFiled : FxTreeRemoveOp.Unfile, deleteChildren);
+        getTreeEngine().remove(
+                live ? Live : Edit, nodeId,
+                deleteChildren && removeContent
+                        ? FxTreeRemoveOp.RemoveSingleFiled  // don't delete multi-filed children
+                        : removeContent
+                        ? FxTreeRemoveOp.Remove             // removeContent set, but not recursive - remove all instances
+                        : FxTreeRemoveOp.Unfile,            // unfile content, remove tree node              
+                deleteChildren
+        );
         return "[]";
     }
 
