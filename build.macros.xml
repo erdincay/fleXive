@@ -65,13 +65,14 @@
                     <filter token="FLEXIVE_VERSION" value="${flexive.version}"/>
                 </filterset>
             </copy>
+            <mkdir dir="@{srcdir}/resources/scripts"/>  <!-- ensure script exists for zipfileset -->
             <jar jarfile="@{jarfile}">
                 <fileset dir="@{builddir}/component-config/@{name}" includes="**/*"/>
                 <fileset dir="@{builddir}/classes"/>
                 <fileset dir="@{srcdir}/resources/weblets" includes="**/*"/>
                 <fileset dir="@{srcdir}/web" includes="**/*"/>
 
-                <zipfileset dir="@{srcdir}/resources/scripts" prefix="scripts" includes="**/*" erroronmissingdir="false"/>
+                <zipfileset dir="@{srcdir}/resources/scripts" prefix="scripts" includes="**/*"/>
                 <jar-elements/>
             </jar>
         </sequential>
