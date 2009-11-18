@@ -780,6 +780,13 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
             return;
         long ids[] = getIdChain(con, mode, nodeId);
         acquireLocksForUpdate(con, mode, Arrays.asList(ArrayUtils.toObject(ids)));
+        try {
+            // lock node in live tree including all children (which *can* be removed if they were removed in the edit tree)
+            acquireLocksForUpdate(con, FxTreeMode.Live, selectNodeIds(con, FxTreeMode.Live, nodeId, true));
+        } catch (SQLException e) {
+            throw new FxDbException(e);
+        }
+
         for (long id : ids) {
             if (id == ROOT_NODE) continue;
             FxTreeNode srcNode = getNode(con, mode, id);
@@ -1084,7 +1091,8 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
 
             return true;
         } catch (SQLException e) {
-            if (StorageManager.getStorageImpl().isDeadlock(e)) {
+            final DBStorage si = StorageManager.getStorageImpl();
+            if (si.isDeadlock(e) || si.isQueryTimeout(e)) {
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Deadlock detected while locking tree tables.");
                 }

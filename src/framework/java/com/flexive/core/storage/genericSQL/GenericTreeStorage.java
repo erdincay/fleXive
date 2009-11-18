@@ -1301,15 +1301,36 @@ public abstract class GenericTreeStorage implements TreeStorage {
             stmt = con.prepareStatement("SELECT id FROM " + getTable(mode) + " WHERE lft > ? AND rgt < ?");
             stmt.setBigDecimal(1, toBigDecimal(left));
             stmt.setBigDecimal(2, toBigDecimal(right));
-            final ResultSet rs = stmt.executeQuery();
-            final List<Long> ids = new ArrayList<Long>();
-            while (rs.next()) {
-                ids.add(rs.getLong(1));
-            }
-            return ids;
+            return collectNodeIds(stmt);
         } finally {
             Database.closeObjects(GenericTreeStorage.class, null, stmt);
         }
+    }
+
+    protected List<Long> selectNodeIds(Connection con, FxTreeMode mode, long parentId, boolean includeParent) throws SQLException {
+        PreparedStatement stmt = null;
+        try {
+            stmt = con.prepareStatement(
+                    "SELECT id FROM " + getTable(mode) + " WHERE PARENT=? "
+                    + (includeParent ? "OR ID=?" : "")
+            );
+            stmt.setLong(1, parentId);
+            if (includeParent) {
+                stmt.setLong(2, parentId);
+            }
+            return collectNodeIds(stmt);
+        } finally {
+            Database.closeObjects(GenericTreeStorage.class, null, stmt);
+        }
+    }
+
+    private List<Long> collectNodeIds(PreparedStatement stmt) throws SQLException {
+        final ResultSet rs = stmt.executeQuery();
+        final List<Long> ids = new ArrayList<Long>();
+        while (rs.next()) {
+            ids.add(rs.getLong(1));
+        }
+        return ids;
     }
 
     /**
