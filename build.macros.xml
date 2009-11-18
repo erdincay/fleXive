@@ -71,7 +71,7 @@
                 <fileset dir="@{srcdir}/resources/weblets" includes="**/*"/>
                 <fileset dir="@{srcdir}/web" includes="**/*"/>
 
-                <zipfileset dir="@{srcdir}/resources/scripts" prefix="scripts" includes="**/*"/>
+                <zipfileset dir="@{srcdir}/resources/scripts" prefix="scripts" includes="**/*" erroronmissingdir="false"/>
                 <jar-elements/>
             </jar>
         </sequential>
