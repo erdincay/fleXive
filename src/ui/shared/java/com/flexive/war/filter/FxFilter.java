@@ -279,11 +279,8 @@ public class FxFilter implements Filter {
      * @return  the JSON-RPC-Bridge of the current session
      */
     public static JSONRPCBridge getJsonRpcBridge(HttpSession session, boolean force) {
-        synchronized(session) {
-            return session.getAttribute(SESSION_JSON_BRIDGE) != null || !force
-                    ? (JSONRPCBridge) session.getAttribute(SESSION_JSON_BRIDGE)
-                    : new JSONRPCBridge();
-        }
+        // don't register bridge in session, all clients get the same methodset anyway
+        return JSONRPCBridge.getGlobalBridge();
     }
 
     /**
@@ -294,9 +291,7 @@ public class FxFilter implements Filter {
      * @param bridge    the bridge to be stored
      */
     public static void setJsonRpcBridge(HttpSession session, JSONRPCBridge bridge) {
-        synchronized(session) {
-            session.setAttribute(SESSION_JSON_BRIDGE, bridge);
-        }
+        // use global JSON/RPC bridge
     }
 
     private int getDivisionId(ServletRequest servletRequest, ServletResponse servletResponse) throws IOException {
