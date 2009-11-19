@@ -678,12 +678,13 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
 
 
         Statement stmt = null;
+        final String TRUE = StorageManager.getBooleanTrueExpression();
         try {
             // Update the parent of the node
             stmt = con.createStatement();
             stmt.addBatch("UPDATE " + getTable(mode) + " SET PARENT=" + newParentId + " WHERE ID=" + nodeId);
             if (mode != FxTreeMode.Live)
-                stmt.addBatch("UPDATE " + getTable(mode) + " SET DIRTY=TRUE WHERE ID=" + nodeId);
+                stmt.addBatch("UPDATE " + getTable(mode) + " SET DIRTY="+TRUE+" WHERE ID=" + nodeId);
             stmt.executeBatch();
             stmt.close();
 
@@ -698,11 +699,11 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
                     acquireLocksForUpdate(con, mode, newChildren);
 
                     for (List<Long> part : Iterables.partition(newChildren, SQL_IN_PARTSIZE)) {
-                        stmt.addBatch("UPDATE " + getTable(mode) + " SET DIRTY=TRUE" +
+                        stmt.addBatch("UPDATE " + getTable(mode) + " SET DIRTY=" + TRUE +
                                 " WHERE ID IN (" + StringUtils.join(part, ',') + ")");
                     }
-                    
-                    stmt.addBatch("UPDATE " + getTable(mode) + " SET DIRTY=TRUE WHERE ID IN(" + oldParent + "," + newParentId + ")");
+
+                    stmt.addBatch("UPDATE " + getTable(mode) + " SET DIRTY=" + TRUE + " WHERE ID IN(" + oldParent + "," + newParentId + ")");
                 }
                 stmt.executeBatch();
                 stmt.close();
@@ -809,11 +810,13 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
                 stmt2 = con.createStatement();
                 stmt2.execute(StorageManager.getReferentialIntegrityChecksStatement(false));
                 try {
-                    ResultSet rs = stmt.executeQuery("SELECT DISTINCT a.ID FROM (SELECT ID FROM " + getTable(FxTreeMode.Live) + " WHERE PARENT=" +
-                            nodeId + ") a LEFT " +
-                            "JOIN (SELECT ID FROM " + getTable(FxTreeMode.Live) + " WHERE PARENT=" + nodeId + ") b USING (ID) WHERE b.ID IS NULL");
+                    ResultSet rs = stmt.executeQuery(
+                            "SELECT DISTINCT tl.ID FROM " + getTable(FxTreeMode.Live) + " tl " +
+                                    "LEFT JOIN " + getTable(FxTreeMode.Edit) + " te ON tl.ID=te.ID WHERE te.ID=null AND " +
+                                    "te.PARENT=" + nodeId + " AND tl.PARENT=" + nodeId);
                     while (rs != null && rs.next()) {
                         long deleteId = rs.getLong(1);
+//                        System.out.println("==> deleted:"+deleteId);
                         acquireLocksForUpdate(con, FxTreeMode.Live, Arrays.asList(deleteId));
                         stmt2.addBatch("DELETE FROM " + getTable(FxTreeMode.Live) + " WHERE ID=" + deleteId);
 
