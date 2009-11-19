@@ -92,6 +92,10 @@
                     <groupId>org.jboss.javaee</groupId>
                     <artifactId>jboss-javaee</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>javax.transaction</groupId>
+                    <artifactId>jta</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
 
