@@ -46,6 +46,7 @@ import com.flexive.shared.search.SortDirection;
 import com.flexive.shared.structure.FxDataType;
 import com.flexive.shared.structure.FxFlatStorageMapping;
 import com.flexive.shared.tree.FxTreeNode;
+import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.sqlParser.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -277,15 +278,19 @@ public class GenericSQLDataSelector extends DataSelector {
             long root = FxContext.get().getNodeId();
             if (root == -1) root = FxTreeNode.ROOT_NODE;
             final String sel = "(select tree_nodeIndex(" + root + "," + FILTER_ALIAS + ".id," +
-                    // TODO: LIVE/EDIT
-                    search.getStorage().getBooleanFalseExpression() + ")" + search.getStorage().getFromDual() + ")";
+                    search.getStorage().getBooleanExpression(
+                            FxContext.get().getTreeMode() == FxTreeMode.Live
+                    )
+                    + ")" + search.getStorage().getFromDual() + ")";
             result.addItem(sel, resultPos, false);
         } else if (entry.getType() == PropertyEntry.Type.PATH) {
             final long propertyId = search.getEnvironment().getProperty("CAPTION").getId();
             final String sel = "(select tree_FTEXT1024_Paths(" + FILTER_ALIAS + ".id," +
                     search.getLanguage().getId() + "," + propertyId + "," +
-                    // TODO: LIVE/EDIT
-                    search.getStorage().getBooleanFalseExpression() + ")" + search.getStorage().getFromDual() + ")";
+                    search.getStorage().getBooleanExpression(
+                            FxContext.get().getTreeMode() == FxTreeMode.Live
+                    )
+                    + ")" + search.getStorage().getFromDual() + ")";
             result.addItem(sel, resultPos, false);
         } else if (entry.getType() == PropertyEntry.Type.METADATA) {
             // TODO: support for tree node metadata?

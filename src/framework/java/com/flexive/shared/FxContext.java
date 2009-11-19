@@ -39,6 +39,7 @@ import com.flexive.shared.exceptions.FxLogoutFailedException;
 import com.flexive.shared.interfaces.AccountEngine;
 import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.structure.FxEnvironment;
+import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.core.flatstorage.FxFlatStorageManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -100,6 +101,7 @@ public class FxContext implements Serializable {
     private int runAsSystem;
     private UserTicket ticket;
     private long nodeId = -1;
+    private FxTreeMode treeMode;
     private DivisionData divisionData;
 
     private static UserTicket getLastUserTicket(HttpSession session) {
@@ -122,21 +124,43 @@ public class FxContext implements Serializable {
     }
 
     /**
-     * Get the current users active tree node id  (CMS extension)
+     * Get the current users active tree node id, used for FxSQL tree queries
      *
      * @return the current users active tree node id
+     * @deprecated  will be removed as soon as tree search is fixed
      */
     public long getNodeId() {
         return nodeId;
     }
 
     /**
-     * Set the current users active tree node id (CMS extension)
+     * Set the current users active tree node id used for FxSQL tree queries
      *
      * @param nodeId active tree node id
+     * @deprecated  will be removed as soon as tree search is fixed
      */
     public void setNodeId(long nodeId) {
         this.nodeId = nodeId;
+    }
+
+    /**
+     * Get the current users tree mode, used for FxSQL tree queries
+     *
+     * @return the current users active tree node id
+     * @deprecated  will be removed as soon as tree search is fixed
+     */
+    public FxTreeMode getTreeMode() {
+        return treeMode;
+    }
+
+    /**
+     * Set the current users tree mode, used for FxSQL tree queries
+     *
+     * @return the current users active tree node id
+     * @deprecated  will be removed as soon as tree search is fixed
+     */
+    public void setTreeMode(FxTreeMode treeMode) {
+        this.treeMode = treeMode;
     }
 
     /**
