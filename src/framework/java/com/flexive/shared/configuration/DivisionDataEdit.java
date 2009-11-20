@@ -48,7 +48,7 @@ public class DivisionDataEdit extends DivisionData {
      * @param data  the source division data.
      */
     public DivisionDataEdit(DivisionData data) {
-        super(data.id, data.available, data.dataSource, data.domainRegEx, data.dbVendor, data.dbVersion);
+        super(data.id, data.available, data.dataSource, data.domainRegEx, data.dbVendor, data.dbVersion, data.dbDriverVersion);
     }
 
 
@@ -75,6 +75,10 @@ public class DivisionDataEdit extends DivisionData {
 
     public void setDbVersion(String dbVersion) {
         this.dbVersion = dbVersion;
+    }
+
+    public void setDbDriverVersion(String dbDriverVersion) {
+        this.dbDriverVersion = dbDriverVersion;
     }
 
 }

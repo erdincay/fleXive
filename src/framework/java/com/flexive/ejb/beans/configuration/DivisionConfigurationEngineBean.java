@@ -453,6 +453,14 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
+    public String getDatabaseDriverInfo() {
+        return FxContext.get().getDivisionData().getDbDriverVersion();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public boolean isFlatStorageEnabled() {
         return FxFlatStorageManager.getInstance().isEnabled();
     }

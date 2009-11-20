@@ -114,4 +114,15 @@ public class MySQLTreeStorage extends GenericTreeStorageSpreaded {
             }
         }
     }
+
+    //commented out since using shared locks for the tree causes more troubles than it helps
+    /**
+     * {@inheritDoc}
+     *
+    @Override
+    protected String getForUpdateClause() {
+        //see: http://dev.mysql.com/doc/refman/5.1/en/innodb-deadlocks.html
+        return " LOCK IN SHARE MODE";
+    }
+    */
 }

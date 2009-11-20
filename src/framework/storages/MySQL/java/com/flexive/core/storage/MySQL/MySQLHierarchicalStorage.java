@@ -33,6 +33,8 @@ package com.flexive.core.storage.MySQL;
 
 import com.flexive.core.DatabaseConst;
 import com.flexive.core.storage.ContentStorage;
+import com.flexive.core.storage.DBStorage;
+import com.flexive.core.storage.StorageManager;
 import com.flexive.core.storage.genericSQL.GenericHierarchicalStorage;
 import com.flexive.core.storage.genericSQL.GenericBinarySQLStorage;
 import com.flexive.shared.exceptions.FxDbException;
@@ -76,21 +78,42 @@ public class MySQLHierarchicalStorage extends GenericHierarchicalStorage {
      */
     @Override
     public void lockTables(Connection con, long id, int version) throws FxRuntimeException {
+        int counter=0;
+        while (!tryLock(con, id, version)) {
+            if (LOG.isInfoEnabled()) {
+                LOG.info("Failed to lock content tables, waiting 100ms and retrying... (try #"+(++counter)+")");
+            }
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                // ignore
+            }
+        }
+        if( counter > 0 )
+            LOG.info("Locking succeeded without (dead)locks after "+counter+" tries!");
+    }
+
+    protected boolean tryLock(Connection con, long id, int version) {
         try {
             PreparedStatement ps = null;
             try {
-                String ver = version <= 0 ? "" : " AND VER=?";
-                ps = con.prepareStatement("SELECT * FROM " + DatabaseConst.TBL_CONTENT + " WHERE ID=?" + ver + " FOR UPDATE");
+                //grouping by (dummy) 1 prevents reading the data and just issues the lock
+                String ver = (version <= 0 ? "" : " AND VER=?")+" GROUP BY 1";
+//                final String LOCK_MODE = " FOR UPDATE";
+                //see: http://dev.mysql.com/doc/refman/5.1/en/innodb-deadlocks.html
+                //and http://dev.mysql.com/doc/refman/5.1/en/innodb-locking-reads.html
+                final String LOCK_MODE = " LOCK IN SHARE MODE";
+                ps = con.prepareStatement("SELECT 1 FROM " + DatabaseConst.TBL_CONTENT + " WHERE ID=?" + ver + LOCK_MODE);
                 ps.setLong(1, id);
                 if (version > 0) ps.setInt(2, version);
                 ps.executeQuery();
                 ps.close();
-                ps = con.prepareStatement("SELECT * FROM " + DatabaseConst.TBL_CONTENT_DATA + " WHERE ID=?" + ver + " FOR UPDATE");
+                ps = con.prepareStatement("SELECT 1 FROM " + DatabaseConst.TBL_CONTENT_DATA + " WHERE ID=?" + ver + LOCK_MODE);
                 ps.setLong(1, id);
                 if (version > 0) ps.setInt(2, version);
                 ps.executeQuery();
                 ps.close();
-                ps = con.prepareStatement("SELECT * FROM " + DatabaseConst.TBL_CONTENT_BINARY + " WHERE ID=?" + ver + " FOR UPDATE");
+                ps = con.prepareStatement("SELECT 1 FROM " + DatabaseConst.TBL_CONTENT_BINARY + " WHERE ID=?" + ver + LOCK_MODE);
                 ps.setLong(1, id);
                 if (version > 0) ps.setInt(2, version);
                 ps.executeQuery();
@@ -101,9 +124,18 @@ public class MySQLHierarchicalStorage extends GenericHierarchicalStorage {
             }
             if (LOG.isDebugEnabled())
                 LOG.debug("Locked instances of id #" + id + (version > 0 ? " and version #" + version : " (all versions)"));
+            return true;
         } catch (SQLException e) {
-            //noinspection ThrowableInstanceNeverThrown
-            throw new FxDbException(LOG, e, "ex.db.sqlError", e.getMessage()).asRuntimeException();
+            final DBStorage si = StorageManager.getStorageImpl();
+            if (si.isDeadlock(e) || si.isQueryTimeout(e)) {
+//                if (LOG.isDebugEnabled()) {
+                    LOG.warn("Possible (dead)lock detected while locking content tables.");
+//                }
+                return false;
+            } else {
+                //noinspection ThrowableInstanceNeverThrown
+                throw new FxDbException(LOG, e, "ex.db.sqlError", e.getMessage()).asRuntimeException();
+            }
         }
     }
 }

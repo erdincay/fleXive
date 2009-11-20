@@ -51,4 +51,12 @@ public class H2TreeStorage extends GenericTreeStorageSpreaded {
     public static TreeStorage getInstance() {
         return instance;
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected String getForUpdateClause() {
+        return ""; //do nothing for H2 since we rely on MVCC
+    }
 }

@@ -149,6 +149,15 @@ public class SystemInfoBean implements Serializable {
     }
 
     /**
+     * Get information about the database jdbc driver used for the current division
+     *
+     * @return information about the database jdbc driver used for the current division
+     */
+    public String getDatabaseDriverInfo() {
+        return EJBLookup.getDivisionConfigurationEngine().getDatabaseDriverInfo();
+    }
+
+    /**
      * Get the used database schema version
      *
      * @return used database schema version

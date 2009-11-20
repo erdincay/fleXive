@@ -397,7 +397,7 @@ public class ConfigurationTest {
         final DivisionData[] orig = config.getDivisions();
         FxContext.get().setGlobalAuthenticated(true);
         try {
-            final DivisionData newDivision = new DivisionData(1, false, "test", "xxx", "Unknown", "1.2");
+            final DivisionData newDivision = new DivisionData(1, false, "test", "xxx", "Unknown", "1.2", "Unknown");
             config.saveDivisions(Arrays.asList(newDivision));
             assertTrue(config.getDivisions().length == 1, "Division table not updated");
             assertTrue(config.getDivisions()[0].equals(newDivision), "New division not written properly");

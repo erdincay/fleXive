@@ -74,6 +74,13 @@ public interface DivisionConfigurationEngine extends GenericConfigurationEngine 
     String getDatabaseInfo();
 
     /**
+     * Get information about the used database jdbc driver (name and version)
+     *
+     * @return information about the used database jdbc driver (name and version)
+     */
+    String getDatabaseDriverInfo();
+
+    /**
      * Is the a flat storage engine enabled for this division?
      *
      * @return if a flat storage engine is enabled for this division

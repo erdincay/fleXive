@@ -36,17 +36,21 @@ import java.util.regex.Pattern;
 
 /**
  * Container for division data read from the global configuration.
- * 
+ *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 
 public class DivisionData implements Serializable {
     private static final long serialVersionUID = -7804463451172463152L;
-    /** Division to be used for automated tests */
+    /**
+     * Division to be used for automated tests
+     */
     public static final int DIVISION_TEST = -2;
-    /** Global configuration division */
+    /**
+     * Global configuration division
+     */
     public static final int DIVISION_GLOBAL = 0;
-    
+
     protected int id = -1;
     protected boolean available;
     protected String dataSource = null;
@@ -54,24 +58,28 @@ public class DivisionData implements Serializable {
     protected Pattern domainPattern = null;
     protected String dbVendor = null;
     protected String dbVersion = null;
+    protected String dbDriverVersion = null;
 
     /**
      * Constructor.
-     * @param id    the division ID
-     * @param available if division is available
-     * @param dataSource    datasource JNDI path
-     * @param domainRegEx   domain name matcher
-     * @param dbVendor  database vendor
-     * @param dbVersion database version
+     *
+     * @param id              the division ID
+     * @param available       if division is available
+     * @param dataSource      datasource JNDI path
+     * @param domainRegEx     domain name matcher
+     * @param dbVendor        database vendor
+     * @param dbVersion       database version
+     * @param dbDriverVersion database jdbc driver version
      */
     public DivisionData(int id, boolean available, String dataSource, String domainRegEx, String dbVendor,
-            String dbVersion) {
+                        String dbVersion, String dbDriverVersion) {
         this.id = id;
         this.available = available;
         this.dataSource = dataSource;
         this.domainRegEx = domainRegEx;
         this.dbVendor = dbVendor;
         this.dbVersion = dbVersion;
+        this.dbDriverVersion = dbDriverVersion;
         try {
             this.domainPattern = Pattern.compile(domainRegEx);
         } catch (Exception e) {
@@ -84,7 +92,7 @@ public class DivisionData implements Serializable {
      * edit object does not influence the original division data object, so it is safe to create
      * edit objects from system division data entries without cloning them first.
      *
-     * @return  an editable division data object initialized with this instance
+     * @return an editable division data object initialized with this instance
      */
     public DivisionDataEdit asEditable() {
         return new DivisionDataEdit(this);
@@ -92,7 +100,8 @@ public class DivisionData implements Serializable {
 
     /**
      * Returns the JNDI path to this division's datasource.
-     * @return	the JNDI path to this division's datasource.
+     *
+     * @return the JNDI path to this division's datasource.
      */
     public String getDataSource() {
         return dataSource;
@@ -100,7 +109,8 @@ public class DivisionData implements Serializable {
 
     /**
      * The regular expression describing matching domains for this divison.
-     * @return	the regular expression describing matching domains for this divison.
+     *
+     * @return the regular expression describing matching domains for this divison.
      */
     public String getDomainRegEx() {
         return domainRegEx;
@@ -109,8 +119,8 @@ public class DivisionData implements Serializable {
     /**
      * Returns true when the given domain matches, false otherwise.
      *
-     * @param domain	the domain to be checked
-     * @return			true when the given domain matches, false otherwise.
+     * @param domain the domain to be checked
+     * @return true when the given domain matches, false otherwise.
      */
     public boolean isMatchingDomain(String domain) {
         return domainPattern != null && domainPattern.matcher(domain).lookingAt();
@@ -135,17 +145,27 @@ public class DivisionData implements Serializable {
     }
 
     /**
+     * Get the database jdbc driver version
+     *
+     * @return database jdbc driver version
+     */
+    public String getDbDriverVersion() {
+        return dbDriverVersion;
+    }
+
+    /**
      * Is this division available (ie can a connection be retrieved)
-     * 
-     * @return  available
+     *
+     * @return available
      */
     public boolean isAvailable() {
         return available;
     }
-    
+
     /**
      * Return the unique ID of this division.
-     * @return  the unique ID of this division.
+     *
+     * @return the unique ID of this division.
      */
     public int getId() {
         return id;
@@ -179,8 +199,8 @@ public class DivisionData implements Serializable {
      * parameter has been set). This method does not check if the given division
      * is available, i.e. if corresponding entries exist in the global configuration.
      *
-     * @param divisionId    the division ID to be checked
-     * @return  true for valid division IDs
+     * @param divisionId the division ID to be checked
+     * @return true for valid division IDs
      */
     public static boolean isValidDivisionId(int divisionId) {
         return divisionId > 0 || divisionId == DIVISION_TEST || divisionId == DIVISION_GLOBAL;

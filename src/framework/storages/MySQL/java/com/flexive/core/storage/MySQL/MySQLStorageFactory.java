@@ -338,7 +338,8 @@ public class MySQLStorageFactory implements DBStorage {
     public boolean isDeadlock(Exception exc) {
         //see http://dev.mysql.com/doc/refman/5.0/en/error-messages-server.html
         final int errorCode = Database.getSqlErrorCode(exc);
-        return errorCode == 1213 || errorCode == 1479;
+        return errorCode == 1213 || errorCode == 1479 || errorCode == 1205 /* lock timeout exception */
+                || errorCode == 1614 || errorCode == 1613;
     }
 
     /**

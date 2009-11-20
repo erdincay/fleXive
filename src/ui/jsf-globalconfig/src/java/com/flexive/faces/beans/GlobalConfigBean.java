@@ -115,7 +115,7 @@ public class GlobalConfigBean {
                     maxId = data.getId();
                 }
             }
-            getDivisions().add(new DivisionDataEdit(new DivisionData(maxId + 1, false, "", "", "Unknown", "")));
+            getDivisions().add(new DivisionDataEdit(new DivisionData(maxId + 1, false, "", "", "Unknown", "", "Unknown")));
             editIndex = getDivisions().size() - 1;
         } catch (FxApplicationException e) {
             new FxFacesMsgErr(e).addToContext();

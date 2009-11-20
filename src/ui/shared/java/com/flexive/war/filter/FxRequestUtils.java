@@ -69,7 +69,17 @@ public class FxRequestUtils {
         try {
             divisionId = configuration.getDivisionId(server);
         } catch (Exception e) {
-            LOG.error("Could not determine division: " + e.getMessage(), e);
+            if( e.getCause() instanceof javax.transaction.HeuristicMixedException) {
+                //try once more, this can happen on the first time accessing a postgres datasource using JBoss 5.x
+                //reason is yet unknown, probably a bug in the jboss transaction manager
+                //retrying usually solves the problem
+                try {
+                    divisionId = configuration.getDivisionId(server);
+                } catch (Exception e1) {
+                    LOG.error("Could not determine division: " + e1.getMessage(), e1);
+                }
+            } else
+                LOG.error("Could not determine division: " + e.getMessage(), e);
         }
         if (divisionId != -1)
             return divisionId;

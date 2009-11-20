@@ -1083,13 +1083,22 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
         return true;    // sucess
     }
 
+    /**
+     * Get the database specific "for update" clause to lock tables rows
+     *
+     * @return database specific "for update" clause
+     */
+    protected String getForUpdateClause() {
+        return " FOR UPDATE";
+    }
+
     private boolean tryLock(Connection con, String table, List<Long> part) throws FxDbException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("SELECT id FROM " + table + " t "
                     + (part == null || part.isEmpty() ? ""
                     : " WHERE id IN (" + StringUtils.join(part, ',') + ")")
-                    + " FOR UPDATE");
+                    + getForUpdateClause());
             stmt.executeQuery();
 
             return true;

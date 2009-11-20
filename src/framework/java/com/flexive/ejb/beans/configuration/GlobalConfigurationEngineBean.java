@@ -36,10 +36,7 @@ import com.flexive.core.DatabaseConst;
 import static com.flexive.core.DatabaseConst.TBL_GLOBAL_CONFIG;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.ejb.mbeans.FxCache;
-import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.FxContext;
-import com.flexive.shared.FxSharedUtils;
-import com.flexive.shared.SimpleCacheStats;
+import com.flexive.shared.*;
 import com.flexive.shared.cache.FxCacheException;
 import com.flexive.shared.configuration.DivisionData;
 import com.flexive.shared.configuration.ParameterScope;
@@ -314,6 +311,7 @@ public class GlobalConfigurationEngineBean extends GenericConfigurationImpl impl
                     final List<DivisionData> divisionList = new ArrayList<DivisionData>(divisionIds.length);
                     for (int divisionId : divisionIds) {
                         try {
+                            System.out.println("==> requesting data for division "+divisionId);
                             divisionList.add(getDivisionData(divisionId));
                         } catch (Exception e) {
                             LOG.error("Invalid division data (ignored): " + e.getMessage());
@@ -355,6 +353,7 @@ public class GlobalConfigurationEngineBean extends GenericConfigurationImpl impl
     public DivisionData createDivisionData(int divisionId, String dataSource, String domainRegEx) {
         String dbVendor = "unknown";
         String dbVersion = "unknown";
+        String dbDriverVersion = "unknown";
         boolean available = false;
         Connection con = null;
         try {
@@ -362,6 +361,7 @@ public class GlobalConfigurationEngineBean extends GenericConfigurationImpl impl
             DatabaseMetaData dbmd = con.getMetaData();
             dbVendor = dbmd.getDatabaseProductName();
             dbVersion = dbmd.getDatabaseProductVersion();
+            dbDriverVersion = dbmd.getDriverName() + " " + dbmd.getDriverVersion();
             available = true;
         } catch (NamingException e) {
             LOG.error("Failed to get datasource " + dataSource + " (flagged inactive)");
@@ -372,7 +372,7 @@ public class GlobalConfigurationEngineBean extends GenericConfigurationImpl impl
         } finally {
             Database.closeObjects(GlobalConfigurationEngineBean.class, con, null);
         }
-        return new DivisionData(divisionId, available, dataSource, domainRegEx, dbVendor, dbVersion);
+        return new DivisionData(divisionId, available, dataSource, domainRegEx, dbVendor, dbVersion, dbDriverVersion);
     }
 
     /**
