@@ -311,7 +311,6 @@ public class GlobalConfigurationEngineBean extends GenericConfigurationImpl impl
                     final List<DivisionData> divisionList = new ArrayList<DivisionData>(divisionIds.length);
                     for (int divisionId : divisionIds) {
                         try {
-                            System.out.println("==> requesting data for division "+divisionId);
                             divisionList.add(getDivisionData(divisionId));
                         } catch (Exception e) {
                             LOG.error("Invalid division data (ignored): " + e.getMessage());
