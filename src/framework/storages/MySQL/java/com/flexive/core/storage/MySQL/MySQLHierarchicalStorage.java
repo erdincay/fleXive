@@ -99,10 +99,10 @@ public class MySQLHierarchicalStorage extends GenericHierarchicalStorage {
             try {
                 //grouping by (dummy) 1 prevents reading the data and just issues the lock
                 String ver = (version <= 0 ? "" : " AND VER=?")+" GROUP BY 1";
-//                final String LOCK_MODE = " FOR UPDATE";
+                final String LOCK_MODE = " FOR UPDATE";
                 //see: http://dev.mysql.com/doc/refman/5.1/en/innodb-deadlocks.html
                 //and http://dev.mysql.com/doc/refman/5.1/en/innodb-locking-reads.html
-                final String LOCK_MODE = " LOCK IN SHARE MODE";
+//                final String LOCK_MODE = " LOCK IN SHARE MODE";
                 ps = con.prepareStatement("SELECT 1 FROM " + DatabaseConst.TBL_CONTENT + " WHERE ID=?" + ver + LOCK_MODE);
                 ps.setLong(1, id);
                 if (version > 0) ps.setInt(2, version);
