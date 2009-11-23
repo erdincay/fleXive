@@ -133,18 +133,18 @@ public class FxFilter implements Filter {
                             ? (FxResponseWrapper) servletResponse
                             : new FxResponseWrapper(servletResponse, cacheData);
 
+            response.setXPoweredBy(X_POWERED_BY_VALUE);
+            if (request.isDynamicContent() && !response.containsHeader("Cache-Control")) {
+                response.disableBrowserCache();
+            } else if (!response.containsHeader("last-modified") || !response.containsHeader("expires")) {
+                response.enableBrowserCache(FxResponseWrapper.CacheControl.PRIVATE, null, false);
+            }
+
             filterChain.doFilter(request, response);
 
             try {
                 if ("css".equalsIgnoreCase(request.getPageType())) {
                     response.setContentType("text/css");
-                }
-
-                response.setXPoweredBy(X_POWERED_BY_VALUE);
-                if (request.isDynamicContent()) {
-                    response.disableBrowserCache();
-                } else if (!response.containsHeader("last-modified") || !response.containsHeader("expires")) {
-                    response.enableBrowserCache(FxResponseWrapper.CacheControl.PRIVATE, null, false);
                 }
 
                 if (!response.isClientWriteThrough()) {

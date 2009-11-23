@@ -55,12 +55,18 @@ import java.net.URLEncoder;
 /**
  * <p>Provides streaming downloads for all binary objects ({@link com.flexive.shared.value.FxBinary FxBinary}).
  * The requested value is identified by its XPath or by a unique tree path.</p>
- * <p>Link format:</p>
+ * <h4>Link format:</h4>
  * <pre>/download/pk{n.m}/xpath/filename.ext</pre>
  * <pre>/download/tree/[edit,live]/fqn-path</pre>
  * <p>
  * When no XPath is provided, the first mandatory binary property of the instance's type is chosen.
  * </p>
+ * <h4>URL Parameters:</h4>
+ * Optional parameters can be appended to the requested path (e.g. {@code ?param=value&param2}):
+ * <ul>
+ * <li><strong>inline=true</strong> to download the content "inline" (i.e. skip the attachment response header)
+ * </ul>
+ *
  *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
@@ -175,7 +181,9 @@ public class DownloadServlet implements Servlet {
         try {
             response.setContentType(descriptor.getMimeType());
             response.setContentLength((int) descriptor.getSize());
-            response.setHeader("Content-Disposition", "attachment; filename=\"" + descriptor.getName() + "\";");
+            if (request.getParameter("inline") == null || "false".equals(request.getParameter("inline"))) {
+                response.setHeader("Content-Disposition", "attachment; filename=\"" + descriptor.getName() + "\";");
+            }
             descriptor.download(response.getOutputStream());
         } catch (Exception e) {
             FxServletUtils.sendErrorMessage(response, "Download failed: " + e.getMessage());

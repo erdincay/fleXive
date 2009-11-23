@@ -201,6 +201,8 @@ public class ThumbnailServlet implements Servlet {
         try {
             response.setDateHeader("Expires", System.currentTimeMillis() + 24L * 3600 * 1000);
             response.setDateHeader("Last-Modified", System.currentTimeMillis());
+            response.setHeader("Cache-Control", "private");
+            response.setHeader("Pragma", "cache");
             FxStreamUtils.downloadBinary(new ThumbnailBinaryCallback(response),
                     CacheAdmin.getStreamServers(), response.getOutputStream(), binaryId, conf);
         } catch (FxStreamException e) {
