@@ -33,17 +33,19 @@ package com.flexive.core.storage.genericSQL;
 
 import com.flexive.core.Database;
 import com.flexive.core.DatabaseConst;
+
 import static com.flexive.core.DatabaseConst.TBL_LOCK;
+
+import com.flexive.core.storage.ContentStorage;
 import com.flexive.core.storage.LockStorage;
 import com.flexive.core.storage.StorageManager;
+import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxLock;
 import com.flexive.shared.FxLockType;
-import com.flexive.shared.content.FxContentVersionInfo;
-import com.flexive.shared.content.FxPK;
-import com.flexive.shared.exceptions.FxDbException;
-import com.flexive.shared.exceptions.FxLockException;
-import com.flexive.shared.exceptions.FxNotFoundException;
+import com.flexive.shared.content.*;
+import com.flexive.shared.exceptions.*;
+import com.flexive.shared.security.ACLPermission;
 import com.flexive.shared.security.UserTicket;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -160,19 +162,19 @@ public class GenericLockStorage implements LockStorage {
     }
 
     /**
-     * Internal lock method that acquires a lock for a primary or resource depending of the class of <code>obj</code>
+     * Internal lock method that acquires a lock for a primary key or resource depending of the class of <code>obj</code>
      *
      * @param con      an open and valid connection
      * @param lockType type of the lock
      * @param obj      resource or primary key
      * @param duration duration in [ms] of the lock
      * @return FxLock
-     * @throws FxLockException on errors
+     * @throws FxLockException     on errors
      */
     @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     protected FxLock _lock(Connection con, FxLockType lockType, Object obj, long duration) throws FxLockException {
         if (obj instanceof FxPK) {
-            obj = getDistinctPK(con, (FxPK)obj);
+            obj = getDistinctPK(con, (FxPK) obj);
         } else if (obj instanceof String) {
             if (StringUtils.isEmpty((String) obj))
                 throw new FxLockException("ex.lock.invalidResource");
@@ -181,6 +183,10 @@ public class GenericLockStorage implements LockStorage {
         PreparedStatement ps = null;
 
         final UserTicket ticket = FxContext.getUserTicket();
+        //permission checks if content lock
+        if (!(ticket.isGlobalSupervisor() || ticket.isMandatorSupervisor()) && obj instanceof FxPK)
+            checkEditPermission(con, (FxPK) obj, ticket);
+
         final boolean allowTakeOver = lockType == FxLockType.Loose ||
                 (lockType == FxLockType.Permanent &&
                         (ticket.isGlobalSupervisor() || ticket.isMandatorSupervisor()));
@@ -227,6 +233,42 @@ public class GenericLockStorage implements LockStorage {
     }
 
     /**
+     * Check if the calling user has edit permission on the primary key he is trying to lock
+     *
+     * @param con    an open and valid connection
+     * @param pk     primary key of the content instance to check
+     * @param ticket calling users ticket
+     * @throws FxLockException thrown when the content can not be loaded/checked or no access
+     */
+    private void checkEditPermission(Connection con, FxPK pk, UserTicket ticket) throws FxLockException {
+        FxContent content;
+        FxContentSecurityInfo si;
+        FxCachedContent cachedContent = CacheAdmin.getCachedContent(pk);
+        if (cachedContent == null) {
+            StringBuilder sb = new StringBuilder(5000);
+            try {
+                final ContentStorage contentStorage = StorageManager.getContentStorage(pk.getStorageMode());
+                content = contentStorage.contentLoad(con, pk, CacheAdmin.getEnvironment(), sb);
+                si = contentStorage.getContentSecurityInfo(con, pk, content);
+            } catch (FxApplicationException e) {
+                throw new FxLockException(e);
+            }
+        } else {
+            content = cachedContent.getContent();
+            si = cachedContent.getSecurityInfo();
+        }
+        try {
+            FxPermissionUtils.checkPermission(ticket, content.getLifeCycleInfo().getCreatorId(),
+                    ACLPermission.EDIT,
+                    CacheAdmin.getEnvironment().getType(content.getTypeId()),
+                    si.getStepACL(),
+                    si.getContentACLs(), true);
+        } catch (FxNoAccessException e) {
+            throw new FxLockException(e, "ex.lock.content.noEditPermission", pk);
+        }
+    }
+
+    /**
      * Internal method that returns a lock if <code>obj</code> is locked, or <code>FxLockType.None</code> if not
      *
      * @param con an open and valid connection
@@ -237,7 +279,7 @@ public class GenericLockStorage implements LockStorage {
     @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     protected FxLock _getLock(Connection con, Object obj) throws FxLockException {
         if (obj instanceof FxPK) {
-            obj = getDistinctPK(con, (FxPK)obj);
+            obj = getDistinctPK(con, (FxPK) obj);
         } else if (obj instanceof String) {
             if (StringUtils.isEmpty((String) obj))
                 throw new FxLockException("ex.lock.invalidResource");
@@ -320,7 +362,7 @@ public class GenericLockStorage implements LockStorage {
         PreparedStatement ps = null;
         try {
             if (currentLock.isContentLock()) {
-                obj = getDistinctPK(con, (FxPK)obj); //make sure to have a distinct pk
+                obj = getDistinctPK(con, (FxPK) obj); //make sure to have a distinct pk
                 ps = con.prepareStatement("DELETE FROM " + TBL_LOCK + " WHERE LOCK_ID=? AND LOCK_VER=?");
                 ps.setLong(1, ((FxPK) obj).getId());
                 ps.setInt(2, ((FxPK) obj).getVersion());
@@ -396,6 +438,9 @@ public class GenericLockStorage implements LockStorage {
             else
                 throw new FxLockException("ex.lock.takeOver.denied.resource", lock.getLockedResource());
         }
+        //permission checks if content lock
+        if (!(ticket.isGlobalSupervisor() || ticket.isMandatorSupervisor()) && lock.isContentLock())
+            checkEditPermission(con, lock.getLockedPK(), ticket);
         PreparedStatement ps = null;
         try {
             ps = con.prepareStatement("UPDATE " + TBL_LOCK + " SET USER_ID=?" + (duration > 0 ? ",EXPIRES_AT=?" : "") +

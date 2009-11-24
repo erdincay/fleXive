@@ -316,7 +316,7 @@
                             </ui:insert>
                         </ui:fragment>
                         <!-- take over lock button -->
-                        <ui:fragment rendered="#{_ceContent.guiSettings.userMayTakeover and not _ceContent.new}">
+                        <ui:fragment rendered="#{_ceContent.guiSettings.userMayTakeover and not _ceContent.new and _ceContent.content.permissions.mayEdit}">
                             <ui:insert name="takeoverButton">
                                 <a4j:commandButton id="#{editorId}_overrideButton" value="#{fxMessageBean['ContentEditor.button.lockOverride']}"
                                                    title="#{fxMessageBean['ContentEditor.button.lockOverride.title']}"
@@ -330,7 +330,7 @@
                             </ui:insert>
                         </ui:fragment>
                         <!-- loose lock button -->
-                        <ui:fragment rendered="#{not _ceContent.guiSettings.looseLock and not _ceContent.new and _ceContent.guiSettings.userMayLooseLock}">
+                        <ui:fragment rendered="#{not _ceContent.guiSettings.looseLock and not _ceContent.new and _ceContent.guiSettings.userMayLooseLock and _ceContent.content.permissions.mayEdit}">
                             <ui:insert name="looseLockButton">
                                 <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.acquireLooseLock']}"
                                         title="#{fxMessageBean['ContentEditor.button.acquirePermLock.title']}"
@@ -342,7 +342,7 @@
                             </ui:insert>
                         </ui:fragment>
                         <!-- permanent lock button -->
-                        <ui:fragment rendered="#{not _ceContent.guiSettings.permLock and not _ceContent.new and _ceContent.guiSettings.userMayPermLock}">
+                        <ui:fragment rendered="#{not _ceContent.guiSettings.permLock and not _ceContent.new and _ceContent.guiSettings.userMayPermLock and _ceContent.content.permissions.mayEdit}">
                             <ui:insert name="permLockButton">
                                 <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.acquirePermLock']}"
                                         title="#{fxMessageBean['ContentEditor.button.acquirePermLock.title']}"

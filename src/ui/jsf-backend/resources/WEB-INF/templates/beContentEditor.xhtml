@@ -101,7 +101,7 @@ disableTab... false if the <adm:tab/> component should be rendered, true otherwi
                                     </div>
                                 </ui:fragment>
                                 <!-- take over lock button -->
-                                <ui:fragment rendered="#{_ceContent.guiSettings.userMayTakeover}">
+                                <ui:fragment rendered="#{_ceContent.guiSettings.userMayTakeover and _ceContent.content.permissions.mayEdit}">
                                     <div style="#{buttonStyle}">
                                         <adm:ajaxCommandIcon id="#{editorId}_overrideButton" titleKey="ContentEditor.button.lockOverride.title"
                                                                bean="#{srcEditor}" icon="unlock" action="lockOverride"
@@ -115,7 +115,7 @@ disableTab... false if the <adm:tab/> component should be rendered, true otherwi
                                     </div>
                                 </ui:fragment>
                                 <!-- loose lock button -->
-                                <ui:fragment rendered="#{not _ceContent.guiSettings.looseLock and _ceContent.guiSettings.userMayLooseLock}">
+                                <ui:fragment rendered="#{not _ceContent.guiSettings.looseLock and _ceContent.guiSettings.userMayLooseLock and _ceContent.content.permissions.mayEdit}">
                                     <div style="#{buttonStyle}">
                                         <adm:ajaxCommandIcon id="#{editorId}_looseLockButton" titleKey="ContentEditor.button.acquireLooseLock.title"
                                                                bean="#{srcEditor}" icon="looseLock" action="acquireLooseLock"
@@ -129,7 +129,7 @@ disableTab... false if the <adm:tab/> component should be rendered, true otherwi
                                     </div>
                                 </ui:fragment>
                                 <!-- permanent lock button -->
-                                <ui:fragment rendered="#{not _ceContent.guiSettings.permLock and _ceContent.guiSettings.userMayPermLock}">
+                                <ui:fragment rendered="#{not _ceContent.guiSettings.permLock and _ceContent.guiSettings.userMayPermLock and _ceContent.content.permissions.mayEdit}">
                                     <div style="#{buttonStyle}">
                                         <adm:ajaxCommandIcon id="#{editorId}_permLockButton" titleKey="ContentEditor.button.acquirePermLock.title"
                                                              bean="#{srcEditor}" icon="lock" action="acquirePermLock"
@@ -143,7 +143,7 @@ disableTab... false if the <adm:tab/> component should be rendered, true otherwi
                                     </div>
                                 </ui:fragment>
                                 <!-- lock duration & extension -->
-                                <ui:fragment rendered="#{_ceContent.guiSettings.contentLocked}">
+                                <ui:fragment rendered="#{_ceContent.guiSettings.contentLocked and _ceContent.content.permissions.mayEdit}">
                                     <div id="#{editorId}_lockTimeAndUnlock" style="#{buttonStyle}">
                                         <!-- lock duration -->
                                         <adm:ajaxCommandIcon id="#{editorId}_lockTimeButton" titleKey="ContentEditor.button.remainingTime" bean="#{srcEditor}"

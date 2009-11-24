@@ -31,8 +31,6 @@
  ***************************************************************/
 package com.flexive.shared.security;
 
-import com.flexive.shared.security.ACLPermission;
-
 import java.io.Serializable;
 
 /**
@@ -74,7 +72,7 @@ public final class PermissionSet implements Serializable {
     }
 
     /**
-     * Returns this & other (a permission has to be pressent in both of the sets).
+     * Returns this & other (a permission has to be present in both of the sets).
      *
      * @param other the other permission set
      * @return  this & other
