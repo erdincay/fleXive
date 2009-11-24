@@ -267,8 +267,12 @@ public class FxContent implements Serializable {
         this.stepId = stepId;
         if (CacheAdmin.getEnvironment().getStep(stepId).isLiveStep())
             this.liveVersion = this.getPk().getVersion();
-        else
-            this.liveVersion = this.initialLiveVersion;
+        else {
+            if (pk.isNew())
+                this.liveVersion = 0;
+            else
+                this.liveVersion = this.initialLiveVersion;
+        }
         updateSystemInternalProperties();
     }
 
