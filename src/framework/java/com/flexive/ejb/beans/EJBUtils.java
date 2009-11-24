@@ -50,10 +50,14 @@ public class EJBUtils {
      * @param ctx   the session context
      */
     public static void rollback(SessionContext ctx) {
-        if( !ctx.getRollbackOnly())
-            ctx.setRollbackOnly();
-        // notify environment cache that the thread-local environment may have changed
-        CacheAdmin.environmentChanged();
+        try {
+            if( !ctx.getRollbackOnly())
+                ctx.setRollbackOnly();
+            // notify environment cache that the thread-local environment may have changed
+            CacheAdmin.environmentChanged();
+        } catch (IllegalStateException e) {
+            //ignore, called on a CMT TX with SUPPORTS (ie SearchEngineBean) and no active TX will throw this exception
+        }
     }
 
 }

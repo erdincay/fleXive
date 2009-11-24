@@ -362,8 +362,8 @@ public abstract class GenericTreeStorage implements TreeStorage {
      * {@inheritDoc}
      */
     public void syncFQNName(Connection con, long referenceId, boolean maxVersion, boolean liveVersion, String name) throws FxApplicationException {
-        if (StringUtils.isEmpty(name))
-            return;
+//        if (StringUtils.isEmpty(name))
+//            return;
         if (liveVersion)
             updateName(con, FxTreeMode.Live, referenceId, name);
         if (maxVersion || liveVersion)

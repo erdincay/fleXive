@@ -1990,6 +1990,12 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 }
                 if (!change.getOriginalData().isSystemInternal()) {
                     deleteDetailData(con, sql, pk, change.getOriginalData());
+                    if( change.isProperty() ) {
+                        //check if the removed property is a FQN
+                        if (((FxPropertyData) change.getOriginalData()).getPropertyId() == fqnPropertyId) {
+                            syncFQNName(con, content, pk, change);
+                        }
+                    }
                     if (fs != null && change.isFlatStorageChange())
                         fs.deletePropertyData(con, pk, (FxPropertyData) change.getOriginalData());
                     ft.index(change);
@@ -2172,6 +2178,11 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     private void syncFQNName(Connection con, FxContent content, FxPK pk, FxDelta.FxDeltaChange change) throws FxApplicationException {
         FxValue val;
         if (change != null) {
+            if (change.getChangeType() == FxDelta.FxDeltaChange.ChangeType.Remove) {
+                //sync to empty FQN (see FX-752)
+                StorageManager.getTreeStorage().syncFQNName(con, pk.getId(), content.isMaxVersion(), content.isLiveVersion(), null);
+                return;
+            }
             val = ((FxPropertyData) change.getNewData()).getValue();
         } else {
             //check if there is a FQN property and sync that one (used when creating a new version)
@@ -2182,7 +2193,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             else
                 return;
         }
-        if (!val.isEmpty() && val instanceof FxString) {
+        if (/*!val.isEmpty() &&*/ val instanceof FxString) {
             StorageManager.getTreeStorage().syncFQNName(con, pk.getId(), content.isMaxVersion(), content.isLiveVersion(), (String) val.getBestTranslation());
         }
     }

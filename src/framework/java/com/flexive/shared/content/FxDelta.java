@@ -54,7 +54,7 @@ public class FxDelta implements Serializable {
      * A single delta change
      */
     public static class FxDeltaChange implements Serializable {
-        enum ChangeType {
+        public static enum ChangeType {
             Add, Remove, Update, None
         }
 

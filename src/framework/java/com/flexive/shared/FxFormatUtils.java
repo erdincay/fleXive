@@ -206,6 +206,8 @@ public final class FxFormatUtils {
      * @return escaped path
      */
     public static String escapeTreePath(final String path) {
+        if (StringUtils.isEmpty(path))
+            return "_";
         StringBuilder sb = new StringBuilder(path.length());
         char c;
         boolean inTag = false;
