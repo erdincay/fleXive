@@ -32,7 +32,6 @@
 package com.flexive.ejb.beans.search;
 
 import com.flexive.core.Database;
-import com.flexive.core.DatabaseConst;
 import com.flexive.core.search.SqlSearch;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.shared.EJBLookup;
@@ -88,7 +87,7 @@ public class SearchEngineBean implements SearchEngine, SearchEngineLocal {
     /**
      * {@inheritDoc}
      */
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public FxResultSet search(String query) throws FxApplicationException {
         return search(query, 0, Integer.MAX_VALUE, null);
     }
@@ -96,7 +95,7 @@ public class SearchEngineBean implements SearchEngine, SearchEngineLocal {
     /**
      * {@inheritDoc}
      */
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public FxResultSet search(String query, int startIndex, int fetchRows, FxSQLSearchParams params)
             throws FxApplicationException {
         return search(query, startIndex, fetchRows, params, AdminResultLocations.DEFAULT, ResultViewType.LIST);
@@ -105,7 +104,7 @@ public class SearchEngineBean implements SearchEngine, SearchEngineLocal {
     /**
      * {@inheritDoc}
      */
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public FxResultSet search(String query, int startIndex, int fetchRows, FxSQLSearchParams params, ResultLocation location, ResultViewType viewType) throws FxApplicationException {
         try {
             if (params == null) {

@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2008
+ *  Copyright (c) 1999-2009
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -31,21 +31,11 @@
  ***************************************************************/
 package com.flexive.core.structure;
 
-import com.flexive.core.DatabaseConst;
 import com.flexive.core.Database;
 import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.EJBLookup;
 import com.flexive.shared.cache.FxCacheException;
 import com.flexive.shared.configuration.DivisionData;
-import com.flexive.shared.exceptions.FxApplicationException;
-import com.flexive.shared.exceptions.FxNotFoundException;
-import com.flexive.shared.interfaces.GlobalConfigurationEngine;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
-import javax.naming.Context;
-import javax.naming.NamingException;
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 
@@ -55,7 +45,7 @@ import java.sql.SQLException;
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 final class FxEnvironmentUtils {
-    private static final Log LOG = LogFactory.getLog(FxEnvironmentUtils.class);
+//    private static final Log LOG = LogFactory.getLog(FxEnvironmentUtils.class);
 
     /**
      * Includes the division id into the path.

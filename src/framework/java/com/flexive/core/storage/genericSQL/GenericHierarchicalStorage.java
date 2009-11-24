@@ -567,11 +567,8 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         content.checkValidity();
         final FxType type = CacheAdmin.getEnvironment().getType(content.getTypeId());
 
-        //step dependencies will be updated, need to lock
-        lockTables(con, content.getPk().getId(), -1);
-
         FxPK pk;
-        PreparedStatement ps;
+        PreparedStatement ps = null;
         FulltextIndexer ft = null;
         try {
             int new_version = getContentVersionInfo(con, content.getPk().getId()).getMaxVersion() + 1;
@@ -592,6 +589,18 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             checkUniqueConstraints(con, env, sql, pk, content.getTypeId());
             binaryStorage.updateContentBinaryEntry(con, pk, content.getBinaryPreviewId(), content.getBinaryPreviewACL());
             ft.commitChanges();
+
+            ps.close();
+            final long id = content.getPk().getId();
+            //lock needed columns
+            ps = con.prepareStatement("SELECT MAX_VER, LIVE_VER, ISMAX_VER, ISLIVE_VER FROM " + TBL_CONTENT + " WHERE ID=? FOR UPDATE");
+            ps.setLong(1, id);
+            ps.execute();
+            ps.close();
+            ps = con.prepareStatement("SELECT ISMAX_VER, ISLIVE_VER FROM " + TBL_CONTENT_DATA + " WHERE ID=? FOR UPDATE");
+            ps.setLong(1, id);
+            ps.execute();
+            fixContentVersionStats(con, type, id);
         } catch (FxApplicationException e) {
             if (e instanceof FxCreateException)
                 throw (FxCreateException) e;
@@ -601,14 +610,9 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         } catch (SQLException e) {
             throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
         } finally {
+            Database.closeObjects(GenericHierarchicalStorage.class, null, ps);
             if (ft != null)
                 ft.cleanup();
-        }
-
-        try {
-            fixContentVersionStats(con, type, content.getPk().getId());
-        } catch (FxUpdateException e) {
-            throw new FxCreateException(e);
         }
 
         final FxContent newVersion;

@@ -432,6 +432,14 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
         } catch (FxApplicationException e) {
             EJBUtils.rollback(ctx);
             throw new FxCreateException(e);
+        } catch(Exception e) {
+            EJBUtils.rollback(ctx);
+            System.out.println("===> generic exception!!! "+e.getClass().getCanonicalName());
+            throw new FxCreateException(LOG, e);
+        } catch(Throwable t) {
+            EJBUtils.rollback(ctx);
+            System.out.println("===> generic throwable!!! "+t.getClass().getCanonicalName());
+            throw new FxCreateException(LOG, t);
         } finally {
             Database.closeObjects(ContentEngineBean.class, con, ps);
             if (!ctx.getRollbackOnly())

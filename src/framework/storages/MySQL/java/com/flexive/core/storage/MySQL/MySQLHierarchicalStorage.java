@@ -31,6 +31,7 @@
  ***************************************************************/
 package com.flexive.core.storage.MySQL;
 
+import com.flexive.core.Database;
 import com.flexive.core.DatabaseConst;
 import com.flexive.core.storage.ContentStorage;
 import com.flexive.core.storage.DBStorage;
@@ -119,8 +120,7 @@ public class MySQLHierarchicalStorage extends GenericHierarchicalStorage {
                 ps.executeQuery();
                 //fulltext table uses MyISAM engine and can not be locked
             } finally {
-                if (ps != null)
-                    ps.close();
+                Database.closeObjects(MySQLHierarchicalStorage.class, null, ps);
             }
             if (LOG.isDebugEnabled())
                 LOG.debug("Locked instances of id #" + id + (version > 0 ? " and version #" + version : " (all versions)"));
