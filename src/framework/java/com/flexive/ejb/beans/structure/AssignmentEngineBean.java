@@ -2183,11 +2183,13 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                         psML.setLong(1, ml.getId());
                         psML.addBatch();
                     }
+                    psData.setLong(1, ml.getId());
+                    psData.addBatch();
                     if (ml instanceof FxPropertyAssignment) {
-                        if (!disableAssignment)
-                            FxFlatStorageManager.getInstance().removeAssignmentMappings(con, ml.getId());
-                        psData.setLong(1, ml.getId());
-                        psData.addBatch();
+                        if (!disableAssignment) {
+                            if (((FxPropertyAssignment) ml).isFlatStorageEntry()) 
+                                FxFlatStorageManager.getInstance().removeAssignmentMappings(con, ml.getId());
+                        }
                         psDataFT.setLong(1, ml.getId());
                         psDataFT.addBatch();
                         psPropertyOptionRemove.setLong(1, ml.getId());
