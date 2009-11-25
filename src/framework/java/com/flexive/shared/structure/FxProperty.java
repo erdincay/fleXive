@@ -294,7 +294,7 @@ public class FxProperty extends FxStructureElement implements Serializable {
     }
 
     /**
-     * Does this property reference a FxType
+     * Does this property references a FxType
      *
      * @return if this property references a FxType
      */

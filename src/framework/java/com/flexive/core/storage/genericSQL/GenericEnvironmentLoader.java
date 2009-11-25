@@ -273,6 +273,8 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                 mayOverrideACL = rs.getBoolean(7);
                 dataType = environment.getDataType(rs.getLong(8));
                 refTypeId = rs.getLong(9);
+                if (rs.wasNull())
+                    refTypeId = -1;
                 fulltextIndexed = rs.getBoolean(10);
                 String _def = rs.getString(11);
                 defaultValue = null;
@@ -290,8 +292,6 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                     }
                 }
                 systemInternal = rs.getBoolean(12);
-                if (rs.wasNull())
-                    refTypeId = -1;
                 refListId = rs.getLong(13);
                 if (rs.wasNull())
                     refListId = -1;
