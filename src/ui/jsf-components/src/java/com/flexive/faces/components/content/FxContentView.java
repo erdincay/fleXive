@@ -55,6 +55,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.faces.component.UIOutput;
+import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.event.FacesEvent;
 import javax.faces.event.FacesListener;
@@ -148,6 +149,34 @@ public class FxContentView extends UIOutput {
             requestMap.remove(getVar());
             LOG.error("Failed to provide content: " + e.getMessage(), e);
             throw e.asRuntimeException();
+        }
+    }
+
+    /**
+     * Helper method to force reloading in very specific situations when the heuristic in
+     * {@link #provideContent(javax.faces.context.FacesContext)} does not detect content changes
+     * (for example: maximum version changed its edit/live status). Clears all cached contents
+     * in this view.
+     *
+     * @since 3.1
+     */
+    public static void clearCachedContents() {
+        for (UIComponent component : FacesContext.getCurrentInstance().getViewRoot().getChildren()) {
+            clearCachedContents(component);
+        }
+    }
+
+    private static void clearCachedContents(UIComponent comp) {
+        if (comp instanceof FxContentView) {
+            final FxContentView fcv = (FxContentView) comp;
+            fcv.content = null;
+            fcv.contentMap.clear();
+        }
+
+        if (comp.getChildCount() > 0) {
+            for (UIComponent child : comp.getChildren()) {
+                clearCachedContents(child);
+            }
         }
     }
 
