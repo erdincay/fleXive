@@ -32,13 +32,13 @@
 package com.flexive.faces.components.input;
 
 import com.flexive.shared.EJBLookup;
-import com.flexive.shared.FxLanguage;
-import com.flexive.shared.security.ACL;
-import static com.flexive.shared.FxFormatUtils.toDateTime;
 import static com.flexive.shared.FxFormatUtils.toDate;
+import static com.flexive.shared.FxFormatUtils.toDateTime;
+import com.flexive.shared.FxLanguage;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxUpdateException;
+import com.flexive.shared.security.ACL;
 import com.flexive.shared.value.*;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
@@ -49,16 +49,16 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.myfaces.custom.fileupload.HtmlInputFileUpload;
 import org.apache.myfaces.custom.fileupload.UploadedFile;
 
+import javax.faces.component.NamingContainer;
 import javax.faces.component.UIComponent;
 import javax.faces.component.UIInput;
-import javax.faces.component.NamingContainer;
 import javax.faces.context.FacesContext;
 import javax.faces.render.Renderer;
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Calendar;
 
 /**
  * Renderer for the FxValueInput component.
@@ -110,7 +110,8 @@ public class FxValueInputRenderer extends Renderer {
         final FxValue value = component.isReadOnly()
                 ? getFxValue(context, component)
                 : component.getInputMapper().encode(getFxValue(context, component));
-        RenderHelper helper = component.isReadOnly()
+
+        RenderHelper helper = component.isReadOnly() || value.isReadOnly()
                 ? new ReadOnlyModeHelper(component, clientId, value)
                 : new EditModeHelper(component, clientId, value);
         /*if (!component.getChildren().isEmpty()) {
@@ -139,7 +140,8 @@ public class FxValueInputRenderer extends Renderer {
     public void decode(FacesContext context, UIComponent component) {
         FxValueInput input = (FxValueInput) component;
         buildComponent(context, input);
-        if (!(input.getValue() instanceof FxVoid) && !input.isReadOnly()) {
+        if (!(input.getValue() instanceof FxVoid) && !input.isReadOnly()
+                && !(input.getValue() != null && ((FxValue) input.getValue()).isReadOnly())) {
             input.setSubmittedValue(decodeFxValue(context, component));
         }
     }
