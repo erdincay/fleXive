@@ -1763,21 +1763,22 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 }
                 // change the assigment's default value
                 if (original.getDefaultValue() != null && !original.getDefaultValue().equals(modified.getDefaultValue()) ||
-                        original.getDefaultValue() == null && modified.getDefaultValue() != null) {
+                        original.getDefaultValue() == null && modified.getDefaultValue() != null ||
+                        original.hasAssignmentDefaultValue() != modified.hasAssignmentDefaultValue()) {
                     if (changes)
                         changesDesc.append(',');
                     ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET DEFAULT_VALUE=? WHERE ID=?");
                     FxValue defValue = modified.getDefaultValue();
-                    if (defValue instanceof FxBinary) {
+                    if (defValue instanceof FxBinary && modified.hasAssignmentDefaultValue()) {
                         ContentStorage storage = StorageManager.getContentStorage(modified.getAssignedType().getStorageMode());
                         storage.prepareBinary(con, (FxBinary) defValue);
                     }
                     final String _def = defValue == null || defValue.isEmpty() ? null : ConversionEngine.getXStream().toXML(defValue);
-                    if (_def != null && (modified.getDefaultValue() instanceof FxReference)) {
+                    if (_def != null && modified.hasAssignmentDefaultValue() && (modified.getDefaultValue() instanceof FxReference)) {
                         //check if the type matches the instance
                         checkReferencedType(con, (FxReference) modified.getDefaultValue(), modified.getProperty().getReferencedType());
                     }
-                    if (_def == null)
+                    if (_def == null || !modified.hasAssignmentDefaultValue())
                         ps.setNull(1, java.sql.Types.VARCHAR);
                     else
                         ps.setString(1, _def);

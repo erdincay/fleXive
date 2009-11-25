@@ -92,6 +92,9 @@
                              disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}">
                         <a4j:support event="onclick" reRender="multiLangBox,defaultLangSelect,defaultValueInput,defaultLanguageInput"/>
                     </h:selectBooleanCheckbox>
+                    <ui:fragment rendered="#{propertyEditorBean.propertyDefaultValueSet and not propertyEditorBean.defaultValueSet}">
+                        #{fxMessageBean['PropertyEditor.label.defaultValue.fromProperty']}
+                    </ui:fragment>
                 </fx:formRow>
             </a4j:region>
 
