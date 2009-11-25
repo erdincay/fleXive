@@ -143,7 +143,8 @@ public class FxFilter implements Filter {
             filterChain.doFilter(request, response);
 
             try {
-                if ("css".equalsIgnoreCase(request.getPageType())) {
+                if ("css".equalsIgnoreCase(request.getPageType()) &&
+                        (response.getContentType() == null || !response.getContentType().startsWith("text/css"))) {
                     response.setContentType("text/css");
                 }
 

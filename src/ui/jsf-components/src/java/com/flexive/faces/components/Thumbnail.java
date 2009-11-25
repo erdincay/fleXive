@@ -128,6 +128,8 @@ public class Thumbnail extends UIOutput {
             final HtmlGraphicImage image = (HtmlGraphicImage) body;
             image.setUrl(link);
             image.setStyleClass(CSS_CLASS);
+            image.setAlt(FxJsfComponentUtils.getStringValue(this, "alt", ""));
+            image.setTitle(FxJsfComponentUtils.getStringValue(this, "title", null));
         }
     }
 
