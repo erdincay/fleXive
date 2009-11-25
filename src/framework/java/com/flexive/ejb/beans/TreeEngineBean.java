@@ -376,7 +376,7 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
      * @param mode                    tree mode to use (Live or Edit tree)
      * @param nodeId                  the node to delete
      * @param deleteReferencedContent delete referenced content
-     * @param deleteChildren
+     * @param deleteChildren          delete all child nodes as well?
      * @throws FxApplicationException on errors
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)

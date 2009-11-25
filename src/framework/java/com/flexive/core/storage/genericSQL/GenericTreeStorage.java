@@ -1161,6 +1161,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
         final List<Long> scriptAfterIds = scripting.getByScriptEvent(FxScriptEvent.AfterTreeNodeRemoved);
         //warning: removedNodes will only be available if script mappings for event AfterTreeNodeRemoved exist!
         List<FxTreeNode> removedNodes = scriptAfterIds.size() > 0 ? new ArrayList<FxTreeNode>(100) : null;
+        final String TRUE = StorageManager.getBooleanTrueExpression();
         try {
             stmt = con.createStatement();
             stmt.execute(StorageManager.getReferentialIntegrityChecksStatement(false));
@@ -1198,6 +1199,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
                         }
                     }
                 }
+
                 for (List<Long> removeIds : Iterables.partition(removeNodeIds, SQL_IN_PARTSIZE)) {
                     stmt.addBatch(
                             "DELETE FROM " + getTable(mode)
@@ -1234,18 +1236,19 @@ public abstract class GenericTreeStorage implements TreeStorage {
 
             // Set the dirty flag for the parent if needed
             if (mode != FxTreeMode.Live) {
-                stmt.addBatch("UPDATE " + getTable(mode) + " SET DIRTY="+StorageManager.getBooleanTrueExpression()+" WHERE ID=" + nodeInfo.getParentId());
+                stmt.addBatch("UPDATE " + getTable(mode) + " SET DIRTY="+TRUE+" WHERE ID=" + nodeInfo.getParentId());
             }
 
             if (mode == FxTreeMode.Live && exists(con, FxTreeMode.Edit, nodeId)) {
                 //check if a node with the same id that has been removed in the live tree exists in the edit tree,
                 //the node and all its children will be flagged as dirty in the edit tree
                 FxTreeNodeInfo editNode = getTreeNodeInfo(con, FxTreeMode.Edit, nodeId);
-                final List<Long> editNodeIds = selectNodeIds(con, FxTreeMode.Edit, editNode.getLeft(), editNode.getRight());
-                acquireLocksForUpdate(con, FxTreeMode.Edit, editNodeIds);
+                List<Long> editNodeIds = selectNodeIds(con, FxTreeMode.Edit, editNode.getLeft(), editNode.getRight());
+                editNodeIds.add(nodeId); //add the node itself as well, see FX-754
 
+                acquireLocksForUpdate(con, FxTreeMode.Edit, editNodeIds);
                 for (List<Long> part : Iterables.partition(editNodeIds, SQL_IN_PARTSIZE)) {
-                    stmt.addBatch("UPDATE " + getTable(FxTreeMode.Edit) + " SET DIRTY=" + StorageManager.getBooleanTrueExpression() +
+                    stmt.addBatch("UPDATE " + getTable(FxTreeMode.Edit) + " SET DIRTY=" + TRUE +
                             " WHERE ID IN ("  + StringUtils.join(part, ',') + ")");
                 }
             }
