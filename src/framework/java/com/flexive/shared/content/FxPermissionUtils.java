@@ -150,7 +150,7 @@ public class FxPermissionUtils {
             default:
                 checkLock = false;
         }
-        if( checkLock && si.getLock().isLocked() && !si.getLock().isExpired()) {
+        if( checkLock && si.getLock().isLocked() && !si.getLock().isUnlockable()) {
             if( si.getLock().getUserId() != ticket.getUserId() && !ticket.isMandatorSupervisor()) {
                 if( throwException )
                     throw new FxNoAccessException("ex.lock.content.locked.noAccess", si.getPk());

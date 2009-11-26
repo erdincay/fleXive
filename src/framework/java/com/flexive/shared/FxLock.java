@@ -229,7 +229,7 @@ public class FxLock implements Serializable {
      */
     public boolean isUnlockable() {
         final UserTicket ticket = FxContext.getUserTicket();
-        return ticket.isGlobalSupervisor() || ticket.isMandatorSupervisor() || ticket.getUserId() == userId || lockType == FxLockType.Loose;
+        return ticket.isGlobalSupervisor() || ticket.isMandatorSupervisor() || ticket.getUserId() == userId || lockType == FxLockType.Loose || isExpired();
     }
 
     /**
