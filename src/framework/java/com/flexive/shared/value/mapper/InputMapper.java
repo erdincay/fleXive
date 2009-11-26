@@ -187,4 +187,20 @@ public abstract class InputMapper<BaseType extends FxValue, MappedType extends F
                 + (args.length > 0 ? ',' + StringUtils.join(args, ',') : "") + ") + \")\");"
                 + "})";
     }
+
+    /**
+     * Applies general settings from the old value to the new one.
+     *
+     * @param newValue  the value constructed from oldValue
+     * @param oldValue  the original value
+     * @param <T>       the value type
+     * @return          newValue
+     * @since           3.1
+     */
+    protected <T extends FxValue> T applySettings(T newValue, FxValue oldValue) {
+        if (oldValue.isReadOnly()) {
+            newValue.setReadOnly();
+        }
+        return newValue;
+    }
 }

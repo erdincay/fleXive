@@ -82,9 +82,9 @@ public class SelectOneInputMapper extends InputMapper<FxLargeNumber, FxSelectOne
             for (long languageId : value.getTranslatedLanguages()) {
                 encoded.setTranslation(languageId, getSelectItem(value, languageId));
             }
-            return encoded;
+            return applySettings(encoded, value);
         } else {
-            return new FxSelectOne(false, getSelectItem(value, -1));
+            return applySettings(new FxSelectOne(false, getSelectItem(value, -1)), value);
         }
     }
 
@@ -104,9 +104,12 @@ public class SelectOneInputMapper extends InputMapper<FxLargeNumber, FxSelectOne
             for (long languageId : value.getTranslatedLanguages()) {
                 number.setTranslation(languageId, value.getTranslation(languageId).getId());
             }
-            return number;
+            return applySettings(number, value);
         } else {
-            return new FxLargeNumber(value.isMultiLanguage(), value.getDefaultTranslation().getId());
+            return applySettings(
+                    new FxLargeNumber(value.isMultiLanguage(), value.getDefaultTranslation().getId()),
+                    value
+            );
         }
     }
 

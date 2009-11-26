@@ -64,7 +64,10 @@ public abstract class NumberQueryInputMapper<T, BaseType extends FxValue<T, ?>> 
                 return decoded;
             }
             final Long result = decodeQuery(value, -1);
-            return result != null ? new FxLargeNumber(false, result) : new FxLargeNumber(false, FxLargeNumber.EMPTY).setEmpty();
+            return applySettings(
+                    result != null ? new FxLargeNumber(false, result) : new FxLargeNumber(false, FxLargeNumber.EMPTY).setEmpty(),
+                    value
+            );
         }
 
         private Long decodeQuery(FxString value, long languageId) {
@@ -137,7 +140,7 @@ public abstract class NumberQueryInputMapper<T, BaseType extends FxValue<T, ?>> 
             if (rc.isNew()) {
                 reference.setEmpty();
             }
-            return reference;
+            return applySettings(reference, value);
         }
     }
 
@@ -150,9 +153,9 @@ public abstract class NumberQueryInputMapper<T, BaseType extends FxValue<T, ?>> 
             for (long languageId : value.getTranslatedLanguages()) {
                 encoded.setTranslation(languageId, encodeId(value.getTranslation(languageId)));
             }
-            return encoded;
+            return applySettings(encoded, value);
         } else {
-            return new FxString(false, encodeId(value.isEmpty() ? null : value.getDefaultTranslation()));
+            return applySettings(new FxString(false, encodeId(value.isEmpty() ? null : value.getDefaultTranslation())), value);
         }
     }
 

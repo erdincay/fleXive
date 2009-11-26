@@ -78,15 +78,19 @@ public class FxPkSelectOneInputMapper extends InputMapper<FxReference, FxSelectO
     /** {@inheritDoc} */
     @Override
     protected FxSelectOne doEncode(FxReference value) {
+        final FxSelectOne select;
         if (value.isMultiLanguage()) {
-            final FxSelectOne select = new FxSelectOne(value.getDefaultLanguage(), createSelectItem(value, value.getDefaultLanguage()));
+            select = new FxSelectOne(
+                    value.getDefaultLanguage(),
+                    createSelectItem(value, value.getDefaultLanguage())
+            );
             for (long languageId: value.getTranslatedLanguages()) {
                 select.setTranslation(languageId, createSelectItem(value, languageId));
             }
-            return select;
         } else {
-            return new FxSelectOne(false, createSelectItem(value, -1));
+            select = new FxSelectOne(false, createSelectItem(value, -1));
         }
+        return applySettings(select, value);
     }
 
     private FxSelectListItem createSelectItem(FxReference value, long languageId) {
@@ -103,16 +107,17 @@ public class FxPkSelectOneInputMapper extends InputMapper<FxReference, FxSelectO
     /** {@inheritDoc} */
     @Override
     protected FxReference doDecode(FxSelectOne value) {
+        final FxReference reference;
         if (value.isMultiLanguage()) {
-            final FxReference reference = new FxReference(value.getDefaultLanguage(),
+            reference = new FxReference(value.getDefaultLanguage(),
                     new ReferencedContent(value.getDefaultTranslation().getId()));
             for (long languageId: value.getTranslatedLanguages()) {
                 reference.setTranslation(languageId, new ReferencedContent(value.getTranslation(languageId).getId()));
             }
-            return reference;
         } else {
-            return new FxReference(false, new ReferencedContent(value.getDefaultTranslation().getId()));
+            reference = new FxReference(false, new ReferencedContent(value.getDefaultTranslation().getId()));
         }
+        return applySettings(reference, value);
     }
 
     /** {@inheritDoc} */
