@@ -508,13 +508,11 @@ public class FxContentEditorBean implements Serializable {
                 for (FxWrappedContent c : getReferencingContents(editorId)) {
                     contentStorage.remove(c.getEditorId());
                 }
-                // check if the content is referenced by an existing content
-                FxWrappedContent parent = getParentContent(editorId);
-                if (parent != null) {
-                    parent.getGuiSettings().setOpenedReferenceId(null);
-                } else {
-                    contentStorage.get(editorId).setReset(true);
-                }
+            }
+            // check if the content is referenced by an existing content
+            FxWrappedContent parent = getParentContent(editorId);
+            if (parent != null) {
+                parent.getGuiSettings().setOpenedReferenceId(null);
             } else {
                 contentStorage.get(editorId).setReset(true);
             }
