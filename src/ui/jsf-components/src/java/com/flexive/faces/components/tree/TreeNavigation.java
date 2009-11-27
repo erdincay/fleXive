@@ -6,6 +6,8 @@ import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.structure.FxType;
+import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNode;
@@ -25,9 +27,7 @@ import javax.faces.event.FacesEvent;
 import javax.faces.event.FacesListener;
 import javax.faces.event.PhaseId;
 import java.io.IOException;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.Iterator;
+import java.util.*;
 
 /**
  * <p>The flexive tree navigation component. Renders part of the topic tree as
@@ -120,6 +120,8 @@ public class TreeNavigation extends UIOutput implements NamingContainer {
     private String menuOptions;
     private String treeOptions;
     private Long baseTypeId;
+    private Boolean includeRoot;
+    private Boolean includeFolders;
 
     private transient String selectedPathCache;
     private transient FxTreeNode treeCache;
@@ -232,13 +234,20 @@ public class TreeNavigation extends UIOutput implements NamingContainer {
 
             // remove all filtered type IDs when a filter was specified
             if (getBaseTypeId() != -1) {
+                final FxEnvironment environment = CacheAdmin.getEnvironment();
                 final Set<Long> validTypeIds = new HashSet<Long>();
-                validTypeIds.add(getBaseTypeId());
                 validTypeIds.addAll(
                         FxSharedUtils.getSelectableObjectIdList(
-                            CacheAdmin.getEnvironment().getType(getBaseTypeId()).getDerivedTypes(true)
+                            environment.getType(getBaseTypeId()).getDerivedTypes(true, true)
                         )
                 );
+                if (isIncludeFolders()) {
+                    validTypeIds.addAll(
+                            FxSharedUtils.getSelectableObjectIdList(
+                                    environment.getType(FxType.FOLDER).getDerivedTypes(true, true)
+                            )
+                    );
+                }
                 removeInvalidChildren(treeCache, validTypeIds);
             }
 
@@ -356,14 +365,16 @@ public class TreeNavigation extends UIOutput implements NamingContainer {
         }
 
         public void renderTree(FxTreeNode node) throws IOException {
-            renderSubtree(node);
+            renderSubtree(
+                    isIncludeRoot() ? Arrays.asList(node) : node.getChildren()
+            );
         }
 
-        protected void renderSubtree(FxTreeNode node) throws IOException {
+        protected void renderSubtree(List<FxTreeNode> nodes) throws IOException {
             out.startElement("ul", null);
             out.writeAttribute("class", CSS_TREE, null);
 
-            for (FxTreeNode child : node.getChildren()) {
+            for (FxTreeNode child : nodes) {
                 out.startElement("li", null);
                 out.writeAttribute("class", getElementClass(child), null);
 
@@ -371,10 +382,11 @@ public class TreeNavigation extends UIOutput implements NamingContainer {
 
                 // render nested items
                 if (child.getChildren() != null && !child.getChildren().isEmpty()) {
-                    renderSubtree(child);
+                    renderSubtree(child.getChildren());
                 }
                 out.endElement("li");
             }
+            
             out.endElement("ul");
         }
 
@@ -401,7 +413,7 @@ public class TreeNavigation extends UIOutput implements NamingContainer {
     }
 
     /**
-     * Helper class to encode al the items in JSF phases other than render response
+     * Helper class to encode all the items in JSF phases other than render response
      */
     private class ItemPhaseRenderer extends Renderer {
         private final PhaseId phase;
@@ -412,8 +424,8 @@ public class TreeNavigation extends UIOutput implements NamingContainer {
         }
 
         @Override
-        protected void renderSubtree(FxTreeNode node) throws IOException {
-            for (FxTreeNode child: node.getChildren()) {
+        protected void renderSubtree(List<FxTreeNode> nodes) throws IOException {
+            for (FxTreeNode child: nodes) {
                 final Object oldValue = provideVar(context, child);
                 final UIComponent item = getFacet("item");
                 FxJsfComponentUtils.clearCachedClientIds(item);
@@ -427,7 +439,7 @@ public class TreeNavigation extends UIOutput implements NamingContainer {
                     throw new IllegalArgumentException("Invalid phase: " + phase);
                 }
                 if (child.getChildren() != null && !child.getChildren().isEmpty()) {
-                    renderSubtree(child);
+                    renderSubtree(child.getChildren());
                 }
                 removeVar(context, oldValue);
             }
@@ -485,7 +497,7 @@ public class TreeNavigation extends UIOutput implements NamingContainer {
         }
 
         @Override
-        protected void renderSubtree(FxTreeNode node) throws IOException {
+        protected void renderSubtree(List<FxTreeNode> nodes) throws IOException {
             final int cnt = subTreeCounter++;
             if (cnt > 0) {
                 // write container except for top level
@@ -497,7 +509,7 @@ public class TreeNavigation extends UIOutput implements NamingContainer {
             out.writeAttribute("class", "bd", null);
 
             // render menu
-            super.renderSubtree(node);
+            super.renderSubtree(nodes);
 
             if (cnt > 0) {
                 out.endElement("div");
@@ -513,7 +525,8 @@ public class TreeNavigation extends UIOutput implements NamingContainer {
 
     private boolean isSelected(FxTreeNode node) {
         return !StringUtils.isBlank(getSelectedPath())
-                && getSelectedPath().startsWith(node.getPath());
+                && (getSelectedPath().equals(node.getPath())
+                || getSelectedPath().startsWith(node.getPath() + "/"));
     }
 
     public String getMode() {
@@ -675,6 +688,28 @@ public class TreeNavigation extends UIOutput implements NamingContainer {
         this.selectedPath = selectedPath;
     }
 
+    public Boolean isIncludeRoot() {
+        if (includeRoot == null) {
+            return FxJsfComponentUtils.getBooleanValue(this, "includeRoot", Boolean.FALSE);
+        }
+        return includeRoot;
+    }
+
+    public void setIncludeRoot(Boolean includeRoot) {
+        this.includeRoot = includeRoot;
+    }
+
+    public Boolean isIncludeFolders() {
+        if (includeFolders == null) {
+            return FxJsfComponentUtils.getBooleanValue(this, "includeFolders", Boolean.FALSE);
+        }
+        return includeFolders;
+    }
+
+    public void setIncludeFolders(Boolean includeFolders) {
+        this.includeFolders = includeFolders;
+    }
+
     private static class NodeEvent extends FacesEvent {
         private static final long serialVersionUID = 5274895541939738723L;
         private final FacesEvent target;
@@ -719,7 +754,7 @@ public class TreeNavigation extends UIOutput implements NamingContainer {
 
     @Override
     public Object saveState(FacesContext context) {
-        final Object[] state = new Object[12];
+        final Object[] state = new Object[14];
         state[0] = super.saveState(context);
         state[1] = mode;
         state[2] = nodeId;
@@ -732,6 +767,8 @@ public class TreeNavigation extends UIOutput implements NamingContainer {
         state[9] = selectedNodeId;
         state[10] = selectedPath;
         state[11] = baseTypeId;
+        state[12] = includeRoot;
+        state[13] = includeFolders;
         return state;
     }
 
@@ -750,5 +787,7 @@ public class TreeNavigation extends UIOutput implements NamingContainer {
         this.selectedNodeId = (Long) state[9];
         this.selectedPath = (String) state[10];
         this.baseTypeId = (Long) state[11];
+        this.includeRoot = (Boolean) state[12];
+        this.includeFolders = (Boolean) state[13];
     }
 }

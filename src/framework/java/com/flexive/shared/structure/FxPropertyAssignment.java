@@ -415,7 +415,7 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
                         : getId();
 
         // check for reusage of our assignment
-        for (FxType derivedType : getAssignedType().getDerivedTypes(true)) {
+        for (FxType derivedType : getAssignedType().getDerivedTypes(true, false)) {
             try {
                 final FxAssignment derivedAssignment = derivedType.getAssignment(getXPath());
                 if (derivedAssignment.isDerivedFrom(environment, baseAssignmentId)) {

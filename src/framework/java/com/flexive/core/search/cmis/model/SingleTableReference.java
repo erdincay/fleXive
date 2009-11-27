@@ -75,9 +75,7 @@ public class SingleTableReference implements TableReference {
             // select all types that are not folders
             this.baseType = env.getType(FxType.ROOT_ID);
             final FxType folder = env.getType(FxType.FOLDER);
-            final Set<FxType> folderTypes = new HashSet<FxType>();
-            folderTypes.addAll(folder.getDerivedTypes(true));
-            folderTypes.add(folder);
+            final Set<FxType> folderTypes = new HashSet<FxType>(folder.getDerivedTypes(true, true));
             types = Lists.newArrayList();
             for (FxType type : env.getTypes()) {
                 if (!folderTypes.contains(type)) {
@@ -87,8 +85,7 @@ public class SingleTableReference implements TableReference {
         } else {
             // normal type, add type and all subtypes
             this.baseType = env.getType(name);
-            types = Lists.newArrayList(baseType.getDerivedTypes(true));
-            types.add(0, baseType); // root type comes first
+            types = Lists.newArrayList(baseType.getDerivedTypes(true, true));
         }
         this.referencedTypes = Collections.unmodifiableList(types);
     }

@@ -2241,7 +2241,8 @@
                 <section xml:id="jcl_fx_navigation_synopsis">
                     <title>Synopsis</title>
                     <para>
-                        <programlisting language="xhtml"><![CDATA[<fx:navigation var="varname" [output="default|csspopup|yui"] [path="/treepath"] [mode="live|edit"] [depth="int"] [selectedNodeId="nodeId"]>
+                        <programlisting language="xhtml"><![CDATA[<fx:navigation var="varname" [output="default|csspopup|yui"] [path="/treepath"] [mode="live|edit"] [depth="int"] [selectedNodeId="nodeId"]
+               [baseTypeId="id"] [baseTypeName="typename"] [includeRoot="true|false"] [includeFolders="true|false"]>
     <f:facet name="item">
         <ui:fragment>
             <a href="/content/#{node.id}">#{node.label}</a>
@@ -2345,6 +2346,33 @@
                                 <para>
                                     An optional type filter for the rendered nodes. Only nodes whose reference
                                     is of the given type (or a subtype of the given type) are rendered.
+                                </para>
+                                <para>
+                                    When a non-folder base type is specified, folders are (by default) not
+                                    rendered in the response. You can override this by setting the
+                                    <code>includeFolders</code>
+                                    attribute.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>includeFolders</term>
+                            <listitem>
+                                <para>
+                                    When
+                                    <code>baseTypeId/baseTypeName</code>
+                                    is set, setting this attribute to "true" will include folders
+                                    and their contents in the output even if the specified base type
+                                    is not a folder.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>includeRoot</term>
+                            <listitem>
+                                <para>
+                                    When set to true, the root node of the rendered (sub-)tree is
+                                    included in the output. (default: false)
                                 </para>
                             </listitem>
                         </varlistentry>
