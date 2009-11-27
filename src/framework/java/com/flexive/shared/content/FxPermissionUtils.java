@@ -173,20 +173,22 @@ public class FxPermissionUtils {
                 stepAllowed = assignment.getPermission(permission, si.getOwnerId(), ticket.getUserId());
             if (!contentAllowed && si.getContentACLs().contains(assignment.getAclId()))
                 contentAllowed = assignment.getPermission(permission, si.getOwnerId(), ticket.getUserId());
-            if (permission == ACLPermission.DELETE) {
-                //property permissions are only checked for delete operations since no
-                //exception should be thrown when ie loading as properties are wrapped in
-                //FxNoAccess values or set to read only
-                if (si.usePermissions() && !si.getUsedPropertyACLs().isEmpty() && assignment.getACLCategory() == ACLCategory.STRUCTURE) {
-                    for (long propertyACL : si.getUsedPropertyACLs())
-                        if (propertyACL == assignment.getAclId())
-                            if (!assignment.getPermission(permission, si.getOwnerId(), ticket.getUserId())) {
-                                propertyAllowed = false;
-                                addACLName(lacking, ticket.getLanguage(), propertyACL);
-                            }
+        }
+        if (permission == ACLPermission.DELETE && si.usePermissions() && !si.getUsedPropertyACLs().isEmpty()) {
+            //property permissions are only checked for delete operations since no
+            //exception should be thrown when ie loading as properties are wrapped in
+            //FxNoAccess values or set to read only
+
+            // in contrast to content ACLs, a user must have the permission on *all* property ACLs
+            // since they are attached to different properties
+            for (long propertyACL : si.getUsedPropertyACLs()) {
+                if (!ticket.mayDeleteACL(propertyACL, si.getOwnerId())) {
+                    propertyAllowed = false;
+                    addACLName(lacking, ticket.getLanguage(), propertyACL);
                 }
             }
         }
+
         if (throwException && !(typeAllowed && stepAllowed && contentAllowed && propertyAllowed)) {
             if (!typeAllowed)
                 addACLName(lacking, ticket.getLanguage(), si.getTypeACL());
