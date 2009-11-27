@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) backend application.
  *
- *  Copyright (c) 1999-2008
+ *  Copyright (c) 1999-2009
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -283,7 +283,7 @@ public class ContentTreeEditor implements Serializable {
 
     public String activate(long nodeId, boolean includeChildren) throws Exception {
         try {
-            getTreeEngine().activate(FxTreeMode.Edit, nodeId, includeChildren);
+            getTreeEngine().activate(FxTreeMode.Edit, nodeId, includeChildren, true);
         } catch (Exception e) {
             LOG.error("Failed to activate node: " + e.getMessage(), e);
             throw e;

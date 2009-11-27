@@ -162,9 +162,9 @@ public class GenericTreeStorageSimple extends GenericTreeStorage {
      * {@inheritDoc}
      */
     public long createNode(Connection con, SequencerEngine seq, ContentEngine ce, FxTreeMode mode, long nodeId,
-                           long parentNodeId, String name, FxString label, int position, FxPK reference, String data) throws FxApplicationException {
+                           long parentNodeId, String name, FxString label, int position, FxPK reference, String data, boolean activateContent) throws FxApplicationException {
         checkDataValue(data);
-        NodeCreateInfo nci = getNodeCreateInfo(mode, seq, ce, nodeId, name, label, reference);
+        NodeCreateInfo nci = getNodeCreateInfo(mode, seq, ce, nodeId, name, label, reference, true);
         FxTreeNodeInfo parentNode = getTreeNodeInfo(con, mode, parentNodeId);
         long left, right;
 
@@ -385,14 +385,14 @@ public class GenericTreeStorageSimple extends GenericTreeStorage {
     /**
      * {@inheritDoc}
      */
-    public void activateNode(Connection con, SequencerEngine seq, ContentEngine ce, FxTreeMode mode, long nodeId) throws FxApplicationException {
+    public void activateNode(Connection con, SequencerEngine seq, ContentEngine ce, FxTreeMode mode, long nodeId, boolean activateContents) throws FxApplicationException {
         //TODO: code me!
     }
 
     /**
      * {@inheritDoc}
      */
-    public void activateSubtree(Connection con, SequencerEngine seq, ContentEngine ce, FxTreeMode mode, long nodeId) throws FxApplicationException {
+    public void activateSubtree(Connection con, SequencerEngine seq, ContentEngine ce, FxTreeMode mode, long nodeId, boolean activateContents) throws FxApplicationException {
         //TODO: code me!
     }
 

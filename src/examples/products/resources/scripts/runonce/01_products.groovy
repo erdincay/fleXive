@@ -146,7 +146,7 @@ EJBLookup.scriptingEngine.createTypeScriptMapping(
         true,
         true
 )
-EJBLookup.treeEngine.activate(FxTreeMode.Edit, manuFolderId, true);
+EJBLookup.treeEngine.activate(FxTreeMode.Edit, manuFolderId, true, true);
 
 // create test data
 
@@ -243,4 +243,4 @@ int currentArticleNr = new Random().nextInt(50000)
 }
 
 // activate our demo content
-EJBLookup.treeEngine.activate(FxTreeMode.Edit, manuFolderId, true);
+EJBLookup.treeEngine.activate(FxTreeMode.Edit, manuFolderId, true, true);

@@ -78,37 +78,39 @@ public interface TreeStorage {
     /**
      * Create a new node
      *
-     * @param con          an open and valid Connection
-     * @param seq          reference to the sequencer
-     * @param ce           reference to the content engine
-     * @param mode         tree mode
-     * @param nodeId       use this id unless it is < 0 then generate a new one
-     * @param parentNodeId id of the parent node
-     * @param name         name (will only be used if no FQN property is available in the reference)
-     * @param label        label for Caption property (only used if new reference is created)
-     * @param position     position
-     * @param reference    referenced content id
-     * @param data         optional data to assign
+     * @param con             an open and valid Connection
+     * @param seq             reference to the sequencer
+     * @param ce              reference to the content engine
+     * @param mode            tree mode
+     * @param nodeId          use this id unless it is < 0 then generate a new one
+     * @param parentNodeId    id of the parent node
+     * @param name            name (will only be used if no FQN property is available in the reference)
+     * @param label           label for Caption property (only used if new reference is created)
+     * @param position        position
+     * @param reference       referenced content id
+     * @param data            optional data to assign
+     * @param activateContent change the step of contents that have no live step to live in the max version?
      * @return id of the node created
      * @throws FxApplicationException on errors
      */
     long createNode(Connection con, SequencerEngine seq, ContentEngine ce, FxTreeMode mode, long nodeId, long parentNodeId, String name,
-                    FxString label, int position, FxPK reference, String data) throws FxApplicationException;
+                    FxString label, int position, FxPK reference, String data, boolean activateContent) throws FxApplicationException;
 
     /**
      * Create a set of nodes and attach new Folder instances to them
      *
-     * @param con          an open and valid connection
-     * @param seq          reference to the sequencer
-     * @param ce           reference to the content engine
-     * @param mode         tree mode
-     * @param parentNodeId id of the parent node
-     * @param path         the path to create (separated by "/")
-     * @param position     position within each fqn
+     * @param con              an open and valid connection
+     * @param seq              reference to the sequencer
+     * @param ce               reference to the content engine
+     * @param mode             tree mode
+     * @param parentNodeId     id of the parent node
+     * @param path             the path to create (separated by "/")
+     * @param position         position within each fqn
+     * @param activateContents change the step of contents that have no live step to live in the max version?
      * @return array of the id's
      * @throws FxApplicationException on errors
      */
-    long[] createNodes(Connection con, SequencerEngine seq, ContentEngine ce, FxTreeMode mode, long parentNodeId, String path, int position) throws FxApplicationException;
+    long[] createNodes(Connection con, SequencerEngine seq, ContentEngine ce, FxTreeMode mode, long parentNodeId, String path, int position, boolean activateContents) throws FxApplicationException;
 
     /**
      * Removes all tree entries and creates new root nodes
@@ -305,26 +307,28 @@ public interface TreeStorage {
     /**
      * Activate a single node (and all its parents if necessary)
      *
-     * @param con    an open and valid connections
-     * @param seq    reference to the sequencer
-     * @param ce     reference to the content engine
-     * @param mode   tree mode
-     * @param nodeId id of the node to activate
+     * @param con              an open and valid connections
+     * @param seq              reference to the sequencer
+     * @param ce               reference to the content engine
+     * @param mode             tree mode
+     * @param nodeId           id of the node to activate
+     * @param activateContents change the step of contents that have no live step to live in the max version?
      * @throws FxApplicationException on errors
      */
-    void activateNode(Connection con, SequencerEngine seq, ContentEngine ce, FxTreeMode mode, long nodeId) throws FxApplicationException;
+    void activateNode(Connection con, SequencerEngine seq, ContentEngine ce, FxTreeMode mode, long nodeId, boolean activateContents) throws FxApplicationException;
 
     /**
      * Activate a node, its subtree and its parents up to the root node
      *
-     * @param con    an open and valid connection
-     * @param seq    reference to the sequencer
-     * @param ce     reference to the content engine
-     * @param mode   tree mode
-     * @param nodeId node id
+     * @param con              an open and valid connection
+     * @param seq              reference to the sequencer
+     * @param ce               reference to the content engine
+     * @param mode             tree mode
+     * @param nodeId           node id
+     * @param activateContents change the step of contents that have no live step to live in the max version?
      * @throws FxApplicationException on errors
      */
-    void activateSubtree(Connection con, SequencerEngine seq, ContentEngine ce, FxTreeMode mode, long nodeId) throws FxApplicationException;
+    void activateSubtree(Connection con, SequencerEngine seq, ContentEngine ce, FxTreeMode mode, long nodeId, boolean activateContents) throws FxApplicationException;
 
     /**
      * Activate all nodes in a tree

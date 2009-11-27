@@ -337,18 +337,18 @@ public class FxTreeTest {
         clearTrees();
         //test activation without subtree
         long[] ids = tree.createNodes(FxTreeMode.Edit, FxTreeNode.ROOT_NODE, 0, "/Test1/Test2/Test3");
-        tree.activate(FxTreeMode.Edit, ids[0], false);
+        tree.activate(FxTreeMode.Edit, ids[0], false, true);
         Assert.assertEquals(true, tree.exist(FxTreeMode.Live, ids[0]));
         Assert.assertEquals(false, tree.exist(FxTreeMode.Live, ids[1]));
         Assert.assertEquals(false, tree.exist(FxTreeMode.Live, ids[2]));
         //test activation with subtree
         ids = tree.createNodes(FxTreeMode.Edit, FxTreeNode.ROOT_NODE, 0, "/ATest1/ATest2/ATest3");
-        tree.activate(FxTreeMode.Edit, ids[0], true);
+        tree.activate(FxTreeMode.Edit, ids[0], true, true);
         Assert.assertEquals(true, tree.exist(FxTreeMode.Live, ids[0]));
         Assert.assertEquals(true, tree.exist(FxTreeMode.Live, ids[1]));
         Assert.assertEquals(true, tree.exist(FxTreeMode.Live, ids[2]));
         //there should be 2 nodes not active (Test2 and Test3), see if they get activated after activating all
-        tree.activate(FxTreeMode.Edit, FxTreeNode.ROOT_NODE, true);
+        tree.activate(FxTreeMode.Edit, FxTreeNode.ROOT_NODE, true, true);
         //Assert.assertEquals(6, tree.getTree(FxTreeMode.Live, FxTreeNode.ROOT_NODE, 3).getTotalChildCount());
     }
 
@@ -461,7 +461,7 @@ public class FxTreeTest {
     private void triggerTreeCheck(FxTreeMode mode) throws FxApplicationException {
         final long testId = tree.save(FxTreeNodeEdit.createNew("test").setParentNodeId(FxTreeNode.ROOT_NODE));
         if (FxTreeMode.Live == mode) {
-            tree.activate(FxTreeMode.Edit, testId, false);
+            tree.activate(FxTreeMode.Edit, testId, false, true);
         }
         tree.remove(FxTreeMode.Edit, testId, FxTreeRemoveOp.Remove, false);
     }
@@ -545,11 +545,11 @@ public class FxTreeTest {
         try {
             Assert.assertEquals(scriptCounter, 0);
             long nodeId = tree.save(FxTreeNodeEdit.createNew("Test1").setMode(mode).setParentNodeId(FxTreeNode.ROOT_NODE));
-            tree.activate(FxTreeMode.Edit, nodeId, false);
+            tree.activate(FxTreeMode.Edit, nodeId, false, true);
             Assert.assertEquals(scriptCounter, 1);
 
             long topNode = tree.createNodes(mode, FxTreeNode.ROOT_NODE, 0, "/A/B/C")[0];
-            tree.activate(FxTreeMode.Edit, topNode, true);
+            tree.activate(FxTreeMode.Edit, topNode, true, true);
             Assert.assertEquals(scriptCounter, 4);
         } finally {
             scripting.remove(siBeforeActivate.getId());
@@ -1075,7 +1075,7 @@ public class FxTreeTest {
         tree.createNodes(_mode, (int) nodes[1], 1, "node_2_2");
         tree.createNodes(_mode, (int) nodes[2], 0, "node_3_1");
         if (mode == FxTreeMode.Live)
-            tree.activate(_mode, nodes[0], true);
+            tree.activate(_mode, nodes[0], true, true);
         return nodes;
     }
 

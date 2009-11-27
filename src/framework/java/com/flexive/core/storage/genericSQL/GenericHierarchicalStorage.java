@@ -512,6 +512,8 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             if (rs.wasNull() || live_ver < 0)
                 live_ver = 0;
             ps.close();
+            if (live_ver == 0) //deactivate in live tree
+                StorageManager.getTreeStorage().contentRemoved(con, id, true);
             ps = con.prepareStatement(CONTENT_VER_UPDATE_1);
             ps.setInt(1, max_ver);
             ps.setInt(2, live_ver);
@@ -531,6 +533,10 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 syncContentStats(con, type.getId(), id, max_ver, live_ver);
         } catch (SQLException e) {
             throw new FxUpdateException(LOG, e, "ex.db.sqlError", e.getMessage());
+        } catch (FxNotFoundException e) {
+            throw new FxUpdateException(e);
+        } catch (FxApplicationException e) {
+            throw new FxUpdateException(e);
         } finally {
             if (ps != null)
                 try {

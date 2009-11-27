@@ -32,14 +32,13 @@
 package com.flexive.core.storage.genericSQL;
 
 import com.flexive.core.Database;
-import com.flexive.core.DatabaseConst;
+import static com.flexive.core.DatabaseConst.TBL_CONTENT;
 import com.flexive.core.storage.DBStorage;
 import com.flexive.core.storage.FxTreeNodeInfo;
 import com.flexive.core.storage.FxTreeNodeInfoSpreaded;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.content.FxPK;
-import com.flexive.shared.content.FxPermissionUtils;
+import com.flexive.shared.content.*;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.interfaces.SequencerEngine;
@@ -74,8 +73,10 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
     protected static final BigDecimal GO_UP = new BigDecimal(1024);
     protected static final BigDecimal MAX_RIGHT = new BigDecimal("18446744073709551615");
 
-    /** The maximum spacing for new nodes. Lower means less space reorgs for flat lists, but more reorgs for
-     * deeply nested trees.*/
+    /**
+     * The maximum spacing for new nodes. Lower means less space reorgs for flat lists, but more reorgs for
+     * deeply nested trees.
+     */
     protected static final BigDecimal DEFAULT_NODE_SPACING = new BigDecimal(10000);
 //    protected static final BigDecimal MAX_RIGHT = new BigDecimal("1000");
 //    protected static final BigDecimal GO_UP = new BigDecimal(10);
@@ -159,7 +160,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
             ResultSet rs = stmt.executeQuery("SELECT * FROM (" +
                     "SELECT LFT,RGT FROM " + getTable(node.getMode()) + " WHERE PARENT=" + node.getId() +
                     " ORDER BY LFT ASC) SUB " +
-                    StorageManager.getLimitOffset(false,2,(position == 0) ? 0 : position - 1));
+                    StorageManager.getLimitOffset(false, 2, (position == 0) ? 0 : position - 1));
             if (rs.next()) {
                 if (position == 0) {
                     /* first position */
@@ -255,10 +256,10 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
      * @throws FxTreeException if the function fails
      */
     public long reorganizeSpace(Connection con, SequencerEngine seq,
-                                   FxTreeMode sourceMode, FxTreeMode destMode,
-                                   long nodeId, boolean includeNodeId, BigDecimal overrideSpacing, BigDecimal overrideLeft,
-                                   FxTreeNodeInfo insertParent, int insertPosition, BigDecimal insertSpace, BigDecimal insertBoundaries[],
-                                   int depthDelta, Long destinationNode, boolean createMode, boolean createKeepIds) throws FxTreeException {
+                                FxTreeMode sourceMode, FxTreeMode destMode,
+                                long nodeId, boolean includeNodeId, BigDecimal overrideSpacing, BigDecimal overrideLeft,
+                                FxTreeNodeInfo insertParent, int insertPosition, BigDecimal insertSpace, BigDecimal insertBoundaries[],
+                                int depthDelta, Long destinationNode, boolean createMode, boolean createKeepIds) throws FxTreeException {
         Statement stmt = null;
         try {
             synchronized (LOCK_REORG) {
@@ -274,7 +275,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
         } catch (SQLException e) {
             throw new FxTreeException(LOG, e, "ex.db.sqlError", e.getMessage());
         } finally {
-            if(stmt != null) {
+            if (stmt != null) {
                 try {
                     try {
                         stmt.execute(StorageManager.getReferentialIntegrityChecksStatement(true));
@@ -288,12 +289,12 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
             }
         }
     }
-    
+
     protected long _reorganizeSpace(Connection con, SequencerEngine seq,
-                                FxTreeMode sourceMode, FxTreeMode destMode,
-                                long nodeId, boolean includeNodeId, BigDecimal overrideSpacing, BigDecimal overrideLeft,
-                                FxTreeNodeInfo insertParent, int insertPosition, BigDecimal insertSpace, BigDecimal insertBoundaries[],
-                                int depthDelta, Long destinationNode, boolean createMode, boolean createKeepIds) throws FxTreeException {
+                                    FxTreeMode sourceMode, FxTreeMode destMode,
+                                    long nodeId, boolean includeNodeId, BigDecimal overrideSpacing, BigDecimal overrideLeft,
+                                    FxTreeNodeInfo insertParent, int insertPosition, BigDecimal insertSpace, BigDecimal insertBoundaries[],
+                                    int depthDelta, Long destinationNode, boolean createMode, boolean createKeepIds) throws FxTreeException {
         long firstCreatedNodeId = -1;
         FxTreeNodeInfoSpreaded nodeInfo;
         try {
@@ -490,17 +491,17 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
             if (LOG.isDebugEnabled()) {
                 final long time = System.currentTimeMillis() - start;
 
-                LOG.debug("Tree reorganization of "+counter+" items completed in "
-                        + time + " ms (spaceLen="+spacing + ")");
+                LOG.debug("Tree reorganization of " + counter + " items completed in "
+                        + time + " ms (spaceLen=" + spacing + ")");
             }
             return firstCreatedNodeId;
         } catch (FxApplicationException e) {
             throw e instanceof FxTreeException ? (FxTreeException) e : new FxTreeException(e);
-        } catch(SQLException e) {
+        } catch (SQLException e) {
             String next = "";
-            if(e.getNextException() != null )
-                next = " next:"+e.getNextException().getMessage();
-            throw new FxTreeException(LOG, e, "ex.tree.reorganize.failed", counter, left, right, e.getMessage()+next);
+            if (e.getNextException() != null)
+                next = " next:" + e.getNextException().getMessage();
+            throw new FxTreeException(LOG, e, "ex.tree.reorganize.failed", counter, left, right, e.getMessage() + next);
         } catch (Exception e) {
             throw new FxTreeException(e);
         } finally {
@@ -516,23 +517,24 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
     /**
      * Helper function to create a new node.
      *
-     * @param con          an open and valid connection
-     * @param seq          reference to a sequencer
-     * @param ce           reference to the content engine
-     * @param mode         Live or Edit mode
-     * @param parentNodeId the parent node (1=root)
-     * @param name         the name of the new node (only informative value)
-     * @param label        label for Caption property (only used if new reference is created)
-     * @param position     the position within the childs (0 based, Integer.MAX_VALUE may be used to
-     *                     append to the end)
-     * @param reference    a reference to an existing content (must exist!)
-     * @param nodeId       the id to use or create a new one if < 0
-     * @param data         the optional data
+     * @param con             an open and valid connection
+     * @param seq             reference to a sequencer
+     * @param ce              reference to the content engine
+     * @param mode            Live or Edit mode
+     * @param parentNodeId    the parent node (1=root)
+     * @param name            the name of the new node (only informative value)
+     * @param label           label for Caption property (only used if new reference is created)
+     * @param position        the position within the childs (0 based, Integer.MAX_VALUE may be used to
+     *                        append to the end)
+     * @param reference       a reference to an existing content (must exist!)
+     * @param data            the optional data
+     * @param nodeId          the id to use or create a new one if < 0
+     * @param activateContent change the step of contents that have no live step to live in the max version?
      * @return the used or created node id
      * @throws FxTreeException if the function fails
      */
     private long _createNode(Connection con, SequencerEngine seq, ContentEngine ce, FxTreeMode mode, long parentNodeId, String name,
-                             FxString label, int position, FxPK reference, String data, long nodeId)
+                             FxString label, int position, FxPK reference, String data, long nodeId, boolean activateContent)
             throws FxApplicationException {
 
         // acquire exclusive lock for parent node 
@@ -566,7 +568,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
         final BigDecimal left = leftBoundary.add(BigDecimal.ONE);
         final BigDecimal right = left.add(spacing).add(BigDecimal.ONE);
 
-        NodeCreateInfo nci = getNodeCreateInfo(mode, seq, ce, nodeId, name, label, reference);
+        NodeCreateInfo nci = getNodeCreateInfo(mode, seq, ce, nodeId, name, label, reference, activateContent);
 
         // Create the node
         PreparedStatement ps = null;
@@ -606,14 +608,14 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
      * {@inheritDoc}
      */
     public long createNode(Connection con, SequencerEngine seq, ContentEngine ce, FxTreeMode mode, long nodeId, long parentNodeId, String name,
-                           FxString label, int position, FxPK reference, String data) throws FxApplicationException {
+                           FxString label, int position, FxPK reference, String data, boolean activateContent) throws FxApplicationException {
         checkDataValue(data);
         try {
-            return _createNode(con, seq, ce, mode, parentNodeId, name, label, position, reference, data, nodeId);
+            return _createNode(con, seq, ce, mode, parentNodeId, name, label, position, reference, data, nodeId, activateContent);
         } catch (FxTreeException e) {
             if ("ex.tree.create.noSpace".equals(e.getExceptionMessage().getKey())) {
                 reorganizeSpace(con, seq, mode, mode, parentNodeId, false, null, null, null, -1, null, null, 0, null, false, false);
-                return _createNode(con, seq, ce, mode, parentNodeId, name, label, position, reference, data, nodeId);
+                return _createNode(con, seq, ce, mode, parentNodeId, name, label, position, reference, data, nodeId, activateContent);
             } else
                 throw e;
         }
@@ -684,7 +686,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
             stmt = con.createStatement();
             stmt.addBatch("UPDATE " + getTable(mode) + " SET PARENT=" + newParentId + " WHERE ID=" + nodeId);
             if (mode != FxTreeMode.Live)
-                stmt.addBatch("UPDATE " + getTable(mode) + " SET DIRTY="+TRUE+" WHERE ID=" + nodeId);
+                stmt.addBatch("UPDATE " + getTable(mode) + " SET DIRTY=" + TRUE + " WHERE ID=" + nodeId);
             stmt.executeBatch();
             stmt.close();
 
@@ -695,7 +697,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
                 stmt.addBatch("UPDATE " + getTable(mode) + " SET CHILDCOUNT=CHILDCOUNT+1 WHERE ID=" + newParentId);
                 stmt.addBatch("UPDATE " + getTable(mode) + " SET CHILDCOUNT=CHILDCOUNT-1 WHERE ID=" + oldParent);
                 if (mode != FxTreeMode.Live) {
-                    final List<Long> newChildren = selectNodeIds(con, mode, node.getLeft(), node.getRight());
+                    final List<Long> newChildren = selectAllChildNodeIds(con, mode, node.getLeft(), node.getRight());
                     acquireLocksForUpdate(con, mode, newChildren);
 
                     for (List<Long> part : Iterables.partition(newChildren, SQL_IN_PARTSIZE)) {
@@ -735,7 +737,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
         // Reload the node to obtain the new boundary and spacing informations
         final FxTreeNodeInfoSpreaded destinationNode = (FxTreeNodeInfoSpreaded) getTreeNodeInfo(con, mode, dstParentNodeId);
 
-        acquireLocksForUpdate(con, mode, Arrays.asList(srcNodeId, sourceNode.getParentId(),  dstParentNodeId));
+        acquireLocksForUpdate(con, mode, Arrays.asList(srcNodeId, sourceNode.getParentId(), dstParentNodeId));
 
         // Copy the data
         BigDecimal boundaries[] = getBoundaries(con, destinationNode, dstPosition);
@@ -776,14 +778,15 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
     /**
      * {@inheritDoc}
      */
-    public void activateNode(Connection con, SequencerEngine seq, ContentEngine ce, FxTreeMode mode, final long nodeId) throws FxApplicationException {
+    public void activateNode(Connection con, SequencerEngine seq, ContentEngine ce, FxTreeMode mode,
+                             final long nodeId, boolean activateContents) throws FxApplicationException {
         if (mode == FxTreeMode.Live) //Live tree can not be activated!
             return;
-        long ids[] = getIdChain(con, mode, nodeId);
+        long ids[] = getIdChain(con, mode, nodeId); //all id's up to the root node
         acquireLocksForUpdate(con, mode, Arrays.asList(ArrayUtils.toObject(ids)));
         try {
             // lock node in live tree including all children (which *can* be removed if they were removed in the edit tree)
-            acquireLocksForUpdate(con, FxTreeMode.Live, selectNodeIds(con, FxTreeMode.Live, nodeId, true));
+            acquireLocksForUpdate(con, FxTreeMode.Live, selectDirectChildNodeIds(con, FxTreeMode.Live, nodeId, true));
         } catch (SQLException e) {
             throw new FxDbException(e);
         }
@@ -799,7 +802,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
             } else {
                 createNode(con, seq, ce, FxTreeMode.Live, srcNode.getId(), srcNode.getParentNodeId(),
                         srcNode.getName(), srcNode.getLabel(), srcNode.getPosition(),
-                        srcNode.getReference(), srcNode.getData());
+                        srcNode.getReference(), srcNode.getData(), activateContents);
             }
 
             // Remove all deleted direct child nodes
@@ -845,18 +848,10 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
     }
 
     /**
-     * Activate a node, its subtree and its parents up to the root node
-     *
-     * @param con    an open and valid connection
-     * @param seq    reference to the sequencer
-     * @param ce     reference to the content engine
-     * @param mode   tree mode
-     * @param nodeId node id
-     * @throws FxApplicationException on errors
+     * {@inheritDoc}
      */
-    public void activateSubtree(Connection con, SequencerEngine seq, ContentEngine ce, FxTreeMode mode, long nodeId)
-            throws FxApplicationException {
-
+    public void activateSubtree(Connection con, SequencerEngine seq, ContentEngine ce, FxTreeMode mode,
+                                long nodeId, boolean activateContents) throws FxApplicationException {
         if (nodeId == ROOT_NODE) {
             activateAll(con, mode);
             return;
@@ -866,20 +861,20 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
         final long destination = sourceNode.getParentId();
 
         // Make sure the path up to the root node is activated
-        activateNode(con, seq, ce, mode, sourceNode.getParentId());
+        activateNode(con, seq, ce, mode, sourceNode.getParentId(), activateContents);
 
         try {
             // lock edit tree
             acquireLocksForUpdate(
                     con,
                     mode,
-                    selectNodeIds(con, mode, sourceNode.getLeft(), sourceNode.getRight())
+                    selectAllChildNodeIds(con, mode, sourceNode.getLeft(), sourceNode.getRight())
             );
             // lock live tree
             acquireLocksForUpdate(
                     con,
                     FxTreeMode.Live,
-                    selectNodeIds(con, mode, sourceNode.getLeft(), sourceNode.getRight())
+                    selectAllChildNodeIds(con, mode, sourceNode.getLeft(), sourceNode.getRight())
             );
         } catch (SQLException e) {
             throw new FxDbException(e);
@@ -897,7 +892,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
         FxTreeNodeInfo oldDestNode = null;
         try {
             oldDestNode = getTreeNodeInfo(con, FxTreeMode.Live, nodeId);
-        } catch (FxNotFoundException e ) {
+        } catch (FxNotFoundException e) {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Activated node " + nodeId + " not yet present in Live tree.");
             }
@@ -946,6 +941,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
         reorganizeSpace(con, seq, mode, FxTreeMode.Live, sourceNode.getId(), true, spacing,
                 boundaries[0], null, 0, null, null, depthDelta, destination, true, true);
 
+
         try {
             // Update the childcount of the new parents
             stmt = con.createStatement();
@@ -953,7 +949,6 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
             stmt.addBatch("UPDATE " + getTable(mode) + " SET DIRTY=" + StorageManager.getBooleanFalseExpression() +
                     " WHERE LFT>=" + sourceNode.getLeft() + " AND RGT<=" + sourceNode.getRight());
             stmt.executeBatch();
-            stmt.close();
         } catch (SQLException exc) {
             throw new FxTreeException("ex.tree.activate.failed", nodeId, true, exc.getMessage());
         } finally {
@@ -961,8 +956,69 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
                 if (stmt != null) stmt.close();
             } catch (Exception exc) {/*ignore*/}
         }
+
+        //clear nodes that can not be activated since their content has no live step
+        boolean orgNodeRemoved = false;
+        PreparedStatement psRemove = null;
+        PreparedStatement psFixChildCount = null;
+        PreparedStatement psFlagDirty = null;
+        PreparedStatement psEditBoundaries = null;
+        try {
+            // Update the childcount of the new parents
+            stmt = con.createStatement();
+            //                                                  1     2         3      4      5
+            ResultSet rs = stmt.executeQuery("SELECT DISTINCT l.ID, l.PARENT, l.LFT, l.RGT, c.ID FROM " + getTable(FxTreeMode.Live) + " l, " +
+                    TBL_CONTENT + " c WHERE l.LFT>" + destinationNode.getLeft() + " AND l.RGT<" +
+                    destinationNode.getRight() + " AND l.ref=c.id and c.live_ver=0 ORDER BY l.LFT DESC");
+
+            while (rs != null && rs.next()) {
+                long rmNodeId = rs.getLong(1);
+                if (activateContents) {
+                    FxPK reference = new FxPK(rs.getLong(5));
+                    FxContent co = ce.load(reference);
+                    //create a Live version
+                    reference = createContentLiveVersion(ce, co);
+                    LOG.info("Created new live version " + reference + " during activation of node " + rmNodeId);
+                } else {
+                    System.out.println("removing node #" + rmNodeId + " and children");
+                    if( rmNodeId == nodeId )
+                        orgNodeRemoved = true;
+                    if (psRemove == null) {
+                        psRemove = con.prepareStatement("DELETE FROM " + getTable(FxTreeMode.Live) + " WHERE LFT>=? AND RGT<=?");
+                    }
+                    psRemove.setBigDecimal(1, rs.getBigDecimal(3));
+                    psRemove.setBigDecimal(2, rs.getBigDecimal(4));
+                    psRemove.execute();
+                    if (psFixChildCount == null) {
+                        psFixChildCount = con.prepareStatement("UPDATE " + getTable(FxTreeMode.Live) + " SET CHILDCOUNT=CHILDCOUNT-1 WHERE ID=?");
+                    }
+                    psFixChildCount.setLong(1, rs.getLong(2));
+                    psFixChildCount.executeUpdate();
+                    if (psEditBoundaries == null) {
+                        psEditBoundaries = con.prepareStatement("SELECT LFT,RGT FROM " + getTable(FxTreeMode.Edit) + " WHERE ID=?");
+                    }
+                    psEditBoundaries.setLong(1, rmNodeId);
+                    ResultSet rsBoundaries = psEditBoundaries.executeQuery();
+                    if (rsBoundaries != null && rsBoundaries.next()) {
+                        if (psFlagDirty == null) {
+                            psFlagDirty = con.prepareStatement("UPDATE " + getTable(FxTreeMode.Edit) + " SET DIRTY=" + StorageManager.getBooleanTrueExpression() +
+                                    " WHERE LFT>=? AND RGT<=?");
+                        }
+                        psFlagDirty.setBigDecimal(1, rsBoundaries.getBigDecimal(1));
+                        psFlagDirty.setBigDecimal(2, rsBoundaries.getBigDecimal(2));
+                        psFlagDirty.executeUpdate();
+                    }
+                }
+            }
+        } catch (SQLException exc) {
+            throw new FxTreeException("ex.tree.activate.failed", nodeId, true, exc.getMessage());
+        } finally {
+            Database.closeObjects(GenericTreeStorageSpreaded.class, stmt, psRemove, psFixChildCount, psFlagDirty);
+        }
+
         // Make sure the node is at the correct position
-        move(con, seq, FxTreeMode.Live, sourceNode.getId(), sourceNode.getParentId(), sourceNode.getPosition());
+        if (!orgNodeRemoved)
+            move(con, seq, FxTreeMode.Live, sourceNode.getId(), sourceNode.getParentId(), sourceNode.getPosition());
     }
 
     /**
@@ -1001,7 +1057,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
             stmt = con.createStatement();
             final String sql;
             if (mode == FxTreeMode.Live) {
-                sql = "SELECT t.ID FROM " + getTable(mode) + " t, " + DatabaseConst.TBL_CONTENT + " c "
+                sql = "SELECT t.ID FROM " + getTable(mode) + " t, " + TBL_CONTENT + " c "
                         + " WHERE c.id=t.ref AND c.islive_ver=" + StorageManager.getBooleanTrueExpression();
             } else {
                 sql = "SELECT ID FROM " + getTable(mode);

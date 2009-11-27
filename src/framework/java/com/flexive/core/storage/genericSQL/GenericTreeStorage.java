@@ -32,7 +32,9 @@
 package com.flexive.core.storage.genericSQL;
 
 import com.flexive.core.Database;
+
 import static com.flexive.core.DatabaseConst.*;
+
 import com.flexive.core.LifeCycleInfoImpl;
 import com.flexive.core.storage.DBStorage;
 import com.flexive.core.storage.FxTreeNodeInfo;
@@ -76,7 +78,9 @@ import java.math.BigDecimal;
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public abstract class GenericTreeStorage implements TreeStorage {
-    /** Partition size to be used for large IN(...) queries to workaround limitations of DBMS drivers */
+    /**
+     * Partition size to be used for large IN(...) queries to workaround limitations of DBMS drivers
+     */
     protected static final int SQL_IN_PARTSIZE = 500;
 
     /**
@@ -106,7 +110,9 @@ public abstract class GenericTreeStorage implements TreeStorage {
 
     private static final String TREE_TOTAL_COUNT_LIVE = "(SELECT COUNT(*) FROM " + getTable(FxTreeMode.Live) + " WHERE LFT > t.LFT AND RGT < t.RGT)";
     private static final String TREE_TOTAL_COUNT_EDIT = "(SELECT COUNT(*) FROM " + getTable(FxTreeMode.Edit) + " WHERE LFT > t.LFT AND RGT < t.RGT)";
-    /** Placeholder for dynamic child count */
+    /**
+     * Placeholder for dynamic child count
+     */
     protected static final String COMPUTE_TOTAL_CHILDCOUNT = "__TOTAL_CHILD_COUNT";
     //                                                         1   2   3      4
     protected static final String TREE_LIVE_NODEINFO = "SELECT LFT,RGT,PARENT,TOTAL_CHILDCOUNT," +
@@ -228,11 +234,12 @@ public abstract class GenericTreeStorage implements TreeStorage {
      * @param name      name
      * @param label     label
      * @param reference reference
+     * @param activateContent change the step of contents that have no live step to live in the max version?
      * @return NodeCreateInfo
      * @throws FxApplicationException on errors
      */
     protected NodeCreateInfo getNodeCreateInfo(FxTreeMode mode, SequencerEngine seq, ContentEngine ce,
-                                               long nodeId, String name, FxString label, FxPK reference) throws FxApplicationException {
+                                               long nodeId, String name, FxString label, FxPK reference, boolean activateContent) throws FxApplicationException {
         if (nodeId < 0)
             nodeId = seq.getId(mode.getSequencer());
         if (StringUtils.isEmpty(name))
@@ -249,14 +256,17 @@ public abstract class GenericTreeStorage implements TreeStorage {
                 //if mode==Live(activation), check if a live version exists and if not try to change the step of the max version to live (create a new version?)
                 FxContentVersionInfo versionInfo = ce.getContentVersionInfo(reference);
                 if (versionInfo.hasLiveVersion()) {
-                    //check edit permission
+                    //check read permission
                     FxContentSecurityInfo si = ce.getContentSecurityInfo(new FxPK(reference.getId(), versionInfo.getLiveVersion()));
-                    FxPermissionUtils.checkPermission(FxContext.getUserTicket(), ACLPermission.EDIT, si, true);
+                    FxPermissionUtils.checkPermission(FxContext.getUserTicket(), ACLPermission.READ, si, true);
                 } else {
-                    //create a Live version
-                    co.setStepId(CacheAdmin.getEnvironment().getType(co.getTypeId()).getWorkflow().getLiveStep().getId());
-                    //save will throw an exception if we are not allowed to save a live version
-                    reference = ce.createNewVersion(co);
+                    if (activateContent) {
+                        //create a Live version
+                        reference = createContentLiveVersion(ce, co);
+                        LOG.info("Created new live version " + reference + " to activate node " + nodeId);
+                    } else {
+                        throw new FxTreeException("ex.tree.activate.failed.noLiveContent", nodeId);
+                    }
                 }
             }
             List<FxPropertyData> fqns = co.getPropertyData(EJBLookup.getConfigurationEngine().get(SystemParameters.TREE_FQN_PROPERTY), false);
@@ -267,9 +277,29 @@ public abstract class GenericTreeStorage implements TreeStorage {
     }
 
     /**
+     * Create a live version of the given content, taking over existing locks and unlocking them after the version is created
+     *
+     * @param ce ContentEngine reference
+     * @param co FxContent
+     * @return primary key of the new version
+     * @throws FxApplicationException on errors
+     */
+    protected FxPK createContentLiveVersion(ContentEngine ce, FxContent co) throws FxApplicationException {
+        FxPK pk;
+        if (co.isLocked())
+            ce.takeOverLock(co.getLock());
+        co.setStepId(CacheAdmin.getEnvironment().getType(co.getTypeId()).getWorkflow().getLiveStep().getId());
+        //save will throw an exception if we are not allowed to save a live version
+        pk = ce.createNewVersion(co);
+        if (co.isLocked())
+            ce.unlock(pk);
+        return pk;
+    }
+
+    /**
      * {@inheritDoc}
      */
-    public long[] createNodes(Connection con, SequencerEngine seq, ContentEngine ce, FxTreeMode mode, long parentNodeId, String path, int position) throws FxApplicationException {
+    public long[] createNodes(Connection con, SequencerEngine seq, ContentEngine ce, FxTreeMode mode, long parentNodeId, String path, int position, boolean activateContent) throws FxApplicationException {
         if ("/".equals(path))
             return new long[]{FxTreeNode.ROOT_NODE};
         final List<Long> result = new ArrayList<Long>();
@@ -287,7 +317,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
                 continue;
             long nodeId = getIdByFQNPath(con, mode, currentParent, "/" + name);
             if (nodeId == -1)
-                nodeId = createNode(con, seq, ce, mode, nodeId, currentParent, name, label, position, null, null);
+                nodeId = createNode(con, seq, ce, mode, nodeId, currentParent, name, label, position, null, null, activateContent);
             result.add(nodeId);
             currentParent = nodeId;
         }
@@ -1066,11 +1096,11 @@ public abstract class GenericTreeStorage implements TreeStorage {
     /**
      * Lock tree nodes for updates.
      *
-     * @param con       an existing connection
-     * @param table     the table name to be locked
-     * @param nodeIds   the node ID(s) to be locked. If null or empty, the entire table will be locked.
-     * @return          true if a lock could be required, false if the DBMS indicated a deadlock
-     * @throws FxDbException    on non-deadlock DB errors
+     * @param con     an existing connection
+     * @param table   the table name to be locked
+     * @param nodeIds the node ID(s) to be locked. If null or empty, the entire table will be locked.
+     * @return true if a lock could be required, false if the DBMS indicated a deadlock
+     * @throws FxDbException on non-deadlock DB errors
      */
     protected abstract boolean lockForUpdate(Connection con, String table, Iterable<Long> nodeIds) throws FxDbException;
 
@@ -1083,10 +1113,10 @@ public abstract class GenericTreeStorage implements TreeStorage {
      * are not caught and are thrown to the caller.
      * </p>
      *
-     * @param con       an existing connection
-     * @param mode      the tree mode
-     * @param nodeIds   the tree node IDs
-     * @throws FxDbException    on database errors
+     * @param con     an existing connection
+     * @param mode    the tree mode
+     * @param nodeIds the tree node IDs
+     * @throws FxDbException on database errors
      */
     protected void acquireLocksForUpdate(Connection con, FxTreeMode mode, Iterable<Long> nodeIds) throws FxDbException {
         while (!lockForUpdate(con, getTable(mode), nodeIds)) {
@@ -1109,10 +1139,10 @@ public abstract class GenericTreeStorage implements TreeStorage {
      * are not caught and are thrown to the called.
      * </p>
      *
-     * @param con               an existing connection
-     * @param nodeInfo          the node to be locked
-     * @param lockParent        if the node's parent should also be locked
-     * @throws FxDbException    on database errors
+     * @param con        an existing connection
+     * @param nodeInfo   the node to be locked
+     * @param lockParent if the node's parent should also be locked
+     * @throws FxDbException on database errors
      */
     protected void acquireLocksForUpdate(Connection con, FxTreeNodeInfo nodeInfo, boolean lockParent) throws FxDbException {
         final List<Long> ids = new ArrayList<Long>(2);
@@ -1134,14 +1164,20 @@ public abstract class GenericTreeStorage implements TreeStorage {
      * are not caught and are thrown to the called.
      * </p>
      *
-     * @param con       an existing connection
-     * @param mode      the tree mode (edit or live)
-     * @throws FxDbException    on database errors
+     * @param con  an existing connection
+     * @param mode the tree mode (edit or live)
+     * @throws FxDbException on database errors
      */
     protected void acquireLocksForUpdate(Connection con, FxTreeMode mode) throws FxDbException {
         acquireLocksForUpdate(con, mode, null);
     }
 
+    /**
+     * Convert a Number to BigDecimal
+     *
+     * @param value Number
+     * @return BigDecimal
+     */
     private BigDecimal toBigDecimal(Number value) {
         return value instanceof BigDecimal ? (BigDecimal) value : new BigDecimal(value.toString());
     }
@@ -1169,7 +1205,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
             UserTicket ticket = FxContext.getUserTicket();
 
             // lock all affected rows
-            final List<Long> removeNodeIds = selectNodeIds(con, mode, nodeInfo.getLeft(), nodeInfo.getRight());
+            final List<Long> removeNodeIds = selectAllChildNodeIds(con, mode, nodeInfo.getLeft(), nodeInfo.getRight());
             removeNodeIds.add(nodeId);
             acquireLocksForUpdate(con, mode, Iterables.concat(removeNodeIds, Arrays.asList(nodeInfo.getParentId())));
 
@@ -1180,7 +1216,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
                 while (rs != null && rs.next()) {
                     try {
                         if (ce != null)
-                            FxPermissionUtils.checkPermission(ticket, ACLPermission.EDIT, ce.getContentSecurityInfo(new FxPK(rs.getLong(1))), true);
+                            FxPermissionUtils.checkPermission(ticket, ACLPermission.READ, ce.getContentSecurityInfo(new FxPK(rs.getLong(1))), true);
                         references.add(new FxPK(rs.getLong(1)));
                     } catch (FxLoadException e) {
                         //ignore, might have been removed meanwhile
@@ -1203,16 +1239,16 @@ public abstract class GenericTreeStorage implements TreeStorage {
                 for (List<Long> removeIds : Iterables.partition(removeNodeIds, SQL_IN_PARTSIZE)) {
                     stmt.addBatch(
                             "DELETE FROM " + getTable(mode)
-                            + " WHERE id IN ("
-                            + StringUtils.join(removeIds, ',')
-                            + ")"
+                                    + " WHERE id IN ("
+                                    + StringUtils.join(removeIds, ',')
+                                    + ")"
                     );
                 }
             } else {
                 //FX-102: edit permission checks on references
                 try {
                     if (ce != null)
-                        FxPermissionUtils.checkPermission(FxContext.getUserTicket(), ACLPermission.EDIT, ce.getContentSecurityInfo(nodeInfo.getReference()), true);
+                        FxPermissionUtils.checkPermission(FxContext.getUserTicket(), ACLPermission.READ, ce.getContentSecurityInfo(nodeInfo.getReference()), true);
                     references.add(nodeInfo.getReference());
                 } catch (FxLoadException e) {
                     //ignore, might have been removed meanwhile
@@ -1236,20 +1272,20 @@ public abstract class GenericTreeStorage implements TreeStorage {
 
             // Set the dirty flag for the parent if needed
             if (mode != FxTreeMode.Live) {
-                stmt.addBatch("UPDATE " + getTable(mode) + " SET DIRTY="+TRUE+" WHERE ID=" + nodeInfo.getParentId());
+                stmt.addBatch("UPDATE " + getTable(mode) + " SET DIRTY=" + TRUE + " WHERE ID=" + nodeInfo.getParentId());
             }
 
             if (mode == FxTreeMode.Live && exists(con, FxTreeMode.Edit, nodeId)) {
                 //check if a node with the same id that has been removed in the live tree exists in the edit tree,
                 //the node and all its children will be flagged as dirty in the edit tree
                 FxTreeNodeInfo editNode = getTreeNodeInfo(con, FxTreeMode.Edit, nodeId);
-                List<Long> editNodeIds = selectNodeIds(con, FxTreeMode.Edit, editNode.getLeft(), editNode.getRight());
+                List<Long> editNodeIds = selectAllChildNodeIds(con, FxTreeMode.Edit, editNode.getLeft(), editNode.getRight());
                 editNodeIds.add(nodeId); //add the node itself as well, see FX-754
 
                 acquireLocksForUpdate(con, FxTreeMode.Edit, editNodeIds);
                 for (List<Long> part : Iterables.partition(editNodeIds, SQL_IN_PARTSIZE)) {
                     stmt.addBatch("UPDATE " + getTable(FxTreeMode.Edit) + " SET DIRTY=" + TRUE +
-                            " WHERE ID IN ("  + StringUtils.join(part, ',') + ")");
+                            " WHERE ID IN (" + StringUtils.join(part, ',') + ")");
                 }
             }
             stmt.executeBatch();
@@ -1279,9 +1315,9 @@ public abstract class GenericTreeStorage implements TreeStorage {
             }
         } catch (SQLException exc) {
             String next = "";
-            if(exc.getNextException() != null ) 
-                next = " next:"+exc.getNextException().getMessage();
-            throw new FxRemoveException(LOG, exc, "ex.tree.delete.failed", nodeId, exc.getMessage()+next);
+            if (exc.getNextException() != null)
+                next = " next:" + exc.getNextException().getMessage();
+            throw new FxRemoveException(LOG, exc, "ex.tree.delete.failed", nodeId, exc.getMessage() + next);
         } finally {
             try {
                 if (stmt != null) {
@@ -1298,7 +1334,17 @@ public abstract class GenericTreeStorage implements TreeStorage {
         }
     }
 
-    protected List<Long> selectNodeIds(Connection con, FxTreeMode mode, Number left, Number right) throws SQLException {
+    /**
+     * Get all node ids between the left and right boundaries
+     *
+     * @param con   an open and valid connection
+     * @param mode  tree mode
+     * @param left  left boundary
+     * @param right right boundary
+     * @return node id's between the boundaries
+     * @throws SQLException on errors
+     */
+    protected List<Long> selectAllChildNodeIds(Connection con, FxTreeMode mode, Number left, Number right) throws SQLException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("SELECT id FROM " + getTable(mode) + " WHERE lft > ? AND rgt < ?");
@@ -1310,12 +1356,22 @@ public abstract class GenericTreeStorage implements TreeStorage {
         }
     }
 
-    protected List<Long> selectNodeIds(Connection con, FxTreeMode mode, long parentId, boolean includeParent) throws SQLException {
+    /**
+     * Get all node ids that are a direct child of <code>parentId</code>
+     *
+     * @param con           an open and valid connection
+     * @param mode          tree mode
+     * @param parentId      the parent node id
+     * @param includeParent include the parent id in the returned node id list?
+     * @return found node id's
+     * @throws SQLException on errors
+     */
+    protected List<Long> selectDirectChildNodeIds(Connection con, FxTreeMode mode, long parentId, boolean includeParent) throws SQLException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement(
                     "SELECT id FROM " + getTable(mode) + " WHERE PARENT=? "
-                    + (includeParent ? "OR ID=?" : "")
+                            + (includeParent ? "OR ID=?" : "")
             );
             stmt.setLong(1, parentId);
             if (includeParent) {
@@ -1327,6 +1383,13 @@ public abstract class GenericTreeStorage implements TreeStorage {
         }
     }
 
+    /**
+     * Collect all long values of the first column in the result set as a list of long's
+     *
+     * @param stmt the prepared statement that contains the query, ready to be executed
+     * @return list of found values
+     * @throws SQLException on errors
+     */
     private List<Long> collectNodeIds(PreparedStatement stmt) throws SQLException {
         final ResultSet rs = stmt.executeQuery();
         final List<Long> ids = new ArrayList<Long>();
@@ -1446,15 +1509,15 @@ public abstract class GenericTreeStorage implements TreeStorage {
                 LOG.info("Creating level [" + (i + 1) + "/" + maxNodeChildren + "]");
                 String name = "Level2_[" + i + "]";
                 FxString desc = new FxString(true, "Level2 Node " + i);
-                long newIdLevel1 = createNode(con, seq, ce, mode, -1, ROOT_NODE, name, desc, 0, null, null);
+                long newIdLevel1 = createNode(con, seq, ce, mode, -1, ROOT_NODE, name, desc, 0, null, null, true);
                 for (int y = 0; y < 10; y++) {
                     String name2 = "Level3_[" + i + "|" + y + "]";
                     FxString desc2 = new FxString(true, "Level3 Node " + y);
-                    long newIdLevel2 = createNode(con, seq, ce, mode, -1, newIdLevel1, name2, desc2, 0, null, null);
+                    long newIdLevel2 = createNode(con, seq, ce, mode, -1, newIdLevel1, name2, desc2, 0, null, null, true);
                     for (int t = 0; t < 100; t++) {
                         String name3 = "Level4_[" + i + "|" + y + "|" + t + "]";
                         FxString desc3 = new FxString(true, "Level4 Node " + y);
-                        createNode(con, seq, ce, mode, -1, newIdLevel2, name3, desc3, 0, null, null);
+                        createNode(con, seq, ce, mode, -1, newIdLevel2, name3, desc3, 0, null, null, true);
                     }
                 }
                 LOG.info("Created level [" + (i + 1) + "/" + maxNodeChildren + "]");
@@ -1731,9 +1794,9 @@ public abstract class GenericTreeStorage implements TreeStorage {
     /**
      * Replace dynamic placeholders in the given select statement.
      *
-     * @param sql       the SQL statement
-     * @return          the final SQL statement
-     * @since           3.1
+     * @param sql the SQL statement
+     * @return the final SQL statement
+     * @since 3.1
      */
     protected String prepareSql(FxTreeMode mode, String sql) {
         String result = sql;
@@ -1746,7 +1809,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
                             "0",
                             mode == FxTreeMode.Live ? TREE_TOTAL_COUNT_LIVE : TREE_TOTAL_COUNT_EDIT
                     )
-                    + " AS TOTAL_CHILDCOUNT"
+                            + " AS TOTAL_CHILDCOUNT"
             );
         }
         return result;

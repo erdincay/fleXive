@@ -360,6 +360,17 @@ public final class Database {
     }
 
     /**
+     * Helper function to close statements.
+     * No Exception is thrown if the Statement failed to close, but a error is logged.
+     *
+     * @param caller class calling function/module, or null
+     * @param stmts   the statements to close, or null
+     */
+    public static void closeObjects(Class caller, Statement... stmts) {
+        closeObjects(caller.getName(), stmts);
+    }
+
+    /**
      * Helper function to close connections and statements.
      * A FxDbException is thrown if the close of the connection failed.
      * No Exception is thrown if the Statement failed to close, but a error is logged.
@@ -388,6 +399,26 @@ public final class Database {
                         + "nable to close the db connection");
                 LOG.error(dbExc);
                 System.err.println(dbExc.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Helper function to close connections and statements.
+     * No Exception is thrown if the Statement failed to close, but a error is logged.
+     *
+     * @param caller a string representing the calling function/module, or null
+     * @param stmts   the statements to close, or null
+     */
+    public static void closeObjects(String caller, Statement... stmts) {
+        for (Statement stmt : stmts) {
+            try {
+                if (stmt != null) stmt.close();
+            } catch (Exception exc) {
+                //noinspection ThrowableInstanceNeverThrown
+                StackTraceElement[] se = new Throwable().getStackTrace();
+                LOG.error(((caller != null) ? caller + " f" : "F") + "ailed to close the statement(s): "
+                        + exc.getMessage() + " Calling line: " + se[2].toString());
             }
         }
     }

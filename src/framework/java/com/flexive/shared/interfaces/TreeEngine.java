@@ -193,8 +193,22 @@ public interface TreeEngine {
      * @param nodeId          the node to activate
      * @param includeChildren if true all children of the node are activated as well
      * @throws FxApplicationException on errors
+     * @see com.flexive.shared.interfaces.TreeEngine#activate(com.flexive.shared.tree.FxTreeMode, long, boolean, boolean)
+     * @deprecated use com.flexive.shared.interfaces.TreeEngine#activate(com.flexive.shared.tree.FxTreeMode, long, boolean, boolean)
      */
     void activate(FxTreeMode mode, long nodeId, boolean includeChildren) throws FxApplicationException;
+
+    /**
+     * Activates a node - copying it from the "Edit" to the "Live" tree
+     *
+     * @param mode             tree mode (currently only Edit supported)
+     * @param nodeId           the node to activate
+     * @param includeChildren  if true all children of the node are activated as well
+     * @param activateContents change the step of contents that have no live step to live in the max version?
+     * @throws FxApplicationException on errors
+     * @since 3.1
+     */
+    void activate(FxTreeMode mode, long nodeId, boolean includeChildren, boolean activateContents) throws FxApplicationException;
 
     //----------------------
     //- Read/Load
@@ -357,7 +371,7 @@ public interface TreeEngine {
     long[] getIdChain(FxTreeMode mode, long nodeId) throws FxApplicationException;
 
     /**
-     * Returns all ids from the root up to the given node.
+     * Returns all ids from the root down to the given node.
      *
      * @param mode tree mode to use (Live or Edit tree)
      * @param id   the id to start with

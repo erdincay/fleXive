@@ -229,7 +229,7 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
             boolean ok = false;
             try {
                 long nodeId =  StorageManager.getTreeStorage().createNode(con, seq, contentEngine, mode, -1,
-                        parentNodeId, name, label, position, reference, template);
+                        parentNodeId, name, label, position, reference, template, true);
                 ok = true;
                 return nodeId;
             } finally {
@@ -258,7 +258,7 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
             con = Database.getDbConnection();
             boolean ok = false;
             try {
-                long[] nodes = StorageManager.getTreeStorage().createNodes(con, seq, contentEngine, mode, parentNodeId, path, position);
+                long[] nodes = StorageManager.getTreeStorage().createNodes(con, seq, contentEngine, mode, parentNodeId, path, position, true);
                 // call scripts
                 final List<Long> scriptIds = scripting.getByScriptEvent(FxScriptEvent.AfterTreeNodeAdded);
                 if (scriptIds.size() == 0)
@@ -576,19 +576,28 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
         }
     }
 
+
     /**
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void activate(FxTreeMode mode, long nodeId, boolean includeChildren) throws FxApplicationException {
+        activate(mode, nodeId, includeChildren, true);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void activate(FxTreeMode mode, long nodeId, boolean includeChildren, boolean activateContents) throws FxApplicationException {
         Connection con = null;
         try {
             if (mode == FxTreeMode.Live)
                 return;
             con = Database.getDbConnection();
             final FxTreeNode srcNode = StorageManager.getTreeStorage().getNode(con, mode, nodeId);
-            if( !contentEngine.getContentVersionInfo(srcNode.getReference()).hasLiveVersion() )
-                throw new FxTreeException("ex.tree.activate.failed.noLiveContent", srcNode.getPath());
+//            if( !contentEngine.getContentVersionInfo(srcNode.getReference()).hasLiveVersion() )
+//                throw new FxTreeException("ex.tree.activate.failed.noLiveContent", srcNode.getPath());
             if (!includeChildren) {
                 //if the node is a leaf node, always activate with children to propagate removed subnodes
                 if (srcNode.isLeaf())
@@ -605,7 +614,7 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
                     for (long scriptId : scriptBeforeIds)
                         executeScript(scriptId, parent, binding);
                 }
-                StorageManager.getTreeStorage().activateSubtree(con, seq, contentEngine, mode, nodeId);
+                StorageManager.getTreeStorage().activateSubtree(con, seq, contentEngine, mode, nodeId, activateContents);
                 if (scriptAfterIds.size() > 0) {
                     final FxScriptBinding binding = new FxScriptBinding();
                     FxTreeNode parent = getTree(FxTreeMode.Live, nodeId, 1000);
@@ -620,7 +629,7 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
                         scripting.runScript(scriptId, binding);
                     }
                 }
-                StorageManager.getTreeStorage().activateNode(con, seq, contentEngine, mode, nodeId);
+                StorageManager.getTreeStorage().activateNode(con, seq, contentEngine, mode, nodeId, activateContents);
                 if (scriptAfterIds.size() > 0) {
                     final FxScriptBinding binding = new FxScriptBinding();
                     for (long scriptId : scriptAfterIds) {

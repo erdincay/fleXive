@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) backend application.
  *
- *  Copyright (c) 1999-2008
+ *  Copyright (c) 1999-2009
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -226,7 +226,7 @@ public class ContentTreeWriter implements Serializable {
         enableAction(actionsDisabled, node.getDirectChildCount() > 0, "searchSubtree");
         final boolean editNodeActions =
                 !node.isLive()
-                        && node.isMayEdit()
+//                        && node.isMayEdit()
                         && liveTreeEnabled;
         enableAction(actionsDisabled, editNodeActions, "activateNode", "activateNodeAndChildren", "removeNode");
         enableAction(actionsDisabled, editNodeActions && node.getDirectChildCount() > 0, "removeNodeAndChildren");
@@ -234,7 +234,7 @@ public class ContentTreeWriter implements Serializable {
         final boolean liveNodeActions =
                 node.isLive()
                         && liveTreeEnabled
-                        && node.isMayEdit()
+//                        && node.isMayEdit()
                         && node.getId() != FxTreeNode.ROOT_NODE;
         enableAction(actionsDisabled, liveNodeActions, "deactivateNode");
         enableAction(actionsDisabled, liveNodeActions && node.getDirectChildCount() > 0, "deactivateNodeAndChildren");
