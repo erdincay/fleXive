@@ -90,7 +90,7 @@ public class FxPermissionUtils {
      * @param permission     permission to check
      * @param type           used type
      * @param stepACL        step ACL
-     * @param contentACLs     content ACL(s)
+     * @param contentACLs    content ACL(s)
      * @param throwException should exception be thrown
      * @return access granted
      * @throws FxNoAccessException if not accessible for calling user
@@ -141,7 +141,7 @@ public class FxPermissionUtils {
         if (ticket.isGlobalSupervisor() || FxContext.get().getRunAsSystem())
             return true;
         final boolean checkLock;
-        switch(permission) {
+        switch (permission) {
             case CREATE:
             case DELETE:
             case EDIT:
@@ -150,14 +150,14 @@ public class FxPermissionUtils {
             default:
                 checkLock = false;
         }
-        if( checkLock && si.getLock().isLocked() && !si.getLock().isUnlockable()) {
-            if( si.getLock().getUserId() != ticket.getUserId() && !ticket.isMandatorSupervisor()) {
-                if( throwException )
+        if (checkLock && si.getLock().isLocked() && !si.getLock().isUnlockable()) {
+            if (si.getLock().getUserId() != ticket.getUserId() && !ticket.isMandatorSupervisor()) {
+                if (throwException)
                     throw new FxNoAccessException("ex.lock.content.locked.noAccess", si.getPk());
                 return false;
             }
         }
-        if(!si.usePermissions())
+        if (!si.usePermissions())
             return true;
         boolean typeAllowed = !si.useTypePermissions();
         boolean stepAllowed = !si.useStepPermissions();
@@ -327,13 +327,15 @@ public class FxPermissionUtils {
             return;
         final UserTicket ticket = FxContext.getUserTicket();
         for (FxDelta.FxDeltaChange add : delta.getAdds())
-            checkPropertyPermission(((FxPropertyData) add.getNewData()).getValue(), add.getXPath(), ticket, creatorId,
-                    ((FxPropertyAssignment) add.getNewData().getAssignment()).getACL().getId(), perm);
+            if (add.isProperty())
+                checkPropertyPermission(((FxPropertyData) add.getNewData()).getValue(), add.getXPath(), ticket, creatorId,
+                        ((FxPropertyAssignment) add.getNewData().getAssignment()).getACL().getId(), perm);
         for (FxDelta.FxDeltaChange rem : delta.getRemoves())
-            checkPropertyPermission(((FxPropertyData) rem.getOriginalData()).getValue(), rem.getXPath(), ticket, creatorId,
-                    ((FxPropertyAssignment) rem.getOriginalData().getAssignment()).getACL().getId(), perm);
+            if (rem.isProperty())
+                checkPropertyPermission(((FxPropertyData) rem.getOriginalData()).getValue(), rem.getXPath(), ticket, creatorId,
+                        ((FxPropertyAssignment) rem.getOriginalData().getAssignment()).getACL().getId(), perm);
         for (FxDelta.FxDeltaChange upd : delta.getUpdates())
-            if (!upd.isPositionChangeOnly())
+            if (!upd.isPositionChangeOnly() && upd.isProperty())
                 checkPropertyPermission(((FxPropertyData) upd.getNewData()).getValue(), upd.getXPath(), ticket, creatorId,
                         ((FxPropertyAssignment) upd.getOriginalData().getAssignment()).getACL().getId(), perm);
     }
@@ -540,7 +542,7 @@ public class FxPermissionUtils {
     /**
      * Checks if a UserTicket contains at least one of a given List of (content) ACLs
      *
-     * @param ticket        the UserTicket
+     * @param ticket the UserTicket
      * @param ACLIds a List of (content) ACL ids
      * @return returns true if a match can be found
      */

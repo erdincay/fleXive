@@ -1990,7 +1990,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
 
             //delta-deletes:
             for (FxDelta.FxDeltaChange change : delta.getRemoves()) {
-                if (type.isUsePropertyPermissions()) {
+                if (type.isUsePropertyPermissions() && change.isProperty()) {
                     if (!ticket.mayDeleteACL(type.getPropertyAssignment(change.getXPath()).getACL().getId(), content.getLifeCycleInfo().getCreatorId()))
                         throw new FxNoAccessException("ex.acl.noAccess.property.delete", change.getXPath());
                 }
@@ -2062,7 +2062,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
 
                 //delta-adds:
                 for (FxDelta.FxDeltaChange change : delta.getAdds()) {
-                    if (type.isUsePropertyPermissions()) {
+                    if (type.isUsePropertyPermissions() && change.isProperty()) {
                         if (!ticket.mayCreateACL(type.getPropertyAssignment(change.getXPath()).getACL().getId(), content.getLifeCycleInfo().getCreatorId()))
                             throw new FxNoAccessException("ex.acl.noAccess.property.create", change.getXPath());
                     }

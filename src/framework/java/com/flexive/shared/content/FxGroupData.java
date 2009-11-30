@@ -175,8 +175,11 @@ public class FxGroupData extends FxData {
         int currPos = -1, newPos;
         FxData child = null;
         List<String> aliases = new ArrayList<String>((int) (data.size() * 0.7));
+        int topSysInternalPos = -1;
         for (int i = 0; i < data.size(); i++) {
             child = data.get(i);
+            if( child.isSystemInternal() && topSysInternalPos < child.getPos())
+                topSysInternalPos = child.getPos();
             if (!aliases.contains(child.getAlias()))
                 aliases.add(child.getAlias());
             if (child.getXPathElement().equals(xp)) {
@@ -187,6 +190,8 @@ public class FxGroupData extends FxData {
         if (currPos == -1)
             //noinspection ThrowableInstanceNeverThrown
             throw new FxNotFoundException("ex.xpath.alias.notFound", xp).asRuntimeException();
+        if (delta < 0 && topSysInternalPos >= 0 && topSysInternalPos >= (currPos+delta) && !child.isSystemInternal())
+            return; //do not position a non-sysinternal element before a sysinternal one to remain consistency in visual editors, etc.
 
         newPos = currPos + delta;
         if (newPos < 0)
@@ -261,10 +266,6 @@ public class FxGroupData extends FxData {
      * @param xPath XPath to add to this group (must be a direct child of this group, no nesting allowed!)
      * @param pos   position in same hierarchy level
      * @return the added data element
-     * @throws FxInvalidParameterException on errors
-     * @throws FxNoAccessException         on errors
-     * @throws FxNotFoundException         on errors
-     * @throws FxCreateException           on errors
      */
     @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     public FxData addEmptyChild(String xPath, int pos) {
@@ -435,9 +436,8 @@ public class FxGroupData extends FxData {
      *
      * @param xPath requested XPath for the group
      * @return FxGroupData
-     * @throws FxNotFoundException         if no group with this XPath is found
-     * @throws FxInvalidParameterException if the XPath is invalid
      */
+    @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     public FxGroupData getGroup(String xPath) {
         FxGroupData root = getRootGroup();
         if ("/".equals(xPath))
@@ -486,8 +486,6 @@ public class FxGroupData extends FxData {
      * @param assignment assignment of the property
      * @param value      value
      * @param pos        position
-     * @throws FxInvalidParameterException if the XPath is invalid
-     * @throws FxNotFoundException         if the parent group does not exist
      */
     public void addProperty(String xPath, FxPropertyAssignment assignment, FxValue value, int pos) {
         FxGroupData parentGroup = this;
@@ -585,9 +583,8 @@ public class FxGroupData extends FxData {
      * Remove the requested child data and compact indices and positions
      *
      * @param data FxData to remove
-     * @throws FxInvalidParameterException on errors
-     * @throws FxNoAccessException         on errors
      */
+    @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     public void removeChild(FxData data) {
         if (!data.isRemoveable())
             throw new FxNoAccessException("ex.content.xpath.remove.invalid", data.getXPathFull()).asRuntimeException();
@@ -603,9 +600,8 @@ public class FxGroupData extends FxData {
      * Remove the requested children and compact indices and positions
      *
      * @param dataList list of FxData to remove
-     * @throws FxInvalidParameterException on errors
-     * @throws FxNoAccessException         on errors
      */
+    @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     public void removeChildren(List<FxData> dataList) {
         Map<String, FxData> compactCandidates = new HashMap<String, FxData>(dataList.size());
         for (FxData data : dataList) {
