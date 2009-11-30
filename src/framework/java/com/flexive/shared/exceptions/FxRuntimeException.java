@@ -34,6 +34,9 @@ package com.flexive.shared.exceptions;
 import com.flexive.shared.FxLanguage;
 import com.flexive.shared.security.UserTicket;
 
+import java.io.PrintStream;
+import java.io.PrintWriter;
+
 /**
  * Runtime exception base class, wrapping a checked flexive exception.
  *  
@@ -67,6 +70,24 @@ public class FxRuntimeException extends RuntimeException implements FxLocalizedE
      */
     protected boolean messageLogged() {
         return this.messageLogged;
+    }
+
+    @Override
+    public StackTraceElement[] getStackTrace() {
+        // retain original stacktrace
+        return converted.getStackTrace();
+    }
+
+    @Override
+    public void printStackTrace(PrintStream s) {
+        setStackTrace(getStackTrace());
+        super.printStackTrace(s);
+    }
+
+    @Override
+    public void printStackTrace(PrintWriter s) {
+        setStackTrace(getStackTrace());
+        super.printStackTrace(s);
     }
 
     /** {@inheritDoc} */

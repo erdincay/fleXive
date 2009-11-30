@@ -395,9 +395,6 @@ public class FxApplicationException extends Exception implements FxLocalizedExce
      * @return this exception wrapped in a FxRuntimeException.
      */
     public FxRuntimeException asRuntimeException() {
-        FxRuntimeException exception = new FxRuntimeException(this);
-        // keep our stack trace
-        exception.setStackTrace(this.getStackTrace());
-        return exception;
+        return new FxRuntimeException(this);
     }
 }
