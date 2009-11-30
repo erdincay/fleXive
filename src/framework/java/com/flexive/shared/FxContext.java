@@ -178,6 +178,7 @@ public class FxContext implements Serializable {
      */
     public void setTreeWasModified() {
         this.treeWasModified = true;
+        CacheAdmin.setTreeWasModified();
     }
 
     /**

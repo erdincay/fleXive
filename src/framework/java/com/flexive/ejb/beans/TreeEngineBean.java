@@ -224,7 +224,6 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
         if( mode == FxTreeMode.Live)
             throw new FxCreateException("ex.tree.create.live");
         try {
-            FxContext.get().setTreeWasModified();
             con = Database.getDbConnection();
             boolean ok = false;
             try {
@@ -233,8 +232,10 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
                 ok = true;
                 return nodeId;
             } finally {
-                if( ok && !ctx.getRollbackOnly() )
+                if( ok && !ctx.getRollbackOnly() ) {
                     StorageManager.getTreeStorage().checkTreeIfEnabled(con, mode);
+                    FxContext.get().setTreeWasModified();
+                }
             }
         } catch (FxApplicationException ae) {
             throw ae;
@@ -254,15 +255,16 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
         if( mode == FxTreeMode.Live)
             throw new FxCreateException("ex.tree.create.live");
         try {
-            FxContext.get().setTreeWasModified();
             con = Database.getDbConnection();
             boolean ok = false;
             try {
                 long[] nodes = StorageManager.getTreeStorage().createNodes(con, seq, contentEngine, mode, parentNodeId, path, position, true);
                 // call scripts
                 final List<Long> scriptIds = scripting.getByScriptEvent(FxScriptEvent.AfterTreeNodeAdded);
-                if (scriptIds.size() == 0)
+                if (scriptIds.size() == 0) {
+                    ok = true;
                     return nodes;
+                }
                 final FxScriptBinding binding = new FxScriptBinding();
                 for (long node : nodes) {
                     binding.setVariable("node", getNode(mode, node));
@@ -272,8 +274,10 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
                 ok = true;
                 return nodes;
             } finally {
-                if( ok && !ctx.getRollbackOnly() )
+                if( ok && !ctx.getRollbackOnly() ) {
+                    FxContext.get().setTreeWasModified();
                     StorageManager.getTreeStorage().checkTreeIfEnabled(con, mode);
+                }
             }
         } catch (FxApplicationException ae) {
             EJBUtils.rollback(ctx);
@@ -293,13 +297,13 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
     public void clear(FxTreeMode mode) throws FxApplicationException {
         Connection con = null;
         try {
-            FxContext.get().setTreeWasModified();
             con = Database.getDbConnection();
             UserTicket ticket = FxContext.getUserTicket();
             if (FxContext.get().getRunAsSystem() || ticket.isGlobalSupervisor())
                 StorageManager.getTreeStorage().clearTree(con, contentEngine, mode);
             else
                 throw new FxApplicationException("ex.tree.clear.notAllowed", mode.name());
+            FxContext.get().setTreeWasModified();
         } catch (FxApplicationException ae) {
             EJBUtils.rollback(ctx);
             throw ae;
@@ -324,7 +328,6 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
         Connection con = null;
 //        boolean setInContent = false;
         try {
-            FxContext.get().setTreeWasModified();
             con = Database.getDbConnection();
             FxTreeNode node = getNode(mode, nodeId);
             boolean nameChanged = false;
@@ -361,6 +364,7 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
                 }
             }
             StorageManager.getTreeStorage().checkTreeIfEnabled(con, mode);
+            FxContext.get().setTreeWasModified();
         } catch (Exception t) {
             EJBUtils.rollback(ctx);
             throw new FxUpdateException(LOG, t, "ex.tree.rename.failed", nodeId);
@@ -386,7 +390,6 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
             throw new FxInvalidParameterException("nodeId", "ex.tree.delete.nodeId");
         }
         try {
-            FxContext.get().setTreeWasModified();
             con = Database.getDbConnection();
             final FxTreeNode subTree;
             if (deleteReferencedContent) {
@@ -404,6 +407,7 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
                 }
             }
             StorageManager.getTreeStorage().checkTreeIfEnabled(con, mode);
+            FxContext.get().setTreeWasModified();
         } catch (FxNotFoundException nf) {
             // Node does not exist and we wanted to delete it anyway .. so this is no error
         } catch (FxApplicationException ae) {
@@ -443,7 +447,6 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
             throw new FxInvalidParameterException("nodeId", "ex.tree.delete.nodeId");
         }
         try {
-            FxContext.get().setTreeWasModified();
             con = Database.getDbConnection();
             final FxTreeNode subTree;
             if (removeOp != FxTreeRemoveOp.Unfile) {
@@ -470,6 +473,7 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
                 }
             }
             StorageManager.getTreeStorage().checkTreeIfEnabled(con, mode);
+            FxContext.get().setTreeWasModified();
         } catch (FxNotFoundException nf) {
             // Node does not exist and we wanted to delete it anyway .. so this is no error
         } catch (FxApplicationException ae) {
@@ -530,7 +534,6 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long copy(FxTreeMode mode, long source, long destination, int destinationPosition) throws FxApplicationException {
-        FxContext.get().setTreeWasModified();
         Connection con = null;
         boolean success = false;
         try {
@@ -538,8 +541,10 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
             long nodeId = StorageManager.getTreeStorage().copy(con, seq, mode, source, destination, destinationPosition, false, "CopyOf_");
             // call scripts
             final List<Long> scriptIds = scripting.getByScriptEvent(FxScriptEvent.AfterTreeNodeAdded);
-            if (scriptIds.size() == 0)
+            if (scriptIds.size() == 0) {
+                success = true;
                 return nodeId;
+            }
             FxTreeNode parent = getTree(mode, nodeId, 1000);
             final FxScriptBinding binding = new FxScriptBinding();
             for (long scriptId : scriptIds)
@@ -553,8 +558,10 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
             EJBUtils.rollback(ctx);
             throw new FxUpdateException(LOG, t, "ex.tree.copy.failed", source, destination, destinationPosition);
         } finally {
-            if (success)
+            if (success) {
                 StorageManager.getTreeStorage().checkTreeIfEnabled(con, mode);
+                FxContext.get().setTreeWasModified();
+            }
             Database.closeObjects(TreeEngineBean.class, con, null);
         }
     }

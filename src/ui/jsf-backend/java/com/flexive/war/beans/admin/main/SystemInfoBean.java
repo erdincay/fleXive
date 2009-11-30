@@ -35,6 +35,7 @@ package com.flexive.war.beans.admin.main;
 
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.media.FxMediaEngine;
@@ -184,5 +185,14 @@ public class SystemInfoBean implements Serializable {
         } catch (ClassNotFoundException e) {
             return false;
         }
+    }
+
+    /**
+     * Get the timestamp of the last tree modification
+     *
+     * @return timestamp of the last tree modification
+     */
+    public Date getTreeModificationTimestamp() {
+        return new Date(CacheAdmin.getTreeModificationTimestamp());
     }
 }

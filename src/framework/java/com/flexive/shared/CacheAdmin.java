@@ -68,10 +68,12 @@ public class CacheAdmin {
     public static final String LANGUAGES_ISO = "/FxLang/ISO";
     public static final String LANGUAGES_ALL = "/FxLang/ISO";
     public static final String ENVIRONMENT_BASE = "/FxEnvironment";
-    public static final Object ENVIRONMENT_RUNTIME = "runtime";
+    public static final String ENVIRONMENT_RUNTIME = "runtime";
     public static final String STREAMSERVER_BASE = "/FxStreamServers";
     public static final String STREAMSERVER_EJB_KEY = "ejb_servers";
     public static final String CONTENTCACHE_BASE = "/FxContent";
+    public static final String TREE_BASE = "/FxTree";
+    public static final String TREE_MODIFIED_TIMESTAMP = "modified";
 
     private static final String CONTENTCACHE_KEY_STORE = "content";
 
@@ -187,6 +189,7 @@ public class CacheAdmin {
      *
      * @return FxEnvironment
      */
+    @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     public static FxEnvironment getEnvironment() {
         if (getCachedEnvironment() != null) {
             return getCachedEnvironment();
@@ -251,7 +254,7 @@ public class CacheAdmin {
      * @return a {@link com.flexive.shared.structure.FxFilteredEnvironment} for the calling user.
      */
     public static FxEnvironment getFilteredEnvironment() {
-        if(FxContext.getUserTicket().isGlobalSupervisor())
+        if (FxContext.getUserTicket().isGlobalSupervisor())
             return getEnvironment();
         return new FxFilteredEnvironment(getEnvironment());
     }
@@ -262,6 +265,7 @@ public class CacheAdmin {
      *
      * @throws Exception on errors
      */
+    @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     public static void reloadEnvironment() throws Exception {
         if (!FxContext.getUserTicket().isGlobalSupervisor()) {
             throw new FxNoAccessException("ex.cache.reload.privileges").asRuntimeException();
@@ -358,7 +362,7 @@ public class CacheAdmin {
      *
      * @return list of all available StreamServers
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "ThrowableInstanceNeverThrown"})
     public static List<ServerLocation> getStreamServers() {
         try {
             List<ServerLocation> ret = (List<ServerLocation>) getInstance().globalGet(STREAMSERVER_BASE, STREAMSERVER_EJB_KEY);
@@ -378,7 +382,7 @@ public class CacheAdmin {
      * Return the cached environment for this request. Do not call this code to retrieve the environment,
      * use {@link com.flexive.shared.CacheAdmin#getEnvironment()} instead.
      *
-     * @return  the cached environment for this request, or null if it hasn't been set.
+     * @return the cached environment for this request, or null if it hasn't been set.
      * @since 3.1
      */
     private static FxEnvironment getCachedEnvironment() {
@@ -388,14 +392,45 @@ public class CacheAdmin {
     /**
      * Store the given environment for the rest of this request.
      *
-     * @param env   the new environment
+     * @param env the new environment
      * @since 3.1
      */
     private static void setCachedEnvironment(FxEnvironment env) {
         FxContext.get().setAttribute(ATTR_ENVIRONMENT, env);
     }
 
+    /**
+     * Flag the tree as modified by setting the current timestamp as modification date
+     */
+    public static void setTreeWasModified() {
+        try {
+            getInstance().put(TREE_BASE, TREE_MODIFIED_TIMESTAMP, System.currentTimeMillis());
+        } catch (FxCacheException e) {
+            LOG.error("Failed to set tree modified timestamp", e);
+        }
+    }
 
-
-
+    /**
+     * Get the timestamp of the last tree modification
+     *
+     * @return timestamp of the last tree modification
+     */
+    public static long getTreeModificationTimestamp() {
+        try {
+            Object ts = getInstance().get(TREE_BASE, TREE_MODIFIED_TIMESTAMP);
+            if (ts == null) {
+                synchronized (ENV_LOCK) {
+                    setTreeWasModified();
+                    return getTreeModificationTimestamp();
+                }
+            }
+            if (ts instanceof Long)
+                return (Long) ts;
+            LOG.error("Tree modified timestamp expected as Long, but was: " + ts.getClass().getCanonicalName());
+            return 0;
+        } catch (FxCacheException e) {
+            LOG.error("Failed to get tree modified timestamp", e);
+            return 0;
+        }
+    }
 }
