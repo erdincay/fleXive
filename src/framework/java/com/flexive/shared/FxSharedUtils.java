@@ -96,7 +96,7 @@ public final class FxSharedUtils {
     /**
      * The character(s) representing a "xpath slash" (/) in a public URL.
      */
-    public static final String XPATH_ENCODEDSLASH = "#";
+    public static final String XPATH_ENCODEDSLASH = "@@";
     /**
      * Browser tests set this cookie to force using the test division instead of the actual division
      * defined by the URL domain.
