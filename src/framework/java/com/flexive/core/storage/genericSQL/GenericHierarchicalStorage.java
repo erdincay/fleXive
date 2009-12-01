@@ -1500,8 +1500,9 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         PreparedStatement ps = null;
         try {
             root = type.createEmptyData(type.buildXPathPrefix(pk));
-            root.removeEmptyEntries(true);
-            root.compactPositions(true);
+//            root.removeEmptyEntries(true);
+//            root.compactPositions(true);
+            root.removeNonInternalData();
             ps = con.prepareStatement(CONTENT_DATA_LOAD);
             ps.setLong(1, pk.getId());
             ps.setInt(2, pk.getVersion());
@@ -1870,7 +1871,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             return;
         if (assignment instanceof FxGroupAssignment) {
             root.addGroup(xPath, (FxGroupAssignment) assignment, pos);
-            root.getGroup(xPath.substring(0, xPath.length() - 1)).removeEmptyEntries(true);
+            root.getGroup(xPath.substring(0, xPath.length() - 1)).removeNonInternalData();
         } else {
             root.addProperty(xPath, (FxPropertyAssignment) assignment, value, pos);
         }

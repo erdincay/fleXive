@@ -132,8 +132,8 @@ public class FxGroupData extends FxData {
     /**
      * Return true if this content has at least one multilingual property set.
      *
-     * @return  true if this content has at least one multilingual property set.
-     * @since   3.1
+     * @return true if this content has at least one multilingual property set.
+     * @since 3.1
      */
     public boolean isHasMultiLangProperty() {
         for (FxData fxData : data) {
@@ -178,7 +178,7 @@ public class FxGroupData extends FxData {
         int topSysInternalPos = -1;
         for (int i = 0; i < data.size(); i++) {
             child = data.get(i);
-            if( child.isSystemInternal() && topSysInternalPos < child.getPos())
+            if (child.isSystemInternal() && topSysInternalPos < child.getPos())
                 topSysInternalPos = child.getPos();
             if (!aliases.contains(child.getAlias()))
                 aliases.add(child.getAlias());
@@ -190,7 +190,7 @@ public class FxGroupData extends FxData {
         if (currPos == -1)
             //noinspection ThrowableInstanceNeverThrown
             throw new FxNotFoundException("ex.xpath.alias.notFound", xp).asRuntimeException();
-        if (delta < 0 && topSysInternalPos >= 0 && topSysInternalPos >= (currPos+delta) && !child.isSystemInternal())
+        if (delta < 0 && topSysInternalPos >= 0 && topSysInternalPos >= (currPos + delta) && !child.isSystemInternal())
             return; //do not position a non-sysinternal element before a sysinternal one to remain consistency in visual editors, etc.
 
         newPos = currPos + delta;
@@ -392,6 +392,8 @@ public class FxGroupData extends FxData {
                 return;
             } else if (curr instanceof FxGroupData) {
                 ((FxGroupData) curr).removeEmptyEntries(includeRequired);
+                if (((FxGroupData) curr).data.size() == 0)
+                    data.remove(curr);
             }
         }
     }
@@ -466,8 +468,8 @@ public class FxGroupData extends FxData {
     /**
      * Return true if the content has at least one group.
      *
-     * @return  true if the content has at least one group.
-     * @since   3.1
+     * @return true if the content has at least one group.
+     * @since 3.1
      */
     public boolean isHasGroups() {
         for (FxData data : this.data) {
@@ -759,5 +761,21 @@ public class FxGroupData extends FxData {
                 res.addAll(((FxGroupData) d).getPropertyData(propertyId, includeEmpty));
         }
         return res;
+    }
+
+    /**
+     * Remove all entries that are not system internal form the current group
+     *
+     * @since 3.1
+     */
+    public void removeNonInternalData() {
+        List<FxData> nonInternal = new ArrayList<FxData>(10);
+        for (FxData d : data) {
+            if (!d.isSystemInternal())
+                nonInternal.add(d);
+        }
+        for (FxData d : nonInternal)
+            data.remove(d);
+        this.compactPositions(true);
     }
 }
