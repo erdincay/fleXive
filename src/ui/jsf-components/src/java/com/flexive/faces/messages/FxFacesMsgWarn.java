@@ -36,14 +36,35 @@ public class FxFacesMsgWarn extends FxFacesMessage {
     private static final long serialVersionUID = 5980749747769976237L;
     private static final Severity SEVERITY = SEVERITY_WARN;
 
+    /**
+     * Create a JSF warning message. To render it to the client,
+     * you have to call {@link #addToContext()} or {@link #addToContext(String)}.
+     *
+     * @param summaryKey    the summary message key
+     * @param summaryParams the values to be placed in the summary message
+     */
     public FxFacesMsgWarn(String summaryKey, Object... summaryParams) {
         super(SEVERITY, summaryKey, summaryParams);
     }
 
+    /**
+     * Create a JSF warning message from an exception. To render it to the client,
+     * you have to call {@link #addToContext()} or {@link #addToContext(String)}.
+     *
+     * @param exc           the exception to be displayed
+     * @param summaryKey    the summary message key
+     * @param summaryParams the values to be placed in the summary message
+     */
     public FxFacesMsgWarn(Throwable exc, String summaryKey, Object... summaryParams) {
         super(exc, SEVERITY, summaryKey, summaryParams);
     }
 
+    /**
+     * Create a JSF warning message from an exception. To render it to the client,
+     * you have to call {@link #addToContext()} or {@link #addToContext(String)}.
+     *
+     * @param exc           the exception to be displayed
+     */
     public FxFacesMsgWarn(Throwable exc) {
         super(exc, SEVERITY);
     }

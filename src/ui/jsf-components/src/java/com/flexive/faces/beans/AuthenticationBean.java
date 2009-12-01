@@ -33,7 +33,9 @@ package com.flexive.faces.beans;
 
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.messages.FxFacesMsgErr;
+import com.flexive.faces.messages.FxFacesMsgWarn;
 import com.flexive.shared.FxContext;
+import com.flexive.shared.exceptions.FxLoginFailedException;
 import com.flexive.shared.security.UserTicket;
 import com.flexive.war.FxRequest;
 
@@ -79,8 +81,14 @@ public class AuthenticationBean implements Serializable {
             FxContext.get().login(username, password, takeover);
             request.getUserTicket();
             return "loginSuccess";
+        } catch (FxLoginFailedException e) {
+            new FxFacesMsgErr(
+                    e,
+                    // wrong password isn't really an error that should end up in the logfiles
+                    e.getType() != FxLoginFailedException.TYPE_USER_OR_PASSWORD_NOT_DEFINED
+            ).addToContext();
         } catch (Exception exc) {
-            new FxFacesMsgErr(exc).addToContext();
+            new FxFacesMsgWarn(exc).addToContext();
         }
         return null;
     }
