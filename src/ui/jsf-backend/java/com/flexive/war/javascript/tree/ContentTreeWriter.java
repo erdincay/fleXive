@@ -40,6 +40,9 @@ import static com.flexive.faces.javascript.tree.TreeNodeWriter.Node;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxLockType;
 import com.flexive.shared.FxContext;
+import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.structure.FxEnvironment;
+import com.flexive.shared.structure.FxType;
 import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.tree.FxTreeMode;
@@ -146,10 +149,10 @@ public class ContentTreeWriter implements Serializable {
             FxApplicationException, IOException {
         FxTreeNode root = EJBLookup.getTreeEngine().getTree(liveTree ? FxTreeMode.Live : FxTreeMode.Edit,
                 startNodeId, maxDepth);
-        writeContentNode(writer, root, new HashMap<String, Object>(), new ArrayList<String>(), pathMode);
+        writeContentNode(CacheAdmin.getEnvironment(), writer, root, new HashMap<String, Object>(), new ArrayList<String>(), pathMode);
     }
 
-    private void writeContentNode(TreeNodeWriter writer, FxTreeNode node, Map<String, Object> properties,
+    private void writeContentNode(FxEnvironment environment, TreeNodeWriter writer, FxTreeNode node, Map<String, Object> properties,
                                   List<String> actionsDisabled, boolean pathMode) throws IOException {
         final boolean liveTreeEnabled;
         try {
@@ -194,11 +197,14 @@ public class ContentTreeWriter implements Serializable {
             if (node.getChildren().size() == 0 && node.getDirectChildCount() > 0) {
                 properties.put("isFolder", true);
             }
+            if (environment.getType(node.getReferenceTypeId()).isDerivedFrom(FxType.FOLDER)) {
+                properties.put("isFolderType", true);
+            }
             writer.startNode(new Node(String.valueOf(node.getId()), label + " [" + node.getDirectChildCount() + "]",
                     docType, properties));
             writer.startChildren();
             for (FxTreeNode child : node.getChildren())
-                writeContentNode(writer, child, properties, actionsDisabled, pathMode);
+                writeContentNode(environment, writer, child, properties, actionsDisabled, pathMode);
             writer.closeChildren();
             writer.closeNode();
         }

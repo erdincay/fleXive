@@ -64,7 +64,7 @@
 
             function contentTreeClickHandler(node, doubleClick) {
                 if (doubleClick) {
-                    if (node.referenceId && node.referenceId != -1 && !node.isFolder) {
+                    if (node.referenceId && node.referenceId != -1 && (!node.isFolderType || node.isFolderType == null)) {
                         // open content editor
                         invokeContentAction("adm/content/contentEditor.jsf", "editInstance", {id: node.referenceId, editMode: false});
                     } else {
