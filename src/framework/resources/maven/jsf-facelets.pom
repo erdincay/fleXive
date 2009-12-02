@@ -6,9 +6,9 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.flexive</groupId>
     <artifactId>jsf-facelets</artifactId>
-    <version>1.1.15-beta-patched</version>
+    <version>1.1.15-beta-patched-2</version>
     <description>Custom Facelets version for flexive. This is built from the 1.1.15-beta CVS tag
-        but includes the patch for Facelets bug 286.
+        but includes the patch for Facelets bug 286 and improved caching.
     </description>
 
     <licenses>
