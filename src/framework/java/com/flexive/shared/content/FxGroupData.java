@@ -636,7 +636,7 @@ public class FxGroupData extends FxData {
      * @param explodeChildGroups recursively explode all <i>existing</i> child groups?
      */
     public void explode(boolean explodeChildGroups) {
-        final boolean isOneOf = this.getGroupAssignment().getMode() == GroupMode.OneOf;
+        final boolean isOneOf = !this.isRootGroup() && this.getGroupAssignment().getMode() == GroupMode.OneOf;
         for (String xpath : getCreateableChildren(false)) {
             FxData child = addEmptyChild(xpath, POSITION_BOTTOM);
             if (isOneOf) {
