@@ -380,6 +380,9 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
         } catch (FxCreateException e) {
             EJBUtils.rollback(ctx);
             throw e;
+        } catch (FxNoAccessException e) {
+            EJBUtils.rollback(ctx);
+            throw e;
         } catch (Throwable t) {
             EJBUtils.rollback(ctx);
             if (t instanceof FxApplicationException)
