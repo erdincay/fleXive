@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2008
+ *  Copyright (c) 1999-2009
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -71,8 +71,6 @@ import org.testng.annotations.Test;
 
 import java.sql.Connection;
 import java.util.List;
-import java.util.Collection;
-import java.util.Random;
 
 /**
  * Tree engine tests.
@@ -1089,11 +1087,11 @@ public class FxTreeTest {
         long typeId = EJBLookup.getTypeEngine().save(FxTypeEdit.createNew("TREETESTTYPE", new FxString("Tree test type"),
                 CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()), null));
 
-        EJBLookup.getAssignmentEngine().createProperty(typeId, FxPropertyEdit.createNew(
+        /*EJBLookup.getAssignmentEngine().createProperty(typeId, FxPropertyEdit.createNew(
                 "TESTPROP", new FxString(true, FxLanguage.ENGLISH, "TESTPROP"), new FxString(true, FxLanguage.ENGLISH, "TESTPROP"),
                 new FxMultiplicity(0, 5), CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
-                FxDataType.String1024).setMultiLang(false), "/");
-
+                FxDataType.String1024).setMultiLang(false), "/");*/
+        EJBLookup.getAssignmentEngine().save(FxPropertyAssignmentEdit.reuse("ROOT/FQN", "TREETESTTYPE", "/", "TESTPROP"), false);
         return typeId;
     }
 
@@ -1118,5 +1116,93 @@ public class FxTreeTest {
         tree.save(FxTreeNodeEdit.createNew(String.valueOf(contentPK)).setParentNodeId(parentNode.getId()).setReference(contentPK));
 
         return contentPK;
+    }
+
+    @Test
+    public void removeOpTest() throws FxApplicationException {
+        long typeId = createTestType();
+
+        try {
+            clearTrees();
+            TreeStorage treeStorage = new TreeStorage();
+            FxTreeMode mode = FxTreeMode.Edit;
+            FxTreeNodeEdit tne = FxTreeNodeEdit.createNew("TestRemove").setMode(mode);
+
+            FxTreeNode rootNode = tree.getNode(mode, FxTreeNode.ROOT_NODE);
+
+            FxPK pk = createTestContent(rootNode, typeId, "TestData123");
+            long nodeId = tree.getIdByPath(mode, "/TestData123");
+            Assert.assertEquals(tree.getNode(mode, nodeId).getReference().getId(), pk.getId());
+
+            //Unfile: remove node but keep content
+            tree.remove(tree.getNode(mode, nodeId), FxTreeRemoveOp.Unfile, false);
+            Assert.assertFalse(tree.exist(mode, nodeId), "Node should have been removed!");
+            try {
+                ce.getContentVersionInfo(pk);
+            } catch (FxApplicationException e) {
+                Assert.fail("Expected pk to exist!", e);
+            }
+
+            nodeId = tree.save(FxTreeNodeEdit.createNew("TestData4").setReference(pk).setMode(mode).setParentNodeId(FxTreeNode.ROOT_NODE));
+            Assert.assertEquals(tree.getNode(mode, nodeId).getReference().getId(), pk.getId()); //check exists and pk is correct
+
+            //Remove: remove node AND content
+            tree.remove(tree.getNode(mode, nodeId), FxTreeRemoveOp.Remove, false);
+            Assert.assertFalse(tree.exist(mode, nodeId), "Node should have been removed!");
+            try {
+                ce.getContentVersionInfo(pk);
+                Assert.fail("Content should no longer exist!");
+            } catch (FxApplicationException e) {
+                //expected
+            }
+
+            pk = createTestContent(rootNode, typeId, "TestData123");
+            nodeId = tree.getIdByPath(mode, "/TestData123");
+            Assert.assertEquals(tree.getNode(mode, nodeId).getReference().getId(), pk.getId()); //check exists and pk is correct
+
+            //RemoveSingleFiled: remove node AND content if content is not referenced from other nodes
+            //test1: like Remove the content should be removed
+            tree.remove(tree.getNode(mode, nodeId), FxTreeRemoveOp.RemoveSingleFiled, false);
+            Assert.assertFalse(tree.exist(mode, nodeId), "Node should have been removed!");
+            try {
+                ce.getContentVersionInfo(pk);
+                Assert.fail("Content should no longer exist!");
+            } catch (FxApplicationException e) {
+                //expected
+            }
+
+            pk = createTestContent(rootNode, typeId, "TestData123");
+            nodeId = tree.getIdByPath(mode, "/TestData123");
+            long nodeId2 = tree.save(FxTreeNodeEdit.createNew("TestData5").setReference(pk).setMode(mode).setParentNodeId(FxTreeNode.ROOT_NODE));
+            Assert.assertEquals(tree.getNode(mode, nodeId).getReference().getId(), pk.getId()); //check exists and pk is correct
+
+            //RemoveSingleFiled: remove node AND content if content is not referenced from other nodes
+            //test2: content should still exist since it is referenced by 2 nodes
+            tree.remove(tree.getNode(mode, nodeId), FxTreeRemoveOp.RemoveSingleFiled, false);
+            Assert.assertFalse(tree.exist(mode, nodeId), "Node should have been removed!");
+            Assert.assertTrue(tree.exist(mode, nodeId2), "Node2 should still exist!");
+            try {
+                ce.getContentVersionInfo(pk);
+            } catch (FxApplicationException e) {
+                Assert.fail("Expected pk to exist!", e);
+            }
+
+            nodeId = tree.save(FxTreeNodeEdit.createNew("TestData6").setReference(pk).setMode(mode).setParentNodeId(FxTreeNode.ROOT_NODE));
+            Assert.assertEquals(tree.getTree(mode, FxTreeNode.ROOT_NODE, 10).getDirectChildCount(), 2, "");
+
+            //UnfileAll: remove both nodes but not the content
+            tree.remove(tree.getNode(mode, nodeId), FxTreeRemoveOp.UnfileAll, false);
+            Assert.assertFalse(tree.exist(mode, nodeId), "Node should have been removed!");
+            Assert.assertFalse(tree.exist(mode, nodeId2), "Node2 should have been removed!");
+            try {
+                ce.getContentVersionInfo(pk);
+            } catch (FxApplicationException e) {
+                Assert.fail("Expected pk to exist!", e);
+            }
+        } finally {
+            // clean up
+            ce.removeForType(typeId);
+            ty.remove(typeId);
+        }
     }
 }

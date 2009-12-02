@@ -912,7 +912,7 @@ public class ContentSecurityTest {
                 content.setValue("/p1", "Another value");
                 content.save();
                 fail("User from group 2 should not be able to edit the content.");
-            } catch (FxCreateException e) {
+            } catch (FxNoAccessException e) {
                 // pass
             }
             // removing should work

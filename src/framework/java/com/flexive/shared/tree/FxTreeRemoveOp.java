@@ -45,6 +45,11 @@ public enum FxTreeRemoveOp {
     Unfile,
 
     /**
+     * Unfile all nodes that reference the same content
+     */
+    UnfileAll,
+
+    /**
      * Remove all referenced contents. If contents are referenced from other nodes, they will be unfiled for all other nodes as well.
      */
     Remove,

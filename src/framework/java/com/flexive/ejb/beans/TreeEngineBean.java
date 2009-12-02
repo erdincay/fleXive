@@ -449,12 +449,34 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
         try {
             con = Database.getDbConnection();
             final FxTreeNode subTree;
+            final TreeStorage treeStorage = StorageManager.getTreeStorage();
+
+            if (removeOp == FxTreeRemoveOp.UnfileAll) {
+                subTree = treeStorage.getNode(con, mode, nodeId);
+                FxPK refPK = subTree.getReference();
+                List<FxTreeNode> nodes = treeStorage.getNodesWithReference(con, mode, refPK.getId());
+                for (FxTreeNode node : nodes) {
+                    try {
+                        treeStorage.removeNode(con, mode, contentEngine, node.getId(), removeChildren);
+                    } catch (FxApplicationException e) {
+                        LOG.warn("Could not unfile node " + node, e);
+                    }
+                }
+                treeStorage.checkTreeIfEnabled(con, mode);
+                FxContext.get().setTreeWasModified();
+                return;
+            }
+
             if (removeOp != FxTreeRemoveOp.Unfile) {
-                subTree = removeChildren ? getTree(mode, nodeId, Integer.MAX_VALUE) : getNode(mode, nodeId);
+                subTree = removeChildren
+                        ? treeStorage.getTree(con, contentEngine, mode, nodeId, Integer.MAX_VALUE, PARTIAL_LOADING,
+                            FxContext.getUserTicket().getLanguage())
+                        : treeStorage.getNode(con, mode, nodeId);
             } else {
                 subTree = null;
             }
-            StorageManager.getTreeStorage().removeNode(con, mode, contentEngine, nodeId, removeChildren);
+            
+            treeStorage.removeNode(con, mode, contentEngine, nodeId, removeChildren);
             if (removeOp != FxTreeRemoveOp.Unfile) {
                 for (FxTreeNode currNode: subTree) {
                     if (currNode.getReference() != null) {
@@ -472,7 +494,7 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
                     }
                 }
             }
-            StorageManager.getTreeStorage().checkTreeIfEnabled(con, mode);
+            treeStorage.checkTreeIfEnabled(con, mode);
             FxContext.get().setTreeWasModified();
         } catch (FxNotFoundException nf) {
             // Node does not exist and we wanted to delete it anyway .. so this is no error
