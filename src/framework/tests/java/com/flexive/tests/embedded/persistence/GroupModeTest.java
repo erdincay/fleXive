@@ -34,6 +34,7 @@ package com.flexive.tests.embedded.persistence;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxPK;
+import com.flexive.shared.content.FxGroupData;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxCreateException;
 import com.flexive.shared.exceptions.FxLogoutFailedException;
@@ -199,6 +200,25 @@ public class GroupModeTest extends StructureTestBase {
         FxContent random = co.initialize(typeId).randomize();
         pk = co.save(random);
         co.load(pk);
+    }
+
+    /**
+     * Test exploding one-of groups
+     * see FX-747
+     *
+     * @throws FxApplicationException on errors
+     */
+    @Test
+    public void explodeTest() throws FxApplicationException {
+        FxContent exploded = co.initialize(typeId);
+        FxGroupData grpC = exploded.getGroupData("/C");
+        grpC.removeNonInternalData(); //empty the group
+        try {
+            grpC.explode(true);
+            Assert.assertEquals(grpC.getChildren().size(), 1, "Exactly one child assignment expected!");
+        } catch (Exception e) {
+            Assert.fail("Could not explode one-of group /C!", e);
+        }
     }
 
 }

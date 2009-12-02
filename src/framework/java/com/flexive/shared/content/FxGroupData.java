@@ -81,6 +81,16 @@ public class FxGroupData extends FxData {
     }
 
     /**
+     * Get the groups assignment
+     *
+     * @return FxGroupAssignment
+     * @since 3.1
+     */
+    public FxGroupAssignment getGroupAssignment() {
+        return (FxGroupAssignment) getAssignment();
+    }
+
+    /**
      * Get all child entries for this group
      *
      * @return child entries
@@ -626,8 +636,14 @@ public class FxGroupData extends FxData {
      * @param explodeChildGroups recursively explode all <i>existing</i> child groups?
      */
     public void explode(boolean explodeChildGroups) {
+        final boolean isOneOf = this.getGroupAssignment().getMode() == GroupMode.OneOf;
         for (String xpath : getCreateableChildren(false)) {
-            addEmptyChild(xpath, POSITION_BOTTOM);
+            FxData child = addEmptyChild(xpath, POSITION_BOTTOM);
+            if (isOneOf) {
+                if (explodeChildGroups && child.isGroup())
+                    ((FxGroupData) child).explode(true);
+                return; //can not "explode" any more children
+            }
         }
         if (explodeChildGroups) {
             // explode child groups
