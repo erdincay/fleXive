@@ -50,7 +50,6 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import static org.testng.Assert.*;
 import org.testng.annotations.*;
-import org.testng.Assert;
 
 import java.io.Serializable;
 import java.util.*;
@@ -308,7 +307,7 @@ public class ConfigurationTest {
          * Security-aware "cleanup" for parameters assuming that one can
          * only delete parameters if one can set them...
          *
-         * @throws FxApplicationException
+         * @throws FxApplicationException on errors
          */
         private void safeDelete() throws FxApplicationException {
             try {
@@ -704,7 +703,7 @@ public class ConfigurationTest {
      * @param parameter the parameter to be checked
      * @param expected  expected parameter value
      * @param <T>       value type
-     * @throws FxApplicationException
+     * @throws FxApplicationException on errors
      */
     private <T extends Serializable> void checkFallbacks(Parameter<T> parameter, T expected)
             throws FxApplicationException {
@@ -713,7 +712,7 @@ public class ConfigurationTest {
         fallbacks.addAll(parameter.getScope().getFallbacks());
         for (ParameterScope scope : fallbacks) {
             try {
-                T value = null;
+                T value;
                 final GenericConfigurationEngine config;
                 if (scope == ParameterScope.GLOBAL) {
                     config = globalConfiguration;
@@ -762,6 +761,7 @@ public class ConfigurationTest {
      * Assert that the current user may not access (update) the given parameter.
      *
      * @param parameter the parameter to be checked
+     * @param scope scope of the parameter
      */
     private void assertNoAccess(Parameter<?> parameter, ParameterScope scope) {
         UserTicket ticket = FxContext.getUserTicket();
@@ -785,6 +785,7 @@ public class ConfigurationTest {
      * Assert that the current user may access the given parameter.
      *
      * @param parameter the parameter to be checked
+     * @param scope scope of the parameter
      */
     private void assertAccess(Parameter<?> parameter, ParameterScope scope) {
         UserTicket ticket = FxContext.getUserTicket();

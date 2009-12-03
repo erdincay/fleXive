@@ -41,6 +41,7 @@ import com.flexive.shared.interfaces.UserConfigurationEngineLocal;
 import javax.ejb.*;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.ResultSet;
 
 /**
  * User configuration. Currently no security checks are included - a user
@@ -70,6 +71,11 @@ public class UserConfigurationEngineBean extends CustomDomainConfigurationImpl<L
     @Override
     protected void setDomain(PreparedStatement stmt, int column, Long domains) throws SQLException {
         stmt.setLong(column, domains);
+    }
+
+    @Override
+    protected Long getDomain(ResultSet rs, int column) throws SQLException {
+        return rs.getLong(column);
     }
 
     @Override

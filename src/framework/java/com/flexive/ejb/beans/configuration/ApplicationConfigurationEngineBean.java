@@ -9,6 +9,7 @@ import com.flexive.core.DatabaseConst;
 import javax.ejb.*;
 import java.sql.SQLException;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
 /**
  * @author Daniel Lichtenberger, UCS
@@ -39,6 +40,11 @@ public class ApplicationConfigurationEngineBean
     @Override
     protected void setDomain(PreparedStatement stmt, int column, String domain) throws SQLException {
         stmt.setString(column, domain);
+    }
+
+    @Override
+    protected String getDomain(ResultSet rs, int column) throws SQLException {
+        return rs.getString(column);
     }
 
     @Override

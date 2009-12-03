@@ -46,6 +46,7 @@ import org.apache.commons.logging.LogFactory;
 import javax.ejb.*;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.ResultSet;
 
 /**
  * NodeConfigurationEngine implementation
@@ -90,6 +91,11 @@ public class NodeConfigurationEngineBean extends CustomDomainConfigurationImpl<S
     @Override
     protected void setDomain(PreparedStatement stmt, int column, String domains) throws SQLException {
         stmt.setString(column, domains);
+    }
+
+    @Override
+    protected String getDomain(ResultSet rs, int column) throws SQLException {
+        return rs.getString(column);
     }
 
     /**

@@ -76,6 +76,8 @@ public abstract class CustomDomainConfigurationImpl<T extends Serializable> exte
     protected abstract T getCurrentDomain();
 
     protected abstract void setDomain(PreparedStatement stmt, int column, T domain) throws SQLException;
+    
+    protected abstract T getDomain(ResultSet rs, int column) throws SQLException;
 
     protected abstract boolean mayUpdate();
 
@@ -292,7 +294,7 @@ public abstract class CustomDomainConfigurationImpl<T extends Serializable> exte
             final ResultSet rs = stmt.executeQuery();
             final List<T> result = new ArrayList<T>();
             while (rs.next()) {
-                @SuppressWarnings({"unchecked"}) final T id = (T) rs.getObject(1);
+                @SuppressWarnings({"unchecked"}) final T id = getDomain(rs, 1);
                 result.add(id);
             }
             return result;
@@ -302,7 +304,6 @@ public abstract class CustomDomainConfigurationImpl<T extends Serializable> exte
             Database.closeObjects(getClass(), conn, stmt);
         }
     }
-
 
     /**
      * Store the given domain in the current thread's FxContext attribute map. This will override
