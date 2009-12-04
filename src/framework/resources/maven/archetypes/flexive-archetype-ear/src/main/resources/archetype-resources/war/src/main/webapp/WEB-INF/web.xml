@@ -50,11 +50,11 @@
         <filter-class>org.apache.myfaces.webapp.filter.ExtensionsFilter</filter-class>
         <init-param>
             <param-name>maxFileSize</param-name>
-            <param-value>20m</param-value>
+            <param-value>100m</param-value>
         </init-param>
         <init-param>
             <param-name>uploadThresholdSize</param-name>
-            <param-value>512m</param-value>
+            <param-value>512k</param-value>
         </init-param>
     </filter>
     <filter-mapping>
