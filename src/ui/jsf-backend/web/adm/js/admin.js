@@ -282,7 +282,7 @@ function beCeAjaxButtonRequest(reloadContentTree) {
 }
 
 function ceReloadTree() {
-    window.parent.getContentNavFrame().reloadContentTree();
+    parent.reloadContentTree();
 }
 
 /**
