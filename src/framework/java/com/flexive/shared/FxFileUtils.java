@@ -238,4 +238,44 @@ public class FxFileUtils {
         return file2.length() == file1.length();
     }
 
+    /**
+     * Load a file into a byte array
+     *
+     * @param file the file to load
+     * @return byte[]
+     * @throws IOException on errors
+     */
+    public static byte[] getBytes(File file) throws IOException {
+        InputStream is = null;
+        if (file.length() > Integer.MAX_VALUE)
+            throw new IOException("File " + file.getAbsolutePath() + " is too large!");
+
+        byte[] bytes = new byte[(int) file.length()];
+        try {
+            is = new FileInputStream(file);
+
+            int curr = 0;
+            int read;
+            while (curr < bytes.length && (read = is.read(bytes, curr, bytes.length - curr)) >= 0)
+                curr += read;
+            if (curr < bytes.length)
+                throw new IOException("Failed to fully read " + file.getAbsolutePath() + "!");
+        } finally {
+            if (is != null) is.close();
+        }
+        return bytes;
+    }
+
+    /**
+     * Load a file and base64 encode it
+     *
+     * @param file the file to load
+     * @return base64 encoded file content
+     * @throws IOException on errors
+     */
+    public static String loadBase64Encoded(File file) throws IOException {
+        if (file == null || !file.exists() || file.length() == 0)
+            return "";
+        return FxFormatUtils.encodeBase64(getBytes(file));
+    }
 }

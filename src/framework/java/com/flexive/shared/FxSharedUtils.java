@@ -1,7 +1,7 @@
 /***************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
- *  Copyright (c) 1999-2008
+ *  Copyright (c) 1999-2009
  *  UCS - unique computing solutions gmbh (http://www.ucs.at)
  *  All rights reserved
  *
@@ -43,7 +43,9 @@ import com.flexive.shared.workflow.StepDefinition;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
+
 import static org.apache.commons.lang.StringUtils.defaultString;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -1648,7 +1650,7 @@ public final class FxSharedUtils {
                 boolean inRawBlock = false;
                 while ((line = in.readLine()) != null) {
                     line = line.trim();
-                    if( inRawBlock ) {
+                    if (inRawBlock) {
                         if (line.startsWith("--") && line.indexOf("@END@") > 0) {
                             inRawBlock = false;
                             if (sql.length() > 0) {
@@ -1661,7 +1663,7 @@ public final class FxSharedUtils {
                         continue;
                     }
                     if (line.startsWith("//") || line.startsWith("--")) {
-                        if( line.indexOf("@START@") > 0 )
+                        if (line.indexOf("@START@") > 0)
                             inRawBlock = true;
                         continue;
                     }

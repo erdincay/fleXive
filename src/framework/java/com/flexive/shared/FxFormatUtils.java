@@ -280,6 +280,55 @@ public final class FxFormatUtils {
         return buf.toString();
     }
 
+    private static final int fillchar = '=';
+    private static final String cvt = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+    /**
+     * Encodes a byte array into a base64 String.
+     *
+     * @param data a byte array to encode.
+     * @return a base64 encode String.
+     */
+    public static String encodeBase64(byte[] data) {
+        return encodeBase64(data, data.length);
+    }
+
+    /**
+     * Encodes a byte array into a base64 String.
+     *
+     * @param data a byte array to encode.
+     * @param len  length of the byte array to use
+     * @return a base64 encode String.
+     */
+    public static String encodeBase64(byte[] data, int len) {
+        int c;
+        StringBuffer ret = new StringBuffer(((len / 3) + 1) * 4);
+        for (int i = 0; i < len; ++i) {
+            c = (data[i] >> 2) & 0x3f;
+            ret.append(cvt.charAt(c));
+            c = (data[i] << 4) & 0x3f;
+            if (++i < len)
+                c |= (data[i] >> 4) & 0x0f;
+            ret.append(cvt.charAt(c));
+            if (i < len) {
+                c = (data[i] << 2) & 0x3f;
+                if (++i < len)
+                    c |= (data[i] >> 6) & 0x03;
+                ret.append(cvt.charAt(c));
+            } else {
+                ++i;
+                ret.append((char) fillchar);
+            }
+            if (i < len) {
+                c = data[i] & 0x3f;
+                ret.append(cvt.charAt(c));
+            } else {
+                ret.append((char) fillchar);
+            }
+        }
+        return ret.toString();
+    }
+
     /**
      * Format a resource, replacing all {x} by the appropriate value in values.
      * If values is an instance of FxString the given localeId is used
