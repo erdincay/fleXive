@@ -134,7 +134,7 @@ public class FxFilter implements Filter {
                             : new FxResponseWrapper(servletResponse, cacheData);
 
             response.setXPoweredBy(X_POWERED_BY_VALUE);
-            if (request.isDynamicContent() && !response.containsHeader("Cache-Control")) {
+            if (request.isDynamicContent() && !response.containsHeader("Cache-Control") && !response.containsHeader("Expires")) {
                 response.disableBrowserCache();
             } else if (!response.containsHeader("last-modified") || !response.containsHeader("expires")) {
                 response.enableBrowserCache(FxResponseWrapper.CacheControl.PRIVATE, null, false);
@@ -146,6 +146,9 @@ public class FxFilter implements Filter {
                 if ("css".equalsIgnoreCase(request.getPageType()) &&
                         (response.getContentType() == null || !response.getContentType().startsWith("text/css"))) {
                     response.setContentType("text/css");
+                } else if ("js".equalsIgnoreCase(request.getPageType()) &&
+                        (response.getContentType() == null || !response.getContentType().contains("javascript"))) {
+                    response.setContentType("application/x-javascript");
                 }
 
                 if (!response.isClientWriteThrough()) {
