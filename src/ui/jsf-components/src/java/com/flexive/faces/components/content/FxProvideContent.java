@@ -279,7 +279,8 @@ public class FxProvideContent extends TagHandler {
 
                     } else if (lock.getUserId() != ticket.getUserId() && !wc.getGuiSettings().isAskLockedMode()
                             && !wc.getGuiSettings().isLockedContentOverride() && !wc.getGuiSettings().isTakeOver()) {
-                        new FxFacesMsgErr("ex.lock.content.locked").addToContext();
+                        new FxFacesMsgErr("ex.lock.content.locked" +
+                                (lock.getLockType() == FxLockType.Permanent ? ".permanent" : ".loose")).addToContext();
                         wc.getGuiSettings().setEditMode(false);
                     }
                 } catch (FxLockException e) {
