@@ -2655,14 +2655,33 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     private boolean uniqueConditionsMet(Connection con, FxEnvironment env, StringBuilder sql, UniqueMode mode,
                                         FxProperty prop, long typeId, FxPK pk, boolean throwException)
             throws SQLException, FxApplicationException {
+        /*List<FxPropertyAssignment> pa = CacheAdmin.getEnvironment().getPropertyAssignments(prop.getId(), true);
+        boolean hasFlat=false,hasHierarchical=false;
+        for (FxPropertyAssignment p : pa) {
+            if (hasFlat && hasHierarchical)
+                break;
+            if (p.isFlatStorageEntry())
+                hasFlat = true;
+            else
+                hasHierarchical = true;
+        }
+        if (hasHierarchical) {*/
         String typeChecks = null;
         sql.setLength(0);
         switch (mode) {
             case Global:
                 sql.append("SELECT tcd.XPATHMULT, COUNT(DISTINCT ccd.ID) FROM ").append(TBL_CONTENT_DATA).
                         append(" ccd, ").append(TBL_CONTENT_DATA).append(" tcd WHERE ccd.TPROP=").
-                        append(prop.getId()).append(" AND ccd.TPROP=tcd.TPROP AND ccd.ID<>tcd.ID AND tcd.ID=").append(pk.getId()).
+                        append(prop.getId()).append(" AND ccd.TPROP=tcd.TPROP AND ccd.ID<>tcd.ID").
                         append(" AND ccd.LANG=tcd.LANG");
+                if (pk != null)
+                    sql.append(" AND tcd.ID=").append(pk.getId());
+                else {
+                    //prevent checks across versions
+                    sql.append(" AND NOT(ccd.ID=tcd.ID AND ccd.VER<>tcd.VER)").
+                            //prevent self-references
+                                    append(" AND NOT(ccd.ID=tcd.ID AND ccd.VER=tcd.VER AND ccd.ASSIGN=tcd.ASSIGN AND tcd.XMULT=ccd.XMULT)");
+                }
                 break;
             case DerivedTypes:
                 //gen list of parent and derived types
@@ -2691,19 +2710,28 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 sql.append(" AND ccd.LANG=tcd.LANG");
                 break;
         }
-        if (sql.length() == 0)
-            return true;
-        addColumnComparator(sql, prop, "ccd", "tcd");
-        sql.append(" GROUP BY tcd.XPATHMULT");
-        //noinspection CaughtExceptionImmediatelyRethrown
-        try {
-            doCheckUniqueConstraint(con, sql.toString(), prop.getUniqueMode());
-        } catch (FxApplicationException e) {
-            LOG.warn("SQL:\n" + sql);
-            if (throwException)
-                throw e;
-            return false;
+        if (sql.length() > 0) {
+            addColumnComparator(sql, prop, "ccd", "tcd");
+            sql.append(" GROUP BY tcd.XPATHMULT");
+
+            Statement s = null;
+            try {
+                s = con.createStatement();
+                ResultSet rs = s.executeQuery(sql.toString());
+                if (rs != null && rs.next()) {
+                    if (mode == UniqueMode.Instance || rs.getInt(2) > 0) {
+                        if (throwException)
+                            //noinspection ThrowableInstanceNeverThrown
+                            throw new FxConstraintViolationException("ex.content.contraint.unique.xpath", rs.getString(1), mode).setAffectedXPath(rs.getString(1), FxContentExceptionCause.UniqueConstraintViolated);
+                        else
+                            return false;
+                    }
+                }
+            } finally {
+                Database.closeObjects(GenericHierarchicalStorage.class, s);
+            }
         }
+//        }
         return true;
     }
 
@@ -2791,35 +2819,6 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         for (FxType child : type.getDerivedTypes()) {
             th.append(',').append(child.getId());
             buildTypeChildren(th, child);
-        }
-    }
-
-    /**
-     * Perform unique mode checks
-     *
-     * @param con        an open and valid connection
-     * @param sql        current sql statement with checks
-     * @param uniqueMode the unique mode to check
-     * @throws SQLException           on errors
-     * @throws FxApplicationException on unique constraint violations
-     */
-    private void doCheckUniqueConstraint(Connection con, String sql, UniqueMode uniqueMode) throws SQLException, FxApplicationException {
-        Statement s = null;
-        try {
-            s = con.createStatement();
-            ResultSet rs = s.executeQuery(sql);
-            if (rs != null && rs.next()) {
-                if (uniqueMode == UniqueMode.Instance || rs.getInt(2) > 0)
-                    //noinspection ThrowableInstanceNeverThrown
-                    throw new FxConstraintViolationException("ex.content.contraint.unique.xpath", rs.getString(1), uniqueMode).setAffectedXPath(rs.getString(1), FxContentExceptionCause.UniqueConstraintViolated);
-            }
-        } finally {
-            if (s != null)
-                try {
-                    s.close();
-                } catch (SQLException e) {
-                    //ignore
-                }
         }
     }
 

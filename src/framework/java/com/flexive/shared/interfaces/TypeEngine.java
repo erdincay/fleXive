@@ -99,4 +99,22 @@ public interface TypeEngine {
      * @since 3.1
      */
     public void flatten(String storage, long typeId) throws FxApplicationException;
+
+    /**
+     * Migrate all assignments of the given type that can be stored in the default flat storage
+     *
+     * @param typeId  id of the type
+     * @throws FxApplicationException on errors
+     * @since 3.1
+     */
+    public void flatten(long typeId) throws FxApplicationException;
+
+    /**
+     * Migrate all assignments of the given type that are stored in a flat storage to the hierarchical storage
+     *
+     * @param typeId  id of the type
+     * @throws FxApplicationException on errors
+     * @since 3.1
+     */
+    public void unflatten(long typeId) throws FxApplicationException;
 }

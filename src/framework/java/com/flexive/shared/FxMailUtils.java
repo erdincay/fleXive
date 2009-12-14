@@ -52,6 +52,20 @@ public class FxMailUtils {
     private static final String BOUNDARY2 = "FxMuLtIpArT2BoUnDaRy";
 
     /**
+     * Simple check for valid email address
+     *
+     * @param email address to check
+     * @return valid
+     */
+    public static boolean isValidEmail(String email) {
+        if (StringUtils.isEmpty(email))
+            return false;
+        if (email.indexOf('.') <= 0 || email.indexOf('@') <= 0)
+            return false;
+        return true;
+    }
+
+    /**
      * Encode a file as email attachment
      *
      * @param mimeType mime type
@@ -94,7 +108,7 @@ public class FxMailUtils {
      * @throws FxApplicationException on errors
      */
     public static void sendMail(String SMTPServer, String subject, String textBody, String htmlBody, String to,
-                                 String cc, String bcc, String from, String replyTo, String... mimeAttachments) throws FxApplicationException {
+                                String cc, String bcc, String from, String replyTo, String... mimeAttachments) throws FxApplicationException {
 
         try {
             // Set the mail server

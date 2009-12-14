@@ -41,8 +41,10 @@ import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.FxString;
+
 import static com.flexive.tests.embedded.FxTestUtils.login;
 import static com.flexive.tests.embedded.FxTestUtils.logout;
+
 import com.flexive.tests.embedded.TestUsers;
 import org.apache.commons.lang.RandomStringUtils;
 import org.testng.annotations.AfterClass;
@@ -92,28 +94,41 @@ public class UniqueModeTest extends StructureTestBase {
         logout();
     }
 
-    private void createProperty(long typeId, ACL acl, String name, String XPath, UniqueMode mode) throws FxApplicationException {
+    private void createProperty(long typeId, ACL acl, String name, String XPath, UniqueMode mode, int maxMultiplicity) throws FxApplicationException {
         ass.createProperty(
                 typeId,
                 FxPropertyEdit.createNew(name, new FxString("UniqueMode." + mode + " UnitTest property " + name),
-                        new FxString("hint..."), new FxMultiplicity(1, 2), acl, FxDataType.String1024).setUniqueMode(mode),
+                        new FxString("hint..."), new FxMultiplicity(1, maxMultiplicity), acl, FxDataType.String1024).setUniqueMode(mode),
                 XPath);
     }
 
-    private long[] createTypes(UniqueMode mode) throws FxApplicationException {
+    private long[] createTypes(UniqueMode mode, int maxMultiplicity, boolean flatten) throws FxApplicationException {
         ACL structACL = CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId());
         long typeA = type.save(FxTypeEdit.createNew(TYPE_A, new FxString("Test type " + TYPE_A),
                 structACL, null));
-        createProperty(typeA, structACL, PROP_NAME, "/", mode);
+        createProperty(typeA, structACL, PROP_NAME, "/", mode, maxMultiplicity);
+        if (flatten)
+            type.flatten(typeA);
+        else
+            type.unflatten(typeA);
         long typeB = type.save(FxTypeEdit.createNew(TYPE_B, new FxString("Test type " + TYPE_B),
                 structACL,
                 CacheAdmin.getEnvironment().getType(typeA)));
+        if (flatten)
+            type.flatten(typeB);
+        else
+            type.unflatten(typeB);
         long typeC = type.save(FxTypeEdit.createNew(TYPE_C, new FxString("Test type " + TYPE_C), structACL,
                 CacheAdmin.getEnvironment().getType(typeB)));
+        type.unflatten(typeC); //always unflatten C to have a mixed case
         long typeD = type.save(FxTypeEdit.createNew(TYPE_D, new FxString("Test type " + TYPE_D), structACL, null));
         ass.save(FxPropertyAssignmentEdit.createNew((FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(TYPE_A + "/" + PROP_NAME),
                 CacheAdmin.getEnvironment().getType(TYPE_D),
                 PROP_NAME, "/").setEnabled(true), false);
+        if (flatten)
+            type.flatten(typeD);
+        else
+            type.unflatten(typeD);
         return new long[]{typeA, typeB, typeC, typeD};
     }
 
@@ -149,8 +164,17 @@ public class UniqueModeTest extends StructureTestBase {
     }
 
     @Test
-    public void uniqueGlobal() throws FxApplicationException {
-        long[] types = createTypes(UniqueMode.Global);
+    public void uniqueGlobalFlat() throws FxApplicationException {
+        uniqueGlobal(true);
+    }
+
+    @Test
+    public void uniqueGlobalHierarchical() throws FxApplicationException {
+        uniqueGlobal(false);
+    }
+
+    private void uniqueGlobal(boolean flatten) throws FxApplicationException {
+        long[] types = createTypes(UniqueMode.Global, 1, flatten);
         try {
             FxContent c = co.initialize(types[A]);
             c.setValue(XPATH, V1A);
@@ -196,8 +220,17 @@ public class UniqueModeTest extends StructureTestBase {
     }
 
     @Test
-    public void uniqueType() throws FxApplicationException {
-        long[] types = createTypes(UniqueMode.Type);
+    public void uniqueTypeFlat() throws FxApplicationException {
+        uniqueType(true);
+    }
+
+    @Test
+    public void uniqueTypeHierarchical() throws FxApplicationException {
+        uniqueType(false);
+    }
+
+    private void uniqueType(boolean flatten) throws FxApplicationException {
+        long[] types = createTypes(UniqueMode.Type, 1, flatten);
         try {
             FxContent c = co.initialize(types[A]);
             c.setValue(XPATH, V1A);
@@ -229,8 +262,17 @@ public class UniqueModeTest extends StructureTestBase {
     }
 
     @Test
-    public void uniqueDerivedTypes() throws FxApplicationException {
-        long[] types = createTypes(UniqueMode.DerivedTypes);
+    public void uniqueDerivedTypesFlat() throws FxApplicationException {
+        uniqueDerivedTypes(true);
+    }
+
+    @Test
+    public void uniqueDerivedTypesHierarchical() throws FxApplicationException {
+        uniqueDerivedTypes(false);
+    }
+
+    private void uniqueDerivedTypes(boolean flatten) throws FxApplicationException {
+        long[] types = createTypes(UniqueMode.DerivedTypes, 1, flatten);
         try {
             FxContent c = co.initialize(types[B]);
             c.setValue(XPATH, V2);
@@ -270,7 +312,7 @@ public class UniqueModeTest extends StructureTestBase {
     }
 
     private void uniqueWithinInstance(UniqueMode mode) throws FxApplicationException {
-        long[] types = createTypes(mode);
+        long[] types = createTypes(mode, 2, false);
         try {
             FxContent c = co.initialize(types[A]);
             c.setValue(XPATH, V2);

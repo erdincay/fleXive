@@ -34,6 +34,7 @@ package com.flexive.ejb.beans.structure;
 import com.flexive.core.Database;
 import static com.flexive.core.DatabaseConst.*;
 import com.flexive.core.LifeCycleInfoImpl;
+import com.flexive.core.flatstorage.FxFlatStorage;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.core.conversion.ConversionEngine;
 import com.flexive.core.flatstorage.FxFlatStorageManager;
@@ -293,6 +294,53 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
     public void flatten(String storage, long typeId) throws FxApplicationException {
         try {
             FxFlatStorageManager.getInstance().flattenType(storage, CacheAdmin.getEnvironment().getType(typeId));
+        } catch (FxApplicationException e) {
+            EJBUtils.rollback(ctx);
+            throw e;
+        }
+        try {
+            StructureLoader.reload(null);
+        } catch (FxCacheException e) {
+            EJBUtils.rollback(ctx);
+            throw new FxUpdateException(e, "ex.cache", e.getMessage());
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void flatten(long typeId) throws FxApplicationException {
+        try {
+            final FxFlatStorage flatStorage = FxFlatStorageManager.getInstance();
+            flatStorage.flattenType(flatStorage.getDefaultStorage(), CacheAdmin.getEnvironment().getType(typeId));
+        } catch (FxApplicationException e) {
+            EJBUtils.rollback(ctx);
+            throw e;
+        }
+        try {
+            StructureLoader.reload(null);
+        } catch (FxCacheException e) {
+            EJBUtils.rollback(ctx);
+            throw new FxUpdateException(e, "ex.cache", e.getMessage());
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void unflatten(long typeId) throws FxApplicationException {
+        try {
+            final FxFlatStorage flatStorage = FxFlatStorageManager.getInstance();
+            final FxType type = CacheAdmin.getEnvironment().getType(typeId);
+            for (FxAssignment as : type.getAllAssignments()) {
+                if (!(as instanceof FxPropertyAssignment))
+                    continue;
+                FxPropertyAssignment pa = (FxPropertyAssignment) as;
+                if (pa.isFlatStorageEntry())
+                    flatStorage.unflatten(pa);
+            }
         } catch (FxApplicationException e) {
             EJBUtils.rollback(ctx);
             throw e;

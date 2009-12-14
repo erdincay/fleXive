@@ -1304,7 +1304,8 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
         boolean changes = false;
         boolean success = false;
         StringBuilder changesDesc = new StringBuilder(200);
-        FxProperty org = CacheAdmin.getEnvironment().getProperty(prop.getId());
+        final FxEnvironment env = CacheAdmin.getEnvironment();
+        FxProperty org = env.getProperty(prop.getId());
         PreparedStatement ps = null;
 
         try {
@@ -1390,7 +1391,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                             //check if the type matches the instance
                             checkReferencedType(con, (FxReference) prop.getDefaultValue(), prop.getReferencedType());
                             //check for referencing assignments
-                            final List<FxPropertyAssignment> refAssignments = CacheAdmin.getEnvironment().getReferencingPropertyAssignments(prop.getId());
+                            final List<FxPropertyAssignment> refAssignments = env.getReferencingPropertyAssignments(prop.getId());
                             for (FxPropertyAssignment refAssignment : refAssignments) {
                                 if (refAssignment.hasAssignmentDefaultValue() && refAssignment.getDefaultValue() instanceof FxReference)
                                     checkReferencedType(con, (FxReference) refAssignment.getDefaultValue(), prop.getReferencedType());
@@ -1459,14 +1460,23 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 if (org.getUniqueMode() != prop.getUniqueMode()) {
                     boolean allowChange = getPropertyInstanceCount(org.getId()) == 0 || prop.getUniqueMode().equals(UniqueMode.None);
                     if (!allowChange) {
-                        boolean check = true;
-                        for (FxType type : CacheAdmin.getEnvironment().getTypesForProperty(prop.getId())) {
-                            check = StorageManager.getContentStorage(TypeStorageMode.Hierarchical).
-                                    uniqueConditionValid(con, prop.getUniqueMode(), prop, type.getId(), null);
-                            if (!check)
+                        boolean hasFlat = false;
+                        for (FxPropertyAssignment pa : env.getPropertyAssignments(prop.getId(), true)) {
+                            if (pa.isFlatStorageEntry()) {
+                                hasFlat = true;
                                 break;
+                            }
                         }
-                        allowChange = check;
+                        if (!hasFlat) {
+                            boolean check = true;
+                            for (FxType type : env.getTypesForProperty(prop.getId())) {
+                                check = StorageManager.getContentStorage(TypeStorageMode.Hierarchical).
+                                        uniqueConditionValid(con, prop.getUniqueMode(), prop, type.getId(), null);
+                                if (!check)
+                                    break;
+                            }
+                            allowChange = check;
+                        }
                     }
                     if (allowChange) {
                         ps = con.prepareStatement("UPDATE " + TBL_STRUCT_PROPERTIES + " SET UNIQUEMODE=? WHERE ID=?");
@@ -1521,7 +1531,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                         //check if the type matches the instance
                         checkReferencedType(con, (FxReference) defValue, prop.getReferencedType());
                         //check for referencing assignments
-                        final List<FxPropertyAssignment> refAssignments = CacheAdmin.getEnvironment().getReferencingPropertyAssignments(prop.getId());
+                        final List<FxPropertyAssignment> refAssignments = env.getReferencingPropertyAssignments(prop.getId());
                         for (FxPropertyAssignment refAssignment : refAssignments) {
                             if (refAssignment.hasAssignmentDefaultValue() && refAssignment.getDefaultValue() instanceof FxReference)
                                 checkReferencedType(con, (FxReference) refAssignment.getDefaultValue(), prop.getReferencedType());
