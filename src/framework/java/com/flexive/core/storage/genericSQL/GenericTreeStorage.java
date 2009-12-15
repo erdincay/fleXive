@@ -248,7 +248,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
             else if (reference != null && !reference.isNew()) {
                 try {
                     final FxString caption = ce.load(reference).getCaption();
-                    if (!StringUtils.isEmpty(caption.getBestTranslation()))
+                    if (caption != null && !StringUtils.isEmpty(caption.getBestTranslation()))
                         name = caption.getBestTranslation();
                     else name = "" + nodeId;
                 } catch (FxApplicationException e) {
