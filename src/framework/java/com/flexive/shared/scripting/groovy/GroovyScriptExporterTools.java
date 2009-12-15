@@ -1360,8 +1360,8 @@ public final class GroovyScriptExporterTools {
             }
         }
 
-        final String scriptCode = processScriptCode(si.getCode());
-
+        // final String scriptCode = processScriptCode(si.getCode());
+        final String scriptCode = si.getCode();
         // load type in script, then append type name
         script.append("\n// ***** SCRIPT START ***** \n")
                 .append("currentType = CacheAdmin.getEnvironment().getType(\"")
@@ -1406,7 +1406,8 @@ public final class GroovyScriptExporterTools {
             }
         }
 
-        final String scriptCode = processScriptCode(si.getCode());
+        // final String scriptCode = processScriptCode(si.getCode());
+        final String scriptCode = si.getCode();
         // load assignment, then attach script to event and assignment id
         script.append("\n// ***** SCRIPT START ***** \n")
                 .append("currentAssignment = CacheAdmin.getEnvironment().getAssignment(\"")
@@ -1482,16 +1483,24 @@ public final class GroovyScriptExporterTools {
      */
     private static String createScriptOverrideCode(FxScriptInfo si, String event, boolean isType) {
         StringBuilder script = new StringBuilder(100);
-        script.append("if(scriptOverride && CacheAdmin.getEnvironment().scriptExists(\"")
+        script.append("try {\n")
+                .append("\tif(scriptOverride && CacheAdmin.getEnvironment().scriptExists(\"")
                 .append(si.getName())
                 .append("\")) {\n")
-                .append("\tscriptId = CacheAdmin.getEnvironment().getScript(\"")
+                .append("\t\tdef scriptId = CacheAdmin.getEnvironment().getScript(\"")
                 .append(si.getName())
                 .append("\").getId()\n")
-                .append("\tEJBLookup.getScriptingEngine().updateScriptCode(scriptId, scriptCode)\n")
-                .append("} else {\n\t")
+                .append("\t\tEJBLookup.getScriptingEngine().updateScriptCode(scriptId, scriptCode)\n");
+
+        if (isType)
+            script.append("\t\tsiType = CacheAdmin.getEnvironment().getScript(scriptId)\n");
+        else
+            script.append("\t\tsiAss = CacheAdmin.getEnvironment().getScript(scriptId)\n");
+
+        script.append("\t} else {\n\t\t")
                 .append(createScriptEJBLookup(si, event, isType))
-                .append("}\n");
+                .append("\t}\n")
+                .append("} catch(FxApplicationException e) {\n // do nothing\n}\n");
 
         script.trimToSize();
         return script.toString();
