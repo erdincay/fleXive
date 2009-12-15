@@ -198,7 +198,7 @@ public class ContentTreeEditor implements Serializable {
         try {
             TreeEngine tree = getTreeEngine();
             for (long referenceId : referenceIds) {
-                tree.save(FxTreeNodeEdit.createNew(String.valueOf(referenceId)).setParentNodeId(nodeId).setReference(new FxPK(referenceId)));
+                tree.save(FxTreeNodeEdit.createNew("").setParentNodeId(nodeId).setReference(new FxPK(referenceId)));
 //                tree.createNode(nodeId, String.valueOf(referenceId), referenceId);
             }
         } catch (Exception e) {

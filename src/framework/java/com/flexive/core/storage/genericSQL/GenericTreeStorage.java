@@ -242,8 +242,21 @@ public abstract class GenericTreeStorage implements TreeStorage {
                                                long nodeId, String name, FxString label, FxPK reference, boolean activateContent) throws FxApplicationException {
         if (nodeId < 0)
             nodeId = seq.getId(mode.getSequencer());
-        if (StringUtils.isEmpty(name))
-            name = "" + nodeId;
+        if (StringUtils.isEmpty(name) || "_".equals(name)) {
+            if(!StringUtils.isEmpty(label.getBestTranslation()))
+                name = label.getBestTranslation();
+            else if (reference != null && !reference.isNew()) {
+                try {
+                    final FxString caption = ce.load(reference).getCaption();
+                    if (!StringUtils.isEmpty(caption.getBestTranslation()))
+                        name = caption.getBestTranslation();
+                    else name = "" + nodeId;
+                } catch (FxApplicationException e) {
+                    name = "" + nodeId;
+                }
+            } else
+                name = "" + nodeId;
+        }
         name = FxFormatUtils.escapeTreePath(name);
         //check or optionally create the reference
         if (reference == null || reference.isNew()) {

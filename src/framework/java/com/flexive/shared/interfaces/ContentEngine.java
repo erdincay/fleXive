@@ -252,7 +252,7 @@ public interface ContentEngine {
     long getBinaryId(FxPK pk, String xpath, FxLanguage language, boolean fallbackToDefault) throws FxApplicationException;
 
     /**
-     * Load binary meta data
+     * Load binary meta data (only allowed for global supervisor!)
      *
      * @param id id of the binary
      * @return metadata
