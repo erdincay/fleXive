@@ -94,9 +94,11 @@
                     <a4j:outputPanel id="#{_ceContent.editorId}_settings">
                         <c:if test="#{not _ceContent.guiSettings.disableAcl}">
                              <!-- ACL -->
+<!--
                             <ui:fragment rendered="#{not _ceContent.supportSecurity}">
                                 <em>#{fxMessageBean['ContentEditor.msg.noSecurity']}</em>
                             </ui:fragment>
+-->
                             <ui:fragment rendered="#{_ceContent.supportSecurity}">
                                 <ui:fragment rendered="#{not _ceContent.multipleContentACLs}">
                                     <fx:formRow labelKey="ContentEditor.field.ACL" id="#{_ceContent.editorId}_acl">

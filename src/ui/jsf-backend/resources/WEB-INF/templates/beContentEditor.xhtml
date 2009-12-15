@@ -59,9 +59,11 @@ disableTab... false if the <adm:tab/> component should be rendered, true otherwi
                         </fx:formRow>
 
                         <!-- ACL -->
+<!--
                         <ui:fragment rendered="#{not myContent.supportSecurity}">
                             <em>#{fxMessageBean['Content.msg.noSecurity']}</em>
                         </ui:fragment>
+-->
                         <ui:fragment rendered="#{myContent.supportSecurity}">
                             <ui:fragment rendered="#{not myContent.multipleContentACLs}">
                                 <fx:formRow labelKey="ContentEditor.field.ACL" id="#{myContent.editorId}_acl">
