@@ -35,6 +35,7 @@ import com.flexive.shared.exceptions.FxRuntimeException;
 import com.flexive.shared.value.FxValue;
 import com.flexive.shared.value.mapper.InputMapper;
 import com.flexive.faces.FxJsfComponentUtils;
+import com.flexive.shared.value.renderer.FxValueFormatter;
 import com.sun.facelets.FaceletContext;
 import com.sun.facelets.el.VariableMapperWrapper;
 import com.sun.facelets.tag.TagAttribute;
@@ -121,6 +122,12 @@ public class FxValueHandler extends TagHandler {
             assignAttribute(ctx, mapper, "readOnly", Boolean.class);
             assignAttribute(ctx, mapper, "decorate", Boolean.class);
             assignAttribute(ctx, mapper, "filter", Boolean.class);
+            assignAttribute(ctx, mapper, "forceLineInput", Boolean.class);
+            assignAttribute(ctx, mapper, "valueFormatter", FxValueFormatter.class);
+            assignAttribute(ctx, mapper, "containerDivClass", String.class);
+            assignAttribute(ctx, mapper, "autocompleteHandler", String.class);
+            assignAttribute(ctx, mapper, "disableMultiLanguage", Boolean.class);
+            assignAttribute(ctx, mapper, "disableLytebox", Boolean.class);
 
             // TODO: cache templates/use a facelet ResourceResolver to encapsulate this
             ctx.includeFacelet(parent, Thread.currentThread().getContextClassLoader().getResource(TEMPLATE_ROOT + template));

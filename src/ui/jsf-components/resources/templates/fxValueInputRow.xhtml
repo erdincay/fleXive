@@ -26,6 +26,12 @@ onchange = a javascript onchange handler
 readOnly = true to enable read-only mode
 decorate = if false, no label/input div will be rendered, only the output of the fxValueInput component
 filter = filter HTML output?
+forceLineInput = force a single line of output (e.g. for query forms)
+valueFormatter = A FxValueFormatter to be used for rendering the value (in read-only mode only). If not specified, the JSF renderer will choose the appropriate default formatter for the actual value class.
+containerDivClass = If this CSS class property is set, the component will be embedded in a div-container using this CSS class as style.
+autocompleteHandler = An instance of the flexive.yui.AutoCompleteHandler javascript class. This class provides a query method for a client-side autocomplete widget provided by Yahoo UI, as well as a method for formatting the response.
+disableMultiLanguage = Disables multi language support even if the FxValue object is multilingual. Only the default translation will be displayed and updated. 
+disableLytebox = Set this property to true if the Lytebox  javascript library used for rendering inline previews of images should not be used.
 
 <ui:composition>
 
@@ -44,7 +50,9 @@ filter = filter HTML output?
     <c:set var="inputId" value="#{id}"/>
     <c:if test="#{decorate}">
         <fx:formRow id="#{id}_input_" label="#{label}">
-            <fx:fxValueInput id="#{inputId}" value="#{value}" inputMapper="#{inputMapper}" onchange="#{onchange}" readOnly="#{readOnly}" filter="#{filter}"/>
+            <fx:fxValueInput id="#{inputId}" value="#{value}" inputMapper="#{inputMapper}" onchange="#{onchange}" readOnly="#{readOnly}" filter="#{filter}"
+                    forceLineInput="#{forceLineInput}" valueFormatter="#{valueFormatter}" containerDivClass="#{containerDivClass}"
+                    autocompleteHandler="#{autocompleteHandler}" disableMultiLanguage="#{disableMultiLanguage}" disableLytebox="#{disableLytebox}"/>
         </fx:formRow>
     </c:if>
     <c:if test="#{!decorate}"><fx:fxValueInput id="#{id}" value="#{value}" inputMapper="#{inputMapper}" onchange="#{onchange}" readOnly="#{readOnly}" filter="#{filter}"/></c:if>

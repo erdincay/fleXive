@@ -477,7 +477,8 @@ public class FxValueInput extends UIInput {
     @Override
     public void encodeBegin(FacesContext facesContext) throws IOException {
         super.encodeBegin(facesContext);
-        if( getContainerDivClass() != null) {
+        // TODO move to FxValueInputRenderer
+        if (StringUtils.isNotBlank(getContainerDivClass())) {
             final ResponseWriter writer = facesContext.getResponseWriter();
             writer.startElement("div", null);
             writer.writeAttribute("class", getContainerDivClass(), null);
@@ -487,7 +488,7 @@ public class FxValueInput extends UIInput {
 
     @Override
     public void encodeEnd(FacesContext facesContext) throws IOException {
-        if( containerDivClass != null) {
+        if (StringUtils.isNotBlank(getContainerDivClass())) {
             final ResponseWriter writer = facesContext.getResponseWriter();
             writer.endElement("div");
         }
