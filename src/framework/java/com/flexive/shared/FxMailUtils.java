@@ -32,6 +32,10 @@
 package com.flexive.shared;
 
 import com.flexive.shared.exceptions.FxApplicationException;
+import org.apache.commons.codec.EncoderException;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.codec.net.QuotedPrintableCodec;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 
 import javax.mail.internet.AddressException;
@@ -39,7 +43,9 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.mail.util.ByteArrayDataSource;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Email Utilities.
@@ -66,6 +72,34 @@ public class FxMailUtils {
     }
 
     /**
+     * Encode an input stream as email attachment
+     *
+     * @param mimeType mime type
+     * @param fileName filename
+     * @param input     the data to encode
+     * @return file encoded as email attachment
+     * @throws IOException on errors
+     */
+    public static String encodeAttachment(String mimeType, String fileName, InputStream input) throws IOException {
+        final byte[] data = IOUtils.toByteArray(input);
+        final StringBuilder encoded = new StringBuilder(data.length * 4);
+        encoded.append("Content-Type: ").append(mimeType).append(";\n");
+        encoded.append(" name=\"").append(fileName).append("\"\n");
+        encoded.append("Content-Transfer-Encoding: base64\n");
+        encoded.append("Content-Disposition: attachment;\n");
+        encoded.append(" filename=\"").append(fileName).append("\"\n\n");
+        int k;
+        final String attachmentEncoded = new String(Base64.encodeBase64(data), "UTF-8");
+        int kLines = attachmentEncoded.length() / 74;
+        for (k = 0; k < kLines; k++) {
+            encoded.append(attachmentEncoded.substring(k * 74, k * 74 + 74)).append("\n");
+        }
+        if (kLines * 74 < attachmentEncoded.length())
+            encoded.append(attachmentEncoded.substring(k * 74, attachmentEncoded.length())).append("\n");
+        return encoded.toString();
+    }
+
+    /**
      * Encode a file as email attachment
      *
      * @param mimeType mime type
@@ -75,21 +109,7 @@ public class FxMailUtils {
      * @throws IOException on errors
      */
     public static String encodeAttachment(String mimeType, String fileName, File data) throws IOException {
-        StringBuilder encoded = new StringBuilder((int) data.length() * 4);
-        encoded.append("Content-Type: ").append(mimeType).append(";\n");
-        encoded.append(" name=\"").append(fileName).append("\"\n");
-        encoded.append("Content-Transfer-Encoding: base64\n");
-        encoded.append("Content-Disposition: attachment;\n");
-        encoded.append(" filename=\"").append(fileName).append("\"\n\n");
-        int k;
-        String attachmentEncoded = FxFileUtils.loadBase64Encoded(data);
-        int kLines = attachmentEncoded.length() / 74;
-        for (k = 0; k < kLines; k++) {
-            encoded.append(attachmentEncoded.substring(k * 74, k * 74 + 74)).append("\n");
-        }
-        if (kLines * 74 < attachmentEncoded.length())
-            encoded.append(attachmentEncoded.substring(k * 74, attachmentEncoded.length())).append("\n");
-        return encoded.toString();
+        return encodeAttachment(mimeType, fileName, new FileInputStream(data));
     }
 
     /**
@@ -153,8 +173,13 @@ public class FxMailUtils {
 
             if (textBody.length() > 0) {
                 body.append("--" + BOUNDARY1 + "\n");
-                body.append("Content-Type: text/plain\n\n");
-                body.append(textBody).append("\n");
+                body.append("Content-Type: text/plain; charset=\"UTF-8\"\n");
+                body.append("Content-Transfer-Encoding: quoted-printable\n\n");
+                try {
+                    body.append(new QuotedPrintableCodec("UTF-8").encode(textBody)).append("\n");
+                } catch (EncoderException e) {
+                    throw new IllegalArgumentException("Failed to encode message: " + e.getMessage(), e);
+                }
             }
             if (htmlBody.length() > 0) {
                 body.append("--" + BOUNDARY1 + "\n");
