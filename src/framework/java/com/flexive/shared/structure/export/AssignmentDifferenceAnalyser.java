@@ -31,12 +31,14 @@
  ***************************************************************/
 package com.flexive.shared.structure.export;
 
-import com.flexive.shared.structure.*;
-import com.flexive.shared.value.FxValue;
 import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.structure.*;
+import com.flexive.shared.value.FxString;
+import com.flexive.shared.value.FxValue;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Difference Analyser - Records any differences between a base property / group and an FxAssignment (if within the
@@ -87,16 +89,10 @@ public final class AssignmentDifferenceAnalyser {
             result.add("defaultValue");
         }
 
-        final String propHint = prop.getHint().getDefaultTranslation();
-        final String paHint = pa.getHint().getDefaultTranslation();
-        if (propHint != null && paHint != null) {
-            if (!propHint.equals(paHint))
-                result.add("hint");
-        } else if (propHint == null && paHint != null) {
+        if(compareTranslations(prop.getHint(), prop.getHint().getTranslatedLanguages(), pa.getHint(), pa.getHint().getTranslatedLanguages()))
             result.add("hint");
-        }
 
-        if (!prop.getLabel().getDefaultTranslation().equals(pa.getLabel().getDefaultTranslation()))
+        if(compareTranslations(prop.getLabel(), prop.getLabel().getTranslatedLanguages(), pa.getLabel(), pa.getLabel().getTranslatedLanguages()))
             result.add("label");
 
         if (prop.getMultiLines() != pa.getMultiLines())
@@ -172,16 +168,10 @@ public final class AssignmentDifferenceAnalyser {
             result.add("defaultValue");
         }
 
-        final String baseHint = base.getHint().getDefaultTranslation();
-        final String paHint = pa.getHint().getDefaultTranslation();
-        if (baseHint != null && paHint != null) {
-            if (!baseHint.equals(paHint))
-                result.add("hint");
-        } else if (baseHint == null && paHint != null) {
+        if(compareTranslations(base.getHint(), base.getHint().getTranslatedLanguages(), pa.getHint(), pa.getHint().getTranslatedLanguages()))
             result.add("hint");
-        }
 
-        if (!base.getLabel().getDefaultTranslation().equals(pa.getLabel().getDefaultTranslation()))
+        if(compareTranslations(base.getLabel(), base.getLabel().getTranslatedLanguages(), pa.getLabel(), pa.getLabel().getTranslatedLanguages()))
             result.add("label");
 
         if (base.getMultiLines() != pa.getMultiLines())
@@ -262,16 +252,10 @@ public final class AssignmentDifferenceAnalyser {
         final FxGroup group = ga.getGroup();
         List<String> result = new ArrayList<String>();
 
-        final String groupHint = group.getHint().getDefaultTranslation();
-        final String gaHint = ga.getHint().getDefaultTranslation();
-        if (groupHint != null && gaHint != null) {
-            if (!groupHint.equals(gaHint))
-                result.add("hint");
-        } else if (groupHint == null && gaHint != null) {
+        if(compareTranslations(group.getHint(), group.getHint().getTranslatedLanguages(), ga.getHint(), ga.getHint().getTranslatedLanguages()))
             result.add("hint");
-        }
 
-        if (!group.getLabel().getDefaultTranslation().equals(ga.getLabel().getDefaultTranslation()))
+        if(compareTranslations(group.getLabel(), group.getLabel().getTranslatedLanguages(), ga.getLabel(), ga.getLabel().getTranslatedLanguages()))
             result.add("label");
 
         final int min = ga.getMultiplicity().getMin();
@@ -313,16 +297,10 @@ public final class AssignmentDifferenceAnalyser {
         final List<String> result = new ArrayList<String>();
         final FxGroupAssignment base = (FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment(ga.getBaseAssignmentId());
 
-        final String groupHint = base.getHint().getDefaultTranslation();
-        final String gaHint = ga.getHint().getDefaultTranslation();
-        if (groupHint != null && gaHint != null) {
-            if (!groupHint.equals(gaHint))
-                result.add("hint");
-        } else if (groupHint == null && gaHint != null) {
+        if (compareTranslations(base.getHint(), base.getHint().getTranslatedLanguages(), ga.getHint(), ga.getHint().getTranslatedLanguages()))
             result.add("hint");
-        }
 
-        if (!base.getLabel().getDefaultTranslation().equals(ga.getLabel().getDefaultTranslation()))
+        if (compareTranslations(base.getLabel(), base.getLabel().getTranslatedLanguages(), ga.getLabel(), ga.getLabel().getTranslatedLanguages()))
             result.add("label");
 
         final int min = ga.getMultiplicity().getMin();
@@ -364,5 +342,38 @@ public final class AssignmentDifferenceAnalyser {
         }
 
         return result;
+    }
+
+    /**
+     * Compares the language arrays
+     *
+     * @param languages1 long[] array of lang ids
+     * @param languages2 long[] array of lang ids
+     * @return true if the language arrays differ
+     */
+    private static boolean compareTranslations(FxString s1, long[] languages1, FxString s2, long[] languages2) {
+        if (languages1.length != languages2.length) {
+            return true;
+        } else {
+            // convert and compare
+            final List<Long> languages1List = new ArrayList<Long>(languages1.length);
+            final List<Long> languages2List = new ArrayList<Long>(languages2.length);
+            for(long l : languages1)
+                languages1List.add(l);
+            for(long l : languages2)
+                languages2List.add(l);
+            Collections.sort(languages2List);
+            Collections.sort(languages1List);
+
+            for (int i = 0; i < languages1List.size(); i++) {
+                final long l1 = languages1List.get(i);
+                final long l2 = languages2List.get(i);
+                if (l1 != l2)
+                    return true;
+                if (!s1.getTranslation(l1).equals(s2.getTranslation(l2)))
+                    return true;
+            }
+        }
+        return false;
     }
 }

@@ -153,7 +153,7 @@ public final class GroovyScriptExporterTools {
                         script.append(".setTranslation(")
                                 .append(id)
                                 .append(", \"")
-                                .append(type.getLabel().getBestTranslation(id))
+                                .append(type.getLabel().getTranslation(id))
                                 .append("\")");
                     }
                 }
@@ -162,7 +162,7 @@ public final class GroovyScriptExporterTools {
 
             // sopts - a map for "simple" GroovyTypeBuilder options
             Map<String, String> sopts = new LinkedHashMap<String, String>();
-            final String aclCategory = type.getACL().getCategory().getLabel().getBestTranslation(1).toUpperCase();
+            final String aclCategory = type.getACL().getCategory().getLabel().getTranslation(1).toUpperCase();
             sopts.put("acl", "CacheAdmin.environment.getACL(ACLCategory." + aclCategory + ".getDefaultId())");
             sopts.put("languageMode", type.getLanguage() == LanguageMode.Multiple ? "LanguageMode.Multiple" : "LanguageMode.Single");
             sopts.put("trackHistory", type.isTrackHistory() + "");
@@ -1047,7 +1047,7 @@ public final class GroovyScriptExporterTools {
                         script.append(".setTranslation(")
                                 .append(id)
                                 .append(", \"")
-                                .append(a.getLabel().getBestTranslation(id))
+                                .append(a.getLabel().getTranslation(id))
                                 .append("\")");
                     }
                 }
@@ -1073,7 +1073,7 @@ public final class GroovyScriptExporterTools {
             if (langs.length > 1) { // we have more than one language assignment
                 for (long id : langs) {
                     if (id != defLang) {
-                        hintAsString = a.getHint().getBestTranslation(id);
+                        hintAsString = a.getHint().getTranslation(id);
                         if (isBlank(hintAsString) || "null".equals(hintAsString))
                             hintAsString = "";
                         script.append(".setTranslation(")
@@ -1121,7 +1121,7 @@ public final class GroovyScriptExporterTools {
                         script.append(".setTranslation(")
                                 .append(id)
                                 .append(", \"")
-                                .append(a.getLabel().getBestTranslation(id))
+                                .append(a.getLabel().getTranslation(id))
                                 .append("\")");
                     }
                 }
@@ -1148,7 +1148,7 @@ public final class GroovyScriptExporterTools {
             if (langs.length > 1) { // we have more than one language assignment
                 for (long id : langs) {
                     if (id != defLang) {
-                        hintAsString = a.getHint().getBestTranslation(id);
+                        hintAsString = a.getHint().getTranslation(id);
                         hintAsString = hintAsString.replaceAll("\\\"", "\\\\\"");
                         if (isBlank(hintAsString) || "null".equals(hintAsString))
                             hintAsString = "";
