@@ -916,7 +916,8 @@ flexive.input = new function() {
                     // fix alert when switching between multiple editors
                     focus_alert: false,
                     strict_loading_mode: true,  /* Fixes Firefox HTML encoding problem with multiple editors */
-                    relative_urls: false        /* don't force relative URLs for images and links */
+                    relative_urls: false,        /* don't force relative URLs for images and links */
+                    convert_urls : false
                     /*width: "100%"*/
             });
         } catch (e) {
