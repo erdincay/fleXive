@@ -86,18 +86,6 @@ body {
     border: 0;
 }
 
-.errorMessage {
-    color: red;
-}
-
-.infoMessage {
-    color: blue;
-}
-
-.warnMessage {
-    color: red;
-}
-
 a {
     color: #494949;
     font-weight: normal;

@@ -73,6 +73,10 @@ function getSelectedPks() {
 }
 
 function syncWithBriefcasePanel(rootMenuItemId, itemIdPrefix) {
+    if (parent.getSearchNavFrame() == null) {
+        // search frame not loaded yet
+        return;
+    }
     // get briefcase submenu
     var menu = getSubMenu(rootMenuItemId);
 
@@ -80,7 +84,7 @@ function syncWithBriefcasePanel(rootMenuItemId, itemIdPrefix) {
     var remainingOld = menu.getItemGroups()[1].length;
 
     // copy briefcases from briefcase panel, which is supposed to be up-to-date
-    var briefcases = parent.getNavFrameWnd().briefcasePanel.items;
+    var briefcases = parent.getSearchNavFrame().briefcasePanel.items;
     for (var i = 0; i < briefcases.length; i++) {
         var briefcase = briefcases[i];
         var menuItemId = getBriefcaseMenuItemId(itemIdPrefix, briefcase);

@@ -129,23 +129,23 @@ function getNavFrameObj() {
 }
 
 function getNavFrameWnd() {
-    return frames["treeNavFrame_" + activeTabId];
+    return document.getElementById("treeNavFrame_" + activeTabId).contentWindow;
 }
 
 function getContentNavFrame() {
-    return frames["treeNavFrame_0"];
+    return document.getElementById("treeNavFrame_0").contentWindow;
 }
 
 function getStructureNavFrame() {
-    return frames["treeNavFrame_1"];
+    return document.getElementById("treeNavFrame_1").contentWindow;
 }
 
 function getSearchNavFrame() {
-    return frames["treeNavFrame_2"];
+    return document.getElementById("treeNavFrame_2").contentWindow;
 }
 
 function getNavFrameTop() {
-    return frames['navFrameTop'];
+    return document.getElementById('navFrameTop').contentWindow;
 }
 
 function resize(leftAreaWidth) {
@@ -574,7 +574,7 @@ function pageLoaded(responseId,renderTime,bTreeWasModified) {
     setDefaultCursor();
     // remove busy cursors in navigation frames set via admin.js
     for (var i = 0; i < 4; i++) {
-        var frame = frames["treeNavFrame_" + i];
+        var frame = document.getElementById("treeNavFrame_" + i).contentWindow;
         if (frame.setDefaultCursor) {
             frame.setDefaultCursor();
         }

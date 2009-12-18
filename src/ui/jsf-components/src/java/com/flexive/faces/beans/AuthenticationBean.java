@@ -88,7 +88,7 @@ public class AuthenticationBean implements Serializable {
                     e.getType() != FxLoginFailedException.TYPE_USER_OR_PASSWORD_NOT_DEFINED
             ).addToContext();
         } catch (Exception exc) {
-            new FxFacesMsgWarn(exc).addToContext();
+            new FxFacesMsgErr(exc).addToContext();
         }
         return null;
     }

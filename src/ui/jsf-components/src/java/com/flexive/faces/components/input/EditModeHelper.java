@@ -1001,7 +1001,7 @@ class EditModeHelper extends RenderHelper {
                             + "    var cal = new YAHOO.widget.Calendar('" + containerId + "', '" + containerId + "', \n"
                             + "                  { navigator: navConfig, close: true, title: '"
                             + MessageBean.getInstance().getResource("FxValueInput.datepicker.title")
-                            + "', selected: date, pagedate: pdate });\n"
+                            + "'" + (date != null ? ", selected: date, pagedate: pdate" : "")  + "});\n"
                             + "    cal.cfg.setProperty(\"WEEKDAYS_SHORT\", "+MessageBean.getInstance().getResource("FxValueInput.datepicker.weekdaysShort")+");\n"
                             + "    cal.cfg.setProperty(\"MONTHS_SHORT\", "+MessageBean.getInstance().getResource("FxValueInput.datepicker.monthsShort")+");\n"
                             + "    cal.cfg.setProperty(\"MONTHS_LONG\", "+MessageBean.getInstance().getResource("FxValueInput.datepicker.monthsLong")+");\n"
