@@ -31,16 +31,17 @@
  ***************************************************************/
 package com.flexive.shared.exceptions;
 
-import com.flexive.shared.EJBLookup;
-import com.flexive.shared.FxLanguage;
-import com.flexive.shared.FxSharedUtils;
-import com.flexive.shared.cache.FxCacheException;
+import com.flexive.shared.*;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.io.IOException;
 import java.io.Serializable;
-import java.util.Arrays;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Localized Exception message handling
@@ -55,8 +56,92 @@ public class FxExceptionMessage implements Serializable {
      * Default language of a resource if no _locale file is present
      */
     private static final String EXCEPTION_BUNDLE = "FxExceptionMessages";
+    private static final String PLUGIN_BUNDLE = "PluginMessages";
     private String key;
     private Object[] values;
+
+    private static final List<FxSharedUtils.BundleReference> resourceBundles = new CopyOnWriteArrayList<FxSharedUtils.BundleReference>();
+    private static final ConcurrentMap<String, ResourceBundle> cachedBundles = new ConcurrentHashMap<String, ResourceBundle>();
+    private static final ConcurrentMap<FxSharedUtils.MessageKey, String> cachedMessages = new ConcurrentHashMap<FxSharedUtils.MessageKey, String>();
+    private static volatile boolean initialized = false;
+
+    /**
+     * Initialize the application resource bundles. Scans the classpath for resource bundles
+     * for a predefined set of names ({@link #EXCEPTION_BUNDLE} and {@link #PLUGIN_BUNDLE}),
+     * and then adds resource references that use {@link java.net.URLClassLoader URLClassLoaders} for loading
+     * the associated resource bundles.
+     */
+    private static synchronized void initialize() {
+        if (initialized) {
+            return;
+        }
+        try {
+            resourceBundles.addAll(FxSharedUtils.addMessageResources(EXCEPTION_BUNDLE));
+            resourceBundles.addAll(FxSharedUtils.addMessageResources(PLUGIN_BUNDLE));
+        } catch (IOException e) {
+            LOG.error("Failed to initialize plugin message resources: " + e.getMessage(), e);
+        } finally {
+            initialized = true;
+        }
+    }
+
+    /**
+     * Returns the resource bundle, which is cached within the request.
+     *
+     * @param key resource key
+     * @return the resource bundle
+     */
+    public String getResource(String key) {
+        final Locale locale = FxContext.get().getLocale();
+        if (!initialized) {
+            initialize();
+        }
+        final FxSharedUtils.MessageKey messageKey = new FxSharedUtils.MessageKey(locale, key);
+        if (cachedMessages.containsKey(messageKey)) {
+            return cachedMessages.get(messageKey);
+        }
+        for (FxSharedUtils.BundleReference bundleReference : resourceBundles) {
+            try {
+                final ResourceBundle bundle = getResources(bundleReference, locale);
+                final String message = bundle.getString(key);
+                cachedMessages.putIfAbsent(messageKey, message);
+                return message;
+            } catch (MissingResourceException e) {
+                // continue with next bundle
+            }
+        }
+        if (!locale.equals(Locale.ENGLISH)) {
+            //try to find the locale in english as last resort
+            //this is a fix for using PropertyResourceBundles which can only handle one locale (have to use them thanks to JBoss 5...)
+            for (FxSharedUtils.BundleReference bundleReference : resourceBundles) {
+                try {
+                    final ResourceBundle bundle = getResources(bundleReference, Locale.ENGLISH);
+                    final String message = bundle.getString(key);
+                    cachedMessages.putIfAbsent(messageKey, message);
+                    return message;
+                } catch (MissingResourceException e) {
+                    // continue with next bundle
+                }
+            }
+        }
+        throw new MissingResourceException("Resource not found", FxExceptionMessage.class.getCanonicalName(), key);
+    }
+
+    /**
+     * Return the resource bundle in the given locale. Uses caching to speed up
+     * lookups.
+     *
+     * @param bundleReference the bundle reference object
+     * @param locale          the requested locale
+     * @return the resource bundle in the requested locale
+     */
+    private ResourceBundle getResources(FxSharedUtils.BundleReference bundleReference, Locale locale) {
+        final String key = bundleReference.getCacheKey(locale);
+        if (cachedBundles.get(key) == null) {
+            cachedBundles.putIfAbsent(key, bundleReference.getBundle(locale));
+        }
+        return cachedBundles.get(key);
+    }
 
     /**
      * Ctor
@@ -85,14 +170,17 @@ public class FxExceptionMessage implements Serializable {
      * @return localized message
      */
     public String getLocalizedMessage(long localeId) {
-        FxLanguage locale;
+        String result;
         try {
-            locale = EJBLookup.getLanguageEngine().load(localeId);
-        } catch (FxApplicationException e) {
-            LOG.warn("[Invalid locale id (" + localeId + ") requested for " + key + "!]: "+e.getMessage());
-            return getLocalizedMessage(FxLanguage.DEFAULT);
+            result = getResource(key);
+            if (values != null && values.length > 0) {
+                result = FxFormatUtils.formatResource(result, localeId, values);
+            }
+            return result;
+        } catch (MissingResourceException e) {
+            LOG.warn("Unknown message key: " + key);
+            return "??" + key + "??";
         }
-        return getLocalizedMessage(locale.getId(), locale.getIso2digit());
     }
 
     /**
@@ -110,7 +198,7 @@ public class FxExceptionMessage implements Serializable {
             LOG.warn(msg);
             return msg;
         }
-        return getLocalizedMessage(locale.getId(), locale.getIso2digit());
+        return getLocalizedMessage(locale.getId());
     }
 
     /**
@@ -120,18 +208,7 @@ public class FxExceptionMessage implements Serializable {
      * @return localized message
      */
     public String getLocalizedMessage(FxLanguage locale) {
-        return getLocalizedMessage(locale.getId(), locale.getIso2digit());
-    }
-
-    /**
-     * Get the localized message for a given language code and ISO
-     *
-     * @param localeId  id of the requested locale
-     * @param localeIso ISO code of the requested locale
-     * @return localized message
-     */
-    public String getLocalizedMessage(long localeId, String localeIso) {
-        return FxSharedUtils.getLocalizedMessage(EXCEPTION_BUNDLE, localeId, localeIso, key, values);
+        return getLocalizedMessage(locale.getId());
     }
 
     /**

@@ -41,7 +41,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.IOException;
-import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -90,37 +89,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class MessageBean extends HashMap {
     private static final long serialVersionUID = 2176514561683264331L;
 
-    private static class MessageKey {
-        private final Locale locale;
-        private final String key;
-
-        private MessageKey(Locale locale, String key) {
-            this.locale = locale;
-            this.key = key;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            MessageKey that = (MessageKey) o;
-
-            if (!key.equals(that.key)) return false;
-            if (!locale.equals(that.locale)) return false;
-
-            return true;
-        }
-
-        @Override
-        public int hashCode() {
-            int result;
-            result = locale.hashCode();
-            result = 31 * result + key.hashCode();
-            return result;
-        }
-    }
-
     /**
      * Resource bundle name for plugin packages.
      */
@@ -135,9 +103,9 @@ public class MessageBean extends HashMap {
     public static final String BUNDLE_EXCEPTIONS = "FxExceptionMessages";
 
     private static final Log LOG = LogFactory.getLog(MessageBean.class);
-    private static final List<BundleReference> resourceBundles = new CopyOnWriteArrayList<BundleReference>();
+    private static final List<FxSharedUtils.BundleReference> resourceBundles = new CopyOnWriteArrayList<FxSharedUtils.BundleReference>();
     private static final ConcurrentMap<String, ResourceBundle> cachedBundles = new ConcurrentHashMap<String, ResourceBundle>();
-    private static final ConcurrentMap<MessageKey, String> cachedMessages = new ConcurrentHashMap<MessageKey, String>();
+    private static final ConcurrentMap<FxSharedUtils.MessageKey, String> cachedMessages = new ConcurrentHashMap<FxSharedUtils.MessageKey, String>();
     private static volatile boolean initialized = false;
 
     /**
@@ -230,11 +198,11 @@ public class MessageBean extends HashMap {
         if (!initialized) {
             initialize();
         }
-        final MessageKey messageKey = new MessageKey(locale, key);
+        final FxSharedUtils.MessageKey messageKey = new FxSharedUtils.MessageKey(locale, key);
         if (cachedMessages.containsKey(messageKey)) {
             return cachedMessages.get(messageKey);
         }
-        for (BundleReference bundleReference : resourceBundles) {
+        for (FxSharedUtils.BundleReference bundleReference : resourceBundles) {
             try {
                 final ResourceBundle bundle = getResources(bundleReference, locale);
                 final String message = bundle.getString(key);
@@ -247,7 +215,7 @@ public class MessageBean extends HashMap {
         if (!locale.equals(Locale.ENGLISH)) {
             //try to find the locale in english as last resort
             //this is a fix for using PropertyResourceBundles which can only handle one locale (have to use them thanks to JBoss 5...)
-            for (BundleReference bundleReference : resourceBundles) {
+            for (FxSharedUtils.BundleReference bundleReference : resourceBundles) {
                 try {
                     final ResourceBundle bundle = getResources(bundleReference, Locale.ENGLISH);
                     final String message = bundle.getString(key);
@@ -270,7 +238,7 @@ public class MessageBean extends HashMap {
      * @param locale          the requested locale
      * @return the resource bundle in the requested locale
      */
-    private ResourceBundle getResources(BundleReference bundleReference, Locale locale) {
+    private ResourceBundle getResources(FxSharedUtils.BundleReference bundleReference, Locale locale) {
         final String key = bundleReference.getCacheKey(locale);
         if (cachedBundles.get(key) == null) {
             cachedBundles.putIfAbsent(key, bundleReference.getBundle(locale));
@@ -290,157 +258,13 @@ public class MessageBean extends HashMap {
             return;
         }
         try {
-            addResources(BUNDLE_APPLICATIONS);
-            addResources(BUNDLE_PLUGINS);
-            addResources(BUNDLE_EXCEPTIONS);
+            resourceBundles.addAll(FxSharedUtils.addMessageResources(BUNDLE_APPLICATIONS));
+            resourceBundles.addAll(FxSharedUtils.addMessageResources(BUNDLE_PLUGINS));
+            resourceBundles.addAll(FxSharedUtils.addMessageResources(BUNDLE_EXCEPTIONS));
         } catch (IOException e) {
             LOG.error("Failed to initialize plugin message resources: " + e.getMessage(), e);
         } finally {
             initialized = true;
-        }
-    }
-
-    /**
-     * Add a resource reference for the given resource base name.
-     *
-     * @param baseName the resource name (e.g. "ApplicationResources")
-     * @throws IOException if an I/O error occured while looking for resources
-     */
-    private static void addResources(String baseName) throws IOException {
-        // scan classpath
-        final Enumeration<URL> resources = Thread.currentThread().getContextClassLoader().getResources(baseName + ".properties");
-        while (resources.hasMoreElements()) {
-            final URL resourceURL = resources.nextElement();
-            try {
-                if ("vfszip".equals(resourceURL.getProtocol())) {
-                    addResourceBundle(baseName, resourceURL);
-                    continue;
-                }
-                // expected format: file:/some/path/to/file.jar!{baseName}.properties if this is no JBoss 5 vfs zipfile
-                final int jarDelim = resourceURL.getPath().lastIndexOf(".jar!");
-                if (jarDelim == -1) {
-                    LOG.warn("Cannot use message resources because they are not stored in a jar file: " + resourceURL.getPath());
-                    continue;
-                }
-                String path = resourceURL.getPath();
-                if (!path.startsWith("file:")) {
-                    if (path.startsWith("/") || path.charAt(1) == ':') {
-                        LOG.warn("Trying a filesystem message resource without an explicit file: protocol identifier for " + path);
-                        addResourceBundle(baseName, resourceURL);
-                        continue;
-                    } else {
-                        LOG.warn("Cannot use message resources because they are not served from the file system: " + resourceURL.getPath());
-                        continue;
-                    }
-                } else
-                    path = path.substring("file:".length(), jarDelim + 4);
-
-                // "file:" and everything after ".jar" gets stripped for the class loader URL
-                final URL jarURL = new URL("file", null, path);
-                addResourceBundle(baseName, jarURL);
-
-                LOG.info("Added message resources for " + resourceURL.getPath());
-            } catch (Exception e) {
-                LOG.error("Failed to add message resources for URL " + resourceURL.getPath() + ": " + e.getMessage(), e);
-            }
-        }
-    }
-
-    /**
-     * Add a resource bundle with the given name and classloader.
-     *
-     * @param baseName    the resource base name
-     * @param resourceURL the resource URL
-     */
-    private static void addResourceBundle(String baseName, URL resourceURL) {
-        resourceBundles.add(new BundleReference(baseName, resourceURL));
-    }
-
-    /**
-     * A resource bundle reference.
-     */
-    private static class BundleReference {
-        private final String baseName;
-        private final URL resourceURL;
-
-        /**
-         * Create a new bundle reference.
-         *
-         * @param baseName    the fully qualified base name (e.g. "ApplicationResources")
-         * @param resourceURL the resource URL to be used for loading the resource bundle. If null,
-         *                    the context class loader will be used.
-         */
-        private BundleReference(String baseName, URL resourceURL) {
-            this.baseName = baseName;
-            this.resourceURL = resourceURL;
-        }
-
-        /**
-         * Returns the base name of the resource bundle (e.g. "ApplicationResources").
-         *
-         * @return the base name of the resource bundle (e.g. "ApplicationResources").
-         */
-        public String getBaseName() {
-            return baseName;
-        }
-
-        /**
-         * Returns the class loader to be used for loading the bundle.
-         *
-         * @return the class loader to be used for loading the bundle.
-         */
-        public URL getResourceURL() {
-            return resourceURL;
-        }
-
-        /**
-         * Return the resource bundle in the given locale.
-         *
-         * @param locale the requested locale
-         * @return the resource bundle in the given locale.
-         */
-        public ResourceBundle getBundle(Locale locale) {
-            if (this.resourceURL == null) {
-                return ResourceBundle.getBundle(baseName, locale);
-            } else {
-                try {
-                    return ResourceBundle.getBundle(baseName, locale, new URLClassLoader(new URL[]{resourceURL}));
-                } catch (MissingResourceException mre) {
-                    //fix for JBoss 5 vfs which doesn't work with classloader
-                    try {
-                        //try to find in the desired locale
-                        Enumeration<URL> e = Thread.currentThread().getContextClassLoader().getResources(baseName + "_" + locale.getLanguage() + ".properties");
-                        String orgPath = resourceURL.toExternalForm().substring(0, resourceURL.toExternalForm().lastIndexOf("/"));
-                        while (e.hasMoreElements()) {
-                            URL resource = e.nextElement();
-                            if (orgPath.equals(resource.toExternalForm().substring(0, resource.toExternalForm().lastIndexOf("/")))) {
-                                return new PropertyResourceBundle(resource.openStream());
-                            }
-                        }
-                        //Fallback to the default locale
-                        return new PropertyResourceBundle(resourceURL.openStream());
-                    } catch (IOException e) {
-                        LOG.warn("Failed to retrieve bundle " + baseName + " directly from stream");
-                    }
-                    //last resort
-                    return ResourceBundle.getBundle(baseName, locale);
-                }
-            }
-        }
-
-        /**
-         * Return a cache key unique for this resource bundle and locale.
-         *
-         * @param locale the requested locale
-         * @return a cache key unique for this resource bundle and locale.
-         */
-        public String getCacheKey(Locale locale) {
-            final String localeSuffix = locale == null ? "" : "_" + locale.toString();
-            if (this.resourceURL == null) {
-                return baseName + localeSuffix;
-            } else {
-                return baseName + this.toString() + localeSuffix;
-            }
         }
     }
 

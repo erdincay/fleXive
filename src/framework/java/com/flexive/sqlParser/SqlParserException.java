@@ -31,8 +31,7 @@
  ***************************************************************/
 package com.flexive.sqlParser;
 
-import com.flexive.shared.FxSharedUtils;
-import com.flexive.shared.FxLanguage;
+import com.flexive.shared.FxContext;
 import com.flexive.shared.exceptions.FxExceptionMessage;
 
 
@@ -102,6 +101,6 @@ public class SqlParserException extends Exception {
 
     @Override
     public String getMessage() {
-        return new FxExceptionMessage(super.getMessage(), getValues()).getLocalizedMessage(FxLanguage.DEFAULT_ID, FxLanguage.DEFAULT_ISO);
+        return new FxExceptionMessage(super.getMessage(), getValues()).getLocalizedMessage(FxContext.get().getLanguage().getId());
     }
 }
