@@ -64,6 +64,10 @@
                     <groupId>com.lowagie</groupId>
                     <artifactId>itext</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>javax.servlet</groupId>
+                    <artifactId>jstl</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
 

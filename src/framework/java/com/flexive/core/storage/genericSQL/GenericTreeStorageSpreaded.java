@@ -901,7 +901,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
         if (oldDestNode != null) {
             try {
                 String sql = "SELECT ID FROM " + getTable(FxTreeMode.Live) +
-                        " WHERE (LFT>=" + sourceNode.getLeft() + " AND RGT<=" + sourceNode.getRight() + ") OR ID=" + nodeId;
+                        " WHERE (LFT>=" + oldDestNode.getLeft() + " AND RGT<=" + oldDestNode.getRight() + ") OR ID=" + nodeId;
                 stmt = con.createStatement();
                 ResultSet rs = stmt.executeQuery(sql);
                 while (rs.next()) {
