@@ -175,12 +175,28 @@ public class WorkflowTest {
             editWorkflow.getSteps().add(new StepEdit(new Step(-2, StepDefinition.LIVE_STEP_ID, editWorkflow.getId(), myWorkflowACL.getId())));
             editWorkflow.getRoutes().add(new Route(-1, UserGroup.GROUP_EVERYONE, -1, -2));
             workflowEngine.update(editWorkflow);
+
+            // remove and add edit step
+            editWorkflow = getEnvironment().getWorkflow(editWorkflow.getId()).asEditable();
+            for (Step step : editWorkflow.getSteps()) {
+                if (step.getStepDefinitionId() == StepDefinition.EDIT_STEP_ID) {
+                    editWorkflow.getSteps().remove(step);
+                    break;
+                }
+            }
+            // route from/to new step (created after this statement) to remaining live step
+            editWorkflow.getRoutes().add(new Route(-1, UserGroup.GROUP_OWNER, -1, editWorkflow.getSteps().get(0).getId()));
+            editWorkflow.getRoutes().add(new Route(-2, UserGroup.GROUP_OWNER, editWorkflow.getSteps().get(0).getId(), -1));
+            // create step for route
+            editWorkflow.getSteps().add(new StepEdit(new Step(-1, StepDefinition.EDIT_STEP_ID, editWorkflow.getId(), myWorkflowACL.getId())));
+            workflowEngine.update(editWorkflow);
+
             Workflow workflow = getEnvironment().getWorkflow(workflowId);
             Assert.assertTrue(getUserTicket().isInRole(Role.WorkflowManagement), "User is not in role workflow management - call should have failed.");
             Assert.assertTrue(StringUtils.reverse(WORKFLOW_NAME).equals(workflow.getName()), "Workflow name not updated properly.");
             Assert.assertTrue(StringUtils.reverse(WORKFLOW_DESCRIPTION).equals(workflow.getDescription()), "Workflow description not updated properly.");
             Assert.assertTrue(workflow.getSteps().size() == 2, "Unexpected number of workflow steps: " + workflow.getSteps().size());
-            Assert.assertTrue(workflow.getRoutes().size() == 1, "Unexpected number of workflow routes: " + workflow.getRoutes());
+            Assert.assertTrue(workflow.getRoutes().size() == 3, "Unexpected number of workflow routes: " + workflow.getRoutes());
         } finally {
             // cleanup
             workflowEngine.remove(workflowId);

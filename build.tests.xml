@@ -375,7 +375,7 @@
 
      <target name="emma.report" description="Generate a coverage report" if="tests.emma.enabled">
         <emma>
-            <report sourcepath="${flexive.src.framework.dir},${flexive.src.ui.shared.dir},${flexive.src.ui.jsf.dir}"
+            <report sourcepath="${flexive.src.framework.dir}"
                     sort="+block,+name,+method,+class"
                     metrics="method:70,block:70,line:70,class:100"
                     encoding="UTF-8"

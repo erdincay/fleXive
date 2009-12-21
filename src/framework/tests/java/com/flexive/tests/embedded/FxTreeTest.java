@@ -33,11 +33,8 @@ package com.flexive.tests.embedded;
 
 import com.flexive.core.Database;
 import com.flexive.core.storage.genericSQL.GenericTreeStorageSpreaded;
-import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
-import com.flexive.shared.FxLanguage;
 import com.flexive.shared.FxSharedUtils;
-import static com.flexive.shared.EJBLookup.getTreeEngine;
 import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxPK;
@@ -49,7 +46,9 @@ import com.flexive.shared.interfaces.TypeEngine;
 import com.flexive.shared.scripting.FxScriptEvent;
 import com.flexive.shared.scripting.FxScriptInfo;
 import com.flexive.shared.security.ACLCategory;
-import com.flexive.shared.structure.*;
+import com.flexive.shared.structure.FxPropertyAssignmentEdit;
+import com.flexive.shared.structure.FxType;
+import com.flexive.shared.structure.FxTypeEdit;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNode;
 import com.flexive.shared.tree.FxTreeNodeEdit;
@@ -57,20 +56,23 @@ import com.flexive.shared.tree.FxTreeRemoveOp;
 import com.flexive.shared.value.FxReference;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.value.ReferencedContent;
-import static com.flexive.tests.embedded.FxTestUtils.login;
-import static com.flexive.tests.embedded.FxTestUtils.logout;
+import com.flexive.shared.workflow.StepDefinition;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.RandomUtils;
-import org.testng.Assert;
-import static org.testng.Assert.*;
-import static org.testng.Assert.assertTrue;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.sql.Connection;
 import java.util.List;
+
+import static com.flexive.shared.CacheAdmin.getEnvironment;
+import static com.flexive.shared.EJBLookup.getContentEngine;
+import static com.flexive.shared.EJBLookup.getTreeEngine;
+import static com.flexive.tests.embedded.FxTestUtils.login;
+import static com.flexive.tests.embedded.FxTestUtils.logout;
+import static org.testng.Assert.*;
 
 /**
  * Tree engine tests.
@@ -89,7 +91,7 @@ public class FxTreeTest {
         login(TestUsers.SUPERVISOR);
         tree = getTreeEngine();
         scripting = EJBLookup.getScriptingEngine();
-        ce = EJBLookup.getContentEngine();
+        ce = getContentEngine();
         ty = EJBLookup.getTypeEngine();
         enableTreeChecks();
     }
@@ -162,26 +164,26 @@ public class FxTreeTest {
      */
     private void createPath(FxTreeMode mode) throws FxApplicationException {
         final long[] nodes = tree.createNodes(mode, FxTreeNode.ROOT_NODE, 0, "my/virtual/directory");
-        Assert.assertEquals(nodes.length, 3, "Should have created 3 nodes");
-        Assert.assertEquals(tree.getNode(mode, nodes[0]).getName(), "my");
-        Assert.assertEquals(tree.getNode(mode, nodes[1]).getName(), "virtual");
-        Assert.assertEquals(tree.getNode(mode, nodes[2]).getName(), "directory");
+        assertEquals(nodes.length, 3, "Should have created 3 nodes");
+        assertEquals(tree.getNode(mode, nodes[0]).getName(), "my");
+        assertEquals(tree.getNode(mode, nodes[1]).getName(), "virtual");
+        assertEquals(tree.getNode(mode, nodes[2]).getName(), "directory");
 
         // create subfolder, reuse two folders
         final long[] tmpNodes = tree.createNodes(mode, FxTreeNode.ROOT_NODE, 0, "my/virtual/tmp");
-        Assert.assertEquals(tmpNodes.length, 3, "Should have returned 3 nodes");
-        Assert.assertEquals(tree.getNode(mode, tmpNodes[0]).getName(), "my");
-        Assert.assertEquals(tree.getNode(mode, tmpNodes[1]).getName(), "virtual");
-        Assert.assertEquals(tree.getNode(mode, tmpNodes[2]).getName(), "tmp");
-        Assert.assertEquals(nodes[0], tmpNodes[0]);
-        Assert.assertEquals(nodes[1], tmpNodes[1]);
+        assertEquals(tmpNodes.length, 3, "Should have returned 3 nodes");
+        assertEquals(tree.getNode(mode, tmpNodes[0]).getName(), "my");
+        assertEquals(tree.getNode(mode, tmpNodes[1]).getName(), "virtual");
+        assertEquals(tree.getNode(mode, tmpNodes[2]).getName(), "tmp");
+        assertEquals(nodes[0], tmpNodes[0]);
+        assertEquals(nodes[1], tmpNodes[1]);
 
         // use /my/virtual as root node
         final long[] nestedNodes = tree.createNodes(mode, nodes[1], 0, "/directory/tmp2");
-        Assert.assertEquals(nestedNodes.length, 2);
-        Assert.assertEquals(tree.getNode(mode, nestedNodes[0]).getName(), "directory");
-        Assert.assertEquals(tree.getNode(mode, nestedNodes[1]).getName(), "tmp2");
-        Assert.assertEquals(nestedNodes[0], nodes[2]);  // check "directory" node
+        assertEquals(nestedNodes.length, 2);
+        assertEquals(tree.getNode(mode, nestedNodes[0]).getName(), "directory");
+        assertEquals(tree.getNode(mode, nestedNodes[1]).getName(), "tmp2");
+        assertEquals(nestedNodes[0], nodes[2]);  // check "directory" node
     }
 
     /**
@@ -206,12 +208,12 @@ public class FxTreeTest {
         //load and check if all well
         FxTreeNode node1_loaded = tree.getNode(mode, id1);
         assertTrue(node1_loaded.getName().equals(node1.getName()));
-        Assert.assertEquals(node1_loaded.getLabel(), node1.getLabel());
+        assertEquals(node1_loaded.getLabel(), node1.getLabel());
         //rename name
         tree.save(new FxTreeNodeEdit(node1_loaded).setName("abcd"));
         node1_loaded = tree.getNode(mode, id1);
         assertTrue(node1_loaded.getName().equals("abcd"), "Expected [abcd] - got [" + node1_loaded.getName() + "]");
-        Assert.assertEquals(node1_loaded.getLabel(), node1.getLabel());
+        assertEquals(node1_loaded.getLabel(), node1.getLabel());
         //rename label
         tree.save(new FxTreeNodeEdit(node1_loaded).setLabel(getNodeLabel(42)));
         node1_loaded = tree.getNode(mode, id1);
@@ -225,7 +227,7 @@ public class FxTreeTest {
         //verify path
         assertTrue(node1_1_loaded.getPath().equals("/abcd/1"));
         //verify label
-        Assert.assertEquals(tree.getLabels(mode, node1_1_loaded.getId()).get(0), "/" + getNodeLabel(42).getBestTranslation() + "/" + getNodeLabel(1).getBestTranslation());
+        assertEquals(tree.getLabels(mode, node1_1_loaded.getId()).get(0), "/" + getNodeLabel(42).getBestTranslation() + "/" + getNodeLabel(1).getBestTranslation());
         //create 2 other children for positioning tests
         FxTreeNodeEdit node1_2 = FxTreeNodeEdit.createNewChildNode(node1_loaded).setName("2").setLabel(getNodeLabel(2)).setMode(mode);
         long id1_2 = tree.save(node1_2);
@@ -310,15 +312,15 @@ public class FxTreeTest {
         clearTrees();
 
         //test changing a referenced content
-        ContentEngine co = EJBLookup.getContentEngine();
+        ContentEngine co = getContentEngine();
         FxPK testFolder = co.save(co.initialize(FxType.FOLDER));
         try {
             long nodeId = tree.save(FxTreeNodeEdit.createNew("Test").setParentNodeId(FxTreeNode.ROOT_NODE).setMode(mode));
             FxTreeNode node = tree.getNode(mode, nodeId);
-            Assert.assertNotSame(node.getReference(), testFolder, "Expected to have a different folder pk!");
+            assertNotSame(node.getReference(), testFolder, "Expected to have a different folder pk!");
             tree.save(node.asEditable().setReference(testFolder));
             node = tree.getNode(mode, nodeId);
-            Assert.assertEquals(node.getReference(), testFolder, "Node reference should have been updated!");
+            assertEquals(node.getReference(), testFolder, "Node reference should have been updated!");
         } finally {
             co.remove(testFolder);
         }
@@ -336,18 +338,66 @@ public class FxTreeTest {
         //test activation without subtree
         long[] ids = tree.createNodes(FxTreeMode.Edit, FxTreeNode.ROOT_NODE, 0, "/Test1/Test2/Test3");
         tree.activate(FxTreeMode.Edit, ids[0], false, true);
-        Assert.assertEquals(true, tree.exist(FxTreeMode.Live, ids[0]));
-        Assert.assertEquals(false, tree.exist(FxTreeMode.Live, ids[1]));
-        Assert.assertEquals(false, tree.exist(FxTreeMode.Live, ids[2]));
+        checkTreeExists(FxTreeMode.Live, ids, new boolean[] { true, false, false });
+
         //test activation with subtree
         ids = tree.createNodes(FxTreeMode.Edit, FxTreeNode.ROOT_NODE, 0, "/ATest1/ATest2/ATest3");
         tree.activate(FxTreeMode.Edit, ids[0], true, true);
-        Assert.assertEquals(true, tree.exist(FxTreeMode.Live, ids[0]));
-        Assert.assertEquals(true, tree.exist(FxTreeMode.Live, ids[1]));
-        Assert.assertEquals(true, tree.exist(FxTreeMode.Live, ids[2]));
+        checkTreeExists(FxTreeMode.Live, ids, new boolean[] { true, true, true });
+
+        // activate tree that has activated parts
+        tree.activate(FxTreeMode.Edit, ids[0], true, true);
+        checkTreeExists(FxTreeMode.Live, ids, new boolean[] { true, true, true });
+
+        // set content without live step
+        final long nodeId = ids[2];
+        final FxContent content = getContentEngine().load(tree.getNode(
+                FxTreeMode.Edit,
+                ids[2]
+        ).getReference());
+
+        content.setStepId(
+                getEnvironment().getStepByDefinition(
+                        getEnvironment().getStep(content.getStepId()).getWorkflowId(),
+                        StepDefinition.EDIT_STEP_ID
+                ).getId()
+        );
+        getContentEngine().save(content);
+
+        tree.activate(FxTreeMode.Edit, ids[0], true, false);
+        checkTreeExists(FxTreeMode.Edit, nodeId, true);
+        checkTreeExists(FxTreeMode.Live, nodeId, false);
+        // activate content indirectly
+        tree.activate(FxTreeMode.Edit, ids[1], true, true);
+        checkTreeExists(FxTreeMode.Live, nodeId, true);
+
         //there should be 2 nodes not active (Test2 and Test3), see if they get activated after activating all
         tree.activate(FxTreeMode.Edit, FxTreeNode.ROOT_NODE, true, true);
-        //Assert.assertEquals(6, tree.getTree(FxTreeMode.Live, FxTreeNode.ROOT_NODE, 3).getTotalChildCount());
+        //assertEquals(6, tree.getTree(FxTreeMode.Live, FxTreeNode.ROOT_NODE, 3).getTotalChildCount());
+
+        // remove an activated node
+        tree.remove(FxTreeMode.Live, ids[1], FxTreeRemoveOp.Unfile, false);
+        tree.remove(FxTreeMode.Edit, ids[2], FxTreeRemoveOp.Unfile, true);
+        checkTreeExists(FxTreeMode.Edit, new long[] { ids[1], ids[2] }, new boolean[] { true, false });
+        //checkTreeExists(FxTreeMode.Live, new long[] { ids[1], ids[2] }, new boolean[] { false, true });
+
+        // activate changes through parent node
+        tree.activate(FxTreeMode.Edit, ids[1], false, false);
+        checkTreeExists(FxTreeMode.Live, new long[] { ids[1], ids[2] }, new boolean[] { true, false });
+    }
+
+    private void checkTreeExists(FxTreeMode treeMode, long id, boolean exists) throws FxApplicationException {
+        checkTreeExists(treeMode, new long[] { id } , new boolean[] { exists });
+    }
+
+    private void checkTreeExists(FxTreeMode treeMode, long[] ids, boolean[] exists) throws FxApplicationException {
+        assertEquals(
+                exists.length, ids.length,
+                "Programming error: exists has " + exists.length + " elements, but there are " + ids.length + " ids."
+        );
+        for (int i = 0; i < ids.length; i++) {
+            assertEquals(tree.exist(treeMode, ids[i]), exists[i], "TreeEngine#exist returns unexpected result (i=" + i + ")");
+        }
     }
 
     /**
@@ -504,17 +554,17 @@ public class FxTreeTest {
         FxScriptInfo siAfterRemove = EJBLookup.getScriptingEngine().createScript(FxScriptEvent.AfterTreeNodeRemoved,
                 "afterNodeRemoved.gy", "Test script", code);
         try {
-            Assert.assertEquals(scriptCounter, 0);
+            assertEquals(scriptCounter, 0);
             long nodeId = tree.save(FxTreeNodeEdit.createNew("Test1").setMode(mode).setParentNodeId(FxTreeNode.ROOT_NODE));
-            Assert.assertEquals(scriptCounter, 1);
+            assertEquals(scriptCounter, 1);
             long topNode = tree.createNodes(mode, FxTreeNode.ROOT_NODE, 0, "/A/B/C")[0];
-            Assert.assertEquals(scriptCounter, 4);
+            assertEquals(scriptCounter, 4);
             tree.copy(mode, topNode, nodeId, 0);
-            Assert.assertEquals(scriptCounter, 7);
+            assertEquals(scriptCounter, 7);
             tree.remove(tree.getNode(mode, topNode), FxTreeRemoveOp.Unfile, true);
-            Assert.assertEquals(scriptCounter, 4);
+            assertEquals(scriptCounter, 4);
             tree.remove(tree.getNode(mode, nodeId), FxTreeRemoveOp.Unfile, true);
-            Assert.assertEquals(scriptCounter, 0);
+            assertEquals(scriptCounter, 0);
         } finally {
             scripting.remove(siAdd.getId());
             scripting.remove(siBeforeRemove.getId());
@@ -541,14 +591,14 @@ public class FxTreeTest {
         FxScriptInfo siAfterActivate = EJBLookup.getScriptingEngine().createScript(FxScriptEvent.AfterTreeNodeActivated,
                 "afterNodeActivate.gy", "Test script", code);
         try {
-            Assert.assertEquals(scriptCounter, 0);
+            assertEquals(scriptCounter, 0);
             long nodeId = tree.save(FxTreeNodeEdit.createNew("Test1").setMode(mode).setParentNodeId(FxTreeNode.ROOT_NODE));
             tree.activate(FxTreeMode.Edit, nodeId, false, true);
-            Assert.assertEquals(scriptCounter, 1);
+            assertEquals(scriptCounter, 1);
 
             long topNode = tree.createNodes(mode, FxTreeNode.ROOT_NODE, 0, "/A/B/C")[0];
             tree.activate(FxTreeMode.Edit, topNode, true, true);
-            Assert.assertEquals(scriptCounter, 4);
+            assertEquals(scriptCounter, 4);
         } finally {
             scripting.remove(siBeforeActivate.getId());
             scripting.remove(siAfterActivate.getId());
@@ -565,7 +615,7 @@ public class FxTreeTest {
         clearTrees();
         FxTreeMode mode = FxTreeMode.Edit;
         scriptCounter = 0;
-        ContentEngine co = EJBLookup.getContentEngine();
+        ContentEngine co = getContentEngine();
         FxPK testContent = co.save(co.initialize(FxType.ROOT_ID));
         String code = "println \"[Groovy script]=== AfterTreeNodeFolderReplacement node ${node.id}: ${node.path}. co-pk: ${content}, folder-pk: ${node.reference} ===\"\n" +
                 "com.flexive.tests.embedded.FxTreeTest.scriptCounter=42\n" +
@@ -573,14 +623,14 @@ public class FxTreeTest {
         FxScriptInfo siAfterTreeNodeFolderReplacement = EJBLookup.getScriptingEngine().createScript(FxScriptEvent.AfterTreeNodeFolderReplacement,
                 "treeNodeFolderReplacement.gy", "Test script", code);
         try {
-            Assert.assertEquals(scriptCounter, 0);
+            assertEquals(scriptCounter, 0);
             tree.save(FxTreeNodeEdit.createNew("Test1").
                     setMode(mode).
                     setParentNodeId(FxTreeNode.ROOT_NODE).
                     setReference(testContent));
             tree.createNodes(mode, FxTreeNode.ROOT_NODE, 0, "/Test1/A");
             co.remove(testContent);
-            Assert.assertEquals(scriptCounter, 42);
+            assertEquals(scriptCounter, 42);
         } finally {
             scripting.remove(siAfterTreeNodeFolderReplacement.getId());
             try {
@@ -977,24 +1027,30 @@ public class FxTreeTest {
         final List<Long> rootNodeIds = Lists.newArrayList();    // root node IDs
         final List<Long> folderNodeIds = Lists.newArrayList();
 
-        final long folderId = getTreeEngine().save(FxTreeNodeEdit.createNew("FX-724").setParentNodeId(FxTreeNode.ROOT_NODE));
-        final int numNodes = 30;
-        for (int i = 0; i < numNodes; i++) {
-            rootNodeIds.add(
-                    getTreeEngine().save(FxTreeNodeEdit.createNew("test" + i).setParentNodeId(FxTreeNode.ROOT_NODE))
-            );
-            folderNodeIds.add(
-                    getTreeEngine().save(FxTreeNodeEdit.createNew("nested" + i).setParentNodeId(folderId))
-            );
-        }
         try {
-            randomMoves(FxTreeNode.ROOT_NODE, numNodes / 2);
-            randomMoves(folderId, numNodes / 2);
-        } finally {
-            getTreeEngine().remove(FxTreeMode.Edit, folderId, FxTreeRemoveOp.Remove, true);
-            for (long nodeId : rootNodeIds) {
-                getTreeEngine().remove(FxTreeMode.Edit, nodeId, FxTreeRemoveOp.Remove, false);
+            disableTreeChecks();
+            final long folderId = getTreeEngine().save(FxTreeNodeEdit.createNew("FX-724").setParentNodeId(FxTreeNode.ROOT_NODE));
+            final int numNodes = 30;
+            for (int i = 0; i < numNodes; i++) {
+                rootNodeIds.add(
+                        getTreeEngine().save(FxTreeNodeEdit.createNew("test" + i).setParentNodeId(FxTreeNode.ROOT_NODE))
+                );
+                folderNodeIds.add(
+                        getTreeEngine().save(FxTreeNodeEdit.createNew("nested" + i).setParentNodeId(folderId))
+                );
             }
+            try {
+                randomMoves(FxTreeNode.ROOT_NODE, numNodes / 2);
+                randomMoves(folderId, numNodes / 2);
+            } finally {
+                enableTreeChecks();
+                getTreeEngine().remove(FxTreeMode.Edit, folderId, FxTreeRemoveOp.Remove, true);
+                for (long nodeId : rootNodeIds) {
+                    getTreeEngine().remove(FxTreeMode.Edit, nodeId, FxTreeRemoveOp.Remove, false);
+                }
+            }
+        } finally {
+            enableTreeChecks();
         }
     }
 
@@ -1023,7 +1079,7 @@ public class FxTreeTest {
             children.remove(oldPosition);
             children.add(newPosition, child);
 
-            Assert.assertEquals(
+            assertEquals(
                 FxSharedUtils.getSelectableObjectIdList(
                         getTreeEngine().getTree(FxTreeMode.Edit, parentNodeId, 1).getChildren()
                 ),
@@ -1085,7 +1141,7 @@ public class FxTreeTest {
      */
     private long createTestType() throws FxApplicationException {
         long typeId = EJBLookup.getTypeEngine().save(FxTypeEdit.createNew("TREETESTTYPE", new FxString("Tree test type"),
-                CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()), null));
+                getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()), null));
 
         /*EJBLookup.getAssignmentEngine().createProperty(typeId, FxPropertyEdit.createNew(
                 "TESTPROP", new FxString(true, FxLanguage.ENGLISH, "TESTPROP"), new FxString(true, FxLanguage.ENGLISH, "TESTPROP"),
@@ -1132,41 +1188,41 @@ public class FxTreeTest {
 
             FxPK pk = createTestContent(rootNode, typeId, "TestData123");
             long nodeId = tree.getIdByPath(mode, "/TestData123");
-            Assert.assertEquals(tree.getNode(mode, nodeId).getReference().getId(), pk.getId());
+            assertEquals(tree.getNode(mode, nodeId).getReference().getId(), pk.getId());
 
             //Unfile: remove node but keep content
             tree.remove(tree.getNode(mode, nodeId), FxTreeRemoveOp.Unfile, false);
-            Assert.assertFalse(tree.exist(mode, nodeId), "Node should have been removed!");
+            assertFalse(tree.exist(mode, nodeId), "Node should have been removed!");
             try {
                 ce.getContentVersionInfo(pk);
             } catch (FxApplicationException e) {
-                Assert.fail("Expected pk to exist!", e);
+                fail("Expected pk to exist!", e);
             }
 
             nodeId = tree.save(FxTreeNodeEdit.createNew("TestData4").setReference(pk).setMode(mode).setParentNodeId(FxTreeNode.ROOT_NODE));
-            Assert.assertEquals(tree.getNode(mode, nodeId).getReference().getId(), pk.getId()); //check exists and pk is correct
+            assertEquals(tree.getNode(mode, nodeId).getReference().getId(), pk.getId()); //check exists and pk is correct
 
             //Remove: remove node AND content
             tree.remove(tree.getNode(mode, nodeId), FxTreeRemoveOp.Remove, false);
-            Assert.assertFalse(tree.exist(mode, nodeId), "Node should have been removed!");
+            assertFalse(tree.exist(mode, nodeId), "Node should have been removed!");
             try {
                 ce.getContentVersionInfo(pk);
-                Assert.fail("Content should no longer exist!");
+                fail("Content should no longer exist!");
             } catch (FxApplicationException e) {
                 //expected
             }
 
             pk = createTestContent(rootNode, typeId, "TestData123");
             nodeId = tree.getIdByPath(mode, "/TestData123");
-            Assert.assertEquals(tree.getNode(mode, nodeId).getReference().getId(), pk.getId()); //check exists and pk is correct
+            assertEquals(tree.getNode(mode, nodeId).getReference().getId(), pk.getId()); //check exists and pk is correct
 
             //RemoveSingleFiled: remove node AND content if content is not referenced from other nodes
             //test1: like Remove the content should be removed
             tree.remove(tree.getNode(mode, nodeId), FxTreeRemoveOp.RemoveSingleFiled, false);
-            Assert.assertFalse(tree.exist(mode, nodeId), "Node should have been removed!");
+            assertFalse(tree.exist(mode, nodeId), "Node should have been removed!");
             try {
                 ce.getContentVersionInfo(pk);
-                Assert.fail("Content should no longer exist!");
+                fail("Content should no longer exist!");
             } catch (FxApplicationException e) {
                 //expected
             }
@@ -1174,30 +1230,30 @@ public class FxTreeTest {
             pk = createTestContent(rootNode, typeId, "TestData123");
             nodeId = tree.getIdByPath(mode, "/TestData123");
             long nodeId2 = tree.save(FxTreeNodeEdit.createNew("TestData5").setReference(pk).setMode(mode).setParentNodeId(FxTreeNode.ROOT_NODE));
-            Assert.assertEquals(tree.getNode(mode, nodeId).getReference().getId(), pk.getId()); //check exists and pk is correct
+            assertEquals(tree.getNode(mode, nodeId).getReference().getId(), pk.getId()); //check exists and pk is correct
 
             //RemoveSingleFiled: remove node AND content if content is not referenced from other nodes
             //test2: content should still exist since it is referenced by 2 nodes
             tree.remove(tree.getNode(mode, nodeId), FxTreeRemoveOp.RemoveSingleFiled, false);
-            Assert.assertFalse(tree.exist(mode, nodeId), "Node should have been removed!");
-            Assert.assertTrue(tree.exist(mode, nodeId2), "Node2 should still exist!");
+            assertFalse(tree.exist(mode, nodeId), "Node should have been removed!");
+            assertTrue(tree.exist(mode, nodeId2), "Node2 should still exist!");
             try {
                 ce.getContentVersionInfo(pk);
             } catch (FxApplicationException e) {
-                Assert.fail("Expected pk to exist!", e);
+                fail("Expected pk to exist!", e);
             }
 
             nodeId = tree.save(FxTreeNodeEdit.createNew("TestData6").setReference(pk).setMode(mode).setParentNodeId(FxTreeNode.ROOT_NODE));
-            Assert.assertEquals(tree.getTree(mode, FxTreeNode.ROOT_NODE, 10).getDirectChildCount(), 2, "");
+            assertEquals(tree.getTree(mode, FxTreeNode.ROOT_NODE, 10).getDirectChildCount(), 2, "");
 
             //UnfileAll: remove both nodes but not the content
             tree.remove(tree.getNode(mode, nodeId), FxTreeRemoveOp.UnfileAll, false);
-            Assert.assertFalse(tree.exist(mode, nodeId), "Node should have been removed!");
-            Assert.assertFalse(tree.exist(mode, nodeId2), "Node2 should have been removed!");
+            assertFalse(tree.exist(mode, nodeId), "Node should have been removed!");
+            assertFalse(tree.exist(mode, nodeId2), "Node2 should have been removed!");
             try {
                 ce.getContentVersionInfo(pk);
             } catch (FxApplicationException e) {
-                Assert.fail("Expected pk to exist!", e);
+                fail("Expected pk to exist!", e);
             }
         } finally {
             // clean up

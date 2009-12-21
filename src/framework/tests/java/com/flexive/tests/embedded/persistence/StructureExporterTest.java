@@ -59,7 +59,7 @@ import java.util.*;
  *
  * @author Christopher Blasnik (c.blasnik@flexive.com) UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-@Test(groups = {"structure", "importexport"})
+@Test(groups = {"ejb", "structure", "importexport"})
 public class StructureExporterTest {
 
     private TypeEngine te;
