@@ -175,22 +175,18 @@ public class FxMailUtils {
                 body.append("--" + BOUNDARY1 + "\n");
                 body.append("Content-Type: text/plain; charset=\"UTF-8\"\n");
                 body.append("Content-Transfer-Encoding: quoted-printable\n\n");
-                try {
-                    body.append(new QuotedPrintableCodec("UTF-8").encode(textBody)).append("\n");
-                } catch (EncoderException e) {
-                    throw new IllegalArgumentException("Failed to encode message: " + e.getMessage(), e);
-                }
+                body.append(encodeQuotedPrintable(textBody)).append("\n");
             }
             if (htmlBody.length() > 0) {
                 body.append("--" + BOUNDARY1 + "\n");
-                body.append("Content-Type: text/html;\n\tcharset=\"iso-8859-1\"\n");
+                body.append("Content-Type: text/html;\n\tcharset=\"UTF-8\"\n");
                 body.append("Content-Transfer-Encoding: quoted-printable\n\n");
                 if (htmlBody.toLowerCase().indexOf("<html>") < 0) {
                     body.append("<HTML><HEAD>\n<TITLE></TITLE>\n");
-                    body.append("<META http-equiv=3DContent-Type content=3D\"text/html; charset=3Diso-8859-1\"></HEAD>\n<BODY>\n");
-                    body.append(htmlBody.replaceAll("=", "=3D")).append("</BODY></HTML>\n");
+                    body.append("<META http-equiv=3DContent-Type content=3D\"text/html; charset=3Dutf-8\"></HEAD>\n<BODY>\n");
+                    body.append(encodeQuotedPrintable(htmlBody)).append("</BODY></HTML>\n");
                 } else
-                    body.append(htmlBody.replaceAll("=", "=3D")).append("\n");
+                    body.append(encodeQuotedPrintable(htmlBody)).append("\n");
             }
 
             body.append("\n--" + BOUNDARY1 + "--\n");
@@ -219,6 +215,12 @@ public class FxMailUtils {
             throw new FxApplicationException(e, "ex.messaging.mail.send", e.getMessage());
         } catch (IOException e) {
             throw new FxApplicationException(e, "ex.messaging.mail.send", e.getMessage());
+        } catch (EncoderException e) {
+            throw new FxApplicationException(e, "ex.messaging.mail.send", e.getMessage());
         }
+    }
+
+    private static String encodeQuotedPrintable(String textBody) throws EncoderException {
+        return new QuotedPrintableCodec("UTF-8").encode(textBody);
     }
 }
