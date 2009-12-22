@@ -147,6 +147,7 @@ public class FxContent implements Serializable {
         this.active = active;
         this.binaryPreviewId = binaryPreviewId;
         this.binaryPreviewACL = binaryPreviewACL;
+        updateSystemInternalProperties();
     }
 
     /**
@@ -202,7 +203,8 @@ public class FxContent implements Serializable {
      */
     @Deprecated
     public long getAclId() {
-        return aclIds.isEmpty() ? -1 : aclIds.get(0);
+        final List<Long> acls = getAclIds();
+        return acls.isEmpty() ? -1 : acls.get(0);
     }
 
     /**
@@ -221,7 +223,19 @@ public class FxContent implements Serializable {
      * @return all ACLs assigned to this content.
      */
     public List<Long> getAclIds() {
-        return Collections.unmodifiableList(aclIds);
+        try {
+            List<Long> ret = new ArrayList<Long>(aclIds.size());
+            for (FxValue val : getValues("/ACL")) {
+                if (!(val instanceof FxLargeNumber))
+                    continue;
+                //"reverse" the order since adding them in updateAclProperty() places them at the beginning
+                //resulting in a reverse order
+                ret.add(0, ((FxLargeNumber) val).getDefaultTranslation());
+            }
+            return Collections.unmodifiableList(ret);
+        } catch (NullPointerException e) {
+            return Collections.unmodifiableList(aclIds); //might happen during initialization of new contents
+        }
     }
 
     /**
@@ -254,7 +268,11 @@ public class FxContent implements Serializable {
      * @return step id
      */
     public long getStepId() {
-        return stepId;
+        try {
+            return ((FxLargeNumber) getValue("/STEP")).getDefaultTranslation();
+        } catch (NullPointerException e) {
+            return stepId; //might happen during initialization of new contents
+        }
     }
 
     /**
@@ -331,7 +349,11 @@ public class FxContent implements Serializable {
      * @return main language
      */
     public long getMainLanguage() {
-        return mainLanguage;
+        try {
+            return ((FxLargeNumber) getValue("/MAINLANG")).getDefaultTranslation();
+        } catch (NullPointerException e) {
+            return mainLanguage; //might happen during initialization of new contents
+        }
     }
 
     /**
@@ -350,7 +372,11 @@ public class FxContent implements Serializable {
      * @return content is active
      */
     public boolean isActive() {
-        return active;
+        try {
+            return ((FxBoolean) getValue("/ISACTIVE")).getDefaultTranslation();
+        } catch (NullPointerException e) {
+            return active; //might happen during initialization of new contents
+        }
     }
 
     /**
@@ -756,8 +782,8 @@ public class FxContent implements Serializable {
     public List<FxValue> getValues(String XPath) {
         // XPath check can be skipped because it is performed by FxType#getAssignment below
         //if (!isXPathValid(XPath, true))
-            //noinspection ThrowableInstanceNeverThrown
-         //   throw new FxInvalidParameterException("XPATH", "ex.xpath.element.noProperty", XPath).asRuntimeException();
+        //noinspection ThrowableInstanceNeverThrown
+        //   throw new FxInvalidParameterException("XPATH", "ex.xpath.element.noProperty", XPath).asRuntimeException();
         final FxEnvironment env = CacheAdmin.getEnvironment();
         long assignmentId = env.getType(getTypeId()).getAssignment(XPath).getId();
         FxGroupData group = getGroupData(XPathElement.stripLastElement(XPath));
