@@ -11,7 +11,7 @@
 
     <properties>
         <staging.dir>${project.build.directory}/staging</staging.dir>
-        <izpack-standalone.version>4.3.0</izpack-standalone.version>
+        <izpack-standalone.version>4.3.2</izpack-standalone.version>
         <ant.version>1.7.1</ant.version>
 
         <jetty.version>6.1.17</jetty.version>
@@ -277,7 +277,7 @@
 
     </build>
 
-    <repositories>
+    <!--repositories>
         <repository>
             <id>maven-dev-repository.dev.java.net</id>
             <name>Java.net Dev Repository for Maven</name>
@@ -287,6 +287,6 @@
                 <updatePolicy>never</updatePolicy>
             </snapshots>
         </repository>
-    </repositories>
+    </repositories-->
 
 </project>
