@@ -463,7 +463,7 @@
 			<fileset dir="${build.ui.shared.classes.dir}">
 			</fileset>
 		</jar>
-        <emma enabled="${emma.enabled}">
+        <!--emma enabled="${emma.enabled}">
 			<instr
 				instrpath="${build.ui.jar.dir}/flexive-backend.jar"
 				mode="overwrite"
@@ -480,7 +480,7 @@
 				metadatafile="${coverage.dir}/coverage.em">
 				<filter value="+com.flexive.war.*" />
 			</instr>
-		</emma>
+		</emma-->
 		<war warfile="${flexive.base.build.dir}/ui/flexive.war" webxml="${resources.ui.jsf.dir}/web.xml" keepcompression="yes">
 			<!-- jsp,html,.. files -->
 			<fileset dir="${flexive.web.ui.shared.dir}">
@@ -822,10 +822,10 @@
         <copy file="${build.ui.jar.dir}/flexive-backend.jar" todir="${flexive.dist.apps.dir}/flexive-backend"/>
         <!-- Include standard plugin setup -->
         <copy todir="${flexive.dist.apps.dir}">
-            <fileset dir="${build.ui.jar.dir}" includes="flexive-plugin-*.jar" excludes="flexive-plugin-jsf-testrunner.jar"/>
+            <fileset dir="${build.ui.jar.dir}" includes="flexive-plugin-*.jar" excludes="flexive-plugin-jsf-testrunner.jar,flexive-plugin-jsf-newsletter.jar"/>
         </copy>
         <copy todir="${flexive.dist.apps.disabled.dir}">
-            <fileset dir="${build.ui.jar.dir}" includes="flexive-plugin-jsf-testrunner.jar"/>
+            <fileset dir="${build.ui.jar.dir}" includes="flexive-plugin-jsf-testrunner.jar,flexive-plugin-jsf-newsletter.jar"/>
         </copy>
 
         <!-- Copy build environment to root dist folder -->
@@ -983,6 +983,7 @@ database.vendor=MySQL
         <maven-build-sources artifactId="flexive-plugin-jsf-core" label="[fleXive] JSF components" srcdir="${flexive.src.ui.components.dir}"/>
         <maven-build-sources artifactId="flexive-plugin-globalconfig" label="[fleXive] global (division) configuration plugin" srcdir="${flexive.base.ui.dir}/jsf-globalconfig/src/java"/>
         <maven-build-sources artifactId="flexive-plugin-jsf-feedbackPlugin" label="[fleXive] backend feedback plugin" srcdir="${flexive.base.ui.dir}/jsf-feedbackPlugin/src/java"/>
+        <maven-build-sources artifactId="flexive-plugin-jsf-newsletter" label="[fleXive] backend newsletter plugin" srcdir="${flexive.base.ui.dir}/jsf-newsletter/src/java"/>
         <maven-build-sources artifactId="flexive-backend" label="[fleXive] backend application" srcdir="${flexive.src.ui.jsf.dir}"/>
 
         <maven-build-sources artifactId="flexive-extractor" label="[fleXive] document extraction library" srcdir="${flexive.src.framework.dir}"
@@ -1036,6 +1037,7 @@ database.vendor=MySQL
         <maven-deploy-with-sources path="${build.ui.jar.dir}" name="flexive-plugin-jsf-core"/>
         <maven-deploy-with-sources path="${build.ui.jar.dir}" name="flexive-plugin-globalconfig"/>
         <maven-deploy-with-sources path="${build.ui.jar.dir}" name="flexive-plugin-jsf-feedbackPlugin"/>
+        <maven-deploy-with-sources path="${build.ui.jar.dir}" name="flexive-plugin-jsf-newsletter"/>
         <maven-deploy-with-sources path="${build.ui.jar.dir}" name="flexive-backend"/>
 
         <maven-deploy-with-sources path="${flexive.lib.dir}" name="flexive-extractor"/>
@@ -1190,9 +1192,10 @@ database.vendor=MySQL
         </buildPlugin>
         
         <buildPlugin name="jsf-testrunner" srcdir="${flexive.base.ui.dir}/jsf-testrunner"/>
+        <buildPlugin name="jsf-newsletter" srcdir="${flexive.base.ui.dir}/jsf-newsletter"/>
         <buildPlugin name="globalconfig" srcdir="${flexive.base.ui.dir}/jsf-globalconfig"/>
         <buildPlugin name="jsf-feedbackPlugin" srcdir="${flexive.base.ui.dir}/jsf-feedbackPlugin"/>
-        <emma enabled="${emma.enabled}">
+        <!--emma enabled="${emma.enabled}">
 			<instr
 				instrpath="${build.ui.jar.dir}/flexive-jsf-core.jar"
 				mode="overwrite"
@@ -1200,7 +1203,7 @@ database.vendor=MySQL
 				metadatafile="${coverage.dir}/coverage.em">
 				<filter value="+com.flexive.*" />
 			</instr>
-		</emma>
+		</emma-->
     </target>
 
     <macrodef name="buildPlugin">
