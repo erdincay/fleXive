@@ -1359,6 +1359,14 @@
                             (properties referencing other contents).
                         </td>
                     </tr>
+                    <tr>
+                        <td>
+                            SELECTMANY.CHECKBOXES
+                        </td>
+                        <td>
+                            Render checkboxes instead of a multi-select list for FxSelectMany properties.
+                        </td>
+                    </tr>
                 </tbody>
             </table>
         </para>

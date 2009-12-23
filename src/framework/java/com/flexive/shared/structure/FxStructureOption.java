@@ -64,6 +64,12 @@ public class FxStructureOption implements Serializable {
      * @since 3.1 
      */
     public static final String OPTION_REFERENCE_SELECTONE = "REFERENCE.SELECTONE";
+    /**
+     * Use checkboxes instead of a multi-select list for FxSelectMany properties.
+     *
+     * @since 3.1
+     */
+    public static final String OPTION_SELECTMANY_CHECKBOXES = "SELECTMANY.CHECKBOXES";
 
     public final static String OPTION_MULTILINE = "MULTILINE";
     public final static String VALUE_TRUE = "1";

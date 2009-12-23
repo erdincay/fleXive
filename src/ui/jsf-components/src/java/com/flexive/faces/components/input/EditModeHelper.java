@@ -58,6 +58,7 @@ import org.apache.myfaces.custom.fileupload.HtmlInputFileUpload;
 import javax.faces.component.UIComponent;
 import javax.faces.component.UIInput;
 import javax.faces.component.UISelectItems;
+import javax.faces.component.UISelectMany;
 import javax.faces.component.html.*;
 import javax.faces.context.FacesContext;
 import javax.faces.context.ResponseWriter;
@@ -80,32 +81,41 @@ class EditModeHelper extends RenderHelper {
     private boolean multiLine = false;
     private boolean useHTMLEditor = false;
     private int rows = -1;
+    private boolean selectManyCheckboxes;
 
     protected FxEnvironment environment;
 
     public EditModeHelper(FxValueInput component, String clientId, FxValue value) {
         super(component, clientId, value);
         environment = CacheAdmin.getEnvironment();
-        if (value != null && StringUtils.isNotBlank(value.getXPath()) && value instanceof FxString) {
+        if (value != null && StringUtils.isNotBlank(value.getXPath())) {
             if (CacheAdmin.getEnvironment().assignmentExists(value.getXPath())) {
                 FxPropertyAssignment pa = (FxPropertyAssignment) environment.getAssignment(value.getXPath());
-                multiLine = pa.isMultiLine();
-                if (multiLine) {
-                    rows = pa.getMultiLines();
-                    if (rows <= 1)
-                        rows = -1;
+                if (value instanceof FxString) {
+                    multiLine = pa.isMultiLine();
+                    if (multiLine) {
+                        rows = pa.getMultiLines();
+                        if (rows <= 1)
+                            rows = -1;
+                    }
+                    useHTMLEditor = pa.getOption(FxStructureOption.OPTION_HTML_EDITOR).isValueTrue();
+                } else if (value instanceof FxSelectMany) {
+                    selectManyCheckboxes = pa.getOption(FxStructureOption.OPTION_SELECTMANY_CHECKBOXES).isValueTrue();
                 }
-                useHTMLEditor = pa.getOption(FxStructureOption.OPTION_HTML_EDITOR).isValueTrue();
             }
             else if (CacheAdmin.getEnvironment().propertyExists(value.getXPath())) {
                 FxProperty p = CacheAdmin.getEnvironment().getProperty(value.getXPath());
-                multiLine = p.getOption(FxStructureOption.OPTION_MULTILINE).isValueTrue();
-                if (multiLine) {
-                    rows = p.getMultiLines();
-                    if (rows <= 1)
-                        rows = -1;
+                if (value instanceof FxString) {
+                    multiLine = p.getOption(FxStructureOption.OPTION_MULTILINE).isValueTrue();
+                    if (multiLine) {
+                        rows = p.getMultiLines();
+                        if (rows <= 1)
+                            rows = -1;
+                    }
+                    useHTMLEditor = p.getOption(FxStructureOption.OPTION_HTML_EDITOR).isValueTrue();
+                } else if (value instanceof FxSelectMany) {
+                    selectManyCheckboxes = p.getOption(FxStructureOption.OPTION_SELECTMANY_CHECKBOXES).isValueTrue();
                 }
-                useHTMLEditor = p.getOption(FxStructureOption.OPTION_HTML_EDITOR).isValueTrue();
             }
         }
 
@@ -293,15 +303,24 @@ class EditModeHelper extends RenderHelper {
         for (int i = 0; i < selected.length; i++) {
             selected[i] = sm.getSelected().get(i).getId();
         }
-        // render a "multiple" select list
-        final HtmlSelectManyListbox listbox = (HtmlSelectManyListbox) createUISelect(parent, inputId, HtmlSelectManyListbox.COMPONENT_TYPE);
-        listbox.setStyleClass(CSS_VALUE_INPUT_FIELD + " " + FxValueInputRenderer.CSS_INPUTELEMENTWIDTH + singleLanguageStyle(language));
-        listbox.setSelectedValues(selected);
-        storeSelectItems(listbox, selectValue.getSelectList(), false);
-        // automatically limit select list rows for very long lists. "Real" single-line input is not possible with a
-        // standard listbox widget if multiple selection should still be possible,
-        // so we're only restraining the height a bit stronger 
-        listbox.setSize(Math.min(selectValue.getSelectList().getItems().size(), component.isForceLineInput() ? 3 : 7));
+        final UISelectMany input;
+        if (selectManyCheckboxes) {
+            // render as checkboxes
+            final HtmlSelectManyCheckbox checkboxes = (HtmlSelectManyCheckbox) createUISelect(parent, inputId, HtmlSelectManyCheckbox.COMPONENT_TYPE);
+            checkboxes.setLayout("pageDirection");
+            input = checkboxes;
+        } else {
+            // render a "multiple" select list
+            final HtmlSelectManyListbox listbox = (HtmlSelectManyListbox) createUISelect(parent, inputId, HtmlSelectManyListbox.COMPONENT_TYPE);
+            listbox.setStyleClass(CSS_VALUE_INPUT_FIELD + " " + FxValueInputRenderer.CSS_INPUTELEMENTWIDTH + singleLanguageStyle(language));
+            // automatically limit select list rows for very long lists. "Real" single-line input is not possible with a
+            // standard listbox widget if multiple selection should still be possible,
+            // so we're only restraining the height a bit stronger
+            listbox.setSize(Math.min(selectValue.getSelectList().getItems().size(), component.isForceLineInput() ? 3 : 7));
+            input = listbox;
+        }
+        storeSelectItems(input, selectValue.getSelectList(), false);
+        input.setSelectedValues(selected);
     }
 
     private static void addHtmlAttributes(FxValueInput component, UIComponent target) {
