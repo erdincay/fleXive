@@ -102,7 +102,8 @@ public class FxFilter implements Filter {
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         FxRequestUtils.setCharacterEncoding(servletRequest, servletResponse);
 
-        final int divisionId = getDivisionId(servletRequest, servletResponse);
+        final int divisionId =
+                getDivisionId(servletRequest, servletResponse);
         if (divisionId == FxContext.DIV_UNDEFINED) {
             return;
         }

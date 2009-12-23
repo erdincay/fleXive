@@ -76,7 +76,6 @@
     </path>
 
     <fileset id="jar.ejb.classes" dir="${build.framework.classes.dir}">
-		<include name="com/flexive/core/**"/>
 		<include name="com/flexive/ejb/**"/>
 		<include name="*.properties"/>
         <include name="**/*.flexive"/>
@@ -85,6 +84,13 @@
     <fileset id="jar.ejb.resources" dir="${flexive.resources.framework.dir}">
 		<include name="embeddedJBossCacheConfig.xml"/>
         <include name="fxresources/**"/>
+    </fileset>
+
+    <fileset id="jar.core.classes" dir="${build.framework.classes.dir}">
+        <include name="com/flexive/core/**"/>
+    </fileset>
+    <fileset id="jar.core.resources" dir="${flexive.resources.framework.dir}">
+        <exclude name="**/*"/>  <!-- no inclusions right now -->
     </fileset>
 
 	<!-- ========================== tasks / macros ====================== -->
@@ -515,6 +521,30 @@
         </war>
 	</target>
 
+    <target name="jar.core.prepare">
+        <uptodate targetfile="${flexive.build.framework.jar.dir}/flexive-core.jar" property="jar.core.skip">
+            <srcfiles refid="jar.core.classes"/>
+            <srcfiles refid="jar.core.resources"/>
+        </uptodate>
+    </target>
+
+    <target name="jar.core" depends="compile.framework, jar.core.prepare" unless="jar.core.skip">
+        <jar jarfile="${flexive.build.framework.jar.dir}/flexive-core.jar">
+			<fileset refid="jar.core.classes"/>
+			<fileset refid="jar.core.resources"/>
+        </jar>
+        <emma enabled="${emma.enabled}">
+            <instr
+                instrpath="${flexive.build.framework.jar.dir}/flexive-core.jar"
+                mode="overwrite"
+                merge="true"
+                metadatafile="${coverage.dir}/coverage.em">
+                <filter excludes="*Test*" />
+                <filter value="+com.flexive.core.*" />
+            </instr>
+        </emma> 
+    </target>
+
 	<target name="jar.ejb.prepare">
 		<uptodate targetfile="${flexive.build.framework.jar.dir}/flexive-ejb.jar" property="jar.ejb.skip">
 			<srcfiles refid="jar.ejb.classes"/>
@@ -522,7 +552,7 @@
         </uptodate>
 	</target>
 
-	<target name="jar.ejb" depends="compile.framework, jar.ejb.prepare" unless="jar.ejb.skip">
+	<target name="jar.ejb" depends="compile.framework, jar.ejb.prepare, jar.core" unless="jar.ejb.skip">
         <scriptIndexBuilder indexFile="${build.framework.classes.dir}/fxresources/scripts/runonce/scriptindex.flexive"
                             scriptDir="${flexive.resources.framework.dir}/fxresources/scripts/runonce"/>
         <scriptIndexBuilder indexFile="${build.framework.classes.dir}/fxresources/scripts/startup/scriptindex.flexive"
@@ -542,7 +572,7 @@
 				merge="true"
 				metadatafile="${coverage.dir}/coverage.em">
 				<filter excludes="*Test*" />
-				<filter value="+com.flexive.core.*, +com.flexive.ejb.beans.*" />
+				<filter value="+com.flexive.ejb.beans.*" />
 			</instr>
 		</emma>
 	</target>
@@ -555,7 +585,7 @@
         </javac-call>
         <jar jarfile="${flexive.build.framework.jar.dir}/flexive-dbsetup.jar">
             <manifest>
-                <attribute name="Class-Path" value="flexive-shared.jar flexive-ejb.jar"/>
+                <attribute name="Class-Path" value="flexive-shared.jar flexive-ejb.jar flexive-core.jar"/>
                 <attribute name="Main-Class" value="com.flexive.tools.db.DBSetup"/>
             </manifest>
             <fileset dir="${build.framework.classes.dir}">
@@ -811,6 +841,7 @@
             <fileset dir="${build.ui.jar.dir}" includes="*.jar" excludes="flexive-backend.jar,flexive-plugin-*.jar"/>
         </copy>
         <copy file="${flexive.build.framework.jar.dir}/flexive-ejb.jar" tofile="${flexive.dist.lib.dir}/flexive-ejb.jar"/>
+        <copy file="${flexive.build.framework.jar.dir}/flexive-core.jar" tofile="${flexive.dist.lib.dir}/flexive-core.jar"/>
         <copy todir="${flexive.dist.lib.dir}">
             <fileset dir="${flexive.build.framework.jar.dir}" includes="flexive-storage-*.jar"/>
         </copy>
@@ -967,12 +998,11 @@ database.vendor=MySQL
         <maven-build-sources artifactId="flexive-ejb"
                              label="[fleXive] EJB classes"
                              srcdir="${flexive.src.framework.dir}"
-                             prefix="com/flexive/ejb" packagenames="com.flexive.ejb.*,com.flexive.core.*,com.flexive.shared.*">
-            <fileset dir="${flexive.src.framework.dir}">
-                <include name="com/flexive/core/**/*.java"/>
-                <include name="com/flexive/ejb/**/*.java"/>
-            </fileset>
-        </maven-build-sources>
+                             prefix="com/flexive/ejb/" packagenames="com.flexive.ejb.*"/>
+        <maven-build-sources artifactId="flexive-core"
+                             label="[fleXive] core classes"
+                             srcdir="${flexive.src.framework.dir}"
+                             prefix="com/flexive/core/" packagenames="com.flexive.core.*"/>
 
         <maven-build-sources artifactId="flexive-shared"
                              label="[fleXive] shared classes"
@@ -1029,6 +1059,7 @@ database.vendor=MySQL
 
     <target name="maven.deploy" description="Publish to Maven repository set in maven.dist.repo" depends="jar.all,jar.maven.sources">
         <maven-deploy-with-sources path="${flexive.build.framework.jar.dir}" name="flexive-ejb"/>
+        <maven-deploy-with-sources path="${flexive.build.framework.jar.dir}" name="flexive-core"/>
 
         <maven-deploy-with-sources path="${flexive.build.framework.jar.dir}" name="flexive-shared"/>
 

@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.flexive</groupId>
+    <artifactId>flexive-core</artifactId>
+    <version>@FLEXIVE_VERSION@</version>
+    <name>Flexive Core JAR</name>
+    <description>The core database layer providing the persistence engines and query facilities.</description>
+
+    <licenses>
+        <license>
+            <name>GNU Lesser General Public License (LGPL)</name>
+            <url>http://www.fsf.org/licensing/licenses/lgpl.txt</url>
+        </license>
+    </licenses>
+    <url>http://www.flexive.org/</url>
+    <issueManagement>
+        <system>Atlassian JIRA</system>
+        <url>http://issuetracker.flexive.org/jira/browse/FX</url>
+    </issueManagement>
+    <organization>
+        <name>unique computing solutions GmbH (UCS)</name>
+        <url>http://www.ucs.at/</url>
+    </organization>
+    <scm>
+        <connection>scm:svn:http://svn.flexive.org/repository/flexive/@FLEXIVE_BRANCH@</connection>
+        <url>http://source.flexive.org/browse/fleXive/@FLEXIVE_BRANCH@/src/framework/java/com/flexive/core</url>
+    </scm>
+
+    <dependencies>
+        <!-- default storage engines -->
+        <dependency>
+            <groupId>com.flexive</groupId>
+            <artifactId>flexive-h2</artifactId>
+            <version>@FLEXIVE_VERSION@</version>
+            <optional>false</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>com.flexive</groupId>
+            <artifactId>flexive-mysql</artifactId>
+            <version>@FLEXIVE_VERSION@</version>
+            <optional>false</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>com.flexive</groupId>
+            <artifactId>flexive-postgresql</artifactId>
+            <version>@FLEXIVE_VERSION@</version>
+            <optional>false</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>com.flexive</groupId>
+            <artifactId>flexive-flatstorage</artifactId>
+            <version>@FLEXIVE_VERSION@</version>
+            <optional>false</optional>
+        </dependency>
+
+        <!-- SQL parser and extractors -->
+        <dependency>
+            <groupId>com.flexive</groupId>
+            <artifactId>flexive-sqlParser</artifactId>
+            <version>@FLEXIVE_VERSION@</version>
+            <optional>false</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>com.flexive</groupId>
+            <artifactId>flexive-extractor</artifactId>
+            <version>@FLEXIVE_VERSION@</version>
+            <optional>false</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>com.flexive</groupId>
+            <artifactId>flexive-shared</artifactId>
+            <version>@FLEXIVE_VERSION@</version>
+            <optional>false</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.opensymphony.quartz</groupId>
+            <artifactId>quartz</artifactId>
+            <version>1.6.5</version>
+            <optional>false</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>jtidy</artifactId>
+            <version>r8-20060801</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.antlr</groupId>
+            <artifactId>antlr-runtime</artifactId>
+            <version>3.1.3</version>
+
+            <exclusions>
+                <exclusion>
+                    <groupId>org.antlr</groupId>
+                    <artifactId>stringtemplate</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+    </dependencies>
+</project>

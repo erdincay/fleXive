@@ -32,6 +32,7 @@
 package com.flexive.shared.exceptions;
 
 import com.flexive.shared.*;
+import com.flexive.shared.security.UserTicket;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -92,7 +93,8 @@ public class FxExceptionMessage implements Serializable {
      * @return the resource bundle
      */
     public String getResource(String key) {
-        final Locale locale = FxContext.get().getLocale();
+        final UserTicket ticket = FxContext.getUserTicket();
+        final Locale locale = ticket != null ? ticket.getLanguage().getLocale() : Locale.getDefault();
         if (!initialized) {
             initialize();
         }

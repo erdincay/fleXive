@@ -7,7 +7,8 @@
     <groupId>com.flexive</groupId>
     <artifactId>flexive-ejb</artifactId>
     <version>@FLEXIVE_VERSION@</version>
-    <description>Flexive EJB JAR</description>
+    <name>Flexive EJB JAR</name>
+    <description>EJB interfaces for flexive-core.</description>
 
     <licenses>
         <license>
@@ -30,81 +31,11 @@
     </scm>
 
     <dependencies>
-        <!-- default storage engines -->
         <dependency>
             <groupId>com.flexive</groupId>
-            <artifactId>flexive-h2</artifactId>
+            <artifactId>flexive-core</artifactId>
             <version>@FLEXIVE_VERSION@</version>
             <optional>false</optional>
-        </dependency>
-
-        <dependency>
-            <groupId>com.flexive</groupId>
-            <artifactId>flexive-mysql</artifactId>
-            <version>@FLEXIVE_VERSION@</version>
-            <optional>false</optional>
-        </dependency>
-
-        <dependency>
-            <groupId>com.flexive</groupId>
-            <artifactId>flexive-postgresql</artifactId>
-            <version>@FLEXIVE_VERSION@</version>
-            <optional>false</optional>
-        </dependency>
-
-        <dependency>
-            <groupId>com.flexive</groupId>
-            <artifactId>flexive-flatstorage</artifactId>
-            <version>@FLEXIVE_VERSION@</version>
-            <optional>false</optional>
-        </dependency>
-
-        <!-- SQL parser and extractors -->
-        <dependency>
-            <groupId>com.flexive</groupId>
-            <artifactId>flexive-sqlParser</artifactId>
-            <version>@FLEXIVE_VERSION@</version>
-            <optional>false</optional>
-        </dependency>
-
-        <dependency>
-            <groupId>com.flexive</groupId>
-            <artifactId>flexive-extractor</artifactId>
-            <version>@FLEXIVE_VERSION@</version>
-            <optional>false</optional>
-        </dependency>
-
-        <dependency>
-            <groupId>com.flexive</groupId>
-            <artifactId>flexive-shared</artifactId>
-            <version>@FLEXIVE_VERSION@</version>
-            <optional>false</optional>
-        </dependency>
-
-        <dependency>
-            <groupId>org.opensymphony.quartz</groupId>
-            <artifactId>quartz</artifactId>
-            <version>1.6.5</version>
-            <optional>false</optional>
-        </dependency>
-
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>jtidy</artifactId>
-            <version>r8-20060801</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.antlr</groupId>
-            <artifactId>antlr-runtime</artifactId>
-            <version>3.1.3</version>
-
-            <exclusions>
-                <exclusion>
-                    <groupId>org.antlr</groupId>
-                    <artifactId>stringtemplate</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
     </dependencies>
 </project>

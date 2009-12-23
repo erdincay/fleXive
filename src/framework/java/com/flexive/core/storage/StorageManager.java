@@ -74,6 +74,8 @@ public class StorageManager {
                 storages.put(impl.getStorageVendor(), impl);
             } catch (Exception e) {
                 LOG.error("Could not instantiate storage factory class [" + storage + "]: " + e.getMessage(), e);
+            } catch (NoClassDefFoundError e) {
+                LOG.error("Could not instantiate storage factory class [" + storage + "] (class not found: " + e.getMessage() + ")");
             }
         }
     }

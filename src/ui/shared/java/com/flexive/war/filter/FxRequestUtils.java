@@ -33,8 +33,11 @@ package com.flexive.war.filter;
 
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
+import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.exceptions.FxRuntimeException;
 import com.flexive.shared.interfaces.GlobalConfigurationEngine;
 
+import javax.ejb.EJBException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.ServletResponse;
@@ -54,6 +57,7 @@ public class FxRequestUtils {
      * @param request the current request
      * @return the division, or -1 if the request could not be parsed
      */
+    @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     public static int getDivision(HttpServletRequest request) {
 
         // Check if already resolved
@@ -68,6 +72,15 @@ public class FxRequestUtils {
         int divisionId = -1;
         try {
             divisionId = configuration.getDivisionId(server);
+        } catch (FxApplicationException e) {
+            throw e.asRuntimeException();
+        } catch (EJBException e) {
+            // unwrap
+            if (e.getCause() instanceof RuntimeException) {
+                throw (RuntimeException) e.getCause();
+            } else {
+                throw new FxApplicationException(e).asRuntimeException();
+            }
         } catch (Exception e) {
             if( e.getCause() instanceof javax.transaction.HeuristicMixedException) {
                 //try once more, this can happen on the first time accessing a postgres datasource using JBoss 5.x
