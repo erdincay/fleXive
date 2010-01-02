@@ -1,4 +1,4 @@
-Copyright (c) 1999-2008
+Copyright (c) 1999-20010
 UCS - unique computing solutions gmbh (http://www.ucs.at)
 All rights reserved
 
