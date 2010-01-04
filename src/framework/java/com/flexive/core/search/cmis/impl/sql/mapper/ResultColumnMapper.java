@@ -86,7 +86,8 @@ public interface ResultColumnMapper<T extends ResultColumn> {
      *
      * @param factory   the SQL mapper factory
      *@param column     the result column
-     * @param dataType  the datatype to be checked   @return          true if the SQL dialect can select multivalued properties for the given data type
+     * @param dataType  the datatype to be checked
+     * @return          true if the SQL dialect can select multivalued properties for the given data type
      */
     boolean isDirectSelectForMultivalued(SqlMapperFactory factory, T column, FxDataType dataType);
 }

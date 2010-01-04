@@ -69,7 +69,7 @@ public class GenericSQLFulltextIndexer implements FulltextIndexer {
 
 
     private FxPK pk;
-    private Connection con;
+    protected Connection con;
     private PreparedStatement psu, psi, psd, psd_all;
 
     /**
@@ -374,7 +374,7 @@ public class GenericSQLFulltextIndexer implements FulltextIndexer {
     /**
      * {@inheritDoc}
      */
-    public void commitChanges() {
+    public void commitChanges() throws SQLException {
         //this implementation commits on index(..)
     }
 

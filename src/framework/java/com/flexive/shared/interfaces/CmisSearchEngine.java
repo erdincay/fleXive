@@ -31,7 +31,7 @@
  ***************************************************************/
 package com.flexive.shared.interfaces;
 
-import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.exceptions.*;
 import com.flexive.shared.cmis.search.CmisResultSet;
 
 import javax.ejb.Remote;
@@ -49,10 +49,8 @@ public interface CmisSearchEngine {
     /**
      * @param query the CMIS-SQL query to be submitted
      * @return the query result
-     * @throws com.flexive.shared.exceptions.FxCmisSqlParseException
-     *          when the query could not be parsed
-     * @throws com.flexive.shared.exceptions.FxCmisQueryException
-     *          when the query could not be executed
+     * @throws FxCmisSqlParseException when the query could not be parsed
+     * @throws FxCmisQueryException    when the query could not be executed
      */
     CmisResultSet search(String query) throws FxApplicationException;
 
@@ -60,12 +58,11 @@ public interface CmisSearchEngine {
      * @param query                 the CMIS-SQL query to be submitted
      * @param returnPrimitiveValues if true, the return values will not be boxed in
      *                              {@link com.flexive.shared.value.FxValue} objects
-     * @param startRow
-     * @param maxRows               @return      the query result
-     * @throws com.flexive.shared.exceptions.FxCmisSqlParseException
-     *          when the query could not be parsed
-     * @throws com.flexive.shared.exceptions.FxCmisQueryException
-     *          when the query could not be executed
+     * @param startRow              first row to return
+     * @param maxRows               max. number of rows to return
+     * @return the query result
+     * @throws FxCmisSqlParseException when the query could not be parsed
+     * @throws FxCmisQueryException    when the query could not be executed
      */
     CmisResultSet search(String query, boolean returnPrimitiveValues, int startRow, int maxRows) throws FxApplicationException;
 

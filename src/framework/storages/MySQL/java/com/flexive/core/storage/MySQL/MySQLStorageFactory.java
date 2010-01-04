@@ -272,6 +272,13 @@ public class MySQLStorageFactory implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    public String getLimitOffsetVar(String var, boolean hasWhereClause, long limit, long offset) {
+        return getLimitOffset(hasWhereClause, limit, offset);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public String getLastContentChangeStatement(boolean live) {
         String contentFilter = live ? " WHERE ISLIVE_VER=true " : "";
         return "SELECT MAX(modified_at) FROM\n" +

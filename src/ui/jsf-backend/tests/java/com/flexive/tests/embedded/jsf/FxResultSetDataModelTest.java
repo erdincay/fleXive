@@ -48,10 +48,10 @@ import org.testng.Assert;
 
 /**
  * Tests for the FxResultSetDataModel class, including basic SQL searches.
- *  
+ *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-@Test(groups = {"jsf", "search"})
+@Test(groups = {"jsf", "search", "resultset"})
 public class FxResultSetDataModelTest extends AbstractSqlQueryTest {
 
     @Override
@@ -68,54 +68,56 @@ public class FxResultSetDataModelTest extends AbstractSqlQueryTest {
     }
 
     /**
-	 * Checks if the test content can be found as expected. 
-	 * @throws FxApplicationException 
-	 */
-	@Test
-	public void findTestData() throws FxApplicationException {
-		FxResultSet rs = EJBLookup.getSearchEngine().search(SELECT_ALL);
-		Assert.assertTrue(rs.getRowCount() == TOTALROWS, "Unexpected number of results: " + rs.getRowCount());
-		assertTotalRowCount(rs);
-	}
+     * Checks if the test content can be found as expected.
+     *
+     * @throws FxApplicationException on errors
+     */
+    @Test
+    public void findTestData() throws FxApplicationException {
+        FxResultSet rs = EJBLookup.getSearchEngine().search(SELECT_ALL);
+        Assert.assertTrue(rs.getRowCount() == TOTALROWS, "Unexpected number of results: " + rs.getRowCount());
+        assertTotalRowCount(rs);
+    }
 
-	/**
-	 * Tests a partial result set model with start index 0.
-	 * @throws FxApplicationException 
-	 */
-	@Test
-	public void preloadedPartialResult() throws FxApplicationException {
-		testPreloadedPartialResult(0);
-		testPreloadedPartialResult(10);
-		testPreloadedPartialResult(TOTALROWS - 11);
-	}
-	
-	/**
-	 * Tests partial results retrieved using a query builder.
-	 * @throws FxApplicationException 
-	 *
-	 */
-	@Test
-	public void lazyPartialResult() throws FxApplicationException {
+    /**
+     * Tests a partial result set model with start index 0.
+     *
+     * @throws FxApplicationException on errors
+     */
+    @Test
+    public void preloadedPartialResult() throws FxApplicationException {
+        testPreloadedPartialResult(0);
+        testPreloadedPartialResult(10);
+        testPreloadedPartialResult(TOTALROWS - 11);
+    }
+
+    /**
+     * Tests partial results retrieved using a query builder.
+     *
+     * @throws FxApplicationException on errors
+     */
+    @Test
+    public void lazyPartialResult() throws FxApplicationException {
         SqlQueryBuilder builder = getSelectAllBuilder();
-		
-		testLazyPartialResult(builder, 0, 10);
-		testLazyPartialResult(builder, 10, 10);
-		testLazyPartialResult(builder, 0, 1);
-		testLazyPartialResult(builder, 10, 1);
-	}
+
+        testLazyPartialResult(builder, 0, 10);
+        testLazyPartialResult(builder, 10, 10);
+        testLazyPartialResult(builder, 0, 1);
+        testLazyPartialResult(builder, 10, 1);
+    }
 
     private void testLazyPartialResult(SqlQueryBuilder builder, final int startIndex, final int maxRows) throws FxApplicationException {
-		FxResultSetDataModel model = new FxResultSetDataModel(builder, startIndex, maxRows);
-		FxResultSet refResult = getRows(startIndex, maxRows);
+        FxResultSetDataModel model = new FxResultSetDataModel(builder, startIndex, maxRows);
+        FxResultSet refResult = getRows(startIndex, maxRows);
         // trigger load
 //		model.setRowIndex(startIndex - 1);
 //		Assert.assertTrue(startIndex == 0 || model.isRowAvailable(), "Row before first row should be available");
         model.setRowIndex(startIndex);
         Assert.assertTrue(model.isRowAvailable(), "First row should be available");
-		model.setRowIndex(startIndex + maxRows - 1);
-		Assert.assertTrue(model.isRowAvailable(), "Last row should be available");
-		model.setRowIndex(startIndex + maxRows);
-		Assert.assertTrue(!model.isRowAvailable(), "Row after last row should not be available");
+        model.setRowIndex(startIndex + maxRows - 1);
+        Assert.assertTrue(model.isRowAvailable(), "Last row should be available");
+        model.setRowIndex(startIndex + maxRows);
+        Assert.assertTrue(!model.isRowAvailable(), "Row after last row should not be available");
         Assert.assertTrue(model.getRowCount() == TOTALROWS, "Total row count should be " + TOTALROWS + ", got: " + model.getRowCount());
         Assert.assertNotNull(model.getResult());
         Assert.assertTrue(model.getWrappedData() == model.getResult(), "Result set should be wrapped data");
@@ -124,19 +126,22 @@ public class FxResultSetDataModelTest extends AbstractSqlQueryTest {
     }
 
     /**
-	 * Tests a query that returns only the last row.
-	 * @throws FxApplicationException 
-	 */
-	@Test
-	public void oneRowResult() throws FxApplicationException {
-		FxResultSetDataModel model = new FxResultSetDataModel(getRows(TOTALROWS - 1, 1));
-		model.setRowIndex(TOTALROWS - 1);
-		Assert.assertTrue(model.isRowAvailable(), "Row should be available");
-		model.getRowData();
-	}
+     * Tests a query that returns only the last row.
+     *
+     * @throws FxApplicationException on errors
+     */
+    @Test
+    public void oneRowResult() throws FxApplicationException {
+        FxResultSetDataModel model = new FxResultSetDataModel(getRows(TOTALROWS - 1, 1));
+        model.setRowIndex(TOTALROWS - 1);
+        Assert.assertTrue(model.isRowAvailable(), "Row should be available");
+        model.getRowData();
+    }
 
     /**
      * Sets a custom result as data source.
+     *
+     * @throws FxApplicationException on errors
      */
     @Test
     public void testWrappedData() throws FxApplicationException {
@@ -149,15 +154,15 @@ public class FxResultSetDataModelTest extends AbstractSqlQueryTest {
     }
 
     private void testPreloadedPartialResult(int startRow) throws FxApplicationException {
-		FxResultSetDataModel model = new FxResultSetDataModel(getRows(startRow, 10));
-		model.setRowIndex(startRow - 1);
-		Assert.assertTrue(!model.isRowAvailable(), "No rows before startRow should be available.");
-		for (int i = 0; i < 10; i++) {
-			model.setRowIndex(startRow + i);
-			Assert.assertTrue(model.isRowAvailable(), "Expected more rows, current row: " + (startRow+i+1));
-			model.getRowData();
-		}
-		model.setRowIndex(startRow + 10);
-		Assert.assertTrue(!model.isRowAvailable(), "No more rows should be available");
+        FxResultSetDataModel model = new FxResultSetDataModel(getRows(startRow, 10));
+        model.setRowIndex(startRow - 1);
+        Assert.assertTrue(!model.isRowAvailable(), "No rows before startRow should be available.");
+        for (int i = 0; i < 10; i++) {
+            model.setRowIndex(startRow + i);
+            Assert.assertTrue(model.isRowAvailable(), "Expected more rows, current row: " + (startRow + i + 1));
+            model.getRowData();
+        }
+        model.setRowIndex(startRow + 10);
+        Assert.assertTrue(!model.isRowAvailable(), "No more rows should be available");
 	}
 }

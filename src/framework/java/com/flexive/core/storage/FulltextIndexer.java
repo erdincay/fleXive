@@ -36,6 +36,7 @@ import com.flexive.shared.content.FxPK;
 import com.flexive.shared.content.FxPropertyData;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 
 /**
  * Fulltext indexer
@@ -104,7 +105,7 @@ public interface FulltextIndexer {
     /**
      * Commit changes, to be called prior to cleanup
      */
-    void commitChanges();
+    void commitChanges() throws SQLException;
 
     /**
      * Allow the indexer to clean up used resources like prepared statements, etc.

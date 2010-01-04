@@ -214,9 +214,9 @@ public class PostgreSQLStorageFactory implements DBStorage {
      * {@inheritDoc}
      */
     public String concat(String... text) {
-        if( text.length == 0)
+        if (text.length == 0)
             return "";
-        if( text.length == 1)
+        if (text.length == 1)
             return text[0];
         StringBuilder sb = new StringBuilder(500);
         for (int i = 0; i < text.length; i++) {
@@ -231,9 +231,9 @@ public class PostgreSQLStorageFactory implements DBStorage {
      * {@inheritDoc}
      */
     public String concat_ws(String delimiter, String... text) {
-        if( text.length == 0)
+        if (text.length == 0)
             return "";
-        if( text.length == 1)
+        if (text.length == 1)
             return text[0];
         StringBuilder sb = new StringBuilder(500);
         for (int i = 0; i < text.length; i++) {
@@ -263,6 +263,13 @@ public class PostgreSQLStorageFactory implements DBStorage {
      */
     public String getLimitOffset(boolean hasWhereClause, long limit, long offset) {
         return " LIMIT " + limit + " OFFSET " + offset;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getLimitOffsetVar(String var, boolean hasWhereClause, long limit, long offset) {
+        return getLimitOffset(hasWhereClause, limit, offset);
     }
 
     /**

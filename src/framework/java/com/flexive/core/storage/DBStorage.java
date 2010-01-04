@@ -250,6 +250,17 @@ public interface DBStorage {
     String getLimitOffset(boolean hasWhereClause, long limit, long offset);
 
     /**
+     * Get database vendor specific limit/offset statement using the specified variable name
+     *
+     * @param var            name of the variable to use
+     * @param hasWhereClause does the query already contain a where clause?
+     * @param limit          limit
+     * @param offset         offset
+     * @return limit/offset statement
+     */
+    public String getLimitOffsetVar(String var, boolean hasWhereClause, long limit, long offset);
+
+    /**
      * Get the statement to get the last content change timestamp
      *
      * @param live live version included?
