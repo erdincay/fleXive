@@ -1119,7 +1119,7 @@ public class SearchEngineTest {
             assertTrue(editContentChange > lastContentChange,
                     "Saved content, but lastContentChange timestamp was not increased: " + editContentChange);
             getTreeEngine().activate(FxTreeMode.Edit, nodeId, false, true);
-            assertTrue(getSearchEngine().getLastContentChange(true) > editContentChange,
+            assertTrue(getSearchEngine().getLastContentChange(true) >= editContentChange,
                     "Activated content, but live mode lastContentChange timestamp was not increased: "
                             + getSearchEngine().getLastContentChange(true));
             Assert.assertEquals(getSearchEngine().getLastContentChange(false), editContentChange,

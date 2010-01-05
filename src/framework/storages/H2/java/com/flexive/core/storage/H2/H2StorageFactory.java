@@ -32,10 +32,6 @@
 package com.flexive.core.storage.H2;
 
 import com.flexive.core.Database;
-
-import static com.flexive.core.DatabaseConst.TBL_SELECTLIST_ITEM;
-
-import com.flexive.core.DatabaseConst;
 import com.flexive.core.search.DataFilter;
 import com.flexive.core.search.DataSelector;
 import com.flexive.core.search.H2.H2SQLDataFilter;
@@ -45,8 +41,6 @@ import com.flexive.core.search.cmis.impl.CmisSqlQuery;
 import com.flexive.core.search.cmis.impl.sql.H2.H2Dialect;
 import com.flexive.core.search.cmis.impl.sql.SqlDialect;
 import com.flexive.core.storage.*;
-import com.flexive.core.storage.genericSQL.GenericLockStorage;
-import com.flexive.shared.FxFormatUtils;
 import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.exceptions.FxSqlSearchException;
@@ -59,19 +53,19 @@ import org.apache.commons.logging.LogFactory;
 
 import java.lang.reflect.Method;
 import java.sql.*;
-import java.util.*;
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Factory for the MySQL storage
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-public class H2StorageFactory implements DBStorage {
+public class H2StorageFactory extends GenericDBStorage implements DBStorage {
     private static final Log LOG = LogFactory.getLog(H2StorageFactory.class);
     private final static String VENDOR = "H2";
-    final static String TRUE = "TRUE";
-    final static String FALSE = "FALSE";
 
     /**
      * {@inheritDoc}
@@ -125,13 +119,6 @@ public class H2StorageFactory implements DBStorage {
     /**
      * {@inheritDoc}
      */
-    public LockStorage getLockStorage() {
-        return GenericLockStorage.getInstance();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public DataSelector getDataSelector(SqlSearch search) throws FxSqlSearchException {
         return new H2SQLDataSelector(search);
     }
@@ -148,34 +135,6 @@ public class H2StorageFactory implements DBStorage {
      */
     public SqlDialect getCmisSqlDialect(FxEnvironment environment, ContentEngine contentEngine, CmisSqlQuery query, boolean returnPrimitives) {
         return new H2Dialect(environment, contentEngine, query, returnPrimitives);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public String getBooleanExpression(boolean flag) {
-        return flag ? TRUE : FALSE;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public String getBooleanTrueExpression() {
-        return TRUE;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public String getBooleanFalseExpression() {
-        return FALSE;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public String escapeReservedWords(String query) {
-        return query; //nothing to escape
     }
 
     /**
@@ -202,33 +161,8 @@ public class H2StorageFactory implements DBStorage {
     /**
      * {@inheritDoc}
      */
-    public String getSelectListItemReferenceFixStatement() {
-        return "UPDATE " + TBL_SELECTLIST_ITEM + " SET PARENTID=? WHERE PARENTID IN (SELECT p.ID FROM " +
-                TBL_SELECTLIST_ITEM + " p WHERE p.LISTID=?)";
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public String getTimestampFunction() {
         return "TIMEMILLIS(NOW())";
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public String concat(String... text) {
-        if (text.length == 0)
-            return "";
-        if (text.length == 1)
-            return text[0];
-        StringBuilder sb = new StringBuilder(500);
-        for (int i = 0; i < text.length; i++) {
-            if (i > 0 && i < text.length)
-                sb.append("||");
-            sb.append(text[i]);
-        }
-        return sb.toString();
     }
 
     /**
@@ -250,13 +184,6 @@ public class H2StorageFactory implements DBStorage {
     /**
      * {@inheritDoc}
      */
-    public String getFromDual() {
-        return "";
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public String getLimit(boolean hasWhereClause, long limit) {
         return " LIMIT " + limit;
     }
@@ -266,40 +193,6 @@ public class H2StorageFactory implements DBStorage {
      */
     public String getLimitOffset(boolean hasWhereClause, long limit, long offset) {
         return " LIMIT " + limit + " OFFSET " + offset;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public String getLimitOffsetVar(String var, boolean hasWhereClause, long limit, long offset) {
-        return getLimitOffset(hasWhereClause, limit, offset);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public String getLastContentChangeStatement(boolean live) {
-        String contentFilter = live ? " WHERE ISLIVE_VER=true " : "";
-        return "SELECT MAX(modified_at) FROM\n" +
-                "(SELECT\n" +
-                "(SELECT MAX(modified_at) FROM " + DatabaseConst.TBL_CONTENT + contentFilter + ") AS modified_at\n" +
-                (live ? "\nUNION\n(SELECT MAX(modified_at) FROM " + DatabaseConst.TBL_TREE + "_LIVE)\n" : "") +
-                "\nUNION\n(SELECT MAX(modified_at) FROM " + DatabaseConst.TBL_TREE + ")\n" +
-                ") changes";
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public String formatDateCondition(Date date) {
-        return "'" + FxFormatUtils.getDateTimeFormat().format(date) + "'";
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public String escapeFlatStorageColumn(String column) {
-        return column;
     }
 
     /**

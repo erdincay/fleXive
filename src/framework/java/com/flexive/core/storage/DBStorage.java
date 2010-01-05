@@ -258,7 +258,7 @@ public interface DBStorage {
      * @param offset         offset
      * @return limit/offset statement
      */
-    public String getLimitOffsetVar(String var, boolean hasWhereClause, long limit, long offset);
+    String getLimitOffsetVar(String var, boolean hasWhereClause, long limit, long offset);
 
     /**
      * Get the statement to get the last content change timestamp

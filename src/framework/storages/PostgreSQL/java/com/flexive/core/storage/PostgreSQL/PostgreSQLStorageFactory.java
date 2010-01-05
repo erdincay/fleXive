@@ -31,9 +31,6 @@
  ***************************************************************/
 package com.flexive.core.storage.PostgreSQL;
 
-import static com.flexive.core.DatabaseConst.TBL_SELECTLIST_ITEM;
-
-import com.flexive.core.DatabaseConst;
 import com.flexive.core.search.DataFilter;
 import com.flexive.core.search.DataSelector;
 import com.flexive.core.search.PostgreSQL.PostgreSQLDataFilter;
@@ -43,8 +40,6 @@ import com.flexive.core.search.cmis.impl.CmisSqlQuery;
 import com.flexive.core.search.cmis.impl.sql.PostgreSQL.PostgreSQLDialect;
 import com.flexive.core.search.cmis.impl.sql.SqlDialect;
 import com.flexive.core.storage.*;
-import com.flexive.core.storage.genericSQL.GenericLockStorage;
-import com.flexive.shared.FxFormatUtils;
 import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.exceptions.FxSqlSearchException;
@@ -56,18 +51,19 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.sql.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Factory for the PostgreSQL storage
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-public class PostgreSQLStorageFactory implements DBStorage {
+public class PostgreSQLStorageFactory extends GenericDBStorage implements DBStorage {
     private static final Log LOG = LogFactory.getLog(PostgreSQLStorageFactory.class);
     private final static String VENDOR = "PostgreSQL";
-    final static String TRUE = "TRUE";
-    final static String FALSE = "FALSE";
 
     /**
      * {@inheritDoc}
@@ -121,13 +117,6 @@ public class PostgreSQLStorageFactory implements DBStorage {
     /**
      * {@inheritDoc}
      */
-    public LockStorage getLockStorage() {
-        return GenericLockStorage.getInstance();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public DataSelector getDataSelector(SqlSearch search) throws FxSqlSearchException {
         return new PostgreSQLDataSelector(search);
     }
@@ -144,34 +133,6 @@ public class PostgreSQLStorageFactory implements DBStorage {
      */
     public SqlDialect getCmisSqlDialect(FxEnvironment environment, ContentEngine contentEngine, CmisSqlQuery query, boolean returnPrimitives) {
         return new PostgreSQLDialect(environment, contentEngine, query, returnPrimitives);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public String getBooleanExpression(boolean flag) {
-        return flag ? TRUE : FALSE;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public String getBooleanTrueExpression() {
-        return TRUE;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public String getBooleanFalseExpression() {
-        return FALSE;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public String escapeReservedWords(String query) {
-        return query; //nothing to escape
     }
 
     /**
@@ -198,57 +159,8 @@ public class PostgreSQLStorageFactory implements DBStorage {
     /**
      * {@inheritDoc}
      */
-    public String getSelectListItemReferenceFixStatement() {
-        return "UPDATE " + TBL_SELECTLIST_ITEM + " SET PARENTID=? WHERE PARENTID IN (SELECT p.ID FROM " +
-                TBL_SELECTLIST_ITEM + " p WHERE p.LISTID=?)";
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public String getTimestampFunction() {
         return "TIMEMILLIS(NOW())";
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public String concat(String... text) {
-        if (text.length == 0)
-            return "";
-        if (text.length == 1)
-            return text[0];
-        StringBuilder sb = new StringBuilder(500);
-        for (int i = 0; i < text.length; i++) {
-            if (i > 0 && i < text.length)
-                sb.append("||");
-            sb.append(text[i]);
-        }
-        return sb.toString();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public String concat_ws(String delimiter, String... text) {
-        if (text.length == 0)
-            return "";
-        if (text.length == 1)
-            return text[0];
-        StringBuilder sb = new StringBuilder(500);
-        for (int i = 0; i < text.length; i++) {
-            if (i > 0 && i < text.length)
-                sb.append("||'").append(delimiter).append("'||");
-            sb.append(text[i]);
-        }
-        return sb.toString();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public String getFromDual() {
-        return "";
     }
 
     /**
@@ -263,40 +175,6 @@ public class PostgreSQLStorageFactory implements DBStorage {
      */
     public String getLimitOffset(boolean hasWhereClause, long limit, long offset) {
         return " LIMIT " + limit + " OFFSET " + offset;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public String getLimitOffsetVar(String var, boolean hasWhereClause, long limit, long offset) {
-        return getLimitOffset(hasWhereClause, limit, offset);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public String getLastContentChangeStatement(boolean live) {
-        String contentFilter = live ? " WHERE ISLIVE_VER=true " : "";
-        return "SELECT MAX(modified_at) FROM\n" +
-                "(SELECT\n" +
-                "(SELECT MAX(modified_at) FROM " + DatabaseConst.TBL_CONTENT + contentFilter + ") AS modified_at\n" +
-                (live ? "\nUNION\n(SELECT MAX(modified_at) FROM " + DatabaseConst.TBL_TREE + "_LIVE)\n" : "") +
-                "\nUNION\n(SELECT MAX(modified_at) FROM " + DatabaseConst.TBL_TREE + ")\n" +
-                ") changes";
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public String formatDateCondition(java.util.Date date) {
-        return "'" + FxFormatUtils.getDateTimeFormat().format(date) + "'";
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public String escapeFlatStorageColumn(String column) {
-        return column;
     }
 
     /**

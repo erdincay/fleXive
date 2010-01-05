@@ -34,7 +34,6 @@ package com.flexive.core.storage.MySQL;
 import com.flexive.core.Database;
 import static com.flexive.core.DatabaseConst.TBL_SELECTLIST_ITEM;
 
-import com.flexive.core.DatabaseConst;
 import com.flexive.core.search.DataFilter;
 import com.flexive.core.search.DataSelector;
 import com.flexive.core.search.SqlSearch;
@@ -44,8 +43,6 @@ import com.flexive.core.search.cmis.impl.sql.SqlDialect;
 import com.flexive.core.search.genericSQL.GenericSQLDataFilter;
 import com.flexive.core.search.genericSQL.GenericSQLDataSelector;
 import com.flexive.core.storage.*;
-import com.flexive.core.storage.genericSQL.GenericLockStorage;
-import com.flexive.shared.FxFormatUtils;
 import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.exceptions.FxSqlSearchException;
@@ -64,11 +61,9 @@ import java.util.*;
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-public class MySQLStorageFactory implements DBStorage {
+public class MySQLStorageFactory extends GenericDBStorage  implements DBStorage {
     private static final Log LOG = LogFactory.getLog(MySQLStorageFactory.class);
     private final static String VENDOR = "MySQL";
-    final static String TRUE = "TRUE";
-    final static String FALSE = "FALSE";
 
     /**
      * {@inheritDoc}
@@ -122,13 +117,6 @@ public class MySQLStorageFactory implements DBStorage {
     /**
      * {@inheritDoc}
      */
-    public LockStorage getLockStorage() {
-        return GenericLockStorage.getInstance();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public DataSelector getDataSelector(SqlSearch search) throws FxSqlSearchException {
         return new GenericSQLDataSelector(search);
     }
@@ -145,34 +133,6 @@ public class MySQLStorageFactory implements DBStorage {
      */
     public SqlDialect getCmisSqlDialect(FxEnvironment environment, ContentEngine contentEngine, CmisSqlQuery query, boolean returnPrimitives) {
         return new MySqlDialect(environment, contentEngine, query, returnPrimitives);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public String getBooleanExpression(boolean flag) {
-        return flag ? TRUE : FALSE;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public String getBooleanTrueExpression() {
-        return TRUE;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public String getBooleanFalseExpression() {
-        return FALSE;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public String escapeReservedWords(String query) {
-        return query; //nothing to escape
     }
 
     /**
@@ -251,13 +211,6 @@ public class MySQLStorageFactory implements DBStorage {
     /**
      * {@inheritDoc}
      */
-    public String getFromDual() {
-        return "";
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     public String getLimit(boolean hasWhereClause, long limit) {
         return " LIMIT " + limit;
     }
@@ -267,40 +220,6 @@ public class MySQLStorageFactory implements DBStorage {
      */
     public String getLimitOffset(boolean hasWhereClause, long limit, long offset) {
         return " LIMIT " + limit + " OFFSET " + offset;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public String getLimitOffsetVar(String var, boolean hasWhereClause, long limit, long offset) {
-        return getLimitOffset(hasWhereClause, limit, offset);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public String getLastContentChangeStatement(boolean live) {
-        String contentFilter = live ? " WHERE ISLIVE_VER=true " : "";
-        return "SELECT MAX(modified_at) FROM\n" +
-                "(SELECT\n" +
-                "(SELECT MAX(modified_at) FROM " + DatabaseConst.TBL_CONTENT + contentFilter + ") AS modified_at\n" +
-                (live ? "\nUNION\n(SELECT MAX(modified_at) FROM " + DatabaseConst.TBL_TREE + "_LIVE)\n" : "") +
-                "\nUNION\n(SELECT MAX(modified_at) FROM " + DatabaseConst.TBL_TREE + ")\n" +
-                ") changes";
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public String formatDateCondition(java.util.Date date) {
-        return "'" + FxFormatUtils.getDateTimeFormat().format(date) + "'";
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public String escapeFlatStorageColumn(String column) {
-        return column;
     }
 
     /**
