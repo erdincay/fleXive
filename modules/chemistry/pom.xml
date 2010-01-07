@@ -6,10 +6,12 @@
         <flexive.version>3.1-SNAPSHOT</flexive.version>
         <spi.version>${flexive.version}</spi.version>
         <chemistry.version>0.62-SNAPSHOT</chemistry.version>
-        <h2.version>1.1.117</h2.version>
+        <h2.version>1.2.125</h2.version>
         <openejb.version>3.1</openejb.version>
         <gmaven.version>1.0-rc-5</gmaven.version>
-        <jetty.version>6.1.18</jetty.version>
+        <jetty.version>6.1.22</jetty.version>
+
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <groupId>com.flexive.cmis</groupId>
@@ -376,7 +378,6 @@
         <repository>
             <id>maven-dev-repository.dev.java.net</id>
             <name>Java.net Dev Repository for Maven</name>
-            <!--url>https://maven-repository.dev.java.net/repository/</url-->
             <url>http://download.java.net/maven/1/</url>
             <layout>legacy</layout>
             <snapshots>

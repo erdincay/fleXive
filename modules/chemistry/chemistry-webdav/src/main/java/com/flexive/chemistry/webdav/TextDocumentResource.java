@@ -64,7 +64,6 @@ public class TextDocumentResource extends DocumentResource implements Replaceabl
      * {@inheritDoc}
      */
     public void sendContent(OutputStream out, Range range, Map<String, String> params, String contentType) throws IOException, NotAuthorizedException {
-        // TODO: use StAX XMLStreamWriter instead?
         if (LOG.isDebugEnabled()) {
             LOG.debug("Sending object " + object.getId() + " as XML (range=" + range
                     + ",params=" + params + ", contentType=" + contentType+ ")");
