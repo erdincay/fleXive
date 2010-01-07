@@ -45,6 +45,8 @@ import com.google.common.collect.Lists;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.structure.FxType;
 
+import static com.flexive.shared.CacheAdmin.getEnvironment;
+
 /**
  * The flexive repository implementation.
  * 
@@ -84,20 +86,18 @@ public class FlexiveRepository implements Repository {
     public Collection<Type> getTypes(String typeId) {
         final List<Type> result = Lists.newArrayList();
         if (typeId == null) {
-            for (FxType fxType : CacheAdmin.getEnvironment().getTypes()) {
+            for (FxType fxType : getEnvironment().getTypes()) {
                 result.add(new FlexiveType(fxType));
             }
         } else {
             if (FlexiveType.ROOT_TYPE_ID.equalsIgnoreCase(typeId)) {
                 // return all types
-                for (FxType type : CacheAdmin.getEnvironment().getTypes()) {
+                for (FxType type : getEnvironment().getTypes()) {
                     result.add(new FlexiveType(type));
                 }
             } else {
                 // return type + descendants
-                final FxType rootType = CacheAdmin.getEnvironment().getType(typeId);
-                result.add(new FlexiveType(rootType));
-                for (FxType derived : rootType.getDerivedTypes(true)) {
+                for (FxType derived : getEnvironment().getType(typeId).getDerivedTypes(true, true)) {
                     result.add(new FlexiveType(derived));
                 }
             }

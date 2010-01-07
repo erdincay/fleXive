@@ -376,7 +376,8 @@
         <repository>
             <id>maven-dev-repository.dev.java.net</id>
             <name>Java.net Dev Repository for Maven</name>
-            <url>https://maven-repository.dev.java.net/repository/</url>
+            <!--url>https://maven-repository.dev.java.net/repository/</url-->
+            <url>http://download.java.net/maven/1/</url>
             <layout>legacy</layout>
             <snapshots>
                 <updatePolicy>never</updatePolicy>

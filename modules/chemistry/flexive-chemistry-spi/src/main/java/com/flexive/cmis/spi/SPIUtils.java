@@ -95,12 +95,11 @@ public class SPIUtils {
     }
 
     public static Set<Long> getFolderTypeIds() {
-        final FxType folderType = CacheAdmin.getEnvironment().getType(FxType.FOLDER);
-        final Set<Long> folderTypeIds = new HashSet<Long>(
-                FxSharedUtils.getSelectableObjectIdList(folderType.getDerivedTypes(true))
+        return new HashSet<Long>(
+                FxSharedUtils.getSelectableObjectIdList(
+                        CacheAdmin.getEnvironment().getType(FxType.FOLDER).getDerivedTypes(true, true)
+                )
         );
-        folderTypeIds.add(folderType.getId());
-        return folderTypeIds;
     }
 
     public static PropertyType mapPropertyType(FxProperty property) {

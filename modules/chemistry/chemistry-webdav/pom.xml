@@ -14,7 +14,8 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.flexive.chemistry</groupId>
     <artifactId>chemistry-webdav</artifactId>
-    <name>chemistry-webdav</name>
+    <name>Chemistry WebDAV adapter</name>
+    <description>A WebDAV adapter for Chemistry based on the Milton WebDAV library.</description>
     <version>${chemistry.version}</version>
     <url>http://incubator.apache.org/chemistry/</url>
 

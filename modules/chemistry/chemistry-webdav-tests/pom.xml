@@ -13,7 +13,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.flexive.chemistry</groupId>
     <artifactId>chemistry-webdav-tests</artifactId>
-    <name>chemistry-webdav-tests</name>
+    <name>Chemistry WebDAV adapter testsuite</name>
     <version>${chemistry.version}</version>
 
     <url>http://incubator.apache.org/chemistry/</url>
