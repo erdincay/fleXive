@@ -3,11 +3,12 @@
     <parent>
         <groupId>org.apache.chemistry</groupId>
         <artifactId>chemistry-parent</artifactId>
-        <version>0.62-SNAPSHOT</version>
+        <version>0.5-SNAPSHOT</version>
     </parent>
 
     <properties>
-        <chemistry.version>0.62-SNAPSHOT</chemistry.version>
+        <chemistry.version>0.5-SNAPSHOT</chemistry.version>
+        <spi.version>3.1-SNAPSHOT</spi.version>
     </properties>
 
     <modelVersion>4.0.0</modelVersion>
@@ -22,13 +23,12 @@
         <dependency>
             <groupId>com.flexive.chemistry</groupId>
             <artifactId>chemistry-webdav</artifactId>
-            <version>${chemistry.version}</version>
+            <version>${spi.version}</version>
         </dependency>
         
         <dependency>
             <groupId>org.apache.chemistry</groupId>
             <artifactId>chemistry-tests</artifactId>
-            <version>${chemistry.version}</version>
         </dependency>
 
         <dependency>

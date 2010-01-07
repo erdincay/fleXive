@@ -31,14 +31,8 @@
  ***************************************************************/
 package com.flexive.chemistry.webdav;
 
-import com.bradmcevoy.http.CollectionResource;
-import com.bradmcevoy.http.CopyableResource;
-import com.bradmcevoy.http.HttpManager;
-import static com.flexive.chemistry.webdav.AuthenticationFilter.getConnection;
-import com.flexive.chemistry.webdav.extensions.CopyDocumentExtension;
-import org.apache.chemistry.CMISObject;
 import org.apache.chemistry.Document;
-import org.apache.chemistry.Folder;
+import org.apache.chemistry.UpdateConflictException;
 
 /**
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
@@ -54,7 +48,11 @@ public abstract class DocumentResource extends ObjectResource<Document> {
      * {@inheritDoc}
      */
     public void delete() {
-        object.deleteAllVersions();
+        try {
+            object.deleteAllVersions();
+        } catch (UpdateConflictException e) {
+            throw CMISExceptionWrapper.wrap(e);
+        }
     }
 
 }

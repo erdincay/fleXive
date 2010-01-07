@@ -31,9 +31,10 @@
  ***************************************************************/
 package com.flexive.chemistry.webdav.extensions;
 
-import org.apache.chemistry.CMISObject;
-import org.apache.chemistry.ObjectId;
 import org.apache.chemistry.Connection;
+import org.apache.chemistry.NameConstraintViolationException;
+import org.apache.chemistry.ObjectId;
+import org.apache.chemistry.UpdateConflictException;
 
 /**
  * An extension for Chemistry to allow efficient copying of resources.
@@ -55,6 +56,6 @@ public interface CopyDocumentExtension {
      * should be cloned
      * @return      an independent copy of the object
      */
-    void copy(Connection conn, ObjectId id, ObjectId targetFolder, String newName, boolean overwrite, boolean shallow);
+    void copy(Connection conn, ObjectId id, ObjectId targetFolder, String newName, boolean overwrite, boolean shallow) throws UpdateConflictException, NameConstraintViolationException;
     
 }

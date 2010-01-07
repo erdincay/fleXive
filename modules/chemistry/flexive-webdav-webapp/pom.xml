@@ -90,7 +90,7 @@
         <dependency>
             <groupId>com.flexive.chemistry</groupId>
             <artifactId>chemistry-webdav</artifactId>
-            <version>${chemistry.version}</version>
+            <version>${spi.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.apache.chemistry</groupId>

@@ -31,13 +31,13 @@
  ***************************************************************/
 package com.flexive.cmis;
 
+import org.apache.chemistry.*;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
-import org.apache.chemistry.Folder;
-import org.apache.chemistry.Unfiling;
-import org.apache.chemistry.Connection;
+
 import static com.flexive.cmis.Utils.getRepoConnection;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
@@ -50,7 +50,7 @@ public class FolderTest {
     }
 
     @Test
-    public void getAncestors() {
+    public void getAncestors() throws NameConstraintViolationException, UpdateConflictException {
         final Connection conn = getRepoConnection();
 
         assertEquals(0, conn.getRootFolder().getParents().size());
@@ -68,7 +68,7 @@ public class FolderTest {
     }
 
     @Test
-    public void moveFolder() {
+    public void moveFolder() throws UpdateConflictException, NameConstraintViolationException {
         final Connection conn = getRepoConnection();
 
         final Folder src = conn.newFolder("fold", conn.getRootFolder());

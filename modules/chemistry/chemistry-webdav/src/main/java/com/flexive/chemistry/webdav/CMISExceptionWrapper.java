@@ -29,49 +29,29 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the file!
  ***************************************************************/
-package com.flexive.chemistry.webdav.tests;
+package com.flexive.chemistry.webdav;
 
-import com.bradmcevoy.http.Auth;
-import com.bradmcevoy.http.Request;
-import com.flexive.chemistry.webdav.ChemistryResourceFactory;
-import org.apache.chemistry.Connection;
-import org.apache.chemistry.Repository;
-import org.apache.chemistry.test.BasicHelper;
-
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
+import org.apache.chemistry.CMISException;
 
 /**
+ * Wraps CMIS repository exceptions for Milton methods.
+ *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-public class SimpleRepositoryTest extends WebdavTestCase {
-    private static final Map<String, Serializable> EMPTY_PARAMS = new HashMap<String, Serializable>();
-    private static final String ROOT_FOLDER = "webdavRepository";
+public class CMISExceptionWrapper {
 
-    @Override
-    protected Repository getRepository() {
-        try {
-            return BasicHelper.makeSimpleRepository(ROOT_FOLDER);
-        } catch (Exception e) {
-            throw new IllegalArgumentException(e);
-        } 
+    private CMISExceptionWrapper() {
     }
 
-    @Override
-    protected ChemistryResourceFactory getResourceFactory(final Repository repository) {
-        return new ChemistryResourceFactory() {
-            @Override
-            public Connection createConnection(Request request, Auth auth) {
-                return repository.getConnection(EMPTY_PARAMS);
-            }
+    public static RuntimeException wrap(CMISException e) {
+        return new WrappedCMISException(e);
+    }
 
-            @Override
-            protected boolean requireAuthentication() {
-                return false;
-            }
-        };
+    private static class WrappedCMISException extends RuntimeException {
+        public WrappedCMISException(CMISException cause) {
+            super(cause);
+        }
     }
 
 }

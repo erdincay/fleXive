@@ -34,7 +34,6 @@ package com.flexive.chemistry.webdav;
 import com.bradmcevoy.http.*;
 import com.bradmcevoy.http.exceptions.ConflictException;
 import com.bradmcevoy.http.exceptions.NotAuthorizedException;
-import static com.flexive.chemistry.webdav.AuthenticationFilter.getConnection;
 import com.generationjava.io.xml.SimpleXmlWriter;
 import com.generationjava.io.xml.XmlWriter;
 import org.apache.chemistry.*;
@@ -45,6 +44,8 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static com.flexive.chemistry.webdav.AuthenticationFilter.getConnection;
 
 /**
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
@@ -64,8 +65,12 @@ public class FolderResource extends ObjectResource<Folder>
      */
     public FolderResource createCollection(String newName) throws NotAuthorizedException, ConflictException {
         final Folder newFolder = object.newFolder(object.getBaseType().getId());
-        newFolder.setName(newName);
-        newFolder.save();
+        try {
+            newFolder.setName(newName);
+            newFolder.save();
+        } catch (CMISException e) {
+            throw CMISExceptionWrapper.wrap(e);
+        }
         return new FolderResource(resourceFactory, getChildPath(newName), newFolder);
     }
 
@@ -275,11 +280,15 @@ public class FolderResource extends ObjectResource<Folder>
 
     protected Resource handleBinaryDocument(InputStream inputStream, Long length, String contentType, String newName) throws IOException {
         final Document doc = getObject().newDocument(BaseType.DOCUMENT.getId());
-        doc.setName(newName);
-        if (inputStream != null) {
-            doc.setContentStream(new UploadContentStream(inputStream, newName, contentType, length));
+        try {
+            doc.setName(newName);
+            if (inputStream != null) {
+                doc.setContentStream(new UploadContentStream(inputStream, newName, contentType, length));
+            }
+            doc.save();
+        } catch (CMISException e) {
+            throw CMISExceptionWrapper.wrap(e);
         }
-        doc.save();
 
         return resourceFactory.createResource(getChildPath(newName), doc);
     }
@@ -313,8 +322,12 @@ public class FolderResource extends ObjectResource<Folder>
             final Document newDoc = ((DocumentResource) resourceFactory.getResource(null, getChildPath(newName))).getObject();
             final TextDocumentResource newResource = resourceFactory.createTextDocument(getChildPath(newName), newDoc);
             newResource.processXmlProperties(input);
-            newDoc.setName(newName);
-            newDoc.save();
+            try {
+                newDoc.setName(newName);
+                newDoc.save();
+            } catch (CMISException e) {
+                throw CMISExceptionWrapper.wrap(e);
+            } 
 
             return newResource;
         }
@@ -333,6 +346,10 @@ public class FolderResource extends ObjectResource<Folder>
      * {@inheritDoc}
      */
     public void delete() {
-        object.delete();
+        try {
+            object.delete();
+        } catch (CMISException e) {
+            throw CMISExceptionWrapper.wrap(e);
+        }
     }
 }

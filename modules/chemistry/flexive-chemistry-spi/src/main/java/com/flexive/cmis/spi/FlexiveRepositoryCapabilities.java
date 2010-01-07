@@ -100,4 +100,8 @@ public class FlexiveRepositoryCapabilities implements RepositoryCapabilities {
     public CapabilityACL getACLCapability() {
         return CapabilityACL.MANAGE;
     }
+
+    public boolean hasGetFolderTree() {
+        return true;
+    }
 }

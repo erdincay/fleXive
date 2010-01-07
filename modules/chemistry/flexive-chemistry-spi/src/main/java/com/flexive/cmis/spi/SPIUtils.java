@@ -31,22 +31,22 @@
  ***************************************************************/
 package com.flexive.cmis.spi;
 
-import com.flexive.shared.content.FxPK;
-import com.flexive.shared.structure.FxType;
-import com.flexive.shared.structure.FxProperty;
-import com.flexive.shared.structure.FxDataType;
-import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxRuntimeException;
+import com.flexive.shared.structure.FxDataType;
+import com.flexive.shared.structure.FxProperty;
+import com.flexive.shared.structure.FxType;
 import com.flexive.shared.value.FxValue;
-import org.apache.chemistry.PropertyType;
 import org.apache.chemistry.BaseType;
+import org.apache.chemistry.PropertyType;
 
 import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Set;
 import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Utility methods for the SPI implementation.
@@ -144,7 +144,7 @@ public class SPIUtils {
 
     public static Serializable convertValue(FxValue value, FlexivePropertyDefinition definition) {
         return convertValue(
-                (Serializable) value.getBestTranslation(),
+                value.getBestTranslation(),
                 mapPropertyType(definition.getAssignment().getProperty())
         );
     }
@@ -161,7 +161,7 @@ public class SPIUtils {
         if (value == null) {
             return null;
         } else if (type == PropertyType.STRING || type == PropertyType.HTML
-                || type == PropertyType.XML || type == PropertyType.ID || type == PropertyType.URI) {
+                || type == PropertyType.ID || type == PropertyType.URI) {
             return value.toString();
         } else if (type == PropertyType.DATETIME) {
             return convertDate(value);

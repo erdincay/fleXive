@@ -37,6 +37,7 @@ import com.bradmcevoy.http.exceptions.NotAuthorizedException;
 import com.generationjava.io.xml.PrettyPrinterXmlWriter;
 import com.generationjava.io.xml.SimpleXmlWriter;
 import com.generationjava.io.xml.XmlWriter;
+import org.apache.chemistry.CMISException;
 import org.apache.chemistry.Document;
 import org.apache.chemistry.Property;
 import org.apache.commons.logging.Log;
@@ -107,7 +108,11 @@ public class TextDocumentResource extends DocumentResource implements Replaceabl
             LOG.debug("Replacing content for object " + object.getId());
         }
         processXmlProperties(in);
-        object.save();
+        try {
+            object.save();
+        } catch (CMISException e) {
+            throw CMISExceptionWrapper.wrap(e);
+        }
     }
 
     protected void processXmlProperties(InputStream in) {
@@ -200,7 +205,11 @@ public class TextDocumentResource extends DocumentResource implements Replaceabl
             if (LOG.isTraceEnabled()) {
                 LOG.trace("Setting new name: " + name);
             }
-            object.setName(name);
+            try {
+                object.setName(name);
+            } catch (CMISException e) {
+                throw CMISExceptionWrapper.wrap(e);
+            }
         }
     }
 

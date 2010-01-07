@@ -3,24 +3,25 @@
     <parent>
         <groupId>org.apache.chemistry</groupId>
         <artifactId>chemistry-parent</artifactId>
-        <version>0.62-SNAPSHOT</version>
+        <version>0.5-SNAPSHOT</version>
     </parent>
 
     <properties>
-        <chemistry.version>0.62-SNAPSHOT</chemistry.version>
+        <chemistry.version>0.5-SNAPSHOT</chemistry.version>
     </properties>
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.flexive.chemistry</groupId>
     <artifactId>chemistry-webdav-extensions</artifactId>
     <name>Chemistry extensions for WebDAV</name>
-    <version>${chemistry.version}</version>
+    <version>3.1-SNAPSHOT</version>
     <url>http://incubator.apache.org/chemistry/</url>
 
    <dependencies>
         <dependency>
             <groupId>org.apache.chemistry</groupId>
             <artifactId>chemistry-api</artifactId>
+            <version>${chemistry.version}</version>
         </dependency>
     </dependencies>
 

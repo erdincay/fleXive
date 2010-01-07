@@ -32,8 +32,6 @@
 package com.flexive.cmis.spi;
 
 import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.EJBLookup;
-import static com.flexive.shared.EJBLookup.getTreeEngine;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.cmis.search.CmisResultRow;
 import com.flexive.shared.cmis.search.CmisResultSet;
@@ -42,8 +40,8 @@ import com.flexive.shared.exceptions.*;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNode;
-import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import org.apache.chemistry.*;
+import org.apache.chemistry.impl.simple.SimpleListPage;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -51,6 +49,10 @@ import javax.xml.namespace.QName;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
+
+import static com.flexive.shared.EJBLookup.getCmisSearchEngine;
+import static com.flexive.shared.EJBLookup.getTreeEngine;
+import static com.google.common.collect.Lists.newArrayListWithCapacity;
 
 /**
  * The main facade for accessing flexive via Chemistry/CMIS APIs. The connection implements both the external
@@ -157,7 +159,7 @@ public class FlexiveConnection implements Connection, SPI {
     }
 
     public Collection<CMISObject> query(String statement, boolean searchAllVersions) {
-        final Collection<ObjectEntry> entries = query(statement, searchAllVersions, true, true, true, -1, -1, null);
+        final Collection<ObjectEntry> entries = query(statement, searchAllVersions, null, null);
         // hack because query signatures are inconsistent
         final List<CMISObject> result = newArrayListWithCapacity(entries.size());
         for (ObjectEntry entry : entries) {
@@ -184,7 +186,7 @@ public class FlexiveConnection implements Connection, SPI {
         }
     }
 
-    public List<ObjectEntry> getDescendants(ObjectId folder, int depth, String filter, boolean includeAllowableActions, boolean includeRelationships, boolean includeRenditions, String orderBy) {
+    public List<ObjectEntry> getDescendants(ObjectId folder, int depth, String orderBy, Inclusion inclusion) {
         final List<CMISObject> children = new FlexiveFolder(context, SPIUtils.getNodeId(folder.getId())).getChildren(null, depth);
         final List<ObjectEntry> result = newArrayListWithCapacity(children.size());
         for (CMISObject child : children) {
@@ -194,33 +196,19 @@ public class FlexiveConnection implements Connection, SPI {
         return result;
     }
 
-    public List<ObjectEntry> getChildren(ObjectId folder, String filter, boolean includeAllowableActions, boolean includeRelationships, boolean includeRenditions, int maxItems, int skipCount, String orderBy, boolean[] hasMoreItems) {
+    public ListPage<ObjectEntry> getChildren(ObjectId folder, Inclusion inclusion, String orderBy, Paging paging) {
         final List<CMISObject> children = new FlexiveFolder(context, SPIUtils.getNodeId(folder.getId())).getChildren(null);
-        final List<ObjectEntry> result = newArrayListWithCapacity(children.size());
-        int row = 0;
-        if (hasMoreItems != null) {
-            hasMoreItems[0] = false;
-        }
-        for (CMISObject child : children) {
-            row++;
-            if (skipCount > 0 && row <= skipCount) {
-                continue;
+        return page(children.iterator(), paging, new Function<CMISObject, ObjectEntry>() {
+            public ObjectEntry apply(CMISObject value) {
+                // HACK! (FlexiveFolder#getChildren always returns ObjectEntries)
+                return (FlexiveObjectEntry) value;
             }
-            if (maxItems > 0 && result.size() == maxItems) {
-                if (hasMoreItems != null) {
-                    hasMoreItems[0] = true;
-                }
-                break;
-            }
-            // HACK! (FlexiveFolder#getChildren always returns ObjectEntries)
-            result.add((FlexiveObjectEntry) child);
-        }
-        return result;
+        });
     }
 
     public ObjectEntry getFolderParent(ObjectId folder, String filter) {
         // HACK! (FlexiveFolder#getParent always returns ObjectEntries)
-        return (ObjectEntry) new FlexiveFolder(context, SPIUtils.getNodeId(folder.getId())).getParent();
+        return new FlexiveFolder(context, SPIUtils.getNodeId(folder.getId())).getParent();
     }
 
     public Collection<ObjectEntry> getObjectParents(ObjectId object, String filter) {
@@ -233,36 +221,44 @@ public class FlexiveConnection implements Connection, SPI {
         return result;
     }
 
-    public Collection<ObjectEntry> getCheckedOutDocuments(ObjectId folder, String filter, boolean includeAllowableActions, boolean includeRelationships, int maxItems, int skipCount, boolean[] hasMoreItems) {
+    public ListPage<ObjectEntry> getCheckedOutDocuments(ObjectId folder, Inclusion inclusion, Paging paging) {
         throw new UnsupportedOperationException();
     }
 
-    public ObjectId createDocument(Map<String, Serializable> properties, ObjectId folder, ContentStream contentStream, VersioningState versioningState) {
+    public ObjectId createDocument(Map<String, Serializable> properties, ObjectId folder, ContentStream contentStream, VersioningState versioningState) throws NameConstraintViolationException {
         final Document doc = newDocument(
                 (String) properties.get(VirtualProperties.TYPE_ID.getId()),
                 folder == null ? null : getFolder(folder)
         );
-        doc.setValues(properties);
-        if (contentStream != null) {
-            try {
-                doc.setContentStream(contentStream);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+        try {
+            doc.setValues(properties);
+            if (contentStream != null) {
+                try {
+                    doc.setContentStream(contentStream);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
             }
+            // TODO: versioning state?
+            doc.save();
+        } catch (UpdateConflictException e) {
+            throw new IllegalStateException("Unexpected update error during document creation: " + e.getMessage(), e);
         }
-        // TODO: versioning state?
-        doc.save();
         return doc;
     }
 
-    public ObjectId createFolder(Map<String, Serializable> properties, ObjectId folder) {
+    public ObjectId createFolder(Map<String, Serializable> properties, ObjectId folder) throws NameConstraintViolationException {
         final Folder fold = newFolder(
                 (String) properties.get(VirtualProperties.TYPE_ID.getId()),
                 folder instanceof Folder
                 ? (Folder) folder
                 : new FlexiveFolder(context, SPIUtils.getNodeId(folder.getId())));
-        fold.setValues(properties);
-        fold.save();
+        try {
+            fold.setValues(properties);
+            fold.save();
+        } catch (UpdateConflictException e) {
+            throw new IllegalStateException("Unexpected update error during folder creation: " + e.getMessage(), e);
+        }
         return fold;
     }
 
@@ -278,7 +274,7 @@ public class FlexiveConnection implements Connection, SPI {
         return getContent(object).getAllowableActions().keySet();
     }
 
-    public ObjectEntry getProperties(ObjectId object, String filter, boolean includeAllowableActions, boolean includeRelationships) {
+    public ObjectEntry getProperties(ObjectId object, Inclusion inclusion) {
         return getContent(object);
     }
 
@@ -292,7 +288,7 @@ public class FlexiveConnection implements Connection, SPI {
         }
     }
 
-    public ObjectId setContentStream(ObjectId document, boolean overwrite, ContentStream contentStream) {
+    public ObjectId setContentStream(ObjectId document, ContentStream contentStream, boolean overwrite) throws IOException, ContentAlreadyExistsException, UpdateConflictException {
         // TODO: what to do if overwrite == false?
         try {
             final Document doc = getDocument(document);
@@ -301,6 +297,8 @@ public class FlexiveConnection implements Connection, SPI {
             return doc;
         } catch (IOException e) {
             throw new IllegalArgumentException(e);  // TODO
+        } catch (NameConstraintViolationException e) {
+            throw new ContentAlreadyExistsException(e); // TODO ?
         }
     }
 
@@ -314,7 +312,7 @@ public class FlexiveConnection implements Connection, SPI {
         }
     }
 
-    public ObjectId updateProperties(ObjectId object, String changeToken, Map<String, Serializable> properties) {
+    public ObjectId updateProperties(ObjectId object, String changeToken, Map<String, Serializable> properties) throws UpdateConflictException, NameConstraintViolationException {
         // TODO: changeToken
         final CMISObject obj = getObject(object);
         obj.setValues(properties);
@@ -346,10 +344,6 @@ public class FlexiveConnection implements Connection, SPI {
         return newObjectId(obj.getId());    // force reload
     }
 
-    public void deleteObject(ObjectId object) {
-        getContent(object).delete();
-    }
-
     public Collection<ObjectId> deleteTree(ObjectId folder, Unfiling unfiling, boolean continueOnFailure) {
         // TODO: continueOnFailure
         return getFolder(folder).deleteTree(unfiling);
@@ -367,14 +361,17 @@ public class FlexiveConnection implements Connection, SPI {
         dest.save();
     }
 
-    public Collection<ObjectEntry> query(String statement, boolean searchAllVersions, boolean includeAllowableActions, boolean includeRelationships, boolean includeRenditions, int maxItems, int skipCount, boolean[] hasMoreItems) {
+    public ListPage<ObjectEntry> query(String statement, boolean searchAllVersions, Inclusion inclusion, Paging paging) {
         try {
-            final CmisResultSet result = EJBLookup.getCmisSearchEngine().search(statement, true, skipCount, maxItems);
-            final List<ObjectEntry> rows = newArrayListWithCapacity(result.getRowCount());
-            for (CmisResultRow row : result) {
-                rows.add(new FlexiveResultObject(context , row));
-            }
-            return rows;
+            final CmisResultSet rs = getCmisSearchEngine().search(
+                    statement, true, getSkipCount(paging),
+                    getMaxItems(paging) + 1     // select one more row to check if there are more of them
+            );
+            return page(rs.iterator(), new Paging(getMaxItems(paging), 0), new Function<CmisResultRow, ObjectEntry>() {
+                public ObjectEntry apply(CmisResultRow from) {
+                    return new FlexiveResultObject(context, from);
+                }
+            });
         } catch (FxApplicationException e) {
             throw e.asRuntimeException();
         }
@@ -396,7 +393,7 @@ public class FlexiveConnection implements Connection, SPI {
         checkouts.cancelCheckout(SPIUtils.getDocumentId(document.getId()));
     }
 
-    public ObjectId checkIn(ObjectId document, boolean major, Map<String, Serializable> properties, ContentStream contentStream, String comment) {
+    public ObjectId checkIn(ObjectId document, Map<String, Serializable> properties, ContentStream contentStream, boolean major, String comment) throws UpdateConflictException {
         final FlexiveDocument doc = getDocument(document);
         if (properties != null) {
             doc.setValues(properties);
@@ -409,10 +406,6 @@ public class FlexiveConnection implements Connection, SPI {
     }
 
     public Collection<ObjectEntry> getAllVersions(String versionSeriesId, String filter) {
-        throw new UnsupportedOperationException();
-    }
-
-    public List<ObjectEntry> getRelationships(ObjectId object, RelationshipDirection direction, String typeId, boolean includeSubRelationshipTypes, String filter, String includeAllowableActions, int maxItems, int skipCount, boolean[] hasMoreItems) {
         throw new UnsupportedOperationException();
     }
 
@@ -437,11 +430,11 @@ public class FlexiveConnection implements Connection, SPI {
         }
     }
 
-    public List<ObjectEntry> getFolderTree(ObjectId folder, int depth, String filter, boolean includeAllowableActions) {
+    public List<ObjectEntry> getFolderTree(ObjectId folder, int depth, Inclusion inclusion) {
         throw new UnsupportedOperationException();
     }
 
-    public ObjectEntry getObjectByPath(String path, String filter, boolean includeAllowableActions, boolean includeRelationships) {
+    public ObjectEntry getObjectByPath(String path, Inclusion inclusion) {
         try {
             final long nodeId = getTreeEngine().getIdByLabelPath(FxTreeMode.Edit, FxTreeNode.ROOT_NODE, path);
             if (nodeId == -1) {
@@ -460,7 +453,8 @@ public class FlexiveConnection implements Connection, SPI {
         }
     }
 
-    public List<Rendition> getRenditions(ObjectId object, String filter, int maxItems, int skipCount) {
+
+    public List<Rendition> getRenditions(ObjectId object, Inclusion inclusion, Paging paging) {
         throw new UnsupportedOperationException();
     }
 
@@ -468,7 +462,7 @@ public class FlexiveConnection implements Connection, SPI {
         return getDocument(object).getContentStream(contentStreamId);
     }
 
-    public void deleteObject(ObjectId object, boolean allVersions) {
+    public void deleteObject(ObjectId object, boolean allVersions) throws UpdateConflictException {
         if (SPIUtils.isDocumentId(object.getId())) {
             getDocument(object).deleteAllVersions();
         } else {
@@ -476,7 +470,7 @@ public class FlexiveConnection implements Connection, SPI {
         }
     }
 
-    public Iterator<ObjectEntry> getChangeLog(String changeLogToken, boolean includeProperties, int maxItems, boolean[] hasMoreItems, String[] lastChangeLogToken) {
+    public ListPage<ObjectEntry> getChangeLog(String changeLogToken, boolean includeProperties, Paging paging, String[] latestChangeLogToken) {
         throw new UnsupportedOperationException();
     }
 
@@ -485,6 +479,10 @@ public class FlexiveConnection implements Connection, SPI {
     }
 
     public List<ACE> applyACL(ObjectId object, List<ACE> addACEs, List<ACE> removeACEs, ACLPropagation propagation, boolean[] exact, String[] changeToken) {
+        throw new UnsupportedOperationException();
+    }
+
+    public ListPage<ObjectEntry> getRelationships(ObjectId object, String typeId, boolean includeSubRelationshipTypes, Inclusion inclusion, Paging paging) {
         throw new UnsupportedOperationException();
     }
 
@@ -520,6 +518,39 @@ public class FlexiveConnection implements Connection, SPI {
         } else {
             throw new IllegalArgumentException("Object " + object + " is not a folder.");
         }
+    }
+
+    private int getSkipCount(Paging paging) {
+        return paging == null ? 0 : paging.skipCount;
+    }
+
+    private int getMaxItems(Paging paging) {
+        return paging == null ? Integer.MAX_VALUE : paging.maxItems;
+    }
+
+    private <T> Iterator<T> skip(Iterator<T> iterator, Paging paging) {
+        for (int i = 0; i < getSkipCount(paging) && iterator.hasNext(); i++) {
+            iterator.next();
+        }
+        return iterator;
+    }
+
+    private static interface Function<T, U> {
+        U apply(T value);
+    }
+
+    private <T, U> ListPage<U> page(Iterator<T> iterator, Paging paging, Function<T, U> mapper) {
+        skip(iterator, paging);
+        final SimpleListPage<U> result = new SimpleListPage<U>();
+        final int maxItems = getMaxItems(paging);
+        while (iterator.hasNext()) {
+            if (result.size() > maxItems) {
+                result.setHasMoreItems(true);
+                break;
+            }
+            result.add(mapper.apply(iterator.next()));
+        }
+        return result;
     }
 
     public static class Context {

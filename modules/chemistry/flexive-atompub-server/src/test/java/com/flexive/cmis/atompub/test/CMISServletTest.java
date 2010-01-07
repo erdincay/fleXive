@@ -1,22 +1,26 @@
 package com.flexive.cmis.atompub.test;
 
-import com.flexive.cmis.atompub.FlexiveCMISServlet;
 import com.flexive.cmis.TestFixture;
+import com.flexive.cmis.atompub.FlexiveCMISServlet;
 import com.flexive.shared.FxContext;
 import com.flexive.war.filter.FxFilter;
+import org.apache.abdera.protocol.client.AbderaClient;
+import org.apache.abdera.protocol.client.ClientResponse;
+import org.apache.chemistry.Repository;
+import org.apache.chemistry.atompub.client.connector.APPContentManager;
+import org.apache.chemistry.test.BasicTestCase;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Test;
-import static org.junit.Assert.assertEquals;
+import org.mortbay.jetty.Connector;
 import org.mortbay.jetty.Handler;
 import org.mortbay.jetty.Server;
+import org.mortbay.jetty.nio.SelectChannelConnector;
 import org.mortbay.jetty.servlet.Context;
 import org.mortbay.jetty.servlet.FilterHolder;
 import org.mortbay.jetty.servlet.ServletHolder;
-import org.apache.abdera.protocol.client.AbderaClient;
-import org.apache.abdera.protocol.client.ClientResponse;
-import org.apache.chemistry.test.BasicTestCase;
-import org.apache.chemistry.atompub.client.connector.APPContentManager;
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
+
+import java.util.Random;
 
 /**
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
@@ -24,8 +28,10 @@ import org.apache.commons.logging.Log;
  */
 public class CMISServletTest extends BasicTestCase {
     private static final Log LOG = LogFactory.getLog(CMISServletTest.class);
-    
-    private static final int PORT = 8080;
+
+    /* Random port between [15000, 15100) */
+    private static final int PORT = 15000 + new Random().nextInt(100);
+    private static final String HOST = "127.0.0.1";
     private static final String CONTEXT_PATH = "/server-atompub";
     private static final AbderaClient client = new AbderaClient();
 
@@ -33,13 +39,13 @@ public class CMISServletTest extends BasicTestCase {
     private static String serverUrl;
 
     @Override
-    public synchronized void makeRepository() throws Exception {
+    public synchronized Repository makeRepository() throws Exception {
         if (!initialized) {
             initialized = true;
             serverUrl = startServer();
             new TestFixture();
         }
-        repository = new APPContentManager(serverUrl).getDefaultRepository();
+        return repository = new APPContentManager(serverUrl).getDefaultRepository();
     }
 
     private String startServer() throws Exception {
@@ -47,8 +53,14 @@ public class CMISServletTest extends BasicTestCase {
         System.setProperty("openejb.base", "../openejb/");
         FxContext.initializeSystem(1, "chemistry-atompub-tests");
 
-        // boot jetty
-        final Server server = new Server(PORT);
+        // Create a Jetty instance
+        final Server server = new Server();
+
+        // create HTTP connector
+        final SelectChannelConnector connector = new SelectChannelConnector();
+        connector.setPort(PORT);
+        connector.setHost(HOST);
+        server.setConnectors(new Connector[] { connector });
 
         final Context context = new Context(server, CONTEXT_PATH, Context.SESSIONS);
         context.addServlet(
@@ -61,6 +73,7 @@ public class CMISServletTest extends BasicTestCase {
                 Handler.DEFAULT
         );
 
+        // boot Jetty
         server.start();
         return "http://localhost:" + PORT + CONTEXT_PATH + "/srv/repository";
     }

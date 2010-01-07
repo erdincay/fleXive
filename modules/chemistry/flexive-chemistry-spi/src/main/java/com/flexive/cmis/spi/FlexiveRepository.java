@@ -31,19 +31,17 @@
  ***************************************************************/
 package com.flexive.cmis.spi;
 
+import com.flexive.chemistry.webdav.extensions.CopyDocumentExtension;
+import com.flexive.shared.structure.FxType;
+import com.google.common.collect.Lists;
 import org.apache.chemistry.*;
 import org.apache.commons.lang.StringUtils;
-import com.flexive.chemistry.webdav.extensions.CopyDocumentExtension;
 
 import java.io.Serializable;
 import java.net.URI;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
-import com.google.common.collect.Lists;
-import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.structure.FxType;
 
 import static com.flexive.shared.CacheAdmin.getEnvironment;
 
@@ -152,7 +150,7 @@ public class FlexiveRepository implements Repository {
             return INSTANCE;
         }
 
-        public void copy(Connection conn, ObjectId id, ObjectId targetFolder, String newName, boolean overwrite, boolean shallow) {
+        public void copy(Connection conn, ObjectId id, ObjectId targetFolder, String newName, boolean overwrite, boolean shallow) throws UpdateConflictException, NameConstraintViolationException {
             final CMISObject object = conn.getObject(id);
             if (!(object instanceof FlexiveObjectEntry)) {
                 throw new IllegalArgumentException("Cannot copy object of type " + object.getClass());

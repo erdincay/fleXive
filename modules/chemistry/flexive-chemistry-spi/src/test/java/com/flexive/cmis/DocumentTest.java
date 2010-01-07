@@ -31,11 +31,14 @@
  ***************************************************************/
 package com.flexive.cmis;
 
+import org.apache.chemistry.Document;
+import org.apache.chemistry.NameConstraintViolationException;
+import org.apache.chemistry.UpdateConflictException;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.apache.chemistry.Document;
+
 import static com.flexive.cmis.Utils.getRepoConnection;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
@@ -48,7 +51,7 @@ public class DocumentTest {
     }
 
     @Test
-    public void getAllVersions() {
+    public void getAllVersions() throws UpdateConflictException, NameConstraintViolationException {
         final Document doc = createTestDoc("getAllVersions test content");
         try {
             assertEquals(1, doc.getAllVersions().size());
@@ -58,7 +61,7 @@ public class DocumentTest {
         }
     }
 
-    private Document createTestDoc(String name) {
+    private Document createTestDoc(String name) throws NameConstraintViolationException, UpdateConflictException {
         final Document doc = getRepoConnection().newDocument("doc", getRepoConnection().getRootFolder());
         doc.setName(name);
         doc.save();

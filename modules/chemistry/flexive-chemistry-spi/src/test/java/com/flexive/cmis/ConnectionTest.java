@@ -31,19 +31,18 @@
  ***************************************************************/
 package com.flexive.cmis;
 
-import static com.flexive.cmis.Utils.getRepoConnection;
 import com.flexive.cmis.spi.FlexiveRepository;
 import com.flexive.shared.tree.FxTreeNode;
-import org.apache.chemistry.BaseType;
-import org.apache.chemistry.CMISObject;
-import org.apache.chemistry.Document;
-import static org.junit.Assert.*;
+import org.apache.chemistry.*;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+
+import static com.flexive.cmis.Utils.getRepoConnection;
+import static org.junit.Assert.*;
 
 /**
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
@@ -97,7 +96,7 @@ public class ConnectionTest {
     }
 
     @Test
-    public void createDocument() {
+    public void createDocument() throws UpdateConflictException, NameConstraintViolationException {
         final Document doc = getRepoConnection().newDocument("doc", getRepoConnection().getRootFolder());
         doc.setValue("title", "createDocument test title");
         try {

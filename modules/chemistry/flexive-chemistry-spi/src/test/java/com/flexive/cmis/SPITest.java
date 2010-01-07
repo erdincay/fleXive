@@ -31,15 +31,12 @@
  ***************************************************************/
 package com.flexive.cmis;
 
-import static com.flexive.cmis.Utils.getRepoConnection;
-import static com.flexive.shared.EJBLookup.getAccountEngine;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.security.AccountEdit;
 import org.apache.chemistry.*;
 import org.apache.chemistry.impl.simple.SimpleContentStream;
-import static org.junit.Assert.*;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -48,6 +45,10 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+
+import static com.flexive.cmis.Utils.getRepoConnection;
+import static com.flexive.shared.EJBLookup.getAccountEngine;
+import static org.junit.Assert.*;
 
 /**
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
@@ -82,7 +83,7 @@ public class SPITest {
     }
     
     @Test
-    public void createDocument() {
+    public void createDocument() throws NameConstraintViolationException, UpdateConflictException {
         final Map<String, Serializable> properties = new HashMap<String, Serializable>();
         properties.put("Name", "test document");
         properties.put(Property.TYPE_ID, "doc");
@@ -91,7 +92,7 @@ public class SPITest {
     }
 
     @Test
-    public void createFolder() {
+    public void createFolder() throws NameConstraintViolationException, UpdateConflictException {
         final Map<String, Serializable> properties = new HashMap<String, Serializable>();
         properties.put(Property.NAME, "test folder");
         properties.put(Property.TYPE_ID, "fold");
@@ -100,18 +101,18 @@ public class SPITest {
     }
 
     @Test
-    public void setContentStream() throws IOException {
+    public void setContentStream() throws IOException, UpdateConflictException, NameConstraintViolationException, ContentAlreadyExistsException {
         final Document doc = getRepoConnection().newDocument("doc", getRepoConnection().getRootFolder());
         doc.setValue("title", "setContentStream test title");
         try {
             doc.save();
 
             final String content = "setContentStream test doc";
-            getSPI().setContentStream(doc, true, new SimpleContentStream(
-                    content.getBytes("UTF-8"),
-                    "text/plain",
-                    "test.txt"
-            ));
+            getSPI().setContentStream(doc, new SimpleContentStream(
+                                content.getBytes("UTF-8"),
+                                "text/plain",
+                                "test.txt"
+                        ), true);
 
             final InputStream in = getSPI().getContentStream(doc, null).getStream();
             assertEquals(content, FxSharedUtils.loadFromInputStream(in));
@@ -124,7 +125,7 @@ public class SPITest {
     }
 
     @Test
-    public void moveObject() {
+    public void moveObject() throws NameConstraintViolationException, UpdateConflictException {
         final Connection conn = getRepoConnection();
         final Folder src = conn.newFolder("fold", conn.getRootFolder());
         src.setName("moveObject source folder");
@@ -159,7 +160,7 @@ public class SPITest {
     }
 
     @Test
-    public void checkout() throws FxLoginFailedException, FxAccountInUseException, FxLogoutFailedException {
+    public void checkout() throws FxLoginFailedException, FxAccountInUseException, FxLogoutFailedException, UpdateConflictException, NameConstraintViolationException {
         final Document doc = getRepoConnection().newDocument("doc", getRepoConnection().getRootFolder());
         try {
             doc.setValue("title", "public title");
@@ -201,7 +202,8 @@ public class SPITest {
                 logout();
             }
 
-            final ObjectId newId = getSPI().checkIn(pwc, true, null, null, null);
+            // TODO properties?
+            final ObjectId newId = getSPI().checkIn(pwc, null, null, true, null);
 
             // assert that the changes were propagated (force reloading)
             assertEquals(
@@ -228,7 +230,7 @@ public class SPITest {
 
     @Test
     public void objectPathFQN() {
-        final ObjectEntry dog = getSPI().getObjectByPath("/folder 1/folder 2/dog.jpg", null, true, false);
+        final ObjectEntry dog = getSPI().getObjectByPath("/folder 1/folder 2/dog.jpg", null);
         assertNotNull("Object not found by path", dog);
         assertEquals("dog.jpg", ((Document) dog).getName());
     }

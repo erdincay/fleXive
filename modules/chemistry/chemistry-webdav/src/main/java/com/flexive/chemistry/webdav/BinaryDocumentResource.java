@@ -34,9 +34,10 @@ package com.flexive.chemistry.webdav;
 import com.bradmcevoy.http.Range;
 import com.bradmcevoy.http.ReplaceableResource;
 import com.bradmcevoy.http.exceptions.NotAuthorizedException;
+import org.apache.chemistry.CMISException;
 import org.apache.chemistry.Document;
-import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -104,6 +105,8 @@ public class BinaryDocumentResource extends DocumentResource implements Replacea
             getObject().save();
         } catch (IOException e) {
             throw new IllegalStateException(e);
+        } catch (CMISException e) {
+            throw CMISExceptionWrapper.wrap(e);
         }
     }
 }

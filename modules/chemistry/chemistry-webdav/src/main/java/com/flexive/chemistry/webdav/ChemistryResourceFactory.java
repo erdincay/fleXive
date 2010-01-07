@@ -33,9 +33,10 @@ package com.flexive.chemistry.webdav;
 
 import com.bradmcevoy.http.*;
 import org.apache.chemistry.*;
-import static com.flexive.chemistry.webdav.AuthenticationFilter.getConnection;
 
 import java.io.IOException;
+
+import static com.flexive.chemistry.webdav.AuthenticationFilter.getConnection;
 
 /**
  * Base class for returning resources from a Chemistry repository. It is also responsible for creating
@@ -69,7 +70,7 @@ public abstract class ChemistryResourceFactory implements ResourceFactory {
      */
     public Resource getResource(String host, String path) {
         final String objectPath = stripContextPath(path);
-        final ObjectEntry object = getConnection().getSPI().getObjectByPath(objectPath, null, true, false);
+        final ObjectEntry object = getConnection().getSPI().getObjectByPath(objectPath, null);
         if (object == null) {
             return null;
         }

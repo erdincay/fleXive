@@ -31,18 +31,18 @@
  ***************************************************************/
 package com.flexive.cmis;
 
-import static com.flexive.cmis.Utils.getRepo;
-import static com.flexive.cmis.Utils.getRepoConnection;
 import com.flexive.cmis.spi.FlexiveType;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.tree.FxTreeNode;
 import org.apache.chemistry.*;
 import org.junit.Assert;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import org.junit.BeforeClass;
 import org.junit.Test;
+
+import static com.flexive.cmis.Utils.getRepo;
+import static com.flexive.cmis.Utils.getRepoConnection;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
@@ -62,7 +62,7 @@ public class RepositoryTest {
     }
 
     @Test
-    public void createFolder() {
+    public void createFolder() throws NameConstraintViolationException, UpdateConflictException {
         final Connection conn = getRepoConnection();
         final Folder folder = conn.newFolder("folder", conn.getRootFolder());
         folder.setName("createFolder");

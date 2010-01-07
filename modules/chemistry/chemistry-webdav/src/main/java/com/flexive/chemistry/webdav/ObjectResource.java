@@ -33,18 +33,19 @@ package com.flexive.chemistry.webdav;
 
 import com.bradmcevoy.http.*;
 import com.bradmcevoy.http.exceptions.ConflictException;
+import com.flexive.chemistry.webdav.extensions.CopyDocumentExtension;
 import org.apache.chemistry.AllowableAction;
 import org.apache.chemistry.CMISObject;
-import org.apache.commons.logging.LogFactory;
+import org.apache.chemistry.NameConstraintViolationException;
+import org.apache.chemistry.UpdateConflictException;
 import org.apache.commons.logging.Log;
-import static com.flexive.chemistry.webdav.AuthenticationFilter.getConnection;
-import com.flexive.chemistry.webdav.extensions.CopyDocumentExtension;
+import org.apache.commons.logging.LogFactory;
 
 import javax.xml.namespace.QName;
 import java.util.Collection;
 import java.util.Date;
 
-import sun.util.LocaleServiceProviderPool;
+import static com.flexive.chemistry.webdav.AuthenticationFilter.getConnection;
 
 /**
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
@@ -193,9 +194,20 @@ public abstract class ObjectResource<T extends CMISObject>
                 object.move(target.getObject(), object.getParent());
             }
             done = true;
+        } catch (NameConstraintViolationException e) {
+            throw new ConflictException(this);
+        } catch (UpdateConflictException e) {
+            throw new ConflictException(this);
         } finally {
             if (!done) {
-                object.setName(oldName);    // restore object name in case of errors
+                try {
+                    object.setName(oldName);    // restore object name in case of errors
+                } catch (NameConstraintViolationException e) {
+                    // cannot do much except emit a warning
+                    if (LOG.isWarnEnabled()) {
+                        LOG.warn("Failed to restore old filename: " + e.getMessage(), e);
+                    }
+                }
             }
         }
     }
@@ -215,7 +227,13 @@ public abstract class ObjectResource<T extends CMISObject>
                     + CopyDocumentExtension.class.getCanonicalName());
         }
         // perform copy and add to target folder
-        cde.copy(getConnection(), object, ((FolderResource) toCollection).getObject(), name, overwrite, getDepthHeader() == 0);
+        try {
+            cde.copy(getConnection(), object, ((FolderResource) toCollection).getObject(), name, overwrite, getDepthHeader() == 0);
+        } catch (UpdateConflictException e) {
+            throw new IllegalArgumentException(e);
+        } catch (NameConstraintViolationException e) {
+            throw new IllegalArgumentException(e);
+        }
     }
 
     protected boolean isOverwriteRequest() {

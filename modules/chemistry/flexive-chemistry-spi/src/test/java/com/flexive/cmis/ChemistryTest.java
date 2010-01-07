@@ -31,6 +31,7 @@
  ***************************************************************/
 package com.flexive.cmis;
 
+import org.apache.chemistry.Repository;
 import org.apache.chemistry.test.BasicTestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -45,9 +46,9 @@ public class ChemistryTest extends BasicTestCase {
     private static final Log LOG = LogFactory.getLog(ChemistryTest.class);
 
     @Override
-    public void makeRepository() throws Exception {
+    public Repository makeRepository() throws Exception {
         Utils.init();
-        repository = Utils.getRepo();
+        return repository = Utils.getRepo();
     }
 
     @Override

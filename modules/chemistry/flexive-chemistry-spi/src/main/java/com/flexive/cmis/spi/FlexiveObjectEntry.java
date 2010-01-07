@@ -33,24 +33,24 @@ package com.flexive.cmis.spi;
 
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.XPathElement;
-import com.flexive.shared.tree.FxTreeNode;
-import com.flexive.shared.tree.FxTreeNodeEdit;
-import com.flexive.shared.tree.FxTreeMode;
-import com.flexive.shared.exceptions.FxRuntimeException;
-import com.flexive.shared.exceptions.FxApplicationException;
-import com.flexive.shared.security.LifeCycleInfo;
-import com.flexive.shared.security.PermissionSet;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxPropertyData;
+import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.exceptions.FxRuntimeException;
+import com.flexive.shared.security.LifeCycleInfo;
+import com.flexive.shared.security.PermissionSet;
 import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.structure.FxType;
+import com.flexive.shared.tree.FxTreeMode;
+import com.flexive.shared.tree.FxTreeNode;
 import org.apache.chemistry.*;
 import org.apache.chemistry.impl.base.BaseObject;
 
 import javax.xml.namespace.QName;
 import java.io.Serializable;
 import java.util.*;
+
 import static org.apache.chemistry.AllowableAction.*;
 
 /**
@@ -231,8 +231,7 @@ public abstract class FlexiveObjectEntry extends BaseObject implements ObjectEnt
         final Set<QName> allowableActions = new HashSet<QName>();
         if (permissions.isMayRead()) {
             allowableActions.addAll(Arrays.asList(
-                    CAN_GET_PROPERTIES, CAN_GET_RELATIONSHIPS, CAN_GET_OBJECT_PARENTS,
-                    CAN_GET_RELATIONSHIPS,
+                    CAN_GET_PROPERTIES, CAN_GET_OBJECT_RELATIONSHIPS, CAN_GET_OBJECT_PARENTS,
                     CAN_GET_FOLDER_PARENT, CAN_GET_DESCENDANTS,
                     CAN_ADD_OBJECT_TO_FOLDER, CAN_REMOVE_OBJECT_FROM_FOLDER,
                     CAN_GET_CONTENT_STREAM, CAN_GET_ACL
