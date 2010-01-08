@@ -195,7 +195,7 @@ public class JsonWriter {
     }
 
     private String escapeStringValue(String quotesReplacedValue) {
-        return StringUtils.replace(quotesReplacedValue, "\n", "\\\n");
+        return StringUtils.replace(quotesReplacedValue, "\n", "\\\n").replace('\r', ' ');
     }
 
     /**
