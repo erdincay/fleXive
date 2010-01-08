@@ -109,7 +109,7 @@ public class FlexiveRepositoryInfo implements RepositoryInfo {
     }
 
     public String getRelationshipName() {
-        return null;
+        return "";
     }
 
     public ACLCapabilityType getACLCapabilityType() {
@@ -126,7 +126,7 @@ public class FlexiveRepositoryInfo implements RepositoryInfo {
     }
 
     public String getLatestChangeLogToken() {
-        return null;
+        return "";
     }
 
     public URI getThinClientURI() {

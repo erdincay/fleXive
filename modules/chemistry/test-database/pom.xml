@@ -35,7 +35,7 @@
             -->
             <activation>
                 <file>
-                    <missing>database/h2/flexive.data.db</missing>
+                    <missing>test-database/h2/flexive.h2.db</missing>
                 </file>
             </activation>
             <build>
