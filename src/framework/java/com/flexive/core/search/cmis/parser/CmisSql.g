@@ -325,7 +325,7 @@ ASC	:	'ASC';
 DESC	:	'DESC';
 */
 INTVAL	:	('0'..'9')+;
-IDENT	:	('a'..'z' | 'A'..'Z') ('a'..'z'|'A'..'Z'|'0'..'9'|'_')*;
+IDENT	:	('a'..'z' | 'A'..'Z') ('a'..'z'|'A'..'Z'|'0'..'9'|'_'|':')*;
 QUOTEDSTRING
 	:	'\'' ( ~ '\'')* '\'';
 QUOTEDIDENT

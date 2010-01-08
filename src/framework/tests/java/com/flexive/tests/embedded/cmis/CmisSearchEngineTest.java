@@ -40,6 +40,7 @@ import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.cmis.CmisVirtualProperty;
 import com.flexive.shared.cmis.search.CmisResultRow;
 import com.flexive.shared.cmis.search.CmisResultSet;
+import com.flexive.shared.cmis.search.CmisResultValue;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxAccountInUseException;
@@ -266,19 +267,28 @@ public class CmisSearchEngineTest {
                 columns.add(vp.getFxPropertyName());
             }
         }
-        final CmisResultSet result = getCmisSearchEngine().search(
-                "SELECT " + StringUtils.join(columns, ',') + " FROM document"
-        );
-        assertTrue(result.getRowCount() > 0);
-        for (CmisResultRow row : result) {
-            for (int i = 0; i < result.getColumnCount() / 2; i++) {
-                final int cmis = i * 2 + 1;
-                final int flexive = i * 2 + 2;
-                assertEquals(row.getColumn(cmis), row.getColumn(flexive),
-                        "CMIS property returned other result than flexive property: "
-                                + row.getColumn(cmis) + " (" + result.getColumnAliases().get(cmis - 1) + ") vs. "
-                                + row.getColumn(flexive) + " (" + result.getColumnAliases().get(flexive - 1) + ")"
+        for (String table: new String[] { "document", "cmis:document" }) {
+            final CmisResultSet result = getCmisSearchEngine().search(
+                    "SELECT " + StringUtils.join(columns, ',') + " FROM " + table
+            );
+            assertTrue(result.getRowCount() > 0);
+            for (CmisResultRow row : result) {
+                // check if the document/folder base types filter correctly
+                final FxType type = CacheAdmin.getEnvironment().getType(
+                        row.getColumn(CmisVirtualProperty.TypeId.getCmisPropertyName()).getLong()
                 );
+                assertEquals(type.isDerivedFrom(FxType.FOLDER), table.contains("folder"));
+
+                // check if the CMIS properties select the same value as the FX properties
+                for (int i = 0; i < result.getColumnCount() / 2; i++) {
+                    final int cmis = i * 2 + 1;
+                    final int flexive = i * 2 + 2;
+                    assertEquals(row.getColumn(cmis), row.getColumn(flexive),
+                            "CMIS property returned other result than flexive property: "
+                                    + row.getColumn(cmis) + " (" + result.getColumnAliases().get(cmis - 1) + ") vs. "
+                                    + row.getColumn(flexive) + " (" + result.getColumnAliases().get(flexive - 1) + ")"
+                    );
+                }
             }
         }
     }

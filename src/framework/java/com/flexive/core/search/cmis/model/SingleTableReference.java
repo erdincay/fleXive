@@ -59,7 +59,7 @@ public class SingleTableReference implements TableReference {
     private final FxType baseType;
 
     public SingleTableReference(FxEnvironment env, String name, String alias) {
-        this.alias = alias;
+        this.alias = escapeTableAlias(alias);
         final List<FxType> types;
         if ("root".equalsIgnoreCase(name)) {
             // treat root type as a special case, because the API won't return any derived types
@@ -71,17 +71,18 @@ public class SingleTableReference implements TableReference {
                     types.add(type);
                 }
             }
-        } else if ("document".equalsIgnoreCase(name)) {
+        } else if ("document".equalsIgnoreCase(name) || "cmis:document".equalsIgnoreCase(name)) {
             // select all types that are not folders
             this.baseType = env.getType(FxType.ROOT_ID);
-            final FxType folder = env.getType(FxType.FOLDER);
-            final Set<FxType> folderTypes = new HashSet<FxType>(folder.getDerivedTypes(true, true));
             types = Lists.newArrayList();
             for (FxType type : env.getTypes()) {
-                if (!folderTypes.contains(type)) {
+                if (!type.isDerivedFrom(FxType.FOLDER)) {
                     types.add(type);
                 }
             }
+        } else if ("folder".equalsIgnoreCase(name) || "cmis:folder".equalsIgnoreCase(name)) {
+            this.baseType = env.getType(FxType.FOLDER);
+            types = Lists.newArrayList(baseType.getDerivedTypes(true, true));
         } else {
             // normal type, add type and all subtypes
             this.baseType = env.getType(name);
@@ -250,5 +251,15 @@ public class SingleTableReference implements TableReference {
     @Override
     public String toString() {
         return alias;
+    }
+
+    /**
+     * Escape a table alias that may be valid in CMIS SQL, but invalid in SQL92.
+     *
+     * @param alias the alias to be escaped
+     * @return      the escaped alias
+     */
+    public static String escapeTableAlias(String alias) {
+        return alias.replace(':', '_');
     }
 }

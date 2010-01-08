@@ -62,6 +62,8 @@ import java.util.List;
  * @since 3.1
  */
 public class CmisResultSet implements Serializable, Iterable<CmisResultRow> {
+    // TODO: equals/hashCode
+
     private static final long serialVersionUID = -5423097964253577081L;
 
     private final List<CmisResultRow> rows;
