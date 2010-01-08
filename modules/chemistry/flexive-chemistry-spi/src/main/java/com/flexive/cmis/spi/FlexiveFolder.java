@@ -31,34 +31,35 @@
  ***************************************************************/
 package com.flexive.cmis.spi;
 
-import static com.flexive.shared.CacheAdmin.getEnvironment;
 import com.flexive.shared.EJBLookup;
-import static com.flexive.shared.EJBLookup.getTreeEngine;
 import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.configuration.SystemParameters;
-import com.flexive.shared.value.FxString;
-import com.flexive.shared.security.LifeCycleInfo;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.security.LifeCycleInfo;
 import com.flexive.shared.structure.FxEnvironment;
-import com.flexive.shared.structure.FxType;
 import com.flexive.shared.structure.FxPropertyAssignment;
+import com.flexive.shared.structure.FxType;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNode;
 import com.flexive.shared.tree.FxTreeNodeEdit;
 import com.flexive.shared.tree.FxTreeRemoveOp;
+import com.flexive.shared.value.FxString;
 import com.google.common.collect.Lists;
-import static com.google.common.collect.Lists.newArrayList;
 import org.apache.chemistry.*;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import javax.xml.namespace.QName;
-import java.io.Serializable;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.*;
+
+import static com.flexive.shared.CacheAdmin.getEnvironment;
+import static com.flexive.shared.EJBLookup.getTreeEngine;
+import static com.google.common.collect.Lists.newArrayList;
 
 /**
  * A folder based on a FxTreeNode and the backing FxContent instance, which must be derived from flexive's
@@ -205,6 +206,9 @@ public class FlexiveFolder extends FlexiveObjectEntry implements Folder {
 
     public Collection<ObjectId> deleteTree(Unfiling unfiling) {
         try {
+            if (unfiling == null) {
+                unfiling = Unfiling.DELETE; // according to javadoc
+            }
             switch(unfiling) {
                 case DELETE:
                     EJBLookup.getTreeEngine().remove(getNode(), true, true);
@@ -325,6 +329,9 @@ public class FlexiveFolder extends FlexiveObjectEntry implements Folder {
     }
 
     public void delete() {
+        if (!getChildren().isEmpty()) {
+            throw new ConstraintViolationException("Folder not empty.");
+        }
         try {
             getTreeEngine().remove(getTreeMode(), getNodeId(), true, true);
         } catch (FxApplicationException e) {

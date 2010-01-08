@@ -165,7 +165,8 @@ public abstract class FlexiveObjectEntry extends BaseObject implements ObjectEnt
         if (properties.isEmpty()) {
             // rebuild property map
             final FxContent content = getContent();
-            for (FxPropertyData data : content.getPropertyData(-1, false)) {
+            content.getRootGroup().explode(true);
+            for (FxPropertyData data : content.getPropertyData(-1, true)) {
                 final FxPropertyAssignment assignment = data.getPropertyAssignment();
                 if (!assignment.isSystemInternal()) {
                     final String cmisName = createName(data.getXPathFull());

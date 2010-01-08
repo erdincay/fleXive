@@ -15,8 +15,9 @@
     </properties>
 
     <groupId>com.flexive.cmis</groupId>
-    <artifactId>chemistry-spi-reactor</artifactId>
-    <version>${spi.version}</version>
+    <artifactId>flexive-chemistry-parent</artifactId>
+    <!-- Use hardcoded version, else it won't build on a fresh install -->
+    <version>3.1-SNAPSHOT</version>
     <name>[fleXive]/Chemistry Root Module</name>
     <packaging>pom</packaging>
 
@@ -77,21 +78,21 @@
             </dependency>
 
             <dependency>
-                <groupId>com.flexive.chemistry</groupId>
+                <groupId>com.flexive.cmis.chemistry</groupId>
                 <artifactId>chemistry-webdav</artifactId>
-                <version>${spi.version}</version>
+                <version>${chemistry.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>com.flexive.chemistry</groupId>
+                <groupId>com.flexive.cmis.chemistry</groupId>
                 <artifactId>chemistry-webdav-extensions</artifactId>
-                <version>${spi.version}</version>
+                <version>${chemistry.version}</version>
             </dependency>
 
             <dependency>
-                <groupId>com.flexive.chemistry</groupId>
+                <groupId>com.flexive.cmis.chemistry</groupId>
                 <artifactId>chemistry-webdav-tests</artifactId>
-                <version>${spi.version}</version>
+                <version>${chemistry.version}</version>
             </dependency>
 
             <!-- Flexive dependencies -->
@@ -341,7 +342,7 @@
     </reporting>
 
     <modules>
-        <module>database</module>
+        <module>test-database</module>
         <module>flexive-chemistry-spi</module>
         <module>flexive-atompub-server</module>
         <module>flexive-atompub-webapp</module>

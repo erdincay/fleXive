@@ -2,7 +2,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <parent>
-        <artifactId>chemistry-spi-reactor</artifactId>
+        <artifactId>flexive-chemistry-parent</artifactId>
         <groupId>com.flexive.cmis</groupId>
         <version>3.1-SNAPSHOT</version>
     </parent>
@@ -53,7 +53,7 @@
         </dependency>
 
         <dependency>
-            <groupId>com.flexive.chemistry</groupId>
+            <groupId>com.flexive.cmis.chemistry</groupId>
             <artifactId>chemistry-webdav-extensions</artifactId>
         </dependency>
 

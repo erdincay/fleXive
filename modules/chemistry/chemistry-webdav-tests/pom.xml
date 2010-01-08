@@ -12,7 +12,7 @@
     </properties>
 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.flexive.chemistry</groupId>
+    <groupId>com.flexive.cmis.chemistry</groupId>
     <artifactId>chemistry-webdav-tests</artifactId>
     <name>Chemistry WebDAV adapter testsuite</name>
     <version>${chemistry.version}</version>
@@ -21,9 +21,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.flexive.chemistry</groupId>
+            <groupId>com.flexive.cmis.chemistry</groupId>
             <artifactId>chemistry-webdav</artifactId>
-            <version>${spi.version}</version>
+            <version>${chemistry.version}</version>
         </dependency>
         
         <dependency>

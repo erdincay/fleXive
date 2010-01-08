@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <!-- TODO: create shared database module for all Maven projects? -->
     <parent>
-        <artifactId>chemistry-spi-reactor</artifactId>
+        <artifactId>flexive-chemistry-parent</artifactId>
         <groupId>com.flexive.cmis</groupId>
         <version>3.1-SNAPSHOT</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.flexive.cmis</groupId>
-    <artifactId>database</artifactId>
+    <artifactId>test-database</artifactId>
     <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
     <name>[fleXive]/CMIS test database</name>

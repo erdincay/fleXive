@@ -424,7 +424,18 @@ public class FlexiveConnection implements Connection, SPI {
     public Folder getFolder(String path) {
         try {
             // TODO: tree mode?
-            return new FlexiveFolder(context, getTreeEngine().getIdByLabelPath(FxTreeMode.Edit, FxTreeNode.ROOT_NODE, path));
+            final long nodeId = getTreeEngine().getIdByLabelPath(FxTreeMode.Edit, FxTreeNode.ROOT_NODE, path);
+            if (nodeId == -1) {
+                return null;
+            }
+            final FxTreeNode node = getTreeEngine().getNode(FxTreeMode.Edit, nodeId);
+            if (SPIUtils.getFolderTypeIds().contains(node.getReferenceTypeId())) {
+                // this is a valid folder
+                return new FlexiveFolder(context, node);
+            } else {
+                // conform to BasicTestCasetestGetObjectByPath
+                throw new IllegalArgumentException(path + " is not a folder.");
+            }
         } catch (FxApplicationException e) {
             throw e.asRuntimeException();
         }
@@ -463,7 +474,7 @@ public class FlexiveConnection implements Connection, SPI {
     }
 
     public void deleteObject(ObjectId object, boolean allVersions) throws UpdateConflictException {
-        if (SPIUtils.isDocumentId(object.getId())) {
+        if (allVersions && SPIUtils.isDocumentId(object.getId())) {
             getDocument(object).deleteAllVersions();
         } else {
             getObject(object).delete();
@@ -525,7 +536,7 @@ public class FlexiveConnection implements Connection, SPI {
     }
 
     private int getMaxItems(Paging paging) {
-        return paging == null ? Integer.MAX_VALUE : paging.maxItems;
+        return paging == null ? Integer.MAX_VALUE - 1 : paging.maxItems;
     }
 
     private <T> Iterator<T> skip(Iterator<T> iterator, Paging paging) {

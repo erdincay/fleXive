@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <project>
     <parent>
-        <artifactId>chemistry-spi-reactor</artifactId>
+        <artifactId>flexive-chemistry-parent</artifactId>
         <groupId>com.flexive.cmis</groupId>
         <version>3.1-SNAPSHOT</version>
     </parent>
@@ -88,9 +88,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.flexive.chemistry</groupId>
+            <groupId>com.flexive.cmis.chemistry</groupId>
             <artifactId>chemistry-webdav</artifactId>
-            <version>${spi.version}</version>
+            <version>${chemistry.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.apache.chemistry</groupId>
@@ -100,7 +100,7 @@
         </dependency>
 
         <dependency>
-            <groupId>com.flexive.chemistry</groupId>
+            <groupId>com.flexive.cmis.chemistry</groupId>
             <artifactId>chemistry-webdav-tests</artifactId>
             <version>${chemistry.version}</version>
             <scope>test</scope>

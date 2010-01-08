@@ -40,6 +40,7 @@ import com.flexive.shared.structure.FxProperty;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.value.FxValue;
 import org.apache.chemistry.BaseType;
+import org.apache.chemistry.ObjectNotFoundException;
 import org.apache.chemistry.PropertyType;
 
 import java.io.Serializable;
@@ -68,11 +69,19 @@ public class SPIUtils {
     }
 
     public static long getNodeId(String objectId) {
-        return Long.parseLong(objectId);
+        try {
+            return Long.parseLong(objectId);
+        } catch (NumberFormatException e) {
+            throw new ObjectNotFoundException("Not a valid ID: " + objectId);
+        }
     }
 
     public static FxPK getDocumentId(String objectId) {
-        return FxPK.fromString(objectId);
+        try {
+            return FxPK.fromString(objectId);
+        } catch (IllegalArgumentException e) {
+            throw new ObjectNotFoundException("Not a valid ID: " + objectId);
+        }
     }
 
     public static Calendar convertDate(Object value) {

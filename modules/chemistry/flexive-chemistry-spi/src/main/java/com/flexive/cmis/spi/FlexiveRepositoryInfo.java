@@ -38,10 +38,10 @@ import org.apache.chemistry.*;
 import org.w3c.dom.Document;
 
 import java.net.URI;
-import java.util.Collection;
-import java.util.Set;
-import java.util.HashSet;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Returns basic information about this content repository. 
@@ -50,7 +50,11 @@ import java.util.Arrays;
  * @version $Rev$
  */
 public class FlexiveRepositoryInfo implements RepositoryInfo {
-    private static final ObjectId rootFolderId = new ObjectId() {
+
+    private static final String VENDOR = "unique computing solutions GmbH";
+    private static final String PRODUCT_NAME = "fleXive";
+    private static final String CMIS_VERSION = "1.0";
+    private static final ObjectId ROOT_FOLDER_ID = new ObjectId() {
         public String getId() {
             return String.valueOf(FxTreeNode.ROOT_NODE);
         }
@@ -61,15 +65,15 @@ public class FlexiveRepositoryInfo implements RepositoryInfo {
     }
 
     public ObjectId getRootFolderId() {
-        return rootFolderId;
+        return ROOT_FOLDER_ID;
     }
 
     public String getVendorName() {
-        return "unique computing solutions GmbH";
+        return VENDOR;
     }
 
     public String getProductName() {
-        return "fleXive";
+        return PRODUCT_NAME;
     }
 
     public String getProductVersion() {
@@ -77,7 +81,7 @@ public class FlexiveRepositoryInfo implements RepositoryInfo {
     }
 
     public String getVersionSupported() {
-        return "0.61";
+        return CMIS_VERSION;
     }
 
     public Document getRepositorySpecificInformation() {
@@ -113,7 +117,8 @@ public class FlexiveRepositoryInfo implements RepositoryInfo {
     }
 
     public Set<BaseType> getChangeLogBaseTypes() {
-        return new HashSet<BaseType>(Arrays.asList(BaseType.DOCUMENT));
+        // TODO: really return all? Currently needed for testcases.
+        return new HashSet<BaseType>(Arrays.asList(BaseType.values()));
     }
 
     public boolean isChangeLogIncomplete() {

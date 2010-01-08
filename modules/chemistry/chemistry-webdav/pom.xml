@@ -13,7 +13,7 @@
     </properties>
 
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.flexive.chemistry</groupId>
+    <groupId>com.flexive.cmis.chemistry</groupId>
     <artifactId>chemistry-webdav</artifactId>
     <name>Chemistry WebDAV adapter</name>
     <description>A WebDAV adapter for Chemistry based on the Milton WebDAV library.</description>
@@ -39,9 +39,9 @@
         </dependency>
 
         <dependency>
-            <groupId>com.flexive.chemistry</groupId>
+            <groupId>com.flexive.cmis.chemistry</groupId>
             <artifactId>chemistry-webdav-extensions</artifactId>
-            <version>${flexive.version}</version>
+            <version>${chemistry.version}</version>
         </dependency>
 
         <dependency>

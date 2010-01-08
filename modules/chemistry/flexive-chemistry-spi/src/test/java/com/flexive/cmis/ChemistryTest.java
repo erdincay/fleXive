@@ -31,6 +31,7 @@
  ***************************************************************/
 package com.flexive.cmis;
 
+import com.flexive.cmis.spi.FlexiveRepositoryInfo;
 import org.apache.chemistry.Repository;
 import org.apache.chemistry.test.BasicTestCase;
 import org.apache.commons.logging.Log;
@@ -48,6 +49,14 @@ public class ChemistryTest extends BasicTestCase {
     @Override
     public Repository makeRepository() throws Exception {
         Utils.init();
+        final FlexiveRepositoryInfo info = new FlexiveRepositoryInfo();
+        expectedRepositoryId = info.getId();
+        expectedRepositoryName = info.getName();
+        expectedRepositoryDescription = info.getDescription();
+        expectedRepositoryVendor = info.getVendorName();
+        expectedRepositoryProductName = info.getProductName();
+        expectedRepositoryProductVersion = info.getProductVersion();
+        expectedRootTypeId = "Root";
         return repository = Utils.getRepo();
     }
 

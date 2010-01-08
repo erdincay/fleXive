@@ -33,12 +33,13 @@ package com.flexive.cmis.spi;
 
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.value.FxValue;
-import static com.google.common.collect.Lists.newArrayList;
 import org.apache.chemistry.Property;
 
 import java.io.Serializable;
-import java.util.List;
 import java.lang.reflect.Array;
+import java.util.List;
+
+import static com.google.common.collect.Lists.newArrayList;
 
 /**
  * An editable property instance of a flexive FxContent instance.
@@ -105,6 +106,8 @@ public class FlexiveProperty implements Property {
                 result[index++] = SPIUtils.convertValue(value, definition);
             }
             return result;
+        } else if (values.isEmpty()) {
+            return null;
         } else {
             return SPIUtils.convertValue(values.get(0), definition);
         }
