@@ -49,10 +49,8 @@ import com.flexive.shared.structure.FxDataType;
 import com.flexive.shared.structure.FxFlatStorageMapping;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.sqlParser.*;
-
-import static com.flexive.sqlParser.Condition.ValueComparator;
-
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
@@ -65,6 +63,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.flexive.sqlParser.Condition.ValueComparator;
 
 // NVL --> IFNULL((select sub.id from FX_CONTENT_DATA sub where sub.id=filter.id),1)
 
@@ -925,7 +925,11 @@ public class GenericSQLDataFilter extends DataFilter {
                 if (comparator == ValueComparator.EQUAL || comparator == ValueComparator.NOT_EQUAL) {
                     // exact match, so we use the text column that stores the comma-separated list of selected items
                     column = "FTEXT1024";
-                    value = "'" + StringUtils.join(constant.iterator(), ',') + "'";
+                    final List<String> ids = Lists.newArrayList();
+                    for (Constant c : constant) {
+                        ids.add(PropertyEntry.mapSelectConstant(entry.getProperty(), c.toString()));
+                    }
+                    value = "'" + StringUtils.join(ids, ',') + "'";
                 } else if (comparator != ValueComparator.IN && comparator != ValueComparator.NOT_IN) {
                     throw new FxSqlSearchException(LOG, "ex.sqlSearch.reader.type.invalidOperator",
                             entry.getProperty().getDataType(), comparator);

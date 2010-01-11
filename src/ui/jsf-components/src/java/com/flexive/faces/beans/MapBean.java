@@ -32,17 +32,15 @@
 package com.flexive.faces.beans;
 
 import com.flexive.shared.*;
+import com.flexive.shared.structure.*;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.Account;
 import com.flexive.shared.security.Mandator;
 import com.flexive.shared.security.UserGroup;
-import com.flexive.shared.structure.FxAssignment;
-import com.flexive.shared.structure.FxEnvironment;
-import com.flexive.shared.structure.FxProperty;
-import com.flexive.shared.structure.FxType;
 import com.flexive.shared.workflow.StepDefinition;
+import org.apache.commons.lang.StringUtils;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -72,6 +70,7 @@ public class MapBean implements Serializable {
     private Map<Long, String> dateTimeMap = null;
     private Map<Long, FxLanguage> languagesMap = null;
     private Map<Long, FxString> stepNameMap = null;
+    private Map<Object, FxSelectList> selectListMap;
     private FxEnvironment environment;
 
     /**
@@ -315,6 +314,33 @@ public class MapBean implements Serializable {
             });
         }
         return languagesMap;
+    }
+
+    /**
+     * Provide access to user-defined select lists by ID or (unique) select list name.
+     * 
+     * @return  the select list
+     */
+    public Map<Object, FxSelectList> getSelectList() {
+        if (selectListMap == null) {
+            selectListMap = FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<Object, FxSelectList>() {
+                public FxSelectList get(Object key) {
+                    if (key == null) {
+                        return null;
+                    }
+                    if (key instanceof Number) {
+                        return CacheAdmin.getEnvironment().getSelectList(((Number) key).longValue());
+                    }
+                    final String keyVal = key.toString();
+                    if (StringUtils.isNumeric(keyVal)) {
+                        return CacheAdmin.getEnvironment().getSelectList(Long.valueOf(keyVal));
+                    } else {
+                        return CacheAdmin.getEnvironment().getSelectList(keyVal);
+                    }
+                }
+            });
+        }
+        return selectListMap;
     }
 
     /**

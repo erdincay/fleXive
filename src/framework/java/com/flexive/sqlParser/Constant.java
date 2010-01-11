@@ -39,7 +39,7 @@ import java.util.Arrays;
  *
  * @author Gregor Schober (gregor.schober@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-public class Constant extends Value implements Iterable
+public class Constant extends Value implements Iterable<Constant>
 {
     public Constant(String sValue) {
         super(sValue);

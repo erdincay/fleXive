@@ -919,14 +919,7 @@ public class PropertyEntry {
                 break;
             case SelectOne:
             case SelectMany:
-                if (StringUtils.isNumeric(constantValue)) {
-                    //list item id, nothing to lookup
-                    value = constantValue;
-                } else {
-                    //list item data (of first matching item)
-                    value = "" + getProperty().getReferencedList().
-                            getItemByData(FxFormatUtils.unquote(constantValue)).getId();
-                }
+                value = mapSelectConstant(getProperty(), constantValue);
                 break;
             case Boolean:
                 value = FxFormatUtils.toBoolean(constantValue) ? "1" : "0";
@@ -959,6 +952,26 @@ public class PropertyEntry {
                 break;
         }
         return value == null ? null : new Pair<String, String>(column, value);
+    }
+
+    /**
+     * Map a select value (either an item ID or a selectitem data identifier) to a SQL value.
+     *
+     * @param property      the search property
+     * @param constantValue the select value from a FxSQL query
+     * @return              the mapped value
+     */
+    public static String mapSelectConstant(FxProperty property, String constantValue) {
+        String value;
+        if (StringUtils.isNumeric(constantValue)) {
+            //list item id, nothing to lookup
+            value = constantValue;
+        } else {
+            //list item data (of first matching item)
+            value = "" + property.getReferencedList().
+                    getItemByData(FxFormatUtils.unquote(constantValue)).getId();
+        }
+        return value;
     }
 
 
