@@ -80,6 +80,8 @@ public class GenericSQLDataSelector extends DataSelector {
         SELECTORS.put("STEP", new GenericSQLStepSelector());
         SELECTORS.put("TYPEDEF", new GenericSQLForeignTableSelector("tdef", DatabaseConst.TBL_STRUCT_TYPES, "id", true, "description"));
     }
+    public static final FieldSelector SELECTLIST_ITEM_SELECTOR =
+            new GenericSQLForeignTableSelector(null, DatabaseConst.TBL_SELECTLIST_ITEM, "ID", false, null);
 
     protected static final String[] CONTENT_DIRECT_SELECT = {"ID", "VERSION"};
     protected static final String[] CONTENT_DIRECT_SELECT_PROP = {"ID", "VER"};

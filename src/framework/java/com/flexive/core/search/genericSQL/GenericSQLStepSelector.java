@@ -32,11 +32,6 @@
 package com.flexive.core.search.genericSQL;
 
 import com.flexive.core.DatabaseConst;
-import com.flexive.core.search.PropertyEntry;
-import com.flexive.shared.exceptions.FxSqlSearchException;
-import com.flexive.shared.structure.FxDataType;
-import com.flexive.shared.FxContext;
-import com.flexive.sqlParser.Property;
 
 /**
  * Generic SQL workflow step selector

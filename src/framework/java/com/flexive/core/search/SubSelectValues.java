@@ -31,8 +31,10 @@
  ***************************************************************/
 package com.flexive.core.search;
 
+import com.flexive.core.search.genericSQL.GenericSQLDataSelector;
 import com.flexive.shared.exceptions.FxSqlSearchException;
 import com.flexive.shared.search.SortDirection;
+import com.flexive.shared.structure.FxDataType;
 import com.flexive.sqlParser.Property;
 import com.flexive.sqlParser.Value;
 
@@ -137,10 +139,15 @@ public class SubSelectValues {
         }
 
         // Find and apply the selector
-        if (isMultivalue() || entry.getTableType() != PropertyResolver.Table.T_CONTENT) {
+        if (isMultivalue()) {
             throw new FxSqlSearchException(LOG, "ex.sqlSearch.query.fieldNotAllowedFor", prop.getPropertyName());
         }
-        final FieldSelector selector = ds.getSelectors().get(prop.getPropertyName().toUpperCase());
+        final FieldSelector selector;
+        if (entry.getProperty().getDataType() == FxDataType.SelectOne) {
+            selector = GenericSQLDataSelector.SELECTLIST_ITEM_SELECTOR;
+        } else {
+            selector = ds.getSelectors().get(prop.getPropertyName().toUpperCase());
+        }
         if (selector == null) {
             throw new FxSqlSearchException(LOG, "ex.sqlSearch.query.noFieldsForProp",
                     prop.getField(), prop.getPropertyName());

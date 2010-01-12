@@ -895,6 +895,18 @@ public class SearchEngineTest {
     }
 
     @Test
+    public void selectOneFieldSelectorTest() throws FxApplicationException {
+        final String propertyName = getTestPropertyName("selectOne");
+        for (String field : new String[] { "id", "name", "data", "color", "pos" }) {
+            final FxResultSet result = new SqlQueryBuilder().select(
+                    "@pk", propertyName, propertyName + "." + field).getResult();
+            assertTrue(result.getRowCount() > 0);
+            // TODO: check return values
+        }
+    }
+
+
+    @Test
     public void contactDataSelectTest() throws FxApplicationException {
         // contact data is an example of a content with extended private permissions and no permissions for other users
         final FxResultSet result = new SqlQueryBuilder().select("@pk", "@permissions").type(FxType.CONTACTDATA).getResult();
@@ -909,7 +921,6 @@ public class SearchEngineTest {
             }
         }
     }
-
     /**
      * Executes a query without conditions and checks if it returns only instances
      * the user can actually read (a select without conditions is an optimized case of the

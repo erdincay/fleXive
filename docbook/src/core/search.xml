@@ -375,6 +375,23 @@ ORDER BY 2]]></programlisting>
             </table>
         </section>
 
+        <section xml:id="css_selectone">
+            <title>Select list properties</title>
+            <para>
+                Selecting properties with data type
+                <code>SelectOne</code>
+                returns the complete select item. You can also query individual columns as they
+                are stored in the table
+                <code>FXS_SELECTLIST_ITEM</code>,
+                which is useful for custom sorts (otherwise the result can only be ordered by the system-internal item ID).
+                Useful column names include
+                <code>ID, NAME, DATA, COLOR, POS</code>
+                (for example:
+                <code>SELECTPROP.POS</code>
+                to select the item position).
+            </para>
+        </section>
+
         <section xml:id="css_selectors">
             <title>Resolving system properties</title>
             <para>
