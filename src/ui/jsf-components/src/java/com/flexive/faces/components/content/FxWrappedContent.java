@@ -101,6 +101,8 @@ public class FxWrappedContent implements Serializable {
      */
     private IsCaptionProperty isCaptionProperty;
 
+    private String closePanelScript = "";
+
     private boolean reset = false;
     // GUI relevant settings
     private GuiSettings guiSettings;
@@ -1066,7 +1068,15 @@ public class FxWrappedContent implements Serializable {
         }
     }
 
-     /**
+    public String getClosePanelScript() {
+        return closePanelScript;
+    }
+
+    public void setClosePanelScript(String closePanelScript) {
+        this.closePanelScript = closePanelScript;
+    }
+
+    /**
      * HashMap returning if this FxData's assignment remesmbles the possibly reused caption property.
      */
     private static class IsCaptionProperty extends HashMap<FxPropertyData, Boolean> {

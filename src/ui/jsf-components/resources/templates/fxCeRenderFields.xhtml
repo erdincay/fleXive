@@ -56,7 +56,7 @@
                                          valueFormatter="#{_ceContent.guiSettings.valueFormatter}"/>
                         <ui:fragment rendered="#{element.value.class eq 'class com.flexive.shared.value.FxReference' and _ceContent.guiSettings.editMode and not _ceContent.guiSettings.disableReferenceEditor}">
                             <ui:insert name="editReferenceButton">
-                                <a4j:commandLink reRender="#{__ce_reRender}" action="#{__ceBean.editReference}"
+                                <a4j:commandLink reRender="#{_ceContent.editorId}" action="#{__ceBean.editReference}"
                                                  eventsQueue="ceQueue" onclick="flexive.contentEditor.preSubmit();"
                                                  title="#{fxMessageBean['ContentEditor.button.editReference.title']}"
                                                  styleClass="fxContentEditor_editReferenceIcon"
@@ -70,7 +70,7 @@
                             </ui:insert>
 
                             <ui:insert name="newReferenceButton">
-                                <a4j:commandLink reRender="#{__ce_reRender}" action="#{__ceBean.createReference}"
+                                <a4j:commandLink reRender="#{_ceContent.editorId}" action="#{__ceBean.createReference}"
                                                  eventsQueue="ceQueue" onclick="flexive.contentEditor.preSubmit();"
                                                  title="#{fxMessageBean['ContentEditor.button.newReference.title']}"
                                                  styleClass="fxContentEditor_newReferenceIcon"
@@ -91,8 +91,9 @@
 
                                 <!-- un-set parameters from outer content editor-->
                                     <fx:contentEditor editorId="#{__refContent.editorId}" formPrefix="#{__refContent.guiSettings.formPrefix}"
-                                                      typeId="#{null}" editMode="#{null}"
-                                                      content="#{null}" pk="#{null}" type="#{null}" contentId="#{null}">
+                                                      typeId="#{null}" editMode="#{null}" reset="false"
+                                                      content="#{null}" pk="#{null}" type="#{null}" contentId="#{null}"
+                                            closePanelScript="#{null}">
                                     </fx:contentEditor>
                                 </div>
                             </c:if>

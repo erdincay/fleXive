@@ -1015,6 +1015,13 @@ public class PropertyEditorBean implements ActionBean, Serializable {
         else
             new FxFacesMsgInfo("StructureEditor.info.notInRole.scriptManagement").addToContext();
 
+        if (assignment.getAssignedType().getId() == assignment.getProperty().getReferencedType().getId() && // selfreference
+            !minMultiplicity.equalsIgnoreCase("0") )
+        {
+            new FxFacesMsgErr("PropertyEditor.err.selfReference").addToContext();
+            return;
+        }
+
         if (FxJsfUtils.getRequest().getUserTicket().isInRole(Role.StructureManagement)) {
             try {
                 applyPropertyChanges();

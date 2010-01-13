@@ -930,6 +930,18 @@
                             </varlistentry>
                         </variablelist>
                     </para>
+                    <para>
+                        <variablelist>
+                            <varlistentry>
+                                <term>closePanelScript</term>
+                                <listitem>
+                                    <para>
+                                        A JavaScript code which is called when the editor is closed (clicking on the "Save and exit" or "Stop editing" button)
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+                        </variablelist>
+                    </para>
                 </section>
 
                 <section xml:id="jcl_fx_contentEditor_customization">

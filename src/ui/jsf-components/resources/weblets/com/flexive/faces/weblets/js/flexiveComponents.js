@@ -1346,7 +1346,11 @@ flexive.contentEditor = new function() {
     };
 
     this.saveHtmlEditors =function() {
-        tinyMCE.triggerSave();
+        try {
+            tinyMCE.triggerSave();
+        } catch (e) {
+            alert ('Failed to save HTML editors: ' + e);
+        }
         for (var i in tinyMCE.editors) {
             var editor = tinyMCE.editors[i];
             try {

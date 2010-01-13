@@ -183,6 +183,7 @@ public class FxProvideContent extends TagHandler {
         final Boolean userMayUnlock = isAttributeSet(ctx, "userMayUnlock") && Boolean.valueOf(getAttribute("userMayUnlock").getValue(ctx));
         final Boolean userMayLooseLock = isAttributeSet(ctx, "userMayLooseLock") && Boolean.valueOf(getAttribute("userMayLooseLock").getValue(ctx));
         final Boolean userMayPermLock = isAttributeSet(ctx, "userMayPermLock") && Boolean.valueOf(getAttribute("userMayPermLock").getValue(ctx));
+        final String closePanelScript = isAttributeSet(ctx, "closePanelScript") ? getAttribute("closePanelScript").getValue(ctx) : "";
 
         //encapsulate gui-relevant attributes in wrapper object
         FxWrappedContent.GuiSettings guiSettings = new FxWrappedContent.GuiSettings(editMode, disableAcl,
@@ -300,6 +301,8 @@ public class FxProvideContent extends TagHandler {
             if (wc == null)
                 wc = new FxWrappedContent(null, id, guiSettings, false);
         }
+
+        wc.setClosePanelScript(closePanelScript);
 
         final VariableMapper origMapper = ctx.getVariableMapper();
         final VariableMapperWrapper mapper = new VariableMapperWrapper(origMapper);

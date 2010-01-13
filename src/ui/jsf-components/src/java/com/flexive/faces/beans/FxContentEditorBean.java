@@ -402,15 +402,16 @@ public class FxContentEditorBean implements Serializable {
     public void createReference() {
         String formPrefix = "";
         try {
-            formPrefix = contentStorage.get(editorId).getGuiSettings().getFormPrefix();
+            FxWrappedContent.GuiSettings curGuiSettings =contentStorage.get(editorId).getGuiSettings();
+            formPrefix = curGuiSettings.getFormPrefix();
             String referenceId = contentStorage.get(editorId).getIdGenerator().get(element);
             // set opened reference
-            contentStorage.get(editorId).getGuiSettings().setOpenedReferenceId(referenceId);
+            curGuiSettings.setOpenedReferenceId(referenceId);
             // create wrapped content for referenced type and put into storage
             long typeId = CacheAdmin.getFilteredEnvironment().getProperty(((FxPropertyData) element).getPropertyId()).getReferencedType().getId();
             String referenceEditorId = EDITOR_REFERENCE_PREFIX + editorId;
             FxWrappedContent.GuiSettings guiSettings = FxWrappedContent.GuiSettings.createGuiSettingsForReference(
-                    contentStorage.get(editorId).getGuiSettings(), true);
+                    curGuiSettings, true);
             FxWrappedContent wc = new FxWrappedContent(EJBLookup.getContentEngine().initialize(typeId),
                     referenceEditorId, guiSettings, true);
             contentStorage.put(referenceEditorId, wc);
@@ -491,6 +492,7 @@ public class FxContentEditorBean implements Serializable {
     public void cancel() {
         // ! do not reload since we want exactly the version which is in the contentStorage for the current user
         // reloadContent();
+        try {
         final String formPrefix = contentStorage.get(editorId).getGuiSettings().getFormPrefix();
         try {
             // unlock only if the current user also acquired the lock
@@ -522,6 +524,9 @@ public class FxContentEditorBean implements Serializable {
         }
         finally {
             resetForm(formPrefix);
+        }
+        } catch (Exception t) {
+            new FxFacesMsgErr(t).addToContext();
         }
     }
 

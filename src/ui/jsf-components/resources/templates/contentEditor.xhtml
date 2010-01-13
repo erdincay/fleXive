@@ -27,7 +27,8 @@
         askCreateNewVersion="#{askCreateNewVersion}" lockStatus="#{lockStatus}" lockStatusTooltip="#{lockStatusTooltip}"
         contentLocked="#{contentLocked}" looseLock="#{looseLock}" permLock="#{permLock}" takeOver="#{takeOver}"
         userMayTakeover="#{userMayTakeover}" userMayUnlock="#{userMayUnlock}" userMayLooseLock="#{userMayLooseLock}"
-        userMayPermLock="#{userMayPermLock}" disableReferenceEditor="#{disableReferenceEditor}">
+        userMayPermLock="#{userMayPermLock}" disableReferenceEditor="#{disableReferenceEditor}"
+        closePanelScript="#{closePanelScript}">
 
         <c:if test="#{not _ceContent.guiSettings.disableMessages and __ceError}">
                 <!-- error messages outside of container output panel
@@ -35,14 +36,37 @@
                 <h:messages id="#{_ceContent.editorId}_#{__ceBean.messagesId}"/>
         </c:if>
 
+        <c:set var="__ce_reRenderSuffix" value=""/>
+
+        <c:if test="false">
+            <!-- ##############################################  -->
+            <!-- ###  !!!!!DO NOT MODIFY __ce_reRender !!!!!###  -->
+            <!-- ##############################################  -->
+            <!--!!! DO NOT MODIFY __ce_reRender if Boxed !!!-->
+            <!--we need to reRender the "super-parent" (the one who opens the references) and the top most reference -->
+        </c:if>
+
         <c:if test="#{not __ceError}">
-            <c:if test="#{not empty _ceContent.guiSettings.reRender}">
-                <c:set var="__ce_reRender" value="#{_ceContent.guiSettings.reRender}"/>
+
+        <c:if test="#{not empty _ceContent.guiSettings.reRender}">
+            <c:set var="__ce_reRenderSuffix" value=",#{_ceContent.guiSettings.reRender}"/>
+        </c:if>
+            <c:if test="#{not __ceRenderedBoxed}">
+                <c:set var="__ce_reRender" value="#{_ceContent.editorId}"/>
+                <c:set var="__ce_reRenderMove" value="#{_ceContent.editorId}"/>
+            </c:if>
+            <c:if test="#{__ceRenderedBoxed}">
+                <c:set var="__ce_reRenderMove" value="#{__ce_reRender},#{_ceContent.editorId}"/>
             </c:if>
 
-            <c:if test="#{not __ceRenderedBoxed and empty _ceContent.guiSettings.reRender}">
-                <c:set var="__ce_reRender" value="#{_ceContent.editorId}"/>
+            <c:if test="false">
+                <!-- ##############################################  -->
+                <!-- ###  !!!!!DO NOT MODIFY __ce_reRender!!!!! ###  -->
+                <!-- ##############################################  -->
             </c:if>
+
+
+        <c:set var="__ce_reRenderButton" value="#{__ce_reRender}#{__ce_reRenderSuffix}"/>
 
             <!--hidden input elements for saving state only needed once per content editor form-->
             <c:set var="__ceAlreadyRendered" value="#{_ceContent.guiSettings.formPrefix}__ceRendered"/>
@@ -67,9 +91,7 @@
             <c:set var="__ceRenderedBoxed" value="true"/>
 
             <a4j:outputPanel id="#{_ceContent.editorId}" display="block"
-                             styleClass="#{empty _ceContent.guiSettings.openedReferenceId ?
-                             'fxContentEditor_base' :'fxContentEditor_locked'}">
-                
+                             styleClass="'fxContentEditor_base'">
                 <a4j:status id="#{_ceContent.editorId}_status" forceId="true">
                     <f:facet name="start">
                         <div class="fxContentEditor_statusStart" title="#{fxMessageBean['ContentEditor.button.busy.title']}"/>
@@ -186,7 +208,7 @@
 
                 <div style="clear:both;height:20px"><!-- __ --></div>
 
-                <a4j:outputPanel id="#{_ceContent.editorId}_buttons" rendered="#{not _ceContent.guiSettings.disableButtons}" layout="block">
+                <a4j:outputPanel id="#{_ceContent.editorId}_buttons" rendered="#{not _ceContent.guiSettings.disableButtons and empty _ceContent.guiSettings.openedReferenceId}" layout="block">
                     <ui:insert name="buttons">
                         <ui:fragment rendered="#{not _ceContent.guiSettings.editMode and _ceContent.content.permissions.mayEdit
                         and empty _ceContent.guiSettings.openedReferenceId}">
@@ -194,7 +216,7 @@
                                 <ui:insert name="editButton">
                                     <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.edit']}"
                                             title="#{fxMessageBean['ContentEditor.button.edit.title']}"
-                                            action="#{__ceBean.enableEdit}" reRender="#{__ce_reRender}"
+                                            action="#{__ceBean.enableEdit}" reRender="#{__ce_reRenderButton}"
                                             status="#{_ceContent.editorId}_status">
                                         <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
                                         <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
@@ -210,9 +232,8 @@
                                     <ui:insert name="createButton">
                                         <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.create']}"
                                                            title="#{fxMessageBean['ContentEditor.button.create.title']}"
-                                                   action="#{__ceBean.save}" onclick="flexive.contentEditor.preSubmit();"
-                                                reRender="#{__ce_reRender}"
-                                                status="#{_ceContent.editorId}_status">
+                                                   action="#{__ceBean.save}" onclick="flexive.contentEditor.preSubmit();#{_ceContent.closePanelScript}"
+                                                reRender="#{__ce_reRenderButton}" status="#{_ceContent.editorId}_status">
                                              <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
                                              <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
                                         </a4j:commandButton>
@@ -227,8 +248,7 @@
                                         <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.save']}"
                                                            title="#{fxMessageBean['ContentEditor.button.save']}"
                                                    action="#{__ceBean.save}" onclick="flexive.contentEditor.preSubmit();"
-                                                reRender="#{__ce_reRender}"
-                                                status="#{_ceContent.editorId}_status">
+                                                reRender="#{__ce_reRenderButton}" status="#{_ceContent.editorId}_status">
                                             <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
                                             <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
                                         </a4j:commandButton>
@@ -240,9 +260,8 @@
                                     <ui:insert name="saveInNewVersionButton">
                                         <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.saveInNewVersion']}"
                                                            title="#{fxMessageBean['ContentEditor.button.saveInNewVersion.title']}"
-                                                action="#{__ceBean.saveInNewVersion}" onclick="flexive.contentEditor.preSubmit();"
-                                                reRender="#{__ce_reRender}"
-                                                status="#{_ceContent.editorId}_status">
+                                                action="#{__ceBean.saveInNewVersion}" onclick="flexive.contentEditor.preSubmit();#{_ceContent.closePanelScript}"
+                                                reRender="#{__ce_reRenderButton}" status="#{_ceContent.editorId}_status">
                                             <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
                                             <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
                                         </a4j:commandButton>
@@ -256,7 +275,7 @@
                                        <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.deleteVersion']}"
                                                           title="#{fxMessageBean['ContentEditor.button.deleteVersion.title']}"
                                                action="#{__ceBean.deleteCurrentVersion}" onclick="flexive.contentEditor.preSubmit();"
-                                               reRender="#{__ce_reRender}"
+                                               reRender="#{__ce_reRenderButton}"
                                                status="#{_ceContent.editorId}_status">
                                             <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
                                             <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
@@ -272,7 +291,7 @@
                                     <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.compact']}"
                                                        title="#{fxMessageBean['ContentEditor.button.compact.title']}"
                                                    action="#{__ceBean.compact}" onclick="flexive.contentEditor.preSubmit();"
-                                            reRender="#{__ce_reRender}"
+                                            reRender="#{__ce_reRenderButton}"
                                             status="#{_ceContent.editorId}_status">
                                          <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
                                          <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
@@ -285,18 +304,16 @@
                                                     and _ceContent.guiSettings.editMode}">
                                 <ui:insert name="cancelButton">
                                     <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.saveAndCancel']}"
-                                               action="#{__ceBean.saveAndCancel}" onclick="flexive.contentEditor.preSubmit();"
+                                               action="#{__ceBean.saveAndCancel}" onclick="flexive.contentEditor.preSubmit();#{_ceContent.closePanelScript}"
                                                title="#{fxMessageBean['ContentEditor.button.saveAndCancel.title']}"
-                                               reRender="#{__ce_reRender}"
-                                               status="#{_ceContent.editorId}_status">
+                                               reRender="#{__ce_reRenderButton}" status="#{_ceContent.editorId}_status">
                                         <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
                                         <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
                                     </a4j:commandButton>
                                     <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.cancel']}"
-                                               action="#{__ceBean.cancel}" onclick="flexive.contentEditor.preSubmit();"
+                                               action="#{__ceBean.cancel}" onclick="flexive.contentEditor.preSubmit();#{_ceContent.closePanelScript}"
                                                title="#{fxMessageBean['ContentEditor.button.cancel.title']}"
-                                               reRender="#{__ce_reRender}"
-                                               status="#{_ceContent.editorId}_status">
+                                               reRender="#{__ce_reRenderButton}" status="#{_ceContent.editorId}_status">
                                         <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
                                         <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
                                     </a4j:commandButton>
@@ -309,9 +326,8 @@
                             <ui:insert name="deleteButton">
                                 <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.delete']}"
                                                    title="#{fxMessageBean['ContentEditor.button.delete.title']}"
-                                       action="#{__ceBean.delete}" onclick="flexive.contentEditor.preSubmit();"
-                                       reRender="#{__ce_reRender}"
-                                       status="#{_ceContent.editorId}_status">
+                                       action="#{__ceBean.delete}" onclick="flexive.contentEditor.preSubmit();#{_ceContent.closePanelScript}"
+                                       reRender="#{__ce_reRenderButton}" status="#{_ceContent.editorId}_status">
                                      <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
                                      <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
                                </a4j:commandButton>
@@ -322,7 +338,7 @@
                             <ui:insert name="takeoverButton">
                                 <a4j:commandButton id="#{editorId}_overrideButton" value="#{fxMessageBean['ContentEditor.button.lockOverride']}"
                                                    title="#{fxMessageBean['ContentEditor.button.lockOverride.title']}"
-                                                   action="#{__ceBean.lockOverride}" reRender="#{__ce_reRender}"
+                                                   action="#{__ceBean.lockOverride}" reRender="#{__ce_reRenderButton}"
                                                    status="#{_ceContent.editorId}_status">
                                     <f:setPropertyActionListener value="#{myContent}" target="#{srcEditor.wrappedContent}"/>
                                     <!-- set properties for fxContentEditorBean -->
@@ -336,7 +352,7 @@
                             <ui:insert name="looseLockButton">
                                 <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.acquireLooseLock']}"
                                         title="#{fxMessageBean['ContentEditor.button.acquirePermLock.title']}"
-                                        action="#{__ceBean.acquireLooseLock}" reRender="#{__ce_reRender}"
+                                        action="#{__ceBean.acquireLooseLock}" reRender="#{__ce_reRenderButton}"
                                         status="#{_ceContent.editorId}_status">
                                     <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
                                     <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
@@ -348,7 +364,7 @@
                             <ui:insert name="permLockButton">
                                 <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.acquirePermLock']}"
                                         title="#{fxMessageBean['ContentEditor.button.acquirePermLock.title']}"
-                                        action="#{__ceBean.acquirePermLock}" reRender="#{__ce_reRender}"
+                                        action="#{__ceBean.acquirePermLock}" reRender="#{__ce_reRenderButton}"
                                         status="#{_ceContent.editorId}_status">
                                     <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
                                     <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
@@ -361,7 +377,7 @@
                         <ui:insert name="unlockButton">
                                 <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.unlock']}"
                                         title="#{fxMessageBean['ContentEditor.button.unlock.title']}"
-                                        action="#{__ceBean.unLock}" reRender="#{__ce_reRender}"
+                                        action="#{__ceBean.unLock}" reRender="#{__ce_reRenderButton}"
                                         status="#{_ceContent.editorId}_status">
                                     <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
                                     <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
@@ -376,8 +392,7 @@
                                     <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.remainingTime']}"
                                                        title="#{fxMessageBean['ContentEditor.button.remainingTime.title']}"
                                                        action="#{__ceBean.computeRemainingLockTime}"
-                                                       status="#{_ceContent.editorId}_status"
-                                                       reRender="#{__ce_reRender}">
+                                                       status="#{_ceContent.editorId}_status" reRender="#{__ce_reRenderButton}">
                                         <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
                                         <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
                                     </a4j:commandButton>
@@ -388,7 +403,7 @@
                                                        title="#{fxMessageBean['ContentEditor.button.extendLock.title']}"
                                                        action="#{__ceBean.extendLock}"
                                                        status="#{_ceContent.editorId}_status"
-                                                       reRender="#{__ce_reRender}">
+                                                       reRender="#{__ce_reRenderButton}">
                                         <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
                                         <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
                                     </a4j:commandButton>
@@ -417,14 +432,14 @@
                             </c:if>
                             <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.lockOverrideYes']}"
                                                title="#{fxMessageBean['ContentEditor.button.lockOverrideYes.title']}"
-                                               action="#{__ceBean.lockOverrideAndEdit}" reRender="#{__ce_reRender}"
+                                               action="#{__ceBean.lockOverrideAndEdit}" reRender="#{__ce_reRenderButton}"
                                                status="#{_ceContent.editorId}_status">
                                 <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
                                 <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
                             </a4j:commandButton>
                             <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.lockOverrideNo']}"
                                                title="#{fxMessageBean['ContentEditor.button.lockOverrideNo.title']}"
-                                               action="#{__ceBean.noLockOverride}" reRender="#{__ce_reRender}"
+                                               action="#{__ceBean.noLockOverride}" reRender="#{__ce_reRenderButton}"
                                                status="#{_ceContent.editorId}_status">
                                 <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
                                 <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
@@ -439,14 +454,14 @@
                             <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.askCreateNewVersionYes']}"
                                                title="#{fxMessageBean['ContentEditor.button.askCreateNewVersionYes.title']}"
                                                action="#{__ceBean.enableEditInNewVersion}"
-                                               reRender="#{__ce_reRender}"
+                                               reRender="#{__ce_reRenderButton}"
                                                status="#{_ceContent.editorId}_status">
                                 <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
                                 <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
                             </a4j:commandButton>
                             <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.askCreateNewVersionNo']}"
                                                title="#{fxMessageBean['ContentEditor.button.askCreateNewVersionNo.title']}"
-                                               action="#{__ceBean.cancel}" reRender="#{__ce_reRender}"
+                                               action="#{__ceBean.cancel}" reRender="#{__ce_reRenderButton}"
                                                status="#{_ceContent.editorId}_status">
                                 <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
                                 <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>

@@ -22,7 +22,7 @@
             var inputId = "#{fxBrowseReferencesBean.inputName}";
             function selectReference(pk, caption) {
                 try {
-                    var parentForm = window.opener.document.forms[formId];
+                    var parentForm = window.opener.document.getElementById(formId);
                     if (parentForm[inputId + "_caption"] != null) {
                         // "old" reference select without autocomplete input
                         parentForm[inputId].value = pk;
