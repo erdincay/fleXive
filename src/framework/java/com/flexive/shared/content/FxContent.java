@@ -44,6 +44,8 @@ import com.flexive.shared.structure.FxMultiplicity;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.value.*;
+import com.flexive.shared.workflow.Step;
+import com.flexive.shared.workflow.StepDefinition;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
 
@@ -292,6 +294,35 @@ public class FxContent implements Serializable {
                 this.liveVersion = this.initialLiveVersion;
         }
         updateSystemInternalProperties();
+    }
+
+    /**
+     * Set the workflow step using the given {@link StepDefinition step definition ID}.
+     *
+     * @param stepDefinitionId  the step definition ID
+     * @return  true if the step was changed
+     * @throws  FxRuntimeException  if the given step definition ID does
+     * not exist for the content's workflow
+     * @since   3.1
+     */
+    public boolean setStepByDefinition(long stepDefinitionId) {
+        final FxEnvironment env = CacheAdmin.getEnvironment();
+        final FxType type = env.getType(getTypeId());
+        for (Step step : type.getWorkflow().getSteps()) {
+            if (step.getStepDefinitionId() == stepDefinitionId) {
+                if (getStepId() == step.getId()) {
+                    return false;   // no update necessary
+                } else {
+                    setStepId(step.getId());
+                    return true;
+                }
+            }
+        }
+        throw new FxInvalidParameterException(
+                "stepDefinitionId",
+                "ex.content.step.definition.invalid",
+                stepDefinitionId, type.getWorkflow().getName()
+        ).asRuntimeException();
     }
 
     /**

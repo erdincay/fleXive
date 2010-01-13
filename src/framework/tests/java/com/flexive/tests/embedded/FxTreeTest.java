@@ -356,12 +356,7 @@ public class FxTreeTest {
                 ids[2]
         ).getReference());
 
-        content.setStepId(
-                getEnvironment().getStepByDefinition(
-                        getEnvironment().getStep(content.getStepId()).getWorkflowId(),
-                        StepDefinition.EDIT_STEP_ID
-                ).getId()
-        );
+        content.setStepByDefinition(StepDefinition.EDIT_STEP_ID);
         getContentEngine().save(content);
 
         tree.activate(FxTreeMode.Edit, ids[0], true, false);
