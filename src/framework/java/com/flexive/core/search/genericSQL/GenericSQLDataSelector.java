@@ -220,7 +220,7 @@ public class GenericSQLDataSelector extends DataSelector {
                         // add index
                         orderByNumbers.put(ssv.getSortPos(), orderByPos + " " + (ssv.isSortedAscending() ? "asc" : "desc"));
                     } else {
-                        sql.append(",null\n");
+                        sql.append(",null AS ").append(item.getAlias()).append('\n');
                     }
                     orderByPos++;
                 }

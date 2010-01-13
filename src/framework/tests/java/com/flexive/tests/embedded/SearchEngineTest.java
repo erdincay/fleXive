@@ -109,15 +109,12 @@ public class SearchEngineTest {
         TEST_PROPS.put("dateTimeRange", FxDataType.DateTimeRange);
     }
 
-    private int testInstanceCount;  // number of instances for the SearchTest type
     private final List<Long> generatedNodeIds = new ArrayList<Long>();
 
     @BeforeClass
     public void setup() throws Exception {
         login(TestUsers.REGULAR);
         final List<FxPK> testPks = new SqlQueryBuilder().select("@pk").type(TEST_TYPE).getResult().collectColumn(1);
-        testInstanceCount = testPks.size();
-        assertTrue(testInstanceCount > 0, "No instances of test type " + TEST_TYPE + " found.");
         // link test instances in tree
         for (FxPK pk : testPks) {
             generatedNodeIds.add(
@@ -328,6 +325,7 @@ public class SearchEngineTest {
     public void genericSelectTest(String name, FxDataType dataType) throws FxApplicationException {
         final FxResultSet result = new SqlQueryBuilder().select(
                 getTestPropertyName(name)).type(TEST_TYPE).getResult();
+        final int testInstanceCount = getTestInstanceCount();
         Assert.assertEquals(result.getRowCount(), testInstanceCount, "Expected all test instances to be returned, got "
                 + result.getRowCount() + " instead of " + testInstanceCount);
         final int idx = 1;
@@ -797,6 +795,7 @@ public class SearchEngineTest {
     private FxValue getTestValue(String name, PropertyValueComparator comparator) throws FxApplicationException {
         final FxResultSet result = new SqlQueryBuilder().select(TEST_TYPE + "/" + getTestPropertyName(name)).type(TEST_TYPE).getResult();
         final List<FxValue> values = result.collectColumn(1);
+        final int testInstanceCount = getTestInstanceCount();
         assertTrue(values.size() == testInstanceCount, "Expected " + testInstanceCount + " rows, got: " + values.size());
         for (FxValue value : values) {
             if (value == null || value.isEmpty()) {
@@ -1435,7 +1434,7 @@ public class SearchEngineTest {
 
     @Test
     public void searchLanguageFallbackTest_FX260() throws FxApplicationException {
-        final int maxRows = 10;
+        final int maxRows = 5;
         final UserTicket ticket = FxContext.getUserTicket();
         final FxLanguage oldLanguage = ticket.getLanguage();
 
@@ -1594,5 +1593,11 @@ public class SearchEngineTest {
 
     private long getTestTypeId() {
         return CacheAdmin.getEnvironment().getType(TEST_TYPE).getId();
+    }
+
+    private int getTestInstanceCount() throws FxApplicationException {
+        final int instances = new SqlQueryBuilder().select("@pk").type(TEST_TYPE).getResult().collectColumn(1).size();
+        assertTrue(instances > 0, "No instances for test type " + TEST_TYPE + " found.");
+        return instances;
     }
 }
