@@ -32,10 +32,7 @@
 package com.flexive.shared;
 
 import com.flexive.shared.configuration.DivisionData;
-import com.flexive.shared.exceptions.FxAccountInUseException;
-import com.flexive.shared.exceptions.FxApplicationException;
-import com.flexive.shared.exceptions.FxLoginFailedException;
-import com.flexive.shared.exceptions.FxLogoutFailedException;
+import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.AccountEngine;
 import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.structure.FxEnvironment;
@@ -668,6 +665,10 @@ public class FxContext implements Serializable {
                         si.ticket.setLanguage(EJBLookup.getLanguageEngine().load(request.getLocale().getLanguage()));
                     else
                         si.ticket.setLanguage(last.getLanguage());
+                } catch (FxInvalidLanguageException e) {
+                    if (LOG.isInfoEnabled()) {
+                        LOG.info("Failed to use request locale from browser - unknown language: " + request.getLocale().getLanguage());
+                    }
                 } catch (FxApplicationException e) {
                     if (LOG.isInfoEnabled()) {
                         LOG.info("Failed to use request locale from browser: " + e.getMessage(), e);

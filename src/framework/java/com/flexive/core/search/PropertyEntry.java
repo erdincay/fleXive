@@ -869,7 +869,7 @@ public class PropertyEntry {
                 column = escaped.getFirst();
                 result.add(escaped.getSecond());
             }
-            return Pair.create(column, "(" + StringUtils.join(result, ',') + ")");
+            return Pair.newPair(column, "(" + StringUtils.join(result, ',') + ")");
         } else {
             // scalar value passed, escape and return
             return escapeScalarValue(storage, getFilterColumn(), constantValue);

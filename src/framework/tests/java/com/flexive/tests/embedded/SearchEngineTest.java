@@ -385,6 +385,17 @@ public class SearchEngineTest {
     }
 
     @Test
+    public void multipleOrderByTest() throws FxApplicationException {
+        final FxResultSet result = new SqlQueryBuilder().select("@pk", getTestPropertyName("string"), getTestPropertyName("number"))
+                .type(TEST_TYPE)
+                .orderByIndices(
+                        Pair.newPair(3, SortDirection.ASCENDING),
+                        Pair.newPair(2, SortDirection.DESCENDING)
+                ).getResult();
+        assertAscendingOrder(result, 3);
+    }
+
+    @Test
     public void selectSystemPropertiesTest() throws FxApplicationException {
         final String[] props = {"id", "version", "typedef", "mandator", "acl", "created_by",
                 "created_at", "modified_by", "modified_at"};

@@ -31,10 +31,8 @@
  ***************************************************************/
 package com.flexive.shared.search.query;
 
-import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.EJBLookup;
-import com.flexive.shared.FxSharedUtils;
-import com.flexive.shared.FxFormatUtils;
+import com.flexive.shared.*;
+
 import static com.flexive.shared.FxSharedUtils.checkParameterNull;
 import com.flexive.shared.interfaces.SearchEngine;
 import com.flexive.shared.exceptions.FxApplicationException;
@@ -551,8 +549,12 @@ public class SqlQueryBuilder implements Serializable {
      * @return  this
      */
     public SqlQueryBuilder orderBy(String column, SortDirection direction) {
-        checkParameterNull(column, "column");
         clearOrderBy();
+        return addOrderBy(column, direction);
+    }
+
+    private SqlQueryBuilder addOrderBy(String column, SortDirection direction) {
+        checkParameterNull(column, "column");
         final int columnIndex = FxSharedUtils.getColumnIndex(getColumnNames(), column);
         if (columnIndex == -1) {
             throw new FxInvalidParameterException("column", "ex.sqlQueryBuilder.column.invalid", column).asRuntimeException();
@@ -570,17 +572,53 @@ public class SqlQueryBuilder implements Serializable {
      * @return  this
      */
     public SqlQueryBuilder orderBy(int columnIndex, SortDirection direction) {
-        checkParameterNull(direction, "direction");
         clearOrderBy();
+        return addOrderBy(columnIndex, direction);
+    }
+
+    private SqlQueryBuilder addOrderBy(int columnIndex, SortDirection direction) {
+        checkParameterNull(direction, "direction");
         final List<String> names = getColumnNames();
         if (columnIndex <= names.size()) {
-            orderBy(names.get(columnIndex - 1), direction);
+            addOrderBy(names.get(columnIndex - 1), direction);
         } else if (isWildcardSelected() && columnIndex > 0) {
             // allow invalid index since it may become valid after the co.* wildcard is resolved
             // (if it remains invalid, the search engine will throw an exception)
             orderBy.add(String.valueOf(columnIndex) + " " + direction.getSqlSuffix());
         } else {
             throw new FxInvalidParameterException("column", "ex.sqlQueryBuilder.column.invalidIndex", columnIndex).asRuntimeException();
+        }
+        return this;
+    }
+
+    /**
+     * Order the results by the given column indices (1-based). Any previously set order by columns
+     * are removed.
+     *
+     * @param columns   the order by columns
+     * @return  this
+     * @since 3.1
+     */
+    public SqlQueryBuilder orderByIndices(Pair<Integer, SortDirection>... columns) {
+        clearOrderBy();
+        for (Pair<Integer, SortDirection> column : columns) {
+            addOrderBy(column.getFirst(), column.getSecond());
+        }
+        return this;
+    }
+
+    /**
+     * Order the results by the given column names. Any previously set order by columns
+     * are removed.
+     *
+     * @param columns   the order by columns
+     * @return  this
+     * @since 3.1
+     */
+    public SqlQueryBuilder orderByColumns(Pair<String, SortDirection>... columns) {
+        clearOrderBy();
+        for (Pair<String, SortDirection> column : columns) {
+            addOrderBy(column.getFirst(), column.getSecond());
         }
         return this;
     }

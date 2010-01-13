@@ -575,18 +575,18 @@ public class GenericSQLDataFilter extends DataFilter {
         if (prop == null) {
             // insert dummy entry that will prevent any table-level optimizations
             // because this condition is not mapped to a content table (e.g. tree ops)
-            cti = Pair.create("null table", new ConditionTableInfo(false, false, -1));
+            cti = Pair.newPair("null table", new ConditionTableInfo(false, false, -1));
         } else if (prop.isWildcard() || prop.isUserPropsWildcard()) {
-            cti = Pair.create("wildcard property", new ConditionTableInfo(false, false, -1));
+            cti = Pair.newPair("wildcard property", new ConditionTableInfo(false, false, -1));
         } else {
             final PropertyEntry entry = getPropertyResolver().get(getStatement(), prop);
             if (entry.getProperty() == null) {
                 // insert dummy entry to prevent table-level optimizations
-                cti = Pair.create("virtual property", new ConditionTableInfo(false, false, -1));
+                cti = Pair.newPair("virtual property", new ConditionTableInfo(false, false, -1));
             } else {
                 if (entry.getAssignment() != null && entry.getAssignment().isFlatStorageEntry()) {
                     final FxFlatStorageMapping mapping = entry.getAssignment().getFlatStorageMapping();
-                    cti = Pair.create(
+                    cti = Pair.newPair(
                             mapping.getStorage(),
                             new ConditionTableInfo(
                                     true,
@@ -595,7 +595,7 @@ public class GenericSQLDataFilter extends DataFilter {
                             )
                     );
                 } else {
-                    cti = Pair.create(
+                    cti = Pair.newPair(
                             entry.getTableType().getTableName(),
                             new ConditionTableInfo(
                                     false,

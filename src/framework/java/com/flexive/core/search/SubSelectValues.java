@@ -55,6 +55,7 @@ public class SubSelectValues {
 
     private final int resultSetPos;
     private final SortDirection sortDirection;
+    private final int sortPosition;
     private final List<Item> items = new ArrayList<Item>();
     private int values = 0;
     private Value value = null;
@@ -64,9 +65,11 @@ public class SubSelectValues {
      *
      * @param resultSetPos  the position within the resultset
      * @param sortDirection the sort direction for this column
+     * @param sortPosition  the position in the user query, determining the order of the order by columns
      */
-    public SubSelectValues(int resultSetPos, SortDirection sortDirection) {
+    public SubSelectValues(int resultSetPos, int sortPosition, SortDirection sortDirection) {
         this.resultSetPos = resultSetPos;
+        this.sortPosition = sortPosition;
         this.sortDirection = sortDirection;
     }
 
@@ -81,6 +84,10 @@ public class SubSelectValues {
     public void addItem(String select, int resultSetPos, boolean isXpath) {
         if (!isXpath) values++;
         items.add(new Item(select, isXpath, resultSetPos, items.size()));
+    }
+
+    public int getSortPos() {
+        return sortPosition;
     }
 
     public List<Item> getItems() {

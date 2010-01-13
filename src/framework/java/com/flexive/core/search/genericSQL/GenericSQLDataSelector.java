@@ -40,6 +40,7 @@ import com.flexive.core.search.*;
 import com.flexive.shared.FxArrayUtils;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.Pair;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.exceptions.FxSqlSearchException;
 import com.flexive.shared.search.SortDirection;
@@ -53,10 +54,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.sql.Connection;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Generic SQL data selector
@@ -191,7 +189,7 @@ public class GenericSQLDataSelector extends DataSelector {
         final String typeFilter = search.getTypeFilter() == null ? ""
                 : " AND " + FILTER_ALIAS + ".TDEF=" + search.getTypeFilter().getId() + " ";
 
-        final List<String> orderByNumbers = new ArrayList<String>();
+        final Map<Integer, String> orderByNumbers = new HashMap<Integer, String>(); // order by index --> column select
         final List<String> columns = new ArrayList<String>();
 
         // create select columns
@@ -220,7 +218,7 @@ public class GenericSQLDataSelector extends DataSelector {
                         // select item from order by
                         sql.append(",").append(item.getSelect()).append(" AS ").append(item.getAlias()).append("\n");
                         // add index
-                        orderByNumbers.add(orderByPos + " " + (ssv.isSortedAscending() ? "asc" : "desc"));
+                        orderByNumbers.put(ssv.getSortPos(), orderByPos + " " + (ssv.isSortedAscending() ? "asc" : "desc"));
                     } else {
                         sql.append(",null\n");
                     }
@@ -232,12 +230,17 @@ public class GenericSQLDataSelector extends DataSelector {
                 "WHERE search_id=" + search.getSearchId() + " AND " + FILTER_ALIAS + ".tdef=t.id " +
                 typeFilter + " "));
 
-        // No order by specified = order by id and version
         if (orderByNumbers.size() == 0) {
-            orderByNumbers.add("2 asc");
-            orderByNumbers.add("3 asc");
+            // No order by specified = order by id and version
+            orderByNumbers.put(1, "2 asc");
+            orderByNumbers.put(2, "3 asc");
         }
-        sql.append("ORDER BY ").append(StringUtils.join(orderByNumbers, ','));
+        sql.append("ORDER BY ");
+        // insert order by columns in the order they were defined in the FxSQL query
+        for (Integer index : new TreeSet<Integer>(orderByNumbers.keySet())) {
+            sql.append(orderByNumbers.get(index)).append(',');
+        }
+        sql.setCharAt(sql.length() - 1, ' ');   // replace last separator
 
         if (!supportsCounterAfterOrderBy()) {
             // insert outer SELECT
@@ -273,7 +276,8 @@ public class GenericSQLDataSelector extends DataSelector {
      * @throws FxSqlSearchException if anything goes wrong
      */
     protected SubSelectValues selectFromTbl(PropertyEntry entry, Value prop, int resultPos) throws FxSqlSearchException {
-        final SubSelectValues result = new SubSelectValues(resultPos, getSortDirection(resultPos));
+        final Pair<Integer, SortDirection> sortInfo = getSortInfo(resultPos);
+        final SubSelectValues result = new SubSelectValues(resultPos, sortInfo.getFirst(), sortInfo.getSecond());
         if (prop instanceof Constant || entry == null) {
             result.addItem(prop.getValue().toString(), resultPos, false);
         } else if (entry.getType() == PropertyEntry.Type.NODE_POSITION) {
@@ -416,19 +420,21 @@ public class GenericSQLDataSelector extends DataSelector {
     }
 
     /**
-     * Returns the {@link SortDirection} for the given column index.
+     * Returns the position in the user's "ORDER BY" clause and the {@link SortDirection} for the given column index.
      *
      * @param pos the position to check
-     * @return the {@link SortDirection} for the given column index.
+     * @return the position in the "ORDER BY" clause and the {@link SortDirection} for the given column index.
      */
-    private SortDirection getSortDirection(int pos) {
+    private Pair<Integer, SortDirection> getSortInfo(int pos) {
         final List<OrderByValue> obvs = search.getFxStatement().getOrderByValues();
+        int index = 0;
         for (OrderByValue obv : obvs) {
             if (Math.abs(obv.getColumnIndex()) == pos) {    // also check for negative (=wildcard) order bys
-                return obv.isAscending() ? SortDirection.ASCENDING : SortDirection.DESCENDING;
+                return Pair.newPair(index, obv.isAscending() ? SortDirection.ASCENDING : SortDirection.DESCENDING);
             }
+            index++;
         }
-        return SortDirection.UNSORTED;
+        return Pair.newPair(-1, SortDirection.UNSORTED);
     }
 
     /**
