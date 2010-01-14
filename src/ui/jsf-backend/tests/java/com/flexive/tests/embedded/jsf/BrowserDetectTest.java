@@ -57,7 +57,7 @@ public class BrowserDetectTest {
         );
         tests.put(
                 "Mozilla/5.0 (Windows; U; Windows NT 5.1; de-DE; rv:1.4) Gecko/20030619 Netscape/7.1 (ax)",
-                expect(Browser.MOZILLA, 5.0, OperatingSystem.WINDOWS)   // netscape not handled
+                expect(Browser.GECKO, 1.4, OperatingSystem.WINDOWS)   // netscape not handled
         );
         tests.put(
                 "Mozilla/5.0 Galeon/1.2.7 (X11; Linux i686; U;) Gecko/20030131",
