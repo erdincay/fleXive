@@ -28,8 +28,7 @@ public interface SequencerStorage {
      * @param name          the name
      * @param allowRollover if MAX_ID is reached throw exception or reset to zero?
      * @return the new id
-     * @throws com.flexive.shared.exceptions.FxCreateException
-     *          if the function fails
+     * @throws FxCreateException if the function fails
      */
     long fetchId(final String name, boolean allowRollover) throws FxCreateException;
 
@@ -39,10 +38,37 @@ public interface SequencerStorage {
      *
      * @param type the type (database table) to get an id for
      * @return new id
-     * @throws com.flexive.shared.exceptions.FxApplicationException
-     *          on errors
+     * @throws FxApplicationException on errors
      */
     long getId(FxSystemSequencer type) throws FxApplicationException;
+
+    /**
+     * Get a new id from a registered sequencer
+     *
+     * @param sequencer name of the sequencer to use
+     * @return new id
+     * @throws FxApplicationException on errors
+     */
+    long getId(String sequencer) throws FxApplicationException;
+
+    /**
+     * Read the current value of the given sequencer without incrementing it
+     *
+     * @param sequencer name of the sequencer to use
+     * @return current value
+     * @throws FxApplicationException on errors
+     */
+    long getCurrentId(String sequencer) throws FxApplicationException;
+
+    /**
+     * Read the current value of the given system internal sequencer without incrementing it
+     * Internal method!! Safe to use but of no use to 'end-users'!
+     *
+     * @param sequencer the system sequencer to use
+     * @return current value
+     * @throws FxApplicationException on errors
+     */
+    long getCurrentId(FxSystemSequencer sequencer) throws FxApplicationException;
 
     /**
      * Create a new sequencer
@@ -61,15 +87,6 @@ public interface SequencerStorage {
      * @throws FxApplicationException on errors
      */
     void removeSequencer(String name) throws FxApplicationException;
-
-    /**
-     * Get a new id from a registered sequencer
-     *
-     * @param sequencer name of the sequencer to use
-     * @return new id
-     * @throws FxApplicationException on errors
-     */
-    long getId(String sequencer) throws FxApplicationException;
 
     /**
      * Check existance of a sequencer

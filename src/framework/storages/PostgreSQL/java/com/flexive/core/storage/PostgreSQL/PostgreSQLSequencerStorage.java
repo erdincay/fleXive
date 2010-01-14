@@ -36,6 +36,7 @@ import com.flexive.core.Database;
 import com.flexive.core.storage.SequencerStorage;
 import com.flexive.core.storage.genericSQL.GenericSequencerStorage;
 import com.flexive.shared.CustomSequencer;
+import com.flexive.shared.FxSystemSequencer;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxCreateException;
 import com.flexive.shared.exceptions.FxDbException;
@@ -141,7 +142,7 @@ public class PostgreSQLSequencerStorage extends GenericSequencerStorage {
      */
     public void removeSequencer(String name) throws FxApplicationException {
         if (!sequencerExists(name))
-            throw new FxCreateException(LOG, "ex.sequencer.remove.notFound", name);
+            throw new FxCreateException(LOG, "ex.sequencer.notFound", name);
         Connection con = null;
         Statement stmt = null;
         try {
@@ -190,7 +191,7 @@ public class PostgreSQLSequencerStorage extends GenericSequencerStorage {
             s = con.createStatement();
             ResultSet rs = ps.executeQuery();
             while (rs != null && rs.next()) {
-                ResultSet rsi = s.executeQuery(SQL_GET_INFO + PG_SEQ_PREFIX+rs.getString(1));
+                ResultSet rsi = s.executeQuery(SQL_GET_INFO + PG_SEQ_PREFIX + rs.getString(1));
                 rsi.next();
                 res.add(new CustomSequencer(rs.getString(1), rsi.getBoolean(1), rsi.getLong(2)));
                 rsi.close();
@@ -207,6 +208,26 @@ public class PostgreSQLSequencerStorage extends GenericSequencerStorage {
             Database.closeObjects(PostgreSQLSequencerStorage.class, con, ps);
         }
         return res;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public long getCurrentId(FxSystemSequencer sequencer) throws FxApplicationException {
+        Connection con = null;
+        PreparedStatement ps = null;
+        try {
+            con = Database.getDbConnection();
+            ps = con.prepareStatement(SQL_GET_INFO + PG_SEQ_PREFIX + sequencer.getSequencerName());
+            ResultSet rs = ps.executeQuery();
+            if (rs != null && rs.next())
+                return rs.getLong(2);
+        } catch (SQLException exc) {
+            throw new FxDbException(LOG, exc, "ex.db.sqlError", exc.getMessage());
+        } finally {
+            Database.closeObjects(PostgreSQLSequencerStorage.class, con, ps);
+        }
+        throw new FxCreateException(LOG, "ex.sequencer.notFound", sequencer.getSequencerName());
     }
 
     /**

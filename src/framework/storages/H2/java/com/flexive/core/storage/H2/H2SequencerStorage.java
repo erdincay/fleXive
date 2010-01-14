@@ -36,6 +36,7 @@ import com.flexive.core.Database;
 import com.flexive.core.storage.SequencerStorage;
 import com.flexive.core.storage.genericSQL.GenericSequencerStorage;
 import com.flexive.shared.CustomSequencer;
+import com.flexive.shared.FxSystemSequencer;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxCreateException;
 import com.flexive.shared.exceptions.FxDbException;
@@ -68,7 +69,8 @@ public class H2SequencerStorage extends GenericSequencerStorage {
     private final static String SQL_GET_COMMENT = "SELECT r.REMARKS FROM " + TBL_H2_SEQUENCES + " r WHERE r.SEQUENCE_NAME=";
     private final static String SQL_SET_COMMENT = "COMMENT ON SEQUENCE ";
     private final static String SQL_GET_USER = "SELECT SUBSTR(s.SEQUENCE_NAME," + (H2_SEQ_PREFIX.length() + 1) + "), (" + SQL_GET_COMMENT + "s.SEQUENCE_NAME) AS ROLLOVER, s.CURRENT_VALUE FROM " +
-            TBL_H2_SEQUENCES + " s WHERE s.SEQUENCE_NAME NOT LIKE '" + H2_SEQ_PREFIX + "SYS_%' AND s.SEQUENCE_NAME LIKE '"+H2_SEQ_PREFIX+"%' ORDER BY s.SEQUENCE_NAME ASC";
+            TBL_H2_SEQUENCES + " s WHERE s.SEQUENCE_NAME NOT LIKE '" + H2_SEQ_PREFIX + "SYS_%' AND s.SEQUENCE_NAME LIKE '" + H2_SEQ_PREFIX + "%' ORDER BY s.SEQUENCE_NAME ASC";
+    private final static String SQL_GET_CURRVALUE = "SELECT s.CURRENT_VALUE FROM " + TBL_H2_SEQUENCES + " s WHERE s.SEQUENCE_NAME=?";
 
     private static final String NOROLLOVER = "NOROLLOVER";
     private static final String ROLLOVER = "ROLLOVER";
@@ -167,7 +169,7 @@ public class H2SequencerStorage extends GenericSequencerStorage {
      */
     public void removeSequencer(String name) throws FxApplicationException {
         if (!sequencerExists(name))
-            throw new FxCreateException(LOG, "ex.sequencer.remove.notFound", name);
+            throw new FxCreateException(LOG, "ex.sequencer.notFound", name);
         Connection con = null;
         Statement stmt = null;
         try {
@@ -221,6 +223,27 @@ public class H2SequencerStorage extends GenericSequencerStorage {
             Database.closeObjects(H2SequencerStorage.class, con, ps);
         }
         return res;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public long getCurrentId(FxSystemSequencer sequencer) throws FxApplicationException {
+        Connection con = null;
+        PreparedStatement ps = null;
+        try {
+            con = Database.getDbConnection();
+            ps = con.prepareStatement(SQL_GET_CURRVALUE);
+            ps.setString(1, H2_SEQ_PREFIX + sequencer.getSequencerName());
+            ResultSet rs = ps.executeQuery();
+            if (rs != null && rs.next())
+                return rs.getLong(1);
+        } catch (SQLException exc) {
+            throw new FxDbException(LOG, exc, "ex.db.sqlError", exc.getMessage());
+        } finally {
+            Database.closeObjects(H2SequencerStorage.class, con, ps);
+        }
+        throw new FxCreateException(LOG, "ex.sequencer.notFound", sequencer.getSequencerName());
     }
 
     /**

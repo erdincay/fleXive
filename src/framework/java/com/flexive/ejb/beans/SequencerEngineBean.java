@@ -82,6 +82,45 @@ public class SequencerEngineBean implements SequencerEngine, SequencerEngineLoca
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public long getId(String name) throws FxApplicationException {
+        try {
+            return StorageManager.getSequencerStorage().getId(name);
+        } catch (FxApplicationException e) {
+            EJBUtils.rollback(ctx);
+            throw e;
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public long getCurrentId(String sequencer) throws FxApplicationException {
+        try {
+            return StorageManager.getSequencerStorage().getCurrentId(sequencer);
+        } catch (FxApplicationException e) {
+            EJBUtils.rollback(ctx);
+            throw e;
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public long getCurrentId(FxSystemSequencer sequencer) throws FxApplicationException {
+        try {
+            return StorageManager.getSequencerStorage().getCurrentId(sequencer);
+        } catch (FxApplicationException e) {
+            EJBUtils.rollback(ctx);
+            throw e;
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void createSequencer(String name, boolean allowRollover, long startNumber) throws FxApplicationException {
         try {
             StorageManager.getSequencerStorage().createSequencer(name, allowRollover, startNumber);
@@ -98,19 +137,6 @@ public class SequencerEngineBean implements SequencerEngine, SequencerEngineLoca
     public void removeSequencer(String name) throws FxApplicationException {
         try {
             StorageManager.getSequencerStorage().removeSequencer(name);
-        } catch (FxApplicationException e) {
-            EJBUtils.rollback(ctx);
-            throw e;
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public long getId(String name) throws FxApplicationException {
-        try {
-            return StorageManager.getSequencerStorage().getId(name);
         } catch (FxApplicationException e) {
             EJBUtils.rollback(ctx);
             throw e;

@@ -35,6 +35,7 @@ import com.flexive.core.Database;
 import com.flexive.core.storage.SequencerStorage;
 import com.flexive.core.storage.genericSQL.GenericSequencerStorage;
 import com.flexive.shared.CustomSequencer;
+import com.flexive.shared.FxSystemSequencer;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxCreateException;
 import com.flexive.shared.exceptions.FxDbException;
@@ -84,6 +85,7 @@ public class MySQLSequencerStorage extends GenericSequencerStorage {
     private final static String SQL_DELETE = "DELETE FROM " + TBL_SEQUENCE + " WHERE NAME=?";
     private final static String SQL_EXIST = "SELECT COUNT(*) FROM " + TBL_SEQUENCE + " WHERE NAME=?";
     private final static String SQL_GET_USER = "SELECT NAME,ROLLOVER,ID FROM " + TBL_SEQUENCE + " WHERE NAME NOT LIKE 'SYS_%' ORDER BY NAME ASC";
+    private final static String SQL_GET_CURRVALUE = "SELECT ID FROM " + TBL_SEQUENCE + " WHERE NAME=?";
 
     private final static String SQL_NEXT = "UPDATE " + TBL_SEQUENCE + " SET ID=LAST_INSERT_ID(ID+1) WHERE NAME=?";
     private final static String SQL_RESET = "UPDATE " + TBL_SEQUENCE + " SET ID=0 WHERE NAME=?";
@@ -188,7 +190,7 @@ public class MySQLSequencerStorage extends GenericSequencerStorage {
      */
     public void removeSequencer(String name) throws FxApplicationException {
         if (!sequencerExists(name))
-            throw new FxCreateException(LOG, "ex.sequencer.remove.notFound", name);
+            throw new FxCreateException(LOG, "ex.sequencer.notFound", name);
         Connection con = null;
         PreparedStatement ps = null;
         try {
@@ -245,6 +247,27 @@ public class MySQLSequencerStorage extends GenericSequencerStorage {
             Database.closeObjects(MySQLSequencerStorage.class, con, ps);
         }
         return res;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public long getCurrentId(FxSystemSequencer sequencer) throws FxApplicationException {
+        Connection con = null;
+        PreparedStatement ps = null;
+        try {
+            con = Database.getDbConnection();
+            ps = con.prepareStatement(SQL_GET_CURRVALUE);
+            ps.setString(1, sequencer.getSequencerName());
+            ResultSet rs = ps.executeQuery();
+            if (rs != null && rs.next())
+                return rs.getLong(1);
+        } catch (SQLException exc) {
+            throw new FxDbException(LOG, exc, "ex.db.sqlError", exc.getMessage());
+        } finally {
+            Database.closeObjects(MySQLSequencerStorage.class, con, ps);
+        }
+        throw new FxCreateException(LOG, "ex.sequencer.notFound", sequencer.getSequencerName());
     }
 
     /**

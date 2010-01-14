@@ -42,6 +42,7 @@ import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.structure.TypeStorageMode;
 
+import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.util.Date;
@@ -371,4 +372,13 @@ public interface DBStorage {
      * @throws Exception on errors
      */
     boolean initDivision(Connection con, String schema, boolean dropIfExist) throws Exception;
+
+    /**
+     * Export all data of a division to an OutputStream as ZIP
+     *
+     * @param con an open and valid connection to the database to be exported
+     * @param out OutputStream that will be used to create the zip file
+     * @throws Exception on errors
+     */
+    void exportDivision(Connection con, OutputStream out) throws Exception;
 }

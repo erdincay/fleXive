@@ -31,11 +31,11 @@
  ***************************************************************/
 package com.flexive.core.storage.genericSQL;
 
+import com.flexive.core.storage.SequencerStorage;
+import com.flexive.shared.CustomSequencer;
+import com.flexive.shared.FxSystemSequencer;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxCreateException;
-import com.flexive.shared.FxSystemSequencer;
-import com.flexive.core.storage.SequencerStorage;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -65,4 +65,13 @@ public abstract class GenericSequencerStorage implements SequencerStorage {
         return fetchId(sequencer, false);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public long getCurrentId(String sequencer) throws FxApplicationException {
+        for (CustomSequencer cs : getCustomSequencers())
+            if (cs.getName().equalsIgnoreCase(sequencer))
+                return cs.getCurrentNumber();
+        throw new FxCreateException(LOG, "ex.sequencer.notFound", sequencer);
+    }
 }

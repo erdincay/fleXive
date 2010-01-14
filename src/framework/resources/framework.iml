@@ -224,15 +224,6 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="module-library" exported="">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../../lib/google-collect-1.0-rc1.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
     <orderEntry type="module-library">
       <library>
         <CLASSES>
@@ -294,6 +285,15 @@
       <library>
         <CLASSES>
           <root url="jar://$MODULE_DIR$/../../../lib/text_extraction/PDFBox-0.7.3.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../../../lib/google-collect-1.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />

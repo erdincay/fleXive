@@ -31,20 +31,23 @@
  ***************************************************************/
 package com.flexive.tests.embedded;
 
+import com.flexive.core.storage.StorageManager;
 import com.flexive.shared.CustomSequencer;
 import com.flexive.shared.EJBLookup;
+import com.flexive.shared.FxSystemSequencer;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxLogoutFailedException;
 import com.flexive.shared.interfaces.SequencerEngine;
-import static com.flexive.tests.embedded.FxTestUtils.login;
-import static com.flexive.tests.embedded.FxTestUtils.logout;
 import org.apache.commons.lang.RandomStringUtils;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.testng.Assert;
 
 import java.util.List;
+
+import static com.flexive.tests.embedded.FxTestUtils.login;
+import static com.flexive.tests.embedded.FxTestUtils.logout;
 
 /**
  * Sequencer tests
@@ -68,6 +71,18 @@ public class SequencerTest {
     }
 
     @Test
+    public void systemSequencer() throws Exception {
+        long next = id.getId(FxSystemSequencer.MANDATOR);
+        long start = next - 1;
+        //curr >= next and not curr == next due to possible caching from the database (eg postgres)
+        long curr = id.getCurrentId(FxSystemSequencer.MANDATOR);
+        Assert.assertTrue(curr >= next, curr + " is expected to be >= " + next);
+        StorageManager.getSequencerStorage().setSequencerId(FxSystemSequencer.MANDATOR.getSequencerName(), start);
+        long reset = id.getCurrentId(FxSystemSequencer.MANDATOR);
+        Assert.assertTrue(start == reset || start == (reset - 1), "Expected start to be reset or reset-1. start=" + start + ", reset=" + reset);
+    }
+
+    @Test
     public void customSequencer() throws Exception {
         List<CustomSequencer> startList = id.getCustomSequencers();
         String seq1 = "A" + RandomStringUtils.randomAlphanumeric(16).toUpperCase();
@@ -83,10 +98,10 @@ public class SequencerTest {
         long i2 = id.getId(seq1);
         Assert.assertTrue(i2 > i1, "Expected a higher id after 2nd getId()!");
         i1 = id.getId(seq2); //call should cause the sequencer to roll over
-        Assert.assertTrue(i1 == 0, "Expected: " + 0 + ", got: " + i1);
+        Assert.assertEquals(i1, 0, "Expected: " + 0 + ", got: " + i1);
         i1 = id.getId(seq2); //should be 1 after rollover
-        Assert.assertTrue(i1 == 1, "Expected: " + 1 + ", got: " + i1);
-
+        Assert.assertEquals(i1, 1, "Expected: " + 1 + ", got: " + i1);
+        Assert.assertTrue(i1 <= id.getCurrentId(seq2), "Expected " + i1 + " of " + seq2 + " to be <= " + id.getCurrentId(seq2));
         try {
             id.getId(seq3);
             Assert.fail("Expected an exception since seq3 should be exhausted!");

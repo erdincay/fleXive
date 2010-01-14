@@ -35,6 +35,11 @@ import com.flexive.core.DatabaseConst;
 import com.flexive.core.storage.genericSQL.GenericLockStorage;
 import com.flexive.shared.FxFormatUtils;
 
+import java.io.OutputStream;
+import java.sql.Connection;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
+
 import static com.flexive.core.DatabaseConst.TBL_SELECTLIST_ITEM;
 
 /**
@@ -50,6 +55,7 @@ public abstract class GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getBooleanExpression(boolean flag) {
         return flag ? TRUE : FALSE;
     }
@@ -57,6 +63,7 @@ public abstract class GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getBooleanTrueExpression() {
         return TRUE;
     }
@@ -64,6 +71,7 @@ public abstract class GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getBooleanFalseExpression() {
         return FALSE;
     }
@@ -71,6 +79,7 @@ public abstract class GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public LockStorage getLockStorage() {
         return GenericLockStorage.getInstance();
     }
@@ -78,6 +87,7 @@ public abstract class GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String escapeReservedWords(String query) {
         return query; //nothing to escape
     }
@@ -85,6 +95,7 @@ public abstract class GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String concat(String... text) {
         if (text.length == 0)
             return "";
@@ -102,6 +113,7 @@ public abstract class GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String concat_ws(String delimiter, String... text) {
         if (text.length == 0)
             return "";
@@ -119,6 +131,7 @@ public abstract class GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getFromDual() {
         return "";
     }
@@ -126,6 +139,7 @@ public abstract class GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getLimitOffsetVar(String var, boolean hasWhereClause, long limit, long offset) {
         return getLimitOffset(hasWhereClause, limit, offset);
     }
@@ -133,6 +147,7 @@ public abstract class GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getLastContentChangeStatement(boolean live) {
         String contentFilter = live ? " WHERE ISLIVE_VER=TRUE " : "";
         return "SELECT MAX(modified_at) FROM\n" +
@@ -146,6 +161,7 @@ public abstract class GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String formatDateCondition(java.util.Date date) {
         return "'" + FxFormatUtils.getDateTimeFormat().format(date) + "'";
     }
@@ -153,6 +169,7 @@ public abstract class GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String escapeFlatStorageColumn(String column) {
         return column;
     }
@@ -160,8 +177,99 @@ public abstract class GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    @Override
     public String getSelectListItemReferenceFixStatement() {
         return "UPDATE " + TBL_SELECTLIST_ITEM + " SET PARENTID=? WHERE PARENTID IN (SELECT p.ID FROM " +
                 TBL_SELECTLIST_ITEM + " p WHERE p.LISTID=?)";
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void exportDivision(Connection con, OutputStream out) throws Exception {
+        ZipOutputStream zip = new ZipOutputStream(out);
+        GenericDivisionExporter exporter = GenericDivisionExporter.getInstance();
+        StringBuilder sb = new StringBuilder(10000);
+        try {
+            ZipEntry ze = new ZipEntry("languages.xml");
+            zip.putNextEntry(ze);
+            exporter.exportLanguages(con, zip, sb);
+            zip.closeEntry();
+            zip.flush();
+            ze = new ZipEntry("mandators.xml");
+            zip.putNextEntry(ze);
+            exporter.exportMandators(con, zip, sb);
+            zip.closeEntry();
+            zip.flush();
+            ze = new ZipEntry("security.xml");
+            zip.putNextEntry(ze);
+            exporter.exportSecurity(con, zip, sb);
+            zip.closeEntry();
+            zip.flush();
+            ze = new ZipEntry("workflows.xml");
+            zip.putNextEntry(ze);
+            exporter.exportWorkflows(con, zip, sb);
+            zip.closeEntry();
+            zip.flush();
+            ze = new ZipEntry("configurations.xml");
+            zip.putNextEntry(ze);
+            exporter.exportConfigurations(con, zip, sb);
+            zip.closeEntry();
+            zip.flush();
+            ze = new ZipEntry("structures.xml");
+            zip.putNextEntry(ze);
+            exporter.exportStructures(con, zip, sb);
+            zip.closeEntry();
+            zip.flush();
+            ze = new ZipEntry("flatstorage.xml");
+            zip.putNextEntry(ze);
+            exporter.exportFlatStorageMeta(con, zip, sb);
+            zip.closeEntry();
+            zip.flush();
+            ze = new ZipEntry("tree.xml");
+            zip.putNextEntry(ze);
+            exporter.exportTree(con, zip, sb);
+            zip.closeEntry();
+            zip.flush();
+            ze = new ZipEntry("briefcases.xml");
+            zip.putNextEntry(ze);
+            exporter.exportBriefcases(con, zip, sb);
+            zip.closeEntry();
+            zip.flush();
+            ze = new ZipEntry("scripts.xml");
+            zip.putNextEntry(ze);
+            exporter.exportScripts(con, zip, sb);
+            zip.closeEntry();
+            zip.flush();
+            ze = new ZipEntry("history.xml");
+            zip.putNextEntry(ze);
+            exporter.exportHistory(con, zip, sb);
+            zip.closeEntry();
+            zip.flush();
+            ze = new ZipEntry("data_hierarchical.xml");
+            zip.putNextEntry(ze);
+            exporter.exportHierarchicalStorage(con, zip, sb);
+            zip.closeEntry();
+            zip.flush();
+            ze = new ZipEntry("data_flat.xml");
+            zip.putNextEntry(ze);
+            exporter.exportFlatStorages(con, zip, sb);
+            zip.closeEntry();
+            zip.flush();
+            ze = new ZipEntry("sequencers.xml");
+            zip.putNextEntry(ze);
+            exporter.exportSequencers(con, zip, sb);
+            zip.closeEntry();
+            zip.flush();
+            ze = new ZipEntry("flexive.xml");
+            zip.putNextEntry(ze);
+            exporter.exportBuildInfos(con, zip, sb);
+            zip.closeEntry();
+            zip.flush();
+            exporter.exportBinaries("binaries.xml", con, zip, sb);
+        } finally {
+            zip.finish();
+        }
     }
 }

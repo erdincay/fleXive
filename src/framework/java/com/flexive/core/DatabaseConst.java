@@ -107,10 +107,7 @@ public final class DatabaseConst {
      * ACL to usergroups table
      */
     public static final String TBL_ASSIGN_ACLS = "FXS_ACLASSIGNMENTS";
-    /**
-     * User roles definitions
-     */
-    public static final String TBL_ROLES = "FXS_ROLES";
+    
     /**
      * Workflow step definitions table
      */
@@ -188,6 +185,10 @@ public final class DatabaseConst {
      */
     public static final String TBL_STRUCT_TYPERELATIONS = "FXS_TYPERELS";
     /**
+     * Type options
+     */
+    public static final String TBL_STRUCT_TYPES_OPTIONS = "FXS_TYPE_OPT";
+    /**
      * Structure flat storeage mapping table
      */
     public static final String TBL_STRUCT_FLATSTORE_MAPPING = "FXS_FLAT_MAPPING";
@@ -240,14 +241,6 @@ public final class DatabaseConst {
      * Select list items table
      */
     public static final String TBL_SELECTLIST_ITEM = "FXS_SELECTLIST_ITEM";
-    /**
-     * Template table
-     */
-    public static final String TBL_TEMPLATE = "FXS_TEMPLATE";
-    /**
-     * Tag relation table
-     */
-    public static final String TBL_TAG_RELATIONS = "FXS_TAG_RELATIONS";
     /**
      * Tree Base table
      */
