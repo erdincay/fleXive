@@ -389,7 +389,7 @@ function reload() {
 }
 
 function refresh() {
-    document.getElementById("frm:refresResultsButton").onclick();
+    document.getElementById("frm:refreshResultsButton").onclick();
 }
 
 function storePk(/* PK */ pk) {

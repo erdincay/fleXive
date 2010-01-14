@@ -39,7 +39,7 @@ public interface FxRequest extends HttpServletRequest {
 
     // All recognized browsers
     enum Browser {
-        KONQUEROR, IE, FIREFOX, SHIRETOKO, MOZILLA, SAFARI, OPERA, CHROME, GALEON, EPIPHANY, CAMINO, UNKNOWN
+        KONQUEROR, IE, FIREFOX, GECKO, MOZILLA, SAFARI, OPERA, CHROME, GALEON, EPIPHANY, CAMINO, UNKNOWN
     }
 
     // All recognized operating systems

@@ -295,10 +295,13 @@ public class SystemBean implements Serializable {
         final FxRequest req = FxJsfUtils.getRequest();
         switch( req.getBrowser() ) {
             case FIREFOX:
-            case SHIRETOKO:
-                return req.getBrowserVersion() > 2.0d;
+                return req.getBrowserVersion() >= 2.0d;
             case IE:
-                return req.getBrowserVersion() > 7.0d;
+                return req.getBrowserVersion() >= 7.0d;
+            case GECKO:
+                return req.getBrowserVersion() >= 1.8;   // firefox 2.0 upwards
+            case SAFARI:
+                return req.getBrowserVersion() >= 530;  // safari 4.0+ - http://en.wikipedia.org/wiki/Safari_version_history
             default:
                 return false;
         }

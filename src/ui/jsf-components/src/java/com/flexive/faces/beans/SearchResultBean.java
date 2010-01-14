@@ -314,7 +314,10 @@ public class SearchResultBean implements ActionBean, Serializable {
 
     public SqlQueryBuilder getQueryBuilder() {
         final SqlQueryBuilder builder = getSessionData().getQueryBuilder();
-        return builder.viewType(getViewType()).filterType(getTypeId());
+        return builder
+                .viewType(getViewType())
+                .filterType(getTypeId())
+                .filterVersion(getVersionFilter());
     }
 
     public void setQueryBuilder(SqlQueryBuilder queryBuilder) {

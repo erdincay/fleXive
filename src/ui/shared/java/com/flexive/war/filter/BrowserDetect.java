@@ -52,7 +52,7 @@ public class BrowserDetect {
     private static final String LINUX = "linux";
     private static final String UNIX = "unix";
 
-    private static final Pattern P_VERSION = Pattern.compile("\\d+(\\.\\d+)?");
+    private static final Pattern P_VERSION = Pattern.compile("\\s?\\d+(\\.\\d+)?");
     private static final Map<FxRequest.Browser, String> BROWSER_IDS;
     private static final Map<FxRequest.Browser, String> BROWSER_VERSION_OVERRIDES;
     static {
@@ -60,19 +60,20 @@ public class BrowserDetect {
         ids.put(Browser.OPERA, "opera");    // check opera before MSIE
         ids.put(Browser.IE, "msie");
         ids.put(Browser.FIREFOX, "firefox");
-        ids.put(Browser.SHIRETOKO, "shiretoko"); //firefox alphas
         ids.put(Browser.SAFARI, "safari");
         ids.put(Browser.KONQUEROR, "konqueror");
         ids.put(Browser.CHROME, "chrome");
         ids.put(Browser.GALEON, "galeon");
         ids.put(Browser.EPIPHANY, "epiphany");
         ids.put(Browser.CAMINO, "camino");
+        ids.put(Browser.GECKO, "gecko");        // fallback for gecko-based browsers
         ids.put(Browser.MOZILLA, "mozilla");    // fallback for mozilla-compatible browsers
         ids.put(Browser.UNKNOWN, "");
         BROWSER_IDS = Collections.unmodifiableMap(ids);
 
         final Map<FxRequest.Browser, String> versionIdOverrides = Maps.newHashMap();
         //versionIdOverrides.put(Browser.SAFARI, "version");
+        versionIdOverrides.put(Browser.GECKO, "rv:");
         BROWSER_VERSION_OVERRIDES = Collections.unmodifiableMap(versionIdOverrides);
     }
 
@@ -149,7 +150,7 @@ public class BrowserDetect {
             browserVersion = DEFAULT_VERSION;
             if (pos != -1) {
                 final Matcher matcher = P_VERSION.matcher(ua);
-                if (matcher.find(pos + versionString.length() + 1)) {
+                if (matcher.find(pos + versionString.length())) {
                     try {
                         browserVersion = Double.parseDouble(ua.substring(matcher.start(), matcher.end()));
                     } catch (NumberFormatException e) {
