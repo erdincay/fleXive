@@ -2,6 +2,12 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <parent>
+        <groupId>com.flexive.installer</groupId>
+        <artifactId>flexive-installer-shared</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+
     <groupId>com.flexive.installer</groupId>
     <artifactId>flexive-installer-parent</artifactId>
     <version>1.0-SNAPSHOT</version>
@@ -11,17 +17,12 @@
 
     <properties>
         <staging.dir>${project.build.directory}/staging</staging.dir>
-        <izpack-standalone.version>4.3.2</izpack-standalone.version>
-        <ant.version>1.7.1</ant.version>
-
-        <jetty.version>6.1.17</jetty.version>
-        <jetty.baseUrl>http://dist.codehaus.org/jetty/jetty-${jetty.version}/</jetty.baseUrl>
-        <jetty.zipFile>jetty-${jetty.version}.zip</jetty.zipFile>
         <jetty.staging.dir>${staging.dir}/jetty-${jetty.version}</jetty.staging.dir>
     </properties>
                
     <dependencies>
 
+        
         <dependency>
             <groupId>org.codehaus.izpack</groupId>
             <artifactId>izpack-standalone-compiler</artifactId>
@@ -200,6 +201,30 @@
                             <outputDirectory>${staging.dir}/dependency/openejb</outputDirectory>
                             <includeScope>provided</includeScope>
                         </configuration>
+                    </execution>
+
+                    <!-- Copy install listener -->
+                    <execution>
+                        <id>flexive-installer-dist</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        
+                        <configuration>
+                            <outputDirectory>${staging.dir}/bin/customActions/</outputDirectory>
+                            <stripVersion>true</stripVersion>
+
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>com.flexive.installer</groupId>
+                                    <artifactId>flexive-installer-dist</artifactId>
+                                    <version>${version}</version>
+                                    <destFileName>FlexiveInstallListener.jar</destFileName>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+
                     </execution>
                 </executions>
             </plugin>
