@@ -106,10 +106,13 @@ public class BinaryDownloadProtocol extends StreamProtocol<BinaryDownloadPayload
                     // choose biggest preview size if an image is required, but the binary is no image
                     bin = loadBinaryDescriptor(dataPacket, BinaryDescriptor.PreviewSizes.SCREENVIEW);
                 }
+            } catch (NullPointerException e) {
+                //FX-782, loadBinaryDescriptor failed
+                return new DataPacket<BinaryDownloadPayload>(new BinaryDownloadPayload(true, "ex.stream.notFound"), false);
             } catch (FxNotFoundException e) {
                 LOG.error("Failed to lookup content storage for division #" + dataPacket.getPayload().getDivision() + ": " + e.getLocalizedMessage());
             }
-            if (!bin.isBinaryFound())
+            if (bin == null || !bin.isBinaryFound())
                 return new DataPacket<BinaryDownloadPayload>(new BinaryDownloadPayload(true, "ex.stream.notFound"), false);
             mimeType = bin.getMimeType();
             datasize = bin.getSize();

@@ -176,6 +176,17 @@ public class FxExceptionMessage implements Serializable {
         try {
             result = getResource(key);
             if (values != null && values.length > 0) {
+                for (int i = 0, valuesLength = values.length; i < valuesLength; i++) {
+                    Object val = values[i];
+                    if (val != null && val instanceof String && ((String) val).startsWith("ex.")) {
+                        //replace potential resource key with message
+                        try {
+                            values[i] = getResource((String)val);
+                        } catch (Exception e) {
+                            LOG.warn(e);
+                        }
+                    }
+                }
                 result = FxFormatUtils.formatResource(result, localeId, values);
             }
             return result;
