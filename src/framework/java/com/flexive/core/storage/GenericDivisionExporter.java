@@ -38,6 +38,7 @@ import com.flexive.core.flatstorage.FxFlatStorageManager;
 import com.flexive.core.storage.binary.FxBinaryUtils;
 import com.flexive.shared.*;
 import com.flexive.shared.configuration.DivisionData;
+import com.flexive.shared.impex.FxImportExportConstants;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringEscapeUtils;
@@ -53,7 +54,7 @@ import java.util.zip.ZipOutputStream;
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-public class GenericDivisionExporter {
+public class GenericDivisionExporter implements FxImportExportConstants {
 
 /*
 Groovy test script:
@@ -70,30 +71,61 @@ fos.close()
 con.close()
 */
 
-    public final static String FS_BINARY_FOLDER = "fsbinary";
-    public final static String BINARY_FOLDER = "binary";
+    /**
+     * XML header to use
+     */
     public final static String XML_HEADER = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
-
 
     private static GenericDivisionExporter INSTANCE = new GenericDivisionExporter();
 
+    /**
+     * Getter for the exporter singleton
+     *
+     * @return exporter
+     */
     public static GenericDivisionExporter getInstance() {
         return INSTANCE;
     }
 
+    /**
+     * Escape data for xml usage and append it to the string builder
+     *
+     * @param sb   the string builder to append data to
+     * @param data string to escape and append
+     */
     private void escape(StringBuilder sb, String data) {
         sb.append(StringEscapeUtils.escapeXml(data));
     }
 
+    /**
+     * Write the contents of a string builder in correct encoding to the given output stream
+     *
+     * @param out output stream to write to
+     * @param sb  string builder containing data to be written
+     * @throws IOException on errors
+     */
     private void write(OutputStream out, StringBuilder sb) throws IOException {
         out.write(sb.toString().getBytes("UTF-8"));
         sb.setLength(0);
     }
 
+    /**
+     * Write an XML header to the given output stream
+     *
+     * @param out output stream
+     * @throws IOException on errors
+     */
     private void writeHeader(OutputStream out) throws IOException {
         out.write(XML_HEADER.getBytes("UTF-8"));
     }
 
+    /**
+     * Dump all files (including subdirectories) to a zip archive
+     *
+     * @param zip     zip archive output stream to use
+     * @param baseDir base directory
+     * @throws IOException on errors
+     */
     private void dumpFilesystem(ZipOutputStream zip, String baseDir) throws IOException {
         File base = new File(baseDir);
         if (!base.exists() || !base.isDirectory())
@@ -101,13 +133,21 @@ con.close()
         dumpFile(zip, base, base.getAbsolutePath());
     }
 
+    /**
+     * Dump a single file to a zip output stream
+     *
+     * @param zip  zip output stream
+     * @param file the file to dump
+     * @param path absolute base directory path (will be stripped in the archive from file)
+     * @throws IOException on errors
+     */
     private void dumpFile(ZipOutputStream zip, File file, String path) throws IOException {
         if (file.isDirectory()) {
             for (File f : file.listFiles())
                 dumpFile(zip, f, path);
             return;
         }
-        ZipEntry ze = new ZipEntry(FS_BINARY_FOLDER + file.getAbsolutePath().substring(path.length()));
+        ZipEntry ze = new ZipEntry(FOLDER_FS_BINARY + file.getAbsolutePath().substring(path.length()));
         zip.putNextEntry(ze);
         FileInputStream fis = null;
         try {
@@ -211,7 +251,6 @@ con.close()
                         case java.sql.Types.VARBINARY:
                         case java.sql.Types.LONGVARBINARY:
                         case java.sql.Types.BLOB:
-//                            System.err.println("Can not handle blobs yet! (" + tableName + "." + md.getColumnName(i) + ")");
                             if (!(out instanceof ZipOutputStream))
                                 throw new IllegalArgumentException("out has to be a ZipOutputStream to store binaries!");
                             ZipOutputStream zip = (ZipOutputStream) out;
@@ -220,7 +259,7 @@ con.close()
                                 break;
 
                             att = md.getColumnName(i).toLowerCase();
-                            String binFile = BINARY_FOLDER + "/BIN_" +
+                            String binFile = FOLDER_BINARY + "/BIN_" +
                                     (idColumn == null ? RandomStringUtils.randomAlphanumeric(8) : String.valueOf(rs.getLong(idColumn))) +
                                     "_" + RandomStringUtils.randomAlphanumeric(8) + ".blob";
 
@@ -262,80 +301,94 @@ con.close()
         }
     }
 
-    public void exportLanguages(Connection con, OutputStream out, StringBuilder sb) throws Exception {
+    /**
+     * Start a new zip entry/file
+     *
+     * @param out   zip output stream to use
+     * @param entry name of the new entry
+     * @throws IOException on errors
+     */
+    private void startEntry(ZipOutputStream out, String entry) throws IOException {
+        ZipEntry ze = new ZipEntry(entry);
+        out.putNextEntry(ze);
+        writeHeader(out);
+    }
+
+    /**
+     * Signal the end of a zip entry and flush the stream
+     *
+     * @param out zip output stream
+     * @throws IOException on errors
+     */
+    private void endEntry(ZipOutputStream out) throws IOException {
+        out.closeEntry();
+        out.flush();
+    }
+
+    /**
+     * Export all language data
+     *
+     * @param con an open and valid connection to read the data from
+     * @param out destination zip output stream
+     * @param sb  string builder to reuse
+     * @throws Exception on errors
+     */
+    public void exportLanguages(Connection con, ZipOutputStream out, StringBuilder sb) throws Exception {
         Statement stmt = null;
         try {
             stmt = con.createStatement();
-            //                                       1          2         3      4
-            ResultSet rs = stmt.executeQuery("SELECT LANG_CODE, ISO_CODE, INUSE, DISPPOS FROM " + DatabaseConst.TBL_LANG + " ORDER BY LANG_CODE ASC");
-            int pos;
-            writeHeader(out);
+            startEntry(out, FILE_LANGUAGES);
             sb.setLength(0);
             sb.append("<languages>\n");
             write(out, sb);
-            while (rs != null && rs.next()) {
-                sb.append("  <lang code=\"").append(rs.getLong(1)).append("\" iso=\"").append(rs.getString(2)).append("\"");
-                if (rs.getBoolean(3))
-                    sb.append(" inuse=\"1\"");
-                pos = rs.getInt(4);
-                if (!rs.wasNull())
-                    sb.append(" pos=\"").append(pos).append("\"");
-                sb.append("/>\n");
-                write(out, sb);
-            }
-            //                             1          2     3
-            rs = stmt.executeQuery("SELECT LANG_CODE, LANG, DESCRIPTION FROM " + DatabaseConst.TBL_LANG + DatabaseConst.ML + " ORDER BY LANG_CODE ASC");
-            while (rs != null && rs.next()) {
-                sb.append("  <lang_t code=\"").append(rs.getLong(1)).append("\" lang=\"").append(rs.getLong(2)).append("\">");
-                escape(sb, rs.getString(3));
-                sb.append("</lang_t>\n");
-                write(out, sb);
-            }
+            dumpTable(DatabaseConst.TBL_LANG, stmt, out, sb, "lang", "LANG_CODE");
+            dumpTable(DatabaseConst.TBL_LANG + DatabaseConst.ML, stmt, out, sb, "lang_t", "LANG_CODE");
             sb.append("</languages>\n");
             write(out, sb);
+            endEntry(out);
         } finally {
             Database.closeObjects(GenericDivisionExporter.class, stmt);
         }
     }
 
-    public void exportMandators(Connection con, OutputStream out, StringBuilder sb) throws Exception {
+    /**
+     * Export all mandator data
+     *
+     * @param con an open and valid connection to read the data from
+     * @param out destination zip output stream
+     * @param sb  string builder to reuse
+     * @throws Exception on errors
+     */
+    public void exportMandators(Connection con, ZipOutputStream out, StringBuilder sb) throws Exception {
         Statement stmt = null;
         try {
             stmt = con.createStatement();
-            //                                       1   2     3         4          5           6           7            8
-            ResultSet rs = stmt.executeQuery("SELECT ID, NAME, METADATA, IS_ACTIVE, CREATED_BY, CREATED_AT, MODIFIED_BY, MODIFIED_AT FROM " + DatabaseConst.TBL_MANDATORS + " ORDER BY ID ASC");
-            long meta;
-            writeHeader(out);
+            startEntry(out, FILE_MANDATORS);
             sb.setLength(0);
             sb.append("<mandators>\n");
             write(out, sb);
-            while (rs != null && rs.next()) {
-                sb.append("  <mandator id=\"").append(rs.getLong(1)).append("\"");
-                meta = rs.getLong(3);
-                if (!rs.wasNull())
-                    sb.append(" metadata=\"").append(meta).append("\"");
-                sb.append(" active=\"").append(rs.getBoolean(4) ? "1" : "0").append("\"");
-                sb.append(" created_by=\"").append(rs.getLong(5)).append("\"");
-                sb.append(" created_at=\"").append(rs.getLong(6)).append("\"");
-                sb.append(" modified_by=\"").append(rs.getLong(7)).append("\"");
-                sb.append(" modified_at=\"").append(rs.getLong(8)).append("\"");
-                sb.append(">");
-                escape(sb, rs.getString(2));
-                sb.append("</mandator>\n");
-                write(out, sb);
-            }
+            dumpTable(DatabaseConst.TBL_MANDATORS, stmt, out, sb, "mandator", "ID");
             sb.append("</mandators>\n");
             write(out, sb);
+            endEntry(out);
         } finally {
             Database.closeObjects(GenericDivisionExporter.class, stmt);
         }
     }
 
-    public void exportSecurity(Connection con, OutputStream out, StringBuilder sb) throws Exception {
+    /**
+     * Export all security data
+     *
+     * @param con an open and valid connection to read the data from
+     * @param out destination zip output stream
+     * @param sb  string builder to reuse
+     * @throws Exception on errors
+     */
+    public void exportSecurity(Connection con, ZipOutputStream out, StringBuilder sb) throws Exception {
         Statement stmt = null;
         try {
             stmt = con.createStatement();
-            writeHeader(out);
+            startEntry(out, FILE_SECURITY);
             sb.setLength(0);
             sb.append("<security>\n");
             sb.append("<accounts>\n");
@@ -372,16 +425,25 @@ con.close()
             sb.append("</roleAssignments>\n");
             sb.append("</security>\n");
             write(out, sb);
+            endEntry(out);
         } finally {
             Database.closeObjects(GenericDivisionExporter.class, stmt);
         }
     }
 
-    public void exportWorkflows(Connection con, OutputStream out, StringBuilder sb) throws Exception {
+    /**
+     * Export all workflow data
+     *
+     * @param con an open and valid connection to read the data from
+     * @param out destination zip output stream
+     * @param sb  string builder to reuse
+     * @throws Exception on errors
+     */
+    public void exportWorkflows(Connection con, ZipOutputStream out, StringBuilder sb) throws Exception {
         Statement stmt = null;
         try {
             stmt = con.createStatement();
-            writeHeader(out);
+            startEntry(out, FILE_WORKFLOWS);
             sb.setLength(0);
             sb.append("<workflow>\n");
             sb.append("<workflows>\n");
@@ -403,16 +465,25 @@ con.close()
             sb.append("</routes>\n");
             sb.append("</workflow>\n");
             write(out, sb);
+            endEntry(out);
         } finally {
             Database.closeObjects(GenericDivisionExporter.class, stmt);
         }
     }
 
-    public void exportConfigurations(Connection con, OutputStream out, StringBuilder sb) throws Exception {
+    /**
+     * Export all configuration data
+     *
+     * @param con an open and valid connection to read the data from
+     * @param out destination zip output stream
+     * @param sb  string builder to reuse
+     * @throws Exception on errors
+     */
+    public void exportConfigurations(Connection con, ZipOutputStream out, StringBuilder sb) throws Exception {
         Statement stmt = null;
         try {
             stmt = con.createStatement();
-            writeHeader(out);
+            startEntry(out, FILE_CONFIGURATIONS);
             sb.setLength(0);
             sb.append("<configurations>\n");
             sb.append("<application>\n");
@@ -433,16 +504,25 @@ con.close()
             sb.append("</user>\n");
             sb.append("</configurations>\n");
             write(out, sb);
+            endEntry(out);
         } finally {
             Database.closeObjects(GenericDivisionExporter.class, stmt);
         }
     }
 
-    public void exportStructures(Connection con, OutputStream out, StringBuilder sb) throws Exception {
+    /**
+     * Export all structure data
+     *
+     * @param con an open and valid connection to read the data from
+     * @param out destination zip output stream
+     * @param sb  string builder to reuse
+     * @throws Exception on errors
+     */
+    public void exportStructures(Connection con, ZipOutputStream out, StringBuilder sb) throws Exception {
         Statement stmt = null;
         try {
             stmt = con.createStatement();
-            writeHeader(out);
+            startEntry(out, FILE_STRUCTURES);
             sb.setLength(0);
             sb.append("<structures>\n");
             sb.append("<types>\n");
@@ -478,16 +558,25 @@ con.close()
             sb.append("</selectlists>\n");
             sb.append("</structures>\n");
             write(out, sb);
+            endEntry(out);
         } finally {
             Database.closeObjects(GenericDivisionExporter.class, stmt);
         }
     }
 
-    public void exportTree(Connection con, OutputStream out, StringBuilder sb) throws Exception {
+    /**
+     * Export all tree data
+     *
+     * @param con an open and valid connection to read the data from
+     * @param out destination zip output stream
+     * @param sb  string builder to reuse
+     * @throws Exception on errors
+     */
+    public void exportTree(Connection con, ZipOutputStream out, StringBuilder sb) throws Exception {
         Statement stmt = null;
         try {
             stmt = con.createStatement();
-            writeHeader(out);
+            startEntry(out, FILE_TREE);
             sb.setLength(0);
             sb.append("<tree>\n");
             sb.append("<edit>\n");
@@ -500,16 +589,25 @@ con.close()
             sb.append("</live>\n");
             sb.append("</tree>\n");
             write(out, sb);
+            endEntry(out);
         } finally {
             Database.closeObjects(GenericDivisionExporter.class, stmt);
         }
     }
 
-    public void exportBriefcases(Connection con, OutputStream out, StringBuilder sb) throws Exception {
+    /**
+     * Export all briefcase data
+     *
+     * @param con an open and valid connection to read the data from
+     * @param out destination zip output stream
+     * @param sb  string builder to reuse
+     * @throws Exception on errors
+     */
+    public void exportBriefcases(Connection con, ZipOutputStream out, StringBuilder sb) throws Exception {
         Statement stmt = null;
         try {
             stmt = con.createStatement();
-            writeHeader(out);
+            startEntry(out, FILE_BRIEFCASES);
             sb.setLength(0);
             sb.append("<briefcases>\n");
             write(out, sb);
@@ -517,16 +615,25 @@ con.close()
             dumpTable(DatabaseConst.TBL_BRIEFCASE_DATA, stmt, out, sb, "data", null);
             sb.append("</briefcases>\n");
             write(out, sb);
+            endEntry(out);
         } finally {
             Database.closeObjects(GenericDivisionExporter.class, stmt);
         }
     }
 
-    public void exportScripts(Connection con, OutputStream out, StringBuilder sb) throws Exception {
+    /**
+     * Export all scripting data
+     *
+     * @param con an open and valid connection to read the data from
+     * @param out destination zip output stream
+     * @param sb  string builder to reuse
+     * @throws Exception on errors
+     */
+    public void exportScripts(Connection con, ZipOutputStream out, StringBuilder sb) throws Exception {
         Statement stmt = null;
         try {
             stmt = con.createStatement();
-            writeHeader(out);
+            startEntry(out, FILE_SCRIPTS);
             sb.setLength(0);
             sb.append("<scripts>\n");
             write(out, sb);
@@ -535,32 +642,50 @@ con.close()
             dumpTable(DatabaseConst.TBL_SCRIPT_MAPPING_TYPES, stmt, out, sb, "typemap", null);
             sb.append("</scripts>\n");
             write(out, sb);
+            endEntry(out);
         } finally {
             Database.closeObjects(GenericDivisionExporter.class, stmt);
         }
     }
 
-    public void exportHistory(Connection con, OutputStream out, StringBuilder sb) throws Exception {
+    /**
+     * Export all history data
+     *
+     * @param con an open and valid connection to read the data from
+     * @param out destination zip output stream
+     * @param sb  string builder to reuse
+     * @throws Exception on errors
+     */
+    public void exportHistory(Connection con, ZipOutputStream out, StringBuilder sb) throws Exception {
         Statement stmt = null;
         try {
             stmt = con.createStatement();
-            writeHeader(out);
+            startEntry(out, FILE_HISTORY);
             sb.setLength(0);
             sb.append("<history>\n");
             write(out, sb);
             dumpTable(DatabaseConst.TBL_HISTORY, stmt, out, sb, "entry", null);
             sb.append("</history>\n");
             write(out, sb);
+            endEntry(out);
         } finally {
             Database.closeObjects(GenericDivisionExporter.class, stmt);
         }
     }
 
-    public void exportFlatStorageMeta(Connection con, OutputStream out, StringBuilder sb) throws Exception {
+    /**
+     * Export flatstorage meta information
+     *
+     * @param con an open and valid connection to read the data from
+     * @param out destination zip output stream
+     * @param sb  string builder to reuse
+     * @throws Exception on errors
+     */
+    public void exportFlatStorageMeta(Connection con, ZipOutputStream out, StringBuilder sb) throws Exception {
         Statement stmt = null;
         try {
             stmt = con.createStatement();
-            writeHeader(out);
+            startEntry(out, FILE_FLATSTORAGE_META);
             sb.setLength(0);
             sb.append("<flatstorageMeta>\n");
             for (FxFlatStorageInfo info : FxFlatStorageManager.getInstance().getFlatStorageInfos()) {
@@ -583,12 +708,21 @@ con.close()
             dumpTable(DatabaseConst.TBL_STRUCT_FLATSTORE_MAPPING, stmt, out, sb, "mapping", null);
             sb.append("</flatstorageMeta>\n");
             write(out, sb);
+            endEntry(out);
         } finally {
             Database.closeObjects(GenericDivisionExporter.class, stmt);
         }
     }
 
-    public void exportBinaries(String xmlFile, Connection con, ZipOutputStream zip, StringBuilder sb) throws Exception {
+    /**
+     * Export all binaries
+     *
+     * @param con an open and valid connection to read the data from
+     * @param zip destination zip output stream
+     * @param sb  string builder to reuse
+     * @throws Exception on errors
+     */
+    public void exportBinaries(Connection con, ZipOutputStream zip, StringBuilder sb) throws Exception {
         Statement stmt = null;
         try {
             stmt = con.createStatement();
@@ -596,7 +730,7 @@ con.close()
             sb.setLength(0);
             sb.append("<binaries>\n");
             dumpTable(DatabaseConst.TBL_CONTENT_BINARY, stmt, zip, sb, "binary", "id", false);
-            ZipEntry ze = new ZipEntry(xmlFile);
+            ZipEntry ze = new ZipEntry(FILE_BINARIES);
             zip.putNextEntry(ze);
             sb.append("</binaries>\n");
             writeHeader(zip);
@@ -611,11 +745,19 @@ con.close()
         }
     }
 
-    public void exportHierarchicalStorage(Connection con, OutputStream out, StringBuilder sb) throws Exception {
+    /**
+     * Export all hierarchical storage data
+     *
+     * @param con an open and valid connection to read the data from
+     * @param out destination zip output stream
+     * @param sb  string builder to reuse
+     * @throws Exception on errors
+     */
+    public void exportHierarchicalStorage(Connection con, ZipOutputStream out, StringBuilder sb) throws Exception {
         Statement stmt = null;
         try {
             stmt = con.createStatement();
-            writeHeader(out);
+            startEntry(out, FILE_DATA_HIERARCHICAL);
             sb.setLength(0);
             sb.append("<hierarchical>\n");
             write(out, sb);
@@ -625,16 +767,25 @@ con.close()
             dumpTable(DatabaseConst.TBL_CONTENT_ACLS, stmt, out, sb, "acl", "id");
             sb.append("</hierarchical>\n");
             write(out, sb);
+            endEntry(out);
         } finally {
             Database.closeObjects(GenericDivisionExporter.class, stmt);
         }
     }
 
-    public void exportFlatStorages(Connection con, OutputStream out, StringBuilder sb) throws Exception {
+    /**
+     * Export all flat storages
+     *
+     * @param con an open and valid connection to read the data from
+     * @param out destination zip output stream
+     * @param sb  string builder to reuse
+     * @throws Exception on errors
+     */
+    public void exportFlatStorages(Connection con, ZipOutputStream out, StringBuilder sb) throws Exception {
         Statement stmt = null;
         try {
             stmt = con.createStatement();
-            writeHeader(out);
+            startEntry(out, FILE_DATA_FLAT);
             sb.setLength(0);
             sb.append("<flatstorages>\n");
             write(out, sb);
@@ -646,16 +797,25 @@ con.close()
             }
             sb.append("</flatstorages>\n");
             write(out, sb);
+            endEntry(out);
         } finally {
             Database.closeObjects(GenericDivisionExporter.class, stmt);
         }
     }
 
-    public void exportSequencers(Connection con, OutputStream out, StringBuilder sb) throws Exception {
+    /**
+     * Export all sequencer settings
+     *
+     * @param con an open and valid connection to read the data from
+     * @param out destination zip output stream
+     * @param sb  string builder to reuse
+     * @throws Exception on errors
+     */
+    public void exportSequencers(Connection con, ZipOutputStream out, StringBuilder sb) throws Exception {
         Statement stmt = null;
         try {
             stmt = con.createStatement();
-            writeHeader(out);
+            startEntry(out, FILE_SEQUENCERS);
             sb.setLength(0);
             sb.append("<sequencers>\n");
             write(out, sb);
@@ -677,16 +837,25 @@ con.close()
             }
             sb.append("</sequencers>\n");
             write(out, sb);
+            endEntry(out);
         } finally {
             Database.closeObjects(GenericDivisionExporter.class, stmt);
         }
     }
 
-    public void exportBuildInfos(Connection con, OutputStream out, StringBuilder sb) throws Exception {
+    /**
+     * Export information about the exported division
+     *
+     * @param con an open and valid connection to read the data from
+     * @param out destination zip output stream
+     * @param sb  string builder to reuse
+     * @throws Exception on errors
+     */
+    public void exportBuildInfos(Connection con, ZipOutputStream out, StringBuilder sb) throws Exception {
         Statement stmt = null;
         try {
             stmt = con.createStatement();
-            writeHeader(out);
+            startEntry(out, FILE_BUILD_INFOS);
             sb.setLength(0);
             sb.append("<flexive>\n");
             sb.append("  <division>").append(FxContext.get().getDivisionId()).append("</division>\n");
@@ -709,6 +878,7 @@ con.close()
             sb.append("  <date>").append(FxFormatUtils.getDateTimeFormat().format(new java.util.Date(System.currentTimeMillis()))).append("</date>\n");
             sb.append("</flexive>\n");
             write(out, sb);
+            endEntry(out);
         } finally {
             Database.closeObjects(GenericDivisionExporter.class, stmt);
         }

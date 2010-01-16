@@ -46,6 +46,8 @@ import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.util.Date;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
 /**
  * Database vendor specific storage
@@ -381,4 +383,13 @@ public interface DBStorage {
      * @throws Exception on errors
      */
     void exportDivision(Connection con, OutputStream out) throws Exception;
+
+    /**
+     * Import a complete division from a zip stream
+     *
+     * @param con an open and valid connection
+     * @param zip  zip archive that contains an exported divison
+     * @throws Exception on errors
+     */
+    void importDivision(Connection con, ZipFile zip) throws Exception;
 }

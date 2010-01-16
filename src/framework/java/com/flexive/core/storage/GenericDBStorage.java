@@ -34,10 +34,15 @@ package com.flexive.core.storage;
 import com.flexive.core.DatabaseConst;
 import com.flexive.core.storage.genericSQL.GenericLockStorage;
 import com.flexive.shared.FxFormatUtils;
+import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.impex.FxDivisionExportInfo;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.io.OutputStream;
 import java.sql.Connection;
-import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
 import static com.flexive.core.DatabaseConst.TBL_SELECTLIST_ITEM;
@@ -48,6 +53,8 @@ import static com.flexive.core.DatabaseConst.TBL_SELECTLIST_ITEM;
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public abstract class GenericDBStorage implements DBStorage {
+
+    private static final Log LOG = LogFactory.getLog(GenericDBStorage.class);
 
     final static String TRUE = "TRUE";
     final static String FALSE = "FALSE";
@@ -187,89 +194,50 @@ public abstract class GenericDBStorage implements DBStorage {
      * {@inheritDoc}
      */
     @Override
-    public void exportDivision(Connection con, OutputStream out) throws Exception {
+    public void exportDivision(Connection con, OutputStream out) throws FxApplicationException {
         ZipOutputStream zip = new ZipOutputStream(out);
         GenericDivisionExporter exporter = GenericDivisionExporter.getInstance();
         StringBuilder sb = new StringBuilder(10000);
         try {
-            ZipEntry ze = new ZipEntry("languages.xml");
-            zip.putNextEntry(ze);
-            exporter.exportLanguages(con, zip, sb);
-            zip.closeEntry();
-            zip.flush();
-            ze = new ZipEntry("mandators.xml");
-            zip.putNextEntry(ze);
-            exporter.exportMandators(con, zip, sb);
-            zip.closeEntry();
-            zip.flush();
-            ze = new ZipEntry("security.xml");
-            zip.putNextEntry(ze);
-            exporter.exportSecurity(con, zip, sb);
-            zip.closeEntry();
-            zip.flush();
-            ze = new ZipEntry("workflows.xml");
-            zip.putNextEntry(ze);
-            exporter.exportWorkflows(con, zip, sb);
-            zip.closeEntry();
-            zip.flush();
-            ze = new ZipEntry("configurations.xml");
-            zip.putNextEntry(ze);
-            exporter.exportConfigurations(con, zip, sb);
-            zip.closeEntry();
-            zip.flush();
-            ze = new ZipEntry("structures.xml");
-            zip.putNextEntry(ze);
-            exporter.exportStructures(con, zip, sb);
-            zip.closeEntry();
-            zip.flush();
-            ze = new ZipEntry("flatstorage.xml");
-            zip.putNextEntry(ze);
-            exporter.exportFlatStorageMeta(con, zip, sb);
-            zip.closeEntry();
-            zip.flush();
-            ze = new ZipEntry("tree.xml");
-            zip.putNextEntry(ze);
-            exporter.exportTree(con, zip, sb);
-            zip.closeEntry();
-            zip.flush();
-            ze = new ZipEntry("briefcases.xml");
-            zip.putNextEntry(ze);
-            exporter.exportBriefcases(con, zip, sb);
-            zip.closeEntry();
-            zip.flush();
-            ze = new ZipEntry("scripts.xml");
-            zip.putNextEntry(ze);
-            exporter.exportScripts(con, zip, sb);
-            zip.closeEntry();
-            zip.flush();
-            ze = new ZipEntry("history.xml");
-            zip.putNextEntry(ze);
-            exporter.exportHistory(con, zip, sb);
-            zip.closeEntry();
-            zip.flush();
-            ze = new ZipEntry("data_hierarchical.xml");
-            zip.putNextEntry(ze);
-            exporter.exportHierarchicalStorage(con, zip, sb);
-            zip.closeEntry();
-            zip.flush();
-            ze = new ZipEntry("data_flat.xml");
-            zip.putNextEntry(ze);
-            exporter.exportFlatStorages(con, zip, sb);
-            zip.closeEntry();
-            zip.flush();
-            ze = new ZipEntry("sequencers.xml");
-            zip.putNextEntry(ze);
-            exporter.exportSequencers(con, zip, sb);
-            zip.closeEntry();
-            zip.flush();
-            ze = new ZipEntry("flexive.xml");
-            zip.putNextEntry(ze);
-            exporter.exportBuildInfos(con, zip, sb);
-            zip.closeEntry();
-            zip.flush();
-            exporter.exportBinaries("binaries.xml", con, zip, sb);
-        } finally {
-            zip.finish();
+            try {
+                exporter.exportLanguages(con, zip, sb);
+                exporter.exportMandators(con, zip, sb);
+                exporter.exportSecurity(con, zip, sb);
+                exporter.exportWorkflows(con, zip, sb);
+                exporter.exportConfigurations(con, zip, sb);
+                exporter.exportStructures(con, zip, sb);
+                exporter.exportFlatStorageMeta(con, zip, sb);
+                exporter.exportTree(con, zip, sb);
+                exporter.exportBriefcases(con, zip, sb);
+                exporter.exportScripts(con, zip, sb);
+                exporter.exportHistory(con, zip, sb);
+                exporter.exportHierarchicalStorage(con, zip, sb);
+                exporter.exportFlatStorages(con, zip, sb);
+                exporter.exportSequencers(con, zip, sb);
+                exporter.exportBuildInfos(con, zip, sb);
+                exporter.exportBinaries(con, zip, sb);
+            } finally {
+                zip.finish();
+            }
+        } catch (Exception e) {
+            throw new FxApplicationException(e, "ex.export.error", e.getMessage());
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void importDivision(Connection con, ZipFile zip) throws Exception {
+        GenericDivisionImporter importer = GenericDivisionImporter.getInstance();
+        FxDivisionExportInfo exportInfo = importer.getDivisionExportInfo(zip);
+        if (FxSharedUtils.getDBVersion() != exportInfo.getSchemaVersion()) {
+            LOG.warn("DB Version mismatch! Current:" + FxSharedUtils.getDBVersion() +
+                    ", exported schema:" + exportInfo.getSchemaVersion());
+        }
+        System.out.println("export drops:");
+        for (String d : exportInfo.getDrops())
+            System.out.println("Drop: [" + d + "]");
+
     }
 }
