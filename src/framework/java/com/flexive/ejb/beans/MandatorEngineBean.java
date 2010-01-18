@@ -32,7 +32,7 @@
 package com.flexive.ejb.beans;
 
 import com.flexive.core.Database;
-import static com.flexive.core.DatabaseConst.TBL_GROUP;
+import static com.flexive.core.DatabaseConst.TBL_USERGROUPS;
 import static com.flexive.core.DatabaseConst.TBL_MANDATORS;
 import com.flexive.core.LifeCycleInfoImpl;
 import com.flexive.core.storage.StorageManager;
@@ -118,7 +118,7 @@ public class MandatorEngineBean implements MandatorEngine, MandatorEngineLocal {
             ps.setLong(8, NOW);
             ps.executeUpdate();
             ps.close();
-            sql = "INSERT INTO " + TBL_GROUP + " " +
+            sql = "INSERT INTO " + TBL_USERGROUPS + " " +
                     "(ID,MANDATOR,AUTOMANDATOR,ISSYSTEM,NAME,COLOR,CREATED_BY,CREATED_AT,MODIFIED_BY,MODIFIED_AT) VALUES (" +
                     "?,?,?,?,?,?,?,?,?,?)";
             ps = con.prepareStatement(sql);
@@ -341,7 +341,7 @@ public class MandatorEngineBean implements MandatorEngine, MandatorEngineLocal {
             }
             con = Database.getDbConnection();
             //                                                  1
-            sql = "DELETE FROM " + TBL_GROUP + " WHERE MANDATOR=? AND AUTOMANDATOR=1";
+            sql = "DELETE FROM " + TBL_USERGROUPS + " WHERE MANDATOR=? AND AUTOMANDATOR=1";
             ps = con.prepareStatement(sql);
             ps.setLong(1, mandatorId);
             ps.executeUpdate();
@@ -393,7 +393,7 @@ public class MandatorEngineBean implements MandatorEngine, MandatorEngineLocal {
             ps.setLong(4, mandatorId);
             ps.executeUpdate();
             ps.close();
-            sql = "UPDATE " + TBL_GROUP + " SET NAME=? WHERE AUTOMANDATOR=?";
+            sql = "UPDATE " + TBL_USERGROUPS + " SET NAME=? WHERE AUTOMANDATOR=?";
             ps = con.prepareStatement(sql);
             ps.setString(1, "Everyone (" + name + ")");
             ps.setLong(2, mandatorId);

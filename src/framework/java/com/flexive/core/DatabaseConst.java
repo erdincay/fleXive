@@ -40,45 +40,32 @@ package com.flexive.core;
  */
 public final class DatabaseConst {
 
-    /**
-     * Database vendors
-     */
-    public static enum Dialect {
-        /**
-         * MySQL (>= 5)
-         */
-        MySQL,
-        /**
-         * Oracle
-         */
-        Oracle
-    }
-
     private static final String DEFAULT_CONFIGSCHEMA = "flexiveConfiguration";
     /**
      * Datasource for the global configuration
      */
     public static final String DS_GLOBAL_CONFIG = "jdbc/flexiveConfiguration";
-
+    /**
+     * Name of the configuration schema
+     */
     private static String configSchema = null;
 
-    // Table/Sequencer definitions
     /**
-     * Search cache table
+     * Briefcase table
      */
     public static final String TBL_BRIEFCASE = "FXS_BRIEFCASE";
+    /**
+     * Briefcase data table
+     */
     public static final String TBL_BRIEFCASE_DATA = "FXS_BRIEFCASE_DATA";
+    /**
+     * In-memory search cache
+     */
     public static final String TBL_SEARCHCACHE_MEMORY = "FXS_SEARCHCACHE_MEMORY";
+    /**
+     * Permanent search cache
+     */
     public static final String TBL_SEARCHCACHE_PERM = "FXS_SEARCHCACHE_PERM";
-
-    /**
-     * Search cache table
-     */
-    public static final String TBL_SEARCH_CACHE = "FXS_SEARCH_CACHE";
-    /**
-     * Search cache data table
-     */
-    public static final String TBL_SEARCH_CACHE_DATA = "FXS_SEARCH_CACHE_DATA";
     /**
      * Accounts table
      */
@@ -94,7 +81,7 @@ public final class DatabaseConst {
     /**
      * Roles to accounts table
      */
-    public static final String TBL_ASSIGN_ROLES = "FXS_ROLEMAPPING";
+    public static final String TBL_ROLE_MAPPING = "FXS_ROLEMAPPING";
     /**
      * History tracker table
      */
@@ -106,16 +93,16 @@ public final class DatabaseConst {
     /**
      * ACL to usergroups table
      */
-    public static final String TBL_ASSIGN_ACLS = "FXS_ACLASSIGNMENTS";
+    public static final String TBL_ACLS_ASSIGNMENT = "FXS_ACLASSIGNMENTS";
     
     /**
      * Workflow step definitions table
      */
-    public static final String TBL_STEPDEFINITION = "FXS_WF_STEPDEFS";
+    public static final String TBL_WORKFLOW_STEPDEFINITION = "FXS_WF_STEPDEFS";
     /**
      * Workflow steps table
      */
-    public static final String TBL_STEP = "FXS_WF_STEPS";
+    public static final String TBL_WORKFLOW_STEP = "FXS_WF_STEPS";
     /**
      * Workflow table
      */
@@ -123,11 +110,11 @@ public final class DatabaseConst {
     /**
      * Workflow routes table
      */
-    public static final String TBL_ROUTES = "FXS_WF_ROUTES";
+    public static final String TBL_WORKFLOW_ROUTES = "FXS_WF_ROUTES";
     /**
      * User groups table
      */
-    public static final String TBL_GROUP = "FXS_USERGROUPS";
+    public static final String TBL_USERGROUPS = "FXS_USERGROUPS";
     /**
      * Mandator definitions table
      */
@@ -135,27 +122,27 @@ public final class DatabaseConst {
     /**
      * Instance lock table
      */
-    public static final String TBL_LOCK = "FXS_LOCK";
+    public static final String TBL_LOCKS = "FXS_LOCK";
     /**
      * Global configuration table
      */
-    public static final String TBL_GLOBAL_CONFIG = "FXS_CONFIGURATION";
+    public static final String TBL_CONFIG_GLOBAL = "FXS_CONFIGURATION";
     /**
      * User configuration table
      */
-    public static final String TBL_USER_CONFIG = "FXS_USERCONFIGURATION";
+    public static final String TBL_CONFIG_USER = "FXS_USERCONFIGURATION";
     /**
      * Division configuration table
      */
-    public static final String TBL_DIVISION_CONFIG = "FXS_DIVISIONCONFIGURATION";
+    public static final String TBL_CONFIG_DIVISION = "FXS_DIVISIONCONFIGURATION";
     /**
      * Application configuration table
      */
-    public static final String TBL_APPLICATION_CONFIG = "FXS_APPLICATIONCONFIGURATION";
+    public static final String TBL_CONFIG_APPLICATION = "FXS_APPLICATIONCONFIGURATION";
     /**
      * Node configuration table
      */
-    public static final String TBL_NODE_CONFIG = "FXS_NODECONFIGURATION";
+    public static final String TBL_CONFIG_NODE = "FXS_NODECONFIGURATION";
     /**
      * Language definition table
      */
@@ -169,9 +156,17 @@ public final class DatabaseConst {
      */
     public static final String TBL_STRUCT_GROUPS = "FXS_TYPEGROUPS";
     /**
+     * Group options
+     */
+    public static final String TBL_STRUCT_GROUP_OPTIONS = "FXS_GROUP_OPT";
+    /**
      * Structure properties table
      */
     public static final String TBL_STRUCT_PROPERTIES = "FXS_TYPEPROPS";
+    /**
+     * Property options
+     */
+    public static final String TBL_STRUCT_PROPERTY_OPTIONS = "FXS_PROP_OPT";
     /**
      * Structure type assignments table
      */
@@ -197,6 +192,14 @@ public final class DatabaseConst {
      */
     public static final String TBL_STRUCT_FLATSTORE_INFO = "FXS_FLAT_STORAGES";
     /**
+     * Select lists table
+     */
+    public static final String TBL_STRUCT_SELECTLIST = "FXS_SELECTLIST";
+    /**
+     * Select list items table
+     */
+    public static final String TBL_STRUCT_SELECTLIST_ITEM = "FXS_SELECTLIST_ITEM";
+    /**
      * Main content table
      */
     public static final String TBL_CONTENT = "FX_CONTENT";
@@ -209,6 +212,11 @@ public final class DatabaseConst {
      */
     public static final String TBL_CONTENT_DATA_FT = "FX_CONTENT_DATA_FT";
     /**
+     * ACL table for contents with multiple ACLs.
+     * @since 3.1
+     */
+    public static final String TBL_CONTENT_ACLS = "FX_CONTENT_ACLS";
+    /**
      * Content binary table
      */
     public static final String TBL_CONTENT_BINARY = "FX_BINARY";
@@ -216,11 +224,6 @@ public final class DatabaseConst {
      * Binary transit table
      */
     public static final String TBL_BINARY_TRANSIT = "FXS_BINARY_TRANSIT";
-    /**
-     * ACL table for contents with multiple ACLs.
-     * @since 3.1
-     */
-    public static final String TBL_CONTENT_ACLS = "FX_CONTENT_ACLS";
     /**
      * Script table
      */
@@ -234,23 +237,12 @@ public final class DatabaseConst {
      */
     public static final String TBL_SCRIPT_MAPPING_TYPES = "FXS_SCRIPT_TYPE_MAPPING";
     /**
-     * Select lists table
-     */
-    public static final String TBL_SELECTLIST = "FXS_SELECTLIST";
-    /**
-     * Select list items table
-     */
-    public static final String TBL_SELECTLIST_ITEM = "FXS_SELECTLIST_ITEM";
-    /**
      * Tree Base table
      */
     public static final String TBL_TREE = "FXS_TREE";
-    
-    public static final String TBL_PROPERTY_OPTIONS = "FXS_PROP_OPT";
-    public static final String TBL_GROUP_OPTIONS = "FXS_GROUP_OPT";
 
     /**
-     * General table name extension for multilingual tables
+     * General table name extension for translation tables
      */
     public static final String ML = "_T";
 

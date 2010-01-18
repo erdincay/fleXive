@@ -1008,7 +1008,7 @@ public class GenericBinarySQLStorage implements BinaryStorage {
             psRemove = con.prepareStatement(CONTENT_BINARY_REMOVE_ID);
             psUsage1 = con.prepareStatement("SELECT COUNT(*) FROM " + TBL_CONTENT + " WHERE DBIN_ID=?");
             psUsage2 = con.prepareStatement("SELECT COUNT(*) FROM " + TBL_CONTENT_DATA + " WHERE FBLOB=?");
-            psUsage3 = con.prepareStatement("SELECT COUNT(*) FROM " + TBL_SELECTLIST_ITEM + " WHERE DBIN_ID=?");
+            psUsage3 = con.prepareStatement("SELECT COUNT(*) FROM " + TBL_STRUCT_SELECTLIST_ITEM + " WHERE DBIN_ID=?");
             psUsage4 = con.prepareStatement("SELECT COUNT(*) FROM " + TBL_CONTENT_BINARY + " WHERE PREVIEW_REF=?");
             int divisionId = FxContext.get().getDivisionId();
             long cnt1, cnt2, cnt3, cnt4;

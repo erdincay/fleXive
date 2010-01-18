@@ -206,7 +206,7 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
         try {
             con = Database.getDbConnection();
             //fix list references
-            StringBuilder sb = new StringBuilder(500).append("UPDATE ").append(TBL_SELECTLIST).append(" SET PARENTID=? WHERE PARENTID=?");
+            StringBuilder sb = new StringBuilder(500).append("UPDATE ").append(TBL_STRUCT_SELECTLIST).append(" SET PARENTID=? WHERE PARENTID=?");
             ps = con.prepareStatement(sb.toString());
             ps.setNull(1, java.sql.Types.INTEGER);
             ps.setLong(2, list.getId());
@@ -214,15 +214,15 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
             ps.close();
             sb.setLength(0);
             //list translations
-            sb.append("DELETE FROM ").append(TBL_SELECTLIST).append(ML).append(" WHERE ID=?");
+            sb.append("DELETE FROM ").append(TBL_STRUCT_SELECTLIST).append(ML).append(" WHERE ID=?");
             ps = con.prepareStatement(sb.toString());
             ps.setLong(1, list.getId());
             ps.executeUpdate();
             ps.close();
             sb.setLength(0);
             //item translations
-            sb.append("DELETE FROM ").append(TBL_SELECTLIST_ITEM).append(ML).append(" WHERE ID IN(SELECT DISTINCT ID FROM ").
-                    append(TBL_SELECTLIST_ITEM).append(" WHERE LISTID=?)");
+            sb.append("DELETE FROM ").append(TBL_STRUCT_SELECTLIST_ITEM).append(ML).append(" WHERE ID IN(SELECT DISTINCT ID FROM ").
+                    append(TBL_STRUCT_SELECTLIST_ITEM).append(" WHERE LISTID=?)");
             ps = con.prepareStatement(sb.toString());
             ps.setLong(1, list.getId());
             ps.executeUpdate();
@@ -235,14 +235,14 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
             ps.executeUpdate();
             ps.close();
             //items
-            sb.append("DELETE FROM ").append(TBL_SELECTLIST_ITEM).append(" WHERE LISTID=?");
+            sb.append("DELETE FROM ").append(TBL_STRUCT_SELECTLIST_ITEM).append(" WHERE LISTID=?");
             ps = con.prepareStatement(sb.toString());
             ps.setLong(1, list.getId());
             ps.executeUpdate();
             ps.close();
             sb.setLength(0);
             //the entry itself
-            sb.append("DELETE FROM ").append(TBL_SELECTLIST).append(" WHERE ID=?");
+            sb.append("DELETE FROM ").append(TBL_STRUCT_SELECTLIST).append(" WHERE ID=?");
             ps = con.prepareStatement(sb.toString());
             ps.setLong(1, list.getId());
             ps.executeUpdate();
@@ -273,7 +273,7 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
         try {
             con = Database.getDbConnection();
             //references (parent items)
-            StringBuilder sb = new StringBuilder(500).append("UPDATE ").append(TBL_SELECTLIST_ITEM).append(" SET PARENTID=? WHERE PARENTID=?");
+            StringBuilder sb = new StringBuilder(500).append("UPDATE ").append(TBL_STRUCT_SELECTLIST_ITEM).append(" SET PARENTID=? WHERE PARENTID=?");
             ps = con.prepareStatement(sb.toString());
             ps.setNull(1, java.sql.Types.INTEGER);
             ps.setLong(2, item.getId());
@@ -281,14 +281,14 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
             ps.close();
             sb.setLength(0);
             //translations
-            sb.append("DELETE FROM ").append(TBL_SELECTLIST_ITEM).append(ML).append(" WHERE ID=?");
+            sb.append("DELETE FROM ").append(TBL_STRUCT_SELECTLIST_ITEM).append(ML).append(" WHERE ID=?");
             ps = con.prepareStatement(sb.toString());
             ps.setLong(1, item.getId());
             ps.executeUpdate();
             ps.close();
             sb.setLength(0);
             //the entry itself
-            sb.append("DELETE FROM ").append(TBL_SELECTLIST_ITEM).append(" WHERE ID=?");
+            sb.append("DELETE FROM ").append(TBL_STRUCT_SELECTLIST_ITEM).append(" WHERE ID=?");
             ps = con.prepareStatement(sb.toString());
             ps.setLong(1, item.getId());
             ps.executeUpdate();
@@ -315,7 +315,7 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
         try {
             con = Database.getDbConnection();
             //                                                            1  2        3    4
-            ps = con.prepareStatement("INSERT INTO " + TBL_SELECTLIST + "(ID,PARENTID,NAME,ALLOW_ITEM_CREATE," +
+            ps = con.prepareStatement("INSERT INTO " + TBL_STRUCT_SELECTLIST + "(ID,PARENTID,NAME,ALLOW_ITEM_CREATE," +
                     //5              6            7            8     9
                     "ACL_CREATE_ITEM,ACL_ITEM_NEW,DEFAULT_ITEM,BCSEP,SAMELVLSELECT)VALUES(?,?,?,?,?,?,?,?,?)");
             ps.setLong(1, newId);
@@ -332,7 +332,7 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
             ps.setBoolean(9, list.isOnlySameLevelSelect());
             ps.executeUpdate();
             Database.storeFxString(new FxString[]{list.getLabel(), list.getDescription()},
-                    con, TBL_SELECTLIST, new String[]{"LABEL", "DESCRIPTION"}, "ID", newId);
+                    con, TBL_STRUCT_SELECTLIST, new String[]{"LABEL", "DESCRIPTION"}, "ID", newId);
             return newId;
         } catch (SQLException e) {
             EJBUtils.rollback(ctx);
@@ -355,7 +355,7 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
         try {
             con = Database.getDbConnection();
             //                                                                        1          2
-            ps = con.prepareStatement("UPDATE " + TBL_SELECTLIST + " SET DEFAULT_ITEM=? WHERE ID=?");
+            ps = con.prepareStatement("UPDATE " + TBL_STRUCT_SELECTLIST + " SET DEFAULT_ITEM=? WHERE ID=?");
             if (defaultItemId <= 0)
                 ps.setNull(1, java.sql.Types.INTEGER);
             else
@@ -384,7 +384,7 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
         try {
             con = Database.getDbConnection();
             //                                                                    1          2
-            ps = con.prepareStatement("UPDATE " + TBL_SELECTLIST_ITEM + " SET POS=? WHERE ID=?");
+            ps = con.prepareStatement("UPDATE " + TBL_STRUCT_SELECTLIST_ITEM + " SET POS=? WHERE ID=?");
             for (FxSelectListItem item : items) {
                 ps.setInt(1, pos++);
                 ps.setLong(2, item.getId() < 0 && idMap != null
@@ -412,7 +412,7 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
         try {
             con = Database.getDbConnection();
             //                                                                    1      2                   3
-            ps = con.prepareStatement("UPDATE " + TBL_SELECTLIST + " SET PARENTID=?,NAME=?,ALLOW_ITEM_CREATE=?," +
+            ps = con.prepareStatement("UPDATE " + TBL_STRUCT_SELECTLIST + " SET PARENTID=?,NAME=?,ALLOW_ITEM_CREATE=?," +
                     //               4              5       6               7          8
                     "ACL_CREATE_ITEM=?,ACL_ITEM_NEW=?,BCSEP=?,SAMELVLSELECT=? WHERE ID=?");
             if (list.hasParentList())
@@ -428,7 +428,7 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
             ps.setLong(8, list.getId());
             ps.executeUpdate();
             Database.storeFxString(new FxString[]{list.getLabel(), list.getDescription()},
-                    con, TBL_SELECTLIST, new String[]{"LABEL", "DESCRIPTION"}, "ID", list.getId());
+                    con, TBL_STRUCT_SELECTLIST, new String[]{"LABEL", "DESCRIPTION"}, "ID", list.getId());
         } catch (SQLException e) {
             EJBUtils.rollback(ctx);
             throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
@@ -466,7 +466,7 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
         try {
             con = Database.getDbConnection();
             //                                                                 1  2    3   4        5      6    7
-            ps = con.prepareStatement("INSERT INTO " + TBL_SELECTLIST_ITEM + "(ID,NAME,ACL,PARENTID,LISTID,DATA,COLOR," +
+            ps = con.prepareStatement("INSERT INTO " + TBL_STRUCT_SELECTLIST_ITEM + "(ID,NAME,ACL,PARENTID,LISTID,DATA,COLOR," +
                     //8         9          10          11          12      13       14
                     "CREATED_BY,CREATED_AT,MODIFIED_BY,MODIFIED_AT,DBIN_ID,DBIN_VER,DBIN_QUALITY)VALUES" +
                     "(?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
@@ -489,7 +489,7 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
             ps.setInt(14, item.getIconQuality());
             ps.executeUpdate();
             Database.storeFxString(item.getLabel(),
-                    con, TBL_SELECTLIST_ITEM, "LABEL", "ID", newId);
+                    con, TBL_STRUCT_SELECTLIST_ITEM, "LABEL", "ID", newId);
             return newId;
         } catch (SQLException e) {
             try {
@@ -523,7 +523,7 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
         try {
             con = Database.getDbConnection();
             //                                                                     1      2          3      4       5
-            ps = con.prepareStatement("UPDATE " + TBL_SELECTLIST_ITEM + " SET NAME=?, ACL=?,PARENTID=?,DATA=?,COLOR=?," +
+            ps = con.prepareStatement("UPDATE " + TBL_STRUCT_SELECTLIST_ITEM + " SET NAME=?, ACL=?,PARENTID=?,DATA=?,COLOR=?," +
                     //           6             7         8          9              10         11
                     "MODIFIED_BY=?,MODIFIED_AT=?,DBIN_ID=?,DBIN_VER=?,DBIN_QUALITY=? WHERE ID=?");
             ps.setString(1, item.getName());
@@ -541,7 +541,7 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
             ps.setLong(11, item.getId());
             ps.executeUpdate();
             Database.storeFxString(item.getLabel(),
-                    con, TBL_SELECTLIST_ITEM, "LABEL", "ID", item.getId());
+                    con, TBL_STRUCT_SELECTLIST_ITEM, "LABEL", "ID", item.getId());
         } catch (SQLException e) {
             try {
                 if (StorageManager.isUniqueConstraintViolation(e))

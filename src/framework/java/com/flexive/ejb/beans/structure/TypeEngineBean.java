@@ -905,7 +905,7 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
             }
             if (sql.length() > 0) {
                 sql.append(')');
-                ps = con.prepareStatement("DELETE FROM " + TBL_PROPERTY_OPTIONS + sql.toString());
+                ps = con.prepareStatement("DELETE FROM " + TBL_STRUCT_PROPERTY_OPTIONS + sql.toString());
                 ps.executeUpdate();
                 ps.close();
             }
@@ -920,7 +920,7 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
             }
             if (sql.length() > 0) {
                 sql.append(')');
-                ps = con.prepareStatement("DELETE FROM " + TBL_GROUP_OPTIONS + sql.toString());
+                ps = con.prepareStatement("DELETE FROM " + TBL_STRUCT_GROUP_OPTIONS + sql.toString());
                 ps.executeUpdate();
                 ps.close();
             }

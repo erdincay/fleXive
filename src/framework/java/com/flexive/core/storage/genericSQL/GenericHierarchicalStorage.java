@@ -146,7 +146,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
 
     //security info main query
     protected static final String SECURITY_INFO_MAIN = "SELECT DISTINCT c.ACL, t.ACL, s.ACL, t.SECURITY_MODE, t.ID, c.DBIN_ID, c.DBIN_ACL, c.CREATED_BY, c.MANDATOR, c.ver FROM " +
-            TBL_CONTENT + " c, " + TBL_STRUCT_TYPES + " t, " + TBL_STEP + " s WHERE c.ID=? AND ";
+            TBL_CONTENT + " c, " + TBL_STRUCT_TYPES + " t, " + TBL_WORKFLOW_STEP + " s WHERE c.ID=? AND ";
     protected static final String SECURITY_INFO_WHERE = " AND t.ID=c.TDEF AND s.ID=c.STEP";
     protected static final String SECURITY_INFO_VER = SECURITY_INFO_MAIN + "c.VER=?" + SECURITY_INFO_WHERE;
     protected static final String SECURITY_INFO_MAXVER = SECURITY_INFO_MAIN + "c.VER=c.MAX_VER" + SECURITY_INFO_WHERE;
@@ -154,7 +154,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
 
     //calculate max_ver and live_ver for a content instance
     protected static final String CONTENT_VER_CALC = "SELECT MAX(VER) AS MAX_VER, COALESCE((SELECT s.VER FROM " +
-            TBL_CONTENT + " s WHERE s.STEP=(SELECT w.ID FROM " + TBL_STEP + " w, " + TBL_STRUCT_TYPES + " t WHERE w.STEPDEF=" +
+            TBL_CONTENT + " s WHERE s.STEP=(SELECT w.ID FROM " + TBL_WORKFLOW_STEP + " w, " + TBL_STRUCT_TYPES + " t WHERE w.STEPDEF=" +
             StepDefinition.LIVE_STEP_ID + " AND w.WORKFLOW=t.WORKFLOW AND t.ID=c.TDEF) AND s.ID=c.ID),-1) AS LIVE_VER FROM " + TBL_CONTENT +
             " c WHERE c.ID=? GROUP BY c.ID,c.TDEF";
     protected static final String CONTENT_VER_UPDATE_1 = "UPDATE " + TBL_CONTENT + " SET MAX_VER=?, LIVE_VER=? WHERE ID=?";

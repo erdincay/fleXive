@@ -79,7 +79,7 @@ public class GenericSQLDataSelector extends DataSelector {
         SELECTORS.put("TYPEDEF", new GenericSQLForeignTableSelector("tdef", DatabaseConst.TBL_STRUCT_TYPES, "id", true, "description"));
     }
     public static final FieldSelector SELECTLIST_ITEM_SELECTOR =
-            new GenericSQLForeignTableSelector(null, DatabaseConst.TBL_SELECTLIST_ITEM, "ID", false, null);
+            new GenericSQLForeignTableSelector(null, DatabaseConst.TBL_STRUCT_SELECTLIST_ITEM, "ID", false, null);
 
     protected static final String[] CONTENT_DIRECT_SELECT = {"ID", "VERSION"};
     protected static final String[] CONTENT_DIRECT_SELECT_PROP = {"ID", "VER"};
@@ -320,7 +320,7 @@ public class GenericSQLDataSelector extends DataSelector {
         } else if (entry.getType() == PropertyEntry.Type.LOCK) {
             for (String readColumn : entry.getReadColumns()) {
                 final String sel = "(SELECT " + readColumn
-                        + " FROM " + DatabaseConst.TBL_LOCK
+                        + " FROM " + DatabaseConst.TBL_LOCKS
                         + " WHERE lock_id=" + FILTER_ALIAS + ".id AND lock_ver=" + FILTER_ALIAS + ".ver)";
                 result.addItem(sel, resultPos, false);
             }

@@ -124,7 +124,7 @@ public class StepEngineBean implements StepEngine, StepEngineLocal {
             //check if that step already exists
             long newStepId;
             stmt = con.createStatement();
-            sql = "SELECT ID FROM " + TBL_STEP + " WHERE STEPDEF=" + step.getStepDefinitionId() + " AND WORKFLOW=" + step.getWorkflowId();
+            sql = "SELECT ID FROM " + TBL_WORKFLOW_STEP + " WHERE STEPDEF=" + step.getStepDefinitionId() + " AND WORKFLOW=" + step.getWorkflowId();
             ResultSet rs = stmt.executeQuery(sql);
             if (rs != null && rs.next()) {
                 // return existing step ID as "new step ID"
@@ -132,7 +132,7 @@ public class StepEngineBean implements StepEngine, StepEngineLocal {
             } else {
                 // Create the step
                 newStepId = seq.getId(FxSystemSequencer.STEP);
-                sql = "INSERT INTO " + TBL_STEP + " (ID, STEPDEF, WORKFLOW, ACL) VALUES (" + newStepId + ","
+                sql = "INSERT INTO " + TBL_WORKFLOW_STEP + " (ID, STEPDEF, WORKFLOW, ACL) VALUES (" + newStepId + ","
                         + step.getStepDefinitionId() + "," + step.getWorkflowId() + "," + step.getAclId() + ")";
                 stmt.executeUpdate(sql);
             }
@@ -170,7 +170,7 @@ public class StepEngineBean implements StepEngine, StepEngineLocal {
                 "SELECT DISTINCT step.ID,aclug.ACL,step.WORKFLOW,"
                         // 4        ,  5       ,   6     ,  7         ,   8      ,      9        , 10
                         + " aclug.PEDIT,aclug.PREAD,aclug.PREMOVE,aclug.PEXPORT,aclug.PREL,aclug.PCREATE,step.STEPDEF"
-                        + " FROM " + TBL_ACLS + " acl," + TBL_ASSIGN_ACLS + " aclug," + TBL_STEP + " step"
+                        + " FROM " + TBL_ACLS + " acl," + TBL_ACLS_ASSIGNMENT + " aclug," + TBL_WORKFLOW_STEP + " step"
                         + " WHERE"
                         + " aclug.ACL=acl.ID"
                         + " AND acl.CAT_TYPE=" + ACLCategory.WORKFLOW.getId()
@@ -290,8 +290,8 @@ public class StepEngineBean implements StepEngine, StepEngineLocal {
             if (!isWorkflow) {
                 Step step = env.getStep(objectId);
                 stmt = con.createStatement();
-                sql = "SELECT COUNT(*) FROM " + TBL_STEP + " WHERE WORKFLOW=" + step.getWorkflowId()
-                        + " AND STEPDEF IN (SELECT def.ID FROM " + TBL_STEPDEFINITION + " def, " + TBL_STEP
+                sql = "SELECT COUNT(*) FROM " + TBL_WORKFLOW_STEP + " WHERE WORKFLOW=" + step.getWorkflowId()
+                        + " AND STEPDEF IN (SELECT def.ID FROM " + TBL_WORKFLOW_STEPDEFINITION + " def, " + TBL_WORKFLOW_STEP
                         + " stp WHERE stp.ID=" + step.getId() + " AND stp.STEPDEF=def.UNIQUE_TARGET)";
                 ResultSet rs = stmt.executeQuery(sql);
                 int count = 0;
@@ -304,10 +304,10 @@ public class StepEngineBean implements StepEngine, StepEngineLocal {
 
             // Delete all routes that use the step(s)
             if (isWorkflow) {
-                sql = "DELETE FROM " + TBL_ROUTES + " WHERE FROM_STEP in (select id from "
-                        + TBL_STEP + " WHERE WORKFLOW=" + workflowId + ")";
+                sql = "DELETE FROM " + TBL_WORKFLOW_ROUTES + " WHERE FROM_STEP in (select id from "
+                        + TBL_WORKFLOW_STEP + " WHERE WORKFLOW=" + workflowId + ")";
             } else {
-                sql = "DELETE FROM " + TBL_ROUTES + " WHERE FROM_STEP=" + objectId + " OR TO_STEP=" + objectId;
+                sql = "DELETE FROM " + TBL_WORKFLOW_ROUTES + " WHERE FROM_STEP=" + objectId + " OR TO_STEP=" + objectId;
             }
             stmt = con.createStatement();
             stmt.executeUpdate(sql);
@@ -315,7 +315,7 @@ public class StepEngineBean implements StepEngine, StepEngineLocal {
 
             // Delete the step(s) itself
             stmt = con.createStatement();
-            sql = "DELETE FROM " + TBL_STEP + " WHERE " + (isWorkflow ? "WORKFLOW=" : "ID=") + objectId;
+            sql = "DELETE FROM " + TBL_WORKFLOW_STEP + " WHERE " + (isWorkflow ? "WORKFLOW=" : "ID=") + objectId;
             stmt.executeUpdate(sql);
             success = true;
         } catch (SQLException exc) {
@@ -374,7 +374,7 @@ public class StepEngineBean implements StepEngine, StepEngineLocal {
 
             // Update the step
             stmt = con.createStatement();
-            sql = "UPDATE " + TBL_STEP + " SET ACL=" + aclId + " WHERE ID=" + stepId;
+            sql = "UPDATE " + TBL_WORKFLOW_STEP + " SET ACL=" + aclId + " WHERE ID=" + stepId;
             int ucount = stmt.executeUpdate(sql);
 
             // Is the step defined at all?

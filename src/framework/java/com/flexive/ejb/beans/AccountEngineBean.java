@@ -276,7 +276,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
 
             // Load the groups the account is assigned to
             curSql = "SELECT DISTINCT ass.USERGROUP,grp.NAME,grp.MANDATOR,grp.COLOR" +
-                    " FROM " + TBL_ASSIGN_GROUPS + " ass, " + TBL_GROUP + " grp" +
+                    " FROM " + TBL_ASSIGN_GROUPS + " ass, " + TBL_USERGROUPS + " grp" +
                     " WHERE grp.ID=ass.USERGROUP AND ass.ACCOUNT=" + accountId;
             stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(curSql);
@@ -349,7 +349,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             }
 
             // Load the roles
-            curSql = "SELECT DISTINCT ROLE FROM " + TBL_ASSIGN_ROLES + " WHERE " +
+            curSql = "SELECT DISTINCT ROLE FROM " + TBL_ROLE_MAPPING + " WHERE " +
                     ((mode == RoleLoadMode.ALL || mode == RoleLoadMode.FROM_USER_ONLY) ? "ACCOUNT=" + accountId : "") +
                     ((mode == RoleLoadMode.ALL) ? " OR " : "") +
                     ((mode == RoleLoadMode.ALL || mode == RoleLoadMode.FROM_GROUPS_ONLY) ? " USERGROUP IN (SELECT USERGROUP FROM " +
@@ -617,7 +617,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
 
             // Delete all role assigments ..
             stmt = con.createStatement();
-            curSql = "DELETE FROM " + TBL_ASSIGN_ROLES + " WHERE ACCOUNT=" + accountId;
+            curSql = "DELETE FROM " + TBL_ROLE_MAPPING + " WHERE ACCOUNT=" + accountId;
             stmt.executeUpdate(curSql);
             stmt.close();
 
@@ -897,13 +897,13 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             }
 
             // Delete the old assignments of the user
-            ps = con.prepareStatement("DELETE FROM " + TBL_ASSIGN_ROLES + " WHERE ACCOUNT=?");
+            ps = con.prepareStatement("DELETE FROM " + TBL_ROLE_MAPPING + " WHERE ACCOUNT=?");
             ps.setLong(1, accountId);
             ps.executeUpdate();
 
             if (roles.length > 0) {
                 ps.close();
-                ps = con.prepareStatement("INSERT INTO " + TBL_ASSIGN_ROLES
+                ps = con.prepareStatement("INSERT INTO " + TBL_ROLE_MAPPING
                         + " (ACCOUNT,USERGROUP,ROLE) VALUES (?,?,?)");
             }
 
@@ -1127,9 +1127,9 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
 
                 // Role link
                 ((!filterByRole) ? "" :
-                        " AND (EXISTS (SELECT 1 FROM " + TBL_ASSIGN_ROLES + " rol WHERE rol.ACCOUNT=usr.ID and rol.ROLE IN (" +
+                        " AND (EXISTS (SELECT 1 FROM " + TBL_ROLE_MAPPING + " rol WHERE rol.ACCOUNT=usr.ID and rol.ROLE IN (" +
                                 StringUtils.join(ArrayUtils.toObject(isInRole), ',') + ")) OR " +
-                                "EXISTS (SELECT 1 FROM " + TBL_ASSIGN_ROLES + " rol, " + TBL_ASSIGN_GROUPS + " grp WHERE " +
+                                "EXISTS (SELECT 1 FROM " + TBL_ROLE_MAPPING + " rol, " + TBL_ASSIGN_GROUPS + " grp WHERE " +
                                 "grp.ACCOUNT=usr.ID AND rol.USERGROUP=grp.USERGROUP AND rol.ROLE IN (" + StringUtils.join(ArrayUtils.toObject(isInRole), ',') + ")))") +
 
                 // Order
@@ -1495,7 +1495,7 @@ public class AccountEngineBean implements AccountEngine, AccountEngineLocal {
             curSql = "SELECT DISTINCT ass.USERGROUP,ass.ACL,ass.PREAD,ass.PEDIT,ass.PREMOVE,ass.PEXPORT,ass.PREL," +
                     //   8            9            10             11             12              13
                     "ass.PCREATE, acl.CAT_TYPE,ass.CREATED_BY,ass.CREATED_AT,ass.MODIFIED_BY,ass.MODIFIED_AT " +
-                    "FROM " + TBL_ASSIGN_ACLS + " ass, " + TBL_ASSIGN_GROUPS + " grp, " + TBL_ACLS + " acl " +
+                    "FROM " + TBL_ACLS_ASSIGNMENT + " ass, " + TBL_ASSIGN_GROUPS + " grp, " + TBL_ACLS + " acl " +
                     "WHERE acl.ID=ass.ACL AND ((ass.USERGROUP=grp.USERGROUP AND grp.ACCOUNT=" + accountId +
                     ")OR(ass.USERGROUP=" + UserGroup.GROUP_OWNER + "))";
 

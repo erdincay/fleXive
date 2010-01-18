@@ -40,14 +40,14 @@ import com.flexive.core.DatabaseConst;
  * @version $Rev$
  */
 public class GenericSQLStepSelector extends GenericSQLForeignTableSelector {
-    private static final String ML_SEL = "(SELECT deft.name FROM " + DatabaseConst.TBL_CONTENT + " ct," + DatabaseConst.TBL_STEP + " step, " +
-            DatabaseConst.TBL_STEPDEFINITION + " def," + DatabaseConst.TBL_STEPDEFINITION + DatabaseConst.ML + " deft" +
+    private static final String ML_SEL = "(SELECT deft.name FROM " + DatabaseConst.TBL_CONTENT + " ct," + DatabaseConst.TBL_WORKFLOW_STEP + " step, " +
+            DatabaseConst.TBL_WORKFLOW_STEPDEFINITION + " def," + DatabaseConst.TBL_WORKFLOW_STEPDEFINITION + DatabaseConst.ML + " deft" +
             " WHERE \n" +
             "ct.id=filter.id AND ct.ver=filter.ver AND step.id=ct.step AND step.stepdef=def.id AND" +
             " deft.id=def.id AND ";
 
     public GenericSQLStepSelector() {
-        super("step", DatabaseConst.TBL_STEP, "id", true, "label");
+        super("step", DatabaseConst.TBL_WORKFLOW_STEP, "id", true, "label");
     }
 
     @Override

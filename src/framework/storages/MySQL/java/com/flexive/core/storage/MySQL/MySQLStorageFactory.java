@@ -32,7 +32,7 @@
 package com.flexive.core.storage.MySQL;
 
 import com.flexive.core.Database;
-import static com.flexive.core.DatabaseConst.TBL_SELECTLIST_ITEM;
+import static com.flexive.core.DatabaseConst.TBL_STRUCT_SELECTLIST_ITEM;
 
 import com.flexive.core.search.DataFilter;
 import com.flexive.core.search.DataSelector;
@@ -160,7 +160,7 @@ public class MySQLStorageFactory extends GenericDBStorage  implements DBStorage 
      * {@inheritDoc}
      */
     public String getSelectListItemReferenceFixStatement() {
-        return "UPDATE " + TBL_SELECTLIST_ITEM + " i1, " + TBL_SELECTLIST_ITEM +
+        return "UPDATE " + TBL_STRUCT_SELECTLIST_ITEM + " i1, " + TBL_STRUCT_SELECTLIST_ITEM +
                 " i2 SET i1.PARENTID=? WHERE i1.PARENTID=i2.ID AND i2.LISTID=?";
     }
 

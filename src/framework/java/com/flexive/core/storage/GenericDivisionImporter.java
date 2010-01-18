@@ -31,17 +31,29 @@
  ***************************************************************/
 package com.flexive.core.storage;
 
+import com.flexive.core.DatabaseConst;
+import com.flexive.core.flatstorage.FxFlatStorageInfo;
+import com.flexive.core.flatstorage.FxFlatStorageManager;
+import com.flexive.core.storage.binary.FxBinaryUtils;
+import com.flexive.shared.FxContext;
+import com.flexive.shared.FxFileUtils;
 import com.flexive.shared.FxFormatUtils;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.impex.FxDivisionExportInfo;
 import com.flexive.shared.impex.FxImportExportConstants;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathFactory;
+import java.io.File;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -51,6 +63,8 @@ import java.util.zip.ZipFile;
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public class GenericDivisionImporter implements FxImportExportConstants {
+
+    private static final Log LOG = LogFactory.getLog(GenericDivisionImporter.class);
 
     private static GenericDivisionImporter INSTANCE = new GenericDivisionImporter();
 
@@ -106,5 +120,140 @@ public class GenericDivisionImporter implements FxImportExportConstants {
             throw new FxApplicationException(e, "ex.import.parseInfoFailed", e.getMessage());
         }
         return exportInfo;
+    }
+
+    /**
+     * Wipe all tables of a division
+     *
+     * @param con an open and valid connection for the division to wipe
+     * @throws Exception on errors
+     */
+    public void wipeDivisionData(Connection con) throws Exception {
+        Statement stmt = con.createStatement();
+        dropTableData(stmt, DatabaseConst.TBL_CONTENT_DATA_FT);
+        dropTableData(stmt, DatabaseConst.TBL_CONTENT_DATA);
+        dropTableData(stmt, DatabaseConst.TBL_CONTENT_ACLS);
+        dropTableData(stmt, DatabaseConst.TBL_BINARY_TRANSIT);
+        dropTableData(stmt, DatabaseConst.TBL_SEARCHCACHE_PERM);
+        dropTableData(stmt, DatabaseConst.TBL_SEARCHCACHE_MEMORY);
+        dropTableData(stmt, DatabaseConst.TBL_BRIEFCASE_DATA);
+        dropTableData(stmt, DatabaseConst.TBL_BRIEFCASE);
+        setFieldNull(stmt, DatabaseConst.TBL_TREE + "_LIVE", "PARENT");
+        dropTableData(stmt, DatabaseConst.TBL_TREE + "_LIVE");
+        setFieldNull(stmt, DatabaseConst.TBL_TREE, "PARENT");
+        dropTableData(stmt, DatabaseConst.TBL_TREE);
+        boolean hasFlatStorages = false;
+        for (FxFlatStorageInfo flat : FxFlatStorageManager.getInstance().getFlatStorageInfos()) {
+            hasFlatStorages = true;
+            dropTableData(stmt, flat.getName());
+            dropTable(stmt, flat.getName());
+        }
+        if (hasFlatStorages) {
+            dropTableData(stmt, DatabaseConst.TBL_STRUCT_FLATSTORE_INFO);
+            dropTableData(stmt, DatabaseConst.TBL_STRUCT_FLATSTORE_MAPPING);
+        }
+        dropTableData(stmt, DatabaseConst.TBL_HISTORY);
+        dropTableData(stmt, DatabaseConst.TBL_ACCOUNT_DETAILS);
+        dropTableData(stmt, DatabaseConst.TBL_LOCKS);
+        setFieldNull(stmt, DatabaseConst.TBL_STRUCT_TYPES, "ICON_REF");
+        dropTableData(stmt, DatabaseConst.TBL_CONTENT);
+
+        dropTableData(stmt, DatabaseConst.TBL_ACLS + DatabaseConst.ML);
+        dropTableData(stmt, DatabaseConst.TBL_STRUCT_ASSIGNMENTS + DatabaseConst.ML);
+        dropTableData(stmt, DatabaseConst.TBL_STRUCT_SELECTLIST_ITEM + DatabaseConst.ML);
+        dropTableData(stmt, DatabaseConst.TBL_STRUCT_SELECTLIST + DatabaseConst.ML);
+        dropTableData(stmt, DatabaseConst.TBL_STRUCT_TYPES + DatabaseConst.ML);
+        dropTableData(stmt, DatabaseConst.TBL_STRUCT_GROUPS + DatabaseConst.ML);
+        dropTableData(stmt, DatabaseConst.TBL_STRUCT_PROPERTIES + DatabaseConst.ML);
+        dropTableData(stmt, DatabaseConst.TBL_WORKFLOW_STEPDEFINITION + DatabaseConst.ML);
+
+        dropTableData(stmt, DatabaseConst.TBL_SCRIPT_MAPPING_TYPES);
+        dropTableData(stmt, DatabaseConst.TBL_SCRIPT_MAPPING_ASSIGN);
+        dropTableData(stmt, DatabaseConst.TBL_ROLE_MAPPING);
+
+        dropTableData(stmt, DatabaseConst.TBL_STRUCT_GROUP_OPTIONS);
+        dropTableData(stmt, DatabaseConst.TBL_STRUCT_PROPERTY_OPTIONS);
+        dropTableData(stmt, DatabaseConst.TBL_STRUCT_TYPES_OPTIONS);
+
+        stmt.execute(StorageManager.getStorageImpl().getReferentialIntegrityChecksStatement(false));
+        dropTableData(stmt, DatabaseConst.TBL_STRUCT_ASSIGNMENTS);
+        stmt.execute(StorageManager.getStorageImpl().getReferentialIntegrityChecksStatement(true));
+        dropTableData(stmt, DatabaseConst.TBL_STRUCT_PROPERTIES);
+        dropTableData(stmt, DatabaseConst.TBL_STRUCT_GROUPS);
+        dropTableData(stmt, DatabaseConst.TBL_STRUCT_TYPERELATIONS);
+        setFieldNull(stmt, DatabaseConst.TBL_STRUCT_TYPES, "PARENT");
+        dropTableData(stmt, DatabaseConst.TBL_STRUCT_TYPES);
+        dropTableData(stmt, DatabaseConst.TBL_STRUCT_DATATYPES + DatabaseConst.ML);
+        dropTableData(stmt, DatabaseConst.TBL_STRUCT_DATATYPES);
+
+        dropTableData(stmt, DatabaseConst.TBL_STRUCT_SELECTLIST_ITEM);
+        dropTableData(stmt, DatabaseConst.TBL_STRUCT_SELECTLIST);
+        dropTableData(stmt, DatabaseConst.TBL_SCRIPTS);
+
+        dropTableData(stmt, DatabaseConst.TBL_CONTENT_BINARY);
+
+        dropTableData(stmt, DatabaseConst.TBL_WORKFLOW_ROUTES);
+        dropTableData(stmt, DatabaseConst.TBL_WORKFLOW_STEP);
+        dropTableData(stmt, DatabaseConst.TBL_WORKFLOW_STEPDEFINITION);
+        dropTableData(stmt, DatabaseConst.TBL_WORKFLOW);
+
+        dropTableData(stmt, DatabaseConst.TBL_CONFIG_APPLICATION);
+        dropTableData(stmt, DatabaseConst.TBL_CONFIG_DIVISION);
+        dropTableData(stmt, DatabaseConst.TBL_CONFIG_NODE);
+        dropTableData(stmt, DatabaseConst.TBL_CONFIG_USER);
+
+        dropTableData(stmt, DatabaseConst.TBL_ASSIGN_GROUPS);
+        dropTableData(stmt, DatabaseConst.TBL_ACLS_ASSIGNMENT);
+        dropTableData(stmt, DatabaseConst.TBL_USERGROUPS);
+        dropTableData(stmt, DatabaseConst.TBL_ACLS);
+        dropTableData(stmt, DatabaseConst.TBL_ACCOUNTS);
+        dropTableData(stmt, DatabaseConst.TBL_MANDATORS);
+
+        dropTableData(stmt, DatabaseConst.TBL_LANG + DatabaseConst.ML);
+        dropTableData(stmt, DatabaseConst.TBL_LANG);
+
+        FxFileUtils.removeDirectory(FxBinaryUtils.getBinaryDirectory() + File.separatorChar + String.valueOf(FxContext.get().getDivisionId()));
+        FxFileUtils.removeDirectory(FxBinaryUtils.getTransitDirectory() + File.separatorChar + String.valueOf(FxContext.get().getDivisionId()));
+    }
+
+    /**
+     * Set a column of a table to <code>null</code>
+     *
+     * @param stmt   statement to operate on
+     * @param table  name of the table
+     * @param column name of the column
+     * @throws SQLException on errors
+     */
+    private void setFieldNull(Statement stmt, String table, String column) throws SQLException {
+        int count = stmt.executeUpdate("UPDATE " + table + " SET " + column + "=NULL");
+        LOG.info("Set [" + count + "] entries in [" + table + "." + column + "] to NULL");
+    }
+
+    /**
+     * Drop a table
+     *
+     * @param stmt  statement to operate on
+     * @param table name of the table to drop
+     * @throws SQLException on errors
+     */
+    private void dropTable(Statement stmt, String table) throws SQLException {
+        stmt.executeUpdate("DROP TABLE " + table);
+        LOG.info("Dropped table [" + table + "]");
+    }
+
+    /**
+     * Drop all data of a table
+     *
+     * @param stmt  statement to operate on
+     * @param table name of the table
+     * @throws SQLException on errors
+     */
+    private void dropTableData(Statement stmt, String table) throws SQLException {
+        int count = stmt.executeUpdate("DELETE FROM " + table);
+        LOG.info("Removed [" + count + "] entries from table [" + table + "]");
+    }
+
+    public void importMandators(Connection con, ZipFile zip) throws Exception {
+
     }
 }

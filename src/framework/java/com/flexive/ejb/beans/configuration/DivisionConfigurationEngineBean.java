@@ -32,7 +32,7 @@
 package com.flexive.ejb.beans.configuration;
 
 import com.flexive.core.Database;
-import static com.flexive.core.DatabaseConst.TBL_DIVISION_CONFIG;
+import static com.flexive.core.DatabaseConst.TBL_CONFIG_DIVISION;
 import com.flexive.core.flatstorage.FxFlatStorageInfo;
 import com.flexive.core.flatstorage.FxFlatStorageManager;
 import com.flexive.core.storage.ContentStorage;
@@ -106,7 +106,7 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
         if (!FxContext.getUserTicket().isGlobalSupervisor()) {
             throw new FxNoAccessException("ex.configuration.update.perm.division");
         }
-        String sql = "INSERT INTO " + TBL_DIVISION_CONFIG + " (cpath, ckey, cvalue, className) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO " + TBL_CONFIG_DIVISION + " (cpath, ckey, cvalue, className) VALUES (?, ?, ?, ?)";
         PreparedStatement stmt = conn.prepareStatement(sql);
         stmt.setString(1, path);
         stmt.setString(2, key);
@@ -120,7 +120,7 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
      */
     @Override
     protected PreparedStatement getSelectStatement(Connection conn, String path, String key) throws SQLException {
-        final String sql = "SELECT cvalue FROM " + TBL_DIVISION_CONFIG + " WHERE cpath=? AND ckey=?";
+        final String sql = "SELECT cvalue FROM " + TBL_CONFIG_DIVISION + " WHERE cpath=? AND ckey=?";
         PreparedStatement stmt = conn.prepareStatement(sql);
         stmt.setString(1, path);
         stmt.setString(2, key);
@@ -132,7 +132,7 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
      */
     @Override
     protected PreparedStatement getSelectStatement(Connection conn, String path) throws SQLException {
-        final String sql = "SELECT ckey, cvalue FROM " + TBL_DIVISION_CONFIG + " WHERE cpath=?";
+        final String sql = "SELECT ckey, cvalue FROM " + TBL_CONFIG_DIVISION + " WHERE cpath=?";
         PreparedStatement stmt = conn.prepareStatement(sql);
         stmt.setString(1, path);
         return stmt;
@@ -143,7 +143,7 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
      */
     @Override
     protected PreparedStatement getSelectStatement(Connection conn) throws SQLException {
-        final String sql = "SELECT cpath, ckey, cvalue, className FROM " + TBL_DIVISION_CONFIG;
+        final String sql = "SELECT cpath, ckey, cvalue, className FROM " + TBL_CONFIG_DIVISION;
         return conn.prepareStatement(sql);
     }
 
@@ -156,7 +156,7 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
         if (!FxContext.getUserTicket().isGlobalSupervisor()) {
             throw new FxNoAccessException("ex.configuration.update.perm.division");
         }
-        final String sql = "UPDATE " + TBL_DIVISION_CONFIG + " SET cvalue=?, className=? WHERE cpath=? AND ckey=?";
+        final String sql = "UPDATE " + TBL_CONFIG_DIVISION + " SET cvalue=?, className=? WHERE cpath=? AND ckey=?";
         PreparedStatement stmt = conn.prepareStatement(sql);
         stmt.setString(1, value);
         stmt.setString(2, className);
@@ -174,7 +174,7 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
         if (!FxContext.getUserTicket().isGlobalSupervisor()) {
             throw new FxNoAccessException("ex.configuration.delete.perm.division");
         }
-        final String sql = "DELETE FROM " + TBL_DIVISION_CONFIG + " WHERE cpath=? "
+        final String sql = "DELETE FROM " + TBL_CONFIG_DIVISION + " WHERE cpath=? "
                 + (key != null ? " AND ckey=?" : "");
         PreparedStatement stmt = conn.prepareStatement(sql);
         stmt.setString(1, path);

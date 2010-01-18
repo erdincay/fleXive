@@ -45,7 +45,7 @@ import java.sql.Connection;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
-import static com.flexive.core.DatabaseConst.TBL_SELECTLIST_ITEM;
+import static com.flexive.core.DatabaseConst.TBL_STRUCT_SELECTLIST_ITEM;
 
 /**
  * Database vendor specific storage, common implementations for all storages
@@ -186,8 +186,8 @@ public abstract class GenericDBStorage implements DBStorage {
      */
     @Override
     public String getSelectListItemReferenceFixStatement() {
-        return "UPDATE " + TBL_SELECTLIST_ITEM + " SET PARENTID=? WHERE PARENTID IN (SELECT p.ID FROM " +
-                TBL_SELECTLIST_ITEM + " p WHERE p.LISTID=?)";
+        return "UPDATE " + TBL_STRUCT_SELECTLIST_ITEM + " SET PARENTID=? WHERE PARENTID IN (SELECT p.ID FROM " +
+                TBL_STRUCT_SELECTLIST_ITEM + " p WHERE p.LISTID=?)";
     }
 
     /**
@@ -235,9 +235,6 @@ public abstract class GenericDBStorage implements DBStorage {
             LOG.warn("DB Version mismatch! Current:" + FxSharedUtils.getDBVersion() +
                     ", exported schema:" + exportInfo.getSchemaVersion());
         }
-        System.out.println("export drops:");
-        for (String d : exportInfo.getDrops())
-            System.out.println("Drop: [" + d + "]");
-
+        importer.wipeDivisionData(con);
     }
 }

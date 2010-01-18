@@ -245,7 +245,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             if (rs != null && rs.next())
                 pos = rs.getLong(1);
             ps.close();
-            storeOptions(con, TBL_PROPERTY_OPTIONS, "ID", newPropertyId, null, property.getOptions());
+            storeOptions(con, TBL_STRUCT_PROPERTY_OPTIONS, "ID", newPropertyId, null, property.getOptions());
             sql.setLength(0);
             //create root assignment
             sql.append("INSERT INTO ").append(TBL_STRUCT_ASSIGNMENTS).
@@ -345,7 +345,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             }
         }
         if (changed)
-            storeOptions(con, TBL_GROUP_OPTIONS, "ID", group.getId(), null, group.getOptions());
+            storeOptions(con, TBL_STRUCT_GROUP_OPTIONS, "ID", group.getId(), null, group.getOptions());
         return changed;
     }
 
@@ -373,7 +373,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             }
         }
         if (changed)
-            storeOptions(con, TBL_PROPERTY_OPTIONS, "ID", prop.getId(), null, prop.getOptions());
+            storeOptions(con, TBL_STRUCT_PROPERTY_OPTIONS, "ID", prop.getId(), null, prop.getOptions());
         return changed;
     }
 
@@ -402,7 +402,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             }
         }
         if (changed)
-            storeOptions(con, TBL_GROUP_OPTIONS, "ID", group.getGroup().getId(), group.getId(), group.getOptions());
+            storeOptions(con, TBL_STRUCT_GROUP_OPTIONS, "ID", group.getGroup().getId(), group.getId(), group.getOptions());
         return changed;
     }
 
@@ -431,7 +431,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             }
         }
         if (changed)
-            storeOptions(con, TBL_PROPERTY_OPTIONS, "ID", original.getProperty().getId(), original.getId(), prop.getOptions());
+            storeOptions(con, TBL_STRUCT_PROPERTY_OPTIONS, "ID", original.getProperty().getId(), original.getId(), prop.getOptions());
         return changed;
     }
 
@@ -440,7 +440,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
      * for an FxPropertyAssignment)
      *
      * @param con               the DB connection
-     * @param table             the table name to store the options (e.g. TBL_PROPERTY_OPTIONS)
+     * @param table             the table name to store the options (e.g. TBL_STRUCT_PROPERTY_OPTIONS)
      * @param primaryColumn     the column name of the primary key (where the property Id is stored, e.g. ID)
      * @param primaryId         the primary key itself (the property Id, e.g. FxPropertyAssignment.getProperty().getId())
      * @param assignmentId      the foreign key, may be <code>null</code> (the assignment Id, e.g. FxPropertyAssignment.getId())
@@ -711,7 +711,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             if (rs != null && rs.next())
                 pos = rs.getLong(1);
             ps.close();
-            storeOptions(con, TBL_GROUP_OPTIONS, "ID", newGroupId, null, group.getOptions());
+            storeOptions(con, TBL_STRUCT_GROUP_OPTIONS, "ID", newGroupId, null, group.getOptions());
             sql.setLength(0);
             //create root assignment
             sql.append("INSERT INTO ").append(TBL_STRUCT_ASSIGNMENTS).
@@ -1254,7 +1254,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             }
             htracker.track(group.getAssignedType(), "history.assignment.createGroupAssignment", XPath, group.getAssignedType().getId(), group.getAssignedType().getName(),
                     group.getGroup().getId(), group.getGroup().getName());
-            storeOptions(con, TBL_GROUP_OPTIONS, "ID", group.getGroup().getId(), newAssignmentId, group.getOptions());
+            storeOptions(con, TBL_STRUCT_GROUP_OPTIONS, "ID", group.getGroup().getId(), newAssignmentId, group.getOptions());
             if (group.getBaseAssignmentId() > 0 && createSubAssignments) {
                 FxGroupAssignment baseGroup = (FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment(group.getBaseAssignmentId());
                 for (FxGroupAssignment ga : baseGroup.getAssignedGroups()) {
@@ -1952,7 +1952,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     TBL_STRUCT_ASSIGNMENTS, new String[]{"DESCRIPTION", "HINT"}, "ID", newAssignmentId);
             htracker.track(pa.getAssignedType(), "history.assignment.createPropertyAssignment", XPath, pa.getAssignedType().getId(), pa.getAssignedType().getName(),
                     pa.getProperty().getId(), pa.getProperty().getName());
-            storeOptions(con, TBL_PROPERTY_OPTIONS, "ID", pa.getProperty().getId(), newAssignmentId, pa.getOptions());
+            storeOptions(con, TBL_STRUCT_PROPERTY_OPTIONS, "ID", pa.getProperty().getId(), newAssignmentId, pa.getOptions());
             setAssignmentPosition(con, newAssignmentId, pa.getPosition());
 
             if (!pa.isSystemInternal()) {
@@ -2171,10 +2171,10 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 sql.append("DELETE FROM ").append(TBL_STRUCT_ASSIGNMENTS).append(ML).append(" WHERE ID=?");
                 psML = con.prepareStatement(sql.toString());
                 sql.setLength(0);
-                sql.append("DELETE FROM ").append(TBL_PROPERTY_OPTIONS).append(" WHERE ASSID=?");
+                sql.append("DELETE FROM ").append(TBL_STRUCT_PROPERTY_OPTIONS).append(" WHERE ASSID=?");
                 psPropertyOptionRemove = con.prepareStatement(sql.toString());
                 sql.setLength(0);
-                sql.append("DELETE FROM ").append(TBL_GROUP_OPTIONS).append(" WHERE ASSID=?");
+                sql.append("DELETE FROM ").append(TBL_STRUCT_GROUP_OPTIONS).append(" WHERE ASSID=?");
                 psGroupOptionRemove = con.prepareStatement(sql.toString());
                 sql.setLength(0);
                 sql.append("DELETE FROM ").append(TBL_CONTENT_DATA).append(" WHERE ASSIGN=?");

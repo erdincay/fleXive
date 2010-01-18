@@ -71,7 +71,7 @@ public class NodeConfigurationEngineBean extends CustomDomainConfigurationImpl<S
      * Ctor
      */
     public NodeConfigurationEngineBean() {
-        super("node", DatabaseConst.TBL_NODE_CONFIG, "node_id", true);
+        super("node", DatabaseConst.TBL_CONFIG_NODE, "node_id", true);
     }
 
 

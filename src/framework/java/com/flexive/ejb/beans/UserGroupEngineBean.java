@@ -75,7 +75,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
     public UserGroup load(long groupId) throws FxApplicationException {
         Connection con = null;
         Statement stmt = null;
-        String sql = "SELECT MANDATOR,NAME,COLOR,AUTOMANDATOR,ISSYSTEM FROM " + TBL_GROUP + " WHERE ID=" + groupId;
+        String sql = "SELECT MANDATOR,NAME,COLOR,AUTOMANDATOR,ISSYSTEM FROM " + TBL_USERGROUPS + " WHERE ID=" + groupId;
         try {
 
             // Obtain a database connection
@@ -114,7 +114,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
     public UserGroup loadMandatorGroup(long mandatorId) throws FxApplicationException {
         Connection con = null;
         Statement stmt = null;
-        String sql = "SELECT ID,MANDATOR,NAME,COLOR,AUTOMANDATOR,ISSYSTEM FROM " + TBL_GROUP + " WHERE AUTOMANDATOR=" + mandatorId;
+        String sql = "SELECT ID,MANDATOR,NAME,COLOR,AUTOMANDATOR,ISSYSTEM FROM " + TBL_USERGROUPS + " WHERE AUTOMANDATOR=" + mandatorId;
 
         try {
 
@@ -161,7 +161,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
             stmt = con.createStatement();
 
             //            1  2        3    4     5            6
-            sql = "SELECT ID,MANDATOR,NAME,COLOR,AUTOMANDATOR,ISSYSTEM FROM " + TBL_GROUP +
+            sql = "SELECT ID,MANDATOR,NAME,COLOR,AUTOMANDATOR,ISSYSTEM FROM " + TBL_USERGROUPS +
                     // Never display the dummy NULL group
                     " WHERE ID!=" + UserGroup.GROUP_NULL;
             if (mandatorId != -1)
@@ -237,7 +237,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
             long groupId = seq.getId(FxSystemSequencer.GROUP);
 
             // Create the new group
-            sql = "INSERT INTO " + TBL_GROUP + " " +
+            sql = "INSERT INTO " + TBL_USERGROUPS + " " +
                     "(ID,MANDATOR,AUTOMANDATOR,ISSYSTEM,NAME,COLOR,CREATED_BY,CREATED_AT,MODIFIED_BY,MODIFIED_AT) VALUES (" +
                     "?,?,?,?,?,?,?,?,?,?)";
             final long NOW = System.currentTimeMillis();
@@ -314,7 +314,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
             con = Database.getDbConnection();
 
             // Create the new group
-            sCurSql = "UPDATE " + TBL_GROUP + " SET " +
+            sCurSql = "UPDATE " + TBL_USERGROUPS + " SET " +
                     "NAME=?, COLOR=?, MODIFIED_BY=?, MODIFIED_AT=? " +
                     "WHERE ID=" + groupId;
             final long NOW = System.currentTimeMillis();
@@ -387,19 +387,19 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
 
             // ... delete all roles assigned to this group
             stmt = con.createStatement();
-            sCurSql = "DELETE FROM " + TBL_ASSIGN_ROLES + " WHERE USERGROUP=" + groupId;
+            sCurSql = "DELETE FROM " + TBL_ROLE_MAPPING + " WHERE USERGROUP=" + groupId;
             stmt.executeUpdate(sCurSql);
             stmt.close();
 
             // ... then delete all ACL assignments to this group ..
             stmt = con.createStatement();
-            sCurSql = "DELETE FROM " + TBL_ASSIGN_ACLS + " WHERE USERGROUP=" + groupId;
+            sCurSql = "DELETE FROM " + TBL_ACLS_ASSIGNMENT + " WHERE USERGROUP=" + groupId;
             stmt.executeUpdate(sCurSql);
             stmt.close();
 
             // ... and finally delete the group itself;
             stmt = con.createStatement();
-            sCurSql = "DELETE FROM " + TBL_GROUP + " WHERE ID=" + groupId;
+            sCurSql = "DELETE FROM " + TBL_USERGROUPS + " WHERE ID=" + groupId;
             stmt.executeUpdate(sCurSql);
 
             // Update all active user tickets that are affected
@@ -527,7 +527,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
             con = Database.getDbConnection();
 
             // Delete the old assignments of the user
-            sCurSql = "DELETE FROM " + TBL_ASSIGN_ROLES + " WHERE USERGROUP=" + groupId;
+            sCurSql = "DELETE FROM " + TBL_ROLE_MAPPING + " WHERE USERGROUP=" + groupId;
             stmt = con.createStatement();
             stmt.executeUpdate(sCurSql);
             stmt.close();
@@ -538,7 +538,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
                 if (Role.isUndefined(role)) continue;
 
                 stmt = con.createStatement();
-                sCurSql = "INSERT INTO " + TBL_ASSIGN_ROLES +
+                sCurSql = "INSERT INTO " + TBL_ROLE_MAPPING +
                         " (ACCOUNT,USERGROUP,ROLE) VALUES (" + Account.NULL_ACCOUNT + "," + groupId + "," + role + ")";
                 stmt.executeUpdate(sCurSql);
                 stmt.close();
@@ -604,7 +604,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
     public List<Role> getRoles(long groupId) throws FxApplicationException {
         Connection con = null;
         Statement stmt = null;
-        final String sql = "SELECT DISTINCT ROLE FROM " + TBL_ASSIGN_ROLES + " WHERE USERGROUP=" + groupId;
+        final String sql = "SELECT DISTINCT ROLE FROM " + TBL_ROLE_MAPPING + " WHERE USERGROUP=" + groupId;
 
         // EJBLookup the group
         final UserGroup aGroup = load(groupId);
@@ -666,7 +666,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
             }
             final long NOW = System.currentTimeMillis();
             for (Mandator m : missing) {
-                sql = "INSERT INTO " + TBL_GROUP + " " +
+                sql = "INSERT INTO " + TBL_USERGROUPS + " " +
                         "(ID,MANDATOR,AUTOMANDATOR,ISSYSTEM,NAME,COLOR,CREATED_BY,CREATED_AT,MODIFIED_BY,MODIFIED_AT) VALUES (" +
                         "?,?,?,?,?,?,?,?,?,?)";
                 if (ps == null)

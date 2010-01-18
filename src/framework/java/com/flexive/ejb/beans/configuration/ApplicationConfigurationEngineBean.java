@@ -24,7 +24,7 @@ public class ApplicationConfigurationEngineBean
 
 
     public ApplicationConfigurationEngineBean() {
-        super("application", DatabaseConst.TBL_APPLICATION_CONFIG, "application_id", true);
+        super("application", DatabaseConst.TBL_CONFIG_APPLICATION, "application_id", true);
     }
 
     @Override

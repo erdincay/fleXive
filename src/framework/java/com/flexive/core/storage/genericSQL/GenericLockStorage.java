@@ -34,7 +34,7 @@ package com.flexive.core.storage.genericSQL;
 import com.flexive.core.Database;
 import com.flexive.core.DatabaseConst;
 
-import static com.flexive.core.DatabaseConst.TBL_LOCK;
+import static com.flexive.core.DatabaseConst.TBL_LOCKS;
 
 import com.flexive.core.storage.ContentStorage;
 import com.flexive.core.storage.LockStorage;
@@ -203,7 +203,7 @@ public class GenericLockStorage implements LockStorage {
                 return takeOver(con, currentLock, duration);
             }
             if (obj instanceof FxPK) {
-                ps = con.prepareStatement("INSERT INTO " + TBL_LOCK +
+                ps = con.prepareStatement("INSERT INTO " + TBL_LOCKS +
                         // 1       2                      3       4        5          6
                         " (LOCK_ID,LOCK_VER,LOCK_RESOURCE,USER_ID,LOCKTYPE,CREATED_AT,EXPIRES_AT)VALUES(?,?,NULL,?,?,?,?)");
                 ps.setLong(1, ((FxPK) obj).getId());
@@ -213,7 +213,7 @@ public class GenericLockStorage implements LockStorage {
                 ps.setLong(5, now);
                 ps.setLong(6, now + duration);
             } else {
-                ps = con.prepareStatement("INSERT INTO " + TBL_LOCK +
+                ps = con.prepareStatement("INSERT INTO " + TBL_LOCKS +
                         //                  1             2       3        4          5
                         " (LOCK_ID,LOCK_VER,LOCK_RESOURCE,USER_ID,LOCKTYPE,CREATED_AT,EXPIRES_AT)VALUES(NULL,NULL,?,?,?,?,?)");
                 ps.setString(1, (String) obj);
@@ -289,13 +289,13 @@ public class GenericLockStorage implements LockStorage {
         try {
             if (obj instanceof FxPK) {
                 //                                1       2        3          4
-                ps = con.prepareStatement("SELECT USER_ID,LOCKTYPE,CREATED_AT,EXPIRES_AT FROM " + TBL_LOCK +
+                ps = con.prepareStatement("SELECT USER_ID,LOCKTYPE,CREATED_AT,EXPIRES_AT FROM " + TBL_LOCKS +
                         " WHERE LOCK_ID=? AND LOCK_VER=?");
                 ps.setLong(1, ((FxPK) obj).getId());
                 ps.setInt(2, ((FxPK) obj).getVersion());
             } else {
                 //                                1       2        3          4
-                ps = con.prepareStatement("SELECT USER_ID,LOCKTYPE,CREATED_AT,EXPIRES_AT FROM " + TBL_LOCK +
+                ps = con.prepareStatement("SELECT USER_ID,LOCKTYPE,CREATED_AT,EXPIRES_AT FROM " + TBL_LOCKS +
                         " WHERE LOCK_RESOURCE=?");
                 ps.setString(1, (String) obj);
             }
@@ -306,11 +306,11 @@ public class GenericLockStorage implements LockStorage {
             if (ret.isExpired()) {
                 ps.close();
                 if (ret.isContentLock()) {
-                    ps = con.prepareStatement("DELETE FROM " + TBL_LOCK + " WHERE LOCK_ID=? AND LOCK_VER=?");
+                    ps = con.prepareStatement("DELETE FROM " + TBL_LOCKS + " WHERE LOCK_ID=? AND LOCK_VER=?");
                     ps.setLong(1, ((FxPK) obj).getId());
                     ps.setInt(2, ((FxPK) obj).getVersion());
                 } else {
-                    ps = con.prepareStatement("DELETE FROM " + TBL_LOCK + " WHERE LOCK_RESOURCE=?");
+                    ps = con.prepareStatement("DELETE FROM " + TBL_LOCKS + " WHERE LOCK_RESOURCE=?");
                     ps.setString(1, String.valueOf(obj));
                 }
                 ps.executeUpdate();
@@ -363,11 +363,11 @@ public class GenericLockStorage implements LockStorage {
         try {
             if (currentLock.isContentLock()) {
                 obj = getDistinctPK(con, (FxPK) obj); //make sure to have a distinct pk
-                ps = con.prepareStatement("DELETE FROM " + TBL_LOCK + " WHERE LOCK_ID=? AND LOCK_VER=?");
+                ps = con.prepareStatement("DELETE FROM " + TBL_LOCKS + " WHERE LOCK_ID=? AND LOCK_VER=?");
                 ps.setLong(1, ((FxPK) obj).getId());
                 ps.setInt(2, ((FxPK) obj).getVersion());
             } else {
-                ps = con.prepareStatement("DELETE FROM " + TBL_LOCK + " WHERE LOCK_RESOURCE=?");
+                ps = con.prepareStatement("DELETE FROM " + TBL_LOCKS + " WHERE LOCK_RESOURCE=?");
                 ps.setString(1, String.valueOf(obj));
             }
             ps.executeUpdate();
@@ -398,11 +398,11 @@ public class GenericLockStorage implements LockStorage {
         PreparedStatement ps = null;
         try {
             if (lock.isContentLock()) {
-                ps = con.prepareStatement("UPDATE " + TBL_LOCK + " SET EXPIRES_AT=? WHERE LOCK_ID=? AND LOCK_VER=?");
+                ps = con.prepareStatement("UPDATE " + TBL_LOCKS + " SET EXPIRES_AT=? WHERE LOCK_ID=? AND LOCK_VER=?");
                 ps.setLong(2, lock.getLockedPK().getId());
                 ps.setInt(3, lock.getLockedPK().getVersion());
             } else {
-                ps = con.prepareStatement("UPDATE " + TBL_LOCK + " SET EXPIRES_AT=? WHERE LOCK_RESOURCE=?");
+                ps = con.prepareStatement("UPDATE " + TBL_LOCKS + " SET EXPIRES_AT=? WHERE LOCK_RESOURCE=?");
                 ps.setString(2, lock.getLockedResource());
             }
             ps.setLong(1, lock.getExpiresTimestamp() + duration);
@@ -443,7 +443,7 @@ public class GenericLockStorage implements LockStorage {
             checkEditPermission(con, lock.getLockedPK(), ticket);
         PreparedStatement ps = null;
         try {
-            ps = con.prepareStatement("UPDATE " + TBL_LOCK + " SET USER_ID=?" + (duration > 0 ? ",EXPIRES_AT=?" : "") +
+            ps = con.prepareStatement("UPDATE " + TBL_LOCKS + " SET USER_ID=?" + (duration > 0 ? ",EXPIRES_AT=?" : "") +
                     " WHERE " + (lock.isContentLock() ? "LOCK_ID=? AND LOCK_VER=?" : "LOCK_RESOURCE=?"));
             ps.setLong(1, ticket.getUserId());
             int startIdx = 2;
@@ -478,7 +478,7 @@ public class GenericLockStorage implements LockStorage {
         PreparedStatement ps = null;
         try {
             //                                1        2          3          4       5        6
-            ps = con.prepareStatement("SELECT LOCKTYPE,CREATED_AT,EXPIRES_AT,LOCK_ID,LOCK_VER,LOCK_RESOURCE FROM " + TBL_LOCK + " WHERE USER_ID=?");
+            ps = con.prepareStatement("SELECT LOCKTYPE,CREATED_AT,EXPIRES_AT,LOCK_ID,LOCK_VER,LOCK_RESOURCE FROM " + TBL_LOCKS + " WHERE USER_ID=?");
             ps.setLong(1, userId);
             ResultSet rs = ps.executeQuery();
             while (rs != null && rs.next()) {
@@ -509,7 +509,7 @@ public class GenericLockStorage implements LockStorage {
             userId = ticket.getUserId();
 
         StringBuilder sql = new StringBuilder(500);
-        sql.append("SELECT l.LOCKTYPE,l.CREATED_AT,l.EXPIRES_AT,l.LOCK_ID,l.LOCK_VER,l.LOCK_RESOURCE,l.USER_ID FROM ").append(TBL_LOCK).append(" l");
+        sql.append("SELECT l.LOCKTYPE,l.CREATED_AT,l.EXPIRES_AT,l.LOCK_ID,l.LOCK_VER,l.LOCK_RESOURCE,l.USER_ID FROM ").append(TBL_LOCKS).append(" l");
         boolean hasWhere = false;
         if (typeId >= 0) {
             hasWhere = true;
@@ -574,7 +574,7 @@ public class GenericLockStorage implements LockStorage {
     public void removeExpiredLocks(Connection con) {
         PreparedStatement ps = null;
         try {
-            ps = con.prepareStatement("DELETE FROM " + TBL_LOCK + " WHERE EXPIRES_AT<?");
+            ps = con.prepareStatement("DELETE FROM " + TBL_LOCKS + " WHERE EXPIRES_AT<?");
             ps.setLong(1, System.currentTimeMillis());
             int count = ps.executeUpdate();
             if (count > 0)

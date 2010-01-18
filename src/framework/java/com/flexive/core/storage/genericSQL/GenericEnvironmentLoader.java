@@ -331,7 +331,7 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
      * @throws SQLException on errors
      */
     private Map<Long, List<FxStructureOption>> loadAllGroupAssignmentOptions(Connection con) throws SQLException {
-        return loadAllOptions(con, "ASSID", "ASSID IS NOT NULL", TBL_GROUP_OPTIONS);
+        return loadAllOptions(con, "ASSID", "ASSID IS NOT NULL", TBL_STRUCT_GROUP_OPTIONS);
     }
 
     /**
@@ -342,15 +342,15 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
      * @throws SQLException on errors
      */
     private Map<Long, List<FxStructureOption>> loadAllGroupOptions(Connection con) throws SQLException {
-        return loadAllOptions(con, "ID", "ASSID IS NULL", TBL_GROUP_OPTIONS);
+        return loadAllOptions(con, "ID", "ASSID IS NULL", TBL_STRUCT_GROUP_OPTIONS);
     }
 
     private Map<Long, List<FxStructureOption>> loadAllPropertyAssignmentOptions(Connection con) throws SQLException {
-        return loadAllOptions(con, "ASSID", "ASSID IS NOT NULL", TBL_PROPERTY_OPTIONS);
+        return loadAllOptions(con, "ASSID", "ASSID IS NOT NULL", TBL_STRUCT_PROPERTY_OPTIONS);
     }
 
     private Map<Long, List<FxStructureOption>> loadAllPropertyOptions(Connection con) throws SQLException {
-        return loadAllOptions(con, "ID", "ASSID IS NULL", TBL_PROPERTY_OPTIONS);
+        return loadAllOptions(con, "ID", "ASSID IS NULL", TBL_STRUCT_PROPERTY_OPTIONS);
     }
 
     private Map<Long, List<FxStructureOption>> loadAllOptions(Connection con, String idColumn, String whereClause, String table) throws SQLException {
@@ -571,9 +571,9 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
             // Read all stepDefinitions from the database
             stmt = con.createStatement();
             //                                             1  2    3
-            final ResultSet rs = stmt.executeQuery("SELECT ID,NAME,UNIQUE_TARGET FROM " + TBL_STEPDEFINITION + " ORDER BY ID");
+            final ResultSet rs = stmt.executeQuery("SELECT ID,NAME,UNIQUE_TARGET FROM " + TBL_WORKFLOW_STEPDEFINITION + " ORDER BY ID");
             ArrayList<StepDefinition> tmp = new ArrayList<StepDefinition>(10);
-            final Map<Long, FxString[]> labels = Database.loadFxStrings(con, TBL_STEPDEFINITION, "name");
+            final Map<Long, FxString[]> labels = Database.loadFxStrings(con, TBL_WORKFLOW_STEPDEFINITION, "name");
 
             // Build the result array set
             while (rs != null && rs.next()) {
@@ -601,7 +601,7 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
         Statement stmt = null;
         //                                      1      2               3                4
         final String sql = "SELECT DISTINCT stp.ID, stp.WORKFLOW, stp.STEPDEF,stp.ACL " +
-                "FROM " + TBL_STEP + " stp ORDER BY stp.ID";
+                "FROM " + TBL_WORKFLOW_STEP + " stp ORDER BY stp.ID";
         try {
             // Load all steps in the database
             stmt = con.createStatement();
@@ -625,7 +625,7 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
     public List<Route> loadRoutes(Connection con, int workflowId) throws FxLoadException {
         //                             1     2               3             4
         final String sql = "SELECT ro.ID,ro.FROM_STEP,ro.TO_STEP,ro.USERGROUP " +
-                "FROM " + TBL_ROUTES + " ro, " + TBL_STEP + " stp " +
+                "FROM " + TBL_WORKFLOW_ROUTES + " ro, " + TBL_WORKFLOW_STEP + " stp " +
                 "WHERE ro.TO_STEP=stp.ID AND stp.WORKFLOW=" + workflowId + " " +
                 "ORDER BY ro.USERGROUP ASC";
 
@@ -760,12 +760,12 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
         String sql;
         List<FxSelectList> lists = new ArrayList<FxSelectList>(10);
         try {
-            final Map<Long, FxString[]> translations = Database.loadFxStrings(con, TBL_SELECTLIST, "LABEL", "DESCRIPTION");
-            final Map<Long, FxString[]> itemTranslations = Database.loadFxStrings(con, TBL_SELECTLIST_ITEM, "LABEL");
+            final Map<Long, FxString[]> translations = Database.loadFxStrings(con, TBL_STRUCT_SELECTLIST, "LABEL", "DESCRIPTION");
+            final Map<Long, FxString[]> itemTranslations = Database.loadFxStrings(con, TBL_STRUCT_SELECTLIST_ITEM, "LABEL");
 
             //            1  2        3    4                 5               6            7            8     9
             sql = "SELECT ID,PARENTID,NAME,ALLOW_ITEM_CREATE,ACL_CREATE_ITEM,ACL_ITEM_NEW,DEFAULT_ITEM,BCSEP,SAMELVLSELECT FROM " +
-                    TBL_SELECTLIST + " ORDER BY NAME";
+                    TBL_STRUCT_SELECTLIST + " ORDER BY NAME";
             ps = con.prepareStatement(sql);
             ResultSet rs = ps.executeQuery();
             while (rs != null && rs.next()) {
@@ -788,7 +788,7 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
             ps.close();
             //            1  2    3   4        5    6     7          8          9           10          11      12       13
             sql = "SELECT ID,NAME,ACL,PARENTID,DATA,COLOR,CREATED_BY,CREATED_AT,MODIFIED_BY,MODIFIED_AT,DBIN_ID,DBIN_VER,DBIN_QUALITY FROM " +
-                    TBL_SELECTLIST_ITEM + " WHERE LISTID=? ORDER BY POS,ID";
+                    TBL_STRUCT_SELECTLIST_ITEM + " WHERE LISTID=? ORDER BY POS,ID";
             ps = con.prepareStatement(sql);
             for (FxSelectList list : lists) {
                 ps.setLong(1, list.getId());

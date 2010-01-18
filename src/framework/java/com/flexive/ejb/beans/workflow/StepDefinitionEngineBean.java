@@ -34,7 +34,7 @@ package com.flexive.ejb.beans.workflow;
 import com.flexive.core.Database;
 import com.flexive.core.storage.StorageManager;
 import static com.flexive.core.DatabaseConst.ML;
-import static com.flexive.core.DatabaseConst.TBL_STEPDEFINITION;
+import static com.flexive.core.DatabaseConst.TBL_WORKFLOW_STEPDEFINITION;
 import com.flexive.core.structure.StructureLoader;
 import com.flexive.shared.CacheAdmin;
 import static com.flexive.shared.CacheAdmin.getEnvironment;
@@ -185,7 +185,7 @@ public class StepDefinitionEngineBean implements StepDefinitionEngine, StepDefin
             con = Database.getDbConnection();
 
             // Create the new workflow instance
-            sql = "INSERT INTO " + TBL_STEPDEFINITION + " (ID,NAME,UNIQUE_TARGET) VALUES (?,?,?)";
+            sql = "INSERT INTO " + TBL_WORKFLOW_STEPDEFINITION + " (ID,NAME,UNIQUE_TARGET) VALUES (?,?,?)";
             ps = con.prepareStatement(sql);
             newId = seq.getId(FxSystemSequencer.STEPDEFINITION);
             ps.setLong(1, newId);
@@ -197,7 +197,7 @@ public class StepDefinitionEngineBean implements StepDefinitionEngine, StepDefin
             }
             if (ps.executeUpdate() != 1)
                 throw new FxCreateException(LOG, "ex.stepdefinition.create");
-            Database.storeFxString(label, con, TBL_STEPDEFINITION, "name", "id", newId);
+            Database.storeFxString(label, con, TBL_WORKFLOW_STEPDEFINITION, "name", "id", newId);
             success = true;
         } catch (FxInvalidParameterException exc) {
             throw exc;
@@ -269,10 +269,10 @@ public class StepDefinitionEngineBean implements StepDefinitionEngine, StepDefin
             con = Database.getDbConnection();
 
             // store label
-            Database.storeFxString(stepDefinition.getLabel(), con, TBL_STEPDEFINITION,
+            Database.storeFxString(stepDefinition.getLabel(), con, TBL_WORKFLOW_STEPDEFINITION,
                     "name", "id", stepDefinition.getId());
 
-            sql = "UPDATE " + TBL_STEPDEFINITION + " SET NAME=?,UNIQUE_TARGET=? WHERE ID=?";
+            sql = "UPDATE " + TBL_WORKFLOW_STEPDEFINITION + " SET NAME=?,UNIQUE_TARGET=? WHERE ID=?";
             stmt = con.prepareStatement(sql);
             stmt.setString(1, stepDefinition.getName());
             if (stepDefinition.getUniqueTargetId() != -1) {
@@ -370,9 +370,9 @@ public class StepDefinitionEngineBean implements StepDefinitionEngine, StepDefin
 
             // Read all stepDefinitions from the database
             stmt = con.createStatement();
-            sql = "DELETE FROM " + TBL_STEPDEFINITION + ML + " WHERE ID=" + id;
+            sql = "DELETE FROM " + TBL_WORKFLOW_STEPDEFINITION + ML + " WHERE ID=" + id;
             stmt.executeUpdate(sql);
-            sql = "SELECT COUNT(*) FROM " + TBL_STEPDEFINITION + " WHERE UNIQUE_TARGET=" + id;
+            sql = "SELECT COUNT(*) FROM " + TBL_WORKFLOW_STEPDEFINITION + " WHERE UNIQUE_TARGET=" + id;
             ResultSet rs = stmt.executeQuery(sql);
             rs.next();
             if (rs.getInt(1) > 0) {
@@ -380,7 +380,7 @@ public class StepDefinitionEngineBean implements StepDefinitionEngine, StepDefin
                 LOG.error(dbe);
                 throw dbe;
             }
-            sql = "DELETE FROM " + TBL_STEPDEFINITION + " WHERE ID=" + id;
+            sql = "DELETE FROM " + TBL_WORKFLOW_STEPDEFINITION + " WHERE ID=" + id;
             if (stmt.executeUpdate(sql) == 0) {
                 FxEntryInUseException eiu = new FxEntryInUseException("ex.stepdefinition.load.notFound");
                 if (LOG.isInfoEnabled()) LOG.info(eiu);

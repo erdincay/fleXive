@@ -55,7 +55,7 @@ import java.sql.ResultSet;
 public class UserConfigurationEngineBean extends CustomDomainConfigurationImpl<Long> implements UserConfigurationEngine, UserConfigurationEngineLocal {
 
     public UserConfigurationEngineBean() {
-        super("user", DatabaseConst.TBL_USER_CONFIG, "user_id", true);
+        super("user", DatabaseConst.TBL_CONFIG_USER, "user_id", true);
     }
 
     @Override

@@ -33,8 +33,8 @@ package com.flexive.ejb.beans.workflow;
 
 import com.flexive.core.Database;
 import com.flexive.core.storage.StorageManager;
-import static com.flexive.core.DatabaseConst.TBL_ROUTES;
-import static com.flexive.core.DatabaseConst.TBL_STEP;
+import static com.flexive.core.DatabaseConst.TBL_WORKFLOW_ROUTES;
+import static com.flexive.core.DatabaseConst.TBL_WORKFLOW_STEP;
 import com.flexive.core.structure.StructureLoader;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxContext;
@@ -90,10 +90,10 @@ public class RouteEngineBean implements RouteEngine, RouteEngineLocal {
             con = Database.getDbConnection();
             stmt = con.createStatement();
             if (ticket.isMandatorSupervisor() || ticket.isGlobalSupervisor()) {
-                sql = "SELECT ID FROM " + TBL_STEP + "  WHERE WORKFLOW="
+                sql = "SELECT ID FROM " + TBL_WORKFLOW_STEP + "  WHERE WORKFLOW="
                         + step.getWorkflowId() + " AND ID!=" + fromStep;
             } else {
-                sql = "SELECT DISTINCT TO_STEP FROM " + TBL_ROUTES + " WHERE FROM_STEP=" + fromStep
+                sql = "SELECT DISTINCT TO_STEP FROM " + TBL_WORKFLOW_ROUTES + " WHERE FROM_STEP=" + fromStep
                         + " AND USERGROUP IN (" + StringUtils.join(ArrayUtils.toObject(ticket.getGroups()), ',') + ")";
             }
             ResultSet rs = stmt.executeQuery(sql);
@@ -154,7 +154,7 @@ public class RouteEngineBean implements RouteEngine, RouteEngineLocal {
             // Create the new route
             stmt = con.createStatement();
             long routeId = seq.getId(FxSystemSequencer.ROUTE);
-            sql = "INSERT INTO " + TBL_ROUTES + " (ID,FROM_STEP,TO_STEP,USERGROUP) VALUES ("
+            sql = "INSERT INTO " + TBL_WORKFLOW_ROUTES + " (ID,FROM_STEP,TO_STEP,USERGROUP) VALUES ("
                     + routeId + "," + fromStep.getId() + "," + toStep.getId() + "," + groupId + ")";
             stmt.executeUpdate(sql);
 
@@ -190,7 +190,7 @@ public class RouteEngineBean implements RouteEngine, RouteEngineLocal {
         // Create the new step
         Connection con = null;
         PreparedStatement stmt = null;
-        final String sql = "DELETE FROM " + TBL_ROUTES + " WHERE ID=?";
+        final String sql = "DELETE FROM " + TBL_WORKFLOW_ROUTES + " WHERE ID=?";
         boolean success = false;
         try {
             // Obtain a database connection

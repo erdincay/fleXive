@@ -898,7 +898,7 @@ public class PropertyEntry {
             case LargeNumber:
                 if ("STEP".equals(column)) {
                     // filter by workflow step definition, not internal step ID
-                    column = "(SELECT sd.stepdef FROM " + DatabaseConst.TBL_STEP + " sd " +
+                    column = "(SELECT sd.stepdef FROM " + DatabaseConst.TBL_WORKFLOW_STEP + " sd " +
                             " WHERE sd.id=cd." + column + ")";
                 }
                 if ("TDEF".equals(column) && FxSharedUtils.isQuoted(constantValue, '\'')) {

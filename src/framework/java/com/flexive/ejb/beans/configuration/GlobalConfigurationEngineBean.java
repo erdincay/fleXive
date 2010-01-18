@@ -33,7 +33,7 @@ package com.flexive.ejb.beans.configuration;
 
 import com.flexive.core.Database;
 import com.flexive.core.DatabaseConst;
-import static com.flexive.core.DatabaseConst.TBL_GLOBAL_CONFIG;
+import static com.flexive.core.DatabaseConst.TBL_CONFIG_GLOBAL;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.ejb.mbeans.FxCache;
 import com.flexive.shared.*;
@@ -165,14 +165,14 @@ public class GlobalConfigurationEngineBean extends GenericConfigurationImpl impl
         try {
             if (StorageManager.getStorageImpl(con.getMetaData().getDatabaseProductName()).requiresConfigSchema()) {
                 if (DatabaseConst.getConfigSchema().endsWith("."))
-                    return DatabaseConst.getConfigSchema() + TBL_GLOBAL_CONFIG;
+                    return DatabaseConst.getConfigSchema() + TBL_CONFIG_GLOBAL;
                 else
-                    return DatabaseConst.getConfigSchema() + "." + TBL_GLOBAL_CONFIG;
+                    return DatabaseConst.getConfigSchema() + "." + TBL_CONFIG_GLOBAL;
             }
         } catch (SQLException e) {
             LOG.warn(e);
         }
-        return TBL_GLOBAL_CONFIG;
+        return TBL_CONFIG_GLOBAL;
     }
 
     /**

@@ -240,7 +240,7 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
             con = Database.getDbConnection();
 
             // Delete all ACLAssignments
-            curSql = "DELETE FROM " + TBL_ASSIGN_ACLS + " WHERE ACL=" + id;
+            curSql = "DELETE FROM " + TBL_ACLS_ASSIGNMENT + " WHERE ACL=" + id;
             stmt = con.prepareStatement(curSql);
             stmt.executeUpdate();
             stmt.close();
@@ -360,14 +360,14 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
             final List<Long> affectedUserGroupIds = new ArrayList<Long>();
             if (!keepAssignment) {
                 //remove assignments
-                curSql = "DELETE FROM " + TBL_ASSIGN_ACLS + " WHERE ACL=?";
+                curSql = "DELETE FROM " + TBL_ACLS_ASSIGNMENT + " WHERE ACL=?";
                 stmt = con.prepareStatement(curSql);
                 stmt.setLong(1, theACL.getId());
                 stmt.executeUpdate();
                 if (assignments.size() > 0) {
                     stmt.close();
                     //                                             1          2    3      4        5        6     7      8
-                    curSql = "INSERT INTO " + TBL_ASSIGN_ACLS + " (USERGROUP, ACL, PEDIT, PREMOVE, PEXPORT, PREL, PREAD, PCREATE, " +
+                    curSql = "INSERT INTO " + TBL_ACLS_ASSIGNMENT + " (USERGROUP, ACL, PEDIT, PREMOVE, PEXPORT, PREL, PREAD, PCREATE, " +
                             //9          10          11           12
                             "CREATED_BY, CREATED_AT, MODIFIED_BY, MODIFIED_AT) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
                     stmt = con.prepareStatement(curSql);
@@ -521,14 +521,14 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
             con = Database.getDbConnection();
 
             // Delete any old assignments
-            curSql = "DELETE FROM " + TBL_ASSIGN_ACLS + " WHERE USERGROUP=" + groupId + " AND ACL=" + aclId;
+            curSql = "DELETE FROM " + TBL_ACLS_ASSIGNMENT + " WHERE USERGROUP=" + groupId + " AND ACL=" + aclId;
             stmt = con.prepareStatement(curSql);
             int ucount = stmt.executeUpdate();
             stmt.close();
             if (LOG.isDebugEnabled())
                 LOG.debug("Deleted assignments group[" + groupId + "]-acl[" + aclId + "]:" + ucount);
 
-            curSql = "INSERT INTO " + TBL_ASSIGN_ACLS +
+            curSql = "INSERT INTO " + TBL_ACLS_ASSIGNMENT +
                     //1         2   3     4     5       6       7       8     9          10         11          12
                     "(USERGROUP,ACL,PREAD,PEDIT,PREMOVE,PCREATE,PEXPORT,PREL,CREATED_AT,CREATED_BY,MODIFIED_AT,MODIFIED_BY)" +
                     " VALUES " +
@@ -635,7 +635,7 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
             con = Database.getDbConnection();
 
             // Delete any old assignments
-            curSql = "DELETE FROM " + TBL_ASSIGN_ACLS + " WHERE USERGROUP=" + groupId + " AND ACL=" + aclId;
+            curSql = "DELETE FROM " + TBL_ACLS_ASSIGNMENT + " WHERE USERGROUP=" + groupId + " AND ACL=" + aclId;
             stmt = con.createStatement();
             if (stmt.executeUpdate(curSql) == 0)
                 throw new FxNotFoundException(LOG, "ex.aclAssignment.notFound", aclId, groupId);
@@ -705,7 +705,7 @@ public class ACLEngineBean implements ACLEngine, ACLEngineLocal {
             curSql = "SELECT ass.USERGROUP,ass.ACL,ass.PREAD,ass.PEDIT,ass.PREMOVE,ass.PEXPORT,ass.PREL," +
                     //   8        ,      9        10             11             12              13
                     "ass.PCREATE,acl.CAT_TYPE,ass.CREATED_BY,ass.CREATED_AT,ass.MODIFIED_BY,ass.MODIFIED_AT " +
-                    "FROM " + TBL_ASSIGN_ACLS + " ass, " + TBL_ACLS + " acl WHERE " +
+                    "FROM " + TBL_ACLS_ASSIGNMENT + " ass, " + TBL_ACLS + " acl WHERE " +
                     "ass.ACL=acl.ID AND " +
                     ((groupId != null) ? "USERGROUP=" + groupId : "") +
                     ((groupId != null && aclId != null) ? " AND " : "") +
