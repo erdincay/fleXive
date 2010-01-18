@@ -236,5 +236,11 @@ public abstract class GenericDBStorage implements DBStorage {
                     ", exported schema:" + exportInfo.getSchemaVersion());
         }
         importer.wipeDivisionData(con);
+        importer.importLanguages(con, zip);
+        importer.importMandators(con, zip);
+        importer.importSecurity(con, zip);
+        importer.importWorkflows(con, zip);
+        importer.importConfigurations(con, zip);
+        importer.importStructures(con, zip);
     }
 }

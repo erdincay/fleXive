@@ -31,6 +31,7 @@
  ***************************************************************/
 package com.flexive.core.storage;
 
+import com.flexive.core.Database;
 import com.flexive.core.DatabaseConst;
 import com.flexive.core.flatstorage.FxFlatStorageInfo;
 import com.flexive.core.flatstorage.FxFlatStorageManager;
@@ -42,18 +43,28 @@ import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.impex.FxDivisionExportInfo;
 import com.flexive.shared.impex.FxImportExportConstants;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathFactory;
 import java.io.File;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.math.BigDecimal;
+import java.sql.*;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -68,6 +79,8 @@ public class GenericDivisionImporter implements FxImportExportConstants {
 
     private static GenericDivisionImporter INSTANCE = new GenericDivisionImporter();
 
+    private static boolean DBG = false;
+
     /**
      * Getter for the importer singleton
      *
@@ -78,6 +91,21 @@ public class GenericDivisionImporter implements FxImportExportConstants {
     }
 
     /**
+     * Get a file from the zip archive
+     *
+     * @param zip  zip archive containing the file
+     * @param file name of the file
+     * @return ZipEntry
+     * @throws FxNotFoundException if the archive does not contain the file
+     */
+    private ZipEntry getZipEntry(ZipFile zip, String file) throws FxNotFoundException {
+        ZipEntry ze = zip.getEntry(file);
+        if (ze == null)
+            throw new FxNotFoundException("ex.import.missingFile", file, zip.getName());
+        return ze;
+    }
+
+    /**
      * Get division export information from an exported archive
      *
      * @param zip zip file containing the export
@@ -85,9 +113,7 @@ public class GenericDivisionImporter implements FxImportExportConstants {
      * @throws FxApplicationException on errors
      */
     public FxDivisionExportInfo getDivisionExportInfo(ZipFile zip) throws FxApplicationException {
-        ZipEntry ze = zip.getEntry(FILE_BUILD_INFOS);
-        if (ze == null)
-            throw new FxNotFoundException("ex.import.missingFile", FILE_BUILD_INFOS, zip.getName());
+        ZipEntry ze = getZipEntry(zip, FILE_BUILD_INFOS);
         FxDivisionExportInfo exportInfo;
         try {
             DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
@@ -253,7 +279,493 @@ public class GenericDivisionImporter implements FxImportExportConstants {
         LOG.info("Removed [" + count + "] entries from table [" + table + "]");
     }
 
-    public void importMandators(Connection con, ZipFile zip) throws Exception {
+    /**
+     * Helper class to keep information about columns in a prepared statement
+     */
+    class ColumnInfo {
+        ColumnInfo(int columnType, int index) {
+            this.columnType = columnType;
+            this.index = index;
+        }
 
+        int columnType;
+        int index;
+    }
+
+
+    /**
+     * Import data from a zip archive to a database table
+     *
+     * @param stmt  statement to use
+     * @param zip   zip archive containing the zip entry
+     * @param ze    zip entry within the archive
+     * @param xpath xpath containing the entries to import
+     * @param table name of the table
+     * @throws Exception on errors
+     */
+    private void importTable(Statement stmt, final ZipFile zip, final ZipEntry ze, final String xpath, final String table) throws Exception {
+        importTable(stmt, zip, ze, xpath, table, true, false);
+    }
+
+    /**
+     * Import data from a zip archive to a database table
+     *
+     * @param stmt               statement to use
+     * @param zip                zip archive containing the zip entry
+     * @param ze                 zip entry within the archive
+     * @param xpath              xpath containing the entries to import
+     * @param table              name of the table
+     * @param executeInsertPhase execute the insert phase?
+     * @param executeUpdatePhase execute the update phase?
+     * @param updateColumns      columns that should be set to <code>null</code> in a first pass (insert) and updated to the provided values in a second pass (update)
+     * @throws Exception on errors
+     */
+    private void importTable(Statement stmt, final ZipFile zip, final ZipEntry ze, final String xpath, final String table,
+                             final boolean executeInsertPhase, final boolean executeUpdatePhase, final String... updateColumns) throws Exception {
+        //analyze the table
+        final ResultSet rs = stmt.executeQuery("SELECT * FROM " + table + " WHERE 1=2");
+        StringBuilder sbInsert = new StringBuilder(500);
+        StringBuilder sbUpdate = updateColumns.length > 0 ? new StringBuilder(500) : null;
+        if (rs == null)
+            throw new IllegalArgumentException("Can not analyze table [" + table + "]!");
+        sbInsert.append("INSERT INTO ").append(table).append(" (");
+        if (sbUpdate != null) {
+            sbUpdate.append("UPDATE ").append(table).append(" SET ");
+            for (int i = 0; i < updateColumns.length; i++) {
+                if (i > 0)
+                    sbUpdate.append(',');
+                sbUpdate.append(updateColumns[i]).append("=?");
+            }
+            sbUpdate.append(" WHERE ");
+        }
+        final ResultSetMetaData md = rs.getMetaData();
+        final Map<String, ColumnInfo> insertColumns = new HashMap<String, ColumnInfo>(md.getColumnCount());
+        final Map<String, ColumnInfo> updateClauseColumns = updateColumns.length > 0 ? new HashMap<String, ColumnInfo>(md.getColumnCount()) : null;
+        final Map<String, ColumnInfo> updateSetColumns = updateColumns.length > 0 ? new HashMap<String, ColumnInfo>(md.getColumnCount()) : null;
+        int insertIndex = 1;
+        int updateSetIndex = 1;
+        int updateClauseIndex = 1;
+        boolean first = true;
+        for (int i = 0; i < md.getColumnCount(); i++) {
+            final String currCol = md.getColumnName(i + 1).toLowerCase();
+            if (updateColumns.length > 0) {
+                boolean abort = false;
+                for (String col : updateColumns) {
+                    if (currCol.equals(col)) {
+                        abort = true;
+                        updateSetColumns.put(currCol, new ColumnInfo(md.getColumnType(i + 1), updateSetIndex++));
+                        break;
+                    }
+                }
+                if (abort)
+                    continue;
+            }
+            if (first) {
+                first = false;
+            } else
+                sbInsert.append(',');
+            sbInsert.append(currCol);
+            insertColumns.put(currCol, new ColumnInfo(md.getColumnType(i + 1), insertIndex++));
+            if (updateColumns.length > 0) {
+                updateClauseColumns.put(currCol, new ColumnInfo(md.getColumnType(i + 1), updateClauseIndex++));
+                sbUpdate.append(currCol).append("=? AND ");
+            }
+        }
+        if (updateColumns.length > 0) {
+            sbUpdate.delete(sbUpdate.length() - 5, sbUpdate.length()); //remove trailing " AND "
+            //"shift" clause indices
+            for (String col : updateClauseColumns.keySet()) {
+                GenericDivisionImporter.ColumnInfo ci = updateClauseColumns.get(col);
+                ci.index += (updateSetIndex - 1);
+            }
+        }
+        sbInsert.append(")VALUES(");
+        for (int i = 0; i < md.getColumnCount() - updateColumns.length; i++) {
+            if (i > 0)
+                sbInsert.append(',');
+            sbInsert.append('?');
+        }
+        sbInsert.append(')');
+        if (DBG) {
+            LOG.info("Insert statement:\n" + sbInsert.toString());
+            if (updateColumns.length > 0)
+                LOG.info("Update statement:\n" + sbUpdate.toString());
+        }
+        final PreparedStatement psInsert = stmt.getConnection().prepareStatement(sbInsert.toString());
+        final PreparedStatement psUpdate = updateColumns.length > 0 ? stmt.getConnection().prepareStatement(sbUpdate.toString()) : null;
+        try {
+            final SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
+            final DefaultHandler handler = new DefaultHandler() {
+                private String currentElement = null;
+                private Map<String, String> data = new HashMap<String, String>(10);
+                private StringBuilder sbData = new StringBuilder(10000);
+                boolean inTag = false;
+                boolean inElement = false;
+                int counter;
+                List<String> path = new ArrayList<String>(10);
+                StringBuilder currPath = new StringBuilder(100);
+                boolean insertMode = true;
+
+
+                /**
+                 * {@inheritDoc}
+                 */
+                @Override
+                public void startDocument() throws SAXException {
+                    counter = 0;
+                    inTag = false;
+                    inElement = false;
+                    path.clear();
+                    currPath.setLength(0);
+                    sbData.setLength(0);
+                    data.clear();
+                    currentElement = null;
+                }
+
+                /**
+                 * {@inheritDoc}
+                 */
+                @Override
+                public void processingInstruction(String target, String data) throws SAXException {
+                    if (target != null && target.startsWith("fx_")) {
+                        if (target.equals("fx_mode"))
+                            insertMode = "insert".equals(data);
+                    } else
+                        super.processingInstruction(target, data);
+                }
+
+                /**
+                 * {@inheritDoc}
+                 */
+                @Override
+                public void endDocument() throws SAXException {
+                    if (insertMode)
+                        LOG.info("Inserted [" + counter + "] entries into [" + table + "] for xpath [" + xpath + "]");
+                    else
+                        LOG.info("Updated [" + counter + "] entries in [" + table + "] for xpath [" + xpath + "]");
+                }
+
+                /**
+                 * {@inheritDoc}
+                 */
+                @Override
+                public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+                    pushPath(qName);
+                    if (currPath.toString().equals(xpath)) {
+                        inTag = true;
+                        data.clear();
+                        for (int i = 0; i < attributes.getLength(); i++) {
+                            data.put(attributes.getLocalName(i), attributes.getValue(i));
+                        }
+                    } else {
+                        currentElement = qName;
+                    }
+                    inElement = true;
+                    sbData.setLength(0);
+                }
+
+                /**
+                 * Push a path element from the stack
+                 *
+                 * @param qName element name to push
+                 */
+                private void pushPath(String qName) {
+                    path.add(qName);
+                    buildPath();
+                }
+
+                /**
+                 * Pop the top path element from the stack
+                 */
+                private void popPath() {
+                    path.remove(path.size() - 1);
+                    buildPath();
+                }
+
+                /**
+                 * Rebuild the current path
+                 */
+                private synchronized void buildPath() {
+                    currPath.setLength(0);
+                    for (String s : path)
+                        currPath.append(s).append('/');
+                    if (currPath.length() > 1)
+                        currPath.delete(currPath.length() - 1, currPath.length());
+//                    System.out.println("currPath: " + currPath);
+                }
+
+                /**
+                 * {@inheritDoc}
+                 */
+                @Override
+                public void endElement(String uri, String localName, String qName) throws SAXException {
+                    if (currPath.toString().equals(xpath)) {
+                        if (DBG) LOG.info("Insert [" + xpath + "]: [" + data + "]");
+                        inTag = false;
+                        try {
+                            if (insertMode) {
+                                if (executeInsertPhase) {
+                                    processColumnSet(insertColumns, psInsert);
+                                    counter += psInsert.executeUpdate();
+                                }
+                            } else {
+                                if (executeUpdatePhase) {
+                                    if (processColumnSet(updateSetColumns, psUpdate)) {
+                                        processColumnSet(updateClauseColumns, psUpdate);
+                                        counter += psUpdate.executeUpdate();
+                                    }
+                                }
+                            }
+                        } catch (SQLException e) {
+                            throw new SAXException(e);
+                        } catch (ParseException e) {
+                            throw new SAXException(e);
+                        }
+                    } else {
+                        if (inTag) {
+                            data.put(currentElement, sbData.toString());
+                        }
+                        currentElement = null;
+                    }
+                    popPath();
+                    inElement = false;
+                    sbData.setLength(0);
+                }
+
+                /**
+                 * Process a column set
+                 *
+                 * @param columns the columns to process
+                 * @param ps prepared statement to use
+                 * @return if data other than <code>null</code> has been set
+                 * @throws SQLException on errors
+                 * @throws ParseException on date/time conversion errors
+                 */
+                private boolean processColumnSet(Map<String, ColumnInfo> columns, PreparedStatement ps) throws SQLException, ParseException {
+                    boolean dataSet = false;
+                    for (String col : columns.keySet()) {
+                        ColumnInfo ci = columns.get(col);
+                        String value = StringEscapeUtils.unescapeXml(data.get(col));
+
+                        if (value == null)
+                            ps.setNull(ci.index, ci.columnType);
+                        else {
+                            dataSet = true;
+                            switch (ci.columnType) {
+                                case Types.BIGINT:
+                                    if (DBG) LOG.info("BigInt " + ci.index + "->" + new BigDecimal(value));
+                                    ps.setBigDecimal(ci.index, new BigDecimal(value));
+                                    break;
+                                case java.sql.Types.DOUBLE:
+                                    if (DBG) LOG.info("Double " + ci.index + "->" + Double.parseDouble(value));
+                                    ps.setDouble(ci.index, Double.parseDouble(value));
+                                    break;
+                                case java.sql.Types.FLOAT:
+                                    if (DBG) LOG.info("Float " + ci.index + "->" + Float.parseFloat(value));
+                                    ps.setFloat(ci.index, Float.parseFloat(value));
+                                    break;
+                                case java.sql.Types.TIMESTAMP:
+                                case java.sql.Types.DATE:
+                                    if (DBG)
+                                        LOG.info("Timestamp/Date " + ci.index + "->" + FxFormatUtils.getDateTimeFormat().parse(value));
+                                    ps.setTimestamp(ci.index, new Timestamp(FxFormatUtils.getDateTimeFormat().parse(value).getTime()));
+                                    break;
+                                case Types.TINYINT:
+                                case Types.SMALLINT:
+                                    if (DBG) LOG.info("Integer " + ci.index + "->" + Integer.valueOf(value));
+                                    ps.setInt(ci.index, Integer.valueOf(value));
+                                    break;
+                                case Types.INTEGER:
+                                case Types.DECIMAL:
+                                case Types.NUMERIC:
+                                    if (DBG) LOG.info("Long " + ci.index + "->" + Long.valueOf(value));
+                                    ps.setLong(ci.index, Long.valueOf(value));
+                                    break;
+                                case Types.BIT:
+                                case Types.CHAR:
+                                case Types.BOOLEAN:
+                                    if (DBG) LOG.info("Boolean " + ci.index + "->" + value);
+                                    if ("1".equals(value) || "true".equals(value))
+                                        ps.setBoolean(ci.index, true);
+                                    else
+                                        ps.setBoolean(ci.index, false);
+                                    break;
+                                case Types.LONGVARBINARY:
+                                case Types.VARBINARY:
+                                case Types.BLOB:
+                                    LOG.warn("Can not handle blobs yet!");
+                                    break;
+                                case Types.CLOB:
+                                case Types.LONGNVARCHAR:
+                                case Types.LONGVARCHAR:
+                                case Types.NCHAR:
+                                case Types.NCLOB:
+                                case Types.NVARCHAR:
+                                case Types.VARCHAR:
+                                    if (DBG) LOG.info("String " + ci.index + "->" + value);
+                                    ps.setString(ci.index, value);
+                                    break;
+                                default:
+                                    LOG.warn("Unhandled type [" + ci.columnType + "] for column [" + col + "]");
+                            }
+                        }
+                    }
+                    return dataSet;
+                }
+
+                /**
+                 * {@inheritDoc}
+                 */
+                @Override
+                public void characters(char[] ch, int start, int length) throws SAXException {
+                    if (inElement)
+                        sbData.append(ch, start, length);
+                }
+
+
+            };
+            handler.processingInstruction("fx_mode", "insert");
+            parser.parse(zip.getInputStream(ze), handler);
+            if (updateColumns.length > 0 && executeUpdatePhase) {
+                handler.processingInstruction("fx_mode", "update");
+                parser.parse(zip.getInputStream(ze), handler);
+            }
+        } finally {
+            Database.closeObjects(GenericDivisionImporter.class, psInsert, psUpdate);
+        }
+    }
+
+    /**
+     * Import language settings
+     *
+     * @param con an open and valid connection to store imported data
+     * @param zip zip file containing the data
+     * @throws Exception on errors
+     */
+    public void importLanguages(Connection con, ZipFile zip) throws Exception {
+        ZipEntry ze = getZipEntry(zip, FILE_LANGUAGES);
+        Statement stmt = con.createStatement();
+        try {
+            importTable(stmt, zip, ze, "languages/lang", DatabaseConst.TBL_LANG);
+            importTable(stmt, zip, ze, "languages/lang_t", DatabaseConst.TBL_LANG + DatabaseConst.ML);
+        } finally {
+            Database.closeObjects(GenericDivisionImporter.class, stmt);
+        }
+    }
+
+    /**
+     * Import mandators
+     *
+     * @param con an open and valid connection to store imported data
+     * @param zip zip file containing the data
+     * @throws Exception on errors
+     */
+    public void importMandators(Connection con, ZipFile zip) throws Exception {
+        ZipEntry ze = getZipEntry(zip, FILE_MANDATORS);
+        Statement stmt = con.createStatement();
+        try {
+            importTable(stmt, zip, ze, "mandators/mandator", DatabaseConst.TBL_MANDATORS);
+        } finally {
+            Database.closeObjects(GenericDivisionImporter.class, stmt);
+        }
+    }
+
+    /**
+     * Import security data
+     *
+     * @param con an open and valid connection to store imported data
+     * @param zip zip file containing the data
+     * @throws Exception on errors
+     */
+    public void importSecurity(Connection con, ZipFile zip) throws Exception {
+        ZipEntry ze = getZipEntry(zip, FILE_SECURITY);
+        Statement stmt = con.createStatement();
+        try {
+            importTable(stmt, zip, ze, "security/accounts/data/account", DatabaseConst.TBL_ACCOUNTS);
+            importTable(stmt, zip, ze, "security/accounts/details/detail", DatabaseConst.TBL_ACCOUNT_DETAILS);
+            importTable(stmt, zip, ze, "security/acls/acl", DatabaseConst.TBL_ACLS);
+            importTable(stmt, zip, ze, "security/acls/acl_t", DatabaseConst.TBL_ACLS + DatabaseConst.ML);
+            importTable(stmt, zip, ze, "security/groups/group", DatabaseConst.TBL_USERGROUPS);
+            importTable(stmt, zip, ze, "security/assignments/assignment", DatabaseConst.TBL_ACLS_ASSIGNMENT);
+            importTable(stmt, zip, ze, "security/groupAssignments/assignment", DatabaseConst.TBL_ASSIGN_GROUPS);
+            importTable(stmt, zip, ze, "security/roleAssignments/assignment", DatabaseConst.TBL_ROLE_MAPPING);
+        } finally {
+            Database.closeObjects(GenericDivisionImporter.class, stmt);
+        }
+    }
+
+    /**
+     * Import workflow data
+     *
+     * @param con an open and valid connection to store imported data
+     * @param zip zip file containing the data
+     * @throws Exception on errors
+     */
+    public void importWorkflows(Connection con, ZipFile zip) throws Exception {
+        ZipEntry ze = getZipEntry(zip, FILE_WORKFLOWS);
+        Statement stmt = con.createStatement();
+        try {
+            importTable(stmt, zip, ze, "workflow/workflows/workflow", DatabaseConst.TBL_WORKFLOW);
+            importTable(stmt, zip, ze, "workflow/stepDefinitions/stepdef", DatabaseConst.TBL_WORKFLOW_STEPDEFINITION,
+                    true, true, "unique_target");
+            importTable(stmt, zip, ze, "workflow/stepDefinitions/stepdef_t", DatabaseConst.TBL_WORKFLOW_STEPDEFINITION + DatabaseConst.ML);
+            importTable(stmt, zip, ze, "workflow/steps/step", DatabaseConst.TBL_WORKFLOW_STEP);
+            importTable(stmt, zip, ze, "workflow/routes/route", DatabaseConst.TBL_WORKFLOW_ROUTES);
+        } finally {
+            Database.closeObjects(GenericDivisionImporter.class, stmt);
+        }
+    }
+
+    /**
+     * Import configurations
+     *
+     * @param con an open and valid connection to store imported data
+     * @param zip zip file containing the data
+     * @throws Exception on errors
+     */
+    public void importConfigurations(Connection con, ZipFile zip) throws Exception {
+        ZipEntry ze = getZipEntry(zip, FILE_CONFIGURATIONS);
+        Statement stmt = con.createStatement();
+        try {
+            importTable(stmt, zip, ze, "configurations/application/entry", DatabaseConst.TBL_CONFIG_APPLICATION);
+            importTable(stmt, zip, ze, "configurations/division/entry", DatabaseConst.TBL_CONFIG_DIVISION);
+            importTable(stmt, zip, ze, "configurations/node/entry", DatabaseConst.TBL_CONFIG_NODE);
+            importTable(stmt, zip, ze, "configurations/user/entry", DatabaseConst.TBL_CONFIG_USER);
+        } finally {
+            Database.closeObjects(GenericDivisionImporter.class, stmt);
+        }
+    }
+
+    /**
+     * Import structural data
+     *
+     * @param con an open and valid connection to store imported data
+     * @param zip zip file containing the data
+     * @throws Exception on errors
+     */
+    public void importStructures(Connection con, ZipFile zip) throws Exception {
+        ZipEntry ze = getZipEntry(zip, FILE_STRUCTURES);
+        Statement stmt = con.createStatement();
+        try {
+            importTable(stmt, zip, ze, "structures/selectlists/list", DatabaseConst.TBL_STRUCT_SELECTLIST);
+            importTable(stmt, zip, ze, "structures/selectlists/list_t", DatabaseConst.TBL_STRUCT_SELECTLIST + DatabaseConst.ML);
+            importTable(stmt, zip, ze, "structures/datatypes/type", DatabaseConst.TBL_STRUCT_DATATYPES);
+            importTable(stmt, zip, ze, "structures/datatypes/type_t", DatabaseConst.TBL_STRUCT_DATATYPES + DatabaseConst.ML);
+            importTable(stmt, zip, ze, "structures/types/tdef", DatabaseConst.TBL_STRUCT_TYPES, true, false, "icon_ref");
+            //TODO: update icon_ref after contents have been imported
+            importTable(stmt, zip, ze, "structures/types/tdef_t", DatabaseConst.TBL_STRUCT_TYPES + DatabaseConst.ML);
+            importTable(stmt, zip, ze, "structures/properties/property", DatabaseConst.TBL_STRUCT_PROPERTIES);
+            importTable(stmt, zip, ze, "structures/properties/property_t", DatabaseConst.TBL_STRUCT_PROPERTIES + DatabaseConst.ML);
+            importTable(stmt, zip, ze, "structures/properties/poption", DatabaseConst.TBL_STRUCT_PROPERTY_OPTIONS);
+            importTable(stmt, zip, ze, "structures/groups/group", DatabaseConst.TBL_STRUCT_GROUPS);
+            importTable(stmt, zip, ze, "structures/groups/group_t", DatabaseConst.TBL_STRUCT_GROUPS + DatabaseConst.ML);
+            importTable(stmt, zip, ze, "structures/assignments/assignment", DatabaseConst.TBL_STRUCT_ASSIGNMENTS);
+            importTable(stmt, zip, ze, "structures/assignments/assignment_t", DatabaseConst.TBL_STRUCT_ASSIGNMENTS + DatabaseConst.ML);
+            //TODO: selectlist items after binaries
+//            importTable(stmt, zip, ze, "structures/selectlists/item", DatabaseConst.TBL_STRUCT_SELECTLIST_ITEM);
+//            importTable(stmt, zip, ze, "structures/selectlists/item_t", DatabaseConst.TBL_STRUCT_SELECTLIST_ITEM + DatabaseConst.ML);
+        } finally {
+            Database.closeObjects(GenericDivisionImporter.class, stmt);
+        }
     }
 }

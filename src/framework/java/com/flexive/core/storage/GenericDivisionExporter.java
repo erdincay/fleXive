@@ -43,6 +43,8 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.io.*;
 import java.sql.*;
@@ -70,6 +72,8 @@ StorageManager.storageImpl.exportDivision(con, fos)
 fos.close()
 con.close()
 */
+
+    private static final Log LOG = LogFactory.getLog(GenericDivisionExporter.class);
 
     /**
      * XML header to use
@@ -216,10 +220,25 @@ con.close()
                     case java.sql.Types.INTEGER:
                     case java.sql.Types.DECIMAL:
                     case java.sql.Types.SMALLINT:
+                    case java.sql.Types.TINYINT:
                     case java.sql.Types.NUMERIC:
                         value = String.valueOf(rs.getLong(i));
                         if (rs.wasNull())
                             value = null;
+                        break;
+                    case java.sql.Types.DOUBLE:
+                    case java.sql.Types.FLOAT:
+                        value = String.valueOf(rs.getDouble(i));
+                        if (rs.wasNull())
+                            value = null;
+                        break;
+                    case java.sql.Types.TIMESTAMP:
+                    case java.sql.Types.DATE:
+                        final Timestamp ts = rs.getTimestamp(i);
+                        if (rs.wasNull())
+                            value = null;
+                        else
+                            value = FxFormatUtils.getDateTimeFormat().format(ts);
                         break;
                     case java.sql.Types.BIT:
                     case java.sql.Types.CHAR:
@@ -240,6 +259,8 @@ con.close()
                     case java.sql.Types.VARCHAR:
                         hasSubTags = true;
                         break;
+                    default:
+                        LOG.warn("Unhandled type [" + md.getColumnType(i) + "] for [" + tableName + "." + att + "]");
                 }
                 if (value != null)
                     sb.append(' ').append(att).append("=\"").append(value).append("\"");
