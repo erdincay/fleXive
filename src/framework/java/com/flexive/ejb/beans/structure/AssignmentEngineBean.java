@@ -1670,15 +1670,16 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     changesDesc.append("defaultMultiplicity=").append(modified.getDefaultMultiplicity());
                     changes = true;
                 }
+                boolean needMin = original.getMultiplicity().getMin() != modified.getMultiplicity().getMin();
+                boolean needMax = original.getMultiplicity().getMax() != modified.getMultiplicity().getMax();
                 // change the property assignment's multiplicity
-                if (original.getMultiplicity().getMin() != modified.getMultiplicity().getMin() ||
-                        original.getMultiplicity().getMax() != modified.getMultiplicity().getMax()) {
+                if (needMin || needMax) {
                     if (original.getProperty().mayOverrideBaseMultiplicity()) {
-                        if (getAssignmentInstanceCount(original.getId()) > 0) {
-                            //only check if instances using this assignment exist
-                            if (getPropertyInstanceMultiplicity(con, original.getProperty().getId(), true) < modified.getMultiplicity().getMin())
+                        //only check if instances exist
+                        if (EJBLookup.getTypeEngine().getInstanceCount(original.getAssignedType().getId()) > 0) {
+                            if (needMin && getPropertyInstanceMultiplicity(con, original.getProperty().getId(), true) < modified.getMultiplicity().getMin())
                                 throw new FxUpdateException("ex.structure.modification.contentExists", "minimumMultiplicity");
-                            if (getPropertyInstanceMultiplicity(con, original.getProperty().getId(), false) > modified.getMultiplicity().getMax())
+                            if (needMax && getPropertyInstanceMultiplicity(con, original.getProperty().getId(), false) > modified.getMultiplicity().getMax())
                                 throw new FxUpdateException("ex.structure.modification.contentExists", "maximumMultiplicity");
                         }
                     } else {
