@@ -241,6 +241,14 @@ public abstract class GenericDBStorage implements DBStorage {
         importer.importSecurity(con, zip);
         importer.importWorkflows(con, zip);
         importer.importConfigurations(con, zip);
+        importer.importBinaries(con, zip);
         importer.importStructures(con, zip);
+        importer.importHierarchicalContents(con, zip);
+        importer.importScripts(con, zip);
+        importer.importTree(con, zip);
+        importer.importHistory(con, zip);
+        importer.importBriefcases(con, zip);
+        importer.importFlatStorages(con, zip);
+        importer.importSequencers(con, zip);
     }
 }

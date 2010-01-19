@@ -36,9 +36,8 @@ import com.flexive.core.DatabaseConst;
 import com.flexive.core.flatstorage.FxFlatStorageInfo;
 import com.flexive.core.flatstorage.FxFlatStorageManager;
 import com.flexive.core.storage.binary.FxBinaryUtils;
-import com.flexive.shared.FxContext;
-import com.flexive.shared.FxFileUtils;
-import com.flexive.shared.FxFormatUtils;
+import com.flexive.shared.*;
+import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.impex.FxDivisionExportInfo;
@@ -47,6 +46,8 @@ import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
@@ -56,15 +57,14 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.*;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -391,6 +391,20 @@ public class GenericDivisionImporter implements FxImportExportConstants {
             if (updateColumns.length > 0)
                 LOG.info("Update statement:\n" + sbUpdate.toString());
         }
+        //build a map containing all nodes that require attributes
+        //this allows for matching simple xpath queries like "flatstorages/storage[@name='FX_FLAT_STORAGE']/data"
+        final Map<String, List<String>> queryAttributes = new HashMap<String, List<String>>(5);
+        for (String pElem : xpath.split("/")) {
+            if (!(pElem.indexOf('@') > 0 && pElem.indexOf('[') > 0))
+                continue;
+            List<String> att = new ArrayList<String>(5);
+            for (String pAtt : pElem.split("@")) {
+                if (!(pAtt.indexOf('=') > 0))
+                    continue;
+                att.add(pAtt.substring(0, pAtt.indexOf('=')));
+            }
+            queryAttributes.put(pElem.substring(0, pElem.indexOf('[')), att);
+        }
         final PreparedStatement psInsert = stmt.getConnection().prepareStatement(sbInsert.toString());
         final PreparedStatement psUpdate = updateColumns.length > 0 ? stmt.getConnection().prepareStatement(sbUpdate.toString()) : null;
         try {
@@ -440,7 +454,7 @@ public class GenericDivisionImporter implements FxImportExportConstants {
                 @Override
                 public void endDocument() throws SAXException {
                     if (insertMode)
-                        LOG.info("Inserted [" + counter + "] entries into [" + table + "] for xpath [" + xpath + "]");
+                        LOG.info("Imported [" + counter + "] entries into [" + table + "] for xpath [" + xpath + "]");
                     else
                         LOG.info("Updated [" + counter + "] entries in [" + table + "] for xpath [" + xpath + "]");
                 }
@@ -450,7 +464,7 @@ public class GenericDivisionImporter implements FxImportExportConstants {
                  */
                 @Override
                 public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-                    pushPath(qName);
+                    pushPath(qName, attributes);
                     if (currPath.toString().equals(xpath)) {
                         inTag = true;
                         data.clear();
@@ -468,9 +482,26 @@ public class GenericDivisionImporter implements FxImportExportConstants {
                  * Push a path element from the stack
                  *
                  * @param qName element name to push
+                 * @param att attributes
                  */
-                private void pushPath(String qName) {
-                    path.add(qName);
+                private void pushPath(String qName, Attributes att) {
+                    if (att.getLength() > 0 && queryAttributes.containsKey(qName)) {
+                        String curr = qName + "[";
+                        boolean first = true;
+                        final List<String> attList = queryAttributes.get(qName);
+                        for (int i = 0; i < att.getLength(); i++) {
+                            if (!attList.contains(att.getQName(i)))
+                                continue;
+                            if (first)
+                                first = false;
+                            else
+                                curr += ',';
+                            curr += "@" + att.getQName(i) + "='" + att.getValue(i) + "'";
+                        }
+                        curr += ']';
+                        path.add(curr);
+                    } else
+                        path.add(qName);
                     buildPath();
                 }
 
@@ -593,7 +624,17 @@ public class GenericDivisionImporter implements FxImportExportConstants {
                                 case Types.LONGVARBINARY:
                                 case Types.VARBINARY:
                                 case Types.BLOB:
-                                    LOG.warn("Can not handle blobs yet!");
+                                    ZipEntry bin = zip.getEntry(value);
+                                    if (bin == null) {
+                                        LOG.error("Failed to lookup binary [" + value + "]!");
+                                        ps.setNull(ci.index, ci.columnType);
+                                        break;
+                                    }
+                                    try {
+                                        ps.setBinaryStream(ci.index, zip.getInputStream(bin), (int) bin.getSize());
+                                    } catch (IOException e) {
+                                        LOG.error("IOException importing binary [" + value + "]: " + e.getMessage(), e);
+                                    }
                                     break;
                                 case Types.CLOB:
                                 case Types.LONGNVARCHAR:
@@ -752,7 +793,6 @@ public class GenericDivisionImporter implements FxImportExportConstants {
             importTable(stmt, zip, ze, "structures/datatypes/type", DatabaseConst.TBL_STRUCT_DATATYPES);
             importTable(stmt, zip, ze, "structures/datatypes/type_t", DatabaseConst.TBL_STRUCT_DATATYPES + DatabaseConst.ML);
             importTable(stmt, zip, ze, "structures/types/tdef", DatabaseConst.TBL_STRUCT_TYPES, true, false, "icon_ref");
-            //TODO: update icon_ref after contents have been imported
             importTable(stmt, zip, ze, "structures/types/tdef_t", DatabaseConst.TBL_STRUCT_TYPES + DatabaseConst.ML);
             importTable(stmt, zip, ze, "structures/properties/property", DatabaseConst.TBL_STRUCT_PROPERTIES);
             importTable(stmt, zip, ze, "structures/properties/property_t", DatabaseConst.TBL_STRUCT_PROPERTIES + DatabaseConst.ML);
@@ -761,9 +801,286 @@ public class GenericDivisionImporter implements FxImportExportConstants {
             importTable(stmt, zip, ze, "structures/groups/group_t", DatabaseConst.TBL_STRUCT_GROUPS + DatabaseConst.ML);
             importTable(stmt, zip, ze, "structures/assignments/assignment", DatabaseConst.TBL_STRUCT_ASSIGNMENTS);
             importTable(stmt, zip, ze, "structures/assignments/assignment_t", DatabaseConst.TBL_STRUCT_ASSIGNMENTS + DatabaseConst.ML);
-            //TODO: selectlist items after binaries
-//            importTable(stmt, zip, ze, "structures/selectlists/item", DatabaseConst.TBL_STRUCT_SELECTLIST_ITEM);
-//            importTable(stmt, zip, ze, "structures/selectlists/item_t", DatabaseConst.TBL_STRUCT_SELECTLIST_ITEM + DatabaseConst.ML);
+            importTable(stmt, zip, ze, "structures/selectlists/item", DatabaseConst.TBL_STRUCT_SELECTLIST_ITEM);
+            importTable(stmt, zip, ze, "structures/selectlists/item_t", DatabaseConst.TBL_STRUCT_SELECTLIST_ITEM + DatabaseConst.ML);
+        } finally {
+            Database.closeObjects(GenericDivisionImporter.class, stmt);
+        }
+    }
+
+    /**
+     * Import database and filesystem binaries
+     *
+     * @param con an open and valid connection to store imported data
+     * @param zip zip file containing the data
+     * @throws Exception on errors
+     */
+    public void importBinaries(Connection con, ZipFile zip) throws Exception {
+        ZipEntry ze = getZipEntry(zip, FILE_BINARIES);
+        Statement stmt = con.createStatement();
+        try {
+            importTable(stmt, zip, ze, "binaries/binary", DatabaseConst.TBL_CONTENT_BINARY);
+            ZipEntry curr;
+            File binDir = new File(FxBinaryUtils.getBinaryDirectory() + File.separatorChar + String.valueOf(FxContext.get().getDivisionId()));
+            if (!binDir.exists())
+                //noinspection ResultOfMethodCallIgnored
+                binDir.mkdirs();
+            if (!binDir.exists() && binDir.isDirectory()) {
+                LOG.error("Failed to create binary directory [" + binDir.getAbsolutePath() + "]!");
+                return;
+            }
+            int count = 0;
+            for (Enumeration e = zip.entries(); e.hasMoreElements();) {
+                curr = (ZipEntry) e.nextElement();
+                if (curr.getName().startsWith(FOLDER_FS_BINARY) && !curr.isDirectory()) {
+                    File out = new File(binDir.getAbsolutePath() + File.separatorChar + curr.getName().substring(FOLDER_FS_BINARY.length() + 1));
+                    String path = out.getAbsolutePath();
+                    path = path.replace('\\', '/'); //normalize separator chars
+                    path = path.replace('/', File.separatorChar);
+                    path = path.substring(0, out.getAbsolutePath().lastIndexOf(File.separatorChar));
+                    File fPath = new File(path);
+                    if (!fPath.exists()) {
+                        if (!fPath.mkdirs()) {
+                            LOG.error("Failed to create path [" + path + "!]");
+                            continue;
+                        }
+                    }
+                    if (!out.createNewFile()) {
+                        LOG.error("Failed to create file [" + out.getAbsolutePath() + "]!");
+                        continue;
+                    }
+                    if (FxFileUtils.copyStream2File(curr.getSize(), zip.getInputStream(curr), out))
+                        count++;
+                    else
+                        LOG.error("Failed to write zip stream to file [" + out.getAbsolutePath() + "]!");
+                }
+            }
+            FxContext.get().runAsSystem();
+            try {
+                EJBLookup.getNodeConfigurationEngine().put(SystemParameters.NODE_BINARY_PATH, binDir.getAbsolutePath());
+            } finally {
+                FxContext.get().stopRunAsSystem();
+            }
+            LOG.info("Imported [" + count + "] files to filesystem binary storage located at [" + binDir.getAbsolutePath() + "]");
+        } finally {
+            Database.closeObjects(GenericDivisionImporter.class, stmt);
+        }
+    }
+
+    /**
+     * Import hierarchical contents
+     *
+     * @param con an open and valid connection to store imported data
+     * @param zip zip file containing the data
+     * @throws Exception on errors
+     */
+    public void importHierarchicalContents(Connection con, ZipFile zip) throws Exception {
+        ZipEntry ze = getZipEntry(zip, FILE_DATA_HIERARCHICAL);
+        ZipEntry ze_struct = getZipEntry(zip, FILE_STRUCTURES);
+        Statement stmt = con.createStatement();
+        try {
+            importTable(stmt, zip, ze, "hierarchical/content", DatabaseConst.TBL_CONTENT);
+            importTable(stmt, zip, ze, "hierarchical/data", DatabaseConst.TBL_CONTENT_DATA);
+            importTable(stmt, zip, ze, "hierarchical/ft", DatabaseConst.TBL_CONTENT_DATA_FT);
+            importTable(stmt, zip, ze, "hierarchical/acl", DatabaseConst.TBL_CONTENT_ACLS);
+            importTable(stmt, zip, ze_struct, "structures/types/tdef", DatabaseConst.TBL_STRUCT_TYPES, false, true, "icon_ref");
+        } finally {
+            Database.closeObjects(GenericDivisionImporter.class, stmt);
+        }
+    }
+
+    /**
+     * Import scripting data
+     *
+     * @param con an open and valid connection to store imported data
+     * @param zip zip file containing the data
+     * @throws Exception on errors
+     */
+    public void importScripts(Connection con, ZipFile zip) throws Exception {
+        ZipEntry ze = getZipEntry(zip, FILE_SCRIPTS);
+        Statement stmt = con.createStatement();
+        try {
+            importTable(stmt, zip, ze, "scripts/script", DatabaseConst.TBL_SCRIPTS);
+            importTable(stmt, zip, ze, "scripts/assignmap", DatabaseConst.TBL_SCRIPT_MAPPING_ASSIGN);
+            importTable(stmt, zip, ze, "scripts/typemap", DatabaseConst.TBL_SCRIPT_MAPPING_TYPES);
+        } finally {
+            Database.closeObjects(GenericDivisionImporter.class, stmt);
+        }
+    }
+
+    /**
+     * Import tree data
+     *
+     * @param con an open and valid connection to store imported data
+     * @param zip zip file containing the data
+     * @throws Exception on errors
+     */
+    public void importTree(Connection con, ZipFile zip) throws Exception {
+        ZipEntry ze = getZipEntry(zip, FILE_TREE);
+        Statement stmt = con.createStatement();
+        try {
+            importTable(stmt, zip, ze, "tree/edit/node", DatabaseConst.TBL_TREE, true, true, "parent");
+            importTable(stmt, zip, ze, "tree/live/node", DatabaseConst.TBL_TREE + "_LIVE", true, true, "parent");
+        } finally {
+            Database.closeObjects(GenericDivisionImporter.class, stmt);
+        }
+    }
+
+    /**
+     * Import history data
+     *
+     * @param con an open and valid connection to store imported data
+     * @param zip zip file containing the data
+     * @throws Exception on errors
+     */
+    public void importHistory(Connection con, ZipFile zip) throws Exception {
+        ZipEntry ze = getZipEntry(zip, FILE_HISTORY);
+        Statement stmt = con.createStatement();
+        try {
+            importTable(stmt, zip, ze, "history/entry", DatabaseConst.TBL_HISTORY);
+        } finally {
+            Database.closeObjects(GenericDivisionImporter.class, stmt);
+        }
+    }
+
+    /**
+     * Import briefcases
+     *
+     * @param con an open and valid connection to store imported data
+     * @param zip zip file containing the data
+     * @throws Exception on errors
+     */
+    public void importBriefcases(Connection con, ZipFile zip) throws Exception {
+        ZipEntry ze = getZipEntry(zip, FILE_BRIEFCASES);
+        Statement stmt = con.createStatement();
+        try {
+            importTable(stmt, zip, ze, "briefcases/briefcase", DatabaseConst.TBL_BRIEFCASE);
+            importTable(stmt, zip, ze, "briefcases/data", DatabaseConst.TBL_BRIEFCASE_DATA);
+        } finally {
+            Database.closeObjects(GenericDivisionImporter.class, stmt);
+        }
+    }
+
+    /**
+     * Import briefcases
+     *
+     * @param con an open and valid connection to store imported data
+     * @param zip zip file containing the data
+     * @throws Exception on errors
+     */
+    public void importFlatStorages(Connection con, ZipFile zip) throws Exception {
+        ZipEntry ze = getZipEntry(zip, FILE_FLATSTORAGE_META);
+        Statement stmt = con.createStatement();
+        try {
+            DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+            Document document = builder.parse(zip.getInputStream(ze));
+            XPath xPath = XPathFactory.newInstance().newXPath();
+
+            NodeList nodes = (NodeList) xPath.evaluate("/flatstorageMeta/storageMeta", document, XPathConstants.NODESET);
+            Node currNode;
+            List<String> storages = new ArrayList<String>(5);
+            for (int i = 0; i < nodes.getLength(); i++) {
+                currNode = nodes.item(i);
+                int cbigInt = Integer.parseInt(currNode.getAttributes().getNamedItem("bigInt").getNodeValue());
+                int cdouble = Integer.parseInt(currNode.getAttributes().getNamedItem("double").getNodeValue());
+                int cselect = Integer.parseInt(currNode.getAttributes().getNamedItem("select").getNodeValue());
+                int cstring = Integer.parseInt(currNode.getAttributes().getNamedItem("string").getNodeValue());
+                int ctext = Integer.parseInt(currNode.getAttributes().getNamedItem("text").getNodeValue());
+                String tableName = null;
+                String description = null;
+                if (currNode.hasChildNodes()) {
+                    for (int j = 0; j < currNode.getChildNodes().getLength(); j++)
+                        if (currNode.getChildNodes().item(j).getNodeName().equals("name")) {
+                            tableName = currNode.getChildNodes().item(j).getTextContent();
+                        } else if (currNode.getChildNodes().item(j).getNodeName().equals("description")) {
+                            description = currNode.getChildNodes().item(j).getTextContent();
+                        }
+                }
+                if (tableName != null) {
+                    if (description == null)
+                        description = "FlatStorage " + tableName;
+                    FxFlatStorageManager.getInstance().createFlatStorage(tableName, description, cstring, ctext, cbigInt, cdouble, cselect);
+                    storages.add(tableName);
+                }
+            }
+
+            importTable(stmt, zip, ze, "flatstorageMeta/mapping", DatabaseConst.TBL_STRUCT_FLATSTORE_MAPPING);
+
+            ZipEntry zeData = getZipEntry(zip, FILE_DATA_FLAT);
+            for (String storage : storages)
+                importTable(stmt, zip, zeData, "flatstorages/storage[@name='" + storage + "']/data", storage);
+        } finally {
+            Database.closeObjects(GenericDivisionImporter.class, stmt);
+        }
+    }
+
+    /**
+     * Import sequencer settings
+     *
+     * @param con an open and valid connection to store imported data
+     * @param zip zip file containing the data
+     * @throws Exception on errors
+     */
+    public void importSequencers(Connection con, ZipFile zip) throws Exception {
+        ZipEntry ze = getZipEntry(zip, FILE_SEQUENCERS);
+        Statement stmt = con.createStatement();
+        try {
+            SequencerStorage seq = StorageManager.getSequencerStorage();
+            for (CustomSequencer cust : seq.getCustomSequencers())
+                seq.removeSequencer(cust.getName());
+            DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+            Document document = builder.parse(zip.getInputStream(ze));
+            XPath xPath = XPathFactory.newInstance().newXPath();
+
+            NodeList nodes = (NodeList) xPath.evaluate("/sequencers/syssequence", document, XPathConstants.NODESET);
+            Node currNode;
+            String seqName;
+            long value;
+            for (int i = 0; i < nodes.getLength(); i++) {
+                currNode = nodes.item(i);
+                if (currNode.hasChildNodes()) {
+                    seqName = null;
+                    value = -1L;
+                    for (int j = 0; j < currNode.getChildNodes().getLength(); j++)
+                        if (currNode.getChildNodes().item(j).getNodeName().equals("name")) {
+                            seqName = currNode.getChildNodes().item(j).getTextContent();
+                        } else if (currNode.getChildNodes().item(j).getNodeName().equals("value")) {
+                            value = Long.parseLong(currNode.getChildNodes().item(j).getTextContent());
+                        }
+                    if (value != -1L && seqName != null) {
+                        try {
+                            FxSystemSequencer sseq = FxSystemSequencer.valueOf(seqName); //check if this is really a system sequencer
+                            seq.setSequencerId(sseq.getSequencerName(), value);
+                            LOG.info("Set sequencer [" + seqName + "] to [" + value + "]");
+                        } catch (IllegalArgumentException e) {
+                            LOG.error("Could not find system sequencer named [" + seqName + "]!");
+                        }
+
+                    }
+                }
+            }
+
+            nodes = (NodeList) xPath.evaluate("/sequencers/usrsequence", document, XPathConstants.NODESET);
+            boolean rollOver = false;
+            for (int i = 0; i < nodes.getLength(); i++) {
+                currNode = nodes.item(i);
+                if (currNode.hasChildNodes()) {
+                    seqName = null;
+                    value = -1L;
+                    for (int j = 0; j < currNode.getChildNodes().getLength(); j++)
+                        if (currNode.getChildNodes().item(j).getNodeName().equals("name")) {
+                            seqName = currNode.getChildNodes().item(j).getTextContent();
+                        } else if (currNode.getChildNodes().item(j).getNodeName().equals("value")) {
+                            value = Long.parseLong(currNode.getChildNodes().item(j).getTextContent());
+                        } else if (currNode.getChildNodes().item(j).getNodeName().equals("rollover")) {
+                            rollOver = "1".equals(currNode.getChildNodes().item(j).getTextContent());
+                        }
+                    if (value != -1L && seqName != null) {
+                        seq.createSequencer(seqName, rollOver, value);
+                        LOG.info("Created sequencer [" + seqName + "] with start value [" + value + "], rollover: " + rollOver);
+                    }
+                }
+            }
         } finally {
             Database.closeObjects(GenericDivisionImporter.class, stmt);
         }

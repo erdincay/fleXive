@@ -715,7 +715,7 @@ con.close()
             sb.setLength(0);
             sb.append("<flatstorageMeta>\n");
             for (FxFlatStorageInfo info : FxFlatStorageManager.getInstance().getFlatStorageInfos()) {
-                sb.append("  <storage bigInt=\"").append(info.getColumnsBigInt()).
+                sb.append("  <storageMeta bigInt=\"").append(info.getColumnsBigInt()).
                         append("\" double=\"").append(info.getColumnsDouble()).
                         append("\" select=\"").append(info.getColumnsSelect()).
                         append("\" string=\"").append(info.getColumnsString()).
@@ -726,8 +726,8 @@ con.close()
                 sb.append("</name>\n");
                 sb.append("    <description>");
                 escape(sb, info.getDescription());
-                sb.append("</desription>\n");
-                sb.append("  </storage>\n");
+                sb.append("</description>\n");
+                sb.append("  </storageMeta>\n");
             }
             write(out, sb);
             dumpTable(DatabaseConst.TBL_STRUCT_FLATSTORE_INFO, stmt, out, sb, "storage", null);
@@ -849,7 +849,7 @@ con.close()
             for (FxSystemSequencer s : FxSystemSequencer.values()) {
                 sb.append("  <syssequence>\n");
                 sb.append("    <name>").append(StringEscapeUtils.escapeXml(s.name())).append("</name>\n");
-                sb.append("    <value>").append(ss.getCurrentId(s)).append("</name>\n");
+                sb.append("    <value>").append(ss.getCurrentId(s)).append("</value>\n");
                 sb.append("    <rollover>").append(s.isAllowRollover() ? 1 : 0).append("</rollover>\n");
                 sb.append("  </syssequence>\n");
             }
@@ -857,7 +857,7 @@ con.close()
             for (CustomSequencer s : ss.getCustomSequencers()) {
                 sb.append("  <usrsequence>\n");
                 sb.append("    <name>").append(StringEscapeUtils.escapeXml(s.getName())).append("</name>\n");
-                sb.append("    <value>").append(s.getCurrentNumber()).append("</name>\n");
+                sb.append("    <value>").append(s.getCurrentNumber()).append("</value>\n");
                 sb.append("    <rollover>").append(s.isAllowRollover() ? 1 : 0).append("</rollover>\n");
                 sb.append("  </usrsequence>\n");
             }
