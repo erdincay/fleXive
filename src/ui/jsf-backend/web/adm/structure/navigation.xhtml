@@ -445,12 +445,17 @@
                         newAssignmentId = flexive.util.getJsonRpc().StructureTreeEditor.pasteAssignmentRelative(getNodeId(copyNode), copyNode.nodeType , destId, destNodeType ,alias, 1);
                         reloadAndKeepExpanded();
                         expandToNodeWithId(newAssignmentId, false);
-                    }
-                    else if (cutMode && sameLevel){
-                        // just perform move operation
-                        flexive.util.getJsonRpc().StructureTreeEditor.moveAssignmentRelative(getNodeId(copyNode), copyNode.nodeType, destId, 1);
-                        reloadAndKeepExpanded();
-                        expandToNodeWithId(getNodeId(copyNode), false);
+                    } else {
+                        if (cutMode){   // && sameLevel assured by else
+                            // just perform move operation
+                            flexive.util.getJsonRpc().StructureTreeEditor.moveAssignmentRelative(getNodeId(copyNode), copyNode.nodeType, destId, 1);
+                            reloadAndKeepExpanded();
+                            expandToNodeWithId(getNodeId(copyNode), false);
+                        } else if (copyMode) {   // && sameLevel assured by else
+                            flexive.util.getJsonRpc().StructureTreeEditor.pasteAssignmentRelative(getNodeId(copyNode), copyNode.nodeType, destId, copyNode.nodeType, alias, 1);
+                            reloadAndKeepExpanded();
+                            expandToNodeWithId(getNodeId(copyNode), false);
+                        }
                     }
                     if (cutMode && !sameLevel) {
                         //cut out == delete copyNode
@@ -488,12 +493,17 @@
                         newAssignmentId = flexive.util.getJsonRpc().StructureTreeEditor.pasteAssignmentRelative(getNodeId(copyNode), copyNode.nodeType , destId, destNodeType, alias, 0);
                         reloadAndKeepExpanded();
                         expandToNodeWithId(newAssignmentId, false);
-                    }
-                    else if (cutMode && sameLevel){
-                        // just perform move operation
-                        flexive.util.getJsonRpc().StructureTreeEditor.moveAssignmentRelative(getNodeId(copyNode), copyNode.nodeType, destId, 0);
-                        reloadAndKeepExpanded();
-                        expandToNodeWithId(getNodeId(copyNode), false);
+                    } else {
+                        if (cutMode){    // && sameLevel assured by else
+                            // just perform move operation
+                            flexive.util.getJsonRpc().StructureTreeEditor.moveAssignmentRelative(getNodeId(copyNode), copyNode.nodeType, destId, 0);
+                            reloadAndKeepExpanded();
+                            expandToNodeWithId(getNodeId(copyNode), false);
+                        } else if (copyMode) {    // && sameLevel assured by else
+                            flexive.util.getJsonRpc().StructureTreeEditor.pasteAssignmentRelative(getNodeId(copyNode), copyNode.nodeType, destId, copyNode.nodeType, alias, 0);
+                            reloadAndKeepExpanded();
+                            expandToNodeWithId(getNodeId(copyNode), false);
+                        }
                     }
                     if (cutMode && !sameLevel) {
                         //cut out == delete copyNode
