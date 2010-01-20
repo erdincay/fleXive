@@ -403,6 +403,8 @@ public class FxContentView extends UIOutput {
                     return getList(path, true);
                 } else if (isLabelRequest(path)) {
                     return getLabel(path);
+                } else if (isHintRequest(path)) {
+                    return getHint(path);
                 } else if (isNewValueRequest(path)) {
                     return getNewValue(path);
                 } else if (isResolveReferenceRequest(path)) {
@@ -431,6 +433,10 @@ public class FxContentView extends UIOutput {
             return path.endsWith("$label");
         }
 
+        private boolean isHintRequest(String path) {
+            return path.endsWith("$hint");
+        }
+        
         private boolean isListRequest(String path) {
             return path.endsWith("$list");
         }
@@ -457,8 +463,17 @@ public class FxContentView extends UIOutput {
         }
 
         private FxString getLabel(String path) throws FxNotFoundException, FxInvalidParameterException {
-            final long assignmentId = content.getPropertyData(StringUtils.replace(path, "$label", "")).getAssignmentId();
-            return CacheAdmin.getEnvironment().getAssignment(assignmentId).getDisplayLabel();
+            return getAssignment(StringUtils.replace(path, "$label", "")).getDisplayLabel();
+        }
+
+        private FxAssignment getAssignment(String xPath) {
+            return CacheAdmin.getEnvironment().getAssignment(
+                    content.getPropertyData(xPath).getAssignmentId()
+            );
+        }
+
+        private FxString getHint(String path) throws FxNotFoundException, FxInvalidParameterException {
+            return getAssignment(StringUtils.replace(path, "$hint", "")).getHint();
         }
 
         private List<?> getList(String path, boolean includeEmpty) {

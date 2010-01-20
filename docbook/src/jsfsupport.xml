@@ -237,6 +237,17 @@
 
                         <varlistentry>
                             <term>
+                                <code language="jsfel">#{content.name$hint}</code>
+                            </term>
+                            <listitem>
+                                <para>
+                                    Return the assignment hint of type FxString for the given &xpath;.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+
+                        <varlistentry>
+                            <term>
                                 <code language="jsfel">#{content['group/text']}</code>
                             </term>
                             <listitem>

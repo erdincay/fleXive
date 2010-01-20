@@ -140,7 +140,8 @@ public class Thumbnail extends UIOutput {
 
     public FxPK getPk() {
         if (pk == null) {
-            return (FxPK) FxJsfComponentUtils.getValue(this, "pk");
+            final Object pkValue = FxJsfComponentUtils.getValue(this, "pk");
+            return pkValue == null ? null : FxPK.fromObject(pkValue);
         }
         return pk;
     }

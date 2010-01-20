@@ -32,6 +32,7 @@
 package com.flexive.faces.components.content;
 
 import com.flexive.shared.exceptions.FxRuntimeException;
+import com.flexive.shared.value.FxString;
 import com.flexive.shared.value.FxValue;
 import com.flexive.shared.value.mapper.InputMapper;
 import com.flexive.faces.FxJsfComponentUtils;
@@ -43,6 +44,7 @@ import com.sun.facelets.tag.TagConfig;
 import com.sun.facelets.tag.TagHandler;
 
 import javax.el.ELException;
+import javax.el.ExpressionFactory;
 import javax.el.ValueExpression;
 import javax.el.VariableMapper;
 import javax.faces.FacesException;
@@ -102,18 +104,19 @@ public class FxValueHandler extends TagHandler {
             FxJsfComponentUtils.requireAttribute("fx:value", "property", property);
 
             // assign id, label/labelKey and value based on the enclosing FxContentView instance
-            mapper.setVariable("id", ctx.getExpressionFactory().createValueExpression(
+            final ExpressionFactory expressionFactory = ctx.getExpressionFactory();
+            mapper.setVariable("id", expressionFactory.createValueExpression(
                     StringUtils.replace(property, "/", "_"), String.class
             ));
             if (this.getAttribute("labelKey") == null) {
                 // use property label
-                mapper.setVariable("label", ctx.getExpressionFactory().createValueExpression(ctx, FxContentView.getExpression(var, property, "label"), String.class));
+                mapper.setVariable("label", expressionFactory.createValueExpression(ctx, FxContentView.getExpression(var, property, "label"), FxString.class));
             } else {
                 // use provided message key
                 assignAttribute(ctx, mapper, "labelKey", String.class);
             }
             // retrieve content from content view
-            mapper.setVariable("value", ctx.getExpressionFactory().createValueExpression(ctx,
+            mapper.setVariable("value", expressionFactory.createValueExpression(ctx,
                     FxContentView.getExpression(var, property, isNewValue ? "new" : null), FxValue.class));
 
             // passthrough other template attributes
@@ -128,6 +131,8 @@ public class FxValueHandler extends TagHandler {
             assignAttribute(ctx, mapper, "autocompleteHandler", String.class);
             assignAttribute(ctx, mapper, "disableMultiLanguage", Boolean.class);
             assignAttribute(ctx, mapper, "disableLytebox", Boolean.class);
+            assignAttribute(ctx, mapper, "tooltip", String.class);
+            assignAttribute(ctx, mapper, "tooltipKey", String.class);
 
             // TODO: cache templates/use a facelet ResourceResolver to encapsulate this
             ctx.includeFacelet(parent, Thread.currentThread().getContextClassLoader().getResource(TEMPLATE_ROOT + template));
