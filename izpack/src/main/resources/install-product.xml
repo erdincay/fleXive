@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>
+<xfragment>
+    <!-- 
+        The info section.
+        The meaning of the tags should be natural ...
+    -->
+    <info>
+        <appname>flexive</appname>
+        <appversion>${flexive.version}</appversion>
+        <url>http://www.flexive.org/</url>
+        <javaversion>1.5</javaversion>
+        <appsubpath>flexive-${flexive.version}</appsubpath>
+
+        <!-- Pack200 greatly reduces the download size, but it does not seem to work correctly
+             for the Jetty and flexive packs -->
+        <!--<pack200/>-->
+    </info>
+
+    <!-- Passthru Maven variables to files filtered by the installer (e.g. shortcut specifications) -->
+    <variables>
+        <variable name="flexive.version" value="${flexive.version}"/>
+    </variables>
+</xfragment>
+
