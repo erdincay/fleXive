@@ -52,33 +52,33 @@
             <adm:tab label="#{fxMessageBean['PropertyEditor.tab.option']}" active="false" id="tab2"
             	bean="#{propertyEditorBean}" action="showPropertyOptionEditor"/>
         </c:if>
-            <fx:formRow labelKey="PropertyEditor.label.name" id="name">
+            <fx:formRow labelKey="PropertyEditor.label.name" id="name" tooltipKey="PropertyEditor.tooltip.name">
                     <h:inputText id="name" value="#{propertyEditorBean.propertyName}"
                             disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"
                             onkeyup="transferInputValue('frm','name',document.getElementById('frm:label').fxValue.getFirstInputId());">
                         <f:validator validatorId="flexive.FxNameForXPathValidator"/>
                     </h:inputText>
             </fx:formRow>
-            <fx:formRow labelKey="PropertyEditor.label.label" id="label">
+            <fx:formRow labelKey="PropertyEditor.label.label" id="label" tooltipKey="PropertyEditor.tooltip.label">
 					<fx:fxValueInput id="label" value="#{propertyEditorBean.propertyLabel}"
                          readOnly="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"/>
 			</fx:formRow>
-            <fx:formRow labelKey="PropertyEditor.label.hint" id="hint">
+            <fx:formRow labelKey="PropertyEditor.label.hint" id="hint" tooltipKey="PropertyEditor.tooltip.hint">
 					<fx:fxValueInput id="hint" value="#{propertyEditorBean.propertyHint}"
                          readOnly="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"/>
 			</fx:formRow>
             <c:if test="#{propertyEditorBean.property.new}">
-                <fx:formRow labelKey="PropertyEditor.label.autoUniquePropertyName" id="autoUniquePropertyName">
-                    <h:selectBooleanCheckbox id="autoUniquePropertyName" value="#{propertyEditorBean.propertyAutoUniquePropertyName}"/>    
+                <fx:formRow labelKey="PropertyEditor.label.autoUniquePropertyName" id="autoUniquePropertyName" tooltipKey="PropertyEditor.tooltip.autoUniquePropertyName">
+                    <h:selectBooleanCheckbox id="autoUniquePropertyName" value="#{propertyEditorBean.propertyAutoUniquePropertyName}"/>
                 </fx:formRow>
             </c:if>
-            <fx:formRow labelKey="PropertyEditor.label.multiLang" id="multiLang">
+            <fx:formRow labelKey="PropertyEditor.label.multiLang" id="multiLang" tooltipKey="PropertyEditor.tooltip.multiLang">
                 <h:selectBooleanCheckbox id="multiLang" value="#{propertyEditorBean.propertyMultiLanguage}"
                      disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}">
                     <a4j:support event="onclick" reRender="defaultValueInput"/>
                 </h:selectBooleanCheckbox>
             </fx:formRow>
-            <fx:formRow labelKey="PropertyEditor.label.dataType" id="dataType">
+            <fx:formRow labelKey="PropertyEditor.label.dataType" id="dataType" tooltipKey="PropertyEditor.tooltip.dataType">
                 <h:selectOneListbox size="1" id="dataType" value="#{propertyEditorBean.propertyDataType}"
                      disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"
                      onchange="submit();">
@@ -87,7 +87,7 @@
             </fx:formRow>
             <div style="padding-left:17px">
                 <ui:fragment rendered="#{propertyEditorBean.propertyReference}">
-                    <fx:formRow labelKey="PropertyEditor.label.referencedType" id="referencedType">
+                    <fx:formRow labelKey="PropertyEditor.label.referencedType" id="referencedType" tooltipKey="PropertyEditor.tooltip.referencedType">
                         <h:selectOneListbox size="1" id="referencedType" value="#{propertyEditorBean.propertyReferencedType}"
                              disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}">
                             <f:selectItems value="#{propertyEditorBean.types}" />
@@ -95,7 +95,7 @@
                     </fx:formRow>
                 </ui:fragment>
                 <ui:fragment rendered="#{propertyEditorBean.propertySelectList}">
-                    <fx:formRow labelKey="PropertyEditor.label.referencedList" id="referencedList">
+                    <fx:formRow labelKey="PropertyEditor.label.referencedList" id="referencedList" tooltipKey="PropertyEditor.tooltip.referencedList">
                         <h:selectOneListbox size="1" id="referencedList" value="#{propertyEditorBean.propertyReferencedList}"
                                  disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}">
                             <f:selectItems value="#{fxSelectBean.selectListsWithEmpty}" />
@@ -105,7 +105,7 @@
             </div>
 
             <a4j:region>
-                <fx:formRow labelKey="PropertyEditor.label.setDefaultValue" id="defaultValue">
+                <fx:formRow labelKey="PropertyEditor.label.setDefaultValue" id="defaultValue" tooltipKey="PropertyEditor.tooltip.setDefaultValue">
                     <h:selectBooleanCheckbox id="defaultValue" value="#{propertyEditorBean.propertyDefaultValueSet}"
                              disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}">
                         <a4j:support event="onclick" reRender="defaultValueInput"/>
@@ -115,14 +115,14 @@
 
             <a4j:outputPanel id="defaultValueInput">
                 <ui:fragment rendered="#{propertyEditorBean.propertyDefaultValueSet}">
-                    <fx:formRow labelKey="PropertyEditor.label.defaultValue" id="defaultValueSelect">
+                    <fx:formRow labelKey="PropertyEditor.label.defaultValue" id="defaultValueSelect" tooltipKey="PropertyEditor.tooltip.defaultValue">
                         <fx:fxValueInput id="defaultValueSelect" value="#{propertyEditorBean.propertyDefaultValue}"
                                  readOnlyShowTranslations="true"
                                  readOnly="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"/>
                     </fx:formRow>
                 </ui:fragment>
             </a4j:outputPanel>
-            <fx:formRow labelKey="PropertyEditor.label.multiplicity" id="multiplicity">
+            <fx:formRow labelKey="PropertyEditor.label.multiplicity" id="multiplicity" tooltipKey="PropertyEditor.tooltip.multiplicity">
                 <h:inputText id="multiplicity" value="#{propertyEditorBean.propertyMinMultiplicity}"
                          disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"
                          required="true" style="width:40px"/>
@@ -130,31 +130,31 @@
                                 disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"
                                 required="true" style="width:40px"/>
             </fx:formRow>
-            <fx:formRow labelKey="PropertyEditor.label.acl" id="acl">
+            <fx:formRow labelKey="PropertyEditor.label.acl" id="acl" tooltipKey="PropertyEditor.tooltip.acl">
                 <h:selectOneListbox size="1" id="acl" value="#{propertyEditorBean.propertyAcl}"
                         disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}">
                     <f:selectItems value="#{fxSelectBean.structureACLs}" />
                 </h:selectOneListbox>
             </fx:formRow>
             <fx:fieldSet legend="#{fxMessageBean['PropertyEditor.label.propertyOverrideOptions']}">
-                <fx:formRow labelKey="PropertyEditor.label.mayOverrideMultiLang" id="propertyMayOverrideMultiLang">
+                <fx:formRow labelKey="PropertyEditor.label.mayOverrideMultiLang" id="propertyMayOverrideMultiLang" tooltipKey="PropertyEditor.tooltip.mayOverrideMultiLang">
                     <h:selectBooleanCheckbox id="propertyMayOverrideMultiLang" value="#{propertyEditorBean.propertyMayOverrideMultiLang}"
                          disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"/>
                 </fx:formRow>
-                <fx:formRow labelKey="PropertyEditor.label.mayOverrideBaseMultiplicity" id="propertyMayOverrideBaseMultiplicity">
+                <fx:formRow labelKey="PropertyEditor.label.mayOverrideBaseMultiplicity" id="propertyMayOverrideBaseMultiplicity" tooltipKey="PropertyEditor.tooltip.mayOverrideBaseMultiplicity">
                     <h:selectBooleanCheckbox id="propertyMayOverrideBaseMultiplicity" value="#{propertyEditorBean.propertyMayOverrideBaseMultiplicity}"
                          disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"/>
                 </fx:formRow>
-                <fx:formRow labelKey="PropertyEditor.label.mayOverrideACL" id="propertyMayOverrideACL">
+                <fx:formRow labelKey="PropertyEditor.label.mayOverrideACL" id="propertyMayOverrideACL" tooltipKey="PropertyEditor.tooltip.mayOverrideACL">
                     <h:selectBooleanCheckbox id="propertyMayOverrideACL" value="#{propertyEditorBean.propertyMayOverrideACL}"
                          disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"/>
                 </fx:formRow>
            </fx:fieldSet>
-            <fx:formRow labelKey="PropertyEditor.label.fulltextIndexed" id="fulltextIndexed">
+            <fx:formRow labelKey="PropertyEditor.label.fulltextIndexed" id="fulltextIndexed" tooltipKey="PropertyEditor.tooltip.fulltextIndexed">
                     <h:selectBooleanCheckbox id="fulltextIndexed" value="#{propertyEditorBean.propertyFulltextIndexed}"
                          disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"/>
             </fx:formRow>
-            <fx:formRow labelKey="PropertyEditor.label.uniqueMode" id="uniqueMode">
+            <fx:formRow labelKey="PropertyEditor.label.uniqueMode" id="uniqueMode" tooltipKey="PropertyEditor.tooltip.uniqueMode">
                 <h:selectOneListbox size="1" id="uniqueMode" value="#{propertyEditorBean.propertyUniqueMode}"
                      disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor']) or
                      propertyEditorBean.propertyUsedInInstance}">
