@@ -143,6 +143,24 @@ public class FxRequestUtils {
     }
 
     /**
+     * Return the remote client IP that sent the request, taking into account proxying servers
+     * like Apache 2 that set appropriate forwarding headers (i.e. the actual client IP will be reported,
+     * not the IP of the proxy server).
+     *
+     * @param request   the request
+     * @return          the client IP
+     * @since           3.1
+     */
+    public static String getRemoteAddress(HttpServletRequest request) {
+        if (request.getHeader("x-forwarded-for") != null) {
+            // return forwarded client IP
+            return request.getHeader("x-forwarded-for");
+        } else {
+            return request.getRemoteAddr();
+        }
+    }
+
+    /**
      * Set the request and response character encodings to UTF-8 if they are not so already.
      * Either of the parameters may be set to null, in this case no action is performed.
      *
