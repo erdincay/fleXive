@@ -20,6 +20,7 @@
     <modules>
         <module>flexive-installer-dist</module>
         <module>flexive-installer-parent</module>
+        <module>flexive-installer-resources</module>
     </modules>
 
 </project>

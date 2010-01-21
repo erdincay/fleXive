@@ -12,7 +12,15 @@
     <version>1.0-SNAPSHOT</version>
 
     <name>[fleXive] installer based on Jetty and OpenEJB</name>
+    <description>
+        Build an installer for ../build/flexive-dist.zip (run "ant dist" in
+        the parent directory to build the distribution).
+    </description>
     <packaging>jar</packaging>
+
+    <properties>
+        <flexive-dist>../build/flexive-dist.zip</flexive-dist>
+    </properties>
 
     <build>
         <defaultGoal>package</defaultGoal>
@@ -29,24 +37,33 @@
                 </configuration>
             </plugin>
 
-            <!-- Fetch Jetty, ant -->
-            <plugin>
-                <artifactId>maven-antrun-plugin</artifactId>
-            </plugin>
-
             <!-- Import the current flexive.properties and make them available as properties
-                (also available in install.xml) -->
+            (also available in install.xml) -->
+            
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>properties-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>load-flexive-properties</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>read-project-properties</goal>
+                        </goals>
+                        <configuration>
+                            <files>
+                                <file>${basedir}/../flexive.properties</file>
+                            </files>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
 
-            <!--  copy other checked resource into staging area, expected by install.xml -->
+            <!-- Invoke plugins configured in flexive-installer-parent -->
             <plugin>
                 <artifactId>maven-antrun-plugin</artifactId>
             </plugin>
 
-            <!--  prepare dependencies so that izpack jar tag to pickup at compile time -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
@@ -58,17 +75,5 @@
             </plugin>
         </plugins>
     </build>
-
-    <!--repositories>
-        <repository>
-            <id>maven-dev-repository.dev.java.net</id>
-            <name>Java.net Dev Repository for Maven</name>
-            <url>https://maven-repository.dev.java.net/repository/</url>
-            <layout>legacy</layout>
-            <snapshots>
-                <updatePolicy>never</updatePolicy>
-            </snapshots>
-        </repository>
-    </repositories-->
 
 </project>
