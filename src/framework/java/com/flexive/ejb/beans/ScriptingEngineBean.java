@@ -189,7 +189,6 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
                     LOG.error("Exception running script [" + name + "]: " + e.getMessage(), e);
                     if (e instanceof FxApplicationException)
                         throw (FxApplicationException) e;
-                    System.err.println("==> generic thrown");
                     throw new GenericScriptException(name, LOG, e, "ex.general.scripting.exception", name, e.getMessage());
                 }
             }

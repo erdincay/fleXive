@@ -37,9 +37,10 @@
 
         <!--<res id="Installer.image" src="installer-image.png"/>-->
         <res id="Heading.image" src="installer-header.png"/>
-        
-        <res id="Unix_shortcutSpec.xml" src="unix_shortcut_specification.xml"/>
-        <res id="shortcutSpec.xml" src="windows_shortcut_specification.xml"/>
+
+        <!-- Shortcut definitions must be supplied by the final installer artifact -->
+        <res id="Unix_shortcutSpec.xml" src="../classes/unix_shortcut_specification.xml"/>
+        <res id="shortcutSpec.xml" src="../classes/windows_shortcut_specification.xml"/>
     </resources>
 
     <!-- 

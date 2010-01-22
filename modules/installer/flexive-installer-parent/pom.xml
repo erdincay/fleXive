@@ -10,7 +10,6 @@
 
     <groupId>com.flexive.installer</groupId>
     <artifactId>flexive-installer-parent</artifactId>
-    <version>1.0-SNAPSHOT</version>
 
     <name>[fleXive] Installer Parent</name>
     <description>
@@ -137,7 +136,6 @@
                                 <artifactItem>
                                     <groupId>com.flexive.installer</groupId>
                                     <artifactId>flexive-installer-dist</artifactId>
-                                    <version>${version}</version>
                                     <destFileName>FlexiveInstallListener.jar</destFileName>
                                 </artifactItem>
                             </artifactItems>
@@ -161,7 +159,6 @@
                                 <artifactItem>
                                     <groupId>com.flexive.installer</groupId>
                                     <artifactId>flexive-installer-resources</artifactId>
-                                    <version>${version}</version>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>
@@ -171,6 +168,27 @@
                 </executions>
             </plugin>
 
+            <!-- Checkout flexive's OpenEJB directory. This is a bit hacky,
+                but guarantees that we're using the same OpenEJB version as flexive
+                (and the flexive integration test suite) uses -->
+            <!--plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-scm-plugin</artifactId>
+
+                <executions>
+                    <execution>
+                        <id>openejb-checkout</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>checkout</goal>
+                        </goals>
+                        <configuration>
+                            <connectionUrl>${openejb.svnurl}</connectionUrl>
+                            <checkoutDirectory>${openejb.dir}</checkoutDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin-->
 
             <!-- Fetch Jetty, ant -->
             <plugin>
@@ -181,6 +199,7 @@
                         <phase>compile</phase>
                         <configuration>
                             <tasks>
+                                <!-- Get Jetty -->
                                 <get
                                         src="${jetty.baseUrl}${jetty.zipFile}"
                                         dest="${basedir}/src/${jetty.zipFile}"
@@ -228,9 +247,9 @@
                                                 includes="database.properties,deployment.properties"/>
                                 </jar>
                                 <!-- Copy OpenEJB into staging area -->
-                                <copy todir="${staging.dir}/openejb-3.1">
-                                    <fileset dir="${basedir}/../lib/openejb-3.1" includes="**/*" excludes="logs/**"/>
-                                </copy>
+                                <!--copy todir="${staging.dir}/openejb-3.1">
+                                    <fileset dir="${openejb.dir}" includes="**/*" excludes="logs/**"/>
+                                </copy-->
                             </tasks>
                         </configuration>
                         <goals>

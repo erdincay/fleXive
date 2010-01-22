@@ -7,9 +7,7 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>com.flexive.installer</groupId>
     <artifactId>flexive-installer</artifactId>
-    <version>1.0-SNAPSHOT</version>
 
     <name>[fleXive] installer based on Jetty and OpenEJB</name>
     <description>
@@ -38,17 +36,13 @@
         </resources>
 
         <plugins>
-            <!-- configure the compiler to use 1.5  -->
+            <!-- Invoke plugins configured in flexive-installer-parent -->
+
             <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <encoding>${project.build.sourceEncoding}</encoding>
-                    <source>1.5</source>
-                    <target>1.5</target>
-                </configuration>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-scm-plugin</artifactId>
             </plugin>
 
-            <!-- Invoke plugins configured in flexive-installer-parent -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
