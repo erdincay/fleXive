@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>
+<xfragment>
+
+    <!-- The flexive distribution pack -->
+
+    <pack name="[fleXive] ${flexive.version}" required="yes">
+        <description>[fleXive] distribution, release ${flexive.version}.</description>
+        <file src="flexive-dist.zip" targetdir="$INSTALL_PATH" unpack="true"/>
+    </pack>
+
+</xfragment>

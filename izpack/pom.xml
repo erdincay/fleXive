@@ -26,6 +26,17 @@
         <defaultGoal>package</defaultGoal>
         <finalName>${project.artifactId}</finalName>
 
+        <filters>
+            <filter>../flexive.properties</filter>
+        </filters>
+
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+
         <plugins>
             <!-- configure the compiler to use 1.5  -->
             <plugin>
@@ -35,28 +46,6 @@
                     <source>1.5</source>
                     <target>1.5</target>
                 </configuration>
-            </plugin>
-
-            <!-- Import the current flexive.properties and make them available as properties
-            (also available in install.xml) -->
-            
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>properties-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>load-flexive-properties</id>
-                        <phase>process-resources</phase>
-                        <goals>
-                            <goal>read-project-properties</goal>
-                        </goals>
-                        <configuration>
-                            <files>
-                                <file>${basedir}/../flexive.properties</file>
-                            </files>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
 
             <!-- Invoke plugins configured in flexive-installer-parent -->

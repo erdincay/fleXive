@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>
 <installation version="1.0" xmlns:xi="http://www.w3.org/2001/XInclude">
 
-    <xi:include href="../../src/main/resources/install-product.xml"/>
+    <!-- Include files from the installer's src/main/resources directory -->
+    <xi:include href="../classes/install-product.xml"/>
 
     <!-- 
         The gui preferences indication.
@@ -94,14 +95,15 @@
             <!--<parsable targetfile="$INSTALL_PATH/script.bat"/>-->
             <!-- The file will be parsed -->
         </pack>
-        <pack name="[fleXive] ${flexive.version}" required="yes">
-            <description>[fleXive] distribution, release ${flexive.version}.</description>
-            <file src="flexive-dist.zip" targetdir="$INSTALL_PATH" unpack="true"/>
-        </pack>
+        
+        <!-- Include the main flexive distribution pack (the file must be named flexive-dist.zip) -->
+        <xi:include href="../classes/install-packs.xml"/>
+        
         <pack name="Jetty WebServer" required="yes">
             <description>Jetty WebServer</description>
             <fileset dir="jetty-6.1.17" targetdir="$INSTALL_PATH/jetty-6.1.17"/>
         </pack>
+
         <pack name="OpenEJB Container" required="yes">
             <description>OpenEJB container</description>
             <fileset dir="dependency/openejb"  targetdir="$INSTALL_PATH/jetty-6.1.17/lib/ext/openejb"/>
