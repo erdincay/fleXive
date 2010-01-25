@@ -197,7 +197,9 @@ public class ApplicationDescriptorBuilderTask extends Task {
                 ejbs.add(f);
             else if (f.getAbsolutePath().toLowerCase().endsWith(".jar"))
                 jars.add(f);
-            else if (f.getAbsolutePath().toLowerCase().endsWith(".war"))
+            else if (f.getAbsolutePath().toLowerCase().endsWith(".war")
+                    // exclude Jetty root application
+                    && !"root.war".equals(f.getName()))
                 wars.add(f);
             else if (!f.getName().startsWith(".") && !f.getName().equals("drops.archives")
                     && !f.getName().equals("format") && !f.getName().equals("entries")

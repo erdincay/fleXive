@@ -15,7 +15,7 @@
         <izpack-standalone.version>4.3.2</izpack-standalone.version>
         <ant.version>1.7.1</ant.version>
 
-        <jetty.version>6.1.17</jetty.version>
+        <jetty.version>6.1.22</jetty.version>
         <jetty.baseUrl>http://dist.codehaus.org/jetty/jetty-${jetty.version}/</jetty.baseUrl>
         <jetty.zipFile>jetty-${jetty.version}.zip</jetty.zipFile>
 

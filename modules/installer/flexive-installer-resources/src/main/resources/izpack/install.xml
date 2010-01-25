@@ -36,7 +36,7 @@
         <res id="InfoPanel.info" src="Readme.txt"/>
 
         <!--<res id="Installer.image" src="installer-image.png"/>-->
-        <res id="Heading.image" src="installer-header.png"/>
+        <res id="Heading.image" src="../classes/installer-header.png"/>
 
         <!-- Shortcut definitions must be supplied by the final installer artifact -->
         <res id="Unix_shortcutSpec.xml" src="../classes/unix_shortcut_specification.xml"/>
@@ -77,7 +77,7 @@
             <description>The base files</description>
             <file src="Readme.txt" targetdir="$INSTALL_PATH"/>
             <file src="Licence.txt" targetdir="$INSTALL_PATH"/>
-            <file src="openejb.conf.xml" targetdir="$INSTALL_PATH/jetty-6.1.17"/>
+            <file src="openejb.conf.xml" targetdir="$INSTALL_PATH/jetty"/>
             <file src="start.sh" targetdir="$INSTALL_PATH"/>
             <file src="start.bat" targetdir="$INSTALL_PATH"/>
             <file src="deployment.properties" targetdir="$INSTALL_PATH/flexive-dist"/>
@@ -102,12 +102,12 @@
         
         <pack name="Jetty WebServer" required="yes">
             <description>Jetty WebServer</description>
-            <fileset dir="jetty-6.1.17" targetdir="$INSTALL_PATH/jetty-6.1.17"/>
+            <fileset dir="jetty" targetdir="$INSTALL_PATH/jetty"/>
         </pack>
 
         <pack name="OpenEJB Container" required="yes">
             <description>OpenEJB container</description>
-            <fileset dir="dependency/openejb"  targetdir="$INSTALL_PATH/jetty-6.1.17/lib/ext/openejb"/>
+            <fileset dir="dependency/openejb"  targetdir="$INSTALL_PATH/jetty/lib/ext/openejb"/>
         </pack>
     </packs>
 

@@ -33,11 +33,9 @@
  ***************************************************************/
 package com.flexive.war.javascript;
 
-import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.EJBLookup;
-import com.flexive.shared.FxContext;
-import com.flexive.shared.FxFormatUtils;
+import com.flexive.shared.*;
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.exceptions.FxRuntimeException;
 import com.flexive.shared.scripting.FxScriptRunInfo;
 
 import java.io.Serializable;
@@ -79,7 +77,7 @@ public class SystemInformation implements Serializable {
                 else if (!ri.isSuccessful())
                     sb.append("<td class=\"initStatusError\">ERROR");
                 sb.append("</td><td class=\"initDrop\">");
-                sb.append(ri.getDrop()).append("</td><td class=\"initName\">").append(ri.getName());
+                sb.append(getDropLabel(ri)).append("</td><td class=\"initName\">").append(ri.getName());
                 sb.append("</td><td class=\"initDuration\">").append(duration).append("</td>\n");
                 sb.append("</tr>\n");
             }
@@ -88,6 +86,14 @@ public class SystemInformation implements Serializable {
             sb.append("Failed to retrieve information: ").append(e.getMessage(FxContext.getUserTicket()));
         }
         return sb.toString();
+    }
+
+    private String getDropLabel(FxScriptRunInfo ri) {
+        try {
+            return FxSharedUtils.getDropApplication(ri.getDrop()).getDisplayName();
+        } catch (FxRuntimeException e) {
+            return ri.getDrop();
+        }
     }
 
     /**

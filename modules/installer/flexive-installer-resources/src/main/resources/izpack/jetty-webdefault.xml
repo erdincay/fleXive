@@ -328,7 +328,9 @@
   -->
 
     <!-- GzipFilter configuration -->
-    <filter>
+    <!-- Disabled for now, because it somehow leads to incorrect responses on some pages ("not a gzip file") -->
+    
+    <!--filter>
         <filter-name>GzipFilter</filter-name>
         <filter-class>org.mortbay.servlet.GzipFilter</filter-class>
     </filter>
@@ -343,7 +345,7 @@
         <url-pattern>*.xhtml</url-pattern>
         <url-pattern>*.jsf</url-pattern>
         <url-pattern>*.faces</url-pattern>
-    </filter-mapping>
+    </filter-mapping-->
 
 
   <!-- ==================================================================== -->

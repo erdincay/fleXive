@@ -4,7 +4,7 @@
 * To start a [fleXive] server:
     On Unix:    sh start.sh
     On Windows: start.bat
-    Other OS:   cd jetty-6.1.17
+    Other OS:   cd jetty
                 java -Dopenejb.configuration=openejb.conf.xml -Xmx128m -jar start.jar
 
 * Backend URL: http://localhost:8080/flexive/adm/

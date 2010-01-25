@@ -23,7 +23,7 @@
 
     <properties>
         <staging.dir>${project.build.directory}/staging</staging.dir>
-        <jetty.staging.dir>${staging.dir}/jetty-${jetty.version}</jetty.staging.dir>
+        <jetty.staging.dir>${staging.dir}/jetty</jetty.staging.dir>
     </properties>
                
     <dependencies>
@@ -207,6 +207,7 @@
                                         verbose="true"
                                         />
                                 <unzip src="${basedir}/src/${jetty.zipFile}" dest="${staging.dir}"/>
+                                <move file="${staging.dir}/jetty-${jetty.version}" tofile="${staging.dir}/jetty"/>
                                                                                                                                            
                                 <!-- Install our own webdefault.xml -->
                                 <copy file="${staging.dir}/izpack/jetty-webdefault.xml" tofile="${jetty.staging.dir}/etc/webdefault.xml"/>
@@ -273,7 +274,7 @@
                 <configuration>
                     <izpackBasedir>${staging.dir}</izpackBasedir>
                     <customPanelDirectory>${staging.dir}</customPanelDirectory>
-                    <installerFile>${project.build.directory}/flexive-installer.jar</installerFile>
+                    <installerFile>${project.build.directory}/${project.build.finalName}.jar</installerFile>
                 </configuration>
                 <executions>
                     <execution>

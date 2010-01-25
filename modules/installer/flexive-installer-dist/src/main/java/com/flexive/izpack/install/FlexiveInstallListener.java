@@ -16,7 +16,7 @@ import org.apache.tools.ant.ProjectHelper;
  * @version $Rev$
  */
 public class FlexiveInstallListener implements InstallerListener {
-    private static final String JETTY_DIR = "jetty-6.1.17";
+    private static final String JETTY_DIR = "jetty";
 
     public void afterPacks(AutomatedInstallData idata, AbstractUIProgressHandler handler) throws Exception {
         handler.startAction("Flexive setup", 3);

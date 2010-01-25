@@ -49,6 +49,12 @@
                             </span>
                             <br/>
                         </ui:fragment>
+                        <ui:fragment rendered="#{param['newInstall'] eq 'true'}">
+                            <span class="infoMessage">
+                                #{fxMessageBean['Login.info.newInstall']}
+                            </span>
+                            <br/>
+                        </ui:fragment>
                         <ui:fragment rendered="#{!fxSystemBean.isSupportedBackendBrowserVersion}">
                             <span class="warnMessage">
                                 #{fxMessageBean['Login.error.unsupportedBrowser']}

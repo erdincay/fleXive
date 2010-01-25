@@ -10,7 +10,11 @@
     
     <artifactId>flexive-installer-dist</artifactId>
 
-    <name>[fleXive] IZPack Install Listener</name>
+    <name>[fleXive] Installer IZPack Listener</name>
+    <description>
+        IZPack listener to deploy the flexive distribution
+        to the packaged Jetty container.
+    </description>
     <packaging>jar</packaging>
 
     <dependencies>

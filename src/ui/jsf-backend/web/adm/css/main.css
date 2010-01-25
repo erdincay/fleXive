@@ -373,6 +373,9 @@ a > img {
 
 .initDrop {
     text-align:center;
+    white-space: nowrap;
+    padding-left: 2em;
+    padding-right: 2em;
 }
 
 .initStatusError {

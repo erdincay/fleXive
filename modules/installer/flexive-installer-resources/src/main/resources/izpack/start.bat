@@ -1,2 +1,2 @@
-cd jetty-6.1.17
+cd jetty
 java -Dopenejb.configuration=openejb.conf.xml -Xmx200m -jar start.jar
