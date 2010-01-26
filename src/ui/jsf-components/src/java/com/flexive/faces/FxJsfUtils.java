@@ -69,10 +69,7 @@ import javax.faces.context.FacesContext;
 import static javax.faces.context.FacesContext.getCurrentInstance;
 import javax.faces.model.SelectItem;
 import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
-import javax.servlet.http.HttpServletResponseWrapper;
-import javax.servlet.http.HttpSession;
+import javax.servlet.http.*;
 import java.io.Writer;
 import java.io.IOException;
 import java.text.Collator;
@@ -513,7 +510,9 @@ public class FxJsfUtils {
         HttpServletResponseWrapper resp = (HttpServletResponseWrapper) getCurrentInstance().
                 getExternalContext().getResponse();
         FxResponseWrapper fresp;
-        if (resp instanceof FxResponseWrapper) {
+        if (resp == null) {
+            fresp = null;
+        } else if (resp instanceof FxResponseWrapper) {
             fresp = (FxResponseWrapper) resp;
         } else {
             fresp = (FxResponseWrapper) resp.getResponse();

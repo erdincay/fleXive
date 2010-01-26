@@ -89,7 +89,7 @@ public class FxRequestWrapper extends HttpServletRequestWrapper implements FxReq
      * @param httpServletRequest the servlet request
      * @param divisionId         the division id
      */
-    protected FxRequestWrapper(final HttpServletRequest httpServletRequest, final int divisionId) {
+    public FxRequestWrapper(final HttpServletRequest httpServletRequest, final int divisionId) {
         super(httpServletRequest);
         // Setup internal variables
         this.timestamp = System.currentTimeMillis();

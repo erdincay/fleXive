@@ -33,12 +33,10 @@ package com.flexive.faces.beans;
 
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.messages.FxFacesMsgErr;
-import com.flexive.faces.messages.FxFacesMsgWarn;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.exceptions.FxAccountInUseException;
 import com.flexive.shared.exceptions.FxLoginFailedException;
 import com.flexive.shared.security.UserTicket;
-import com.flexive.war.FxRequest;
 
 import java.io.Serializable;
 
@@ -78,9 +76,8 @@ public class AuthenticationBean implements Serializable {
      */
     public String login() {
         try {
-            FxRequest request = FxJsfUtils.getRequest();
             FxContext.get().login(username, password, takeover);
-            request.getUserTicket();
+            FxContext.getUserTicket();
             return "loginSuccess";
         } catch (FxLoginFailedException e) {
             new FxFacesMsgErr(
