@@ -86,8 +86,16 @@ public class SessionFixationFilter implements Filter {
                 final Map<String, Object> attributes = getAttributes(request.getSession());
 
                 // create new session ID
+                final String oldSessionId = request.getSession(true).getId();
                 request.getSession().invalidate();
                 request.getSession(true);
+                if (oldSessionId.equals(request.getSession().getId())) {
+                    if (LOG.isWarnEnabled()) {
+                        LOG.warn("Invalidating the session did not generate a new session ID. Your application may "
+                        + "be vulnerable to session fixation attacks. When using JBoss, try setting "
+                        + "emptySessionPath=\"false\" in your server.xml.");
+                    }
+                }
 
                 // integrate old values
                 setAttributes(request.getSession(false), attributes);
