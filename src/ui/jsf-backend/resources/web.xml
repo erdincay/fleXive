@@ -123,6 +123,10 @@
         <filter-class>com.flexive.war.filter.VersionUrlFilter</filter-class>
     </filter>
 
+    <filter>
+        <filter-name>SessionFixationFilter</filter-name>
+        <filter-class>com.flexive.war.filter.SessionFixationFilter</filter-class>
+    </filter>
 
     <filter-mapping>
         <filter-name>ajax4jsf</filter-name>
@@ -135,6 +139,19 @@
     <filter-mapping>
         <filter-name>ajax4jsf</filter-name>
         <url-pattern>*.faces</url-pattern>
+    </filter-mapping>
+
+    <filter-mapping>
+        <filter-name>SessionFixationFilter</filter-name>
+        <url-pattern>/pub/login.xhtml</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>SessionFixationFilter</filter-name>
+        <url-pattern>/pub/login.jsf</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>SessionFixationFilter</filter-name>
+        <url-pattern>/pub/login.faces</url-pattern>
     </filter-mapping>
 
     <filter-mapping>
