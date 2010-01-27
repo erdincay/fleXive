@@ -31,8 +31,6 @@
  ***************************************************************/
 package com.flexive.core;
 
-import static com.flexive.core.DatabaseConst.DS_GLOBAL_CONFIG;
-import static com.flexive.core.DatabaseConst.ML;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxLanguage;
@@ -40,6 +38,7 @@ import com.flexive.shared.configuration.DivisionData;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.GlobalConfigurationEngine;
 import com.flexive.shared.value.FxString;
+import com.google.common.collect.Maps;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -51,6 +50,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.flexive.core.DatabaseConst.DS_GLOBAL_CONFIG;
+import static com.flexive.core.DatabaseConst.ML;
 
 /**
  * Class handling Database stuff
@@ -512,7 +514,8 @@ public final class Database {
     public static Map<Long, FxString[]> loadFxStrings(Connection con, String table, String... columns) throws SQLException {
         Statement stmt = null;
         final StringBuilder sql = new StringBuilder();
-        final Map<Long, FxString[]> result = new HashMap<Long, FxString[]>();
+        final Map<Long, FxString[]> result = Maps.newHashMap();
+        final Map<String, String> cache = Maps.newHashMap();        // avoid return duplicate strings
         try {
             sql.append("SELECT ID, LANG");
             final boolean hasDefLang = columns.length == 1; // deflang is only meaningful for single-column tables
@@ -545,7 +548,14 @@ public final class Database {
                     result.put(id, entry);*/
                 }
                 for (int i = 0; i < columns.length; i++) {
-                    final String translation = rs.getString(startIndex + i * (hasDefLang ? 1 : 2));
+                    final String value = rs.getString(startIndex + i * (hasDefLang ? 1 : 2));
+                    final String translation;
+                    if (cache.containsKey(value)) {
+                        translation = cache.get(value); // return cached string instance
+                    } else {
+                        translation = value;
+                        cache.put(value, value);
+                    }
                     if (entry[i] == null)
                         entry[i] = new FxString(true, lang, translation);
                     else

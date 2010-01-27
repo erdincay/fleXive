@@ -42,10 +42,7 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.mail.util.ByteArrayDataSource;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 
 /**
  * Email Utilities.
@@ -142,23 +139,24 @@ public class FxMailUtils {
             // Set the sender
             if (StringUtils.isBlank(from))
                 msg.setFrom(); // Uses local IP Adress and the user under which the server is running
-            else
-                msg.setFrom(new InternetAddress(from));
+            else {
+                msg.setFrom(createAddress(from));
+            }
 
             if (!StringUtils.isBlank(replyTo))
-                msg.setReplyTo(InternetAddress.parse(replyTo, false));
+                msg.setReplyTo(encodePersonal(InternetAddress.parse(replyTo, false)));
 
 
             // Set the To, Cc and Bcc fields
             if (!StringUtils.isBlank(to))
-                msg.setRecipients(MimeMessage.RecipientType.TO, InternetAddress.parse(to, false));
+                msg.setRecipients(MimeMessage.RecipientType.TO, encodePersonal(InternetAddress.parse(to, false)));
             if (!StringUtils.isBlank(cc))
-                msg.setRecipients(MimeMessage.RecipientType.CC, InternetAddress.parse(cc, false));
+                msg.setRecipients(MimeMessage.RecipientType.CC, encodePersonal(InternetAddress.parse(cc, false)));
             if (!StringUtils.isBlank(bcc))
-                msg.setRecipients(MimeMessage.RecipientType.BCC, InternetAddress.parse(bcc, false));
+                msg.setRecipients(MimeMessage.RecipientType.BCC, encodePersonal(InternetAddress.parse(bcc, false)));
 
             // Set the subject
-            msg.setSubject(subject, "ISO-8859-1");
+            msg.setSubject(subject, "UTF-8");
 
             String sMainType = "Multipart/Alternative;\n\tboundary=\"" + BOUNDARY1 + "\"";
 
@@ -218,6 +216,27 @@ public class FxMailUtils {
         } catch (EncoderException e) {
             throw new FxApplicationException(e, "ex.messaging.mail.send", e.getMessage());
         }
+    }
+
+    private static InternetAddress[] encodePersonal(InternetAddress[] addresses) throws UnsupportedEncodingException {
+        if (addresses == null) {
+            return null;
+        }
+        for (InternetAddress address : addresses) {
+            if (address.getPersonal() != null) {
+                address.setPersonal(address.getPersonal(), "UTF-8");
+            }
+        }
+        return addresses;
+    }
+
+    private static InternetAddress createAddress(String from) throws AddressException, UnsupportedEncodingException {
+        final InternetAddress address = new InternetAddress(from);
+        if (address.getPersonal() != null) {
+            // encode name which is more likely to use non-ASCII characters
+            address.setPersonal(address.getPersonal(), "UTF-8");
+        }
+        return address;
     }
 
     private static String encodeQuotedPrintable(String textBody) throws EncoderException {

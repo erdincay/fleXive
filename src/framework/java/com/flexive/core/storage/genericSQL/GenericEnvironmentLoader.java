@@ -365,7 +365,18 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                 if (!result.containsKey(id)) {
                     result.put(id, new ArrayList<FxStructureOption>());
                 }
-                FxStructureOption.setOption(result.get(id), rs.getString(2), rs.getBoolean(3), rs.getString(4));
+
+                final String dbValue = rs.getString(4);
+                final String value;
+                if (FxStructureOption.VALUE_FALSE.equals(dbValue)) {
+                    // check string constants to avoid creating "0" and "1" strings all over the place
+                    value = FxStructureOption.VALUE_FALSE;
+                } else if (FxStructureOption.VALUE_TRUE.equals(dbValue)) {
+                    value = FxStructureOption.VALUE_TRUE;
+                } else {
+                    value = dbValue;
+                }
+                FxStructureOption.setOption(result.get(id), rs.getString(2), rs.getBoolean(3), value);
             }
             return result;
         } finally {

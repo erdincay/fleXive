@@ -51,7 +51,6 @@ import com.flexive.shared.workflow.Step;
 import com.flexive.shared.workflow.StepDefinition;
 import com.flexive.shared.workflow.Workflow;
 import com.google.common.collect.Lists;
-import static com.google.common.collect.Lists.newArrayListWithCapacity;
 
 import java.util.*;
 
@@ -297,8 +296,16 @@ public final class FxEnvironmentImpl implements FxEnvironment {
         this.propertyNameLookup = new HashMap<String, Long>(properties.size());
         for (FxProperty property : properties) {
             this.properties.put(property.getId(), property);
-            this.propertyNameLookup.put(property.getName().toLowerCase(), property.getId());
+            this.propertyNameLookup.put(
+                    toUpperKey(property.getName()),
+                    property.getId()
+            );
         }
+    }
+
+    private String toUpperKey(String key) {
+        final String upperName = key.toUpperCase();
+        return upperName.equals(key) ? key : upperName;
     }
 
     /**
@@ -320,7 +327,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
         this.assignmentXPathLookup = new HashMap<String, Long>(assignments.size());
         for (FxAssignment assignment : assignments) {
             this.assignments.put(assignment.getId(), assignment);
-            this.assignmentXPathLookup.put(assignment.getXPath().toUpperCase(), assignment.getId());
+            this.assignmentXPathLookup.put(toUpperKey(assignment.getXPath()), assignment.getId());
         }
         if (propertyAssignmentsAll != null)
             propertyAssignmentsAll.clear();
@@ -647,7 +654,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
      * {@inheritDoc}
      */
     public FxProperty getProperty(String name) {
-        final Long id = propertyNameLookup.get(name.toLowerCase());
+        final Long id = propertyNameLookup.get(name.toUpperCase());
         if (id != null) {
             return properties.get(id);
         }
@@ -658,7 +665,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
      * {@inheritDoc}
      */
     public boolean propertyExists(String name) {
-        return propertyNameLookup.containsKey(name.toLowerCase());
+        return propertyNameLookup.containsKey(name.toUpperCase());
     }
 
     /**
@@ -702,7 +709,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
         if (xPath != null && xPath.trim().length() > 0) {
             if (!XPathElement.isValidXPath(xPath))
                 return false; //avoid exceptions on malformed xpath's
-            xPath = XPathElement.toXPathNoMult(xPath);
+            xPath = XPathElement.toXPathNoMult(xPath);  // toXPathNoMult also performs toUpperCase
             return assignmentXPathLookup.containsKey(xPath);
         }
         return false;
