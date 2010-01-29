@@ -31,6 +31,7 @@
  ***************************************************************/
 package com.flexive.shared;
 
+import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -41,6 +42,7 @@ import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
+import java.util.List;
 
 
 /**
@@ -277,5 +279,24 @@ public class FxFileUtils {
         if (file == null || !file.exists() || file.length() == 0)
             return "";
         return FxFormatUtils.encodeBase64(getBytes(file));
+    }
+
+    /**
+     * List the contents of the given directory recursively.
+     *
+     * @param root  the root directory
+     * @return      the contents of the directory
+     * @since 3.1
+     */
+    public static List<File> listRecursive(File root) {
+        final List<File> result = Lists.newArrayList();
+        for (File file : root.listFiles()) {
+            if (file.isDirectory()) {
+                result.addAll(listRecursive(file));
+            } else {
+                result.add(file);
+            }
+        }
+        return result;
     }
 }

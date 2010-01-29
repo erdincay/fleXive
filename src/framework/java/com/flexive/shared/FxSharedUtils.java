@@ -111,8 +111,8 @@ public final class FxSharedUtils {
      */
     public final static boolean USE_JDK6_EXTENSION;
     public final static boolean WINDOWS = System.getProperty("os.name").indexOf("Windows") >= 0;
-    private static final String FLEXIVE_DROP_PROPERTIES = "flexive-application.properties";
-    private static final String FLEXIVE_STORAGE_PROPERTIES = "flexive-storage.properties";
+    public static final String FLEXIVE_DROP_PROPERTIES = "flexive-application.properties";
+    public static final String FLEXIVE_STORAGE_PROPERTIES = "flexive-storage.properties";
 
     static {
         int major = -1, minor = -1;
@@ -486,16 +486,12 @@ public final class FxSharedUtils {
                 final String contextRoot = properties.getProperty("contextRoot");
                 final String displayName = properties.getProperty("displayName");
                 if (StringUtils.isNotBlank(name)) {
-                    String path = url.getPath().replace("/" + FLEXIVE_DROP_PROPERTIES, "");
-                    if (path.endsWith("!")) {
-                        path = StringUtils.chop(path);
-                    }
                     dropApplications.add(
                             new FxDropApplication(
                                     name,
                                     contextRoot,
                                     defaultString(displayName, name),
-                                    path
+                                    url
                             )
                     );
                 }
@@ -1868,6 +1864,28 @@ public final class FxSharedUtils {
             }
         }
         return refs;
+    }
+
+    /**
+     * Close the given resources and log a warning message if closing fails.
+     *
+     * @param resources the resource(s) to be closed
+     * @since 3.1
+     */
+    public static void close(Closeable... resources) {
+        if (resources != null) {
+            for (Closeable resource : resources) {
+                if (resource != null) {
+                    try {
+                        resource.close();
+                    } catch (IOException e) {
+                        if (LOG.isWarnEnabled()) {
+                            LOG.warn("Failed to close resource " + resource + ": " + e.getMessage(), e);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     /**

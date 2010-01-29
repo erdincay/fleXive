@@ -32,12 +32,10 @@
 package com.flexive.ejb.beans;
 
 import com.flexive.core.Database;
-import com.flexive.core.storage.StorageManager;
-import static com.flexive.core.DatabaseConst.*;
 import com.flexive.core.security.UserTicketImpl;
+import com.flexive.core.storage.StorageManager;
 import com.flexive.core.structure.FxEnvironmentImpl;
 import com.flexive.core.structure.StructureLoader;
-import static com.flexive.shared.EJBLookup.getDivisionConfigurationEngine;
 import com.flexive.shared.*;
 import com.flexive.shared.configuration.Parameter;
 import com.flexive.shared.configuration.SystemParameters;
@@ -59,8 +57,10 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.codehaus.groovy.control.CompilationFailedException;
+
 import javax.annotation.Resource;
 import javax.ejb.*;
+import java.io.File;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -69,10 +69,12 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.jar.JarInputStream;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+
+import static com.flexive.core.DatabaseConst.*;
+import static com.flexive.shared.EJBLookup.getDivisionConfigurationEngine;
 
 /**
  * ScriptingEngine implementation
@@ -443,30 +445,27 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public FxScriptInfo createScriptFromDropLibrary(String dropName, FxScriptEvent event, String libraryname, String name, String description) throws FxApplicationException {
-        boolean fnf = true;
         FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.ScriptManagement);
         String code = FxSharedUtils.loadFromInputStream(FxSharedUtils.getResourceStream(dropName + "Resources/scripts/library/" + libraryname), -1);
         if (code == null || code.length() == 0) { // this might be a jar file
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Failed to locate script in regular application library, checking for drop application in classpath JARs");
             }
-            JarInputStream jarStream;
             try {
                 final FxDropApplication dropApplication = FxSharedUtils.getDropApplication(dropName);
-                jarStream = dropApplication.getResourceJarStream();
-                Map<String, String> jarContents = FxSharedUtils.getContentsFromJarStream(jarStream, libraryname, true);
-                if ((jarContents.get(libraryname)) != null) {
-                    code = jarContents.get(libraryname);
-                    fnf = false;
+                final Map<String, String> libraries = dropApplication.loadTextResources("scripts/library/");
+                for (Map.Entry<String, String> libEntry : libraries.entrySet()) {
+                    if (libEntry.getKey().endsWith('/' + libraryname) || libEntry.getKey().endsWith(File.separator + libraryname)) {
+                        code = libEntry.getValue();
+                        break;
+                    }
                 }
             } catch (Exception e) {
                 LOG.error("Failed to load library scripts for " + dropName + " from JAR file: " + e.getMessage(), e);
             }
-        } else {
-            fnf = false;
         }
 
-        if (fnf) {
+        if (code == null || code.length() == 0) {
             throw new FxNotFoundException("ex.scripting.load.library.failed", libraryname);
         }
         return createScript(event, name, description, code);
@@ -574,6 +573,11 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
                 throw (FxApplicationException) e;
             LOG.error("Scripting error: " + e.getMessage(), e);
             throw new FxInvalidParameterException(si.getName(), "ex.general.scripting.exception", si.getName(), e.getMessage());
+        } finally {
+            // don't leave binding in script cache
+            synchronized (script) {
+                script.setBinding(null);
+            }
         }
     }
 
@@ -1042,19 +1046,27 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
             }
         } else {
             // scan classpath from shared resource JAR
-            JarInputStream jarStream;
             try {
                 final FxDropApplication dropApplication = FxSharedUtils.getDropApplication(dropName);
-                jarStream = dropApplication.getResourceJarStream();
-                Map<String, String> jarContents = FxSharedUtils.getContentsFromJarStream(jarStream, "scripts/" + folder + "/", false);
-                if (jarContents != null) {
-                    final List<String> filenames = Lists.newArrayList(jarContents.keySet());
-                    Collections.sort(filenames);
-                    for (String scriptName : filenames) {
-                        scriptExecutor.runScript(scriptName, jarContents.get(scriptName));
+                final Map<String, String> resources = dropApplication.loadTextResources("scripts/" + folder + "/");
+                if (resources.isEmpty()) {
+                    if (LOG.isInfoEnabled()) {
+                        LOG.info("Found no scripts in drop " + dropName + " in path \"scripts/" + folder + "/\"");
                     }
                 } else {
-                    LOG.info("Found no scripts in drop " + dropName + " in path \"scripts/" + folder + "/\"");
+                    // sort by name
+                    final List<String> names = Lists.newArrayList(resources.keySet());
+                    Collections.sort(names);
+
+                    // execute scripts
+                    for (String name : names) {
+                        scriptExecutor.runScript(
+                                // extract filename
+                                name.substring(Math.max(name.lastIndexOf('/'), name.lastIndexOf(File.separator)) + 1),
+                                // load script code
+                                resources.get(name)
+                        );
+                    }
                 }
             } catch (Exception e) {
                 LOG.error("Failed to load " + folder + " scripts for " + dropName + " from JAR file: " + e.getMessage(), e);
