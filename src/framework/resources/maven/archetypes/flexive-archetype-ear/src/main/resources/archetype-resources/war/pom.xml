@@ -40,7 +40,7 @@
     <build>
         <finalName>yourWarName</finalName>
         <plugins>
-            <!-- Copy the backend application to target/backend/flexive-backend-war.war (for Jetty deployment) -->
+            <!-- Copy the backend application to target/backend/flexive.war (for Jetty deployment) -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
@@ -62,6 +62,7 @@
                                     <version>${flexive.version}</version>
                                     <overWrite>true</overWrite>
                                     <outputDirectory>target/backend</outputDirectory>
+                                    <destFileName>flexive.war</destFileName>
                                 </artifactItem>
                             </artifactItems>
                         </configuration>
