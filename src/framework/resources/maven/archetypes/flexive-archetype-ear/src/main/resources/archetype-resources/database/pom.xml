@@ -12,11 +12,11 @@
     <name>database</name>
 
     <!--
-        Define the flexive-db-setup-h2 profile for database setup.
+        Define the db-setup-h2 profile for database setup.
     -->
     <profiles>
         <profile>
-            <id>flexive-db-setup-h2</id>
+            <id>db-setup-h2</id>
             <!--
                 Activate the profile automatically when the database files are missing.
 
@@ -36,6 +36,20 @@
             </activation>
             <build>
                 <plugins>
+                    <!-- Clean database directory -->
+                    <plugin>
+                        <artifactId>maven-clean-plugin</artifactId>
+                        <configuration>
+                            <filesets>
+                                <fileset>
+                                    <directory>h2</directory>
+                                    <includes>
+                                        <include>**/*</include>
+                                    </includes>
+                                </fileset>
+                            </filesets>
+                        </configuration>
+                    </plugin>
                     <!-- Extract schema artifact -->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>

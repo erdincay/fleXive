@@ -1090,13 +1090,13 @@ BUILD SUCCESSFUL]]></screen>
                     </varlistentry>
                     <varlistentry>
                         <term>
-                            <command>mvn install -Pflexive-db-setup-h2</command>
+                            <command>mvn install -Pdb-setup-h2</command>
                             (since 3.1)
                         </term>
                         <listitem>
                             <para>
                                 Compile, package and install the application. Manually activate the profile
-                                <code>flexive-db-setup-h2</code>
+                                <code>db-setup-h2</code>
                                 to reset the H2 database in the
                                 <filename>database/h2</filename>
                                 subdirectory. (You can also force a reset of the H2 database by deleting the

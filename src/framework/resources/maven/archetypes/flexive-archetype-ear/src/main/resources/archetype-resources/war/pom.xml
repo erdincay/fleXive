@@ -37,6 +37,30 @@
         </dependency>
     </dependencies>
 
+    <profiles>
+        <profile>
+            <id>db-setup-h2</id>
+            <build>
+                <plugins>
+                    <!-- Clean storage directory when database is resetted -->
+                    <plugin>
+                        <artifactId>maven-clean-plugin</artifactId>
+                        <configuration>
+                            <filesets>
+                                <fileset>
+                                    <directory>flexive-storage</directory>
+                                    <includes>
+                                        <include>**/*</include>
+                                    </includes>
+                                </fileset>
+                            </filesets>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
     <build>
         <finalName>yourWarName</finalName>
         <plugins>

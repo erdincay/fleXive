@@ -289,6 +289,9 @@ public class FxFileUtils {
      * @since 3.1
      */
     public static List<File> listRecursive(File root) {
+        if (root == null) {
+            return Lists.newArrayListWithCapacity(0);
+        }
         final List<File> result = Lists.newArrayList();
         for (File file : root.listFiles()) {
             if (file.isDirectory()) {

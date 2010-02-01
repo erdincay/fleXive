@@ -45,4 +45,12 @@
         <module>flexive-installer-resources</module>
     </modules>
 
+    <distributionManagement>
+        <repository>
+            <id>local</id>
+            <name>Local repository</name>
+            <url>file://${local-repo}</url>    
+        </repository>
+    </distributionManagement>
+
 </project>
