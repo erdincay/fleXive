@@ -226,9 +226,8 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
         try {
 
             // Sanity checks
-            if (color == null || color.length() == 0) color = "#000000";
-            if (color.charAt(0) != '#') color = "#" + color;
-            IsValid(name, color);
+            color = FxFormatUtils.processColorString("color", color);
+            checkName(name);
 
             // Obtain a database connection
             con = Database.getDbConnection();
@@ -304,7 +303,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
             if (color != null && color.length() > 0 && color.charAt(0) != '#') {
                 color = "#" + color;
             }
-            IsValid(name, color);
+            checkName(name);
 
             // Fill in new values
             if (name != null && color.length() > 0) aGroup.setName(name);
@@ -426,20 +425,14 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
      * Throws a FxInvalidParameterException if the name is invalid.
      *
      * @param sName  the name to check
-     * @param sColor the color to check
      * @throws FxInvalidParameterException if the name is not valid
      */
-    private static void IsValid(final String sName, String sColor) throws FxInvalidParameterException {
+    private void checkName(final String sName) throws FxInvalidParameterException {
         if (sName == null || sName.length() == 0) {
             throw new FxInvalidParameterException("NAME", "ex.usergroup.nameEmpty");
         }
         if (sName.indexOf("'") > -1 || sName.indexOf("\"") > -1) {
             throw new FxInvalidParameterException("NAME", "ex.usergroup.nameContainsInvalidChars");
-        }
-
-        // Check the color
-        if (sColor != null && !FxFormatUtils.isRGBCode(sColor)) {
-            throw new FxInvalidParameterException("COLOR", "ex.usergroup.invalidColor");
         }
     }
 
@@ -579,7 +572,7 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
      * @param mode  mode displayed in the error message, eg 'update', 'delete', ..
      * @throws FxNoAccessException if the caller lacks the permissions
      */
-    private static void checkPermission(UserGroup group, String mode) throws FxNoAccessException {
+    private void checkPermission(UserGroup group, String mode) throws FxNoAccessException {
         final UserTicket ticket = FxContext.getUserTicket();
         // Permission checks
         try {

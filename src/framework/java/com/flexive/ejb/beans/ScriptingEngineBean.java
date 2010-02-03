@@ -380,7 +380,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public List<FxScriptRunInfo> getRunOnceInformation() throws FxApplicationException {
         if (LocalScriptingCache.runOnceInfos != null) {
-            return LocalScriptingCache.runOnceInfos;
+            return Lists.newArrayList(LocalScriptingCache.runOnceInfos);
         } else {
             return getDivisionConfigurationEngine().get(SystemParameters.DIVISION_RUNONCE_INFOS);
         }
@@ -983,6 +983,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
 
             executeInitializerScripts("runonce", dropName, prefix, applicationName, new RunonceScriptExecutor(applicationName));
 
+            // TODO: this fails to update the script infos when the transaction was rolled back because of a script error
             FxContext.get().runAsSystem();
             try {
                 divisionRunOnceInfos.clear();
@@ -1121,9 +1122,15 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
             // TODO: write in tree cache for cluster support
             LocalScriptingCache.runOnceInfos.add(runInfo);
             try {
+                if (LOG.isInfoEnabled()) {
+                    LOG.info("[" + applicationName + " :: " + name + "]");
+                }
                 runInitializerScript(name, code);
                 runInfo.endExecution(true);
             } catch (Exception e) {
+                if (LOG.isWarnEnabled()) {
+                    LOG.warn("Failed to execute " + name + ": " + e.getMessage(), e);
+                }
                 runInfo.endExecution(false);
                 final Throwable reported = e instanceof GenericScriptException ? e.getCause() : e;
                 StringWriter sw = new StringWriter();

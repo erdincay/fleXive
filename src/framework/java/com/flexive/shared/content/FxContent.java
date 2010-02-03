@@ -1071,7 +1071,8 @@ public class FxContent implements Serializable {
         if (containsValue("/ACL") && getPropertyData("/ACL").getOccurances() > aclIds.size()) {
             // remove old ACLs that wouldn't be overwritten otherwise
             int index = 2;
-            while (getValue("/ACL[" + index + "]") != null) {
+            final int max = getPropertyData("/ACL").getPropertyAssignment().getMultiplicity().getMax();
+            while (index <= max && getValue("/ACL[" + index + "]") != null) {
                 remove("/ACL[" + index + "]");
                 index++;
             }

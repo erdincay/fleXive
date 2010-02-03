@@ -56,6 +56,7 @@
         <fileset dir="${flexive.lib.dir}/groovy" includes="*.jar"/>
         <fileset dir="${flexive.lib.dir}/jsf" includes="*.jar"/>
         <fileset dir="${flexive.lib.dir}/antlr" includes="*.jar"/>
+        <fileset dir="${flexive.build.framework.jar.dir}" includes="flexive-tests.jar"/>
         <path refid="emma.lib"/>
     	<path path="${build.ui.classes.dir}"/>
         <path path="${build.ui.shared.classes.dir}"/>
@@ -162,6 +163,10 @@
                 <include name="com/flexive/tests/**/*"/>
                 <include name="*.properties"/>
             </fileset>
+            <fileset dir="${tests.resources.dir}">
+                <include name="flexive-application.properties"/>
+                <include name="scripts/**"/>
+            </fileset>
         </jar>
     </target>
 
@@ -171,6 +176,10 @@
             <fileset dir="${tests.classes.dir}">
                 <include name="com/flexive/tests/**/*"/>
                 <include name="*.properties"/>
+            </fileset>
+            <fileset dir="${tests.resources.dir}">
+                <include name="flexive-application.properties"/>
+                <include name="scripts/**"/>
             </fileset>
         </jar>
         <property name="package.testNG" value="true"/>
@@ -290,7 +299,7 @@
         <fail unless="openEjbConfigExists" message="OpenEJB configuration file (${tests.openejb.configFile}) not found. A template can be found at ${flexive.openejb.dir}/openejb-tests.conf.xml.sample."/>
     </target>
 
-    <target name="tests.groups.run" depends="tests.groups.prepare, tests.compile.all, db.update.test">
+    <target name="tests.groups.run" depends="tests.groups.prepare, tests.compile.all, tests.package.ear, db.update.test">
     	<!-- Run a given test group (set via the tests.groups property, e.g. via -Dtests.groups=...) -->
         <echo>Test groups can be specified in the tests.groups property,</echo>
         <echo>e.g. "ant tests.groups -Dtests.groups=shared,configuration"</echo>

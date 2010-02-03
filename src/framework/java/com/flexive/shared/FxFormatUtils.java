@@ -195,6 +195,9 @@ public final class FxFormatUtils {
                     throw new FxInvalidParameterException("Invalid color for property [" + paramName + "]", paramName);
                 }
             }
+        } else if (StringUtils.containsOnly(value.toUpperCase(), "0123456789ABCDEF")) {
+            // prefix with '#'
+            value = "#" + value;
         }
         return value;
     }
