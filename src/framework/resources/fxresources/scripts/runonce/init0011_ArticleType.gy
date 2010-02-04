@@ -50,6 +50,11 @@ import com.flexive.shared.scripting.groovy.GroovyTypeBuilder
 //def String WF_ACL = "Article Workflow ACL";
 def String ARTICLE_TYPE = "Article";
 
+if (FxSharedUtils.isMinimalRunOnceScripts()) {
+    // skip for minimal test config
+    return;
+}
+
 try {
     if (CacheAdmin.getEnvironment().getType(ARTICLE_TYPE) != null) {
         println "Article type '${ARTICLE_TYPE}' already exists! exiting!";

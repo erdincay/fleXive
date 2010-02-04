@@ -31,6 +31,7 @@
  ***************************************************************/
 package com.flexive.shared;
 
+import com.flexive.shared.configuration.DivisionData;
 import com.flexive.shared.exceptions.FxCreateException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxNotFoundException;
@@ -109,10 +110,16 @@ public final class FxSharedUtils {
     /**
      * Are JDK 6+ extensions allowed to be run on the current VM?
      */
-    public final static boolean USE_JDK6_EXTENSION;
-    public final static boolean WINDOWS = System.getProperty("os.name").indexOf("Windows") >= 0;
+    public static final boolean USE_JDK6_EXTENSION;
+    public static final boolean WINDOWS = System.getProperty("os.name").indexOf("Windows") >= 0;
     public static final String FLEXIVE_DROP_PROPERTIES = "flexive-application.properties";
     public static final String FLEXIVE_STORAGE_PROPERTIES = "flexive-storage.properties";
+    /**
+     * System property to force a minimum set of runonce scripts when set (e.g. UI icons are not installed).
+     * This should not be enabled for flexive's own test suite, but for tests in external projects
+     * that can assume that the stock run-once scripts work. 
+     */
+    public static final String PROP_RUNONCE_MINIMAL = "flexive.runonce.minimal";
 
     static {
         int major = -1, minor = -1;
@@ -1886,6 +1893,16 @@ public final class FxSharedUtils {
                 }
             }
         }
+    }
+
+    /**
+     * @return true if only a minimum set of runonce scripts should be installed.
+     * @see #PROP_RUNONCE_MINIMAL
+     * @since 3.1
+     */
+    public static boolean isMinimalRunOnceScripts() {
+        return FxContext.get().getDivisionId() == DivisionData.DIVISION_TEST
+                && System.getProperty(PROP_RUNONCE_MINIMAL) != null;
     }
 
     /**

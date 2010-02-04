@@ -50,6 +50,10 @@ import com.flexive.shared.search.query.PropertyValueNode
 import com.flexive.shared.value.FxLargeNumber
 import com.flexive.shared.search.AdminResultLocations
 
+if (FxSharedUtils.isMinimalRunOnceScripts()) {
+    return;
+}
+
 // add an article to the tree
 final FxContent article = EJBLookup.contentEngine.initialize("article")
 article.setValue("/title", new FxString(FxLanguage.ENGLISH, "Welcome to [fleXive] 3.1").setTranslation(FxLanguage.GERMAN, "Willkommen bei [fleXive] 3.1"))

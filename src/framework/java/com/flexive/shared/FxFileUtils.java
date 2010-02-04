@@ -289,11 +289,18 @@ public class FxFileUtils {
      * @since 3.1
      */
     public static List<File> listRecursive(File root) {
-        if (root == null) {
+        if (root == null || !root.exists()) {
             return Lists.newArrayListWithCapacity(0);
         }
         final List<File> result = Lists.newArrayList();
-        for (File file : root.listFiles()) {
+        final File[] files = root.listFiles();
+        if (files == null) {
+            if (LOG.isWarnEnabled()) {
+                LOG.warn("Cannot list " + root.getPath() + " (not a directory?)");
+            }
+            return Lists.newArrayListWithCapacity(0);
+        }
+        for (File file : files) {
             if (file.isDirectory()) {
                 result.addAll(listRecursive(file));
             } else {
