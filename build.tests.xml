@@ -56,7 +56,6 @@
         <fileset dir="${flexive.lib.dir}/groovy" includes="*.jar"/>
         <fileset dir="${flexive.lib.dir}/jsf" includes="*.jar"/>
         <fileset dir="${flexive.lib.dir}/antlr" includes="*.jar"/>
-        <fileset dir="${flexive.build.framework.jar.dir}" includes="flexive-tests.jar"/>
         <path refid="emma.lib"/>
     	<path path="${build.ui.classes.dir}"/>
         <path path="${build.ui.shared.classes.dir}"/>
@@ -66,6 +65,7 @@
         <path refid="build.classpath.testng"/>
         <fileset dir="${flexive.lib.dir}/jsf" includes="*.jar"/>
         <fileset dir="${flexive.lib.dir}/text_extraction" includes="*.jar"/>
+        <fileset dir="${flexive.build.framework.jar.dir}" includes="flexive-tests.jar"/>
         <path refid="flexive.ejb3-embedded.classpath"/>
     </path>
 
