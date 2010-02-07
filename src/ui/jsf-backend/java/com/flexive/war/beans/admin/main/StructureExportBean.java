@@ -35,7 +35,9 @@ package com.flexive.war.beans.admin.main;
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
+import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxInvalidStateException;
 import com.flexive.shared.security.Role;
 import com.flexive.shared.security.UserTicket;
@@ -379,10 +381,11 @@ public class StructureExportBean {
 
     /**
      * Action method rendering the script code for the current script to be displayed
+     * @throws FxApplicationException if the code could not be loaded
      */
-    public void renderScriptCode() {
+    public void renderScriptCode() throws FxApplicationException {
         if (currentScriptId > 0) {
-            currentScriptCode = CacheAdmin.getEnvironment().getScript(currentScriptId).getCode();
+            currentScriptCode = EJBLookup.getScriptingEngine().loadScriptCode(currentScriptId);
         }
     }
 

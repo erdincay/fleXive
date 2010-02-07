@@ -117,12 +117,12 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
 
         static volatile List<FxScriptRunInfo> runOnceInfos = null;
 
-        static Script checkoutScript(long scriptId, FxScriptInfo si) throws FxInvalidParameterException {
+        static Script checkoutScript(long scriptId, FxScriptInfo si, String code) throws FxInvalidParameterException {
             Script script = LocalScriptingCache.groovyScriptCache.get(scriptId);
             if (script == null) {
                 try {
                     GroovyShell shell = new GroovyShell();
-                    script = shell.parse(CacheAdmin.getEnvironment().getScript(scriptId).getCode());
+                    script = shell.parse(code);
                 } catch (CompilationFailedException e) {
                     throw new FxInvalidParameterException(si.getName(), "ex.general.scripting.compileFailed", si.getName(), e.getMessage());
                 } catch (Throwable t) {
@@ -253,14 +253,14 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         try {
             // Obtain a database connection
             con = Database.getDbConnection();
-            //                  1     2     3     4     5
-            sql = "SELECT ID, SNAME,SDESC,SDATA,STYPE,ACTIVE FROM " + TBL_SCRIPTS + " ORDER BY ID";
+            //                  1     2     3     4
+            sql = "SELECT ID, SNAME,SDESC,STYPE,ACTIVE FROM " + TBL_SCRIPTS + " ORDER BY ID";
             ps = con.prepareStatement(sql);
             ResultSet rs = ps.executeQuery();
 
             while (rs != null && rs.next()) {
-                slist.add(new FxScriptInfo(rs.getInt(1), FxScriptEvent.getById(rs.getLong(5)), rs.getString(2), rs.getString(3),
-                        rs.getString(4), rs.getBoolean(5)));
+                slist.add(new FxScriptInfo(rs.getInt(1), FxScriptEvent.getById(rs.getLong(5)), rs.getString(2),
+                        rs.getString(3), rs.getBoolean(4)));
             }
 
         } catch (SQLException exc) {
@@ -398,7 +398,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         String sql;
         boolean success = false;
         try {
-            si = new FxScriptInfo(seq.getId(FxSystemSequencer.SCRIPTS), event, name, description, code, true);
+            si = new FxScriptInfo(seq.getId(FxSystemSequencer.SCRIPTS), event, name, description, true);
             if (code == null)
                 code = "";
             // Obtain a database connection
@@ -532,7 +532,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         }
 
         if (!FxSharedUtils.isGroovyScript(si.getName()))
-            return LocalScriptingCache.internal_runScript(si.getName(), binding, si.getCode());
+            return LocalScriptingCache.internal_runScript(si.getName(), binding, loadScriptCode(si.getId()));
 
         if (si.getEvent() == FxScriptEvent.Manual)
             FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.ScriptExecution);
@@ -544,7 +544,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         if (script == null) {
             try {
                 GroovyShell shell = new GroovyShell();
-                script = shell.parse(CacheAdmin.getEnvironment().getScript(scriptId).getCode());
+                script = shell.parse(loadScriptCode(scriptId));
             } catch (CompilationFailedException e) {
                 throw new FxInvalidParameterException(si.getName(), "ex.general.scripting.compileFailed", si.getName(), e.getMessage());
             } catch (Throwable t) {

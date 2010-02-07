@@ -660,9 +660,10 @@ public class ScriptBean implements Serializable {
      * This method adds the default [fleXive] imports for a given script
      * (Configured in Script.properties and Script_de.properties: Script.defaultImports.[script extension],
      * e.g. "Script.defaultImports.groovy")
+     * @throws FxApplicationException if the code could not be loaded
      */
-    public void addDefaultImports() {
-        String code = sinfo.getCode() == null ? "" : sinfo.getCode();
+    public void addDefaultImports() throws FxApplicationException {
+        String code = getScriptingEngine().loadScriptCode(sinfo.getId());
         final String name = sinfo.getName();
         if (StringUtils.isNotBlank(name)) {
             sinfo.setCode(getClassImports(name.substring(name.lastIndexOf(".") + 1, name.length())) + code);

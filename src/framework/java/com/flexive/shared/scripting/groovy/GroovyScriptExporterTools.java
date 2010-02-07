@@ -33,8 +33,10 @@
 package com.flexive.shared.scripting.groovy;
 
 import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.content.FxPK;
+import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.scripting.FxScriptInfo;
 import com.flexive.shared.scripting.FxScriptMapping;
 import com.flexive.shared.scripting.FxScriptMappingEntry;
@@ -1009,8 +1011,8 @@ public final class GroovyScriptExporterTools {
         if (childAssignments != null && childAssignments.size() == 0 && groupAssignments != null && groupAssignments.size() > 0 && differingDerivedAssignments != null && differingDerivedAssignments.size() > 0) {
             for (FxGroupAssignment ga : groupAssignments.keySet()) {
                 final boolean isDerived = ga.isDerivedAssignment();
-                final List<FxAssignment> currentChildren = groupAssignments.get((FxGroupAssignment) ga);
-                script.append(createGroup((FxGroupAssignment) ga, currentChildren, groupAssignments, isDerived, defaultsOnly, callOnlyGroups, tabCount, withoutDependencies, differingDerivedAssignments));
+                final List<FxAssignment> currentChildren = groupAssignments.get(ga);
+                script.append(createGroup(ga, currentChildren, groupAssignments, isDerived, defaultsOnly, callOnlyGroups, tabCount, withoutDependencies, differingDerivedAssignments));
             }
         }
 
@@ -1361,7 +1363,12 @@ public final class GroovyScriptExporterTools {
         }
 
         // final String scriptCode = processScriptCode(si.getCode());
-        final String scriptCode = si.getCode();
+        final String scriptCode;
+        try {
+            scriptCode = EJBLookup.getScriptingEngine().loadScriptCode(si.getId());
+        } catch (FxApplicationException e) {
+            throw e.asRuntimeException();
+        }
         // load type in script, then append type name
         script.append("\n// ***** SCRIPT START ***** \n")
                 .append("currentType = CacheAdmin.getEnvironment().getType(\"")
@@ -1407,7 +1414,12 @@ public final class GroovyScriptExporterTools {
         }
 
         // final String scriptCode = processScriptCode(si.getCode());
-        final String scriptCode = si.getCode();
+        final String scriptCode;
+        try {
+            scriptCode = EJBLookup.getScriptingEngine().loadScriptCode(si.getId());
+        } catch (FxApplicationException e) {
+            throw e.asRuntimeException();
+        }
         // load assignment, then attach script to event and assignment id
         script.append("\n// ***** SCRIPT START ***** \n")
                 .append("currentAssignment = CacheAdmin.getEnvironment().getAssignment(\"")

@@ -33,19 +33,22 @@
  ***************************************************************/
 package com.flexive.war.beans.admin.structure;
 
-import com.flexive.shared.scripting.FxScriptInfo;
-import com.flexive.shared.scripting.FxScriptEvent;
-import com.flexive.shared.scripting.FxScriptMappingEntry;
-import com.flexive.shared.exceptions.FxEntryExistsException;
-import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxSharedUtils;
-import com.flexive.shared.structure.FxType;
+import com.flexive.shared.exceptions.FxEntryExistsException;
+import com.flexive.shared.exceptions.FxNotFoundException;
+import com.flexive.shared.scripting.FxScriptEvent;
+import com.flexive.shared.scripting.FxScriptInfo;
+import com.flexive.shared.scripting.FxScriptMappingEntry;
 import com.flexive.shared.structure.FxAssignment;
+import com.flexive.shared.structure.FxType;
 
-import java.util.*;
 import java.io.Serializable;
 import java.text.Collator;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 /**
  * Conveniently wraps script mappings to simplify GUI Manipulaiton.
@@ -54,22 +57,22 @@ import java.text.Collator;
  */
 public class ScriptListWrapper implements Serializable {
     private static final long serialVersionUID = 7620819571266609753L;
-    public final static int ID_SCRIPT_REMOVED=-1;
-    public final static int ID_SCRIPT_ADDED=-2;
-    public final static int ID_SCRIPT_UPDATED=-3;
-    public final static int SORT_STATUS_UNSORTED=0;
-    public final static int SORT_STATUS_ASCENDING=1;
-    public final static int SORT_STATUS_DESCENDING=2;
-    private int sortStatusScriptInfo=-1;
-    private int sortStatusEvent=-1;
+    public final static int ID_SCRIPT_REMOVED = -1;
+    public final static int ID_SCRIPT_ADDED = -2;
+    public final static int ID_SCRIPT_UPDATED = -3;
+    public final static int SORT_STATUS_UNSORTED = 0;
+    public final static int SORT_STATUS_ASCENDING = 1;
+    public final static int SORT_STATUS_DESCENDING = 2;
+    private int sortStatusScriptInfo = -1;
+    private int sortStatusEvent = -1;
 
     public static class ScriptListEntry {
         private int id;
-        private FxScriptInfo scriptInfo=null;
-        private FxScriptEvent scriptEvent=null;
-        private boolean derived =false;
+        private FxScriptInfo scriptInfo = null;
+        private FxScriptEvent scriptEvent = null;
+        private boolean derived = false;
         private boolean derivedUsage = false;
-        private long derivedFrom =-1;
+        private long derivedFrom = -1;
         private boolean active = false;
 
         public ScriptListEntry(int id, FxScriptInfo scriptInfo, FxScriptEvent scriptEvent, boolean derived, long derivedFrom, boolean derivedUsage, boolean active) {
@@ -79,7 +82,7 @@ public class ScriptListWrapper implements Serializable {
             this.derived = derived;
             this.derivedFrom = derivedFrom;
             this.derivedUsage = derivedUsage;
-            this.active =active;
+            this.active = active;
         }
 
         public int getId() {
@@ -87,7 +90,7 @@ public class ScriptListWrapper implements Serializable {
         }
 
         private void setId(int id) {
-            this.id=id;
+            this.id = id;
         }
 
         public FxScriptInfo getScriptInfo() {
@@ -129,10 +132,25 @@ public class ScriptListWrapper implements Serializable {
         public void setActive(boolean active) {
             this.active = active;
         }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public boolean equals(Object obj) {
+            if (!(obj instanceof ScriptListEntry))
+                return false;
+            ScriptListEntry e = (ScriptListEntry) obj;
+            //we only care about event, active and derived usage flags (besides id)
+            return !(e.getScriptInfo().getId() != this.getScriptInfo().getId()
+                    || e.getScriptEvent() != this.getScriptEvent()
+                    || e.isActive() != this.isActive()
+                    || e.isDerivedUsage() != this.isDerivedUsage());
+        }
     }
 
     private List<ScriptListEntry> scriptList = null;
-    private int ctr=0;
+    private int ctr = 0;
     private Comparator<ScriptListEntry> scriptComparator = new ScriptInfoSorter();
     private Comparator<ScriptListEntry> eventComparator = new ScriptEventSorter();
     private boolean isType;
@@ -140,23 +158,22 @@ public class ScriptListWrapper implements Serializable {
     /**
      * Constructs a new script list wrapper
      *
-     * @param id        the id of the type or assignment
-     * @param isType    if the id is from a type or assignment
+     * @param id     the id of the type or assignment
+     * @param isType if the id is from a type or assignment
      */
     ScriptListWrapper(long id, boolean isType) {
-        this.isType =isType;
+        this.isType = isType;
         scriptList = buildScriptList(id);
         sortByScripts();
     }
 
     private List<ScriptListEntry> buildScriptList(long id) {
         //determine if type or assignment are derived
-        boolean isDerived=false;
+        boolean isDerived = false;
         if (isType) {
-            FxType type= CacheAdmin.getEnvironment().getType(id);
+            FxType type = CacheAdmin.getEnvironment().getType(id);
             isDerived = type.isDerived();
-        }
-        else {
+        } else {
             FxAssignment ass = CacheAdmin.getEnvironment().getAssignment(id);
             isDerived = ass.isDerivedAssignment();
         }
@@ -164,14 +181,14 @@ public class ScriptListWrapper implements Serializable {
 
         //set remaining properties
         for (FxScriptInfo s : CacheAdmin.getEnvironment().getScripts())
-            for (FxScriptMappingEntry e : isType? CacheAdmin.getFilteredEnvironment().getScriptMapping(s.getId()).getMappedTypes() :
+            for (FxScriptMappingEntry e : isType ? CacheAdmin.getFilteredEnvironment().getScriptMapping(s.getId()).getMappedTypes() :
                     CacheAdmin.getFilteredEnvironment().getScriptMapping(s.getId()).getMappedAssignments()) {
                 //determine if script is active and derived usage
-                if (e.getId() ==id &&  s.getId() == e.getScriptId()) {
+                if (e.getId() == id && s.getId() == e.getScriptId()) {
                     list.add(new ScriptListEntry(ctr++, s, e.getScriptEvent(), false, -1, e.isDerivedUsage(), e.isActive()));
                 }
                 //determine if script is derived and from which id
-                else if(isDerived && e.isDerivedUsage() && s.getId() == e.getScriptId()) {
+                else if (isDerived && e.isDerivedUsage() && s.getId() == e.getScriptId()) {
                     for (long derivedId : e.getDerivedIds()) {
                         if (id == derivedId) {
                             list.add(new ScriptListEntry(ctr++, s, e.getScriptEvent(), true, e.getId(), e.isDerivedUsage(), e.isActive()));
@@ -183,37 +200,40 @@ public class ScriptListWrapper implements Serializable {
         return list;
     }
 
-   /**
+    /**
      * builds the delta to the original scriptMapping. Returns a List of ScriptListEntry objects,
      * where the id is set to ScriptListWrapper.ID_SCRIPT_REMOVED for scripts that where removed from
      * the script list and where the id is set to ScriptListWrapper.ID_SCRIPT_ADDED for scripts that
      * where added to the script list. ID_SCRIPT_UPDATED for scripts that have been updated.
      *
-     * @param id                        the id of the type or assignment for the script mapping
-     * @return  a list of ScriptEntry objects which have changed in the script list relative to
-     *          the original scriptMapping.
+     * @param id the id of the type or assignment for the script mapping
+     * @return a list of ScriptEntry objects which have changed in the script list relative to
+     *         the original scriptMapping.
      */
-
     public List<ScriptListEntry> getDelta(long id) {
         List<ScriptListEntry> delta = new ArrayList<ScriptListEntry>();
         List<ScriptListEntry> original = buildScriptList(id);
-        for (ScriptListEntry s : original) {
+        for (ScriptListEntry s : original)
             if (!hasEntry(s)) {
                 s.setId(ID_SCRIPT_REMOVED);
                 delta.add(s);
             }
-        }
 
-        for (ScriptListEntry s : scriptList) {
-            if (!hasEntry(original, s)) {
+        for (ScriptListEntry s : scriptList)
+            if (!hasEntry(original, s))
                 delta.add(new ScriptListEntry(ID_SCRIPT_ADDED, s.getScriptInfo(), s.getScriptEvent(), s.isDerived(), s.getDerivedFrom(), s.derivedUsage, s.isActive()));
-            }
-        }
 
-        for (ScriptListEntry s: scriptList)
-            if (!hasEntry(delta, s )) {
-                //TODO: check if value has really changed versus the original before marking UPDATED ->would increase computing time but decrease DB accesses
-                delta.add(new ScriptListEntry(ID_SCRIPT_UPDATED, s.getScriptInfo(), s.getScriptEvent(), s.isDerived(), s.getDerivedFrom(), s.derivedUsage, s.isActive()));
+        for (ScriptListEntry s : scriptList)
+            if (!hasEntry(delta, s)) {
+                boolean changed = true;
+                for (ScriptListEntry o : original) {
+                    if (o.getScriptInfo().getId() == s.getScriptInfo().getId()) {
+                        changed = !o.equals(s);
+                        break;
+                    }
+                }
+                if (changed)
+                    delta.add(new ScriptListEntry(ID_SCRIPT_UPDATED, s.getScriptInfo(), s.getScriptEvent(), s.isDerived(), s.getDerivedFrom(), s.derivedUsage, s.isActive()));
             }
 
         return delta;
@@ -226,14 +246,14 @@ public class ScriptListWrapper implements Serializable {
     /**
      * checks the script list for a script list entry with matching script id, event and derived source.
      *
-     * @param key   a script list entry
-     * @return      true if another script list entry with matching script id and event was found
+     * @param key a script list entry
+     * @return true if another script list entry with matching script id and event was found
      */
     private boolean hasEntry(ScriptListEntry key) {
-        for (ScriptListEntry le: scriptList) {
+        for (ScriptListEntry le : scriptList) {
             if (le.getScriptEvent().getId() == key.getScriptEvent().getId()
-                && le.getScriptInfo().getId() == key.getScriptInfo().getId()
-                && le.getDerivedFrom()== key.getDerivedFrom())
+                    && le.getScriptInfo().getId() == key.getScriptInfo().getId()
+                    && le.getDerivedFrom() == key.getDerivedFrom())
                 return true;
         }
         return false;
@@ -243,16 +263,16 @@ public class ScriptListWrapper implements Serializable {
      * checks a specific script list for a script list entry with matching
      * script id and event.
      *
-     * @param scriptList    the script list to be searched
-     * @param key           a script list entry
-     * @return              true if another script list entry with matching script id and event was found
+     * @param scriptList the script list to be searched
+     * @param key        a script list entry
+     * @return true if another script list entry with matching script id and event was found
      */
 
     private boolean hasEntry(List<ScriptListEntry> scriptList, ScriptListEntry key) {
-        for (ScriptListEntry le: scriptList) {
+        for (ScriptListEntry le : scriptList) {
             if (le.getScriptEvent().getId() == key.getScriptEvent().getId()
-                && le.getScriptInfo().getId() == key.getScriptInfo().getId()
-                && le.getDerivedFrom() == key.getDerivedFrom())
+                    && le.getScriptInfo().getId() == key.getScriptInfo().getId()
+                    && le.getDerivedFrom() == key.getDerivedFrom())
                 return true;
         }
         return false;
@@ -262,18 +282,17 @@ public class ScriptListWrapper implements Serializable {
         ScriptListEntry e = new ScriptListEntry(ctr++, CacheAdmin.getEnvironment().getScript(scriptInfo), FxScriptEvent.getById(scirptEvent), false, -1, derivedUsage, active);
         if (!hasEntry(e)) {
             scriptList.add(e);
-            sortStatusScriptInfo=SORT_STATUS_UNSORTED;
-            sortStatusEvent=SORT_STATUS_UNSORTED;
-        }
-        else
-            throw new FxEntryExistsException("ex.scriptListWrapper.entryExists",e.getScriptInfo().getName(),e.getScriptEvent().getName());
+            sortStatusScriptInfo = SORT_STATUS_UNSORTED;
+            sortStatusEvent = SORT_STATUS_UNSORTED;
+        } else
+            throw new FxEntryExistsException("ex.scriptListWrapper.entryExists", e.getScriptInfo().getName(), e.getScriptEvent().getName());
     }
 
     public void remove(int entryId) {
         ScriptListEntry entry = null;
-        for (ScriptListEntry e: scriptList) {
+        for (ScriptListEntry e : scriptList) {
             if (e.getId() == entryId) {
-                entry=e;
+                entry = e;
                 break;
             }
         }
@@ -283,7 +302,7 @@ public class ScriptListWrapper implements Serializable {
     public void sortByScripts() {
         Collections.sort(scriptList, scriptComparator);
         if (sortStatusScriptInfo == SORT_STATUS_UNSORTED)
-            sortStatusScriptInfo=SORT_STATUS_ASCENDING;
+            sortStatusScriptInfo = SORT_STATUS_ASCENDING;
         else if (sortStatusScriptInfo == SORT_STATUS_ASCENDING)
             sortStatusScriptInfo = SORT_STATUS_DESCENDING;
         else
@@ -295,7 +314,7 @@ public class ScriptListWrapper implements Serializable {
     public void sortByEvents() {
         Collections.sort(scriptList, eventComparator);
         if (sortStatusEvent == SORT_STATUS_UNSORTED)
-            sortStatusEvent=SORT_STATUS_ASCENDING;
+            sortStatusEvent = SORT_STATUS_ASCENDING;
         else if (sortStatusEvent == SORT_STATUS_ASCENDING)
             sortStatusEvent = SORT_STATUS_DESCENDING;
         else
@@ -328,14 +347,14 @@ public class ScriptListWrapper implements Serializable {
         private final Collator collator = FxSharedUtils.getCollator();
 
         public int compare(ScriptListEntry o1, ScriptListEntry o2) {
-            int multiplicator =1;
+            int multiplicator = 1;
             if (sortStatusScriptInfo == SORT_STATUS_ASCENDING)
-                multiplicator =-1;
+                multiplicator = -1;
             int c1 = this.collator.compare(o1.getScriptInfo().getName(), o2.getScriptInfo().getName());
-            if (c1 !=0)
-                return c1*multiplicator;
+            if (c1 != 0)
+                return c1 * multiplicator;
             else
-                return multiplicator* this.collator.compare(o1.getScriptEvent().getName(), o2.getScriptEvent().getName());
+                return multiplicator * this.collator.compare(o1.getScriptEvent().getName(), o2.getScriptEvent().getName());
         }
     }
 
@@ -347,14 +366,14 @@ public class ScriptListWrapper implements Serializable {
         private final Collator collator = FxSharedUtils.getCollator();
 
         public int compare(ScriptListEntry o1, ScriptListEntry o2) {
-            int multiplicator =1;
+            int multiplicator = 1;
             if (sortStatusEvent == SORT_STATUS_ASCENDING)
-                multiplicator =-1;
+                multiplicator = -1;
             int c1 = this.collator.compare(o1.getScriptEvent().getName(), o2.getScriptEvent().getName());
-            if (c1 !=0)
-                return c1*multiplicator;
+            if (c1 != 0)
+                return c1 * multiplicator;
             else
-                return multiplicator*this.collator.compare(o1.getScriptInfo().getName(), o2.getScriptInfo().getName());
+                return multiplicator * this.collator.compare(o1.getScriptInfo().getName(), o2.getScriptInfo().getName());
         }
     }
 }

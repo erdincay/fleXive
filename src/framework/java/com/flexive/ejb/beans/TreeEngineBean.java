@@ -46,21 +46,21 @@ import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.*;
 import com.flexive.shared.scripting.FxScriptBinding;
 import com.flexive.shared.scripting.FxScriptEvent;
-import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.security.ACLCategory;
+import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.tree.FxTreeMode;
-import static com.flexive.shared.tree.FxTreeMode.Live;
 import com.flexive.shared.tree.FxTreeNode;
 import com.flexive.shared.tree.FxTreeNodeEdit;
 import com.flexive.shared.tree.FxTreeRemoveOp;
 import com.flexive.shared.value.FxReference;
 import com.flexive.shared.value.FxString;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
 import javax.annotation.Resource;
 import javax.ejb.*;
 import java.sql.Connection;
@@ -68,12 +68,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.flexive.shared.tree.FxTreeMode.Live;
+
 /**
  * Flexive Tree implementation
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-@Stateless(name = "TreeEngine", mappedName="TreeEngine")
+@Stateless(name = "TreeEngine", mappedName = "TreeEngine")
 @TransactionAttribute(TransactionAttributeType.SUPPORTS)
 @TransactionManagement(TransactionManagementType.CONTAINER)
 public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
@@ -95,6 +97,10 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
         // nothing to do
     }
 
+    private static long lastCheck = System.currentTimeMillis();
+    private static long cachedTreeCaptionProperty = -1L;
+    private final static long CHECK_INTERVAL = 10000; //check every 10 sec
+
     /**
      * Get the caption property id
      *
@@ -102,8 +108,12 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
      * @throws FxApplicationException on errors
      */
     private long getCaptionPropertyId() throws FxApplicationException {
-        //TODO: cache me!
-        return EJBLookup.getConfigurationEngine().get(SystemParameters.TREE_CAPTION_PROPERTY);
+        if (cachedTreeCaptionProperty == -1L || (System.currentTimeMillis() - CHECK_INTERVAL) > lastCheck) {
+            System.out.println("Checking treeCaptionProperty at " + System.currentTimeMillis() + " last check:" + lastCheck);
+            cachedTreeCaptionProperty = EJBLookup.getConfigurationEngine().get(SystemParameters.TREE_CAPTION_PROPERTY);
+            lastCheck = System.currentTimeMillis();
+        }
+        return cachedTreeCaptionProperty;
     }
 
     final static boolean PARTIAL_LOADING = true;
@@ -221,18 +231,18 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
     private long createNode(long parentNodeId, String name, FxString label,
                             int position, FxPK reference, String template, FxTreeMode mode) throws FxApplicationException {
         Connection con = null;
-        if( mode == FxTreeMode.Live)
+        if (mode == FxTreeMode.Live)
             throw new FxCreateException("ex.tree.create.live");
         try {
             con = Database.getDbConnection();
             boolean ok = false;
             try {
-                long nodeId =  StorageManager.getTreeStorage().createNode(con, seq, contentEngine, mode, -1,
+                long nodeId = StorageManager.getTreeStorage().createNode(con, seq, contentEngine, mode, -1,
                         parentNodeId, name, label, position, reference, template, true);
                 ok = true;
                 return nodeId;
             } finally {
-                if( ok && !ctx.getRollbackOnly() ) {
+                if (ok && !ctx.getRollbackOnly()) {
                     StorageManager.getTreeStorage().checkTreeIfEnabled(con, mode);
                     FxContext.get().setTreeWasModified();
                 }
@@ -252,7 +262,7 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long[] createNodes(FxTreeMode mode, long parentNodeId, int position, String path) throws FxApplicationException {
         Connection con = null;
-        if( mode == FxTreeMode.Live)
+        if (mode == FxTreeMode.Live)
             throw new FxCreateException("ex.tree.create.live");
         try {
             con = Database.getDbConnection();
@@ -274,7 +284,7 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
                 ok = true;
                 return nodes;
             } finally {
-                if( ok && !ctx.getRollbackOnly() ) {
+                if (ok && !ctx.getRollbackOnly()) {
                     FxContext.get().setTreeWasModified();
                     StorageManager.getTreeStorage().checkTreeIfEnabled(con, mode);
                 }
@@ -399,7 +409,7 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
             }
             StorageManager.getTreeStorage().removeNode(con, mode, contentEngine, nodeId, deleteChildren);
             if (deleteReferencedContent) {
-                for (FxTreeNode node: subTree) {
+                for (FxTreeNode node : subTree) {
                     if (node.getReference() != null && contentEngine.getReferencedContentCount(node.getReference()) == 0) {
                         // remove only contents that are not referenced elsewhere
                         contentEngine.remove(node.getReference());
@@ -470,15 +480,15 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
             if (removeOp != FxTreeRemoveOp.Unfile) {
                 subTree = removeChildren
                         ? treeStorage.getTree(con, contentEngine, mode, nodeId, Integer.MAX_VALUE, PARTIAL_LOADING,
-                            FxContext.getUserTicket().getLanguage())
+                        FxContext.getUserTicket().getLanguage())
                         : treeStorage.getNode(con, mode, nodeId);
             } else {
                 subTree = null;
             }
-            
+
             treeStorage.removeNode(con, mode, contentEngine, nodeId, removeChildren);
             if (removeOp != FxTreeRemoveOp.Unfile) {
-                for (FxTreeNode currNode: subTree) {
+                for (FxTreeNode currNode : subTree) {
                     if (currNode.getReference() != null) {
                         long refCount = 0;
                         if (removeOp == FxTreeRemoveOp.RemoveSingleFiled) {
@@ -487,7 +497,7 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
                             if (currNode.getId() == nodeId)
                                 refCount++; //include the reference from the already removed node
                         }
-                        if( removeOp == FxTreeRemoveOp.Remove || (removeOp == FxTreeRemoveOp.RemoveSingleFiled && refCount == 1) ) {
+                        if (removeOp == FxTreeRemoveOp.Remove || (removeOp == FxTreeRemoveOp.RemoveSingleFiled && refCount == 1)) {
                             // remove only contents that are not referenced elsewhere
                             contentEngine.remove(currNode.getReference());
                         }

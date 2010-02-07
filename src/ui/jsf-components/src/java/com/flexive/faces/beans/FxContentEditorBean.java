@@ -828,9 +828,8 @@ public class FxContentEditorBean implements Serializable {
             final FxContent repContent = ce.load(currentContent.getPk());
             final FxLock repLock = repContent.getLock();
 
-            if (currentLock.getUserId() != repLock.getUserId()) {
+            if (repLock.isLocked() && currentLock.getUserId() != repLock.getUserId())
                 hasNewOwner = true;
-            }
         } catch (FxApplicationException e) {
             new FxFacesMsgErr(e.getCause() != null ? e.getCause() : e).addToContext();
         }

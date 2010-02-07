@@ -32,12 +32,12 @@
 package com.flexive.shared.structure;
 
 import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxLanguage;
 import com.flexive.shared.FxSharedUtils;
-import com.flexive.shared.EJBLookup;
 import com.flexive.shared.content.FxPermissionUtils;
-import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.security.LifeCycleInfo;
@@ -144,7 +144,7 @@ public class FxTypeEdit extends FxType implements Serializable {
     }
 
     /**
-     * Create a new FxTypeEdit instance for creating a new FxType
+     * Create a new FxTypeEdit instance for creating a derived FxType
      *
      * @param name           name of the type
      * @param parentTypeName parent type name
@@ -156,7 +156,7 @@ public class FxTypeEdit extends FxType implements Serializable {
     }
 
     /**
-     * Create a new FxTypeEdit instance for creating a new FxType
+     * Create a new FxTypeEdit instance for creating a derived FxType
      *
      * @param name       name of the type
      * @param parentType the parent type ID
@@ -164,12 +164,11 @@ public class FxTypeEdit extends FxType implements Serializable {
      * @since 3.0.3
      */
     public static FxTypeEdit createNew(String name, FxType parentType) {
-        return createNew(
-                name,
-                new FxString(FxLanguage.DEFAULT_ID, name),
-                CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
-                parentType
-        );
+        return createNew(name, new FxString(FxLanguage.DEFAULT_ID, name),
+                parentType == null
+                        ? CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId())
+                        : parentType.getACL(),
+                parentType);
     }
 
     /**
@@ -182,12 +181,8 @@ public class FxTypeEdit extends FxType implements Serializable {
      */
     public static FxTypeEdit createNew(String name, long parentTypeId) {
         final FxEnvironment env = CacheAdmin.getEnvironment();
-        return createNew(
-                name,
-                new FxString(FxLanguage.DEFAULT_ID, name),
-                env.getACL(ACLCategory.STRUCTURE.getDefaultId()),
-                env.getType(parentTypeId)
-        );
+        final FxType parent = env.getType(parentTypeId);
+        return createNew(name, new FxString(FxLanguage.DEFAULT_ID, name), parent.getACL(), parent);
     }
 
     /**
@@ -212,12 +207,27 @@ public class FxTypeEdit extends FxType implements Serializable {
      * @return FxTypeEdit instance for creating a new FxType
      */
     public static FxTypeEdit createNew(String name, FxString label, ACL acl, FxType parent) {
-        return createNew(name, label, acl, CacheAdmin.getEnvironment().getWorkflows().get(0),
-                parent, parent != null, TypeStorageMode.Hierarchical,
-                TypeCategory.User, TypeMode.Content, LanguageMode.Multiple, TypeState.Available,
-                getDefaultTypePermissions(), false, 0, -1, 0, 0);
+        if (parent == null)
+            return createNew(name, label, acl,
+                    CacheAdmin.getEnvironment().getWorkflows().get(0),
+                    parent, false, TypeStorageMode.Hierarchical,
+                    TypeCategory.User, TypeMode.Content, LanguageMode.Multiple, TypeState.Available,
+                    getDefaultTypePermissions(), false, 0, -1, 0, 0);
+        else
+            return createNew(name, label, acl,
+                    parent.getWorkflow(),
+                    parent, true, parent.getStorageMode(),
+                    TypeCategory.User, parent.getMode(),
+                    parent.getLanguage(), TypeState.Available,
+                    parent.getBitCodedPermissions(), parent.isTrackHistory(), parent.getHistoryAge(),
+                    parent.getMaxVersions(), parent.getMaxRelSource(), parent.getMaxRelDestination());
     }
 
+    /**
+     * Get the default permission set for new types
+     *
+     * @return default permission set for new types
+     */
     private static byte getDefaultTypePermissions() {
         return FxPermissionUtils.encodeTypePermissions(true, false, true, true);
     }
@@ -275,17 +285,6 @@ public class FxTypeEdit extends FxType implements Serializable {
     public boolean isNew() {
         return isNew;
     }
-
-    /**
-     * Returns the unmodifiable script mapping of this type.
-     *
-     * @return the unmodifiable script mapping of this type
-     */
-    /*
-    public Map<FxScriptEvent, long[]> getScriptMapping() {
-        return Collections.unmodifiableMap(scriptMapping);
-    }
-    */
 
     /**
      * If FxTypeRelation entries are removed, remove all affected instances?
@@ -392,14 +391,6 @@ public class FxTypeEdit extends FxType implements Serializable {
         this.changed = true;
         return this;
     }
-
-    /*public void setParent(FxType parent) {
-        this.parent = parent;
-    }
-
-    public void setStorageMode(TypeStorageMode storageMode) {
-        this.storageMode = storageMode;
-    }*/
 
     /**
      * Set the types category (user, system)
@@ -633,6 +624,7 @@ public class FxTypeEdit extends FxType implements Serializable {
      * @param rel      the relation to validate.
      * @throws FxInvalidParameterException if the relation is invalid.
      */
+
     private void validateRelation(FxTypeRelation rel) throws FxInvalidParameterException {
         if (rel.getSource().isRelation()) {
             throw new FxInvalidParameterException("ex.structure.type.relation.wrongTarget", this.getName(), rel.getSource().getName());
@@ -647,7 +639,7 @@ public class FxTypeEdit extends FxType implements Serializable {
      *
      * @param   newRelationToAdd    the relation to be added.
      * @throws  FxInvalidParameterException if (maxRelSource or maxRelDestination is exceeded.
-     */
+     *
     private void validateRelationMultiplicity(FxTypeRelation newRelationToAdd) throws FxInvalidParameterException {
         long source = newRelationToAdd.getMaxSource();
         long dest = newRelationToAdd.getMaxDestination();
@@ -681,7 +673,7 @@ public class FxTypeEdit extends FxType implements Serializable {
             }
         }
     }
-
+    */
 
     /**
      * Return if the max source or destination settings for two FxTypeRelations differ
@@ -758,7 +750,7 @@ public class FxTypeEdit extends FxType implements Serializable {
      * Set the default options for new assignments created with
      * {@link #addProperty(String, FxDataType)}.
      *
-     * @param defaultOptions    the default options
+     * @param defaultOptions the default options
      */
     public void setDefaultOptions(List<FxStructureOption> defaultOptions) {
         this.defaultOptions.clear();
@@ -768,11 +760,11 @@ public class FxTypeEdit extends FxType implements Serializable {
     /**
      * Add a new assignment to this type. The assignment is saved instantly and is returned to the caller.
      *
-     * @param name      the assignment name
-     * @param dataType  the data type
-     * @return          the created assignment
-     * @throws FxApplicationException   on errors
-     * @since           3.1
+     * @param name     the assignment name
+     * @param dataType the data type
+     * @return the created assignment
+     * @throws FxApplicationException on errors
+     * @since 3.1
      */
     public FxPropertyAssignmentEdit addProperty(String name, FxDataType dataType) throws FxApplicationException {
         final String alias = getAssignmentAlias(name);
@@ -798,10 +790,10 @@ public class FxTypeEdit extends FxType implements Serializable {
     /**
      * Add a new group to this type. The group assignment is saved instantly and is returned to the caller.
      *
-     * @param name  the group name
-     * @return      the group assignment
-     * @throws FxApplicationException   on errors
-     * @since       3.1
+     * @param name the group name
+     * @return the group assignment
+     * @throws FxApplicationException on errors
+     * @since 3.1
      */
     public FxGroupAssignmentEdit addGroup(String name) throws FxApplicationException {
         final String alias = getAssignmentAlias(name);
@@ -880,8 +872,9 @@ public class FxTypeEdit extends FxType implements Serializable {
     /**
      * Save the type and return the saved instance.
      *
-     * @return  the saved instance.
-     * @since   3.1
+     * @return the saved instance.
+     * @since 3.1
+     * @throws FxApplicationException on errors
      */
     public FxTypeEdit save() throws FxApplicationException {
         final long id = EJBLookup.getTypeEngine().save(this);

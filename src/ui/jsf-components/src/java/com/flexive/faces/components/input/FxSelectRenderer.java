@@ -155,7 +155,7 @@ public class FxSelectRenderer extends Renderer {
                         LOG.info("Rendering using script " + editScript);
                         FxScriptInfo scriptInfo = CacheAdmin.getEnvironment().getScript(editScript);
                         GroovyShell shell = new GroovyShell();
-                        Script script = shell.parse(scriptInfo.getCode());
+                        Script script = shell.parse(EJBLookup.getScriptingEngine().loadScriptCode(scriptInfo.getId()));
                         script.setProperty("context", context);
                         script.setProperty("component", component);
                         script.run();
@@ -175,7 +175,7 @@ public class FxSelectRenderer extends Renderer {
                         LOG.info("Rendering using script " + readOnlyScript);
                         FxScriptInfo scriptInfo = CacheAdmin.getEnvironment().getScript(readOnlyScript);
                         GroovyShell shell = new GroovyShell();
-                        Script script = shell.parse(scriptInfo.getCode());
+                        Script script = shell.parse(EJBLookup.getScriptingEngine().loadScriptCode(scriptInfo.getId()));
                         script.setProperty("context", context);
                         script.setProperty("component", component);
                         script.run();

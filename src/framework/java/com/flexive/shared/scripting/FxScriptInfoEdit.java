@@ -31,6 +31,8 @@
  ***************************************************************/
 package com.flexive.shared.scripting;
 
+import com.flexive.shared.EJBLookup;
+import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 
 /**
@@ -40,6 +42,8 @@ import com.flexive.shared.exceptions.FxInvalidParameterException;
  */
 
 public class FxScriptInfoEdit extends FxScriptInfo {
+
+    protected String code;
 
     public void setEvent(FxScriptEvent event) {
         this.event = event;
@@ -51,6 +55,10 @@ public class FxScriptInfoEdit extends FxScriptInfo {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getCode() {
+        return this.code;
     }
 
     public void setCode(String code) {
@@ -74,20 +82,22 @@ public class FxScriptInfoEdit extends FxScriptInfo {
      * @see FxScriptEvent
      */
     public FxScriptInfoEdit(long id, FxScriptEvent event, String name, String description, String code, boolean active) throws FxInvalidParameterException {
-        super(id, event, name, description, code, active);
+        super(id, event, name, description, active);
+        this.code = code;
     }
 
     /**
      * Constructs a editable script info object from FxScriptInfo.
      *
      * @param si the script info object
+     * @throws FxApplicationException if the code could not be loaded
      */
-    public FxScriptInfoEdit(FxScriptInfo si) {
+    public FxScriptInfoEdit(FxScriptInfo si) throws FxApplicationException {
         this.id = si.id;
         this.name = si.name;
         this.event = si.event;
         this.description = si.description;
-        this.code = si.code;
+        this.code = si.getId() != 0 ? EJBLookup.getScriptingEngine().loadScriptCode(si.getId()) : "";
         this.active = si.active;
     }
 }

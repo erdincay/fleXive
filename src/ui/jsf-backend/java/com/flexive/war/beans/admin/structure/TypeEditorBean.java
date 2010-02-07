@@ -284,16 +284,13 @@ public class TypeEditorBean implements Serializable {
      * Propagates changes to the DB.
      */
     public void saveChanges() {
-        if (FxJsfUtils.getRequest().getUserTicket().isInRole(Role.ScriptManagement)) {
-            try {
-                if (!type.isNew())
-                    saveScriptChanges();
-            }
-            catch (Throwable t) {
-                new FxFacesMsgErr(t).addToContext();
-            }
-        } else
-            new FxFacesMsgInfo("StructureEditor.info.notInRole.scriptManagement").addToContext();
+        try {
+            if (!type.isNew())
+                saveScriptChanges();
+        }
+        catch (Throwable t) {
+            new FxFacesMsgErr(t).addToContext();
+        }
 
         if (FxJsfUtils.getRequest().getUserTicket().isInRole(Role.StructureManagement)) {
             try {
@@ -906,7 +903,12 @@ public class TypeEditorBean implements Serializable {
      *          on errors
      */
     public void saveScriptChanges() throws FxApplicationException {
+        boolean mayChange = FxJsfUtils.getRequest().getUserTicket().isInRole(Role.ScriptManagement);
         for (ScriptListWrapper.ScriptListEntry e : scriptWrapper.getDelta(type.getId())) {
+            if (!mayChange) {
+                new FxFacesMsgInfo("StructureEditor.info.notInRole.scriptManagement").addToContext();
+                return;
+            }
             if (e.getId() == ScriptListWrapper.ID_SCRIPT_ADDED)
                 EJBLookup.getScriptingEngine().createTypeScriptMapping(e.getScriptEvent(), e.getScriptInfo().getId(), type.getId(), e.isActive(), e.isDerivedUsage());
             else if (e.getId() == ScriptListWrapper.ID_SCRIPT_REMOVED)

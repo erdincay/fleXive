@@ -146,7 +146,7 @@ public class ScriptingTest {
                 assertEquals(sInfo.getName(), si.getName());
                 assertEquals(sInfo.getDescription(), si.getDescription());
                 assertEquals(sInfo.getEvent(), si.getEvent());
-                assertEquals(sInfo.getCode(), si.getCode());
+                assertEquals(se.loadScriptCode(sInfo.getId()), se.loadScriptCode(si.getId()));
             }
         }
         assertEquals(se.loadScriptCode(si.getId()), code); // compare code
@@ -538,7 +538,7 @@ public class ScriptingTest {
 
         try {
             si = se.createScriptFromDropLibrary("flexiveDropTest", FxScriptEvent.Manual, "TestDropLibScript.gy", "UniqueScriptName1010.gy", "description");
-            assertEquals(si.getCode(), libCode);
+            assertEquals(se.loadScriptCode(si.getId()), libCode);
             se.remove(si.getId()); // clean up
         } catch (FxNotFoundException e) {
             fail("Creating a script from the drop " + dropName + " failed");

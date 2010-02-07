@@ -32,9 +32,7 @@
 package com.flexive.core.storage.genericSQL;
 
 import com.flexive.core.Database;
-
-import static com.flexive.core.DatabaseConst.*;
-
+import com.flexive.core.DatabaseConst;
 import com.flexive.core.LifeCycleInfoImpl;
 import com.flexive.core.storage.DBStorage;
 import com.flexive.core.storage.FxTreeNodeInfo;
@@ -60,16 +58,18 @@ import com.flexive.shared.structure.TypeState;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNode;
 import com.flexive.shared.value.FxString;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.math.BigDecimal;
 import java.sql.*;
 import java.util.*;
-import java.math.BigDecimal;
+
+import static com.flexive.core.DatabaseConst.*;
 
 /**
  * Generic tree storage implementation for nested set model trees
@@ -227,13 +227,13 @@ public abstract class GenericTreeStorage implements TreeStorage {
      * Resolve information about a node to be created like creating a folder if no reference is provided or check
      * permissions on existing references and availability of live instance if operated on the live tree
      *
-     * @param mode      tree mode
-     * @param seq       reference to the sequencer
-     * @param ce        reference to the content engine
-     * @param nodeId    desired node id
-     * @param name      name
-     * @param label     label
-     * @param reference reference
+     * @param mode            tree mode
+     * @param seq             reference to the sequencer
+     * @param ce              reference to the content engine
+     * @param nodeId          desired node id
+     * @param name            name
+     * @param label           label
+     * @param reference       reference
      * @param activateContent change the step of contents that have no live step to live in the max version?
      * @return NodeCreateInfo
      * @throws FxApplicationException on errors
@@ -243,7 +243,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
         if (nodeId < 0)
             nodeId = seq.getId(mode.getSequencer());
         if (StringUtils.isEmpty(name) || "_".equals(name)) {
-            if(!StringUtils.isEmpty(label.getBestTranslation()))
+            if (!StringUtils.isEmpty(label.getBestTranslation()))
                 name = label.getBestTranslation();
             else if (reference != null && !reference.isNew()) {
                 try {
@@ -1458,6 +1458,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
      */
     public void activateAll(Connection con, FxTreeMode mode) throws FxTreeException {
         Statement stmt = null;
+        PreparedStatement ps = null;
         try {
             final String FALSE = StorageManager.getBooleanFalseExpression();
             acquireLocksForUpdate(con, FxTreeMode.Live);
@@ -1469,12 +1470,24 @@ public abstract class GenericTreeStorage implements TreeStorage {
             stmt.addBatch("UPDATE " + getTable(FxTreeMode.Live) + " SET DIRTY=" + FALSE);
             stmt.addBatch(StorageManager.getReferentialIntegrityChecksStatement(true));
             stmt.executeBatch();
+            //FX-793: activate nodes that are not in the live version
+            ps = con.prepareStatement("SELECT DISTINCT c.ID, c.MAX_VER FROM " + getTable(FxTreeMode.Live) +
+                    " l, " + DatabaseConst.TBL_CONTENT + " c WHERE l.REF IS NOT NULL AND c.ID=l.REF AND c.LIVE_VER=0");
+            ResultSet rs = ps.executeQuery();
+            final ContentEngine ce = EJBLookup.getContentEngine();
+            while (rs != null && rs.next()) {
+                FxPK pk = new FxPK(rs.getLong(1), rs.getInt(2));
+                FxContent co = ce.load(pk);
+                //create a Live version
+                pk = createContentLiveVersion(ce, co);
+                LOG.info("Created new live version " + pk + " during tree activation");
+            }
+            if (rs != null)
+                rs.close();
         } catch (Throwable t) {
             throw new FxTreeException(LOG, "ex.tree.activate.all.failed", mode.name(), t.getMessage());
         } finally {
-            try {
-                if (stmt != null) stmt.close();
-            } catch (Exception exc) {/*ignore*/}
+            Database.closeObjects(GenericTreeStorage.class, stmt, ps);
         }
     }
 

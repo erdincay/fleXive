@@ -32,6 +32,7 @@
 package com.flexive.shared.scripting;
 
 import com.flexive.shared.AbstractSelectableObjectWithName;
+import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import org.apache.commons.lang.StringUtils;
 
@@ -48,7 +49,6 @@ public class FxScriptInfo extends AbstractSelectableObjectWithName implements Se
     protected FxScriptEvent event;
     protected String name;
     protected String description;
-    protected String code;
     protected boolean active =false;
 
     public FxScriptInfo() {
@@ -62,17 +62,15 @@ public class FxScriptInfo extends AbstractSelectableObjectWithName implements Se
      * @param event       script type
      * @param name        (unique) name of the script
      * @param description description
-     * @param code        the script code
      * @param active      if the script is active
      * @throws FxInvalidParameterException on errors
      * @see FxScriptEvent
      */
-    public FxScriptInfo(long id, FxScriptEvent event, String name, String description, String code, boolean active) throws FxInvalidParameterException {
+    public FxScriptInfo(long id, FxScriptEvent event, String name, String description, boolean active) throws FxInvalidParameterException {
         this.id = id;
         this.event = event;
         this.name = name;
         this.description = (description == null ? "" : description);
-        this.code = (code == null ? "" : code);
         this.active=active;
         if (StringUtils.isEmpty(this.name) || this.name.length() > 255) {
             throw new FxInvalidParameterException("NAME", "ex.scripting.name.invalid", name);
@@ -86,7 +84,11 @@ public class FxScriptInfo extends AbstractSelectableObjectWithName implements Se
      */
 
     public FxScriptInfoEdit asEditable()  {
-        return new FxScriptInfoEdit(this);
+        try {
+            return new FxScriptInfoEdit(this);
+        } catch (FxApplicationException e) {
+            throw e.asRuntimeException();
+        }
     }
 
     /**
@@ -124,15 +126,6 @@ public class FxScriptInfo extends AbstractSelectableObjectWithName implements Se
      */
     public String getDescription() {
         return description;
-    }
-
-    /**
-     * Get the scripts code
-     *
-     * @return code
-     */
-    public String getCode() {
-        return code;
     }
 
     /**

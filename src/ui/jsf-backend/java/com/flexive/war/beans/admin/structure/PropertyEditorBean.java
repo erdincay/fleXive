@@ -1005,15 +1005,12 @@ public class PropertyEditorBean implements ActionBean, Serializable {
      * Forward property and property assignment changes to the DB
      */
     public void saveChanges() {
-        if (FxJsfUtils.getRequest().getUserTicket().isInRole(Role.ScriptManagement))
-            try {
-                if (!property.isNew())
-                    saveScriptChanges();
-            } catch (Throwable t) {
-                new FxFacesMsgErr(t).addToContext();
-            }
-        else
-            new FxFacesMsgInfo("StructureEditor.info.notInRole.scriptManagement").addToContext();
+        try {
+            if (!property.isNew())
+                saveScriptChanges();
+        } catch (Throwable t) {
+            new FxFacesMsgErr(t).addToContext();
+        }
 
         if (assignment.getProperty().getReferencedType() != null && assignment.getAssignedType().getId() == assignment.getProperty().getReferencedType().getId() && // selfreference
             !minMultiplicity.equalsIgnoreCase("0") )
@@ -1283,7 +1280,12 @@ public class PropertyEditorBean implements ActionBean, Serializable {
      *          on errors
      */
     private void saveScriptChanges() throws FxApplicationException {
+        boolean mayChange = FxJsfUtils.getRequest().getUserTicket().isInRole(Role.ScriptManagement);
         for (ScriptListWrapper.ScriptListEntry e : scriptWrapper.getDelta(assignment.getId())) {
+            if (!mayChange) {
+                new FxFacesMsgInfo("StructureEditor.info.notInRole.scriptManagement").addToContext();
+                return;
+            }
             if (e.getId() == ScriptListWrapper.ID_SCRIPT_ADDED)
                 EJBLookup.getScriptingEngine().createAssignmentScriptMapping(e.getScriptEvent(),
                         e.getScriptInfo().getId(), e.isDerived() ? e.getDerivedFrom() : assignment.getId(),

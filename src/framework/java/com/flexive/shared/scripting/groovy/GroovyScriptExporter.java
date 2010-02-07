@@ -389,7 +389,7 @@ public class GroovyScriptExporter {
         final Set<FxType> tmp = cb.getTypeAssignments().keySet();
         filteredTypes = new LinkedHashSet<FxType>(); // guarantee order f. export
         for (FxType t : tmp) {
-            if (!GroovyScriptExporterTools.isSystemType(t.getName()))
+            if (t.getId() == cb.getTypeId() || !GroovyScriptExporterTools.isSystemType(t.getName()))
                 filteredTypes.add(t);
         }
 
