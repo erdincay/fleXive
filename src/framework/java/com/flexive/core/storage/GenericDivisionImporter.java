@@ -33,6 +33,7 @@ package com.flexive.core.storage;
 
 import com.flexive.core.Database;
 import com.flexive.core.DatabaseConst;
+import com.flexive.core.flatstorage.FxFlatStorage;
 import com.flexive.core.flatstorage.FxFlatStorageInfo;
 import com.flexive.core.flatstorage.FxFlatStorageManager;
 import com.flexive.core.storage.binary.FxBinaryUtils;
@@ -43,6 +44,7 @@ import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.impex.FxDivisionExportInfo;
 import com.flexive.shared.impex.FxImportExportConstants;
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
@@ -317,7 +319,10 @@ public class GenericDivisionImporter implements FxImportExportConstants {
      * @param table              name of the table
      * @param executeInsertPhase execute the insert phase?
      * @param executeUpdatePhase execute the update phase?
-     * @param updateColumns      columns that should be set to <code>null</code> in a first pass (insert) and updated to the provided values in a second pass (update)
+     * @param updateColumns      columns that should be set to <code>null</code> in a first pass (insert)
+     *                           and updated to the provided values in a second pass (update),
+     *                           columns that should be used in the where clause have to be prefixed
+     *                           with "KEY:"
      * @throws Exception on errors
      */
     private void importTable(Statement stmt, final ZipFile zip, final ZipEntry ze, final String xpath, final String table,
@@ -331,10 +336,13 @@ public class GenericDivisionImporter implements FxImportExportConstants {
         sbInsert.append("INSERT INTO ").append(table).append(" (");
         if (sbUpdate != null) {
             sbUpdate.append("UPDATE ").append(table).append(" SET ");
-            for (int i = 0; i < updateColumns.length; i++) {
-                if (i > 0)
+            int counter = 0;
+            for (String updateColumn : updateColumns) {
+                if (updateColumn.startsWith("KEY:"))
+                    continue;
+                if (counter++ > 0)
                     sbUpdate.append(',');
-                sbUpdate.append(updateColumns[i]).append("=?");
+                sbUpdate.append(updateColumn).append("=?");
             }
             sbUpdate.append(" WHERE ");
         }
@@ -351,7 +359,7 @@ public class GenericDivisionImporter implements FxImportExportConstants {
             if (updateColumns.length > 0) {
                 boolean abort = false;
                 for (String col : updateColumns) {
-                    if (currCol.equals(col)) {
+                    if (currCol.equalsIgnoreCase(col)) {
                         abort = true;
                         updateSetColumns.put(currCol, new ColumnInfo(md.getColumnType(i + 1), updateSetIndex++));
                         break;
@@ -366,12 +374,25 @@ public class GenericDivisionImporter implements FxImportExportConstants {
                 sbInsert.append(',');
             sbInsert.append(currCol);
             insertColumns.put(currCol, new ColumnInfo(md.getColumnType(i + 1), insertIndex++));
-            if (updateColumns.length > 0) {
-                updateClauseColumns.put(currCol, new ColumnInfo(md.getColumnType(i + 1), updateClauseIndex++));
-                sbUpdate.append(currCol).append("=? AND ");
-            }
         }
-        if (updateColumns.length > 0) {
+        if (updateColumns.length > 0 && executeUpdatePhase) {
+            boolean hasKeyColumn = false;
+            for (String col : updateColumns) {
+                if (!col.startsWith("KEY:"))
+                    continue;
+                hasKeyColumn = true;
+                String keyCol = col.substring(4);
+                for (int i = 0; i < md.getColumnCount(); i++) {
+                    if (!md.getColumnName(i + 1).equalsIgnoreCase(keyCol))
+                        continue;
+                    updateClauseColumns.put(keyCol, new ColumnInfo(md.getColumnType(i + 1), updateClauseIndex++));
+                    sbUpdate.append(keyCol).append("=? AND ");
+                    break;
+                }
+
+            }
+            if (!hasKeyColumn)
+                throw new IllegalArgumentException("Update columns require a KEY!");
             sbUpdate.delete(sbUpdate.length() - 5, sbUpdate.length()); //remove trailing " AND "
             //"shift" clause indices
             for (String col : updateClauseColumns.keySet()) {
@@ -380,7 +401,7 @@ public class GenericDivisionImporter implements FxImportExportConstants {
             }
         }
         sbInsert.append(")VALUES(");
-        for (int i = 0; i < md.getColumnCount() - updateColumns.length; i++) {
+        for (int i = 0; i < insertColumns.size(); i++) {
             if (i > 0)
                 sbInsert.append(',');
             sbInsert.append('?');
@@ -406,7 +427,7 @@ public class GenericDivisionImporter implements FxImportExportConstants {
             queryAttributes.put(pElem.substring(0, pElem.indexOf('[')), att);
         }
         final PreparedStatement psInsert = stmt.getConnection().prepareStatement(sbInsert.toString());
-        final PreparedStatement psUpdate = updateColumns.length > 0 ? stmt.getConnection().prepareStatement(sbUpdate.toString()) : null;
+        final PreparedStatement psUpdate = updateColumns.length > 0 && executeUpdatePhase ? stmt.getConnection().prepareStatement(sbUpdate.toString()) : null;
         try {
             final SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
             final DefaultHandler handler = new DefaultHandler() {
@@ -469,7 +490,10 @@ public class GenericDivisionImporter implements FxImportExportConstants {
                         inTag = true;
                         data.clear();
                         for (int i = 0; i < attributes.getLength(); i++) {
-                            data.put(attributes.getLocalName(i), attributes.getValue(i));
+                            String name = attributes.getLocalName(i);
+                            if (StringUtils.isEmpty(name))
+                                name = attributes.getQName(i);
+                            data.put(name, attributes.getValue(i));
                         }
                     } else {
                         currentElement = qName;
@@ -584,6 +608,7 @@ public class GenericDivisionImporter implements FxImportExportConstants {
                             dataSet = true;
                             switch (ci.columnType) {
                                 case Types.BIGINT:
+                                case Types.NUMERIC:
                                     if (DBG) LOG.info("BigInt " + ci.index + "->" + new BigDecimal(value));
                                     ps.setBigDecimal(ci.index, new BigDecimal(value));
                                     break;
@@ -608,9 +633,13 @@ public class GenericDivisionImporter implements FxImportExportConstants {
                                     break;
                                 case Types.INTEGER:
                                 case Types.DECIMAL:
-                                case Types.NUMERIC:
-                                    if (DBG) LOG.info("Long " + ci.index + "->" + Long.valueOf(value));
-                                    ps.setLong(ci.index, Long.valueOf(value));
+                                    try {
+                                        if (DBG) LOG.info("Long " + ci.index + "->" + Long.valueOf(value));
+                                        ps.setLong(ci.index, Long.valueOf(value));
+                                    } catch (NumberFormatException e) {
+                                        //Fallback (temporary) for H2 if the reported long is a big decimal (tree...)
+                                        ps.setBigDecimal(ci.index, new BigDecimal(value));
+                                    }
                                     break;
                                 case Types.BIT:
                                 case Types.CHAR:
@@ -624,6 +653,7 @@ public class GenericDivisionImporter implements FxImportExportConstants {
                                 case Types.LONGVARBINARY:
                                 case Types.VARBINARY:
                                 case Types.BLOB:
+                                case Types.BINARY:
                                     ZipEntry bin = zip.getEntry(value);
                                     if (bin == null) {
                                         LOG.error("Failed to lookup binary [" + value + "]!");
@@ -748,7 +778,7 @@ public class GenericDivisionImporter implements FxImportExportConstants {
         try {
             importTable(stmt, zip, ze, "workflow/workflows/workflow", DatabaseConst.TBL_WORKFLOW);
             importTable(stmt, zip, ze, "workflow/stepDefinitions/stepdef", DatabaseConst.TBL_WORKFLOW_STEPDEFINITION,
-                    true, true, "unique_target");
+                    true, true, "unique_target", "KEY:id");
             importTable(stmt, zip, ze, "workflow/stepDefinitions/stepdef_t", DatabaseConst.TBL_WORKFLOW_STEPDEFINITION + DatabaseConst.ML);
             importTable(stmt, zip, ze, "workflow/steps/step", DatabaseConst.TBL_WORKFLOW_STEP);
             importTable(stmt, zip, ze, "workflow/routes/route", DatabaseConst.TBL_WORKFLOW_ROUTES);
@@ -821,7 +851,8 @@ public class GenericDivisionImporter implements FxImportExportConstants {
         try {
             importTable(stmt, zip, ze, "binaries/binary", DatabaseConst.TBL_CONTENT_BINARY);
             ZipEntry curr;
-            File binDir = new File(FxBinaryUtils.getBinaryDirectory() + File.separatorChar + String.valueOf(FxContext.get().getDivisionId()));
+            final String nodeBinDir = FxBinaryUtils.getBinaryDirectory();
+            File binDir = new File(nodeBinDir + File.separatorChar + String.valueOf(FxContext.get().getDivisionId()));
             if (!binDir.exists())
                 //noinspection ResultOfMethodCallIgnored
                 binDir.mkdirs();
@@ -857,7 +888,7 @@ public class GenericDivisionImporter implements FxImportExportConstants {
             }
             FxContext.get().runAsSystem();
             try {
-                EJBLookup.getNodeConfigurationEngine().put(SystemParameters.NODE_BINARY_PATH, binDir.getAbsolutePath());
+                EJBLookup.getNodeConfigurationEngine().put(SystemParameters.NODE_BINARY_PATH, nodeBinDir);
             } finally {
                 FxContext.get().stopRunAsSystem();
             }
@@ -881,9 +912,10 @@ public class GenericDivisionImporter implements FxImportExportConstants {
         try {
             importTable(stmt, zip, ze, "hierarchical/content", DatabaseConst.TBL_CONTENT);
             importTable(stmt, zip, ze, "hierarchical/data", DatabaseConst.TBL_CONTENT_DATA);
-            importTable(stmt, zip, ze, "hierarchical/ft", DatabaseConst.TBL_CONTENT_DATA_FT);
+            //TODO: fulltext table has to be rebuilt!
+//            importTable(stmt, zip, ze, "hierarchical/ft", DatabaseConst.TBL_CONTENT_DATA_FT);
             importTable(stmt, zip, ze, "hierarchical/acl", DatabaseConst.TBL_CONTENT_ACLS);
-            importTable(stmt, zip, ze_struct, "structures/types/tdef", DatabaseConst.TBL_STRUCT_TYPES, false, true, "icon_ref");
+            importTable(stmt, zip, ze_struct, "structures/types/tdef", DatabaseConst.TBL_STRUCT_TYPES, false, true, "icon_ref", "KEY:id");
         } finally {
             Database.closeObjects(GenericDivisionImporter.class, stmt);
         }
@@ -919,8 +951,8 @@ public class GenericDivisionImporter implements FxImportExportConstants {
         ZipEntry ze = getZipEntry(zip, FILE_TREE);
         Statement stmt = con.createStatement();
         try {
-            importTable(stmt, zip, ze, "tree/edit/node", DatabaseConst.TBL_TREE, true, true, "parent");
-            importTable(stmt, zip, ze, "tree/live/node", DatabaseConst.TBL_TREE + "_LIVE", true, true, "parent");
+            importTable(stmt, zip, ze, "tree/edit/node", DatabaseConst.TBL_TREE, true, true, "parent", "KEY:id");
+            importTable(stmt, zip, ze, "tree/live/node", DatabaseConst.TBL_TREE + "_LIVE", true, true, "parent", "KEY:id");
         } finally {
             Database.closeObjects(GenericDivisionImporter.class, stmt);
         }
@@ -999,7 +1031,14 @@ public class GenericDivisionImporter implements FxImportExportConstants {
                 if (tableName != null) {
                     if (description == null)
                         description = "FlatStorage " + tableName;
-                    FxFlatStorageManager.getInstance().createFlatStorage(tableName, description, cstring, ctext, cbigInt, cdouble, cselect);
+                    final FxFlatStorage flatStorage = FxFlatStorageManager.getInstance();
+                    for (FxFlatStorageInfo fi : flatStorage.getFlatStorageInfos()) {
+                        if (fi.getName().equals(tableName)) {
+                            flatStorage.removeFlatStorage(tableName);
+                            break;
+                        }
+                    } //TODO: check if a flatstorage with these parameters can be created and migrate to a supported one if not
+                    flatStorage.createFlatStorage(con, tableName, description, cstring, ctext, cbigInt, cdouble, cselect);
                     storages.add(tableName);
                 }
             }
@@ -1049,6 +1088,8 @@ public class GenericDivisionImporter implements FxImportExportConstants {
                         }
                     if (value != -1L && seqName != null) {
                         try {
+                            if (value <= 0)
+                                value = 1; //make sure we have a valid value
                             FxSystemSequencer sseq = FxSystemSequencer.valueOf(seqName); //check if this is really a system sequencer
                             seq.setSequencerId(sseq.getSequencerName(), value);
                             LOG.info("Set sequencer [" + seqName + "] to [" + value + "]");

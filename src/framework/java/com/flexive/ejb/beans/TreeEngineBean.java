@@ -99,7 +99,7 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
 
     private static long lastCheck = System.currentTimeMillis();
     private static long cachedTreeCaptionProperty = -1L;
-    private final static long CHECK_INTERVAL = 10000; //check every 10 sec
+    private final static long CHECK_INTERVAL = 60000; //check every 60 sec
 
     /**
      * Get the caption property id
@@ -109,7 +109,7 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
      */
     private long getCaptionPropertyId() throws FxApplicationException {
         if (cachedTreeCaptionProperty == -1L || (System.currentTimeMillis() - CHECK_INTERVAL) > lastCheck) {
-            System.out.println("Checking treeCaptionProperty at " + System.currentTimeMillis() + " last check:" + lastCheck);
+//            System.out.println("Checking treeCaptionProperty at " + System.currentTimeMillis() + " last check:" + lastCheck+" delta: "+(System.currentTimeMillis()-lastCheck));
             cachedTreeCaptionProperty = EJBLookup.getConfigurationEngine().get(SystemParameters.TREE_CAPTION_PROPERTY);
             lastCheck = System.currentTimeMillis();
         }

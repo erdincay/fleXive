@@ -74,6 +74,7 @@
                 <adm:treeNode id="export" icon="export" titleKey="Admin.system.importExport">
                     <adm:treeNode titleKey="Admin.system.export" link="/adm/main/importexport/structureExport.jsf"/>
                     <adm:treeNode titleKey="Admin.system.import" link="/adm/main/importexport/structureImport.jsf"/>
+                    <adm:treeNode titleKey="Admin.system.divisionImportExport" link="/adm/main/importexport/divisionImportExport.jsf" rendered="#{fxSystemBean.isInRole['GlobalSupervisor']}"/>
                 </adm:treeNode>
             </c:if>
 

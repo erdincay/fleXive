@@ -212,16 +212,16 @@ con.close()
                 value = null;
                 att = md.getColumnName(i).toLowerCase();
                 switch (md.getColumnType(i)) {
+                    case java.sql.Types.DECIMAL:
+                    case java.sql.Types.NUMERIC:
                     case java.sql.Types.BIGINT:
                         value = String.valueOf(rs.getBigDecimal(i));
                         if (rs.wasNull())
                             value = null;
                         break;
                     case java.sql.Types.INTEGER:
-                    case java.sql.Types.DECIMAL:
                     case java.sql.Types.SMALLINT:
                     case java.sql.Types.TINYINT:
-                    case java.sql.Types.NUMERIC:
                         value = String.valueOf(rs.getLong(i));
                         if (rs.wasNull())
                             value = null;
@@ -257,6 +257,7 @@ con.close()
                     case java.sql.Types.NVARCHAR:
                     case java.sql.Types.VARBINARY:
                     case java.sql.Types.VARCHAR:
+                    case java.sql.Types.BINARY:
                         hasSubTags = true;
                         break;
                     default:
@@ -272,6 +273,7 @@ con.close()
                         case java.sql.Types.VARBINARY:
                         case java.sql.Types.LONGVARBINARY:
                         case java.sql.Types.BLOB:
+                        case java.sql.Types.BINARY:    
                             if (!(out instanceof ZipOutputStream))
                                 throw new IllegalArgumentException("out has to be a ZipOutputStream to store binaries!");
                             ZipOutputStream zip = (ZipOutputStream) out;
@@ -789,7 +791,7 @@ con.close()
             write(out, sb);
             dumpTable(DatabaseConst.TBL_CONTENT, stmt, out, sb, "content", "id");
             dumpTable(DatabaseConst.TBL_CONTENT_DATA, stmt, out, sb, "data", "id");
-            dumpTable(DatabaseConst.TBL_CONTENT_DATA_FT, stmt, out, sb, "ft", "id");
+//            dumpTable(DatabaseConst.TBL_CONTENT_DATA_FT, stmt, out, sb, "ft", "id");
             dumpTable(DatabaseConst.TBL_CONTENT_ACLS, stmt, out, sb, "acl", "id");
             sb.append("</hierarchical>\n");
             write(out, sb);

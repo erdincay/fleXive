@@ -117,4 +117,20 @@ public interface DivisionConfigurationEngine extends GenericConfigurationEngine 
      * @throws FxApplicationException on errors
      */
     public void removeFlatStorage(String name) throws FxApplicationException;
+
+    /**
+     * Export the current division to a file on the local application server
+     *
+     * @param localFileName name (and path) of the file on the local application server
+     * @throws FxApplicationException on errors
+     */
+    public void exportDivision(String localFileName) throws FxApplicationException;
+
+    /**
+     * Import the current division from a file on the local application server
+     *
+     * @param localFileName name (and path) of the file on the local application server
+     * @throws FxApplicationException on errors
+     */
+    public void importDivision(String localFileName) throws FxApplicationException;
 }

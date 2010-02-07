@@ -32,11 +32,11 @@
 package com.flexive.ejb.beans.configuration;
 
 import com.flexive.core.Database;
-import static com.flexive.core.DatabaseConst.TBL_CONFIG_DIVISION;
 import com.flexive.core.flatstorage.FxFlatStorageInfo;
 import com.flexive.core.flatstorage.FxFlatStorageManager;
 import com.flexive.core.storage.ContentStorage;
 import com.flexive.core.storage.StorageManager;
+import com.flexive.ejb.beans.EJBUtils;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.configuration.DivisionData;
@@ -44,26 +44,26 @@ import com.flexive.shared.configuration.ParameterScope;
 import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxDbException;
+import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxNoAccessException;
 import com.flexive.shared.interfaces.DivisionConfigurationEngine;
 import com.flexive.shared.interfaces.DivisionConfigurationEngineLocal;
 import com.flexive.shared.structure.TypeStorageMode;
-import com.flexive.ejb.beans.EJBUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.annotation.Resource;
 import javax.ejb.*;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringReader;
+import java.io.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.zip.ZipFile;
+
+import static com.flexive.core.DatabaseConst.TBL_CONFIG_DIVISION;
 
 /**
  * Division configuration implementation.
@@ -483,11 +483,15 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void createFlatStorage(String name, String description, int stringColumns, int textColumns, int bigIntColumns, int doubleColumns, int selectColumns) throws FxApplicationException {
         try {
+            Connection con = null;
             try {
-                FxFlatStorageManager.getInstance().createFlatStorage(name, description, stringColumns, textColumns, bigIntColumns, doubleColumns, selectColumns);
+                con = Database.getNonTXDataSource().getConnection();
+                FxFlatStorageManager.getInstance().createFlatStorage(con, name, description, stringColumns, textColumns, bigIntColumns, doubleColumns, selectColumns);
             } catch (FxApplicationException e) {
                 EJBUtils.rollback(ctx);
                 throw e;
+            } finally {
+                Database.closeObjects(DivisionConfigurationEngineBean.class, con, null);
             }
         } catch (SQLException e) {
             EJBUtils.rollback(ctx);
@@ -509,6 +513,70 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
             }
         } catch (SQLException e) {
             throw new FxDbException(e, "ex.db.sqlError", e.getMessage());
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    public void exportDivision(String localFileName) throws FxApplicationException {
+        if (!FxContext.getUserTicket().isGlobalSupervisor())
+            throw new FxNoAccessException("ex.export.noAccess");
+        File zip = new File(localFileName);
+        boolean createError = false;
+        try {
+            if (zip.exists() || !zip.createNewFile())
+                createError = true;
+        } catch (IOException e) {
+            LOG.info(e);
+            createError = true;
+        }
+        if (createError)
+            throw new FxInvalidParameterException("localFileName", "ex.export.fileCreateError", localFileName);
+
+        FileOutputStream fos = null;
+        Connection con = null;
+        try {
+            con = Database.getDbConnection();
+            fos = new FileOutputStream(zip);
+            StorageManager.getStorageImpl().exportDivision(con, fos);
+        } catch (Exception e) {
+            throw new FxApplicationException(e, "ex.export.failed", localFileName, e.getMessage());
+        } finally {
+            Database.closeObjects(DivisionConfigurationEngine.class, con, null);
+            try {
+                if (fos != null) fos.close();
+            } catch (IOException e) {
+                LOG.error(e);
+            }
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    public void importDivision(String localFileName) throws FxApplicationException {
+        if (!FxContext.getUserTicket().isGlobalSupervisor())
+            throw new FxNoAccessException("ex.import.noAccess");
+        File data = new File(localFileName);
+        if (!data.exists() || !data.isFile())
+            throw new FxInvalidParameterException("localFileName", "ex.import.noFile", localFileName);
+        ZipFile zip;
+        try {
+            zip = new ZipFile(data);
+        } catch (IOException e) {
+            throw new FxInvalidParameterException("localFileName", "ex.import.noZIP", localFileName);
+        }
+        Connection con = null;
+        try {
+            con = Database.getDbConnection();
+            StorageManager.getStorageImpl().importDivision(con, zip);
+        } catch (Exception e) {
+            throw new FxApplicationException(e, "ex.import.failed", localFileName, e.getMessage());
+        } finally {
+            Database.closeObjects(DivisionConfigurationEngine.class, con, null);
         }
     }
 }

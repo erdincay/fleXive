@@ -66,6 +66,14 @@
     </managed-bean>
 
     <managed-bean>
+        <managed-bean-name>divisionImportExportBean</managed-bean-name>
+        <managed-bean-class>
+            com.flexive.war.beans.admin.main.DivisionImportExportBean
+        </managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean>
+
+    <managed-bean>
         <managed-bean-name>propertyEditorBean</managed-bean-name>
         <managed-bean-class>
             com.flexive.war.beans.admin.structure.PropertyEditorBean

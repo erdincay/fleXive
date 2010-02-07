@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+        PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+<body>
+
+<ui:composition template="/adm/contentTemplate.xhtml">
+
+    <ui:define name="body">
+        <fx:fieldSet id="importWarning" legendKey="DivisionImportExport.warning">
+            <h:outputText escape="false" value="#{fxMessageBean['DivisionImportExport.warning.text']}"/>
+        </fx:fieldSet>
+
+        <adm:tab label="#{fxMessageBean['DivisionImportExport.tabtitle']}" active="true" id="tabChoose"/>
+
+        <h:form id="frm" enctype="multipart/form-data">
+
+            <fx:fieldSet id="fileSet" legendKey="DivisionImportExport.field.localFileName">
+                <h:inputText id="file" value="#{divisionImportExportBean.source}" readonly="false"/>
+                <br/>
+            </fx:fieldSet>
+
+
+            <br/><br/>
+
+            <adm:commandButton labelKey="DivisionImportExport.button.import" location="both"
+                               bean="#{divisionImportExportBean}" lockscreen="true"
+                               confirmKey="DivisionImportExport.warning.confirmImport"
+                               icon="paste" action="importDivision" id="importButton"/>
+            <adm:commandButton labelKey="DivisionImportExport.button.export" location="both"
+                               bean="#{divisionImportExportBean}" lockscreen="true"
+                               icon="export" action="exportDivision" id="exportButton"/>
+            <adm:toolbarPluginButtons/>
+
+
+        </h:form>
+    </ui:define>
+
+</ui:composition>
+
+</body>
+</html>
