@@ -265,7 +265,9 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
             synchronized (LOCK_REORG) {
                 acquireLocksForUpdate(con, sourceMode);
                 stmt = con.createStatement();
-                stmt.execute(StorageManager.getReferentialIntegrityChecksStatement(false));
+                if (StorageManager.isDisableIntegrityTransactional()) {
+                    stmt.execute(StorageManager.getReferentialIntegrityChecksStatement(false));
+                }
                 return _reorganizeSpace(con, seq, sourceMode, destMode, nodeId, includeNodeId, overrideSpacing,
                         overrideLeft, insertParent, insertPosition, insertSpace, insertBoundaries,
                         depthDelta, destinationNode, createMode, createKeepIds);
@@ -277,10 +279,12 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
         } finally {
             if (stmt != null) {
                 try {
-                    try {
-                        stmt.execute(StorageManager.getReferentialIntegrityChecksStatement(true));
-                    } catch (SQLException e) {
-                        LOG.error(e);
+                    if (StorageManager.isDisableIntegrityTransactional()) {
+                        try {
+                            stmt.execute(StorageManager.getReferentialIntegrityChecksStatement(true));
+                        } catch (SQLException e) {
+                            LOG.error(e);
+                        }
                     }
                     stmt.close();
                 } catch (SQLException e) {
@@ -811,7 +815,9 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
             try {
                 stmt = con.createStatement();
                 stmt2 = con.createStatement();
-                stmt2.execute(StorageManager.getReferentialIntegrityChecksStatement(false));
+                if (StorageManager.isDisableIntegrityTransactional()) {
+                    stmt2.execute(StorageManager.getReferentialIntegrityChecksStatement(false));
+                }
                 try {
                     ResultSet rs = stmt.executeQuery(
                             "SELECT DISTINCT tl.ID FROM " + getTable(FxTreeMode.Live) + " tl " +
@@ -827,7 +833,9 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
                     stmt2.addBatch("UPDATE " + getTable(FxTreeMode.Live) + " SET MODIFIED_AT=" + System.currentTimeMillis());
                     stmt2.executeBatch();
                 } finally {
-                    stmt2.execute(StorageManager.getReferentialIntegrityChecksStatement(true));
+                    if (StorageManager.isDisableIntegrityTransactional()) {
+                        stmt2.execute(StorageManager.getReferentialIntegrityChecksStatement(true));
+                    }
                 }
             } catch (SQLException e) {
                 throw new FxTreeException("ex.tree.activate.failed", nodeId, false, e.getMessage());

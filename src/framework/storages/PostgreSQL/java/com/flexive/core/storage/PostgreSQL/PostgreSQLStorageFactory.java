@@ -159,6 +159,13 @@ public class PostgreSQLStorageFactory extends GenericDBStorage implements DBStor
     /**
      * {@inheritDoc}
      */
+    public boolean isDisableIntegrityTransactional() {
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public String getTimestampFunction() {
         return "TIMEMILLIS(NOW())";
     }

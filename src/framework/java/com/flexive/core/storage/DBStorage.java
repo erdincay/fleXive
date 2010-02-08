@@ -188,12 +188,23 @@ public interface DBStorage {
     String getRegExpLikeOperator(String column, String regexp);
 
     /**
-     * Get the database vendor specific statement to enable or disable referential integrity checks
+     * Get the database vendor specific statement to enable or disable referential integrity checks.
+     * When in a transaction, be sure to check {@link #isDisableIntegrityTransactional()}
+     * since not all databases support this in a transactional context.
      *
      * @param enable enable or disable checks?
      * @return database vendor specific statement to enable or disable referential integrity checks
      */
     String getReferentialIntegrityChecksStatement(boolean enable);
+
+    /**
+     * Return true if calling {@link #getReferentialIntegrityChecksStatement(boolean)} is possible
+     * in a transactional context.
+     *
+     * @return  true if calling {@link #getReferentialIntegrityChecksStatement(boolean)} is possible
+     * in a transactional context
+     */
+    boolean isDisableIntegrityTransactional();
 
     /**
      * Get the sql code of the statement to fix referential integrity when removing selectlist items

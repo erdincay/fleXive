@@ -159,6 +159,13 @@ public class MySQLStorageFactory extends GenericDBStorage  implements DBStorage 
     /**
      * {@inheritDoc}
      */
+    public boolean isDisableIntegrityTransactional() {
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public String getSelectListItemReferenceFixStatement() {
         return "UPDATE " + TBL_STRUCT_SELECTLIST_ITEM + " i1, " + TBL_STRUCT_SELECTLIST_ITEM +
                 " i2 SET i1.PARENTID=? WHERE i1.PARENTID=i2.ID AND i2.LISTID=?";

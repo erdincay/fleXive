@@ -272,12 +272,25 @@ public class StorageManager {
 
     /**
      * Get the database vendor specific statement to enable or disable referential integrity checks
+     * When in a transaction, be sure to check {@link #isDisableIntegrityTransactional()}
+     * since not all databases support this in a transactional context.
      *
      * @param enable enable or disable checks?
      * @return database vendor specific statement to enable or disable referential integrity checks
      */
     public static String getReferentialIntegrityChecksStatement(boolean enable) {
         return getStorageImpl().getReferentialIntegrityChecksStatement(enable);
+    }
+
+    /**
+     * Return true if calling {@link #getReferentialIntegrityChecksStatement(boolean)} is possible
+     * in a transactional context.
+     *
+     * @return  true if calling {@link #getReferentialIntegrityChecksStatement(boolean)} is possible
+     * in a transactional context
+     */
+    public static boolean isDisableIntegrityTransactional() {
+        return getStorageImpl().isDisableIntegrityTransactional();
     }
 
     /**

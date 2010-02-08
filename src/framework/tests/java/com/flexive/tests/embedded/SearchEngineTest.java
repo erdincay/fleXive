@@ -1397,18 +1397,11 @@ public class SearchEngineTest {
             content = getContentEngine().initialize(typeId);
             content.setValue("/prop_no_delete", new FxString(false, "test"));
             pk = getContentEngine().save(content);
-            // removal should not work now
-            try {
-                getContentEngine().remove(pk);
-                fail("Content could be removed although delete property permission not set");
-            } catch (FxApplicationException e) {
-                // pass
-            }
 
             // select this content instance and see if delete perm is set
 
             // For performance reasons, property delete permissions are not used for the
-            // instance permission set. Thus this assert is expected to fail. 
+            // instance permission set. Thus this assert is expected to fail.
 
             /*assert !*/
             new SqlQueryBuilder().select("@permissions")
@@ -1418,6 +1411,13 @@ public class SearchEngineTest {
                     .get(0)
                     .isMayDelete();/*
                     : "Delete permission should not be set because of property permissions";*/
+
+            // removal should work now
+            try {
+                getContentEngine().remove(pk);
+            } catch (FxApplicationException e) {
+                fail("Content could not be removed although delete property permission not set");
+            }
         } finally {
             FxContext.get().runAsSystem();
             try {

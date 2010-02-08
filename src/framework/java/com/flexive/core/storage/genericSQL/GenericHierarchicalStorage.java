@@ -1992,8 +1992,9 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             //delta-deletes:
             for (FxDelta.FxDeltaChange change : delta.getRemoves()) {
                 if (type.isUsePropertyPermissions() && change.isProperty()) {
-                    if (!ticket.mayDeleteACL(type.getPropertyAssignment(change.getXPath()).getACL().getId(), content.getLifeCycleInfo().getCreatorId()))
-                        throw new FxNoAccessException("ex.acl.noAccess.property.delete", change.getXPath());
+                    final ACL deltaACL = type.getPropertyAssignment(change.getXPath()).getACL();
+                    if (!ticket.mayDeleteACL(deltaACL.getId(), content.getLifeCycleInfo().getCreatorId()))
+                        throw new FxNoAccessException("ex.acl.noAccess.property.delete", deltaACL.getDisplayName(), change.getXPath());
                 }
                 if (!change.getOriginalData().isSystemInternal()) {
                     deleteDetailData(con, sql, pk, change.getOriginalData());
@@ -2064,8 +2065,9 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 //delta-adds:
                 for (FxDelta.FxDeltaChange change : delta.getAdds()) {
                     if (type.isUsePropertyPermissions() && change.isProperty()) {
-                        if (!ticket.mayCreateACL(type.getPropertyAssignment(change.getXPath()).getACL().getId(), content.getLifeCycleInfo().getCreatorId()))
-                            throw new FxNoAccessException("ex.acl.noAccess.property.create", change.getXPath());
+                        final ACL acl = type.getPropertyAssignment(change.getXPath()).getACL();
+                        if (!ticket.mayCreateACL(acl.getId(), content.getLifeCycleInfo().getCreatorId()))
+                            throw new FxNoAccessException("ex.acl.noAccess.property.create", acl.getDisplayName(), change.getXPath());
                     }
                     if (!change.getNewData().isSystemInternal()) {
                         if (change.isGroup())
@@ -2206,6 +2208,9 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     }
 
     private void enableDetailUniqueChecks(Connection con) throws SQLException {
+        if (!StorageManager.isDisableIntegrityTransactional()) {
+            return; // not supported
+        }
         Statement stmt = null;
         try {
             stmt = con.createStatement();
@@ -2217,6 +2222,9 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     }
 
     private void disableDetailUniqueChecks(Connection con) throws SQLException {
+        if (!StorageManager.isDisableIntegrityTransactional()) {
+            return;
+        }
         Statement stmt = null;
         try {
             stmt = con.createStatement();

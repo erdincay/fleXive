@@ -155,7 +155,17 @@ public class H2StorageFactory extends GenericDBStorage implements DBStorage {
      * {@inheritDoc}
      */
     public String getReferentialIntegrityChecksStatement(boolean enable) {
+        if (LOG.isWarnEnabled()) {
+            LOG.warn("H2: SET REFERENTIAL_INTEGRITY called, current transaction committed.");
+        }
         return "SET REFERENTIAL_INTEGRITY " + (enable ? "TRUE" : "FALSE");
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean isDisableIntegrityTransactional() {
+        return false;
     }
 
     /**

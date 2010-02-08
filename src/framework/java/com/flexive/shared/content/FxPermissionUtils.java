@@ -162,7 +162,6 @@ public class FxPermissionUtils {
         boolean typeAllowed = !si.useTypePermissions();
         boolean stepAllowed = !si.useStepPermissions();
         boolean contentAllowed = !si.useInstancePermissions();
-        boolean propertyAllowed = true;
 
         final Set<String> lacking = (throwException ? new HashSet<String>(3) : null);
 
@@ -174,22 +173,8 @@ public class FxPermissionUtils {
             if (!contentAllowed && si.getContentACLs().contains(assignment.getAclId()))
                 contentAllowed = assignment.getPermission(permission, si.getOwnerId(), ticket.getUserId());
         }
-        if (permission == ACLPermission.DELETE && si.usePermissions() && !si.getUsedPropertyACLs().isEmpty()) {
-            //property permissions are only checked for delete operations since no
-            //exception should be thrown when ie loading as properties are wrapped in
-            //FxNoAccess values or set to read only
 
-            // in contrast to content ACLs, a user must have the permission on *all* property ACLs
-            // since they are attached to different properties
-            for (long propertyACL : si.getUsedPropertyACLs()) {
-                if (!ticket.mayDeleteACL(propertyACL, si.getOwnerId())) {
-                    propertyAllowed = false;
-                    addACLName(lacking, ticket.getLanguage(), propertyACL);
-                }
-            }
-        }
-
-        if (throwException && !(typeAllowed && stepAllowed && contentAllowed && propertyAllowed)) {
+        if (throwException && !(typeAllowed && stepAllowed && contentAllowed)) {
             if (!typeAllowed)
                 addACLName(lacking, ticket.getLanguage(), si.getTypeACL());
             if (!stepAllowed)
@@ -201,7 +186,7 @@ public class FxPermissionUtils {
             }
             throw noAccess(permission, lacking);
         }
-        return typeAllowed && stepAllowed && contentAllowed && propertyAllowed;
+        return typeAllowed && stepAllowed && contentAllowed;
     }
 
     private static FxNoAccessException noAccess(ACLPermission permission, Collection<String> lacking) {
@@ -355,11 +340,11 @@ public class FxPermissionUtils {
         if (value instanceof FxNoAccess || value.isEmpty() || value.isReadOnly())
             return; //dont touch NoAccess or readonly values
         if (perm == ACLPermission.EDIT && !ticket.mayEditACL(aclId, creatorId))
-            throw new FxNoAccessException("ex.acl.noAccess.property.edit", xpath);
+            throw new FxNoAccessException("ex.acl.noAccess.property.edit", CacheAdmin.getEnvironment().getACL(aclId).getDisplayName(), xpath);
         else if (perm == ACLPermission.CREATE && !ticket.mayCreateACL(aclId, creatorId))
-            throw new FxNoAccessException("ex.acl.noAccess.property.create", xpath);
+            throw new FxNoAccessException("ex.acl.noAccess.property.create", CacheAdmin.getEnvironment().getACL(aclId).getDisplayName(), xpath);
         else if (perm == ACLPermission.READ && !ticket.mayReadACL(aclId, creatorId))
-            throw new FxNoAccessException("ex.acl.noAccess.property.read", xpath);
+            throw new FxNoAccessException("ex.acl.noAccess.property.read", CacheAdmin.getEnvironment().getACL(aclId).getDisplayName(), xpath);
     }
 
     /**

@@ -101,10 +101,13 @@ public class FxFacesMsgErr extends FxFacesMessage {
      * @param exc exception
      */
     private void logMessage(Throwable exc) {
-        if (!(exc instanceof FxApplicationException && ((FxApplicationException) exc).isMessageLogged())
+        // log only on debug level since critical exception should be explicitly logged anyway,
+        // and we don't want to log e.g. validation exceptions of the content engine by default
+        if (LOG.isDebugEnabled()
+            && !(exc instanceof FxApplicationException && ((FxApplicationException) exc).isMessageLogged())
             && !(exc instanceof FxRuntimeException && ((FxRuntimeException) exc).getConverted().isMessageLogged())) {
 
-            LOG.warn("Faces error:" + exc.getMessage(), exc);
+            LOG.debug("Faces error:" + exc.getMessage(), exc);
         }
     }
 

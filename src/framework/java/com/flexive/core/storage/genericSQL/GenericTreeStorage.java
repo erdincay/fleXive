@@ -303,7 +303,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
             ce.takeOverLock(co.getLock());
         co.setStepId(CacheAdmin.getEnvironment().getType(co.getTypeId()).getWorkflow().getLiveStep().getId());
         //save will throw an exception if we are not allowed to save a live version
-        pk = ce.createNewVersion(co);
+        pk = ce.save(co);
         if (co.isLocked())
             ce.unlock(pk);
         return pk;
@@ -1213,7 +1213,9 @@ public abstract class GenericTreeStorage implements TreeStorage {
         final String TRUE = StorageManager.getBooleanTrueExpression();
         try {
             stmt = con.createStatement();
-            stmt.execute(StorageManager.getReferentialIntegrityChecksStatement(false));
+            if (StorageManager.isDisableIntegrityTransactional()) {
+                stmt.execute(StorageManager.getReferentialIntegrityChecksStatement(false));
+            }
             List<FxPK> references = new ArrayList<FxPK>(50);
             UserTicket ticket = FxContext.getUserTicket();
 
@@ -1229,7 +1231,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
                 while (rs != null && rs.next()) {
                     try {
                         if (ce != null)
-                            FxPermissionUtils.checkPermission(ticket, ACLPermission.READ, ce.getContentSecurityInfo(new FxPK(rs.getLong(1))), true);
+                            FxPermissionUtils.checkPermission(ticket, ACLPermission.EDIT, ce.getContentSecurityInfo(new FxPK(rs.getLong(1))), true);
                         references.add(new FxPK(rs.getLong(1)));
                     } catch (FxLoadException e) {
                         //ignore, might have been removed meanwhile
@@ -1261,7 +1263,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
                 //FX-102: edit permission checks on references
                 try {
                     if (ce != null)
-                        FxPermissionUtils.checkPermission(FxContext.getUserTicket(), ACLPermission.READ, ce.getContentSecurityInfo(nodeInfo.getReference()), true);
+                        FxPermissionUtils.checkPermission(FxContext.getUserTicket(), ACLPermission.EDIT, ce.getContentSecurityInfo(nodeInfo.getReference()), true);
                     references.add(nodeInfo.getReference());
                 } catch (FxLoadException e) {
                     //ignore, might have been removed meanwhile
@@ -1334,10 +1336,12 @@ public abstract class GenericTreeStorage implements TreeStorage {
         } finally {
             try {
                 if (stmt != null) {
-                    try {
-                        stmt.execute(StorageManager.getReferentialIntegrityChecksStatement(true));
-                    } catch (SQLException e) {
-                        LOG.error(e);
+                    if (StorageManager.isDisableIntegrityTransactional()) {
+                        try {
+                            stmt.execute(StorageManager.getReferentialIntegrityChecksStatement(true));
+                        } catch (SQLException e) {
+                            LOG.error(e);
+                        }
                     }
                     stmt.close();
                 }
@@ -1485,7 +1489,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
             if (rs != null)
                 rs.close();
         } catch (Throwable t) {
-            throw new FxTreeException(LOG, "ex.tree.activate.all.failed", mode.name(), t.getMessage());
+            throw new FxTreeException(LOG, t, "ex.tree.activate.all.failed", mode.name(), t.getMessage());
         } finally {
             Database.closeObjects(GenericTreeStorage.class, stmt, ps);
         }
