@@ -95,6 +95,7 @@ class GenericSQLForeignTableSelector implements FieldSelector {
                         }
                     case java.sql.Types.VARCHAR:
                     case java.sql.Types.LONGVARCHAR:
+                    case java.sql.Types.CLOB:
                         columnType = FxDataType.String1024;
                         break;
                     case java.sql.Types.BOOLEAN:
@@ -130,7 +131,9 @@ class GenericSQLForeignTableSelector implements FieldSelector {
                         columnType = FxDataType.DateTime;
                         break;
                     default:
-                        System.out.println("Assigning String to " + tableName + "." + columnName + " found type=" + md.getColumnType(pos));
+                        if (LOG.isInfoEnabled()) {
+                            LOG.info("Assigning String to " + tableName + "." + columnName + " found type=" + md.getColumnType(pos));
+                        }
                         columnType = FxDataType.String1024;
                 }
                 columns.put(columnName.toUpperCase(), columnType);
