@@ -109,6 +109,7 @@ public final class StructureLoader {
             FxEnvironmentImpl environment = (FxEnvironmentImpl) FxEnvironmentUtils.cacheGet(divisionId, CacheAdmin.ENVIRONMENT_BASE, CacheAdmin.ENVIRONMENT_RUNTIME);
             if (environment != null && !forceReload)
                 return;
+            final boolean bootstrap = (environment == null);
             environment = new FxEnvironmentImpl();
             environment.setDataTypes(loader.loadDataTypes(con));
             environment.setAcls(loader.loadACLs(con));
@@ -135,10 +136,13 @@ public final class StructureLoader {
                 //accessed and it does not exist because its empty
                 CacheAdmin.getInstance().put(CacheAdmin.CONTENTCACHE_BASE, -1, null);
                 UserTicketImpl.reloadGuestTicketAssignments(true);
-                //have to reload since default values require a present environment
-                environment.setProperties(loader.loadProperties(con, environment));
-                environment.setAssignments(loader.loadAssignments(con, environment));
-                FxEnvironmentUtils.cachePut(divisionId, CacheAdmin.ENVIRONMENT_BASE, CacheAdmin.ENVIRONMENT_RUNTIME, environment);
+                if (bootstrap) {
+                    //have to reload since default values require a present environment
+                    environment.setProperties(loader.loadProperties(con, environment));
+                    environment.setAssignments(loader.loadAssignments(con, environment));
+                    environment.resolveDependencies();
+                    FxEnvironmentUtils.cachePut(divisionId, CacheAdmin.ENVIRONMENT_BASE, CacheAdmin.ENVIRONMENT_RUNTIME, environment);
+                }
                 CacheAdmin.expireCachedContents();
             }
         } catch (FxNotFoundException e) {
