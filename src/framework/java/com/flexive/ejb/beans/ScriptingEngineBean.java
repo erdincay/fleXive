@@ -253,14 +253,14 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         try {
             // Obtain a database connection
             con = Database.getDbConnection();
-            //                  1     2     3     4
+            //            1     2     3     4    5
             sql = "SELECT ID, SNAME,SDESC,STYPE,ACTIVE FROM " + TBL_SCRIPTS + " ORDER BY ID";
             ps = con.prepareStatement(sql);
             ResultSet rs = ps.executeQuery();
 
             while (rs != null && rs.next()) {
-                slist.add(new FxScriptInfo(rs.getInt(1), FxScriptEvent.getById(rs.getLong(5)), rs.getString(2),
-                        rs.getString(3), rs.getBoolean(4)));
+                slist.add(new FxScriptInfo(rs.getInt(1), FxScriptEvent.getById(rs.getLong(4)), rs.getString(2),
+                        rs.getString(3), rs.getBoolean(5)));
             }
 
         } catch (SQLException exc) {
