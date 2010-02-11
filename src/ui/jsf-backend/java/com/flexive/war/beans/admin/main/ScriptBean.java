@@ -41,6 +41,8 @@ import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSharedUtils;
 import static com.flexive.shared.EJBLookup.getScriptingEngine;
+
+import com.flexive.shared.content.FxContent;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.scripting.*;
 import com.flexive.shared.security.Role;
@@ -663,7 +665,7 @@ public class ScriptBean implements Serializable {
      * @throws FxApplicationException if the code could not be loaded
      */
     public void addDefaultImports() throws FxApplicationException {
-        String code = getScriptingEngine().loadScriptCode(sinfo.getId());
+        String code = sinfo.getCode();
         final String name = sinfo.getName();
         if (StringUtils.isNotBlank(name)) {
             sinfo.setCode(getClassImports(name.substring(name.lastIndexOf(".") + 1, name.length())) + code);
