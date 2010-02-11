@@ -64,10 +64,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.*;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -393,7 +390,7 @@ public class GenericBinarySQLStorage implements BinaryStorage {
                     LOG.warn(e, e);
                 }
             }
-            created = new BinaryDescriptor(CacheAdmin.getStreamServers(), id, version, quality, java.lang.System.currentTimeMillis(),
+            created = new BinaryDescriptor(CacheAdmin.getStreamServers(), id, version, quality, System.currentTimeMillis(),
                     binary.getName(), binary.getSize(), binary.getMetadata(), binary.getMimeType(), isImage, resolution, width, height, binary.getMd5sum());
             //we can copy the blob directly into the binary table if the database is used for transit and the final binary is
             //stored in the filesystem
@@ -454,7 +451,7 @@ public class GenericBinarySQLStorage implements BinaryStorage {
                         fis = new FileInputStream(binaryTransit);
                         ps.setBinaryStream(4, fis, (int) binaryTransit.length());
                     } else {
-                        ps.setNull(4, java.sql.Types.BINARY);
+                        ps.setNull(4, Types.BINARY);
                         needExplicitBlobInsert = true;
                     }
                 } else {
@@ -467,7 +464,7 @@ public class GenericBinarySQLStorage implements BinaryStorage {
                     } catch (IOException e) {
                         throw new FxDbException(LOG, "ex.content.binary.fsCopyFailedError", created.getId(), e.getMessage());
                     }
-                    ps.setNull(4, java.sql.Types.BINARY);
+                    ps.setNull(4, Types.BINARY);
                 }
             }
 
