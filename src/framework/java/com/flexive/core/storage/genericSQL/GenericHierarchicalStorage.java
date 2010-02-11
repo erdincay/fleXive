@@ -1987,6 +1987,8 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                         scripting.runScript(scriptId, binding);
                     }
                 }
+                //reprocess deltas incase scripts performed any changes to data
+                delta = FxDelta.processDelta(original, content);
             }
 
             //delta-deletes:
