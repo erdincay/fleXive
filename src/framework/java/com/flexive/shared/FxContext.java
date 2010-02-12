@@ -323,7 +323,7 @@ public class FxContext implements Serializable {
     }
 
     /**
-     * Changes the divison ID. Use with care!
+     * Changes the division ID. Use with care!
      * (Currently needed for embedded container testing.)
      *
      * @param division the division id

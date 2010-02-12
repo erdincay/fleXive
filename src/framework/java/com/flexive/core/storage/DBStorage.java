@@ -399,7 +399,7 @@ public interface DBStorage {
      * Import a complete division from a zip stream
      *
      * @param con an open and valid connection
-     * @param zip  zip archive that contains an exported divison
+     * @param zip  zip archive that contains an exported division
      * @throws Exception on errors
      */
     void importDivision(Connection con, ZipFile zip) throws Exception;

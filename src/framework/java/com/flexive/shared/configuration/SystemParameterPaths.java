@@ -37,7 +37,7 @@ import java.util.List;
 
 /**
  * Enumeration holding valid parameter paths. Each parameter path has an associated
- * scope (e.g. global, divison, user, with/without fallbacks).
+ * scope (e.g. global, division, user, with/without fallbacks).
  * 
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */

@@ -74,7 +74,7 @@ public class SystemParameters {
      */
     public static final Parameter<String> GLOBAL_DATASOURCES = ParameterFactory.newInstance(String.class, GLOBAL_DIVISIONS_DS, "", "");
     /**
-     * Divison domain matcher parameter
+     * Division domain matcher parameter
      */
     public static final Parameter<String> GLOBAL_DIVISIONS_DOMAINS = ParameterFactory.newInstance(String.class, SystemParameterPaths.GLOBAL_DIVISIONS_DOMAINS, "", "");
     /**

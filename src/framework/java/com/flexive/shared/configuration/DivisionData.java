@@ -108,9 +108,9 @@ public class DivisionData implements Serializable {
     }
 
     /**
-     * The regular expression describing matching domains for this divison.
+     * The regular expression describing matching domains for this division.
      *
-     * @return the regular expression describing matching domains for this divison.
+     * @return the regular expression describing matching domains for this division.
      */
     public String getDomainRegEx() {
         return domainRegEx;
