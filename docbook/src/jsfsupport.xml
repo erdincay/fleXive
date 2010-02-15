@@ -327,6 +327,17 @@
                                 </para>
                             </listitem>
                         </varlistentry>
+
+                        <varlistentry>
+                            <term>
+                                <code language="jsfel">#{content.name$valid}</code>
+                            </term>
+                            <listitem>
+                                <para>
+                                    Return true if the given XPath (name) is valid for the content instance.
+                                </para>
+                            </listitem>
+                        </varlistentry>
                     </variablelist>
                 </section>
 

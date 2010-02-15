@@ -413,6 +413,8 @@ public class FxContentView extends UIOutput {
                     return getXPath(path);
                 } else if (isMayCreateMoreRequest(path)) {
                     return getMayCreateMore(path);
+                } else if (isXPathValidRequest(path)) {
+                    return getXPathValid(path);
                 } else {
                     return content.getValue(path);
                 }
@@ -460,6 +462,10 @@ public class FxContentView extends UIOutput {
 
         private boolean isMayCreateMoreRequest(String path) {
             return path.endsWith("$mayCreateMore");
+        }
+
+        private boolean isXPathValidRequest(String path) {
+            return path.endsWith("$valid");
         }
 
         private FxString getLabel(String path) throws FxNotFoundException, FxInvalidParameterException {
@@ -590,6 +596,11 @@ public class FxContentView extends UIOutput {
             } catch (FxRuntimeException e) {
                 return false;
             }
+        }
+
+        private boolean getXPathValid(String path) {
+            path = StringUtils.replace(path, "$valid", "");
+            return content.isXPathValid(path, true);
         }
 
         public Map<String, Integer> getNewIndices() {
