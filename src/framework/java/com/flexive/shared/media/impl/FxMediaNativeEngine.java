@@ -35,6 +35,8 @@ import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.media.FxMediaSelector;
 import com.flexive.shared.media.FxMetadata;
 import com.flexive.shared.stream.BinaryDownloadCallback;
+import eu.medsea.mimeutil.MimeType;
+import eu.medsea.mimeutil.MimeUtil;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -57,6 +59,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
@@ -88,6 +91,9 @@ public class FxMediaNativeEngine {
             }
             HEADLESS = caughtException;
         }
+
+        // MIME-type detection setup
+        MimeUtil.registerMimeDetector("eu.medsea.mimeutil.detector.ExtensionMimeDetector");
     }
 
     /**
@@ -437,36 +443,16 @@ public class FxMediaNativeEngine {
             }
         }
         if (!StringUtils.isEmpty(fileName) && fileName.indexOf('.') > 0) {
-            //extension based detection
-            fileName = fileName.trim().toUpperCase();
-            if (fileName.endsWith(".JPG"))
-                return "image/jpeg";
-            if (fileName.endsWith(".GIF"))
-                return "image/gif";
-            if (fileName.endsWith(".PNG"))
-                return "image/png";
-            if (fileName.endsWith(".BMP"))
-                return "image/bmp";
-            if (fileName.endsWith(".TIF"))
-                return "image/tiff";
-            if (fileName.endsWith(".DOC") || fileName.endsWith(".DOCX"))
-                return "application/msword";
-            if (fileName.endsWith(".XLS") || fileName.endsWith(".XLSX"))
-                return "application/msexcel";
-            if (fileName.endsWith(".PPT") || fileName.endsWith(".PPTX"))
-                return "application/mspowerpoint";
-            if (fileName.endsWith(".PDF"))
-                return "application/pdf";
-            if (fileName.endsWith(".HTM"))
-                return "text/html";
-            if (fileName.endsWith(".HTML"))
-                return "text/html";
-            if (fileName.endsWith(".TXT"))
-                return "text/plain";
-            if (fileName.endsWith(".ICO"))
-                return "image/vnd.microsoft.icon";
+            // extension based detection
+
+            final Collection detected = MimeUtil.getMimeTypes(fileName);
+            if (detected.isEmpty()) {
+                return "application/unknown";
+            } else {
+                return ((MimeType) detected.iterator().next()).toString();
+            }
         }
-        //byte signature based detection
+        //byte signature based detection (TODO: also use mime-utils Magic detectors)
         if (header != null && header.length > 5 && header[1] == 0x50 && header[2] == 0x4E && header[3] == 0x47) { //PNG
             return "image/png";
         }
