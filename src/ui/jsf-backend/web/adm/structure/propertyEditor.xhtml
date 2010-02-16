@@ -89,7 +89,7 @@
                 <ui:fragment rendered="#{propertyEditorBean.propertyReference}">
                     <fx:formRow labelKey="PropertyEditor.label.referencedType" id="referencedType" tooltipKey="PropertyEditor.tooltip.referencedType">
                         <h:selectOneListbox size="1" id="referencedType" value="#{propertyEditorBean.propertyReferencedType}"
-                             disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"
+                             disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor']) or propertyEditorBean.propertyDefaultValueSet}"
                              onchange="submit();">
                             <f:selectItems value="#{propertyEditorBean.types}" />
                         </h:selectOneListbox>
