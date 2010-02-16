@@ -1256,4 +1256,28 @@ public class FxTreeTest {
             ty.remove(typeId);
         }
     }
+
+    @Test
+    public void testEscapedTreePathLookup_FX796() throws FxApplicationException {
+        final String[] tests = {
+                "name with spaces",
+                "name-with-dash",
+                "name with colon:",
+                "name-with-umlaut: \u00f6"
+        };
+        for (String test : tests) {
+            final long nodeId = getTreeEngine().save(
+                    FxTreeNodeEdit.createNew(test).setParentNodeId(FxTreeNode.ROOT_NODE)
+            );
+            try {
+                assertEquals(
+                        getTreeEngine().getIdByPath(FxTreeMode.Edit, "/" + test),
+                        nodeId,
+                        "Invalid node returned for path: " + test
+                );
+            } finally {
+                getTreeEngine().remove(FxTreeMode.Edit, nodeId, FxTreeRemoveOp.Remove, false);
+            }
+        }
+    }
 }

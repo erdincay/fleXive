@@ -226,11 +226,12 @@ public final class FxFormatUtils {
             }
             if (inTag)
                 continue;
-            if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == '/' || c == '.')
+            if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == '/' || c == '.' || c == '-')
                 sb.append(c);
             else {
-                if ((i > 0 && path.charAt(i - 1) != '_') || i == 0)
+                if ((sb.length() > 0 && sb.charAt(sb.length() - 1) != '_') || sb.length() == 0) {
                     sb.append('_');
+                }
             }
         }
         if (sb.length() == 0)

@@ -87,17 +87,10 @@ public abstract class GenericTreeStorage implements TreeStorage {
      * Information to be processed when creating a new node (return value helper)
      */
     protected static class NodeCreateInfo {
-        long id;
-        String name;
-        FxPK reference;
+        final long id;
+        final String name;
+        final FxPK reference;
 
-        /**
-         * Ctor
-         *
-         * @param id        id
-         * @param name      name
-         * @param reference reference
-         */
         public NodeCreateInfo(long id, String name, FxPK reference) {
             this.id = id;
             this.name = name;
@@ -258,6 +251,9 @@ public abstract class GenericTreeStorage implements TreeStorage {
                 name = "" + nodeId;
         }
         name = FxFormatUtils.escapeTreePath(name);
+        if (name.contains("/")) {
+            throw new FxTreeException("ex.tree.create.failed.name", name);
+        }
         //check or optionally create the reference
         if (reference == null || reference.isNew()) {
             //create a folder instance if no reference is supplied
@@ -507,22 +503,21 @@ public abstract class GenericTreeStorage implements TreeStorage {
         path = path.replaceAll("/+", "/");
         if ("/".equals(path))
             return FxTreeNode.ROOT_NODE;
-        // Using a statement instead of a prepare statement because it is much faster,
-        // so make sure the path will not crash
-        if (path.contains("'") || path.contains("\n"))
-            return -1;
 
-        Statement ps = null;
+        PreparedStatement ps = null;
         try {
-            ps = con.createStatement();
-            DBStorage storage = StorageManager.getStorageImpl();
-            ResultSet rs = ps.executeQuery("SELECT tree_pathToID(" + startNode + ",'" + path + "'," +
-                    storage.getBooleanExpression(mode == FxTreeMode.Live) + ")" + storage.getFromDual());
+            final DBStorage storage = StorageManager.getStorageImpl();
+            ps = con.prepareStatement("SELECT tree_pathToID(?,?,?) " + storage.getFromDual());
+            ps.setLong(1, startNode);
+            ps.setString(2, FxFormatUtils.escapeTreePath(path));
+            ps.setBoolean(3, mode == FxTreeMode.Live);
+            final ResultSet rs = ps.executeQuery();
             long result = -1;
             if (rs.next()) {
                 result = rs.getLong(1);
-                if (rs.wasNull())
+                if (rs.wasNull()) {
                     result = -1;
+                }
             }
             return result;
         } catch (SQLException e) {
@@ -543,19 +538,18 @@ public abstract class GenericTreeStorage implements TreeStorage {
         path = path.replaceAll("/+", "/");
         if ("/".equals(path))
             return FxTreeNode.ROOT_NODE;
-        // Using a statement instead of a prepare statement because it is much faster,
-        // so make sure the path will not crash
-        if (path.contains("'") || path.contains("\n"))
-            return -1;
 
-        Statement ps = null;
+        PreparedStatement ps = null;
         try {
-            ps = con.createStatement();
-            ResultSet rs;
-            DBStorage storage = StorageManager.getStorageImpl();
-            rs = ps.executeQuery("SELECT tree_captionPathToID(" + startNode + ",'" + path + "'," +
-                    EJBLookup.getConfigurationEngine().get(SystemParameters.TREE_CAPTION_PROPERTY) + ",1," +
-                    storage.getBooleanExpression(mode == FxTreeMode.Live) + ")" + storage.getFromDual());
+            final DBStorage storage = StorageManager.getStorageImpl();
+            ps = con.prepareStatement("SELECT tree_captionPathToID(?, ?, ?, ?, ?) " + storage.getFromDual());
+            ps.setLong(1, startNode);
+            ps.setString(2, path);
+            ps.setLong(3, EJBLookup.getConfigurationEngine().get(SystemParameters.TREE_CAPTION_PROPERTY));
+            ps.setInt(4, 1);
+            ps.setBoolean(5, mode == FxTreeMode.Live);
+
+            final ResultSet rs = ps.executeQuery();
             long result = -1;
             if (rs.next()) {
                 result = rs.getLong(1);
