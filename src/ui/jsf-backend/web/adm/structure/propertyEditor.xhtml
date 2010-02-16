@@ -80,7 +80,7 @@
             </fx:formRow>
             <fx:formRow labelKey="PropertyEditor.label.dataType" id="dataType" tooltipKey="PropertyEditor.tooltip.dataType">
                 <h:selectOneListbox size="1" id="dataType" value="#{propertyEditorBean.propertyDataType}"
-                     disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"
+                     disabled="#{(not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])) or propertyEditorBean.propertyDefaultValueSet}"
                      onchange="submit();">
                     <f:selectItems value="#{fxSelectBean.dataTypes}" />
                 </h:selectOneListbox>
@@ -89,7 +89,8 @@
                 <ui:fragment rendered="#{propertyEditorBean.propertyReference}">
                     <fx:formRow labelKey="PropertyEditor.label.referencedType" id="referencedType" tooltipKey="PropertyEditor.tooltip.referencedType">
                         <h:selectOneListbox size="1" id="referencedType" value="#{propertyEditorBean.propertyReferencedType}"
-                             disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}">
+                             disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"
+                             onchange="submit();">
                             <f:selectItems value="#{propertyEditorBean.types}" />
                         </h:selectOneListbox>
                     </fx:formRow>
@@ -97,7 +98,8 @@
                 <ui:fragment rendered="#{propertyEditorBean.propertySelectList}">
                     <fx:formRow labelKey="PropertyEditor.label.referencedList" id="referencedList" tooltipKey="PropertyEditor.tooltip.referencedList">
                         <h:selectOneListbox size="1" id="referencedList" value="#{propertyEditorBean.propertyReferencedList}"
-                                 disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}">
+                                 disabled="#{(not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])) or propertyEditorBean.propertyDefaultValueSet}"
+                                 onchange="submit();">
                             <f:selectItems value="#{fxSelectBean.selectListsWithEmpty}" />
                         </h:selectOneListbox>
                     </fx:formRow>
@@ -107,8 +109,9 @@
             <a4j:region>
                 <fx:formRow labelKey="PropertyEditor.label.setDefaultValue" id="defaultValue" tooltipKey="PropertyEditor.tooltip.setDefaultValue">
                     <h:selectBooleanCheckbox id="defaultValue" value="#{propertyEditorBean.propertyDefaultValueSet}"
-                             disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}">
-                        <a4j:support event="onclick" reRender="defaultValueInput"/>
+                             disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor']) or propertyEditorBean.disableDefault}"
+                            onchange="submit();">
+                        <c:if test="false"><a4j:support event="onclick" reRender="defaultValueInput, dataType, referencedList"/></c:if>
                     </h:selectBooleanCheckbox>
                 </fx:formRow>
             </a4j:region>

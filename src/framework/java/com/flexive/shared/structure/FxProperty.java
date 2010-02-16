@@ -439,7 +439,11 @@ public class FxProperty extends FxStructureElement implements Serializable {
                 value = new FxReference(multiLang, lang, FxReference.EMPTY).setEmpty();
                 break;
             case SelectOne:
-                value = new FxSelectOne(multiLang, lang, this.getReferencedList().getItems().get(0)).setEmpty();
+                if (this.getReferencedList().getItems().size() > 0) {
+                    value = new FxSelectOne(multiLang, lang, this.getReferencedList().getItems().get(0)).setEmpty();
+                } else {
+                    value = new FxSelectOne(lang, multiLang).setEmpty();
+                }
                 break;
             case SelectMany:
                 value = new FxSelectMany(multiLang, lang, new SelectMany(this.getReferencedList())).setEmpty();

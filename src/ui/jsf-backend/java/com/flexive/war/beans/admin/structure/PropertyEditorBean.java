@@ -106,6 +106,8 @@ public class PropertyEditorBean implements ActionBean, Serializable {
     private boolean selectedActive = true;
     private int defaultMultiplicity = -1;
 
+    private boolean canDefault = false;
+
     public long getAssignmentId() {
         return assignment != null ? assignment.getId() : -1;
     }
@@ -301,6 +303,22 @@ public class PropertyEditorBean implements ActionBean, Serializable {
             */
         }
         return property.getDefaultValue();
+    }
+
+    /**
+     * indicates if the set-default-checkbox should be disabled
+     * @return <code>true</code> if nothing is selected from the 2. list
+     */
+    public boolean isDisableDefault() {
+        boolean returnValue = false;
+        if (isPropertyReference()) {
+            returnValue = property.getReferencedType() == null;
+        } else
+        if (isPropertySelectList()) {
+            returnValue = property.getReferencedList() == null;
+        }
+//        System.out.println("-- isCanDefault --" + returnValue);
+        return returnValue;
     }
 
     public void setPropertyDefaultValue(FxValue val) {
