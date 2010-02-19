@@ -41,6 +41,10 @@
         <!-- Shortcut definitions must be supplied by the final installer artifact -->
         <res id="Unix_shortcutSpec.xml" src="../classes/unix_shortcut_specification.xml"/>
         <res id="shortcutSpec.xml" src="../classes/windows_shortcut_specification.xml"/>
+
+        <xi:include href="../classes/install-resources.xml">
+            <xi:fallback/>
+        </xi:include>
     </resources>
 
     <!-- 

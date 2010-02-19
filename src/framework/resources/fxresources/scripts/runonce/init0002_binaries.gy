@@ -32,12 +32,16 @@
 
 import com.flexive.shared.interfaces.DivisionConfigurationEngine
 import com.flexive.shared.value.BinaryDescriptor
+import com.flexive.shared.*
 
 void installThumbnails() {
     DivisionConfigurationEngine dc = com.flexive.shared.EJBLookup.getDivisionConfigurationEngine()
     println("Installing thumbnails ...")
     dc.installBinary(BinaryDescriptor.SYS_SELECTLIST_DEFAULT, "thumbs/selectlist-default.png");
     dc.installBinary(BinaryDescriptor.SYS_UNKNOWN, "thumbs/unknown.png");
+    if (FxSharedUtils.isMinimalRunOnceScripts()) {
+        return;
+    }
     dc.installBinary(BinaryDescriptor.SYS_NOACCESS, "thumbs/noaccess.png");
     dc.installBinary(BinaryDescriptor.SYS_AUDIO, "thumbs/mime-audio.png");
     dc.installBinary(BinaryDescriptor.SYS_DOC, "thumbs/mime-doc.png");

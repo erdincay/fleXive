@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>
+<xfragment>
+
+    <res id="TargetPanel.dir.windows" src="../classes/TargetPanel.dir.windows"/>
+
+</xfragment>

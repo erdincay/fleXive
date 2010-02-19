@@ -57,6 +57,8 @@ import java.util.Map;
  * <h3>Configuration</h3>
  *
  * The filter is mapped on the actual login URL(s). No other configuration options are available.
+ * The filter matches all {@code POST} requests, so be sure that no other POST action (e.g. logout)
+ * can be executed on the mapped URL.
  *
  * <h3>Notes</h3>
  *

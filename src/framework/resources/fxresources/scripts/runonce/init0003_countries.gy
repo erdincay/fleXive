@@ -50,18 +50,20 @@ def final environment = CacheAdmin.getEnvironment()
 def final ACL itemAcl = environment.getACL(ACLCategory.SELECTLISTITEM.getDefaultId())
 final translations = [:]
 
-["de", "en"].each { languageIso ->
-    final FxLanguage language = EJBLookup.languageEngine.load(languageIso)
-    final xml = com.flexive.shared.FxSharedUtils.loadFromInputStream(cl.getResourceAsStream("fxresources/scripts/runonce/countries/${languageIso}.xml"), -1)
-    final countries = new XmlSlurper().parseText(xml)   // don't validate to avoid errors when unicode.org is offline
-    final rows = countries.localeDisplayNames.territories.territory.list()
-    rows.each {
-        final String cc = it."@type".toString().toLowerCase()    // get country code
-        if (org.apache.commons.lang.StringUtils.isAlpha(cc)) {  // skip world regions and continents (europe, north america, ...)
-            if (translations[cc] == null) {     // initialize
-                translations[cc] = new FxString(true, cc)
+if (!FxSharedUtils.isMinimalRunOnceScripts()) {
+    ["de", "en"].each { languageIso ->
+        final FxLanguage language = EJBLookup.languageEngine.load(languageIso)
+        final xml = com.flexive.shared.FxSharedUtils.loadFromInputStream(cl.getResourceAsStream("fxresources/scripts/runonce/countries/${languageIso}.xml"), -1)
+        final countries = new XmlSlurper().parseText(xml)   // don't validate to avoid errors when unicode.org is offline
+        final rows = countries.localeDisplayNames.territories.territory.list()
+        rows.each {
+            final String cc = it."@type".toString().toLowerCase()    // get country code
+            if (org.apache.commons.lang.StringUtils.isAlpha(cc)) {  // skip world regions and continents (europe, north america, ...)
+                if (translations[cc] == null) {     // initialize
+                    translations[cc] = new FxString(true, cc)
+                }
+                translations[cc].setTranslation(language, it.toString())    // store translation
             }
-            translations[cc].setTranslation(language, it.toString())    // store translation
         }
     }
 }
