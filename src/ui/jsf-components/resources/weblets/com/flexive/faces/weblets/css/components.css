@@ -615,140 +615,80 @@ flexiveResultThumbnails > table,
     width: 100px;
 }
 
-a.fxContentEditor_moveUpIcon {
+.fxContentEditorButton,
+a.fxContentEditorButton:hover {
     cursor: pointer;
+    border: 0;
+    float: left;
+    margin-right: 3px;
+    display: block;
+    height: 16px;
+    width: 16px;
+}
+
+.fxContentEditorDisabled {
+    -moz-opacity: .25;
+    opacity: .25;
+    filter: alpha(opacity = 25);
+}
+
+a.fxContentEditor_moveUpIcon,
+a.fxContentEditor_moveUpIcon:hover {
     background: url(../images/contentEditor/up.png) no-repeat;
-    border: 0;
-    float: left;
-    margin-right: 1px;
-    display: block;
-    height: 17px;
-    width: 17px;
 }
 
-a.fxContentEditor_moveDownIcon {
-    cursor: pointer;
+a.fxContentEditor_moveDownIcon,
+a.fxContentEditor_moveDownIcon:hover {
     background: url("../images/contentEditor/down.png") no-repeat;
-    border: 0;
-    float: left;
-    display: block;
-    height: 17px;
-    width: 17px;
-    margin-right: 3px;
 }
 
-a.fxContentEditor_addIcon {
-    cursor: pointer;
+a.fxContentEditor_addIcon,
+a.fxContentEditor_addIcon:hover {
     background: url("../images/contentEditor/add.png") no-repeat;
-    border: 0;
-    float: left;
-    display: block;
-    height: 17px;
-    width: 17px;
-    margin-right: 3px;
 }
 
 .fxContentEditor_addIcon_disabled {
     background: url("../images/contentEditor/add.png") no-repeat;
-    border: 0;
-    float: left;
-    margin-right: 3px;
-    display: block;
-    height: 17px;
-    width: 17px;
-    -moz-opacity: .25;
-    opacity: .25;
 }
 
-a.fxContentEditor_removeIcon {
-    cursor: pointer;
+a.fxContentEditor_removeIcon,
+a.fxContentEditor_removeIcon:hover {
     background: url("../images/contentEditor/remove.png") no-repeat;
-    border: 0;
-    float: left;
-    display: block;
-    height: 17px;
-    width: 17px;
     margin-right: 5px;
 }
 
 .fxContentEditor_removeIcon_disabled {
     background: url("../images/contentEditor/remove.png") no-repeat;
-    border: 0;
-    float: left;
-    display: block;
-    margin-right: 5px;
-    height: 17px;
-    width: 17px;
-    filter: alpha(opacity = 25);
-    -moz-opacity: .25;
-    opacity: .25;
 }
 
-.fxContentEditor_insertIntoGroup {
-    cursor: pointer;
+.fxContentEditor_insertIntoGroup,
+.fxContentEditor_insertIntoGroup:hover {
     background: url("../images/contentEditor/group.png") no-repeat;
-    border: 0;
-    float: left;
-    display: block;
-    height: 17px;
-    width: 17px;
-    margin-right: 3px;
 }
 
-.fxContentEditor_insertIntoRootGroup {
-    cursor: pointer;
+.fxContentEditor_insertIntoRootGroup,
+.fxContentEditor_insertIntoRootGroup:hover {
     background: url("../images/contentEditor/group.png") no-repeat;
-    border: 0;
-    float: left;
-    display: block;
-    height: 17px;
-    width: 17px;
-    margin-right: 3px;
 }
 
-.fxContentEditor_insertBelowProperty {
-    cursor: pointer;
+.fxContentEditor_insertBelowProperty,
+.fxContentEditor_insertBelowProperty:hover {
     background: url("../images/contentEditor/property.png") no-repeat;
-
-    border: 0;
-    float: left;
-    display: block;
-    height: 17px;
-    width: 17px;
-    margin-right: 3px;
 }
 
-.fxContentEditor_insertAssignment {
-    cursor: pointer;
+.fxContentEditor_insertAssignment,
+.fxContentEditor_insertAssignment:hover {
     background: url("../images/contentEditor/add.png") no-repeat;
-    border: 0;
-    float: left;
-    display: block;
-    height: 17px;
-    width: 17px;
-    margin-right: 3px;
 }
 
-a.fxContentEditor_newReferenceIcon {
-    cursor: pointer;
+a.fxContentEditor_newReferenceIcon,
+a.fxContentEditor_newReferenceIcon:hover {
     background: url("../images/contentEditor/new.png") no-repeat;
-    border: 0;
-    float: left;
-    display: block;
-    height: 16px;
-    width: 16px;
-    margin-right: 3px;
 }
 
-a.fxContentEditor_editReferenceIcon {
-    cursor: pointer;
+a.fxContentEditor_editReferenceIcon,
+a.fxContentEditor_editReferenceIcon:hover {
     background: url("../images/contentEditor/edit.png") no-repeat;
-    border: 0;
-    float: left;
-    display: block;
-    height: 16px;
-    width: 16px;
-    margin-right: 3px;
 }
 
 .fxContentEditor_group {
@@ -854,9 +794,11 @@ a.fxContentEditor_editReferenceIcon {
     top: -4px;
 }
 
-.fxContentEditor_popupMenu a {
+.fxContentEditor_popupMenu a,
+.fxContentEditor_popupMenu a:hover {
     text-decoration: none;
     color: black;
+    background: transparent;
 }
 
 .fxContentEditor_referenceContainer {

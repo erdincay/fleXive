@@ -213,15 +213,8 @@ public class TreeNavigation extends UIOutput implements NamingContainer {
      */
     private FxTreeNode getTree() {
         final FxTreeMode mode = getTreeMode();
-        final long nodeId;
         try {
-            if (isNotBlank(getPath())) {
-                nodeId = EJBLookup.getTreeEngine().getIdByPath(mode, getPath());
-            } else if (getNodeId() != -1) {
-                nodeId = getNodeId();
-            } else {
-                nodeId = FxTreeNode.ROOT_NODE;
-            }
+            final long nodeId = getNodeId(mode);
             if (nodeId == -1) {
                 return null;
             }
@@ -254,6 +247,16 @@ public class TreeNavigation extends UIOutput implements NamingContainer {
             return treeCache;
         } catch (FxApplicationException e) {
             throw e.asRuntimeException();
+        }
+    }
+
+    protected long getNodeId(FxTreeMode mode) throws FxApplicationException {
+        if (isNotBlank(getPath())) {
+            return EJBLookup.getTreeEngine().getIdByPath(mode, getPath());
+        } else if (getNodeId() != -1) {
+            return getNodeId();
+        } else {
+            return FxTreeNode.ROOT_NODE;
         }
     }
 

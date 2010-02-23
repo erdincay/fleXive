@@ -24,6 +24,8 @@
     <properties>
         <staging.dir>${project.build.directory}/staging</staging.dir>
         <jetty.staging.dir>${staging.dir}/jetty</jetty.staging.dir>
+
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
                
     <dependencies>

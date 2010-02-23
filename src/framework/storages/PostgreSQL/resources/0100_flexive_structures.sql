@@ -1234,6 +1234,8 @@ COMMENT ON TABLE FXS_TREE IS 'Hierarchical Treestore (Edit)';
 
 CREATE INDEX FXI_TREE_EDIT_LFT ON FXS_TREE(LFT);
 CREATE INDEX FXI_TREE_EDIT_RGT ON FXS_TREE(RGT);
+-- PostgreSQL doesn't seem to use the foreign key index for parent, in contrast to MySQL
+CREATE INDEX FXI_TREE_EDIT_PARENT ON FXS_TREE(PARENT);
 
 -- -------------------------
 -- Live Tree
@@ -1260,3 +1262,5 @@ COMMENT ON TABLE FXS_TREE_LIVE IS 'Hierarchical Treestore (Live)';
 
 CREATE INDEX FXI_TREE_LIVE_LFT ON FXS_TREE_LIVE(LFT);
 CREATE INDEX FXI_TREE_LIVE_RGT ON FXS_TREE_LIVE(RGT);
+-- PostgreSQL doesn't seem to use the foreign key index for parent, in contrast to MySQL
+CREATE INDEX FXI_TREE_LIVE_PARENT ON FXS_TREE_LIVE(PARENT);

@@ -59,7 +59,7 @@
                                 <a4j:commandLink reRender="#{_ceContent.editorId}" action="#{__ceBean.editReference}"
                                                  eventsQueue="ceQueue" onclick="flexive.contentEditor.preSubmit();"
                                                  title="#{fxMessageBean['ContentEditor.button.editReference.title']}"
-                                                 styleClass="fxContentEditor_editReferenceIcon"
+                                                 styleClass="fxContentEditorButton fxContentEditor_editReferenceIcon"
                                                  oncomplete="flexive.yui.load()"
                                                  rendered="#{empty _ceContent.guiSettings.openedReferenceId and not _ceContent.data[element.XPathFull].isEmpty}"
                                                  status="#{_ceContent.editorId}_status">
@@ -73,7 +73,7 @@
                                 <a4j:commandLink reRender="#{_ceContent.editorId}" action="#{__ceBean.createReference}"
                                                  eventsQueue="ceQueue" onclick="flexive.contentEditor.preSubmit();"
                                                  title="#{fxMessageBean['ContentEditor.button.newReference.title']}"
-                                                 styleClass="fxContentEditor_newReferenceIcon"
+                                                 styleClass="fxContentEditorButton fxContentEditor_newReferenceIcon"
                                                  oncomplete="flexive.yui.load()"
                                                  rendered="#{empty _ceContent.guiSettings.openedReferenceId}"
                                                  status="#{_ceContent.editorId}_status">
