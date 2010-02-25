@@ -299,7 +299,7 @@
                                 </ui:insert>
                             </ui:fragment>
 
-                            <ui:fragment rendered="#{not _ceContent.guiSettings.disableCancel
+                            <ui:fragment rendered="#{not _ceContent.new and not _ceContent.guiSettings.disableCancel
                                                     and empty _ceContent.guiSettings.openedReferenceId
                                                     and _ceContent.guiSettings.editMode}">
                                 <ui:insert name="cancelButton">
@@ -321,7 +321,7 @@
                             </ui:fragment>
                         </ui:fragment>
                         <!-- delete button -->
-                        <ui:fragment rendered="#{_ceContent.content.permissions.mayDelete
+                        <ui:fragment rendered="#{not _ceContent.new and _ceContent.content.permissions.mayDelete
                             and not _ceContent.guiSettings.disableDelete and empty _ceContent.guiSettings.openedReferenceId}">
                             <ui:insert name="deleteButton">
                                 <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.delete']}"

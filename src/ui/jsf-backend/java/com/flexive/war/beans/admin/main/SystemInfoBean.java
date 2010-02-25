@@ -39,9 +39,11 @@ import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.media.FxMediaEngine;
+import org.apache.commons.lang.time.DurationFormatUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.lang.management.ManagementFactory;
 import java.util.Date;
 import java.util.Formatter;
 import java.io.Serializable;
@@ -194,5 +196,17 @@ public class SystemInfoBean implements Serializable {
      */
     public Date getTreeModificationTimestamp() {
         return new Date(CacheAdmin.getTreeModificationTimestamp());
+    }
+
+    /**
+     * @return  the uptime as a formatted string.
+     * @since 3.1
+     */
+    public String getUptime() {
+        return DurationFormatUtils.formatDurationWords(
+                ManagementFactory.getRuntimeMXBean().getUptime(),
+                true,
+                true
+        );
     }
 }

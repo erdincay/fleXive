@@ -14,6 +14,8 @@
         <!-- Pack200 greatly reduces the download size, but it does not seem to work correctly
              for the Jetty and flexive packs -->
         <!--<pack200/>-->
+
+        <run-privileged condition="izpack.windowsinstall.vista|izpack.windowsinstall.7" uninstaller="no"/>
     </info>
 
     <!-- Passthru Maven variables to files filtered by the installer (e.g. shortcut specifications) -->
