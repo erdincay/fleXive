@@ -113,6 +113,8 @@ import java.io.Serializable;
  * </p>
  *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+ * @author Christopher Blasnik (c.blasnik@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+ *
  * @version $Rev$
  */
 public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
@@ -508,8 +510,17 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
             am.setStructureAttributes(acl);
 
             try { // root node, create type
-                final FxTypeEdit type = FxTypeEdit.createNew(structureName, am.label, am.acl,
-                        am.parentTypeName != null ? CacheAdmin.getEnvironment().getType(am.parentTypeName) : null);
+                final FxType parentType = am.parentTypeName != null ? CacheAdmin.getEnvironment().getType(am.parentTypeName) : null;
+                final FxTypeEdit type;
+                if (parentType == null) {
+                    type = FxTypeEdit.createNew(structureName, am.label, am.acl, null);
+                } else {
+                    type = FxTypeEdit.createNew(structureName,
+                            am.attributes.containsKey("label") ? am.label : parentType.getLabel(),
+                            am.attributes.containsKey("acl") ? am.acl : parentType.getACL(),
+                            parentType
+                    );
+                }
                 am.setTypeAttributes(type); // set type attributes
 
                 final long typeId = EJBLookup.getTypeEngine().save(type);
