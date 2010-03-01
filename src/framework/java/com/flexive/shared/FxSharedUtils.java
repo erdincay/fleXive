@@ -44,9 +44,6 @@ import com.flexive.shared.workflow.StepDefinition;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
-
-import static org.apache.commons.lang.StringUtils.defaultString;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -63,6 +60,8 @@ import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.JarInputStream;
+
+import static org.apache.commons.lang.StringUtils.defaultString;
 
 /**
  * Flexive shared utility functions.
@@ -91,6 +90,7 @@ public final class FxSharedUtils {
     private static List<String> translatedLocales = Collections.unmodifiableList(Arrays.asList("en"));
     private static String hostname = null;
     private static String appserver = null;
+    private static final String JBOSS6_VERSION_PROPERTIES = "org/jboss/version.properties";
 
 
     /**
@@ -117,7 +117,7 @@ public final class FxSharedUtils {
     /**
      * System property to force a minimum set of runonce scripts when set (e.g. UI icons are not installed).
      * This should not be enabled for flexive's own test suite, but for tests in external projects
-     * that can assume that the stock run-once scripts work. 
+     * that can assume that the stock run-once scripts work.
      */
     public static final String PROP_RUNONCE_MINIMAL = "flexive.runonce.minimal";
 
@@ -200,24 +200,15 @@ public final class FxSharedUtils {
             appserver = ver;
         } else if (System.getProperty("jboss.home.dir") != null) {
             appserver = "JBoss (unknown version)";
+            boolean found = false;
             try {
                 final Class<?> cls = Class.forName("org.jboss.Version");
                 Method m = cls.getMethod("getInstance");
                 Object v = m.invoke(null);
                 Method pr = cls.getMethod("getProperties");
                 Map props = (Map) pr.invoke(v);
-                String ver = "JBoss";
-                if (props.containsKey("version.major") && props.containsKey("version.minor")) {
-                    if (props.containsKey("version.name"))
-                        ver = ver + " [" + props.get("version.name") + "]";
-                    ver = ver + " " + props.get("version.major") + "." + props.get("version.minor");
-                    if (props.containsKey("version.revision"))
-                        ver = ver + "." + props.get("version.revision");
-                    if (props.containsKey("version.tag"))
-                        ver = ver + " " + props.get("version.tag");
-                    if (props.containsKey("build.day"))
-                        ver = ver + " built " + props.get("build.day");
-                }
+                String ver = inspectJBossVersionProperties(props);
+                found = true;
                 appserver = ver;
             } catch (ClassNotFoundException e) {
                 //ignore
@@ -227,6 +218,25 @@ public final class FxSharedUtils {
                 //ignore
             } catch (InvocationTargetException e) {
                 //ignore
+            }
+            if (!found) {
+                //try again with a JBoss 6.x specific locations
+                try {
+                    final ClassLoader jbossCL = Class.forName("org.jboss.Main").getClassLoader();
+                    if (jbossCL.getResource(JBOSS6_VERSION_PROPERTIES) != null) {
+                        Properties prop = new Properties();
+                        prop.load(jbossCL.getResourceAsStream(JBOSS6_VERSION_PROPERTIES));
+                        if (prop.containsKey("version.name")) {
+                            appserver = inspectJBossVersionProperties(prop);
+                            //noinspection UnusedAssignment
+                            found = true;
+                        }
+                    }
+                } catch (ClassNotFoundException e) {
+                    //ignore
+                } catch (IOException e) {
+                    //ignore
+                }
             }
         } else if (System.getProperty("openejb.version") != null) {
             // try to get Jetty version
@@ -284,6 +294,28 @@ public final class FxSharedUtils {
             appserver = "unknown";
         }
         return appserver;
+    }
+
+    /**
+     * Inspect a map of JBoss specific properties and build a version String
+     * @param props properties
+     * @return JBoss version string
+     */
+    private static String inspectJBossVersionProperties(Map props) {
+        String ver = "JBoss";
+        if (props.containsKey("version.major") && props.containsKey("version.minor")) {
+            if (props.containsKey("version.name"))
+                ver = ver + " [" + props.get("version.name") + "]";
+            ver = ver + " " + props.get("version.major") + "." + props.get("version.minor");
+            if (props.containsKey("version.revision"))
+                ver = ver + "." + props.get("version.revision");
+            if (props.containsKey("version.tag"))
+                ver = ver + " " + props.get("version.tag");
+            if (props.containsKey("build.day"))
+                ver = ver + " built " + props.get("build.day");
+        } else
+            ver = ver + " (unknown version)";
+        return ver;
     }
 
     /**
