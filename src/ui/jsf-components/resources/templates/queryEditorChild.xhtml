@@ -53,7 +53,7 @@ Parameters:
                         </c:if>
                         <div class="queryRowElement queryRemoveNode"><a4j:commandLink id="removeNodeButton_#{node.id}" reRender="queryEditor,sqlPopupPanel" action="#{fxQueryEditorBean.removeNode}" eventsQueue="queryEditor">
                                 <f:setPropertyActionListener target="#{fxQueryEditorBean.removeNodeId}"
-                                    value="#{node.id}"/><t:graphicImage id="removeIcon_#{node.id}" url="/pub/images/queryEditor/remove.png" border="0" style="border:0"/></a4j:commandLink></div>
+                                    value="#{node.id}"/><t:graphicImage id="removeIcon_#{node.id}" url="/pub/images/queryEditor/remove.png" border="0" style="border:0" alt=""/></a4j:commandLink></div>
                         <c:if test="#{node.wideInput}">
                             <!-- Wide input row, e.g. for date range inputs -->
                             <br/>
