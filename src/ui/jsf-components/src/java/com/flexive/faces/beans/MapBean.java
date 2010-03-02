@@ -160,7 +160,7 @@ public class MapBean implements Serializable {
                     }
                     return environment.getType(key.toString());
                 }
-            });
+            }, true);
         }
         return typesByNameMap;
     }
@@ -179,7 +179,7 @@ public class MapBean implements Serializable {
                     }
                     return environment.getProperty((Long) key);
                 }
-            });
+            }, true);
         }
         return propertiesMap;
     }
@@ -198,7 +198,7 @@ public class MapBean implements Serializable {
                     }
                     return environment.getProperty(key.toString());
                 }
-            });
+            }, true);
         }
         return propertiesByNameMap;
     }
@@ -217,7 +217,7 @@ public class MapBean implements Serializable {
                     }
                     return environment.getAssignment((Long) key);
                 }
-            });
+            }, true);
         }
         return assignmentsMap;
     }
@@ -236,7 +236,7 @@ public class MapBean implements Serializable {
                     }
                     return environment.getStepDefinition(environment.getStep((Long)key).getStepDefinitionId()).getLabel();
                 }
-            });
+            }, true);
         }
         return stepNameMap;
     }
@@ -267,7 +267,7 @@ public class MapBean implements Serializable {
                         throw e.asRuntimeException();
                     }
                 }
-            });
+            }, true);
         }
         return accountMap;
     }
@@ -287,7 +287,7 @@ public class MapBean implements Serializable {
                     }
                     return FxFormatUtils.getDateTimeFormat().format(new Date((Long) key));
                 }
-            });
+            }, true);
         }
         return dateTimeMap;
     }
@@ -311,7 +311,7 @@ public class MapBean implements Serializable {
                         throw e.asRuntimeException();
                     }
                 }
-            });
+            }, true);
         }
         return languagesMap;
     }
@@ -338,7 +338,7 @@ public class MapBean implements Serializable {
                         return CacheAdmin.getEnvironment().getSelectList(keyVal);
                     }
                 }
-            });
+            }, true);
         }
         return selectListMap;
     }

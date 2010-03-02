@@ -232,7 +232,7 @@ public class FxResultSetImpl implements Serializable, FxResultSet {
                 public Integer get(Object key) {
                     return getColumnIndex(String.valueOf(key));
                 }
-            });
+            }, true);
         }
         return columnIndexMap;
     }

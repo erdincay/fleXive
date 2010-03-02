@@ -68,6 +68,11 @@ public class DojoMenuItem extends UIOutput implements MenuItemContainer<DojoMenu
         setRendererType(null);
     }
 
+    @Override
+    public boolean getRendersChildren() {
+        return false;
+    }
+
     /**
      * {@inheritDoc}
      */

@@ -129,6 +129,11 @@ abstract class RenderHelper {
     public static abstract class DeferredInputWriter extends UIOutput {
         protected String inputClientId;
 
+        @Override
+        public boolean getRendersChildren() {
+            return false;
+        }
+
         public String getInputClientId() {
             return inputClientId;
         }

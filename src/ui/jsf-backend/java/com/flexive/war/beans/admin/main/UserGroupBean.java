@@ -191,7 +191,7 @@ public class UserGroupBean implements Serializable {
                     return 0L;
                 }
             }
-        });
+        }, true);
     }
 
     /**

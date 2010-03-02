@@ -17,10 +17,10 @@
     </c:if>
     <fx:includes yui="true"/>
     <link rel="stylesheet" type="text/css" href="#{fx:webletUrl('com.flexive.faces.weblets','/css/lytebox.css')}"/>
-    <script type="text/javascript" src="#{adm:versionedUrl('pub/js/shared.js')}"> </script>
-    <script type="text/javascript" src="#{adm:versionedUrl('adm/js/commandElement.js')}"> </script>
-    <script type="text/javascript" src="#{adm:versionedUrl('adm/js/admin.js')}"> </script>
-    <script type="text/javascript" src="#{adm:versionedUrl('adm/js/main.js')}"> </script>
+    <script type="text/javascript" src="#{request.contextPath}/#{adm:versionedUrl('pub/js/shared.js')}"> </script>
+    <script type="text/javascript" src="#{request.contextPath}/#{adm:versionedUrl('adm/js/commandElement.js')}"> </script>
+    <script type="text/javascript" src="#{request.contextPath}/#{adm:versionedUrl('adm/js/admin.js')}"> </script>
+    <script type="text/javascript" src="#{request.contextPath}/#{adm:versionedUrl('adm/js/main.js')}"> </script>
 
     <script type="text/javascript">
         parent.beginPage();
@@ -69,7 +69,7 @@
 <table id="mainTbl" border="0" cellpadding="0" cellspacing="0">
     <tr>
         <td id="header1">
-            <div id="header1Div"><a href="javascript:void(0)" onclick="welcomeScreen();" style="outline: none"><t:graphicImage border="0" url="adm/images/layout/Logo_Flexive.gif" alt="[fleXive] Logo"/></a></div>
+            <div id="header1Div"><a href="javascript:void(0)" onclick="welcomeScreen();" style="outline: none"><t:graphicImage border="0" url="/adm/images/layout/Logo_Flexive.gif" alt="[fleXive] Logo"/></a></div>
         </td>
         <td id="header2"/>
         <td id="fxToolbarTd">
@@ -110,7 +110,7 @@
             </div>
         </td>
         <td id="dragArea" valign="bottom" onmousedown="beginDrag(event);" style="background-color:white;">
-            <t:graphicImage url="adm/images/layout/DragButton.gif" id="dragButton" alt="dragButton"/>
+            <t:graphicImage url="/adm/images/layout/DragButton.gif" id="dragButton" alt="dragButton"/>
             <!--<div id="dragAreaBottomLinie">--><!--t:graphicImage url="images/layout/Linie.gif" /--><!--</div>-->
             <div id="dragAreaTopLinie">_</div>
         </td>

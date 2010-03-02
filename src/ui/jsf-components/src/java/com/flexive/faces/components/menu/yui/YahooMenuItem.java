@@ -32,6 +32,11 @@ public class YahooMenuItem extends UIOutput implements MenuItemContainer<YahooMe
         setRendererType(null);
     }
 
+    @Override
+    public boolean getRendersChildren() {
+        return false;
+    }
+
     @SuppressWarnings({"unchecked"})
     @Override
     public void encodeBegin(FacesContext facesContext) throws IOException {

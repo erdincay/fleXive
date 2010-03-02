@@ -616,7 +616,7 @@ public class ResultPreferencesBean implements Serializable {
                         ).getLabel().getBestTranslation();
                     }
                 }
-            });
+            }, true);
         }
         return propertyLabelMap;
     }

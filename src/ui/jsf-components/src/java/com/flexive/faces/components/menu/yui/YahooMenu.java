@@ -34,6 +34,11 @@ public class YahooMenu extends UIOutput implements MenuItemContainer<YahooMenuIt
     private String clickHandler;
     private String beforeShow;
 
+    @Override
+    public boolean getRendersChildren() {
+        return false;
+    }
+
     /**
      * {@inheritDoc }
      */

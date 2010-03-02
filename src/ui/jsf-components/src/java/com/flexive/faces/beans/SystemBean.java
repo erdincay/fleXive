@@ -83,6 +83,7 @@ public class SystemBean implements Serializable {
     private Map<Object, FxContent> contentMap;
     private Map<Object, FxContent> explodedContentMap;
     private Map<String, DataModel> queries;
+    private Map<Long, Long> instanceCountMap;
     private String nodeName;
 
     /**
@@ -469,11 +470,14 @@ public class SystemBean implements Serializable {
      * @return the instance count
      */
     public Map<Long, Long> getInstanceCount() {
-        return FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<Long, Long>() {
-            public Long get(Object key) {
-                return EJBLookup.getTypeEngine().getInstanceCount(Long.valueOf(key.toString()));
-            }
-        });
+        if (instanceCountMap == null) {
+            FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<Long, Long>() {
+                public Long get(Object key) {
+                    return EJBLookup.getTypeEngine().getInstanceCount(Long.valueOf(key.toString()));
+                }
+            }, true);
+        }
+        return instanceCountMap;
     }
 
     /**
@@ -539,7 +543,7 @@ public class SystemBean implements Serializable {
                     counters.put(key, ctr);
                     return ctr;
                 }
-            });
+            }, true);
         }
         return counterMap;
     }
@@ -558,7 +562,7 @@ public class SystemBean implements Serializable {
                     }
                     return FxSharedUtils.get(counters, key, 0);
                 }
-            });
+            }, true);
         }
         return counterValueMap;
     }
@@ -641,7 +645,7 @@ public class SystemBean implements Serializable {
                         throw e.asRuntimeException();
                     }
                 }
-            });
+            }, true);
         }
         return contentMap;
     }
@@ -673,7 +677,7 @@ public class SystemBean implements Serializable {
                         throw e.asRuntimeException();
                     }
                 }
-            });
+            }, true);
         }
         return explodedContentMap;
     }
@@ -695,7 +699,7 @@ public class SystemBean implements Serializable {
                         throw e.asRuntimeException();
                     }
                 }
-            });
+            }, true);
         }
         return queries;
     }

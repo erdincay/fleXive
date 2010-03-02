@@ -268,7 +268,7 @@ public class WorkflowBean implements Serializable {
                         return false;
                 return true;
             }
-        });
+        }, true);
     }
 
     /**

@@ -63,7 +63,7 @@ public class TreeContextMenu extends UIOutput implements MenuItemContainer<DojoM
      */
     @Override
     public boolean getRendersChildren() {
-        return true;
+        return false;
     }
 
     /**

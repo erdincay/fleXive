@@ -165,7 +165,7 @@ public final class FxSharedUtils {
      * @return current hosts name
      * @since 3.1
      */
-    public static String getHostName() {
+    public synchronized static String getHostName() {
         if (hostname != null)
             return hostname;
         String _hostname;
@@ -189,15 +189,18 @@ public final class FxSharedUtils {
      * @return name of the application server [fleXive] is running on
      * @since 3.1
      */
-    public static String getApplicationServerName() {
+    public synchronized static String getApplicationServerName() {
         if (appserver != null)
             return appserver;
         if (System.getProperty("product.name") != null) {
-            // Glassfish / Sun AS
+            // Glassfish 2 / Sun AS
             String ver = System.getProperty("product.name");
             if (System.getProperty("com.sun.jbi.domain.name") != null)
                 ver += " (Domain: " + System.getProperty("com.sun.jbi.domain.name") + ")";
             appserver = ver;
+        } else if (System.getProperty("glassfish.version") != null) {
+            // Glassfish 3+
+            appserver = System.getProperty("glassfish.version");
         } else if (System.getProperty("jboss.home.dir") != null) {
             appserver = "JBoss (unknown version)";
             boolean found = false;
@@ -1339,8 +1342,9 @@ public final class FxSharedUtils {
 
     /**
      * Projects a single-parameter function on a hashmap.
-     * Useful for calling parameterized functions from JSF-EL. Values returned by the mapper
-     * are cached in the hash map.
+     * Useful for calling parameterized functions from JSF-EL. Results are not cached by default, use
+     * {@link #getMappedFunction(com.flexive.shared.FxSharedUtils.ParameterMapper, boolean)}
+     * to create a caching mapper.
      *
      * @param mapper the parameter mapper wrapping the function to be called
      * @return a hashmap projected on the given parameter mapper
@@ -1349,15 +1353,40 @@ public final class FxSharedUtils {
         return new HashMap<K, V>() {
             private static final long serialVersionUID = 1051489436850755246L;
 
-            @SuppressWarnings({"unchecked"})
             @Override
             public V get(Object key) {
-                if (!containsKey(key)) {
-                    put((K) key, mapper.get(key));
-                }
-                return super.get(key);
+                return mapper.get(key);
             }
         };
+    }
+
+    /**
+     * Projects a single-parameter function on a hashmap.
+     * Useful for calling parameterized functions from JSF-EL. Values returned by the mapper
+     * can be cached in the hash map.
+     *
+     * @param mapper the parameter mapper wrapping the function to be called
+     * @param cacheResults  if the mapper results should be cached by the map
+     * @return a hashmap projected on the given parameter mapper
+     * @since 3.1
+     */
+    public static <K, V> Map<K, V> getMappedFunction(final ParameterMapper<K, V> mapper, boolean cacheResults) {
+        if (cacheResults) {
+            return new HashMap<K, V>() {
+                private static final long serialVersionUID = 1051489436850755246L;
+
+                @SuppressWarnings({"unchecked"})
+                @Override
+                public V get(Object key) {
+                    if (!containsKey(key)) {
+                        put((K) key, mapper.get(key));
+                    }
+                    return super.get(key);
+                }
+            };
+        } else {
+            return getMappedFunction(mapper);
+        }
     }
 
     /**

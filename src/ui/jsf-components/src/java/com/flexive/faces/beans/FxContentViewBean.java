@@ -175,7 +175,7 @@ public class FxContentViewBean implements Serializable {
                     final int pos = value.lastIndexOf('/');
                     return pos != -1 ? value.substring(pos + 1) : value;
                 }
-            });
+            }, true);
         }
         return propertyNameMapper;
     }

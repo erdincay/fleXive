@@ -548,7 +548,7 @@ public class BeContentEditorBean implements ActionBean, Serializable {
                         return "unknown";
                     }
                 }
-            });
+            }, true);
         }
         return treeLabelMap;
     }

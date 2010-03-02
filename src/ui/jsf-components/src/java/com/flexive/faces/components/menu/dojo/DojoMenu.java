@@ -78,6 +78,11 @@ public class DojoMenu extends UIOutput implements MenuItemContainer<DojoMenuItem
         return super.getClientId(facesContext);
     }
 
+    @Override
+    public boolean getRendersChildren() {
+        return false;
+    }
+
     /**
      * {@inheritDoc }
      */

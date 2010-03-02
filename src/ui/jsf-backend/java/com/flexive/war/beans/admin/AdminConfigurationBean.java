@@ -33,6 +33,7 @@
  ***************************************************************/
 package com.flexive.war.beans.admin;
 
+import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.configuration.SystemParameters;
