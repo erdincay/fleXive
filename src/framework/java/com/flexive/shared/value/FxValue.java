@@ -906,7 +906,8 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      * @return passed language is the default language
      */
     public boolean isDefaultLanguage(long language) {
-        return hasDefaultLanguage() && language == defaultLanguage;
+        return !isMultiLanguage() && language == FxLanguage.SYSTEM_ID ||
+                hasDefaultLanguage() && language == defaultLanguage;
     }
 
     /**
