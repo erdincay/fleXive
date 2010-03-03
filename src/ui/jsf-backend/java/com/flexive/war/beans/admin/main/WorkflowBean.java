@@ -82,6 +82,9 @@ public class WorkflowBean implements Serializable {
     private long toStepId = -1;
     private long userGroup = -1;
 
+    private int overviewPageNumber;
+    private int overviewRows;
+
     /**
      * Default constructor
      */
@@ -552,5 +555,19 @@ public class WorkflowBean implements Serializable {
         this.userGroup = userGroup;
     }
 
+    public int getOverviewPageNumber() {
+        return overviewPageNumber;
+    }
 
+    public void setOverviewPageNumber(int overviewPageNumber) {
+        this.overviewPageNumber = overviewPageNumber;
+    }
+
+    public int getOverviewRows() {
+        return overviewRows;
+    }
+
+    public void setOverviewRows(int overviewRows) {
+        this.overviewRows = overviewRows;
+    }
 }

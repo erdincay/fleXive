@@ -97,6 +97,9 @@ public class AccountBean implements Serializable {
     private FxContent contactData;
     private boolean languageChanged;
 
+    private int overviewPageNumber;
+    private int overviewRows;
+
     // user preferences fields
     private FxLanguage defaultInputLanguage;
 
@@ -415,6 +418,22 @@ public class AccountBean implements Serializable {
 
     public void setDefaultInputLanguage(FxLanguage defaultInputLanguage) {
         this.defaultInputLanguage = defaultInputLanguage;
+    }
+
+    public int getOverviewPageNumber() {
+        return overviewPageNumber;
+    }
+
+    public void setOverviewPageNumber(int overviewPageNumber) {
+        this.overviewPageNumber = overviewPageNumber;
+    }
+
+    public int getOverviewRows() {
+        return overviewRows;
+    }
+
+    public void setOverviewRows(int overviewRows) {
+        this.overviewRows = overviewRows;
     }
 
     /**

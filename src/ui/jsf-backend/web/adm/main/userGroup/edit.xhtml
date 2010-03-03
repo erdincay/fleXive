@@ -14,8 +14,11 @@
     <ui:define name="body">
 
         <t:saveState id="ssId" value="#{userGroupBean.id}"/>
+        <t:saveState value="#{userGroupBean.overviewPageNumber}"/>
+        <t:saveState value="#{userGroupBean.overviewRows}"/>
         
         <h:form id="frm">
+
             <adm:tab label="#{fxMessageBean['UserGroup.tabtitle.edit,#{userGroupBean.name}']}" active="true" id="createGroupTable"/>
 
             <fx:formRow label="#{fxMessageBean['UserGroup.field.mandator']}" id="mandator">

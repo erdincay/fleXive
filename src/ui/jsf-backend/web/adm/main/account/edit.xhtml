@@ -18,6 +18,9 @@
         <adm:tab label="#{fxMessageBean['Account.label.edit,#{accountBean.account.name}']}" active="true" id="tab1"/>
         <t:saveState id="ssAccount" value="#{accountBean.account}"/>
         <t:saveState id="ssGroups" value="#{accountBean.groups}"/>
+        <t:saveState id="currentPage" value="#{accountBean.overviewPageNumber}"/>
+        <t:saveState id="rowsPerPage" value="#{accountBean.overviewRows}"/>
+
         <!-- ============================================ -->
         <fx:formRow label="#{fxMessageBean['Account.field.mandator']}" id="mandator"  newLine="false">
             <ui:fragment rendered="#{!accountBean.account.systemInternalAccount}">

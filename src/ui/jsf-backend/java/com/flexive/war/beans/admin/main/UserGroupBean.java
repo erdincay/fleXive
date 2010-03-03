@@ -70,6 +70,9 @@ public class UserGroupBean implements Serializable {
     private List<Account> members;
     private List<ACLAssignment> aclAssignments;
 
+    private int overviewPageNumber;
+    private int overviewRows;
+
 
     public Long[] getRoles() {
         return this.roles;
@@ -105,6 +108,22 @@ public class UserGroupBean implements Serializable {
 
     public long getId() {
         return id;
+    }
+
+    public int getOverviewPageNumber() {
+        return overviewPageNumber;
+    }
+
+    public void setOverviewPageNumber(int overviewPageNumber) {
+        this.overviewPageNumber = overviewPageNumber;
+    }
+
+    public int getOverviewRows() {
+        return overviewRows;
+    }
+
+    public void setOverviewRows(int overviewRows) {
+        this.overviewRows = overviewRows;
     }
 
     public List<Account> getMembers() throws FxApplicationException {

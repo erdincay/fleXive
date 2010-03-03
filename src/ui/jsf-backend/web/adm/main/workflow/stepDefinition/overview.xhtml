@@ -13,9 +13,12 @@
 
     <ui:define name="body">
         <h:form id="frm">
+            <h:inputHidden id="currentPage" value="#{stepDefinitionBean.overviewPageNumber}"/>
+            <h:inputHidden id="rowsPerPage" value="#{stepDefinitionBean.overviewRows}"/>
+
             <adm:tab label="#{fxMessageBean['StepDefinition.tabtitle.overview']}" active="true" id="tab1"/>
 
-            <adm:sortableTable id="table">
+            <adm:sortableTable id="table" onPageChange="DTpageChange" startPage="#{stepDefinitionBean.overviewPageNumber}" rowsPerPage="#{stepDefinitionBean.overviewRows}">
                 <table id="table">
 
                     <thead>
@@ -48,11 +51,13 @@
                                 </td>
                                 <td class="tblColumn">
                                     <adm:commandIcon labelKey="StepDefinition.button.edit" location="content"
-                                                    icon="edit"  bean="#{stepDefinitionBean}" action="edit" immediate="true" 
+                                                    icon="edit"  bean="#{stepDefinitionBean}" action="edit"
+                                                    onclick="storeDataTablePosition('frm')"
                                                     id="editButton_#{stepDefinition.id}">
                                         <f:setPropertyActionListener target="#{stepDefinitionBean.stepDefinitionId}" value="#{stepDefinition.id}"/>
                                     </adm:commandIcon>
                                     <adm:commandIcon labelKey="StepDefinition.button.delete" location="content"
+                                                    onclick="storeDataTablePosition('frm')"
                                                     icon="delete"  bean="#{stepDefinitionBean}" action="delete" id="deleteButton_#{stepDefinition.id}">
                                         <f:setPropertyActionListener target="#{stepDefinitionBean.stepDefinitionId}" value="#{stepDefinition.id}"/>
                                     </adm:commandIcon>

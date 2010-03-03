@@ -13,6 +13,8 @@
     <ui:define name="body">
 
         <h:form id="frm">
+            <h:inputHidden id="currentPage" value="#{userGroupBean.overviewPageNumber}"/>
+            <h:inputHidden id="rowsPerPage" value="#{userGroupBean.overviewRows}"/>
 
             <adm:tab labelKey="UserGroup.tabtitle.overview" active="true" id="tab1"/>
 
@@ -33,7 +35,7 @@
 
             <br/>
 
-            <adm:sortableTable id="table">
+            <adm:sortableTable id="table" onPageChange="DTpageChange" startPage="#{userGroupBean.overviewPageNumber}" rowsPerPage="#{userGroupBean.overviewRows}">
                 <table id="table">
                     <thead>
                         <tr>
@@ -75,13 +77,15 @@
                                 </td>
                                 <td>
                                     <adm:commandIcon labelKey="User.button.edit" location="content"
-                                                    icon="edit"  action="edit"  bean="#{userGroupBean}" immediate="true"
+                                                    icon="edit"  action="edit"  bean="#{userGroupBean}"
+                                                    onclick="storeDataTablePosition('frm')"
                                                     id="editButton_#{group.id}">
                                         <f:setPropertyActionListener target="#{userGroupBean.id}" value="#{group.id}"/>
                                     </adm:commandIcon>
                                     <ui:fragment rendered="#{!group.system}">
                                         <adm:commandIcon labelKey="User.button.delete" location="content"
                                                          icon="delete" action="delete" bean="#{userGroupBean}"
+                                                         onclick="storeDataTablePosition('frm')"
                                                          id="deleteButton_#{group.id}"
                                                          confirmKey="UserGroup.confirm.delete,#{group.name}">
                                             <f:setPropertyActionListener target="#{userGroupBean.id}" value="#{group.id}"/>

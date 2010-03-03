@@ -90,7 +90,7 @@ lockscreen - [optional] if true, the screen will be locked when clicking the but
 
             <a4j:commandLink id="#{id}" reRender="#{reRender}" eventsQueue="#{eventsQueue}" onclick="#{onclick}"
                              action="#{bean[action]}" immediate="#{immediate}"
-                             disabled="#{iconDisabled}" oncomplete="#{oncomplete}">
+                             disabled="#{iconDisabled}" oncomplete="#{oncomplete}" >
                 <ui:insert/>
 
                 <ui:fragment rendered="#{!iconDisabled or empty iconDisabled or iconDisabled == null}">

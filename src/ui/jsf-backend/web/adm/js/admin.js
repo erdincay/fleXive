@@ -785,8 +785,24 @@ function getOnClick(id, onClickAction, lockscreen) {
 var currentDTPage = 1;
 var rowsPerDTPage = 10;
 
-var DTpageChange = function(event) {
+function DTpageChange (event) {
     rowsPerDTPage = event.newState.rowsPerPage;
     currentDTPage = event.newValue;
-};
+}
+
+/**
+ * Stores the current datatable settings in hidden form variables with the following IDs:
+ * currentPage, rowsPerPage
+ *
+ * @param formPrefix    the form prefix
+ */
+function storeDataTablePosition(formPrefix) {
+    var elem;
+    if (elem = document.getElementById(formPrefix + ":currentPage")) {
+        elem.value = currentDTPage;
+    }
+    if (elem = document.getElementById(formPrefix + ":rowsPerPage")) {
+        elem.value = rowsPerDTPage;
+    }
+}
 // **********************************************************************************

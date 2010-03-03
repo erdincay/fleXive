@@ -16,8 +16,9 @@
     <ui:define name="body">
 
         <h:form id="listForm">
-            <t:saveState value="#{scriptBean.overviewPageNumber}"/>
-            <t:saveState value="#{scriptBean.overviewRowNumber}"/>
+            <h:inputHidden id="currentPage" value="#{scriptBean.overviewPageNumber}"/>
+            <h:inputHidden id="rowsPerPage" value="#{scriptBean.overviewRowNumber}"/>
+
 
             <adm:tab label="#{fxMessageBean['Script.tabtitle.overview']}" active="true" id="tab1"/>
 
@@ -67,17 +68,17 @@
                                 <td align="left"><h:selectBooleanCheckbox value="#{item.active}" disabled="true"/></td>
                                 <td align="left">
                                     <!-- edit -->
-                                    <adm:ajaxCommandIcon titleKey="Script.button.edit"
+                                    <adm:commandIcon titleKey="Script.button.edit"
                                                          icon="edit"
                                                          action="editScript"
                                                          bean="#{scriptBean}"
+                                                         location="content"
+                                                         onclick="storeDataTablePosition('listForm')"
                                                          reRender="scriptOverviewPanel"
                                                          id="editButton_#{item.id}">
 
                                         <f:setPropertyActionListener target="#{scriptBean.id}" value="#{item.id}"/>
-                                        <a4j:actionparam name="page" noEscape="true" assignTo="#{scriptBean.overviewPageNumber}" value="currentDTPage"/>
-                                        <a4j:actionparam name="row" noEscape="true" assignTo="#{scriptBean.overviewRowNumber}" value="rowsPerDTPage"/>
-                                    </adm:ajaxCommandIcon>
+                                    </adm:commandIcon>
                                     <!-- delete -->
                                     <ui:fragment rendered="#{fxSystemBean.isInRole['ScriptManagement']}">
                                         <adm:commandIcon labelKey="Script.button.delete" location="content"
@@ -91,14 +92,13 @@
                                     <!-- show run icon only if the script is an independent one (i.e. a not-triggered script) -->
                                     <ui:fragment
                                             rendered="#{item.event.name=='Manual' and item.active and fxSystemBean.isInRole['ScriptExecution']}">
-                                        <adm:ajaxCommandIcon titleKey="Script.button.run" icon="run"
+                                        <adm:commandIcon titleKey="Script.button.run" icon="run"
                                                          action="runScript" bean="#{scriptBean}"
                                                          lockscreen="true"
+                                                         onclick="storeDataTablePosition('listForm')"
                                                          id="runButton_#{item.id}">
                                             <f:setPropertyActionListener value="#{item.id}" target="#{scriptBean.id}"/>
-                                            <a4j:actionparam name="page" noEscape="true" assignTo="#{scriptBean.overviewPageNumber}" value="currentDTPage"/>
-                                            <a4j:actionparam name="row" noEscape="true" assignTo="#{scriptBean.overviewRowNumber}" value="rowsPerDTPage"/>
-                                        </adm:ajaxCommandIcon>
+                                        </adm:commandIcon>
                                     </ui:fragment>
                                 </td>
                             </tr>

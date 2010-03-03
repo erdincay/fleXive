@@ -58,6 +58,9 @@ public class StepDefinitionBean implements Serializable {
     private StepDefinitionEdit stepDefinition;
     private boolean uniqueTargetSelected;
 
+    private int overviewPageNumber;
+    private int overviewRows;
+
     /**
      * Step definition overview.
      *
@@ -175,5 +178,21 @@ public class StepDefinitionBean implements Serializable {
 
     private void initUniqueTargetSelected() {
         uniqueTargetSelected = getStepDefinition().getUniqueTargetId() !=-1;
+    }
+
+    public int getOverviewPageNumber() {
+        return overviewPageNumber;
+    }
+
+    public void setOverviewPageNumber(int overviewPageNumber) {
+        this.overviewPageNumber = overviewPageNumber;
+    }
+
+    public int getOverviewRows() {
+        return overviewRows;
+    }
+
+    public void setOverviewRows(int overviewRows) {
+        this.overviewRows = overviewRows;
     }
 }

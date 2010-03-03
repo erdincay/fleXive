@@ -16,6 +16,10 @@
     </ui:define>
 
     <ui:define name="body">
+
+        <t:saveState value="#{stepDefinitionBean.overviewPageNumber}"/>
+        <t:saveState value="#{stepDefinitionBean.overviewRows}"/>
+
         <a4j:form id="frm">
             <a4j:region>
                 <h:inputHidden value="#{stepDefinitionBean.stepDefinition.id}"/>

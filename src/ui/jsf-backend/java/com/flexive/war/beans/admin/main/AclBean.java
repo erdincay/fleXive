@@ -66,6 +66,9 @@ public class AclBean implements Serializable {
     private static final String ID_CACHE_KEY = AclBean.class + "_id";
     private String selectedIds;
 
+    private int overviewPageNumber;
+    private int overviewRows;
+
 
     public String getSelectedIds() {
         return selectedIds;
@@ -149,6 +152,22 @@ public class AclBean implements Serializable {
                 return;
             }
         }
+    }
+
+    public int getOverviewPageNumber() {
+        return overviewPageNumber;
+    }
+
+    public void setOverviewPageNumber(int overviewPageNumber) {
+        this.overviewPageNumber = overviewPageNumber;
+    }
+
+    public int getOverviewRows() {
+        return overviewRows;
+    }
+
+    public void setOverviewRows(int overviewRows) {
+        this.overviewRows = overviewRows;
     }
 
     /**

@@ -16,8 +16,8 @@
         <h:form id="frm" enctype="multipart/form-data">
 
             <t:saveState value="#{selectListBean.selectListId}"/>
-            <t:saveState value="#{selectListBean.overviewRows}"/>
-            <t:saveState value="#{selectListBean.overviewCurrentPage}"/>
+            <h:inputHidden id="currentPage" value="#{selectListBean.overviewCurrentPage}"/>
+            <h:inputHidden id="rowsPerPage" value="#{selectListBean.overviewRows}"/>
 
            <adm:tab label="#{fxMessageBean['SelectList.tab.overview']}" active="true" id="tab1"/>
 
@@ -53,17 +53,14 @@
                                     <!-- edit -->
                                     <ui:fragment
                                             rendered="#{fxSystemBean.isInRole['SelectListEditor'] or selectListBean.mayCreateItems[list.id]}">
-                                        <adm:ajaxCommandIcon titleKey="SelectList.button.edit"
+                                        <adm:commandIcon titleKey="SelectList.button.edit"
                                                              icon="edit" bean="#{selectListBean}" action="initEditing"
-                                                             reRender="selectListPanel"
+                                                             location="content"
+                                                             onclick="storeDataTablePosition('frm')"
                                                              id="editButton_#{list.id}">
                                             <f:setPropertyActionListener target="#{selectListBean.selectListId}"
                                                                          value="#{list.id}"/>
-                                            <a4j:actionparam noEscape="true" name="overviewrows" value="rowsPerDTPage"
-                                                             assignTo="#{selectListBean.overviewRows}"/>
-                                            <a4j:actionparam noEscape="true" name="overviewpage" value="currentDTPage"
-                                                             assignTo="#{selectListBean.overviewCurrentPage}"/>
-                                        </adm:ajaxCommandIcon>
+                                        </adm:commandIcon>
                                     </ui:fragment>
                                     <!-- delete -->
                                     <ui:fragment rendered="#{fxSystemBean.isInRole['SelectListEditor']}">

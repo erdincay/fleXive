@@ -36,7 +36,10 @@
     </h:form>
 
     <h:form id="listForm">
-        <adm:sortableTable id="table">
+        <h:inputHidden id="currentPage" value="#{aclBean.overviewPageNumber}"/>
+        <h:inputHidden id="rowsPerPage" value="#{aclBean.overviewRows}"/>
+
+        <adm:sortableTable id="table" onPageChange="DTpageChange" startPage="#{aclBean.overviewPageNumber}" rowsPerPage="#{aclBean.overviewRows}">
             <table id="table" class="dojoTable">
                 <thead>
                     <tr>
@@ -86,12 +89,14 @@
                             </td>
                             <td>
                                 <adm:commandIcon labelKey="ACL.button.edit" location="content"
-                                                icon="edit"  action="edit"  bean="#{aclBean}" immediate="true"
+                                                icon="edit"  action="edit"  bean="#{aclBean}"
+                                                onclick="storeDataTablePosition('listForm')"
                                                 id="editButton_#{item.id}">
                                     <f:setPropertyActionListener target="#{aclBean.id}" value="#{item.id}"/>
                                 </adm:commandIcon>
                                 <adm:commandIcon labelKey="ACL.button.delete" location="content"
                                                 icon="delete"  action="delete"  bean="#{aclBean}"
+                                                onclick="storeDataTablePosition('listForm')"
                                                 id="deleteButton_#{item.id}" confirmKey="ACL.confirm.delete">
                                     <f:setPropertyActionListener target="#{aclBean.id}" value="#{item.id}"/>
                                 </adm:commandIcon>
