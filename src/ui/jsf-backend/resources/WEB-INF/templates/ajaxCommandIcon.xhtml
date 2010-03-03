@@ -28,6 +28,7 @@ eventsQueue - ajax events queue
 rendered - [optional] flag to supress rendering of the whole component
 iconDisabled - [optional] flag to disable the component
 oncomplete - [optional] the oncomplete event of the command link
+lockscreen - [optional] if true, the screen will be locked when clicking the button
 
 <ui:composition>
     <c:if test="#{empty id}">
@@ -65,6 +66,26 @@ oncomplete - [optional] the oncomplete event of the command link
 
             <c:if test="#{empty eventsQueue}">
                 <c:set var="eventsQueue" value="defaultQueue"/>
+            </c:if>
+
+
+            <c:if test="#{empty lockscreen or lockscreen == null}">
+                <c:set var="lockscreen" value="false"/>
+            </c:if>
+
+            <c:if test="#{lockscreen}">
+                <c:if test="#{!empty oncomplete or oncomplete != null}">
+                    <c:set var="oncomplete" value="#{oncomplete};parent.unlockScreen();"/>
+                </c:if>
+                <c:if test="#{empty oncomplete or oncomplete == null}">
+                    <c:set var="oncomplete" value="parent.unlockScreen();"/>
+                </c:if>
+                <c:if test="#{!empty onclick or onclick != null}">
+                    <c:set var="onclick" value="#{onclick};parent.lockScreen();"/>
+                </c:if>
+                <c:if test="#{empty onclick or onclick == null}">
+                    <c:set var="onclick" value="parent.lockScreen();"/>
+                </c:if>
             </c:if>
 
             <a4j:commandLink id="#{id}" reRender="#{reRender}" eventsQueue="#{eventsQueue}" onclick="#{onclick}"

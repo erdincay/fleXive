@@ -83,6 +83,7 @@
                                         <adm:commandIcon labelKey="Script.button.delete" location="content"
                                                              icon="delete" action="deleteScript" bean="#{scriptBean}"
                                                              id="deleteButton_#{item.id}"
+                                                             lockscreen="true"
                                                              confirmKey="Script.confirm.delete">
                                             <f:setPropertyActionListener target="#{scriptBean.id}" value="#{item.id}"/>
                                         </adm:commandIcon>
@@ -92,6 +93,7 @@
                                             rendered="#{item.event.name=='Manual' and item.active and fxSystemBean.isInRole['ScriptExecution']}">
                                         <adm:ajaxCommandIcon titleKey="Script.button.run" icon="run"
                                                          action="runScript" bean="#{scriptBean}"
+                                                         lockscreen="true"
                                                          id="runButton_#{item.id}">
                                             <f:setPropertyActionListener value="#{item.id}" target="#{scriptBean.id}"/>
                                             <a4j:actionparam name="page" noEscape="true" assignTo="#{scriptBean.overviewPageNumber}" value="currentDTPage"/>
