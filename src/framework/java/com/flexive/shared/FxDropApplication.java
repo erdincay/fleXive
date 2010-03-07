@@ -124,7 +124,8 @@ public class FxDropApplication implements Serializable {
                 path = StringUtils.chop(path);
             }
             this.resourceURL = path;
-            this.isJarProtocol = resourceURL.getPath().indexOf('!') != -1;
+            this.isJarProtocol = "vfszip".equals(resourceURL.getProtocol()) || "jar".equals(resourceURL.getProtocol())
+                    || resourceURL.getPath().indexOf('!') != -1;
         }
     }
 
