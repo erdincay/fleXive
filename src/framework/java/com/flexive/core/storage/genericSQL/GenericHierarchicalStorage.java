@@ -413,6 +413,15 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     }
 
     /**
+     * {@inheritDoc}
+     */
+    public String[] getColumns(long propertyId, boolean systemInternalProperty, FxDataType dataType) {
+        if (systemInternalProperty)
+            return mainColumnHash.get(propertyId);
+        return detailColumnNameHash.get(dataType);
+    }
+
+    /**
      * Get the insert positions for the given detail properties
      *
      * @param prop property
@@ -433,13 +442,9 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     }
 
     /**
-     * Get a new fulltext indexer instance
-     *
-     * @param pk  primary key
-     * @param con an open and valid connection
-     * @return a new fulltext indexer instance
+     * {@inheritDoc}
      */
-    protected FulltextIndexer getFulltextIndexer(FxPK pk, Connection con) {
+    public FulltextIndexer getFulltextIndexer(FxPK pk, Connection con) {
         FulltextIndexer indexer = new GenericSQLFulltextIndexer();
         indexer.init(pk, con);
         return indexer;

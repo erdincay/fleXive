@@ -104,6 +104,8 @@ public interface FulltextIndexer {
 
     /**
      * Commit changes, to be called prior to cleanup
+     *
+     * @throws SQLException on errors
      */
     void commitChanges() throws SQLException;
 
@@ -111,4 +113,9 @@ public interface FulltextIndexer {
      * Allow the indexer to clean up used resources like prepared statements, etc.
      */
     void cleanup();
+
+    /**
+     * Clean and rebuild the fulltext index
+     */
+    void rebuildIndex();
 }

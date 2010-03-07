@@ -37,10 +37,7 @@ import com.flexive.shared.content.FxContentSecurityInfo;
 import com.flexive.shared.content.FxContentVersionInfo;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.*;
-import com.flexive.shared.structure.FxEnvironment;
-import com.flexive.shared.structure.FxProperty;
-import com.flexive.shared.structure.FxType;
-import com.flexive.shared.structure.UniqueMode;
+import com.flexive.shared.structure.*;
 import com.flexive.shared.value.BinaryDescriptor;
 import com.flexive.shared.value.FxBinary;
 import com.flexive.shared.value.ReferencedContent;
@@ -95,6 +92,17 @@ public interface ContentStorage {
      */
     String[] getColumns(FxProperty prop);
 
+    /**
+     * Get the database columns used for this data type
+     *
+     * @param propertyId id of the property
+     * @param systemInternalProperty is the property system internal?
+     * @param dataType   data type of the property
+     * @return the database columns used
+     * @since 3.1
+     */
+    String[] getColumns(long propertyId, boolean systemInternalProperty, FxDataType dataType);
+
 
     /**
      * Get all security relevant information about a content instance identified by its primary key
@@ -118,6 +126,14 @@ public interface ContentStorage {
      */
     FxContentVersionInfo getContentVersionInfo(Connection con, long id) throws FxNotFoundException;
 
+    /**
+     * Get a new fulltext indexer instance
+     *
+     * @param pk  primary key
+     * @param con an open and valid connection
+     * @return a new fulltext indexer instance
+     */
+    FulltextIndexer getFulltextIndexer(FxPK pk, Connection con);
 
     /**
      * Create a new content instance

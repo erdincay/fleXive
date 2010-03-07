@@ -32,6 +32,8 @@
 package com.flexive.extractor;
 
 import com.flexive.shared.FxFormatUtils;
+import com.flexive.shared.FxXMLUtils;
+import org.apache.commons.lang.StringEscapeUtils;
 
 import java.io.Serializable;
 import java.util.Enumeration;
@@ -109,17 +111,18 @@ public class ExtractedData implements Serializable {
 
     public String toXML() {
         StringBuilder sb = new StringBuilder(1000);
-        sb.append("<extract>");
+        sb.append(FxXMLUtils.XML_HEADER);
+        sb.append("<extract>\n");
         if (getSummaryInformation() != null)
             sb.append(getSummaryInformation().toXML());
-        text = text.replaceAll("<!\\[CDATA\\[", "&lt;![CDATA[").replaceAll("\\]\\]>", "]]&gt;");
-        sb.append("<text><![CDATA[").append(getText().replace('\f', ' ')).append("]]></text>");
-        sb.append("<compressed><![CDATA[").append(getCompressedText()).append("]]></compressed>");
-        sb.append("</extract>");
+//        text = text.replaceAll("<!\\[CDATA\\[", "&lt;![CDATA[").replaceAll("\\]\\]>", "]]&gt;");
+        sb.append("<text>").append(StringEscapeUtils.escapeXml(getText())).append("</text>\n");
+        sb.append("<compressed>").append(StringEscapeUtils.escapeXml(getCompressedText())).append("</compressed>\n");
+        sb.append("</extract>\n");
         return sb.toString();
     }
 
     public static String toEmptyXML() {
-        return "<extract><summary></summary><compressed></compressed></extract>";
+        return "<extract>\n\t<summary>\n\t</summary>\n\t<compressed>\n\t</compressed>\n</extract>\n";
     }
 }

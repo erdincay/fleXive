@@ -75,11 +75,6 @@ con.close()
 
     private static final Log LOG = LogFactory.getLog(GenericDivisionExporter.class);
 
-    /**
-     * XML header to use
-     */
-    public final static String XML_HEADER = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
-
     private static GenericDivisionExporter INSTANCE = new GenericDivisionExporter();
 
     /**
@@ -120,7 +115,7 @@ con.close()
      * @throws IOException on errors
      */
     private void writeHeader(OutputStream out) throws IOException {
-        out.write(XML_HEADER.getBytes("UTF-8"));
+        out.write(FxXMLUtils.XML_HEADER.getBytes("UTF-8"));
     }
 
     /**

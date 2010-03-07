@@ -112,7 +112,7 @@ public class PostgreSQLHierarchicalStorage extends GenericHierarchicalStorage {
      * {@inheritDoc}
      */
     @Override
-    protected FulltextIndexer getFulltextIndexer(FxPK pk, Connection con) {
+    public FulltextIndexer getFulltextIndexer(FxPK pk, Connection con) {
         final PostgreSQLFulltextIndexer fti = new PostgreSQLFulltextIndexer();
         fti.init(pk, con);
         return fti;

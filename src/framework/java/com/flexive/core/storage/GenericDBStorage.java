@@ -37,6 +37,8 @@ import com.flexive.shared.FxFormatUtils;
 import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.impex.FxDivisionExportInfo;
+import com.flexive.shared.structure.TypeMode;
+import com.flexive.shared.structure.TypeStorageMode;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -250,5 +252,8 @@ public abstract class GenericDBStorage implements DBStorage {
         importer.importBriefcases(con, zip);
         importer.importFlatStorages(con, zip);
         importer.importSequencers(con, zip);
+        //rebuild fulltext index
+        FulltextIndexer ft = StorageManager.getStorageImpl().getContentStorage(TypeStorageMode.Hierarchical).getFulltextIndexer(null, con);
+        ft.rebuildIndex();
     }
 }

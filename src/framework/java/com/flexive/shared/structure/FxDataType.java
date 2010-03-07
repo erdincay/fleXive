@@ -78,11 +78,11 @@ public enum FxDataType implements Serializable, SelectableObjectWithName {
     /**
      * Constructor
      *
-     * @param id               internal id
+     * @param id                 internal id
      * @param primitiveValueType if the value type is a primitive (int, long, ...) or a String
-     * @param singleRowStorage can the underlying data be stored in a single db row?
-     * @param textType         is this a text type? text types will be fulltext indexed as default
-     * @param valueClass       class of the value object
+     * @param singleRowStorage   can the underlying data be stored in a single db row?
+     * @param textType           is this a text type? text types will be fulltext indexed as default
+     * @param valueClass         class of the value object
      */
     FxDataType(long id, boolean primitiveValueType, boolean singleRowStorage, boolean textType, Class<? extends FxValue> valueClass) {
         this.initialized = false;
@@ -128,7 +128,7 @@ public enum FxDataType implements Serializable, SelectableObjectWithName {
     /**
      * Return true if this data type maps to a primitive Java value type (int, long, ...) or a String.
      *
-     * @return  true if this data type maps to a primitive Java value type (int, long, ...) or a String.
+     * @return true if this data type maps to a primitive Java value type (int, long, ...) or a String.
      * @since 3.1
      */
     public boolean isPrimitiveValueType() {
@@ -284,14 +284,14 @@ public enum FxDataType implements Serializable, SelectableObjectWithName {
                 long parentMatch = -1;
                 for (FxSelectListItem item : available) {
                     if (rnd.nextInt() % 2 == 0) {
-                        if(sameLvl) {
-                            if(!item.hasParentItem())
+                        if (sameLvl) {
+                            if (!item.hasParentItem())
                                 continue;
-                            if( parentMatch == -1) {
+                            if (parentMatch == -1) {
                                 many.selectItem(item);
                                 parentMatch = item.getParentItem().getId();
                             } else {
-                                if(parentMatch == item.getParentItem().getId())
+                                if (parentMatch == item.getParentItem().getId())
                                     many.selectItem(item);
                             }
                         } else
@@ -406,5 +406,20 @@ public enum FxDataType implements Serializable, SelectableObjectWithName {
         if (len > maxLength)
             len = maxLength;
         return RANDOM_TEXT.substring(start, start + len);
+    }
+
+    /**
+     * Get a FxDataType by its id
+     *
+     * @param dataTypeId id of the data type
+     * @return FxDataType
+     * @throws FxNotFoundException if dataTypeId is not valid
+     * @since 3.1
+     */
+    public static FxDataType getById(long dataTypeId) throws FxNotFoundException {
+        for (FxDataType dataType : values())
+            if (dataType.getId() == dataTypeId)
+                return dataType;
+        throw new FxNotFoundException("ex.structure.dataType.notFound.id", dataTypeId);
     }
 }

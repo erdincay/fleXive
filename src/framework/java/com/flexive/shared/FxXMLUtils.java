@@ -33,12 +33,10 @@ package com.flexive.shared;
 
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.CompactWriter;
-import com.flexive.shared.value.*;
-import com.flexive.core.conversion.FxContentConverter;
-import com.flexive.shared.content.FxContent;
+import org.apache.commons.lang.StringEscapeUtils;
 
-import javax.xml.stream.XMLStreamWriter;
 import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 
@@ -48,6 +46,10 @@ import java.io.Writer;
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public class FxXMLUtils {
+    /**
+     * XML header to use
+     */
+    public final static String XML_HEADER = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n";
 
     /**
      * Get the character content of an element in xml data
@@ -69,40 +71,7 @@ public class FxXMLUtils {
 //        Strip CData if needed
 //        if (ret.startsWith("<![CDATA["))
 //            ret = ret.substring(9, ret.length() - 3);
-        return fromCData(ret);
-    }
-
-    /**
-     * Convert a content to CDATA and preserve all existing CDATA
-     *
-     * @param content content to convert
-     * @return character data encoded content
-     */
-    public static String toCData(String content) {
-        if (content.contains("]]>")) {
-            //take care of nested CDATA sections
-            return "<![CDATA[" + content.replaceAll("\\]\\]\\>", "]]]]><![CDATA[>") + "]]>";
-        } else
-            return "<![CDATA[" + content + "]]>";
-    }
-
-    /**
-     * Convert a CData back to a String
-     *
-     * @param cdata CData to convert
-     * @return String
-     */
-    public static String fromCData(String cdata) {
-        StringBuilder sb = new StringBuilder(cdata);
-        int idx;
-        while ((idx = sb.indexOf("<![CDATA[")) > 0) {
-            int close = sb.indexOf("]]>");
-            if (close > 0) {
-                sb.delete(idx, idx + 9);
-                sb.delete(close - 9, close - 9 + 3);
-            }
-        }
-        return sb.toString();
+        return StringEscapeUtils.unescapeXml(ret);
     }
 
     /**
@@ -122,15 +91,16 @@ public class FxXMLUtils {
     /**
      * Write a "simple" tag
      *
-     * @param writer xml writer
-     * @param tag tag name
-     * @param value value
+     * @param writer  xml writer
+     * @param tag     tag name
+     * @param value   value
      * @param asCData use CDData?
-     * @throws javax.xml.stream.XMLStreamException on errors
+     * @throws javax.xml.stream.XMLStreamException
+     *          on errors
      */
     public static void writeSimpleTag(XMLStreamWriter writer, String tag, Object value, boolean asCData) throws XMLStreamException {
         writer.writeStartElement(tag);
-        if( asCData )
+        if (asCData)
             writer.writeCData(String.valueOf(value));
         else
             writer.writeCharacters(String.valueOf(value));

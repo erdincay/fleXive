@@ -31,6 +31,7 @@
  ***************************************************************/
 package com.flexive.extractor;
 
+import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.poi.hpsf.PropertySetFactory;
 import org.apache.poi.hpsf.SummaryInformation;
 import org.apache.poi.poifs.eventfilesystem.POIFSReader;
@@ -120,7 +121,7 @@ public class FxSummaryInformation implements Serializable {
 
     public String toXML() {
         StringBuilder sb = new StringBuilder(1000);
-        sb.append("<summary>");
+        sb.append("<summary>\n");
         encodeXML(sb, "author", author);
         encodeXML(sb, "applicationName", applicationName);
         encodeXML(sb, "charCount", charCount);
@@ -137,7 +138,7 @@ public class FxSummaryInformation implements Serializable {
         encodeXML(sb, "wordCount", wordCount);
         encodeXML(sb, "encrypted", encrypted);
         encodeXML(sb, "additionalText", additionalText);
-        sb.append("</summary>");
+        sb.append("</summary>\n");
         return sb.toString();
     }
 
@@ -145,12 +146,12 @@ public class FxSummaryInformation implements Serializable {
         if( data != null ) {
             sb.append("<").append(tag).append(">");
             if( data instanceof String)
-                sb.append("<![CDATA[").append(data).append("]]>");
+                sb.append(StringEscapeUtils.escapeXml(String.valueOf(data).trim()));
             else if( data instanceof Date)
                 sb.append(((Date)data).getTime());
             else
                 sb.append(data);
-            sb.append("</").append(tag).append(">");
+            sb.append("</").append(tag).append(">\n");
         }
     }
 

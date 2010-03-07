@@ -31,13 +31,21 @@
  ***************************************************************/
 package com.flexive.core.storage.genericSQL;
 
+import com.flexive.core.Database;
 import com.flexive.core.DatabaseConst;
-import static com.flexive.core.DatabaseConst.TBL_CONTENT_DATA_FT;
+import com.flexive.core.storage.ContentStorage;
+import com.flexive.core.storage.DBStorage;
 import com.flexive.core.storage.FulltextIndexer;
+import com.flexive.core.storage.StorageManager;
+import com.flexive.shared.FxArrayUtils;
 import com.flexive.shared.FxXMLUtils;
 import com.flexive.shared.content.FxDelta;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.content.FxPropertyData;
+import com.flexive.shared.exceptions.FxDbException;
+import com.flexive.shared.exceptions.FxNotFoundException;
+import com.flexive.shared.structure.FxDataType;
+import com.flexive.shared.structure.TypeStorageMode;
 import com.flexive.shared.value.FxBinary;
 import com.flexive.shared.value.FxValue;
 import org.apache.commons.lang.ArrayUtils;
@@ -45,9 +53,9 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
+
+import static com.flexive.core.DatabaseConst.TBL_CONTENT_DATA_FT;
 
 /**
  * Fulltext indexer (generic SQL implementation)
@@ -64,8 +72,11 @@ public class GenericSQLFulltextIndexer implements FulltextIndexer {
     protected static final String CONTENT_FULLTEXT_INSERT = "INSERT INTO " + TBL_CONTENT_DATA_FT + "(ID,VER,LANG,ASSIGN,XMULT,VALUE) VALUES (?,?,?,?,?,?)";
     //                                                                                                    1          2         3          4            5           6
     protected static final String CONTENT_FULLTEXT_UPDATE = "UPDATE " + TBL_CONTENT_DATA_FT + " SET VALUE=? WHERE ID=? AND VER=? AND LANG=? AND ASSIGN=? AND XMULT=?";
-    protected static final String CONTENT_FULLTEXT_DELETE_ALL = "DELETE FROM " + TBL_CONTENT_DATA_FT + " WHERE ID=? AND VER=? AND ASSIGN=?";
-    protected static final String CONTENT_FULLTEXT_DELETE = "DELETE FROM " + TBL_CONTENT_DATA_FT + " WHERE ID=? AND VER=? AND ASSIGN=? AND LANG=?";
+    protected final static String CONTENT_FULLTEXT_DELETE_ALL = "DELETE FROM " + TBL_CONTENT_DATA_FT;
+    protected static final String CONTENT_FULLTEXT_DELETE = "DELETE FROM " + TBL_CONTENT_DATA_FT + " WHERE ID=? AND VER=? AND ASSIGN=?";
+    protected static final String CONTENT_FULLTEXT_DELETE_LANG = "DELETE FROM " + TBL_CONTENT_DATA_FT + " WHERE ID=? AND VER=? AND ASSIGN=? AND LANG=?";
+    protected final static String CONTENT_FULLTEXT_SET_LANG = "UPDATE " + TBL_CONTENT_DATA_FT + " SET LANG=? WHERE ASSIGN=?";
+    protected final static String CONTENT_FULLTEXT_CHANGE_LANG = "UPDATE " + TBL_CONTENT_DATA_FT + " SET LANG=? WHERE LANG=? AND ASSIGN=?";
 
 
     private FxPK pk;
@@ -113,7 +124,7 @@ public class GenericSQLFulltextIndexer implements FulltextIndexer {
      * @return delete statement
      */
     protected String getDeleteSql() {
-        return CONTENT_FULLTEXT_DELETE;
+        return CONTENT_FULLTEXT_DELETE_LANG;
     }
 
     /**
@@ -122,7 +133,7 @@ public class GenericSQLFulltextIndexer implements FulltextIndexer {
      * @return delete all statement
      */
     protected String getDeleteAllSql() {
-        return CONTENT_FULLTEXT_DELETE_ALL;
+        return CONTENT_FULLTEXT_DELETE;
     }
 
     /**
@@ -229,7 +240,7 @@ public class GenericSQLFulltextIndexer implements FulltextIndexer {
             for (long lang : newLang) {
                 try {
                     if (value instanceof FxBinary)
-                        data = prepare(FxXMLUtils.getElementData(((FxBinary) value).getTranslation(lang).getMetadata(), "compressed"));
+                        data = prepare(FxXMLUtils.getElementData(((FxBinary) value).getTranslation(lang).getMetadata(), "text"));
                     else
                         data = prepare(String.valueOf(value.getTranslation(lang)));
                 } catch (Exception e) {
@@ -334,7 +345,7 @@ public class GenericSQLFulltextIndexer implements FulltextIndexer {
     public void changeLanguage(long assignmentId, long oldLanguage, long newLanguage) {
         PreparedStatement ps = null;
         try {
-            ps = con.prepareStatement("UPDATE " + TBL_CONTENT_DATA_FT + " SET LANG=? WHERE LANG=? AND ASSIGN=?");
+            ps = con.prepareStatement(CONTENT_FULLTEXT_CHANGE_LANG);
             ps.setLong(1, oldLanguage);
             ps.setLong(2, newLanguage);
             ps.setLong(3, assignmentId);
@@ -356,7 +367,7 @@ public class GenericSQLFulltextIndexer implements FulltextIndexer {
     public void setLanguage(long assignmentId, long lang) {
         PreparedStatement ps = null;
         try {
-            ps = con.prepareStatement("UPDATE " + TBL_CONTENT_DATA_FT + " SET LANG=? WHERE ASSIGN=?");
+            ps = con.prepareStatement(CONTENT_FULLTEXT_SET_LANG);
             ps.setLong(1, lang);
             ps.setLong(2, assignmentId);
             ps.executeUpdate();
@@ -389,6 +400,146 @@ public class GenericSQLFulltextIndexer implements FulltextIndexer {
             if (psd_all != null) psd_all.close();
         } catch (SQLException e) {
             LOG.error(e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void rebuildIndex() {
+        PreparedStatement ps = null;
+        Statement stmtAssignment = null;
+        Statement stmtFetch = null;
+
+        try {
+            final DBStorage storage = StorageManager.getStorageImpl();
+            final ContentStorage contentStorage = storage.getContentStorage(TypeStorageMode.Hierarchical);
+            final String TRUE = storage.getBooleanTrueExpression();
+            stmtAssignment = con.createStatement();
+            stmtFetch = con.createStatement();
+            int removed = stmtAssignment.executeUpdate(CONTENT_FULLTEXT_DELETE_ALL);
+            LOG.info("Removed " + removed + " fulltext entries.");
+            //                                                   1     2           3         4          5          6    7        8     9
+            ResultSet rs = stmtAssignment.executeQuery("SELECT a.id, p.datatype, m.typeid, m.tblname, m.colname, m.lvl, a.xpath, p.id, p.sysinternal " +
+                    "FROM FXS_TYPEPROPS p, FXS_ASSIGNMENTS a LEFT JOIN FXS_FLAT_MAPPING m ON (m.assid=a.id) " +
+                    "WHERE p.ISFULLTEXTINDEXED=" + TRUE + " AND a.APROPERTY=p.id " +
+                    "ORDER BY p.datatype");
+            //1..ID,2..VER,3..LANG,4..ASSIGN,5..XMULT,6..VALUE
+            ps = con.prepareStatement(getInsertSql());
+            int batchCounter;
+            long totalCount = 0;
+            while (rs != null && rs.next()) {
+                long assignmentId = rs.getLong(1);
+                ps.setLong(4, assignmentId); //assignment id
+                long propertyId = rs.getLong(8);
+                FxDataType dataType = FxDataType.getById(rs.getInt(2));
+                boolean systemInternalProperty = rs.getBoolean(9);
+                if( systemInternalProperty)
+                    continue; //do not index system internal properties
+                long flatTypeId = rs.getLong(3);
+                if (!rs.wasNull()) {
+                    //flatstorage
+                    String xpath = rs.getString(7);
+                    String xmult;
+                    if(!StringUtils.isEmpty(xpath)) {
+                        xmult = "";
+                        for(char c: xpath.toCharArray()) {
+                            if( c == '/') {
+                                if( xmult.length() > 0)
+                                    xmult += ",1";
+                                else
+                                    xmult = "1";
+                            }
+                        }
+                    } else
+                        xmult = "1";
+                    ps.setString(5, xmult);
+                    //                                                1  2   3      4
+                    ResultSet rsData = stmtFetch.executeQuery("SELECT ID,VER,LANG," + rs.getString(5) + " FROM " + rs.getString(4) +
+                            " WHERE TYPEID=" + flatTypeId + " AND LVL=" + rs.getInt(6));
+                    batchCounter = 0;
+                    while (rsData != null && rsData.next()) {
+                        String value = rsData.getString(4);
+                        if (rsData.wasNull() || StringUtils.isEmpty(value))
+                            continue;
+                        ps.setLong(1, rsData.getLong(1));
+                        ps.setInt(2, rsData.getInt(2));
+                        ps.setInt(3, rsData.getInt(3));
+                        ps.setString(6, value.trim().toUpperCase());
+                        ps.addBatch();
+                        batchCounter++;
+                        totalCount++;
+                        if (batchCounter % 1000 == 0)
+                            ps.executeBatch(); //insert every 1000 rows
+                    }
+                    if (rsData != null)
+                        rsData.close();
+                    ps.executeBatch();
+                } else {
+                    //hierarchical storage
+                    String[] columns = contentStorage.getColumns(propertyId, systemInternalProperty, dataType);
+
+                    //                                                1  2   3    4         5+
+                    ResultSet rsData = stmtFetch.executeQuery("SELECT ID,VER,LANG,XMULT," + FxArrayUtils.toStringArray(columns,",") +
+                            " FROM " + DatabaseConst.TBL_CONTENT_DATA +
+                            " WHERE ASSIGN=" + assignmentId);
+                    batchCounter = 0;
+                    while (rsData != null && rsData.next()) {
+                        String value = rsData.getString(4);
+                        if (rsData.wasNull() || StringUtils.isEmpty(value))
+                            continue;
+                        ps.setLong(1, rsData.getLong(1));
+                        ps.setInt(2, rsData.getInt(2));
+                        ps.setInt(3, rsData.getInt(3));
+                        ps.setString(5, rsData.getString(4));
+                        switch(dataType) {
+                            case Binary:
+                            case Boolean:
+                            case Date:
+                            case DateRange:
+                            case DateTime:
+                            case DateTimeRange:
+                            case Double:
+                            case Float:
+                            case InlineReference:
+                            case LargeNumber:
+                            case Number:
+                            case Reference:
+                            case SelectMany:
+                            case SelectOne:
+                                System.out.println("=> not yet supported data type "+dataType.name());
+                                break;
+                            case HTML:
+                            case String1024:
+                            case Text:
+                                String sValue = rs.getString(5);
+                                if(!StringUtils.isEmpty(sValue)) {
+                                    ps.setString(6, sValue.toUpperCase());
+                                    ps.addBatch();
+                                    batchCounter++;
+                                    totalCount++;
+                                }
+                        }
+
+                        if (batchCounter % 1000 == 0)
+                            ps.executeBatch(); //insert every 1000 rows
+                    }
+                    if (rsData != null)
+                        rsData.close();
+                    ps.executeBatch();
+                }
+
+
+            }
+            LOG.info("Added " + totalCount + " entries to fulltext index.");
+            commitChanges();
+        } catch (SQLException e) {
+            throw new FxDbException(e, "ex.db.sqlError", e.getMessage()).asRuntimeException();
+        } catch (FxNotFoundException e) {
+            //ContentStorage was not found
+            throw e.asRuntimeException();
+        } finally {
+            Database.closeObjects(GenericSQLFulltextIndexer.class, ps, stmtAssignment, stmtFetch);
         }
     }
 }
