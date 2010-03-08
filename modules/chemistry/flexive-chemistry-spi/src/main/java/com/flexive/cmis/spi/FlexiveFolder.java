@@ -472,14 +472,19 @@ public class FlexiveFolder extends FlexiveObjectEntry implements Folder {
     }
 
     @Override
-    public Map<QName, Boolean> getAllowableActions() {
-        final Map<QName, Boolean> actions = super.getAllowableActions();
+    public Set<QName> getAllowableActions() {
+        final Set<QName> actions = super.getAllowableActions();
         // currently any user can add objects to a folder (as long as he can create the objects)
-        actions.put(AllowableAction.CAN_ADD_OBJECT_TO_FOLDER, true);
-        actions.put(AllowableAction.CAN_CREATE_DOCUMENT, true);
-        actions.put(AllowableAction.CAN_CREATE_FOLDER, true);
+        actions.add(AllowableAction.CAN_ADD_OBJECT_TO_FOLDER);
+        actions.add(AllowableAction.CAN_CREATE_DOCUMENT);
+        actions.add(AllowableAction.CAN_CREATE_FOLDER);
         return actions;
     }
+
+    public String getPathSegment() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
 
     /**
      * Proprietary copy method.

@@ -7,7 +7,6 @@ import com.flexive.war.filter.FxFilter;
 import org.apache.abdera.protocol.client.AbderaClient;
 import org.apache.abdera.protocol.client.ClientResponse;
 import org.apache.chemistry.Repository;
-import org.apache.chemistry.atompub.client.connector.APPContentManager;
 import org.apache.chemistry.test.BasicTestCase;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -21,6 +20,7 @@ import org.mortbay.jetty.servlet.FilterHolder;
 import org.mortbay.jetty.servlet.ServletHolder;
 
 import java.util.Random;
+import org.apache.chemistry.atompub.client.APPRepositoryService;
 
 /**
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
@@ -45,7 +45,7 @@ public class CMISServletTest extends BasicTestCase {
             serverUrl = startServer();
             new TestFixture();
         }
-        return repository = new APPContentManager(serverUrl).getDefaultRepository();
+        return repository = new APPRepositoryService(serverUrl, null).getDefaultRepository();
     }
 
     private String startServer() throws Exception {

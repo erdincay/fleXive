@@ -66,7 +66,7 @@ public class FlexiveRepository implements Repository {
         return new FlexiveConnection(config, parameters);
     }
 
-    public SPI getSPI() {
+    public SPI getSPI(Map<String, Serializable> params) {
         return new FlexiveConnection(config, null);
     }
 
@@ -81,7 +81,32 @@ public class FlexiveRepository implements Repository {
         return new FlexiveRepositoryInfo();
     }
 
-    public Collection<Type> getTypes(String typeId) {
+    public Collection<Type> getTypes() {
+        final List<FxType> fxTypes = getEnvironment().getTypes();
+        final List<Type> result = Lists.newArrayListWithCapacity(fxTypes.size());
+        for (FxType fxType : fxTypes) {
+            result.add(new FlexiveType(fxType));
+        }
+        return result;
+    }
+
+    public ListPage<Type> getTypeChildren(String typeId, boolean includePropertyDefinitions, Paging paging) {
+        return ListPageUtils.page(
+                getTypes(typeId, false).iterator(),
+                paging,
+                ListPageUtils.<Type>identityFunction()
+        );
+    }
+
+    public Collection<Type> getTypeDescendants(String typeId) {
+        return getTypes(typeId, true);
+    }
+
+    public Collection<Type> getTypeDescendants(String typeId, int depth, boolean includePropertyDefinitions) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    private Collection<Type> getTypes(String typeId, boolean includeType) {
         final List<Type> result = Lists.newArrayList();
         if (typeId == null) {
             for (FxType fxType : getEnvironment().getTypes()) {
@@ -95,7 +120,7 @@ public class FlexiveRepository implements Repository {
                 }
             } else {
                 // return type + descendants
-                for (FxType derived : getEnvironment().getType(typeId).getDerivedTypes(true, true)) {
+                for (FxType derived : getEnvironment().getType(typeId).getDerivedTypes(true, includeType)) {
                     result.add(new FlexiveType(derived));
                 }
             }
@@ -107,21 +132,17 @@ public class FlexiveRepository implements Repository {
         return typeId != null ? new FlexiveType(typeId) : new FlexiveType(FxType.ROOT_ID);
     }
 
+    public PropertyDefinition getPropertyDefinition(String id) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+
     public String getId() {
         return getInfo().getId();
     }
 
     public String getName() {
         return getInfo().getName();
-    }
-
-    public URI getURI() {
-        // TODO: what to return? The URI depends on the frontend server (e.g. AtomPub)
-        return null;
-    }
-
-    public String getRelationshipName() {
-        return null;
     }
 
     public URI getThinClientURI() {
@@ -132,10 +153,6 @@ public class FlexiveRepository implements Repository {
         throw new UnsupportedOperationException();
     }
 
-    public Collection<Type> getTypes(String typeId, int depth, boolean returnPropertyDefinitions) {
-        // TODO
-        return getTypes(typeId);
-    }
 
     /**
      * Extension to provide efficient copying of contents.

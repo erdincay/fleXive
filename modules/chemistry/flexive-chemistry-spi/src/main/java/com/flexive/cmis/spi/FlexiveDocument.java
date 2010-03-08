@@ -419,9 +419,19 @@ public class FlexiveDocument extends FlexiveObjectEntry implements Document {
      * Return an independent copy of this document.
      *
      * @return  an independent copy of this document.
+     *
+     * // TODO remove
      */
     public FlexiveObjectEntry copy() {
         return new FlexiveNewDocument(context, getContent().copyAsNewInstance(), null);
+    }
+
+    public Document copy(Folder folder) throws NameConstraintViolationException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public String getPathSegment() {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     private List<FxTreeNode> getTreeNodes() {

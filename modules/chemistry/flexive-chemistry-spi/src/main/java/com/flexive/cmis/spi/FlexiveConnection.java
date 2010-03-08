@@ -31,6 +31,7 @@
  ***************************************************************/
 package com.flexive.cmis.spi;
 
+import static com.flexive.cmis.spi.ListPageUtils.*;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.cmis.search.CmisResultRow;
@@ -41,7 +42,6 @@ import com.flexive.shared.structure.FxType;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNode;
 import org.apache.chemistry.*;
-import org.apache.chemistry.impl.simple.SimpleListPage;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -73,10 +73,11 @@ public class FlexiveConnection implements Connection, SPI {
     private final Context context;
     private final Map<String, Serializable> parameters;
 
-    public FlexiveConnection(FlexiveRepositoryConfig config, Map<String, Serializable> parameters) {
+    FlexiveConnection(FlexiveRepositoryConfig config, Map<String, Serializable> parameters) {
         this.config = config;
         this.checkouts = new PrivateWorkingCopyManager();
-        this.context = new Context(config, checkouts);
+        // TODO: connection escapes here
+        this.context = new Context(this, config, checkouts);
         // TODO: hack to support authentication, remove when Chemistry adds support for this
         boolean loggedIn = false;
         this.parameters = parameters == null ? null : new HashMap<String, Serializable>(parameters);
@@ -186,14 +187,20 @@ public class FlexiveConnection implements Connection, SPI {
         }
     }
 
-    public List<ObjectEntry> getDescendants(ObjectId folder, int depth, String orderBy, Inclusion inclusion) {
-        final List<CMISObject> children = new FlexiveFolder(context, SPIUtils.getNodeId(folder.getId())).getChildren(null, depth);
+    public ObjectId createDocumentFromSource(ObjectId source, ObjectId folder, Map<String, Serializable> properties, VersioningState versioningState) throws NameConstraintViolationException {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+
+    public Tree<ObjectEntry> getDescendants(ObjectId folder, int depth, String orderBy, Inclusion inclusion) {
+        throw new UnsupportedOperationException("Not supported yet.");
+        /*final List<CMISObject> children = new FlexiveFolder(context, SPIUtils.getNodeId(folder.getId())).getChildren(null, depth);
         final List<ObjectEntry> result = newArrayListWithCapacity(children.size());
         for (CMISObject child : children) {
             // HACK! (FlexiveFolder#getChildren always returns ObjectEntries)
             result.add((FlexiveObjectEntry) child);
         }
-        return result;
+        return result;*/
     }
 
     public ListPage<ObjectEntry> getChildren(ObjectId folder, Inclusion inclusion, String orderBy, Paging paging) {
@@ -270,8 +277,8 @@ public class FlexiveConnection implements Connection, SPI {
         throw new UnsupportedOperationException();
     }
 
-    public Collection<QName> getAllowableActions(ObjectId object) {
-        return getContent(object).getAllowableActions().keySet();
+    public Set<QName> getAllowableActions(ObjectId object) {
+        return getContent(object).getAllowableActions();
     }
 
     public ObjectEntry getProperties(ObjectId object, Inclusion inclusion) {
@@ -441,8 +448,8 @@ public class FlexiveConnection implements Connection, SPI {
         }
     }
 
-    public List<ObjectEntry> getFolderTree(ObjectId folder, int depth, Inclusion inclusion) {
-        throw new UnsupportedOperationException();
+    public Tree<ObjectEntry> getFolderTree(ObjectId folder, int depth, Inclusion inclusion) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     public ObjectEntry getObjectByPath(String path, Inclusion inclusion) {
@@ -531,44 +538,14 @@ public class FlexiveConnection implements Connection, SPI {
         }
     }
 
-    private int getSkipCount(Paging paging) {
-        return paging == null ? 0 : paging.skipCount;
-    }
 
-    private int getMaxItems(Paging paging) {
-        return paging == null ? Integer.MAX_VALUE - 1 : paging.maxItems;
-    }
-
-    private <T> Iterator<T> skip(Iterator<T> iterator, Paging paging) {
-        for (int i = 0; i < getSkipCount(paging) && iterator.hasNext(); i++) {
-            iterator.next();
-        }
-        return iterator;
-    }
-
-    private static interface Function<T, U> {
-        U apply(T value);
-    }
-
-    private <T, U> ListPage<U> page(Iterator<T> iterator, Paging paging, Function<T, U> mapper) {
-        skip(iterator, paging);
-        final SimpleListPage<U> result = new SimpleListPage<U>();
-        final int maxItems = getMaxItems(paging);
-        while (iterator.hasNext()) {
-            if (result.size() > maxItems) {
-                result.setHasMoreItems(true);
-                break;
-            }
-            result.add(mapper.apply(iterator.next()));
-        }
-        return result;
-    }
-
-    public static class Context {
+    static class Context {
         private final FlexiveRepositoryConfig config;
         private final PrivateWorkingCopyManager pwcManager;
+        private final FlexiveConnection connection;
 
-        public Context(FlexiveRepositoryConfig config, PrivateWorkingCopyManager pwcManager) {
+        Context(FlexiveConnection connection, FlexiveRepositoryConfig config, PrivateWorkingCopyManager pwcManager) {
+            this.connection = connection;
             this.config = config;
             this.pwcManager = pwcManager;
         }
@@ -580,5 +557,10 @@ public class FlexiveConnection implements Connection, SPI {
         public PrivateWorkingCopyManager getPwcManager() {
             return pwcManager;
         }
+
+        public FlexiveConnection getConnection() {
+            return connection;
+        }
+
     }
 }

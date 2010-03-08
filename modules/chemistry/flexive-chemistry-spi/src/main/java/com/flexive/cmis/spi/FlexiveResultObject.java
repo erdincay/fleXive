@@ -69,6 +69,11 @@ public class FlexiveResultObject extends BaseObject implements ObjectEntry {
         this.context = context;
     }
 
+    public Connection getConnection() {
+        return context.getConnection();
+    }
+
+
     public void move(Folder targetFolder, Folder sourceFolder) {
         throw new UnsupportedOperationException();
     }
@@ -264,7 +269,7 @@ public class FlexiveResultObject extends BaseObject implements ObjectEntry {
 */
     }
 
-    public Map<QName, Boolean> getAllowableActions() {
+    public Set<QName> getAllowableActions() {
         throw new UnsupportedOperationException();  // TODO: what to return?
     }
 
@@ -283,4 +288,10 @@ public class FlexiveResultObject extends BaseObject implements ObjectEntry {
     public ChangeInfo getChangeInfo() {
         throw new UnsupportedOperationException();
     }
+
+    public String getPathSegment() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+
 }

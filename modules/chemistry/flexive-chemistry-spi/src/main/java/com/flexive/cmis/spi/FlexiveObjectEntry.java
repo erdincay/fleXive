@@ -89,6 +89,11 @@ public abstract class FlexiveObjectEntry extends BaseObject implements ObjectEnt
         return getId().hashCode();
     }
 
+    public Connection getConnection() {
+        return context.getConnection();
+    }
+
+
     @Override
     public String getTypeId() {
         return CacheAdmin.getEnvironment().getType(
@@ -227,7 +232,7 @@ public abstract class FlexiveObjectEntry extends BaseObject implements ObjectEnt
     }
 
 
-    public Map<QName, Boolean> getAllowableActions() {
+    public Set<QName> getAllowableActions() {
         final PermissionSet permissions = getContent().getPermissions();
         final Set<QName> allowableActions = new HashSet<QName>();
         if (permissions.isMayRead()) {
@@ -256,11 +261,7 @@ public abstract class FlexiveObjectEntry extends BaseObject implements ObjectEnt
                     CAN_CREATE_RELATIONSHIP
             ));
         }
-        final Map<QName, Boolean> result = new HashMap<QName, Boolean>(allowableActions.size());
-        for (QName action : allowableActions) {
-            result.put(action, true);
-        }
-        return result;
+        return allowableActions;
     }
 
     public Collection<ObjectEntry> getRelationships() {

@@ -37,13 +37,11 @@ import org.apache.commons.logging.LogFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
 
 import com.flexive.shared.value.FxBinary;
 import com.flexive.shared.value.BinaryDescriptor;
 import com.flexive.shared.stream.FxStreamUtils;
 import com.flexive.shared.exceptions.FxStreamException;
-import com.flexive.stream.StreamException;
 
 /**
  * A content stream provided by flexive's streaming server.

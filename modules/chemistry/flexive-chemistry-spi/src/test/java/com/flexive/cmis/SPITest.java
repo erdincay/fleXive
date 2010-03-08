@@ -236,6 +236,6 @@ public class SPITest {
     }
 
     private SPI getSPI() {
-        return Utils.getRepo().getSPI();
+        return Utils.getRepo().getSPI(null);
     }
 }

@@ -91,9 +91,9 @@ public class RepositoryTest {
         assertEquals(FlexiveType.ROOT_TYPE_ID, repo.getType("ROOT").getId());
         assertEquals("All types should be a subtype of Root",
                 CacheAdmin.getEnvironment().getTypes().size(), 
-                repo.getTypes("Root").size()
+                repo.getTypeDescendants("Root").size()
         );
-        assertEquals("Expected two folder types", 2, repo.getTypes(FxType.FOLDER).size());
+        assertEquals("Expected two folder types", 2, repo.getTypeDescendants(FxType.FOLDER).size());
         /*boolean[] hasMoreItems = new boolean[5];
         assertEquals("Type count limit not applied", 1, repo.getTypes(FxType.FOLDER, false, 1, 0, hasMoreItems).size());
         assertTrue("More items expected", hasMoreItems[0]);
