@@ -34,6 +34,8 @@ package com.flexive.war.filter;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.security.UserTicket;
 import com.flexive.war.FxRequest;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
@@ -46,13 +48,13 @@ import java.util.Map;
  * HttpRequest wrapper to privide flexive specific informations
  */
 public class FxRequestWrapper extends HttpServletRequestWrapper implements FxRequest {
+    private static final Log LOG = LogFactory.getLog(FxRequestWrapper.class);
+
     private HttpServletRequest request = null;
     private long timestamp = -1;
     private int division = -1;
-    private String requestUriNoContext = null;
     private FxSessionWrapper sessionWrapper;
     private String pageType;
-    private String realRequestUriNoContext = null;
     private BrowserDetect browserDetect;
 
     /**
@@ -75,12 +77,20 @@ public class FxRequestWrapper extends HttpServletRequestWrapper implements FxReq
     }
 
 
+    /**
+     * @return  the request URI after forwarding
+     *
+     * @deprecated use {@link #getRequestURIWithoutContext} since the semantics lead to confusing errors.
+     * As a rule of thumb, only the final URL after forwarding should be used to allow arbitrary rewriting
+     * of external URLs, as is the case when calling {@link #getRequestURI()}
+     * or {@link #getRequestURIWithoutContext()}.
+     */
     public String getRealRequestUriNoContext() {
-        return (realRequestUriNoContext == null) ? requestUriNoContext : realRequestUriNoContext;
+        return getRequestURIWithoutContext();
     }
 
     private void setRealRequestUriNoContext(String value) {
-        this.realRequestUriNoContext = value;
+        // nop - remove when getRealRequestUriNoContext is removed
     }
 
     /**
@@ -95,9 +105,8 @@ public class FxRequestWrapper extends HttpServletRequestWrapper implements FxReq
         this.timestamp = System.currentTimeMillis();
         this.request = httpServletRequest;
         this.division = divisionId;
-        this.requestUriNoContext = request.getRequestURI().substring(request.getContextPath().length());
-        int lastDotIdx = requestUriNoContext.lastIndexOf('.');
-        this.pageType = (lastDotIdx == -1) ? "" : this.requestUriNoContext.substring(lastDotIdx + 1).toLowerCase();
+        final int lastDotIdx = httpServletRequest.getRequestURI().lastIndexOf('.');
+        this.pageType = (lastDotIdx == -1) ? "" : httpServletRequest.getRequestURI().substring(lastDotIdx + 1).toLowerCase();
     }
 
     /**
@@ -154,7 +163,7 @@ public class FxRequestWrapper extends HttpServletRequestWrapper implements FxReq
      * @return the request URI without the context.
      */
     public String getRequestURIWithoutContext() {
-        return requestUriNoContext;
+        return request.getRequestURI().substring(request.getContextPath().length());
     }
 
     private BrowserDetect getBrowserDetect() {
@@ -230,17 +239,20 @@ public class FxRequestWrapper extends HttpServletRequestWrapper implements FxReq
      * @param response the response
      * @param path     the path of the resource
      * @return true if the include was successfuly
+     * @deprecated  this does not work well with generic servlet applications that do not know about FxRequestWrapper
      */
     public boolean include(final HttpServletResponse response, final String path) {
         if (path == null || path.length() == 0) return false;
-        String oldURI = getRealRequestUriNoContext();
+        String oldURI = getRequestURIWithoutContext();
         try {
             this.setRealRequestUriNoContext(path);
             RequestDispatcher rd = getRequestDispatcher(path);
             if (rd != null) rd.include(this, response);
             return true;
         } catch (Exception exc) {
-            System.out.println("[" + String.valueOf(this.getClass()) + "] include(" + path + ") failed:" + exc.getMessage());
+            if (LOG.isErrorEnabled()) {
+                LOG.error("[" + String.valueOf(this.getClass()) + "] include(" + path + ") failed:" + exc.getMessage());
+            }
             return false;
         } finally {
             this.setRealRequestUriNoContext(oldURI);
@@ -254,17 +266,20 @@ public class FxRequestWrapper extends HttpServletRequestWrapper implements FxReq
      * @param response the response
      * @param path     the path of the resource
      * @return true if the forward was successfuly
+     * @deprecated  this does not work well with generic servlet applications that do not know about FxRequestWrapper
      */
     public boolean forward(final HttpServletResponse response, final String path) {
         if (path == null || path.length() == 0) return false;
-        String oldURI = getRealRequestUriNoContext();
+        String oldURI = getRequestURI();
         try {
             this.setRealRequestUriNoContext(path);
             RequestDispatcher rd = getRequestDispatcher(path);
             if (rd != null) rd.forward(this, response);
             return true;
         } catch (Exception exc) {
-            System.out.println("[" + String.valueOf(this.getClass()) + "] forward(" + path + ") failed:" + exc.getMessage());
+            if (LOG.isErrorEnabled()) {
+                LOG.error("[" + String.valueOf(this.getClass()) + "] forward(" + path + ") failed:" + exc.getMessage());
+            }
             return false;
         } finally {
             this.setRealRequestUriNoContext(oldURI);
