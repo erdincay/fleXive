@@ -39,6 +39,8 @@ import com.flexive.shared.structure.FxDataType;
 import com.flexive.shared.structure.FxProperty;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.tree.FxTreeNode;
+import com.flexive.shared.structure.FxPropertyAssignment;
+import com.flexive.shared.structure.FxStructureOption;
 import com.flexive.shared.value.FxValue;
 import org.apache.chemistry.BaseType;
 import org.apache.chemistry.ObjectNotFoundException;
@@ -49,6 +51,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * Utility methods for the SPI implementation.
@@ -57,6 +61,13 @@ import java.util.Set;
  * @version $Rev$
  */
 public class SPIUtils {
+    private static final Log LOG = LogFactory.getLog(SPIUtils.class);
+
+    /** Structure option to treat an assignment as a content stream (instead of a binary).
+     * The value can be set to the MIME type that will be used for the stream,
+     * otherwise it default to text/plain.
+     */
+    public static final String OPTION_CONTENTSTREAM = "STREAM";
 
     private SPIUtils() {
     }
@@ -231,4 +242,33 @@ public class SPIUtils {
                 || context.getConnectionConfig().isDocumentsAsFolders() && child.getDirectChildCount() > 0;
     }
 
+    /**
+     * The property assignment to be used as the content stream.
+     *
+     * @param type  the content type
+     * @return      the property assignment. May be of a different datatype than
+     *              FxDataType.Binary to allow the user to flag non-binary
+     *              text contents as the "main" content that should be exposed.
+     */
+    public static FxPropertyAssignment getContentStreamAssignment(FxType type) {
+        final FxPropertyAssignment mainBinaryAssignment = type.getMainBinaryAssignment();
+        if (mainBinaryAssignment != null) {
+            return mainBinaryAssignment;
+        }
+        // search for a property with the CONTENT_STREAM option set
+        for (FxPropertyAssignment property : type.getAllProperties()) {
+            if (property.hasOption(OPTION_CONTENTSTREAM)
+                    && !FxStructureOption.VALUE_FALSE.equals(property.getOption(OPTION_CONTENTSTREAM).getValue())) {
+                if (property.getMultiplicity().getMax() > 1) {
+                    if (LOG.isWarnEnabled()) {
+                        LOG.warn("Assignment " + property.getXPath() + " has CONTENT_STREAM set, "
+                                + "but a max. multiplicity > 1 (ignored).");
+                    } 
+                } else {
+                    return property;
+                }
+            }
+        }
+        return null;
+    }
 }

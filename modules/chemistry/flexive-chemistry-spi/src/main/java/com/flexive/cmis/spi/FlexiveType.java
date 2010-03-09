@@ -126,7 +126,7 @@ public class FlexiveType implements Type {
     }
 
     public ContentStreamPresence getContentStreamAllowed() {
-        final FxPropertyAssignment bin = type.getMainBinaryAssignment();
+        final FxPropertyAssignment bin = SPIUtils.getContentStreamAssignment(type);
         if (bin == null) {
             return ContentStreamPresence.NOT_ALLOWED;
         } else {

@@ -53,6 +53,11 @@ public class FlexiveContentStream implements ContentStream {
     private static final Log LOG = LogFactory.getLog(FlexiveContentStream.class);
     private final FxBinary binary;
 
+    /**
+     * Create a content stream for a binary value.
+     *
+     * @param binary    the binary reference handle
+     */
     public FlexiveContentStream(FxBinary binary) {
         this.binary = binary;
     }

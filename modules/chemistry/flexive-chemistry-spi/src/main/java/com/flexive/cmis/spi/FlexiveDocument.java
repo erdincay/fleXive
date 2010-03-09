@@ -32,6 +32,7 @@
 package com.flexive.cmis.spi;
 
 import com.flexive.shared.EJBLookup;
+import com.flexive.shared.FxSharedUtils;
 import static com.flexive.shared.EJBLookup.getContentEngine;
 import static com.flexive.shared.EJBLookup.getTreeEngine;
 import com.flexive.shared.content.FxContent;
@@ -40,12 +41,14 @@ import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxStreamException;
 import com.flexive.shared.security.LifeCycleInfo;
+import com.flexive.shared.structure.FxDataType;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNode;
 import com.flexive.shared.value.BinaryDescriptor;
 import com.flexive.shared.value.FxBinary;
 import com.flexive.shared.value.FxString;
+import com.flexive.shared.value.FxValue;
 import com.google.common.collect.Lists;
 import static com.google.common.collect.Lists.newArrayList;
 import org.apache.chemistry.*;
@@ -55,6 +58,8 @@ import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import org.apache.chemistry.impl.simple.SimpleContentStream;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * A non-folder FxContent instance.
@@ -182,16 +187,23 @@ public class FlexiveDocument extends FlexiveObjectEntry implements Document {
         // set content name (= caption)
         addVirtualProperty(properties, VirtualProperties.NAME, getName());
         // add binary stream, if available
-        final FxPropertyAssignment binaryAssignment = getFxType().getMainBinaryAssignment();
+        final FxPropertyAssignment binaryAssignment = SPIUtils.getContentStreamAssignment(getFxType());
         if (binaryAssignment != null && getContent().containsValue(binaryAssignment.getXPath())) {
-            final BinaryDescriptor binary = ((FxBinary) getContent().getValue(binaryAssignment.getXPath())).getBestTranslation();
-            //addVirtualProperty(properties, VirtualProperties.CONTENT_STREAM_FILENAME, binary.getName());
-            // TODO: the AtomPub provider currently assumes it's an Integer, but should be a Long really
-            addVirtualProperty(properties, VirtualProperties.CONTENT_STREAM_LENGTH, (int) binary.getSize());
-            addVirtualProperty(properties, VirtualProperties.CONTENT_STREAM_MIME_TYPE, binary.getMimeType());
-            // TODO: currently, the URI does not seem to be necessary, at least for the AtomPub binding, since that
-            // will be handled by Abdera
-            //addVirtualProperty(properties, VirtualProperties.CONTENT_STREAM_URI, context.getConfig().getContentStreamURI() + binary.getId());
+            if (binaryAssignment.getProperty().getDataType() == FxDataType.Binary) {
+                final BinaryDescriptor binary = ((FxBinary) getContent().getValue(binaryAssignment.getXPath())).getBestTranslation();
+                //addVirtualProperty(properties, VirtualProperties.CONTENT_STREAM_FILENAME, binary.getName());
+                // TODO: the AtomPub provider currently assumes it's an Integer, but should be a Long really
+                addVirtualProperty(properties, VirtualProperties.CONTENT_STREAM_LENGTH, (int) binary.getSize());
+                addVirtualProperty(properties, VirtualProperties.CONTENT_STREAM_MIME_TYPE, binary.getMimeType());
+                // TODO: currently, the URI does not seem to be necessary, at least for the AtomPub binding, since that
+                // will be handled by Abdera
+                //addVirtualProperty(properties, VirtualProperties.CONTENT_STREAM_URI, context.getConfig().getContentStreamURI() + binary.getId());
+            } else {
+                final String value = getContent().getValue(binaryAssignment.getXPath()).getBestTranslation().toString();
+                addVirtualProperty(properties, VirtualProperties.CONTENT_STREAM_LENGTH, value.getBytes().length);
+                // TODO: mime type?
+                addVirtualProperty(properties, VirtualProperties.CONTENT_STREAM_MIME_TYPE, "unknown/unknown");
+            }
         }
     }
 
@@ -255,15 +267,25 @@ public class FlexiveDocument extends FlexiveObjectEntry implements Document {
     }
 
     public ContentStream getContentStream() throws IOException {
-        final FxPropertyAssignment assignment = getFxType().getMainBinaryAssignment();
+        final FxPropertyAssignment assignment = SPIUtils.getContentStreamAssignment(getFxType());
         if (assignment == null || !getContent().containsValue(assignment.getXPath())) {
             return null;
         }
-        return new FlexiveContentStream((FxBinary) getContent().getValue(assignment.getXPath()));
+        if (assignment.getProperty().getDataType() == FxDataType.Binary) {
+            return new FlexiveContentStream((FxBinary) getContent().getValue(assignment.getXPath()));
+        } else {
+            final String streamOption = assignment.getOption(SPIUtils.OPTION_CONTENTSTREAM).getValue();
+            return new SimpleContentStream(
+                    getContent().getValue(assignment.getXPath()).getBestTranslation().toString().getBytes("UTF-8"),
+                    // use MIME type set in stream value if available, otherwise default to text/plain
+                    StringUtils.countMatches(streamOption, "/") == 1 ? streamOption : "text/plain",
+                    "content"
+            );
+        }
     }
 
     public void setContentStream(ContentStream contentStream) throws IOException {
-        final FxPropertyAssignment assignment = getFxType().getMainBinaryAssignment();
+        final FxPropertyAssignment assignment = SPIUtils.getContentStreamAssignment(getFxType());
         if (assignment == null) {
             throw new IllegalArgumentException("Content of type " + getFxType().getName() + " does not have a suitable binary property.");
         }
@@ -271,12 +293,19 @@ public class FlexiveDocument extends FlexiveObjectEntry implements Document {
             if (contentStream == null) {
                 getContent().remove(assignment.getXPath());
             } else {
-                getContent().setValue(assignment.getXPath(), new BinaryDescriptor(
-                        contentStream.getFileName(),
-                        contentStream.getLength(),
-                        contentStream.getMimeType(),
-                        contentStream.getStream())
-                );
+                if (assignment.getProperty().getDataType() == FxDataType.Binary) {
+                    getContent().setValue(assignment.getXPath(), new BinaryDescriptor(
+                            contentStream.getFileName(),
+                            contentStream.getLength(),
+                            contentStream.getMimeType(),
+                            contentStream.getStream())
+                    );
+                } else {
+                    final String content = FxSharedUtils.loadFromInputStream(contentStream.getStream());
+                    final FxValue value = assignment.getEmptyValue();
+                    value.setValue(value.fromString(content));
+                    getContent().setValue(assignment.getXPath(),  value);
+                }
             }
         } catch (FxStreamException e) {
             throw e.asRuntimeException();

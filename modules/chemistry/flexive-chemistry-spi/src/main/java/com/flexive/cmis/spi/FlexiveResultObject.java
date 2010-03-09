@@ -210,6 +210,7 @@ public class FlexiveResultObject extends BaseObject implements ObjectEntry {
      * @return the main binary property of the row, or null if none exists.
      */
     private BinaryDescriptor getBinary() {
+        // TODO: check for non-binary content streams?
         final FxPropertyAssignment assignment = getFxType().getMainBinaryAssignment();
         if (assignment == null) {
             return null;
