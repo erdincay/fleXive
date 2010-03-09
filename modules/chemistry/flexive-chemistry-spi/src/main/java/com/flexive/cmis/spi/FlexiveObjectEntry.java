@@ -32,6 +32,7 @@
 package com.flexive.cmis.spi;
 
 import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.EJBLookup;
 import com.flexive.shared.XPathElement;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxPropertyData;
@@ -100,6 +101,16 @@ public abstract class FlexiveObjectEntry extends BaseObject implements ObjectEnt
                 getFxTypeId()
         ).getName().toLowerCase();
     }
+
+    @Override
+    public String getBaseTypeId() {
+        if (SPIUtils.getFolderTypeIds().contains(getFxTypeId())) {
+            return BaseType.FOLDER.getId();
+        } else {
+            return BaseType.DOCUMENT.getId();
+        }
+    }
+
 
     public Serializable getValue(String name) {
         if (VirtualProperties.NAME.getId().equals(name)) {
@@ -185,6 +196,7 @@ public abstract class FlexiveObjectEntry extends BaseObject implements ObjectEnt
             }
             //addVirtualProperty(result, VirtualProperties.URI, "");    // URI handling not implemented yet
             addVirtualProperty(properties, VirtualProperties.TYPE_ID, getTypeId());
+            addVirtualProperty(properties, VirtualProperties.BASE_TYPE_ID, getBaseTypeId());
 
             final LifeCycleInfo lci = getLifeCycleInfo();
             addVirtualProperty(properties, VirtualProperties.CREATED_BY, String.valueOf(lci.getCreatorId()));
@@ -372,7 +384,7 @@ public abstract class FlexiveObjectEntry extends BaseObject implements ObjectEnt
     protected FxTreeNode getNodeWithChildren(FxTreeNode node) {
         try {
             return node.getChildren().isEmpty()
-                    ? com.flexive.shared.EJBLookup.getTreeEngine().getTree(FxTreeMode.Edit, node.getId(), 1) : node;
+                    ? EJBLookup.getTreeEngine().getTree(FxTreeMode.Edit, node.getId(), 1) : node;
         } catch (FxApplicationException e) {
             throw e.asRuntimeException();
         }

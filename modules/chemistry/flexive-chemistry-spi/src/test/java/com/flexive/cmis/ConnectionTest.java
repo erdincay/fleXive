@@ -75,7 +75,7 @@ public class ConnectionTest {
     public void documentQuery() {
         final Collection<CMISObject> result = query("SELECT * FROM " + BaseType.DOCUMENT);
         final Set<String> foundTypes = collectResultTypes(result);
-        assertTrue("Expected more than one type in the result set", foundTypes.size() > 1);
+        assertTrue("Expected more than one type in the result set: " + foundTypes, foundTypes.size() > 1);
     }
 
     @Test
@@ -83,7 +83,7 @@ public class ConnectionTest {
         final Collection<CMISObject> result = query("SELECT * FROM " + BaseType.FOLDER);
         assertTrue(result.size() > 0);
         final Set<String> foundTypes = collectResultTypes(result);
-        assertEquals(2, foundTypes.size());
+        assertEquals("Expected 2 Folder types, got: " + foundTypes, 2, foundTypes.size());
         assertTrue("Folder type not contained: " + foundTypes, foundTypes.contains("folder"));
         assertTrue("Fold type not contained: " + foundTypes, foundTypes.contains("fold"));
         final String rootFolderId = getRepoConnection().getRootFolder().getId();

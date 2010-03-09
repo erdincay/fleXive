@@ -121,7 +121,9 @@ public class SPIUtils {
             case Text:
                 return PropertyType.STRING;
             case HTML:
-                return PropertyType.HTML;
+                return PropertyType.STRING;
+                // TODO HTML currently not supported by chemistry
+                // return PropertyType.HTML;
             case Number:
             case LargeNumber:
                 return PropertyType.INTEGER;

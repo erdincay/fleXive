@@ -62,11 +62,13 @@ enum VirtualProperties {
             return getEnvironment().getType((Long) flexiveValue).getName().toLowerCase();
         }
     },
+    BASE_TYPE_ID(Property.BASE_TYPE_ID),
     CREATED_BY(Property.CREATED_BY, "CREATED_BY", PropertyType.ID),
     CREATION_DATE(Property.CREATION_DATE, "CREATED_AT", PropertyType.DATETIME),
     LAST_MODIFIED_BY(Property.LAST_MODIFIED_BY, "MODIFIED_BY", PropertyType.ID),
     LAST_MODIFICATION_DATE(Property.LAST_MODIFICATION_DATE, "MODIFIED_AT", PropertyType.DATETIME),
     CHANGE_TOKEN(Property.CHANGE_TOKEN),
+    PATH(Property.PATH),
 
     // document
     NAME(Property.NAME),

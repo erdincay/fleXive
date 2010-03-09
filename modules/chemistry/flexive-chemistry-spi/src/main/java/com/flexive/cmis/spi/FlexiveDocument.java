@@ -431,7 +431,7 @@ public class FlexiveDocument extends FlexiveObjectEntry implements Document {
     }
 
     public String getPathSegment() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return getName();
     }
 
     private List<FxTreeNode> getTreeNodes() {

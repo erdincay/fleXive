@@ -67,7 +67,7 @@ public class ListPageUtils {
     }
 
     public static int getMaxItems(Paging paging) {
-        return paging == null ? Integer.MAX_VALUE - 1 : paging.maxItems;
+        return paging == null || paging.maxItems == 0 ? Integer.MAX_VALUE - 1 : paging.maxItems;
     }
 
     public static <T> Iterator<T> skip(Iterator<T> iterator, Paging paging) {
@@ -77,17 +77,26 @@ public class ListPageUtils {
         return iterator;
     }
 
-    public static <T, U> ListPage<U> page(Iterator<T> iterator, Paging paging, Function<T, U> mapper) {
+    public static <T, U> ListPage<U> page(Iterable<T> iterable, Paging paging, Function<T, U> mapper) {
+        final Iterator<T> iterator = iterable.iterator();
         skip(iterator, paging);
         final SimpleListPage<U> result = new SimpleListPage<U>();
         final int maxItems = getMaxItems(paging);
+        int rows = getSkipCount(paging);
         while (iterator.hasNext()) {
             if (result.size() > maxItems) {
                 result.setHasMoreItems(true);
                 break;
             }
             result.add(mapper.apply(iterator.next()));
+            rows++;
         }
+        // count rest of rows - TODO: use Collection#size if applicable
+        while (iterator.hasNext()) {
+            rows++;
+            iterator.next();
+        }
+        result.setNumItems(rows);
         return result;
     }
 

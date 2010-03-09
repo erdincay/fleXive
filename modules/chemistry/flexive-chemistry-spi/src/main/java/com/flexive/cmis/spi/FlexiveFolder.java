@@ -56,6 +56,7 @@ import javax.xml.namespace.QName;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
+import org.apache.chemistry.impl.simple.SimpleTree;
 
 import static com.flexive.shared.CacheAdmin.getEnvironment;
 import static com.flexive.shared.EJBLookup.getTreeEngine;
@@ -156,6 +157,7 @@ public class FlexiveFolder extends FlexiveObjectEntry implements Folder {
         addVirtualProperty(properties, VirtualProperties.PARENT_ID, String.valueOf(getNode().getParentNodeId()));
         addVirtualProperty(properties, VirtualProperties.OBJECT_ID, String.valueOf(getNode().getId()));
         addVirtualProperty(properties, VirtualProperties.NAME, getName());
+        addVirtualProperty(properties, VirtualProperties.PATH, getNode().getPath());
     }
 
     @Override
@@ -299,6 +301,62 @@ public class FlexiveFolder extends FlexiveObjectEntry implements Folder {
         }
     }
 
+    protected Tree<ObjectEntry> getFolderTree(int depth) {
+        return getTree(depth, false, true);
+    }
+
+
+    protected Tree<ObjectEntry> getDescendantTree(int depth) {
+        return getTree(depth, true, true);
+    }
+
+    private Tree<ObjectEntry> getTree(int depth, boolean includeDocuments, boolean includeFolders) {
+        try {
+            return convertNodeTree(
+                    EJBLookup.getTreeEngine().getTree(FxTreeMode.Edit, nodeId, depth),
+                    includeDocuments,
+                    includeFolders
+            );
+        } catch (FxApplicationException e) {
+            throw e.asRuntimeException();
+        }
+    }
+
+    private Tree<ObjectEntry> convertNodeTree(FxTreeNode treeNode, boolean includeDocuments, boolean includeFolders) {
+        final Set<Long> folderTypeIds = SPIUtils.getFolderTypeIds();
+
+        if (folderTypeIds.contains(treeNode.getReferenceTypeId())) {
+            // process direct folder children
+            final List<Tree<ObjectEntry>> children = Lists.newArrayList();
+
+            for (FxTreeNode child : treeNode.getChildren()) {
+                // check if child should be included
+                if (includeDocuments && !folderTypeIds.contains(child.getReferenceTypeId())
+                        || includeFolders && folderTypeIds.contains(child.getReferenceTypeId())) {
+
+                    // include subtree for child node
+                    final Tree<ObjectEntry> childTree = convertNodeTree(child, includeDocuments, includeFolders);
+                    if (childTree != null) {
+                        children.add(childTree);
+                    }
+                }
+            }
+
+            // create tree
+            return new SimpleTree<ObjectEntry>(
+                    new FlexiveFolder(context, treeNode),
+                    children);
+        } else if (includeDocuments) {
+            return new SimpleTree<ObjectEntry>(
+                    new FlexiveDocument(context, treeNode, treeNode.getParentNodeId()),
+                    Lists.<Tree<ObjectEntry>>newArrayListWithCapacity(0)
+            );
+        } else {
+            return null;
+        }
+
+    }
+
     private void addChild(List<CMISObject> result, Set<Long> folderTypeIds, FxTreeNode child) {
         if (child.getId() != getNodeId()) {
             result.add(folderTypeIds.contains(child.getReferenceTypeId())
@@ -389,6 +447,7 @@ public class FlexiveFolder extends FlexiveObjectEntry implements Folder {
     public String getTypeId() {
         return getType().getId();
     }
+
 
     public Property getProperty(String name) {
         return getProperties().get(name);
@@ -482,7 +541,7 @@ public class FlexiveFolder extends FlexiveObjectEntry implements Folder {
     }
 
     public String getPathSegment() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return getName();
     }
 
 

@@ -95,7 +95,9 @@ public class FlexiveProperty implements Property {
     }
 
     public Serializable getValue() {
-        if (definition.isMultiValued()) {
+        if (values.isEmpty()) {
+            return null;
+        } else if (definition.isMultiValued()) {
             // return correctly typed array, not collection (requirement by Chemistry impl)
             final Object[] result = (Object[]) Array.newInstance(
                     values.get(0).getBestTranslation().getClass(),
@@ -106,8 +108,6 @@ public class FlexiveProperty implements Property {
                 result[index++] = SPIUtils.convertValue(value, definition);
             }
             return result;
-        } else if (values.isEmpty()) {
-            return null;
         } else {
             return SPIUtils.convertValue(values.get(0), definition);
         }

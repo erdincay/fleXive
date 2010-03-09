@@ -193,19 +193,13 @@ public class FlexiveConnection implements Connection, SPI {
 
 
     public Tree<ObjectEntry> getDescendants(ObjectId folder, int depth, String orderBy, Inclusion inclusion) {
-        throw new UnsupportedOperationException("Not supported yet.");
-        /*final List<CMISObject> children = new FlexiveFolder(context, SPIUtils.getNodeId(folder.getId())).getChildren(null, depth);
-        final List<ObjectEntry> result = newArrayListWithCapacity(children.size());
-        for (CMISObject child : children) {
-            // HACK! (FlexiveFolder#getChildren always returns ObjectEntries)
-            result.add((FlexiveObjectEntry) child);
-        }
-        return result;*/
+        // TODO orderBy?
+        return getFolder(folder).getDescendantTree(depth);
     }
 
     public ListPage<ObjectEntry> getChildren(ObjectId folder, Inclusion inclusion, String orderBy, Paging paging) {
         final List<CMISObject> children = new FlexiveFolder(context, SPIUtils.getNodeId(folder.getId())).getChildren(null);
-        return page(children.iterator(), paging, new Function<CMISObject, ObjectEntry>() {
+        return page(children, paging, new Function<CMISObject, ObjectEntry>() {
             public ObjectEntry apply(CMISObject value) {
                 // HACK! (FlexiveFolder#getChildren always returns ObjectEntries)
                 return (FlexiveObjectEntry) value;
@@ -374,7 +368,7 @@ public class FlexiveConnection implements Connection, SPI {
                     statement, true, getSkipCount(paging),
                     getMaxItems(paging) + 1     // select one more row to check if there are more of them
             );
-            return page(rs.iterator(), new Paging(getMaxItems(paging), 0), new Function<CmisResultRow, ObjectEntry>() {
+            return page(rs, new Paging(getMaxItems(paging), 0), new Function<CmisResultRow, ObjectEntry>() {
                 public ObjectEntry apply(CmisResultRow from) {
                     return new FlexiveResultObject(context, from);
                 }
@@ -449,7 +443,7 @@ public class FlexiveConnection implements Connection, SPI {
     }
 
     public Tree<ObjectEntry> getFolderTree(ObjectId folder, int depth, Inclusion inclusion) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return getFolder(folder).getFolderTree(depth);
     }
 
     public ObjectEntry getObjectByPath(String path, Inclusion inclusion) {

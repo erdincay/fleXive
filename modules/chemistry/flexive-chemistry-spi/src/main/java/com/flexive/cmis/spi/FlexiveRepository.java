@@ -92,7 +92,7 @@ public class FlexiveRepository implements Repository {
 
     public ListPage<Type> getTypeChildren(String typeId, boolean includePropertyDefinitions, Paging paging) {
         return ListPageUtils.page(
-                getTypes(typeId, false).iterator(),
+                getTypes(typeId, false),
                 paging,
                 ListPageUtils.<Type>identityFunction()
         );
