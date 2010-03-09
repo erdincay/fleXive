@@ -41,6 +41,7 @@ import com.flexive.shared.exceptions.*;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNode;
+import com.google.common.collect.Maps;
 import org.apache.chemistry.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -66,21 +67,28 @@ public class FlexiveConnection implements Connection, SPI {
     public static final String PARAM_USERNAME = "username";
     public static final String PARAM_PASSWORD = "password";
     public static final String PARAM_USE_SESSION_AUTH = "usesession";
+    /**
+     * Return documents as folders if they have children (e.g. for filebrowsing
+     * contexts via WebDAV).
+     */
+    public static final String PARAM_DOCS_FOLDERS = "docs_as_folders";
 
     private static final Log LOG = LogFactory.getLog(FlexiveConnection.class);
-    private final FlexiveRepositoryConfig config;
+    private final FlexiveRepositoryConfig repositoryConfig;
+    private final ConnectionConfig config;
     private final PrivateWorkingCopyManager checkouts;
     private final Context context;
     private final Map<String, Serializable> parameters;
 
-    FlexiveConnection(FlexiveRepositoryConfig config, Map<String, Serializable> parameters) {
-        this.config = config;
+    FlexiveConnection(FlexiveRepositoryConfig repositoryConfig, Map<String, Serializable> parameters) {
+        this.parameters = parameters == null ? null : new HashMap<String, Serializable>(parameters);
+        this.repositoryConfig = repositoryConfig;
+        this.config = new ConnectionConfig(parameters);
         this.checkouts = new PrivateWorkingCopyManager();
         // TODO: connection escapes here
-        this.context = new Context(this, config, checkouts);
+        this.context = new Context(this,  checkouts);
         // TODO: hack to support authentication, remove when Chemistry adds support for this
         boolean loggedIn = false;
-        this.parameters = parameters == null ? null : new HashMap<String, Serializable>(parameters);
 
         // perform authentication with credentials stored in parameters map
         if (this.parameters != null && this.parameters.containsKey(PARAM_USERNAME)) {
@@ -132,7 +140,7 @@ public class FlexiveConnection implements Connection, SPI {
     }
 
     public Repository getRepository() {
-        return new FlexiveRepository(config.getContentStreamURI());
+        return new FlexiveRepository(repositoryConfig.getContentStreamURI());
     }
 
     public Folder getRootFolder() {
@@ -453,7 +461,7 @@ public class FlexiveConnection implements Connection, SPI {
                 return null;
             }
             final FxTreeNode node = getTreeEngine().getNode(FxTreeMode.Edit, nodeId);
-            if (SPIUtils.getFolderTypeIds().contains(node.getReferenceTypeId())) {
+            if (SPIUtils.treatDocumentAsFolder(SPIUtils.getFolderTypeIds(), context, node)) {
                 return new FlexiveFolder(context, node);
             } else {
                 return new FlexiveDocument(context, node, node.getParentNodeId());
@@ -534,18 +542,16 @@ public class FlexiveConnection implements Connection, SPI {
 
 
     static class Context {
-        private final FlexiveRepositoryConfig config;
         private final PrivateWorkingCopyManager pwcManager;
         private final FlexiveConnection connection;
 
-        Context(FlexiveConnection connection, FlexiveRepositoryConfig config, PrivateWorkingCopyManager pwcManager) {
+        Context(FlexiveConnection connection, PrivateWorkingCopyManager pwcManager) {
             this.connection = connection;
-            this.config = config;
             this.pwcManager = pwcManager;
         }
 
-        public FlexiveRepositoryConfig getConfig() {
-            return config;
+        public FlexiveRepositoryConfig getRepositoryConfig() {
+            return connection.repositoryConfig;
         }
 
         public PrivateWorkingCopyManager getPwcManager() {
@@ -556,5 +562,26 @@ public class FlexiveConnection implements Connection, SPI {
             return connection;
         }
 
+        public ConnectionConfig getConnectionConfig() {
+            return connection.config;
+        }
+
+    }
+
+    static class ConnectionConfig {
+        private final boolean documentsAsFolders;
+
+        ConnectionConfig(Map<String, Serializable> parameters) {
+            if (parameters != null) {
+                this.documentsAsFolders = Boolean.TRUE.equals(parameters.get(PARAM_DOCS_FOLDERS));
+            } else {
+                // default configuration
+                this.documentsAsFolders = false;
+            }
+        }
+
+        public boolean isDocumentsAsFolders() {
+            return documentsAsFolders;
+        }
     }
 }

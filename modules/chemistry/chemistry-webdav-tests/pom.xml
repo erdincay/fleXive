@@ -15,7 +15,6 @@
     <groupId>com.flexive.cmis.chemistry</groupId>
     <artifactId>chemistry-webdav-tests</artifactId>
     <name>Chemistry WebDAV adapter testsuite</name>
-    <version>${chemistry.version}</version>
 
     <url>http://incubator.apache.org/chemistry/</url>
 

@@ -38,6 +38,7 @@ import com.flexive.shared.exceptions.FxRuntimeException;
 import com.flexive.shared.structure.FxDataType;
 import com.flexive.shared.structure.FxProperty;
 import com.flexive.shared.structure.FxType;
+import com.flexive.shared.tree.FxTreeNode;
 import com.flexive.shared.value.FxValue;
 import org.apache.chemistry.BaseType;
 import org.apache.chemistry.ObjectNotFoundException;
@@ -214,4 +215,20 @@ public class SPIUtils {
             return typeId;
         }
     }
+
+    /**
+     * Return true if the given tree node should be treated as a folder, even
+     * though it is (in flexive terms) a document.
+     *
+     * @param folderTypeIds the folder type IDs (as returned by {@link SPIUtils#getFolderTypeIds()})
+     * @param context   the connection context
+     * @param child     the tree node to be examined
+     * @return          true if the given tree node should be treated as a folder
+     */
+    static boolean treatDocumentAsFolder(Set<Long> folderTypeIds, FlexiveConnection.Context context, FxTreeNode child) {
+        return folderTypeIds.contains(child.getReferenceTypeId())
+                // check if documents-as-folders connection parameter is set
+                || context.getConnectionConfig().isDocumentsAsFolders() && child.getDirectChildCount() > 0;
+    }
+
 }

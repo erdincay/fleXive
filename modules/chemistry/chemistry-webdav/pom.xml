@@ -17,7 +17,6 @@
     <artifactId>chemistry-webdav</artifactId>
     <name>Chemistry WebDAV adapter</name>
     <description>A WebDAV adapter for Chemistry based on the Milton WebDAV library.</description>
-    <version>${chemistry.version}</version>
     <url>http://incubator.apache.org/chemistry/</url>
 
     <dependencies>
@@ -64,6 +63,10 @@
                 <exclusion>
                     <groupId>log4j</groupId>
                     <artifactId>log4j</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>

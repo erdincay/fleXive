@@ -368,6 +368,11 @@ public class FlexiveDocument extends FlexiveObjectEntry implements Document {
         return new FlexiveType(getFxType());
     }
 
+    @Override
+    public String getBaseTypeId() {
+        return BaseType.DOCUMENT.getId();
+    }
+
     public Property getProperty(String name) {
         return getProperties().get(name);
     }

@@ -33,8 +33,6 @@ package com.flexive.cmis.webdav;
 
 import com.bradmcevoy.http.Auth;
 import com.bradmcevoy.http.Request;
-import com.bradmcevoy.http.HttpManager;
-import com.bradmcevoy.http.ServletRequest;
 import com.flexive.chemistry.webdav.*;
 import com.flexive.cmis.spi.FlexiveConnection;
 import com.flexive.cmis.spi.FlexiveRepository;
@@ -63,6 +61,11 @@ public class FlexiveResourceFactory extends ChemistryResourceFactory {
             params.put(FlexiveConnection.PARAM_USERNAME, auth.user);
             params.put(FlexiveConnection.PARAM_PASSWORD, auth.password);
         }
+        
+        // browse into documents that have children, even if their document type
+        // is not a subtype of folder
+        params.put(FlexiveConnection.PARAM_DOCS_FOLDERS, true);
+
         // use session login info, if available (provided by FxFilter). This is not strictly necessary,
         // because AuthenticationFilter keeps the authentication information in the session,
         // but it avoids the login/logout calls around every request.

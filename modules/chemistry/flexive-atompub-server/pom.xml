@@ -13,7 +13,6 @@
     <artifactId>flexive-atompub-server</artifactId>
     <packaging>jar</packaging>
     <name>[fleXive]/CMIS AtomPub Server</name>
-    <version>${spi.version}</version>
     <url>http://maven.apache.org</url>
     
     <build>

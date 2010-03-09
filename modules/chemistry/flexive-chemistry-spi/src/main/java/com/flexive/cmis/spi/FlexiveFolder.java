@@ -325,7 +325,7 @@ public class FlexiveFolder extends FlexiveObjectEntry implements Folder {
     private Tree<ObjectEntry> convertNodeTree(FxTreeNode treeNode, boolean includeDocuments, boolean includeFolders) {
         final Set<Long> folderTypeIds = SPIUtils.getFolderTypeIds();
 
-        if (folderTypeIds.contains(treeNode.getReferenceTypeId())) {
+        if (SPIUtils.treatDocumentAsFolder(folderTypeIds, context, treeNode)) {
             // process direct folder children
             final List<Tree<ObjectEntry>> children = Lists.newArrayList();
 
@@ -359,8 +359,8 @@ public class FlexiveFolder extends FlexiveObjectEntry implements Folder {
 
     private void addChild(List<CMISObject> result, Set<Long> folderTypeIds, FxTreeNode child) {
         if (child.getId() != getNodeId()) {
-            result.add(folderTypeIds.contains(child.getReferenceTypeId())
-                                ? new FlexiveFolder(context, child)
+            result.add(SPIUtils.treatDocumentAsFolder(folderTypeIds, context, child)
+                    ? new FlexiveFolder(context, child)
                     : new FlexiveDocument(context, child, getNode())
             );
         }
@@ -448,6 +448,10 @@ public class FlexiveFolder extends FlexiveObjectEntry implements Folder {
         return getType().getId();
     }
 
+    @Override
+    public String getBaseTypeId() {
+        return BaseType.FOLDER.getId();
+    }
 
     public Property getProperty(String name) {
         return getProperties().get(name);

@@ -14,7 +14,6 @@
     <groupId>com.flexive.cmis.chemistry</groupId>
     <artifactId>chemistry-webdav-extensions</artifactId>
     <name>Chemistry extensions for WebDAV</name>
-    <version>${chemistry.version}</version>
     <url>http://incubator.apache.org/chemistry/</url>
 
    <dependencies>

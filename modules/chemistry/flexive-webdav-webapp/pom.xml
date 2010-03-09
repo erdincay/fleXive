@@ -11,7 +11,6 @@
     <artifactId>flexive-webdav-webapp</artifactId>
     <packaging>war</packaging>
     <name>[fleXive] WebDAV interface based on Chemistry/CMIS</name>
-    <version>${spi.version}</version>
     <url>http://www.flexive.org</url>
 
     <build>
@@ -122,6 +121,12 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-jcl</artifactId>
             <version>1.5.6</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>commons-logging</artifactId>
+                    <groupId>commons-logging</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -134,6 +139,12 @@
             <groupId>com.flexive</groupId>
             <artifactId>flexive-ejb</artifactId>
             <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+            <scope>provided</scope>
         </dependency>
 
     </dependencies>

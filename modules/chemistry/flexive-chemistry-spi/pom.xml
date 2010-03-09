@@ -12,7 +12,6 @@
     <groupId>com.flexive.cmis</groupId>
     <artifactId>flexive-chemistry-spi</artifactId>
     <packaging>jar</packaging>
-    <version>${spi.version}</version>
     <name>[fleXive]/CMIS Chemistry SPI implementation</name>
     <url>http://www.flexive.org</url>
 

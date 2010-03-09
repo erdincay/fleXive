@@ -102,16 +102,6 @@ public abstract class FlexiveObjectEntry extends BaseObject implements ObjectEnt
         ).getName().toLowerCase();
     }
 
-    @Override
-    public String getBaseTypeId() {
-        if (SPIUtils.getFolderTypeIds().contains(getFxTypeId())) {
-            return BaseType.FOLDER.getId();
-        } else {
-            return BaseType.DOCUMENT.getId();
-        }
-    }
-
-
     public Serializable getValue(String name) {
         if (VirtualProperties.NAME.getId().equals(name)) {
             return getName();

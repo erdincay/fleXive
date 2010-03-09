@@ -4,7 +4,7 @@
 
     <properties>
         <flexive.version>3.1-SNAPSHOT</flexive.version>
-        <spi.version>${flexive.version}</spi.version>
+        <spi.version>3.1-SNAPSHOT</spi.version>
         <chemistry.version>0.5-SNAPSHOT</chemistry.version>
         <h2.version>1.2.125</h2.version>
         <openejb.version>3.1</openejb.version>
@@ -39,6 +39,11 @@
                 <artifactId>flexive-atompub-webapp</artifactId>
                 <version>${spi.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.flexive.cmis</groupId>
+                <artifactId>flexive-webdav-webapp</artifactId>
+                <version>${spi.version}</version>
+            </dependency>
 
 
             <!-- Chemistry dependencies -->
@@ -61,6 +66,10 @@
                     <exclusion>
                         <groupId>stax</groupId>
                         <artifactId>stax-api</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
