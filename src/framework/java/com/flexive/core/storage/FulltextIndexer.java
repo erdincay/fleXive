@@ -55,7 +55,8 @@ public interface FulltextIndexer {
     void init(FxPK pk, Connection con);
 
     /**
-     * Index a property data entry
+     * Index a property data entry.
+     * The caller has to ensure that the properties data type is a text type!
      *
      * @param data property data entry
      */
@@ -115,7 +116,21 @@ public interface FulltextIndexer {
     void cleanup();
 
     /**
-     * Clean and rebuild the fulltext index
+     * Clean and rebuild the complete fulltext index
      */
     void rebuildIndex();
+
+    /**
+     * Rebuild the fulltext index for the given property
+     *
+     * @param propertyId id of the property
+     */
+    void rebuildIndexForProperty(long propertyId);
+
+    /**
+     * Remove the fulltext index for the given property
+     *
+     * @param propertyId id of the property
+     */
+    void removeIndexForProperty(long propertyId);
 }

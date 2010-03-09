@@ -497,21 +497,21 @@ public class PropertyEditorBean implements ActionBean, Serializable {
     /**
      * Set the property's data type and update referenced type and referenced list accordingly
      *
-     * @param d the data type
+     * @param dataType the data type
      */
-    public void setPropertyDataType(FxDataType d) {
+    public void setPropertyDataType(FxDataType dataType) {
         boolean typeChanged = false;
-        if (property.getDataType() != null && property.getDataType().getId() != d.getId())
+        if (property.getDataType() != null && property.getDataType().getId() != dataType.getId())
             typeChanged = true;
-        property.setDataType(d);
+        property.setDataType(dataType);
         if (typeChanged && assignment != null)
             assignment.setDefaultValue(property.getEmptyValue());
-
+        property.setFulltextIndexed(dataType.isTextType());
         /*
         property.setDefaultValue(property.getDefaultValue());
         assignment.setDefaultValue(assignment.getDefaultValue());
         */
-        if (d == FxDataType.HTML)
+        if (dataType == FxDataType.HTML)
             optionWrapper.setOption(true, FxStructureOption.OPTION_HTML_EDITOR, true);
         if (!isPropertySelectList() && getPropertyReferencedList() != -1) {
             setPropertyReferencedList(-1);
@@ -525,8 +525,17 @@ public class PropertyEditorBean implements ActionBean, Serializable {
         return getProperty().isFulltextIndexed();
     }
 
-    public void setPropertyFulltextIndexed(boolean b) {
-        getProperty().setFulltextIndexed(b);
+    public void setPropertyFulltextIndexed(boolean flag) {
+        getProperty().setFulltextIndexed(flag);
+    }
+
+    /**
+     * Is fulltext indexing allowed for the property (depending on the datatype)
+     *
+     * @return fulltext indexing allowed for the property (depending on the datatype)
+     */
+    public boolean isFulltextIndexingAllowed() {
+        return getProperty().getDataType().isTextType();
     }
 
     public boolean isPropertyAutoUniquePropertyName() {

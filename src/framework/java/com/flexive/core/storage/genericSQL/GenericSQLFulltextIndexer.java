@@ -37,7 +37,6 @@ import com.flexive.core.storage.ContentStorage;
 import com.flexive.core.storage.DBStorage;
 import com.flexive.core.storage.FulltextIndexer;
 import com.flexive.core.storage.StorageManager;
-import com.flexive.shared.FxArrayUtils;
 import com.flexive.shared.FxXMLUtils;
 import com.flexive.shared.content.FxDelta;
 import com.flexive.shared.content.FxPK;
@@ -45,6 +44,8 @@ import com.flexive.shared.content.FxPropertyData;
 import com.flexive.shared.exceptions.FxDbException;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.structure.FxDataType;
+import com.flexive.shared.structure.FxProperty;
+import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.structure.TypeStorageMode;
 import com.flexive.shared.value.FxBinary;
 import com.flexive.shared.value.FxValue;
@@ -63,20 +64,22 @@ import static com.flexive.core.DatabaseConst.TBL_CONTENT_DATA_FT;
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @since 3.1
  */
+@SuppressWarnings({"ThrowableInstanceNeverThrown"})
 public class GenericSQLFulltextIndexer implements FulltextIndexer {
     protected static final Log LOG = LogFactory.getLog(GenericSQLFulltextIndexer.class);
 
     protected static final String CONTENT_DATA_FT_REMOVE = "DELETE FROM " + TBL_CONTENT_DATA_FT + " WHERE ID=?";
     protected static final String CONTENT_DATA_FT_REMOVE_TYPE = "DELETE FROM " + TBL_CONTENT_DATA_FT + " WHERE ASSIGN IN (SELECT DISTINCT ID FROM " + DatabaseConst.TBL_STRUCT_ASSIGNMENTS + " WHERE TYPEDEF=?)";
-
+    protected static final String CONTENT_FULLTEXT_REMOVE_ALL = "DELETE FROM " + TBL_CONTENT_DATA_FT;
+    protected static final String CONTENT_FULLTEXT_REMOVE_PROPERTY = "DELETE FROM " + TBL_CONTENT_DATA_FT +
+            " WHERE ASSIGN IN (SELECT DISTINCT ID FROM " + DatabaseConst.TBL_STRUCT_ASSIGNMENTS + " WHERE APROPERTY=?)";
     protected static final String CONTENT_FULLTEXT_INSERT = "INSERT INTO " + TBL_CONTENT_DATA_FT + "(ID,VER,LANG,ASSIGN,XMULT,VALUE) VALUES (?,?,?,?,?,?)";
     //                                                                                                    1          2         3          4            5           6
     protected static final String CONTENT_FULLTEXT_UPDATE = "UPDATE " + TBL_CONTENT_DATA_FT + " SET VALUE=? WHERE ID=? AND VER=? AND LANG=? AND ASSIGN=? AND XMULT=?";
-    protected final static String CONTENT_FULLTEXT_DELETE_ALL = "DELETE FROM " + TBL_CONTENT_DATA_FT;
     protected static final String CONTENT_FULLTEXT_DELETE = "DELETE FROM " + TBL_CONTENT_DATA_FT + " WHERE ID=? AND VER=? AND ASSIGN=?";
     protected static final String CONTENT_FULLTEXT_DELETE_LANG = "DELETE FROM " + TBL_CONTENT_DATA_FT + " WHERE ID=? AND VER=? AND ASSIGN=? AND LANG=?";
-    protected final static String CONTENT_FULLTEXT_SET_LANG = "UPDATE " + TBL_CONTENT_DATA_FT + " SET LANG=? WHERE ASSIGN=?";
-    protected final static String CONTENT_FULLTEXT_CHANGE_LANG = "UPDATE " + TBL_CONTENT_DATA_FT + " SET LANG=? WHERE LANG=? AND ASSIGN=?";
+    protected static final String CONTENT_FULLTEXT_SET_LANG = "UPDATE " + TBL_CONTENT_DATA_FT + " SET LANG=? WHERE ASSIGN=?";
+    protected static final String CONTENT_FULLTEXT_CHANGE_LANG = "UPDATE " + TBL_CONTENT_DATA_FT + " SET LANG=? WHERE LANG=? AND ASSIGN=?";
 
 
     private FxPK pk;
@@ -210,6 +213,17 @@ public class GenericSQLFulltextIndexer implements FulltextIndexer {
         }
         if (change.isGroup())
             return; //only index properties
+        try {
+            FxProperty prop = change.getNewData() != null
+                    ? ((FxPropertyAssignment) change.getNewData().getAssignment()).getProperty()
+                    : ((FxPropertyAssignment) change.getOriginalData().getAssignment()).getProperty();
+            if (!prop.getDataType().isTextType())
+                return; //make sure only text types are fulltext indexed
+        } catch (Exception e) {
+            //could not get the property, return
+            LOG.error("Could not retrieve the used FxProperty for change " + change + "!");
+            return;
+        }
         if (change.getNewData() == null) {
             //data removed
             try {
@@ -407,23 +421,29 @@ public class GenericSQLFulltextIndexer implements FulltextIndexer {
      * {@inheritDoc}
      */
     public void rebuildIndex() {
+        removeIndexForProperty(-1);
+        rebuildIndexForProperty(-1);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void rebuildIndexForProperty(long propertyId) {
         PreparedStatement ps = null;
         Statement stmtAssignment = null;
         Statement stmtFetch = null;
-
         try {
             final DBStorage storage = StorageManager.getStorageImpl();
             final ContentStorage contentStorage = storage.getContentStorage(TypeStorageMode.Hierarchical);
             final String TRUE = storage.getBooleanTrueExpression();
             stmtAssignment = con.createStatement();
             stmtFetch = con.createStatement();
-            int removed = stmtAssignment.executeUpdate(CONTENT_FULLTEXT_DELETE_ALL);
-            LOG.info("Removed " + removed + " fulltext entries.");
             //                                                   1     2           3         4          5          6    7        8     9
             ResultSet rs = stmtAssignment.executeQuery("SELECT a.id, p.datatype, m.typeid, m.tblname, m.colname, m.lvl, a.xpath, p.id, p.sysinternal " +
                     "FROM FXS_TYPEPROPS p, FXS_ASSIGNMENTS a LEFT JOIN FXS_FLAT_MAPPING m ON (m.assid=a.id) " +
-                    "WHERE p.ISFULLTEXTINDEXED=" + TRUE + " AND a.APROPERTY=p.id " +
-                    "ORDER BY p.datatype");
+                    "WHERE p.ISFULLTEXTINDEXED=" + TRUE + " AND a.APROPERTY=p.id" +
+                    (propertyId >= 0 ? " AND p.id=" + propertyId : "") +
+                    " ORDER BY p.datatype");
             //1..ID,2..VER,3..LANG,4..ASSIGN,5..XMULT,6..VALUE
             ps = con.prepareStatement(getInsertSql());
             int batchCounter;
@@ -431,21 +451,21 @@ public class GenericSQLFulltextIndexer implements FulltextIndexer {
             while (rs != null && rs.next()) {
                 long assignmentId = rs.getLong(1);
                 ps.setLong(4, assignmentId); //assignment id
-                long propertyId = rs.getLong(8);
+                long currentPropertyId = rs.getLong(8);
                 FxDataType dataType = FxDataType.getById(rs.getInt(2));
                 boolean systemInternalProperty = rs.getBoolean(9);
-                if( systemInternalProperty)
-                    continue; //do not index system internal properties
+                if (systemInternalProperty || !dataType.isTextType())
+                    continue; //do not index system internal properties or non-text properties
                 long flatTypeId = rs.getLong(3);
                 if (!rs.wasNull()) {
                     //flatstorage
                     String xpath = rs.getString(7);
                     String xmult;
-                    if(!StringUtils.isEmpty(xpath)) {
+                    if (!StringUtils.isEmpty(xpath)) {
                         xmult = "";
-                        for(char c: xpath.toCharArray()) {
-                            if( c == '/') {
-                                if( xmult.length() > 0)
+                        for (char c : xpath.toCharArray()) {
+                            if (c == '/') {
+                                if (xmult.length() > 0)
                                     xmult += ",1";
                                 else
                                     xmult = "1";
@@ -477,12 +497,21 @@ public class GenericSQLFulltextIndexer implements FulltextIndexer {
                     ps.executeBatch();
                 } else {
                     //hierarchical storage
-                    String[] columns = contentStorage.getColumns(propertyId, systemInternalProperty, dataType);
+                    String[] columns = contentStorage.getColumns(currentPropertyId, systemInternalProperty, dataType);
 
-                    //                                                1  2   3    4         5+
-                    ResultSet rsData = stmtFetch.executeQuery("SELECT ID,VER,LANG,XMULT," + FxArrayUtils.toStringArray(columns,",") +
-                            " FROM " + DatabaseConst.TBL_CONTENT_DATA +
-                            " WHERE ASSIGN=" + assignmentId);
+                    final String columnSelect = dataType == FxDataType.Binary
+                            ? "b.XMLMETA"
+                            : "d." + columns[0]; //first column is the one responsible for indexing
+                    final String tableAppend = dataType == FxDataType.Binary
+                            ? "," + DatabaseConst.TBL_CONTENT_BINARY + " b"
+                            : "";
+                    final String whereAppend = dataType == FxDataType.Binary
+                            ? " AND b.ID=d." + columns[0] + " AND b.VER=1 AND b.QUALITY=1"
+                            : "";
+                    //                                                  1    2     3      4               5
+                    ResultSet rsData = stmtFetch.executeQuery("SELECT d.ID,d.VER,d.LANG,d.XMULT," + columnSelect +
+                            " FROM " + DatabaseConst.TBL_CONTENT_DATA + " d" + tableAppend +
+                            " WHERE d.ASSIGN=" + assignmentId + whereAppend);
                     batchCounter = 0;
                     while (rsData != null && rsData.next()) {
                         String value = rsData.getString(4);
@@ -492,35 +521,26 @@ public class GenericSQLFulltextIndexer implements FulltextIndexer {
                         ps.setInt(2, rsData.getInt(2));
                         ps.setInt(3, rsData.getInt(3));
                         ps.setString(5, rsData.getString(4));
-                        switch(dataType) {
+                        final String ftValue;
+                        switch (dataType) {
                             case Binary:
-                            case Boolean:
-                            case Date:
-                            case DateRange:
-                            case DateTime:
-                            case DateTimeRange:
-                            case Double:
-                            case Float:
-                            case InlineReference:
-                            case LargeNumber:
-                            case Number:
-                            case Reference:
-                            case SelectMany:
-                            case SelectOne:
-                                System.out.println("=> not yet supported data type "+dataType.name());
+                                final String xmlMeta = rsData.getString(5);
+                                ftValue = FxXMLUtils.getElementData(xmlMeta, "text");
                                 break;
                             case HTML:
                             case String1024:
                             case Text:
-                                String sValue = rs.getString(5);
-                                if(!StringUtils.isEmpty(sValue)) {
-                                    ps.setString(6, sValue.toUpperCase());
-                                    ps.addBatch();
-                                    batchCounter++;
-                                    totalCount++;
-                                }
+                                ftValue = rsData.getString(5);
+                                break;
+                            default:
+                                ftValue = null;
                         }
-
+                        if (!StringUtils.isEmpty(ftValue)) {
+                            ps.setString(6, ftValue.trim().toUpperCase());
+                            ps.addBatch();
+                            batchCounter++;
+                            totalCount++;
+                        }
                         if (batchCounter % 1000 == 0)
                             ps.executeBatch(); //insert every 1000 rows
                     }
@@ -540,6 +560,27 @@ public class GenericSQLFulltextIndexer implements FulltextIndexer {
             throw e.asRuntimeException();
         } finally {
             Database.closeObjects(GenericSQLFulltextIndexer.class, ps, stmtAssignment, stmtFetch);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void removeIndexForProperty(long propertyId) {
+        PreparedStatement ps = null;
+        try {
+            ps = con.prepareStatement((propertyId < 0
+                    ? CONTENT_FULLTEXT_REMOVE_ALL
+                    : CONTENT_FULLTEXT_REMOVE_PROPERTY));
+            if (propertyId >= 0)
+                ps.setLong(1, propertyId);
+            int removed = ps.executeUpdate();
+            LOG.info("Removed " + removed + " fulltext entries.");
+            commitChanges();
+        } catch (SQLException e) {
+            throw new FxDbException(e, "ex.db.sqlError", e.getMessage()).asRuntimeException();
+        } finally {
+            Database.closeObjects(GenericSQLFulltextIndexer.class, ps);
         }
     }
 }

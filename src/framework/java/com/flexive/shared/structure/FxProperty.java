@@ -288,9 +288,9 @@ public class FxProperty extends FxStructureElement implements Serializable {
      */
     public boolean isFulltextIndexed() {
         if (hasOption(FxStructureOption.OPTION_FULLTEXT)) {
-            return getOption(FxStructureOption.OPTION_FULLTEXT).isValueTrue();
+            return getOption(FxStructureOption.OPTION_FULLTEXT).isValueTrue() && getDataType().isTextType();
         }
-        return fulltextIndexed;
+        return fulltextIndexed  && getDataType().isTextType();
     }
 
     /**

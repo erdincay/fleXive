@@ -134,6 +134,18 @@ public class StorageManager {
     }
 
     /**
+     * Get the FulltextIndexer for the current division
+     *
+     * @param con the Connection to be used by the FulltextIndexer
+     * @return FulltextIndexer for the current division
+     * @throws FxNotFoundException if no implementation was found
+     * @since 3.1
+     */
+    public static FulltextIndexer getFulltextIndexer(Connection con) throws FxNotFoundException {
+        return getStorageImpl().getContentStorage(TypeStorageMode.Hierarchical).getFulltextIndexer(null, con);
+    }
+
+    /**
      * Get concrete content storage implementation for the given type storage mode.
      * This variant is only to be used from a division free context like in a timer service or mbean
      *
@@ -286,8 +298,8 @@ public class StorageManager {
      * Return true if calling {@link #getReferentialIntegrityChecksStatement(boolean)} is possible
      * in a transactional context.
      *
-     * @return  true if calling {@link #getReferentialIntegrityChecksStatement(boolean)} is possible
-     * in a transactional context
+     * @return true if calling {@link #getReferentialIntegrityChecksStatement(boolean)} is possible
+     *         in a transactional context
      */
     public static boolean isDisableIntegrityTransactional() {
         return getStorageImpl().isDisableIntegrityTransactional();

@@ -155,7 +155,7 @@
            </fx:fieldSet>
             <fx:formRow labelKey="PropertyEditor.label.fulltextIndexed" id="fulltextIndexed" tooltipKey="PropertyEditor.tooltip.fulltextIndexed">
                     <h:selectBooleanCheckbox id="fulltextIndexed" value="#{propertyEditorBean.propertyFulltextIndexed}"
-                         disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"/>
+                         disabled="#{(not propertyEditorBean.editMode) or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor']) or (not propertyEditorBean.fulltextIndexingAllowed)}"/>
             </fx:formRow>
             <fx:formRow labelKey="PropertyEditor.label.uniqueMode" id="uniqueMode" tooltipKey="PropertyEditor.tooltip.uniqueMode">
                 <h:selectOneListbox size="1" id="uniqueMode" value="#{propertyEditorBean.propertyUniqueMode}"

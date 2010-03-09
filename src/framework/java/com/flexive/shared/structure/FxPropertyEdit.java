@@ -318,6 +318,8 @@ public class FxPropertyEdit extends FxProperty {
             default:
                 setUseHTMLEditor(false);
         }
+        if (!this.dataType.isTextType())
+            this.fulltextIndexed = false;
         return this;
     }
 
@@ -512,12 +514,13 @@ public class FxPropertyEdit extends FxProperty {
 
     /**
      * Set if values of this property should be fulltext indexed?
+     * Only possible for data types that are text based!
      *
      * @param fulltextIndexed should values of this property be fulltext indexed?
      * @return the property itself, useful for chained calls
      */
     public FxPropertyEdit setFulltextIndexed(boolean fulltextIndexed) {
-        this.fulltextIndexed = fulltextIndexed;
+        this.fulltextIndexed = this.getDataType().isTextType() && fulltextIndexed;
         return this;
     }
 

@@ -37,6 +37,7 @@ import com.flexive.core.conversion.ConversionEngine;
 import com.flexive.core.flatstorage.FxFlatStorage;
 import com.flexive.core.flatstorage.FxFlatStorageManager;
 import com.flexive.core.storage.ContentStorage;
+import com.flexive.core.storage.FulltextIndexer;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.core.structure.StructureLoader;
 import com.flexive.ejb.beans.EJBUtils;
@@ -1422,6 +1423,11 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     if (changes)
                         changesDesc.append(',');
                     changesDesc.append("isFulltextIndexed=").append(prop.isFulltextIndexed());
+                    FulltextIndexer ft = StorageManager.getFulltextIndexer(con);
+                    if(prop.isFulltextIndexed())
+                        ft.rebuildIndexForProperty(prop.getId());
+                    else
+                        ft.removeIndexForProperty(prop.getId());
                     changes = true;
                 }
                 // set ACL override flag
