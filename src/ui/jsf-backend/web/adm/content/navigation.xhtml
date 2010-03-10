@@ -66,7 +66,7 @@
                 if (doubleClick) {
                     if (node.referenceId && node.referenceId != -1 && (!node.isFolderType || node.isFolderType == null)) {
                         // open content editor
-                        invokeContentAction("adm/content/contentEditor.jsf", "editInstance", {id: node.referenceId, editMode: false});
+                        invokeContentAction("adm/content/contentEditor.jsf", "editInstance", {id: node.referenceId, liveMode: treeLiveMode, editMode: false});
                     } else {
                         invokeContentAction("adm/search/searchResult.jsf", "nodeSearch", {nodeId: node.objectId, liveMode: treeLiveMode, onlyDirect: true});
                     }
@@ -78,12 +78,12 @@
 
             // open the content editor for the current node in edit mode
             function editContent(menuItem) {
-                invokeContentAction("adm/content/contentEditor.jsf", "editInstance", {id: getReferenceId(menuItem), editMode: true});
+                invokeContentAction("adm/content/contentEditor.jsf", "editInstance", {id: getReferenceId(menuItem), liveMode: treeLiveMode, editMode: true});
             }
 
             // open the content editor for the current node
             function showContent(menuItem) {
-                invokeContentAction("adm/content/contentEditor.jsf", "editInstance", {id: getReferenceId(menuItem), editMode: false});
+                invokeContentAction("adm/content/contentEditor.jsf", "editInstance", {id: getReferenceId(menuItem), liveMode: treeLiveMode, editMode: false});
             }
 
             // create new content below the current node

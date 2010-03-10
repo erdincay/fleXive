@@ -153,7 +153,11 @@ public class BeContentEditorBean implements ActionBean, Serializable {
                     Integer ver = Integer.valueOf(split[1].trim());
                     newPk = new FxPK(id, ver);
                 } else {
-                    newPk = new FxPK(FxJsfUtils.getLongParameter("id"), FxPK.MAX);
+                    newPk = new FxPK(
+                            FxJsfUtils.getLongParameter("id"),
+                            FxJsfUtils.getBooleanParameter("liveMode", false)
+                            ? FxPK.LIVE : FxPK.MAX
+                    );
                 }
                 pk = newPk;
                 beBeanInUse = true;
