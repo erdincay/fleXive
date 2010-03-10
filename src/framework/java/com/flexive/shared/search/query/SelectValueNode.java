@@ -31,6 +31,7 @@
  ***************************************************************/
 package com.flexive.shared.search.query;
 
+import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxInvalidQueryNodeException;
 import com.flexive.shared.exceptions.FxRuntimeException;
@@ -72,6 +73,20 @@ public class SelectValueNode extends QueryValueNode<FxSelectOne, PropertyValueCo
     public boolean isValid() {
         return true;
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isValidInEnvironment() {
+        try {
+            CacheAdmin.getEnvironment().getAssignment(assignment.getId());
+            return true;
+        } catch (FxRuntimeException e) {
+            return false;
+        }
+    }
+
 
     /** {@inheritDoc} */
     @Override

@@ -31,6 +31,7 @@
  ***************************************************************/
 package com.flexive.shared.search.query;
 
+import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxLanguage;
 import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.exceptions.FxInvalidQueryNodeException;
@@ -96,6 +97,21 @@ public class TreeValueNode extends QueryValueNode<FxValue, TreeValueNode.TreeVal
     public boolean isValid() {
         return true;
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isValidInEnvironment() {
+        try {
+            EJBLookup.getTreeEngine().getNode(treeMode, nodeId);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+
 
     /** {@inheritDoc} */
     @Override
