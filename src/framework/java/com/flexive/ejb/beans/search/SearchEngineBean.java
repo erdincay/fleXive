@@ -44,8 +44,12 @@ import com.flexive.shared.configuration.parameters.ParameterFactory;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.*;
 import com.flexive.shared.search.*;
+import com.flexive.shared.search.query.QueryOperatorNode;
 import com.flexive.shared.search.query.QueryRootNode;
 import com.flexive.ejb.beans.EJBUtils;
+import com.flexive.shared.search.query.QueryNode;
+import com.flexive.shared.search.query.QueryNodeVisitor;
+import com.flexive.shared.search.query.QueryValueNode;
 import com.google.common.collect.Lists;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -145,7 +149,7 @@ public class SearchEngineBean implements SearchEngine, SearchEngineLocal {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public QueryRootNode load(ResultLocation location, String name) throws FxApplicationException {
-        return configuration.get(getConfigurationParameter(location), name);
+        return check(configuration.get(getConfigurationParameter(location), name));
     }
 
     /**
@@ -169,7 +173,7 @@ public class SearchEngineBean implements SearchEngine, SearchEngineLocal {
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public QueryRootNode loadSystemDefault(ResultLocation location) throws FxApplicationException {
         try {
-            return divisionConfiguration.get(getConfigurationParameter(location), DEFAULT_QUERY_NAME);
+            return check(divisionConfiguration.get(getConfigurationParameter(location), DEFAULT_QUERY_NAME));
         } catch (FxNotFoundException e) {
             return new QueryRootNode(QueryRootNode.Type.CONTENTSEARCH, location);
         } catch (FxApplicationException e) {
@@ -195,6 +199,41 @@ public class SearchEngineBean implements SearchEngine, SearchEngineLocal {
         }
 
         return names;
+    }
+
+    /**
+     * Check a saved query and remove invalid nodes (happens when assignments
+     * or properties of the query are no longer available).
+     *
+     * @param root  the query to be checked
+     * @return      root
+     */
+    private QueryRootNode check(QueryRootNode root) {
+        final List<QueryNode> invalidNodes = Lists.newArrayList();
+
+        // collect all nodes that are no longer valid
+        root.visit(new QueryNodeVisitor() {
+            public void visit(QueryOperatorNode operatorNode) {
+                // nop, empty nodes will be removed automatically
+            }
+
+            public void visit(QueryValueNode valueNode) {
+                if (!valueNode.isValidInEnvironment()) {
+                    invalidNodes.add(valueNode);
+                }
+            }
+
+            public void setCurrentParent(QueryOperatorNode operatorNode) {
+                // nop
+            }
+        });
+
+        // remove invalid nodes
+        for (QueryNode node : invalidNodes) {
+            root.removeChild(node);
+        }
+        
+        return root;
     }
 
     /**

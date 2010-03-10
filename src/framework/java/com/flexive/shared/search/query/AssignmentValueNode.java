@@ -84,8 +84,22 @@ public class AssignmentValueNode extends QueryValueNode<FxValue, PropertyValueCo
     public void setAssignmentId(long assignmentId) {
         this.assignmentId = assignmentId;
     }
-    
- 	/** {@inheritDoc} */
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isValidInEnvironment() {
+        try {
+            getAssignment();
+            return true;
+        } catch (FxRuntimeException e) {
+            return false;
+        }
+    }
+
+
+    /** {@inheritDoc} */
     @Override
     public boolean isValid() {
         try {

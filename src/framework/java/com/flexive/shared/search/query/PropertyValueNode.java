@@ -95,6 +95,19 @@ public class PropertyValueNode extends QueryValueNode<FxValue, PropertyValueComp
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isValidInEnvironment() {
+        try {
+            getProperty();
+            return true;
+        } catch (FxRuntimeException e) {
+            return false;
+        }
+    }
+
     /** {@inheritDoc} */
     @Override
     public void buildSqlQuery(SqlQueryBuilder builder) {

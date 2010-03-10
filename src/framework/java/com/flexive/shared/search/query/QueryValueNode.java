@@ -169,6 +169,14 @@ public abstract class QueryValueNode<T extends FxValue, VC extends ValueComparat
     }
 
     /**
+     * Check if this node is (still) valid in the current environment.
+     *
+     * @return  true if the node is still valid, false otherwise
+     * @since 3.1
+     */
+    public abstract boolean isValidInEnvironment();
+
+    /**
      * Return the input mapper for the given property.
      *
      * @param property  the property to be rendered
