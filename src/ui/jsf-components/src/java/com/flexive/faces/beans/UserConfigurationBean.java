@@ -31,6 +31,7 @@
  ***************************************************************/
 package com.flexive.faces.beans;
 
+import com.flexive.faces.FxJsfUtils;
 import com.flexive.shared.configuration.ParameterMap;
 import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.configuration.Parameter;
@@ -48,6 +49,7 @@ import java.io.Serializable;
  */
 public class UserConfigurationBean implements Serializable {
     private static final long serialVersionUID = 5973908397483613677L;
+    private static final String REQ_USER_INPUTLANGUAGE = "UCB_inputLanguageId";
 
     protected final ParameterMap cachedParameters = new ParameterMap();
     private long inputLanguageId = -1;
@@ -67,6 +69,22 @@ public class UserConfigurationBean implements Serializable {
             return defaultLanguageId != -1 ? defaultLanguageId : FxContext.getUserTicket().getLanguage().getId();
         }
         return inputLanguageId;
+    }
+
+    /**
+     * @return  the value of {@link #getInputLanguageId()} for the current user.
+     * @since 3.1
+     */
+    public static long getUserInputLanguageId() {
+        final FxContext ctx = FxContext.get();
+        if (ctx.getAttribute(REQ_USER_INPUTLANGUAGE) == null) {
+            // cache in request context to avoid bean lookups
+            ctx.setAttribute(
+                    REQ_USER_INPUTLANGUAGE,
+                    FxJsfUtils.getManagedBean(UserConfigurationBean.class).getInputLanguageId()
+            );
+        }
+        return (Long) ctx.getAttribute(REQ_USER_INPUTLANGUAGE);
     }
 
     /**

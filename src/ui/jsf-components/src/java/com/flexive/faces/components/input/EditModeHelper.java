@@ -38,20 +38,13 @@ import static com.flexive.faces.components.input.FxValueInputRenderer.*;
 import com.flexive.faces.javascript.FxJavascriptUtils;
 import static com.flexive.faces.javascript.FxJavascriptUtils.*;
 import com.flexive.shared.*;
-import com.flexive.shared.cmis.search.CmisResultSet;
-import com.flexive.shared.cmis.search.CmisResultRow;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
-import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.*;
-import com.flexive.shared.value.mapper.FxPkSelectOneInputMapper;
 import com.flexive.war.FxRequest;
 import com.flexive.war.JsonWriter;
 import com.flexive.war.servlet.ThumbnailServlet;
-import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.LogFactory;
-import org.apache.commons.logging.Log;
 import org.apache.myfaces.custom.date.HtmlInputDate;
 import org.apache.myfaces.custom.fileupload.HtmlInputFileUpload;
 
@@ -686,7 +679,7 @@ class EditModeHelper extends RenderHelper {
             writer.writeAttribute("onchange", "document.getElementById('" + inputClientId + "')."
                     + JS_OBJECT + ".onLanguageChanged(this)", null);
             // use the current page input language 
-            final long inputLanguageId = FxJsfUtils.getManagedBean(UserConfigurationBean.class).getInputLanguageId();
+            final long inputLanguageId = UserConfigurationBean.getUserInputLanguageId();
             writer.startElement("option", null);
             writer.writeAttribute("value", "-2", null);
             writer.writeText(MessageBean.getInstance().getMessage("FxValueInput.language.all.short"), null);
@@ -811,7 +804,12 @@ class EditModeHelper extends RenderHelper {
             writer.writeAttribute("name", radioName, null);
             writer.writeAttribute("value", languageId, null);
             writer.writeAttribute("class", "fxValueDefaultLanguageRadio", null);
-            if (languageId == getInputValue().getDefaultLanguage()) {
+
+            // set default language to the user's desired input language (for empty values only) - FX-729
+            final boolean useDefaultInputLanguage = getInputValue().isEmpty()
+                    && languageId == UserConfigurationBean.getUserInputLanguageId();
+
+            if (languageId == getInputValue().getDefaultLanguage() || useDefaultInputLanguage) {
                 writer.writeAttribute("checked", "true", null);
             }
             writer.writeAttribute("onclick", "document.getElementById('" + inputClientId
