@@ -39,7 +39,6 @@ import com.flexive.shared.structure.FxProperty;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.value.FxValue;
-import com.flexive.shared.value.FxVoid;
 import com.flexive.shared.value.mapper.InputMapper;
 
 import java.util.List;
@@ -100,7 +99,7 @@ public class PropertyValueNode extends QueryValueNode<FxValue, PropertyValueComp
     @Override
     public void buildSqlQuery(SqlQueryBuilder builder) {
         try {
-            builder.condition(getProperty(), comparator, value);
+            builder.condition(getProperty(), comparator, getValueForSQL());
         } catch (FxRuntimeException e) {
             throw new FxInvalidQueryNodeException(getId(), e.getConverted()).asRuntimeException();
         }

@@ -108,7 +108,7 @@ public class AssignmentValueNode extends QueryValueNode<FxValue, PropertyValueCo
     @Override
     public void buildSqlQuery(SqlQueryBuilder builder) {
         try {
-            builder.condition(getAssignment(), comparator, value);
+            builder.condition(getAssignment(), comparator, getValueForSQL());
         } catch (FxRuntimeException e) {
             throw new FxInvalidQueryNodeException(getId(), e.getConverted()).asRuntimeException(); 
         }

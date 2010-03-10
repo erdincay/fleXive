@@ -193,4 +193,18 @@ public abstract class QueryValueNode<T extends FxValue, VC extends ValueComparat
                 return property.getEmptyValue();
         }
     }
+
+    protected T getValueForSQL() {
+        if (comparator == PropertyValueComparator.LIKE && !value.isEmpty()) {
+            // check if value contains wildcards, if not, add them (FX-806)
+            final String query = value.getDefaultTranslation().toString();
+            if (query.indexOf('*') == -1 && query.indexOf('%') == -1) {
+                // no wildcards set, automatically add wildcards
+                T newValue = (T) value.copy();
+                newValue.setDefaultTranslation("%" + query + "%");
+                return newValue;
+            }
+        }
+        return value;
+    }
 }
