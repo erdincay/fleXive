@@ -74,7 +74,7 @@ public class GenericSQLDataSelector extends DataSelector {
         SELECTORS.put("MANDATOR", new GenericSQLForeignTableSelector("mandator", DatabaseConst.TBL_MANDATORS, "id", false, null));
         SELECTORS.put("CREATED_BY", new GenericSQLForeignTableSelector("created_by", DatabaseConst.TBL_ACCOUNTS, "id", false, null));
         SELECTORS.put("MODIFIED_BY", new GenericSQLForeignTableSelector("modified_by", DatabaseConst.TBL_ACCOUNTS, "id", false, null));
-        SELECTORS.put("ACL", new GenericSQLForeignTableSelector("acl", DatabaseConst.TBL_ACLS, "id", false, null));
+        SELECTORS.put("ACL", new GenericSQLForeignTableSelector("acl", DatabaseConst.TBL_ACLS, "id", true, "label"));
         SELECTORS.put("STEP", new GenericSQLStepSelector());
         SELECTORS.put("TYPEDEF", new GenericSQLForeignTableSelector("tdef", DatabaseConst.TBL_STRUCT_TYPES, "id", true, "description"));
     }

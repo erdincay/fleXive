@@ -514,17 +514,18 @@ public class ResultPreferencesBean implements Serializable {
         label.append(assignment.getProperty().getLabel());
 
         final String value;
-        if ("ROOT/CAPTION".equals(assignment.getXPath())) {
+        final String propertyName = assignment.getProperty().getName();
+        if ("CAPTION".equals(propertyName)) {
             // the caption property is often renamed (which breaks assignment inheritance)
             value = "CAPTION";
-        } else if ("ROOT/TYPEDEF".equals(assignment.getXPath())) {
+        } else if ("TYPEDEF".equals(propertyName)) {
             // select the type label instead
             value = "TYPEDEF.DESCRIPTION";
-        } else if ("ROOT/ACL".equals(assignment.getXPath())) {
+        } else if ("ACL".equals(propertyName)) {
             value = "ACL.LABEL";
-        } else if ("ROOT/STEP".equals(assignment.getXPath())) {
+        } else if ("STEP".equals(propertyName)) {
             value = "STEP.LABEL";
-        } else if ("ROOT/CREATED_BY".equals(assignment.getXPath()) || "ROOT/MODIFIED_BY".equals(assignment.getXPath())) {
+        } else if ("CREATED_BY".equals(propertyName) || "MODIFIED_BY".equals(propertyName)) {
             value = assignment.getProperty().getName() + ".USERNAME";
         } else {
             value = "#" + assignment.getXPath();
