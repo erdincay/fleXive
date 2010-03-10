@@ -50,7 +50,7 @@ Parameters:
             flexive.yui.require("datatable");
             flexive.yui.onYahooLoaded(function() {
                 var containerElName = "#{var}_datatable";
-                var createFun = function(result, previewSize, updateRowsPerPage) {
+                var createFun = function(result, previewSize, updateRowsPerPage, updateCurrentPage) {
                     if (result == null) {
                         // no result available, return dummy object
                         return null;
@@ -82,6 +82,9 @@ Parameters:
                           draggableColumns: true
                         }
                     );
+                    if (updateCurrentPage != null) {
+                        dataTable.get("paginator").setPage(updateCurrentPage);
+                    }
                     var __clickHandlerFn = #{empty clickHandler ? 'null' : clickHandler};
                     var __clickHandler = __clickHandlerFn == null ? null :
                         function(args) {
@@ -136,12 +139,12 @@ Parameters:
 
                 #{var} = createFun(#{fx:getJsonResultFromColumn(value, viewType, firstColumn)}, '#{empty previewSize ? 'PREVIEW2' : previewSize}', null);
                 if (#{var} != null) {
-                    #{var}._reset = function(result, previewSize) {
+                    #{var}._reset = function(result, previewSize, currentPage) {
                         var reset = #{var}._reset;  // keep old method
                         // wipe out the entire datatable and create a new one
                         var rowsPerPage = #{var}.get("paginator").getRowsPerPage();
                         #{var}.destroy();
-                        #{var} = createFun(result, previewSize, rowsPerPage);
+                        #{var} = createFun(result, previewSize, rowsPerPage, currentPage);
                         #{var}._reset = reset;
                     }
                 }

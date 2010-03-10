@@ -159,7 +159,7 @@ function onContextMenu(type, args) {
             parent.getContentClipboard().set(selectedIds.length > 0 ? selectedIds : [pk.id]);
             break;
         case "delete":
-            if (getSelectedIds().length > 0) {
+            if (selectedIds.length > 0) {
                 confirmDialog(MESSAGES["SearchResult.dialog.confirm.deleteSelection"], function() {
                     try {
                         flexive.util.getJsonRpc().ContentEditor.removeMultiple(selectedIds);
@@ -177,7 +177,7 @@ function onContextMenu(type, args) {
             }
             break;
         case "deleteBriefcase":
-            if (getSelectedIds().length > 0) {
+            if (selectedIds.length > 0) {
                 try {
                     flexive.util.getJsonRpc().BriefcaseEditor.removeItems(briefcaseId, selectedIds);
                     if (getViewType() == "LIST") {

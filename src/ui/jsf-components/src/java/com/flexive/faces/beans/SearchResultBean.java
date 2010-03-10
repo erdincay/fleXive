@@ -38,7 +38,6 @@ import com.flexive.faces.messages.FxFacesMsgInfo;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxSharedUtils;
-import com.flexive.shared.SelectableObject;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.exceptions.FxApplicationException;
@@ -53,14 +52,12 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import javax.faces.event.ActionEvent;
 import javax.faces.model.SelectItem;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Arrays;
-import java.util.Collection;
 
 public class SearchResultBean implements ActionBean, Serializable {
     private static final long serialVersionUID = -3167186971609121457L;

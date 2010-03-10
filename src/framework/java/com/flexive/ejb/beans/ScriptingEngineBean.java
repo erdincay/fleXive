@@ -527,7 +527,9 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         FxScriptInfo si = CacheAdmin.getEnvironment().getScript(scriptId);
 
         if (!si.isActive()) {
-            LOG.warn("Script [" + si.getName() + "], Id " + si.getId() + " is deactivated and will not be run!");
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Script [" + si.getName() + "], Id " + si.getId() + " is deactivated and will not be run!");
+            }
             return new FxScriptResult(binding, null);
         }
 

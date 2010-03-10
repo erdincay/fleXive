@@ -450,6 +450,7 @@ flexive.yui.datatable = new function() {
      */
     this.selectAllPageRows = function(/* YAHOO.widget.DataTable */ dataTable) {
         var trEl = dataTable.getFirstTrEl();
+        dataTable.unselectAllRows();
         while (trEl != null) {
             dataTable.selectRow(trEl);
             trEl = trEl.nextSibling;
@@ -465,6 +466,7 @@ flexive.yui.datatable = new function() {
      */
     this.selectAllPageCells = function(/* YAHOO.widget.DataTable */ dataTable) {
         var trEl = dataTable.getFirstTrEl();
+        dataTable.unselectAllCells();
         while (trEl != null) {
             var tdEl = dataTable.getFirstTdEl(trEl);
             while (tdEl != null) {
