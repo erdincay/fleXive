@@ -667,12 +667,12 @@ public class GenericDivisionImporter implements FxImportExportConstants {
                                     }
                                     break;
                                 case Types.CLOB:
-                                case Types.LONGNVARCHAR:
                                 case Types.LONGVARCHAR:
-                                case Types.NCHAR:
-                                case Types.NCLOB:
-                                case Types.NVARCHAR:
                                 case Types.VARCHAR:
+                                case SQL_LONGNVARCHAR:
+                                case SQL_NCHAR:
+                                case SQL_NCLOB:
+                                case SQL_NVARCHAR:
                                     if (DBG) LOG.info("String " + ci.index + "->" + value);
                                     ps.setString(ci.index, value);
                                     break;

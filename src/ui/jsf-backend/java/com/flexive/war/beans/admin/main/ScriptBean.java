@@ -38,11 +38,11 @@ import com.flexive.faces.beans.MessageBean;
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.faces.messages.FxFacesMsgInfo;
 import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSharedUtils;
 import static com.flexive.shared.EJBLookup.getScriptingEngine;
 
-import com.flexive.shared.content.FxContent;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.scripting.*;
 import com.flexive.shared.security.Role;
@@ -53,8 +53,6 @@ import org.apache.commons.lang.StringUtils;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
 import javax.faces.model.SelectItem;
-import javax.script.ScriptEngineFactory;
-import javax.script.ScriptEngineManager;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.StringWriter;
@@ -621,14 +619,18 @@ public class ScriptBean implements Serializable {
      * @return true if the given script name contains a valid extension found in the scripting engine
      */
     private boolean checkScriptEngineExtensions(String scriptName) {
-        for (ScriptEngineFactory f : new ScriptEngineManager().getEngineFactories()) {
-            for (String ext : f.getExtensions()) {
-                if (scriptName.toLowerCase().contains("." + ext)) {
+        try {
+            // use scripting engine and avoid JDK6 dependency
+            for (String[] engine : EJBLookup.getScriptingEngine().getAvailableScriptEngines()) {
+                // check if extension (first element) matches scriptName
+                if (scriptName.toLowerCase().endsWith(engine[0])) {
                     return true;
                 }
             }
+            return false;
+        } catch (FxApplicationException e) {
+            throw e.asRuntimeException();
         }
-        return false;
     }
 
     /**

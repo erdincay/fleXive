@@ -37,30 +37,39 @@ package com.flexive.shared.impex;
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public interface FxImportExportConstants {
+
     /**
      * folder for filesystem binaries within the zip archive
      */
-    public final static String FOLDER_FS_BINARY = "fsbinary";
+    String FOLDER_FS_BINARY = "fsbinary";
     /**
      * folder for database binaries within the zip archive
      */
-    public final static String FOLDER_BINARY = "binary";
-
+    String FOLDER_BINARY = "binary";
     //file names to store exported data in
-    public static final String FILE_LANGUAGES = "languages.xml";
-    public static final String FILE_MANDATORS = "mandators.xml";
-    public static final String FILE_SECURITY = "security.xml";
-    public static final String FILE_WORKFLOWS = "workflows.xml";
-    public static final String FILE_CONFIGURATIONS = "configurations.xml";
-    public static final String FILE_STRUCTURES = "structures.xml";
-    public static final String FILE_TREE = "tree.xml";
-    public static final String FILE_BRIEFCASES = "briefcases.xml";
-    public static final String FILE_SCRIPTS = "scripts.xml";
-    public static final String FILE_HISTORY = "history.xml";
-    public static final String FILE_FLATSTORAGE_META = "flatstorage.xml";
-    public static final String FILE_BINARIES = "binaries.xml";
-    public static final String FILE_DATA_HIERARCHICAL = "data_hierarchical.xml";
-    public static final String FILE_DATA_FLAT = "data_flat.xml";
-    public static final String FILE_SEQUENCERS = "sequencers.xml";
-    public static final String FILE_BUILD_INFOS = "flexive.xml";
+    String FILE_LANGUAGES = "languages.xml";
+    String FILE_MANDATORS = "mandators.xml";
+    String FILE_SECURITY = "security.xml";
+    String FILE_WORKFLOWS = "workflows.xml";
+    String FILE_CONFIGURATIONS = "configurations.xml";
+    String FILE_STRUCTURES = "structures.xml";
+    String FILE_TREE = "tree.xml";
+    String FILE_BRIEFCASES = "briefcases.xml";
+    String FILE_SCRIPTS = "scripts.xml";
+    String FILE_HISTORY = "history.xml";
+    String FILE_FLATSTORAGE_META = "flatstorage.xml";
+    String FILE_BINARIES = "binaries.xml";
+    String FILE_DATA_HIERARCHICAL = "data_hierarchical.xml";
+    String FILE_DATA_FLAT = "data_flat.xml";
+    String FILE_SEQUENCERS = "sequencers.xml";
+    String FILE_BUILD_INFOS = "flexive.xml";
+
+    /** JDK6: java.sql.Types.LONGNVARCHAR */
+    int SQL_LONGNVARCHAR = -16;
+    /** JDK6: java.sql.Types.NCHAR: */
+    int SQL_NCHAR = -15;
+    /** JDK6: java.sql.Types.NCLOB: */
+    int SQL_NCLOB = 2011;
+    /** JDK6: java.sql.Types.NVARCHAR: */
+    int SQL_NVARCHAR = -9;          
 }

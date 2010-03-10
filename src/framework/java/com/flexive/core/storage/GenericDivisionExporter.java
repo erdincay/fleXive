@@ -244,15 +244,16 @@ con.close()
                         break;
                     case java.sql.Types.CLOB:
                     case java.sql.Types.BLOB:
-                    case java.sql.Types.LONGNVARCHAR:
                     case java.sql.Types.LONGVARBINARY:
                     case java.sql.Types.LONGVARCHAR:
-                    case java.sql.Types.NCHAR:
-                    case java.sql.Types.NCLOB:
-                    case java.sql.Types.NVARCHAR:
                     case java.sql.Types.VARBINARY:
                     case java.sql.Types.VARCHAR:
                     case java.sql.Types.BINARY:
+                    case SQL_LONGNVARCHAR:
+                    case SQL_NCHAR:
+                    case SQL_NCLOB:
+                    case SQL_NVARCHAR:
+
                         hasSubTags = true;
                         break;
                     default:
@@ -294,11 +295,11 @@ con.close()
                             sb.append("    <").append(att).append(">").append(binFile).append("</").append(att).append(">\n");
                             break;
                         case java.sql.Types.CLOB:
-                        case java.sql.Types.LONGNVARCHAR:
+                        case SQL_LONGNVARCHAR:
+                        case SQL_NCHAR:
+                        case SQL_NCLOB:
+                        case SQL_NVARCHAR:
                         case java.sql.Types.LONGVARCHAR:
-                        case java.sql.Types.NCHAR:
-                        case java.sql.Types.NCLOB:
-                        case java.sql.Types.NVARCHAR:
                         case java.sql.Types.VARCHAR:
                             value = rs.getString(i);
                             if (rs.wasNull())

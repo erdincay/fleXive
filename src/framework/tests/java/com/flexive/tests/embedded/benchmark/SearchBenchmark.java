@@ -65,6 +65,7 @@ import org.testng.annotations.Test;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * Some benchmarks for the {@link com.flexive.shared.interfaces.SearchEngine}.
@@ -252,9 +253,9 @@ public class SearchBenchmark {
     }
 
     private void checkResult(int rangeStart, int rangeEnd, String rangeDescr, int number01, String string01, String string02, String string03) {
-        assertFalse(string01.isEmpty());
-        assertFalse(string02.isEmpty());
-        assertFalse(string03.isEmpty());
+        assertFalse(StringUtils.isBlank(string01));
+        assertFalse(StringUtils.isBlank(string02));
+        assertFalse(StringUtils.isBlank(string03));
         assertTrue(number01 >= rangeStart && number01 < rangeEnd,
                 "Query returned invalid result: " + number01 + ", expected range: " + rangeDescr
         );

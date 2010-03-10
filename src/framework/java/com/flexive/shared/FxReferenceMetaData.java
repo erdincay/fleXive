@@ -101,7 +101,7 @@ public class FxReferenceMetaData<T extends Serializable> implements Serializable
      */
     public void merge(FxReferenceMetaData<?> other) {
         for (Entry<String, String> entry : other.entrySet()) {
-            if (entry.getValue() == null || entry.getValue().isEmpty()) {
+            if (entry.getValue() == null || StringUtils.isBlank(entry.getValue())) {
                 attributes.remove(entry.getKey());
             } else {
                 attributes.put(entry.getKey(), entry.getValue());

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE taglib PUBLIC "-//Sun Microsystems, Inc.//DTD JSP Tag Library 1.2//EN"
-        "http://java.sun.com/dtd/web-jsptaglibrary_1_2.dtd">
+"http://java.sun.com/dtd/web-jsptaglibrary_1_2.dtd">
 <taglib>
     <tlib-version>1.0</tlib-version>
     <jsp-version>1.2</jsp-version>
@@ -9,10 +9,11 @@
     <description>
     </description>
 
+    <!-- Template-based TLD start -->
     <tag>
         <name>formRow</name>
         <body-content>JSP</body-content>
-        <description>Basic [fleXive3] form row.</description>
+        <description>Basic [fleXive3] form row.  </description>
         <attribute>
             <name>id</name>
             <required>false</required>
@@ -32,12 +33,16 @@
             <description>Message key (overrides label)</description>
         </attribute>
         <attribute>
+            <name>tooltip</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>Tooltip</description>
+        </attribute>
+        <attribute>
             <name>tooltipKey</name>
             <required>false</required>
             <rtexprvalue>false</rtexprvalue>
-            <description>Message key of the tooltip (if not specified and labelKey is set, it defaults to
-                #{labelKey}.tooltip)
-            </description>
+            <description>Message key of the tooltip (if not specified and labelKey is set, it defaults to #{labelKey}.tooltip)</description>
         </attribute>
         <attribute>
             <name>newLine</name>
@@ -55,7 +60,7 @@
             <name>relativeWidth</name>
             <required>false</required>
             <rtexprvalue>false</rtexprvalue>
-            <description>overrides the default width (value in %, eg width="80")</description>
+            <description>overrides the default width (value in %, eg width="100"), overwrites the width if given</description>
         </attribute>
         <attribute>
             <name>height</name>
@@ -79,7 +84,7 @@
     <tag>
         <name>fxValueInputRow</name>
         <body-content>JSP</body-content>
-        <description>A flexive form input row with a single fxValueInput field.</description>
+        <description>A flexive form input row with a single fxValueInput field.  </description>
         <attribute>
             <name>id</name>
             <required>false</required>
@@ -90,8 +95,7 @@
             <name>labelKey</name>
             <required>false</required>
             <rtexprvalue>false</rtexprvalue>
-            <description>Label key (possibly including parameters, e.g. my.property.message,#{myBean.value}
-            </description>
+            <description>Label key (possibly including parameters, e.g. my.property.message,#{myBean.value}</description>
         </attribute>
         <attribute>
             <name>label</name>
@@ -127,8 +131,7 @@
             <name>decorate</name>
             <required>false</required>
             <rtexprvalue>false</rtexprvalue>
-            <description>if false, no label/input div will be rendered, only the output of the fxValueInput component
-            </description>
+            <description>if false, no label/input div will be rendered, only the output of the fxValueInput component</description>
         </attribute>
         <attribute>
             <name>filter</name>
@@ -136,11 +139,47 @@
             <rtexprvalue>false</rtexprvalue>
             <description>filter HTML output?</description>
         </attribute>
+        <attribute>
+            <name>forceLineInput</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>force a single line of output (e.g. for query forms)</description>
+        </attribute>
+        <attribute>
+            <name>valueFormatter</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>A FxValueFormatter to be used for rendering the value (in read-only mode only). If not specified, the JSF renderer will choose the appropriate default formatter for the actual value class.</description>
+        </attribute>
+        <attribute>
+            <name>containerDivClass</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>If this CSS class property is set, the component will be embedded in a div-container using this CSS class as style.</description>
+        </attribute>
+        <attribute>
+            <name>autocompleteHandler</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>An instance of the flexive.yui.AutoCompleteHandler javascript class. This class provides a query method for a client-side autocomplete widget provided by Yahoo UI, as well as a method for formatting the response.</description>
+        </attribute>
+        <attribute>
+            <name>disableMultiLanguage</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>Disables multi language support even if the FxValue object is multilingual. Only the default translation will be displayed and updated. </description>
+        </attribute>
+        <attribute>
+            <name>disableLytebox</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>Set this property to true if the Lytebox  javascript library used for rendering inline previews of images should not be used.</description>
+        </attribute>
     </tag>
     <tag>
         <name>queryEditor</name>
         <body-content>JSP</body-content>
-        <description>[fleXive3] search query editor.</description>
+        <description>[fleXive3] search query editor.  </description>
         <attribute>
             <name>nodes</name>
             <required>false</required>
@@ -151,7 +190,7 @@
             <name>addAssignmentNode</name>
             <required>false</required>
             <rtexprvalue>false</rtexprvalue>
-            <description>form element where the selected node for adding an assignment should be stored</description>
+            <description>form element where the selected node for adding an assignment should be stored </description>
         </attribute>
         <attribute>
             <name>addAssignmentNodeValue</name>
@@ -163,8 +202,7 @@
             <name>selectionNode</name>
             <required>false</required>
             <rtexprvalue>false</rtexprvalue>
-            <description>form element for storing the current selection (a comma-separated list of node IDs)
-            </description>
+            <description>form element for storing the current selection (a comma-separated list of node IDs)</description>
         </attribute>
         <attribute>
             <name>emptyMessageKey</name>
@@ -172,12 +210,17 @@
             <rtexprvalue>false</rtexprvalue>
             <description>message key of the message to be displayed when the current query is empty</description>
         </attribute>
+        <attribute>
+            <name>showSqlButton</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>if true, a (Javascript) button for displaying the current query's FxSQL representation will be displayed.</description>
+        </attribute>
     </tag>
     <tag>
         <name>queryEditorChild</name>
         <body-content>JSP</body-content>
-        <description>Search query editor table. Used by queryEditor.xhtml for rendering the actual query editor.
-        </description>
+        <description>Search query editor table. Used by queryEditor.xhtml for rendering the actual query editor.  </description>
         <attribute>
             <name>nodes</name>
             <required>false</required>
@@ -200,31 +243,24 @@
             <name>selectionNode</name>
             <required>false</required>
             <rtexprvalue>false</rtexprvalue>
-            <description>form element for storing the current selection (a comma-separated list of node IDs)
-            </description>
+            <description>form element for storing the current selection (a comma-separated list of node IDs)</description>
         </attribute>
     </tag>
     <tag>
         <name>popupDialog</name>
         <body-content>JSP</body-content>
-        <description>A simple javascript popup panel.</description>
+        <description>A simple javascript popup panel.  </description>
         <attribute>
             <name>jsVar</name>
             <required>false</required>
             <rtexprvalue>false</rtexprvalue>
             <description>javascript variable name that should be initialized with this</description>
         </attribute>
-        <attribute>
-            <name>closeControl</name>
-            <required>false</required>
-            <rtexprvalue>false</rtexprvalue>
-            <description>element ID that should be used for closing the dialog</description>
-        </attribute>
     </tag>
     <tag>
         <name>fieldSet</name>
         <body-content>JSP</body-content>
-        <description>Basic [fleXive3] form group (fieldset).</description>
+        <description>Basic [fleXive3] form group (fieldset).  </description>
         <attribute>
             <name>legend</name>
             <required>false</required>
@@ -241,23 +277,19 @@
             <name>width</name>
             <required>false</required>
             <rtexprvalue>false</rtexprvalue>
-            <description>width in px, overrides the default width of the fieldset, which also affects any nested form rows
-            </description>
+            <description>width in px, overrides the default width of the fieldset, which also affects any nested form rows</description>
         </attribute>
         <attribute>
             <name>relativeWidth</name>
             <required>false</required>
             <rtexprvalue>false</rtexprvalue>
-            <description>width in %, overrides the default width of the fieldset, which also affects any nested form rows
-            </description>
+            <description>width in %, overrides the default width of the fieldset, which also affects any nested form rows</description>
         </attribute>
     </tag>
     <tag>
         <name>downloadLink</name>
         <body-content>JSP</body-content>
-        <description>Renders a download link for the given object/xpath. The passed body content is rendered inside the
-            link.
-        </description>
+        <description>Renders a download link for the given object/xpath. The passed body content is rendered inside the link.  </description>
         <attribute>
             <name>pk</name>
             <required>false</required>
@@ -274,15 +306,13 @@
             <name>filename</name>
             <required>false</required>
             <rtexprvalue>false</rtexprvalue>
-            <description>the filename to be rendered. If not specified, the primary key is used (without extension).
-            </description>
+            <description>the filename to be rendered. If not specified, the primary key is used (without extension).</description>
         </attribute>
     </tag>
     <tag>
         <name>fxValueInputLanguageSelect</name>
         <body-content>JSP</body-content>
-        <description>A select list that toggles all fx:fxValueInput elements on the current page (client-side).
-        </description>
+        <description>A select list that toggles all fx:fxValueInput elements on the current page (client-side).  </description>
         <attribute>
             <name>id</name>
             <required>false</required>
@@ -293,7 +323,7 @@
     <tag>
         <name>children</name>
         <body-content>JSP</body-content>
-        <description>Iterator tag for properties and groups of a content instance.</description>
+        <description>Iterator tag for properties and groups of a content instance.  </description>
         <attribute>
             <name>value</name>
             <required>false</required>
@@ -312,11 +342,17 @@
             <rtexprvalue>false</rtexprvalue>
             <description>name of the variable where the current value will be exposed in the tag body.</description>
         </attribute>
+        <attribute>
+            <name>includeEmpty</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>if true, empty elements will be included (default: false)</description>
+        </attribute>
     </tag>
     <tag>
         <name>resultTable</name>
         <body-content>JSP</body-content>
-        <description>A client-side result table implemented using the Yahoo datatable widget.</description>
+        <description>A client-side result table implemented using the Yahoo datatable widget.  </description>
         <attribute>
             <name>var</name>
             <required>false</required>
@@ -333,30 +369,54 @@
             <name>viewType</name>
             <required>false</required>
             <rtexprvalue>false</rtexprvalue>
-            <description>the view type (THUMBNAILS or LIST). If not set and a result set is passed in as value,
-            </description>
+            <description>the view type (THUMBNAILS or LIST). If not set and a result set is passed in as value,</description>
         </attribute>
         <attribute>
             <name>clickHandler</name>
             <required>false</required>
             <rtexprvalue>false</rtexprvalue>
-            <description>an optional Javascript method for handling clicks on the table. The first two parameters
-            </description>
+            <description>an optional Javascript method for handling clicks on the table. The first two parameters</description>
+        </attribute>
+        <attribute>
+            <name>actionColumnHandler</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>an optional instance of type flexive.yui.datatable.ActionColumnHandler</description>
+        </attribute>
+        <attribute>
+            <name>previewSize</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>name of the preview size to be used for thumbnails </description>
+        </attribute>
+        <attribute>
+            <name>rowsPerPage</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>current value for the paginator (optional)</description>
+        </attribute>
+        <attribute>
+            <name>initialPage</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>current page index for the paginator (optional)</description>
+        </attribute>
+        <attribute>
+            <name>firstColumn</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>index of the first column to be included in the table (1-based, optional).</description>
         </attribute>
     </tag>
     <tag>
         <name>resultTableUpdater</name>
         <body-content>JSP</body-content>
-        <description>Updates the given result table on the current page. Useful for updates during partial page
-            rendering. Ajax4JSF: place this component in the page region that will be re-rendered (e.g. an
-            a4j:outputPanel component).
-        </description>
+        <description>Updates the given result table on the current page. Useful for updates during partial page rendering.  Ajax4JSF: place this component in the page region that will be re-rendered (e.g. an a4j:outputPanel component).  </description>
         <attribute>
             <name>var</name>
             <required>false</required>
             <rtexprvalue>false</rtexprvalue>
-            <description>name of the javascript variable that exposes the Yahoo DataTable widget (default: resultTable)
-            </description>
+            <description>name of the javascript variable that exposes the Yahoo DataTable widget (default: resultTable)</description>
         </attribute>
         <attribute>
             <name>value</name>
@@ -364,37 +424,49 @@
             <rtexprvalue>false</rtexprvalue>
             <description>the result set to be rendered, or a plain text FxSQL query</description>
         </attribute>
+        <attribute>
+            <name>previewSize</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>name of the preview size to be used for thumbnails </description>
+        </attribute>
+        <attribute>
+            <name>firstColumn</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>index of the first column to be included in the table (1-based, optional).</description>
+        </attribute>
     </tag>
     <tag>
         <name>yuiSetup</name>
         <body-content>JSP</body-content>
-        <description>Initializes the Yahoo UI component library shipped with flexive. Include this near the end of all
-            pages where you may want to use Yahoo UI. The Yahoo Loader is only executed when at least one flexive
-            component on the page uses a Yahoo widget, so the performance impact is minimal if no widget is used.
-        </description>
+        <description> Initializes the Yahoo UI component library shipped with flexive. Include this near the end of all pages where you may want to use Yahoo UI.  The Yahoo Loader is only executed when at least one flexive component on the page uses a Yahoo widget, so the performance impact is minimal if no widget is used.  </description>
     </tag>
     <tag>
-      <name>linearizeFxValueInputs</name>
-      <body-content>JSP</body-content>
-      <description>Helper tag to linearize the navigation between all fx:fxValueInput instances on a page. After activating the first input on the page, the user can navigate to all following using the "tab" key (i.e. the tabindex will be strictly increasing for all succeeding inputs, skipping other navigation elements and the language selects).  This tag requires YUI. Add this component near the end of the page, but before the call to fx:yuiSetup.  </description>
-      <attribute>
-        <name>startIndex</name>
-        <required>false</required>
-        <rtexprvalue>false</rtexprvalue>
-        <description>the first tab-index to be used</description>
-      </attribute>
-      <attribute>
-        <name>rootNode</name>
-        <required>false</required>
-        <rtexprvalue>false</rtexprvalue>
-        <description>an optional root DOM node ID where the search for fx:fxValueInput elements should start</description>
-      </attribute>
+        <name>linearizeFxValueInputs</name>
+        <body-content>JSP</body-content>
+        <description>Helper tag to linearize the navigation between all fx:fxValueInput instances on a page. After activating the first input on the page, the user can navigate to all following using the "tab" key (i.e. the tabindex will be strictly increasing for all succeeding inputs, skipping other navigation elements and the language selects).  This tag requires YUI. Add this component near the end of the page, but before the call to fx:yuiSetup.  </description>
+        <attribute>
+            <name>startIndex</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>the first tab-index to be used</description>
+        </attribute>
+        <attribute>
+            <name>rootNode</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>an optional root DOM node ID where the search for fx:fxValueInput elements should start</description>
+        </attribute>
     </tag>
     <tag>
-      <name>resizable</name>
-      <body-content>JSP</body-content>
-      <description>Adds a YUI Resize control for the body contents.  </description>
+        <name>resizable</name>
+        <body-content>JSP</body-content>
+        <description>Adds a YUI Resize control for the body contents. The child element should specify 100% for both width and height to adapt to the resize box size.   </description>
     </tag>
+
+    <!-- Docbook-based TLD start -->
+
     <tag>
         <name>colorPicker</name>
         <body-content>JSP</body-content>
@@ -462,9 +534,7 @@
             <name>value</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>An expression of type FxValue of the value to be edited. Note that the value must not be null,
-                otherwise the input component cannot determine the actual FxValue type.
-            </description>
+            <description>An expression of type FxValue of the value to be edited. Note that the  value must not be null, otherwise the input component cannot determine  the actual FxValue type.</description>
         </attribute>
         <attribute>
             <name>id</name>
@@ -476,9 +546,7 @@
             <name>externalId</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>An optional external ID that overrides the clientId in JSF validation error messages - may be
-                necessary in complex, generic forms, but usually you won't need this.
-            </description>
+            <description>An optional external ID that overrides the clientId in JSF validation error messages  -  may be necessary in complex, generic forms, but usually you won't need this.</description>
         </attribute>
         <attribute>
             <name>readOnly</name>
@@ -490,82 +558,61 @@
             <name>readOnlyShowTranslations</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>If true, all translations of a property will be shown, else only the best matching translation
-                (in the calling users language or the language marked as default).
-            </description>
+            <description>If true, all translations of a property will be shown, else only the best matching  translation (in the calling users language or the language marked as default).</description>
         </attribute>
         <attribute>
             <name>forceLineInput</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>For multiline and HTML properties, force to render a single-line input field (e.g. for search
-                query forms).
-            </description>
+            <description>For multiline and HTML properties, force to render a single-line input field (e.g.  for search query forms).</description>
         </attribute>
         <attribute>
             <name>inputMapper</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>An optional input mapper for rendering the input control. For example, properties referencing
-                other content may need a custom input mapper that provides a select list of content instances. For more
-                information take a look at the InputMapper documentation and at .
-            </description>
+            <description>An optional input mapper for rendering the input control. For example, properties  referencing other content may need a custom input mapper that provides a select list  of content instances. For more information take a look at the InputMapper documentation and at .</description>
         </attribute>
         <attribute>
             <name>valueFormatter</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>A FxValueFormatter to be used for rendering the value (in read-only mode only). If not
-                specified, the JSF renderer will choose the appropriate default formatter for the actual value class.
-            </description>
+            <description>A FxValueFormatter to be used for rendering the value (in read-only mode only). If not specified,  the JSF renderer will choose the appropriate default formatter for  the actual value class.</description>
         </attribute>
         <attribute>
             <name>filter</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>If set to false, HTML output will not be filtered. If set to true (the default), HTML entities
-                will be used for sensitive characters (e.g. "&amp;lt;" instead of "&lt;").
-            </description>
+            <description>If set to false, HTML output will not be filtered. If set to true (the default),  HTML entities will be used for sensitive characters (e.g. "&amp;lt;"  instead of "&lt;").</description>
         </attribute>
         <attribute>
             <name>containerDivClass</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>If this CSS class property is set, the component will be embedded in a div-container using this
-                CSS class as style.
-            </description>
+            <description>If this CSS class property is set, the component will be embedded in a div-container  using this CSS class as style.</description>
         </attribute>
         <attribute>
             <name>disableMultiLanguage</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>Disables multi language support even if the FxValue object is multilingual. Only the default
-                translation will be displayed and updated.
-            </description>
+            <description>Disables multi language support even if the FxValue object is multilingual.  Only the default translation will be displayed and updated.</description>
         </attribute>
         <attribute>
             <name>disableLytebox</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>Set this property to true if the Lytebox javascript library used for rendering inline previews
-                of images should not be used.
-            </description>
+            <description>Set this property to true if the Lytebox javascript library used for rendering inline previews of images should not be used.</description>
         </attribute>
         <attribute>
             <name>onchange</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>An optional javascript expression to be called when an input element changed its value.
-            </description>
+            <description>An optional javascript expression to be called when an input element  changed its value.</description>
         </attribute>
         <attribute>
             <name>autocompleteHandler</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>An instance of the flexive.yui.AutoCompleteHandler javascript class. This class provides a
-                query method for a client-side autocomplete widget provided by Yahoo UI, as well as a method for
-                formatting the response.
-            </description>
+            <description>An instance of the flexive.yui.AutoCompleteHandler javascript class. This class provides a query method for a  client-side autocomplete widget provided by Yahoo UI, as well as a method  for formatting the response.</description>
         </attribute>
     </tag>
     <tag>
@@ -575,19 +622,13 @@
             <name>var</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>The name of the variable that provides the content. The actual FxContent instance itself is
-                provided in "#{var}_content", i.e. if var="project", then the FxContent is supplied in
-                "project_content".
-            </description>
+            <description>The name of the variable that provides the content. The actual FxContent  instance  itself  is provided in "#{var}_content", i.e. if var="project",  then the FxContent is supplied in "project_content".</description>
         </attribute>
         <attribute>
             <name>pk</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>A primary key. May be supplied as an FxPK object, a long ID, a String containing a primary key
-                (e.g. "5", "5.1", "5.MAX"), a FxReference, or a FxSelectListItem whose ID will be interpreted as a
-                content ID.
-            </description>
+            <description>A primary key. May be supplied as an FxPK object, a long ID, a String containing a primary key (e.g. "5", "5.1", "5.MAX"), a FxReference, or a FxSelectListItem whose ID will be interpreted as a content ID.</description>
         </attribute>
         <attribute>
             <name>type</name>
@@ -602,19 +643,16 @@
             <description>The new content type name (if no PK was specified)</description>
         </attribute>
         <attribute>
-            <name>preserveContent</name>
-            <required>false</required>
-            <rtexprvalue>true</rtexprvalue>
-            <description>If set to true, the content instance will be stored in the JSF viewstate. This is
-                memory-expensive, but is necessary for editor pages that modify the content structure, e.g. pages that
-                allow to add or remove groups or properties. By default, this option is set to false.
-            </description>
-        </attribute>
-        <attribute>
             <name>content</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
             <description>The content instance to be displayed (if no PK was specified).</description>
+        </attribute>
+        <attribute>
+            <name>preserveContent</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>If set to true, the content instance will be stored in the JSF viewstate. This  is  memory-expensive, but is necessary for editor pages that modify the content  structure, e.g. pages that allow to add or remove groups or properties. By  default,  this option is set to false.</description>
         </attribute>
     </tag>
     <tag>
@@ -630,9 +668,7 @@
             <name>var</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>The value of the "var" attribute of the &lt;fx:content&gt; component whose content should be
-                edited. If nested directly in a fx:content tag, this attribute can be omitted.
-            </description>
+            <description>The value of the "var" attribute of the &lt;fx:content&gt; component whose content should be edited. If nested directly in a  fx:content tag, this attribute can be omitted.</description>
         </attribute>
         <attribute>
             <name>labelKey</name>
@@ -648,10 +684,7 @@
             <name>var</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>Name of the variable that provides the content. The actual FxContent instance itself is
-                provided in "#{var}_content", i.e. if var="project", then the FxContent is supplied in
-                "project_content".
-            </description>
+            <description>Name of the variable that provides the content. The actual FxContent instance itself  is provided in "#{var}_content", i.e. if var="project", then the FxContent is  supplied in "project_content".</description>
         </attribute>
         <attribute>
             <name>indexVar</name>
@@ -669,9 +702,7 @@
             <name>explode</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>Indicates whether the content instances should be "exploded", i.e. whether empty properties
-                should be initialized. Useful for content editors. Defaults to false.
-            </description>
+            <description>Indicates whether the content instances should be "exploded",  i.e. whether empty properties  should be initialized. Useful for content editors. Defaults to false.</description>
         </attribute>
     </tag>
     <tag>
@@ -711,65 +742,51 @@
             <name>linkFormatter</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>A ContentLinkFormatter instance that will be used for rendering links to contents. This applies
-                to the rendering of the virtual properties @pk and @path , as described in . If not specified, the
-                default ContentLinkFormatter will be used. For a description of the supported link format, please refer
-                to the [fleXive] JavaDoc of this class.
-            </description>
+            <description>A ContentLinkFormatter instance that will be used for rendering links to contents.  This applies to the rendering of the virtual properties @pk and @path , as described in .  If not specified, the default ContentLinkFormatter will be used. For a description of the supported link format,  please refer to the [fleXive] JavaDoc of this class.</description>
         </attribute>
         <attribute>
             <name>contentLinkFormat</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>The format string passed to the linkFormatter for content links, i.e. FxPK values. For a
-                description of the supported link format of the default formatter, please refer to the [fleXive] JavaDoc
-                of this class.
-            </description>
+            <description>The format string passed to the linkFormatter for content links, i.e. FxPK values. For a description of the supported link format of the default formatter,  please refer to the [fleXive] JavaDoc of this class.</description>
         </attribute>
         <attribute>
             <name>itemLinkFormat</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>The format string used for FxPaths values as returned by the virtual @path property. For a
-                description of the supported link format of the default formatter, please refer to the [fleXive] JavaDoc
-                of this class.
-            </description>
+            <description>The format string used for FxPaths values as returned by the virtual @path property. For a description of the supported link format of the default  formatter,  please refer to the [fleXive] JavaDoc of this class.</description>
         </attribute>
     </tag>
     <tag>
-        <name>thumbnail</name>
-        <body-content>JSP</body-content>
         <attribute>
             <name>pk</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>The primary key of the content instance. If the PK is specified, the default thumbnail of the
-                content is rendered.
-            </description>
+            <description>The primary key of the content instance. If the PK is specified,  the default thumbnail of the content is rendered.</description>
         </attribute>
         <attribute>
             <name>binary</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>A specific binary entry of type FxBinary to be rendered. This is useful for for content types
-                with more than one binary property. For an example, see .
-            </description>
+            <description>A specific binary entry of type FxBinary to be rendered. This is useful for for content types with more than one binary  property. For an example, see .</description>
         </attribute>
         <attribute>
             <name>urlOnly</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>If true, only the thumbnail URL will be rendered (relative to the context root, e.g.
-                thumbnail/pk5.1/s0 ).
-            </description>
+            <description>If true, only the thumbnail URL will be rendered (relative to the context root,  e.g. thumbnail/pk5.1/s0 ).</description>
         </attribute>
         <attribute>
             <name>previewSize</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>The desired size of the thumbnail. Valid values are taken from BinaryDescriptor.PreviewSizes :
-                PREVIEW1 , PREVIEW2 (default), PREVIEW3 , ORIGINAL.
-            </description>
+            <description>The desired size of the thumbnail. Valid values are taken from BinaryDescriptor.PreviewSizes : PREVIEW1 , PREVIEW2 (default), PREVIEW3 , SCREENVIEW , ORIGINAL.</description>
+        </attribute>
+        <attribute>
+            <name>forceVersion</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>If set to max or live ,  it overrides the version information in the PK or binary descriptor.</description>
         </attribute>
     </tag>
     <tag>
@@ -781,40 +798,58 @@
         <name>navigation</name>
         <body-content>JSP</body-content>
         <attribute>
-          <name>var</name>
-          <required>false</required>
-          <rtexprvalue>true</rtexprvalue>
-          <description>The variable name where the current tree node of type FxTreeNode will be exposed to the page.</description>
+            <name>var</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>The variable name where the current tree node of type FxTreeNode will be exposed to the page.</description>
         </attribute>
         <attribute>
-          <name>output</name>
-          <required>false</required>
-          <rtexprvalue>true</rtexprvalue>
-          <description>The output format. default Plain HTML output. csspopup Renders additional CSS classes that will show only  the first tree level and open the subfolders when the  mouse hovers over them. yui Renders additional markup that allows the Yahoo UI  Menu component to build a menu. If JavaScript is disabled,  the plain HTML markup is shown to the use.  Note that you have to include YUI on the page with &lt;fx:includes&gt; .</description>
+            <name>output</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>The output format. default Plain HTML output. csspopup Renders additional CSS classes that will show only  the first tree level and open the subfolders when the  mouse hovers over them. yui Renders additional markup that allows the Yahoo UI  Menu component to build a menu. If JavaScript is disabled,  the plain HTML markup is shown to the use.  Note that you have to include YUI on the page with &lt;fx:includes&gt; .</description>
         </attribute>
         <attribute>
-          <name>path</name>
-          <required>false</required>
-          <rtexprvalue>true</rtexprvalue>
-          <description>The tree folder to be rendered. If none is specified, the root folder  ("/") is rendered.</description>
+            <name>path</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>The tree folder to be rendered. If none is specified, the root folder  ("/") is rendered.</description>
         </attribute>
         <attribute>
-          <name>mode</name>
-          <required>false</required>
-          <rtexprvalue>true</rtexprvalue>
-          <description>The tree mode, "edit" or "live" (default).</description>
+            <name>mode</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>The tree mode, "edit" or "live" (default).</description>
         </attribute>
         <attribute>
-          <name>depth</name>
-          <required>false</required>
-          <rtexprvalue>true</rtexprvalue>
-          <description>The maximum tree depth for sub folders. For example, a value of 2 will render  content of the given tree path and the first level of subfolders.</description>
+            <name>depth</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>The maximum tree depth for sub folders. For example, a value of 2 will render  content of the given tree path and the first level of subfolders.</description>
         </attribute>
         <attribute>
-          <name>selectedNodeId</name>
-          <required>false</required>
-          <rtexprvalue>true</rtexprvalue>
-          <description>If specified, the given tree node ID will be highlighted in the HTML output.</description>
+            <name>selectedNodeId</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>If specified, the given tree node ID will be highlighted in the HTML output.</description>
+        </attribute>
+        <attribute>
+            <name>baseTypeId/baseTypeName</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>An optional type filter for the rendered nodes. Only nodes whose reference  is of the given type (or a subtype of the given type) are rendered. When a non-folder base type is specified, folders are (by default) not  rendered in the response. You can override this by setting the includeFolders attribute.</description>
+        </attribute>
+        <attribute>
+            <name>includeFolders</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>When baseTypeId/baseTypeName is set, setting this attribute to "true" will include folders  and their contents in the output even if the specified base type  is not a folder.</description>
+        </attribute>
+        <attribute>
+            <name>includeRoot</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>When set to true, the root node of the rendered (sub-)tree is  included in the output. (default: false)</description>
         </attribute>
     </tag>
     <tag>
@@ -832,7 +867,7 @@
             <required>true</required>
             <rtexprvalue>true</rtexprvalue>
             <description>Id of the content editor component (must be unique in a view,
-                        used as key to retrieve a specific content instance stored in view-state).
+                used as key to retrieve a specific content instance stored in view-state).
             </description>
         </attribute>
         <attribute>
@@ -888,15 +923,15 @@
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
             <description>True if the content for the given editor id should be reset upon the next request
-                (==removed from content storage and reinitilaized with given attributes, default: false).</description>
+            (==removed from content storage and reinitilaized with given attributes, default: false).</description>
         </attribute>
         <attribute>
             <name>reRender</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
             <description>External client id which is to be rerendered upon the next AJAX-request triggered
-                        by the content editor component. Useful for rerendering a component containing
-                        several fxContentEditors.
+                by the content editor component. Useful for rerendering a component containing
+                several fxContentEditors.
             </description>
         </attribute>
         <attribute>
@@ -984,4 +1019,57 @@
             <description>True if the &lt;h:messages/&gt; tag inside the content editor should not be rendered (default:false).</description>
         </attribute>
     </tag>
+
+    <tag>
+        <name>thumbnail</name>
+        <body-content>JSP</body-content>
+        <description>Render a thumbnail for a [fleXive] binary property.</description>
+
+        <attribute>
+            <name>pk</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>The primary key of the content instance. If the PK is specified,  the default thumbnail of the content is rendered.</description>
+        </attribute>
+        <attribute>
+            <name>binary</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>A specific binary entry of type FxBinary to be rendered. This is useful for for content types with more than one binary  property. For an example, see .</description>
+        </attribute>
+        <attribute>
+            <name>urlOnly</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>If true, only the thumbnail URL will be rendered (relative to the context root,  e.g. thumbnail/pk5.1/s0 ).</description>
+        </attribute>
+        <attribute>
+            <name>previewSize</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>The desired size of the thumbnail. Valid values are taken from BinaryDescriptor.PreviewSizes : PREVIEW1 , PREVIEW2 (default), PREVIEW3 , SCREENVIEW , ORIGINAL.</description>
+        </attribute>
+        <attribute>
+            <name>forceVersion</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>If set to max or live ,  it overrides the version information in the PK or binary descriptor.</description>
+        </attribute>
+    </tag>
+
+    <tag>
+        <name>fxCeRenderFields</name>
+        <body-content>JSP</body-content>
+    </tag>
+    
+    <tag>
+        <name>fxCeRenderFieldsMenu</name>
+        <body-content>JSP</body-content>
+    </tag>
+
+    <tag>
+        <name>wrappedContentProvider</name>
+        <body-content>JSP</body-content>
+    </tag>
+
 </taglib>

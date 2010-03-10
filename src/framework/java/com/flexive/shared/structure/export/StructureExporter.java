@@ -158,7 +158,6 @@ public class StructureExporter implements StructureExporterCallback {
     /**
      * {@inheritDoc}
      */
-    @Override
     public long getTypeId() {
         return typeId;
     }
@@ -166,7 +165,6 @@ public class StructureExporter implements StructureExporterCallback {
     /**
      * {@inheritDoc}
      */
-    @Override
     public void setDependencies(Map<Long, List<Long>> dependencies) {
         result.cachedDependencies = dependencies;
     }
@@ -174,7 +172,6 @@ public class StructureExporter implements StructureExporterCallback {
     /**
      * {@inheritDoc}
      */
-    @Override
     public Map<FxType, List<FxAssignment>> getDependencies() throws FxApplicationException {
         if (!getHasDependencies())
             return null;
@@ -187,7 +184,6 @@ public class StructureExporter implements StructureExporterCallback {
     /**
      * {@inheritDoc}
      */
-    @Override
     public List<StructureExporterCallback> getDependencyStructures() throws FxInvalidStateException {
         if (!getHasDependencies())
             throw new FxInvalidStateException("StructureExport.ex.noDependencies");
@@ -205,7 +201,6 @@ public class StructureExporter implements StructureExporterCallback {
     /**
      * {@inheritDoc}
      */
-    @Override
     public List<Long> getDifferingDerivedAssignments() throws FxInvalidStateException {
         if(!getHasDependencies() && !dependencyStructureInitialised)
             throw new FxInvalidStateException("StructureExport.ex.noDependencies");
@@ -272,7 +267,6 @@ public class StructureExporter implements StructureExporterCallback {
     /**
      * {@inheritDoc}
      */
-    @Override
     public void setTypeAssignments(Map<FxType, List<FxAssignment>> typeAssignments) {
         result.typeAssignments = typeAssignments;
     }
@@ -280,7 +274,6 @@ public class StructureExporter implements StructureExporterCallback {
     /**
      * {@inheritDoc}
      */
-    @Override
     public void setGroupAssignments(Map<FxGroupAssignment, List<FxAssignment>> groupAssignments) {
         result.groupAssignments = groupAssignments;
     }
@@ -288,7 +281,6 @@ public class StructureExporter implements StructureExporterCallback {
     /**
      * {@inheritDoc}
      */
-    @Override
     public Map<FxType, List<FxAssignment>> getTypeAssignments() {
         return result.typeAssignments;
     }
@@ -296,12 +288,10 @@ public class StructureExporter implements StructureExporterCallback {
     /**
      * {@inheritDoc}
      */
-    @Override
     public Map<FxGroupAssignment, List<FxAssignment>> getGroupAssignments() {
         return result.groupAssignments;
     }
 
-    @Override
     public boolean getHasDependencies() {
         return !this.ignoreDependencies && result.cachedDependencies != null;
     }
@@ -357,7 +347,6 @@ public class StructureExporter implements StructureExporterCallback {
     /**
      * {@inheritDoc}
      */
-    @Override
     public StructureExporterCallback getDependencyStructure(long typeId) throws FxInvalidStateException {
         if (!getHasDependencies())
             throw new FxInvalidStateException("StructureExport.ex.noDependencies");
@@ -382,7 +371,6 @@ public class StructureExporter implements StructureExporterCallback {
     /**
      * {@inheritDoc}
      */
-    @Override
     public boolean getIsMultipleTypeCall() {
         return isMultiTypeCall;
     }
@@ -390,7 +378,6 @@ public class StructureExporter implements StructureExporterCallback {
     /**
      * {@inheritDoc}
      */
-    @Override
     public List<Long> getTypeIds() {
         if (!isMultiTypeCall)
             return null;
@@ -400,7 +387,6 @@ public class StructureExporter implements StructureExporterCallback {
     /**
      * {@inheritDoc}
      */
-    @Override
     public void setDependentOnMapping(Map<Long, Long> dependentOnMapping) {
         result.dependentOnMapping = dependentOnMapping;
     }
@@ -408,7 +394,6 @@ public class StructureExporter implements StructureExporterCallback {
     /**
      * {@inheritDoc}
      */
-    @Override
     public Map<Long, Map<String, List<Long>>> getTypeScriptMapping() {
         populateTypeScriptMapping();
         return typeScriptMapping;
@@ -417,7 +402,6 @@ public class StructureExporter implements StructureExporterCallback {
     /**
      * {@inheritDoc}
      */
-    @Override
     public Map<Long, Map<String, List<Long>>> getAssignmentScriptMapping() {
         populateAssignmentScriptMapping();
         return assignmentScriptMapping;
@@ -527,7 +511,6 @@ public class StructureExporter implements StructureExporterCallback {
     /**
      * {@inheritDoc}
      */
-    @Override
     public Map<Long, Long> getDependentOnMapping() {
         return result.dependentOnMapping;
     }
