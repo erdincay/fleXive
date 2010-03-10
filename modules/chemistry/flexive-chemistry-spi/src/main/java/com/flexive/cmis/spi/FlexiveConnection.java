@@ -41,7 +41,6 @@ import com.flexive.shared.exceptions.*;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNode;
-import com.google.common.collect.Maps;
 import org.apache.chemistry.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;

@@ -87,7 +87,7 @@ public class FlexiveFolder extends FlexiveObjectEntry implements Folder {
      * @param context   the connection context
      * @param node      the tree node
      */
-    public FlexiveFolder(FlexiveConnection.Context context, FxTreeNode node) {
+    FlexiveFolder(FlexiveConnection.Context context, FxTreeNode node) {
         super(context);
         FxSharedUtils.checkParameterNull(node, "node");
         this.nodeId = node.getId();
@@ -102,7 +102,7 @@ public class FlexiveFolder extends FlexiveObjectEntry implements Folder {
      * @param context   the connection context
      * @param nodeId    the tree node ID
      */
-    public FlexiveFolder(FlexiveConnection.Context context, long nodeId) {
+    FlexiveFolder(FlexiveConnection.Context context, long nodeId) {
         this(context, FxTreeMode.Edit, nodeId);
     }
 
@@ -114,7 +114,7 @@ public class FlexiveFolder extends FlexiveObjectEntry implements Folder {
      * @param treeMode  the tree mode
      * @param nodeId    the tree node ID
      */
-    public FlexiveFolder(FlexiveConnection.Context context, FxTreeMode treeMode, long nodeId) {
+    FlexiveFolder(FlexiveConnection.Context context, FxTreeMode treeMode, long nodeId) {
         super(context);
         if (nodeId == -1) {
             throw new IllegalArgumentException("Folder not found.");
@@ -233,9 +233,9 @@ public class FlexiveFolder extends FlexiveObjectEntry implements Folder {
     public List<Folder> getAncestors() {
         try {
             final List<Folder> result = newArrayList();
-            for (long nodeId : EJBLookup.getTreeEngine().getIdChain(getTreeMode(), getNodeId())) {
-                if (nodeId != getNodeId()) {
-                    result.add(new FlexiveFolder(context, nodeId));
+            for (long pathNodeId : EJBLookup.getTreeEngine().getIdChain(getTreeMode(), getNodeId())) {
+                if (pathNodeId != getNodeId()) {
+                    result.add(new FlexiveFolder(context, pathNodeId));
                 }
             }
             return result;

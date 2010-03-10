@@ -41,7 +41,6 @@ import com.flexive.core.search.cmis.impl.CmisSqlQuery;
 import com.flexive.core.search.cmis.impl.sql.MySQL.MySqlDialect;
 import com.flexive.core.search.cmis.impl.sql.SqlDialect;
 import com.flexive.core.search.genericSQL.GenericSQLDataFilter;
-import com.flexive.core.search.genericSQL.GenericSQLDataSelector;
 import com.flexive.core.storage.*;
 import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.exceptions.FxNotFoundException;
@@ -118,7 +117,7 @@ public class MySQLStorageFactory extends GenericDBStorage  implements DBStorage 
      * {@inheritDoc}
      */
     public DataSelector getDataSelector(SqlSearch search) throws FxSqlSearchException {
-        return new GenericSQLDataSelector(search);
+        return new MySQLDataSelector(search);
     }
 
     /**

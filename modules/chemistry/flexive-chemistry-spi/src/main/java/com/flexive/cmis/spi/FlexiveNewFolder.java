@@ -58,7 +58,7 @@ public class FlexiveNewFolder extends FlexiveFolder {
      * @param typeId    the folder type ID
      * @param parent    the parent folder
      */
-    public FlexiveNewFolder(FlexiveConnection.Context context, String typeId, FlexiveFolder parent) {
+    FlexiveNewFolder(FlexiveConnection.Context context, String typeId, FlexiveFolder parent) {
         super(context, parent == null
                 ? null
                 : FxTreeNodeEdit.createNew("").setParentNodeId(parent.getNode().getId())
@@ -83,7 +83,7 @@ public class FlexiveNewFolder extends FlexiveFolder {
      * @param content   the folder content
      * @param parent    the parent folder
      */
-    public FlexiveNewFolder(FlexiveConnection.Context context, FxTreeNode node, FxContent content, FlexiveFolder parent) {
+    FlexiveNewFolder(FlexiveConnection.Context context, FxTreeNode node, FxContent content, FlexiveFolder parent) {
         super(context, node);
         if (node.getId() >= 0) {
             throw new IllegalArgumentException("Node has already been saved (ID=" + node.getId() + ")");

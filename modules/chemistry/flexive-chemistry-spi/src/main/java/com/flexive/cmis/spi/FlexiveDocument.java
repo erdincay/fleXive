@@ -78,7 +78,7 @@ public class FlexiveDocument extends FlexiveObjectEntry implements Document {
     private FxTreeNode _cachedFolderParent; // the parent if the document was loaded from a folder
     private LifeCycleInfo _cachedLifeCycleInfo;
 
-    public FlexiveDocument(FlexiveConnection.Context context, FxContent content) {
+    FlexiveDocument(FlexiveConnection.Context context, FxContent content) {
         super(context);
         this._cachedContent = content;
         this.pk = content.getPk();
@@ -86,11 +86,11 @@ public class FlexiveDocument extends FlexiveObjectEntry implements Document {
         this.treePathName = null;
     }
 
-    public FlexiveDocument(FlexiveConnection.Context context, FxPK pk) {
+    FlexiveDocument(FlexiveConnection.Context context, FxPK pk) {
         this(context, pk, -1, null, null);
     }
 
-    public FlexiveDocument(FlexiveConnection.Context context, FxTreeNode node, FxTreeNode folderParent) {
+    FlexiveDocument(FlexiveConnection.Context context, FxTreeNode node, FxTreeNode folderParent) {
         this(
                 context,
                 node.getReference(),
@@ -101,7 +101,7 @@ public class FlexiveDocument extends FlexiveObjectEntry implements Document {
         applyNodeInfo(node);
     }
 
-    public FlexiveDocument(FlexiveConnection.Context context, FxTreeNode node, long folderParentId) {
+    FlexiveDocument(FlexiveConnection.Context context, FxTreeNode node, long folderParentId) {
         this(
                 context,
                 node.getReference(),
@@ -112,7 +112,7 @@ public class FlexiveDocument extends FlexiveObjectEntry implements Document {
         applyNodeInfo(node);
     }
 
-    protected FlexiveDocument(FlexiveConnection.Context context, FxPK pk, long folderParentId, FxTreeNode folderParent,
+    FlexiveDocument(FlexiveConnection.Context context, FxPK pk, long folderParentId, FxTreeNode folderParent,
                               String treePathName) {
         super(context);
         this.pk = pk;

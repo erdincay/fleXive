@@ -62,9 +62,9 @@ public class FlexiveResultObject extends BaseObject implements ObjectEntry {
     private static final Log LOG = LogFactory.getLog(FlexiveResultObject.class);
 
     private final CmisResultRow row;
-    protected final FlexiveConnection.Context context;
+    final FlexiveConnection.Context context;
 
-    public FlexiveResultObject(FlexiveConnection.Context context, CmisResultRow row) {
+    FlexiveResultObject(FlexiveConnection.Context context, CmisResultRow row) {
         this.row = row;
         this.context = context;
     }

@@ -592,6 +592,7 @@ public class BriefcaseEngineBean implements BriefcaseEngine, BriefcaseEngineLoca
             stmt = con.prepareStatement("SELECT id, metadata FROM " + TBL_BRIEFCASE_DATA
                     + " WHERE briefcase_id=?"
                     + (itemId == -1 ? "" : " AND id=?")
+                    + " ORDER BY pos"
                     + (forUpdate ? " FOR UPDATE" : ""));
             stmt.setLong(1, id);
             if (itemId != -1) {

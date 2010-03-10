@@ -56,7 +56,7 @@ public class FlexiveNewDocument extends FlexiveDocument {
      * @param content   the (unsaved) content instance
      * @param folder    the parent folder, or null for creating an unfiled document
      */
-    public FlexiveNewDocument(FlexiveConnection.Context context, FxContent content, FlexiveFolder folder) {
+    FlexiveNewDocument(FlexiveConnection.Context context, FxContent content, FlexiveFolder folder) {
         super(context, content);
         if (!content.getPk().isNew()) {
             throw new IllegalArgumentException("Content is already saved (PK=" + content.getPk().toString() + ")");
@@ -73,7 +73,7 @@ public class FlexiveNewDocument extends FlexiveDocument {
      * @param typeName  the desired content type name
      * @param folder    the parent folder, or null for creating an unfiled document
      */
-    public FlexiveNewDocument(FlexiveConnection.Context context, String typeName, FlexiveFolder folder) {
+    FlexiveNewDocument(FlexiveConnection.Context context, String typeName, FlexiveFolder folder) {
         super(context, newContent(typeName));
         this.content = super.getContent();
         this.folder = folder;

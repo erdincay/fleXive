@@ -67,7 +67,7 @@ public abstract class FlexiveObjectEntry extends BaseObject implements ObjectEnt
     protected final FlexiveConnection.Context context;
     protected final Map<String, Property> properties = new HashMap<String, Property>();
 
-    protected FlexiveObjectEntry(FlexiveConnection.Context context) {
+    FlexiveObjectEntry(FlexiveConnection.Context context) {
         this.context = context;
     }
 

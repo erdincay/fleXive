@@ -1526,6 +1526,40 @@ public class SearchEngineTest {
         }
     }
 
+    @Test
+    public void testNodePosition_FX746() throws FxApplicationException {
+        final long parentId = getTreeEngine().save(FxTreeNodeEdit.createNew("FX746").setParentNodeId(FxTreeNode.ROOT_NODE));
+        try {
+            final int numChildren = 5;
+            for (int i = 0; i < numChildren; i++) {
+                getTreeEngine().save(
+                        FxTreeNodeEdit.createNew("child_" + i)
+                        .setParentNodeId(parentId)
+                        .setPosition(i)
+                );
+            }
+            final FxTreeNode tree = getTreeEngine().getTree(FxTreeMode.Edit, parentId, 1);
+            assertEquals(tree.getDirectChildCount(), numChildren);
+            assertEquals(tree.getChildren().size(), numChildren);
+            for (int i = 0; i < numChildren; i++) {
+                assertEquals(tree.getChildren().get(i).getName(), "child_" + i);
+            }
+
+            // check with FxSQL
+            FxContext.get().setNodeId(parentId);    // see FX-718
+            final FxResultSet result = EJBLookup.getSearchEngine().search("SELECT @pk, @node_position WHERE IS CHILD OF '/FX746' ORDER BY @node_position");
+            assertEquals(result.getRowCount(), numChildren);
+            int lastPosition = 0;
+            final String positions = result.collectColumn(2).toString();
+            for (FxResultRow row : result.getResultRows()) {
+                assertTrue(row.getInt(2) > lastPosition, "Order by @node_position not ascending: " + positions);
+                lastPosition = row.getInt(2);
+            }
+        } finally {
+            getTreeEngine().remove(FxTreeMode.Edit, parentId, FxTreeRemoveOp.Remove, true);
+        }
+    }
+
     private void queryForCaption(String name) throws FxApplicationException {
         final FxResultSet result = new SqlQueryBuilder().select("caption").condition("caption", PropertyValueComparator.EQ, name).getResult();
         assertTrue(result.getRowCount() == 1, "Expected one result row, got: " + result.getRowCount());
