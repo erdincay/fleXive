@@ -108,6 +108,7 @@ TOKEN [IGNORE_CASE] :
 | < ORDER_BY  : "ORDER"(" ")*"BY" >
 | < IN_OR_NOTIN: ("IN"|"NOT IN") >
 | < SELECT    : "SELECT " >
+| < AS        : "AS" >
 | < DISTINCT    : "DISTINCT " >
 | < RELATION    : "RELATION" >
 | < RECURSIVE    : "RECURSIVE" >
@@ -282,20 +283,20 @@ Value selectedValue(final FxStatement PI)  throws SqlParserException  :
 	{
 		return vi.addFunction(t1.image);
 	}
-	| t1=<SYM_SELECT_ITEM> [alias=<IDENTIFIER>]
+	| t1=<SYM_SELECT_ITEM> [[<AS>] alias=<IDENTIFIER>]
 	{
 		Property p = new Property(PI, t1.image);
 		PI.addSelectedValue(p,alias==null?null:alias.image);
 		return p;
 	}
-	| t1=<IDENTIFIER> [alias=<IDENTIFIER>]
+	| t1=<IDENTIFIER> [[<AS>] alias=<IDENTIFIER>]
 	{
 	    // a property without table alias
         Property p2 = new Property("co",t1.image,null);
         PI.addSelectedValue(p2,alias != null ? alias.image : t1.image);
         return p2;
 	}
-	| con=constantValue() [alias=<IDENTIFIER>]
+	| con=constantValue() [[<AS>] alias=<IDENTIFIER>]
 	{
 		PI.addSelectedValue(con,alias==null?null:alias.image);
 		return con;

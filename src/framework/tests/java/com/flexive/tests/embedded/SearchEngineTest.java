@@ -1322,6 +1322,19 @@ public class SearchEngineTest {
     }
 
     @Test
+    public void columnAliasTest() throws FxApplicationException {
+        for (String bind: new String[] { "", " AS " }) {
+            final FxResultSet result = getSearchEngine().search(
+                    "SELECT @pk " + bind + " objectId, caption " + bind + " title\n",
+                    0, 10, null);
+            assertTrue(result.getRowCount() > 0);
+            assertNotNull(result.getResultRow(0).getPk("objectId"));
+            assertNotNull(result.getResultRow(0).getString("title"));
+        }
+    }
+
+
+    @Test
     public void selectEmptyPathTest() throws FxApplicationException {
         // select path for all items, will include empty paths like contact data
         final FxResultSet result = getSearchEngine().search("SELECT @path", 0, 99999, null);

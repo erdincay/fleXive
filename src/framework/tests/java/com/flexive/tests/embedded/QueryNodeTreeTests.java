@@ -75,6 +75,12 @@ public class QueryNodeTreeTests {
             return true;
         }
 
+        @Override
+        public boolean isValidInEnvironment() {
+            return true;
+        }
+
+
         public void buildSqlQuery(SqlQueryBuilder builder) {
         }
 
