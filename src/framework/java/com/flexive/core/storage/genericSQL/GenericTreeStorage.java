@@ -1609,14 +1609,16 @@ public abstract class GenericTreeStorage implements TreeStorage {
                     }
                 }
             }
-            edit.removeAll(live);
-            //remaining nodes only exist in edit tree
-            for (long editNode : edit)
-                try {
-                    folderPK = handleContentDeleted(con, ce, folderPK, typeId, getTreeNodeInfo(con, FxTreeMode.Edit, editNode));
-                } catch (FxNotFoundException e) {
-                    //ok, may be an already removed childnode
-                }
+            if (!liveVersionRemovedOnly) {
+                edit.removeAll(live);
+                //remaining nodes only exist in edit tree
+                for (long editNode : edit)
+                    try {
+                        folderPK = handleContentDeleted(con, ce, folderPK, typeId, getTreeNodeInfo(con, FxTreeMode.Edit, editNode));
+                    } catch (FxNotFoundException e) {
+                        //ok, may be an already removed childnode
+                    }
+            }
         } catch (SQLException se) {
             throw new FxTreeException(LOG, "ex.db.sqlError", se.getMessage());
         } finally {

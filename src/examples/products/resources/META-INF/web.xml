@@ -13,6 +13,13 @@
         <param-value>.xhtml</param-value>
     </context-param>
 
+    <!-- Disable JSF 2.0 Facelets -->
+    <context-param>
+        <param-name>javax.faces.DISABLE_FACELET_JSF_VIEWHANDLER</param-name>
+        <param-value>true</param-value>
+    </context-param>
+
+
     <!-- Facelets libraries that are not loaded through the classloader -->
     <context-param>
         <param-name>facelets.LIBRARIES</param-name>

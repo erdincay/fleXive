@@ -45,7 +45,12 @@ import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.security.Mandator;
 import com.flexive.shared.stream.FxStreamUtils;
 import com.flexive.shared.structure.*;
+import com.flexive.shared.tree.FxTreeMode;
+import com.flexive.shared.tree.FxTreeNode;
+import com.flexive.shared.tree.FxTreeNodeEdit;
+import com.flexive.shared.tree.FxTreeRemoveOp;
 import com.flexive.shared.value.*;
+import com.flexive.shared.workflow.StepDefinition;
 import static com.flexive.tests.embedded.FxTestUtils.*;
 import com.flexive.tests.embedded.ScriptingTest;
 import com.flexive.tests.embedded.TestUsers;
@@ -62,6 +67,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.util.List;
 import java.util.Arrays;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * Tests for the ContentEngine
@@ -70,6 +77,7 @@ import java.util.Arrays;
  */
 @Test(groups = {"ejb", "content"})
 public class ContentEngineTest {
+    private static final Log LOG = LogFactory.getLog(ContentEngineTest.class);
 
     private ContentEngine co;
     private ACLEngine acl;
@@ -1010,5 +1018,46 @@ public class ContentEngineTest {
             // pass
         }
         test.setAclIds(Arrays.asList(ACL.ACL_CONTACTDATA));
+    }
+
+    @Test
+    public void removeLiveVersionTest_FX807() throws FxApplicationException {
+
+        // create a content in live version, attach it to the root node
+        FxContent co = EJBLookup.getContentEngine().initialize(FxType.CONTACTDATA);
+        co.setStepByDefinition(StepDefinition.LIVE_STEP_ID);
+        final FxPK pk = EJBLookup.getContentEngine().save(co);
+        final long nodeId = EJBLookup.getTreeEngine().save(
+                FxTreeNodeEdit.createNew("FX807")
+                .setParentNodeId(FxTreeNode.ROOT_NODE)
+                .setReference(pk)
+        );
+
+        boolean success = false;
+        try {
+            assertEquals(EJBLookup.getTreeEngine().getIdByPath(FxTreeMode.Edit, "/FX807"), nodeId, "Node not found: " + nodeId);
+            
+            // put the content in the edit version
+            co = EJBLookup.getContentEngine().load(pk);
+            co.setStepByDefinition(StepDefinition.EDIT_STEP_ID);
+            EJBLookup.getContentEngine().save(co);
+
+            // should be still here
+            assertEquals(EJBLookup.getTreeEngine().getIdByPath(FxTreeMode.Edit, "/FX807"), nodeId, 
+                    "Node removed when setting edit version: " + nodeId);
+            success = true;
+        } finally {
+            // remove node and content
+            try {
+                EJBLookup.getTreeEngine().remove(FxTreeMode.Edit, nodeId, FxTreeRemoveOp.Remove, false);
+            } catch (FxApplicationException e) {
+                if (success) {
+                    throw e;
+                } else {
+                    // don't mask original error
+                    LOG.warn("removeLiveVersionTest_FX807: " + e.getMessage(), e);
+                }
+            }
+        }
     }
 }
