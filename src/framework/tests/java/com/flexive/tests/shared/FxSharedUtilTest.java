@@ -122,7 +122,8 @@ public class FxSharedUtilTest {
         final Pair<String, Long> timestamp = tsr.getTimestamps().get(0);
         Assert.assertEquals("test", timestamp.getFirst());
         final double millis = timestamp.getSecond() / 1000000.0;
-        Assert.assertTrue(Math.abs(50.0 - millis) < 5.0, "Timestamp does not match expected 50ms: " + millis);
+        // perform only vague sanity check since the results vary a lot...
+        Assert.assertTrue(Math.abs(50.0 - millis) < 20.0, "Timestamp does not match expected 50ms: " + millis);
     }
 
     private void assertSplitResult(String[] result, String[] expected) {

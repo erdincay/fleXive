@@ -611,7 +611,7 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
     public List<Step> loadSteps(Connection con) throws FxLoadException {
         Statement stmt = null;
         //                                      1      2               3                4
-        final String sql = "SELECT DISTINCT stp.ID, stp.WORKFLOW, stp.STEPDEF,stp.ACL " +
+        final String sql = "SELECT DISTINCT stp.ID, stp.WORKFLOW, stp.STEPDEF,stp.ACL, stp.POS " +
                 "FROM " + TBL_WORKFLOW_STEP + " stp ORDER BY stp.WORKFLOW, stp.POS, stp.ID";
         try {
             // Load all steps in the database
