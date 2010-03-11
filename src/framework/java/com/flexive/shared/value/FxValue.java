@@ -983,11 +983,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
         if (this.isEmpty() != otherValue.isEmpty()) return false;
         if (this.isMultiLanguage() != otherValue.isMultiLanguage()) return false;
         if (multiLanguage) {
-            if (!ArrayUtils.isEquals(this.translations.keySet().toArray(new Long[this.translations.keySet().size()]),
-                    otherValue.translations.keySet().toArray(new Long[otherValue.translations.keySet().size()])))
-                return false;
-            if (!ArrayUtils.isEquals(this.translations.values().toArray(),
-                    otherValue.translations.values().toArray())) return false;
+            return this.translations.equals(otherValue.translations);
         } else {
             if (!this.isEmpty())
                 if (!this.singleValue.equals(otherValue.singleValue)) return false;
@@ -1002,12 +998,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
     public int hashCode() {
         int hash = 7;
         if (translations != null) {
-            for (T translation : translations.values()) {
-                hash = 31 * hash + translation.hashCode();
-            }
-            for (long language : translations.keySet()) {
-                hash = 31 * hash + (int) language;
-            }
+            hash = 31 * hash + translations.hashCode();
         }
         hash = 31 * hash + (int) defaultLanguage;
         return hash;
