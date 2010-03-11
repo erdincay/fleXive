@@ -612,7 +612,7 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
         Statement stmt = null;
         //                                      1      2               3                4
         final String sql = "SELECT DISTINCT stp.ID, stp.WORKFLOW, stp.STEPDEF,stp.ACL " +
-                "FROM " + TBL_WORKFLOW_STEP + " stp ORDER BY stp.ID";
+                "FROM " + TBL_WORKFLOW_STEP + " stp ORDER BY stp.WORKFLOW, stp.POS, stp.ID";
         try {
             // Load all steps in the database
             stmt = con.createStatement();

@@ -132,8 +132,20 @@ public class StepEngineBean implements StepEngine, StepEngineLocal {
             } else {
                 // Create the step
                 newStepId = seq.getId(FxSystemSequencer.STEP);
-                sql = "INSERT INTO " + TBL_WORKFLOW_STEP + " (ID, STEPDEF, WORKFLOW, ACL) VALUES (" + newStepId + ","
-                        + step.getStepDefinitionId() + "," + step.getWorkflowId() + "," + step.getAclId() + ")";
+                
+                // get maximum position
+                sql = "SELECT MAX(pos) FROM " + TBL_WORKFLOW_STEP + " WHERE workflow=" + step.getWorkflowId();
+                ResultSet rs2 = stmt.executeQuery(sql);
+                final int newPos;
+                if (rs2.next()) {
+                    newPos = rs2.getInt(1) + 1; // 1-based
+                } else {
+                    newPos = 1; // should not happen
+                }
+
+                sql = "INSERT INTO " + TBL_WORKFLOW_STEP + " (ID, STEPDEF, WORKFLOW, ACL, POS) VALUES (" + newStepId + ","
+                        + step.getStepDefinitionId() + "," + step.getWorkflowId() + "," + step.getAclId()
+                        + ", " + newPos + ")";
                 stmt.executeUpdate(sql);
             }
 
@@ -347,9 +359,19 @@ public class StepEngineBean implements StepEngine, StepEngineLocal {
 
     /**
      * {@inheritDoc}
+     *
+     * @deprecated
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void updateStep(long stepId, long aclId)
+    public void updateStep(long stepId, long aclId) throws FxApplicationException {
+        updateStep(stepId, aclId, 1);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void updateStep(long stepId, long aclId, int position)
             throws FxApplicationException {
         UserTicket ticket = FxContext.getUserTicket();
         // Security checks
@@ -374,7 +396,7 @@ public class StepEngineBean implements StepEngine, StepEngineLocal {
 
             // Update the step
             stmt = con.createStatement();
-            sql = "UPDATE " + TBL_WORKFLOW_STEP + " SET ACL=" + aclId + " WHERE ID=" + stepId;
+            sql = "UPDATE " + TBL_WORKFLOW_STEP + " SET ACL=" + aclId + ", POS=" + position + " WHERE ID=" + stepId;
             int ucount = stmt.executeUpdate(sql);
 
             // Is the step defined at all?

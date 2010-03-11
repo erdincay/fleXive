@@ -251,6 +251,21 @@ public class WorkflowBean implements Serializable {
         workflow.setSteps(getSteps());
     }
 
+    public void moveStepUp() {
+        moveStep(stepIndex - 1);
+    }
+    
+    public void moveStepDown() {
+        moveStep(stepIndex + 1);
+    }
+
+    private void moveStep(int targetPosition) {
+        final StepEdit step = getSteps().remove(stepIndex);
+        getSteps().add(
+                Math.max(0, Math.min(getSteps().size(), targetPosition)),
+                step
+        );
+    }
     /**
      * Check if a step can be removed as mapped function
      *

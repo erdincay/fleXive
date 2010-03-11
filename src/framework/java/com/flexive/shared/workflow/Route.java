@@ -31,6 +31,7 @@
  ***************************************************************/
 package com.flexive.shared.workflow;
 
+import com.flexive.shared.SelectableObject;
 import java.io.Serializable;
 
 /**
@@ -38,7 +39,7 @@ import java.io.Serializable;
  * 
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-public class Route implements Serializable {
+public class Route implements SelectableObject, Serializable {
     private static final long serialVersionUID = -1555295747455481165L;
 
 	protected long id = -1;

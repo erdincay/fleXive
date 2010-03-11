@@ -106,6 +106,24 @@
                     <f:facet name="header">
                         #{fxMessageBean['Workflow.field.step.actions']}
                     </f:facet>
+
+                    <!-- Move step up -->
+                    <adm:ajaxCommandIcon id="moveStepUp" reRender="stepAdd, stepList, routeAdd" bean="#{workflowBean}"
+                                         action="moveStepUp"
+                                         titleKey="Workflow.button.step.up"
+                                         icon="up" eventsQueue="stepQ">
+                        <f:setPropertyActionListener target="#{workflowBean.stepIndex}" value="#{rowIndex}"/>
+                    </adm:ajaxCommandIcon>
+
+                    <!-- Move step down -->
+                    <adm:ajaxCommandIcon id="moveStepDown" reRender="stepAdd, stepList, routeAdd" bean="#{workflowBean}"
+                                         action="moveStepDown"
+                                         titleKey="Workflow.button.step.down"
+                                         icon="down" eventsQueue="stepQ">
+                        <f:setPropertyActionListener target="#{workflowBean.stepIndex}" value="#{rowIndex}"/>
+                    </adm:ajaxCommandIcon>
+
+                    <!-- Remove step -->
                     <adm:ajaxCommandIcon id="removeStep" reRender="stepAdd, stepList, routeAdd" bean="#{workflowBean}"
                                          action="removeStep" rendered="#{workflowBean.canRemoveStep[step]}"
                                          icon="delete" titleKey="Workflow.button.step.remove" eventsQueue="stepQ">

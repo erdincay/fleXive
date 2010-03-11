@@ -42,6 +42,7 @@ import com.flexive.shared.security.UserGroup;
 import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.workflow.*;
+import com.google.common.collect.Lists;
 import static com.flexive.tests.embedded.FxTestUtils.*;
 import org.apache.commons.lang.StringUtils;
 import org.testng.annotations.AfterClass;
@@ -176,8 +177,26 @@ public class WorkflowTest {
             editWorkflow.getRoutes().add(new Route(-1, UserGroup.GROUP_EVERYONE, -1, -2));
             workflowEngine.update(editWorkflow);
 
-            // remove and add edit step
+            // revert step order
             editWorkflow = getEnvironment().getWorkflow(editWorkflow.getId()).asEditable();
+            final List<StepEdit> steps = Lists.newArrayList();
+            for (Step step : editWorkflow.getSteps()) {
+                steps.add(step.asEditable());
+            }
+
+            Assert.assertEquals(steps.size(), 2);
+            Collections.reverse(steps);
+            assertStepOrder(steps, editWorkflow.getSteps(), false);
+
+            // update workflow
+            editWorkflow.setSteps(steps);
+            workflowEngine.update(editWorkflow);
+
+            editWorkflow = getEnvironment().getWorkflow(editWorkflow.getId()).asEditable();
+            // order should have been preserved
+            assertStepOrder(editWorkflow.getSteps(), steps, true);
+
+            // remove and add edit step
             for (Step step : editWorkflow.getSteps()) {
                 if (step.getStepDefinitionId() == StepDefinition.EDIT_STEP_ID) {
                     editWorkflow.getSteps().remove(step);
@@ -200,6 +219,17 @@ public class WorkflowTest {
         } finally {
             // cleanup
             workflowEngine.remove(workflowId);
+        }
+    }
+
+    private void assertStepOrder(List<? extends Step> actualSteps, List<? extends Step> expectedSteps, boolean expectedEqual) {
+        final boolean eq = actualSteps.equals(expectedSteps);
+        if (eq != expectedEqual) {
+            Assert.fail("Expected " + (expectedEqual ? "same" : "different")
+                    + " step order - got: "
+                    + FxSharedUtils.getSelectableObjectIdList(actualSteps)
+                    +", expected: " + FxSharedUtils.getSelectableObjectIdList(expectedSteps)
+            );
         }
     }
 
@@ -266,7 +296,7 @@ public class WorkflowTest {
             // update step
             acl2Id = createAcl();
             long stepId = workflow.getSteps().get(0).getId();
-            stepEngine.updateStep(stepId, acl2Id);
+            stepEngine.updateStep(stepId, acl2Id, 1);
             Assert.assertTrue(getEnvironment().getStep(stepId).getAclId() == acl2Id);
 
             stepEngine.removeStep(stepId);

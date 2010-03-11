@@ -116,7 +116,25 @@ public interface StepEngine {
 	 * @throws FxUpdateException   if the update of the step failed
 	 * @throws FxNoAccessException if the caller lacks the permissions to create the step
 	 * @throws FxNotFoundException if the step does not exist
+         *
+         * @deprecated use {@link #updateStep(long, long, int)}
 	 */
 	void updateStep(long stepId, long aclId) throws FxApplicationException;
 
+        /**
+         * Updates a step specified by its unique id.
+         * <p/>
+         * The caller must be within ROLE_WORKFLOWMANAGEMENT.
+         *
+         * @param stepId the step to update
+         * @param aclId  the ACL of the step
+         * @param position  the new position (1-based)
+         * @throws FxApplicationException TODO
+         * @throws FxUpdateException   if the update of the step failed
+         * @throws FxNoAccessException if the caller lacks the permissions to create the step
+         * @throws FxNotFoundException if the step does not exist
+         *
+         * @since 3.1
+         */
+        void updateStep(long stepId, long aclId, int position) throws FxApplicationException;
 }

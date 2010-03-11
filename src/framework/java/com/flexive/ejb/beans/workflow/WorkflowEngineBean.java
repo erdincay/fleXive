@@ -280,16 +280,19 @@ public class WorkflowEngineBean implements WorkflowEngine, WorkflowEngineLocal {
 
             // Add/update steps, if necessary
             Map<Long, Step> createdSteps = new HashMap<Long, Step>();
+            int index = 1;
             for (Step step : workflow.getSteps()) {
                 if (step.getId() < 0) {
                     long newStepId = stepEngine.createStep(step);
+                    // set position
+                    stepEngine.updateStep(newStepId, step.getAclId(), index);
                     // map created steps using the old ID - if routes reference them
                     createdSteps.put(step.getId(), new Step(newStepId, step));
                 } else {
-                    //ACL changed?
-                    if (fxEnvironment.getStep(step.getId()).getAclId() != step.getAclId())
-                        stepEngine.updateStep(step.getId(), step.getAclId());
+                    // update ACL and position
+                    stepEngine.updateStep(step.getId(), step.getAclId(), index);
                 }
+                index++;
             }
 
             // Remove routes?

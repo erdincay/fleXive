@@ -31,6 +31,7 @@
  ***************************************************************/
 package com.flexive.shared.workflow;
 
+import com.flexive.shared.SelectableObject;
 import java.io.Serializable;
 
 /**
@@ -38,7 +39,7 @@ import java.io.Serializable;
  * 
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-public class Step implements Serializable {
+public class Step implements SelectableObject, Serializable {
     private static final long serialVersionUID = -4546587502140978353L;
 
     protected long id = -1;
@@ -185,10 +186,10 @@ public class Step implements Serializable {
     }
 
     /** {@inheritDoc} */
-	@Override
-	public String toString() {
-		return "Step[id=" + id + "]";
-	}
+    @Override
+    public String toString() {
+        return "Step[id=" + id + "]";
+    }
 
 
 }
