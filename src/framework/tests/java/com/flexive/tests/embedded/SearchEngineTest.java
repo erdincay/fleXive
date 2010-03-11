@@ -394,6 +394,29 @@ public class SearchEngineTest {
     }
 
     @Test
+    public void orderByWithLimitTest() throws FxApplicationException {
+        final SqlQueryBuilder sqb = new SqlQueryBuilder()
+                .select("@pk", getTestPropertyName("string"))
+                .type(TEST_TYPE)
+                .orderBy(2, SortDirection.ASCENDING);
+
+        final int rows = 5;
+        final int windowSize = 3;
+
+        // load all rows
+        final FxResultSet refResult = sqb.getResult();
+        assertTrue(refResult.getRowCount() > rows+windowSize, "Not enough rows: " + refResult.getRowCount());
+
+        final List<FxPK> refColumn2 = refResult.collectColumn(2);
+        // load subset with a sliding window
+        for (int i = 0; i < windowSize; i++) {
+            final FxResultSet result = sqb.startRow(i).fetchRows(rows).getResult();
+            assertEquals(result.getRowCount(), rows);
+            assertEquals(result.collectColumn(2), refColumn2.subList(i, i + rows));
+        }
+    }
+
+    @Test
     public void selectSystemPropertiesTest() throws FxApplicationException {
         final String[] props = {"id", "version", "typedef", "mandator", "acl", "created_by",
                 "created_at", "modified_by", "modified_at"};

@@ -759,10 +759,19 @@ public class SqlQueryBuilder implements Serializable {
 
     /**
      * Set the maximum number of rows that the query should return. This determines the size of the entire
-     * result set. If not specified, this defaults to You can then specify a window of rows using
+     * result set. You can then specify a window of rows using
      * {@link #startRow(int)} and {@link #fetchRows(int)} to return a subset of the search result.
      * <p>
      * This value defaults to {@link SearchEngine#DEFAULT_MAX_ROWS}.
+     * </p>
+     * <p>
+     * <strong>Note:</strong> Be aware that restricting the result size with
+     * this parameter can lead to random results, especially in combination
+     * with ORDER BY. This is because first the result set is built using
+     * at most {@code maxRows} rows, which are then sorted and
+     * returned to the client. In general you might want to increase this
+     * value to guarantee precise results for large datasets and
+     * unspecific queries.
      * </p>
      *
      * @param maxRows   the maximum number of rows in the query result

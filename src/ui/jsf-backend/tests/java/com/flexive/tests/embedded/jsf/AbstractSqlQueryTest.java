@@ -69,7 +69,7 @@ public class AbstractSqlQueryTest {
     protected static final int TOTALROWS = 25;
     protected static final String TEST_TYPE = "FXRESULTSET_TYPE";
     protected final static String TEST_PROPERTY = "FXRESULTSET_TESTPROPERTY";
-    protected static final String SELECT_ALL = "SELECT co.@PK, @* FROM content co WHERE co." + TEST_PROPERTY + " like 'testValue%' ORDER BY 1";
+    protected static final String SELECT_ALL = "SELECT @PK, @* FILTER version=max WHERE #fxresultset_type/" + TEST_PROPERTY + " like 'testValue%' ORDER BY @pk";
 
     protected ACL structureAcl;
     protected ACL contentAcl;
@@ -163,6 +163,7 @@ public class AbstractSqlQueryTest {
 
     protected SqlQueryBuilder getSelectAllBuilder() {
         return new SqlQueryBuilder()
+            .select("@pk", "@*")
             .condition(CacheAdmin.getEnvironment().getAssignment(assignmentId),
                     PropertyValueComparator.LIKE, new FxString("testValue%"))
             .orderBy(1, SortDirection.ASCENDING);

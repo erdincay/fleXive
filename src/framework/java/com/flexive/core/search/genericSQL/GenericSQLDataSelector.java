@@ -217,8 +217,10 @@ public class GenericSQLDataSelector extends DataSelector {
                     if (item.isOrderBy()) {
                         // select item from order by
                         sql.append(",").append(item.getSelect()).append(" AS ").append(item.getAlias()).append("\n");
-                        // add index
-                        orderByNumbers.put(ssv.getSortPos(), orderByPos + " " + (ssv.isSortedAscending() ? "asc" : "desc"));
+                        // add index for first selected column
+                        if (!orderByNumbers.containsKey(ssv.getSortPos())) {
+                            orderByNumbers.put(ssv.getSortPos(), orderByPos + " " + (ssv.isSortedAscending() ? "asc" : "desc"));
+                        }
                     } else {
                         sql.append(",null AS ").append(item.getAlias()).append('\n');
                     }
@@ -249,7 +251,7 @@ public class GenericSQLDataSelector extends DataSelector {
         }
 
         // Evaluate the order by, then limit the result by the desired range if needed
-        if (search.getStartIndex() > 0 && search.getFetchRows() < Integer.MAX_VALUE) {
+        if (search.getStartIndex() > 0 || search.getFetchRows() < Integer.MAX_VALUE) {
             return "SELECT * FROM (" + sql + ") tmp " + search.getStorage().getLimitOffsetVar("rownr", false, search.getFetchRows(), search.getStartIndex());
         }
         return sql.toString();

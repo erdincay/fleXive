@@ -34,14 +34,12 @@ package com.flexive.faces.model;
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
-import com.flexive.shared.interfaces.SearchEngine;
 import com.flexive.shared.search.FxEmptyResultSet;
 import com.flexive.shared.search.FxFoundType;
 import com.flexive.shared.search.FxResultSet;
 import com.flexive.shared.search.FxSQLSearchParams;
 import com.flexive.shared.search.query.SqlQueryBuilder;
 import com.flexive.shared.security.ACL;
-import com.flexive.shared.EJBLookup;
 import static com.flexive.shared.EJBLookup.getSearchEngine;
 import org.apache.commons.lang.StringUtils;
 
