@@ -809,7 +809,8 @@ class EditModeHelper extends RenderHelper {
             final boolean useDefaultInputLanguage = getInputValue().isEmpty()
                     && languageId == UserConfigurationBean.getUserInputLanguageId();
 
-            if (languageId == getInputValue().getDefaultLanguage() || useDefaultInputLanguage) {
+            if ((languageId == getInputValue().getDefaultLanguage() && !getInputValue().isEmpty())
+                    || useDefaultInputLanguage) {
                 writer.writeAttribute("checked", "true", null);
             }
             writer.writeAttribute("onclick", "document.getElementById('" + inputClientId
