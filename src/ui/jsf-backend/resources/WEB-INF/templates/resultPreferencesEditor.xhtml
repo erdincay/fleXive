@@ -44,10 +44,11 @@ Renders the body content in a info box.
         </ui:fragment>
 
         <fx:fieldSet legend="#{fxMessageBean['ResultPreferences.legend.selectColumns']}">
+            <t:saveState value="#{resultPreferencesBean.resultPreferences.selectedColumns}"/>
             <t:dataTable id="selectedColumns"
                          binding="#{resultPreferencesBean.selectedColumnsTable}"
                          value="#{resultPreferencesBean.resultPreferences.selectedColumns}"
-                         var="info" rowIndexVar="rowIndex" preserveDataModel="true"
+                         var="info" rowIndexVar="rowIndex"
                          headerClass="tblHeader" rowClasses="tblRowEven, tblRowOdd" width="100%">
                 <t:column>
                     <f:facet name="header">
@@ -120,10 +121,11 @@ Renders the body content in a info box.
         </fx:fieldSet>
 
         <fx:fieldSet legend="#{fxMessageBean['ResultPreferences.legend.orderBy']}">
+            <t:saveState value="#{resultPreferencesBean.resultPreferences.orderByColumns}"/>
             <t:dataTable
                     id="propertyTable"
                     value="#{resultPreferencesBean.resultPreferences.orderByColumns}"
-                    var="info" rowIndexVar="rowIndex" preserveDataModel="true"
+                    var="info" rowIndexVar="rowIndex" 
                     headerClass="tblHeader" rowClasses="tblRowEven, tblRowOdd" width="100%">
                 <t:column>
                     <f:facet name="header">

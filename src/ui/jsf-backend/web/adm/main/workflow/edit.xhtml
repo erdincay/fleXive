@@ -7,6 +7,7 @@
       xmlns:c="http://java.sun.com/jstl/core"
       xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
       xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:rich="http://richfaces.org/rich"
       xmlns:fx="http://www.flexive.com/jsf/core">
 <body>
 
@@ -71,8 +72,9 @@
                 </a4j:outputPanel>
 
             <a4j:outputPanel id="stepList">
+            <t:saveState value="#{workflowBean.steps}"/>
 			<t:dataTable value="#{workflowBean.steps}" var="step" rowIndexVar="rowIndex"
-				preserveDataModel="true" headerClass="tblHeader" rowClasses="tblRowEven, tblRowOdd" width="100%">
+				headerClass="tblHeader" rowClasses="tblRowEven, tblRowOdd" width="100%">
                 <h:column>
 					<f:facet name="header">
 						#{fxMessageBean["Workflow.field.step.label"]}
@@ -183,8 +185,9 @@
             </a4j:outputPanel>
 
             <a4j:outputPanel id="routeList">
+            <t:saveState value="#{workflowBean.routes}"/>
             <t:dataTable value="#{workflowBean.routes}" var="route" rowIndexVar="rowIndex"
-				preserveDataModel="true" headerClass="tblHeader" rowClasses="tblRowEven, tblRowOdd" width="100%">
+				headerClass="tblHeader" rowClasses="tblRowEven, tblRowOdd" width="100%">
 				<h:column>
 					<f:facet name="header">
 						#{fxMessageBean["Workflow.field.route.from"]}

@@ -52,7 +52,8 @@
 
 
         <fx:fieldSet legend="#{fxMessageBean['ACL.label.permissionMatrix']}">
-            <t:dataTable id="assignmentTbl" value="#{aclBean.assignments}" preserveDataModel="true" var="row"
+            <t:saveState value="#{aclBean.assignments}"/>
+            <t:dataTable id="assignmentTbl" value="#{aclBean.assignments}" var="row"
                          rowClasses="tblRowEven, tblRowOdd" width="300" headerClass="dataTableHeader">
                 <h:column>
                     <f:facet name="header">#{fxMessageBean['ACL.label.group']}</f:facet>
