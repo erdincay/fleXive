@@ -69,7 +69,7 @@ public class GenericInnerJoinConditionTableBuilder extends GenericConditionTable
     protected final Stack<List<String>> intersectTableAliases = new Stack<List<String>>();
     protected final Stack<Map<String, List<TableReference>>> intersectTableReferences = new Stack<Map<String, List<TableReference>>>();
     private int tableAliasCounter;
-    private final Set<TableReference> currentConjuctionTables = new HashSet<TableReference>();  // accumulates table reference of the last condition in an AND condition
+    private final Set<TableReference> currentConjunctionTables = new HashSet<TableReference>();  // accumulates table reference of the last condition in an AND condition
 
     public GenericInnerJoinConditionTableBuilder(SqlMapperFactory factory, StringBuilder out, SelectedTableVisitor joinedTables) {
         super(factory, out, joinedTables);
@@ -82,6 +82,7 @@ public class GenericInnerJoinConditionTableBuilder extends GenericConditionTable
             // enter "intersect" subquery, need to perform an inner join because MySQL does not support INTERSECT
             intersectTableAliases.push(new ArrayList<String>());
             intersectTableReferences.push(new HashMap<String, List<TableReference>>());
+            currentConjunctionTables.clear();
         } else {
             super.onEnterSubCondition(type);
         }
@@ -178,7 +179,7 @@ public class GenericInnerJoinConditionTableBuilder extends GenericConditionTable
     /** {@inheritDoc} */
     @Override
     protected void onTableVisited(TableReference tableReference) {
-        currentConjuctionTables.add(tableReference);
+        currentConjunctionTables.add(tableReference);
     }
 
     /** {@inheritDoc} */
@@ -190,13 +191,13 @@ public class GenericInnerJoinConditionTableBuilder extends GenericConditionTable
             final String alias = getNextTableAlias();
             tableAliasCounter++;
             intersectTableAliases.peek().add(alias);
-            if (!currentConjuctionTables.isEmpty()) {
+            if (!currentConjunctionTables.isEmpty()) {
                 final Map<String, List<TableReference>> aliasMap = intersectTableReferences.peek();
                 if (!aliasMap.containsKey(alias)) {
                     aliasMap.put(alias, new ArrayList<TableReference>());
                 }
-                aliasMap.get(alias).addAll(currentConjuctionTables);
-                currentConjuctionTables.clear();
+                aliasMap.get(alias).addAll(currentConjunctionTables);
+                currentConjunctionTables.clear();
             }
             getOut().append(' ').append(alias);
         }
