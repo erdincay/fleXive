@@ -15,7 +15,8 @@
         <javac
                 srcdir="${flexive.base.framework.dir}/storages/H2/java"
                 destdir="${build.storages.dir}/H2/classes"
-                includes="**/StoredProcedures*">
+                includes="**/StoredProcedures*"
+                source="1.5" target="1.5">
 
             <classpath refid="classpath.build.plugin"/>
         </javac>
