@@ -125,13 +125,20 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
                     throw new FxNoAccessException("ex.content.noSuitableACL", type.getName());
             }
         }
-        long step = prefStep;
-        if (!type.getWorkflow().isStepValid(step))
-            try {
-                step = type.getWorkflow().getSteps().get(0).getId();
-            } catch (Exception e) {
-                throw new FxInvalidParameterException("STEP", "ex.workflow.noStepDefined", type.getWorkflow().getName());
+        long step = -2;
+        for (Step check : type.getWorkflow().getSteps()) {
+            if (ticket.mayCreateACL(check.getAclId(), ticket.getUserId()) &&
+                    ticket.mayReadACL(check.getAclId(), ticket.getUserId()) &&
+                    ticket.mayEditACL(check.getAclId(), ticket.getUserId())) {
+                if (check.getId() == prefStep) {
+                    step = check.getId();
+                    break;
+                } else if (step == -2)
+                    step = check.getId(); //first match
             }
+        }
+        if (step < 0)
+            throw new FxInvalidParameterException("STEP", "ex.content.noSuitableStep", type.getName(), type.getWorkflow().getName());
         long lang = prefLang;
         try {
             language.load(lang);
@@ -170,15 +177,9 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
     public FxContent initialize(long typeId) throws FxApplicationException {
         FxType type = CacheAdmin.getEnvironment().getType(typeId);
         UserTicket ticket = FxContext.getUserTicket();
-        long step;
-        try {
-            step = type.getWorkflow().getSteps().get(0).getId();
-        } catch (Exception e) {
-            throw new FxInvalidParameterException("STEP", "ex.workflow.noStepDefined", type.getWorkflow().getName());
-        }
         return initialize(type.getId(), ticket.getMandatorId(),
                 -1 /*invalid ACL will cause a lookup for best-fit ACL*/,
-                step, ticket.getLanguage().getId());
+                -1 /*invalid Step will cause a lookup for best-fit Step*/, ticket.getLanguage().getId());
     }
 
     /**
@@ -435,13 +436,13 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
         } catch (FxApplicationException e) {
             EJBUtils.rollback(ctx);
             throw new FxCreateException(e);
-        } catch(Exception e) {
+        } catch (Exception e) {
             EJBUtils.rollback(ctx);
-            System.out.println("===> generic exception!!! "+e.getClass().getCanonicalName());
+            System.out.println("===> generic exception!!! " + e.getClass().getCanonicalName());
             throw new FxCreateException(LOG, e);
-        } catch(Throwable t) {
+        } catch (Throwable t) {
             EJBUtils.rollback(ctx);
-            System.out.println("===> generic throwable!!! "+t.getClass().getCanonicalName());
+            System.out.println("===> generic throwable!!! " + t.getClass().getCanonicalName());
             throw new FxCreateException(LOG, t);
         } finally {
             Database.closeObjects(ContentEngineBean.class, con, ps);

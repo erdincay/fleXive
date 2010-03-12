@@ -174,11 +174,11 @@ public class MandatorTest {
         me.activate(testMandator); //make sure the mandator is active
         FxType type = CacheAdmin.getEnvironment().getType(testType);
         Assert.assertTrue(CacheAdmin.getEnvironment().getMandator(testMandator).isActive(), "Expected mandator to be active!");
-        FxContent co_act1 = ce.initialize(testType, testMandator, -1, type.getWorkflow().getSteps().get(0).getId(), FxLanguage.DEFAULT_ID);
+        FxContent co_act1 = ce.initialize(testType, testMandator, -1, -1, FxLanguage.DEFAULT_ID);
         me.deactivate(testMandator);
         Assert.assertFalse(CacheAdmin.getEnvironment().getMandator(testMandator).isActive(), "Expected mandator to be inactive!");
         try {
-            ce.initialize(testType, testMandator, -1, type.getWorkflow().getSteps().get(0).getId(), FxLanguage.DEFAULT_ID);
+            ce.initialize(testType, testMandator, -1, -1, FxLanguage.DEFAULT_ID);
             Assert.fail("Initialize on a deactivated mandator should fail!");
         } catch (FxNotFoundException e) {
             //expected
@@ -252,7 +252,7 @@ public class MandatorTest {
         me.activate(testMandator); //make sure we're active
         FxType type = CacheAdmin.getEnvironment().getType(testType);
         Assert.assertTrue(CacheAdmin.getEnvironment().getMandator(testMandator).isActive(), "Expected mandator to be active!");
-        FxContent co_act1 = ce.initialize(testType, testMandator, -1, type.getWorkflow().getSteps().get(0).getId(), FxLanguage.DEFAULT_ID);
+        FxContent co_act1 = ce.initialize(testType, testMandator, -1, -1, FxLanguage.DEFAULT_ID);
         FxPK pk = ce.save(co_act1);
         EJBLookup.getTreeEngine().getNode(FxTreeMode.Edit, FxTreeNode.ROOT_NODE).getDirectChildCount();
         long folder = EJBLookup.getTreeEngine().save(FxTreeNodeEdit.createNew("MandatorTestFolder"));
@@ -331,7 +331,7 @@ public class MandatorTest {
     public void activeQuery() throws Exception {
         me.activate(testMandator); //make sure the mandator is active
         FxType type = CacheAdmin.getEnvironment().getType(testType);
-        FxContent co_act = ce.initialize(testType, testMandator, -1, type.getWorkflow().getSteps().get(0).getId(), FxLanguage.DEFAULT_ID);
+        FxContent co_act = ce.initialize(testType, testMandator, -1, -1, FxLanguage.DEFAULT_ID);
         FxPK pk = ce.save(co_act);
         long org = new SqlQueryBuilder().type(testType).getResult().getRowCount();
         Assert.assertTrue(org > 0, "Expected at least one result!");

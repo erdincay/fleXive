@@ -253,7 +253,7 @@ public class ContentSecurityTest {
                     break;
                 case 5: //Workflow Route matrix - Live
                     as.add(ACLAssignment.createNew(acl, groups[24].getId(), READ, EDIT));
-                    as.add(ACLAssignment.createNew(acl, groups[25].getId(), READ, EDIT));
+                    as.add(ACLAssignment.createNew(acl, groups[25].getId(), READ, EDIT, CREATE));
                     break;
                 default:
                     Assert.assertFalse(true, "Invalid/unknown matrix: " + matrix);
@@ -766,11 +766,11 @@ public class ContentSecurityTest {
                 Assert.assertTrue(grp == 26, "Only group 26 expected to fail! Grp:" + grp);
             }
 
-            //create instance in edit step, error expected for 25, 26
+            //create instance in edit step, error expected for 25
             ref.setStepId(live);
             try {
                 FxPK pk = ce.save(ref);
-                Assert.assertTrue(false, "No group expected to succeed! Grp:" + grp);
+                Assert.assertTrue(grp == 26, "Only group 26 expected to succeed! Grp:" + grp);
                 //cleanup
                 FxContext.get().runAsSystem();
                 try {
@@ -779,7 +779,7 @@ public class ContentSecurityTest {
                     FxContext.get().stopRunAsSystem();
                 }
             } catch (FxApplicationException e) {
-                //expected
+                Assert.assertTrue(grp == 25, "Only group 25 expected to fail! Grp:" + grp);
             }
 
             //use existing instance with step=edit and change it to live, error expected for 26
