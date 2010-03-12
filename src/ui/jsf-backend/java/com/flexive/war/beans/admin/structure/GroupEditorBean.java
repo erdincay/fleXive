@@ -123,7 +123,7 @@ public class GroupEditorBean implements Serializable {
                     parentXPath = ga.getXPath();
                 }
 
-                group = FxGroupEdit.createNew("NEWGROUP", new FxString(""), new FxString(""), false, FxMultiplicity.MULT_0_1);
+                group = FxGroupEdit.createNew("NEWGROUP", new FxString("").setEmpty(), new FxString("").setEmpty(), false, FxMultiplicity.MULT_0_1);
                 initNewGroupEditing();
             }
         } catch (Throwable t) {

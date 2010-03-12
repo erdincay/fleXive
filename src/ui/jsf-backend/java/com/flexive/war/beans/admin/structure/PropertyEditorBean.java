@@ -878,7 +878,7 @@ public class PropertyEditorBean implements ActionBean, Serializable {
                     parentXPath = XPathElement.stripType(ga.getXPath());
                 }
 
-                property = FxPropertyEdit.createNew("NEWPROPERTY", new FxString(""), new FxString(""),
+                property = FxPropertyEdit.createNew("NEWPROPERTY", new FxString("").setEmpty(), new FxString("").setEmpty(),
                         FxMultiplicity.MULT_0_1, CacheAdmin.getEnvironment().getDefaultACL(ACLCategory.STRUCTURE),
                         FxDataType.Text);
                 initNewPropertyEditing();

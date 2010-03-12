@@ -241,7 +241,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      * {@inheritDoc}
      */
     public FxString getLabel() {
-        return label != null && !label.isEmpty() ? label : new FxString(true, name);
+        return label;
     }
 
     /**

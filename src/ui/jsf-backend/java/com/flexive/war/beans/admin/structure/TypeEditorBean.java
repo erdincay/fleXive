@@ -121,12 +121,12 @@ public class TypeEditorBean implements Serializable {
                 editType(propId);
             } else if ("createType".equals(action)) {
                 editMode = true;
-                type = FxTypeEdit.createNew("NEWTYPE", new FxString(""), CacheAdmin.getEnvironment().getDefaultACL(ACLCategory.STRUCTURE));
+                type = FxTypeEdit.createNew("NEWTYPE", new FxString("").setEmpty(), CacheAdmin.getEnvironment().getDefaultACL(ACLCategory.STRUCTURE));
                 initEditing();
                 setTypeMode(TypeMode.Content);
             } else if ("createTypeRelation".equals(action)) {
                 editMode = true;
-                type = FxTypeEdit.createNew("NEWTYPE", new FxString(""), CacheAdmin.getEnvironment().getDefaultACL(ACLCategory.STRUCTURE));
+                type = FxTypeEdit.createNew("NEWTYPE", new FxString("").setEmpty(), CacheAdmin.getEnvironment().getDefaultACL(ACLCategory.STRUCTURE));
                 initEditing();
                 setTypeMode(TypeMode.Relation);
             }
