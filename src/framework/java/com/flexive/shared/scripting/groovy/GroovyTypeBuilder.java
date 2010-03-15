@@ -35,6 +35,7 @@ import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.FxLanguage;
+import com.flexive.shared.media.FxMimeTypeWrapper;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.security.ACL;
@@ -122,6 +123,15 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
     private static final Map<Object, Object> EMPTYATTRIBUTES = Collections.unmodifiableMap(new HashMap<Object, Object>());
 
     /**
+     * FxType non-option keys
+     */
+    private final static String[] TYPE_NONOPTION_KEYS = {
+            "ACL", "GENERALACL", "LABEL", "PARENTTYPENAME", "LANGUAGEMODE", "TYPEMODE", "TRACKHISTORY", "HISTORYAGE",
+            "MAXVERSIONS", "USEINSTANCEPERMISSIONS", "USEPROPERTYPERMISSIONS", "USESTEPPERMISSIONS",
+            "USETYPEPERMISSIONS", "USEPERMISSIONS", "ICON", "MIMETYPE", "STORAGEMODE", "NAME", "HINT"
+    };
+
+    /**
      * List of keys that are not used for options and are "real" parameters
      * when creating a new property
      */
@@ -162,6 +172,20 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
     private final static String[] GROUP_CREATION_UNIQUE_KEYS = {
             "NAME", "OVERRIDEMULTIPLICITY"
     };
+
+    /**
+     * Check if the given key is a type non-option key (=not used for property options)
+     *
+     * @param key the key to check
+     * @return if its a non-option key
+     */
+    private static boolean isTypeNonOptionKey(String key) {
+        String uKey = key.toUpperCase();
+        for(String check : TYPE_NONOPTION_KEYS)
+            if(check.equals(uKey))
+                return true;
+        return false;
+    }
 
     /**
      * Check if the given key is a non-property-option key (=not used for property options)
@@ -887,6 +911,7 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
         boolean createSubAssignments = false;
         boolean isNew = true;
         boolean assignmentChanges = false;
+        FxMimeTypeWrapper mimeTypeWrapper;
 
         /**
          * Construct an AttributeMapper
@@ -940,6 +965,15 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
             historyAge = (Long) FxSharedUtils.get(attributes, "historyAge", 1L);
             maxVersions = (Long) FxSharedUtils.get(attributes, "maxVersions", -1L);
 
+            if(attributes.get("mimeType") instanceof String) {
+                // a comma separated list of Strings is expected
+                final String s = (String)attributes.get("mimeType");
+                mimeTypeWrapper = new FxMimeTypeWrapper(s);
+
+            } else if(attributes.get("mimeType") instanceof FxMimeTypeWrapper) {
+                mimeTypeWrapper = (FxMimeTypeWrapper) FxSharedUtils.get(attributes, "mimeType", null);
+            }
+
             return this;
         }
 
@@ -947,8 +981,9 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
          * Sets the attributes of a given type
          *
          * @param type the FxTypeEdit instance whose attributes will be changed
+         * @throws FxApplicationException on errors
          */
-        void setTypeAttributes(FxTypeEdit type) {
+        void setTypeAttributes(FxTypeEdit type) throws FxApplicationException {
             if (attributes.containsKey("languageMode"))
                 type.setLanguage(languageMode);
             if (attributes.containsKey("typeMode"))
@@ -973,6 +1008,25 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
                 type.setIcon(icon);
             if (attributes.containsKey("trackHistory") && trackHistory) {
                 type.setHistoryAge(historyAge);
+            }
+            if(attributes.containsKey("mimeType")) {
+                type.setMimeType(mimeTypeWrapper);
+            }
+
+            // set non-generic type options
+            for (Object oEntry : attributes.entrySet()) {
+                final Map.Entry entry = (Map.Entry) oEntry;
+                final Object key = entry.getKey();
+                if (isTypeNonOptionKey((String) key))
+                    continue;
+                final Object optionValue = entry.getValue();
+                final String optionKey = ((String) key).toUpperCase();
+                // set generic options
+                if (optionValue instanceof Boolean) {
+                    type.setOption(optionKey, (Boolean) optionValue);
+                } else if (optionValue != null) {
+                    type.setOption(optionKey, optionValue.toString());
+                }
             }
         }
 

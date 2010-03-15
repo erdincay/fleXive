@@ -1,0 +1,245 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:fx="http://www.flexive.com/jsf/core">
+<body>
+
+<ui:composition template="/adm/contentTemplate.xhtml">
+<ui:define name="head">
+    <t:stylesheet path="#{adm:versionedUrl('/adm/css/structureEditor.css')}"/>
+</ui:define>
+
+<ui:define name="body">
+    <h:form id="frm" enctype="multipart/form-data">
+        <!-- provide the type id so that it can be retrieved from the structure editor nav frame -->
+        <h:inputHidden id="struct_internal_typeId" value="#{typeEditorBean.typeId}"/>
+
+        <ui:fragment rendered="#{typeEditorBean.editMode}">
+            <adm:tab label="#{fxMessageBean['TypeEditor.tab.typeEditor']}" active="false" id="tab1"
+                     bean="#{typeEditorBean}" action="showTypeEditor"/>
+        </ui:fragment>
+        <ui:fragment rendered="#{not typeEditorBean.editMode}">
+            <adm:tab label="#{fxMessageBean['TypeEditor.tab.typeEditor.readonly']}" active="false" id="tab1ro"
+                     bean="#{typeEditorBean}" action="showTypeEditor"/>
+        </ui:fragment>
+        <ui:fragment rendered="#{not typeEditorBean.type.new and not typeEditorBean.editMode}">
+            <adm:tab label="#{fxMessageBean['TypeEditor.tab.option.readonly']}" active="true" id="tab2ro"
+                    bean="#{typeEditorBean}" action="showTypeOptionEditor"/>
+        </ui:fragment>
+        <ui:fragment rendered="#{not typeEditorBean.type.new and typeEditorBean.editMode}">
+            <adm:tab label="#{fxMessageBean['TypeEditor.tab.option']}" active="true" id="tab2"
+                    bean="#{typeEditorBean}" action="showTypeOptionEditor"/>
+        </ui:fragment>
+        <ui:fragment rendered="#{not typeEditorBean.type.new and typeEditorBean.editMode}">
+            <adm:tab label="#{fxMessageBean['ScriptEditor.tab.scriptEditor']} [#{typeEditorBean.scriptCount}]" active="false" id="tab3"
+                    bean="#{typeEditorBean}" action="showTypeScriptEditor"/>
+        </ui:fragment>
+        <ui:fragment rendered="#{not typeEditorBean.type.new and not typeEditorBean.editMode}">
+            <adm:tab label="#{fxMessageBean['ScriptEditor.tab.scriptEditor.readonly']} [#{typeEditorBean.scriptCount}]" active="false" id="tab3ro"
+                    bean="#{typeEditorBean}" action="showTypeScriptEditor"/>
+        </ui:fragment>
+
+        <!-- show parent type options -->
+        <ui:fragment rendered="#{not empty typeEditorBean.type.parent}">
+            <fx:fieldSet legend="#{fxMessageBean['TypeEditor.label.parentTypeOptions']}">
+
+                <fx:formRow labelKey="TypeEditor.label.derivedFrom">
+                     <h:commandLink onclick="var treeframe=parent.getStructureNavFrame(); treeframe.openNode(#{typeEditorBean.type.parent.id}, true);">
+                        <h:outputText value="#{typeEditorBean.type.parent.name}"/>
+                    </h:commandLink>
+                </fx:formRow>
+
+                <adm:sortableTable id="optionsTableParent">
+                    <table id="optionsTableParent">
+                        <thead>
+                            <tr>
+                                <th class="tblHeader" field="key" dataType="String" align="left">
+                                    #{fxMessageBean['TypeEditor.table.key']}
+                                </th>
+                                <th class="tblHeader" field="value" dataType="String" align="left">
+                                    #{fxMessageBean['TypeEditor.table.value']}
+                                </th>
+                                <th class="tblHeader" field="overridable" dataType="html" align="left">
+                                    #{fxMessageBean['TypeEditor.table.overridable']}
+                                </th>
+                                <th class="tblHeader" field="passedOn" dataType="html" align="left">
+                                    #{fxMessageBean['TypeEditor.table.passedOn']}
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        <ui:repeat value="#{typeEditorBean.optionWrapperParent.typeOptions}" var="option">
+                            <tr>
+                                <h:panelGroup>
+                                    <td align="left">
+                                        <h:inputText value="#{option.key}" style="color:gray" disabled="true"/>
+                                    </td>
+                                    <td align="left">
+                                        <h:inputText value="#{option.value}" style="color:gray" disabled="true"/>
+                                    </td>
+                                    <td align="left">
+                                        <h:selectBooleanCheckbox value="#{option.overridable}" style="color:gray" disabled="true"/>
+                                    </td>
+                                    <td align="left">
+                                        <h:selectBooleanCheckbox value="#{option.passedOn}" style="color:gray" disabled="true"/>
+                                    </td>
+                                </h:panelGroup>
+                            </tr>
+                        </ui:repeat>
+                        </tbody>
+                    </table>
+                </adm:sortableTable>
+            </fx:fieldSet>
+        </ui:fragment>
+
+        <fx:fieldSet legend="#{fxMessageBean['TypeEditor.label.typeOptions']}" relativeWidth="80">
+            <adm:sortableTable id="optionsTable">
+                <table id="optionsTable">
+                    <thead>
+                    <tr>
+                        <th class="tblHeader" field="key" dataType="String" align="left">
+                            #{fxMessageBean['TypeEditor.table.key']}
+                        </th>
+                        <th class="tblHeader" field="value" dataType="String" align="left">
+                            #{fxMessageBean['TypeEditor.table.value']}
+                        </th>
+                        <th class="tblHeader" field="overridable" dataType="html" align="left">
+                            #{fxMessageBean['TypeEditor.table.overridable']}
+                        </th>
+                        <th class="tblHeader" field="overridable" dataType="html" align="left">
+                            #{fxMessageBean['TypeEditor.table.passedOn']}
+                        </th>
+                        <ui:fragment rendered="#{typeEditorBean.editMode}">
+                            <th class="tblHeader" dataType="html" align="left">
+                                #{fxMessageBean['TypeEditor.table.actions']}
+                            </th>
+                        </ui:fragment>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <ui:repeat value="#{typeEditorBean.optionWrapper.typeOptions}" var="option">
+                        <tr>
+                            <h:panelGroup rendered="#{typeEditorBean.optionWrapper.isTypeOptionValidMap[option.key]}">
+                                <td align="left">
+                                    <h:inputText value="#{option.key}" style="color:green" disabled="#{not typeEditorBean.editMode}"/>
+                                </td>
+                                <td align="left">
+                                    <h:inputText value="#{option.value}" style="color:green" disabled="#{not typeEditorBean.editMode}"/>
+                                </td>
+                                <td align="left">
+                                    <h:selectBooleanCheckbox value="#{option.overridable}" onchange="submit();" style="color:green"
+                                                             disabled="#{not typeEditorBean.editMode or (typeEditorBean.editMode and option.passedOn)}"/>
+                                </td>
+                                <td align="left">
+                                    <h:selectBooleanCheckbox value="#{option.passedOn}" onchange="submit();" style="color:green"
+                                                             disabled="#{not typeEditorBean.editMode}"/>
+                                </td>
+                            </h:panelGroup>
+                            <h:panelGroup rendered="#{not typeEditorBean.optionWrapper.isTypeOptionValidMap[option.key]}">
+                                <td align="left">
+                                    <h:inputText value="#{option.key}" style="color:red"
+                                                              disabled="#{not typeEditorBean.editMode}"/>
+                                </td>
+                                <td align="left">
+                                    <h:inputText value="#{option.value}" style="color:red" disabled="#{not typeEditorBean.editMode}"/>
+                                </td>
+                                <td align="left">
+                                    <h:selectBooleanCheckbox value="#{option.overridable}" onchange="submit();" style="color:red"
+                                                             disabled="#{not typeEditorBean.editMode or (typeEditorBean.editMode and option.passedOn)}"/>
+                                </td>
+                                <td align="left">
+                                    <h:selectBooleanCheckbox value="#{option.passedOn}" onchange="submit();" style="color:red"
+                                                             disabled="#{not typeEditorBean.editMode}"/>
+                                </td>
+                            </h:panelGroup>
+                            <ui:fragment rendered="#{typeEditorBean.editMode}">
+                                <td align="left">
+                                    <adm:commandButton labelKey="TypeEditor.table.button.delete" location="content"
+                                                       icon="delete" action="deleteTypeOption"
+                                                       bean="#{typeEditorBean}"
+                                                       id="deleteTypeOptionButton_#{option.id}"
+                                                       confirmKey="TypeEditor.message.deleteOption">
+                                        <f:setPropertyActionListener target="#{typeEditorBean.optionFiler}"
+                                                                     value="#{option}"/>
+                                    </adm:commandButton>
+                                </td>
+                            </ui:fragment>
+                        </tr>
+                    </ui:repeat>
+                    <ui:fragment rendered="#{typeEditorBean.editMode}">
+                        <tr>
+                            <td align="left">
+                                <h:inputText value="#{typeEditorBean.typeOptionKey}"/>
+                            </td>
+                            <td align="left">
+                                <h:inputText value="#{typeEditorBean.typeOptionValue}"/>
+                            </td>
+                            <td align="left">
+                                <h:selectBooleanCheckbox value="#{typeEditorBean.typeOptionOverridable}"/>
+                            </td>
+                            <td align="left">
+                                <h:selectBooleanCheckbox value="#{typeEditorBean.typeOptionPassedOn}"/>
+                            </td>
+                            <td align="left">
+                                <adm:commandButton labelKey="TypeEditor.table.button.add" location="content"
+                                                   icon="new" action="addTypeOption" bean="#{typeEditorBean}"
+                                                   id="addTypeOptionButton"/>
+                            </td>
+                        </tr>
+                    </ui:fragment>
+                    </tbody>
+                </table>
+            </adm:sortableTable>
+        </fx:fieldSet>
+
+        <br/><br/>
+
+        <ui:fragment rendered="#{not typeEditorBean.type.new and not typeEditorBean.editMode and typeEditorBean.structureManagement}">
+            <adm:commandButton labelKey="TypeEditor.button.editMode" location="both"
+                    icon="edit"  action="toggleEditMode"  bean="#{typeEditorBean}" immediate="true" id="editModeButton"/>
+        </ui:fragment>
+
+        <ui:fragment rendered="#{typeEditorBean.editMode}">
+            <adm:commandButton labelKey="TypeEditor.table.button.validate" icon="ok" bean="#{typeEditorBean}" action="doNothing"
+                                id="validateChangesButton">
+            </adm:commandButton>
+        </ui:fragment>
+
+        <ui:fragment rendered="#{not typeEditorBean.type.new and typeEditorBean.structureManagement and typeEditorBean.editMode}">
+            <adm:commandButton labelKey="TypeEditor.button.save" location="both"
+                            icon="save"  action="saveChanges"  bean="#{typeEditorBean}" id="saveChangesButton">
+            </adm:commandButton>
+        </ui:fragment>
+         <ui:fragment rendered="#{typeEditorBean.type.new}">
+            <adm:commandButton labelKey="TypeEditor.button.createNew" location="both"
+                            icon="new"  action="saveChanges"  bean="#{typeEditorBean}" id="createTypeButton">
+            </adm:commandButton>
+        </ui:fragment>
+
+        <ui:fragment rendered="#{not typeEditorBean.type.new and typeEditorBean.editMode}">
+            <adm:commandButton labelKey="TypeEditor.button.cancel" location="both" immediate="true"
+                    icon="cancel" id="cancelButton"
+                    onclick="parent.getStructureNavFrame().openNode(#{typeEditorBean.type.id}, true);return false;"/>
+        </ui:fragment>
+
+        <!-- help button-->
+        <ui:include src="../templates/structureEditorHelpButton.xhtml"/>
+
+        <adm:toolbarPluginButtons/>
+    </h:form>
+
+    <script type="text/javascript">
+
+    </script>
+
+</ui:define>
+</ui:composition>
+</body>
+</html>

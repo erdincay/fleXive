@@ -76,10 +76,10 @@ public class FxStructureOption implements Serializable {
 
 
     public final static String VALUE_FALSE = "0";
-    private String key;
+    protected String key;
     protected boolean overrideable;
-    private String value;
-    private boolean set;
+    protected String value;
+    protected boolean set;
 
     /**
      * Ctor

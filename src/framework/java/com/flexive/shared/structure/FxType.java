@@ -35,13 +35,11 @@ import com.flexive.shared.AbstractSelectableObjectWithLabel;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.SelectableObjectWithLabel;
 import com.flexive.shared.XPathElement;
+import com.flexive.shared.media.FxMimeTypeWrapper;
 import com.flexive.shared.content.FxGroupData;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.content.FxPermissionUtils;
-import com.flexive.shared.exceptions.FxCreateException;
-import com.flexive.shared.exceptions.FxInvalidParameterException;
-import com.flexive.shared.exceptions.FxNotFoundException;
-import com.flexive.shared.exceptions.FxRuntimeException;
+import com.flexive.shared.exceptions.*;
 import com.flexive.shared.scripting.FxScriptEvent;
 import com.flexive.shared.scripting.FxScriptMapping;
 import com.flexive.shared.scripting.FxScriptMappingEntry;
@@ -70,7 +68,6 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      * Virtual ROOT_ID type
      */
     public final static long ROOT_ID = 0;
-
     /**
      * Name of the account contact data type
      */
@@ -80,8 +77,13 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      */
     public static final String FOLDER = "FOLDER";
     /**
+     * Name of the ROOT DOCUMENTFILE type for storing binary files / documents etc.
+     */
+    public static final String DOCUMENTFILE = "DOCUMENTFILE";
+    /**
      * Name of the document type for storing typical document file formats (PDF, Word, Excel, ...)
      */
+    // public static final String DOCUMENT = "APPLICATION";
     public static final String DOCUMENT = "DOCUMENTFILE";
 
     protected long id;
@@ -113,12 +115,13 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
     protected List<FxAssignment> scriptedAssignments;
     protected Map<FxScriptEvent, long[]> scriptMapping;
     protected FxReference icon;
+    protected List<FxTypeOption> options;
 
     public FxType(long id, ACL acl, Workflow workflow, String name, FxString label, FxType parent, TypeStorageMode storageMode,
                   TypeCategory category, TypeMode mode, LanguageMode language, TypeState state, byte permissions,
                   boolean multipleContentACLs, boolean includedInSupertypeQueries, boolean trackHistory,
-                  long historyAge, long maxVersions, int maxRelSource, int maxRelDestination,
-                  LifeCycleInfo lifeCycleInfo, List<FxType> derivedTypes, List<FxTypeRelation> relations) {
+                  long historyAge, long maxVersions, int maxRelSource, int maxRelDestination, LifeCycleInfo lifeCycleInfo,
+                  List<FxType> derivedTypes, List<FxTypeRelation> relations, List<FxTypeOption> options) {
         this.id = id;
         this.ACL = acl;
         this.workflow = workflow;
@@ -144,6 +147,9 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
         this.containsFlatStorageAssignments = false;
         this.scriptMapping = new LinkedHashMap<FxScriptEvent, long[]>(10);
         this.icon = new FxReference(false, FxReference.EMPTY).setEmpty();
+        this.options = options;
+        if (this.options == null)
+            this.options = FxTypeOption.getEmptyTypeOptionList(2);
     }
 
     /**
@@ -1174,5 +1180,88 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      */
     public String buildXPathPrefix(FxPK pk) {
         return this.getName().toUpperCase() + "[@pk=" + pk + "]";
+    }
+
+    /**
+     * Check if an option is set for the requested key
+     *
+     * @param key option key
+     * @return if an option is set for the requested key
+     */
+    public boolean hasOption(String key) {
+        return FxTypeOption.hasOption(key, options);
+    }
+
+    /**
+     * Get an option entry for the given key, if the key is invalid or not found a <code>FxTypeStructureOption</code> object
+     * will be returned with <code>set</code> set to <code>false</code>, overrideable set to <code>false</code> and value
+     * set to an empty String.
+     *
+     * @param key option key
+     * @return the found option or an object that indicates that the option is not set
+     */
+    public FxTypeOption getOption(String key) {
+        return FxTypeOption.getOption(key, options);
+    }
+
+    /**
+     * Get a (unmodifiable) list of all options set for this group
+     *
+     * @return (unmodifiable) list of all options set for this group
+     */
+    public List<FxTypeOption> getOptions() {
+        return FxTypeOption.getUnmodifiableOptions(options);
+    }
+
+    /**
+     * Retrieve the List of options which are passed on to derived types
+     *
+     * @return (modifiable) list of all options passed on to derived types
+     */
+    public List<FxTypeOption> getPassedOnOptions() {
+        final List<FxTypeOption> out = new ArrayList<FxTypeOption>(options.size());
+        for(FxTypeOption o : options) {
+            if(o.isPassedOn()) {
+                out.add(o);
+            }
+        }
+        return out;
+    }
+
+    /**
+     * Retrieve the mime types for a given FxType
+     *
+     * @return return the mime types for a given FxType as a FxMimeType obj., or null if none are set
+     */
+    public FxMimeTypeWrapper getMimeType() {
+        if(isMimeTypeSet()) {
+            return new FxMimeTypeWrapper(getOption(FxTypeOption.OPTION_MIMETYPE).getValue());
+        }
+        return null;
+    }
+
+    /**
+     * Convenience method to check if ANY mime type was set for this FxType
+     *
+     * @return true if a mime type was set
+     */
+    public boolean isMimeTypeSet() {
+        return getOption(FxTypeOption.OPTION_MIMETYPE).isSet();
+    }
+
+    /**
+     * Checks if a given mime type is set for the FxType
+     * The given String parameter can either be a main type of a mimetype ("e.g." "image" or "image/") or a fully qualified
+     * mime type including the subtype, e.g. "image/png" or "audio/wav".
+     *
+     * @param mimeType the mime type's type or the fully qualified mime type as a String parameter
+     * @return returns true if the given mime type matches the mime types configured for this FxType
+     */
+    public boolean hasMimeType(String mimeType) {
+        if (isMimeTypeSet()) {
+            final FxMimeTypeWrapper mimeWrapper = getMimeType();
+            return mimeWrapper.contains(mimeType);
+        }
+        return false;
     }
 }

@@ -141,7 +141,7 @@ public class StructureTest {
             pe.setMultiplicity(new FxMultiplicity(0, 5));
             ae.createProperty(testId, pe, "/");
         } catch (FxApplicationException e) {
-            fail(e.getMessage());
+            Assert.fail(e.getMessage());
         }
         FxTypeEdit testEdit = new FxTypeEdit(env().getType("TestCD"));
         long propCount = testEdit.getAssignedProperties().size();
@@ -167,12 +167,12 @@ public class StructureTest {
             te.remove(testType.getId());
             try {
                 env().getType("TestCD");
-                fail("TestCD could be loaded after remove!");
+                Assert.fail("TestCD could be loaded after remove!");
             } catch (Exception e) {
                 //ok
             }
         } catch (FxApplicationException e) {
-            fail(e.getMessage());
+            Assert.fail(e.getMessage());
         }
     }
 
@@ -210,7 +210,7 @@ public class StructureTest {
             pe.setMultiplicity(new FxMultiplicity(0, 1));
             ae.createProperty(testId, pe, "/TestGroup");
         } catch (FxApplicationException e) {
-            fail(e.getMessage());
+            Assert.fail(e.getMessage());
         }
         FxType testType = env().getType("TestCDP");
         assertTrue(testId == testType.getId(), "Wrong id for type!");
@@ -229,7 +229,7 @@ public class StructureTest {
         try {
             dp = testTypeDerived.getAssignment("/TestDirectProperty1");
         } catch (Exception e) {
-            fail("Failed to retrieved derived property: " + e.getMessage());
+            Assert.fail("Failed to retrieved derived property: " + e.getMessage());
         }
         assertTrue(!dp.isEnabled(), "Property should be disabled!");
         FxPropertyAssignmentEdit dpe = new FxPropertyAssignmentEdit((FxPropertyAssignment) dp);
@@ -243,7 +243,7 @@ public class StructureTest {
         try {
             dp = testTypeDerived.getAssignment("/TestGroup/TestDirectProperty2");
         } catch (Exception e) {
-            fail("Failed to retrieved derived property: " + e.getMessage());
+            Assert.fail("Failed to retrieved derived property: " + e.getMessage());
         }
         assertTrue(!dp.isEnabled(), "Property should be disabled!");
 
@@ -258,19 +258,19 @@ public class StructureTest {
             te.remove(testTypeDerived.getId());
             try {
                 env().getType("TestCDDerived");
-                fail("TestCDDerived could be loaded after remove!");
+                Assert.fail("TestCDDerived could be loaded after remove!");
             } catch (Exception e) {
                 //ok
             }
             te.remove(testType.getId());
             try {
                 env().getType("TestCDP");
-                fail("TestCD could be loaded after remove!");
+                Assert.fail("TestCD could be loaded after remove!");
             } catch (Exception e) {
                 //ok
             }
         } catch (FxApplicationException e) {
-            fail(e.getMessage());
+            Assert.fail(e.getMessage());
         }
     }
 
@@ -388,7 +388,7 @@ public class StructureTest {
                     true, null, null, null);
             ae.createProperty(testId, pe, "/");
         } catch (FxApplicationException e) {
-            fail(e.getMessage());
+            Assert.fail(e.getMessage());
         }
         FxType testType = env().getType("TestAssignmentRemove");
         assertTrue(testId == testType.getId(), "Wrong id for type!");
@@ -399,14 +399,14 @@ public class StructureTest {
             assertTrue(pa != null, "Created Property Assignment is null!");
             rmId = pa.getId();
         } catch (Exception e) {
-            fail("Created Property Assignment does not exist!");
+            Assert.fail("Created Property Assignment does not exist!");
         }
         FxPropertyAssignmentEdit pae = FxPropertyAssignmentEdit.createNew(pa, testType, "TestAssignmentRemoveProperty2", "/");
         try {
             long paId = ae.save(pae, true);
             pa = (FxPropertyAssignment) env().getAssignment(paId);
         } catch (Exception e) {
-            fail("Failed to retrieve derived assignment(2): " + e.getMessage());
+            Assert.fail("Failed to retrieve derived assignment(2): " + e.getMessage());
         }
         //create derived assignment over 3 hops
         ae.save(FxPropertyAssignmentEdit.createNew(pa, testType, "TestAssignmentRemoveProperty3", "/"), true);
@@ -533,7 +533,7 @@ public class StructureTest {
             try {
                 prop.setDefaultValue(defML);
                 asId = ae.createProperty(FxType.ROOT_ID, prop, "/");
-                fail("Expected create property to fail with a multilang default value for a singlelang assignment");
+                Assert.fail("Expected create property to fail with a multilang default value for a singlelang assignment");
             } catch (FxRuntimeException e) {
                 //expected
             }
@@ -541,7 +541,7 @@ public class StructureTest {
             try {
                 prop.setDefaultValue(defSL);
                 asId = ae.createProperty(FxType.ROOT_ID, prop, "/");
-                fail("Expected create property to fail with a singlelang default value for a singlelang assignment");
+                Assert.fail("Expected create property to fail with a singlelang default value for a singlelang assignment");
             } catch (FxRuntimeException e) {
                 //expected
             }
@@ -667,7 +667,7 @@ public class StructureTest {
             pEdit.setOverrideMultiplicity(false);
             try {
                 ae.save(pEdit);
-                fail("Altering the minimum multiplicity of a property for which content exists should have thrown an exception");
+                Assert.fail("Altering the minimum multiplicity of a property for which content exists should have thrown an exception");
             } catch (FxUpdateException e) {
                 // expected
             }
@@ -688,7 +688,7 @@ public class StructureTest {
             pEdit.setMultiplicity(new FxMultiplicity(0, 1));
             try {
                 ae.save(pEdit);
-                fail("Changing the maximum property multiplicity for assignment counts > new set maximum should have failed");
+                Assert.fail("Changing the maximum property multiplicity for assignment counts > new set maximum should have failed");
             } catch (FxUpdateException e) {
                 // expected
             }
@@ -696,7 +696,7 @@ public class StructureTest {
             pEdit.setMultiplicity(new FxMultiplicity(3, 3));
             try {
                 ae.save(pEdit);
-                fail("Changing the minimum property multiplicity for assignment counts > new set minimum should have failed");
+                Assert.fail("Changing the minimum property multiplicity for assignment counts > new set minimum should have failed");
             } catch (FxUpdateException e) {
                 // expected
             }
@@ -714,7 +714,7 @@ public class StructureTest {
             pEdit.setMultiplicity(new FxMultiplicity(0, 2));
             try {
                 ae.save(pEdit);
-                fail("Changing the maximum property multiplicity for assignment counts > new set maximum should have failed");
+                Assert.fail("Changing the maximum property multiplicity for assignment counts > new set maximum should have failed");
             } catch (FxUpdateException e) {
                 // expected
             }
@@ -727,7 +727,7 @@ public class StructureTest {
             assEdit.setMultiplicity(new FxMultiplicity(0, 5));
             try {
                 ae.save(assEdit, false);
-                fail("Overriding the base multiplicity should have failed due to setOverrideMultiplicity(false)");
+                Assert.fail("Overriding the base multiplicity should have failed due to setOverrideMultiplicity(false)");
             } catch (FxUpdateException e) {
                 // expected
             }
@@ -746,7 +746,7 @@ public class StructureTest {
             assEdit.setMultiplicity(new FxMultiplicity(4, 4));
             try {
                 ae.save(assEdit, false);
-                fail("Assignment of an invalid minimum FxMultiplicity of a property assignment for which content exists should have failed");
+                Assert.fail("Assignment of an invalid minimum FxMultiplicity of a property assignment for which content exists should have failed");
             } catch (FxUpdateException e) {
                 // expected
             }
@@ -835,7 +835,7 @@ public class StructureTest {
             ge.setMultiplicity(new FxMultiplicity(0, 1));
             try {
                 ae.save(ge);
-                fail("Setting the override mult. flag and the maximum group multiplicity to a value less than the number of given content instances should have failed");
+                Assert.fail("Setting the override mult. flag and the maximum group multiplicity to a value less than the number of given content instances should have failed");
             } catch (FxUpdateException e) {
                 // expected
             }
@@ -843,7 +843,7 @@ public class StructureTest {
             ge.setMultiplicity(new FxMultiplicity(3, 3));
             try {
                 ae.save(ge);
-                fail("Setting the override mult. flag and the minimum group multiplicity to a value greater than the number of given content instances should have failed");
+                Assert.fail("Setting the override mult. flag and the minimum group multiplicity to a value greater than the number of given content instances should have failed");
             } catch (FxUpdateException e) {
                 // expected
             }
@@ -860,7 +860,7 @@ public class StructureTest {
             ge.setMultiplicity(new FxMultiplicity(4, 4));
             try {
                 ae.save(ge);
-                fail("Setting the min. group multiplicity to a value > the current # of the assignment's content instances should have failed");
+                Assert.fail("Setting the min. group multiplicity to a value > the current # of the assignment's content instances should have failed");
             } catch (FxUpdateException e) {
                 // expected
             }
@@ -868,7 +868,7 @@ public class StructureTest {
             ge.setMultiplicity(new FxMultiplicity(0, 2));
             try {
                 ae.save(ge);
-                fail("Setting the max. group multiplicity to a value < the current # of the assignment's content instances should have failed");
+                Assert.fail("Setting the max. group multiplicity to a value < the current # of the assignment's content instances should have failed");
             } catch (FxUpdateException e) {
                 // expected
             }
@@ -895,7 +895,7 @@ public class StructureTest {
             assEdit.setMode(GroupMode.OneOf);
             try {
                 ae.save(assEdit, false);
-                fail("Changing the a group's mode from AnyOf to OneOf for existing content instance should have failed");
+                Assert.fail("Changing the a group's mode from AnyOf to OneOf for existing content instance should have failed");
             } catch (FxUpdateException e) {
                 // expected
             }
@@ -968,7 +968,7 @@ public class StructureTest {
             // try to remove a property which doesn't exist
             try {
                 ae.removeProperty(999999);
-                fail("Removing a non-existing property should throw an exception!");
+                Assert.fail("Removing a non-existing property should throw an exception!");
             } catch (FxNotFoundException e) {
                 // expected
             }
@@ -994,14 +994,14 @@ public class StructureTest {
             co = ce.load(contentPK1);
             try {
                 co.getValue("/REMOVETESTPROP2_ALIAS");
-                fail("Loading a content value for a non-existing Xpath should have failed");
+                Assert.fail("Loading a content value for a non-existing Xpath should have failed");
             } catch (Exception e) {
                 // expected
             }
             co = ce.load(contentPK2);
             try {
                 co.getValue("/REMOVETESTPROP2");
-                fail("Loading a content value for a non-existing Xpath should have failed");
+                Assert.fail("Loading a content value for a non-existing Xpath should have failed");
             } catch (Exception e) {
                 // expected
             }
@@ -1093,7 +1093,7 @@ public class StructureTest {
             // remove a group which doesn't exist
             try {
                 ae.removeGroup(999999);
-                fail("Removing a non-existant group should have failed");
+                Assert.fail("Removing a non-existant group should have failed");
             } catch (FxNotFoundException e) {
                 // expected
             }
@@ -1120,7 +1120,7 @@ public class StructureTest {
                 co = ce.load(contentPK1);
                 try {
                     co.getValue("/REMOVETESTGROUP1/REMOVETESTPROP1");
-                    fail("Loading content values for removed props / groups should have thrown an exception");
+                    Assert.fail("Loading content values for removed props / groups should have thrown an exception");
                 } catch (Exception e) {
                     // expected
                 }
@@ -1132,7 +1132,7 @@ public class StructureTest {
                 co = ce.load(contentPK2);
                 try {
                     co.getValue("/REMOVETESTGROUP1_ALIAS/REMOVETESTPROP1_ALIAS");
-                    fail("Loading content values for removed props / groups should have thrown an exception");
+                    Assert.fail("Loading content values for removed props / groups should have thrown an exception");
                 } catch (Exception e) {
                     // expected
                 }
@@ -1517,8 +1517,91 @@ public class StructureTest {
             if (pk != null) {
                 EJBLookup.getContentEngine().remove(pk);
             }
-            EJBLookup.getTypeEngine().remove(type.getId());
+            te.remove(type.getId());
         }
+    }
+
+    /**
+     * Test setting / loading structural options for types and derived types
+     *
+     * @throws FxApplicationException on errors
+     */
+    @Test(groups = {"ejb", "structure"})
+    public void typeStructureOptionsTest() throws FxApplicationException {
+        FxTypeEdit type = null;
+        FxTypeEdit typeDer = null;
+        FxType t1 = null;
+        FxType t1der = null;
+        try {
+            type = FxTypeEdit.createNew("STRUCTOPTTEST");
+            type.setOption("OPTION_A", "a value"); // overrideable, not passed on
+            type.setOption("OPTION_B", "another value", false, true); // non-overrideable, passed on
+            type.setOption("OPTION_BOOL_A", true); // overrideable, not passed on
+            type.setOption("OPTION_BOOL_B", false, false, true); // non-overrideable, passed on
+            type.setOption("OPTION_C", "C", true, true); // overrideable, passed on
+            type = type.save();
+
+            // create a derived type
+            FxTypeEdit.createNew("STRUCTOPTTESTDERIVED", type.getId()).save();
+
+            // safety reload
+            t1 = getEnvironment().getType("STRUCTOPTTEST");
+            t1der = getEnvironment().getType("STRUCTOPTTESTDERIVED");
+
+            Assert.assertEquals(t1.getOption("OPTION_A").getValue(), "a value");
+            Assert.assertTrue(t1.getOption("OPTION_A").isOverrideable());
+            Assert.assertFalse(t1.getOption("OPTION_A").isPassedOn());
+            Assert.assertEquals(t1.getOption("OPTION_B").getValue(), "another value");
+            Assert.assertFalse(t1.getOption("OPTION_B").isOverrideable());
+            Assert.assertTrue(t1.getOption("OPTION_B").isPassedOn());
+            Assert.assertEquals(t1.getOption("OPTION_BOOL_A").isValueTrue(), true);
+            Assert.assertTrue(t1.getOption("OPTION_BOOL_A").isOverrideable());
+            Assert.assertFalse(t1.getOption("OPTION_BOOL_A").isPassedOn());
+            Assert.assertEquals(t1.getOption("OPTION_BOOL_B").isValueTrue(), false);
+            Assert.assertFalse(t1.getOption("OPTION_BOOL_B").isOverrideable());
+            Assert.assertTrue(t1.getOption("OPTION_BOOL_B").isPassedOn());
+            Assert.assertEquals(t1.getOption("OPTION_C").getValue(), "C");
+            Assert.assertTrue(t1.getOption("OPTION_C").isOverrideable());
+            Assert.assertTrue(t1.getOption("OPTION_C").isPassedOn());
+
+            Assert.assertEquals(t1der.getOption("OPTION_B").getValue(), "another value");
+            Assert.assertFalse(t1der.getOption("OPTION_BOOL_B").isValueTrue());
+            Assert.assertEquals(t1der.getOption("OPTION_C").getValue(), "C");
+
+            // try to set the overrideable and the non-overrideable options
+            typeDer = getEnvironment().getType("STRUCTOPTTESTDERIVED").asEditable();
+            typeDer.setOption("OPTION_C", "C NEW");
+
+            try {
+                typeDer.setOption("OPTION_B", "new value");
+                Assert.fail("It should not be possible to set values for un-overrideable, inherited options");
+            } catch (FxApplicationException e) {
+                // expected
+            }
+
+            typeDer.save();
+            t1der = getEnvironment().getType("STRUCTOPTTESTDERIVED");
+            Assert.assertEquals(t1der.getOption("OPTION_C").getValue(), "C NEW");
+
+        } finally {
+            if (t1der != null)
+                te.remove(t1der.getId());
+            if (t1 != null)
+                te.remove(t1.getId());
+        }
+    }
+
+    /**
+     * Test setting mime types for DOCUMENTFILE and its derived types
+     *
+     * @throws FxApplicationException on errors
+     */
+    @Test(groups = {"ejb", "structure"})
+    public void mimeTypeTest() throws FxApplicationException {
+        //
+        // FxTypeEdit document;
+
+        // TODO
     }
 
     /**

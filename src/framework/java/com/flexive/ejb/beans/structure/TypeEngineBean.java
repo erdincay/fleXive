@@ -61,9 +61,7 @@ import org.apache.commons.logging.LogFactory;
 import javax.annotation.Resource;
 import javax.ejb.*;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 
 /**
@@ -228,6 +226,10 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
                     }
                 }
             }
+
+            // store structure options
+            storeTypeOptions(con, TBL_STRUCT_TYPES_OPTIONS, "ID", newId, type.getOptions(), false);
+
             StructureLoader.reload(con);
         } catch (SQLException e) {
             if (StorageManager.isUniqueConstraintViolation(e)) {
@@ -800,12 +802,36 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
             }
             //end icon
 
+            // structure option changes
+            boolean optionsChanged = updateTypeOptions(con, type, orgType);
+            // check if any type options must be propagated to derived types
+            if(type.getDerivedTypes().size() > 0) {
+                final List<FxTypeOption> passOn = new ArrayList<FxTypeOption>(type.getOptions().size());
+                for(FxTypeOption o : type.getOptions()) {
+                    if(o.isPassedOn()) {
+                        passOn.add(o);
+                    }
+                }
+                if(passOn.size() > 0) {
+                    for(FxType derived : type.getDerivedTypes()) {
+                        updateDerivedTypeOptions(con, derived, passOn);
+                    }
+                }
+            }
+
             //sync back to cache
             try {
                 if (needReload)
                     StructureLoader.reload(con);
-                else
+                else {
                     StructureLoader.updateType(FxContext.get().getDivisionId(), loadType(con, type.getId()));
+                    // reload any derived types if type options have changed
+                    if (optionsChanged && type.getDerivedTypes().size() > 0) {
+                        for (FxType derivedType : type.getDerivedTypes()) {
+                            StructureLoader.updateType(FxContext.get().getDivisionId(), loadType(con, derivedType.getId()));
+                        }
+                    }
+                }
             } catch (FxLoadException e) {
                 throw new FxUpdateException(e);
             } catch (FxCacheException e) {
@@ -925,6 +951,9 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
                 ps.close();
             }
 
+            // remove all type structure options
+            storeTypeOptions(con, TBL_STRUCT_TYPES_OPTIONS, "ID", id, null, true);
+
             //remove all flat storage assignments for this type
             FxFlatStorageManager.getInstance().removeTypeMappings(con, type.getId());
 
@@ -1024,6 +1053,9 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
         String curSql;
         FxEnvironment environment = CacheAdmin.getEnvironment();
         try {
+            // load structure options for a given type
+            final List<FxTypeOption> options = loadTypeOptions(con, id, "ID", TBL_STRUCT_TYPES_OPTIONS);
+
             //                                 1         2       3        4
             ps = con.prepareStatement("SELECT TYPESRC, TYPEDST, MAXSRC, MAXDST FROM " + TBL_STRUCT_TYPERELATIONS + " WHERE TYPEDEF=?");
             //               1   2     3       4             5         6
@@ -1044,9 +1076,11 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
                     ps.setLong(1, rs.getLong(1));
                     List<FxTypeRelation> alRelations = new ArrayList<FxTypeRelation>(10);
                     rsRelations = ps.executeQuery();
+
                     while (rsRelations != null && rsRelations.next())
                         alRelations.add(new FxTypeRelation(new FxPreloadType(rsRelations.getLong(1)), new FxPreloadType(rsRelations.getLong(2)),
                                 rsRelations.getInt(3), rsRelations.getInt(4)));
+
                     return new FxType(rs.getLong(1), environment.getACL(rs.getInt(19)),
                             environment.getWorkflow(rs.getInt(20)), rs.getString(2),
                             Database.loadFxString(con, TBL_STRUCT_TYPES, "description", "id=" + rs.getLong(1)),
@@ -1055,7 +1089,8 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
                             LanguageMode.getById(rs.getInt(7)), TypeState.getById(rs.getInt(8)), rs.getByte(9),
                             rs.getBoolean(21), rs.getBoolean(22), rs.getBoolean(10), rs.getLong(11), rs.getLong(12),
                             rs.getInt(13), rs.getInt(14), LifeCycleInfoImpl.load(rs, 15, 16, 17, 18),
-                            new ArrayList<FxType>(5), alRelations);
+                            new ArrayList<FxType>(5), alRelations, options);
+
                 } catch (FxNotFoundException e) {
                     throw new FxLoadException(LOG, e);
                 }
@@ -1104,6 +1139,139 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
             throw new FxApplicationException(e.getCause(), "ex.structure.import.type.conversionError", path, line, e.getShortMessage());
         } catch (Exception e) {
             throw new FxApplicationException(e, "ex.structure.import.type.error", e.getMessage());
+        }
+    }
+
+    /*
+     * Helper to store options, (the information in brackets expalains how to use this method to store the options
+     * for an FxPropertyAssignment)
+     *
+     * @param con               the DB connection
+     * @param table             the table name to store the options (e.g. TBL_PROPERTY_OPTIONS)
+     * @param primaryColumn     the column name of the primary key (where the property Id is stored, e.g. ID)
+     * @param primaryId         the primary key itself (the property Id, e.g. FxPropertyAssignment.getProperty().getId())
+     * @param options           the option list to store (e.g. FxPropertyAssignmentEdit.getOptions())
+     * @param update set to true if an update should be performed
+     */
+    private void storeTypeOptions(Connection con, String table, String primaryColumn, long id, // Long assignmentId,
+                              List<FxTypeOption> options, boolean update) throws SQLException, FxInvalidParameterException {
+        PreparedStatement ps = null;
+        try {
+            if(update) {
+                ps = con.prepareStatement("DELETE FROM " + table + " WHERE " + primaryColumn + "=?");
+                ps.setLong(1, id);
+                ps.executeUpdate();
+                ps.close();
+            }
+
+            if (options == null || options.size() == 0)
+                return;
+            //                                                        1                 2      3           4        5
+            ps = con.prepareStatement("INSERT INTO " + table + " (" + primaryColumn + ",OPTKEY,MAYOVERRIDE,PASSEDON,OPTVALUE)VALUES(?,?,?,?,?)");
+            for (FxTypeOption option : options) {
+                ps.setLong(1, id);
+                if (StringUtils.isEmpty(option.getKey()))
+                    throw new FxInvalidParameterException("key", "ex.structure.option.key.empty", option.getValue());
+                ps.setString(2, option.getKey());
+                ps.setBoolean(3, option.isOverrideable());
+                ps.setBoolean(4, option.isPassedOn());
+                ps.setString(5, option.getValue());
+                ps.addBatch();
+            }
+            ps.executeBatch();
+        } finally {
+            if (ps != null)
+                ps.close();
+        }
+    }
+
+    /**
+     * Updates the options of an FxGroup
+     * Before the options are updated, they are compared against the options that are
+     * already stored in the DB. If there are changes, all present options are deleted
+     * in the DB and newly created afterwards from the assignment's option list.
+     *
+     * @param con a valid and open connection
+     * @param type the type whose structure options (might) have changed
+     * @param orig the original type
+     * @return true if changes were made
+     * @throws SQLException on db errors
+     * @throws FxInvalidParameterException on parameter errors
+     */
+    private boolean updateTypeOptions(Connection con, FxTypeEdit type, FxType orig) throws SQLException, FxInvalidParameterException {
+        boolean changed = false;
+        if (orig.getOptions().size() != type.getOptions().size()) {
+            changed = true;
+        } else {
+            for (int i = 0; i < orig.getOptions().size(); i++) {
+                FxTypeOption origOpt = orig.getOptions().get(i);
+                FxTypeOption newOpt = type.getOption(origOpt.getKey());
+                if (!origOpt.equals(newOpt)) {
+                    changed = true;
+                    break;
+                }
+            }
+        }
+        if (changed)
+            storeTypeOptions(con, TBL_STRUCT_TYPES_OPTIONS, "ID", type.getId(), type.getOptions(), true);
+        return changed;
+    }
+
+    /**
+     * Update the options of any derived types if their supertypes acquire new options which must be passed on
+     * ONLY do this iff the options is not already set
+     * 
+     * @param con an open and valid connection
+     * @param derived the derived type t.b. updated
+     * @param passedOnOpts the options of the source type t.b. passed on to the derived type
+     * @return true if any changes had to be made
+     * @throws SQLException on errors
+     * @throws FxInvalidParameterException on errors
+     */
+    private boolean updateDerivedTypeOptions(Connection con, FxType derived, List<FxTypeOption> passedOnOpts)
+        throws SQLException, FxInvalidParameterException {
+        boolean changed = false;
+        final List<FxTypeOption> current = derived.getOptions();
+        final List<FxTypeOption> newOpts = new ArrayList<FxTypeOption>(passedOnOpts.size());
+        for(FxTypeOption o : passedOnOpts) {
+            if(!FxTypeOption.hasOption(o.getKey(), current))
+                newOpts.add(o);
+        }
+
+        if(newOpts.size() > 0) {
+            storeTypeOptions(con, TBL_STRUCT_TYPES_OPTIONS, "ID", derived.getId(), newOpts, false);
+            changed = true;
+        }
+
+        return changed;
+    }
+
+    /**
+     * Load the structure options for a given type
+     *
+     * @param con an open and valid connection
+     * @param typeId the type's id
+     * @param idColumn the name of the id column
+     * @param table the table name
+     * @return structure options
+     * @throws SQLException on errors
+     */
+    private List<FxTypeOption> loadTypeOptions(Connection con, long typeId, String idColumn, String table) throws SQLException {
+        PreparedStatement ps = null;
+        List<FxTypeOption> result = new ArrayList<FxTypeOption>(4);
+        try {
+            //                                1      2           3        4
+            ps = con.prepareStatement("SELECT OPTKEY,MAYOVERRIDE,PASSEDON,OPTVALUE FROM " + table + " WHERE " + idColumn + "=?");
+            ps.setLong(1, typeId);
+            final ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                FxTypeOption.setOption(result, rs.getString(1), rs.getBoolean(2), rs.getBoolean(3), rs.getString(4));
+            }
+            ps.close();
+            return result;
+        } finally {
+            if(ps != null)
+                ps.close();
         }
     }
 }

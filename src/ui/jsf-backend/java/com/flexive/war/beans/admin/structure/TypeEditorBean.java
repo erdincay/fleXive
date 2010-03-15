@@ -106,6 +106,15 @@ public class TypeEditorBean implements Serializable {
     private boolean selectedDerivedUsage = true;
     private boolean selectedActive = true;
 
+    // type option editor tab
+    private OptionWrapper optionWrapper = null;
+    private OptionWrapper optionWrapperParent = null;
+    private OptionWrapper.WrappedTypeOption optionFiler = null;
+    private String typeOptionValue = null;
+    private String typeOptionKey = null;
+    private boolean typeOptionOverridable = true; // def. value
+    private boolean typeOptionPassedOn = false; // def. value
+
     public String getParseRequestParameters() {
         try {
             String action = FxJsfUtils.getParameter("action");
@@ -193,6 +202,10 @@ public class TypeEditorBean implements Serializable {
         icon = type.getIcon();
         timeRange = initTimeRange();
         selectedScriptInfo = null;
+        optionWrapper = new OptionWrapper(type.getOptions(), true);
+        if(type.isDerived()) {
+            optionWrapperParent = new OptionWrapper(type.getParent().getOptions(), false);
+        }
     }
 
     public boolean isMaxRelSourceUnlimited() {
@@ -298,6 +311,23 @@ public class TypeEditorBean implements Serializable {
                     type.setMaxVersions(-1);
                 }
                 updateRelations();
+
+                //add options (check if they may be set)
+                List<FxTypeOption> opts = optionWrapper.asFxTypeOptionList(optionWrapper.getTypeOptions());
+                for (FxTypeOption o : opts) {
+                    type.setOption(o.getKey(), o.getValue(), o.isOverrideable(), o.isPassedOn());
+                }
+
+                //delete current options
+                while (!type.getOptions().isEmpty()) {
+                    String key = type.getOptions().get(0).getKey();
+                    type.clearOption(key);
+                }
+
+                //add options
+                for (FxTypeOption o : opts) {
+                    type.setOption(o.getKey(), o.getValue(), o.isOverrideable(), o.isPassedOn());
+                }
 
                 type.setHistoryAge(historyAgeToMilis());
                 long id = EJBLookup.getTypeEngine().save(type);
@@ -725,10 +755,8 @@ public class TypeEditorBean implements Serializable {
         public boolean equals(Object o) {
             if (o instanceof FxTypeRelation)
                 return this.asRelation().equals(o);
-            else if (o instanceof WrappedRelation)
-                return (((WrappedRelation) o).getSourceId() == this.getSourceId() &&
-                        ((WrappedRelation) o).getDestId() == this.getDestId());
-            else return false;
+            else return o instanceof WrappedRelation && (((WrappedRelation) o).getSourceId() == this.getSourceId() &&
+                    ((WrappedRelation) o).getDestId() == this.getDestId());
         }
 
         @Override
@@ -742,12 +770,10 @@ public class TypeEditorBean implements Serializable {
         public boolean equalsCompletely(Object o) {
             if (o instanceof FxTypeRelation)
                 return this.asRelation().equalsCompletely(o);
-            else if (o instanceof WrappedRelation)
-                return (((WrappedRelation) o).getSourceId() == this.getSourceId() &&
-                        ((WrappedRelation) o).getDestId() == this.getDestId() &&
-                        ((WrappedRelation) o).getMaxSource() == this.getMaxSource() &&
-                        ((WrappedRelation) o).getMaxDest() == this.getMaxDest());
-            else return false;
+            else return o instanceof WrappedRelation && (((WrappedRelation) o).getSourceId() == this.getSourceId() &&
+                    ((WrappedRelation) o).getDestId() == this.getDestId() &&
+                    ((WrappedRelation) o).getMaxSource() == this.getMaxSource() &&
+                    ((WrappedRelation) o).getMaxDest() == this.getMaxDest());
         }
 
         public boolean isMaxSourceUnlimited() {
@@ -803,6 +829,11 @@ public class TypeEditorBean implements Serializable {
      * ************** script editor tab begin ***********************
      */
 
+    /**
+     * Show the script editor
+     *
+     * @return the view id
+     */
     public String showTypeScriptEditor() {
         return "typeScriptEditor";
     }
@@ -920,4 +951,101 @@ public class TypeEditorBean implements Serializable {
 
     /****script editor tab end*********/
 
+    /**
+     * ***** option editor tab begin *****
+     */
+
+    /**
+     * Show the OptionEditor
+     *
+     * @return the view id
+     */
+    public String showTypeOptionEditor() {
+        return "typeOptionEditor";
+    }
+
+    /**
+     * Action method: add a type option
+     */
+    public void addTypeOption() {
+        try {
+            optionWrapper.addTypeOption(optionWrapper.getTypeOptions(), typeOptionKey, typeOptionValue, typeOptionOverridable, typeOptionPassedOn);
+            typeOptionKey = null;
+            typeOptionValue = null;
+            typeOptionOverridable = true;
+            typeOptionPassedOn = false;
+        }
+        catch (Throwable t) {
+            new FxFacesMsgErr(t).addToContext();
+        }
+    }
+
+    /**
+     * Action method: delete a type option
+     */
+    public void deleteTypeOption() {
+        optionWrapper.deleteOption(optionWrapper.getTypeOptions(), optionFiler);
+    }
+
+    /**
+     * Action method: (hack) submit form vals
+     */
+    public void doNothing() {
+    }
+
+    public OptionWrapper getOptionWrapper() {
+        return optionWrapper;
+    }
+
+    public void setOptionWrapper(OptionWrapper optionWrapper) {
+        this.optionWrapper = optionWrapper;
+    }
+
+    public OptionWrapper.WrappedTypeOption getOptionFiler() {
+        return optionFiler;
+    }
+
+    public void setOptionFiler(OptionWrapper.WrappedTypeOption optionFiler) {
+        this.optionFiler = optionFiler;
+    }
+
+    public String getTypeOptionValue() {
+        return typeOptionValue;
+    }
+
+    public void setTypeOptionValue(String typeOptionValue) {
+        this.typeOptionValue = typeOptionValue;
+    }
+
+    public String getTypeOptionKey() {
+        return typeOptionKey;
+    }
+
+    public void setTypeOptionKey(String typeOptionKey) {
+        this.typeOptionKey = typeOptionKey;
+    }
+
+    public boolean isTypeOptionOverridable() {
+        return typeOptionOverridable;
+    }
+
+    public void setTypeOptionOverridable(boolean typeOptionOverridable) {
+        this.typeOptionOverridable = typeOptionOverridable;
+    }
+
+    public boolean isTypeOptionPassedOn() {
+        return typeOptionPassedOn;
+    }
+
+    public void setTypeOptionPassedOn(boolean typeOptionPassedOn) {
+        this.typeOptionPassedOn = typeOptionPassedOn;
+    }
+
+    public OptionWrapper getOptionWrapperParent() {
+        return optionWrapperParent;
+    }
+
+    public void setOptionWrapperParent(OptionWrapper optionWrapperParent) {
+        this.optionWrapperParent = optionWrapperParent;
+    }
 }

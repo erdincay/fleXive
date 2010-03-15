@@ -28,9 +28,17 @@
             <adm:tab label="#{fxMessageBean['TypeEditor.tab.typeEditor.readonly']}" active="false" id="tab1ro"
                      bean="#{typeEditorBean}" action="showTypeEditor"/>
         </ui:fragment>
+        <ui:fragment rendered="#{not typeEditorBean.type.new and not typeEditorBean.editMode}">
+            <adm:tab label="#{fxMessageBean['TypeEditor.tab.option.readonly']}" active="false" id="tab2ro"
+                    bean="#{typeEditorBean}" action="showTypeOptionEditor"/>
+        </ui:fragment>
+        <ui:fragment rendered="#{not typeEditorBean.type.new and typeEditorBean.editMode}">
+            <adm:tab label="#{fxMessageBean['TypeEditor.tab.option']}" active="false" id="tab2"
+                    bean="#{typeEditorBean}" action="showTypeOptionEditor"/>
+        </ui:fragment>
         <ui:fragment rendered="#{not typeEditorBean.type.new}">
             <adm:tab label="#{fxMessageBean['ScriptEditor.tab.scriptEditor']} [#{typeEditorBean.scriptCount}]"
-                     active="true" id="tab2"/>
+                     active="true" id="tab3"/>
         </ui:fragment>
         <!-- edit script assignments-->
         <div class="scriptTable">

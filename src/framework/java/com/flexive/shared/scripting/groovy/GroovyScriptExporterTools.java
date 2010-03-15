@@ -52,6 +52,7 @@ import static org.apache.commons.lang.StringUtils.stripToEmpty;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -182,6 +183,9 @@ public final class GroovyScriptExporterTools {
             if (type.isDerived()) { // take out of !defaultsOnly option?
                 sopts.put("parentTypeName", "\"" + type.getParent().getName() + "\"");
             }
+
+            // retrieve any FxTypeOptions
+            sopts.putAll(getOptions(type));
 
             // append options to script
             for (String option : sopts.keySet()) {
@@ -1069,7 +1073,7 @@ public final class GroovyScriptExporterTools {
 
             script.append(defLang)
                     .append(", \"")
-                    .append(hintAsString)
+                    .append(convertToUTF8(hintAsString))
                     .append("\")");
 
             if (langs.length > 1) { // we have more than one language assignment
@@ -1170,8 +1174,23 @@ public final class GroovyScriptExporterTools {
     }
 
     /**
+     * Retrieve all set structure options for an FxType (or FxTypeEdit)
+     * // TODO: add boolean attributes f. options
+     * @param element the FxType
+     * @return returns a Map<String, String> containing the FxTypeOption --> Value mappings
+     */
+    private static <T extends FxType> Map<String, String> getOptions(T element) {
+        Map<String, String> opts = new HashMap<String, String>();
+        for (FxTypeOption o : element.getOptions()) {
+            if (o.isSet())
+                opts.put("\"" + o.getKey() + "\"", "\"" + o.getValue() + "\"");
+        }
+        return opts;
+    }
+
+    /**
      * Retrieve all set structure options for an FxStructureElement
-     *
+     * // TODO: add boolean attributes f. options
      * @param element the FxStructureElement (e.g. FxGroup)
      * @return returns a Map<String, String> containing the FxStructureOption --> Value mappings
      */
@@ -1516,5 +1535,13 @@ public final class GroovyScriptExporterTools {
 
         script.trimToSize();
         return script.toString();
+    }
+
+    private static String convertToUTF8(String in) {
+        try {
+        return new String(in.getBytes("UTF-8"));
+        } catch(UnsupportedEncodingException e) {
+            return in;
+        }
     }
 }

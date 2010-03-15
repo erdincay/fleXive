@@ -1666,4 +1666,29 @@ class GroovyTypeBuilderTest {
             removeTestType()
         }
     }
+
+    /**
+     * Test setting type options
+     */
+    @Test (groups = ["ejb", "scripting", "structure"])
+    def typeOptionTest() {
+        try {
+            new GroovyTypeBuilder().builderTest("OPT_A": true,
+                                                "OPT_B": "ASDF") {
+            }
+
+            def t = environment().getType("BUILDERTEST")
+
+            Assert.assertTrue(t.getOption("OPT_A").isValueTrue())
+            Assert.assertEquals(t.getOption("OPT_B").getValue(), "ASDF")
+            // default settings
+            Assert.assertTrue(t.getOption("OPT_A").isOverrideable())
+            Assert.assertFalse(t.getOption("OPT_A").isPassedOn())
+            Assert.assertTrue(t.getOption("OPT_B").isOverrideable())
+            Assert.assertFalse(t.getOption("OPT_B").isPassedOn())
+            
+        } finally {
+            removeTestType()
+        }
+    }
 }

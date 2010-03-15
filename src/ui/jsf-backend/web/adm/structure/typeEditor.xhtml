@@ -48,14 +48,23 @@
             <ui:fragment rendered="#{not typeEditorBean.editMode}">
                 <adm:tab label="#{fxMessageBean['TypeEditor.tab.typeEditor.readonly']}" active="true" id="tab1ro"/>
             </ui:fragment>
+            <ui:fragment rendered="#{not typeEditorBean.type.new and not typeEditorBean.editMode}">
+                <adm:tab label="#{fxMessageBean['TypeEditor.tab.option.readonly']}" active="false" id="tab2ro"
+                        bean="#{typeEditorBean}" action="showTypeOptionEditor"/>
+            </ui:fragment>
             <ui:fragment rendered="#{not typeEditorBean.type.new and typeEditorBean.editMode}">
-                <adm:tab label="#{fxMessageBean['ScriptEditor.tab.scriptEditor']} [#{typeEditorBean.scriptCount}]" active="false" id="tab2"
+                <adm:tab label="#{fxMessageBean['TypeEditor.tab.option']}" active="false" id="tab2"
+                        bean="#{typeEditorBean}" action="showTypeOptionEditor"/>
+            </ui:fragment>
+            <ui:fragment rendered="#{not typeEditorBean.type.new and typeEditorBean.editMode}">
+                <adm:tab label="#{fxMessageBean['ScriptEditor.tab.scriptEditor']} [#{typeEditorBean.scriptCount}]" active="false" id="tab3"
                         bean="#{typeEditorBean}" action="showTypeScriptEditor"/>
             </ui:fragment>
             <ui:fragment rendered="#{not typeEditorBean.type.new and not typeEditorBean.editMode}">
-                <adm:tab label="#{fxMessageBean['ScriptEditor.tab.scriptEditor.readonly']} [#{typeEditorBean.scriptCount}]" active="false" id="tab2ro"
+                <adm:tab label="#{fxMessageBean['ScriptEditor.tab.scriptEditor.readonly']} [#{typeEditorBean.scriptCount}]" active="false" id="tab3ro"
                         bean="#{typeEditorBean}" action="showTypeScriptEditor"/>
             </ui:fragment>
+
              <fx:formRow labelKey="TypeEditor.label.name" id="name">
                 <h:inputText id="name" value="#{typeEditorBean.name}" disabled="#{not typeEditorBean.editMode}"
                          onkeyup="transferInputValue('frm','name',document.getElementById('frm:description').fxValue.getFirstInputId());">

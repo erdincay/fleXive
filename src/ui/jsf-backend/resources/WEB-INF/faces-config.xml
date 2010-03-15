@@ -587,6 +587,16 @@
         </navigation-case>
 
         <navigation-case>
+            <from-outcome>typeOptionEditor</from-outcome>
+            <to-view-id>/adm/structure/typeOptionEditor.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>typeOptionEditor</from-outcome>
+            <to-view-id>/adm/structure/typeOptionEditor.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
             <from-outcome>typeScriptEditor</from-outcome>
             <to-view-id>/adm/structure/typeScriptEditor.xhtml</to-view-id>
         </navigation-case>

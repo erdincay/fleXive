@@ -345,12 +345,56 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
         return loadAllOptions(con, "ID", "ASSID IS NULL", TBL_STRUCT_GROUP_OPTIONS);
     }
 
+    /**
+     * Load all options for property assignments
+     *
+     * @param con an open and valid connection
+     * @return options
+     * @throws SQLException on errors
+     */
     private Map<Long, List<FxStructureOption>> loadAllPropertyAssignmentOptions(Connection con) throws SQLException {
         return loadAllOptions(con, "ASSID", "ASSID IS NOT NULL", TBL_STRUCT_PROPERTY_OPTIONS);
     }
 
+    /**
+     * Load all options for properties
+     *
+     * @param con an open and valid connection
+     * @return options
+     * @throws SQLException on errors
+     */
     private Map<Long, List<FxStructureOption>> loadAllPropertyOptions(Connection con) throws SQLException {
         return loadAllOptions(con, "ID", "ASSID IS NULL", TBL_STRUCT_PROPERTY_OPTIONS);
+    }
+
+    /**
+     * Load all options for types
+     *
+     * @param con an open and valid connection
+     * @return options
+     * @throws SQLException on errors
+     */
+    private Map<Long, List<FxTypeOption>> loadAllTypeOptions(Connection con) throws SQLException {
+        return loadAllTypeOptions(con, "ID", TBL_STRUCT_TYPES_OPTIONS);
+    }
+
+    private Map<Long, List<FxTypeOption>> loadAllTypeOptions(Connection con, String idColumn, String table) throws SQLException {
+        Statement stmt = null;
+        Map<Long, List<FxTypeOption>> result = new HashMap<Long, List<FxTypeOption>>(50);
+        try {
+            stmt = con.createStatement();
+            final ResultSet rs = stmt.executeQuery("SELECT " + idColumn + ",OPTKEY,MAYOVERRIDE,PASSEDON,OPTVALUE FROM " + table);
+            while (rs.next()) {
+                final long id = rs.getLong(1);
+                if (!result.containsKey(id)) {
+                    result.put(id, new ArrayList<FxTypeOption>());
+                }
+                FxTypeOption.setOption(result.get(id), rs.getString(2), rs.getBoolean(3), rs.getBoolean(4), rs.getString(5));
+            }
+            return result;
+        } finally {
+            Database.closeObjects(GenericEnvironmentLoader.class, null, stmt);
+        }
     }
 
     private Map<Long, List<FxStructureOption>> loadAllOptions(Connection con, String idColumn, String whereClause, String table) throws SQLException {
@@ -393,6 +437,8 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
         String curSql;
         ArrayList<FxType> result = new ArrayList<FxType>(20);
         try {
+            final Map<Long, List<FxTypeOption>> typeOptions = loadAllTypeOptions(con);
+
             //                                 1         2       3        4
             ps = con.prepareStatement("SELECT TYPESRC, TYPEDST, MAXSRC, MAXDST FROM " + TBL_STRUCT_TYPERELATIONS + " WHERE TYPEDEF=?");
             //               1   2     3       4             5         6
@@ -428,7 +474,7 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                             LanguageMode.getById(rs.getInt(7)), TypeState.getById(rs.getInt(8)), rs.getByte(9),
                             rs.getBoolean(22), rs.getBoolean(23), rs.getBoolean(10), rs.getLong(11), rs.getLong(12),
                             rs.getInt(13), rs.getInt(14), LifeCycleInfoImpl.load(rs, 15, 16, 17, 18),
-                            new ArrayList<FxType>(5), alRelations);
+                            new ArrayList<FxType>(5), alRelations, FxSharedUtils.get(typeOptions, id, null));
                     long iconId = rs.getLong(21);
                     if (!rs.wasNull())
                         _type.getIcon().setValue(new ReferencedContent(iconId));
