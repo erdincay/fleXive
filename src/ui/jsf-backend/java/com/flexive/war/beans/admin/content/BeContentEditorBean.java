@@ -1144,4 +1144,11 @@ public class BeContentEditorBean implements ActionBean, Serializable {
             }
         };
     }
+
+    /**
+     * @return the confirmKey if in editMode or <code>null</code> if not in editMode
+     */
+    public String getConfirm() {
+        return this.editMode ? "Content.confirm.abort" : null;
+    }
 }
