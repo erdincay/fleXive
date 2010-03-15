@@ -27,12 +27,18 @@
         <dependency>
             <groupId>javax.faces</groupId>
             <artifactId>jsf-api</artifactId>
-            <version>1.2</version>
+            <version>${jsf.api.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.flexive</groupId>
             <artifactId>flexive-plugin-jsf-core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.flexive</groupId>
+            <artifactId>flexive-ejb</artifactId>
+            <type>ejb</type>
             <scope>provided</scope>
         </dependency>
     </dependencies>
@@ -126,7 +132,7 @@
             <plugin>
                 <groupId>org.mortbay.jetty</groupId>
                 <artifactId>maven-jetty-plugin</artifactId>
-                <version>6.1.18</version>
+                <version>${jetty.version}</version>
                 <configuration>
                     <scanIntervalSeconds>10</scanIntervalSeconds>
                     <stopKey>foo</stopKey>
@@ -148,6 +154,13 @@
                     </systemProperties>
                 </configuration>
                 <dependencies>
+                    <!-- SLF4J API -->
+                    <dependency>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-api</artifactId>
+                        <version>${slf4j.version}</version>
+                    </dependency>
+
                     <!-- Deploy flexive shared environment -->
                     <dependency>
                         <groupId>com.flexive</groupId>
@@ -167,12 +180,12 @@
                     <dependency>
                         <groupId>javax.faces</groupId>
                         <artifactId>jsf-api</artifactId>
-                        <version>1.2_12</version>
+                        <version>${jsf.version}</version>
                     </dependency>
                     <dependency>
                         <groupId>javax.faces</groupId>
                         <artifactId>jsf-impl</artifactId>
-                        <version>1.2_12</version>
+                        <version>${jsf.version}</version>
                     </dependency>
 
                     <!-- Deploy OpenEJB -->
@@ -208,7 +221,7 @@
                     <dependency>
                         <groupId>mysql</groupId>
                         <artifactId>mysql-connector-java</artifactId>
-                        <version>5.0.8</version>
+                        <version>${mysql.connector.version}</version>
                     </dependency>
 
                     <!-- Deploy JBoss common library -->

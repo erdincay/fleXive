@@ -10,7 +10,7 @@
 
     <!-- Define common versions of dependencies -->
     <properties>
-        <flexive.version>3.1-beta-1</flexive.version>
+        <flexive.version>3.1-beta-2</flexive.version>
     </properties>
 
     <dependencies>
@@ -58,7 +58,6 @@
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.0.2</version>
                 <configuration>
                     <source>1.5</source>
                     <target>1.5</target>
@@ -98,7 +97,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
-                <version>2.1-beta-1</version>
                 <configuration>
                     <webResources>
                         <resource>
