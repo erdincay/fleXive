@@ -41,6 +41,8 @@ import java.util.List;
  * A class to handle / wrap mime types incl. various tool methods
  *
  * @author Christopher Blasnik (c.blasnik@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+ *
+ * @since 3.1
  */
 public class FxMimeTypeWrapper {
 
@@ -191,19 +193,6 @@ public class FxMimeTypeWrapper {
      */
     @Override
     public String toString() {
-        int initialCapacity = 20;
-        if (mimeTypes.size() > 0)
-            initialCapacity = initialCapacity * mimeTypes.size();
-
-        StringBuilder s = new StringBuilder(initialCapacity);
-        for (FxMimeType mt : mimeTypes) {
-            s.append(mt.toString())
-                    .append(",");
-        }
-
-        s.trimToSize();
-        s.delete(s.length() - 1, s.length());
-
-        return s.toString();
+        return mimeTypes == null ? "[]" : mimeTypes.toString();
     }
 }

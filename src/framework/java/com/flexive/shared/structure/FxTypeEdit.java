@@ -215,10 +215,22 @@ public class FxTypeEdit extends FxType implements Serializable {
             options = removeMimeTypes(options);
         }
 
-        return createNew(name, label, acl, CacheAdmin.getEnvironment().getWorkflows().get(0),
-                parent, parent != null, TypeStorageMode.Hierarchical,
-                TypeCategory.User, TypeMode.Content, LanguageMode.Multiple, TypeState.Available,
-                getDefaultTypePermissions(), false, 0, -1, 0, 0, options);
+        if (parent == null) {
+            return createNew(name, label, acl,
+                    CacheAdmin.getEnvironment().getWorkflows().get(0),
+                    parent, false, TypeStorageMode.Hierarchical,
+                    TypeCategory.User, TypeMode.Content, LanguageMode.Multiple, TypeState.Available,
+                    getDefaultTypePermissions(), false, 0, -1, 0, 0, options);
+        } else {
+            return createNew(name, label, acl,
+                    parent.getWorkflow(),
+                    parent, true, parent.getStorageMode(),
+                    TypeCategory.User, parent.getMode(),
+                    parent.getLanguage(), TypeState.Available,
+                    parent.getBitCodedPermissions(), parent.isTrackHistory(), parent.getHistoryAge(),
+                    parent.getMaxVersions(), parent.getMaxRelSource(), parent.getMaxRelDestination(),
+                    options);
+        }
     }
 
     /**

@@ -39,6 +39,8 @@ import java.io.Serializable;
  * A general mime type / subtype implementation
  *
  * @author Christopher Blasnik (c.blasnik@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+ *
+ * @since 3.1
  */
 public class FxMimeType implements Serializable {
     /**
