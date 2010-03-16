@@ -29,7 +29,7 @@
         </para>
         <para>
             The scripting language of choice is
-            <link xlink:href="$1">$2</link>, but if JavaSE 6 or higher is used any language
+            <link href="http://groovy.codehaus.org">Groovy</link>, but if JavaSE 6 or higher is used any language
             supported by the Java Scripting API can be used.
         </para>
     </section>
