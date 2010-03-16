@@ -128,7 +128,7 @@
                             <para>
                                 <userinput>
                                     mvn -B archetype:generate -DarchetypeGroupId=com.flexive
-                                    -DarchetypeArtifactId=flexive-archetype-ear -DarchetypeVersion=&mavenArchetypeVersion;
+                                    -DarchetypeArtifactId=flexive-archetype-ear -DarchetypeVersion=&mavenEarArchetypeVersion;
                                     -DarchetypeRepository=http://repo.flexive.org/maven2/
                                     -DartifactId=hello-flexive
                                     -DgroupId=test

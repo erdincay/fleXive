@@ -1042,7 +1042,7 @@ BUILD SUCCESSFUL]]></screen>
                 </para>
                 <para>
                     <command>mvn archetype:generate -DarchetypeGroupId=com.flexive
-                        -DarchetypeArtifactId=flexive-archetype-ear -DarchetypeVersion=&mavenArchetypeVersion;
+                        -DarchetypeArtifactId=flexive-archetype-ear -DarchetypeVersion=&mavenEarArchetypeVersion;
                         -DarchetypeRepository=http://repo.flexive.org/maven2/
                     </command>
                 </para>
@@ -1167,7 +1167,7 @@ BUILD SUCCESSFUL]]></screen>
 
                 <para>
                     <command>mvn archetype:generate -DarchetypeGroupId=com.flexive
-                        -DarchetypeArtifactId=flexive-archetype-war -DarchetypeVersion=&mavenArchetypeVersion;
+                        -DarchetypeArtifactId=flexive-archetype-war -DarchetypeVersion=&mavenWarArchetypeVersion;
                         -DarchetypeRepository=http://repo.flexive.org/maven2/
                     </command>
                 </para>
