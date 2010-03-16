@@ -617,8 +617,8 @@ public class SelectListBean implements Serializable {
         try {
             //check if the user has permission
             if (getMayDeleteItems()) {
-                //check if the item is used in content instances
-                if (EJBLookup.getSelectListEngine().getSelectListItemInstanceCount(listItemId) != 0)
+                //check if the item is used in content instances (only check if the item was saved before (id >= 0) )
+                if (listItemId >= 0 && EJBLookup.getSelectListEngine().getSelectListItemInstanceCount(listItemId) != 0)
                     throw new FxEntryInUseException("ex.selectlist.item.itemInUse", selectList.getItem(listItemId).getLabel());
 
                 selectList.removeItem(listItemId);
