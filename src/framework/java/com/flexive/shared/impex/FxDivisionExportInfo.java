@@ -33,6 +33,7 @@ package com.flexive.shared.impex;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Various information about an exported division
@@ -48,13 +49,13 @@ public class FxDivisionExportInfo implements Serializable {
     private String databaseInfo;
     private String databaseDriverInfo;
     private String domainMatcher;
-    private String[] drops;
+    private List<String> drops;
     private String exportUser;
     private java.util.Date exportDate;
 
     public FxDivisionExportInfo(int divisionId, int schemaVersion, int buildVersion, String buildInfo,
                                 String appServerInfo, String databaseInfo, String databaseDriverInfo,
-                                String domainMatcher, String[] drops, String exportUser, Date exportDate) {
+                                String domainMatcher, List<String> drops, String exportUser, Date exportDate) {
         this.divisionId = divisionId;
         this.schemaVersion = schemaVersion;
         this.buildVersion = buildVersion;
@@ -100,7 +101,7 @@ public class FxDivisionExportInfo implements Serializable {
         return domainMatcher;
     }
 
-    public String[] getDrops() {
+    public List<String> getDrops() {
         return drops;
     }
 

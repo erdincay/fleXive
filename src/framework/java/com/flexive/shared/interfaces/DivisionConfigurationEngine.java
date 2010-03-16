@@ -31,8 +31,9 @@
  ***************************************************************/
 package com.flexive.shared.interfaces;
 
-import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.core.flatstorage.FxFlatStorageInfo;
+import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.impex.FxDivisionExportInfo;
 
 import javax.ejb.Remote;
 import java.util.List;
@@ -125,6 +126,16 @@ public interface DivisionConfigurationEngine extends GenericConfigurationEngine 
      * @throws FxApplicationException on errors
      */
     public void exportDivision(String localFileName) throws FxApplicationException;
+
+
+    /**
+     * Get information about a previously exported division
+     *
+     * @param localFileName name (and path) of the file on the local application server
+     * @return FxDivisionExportInfo
+     * @throws FxApplicationException on errors
+     */
+    public FxDivisionExportInfo getDivisionExportInfo(String localFileName) throws FxApplicationException;
 
     /**
      * Import the current division from a file on the local application server

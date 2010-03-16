@@ -409,4 +409,11 @@ public class MySQLStorageFactory extends GenericDBStorage  implements DBStorage 
         return cnt > 0;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected GenericDivisionImporter getDivisionImporter() {
+        return MySQLDivisionImporter.getInstance();
+    }
 }

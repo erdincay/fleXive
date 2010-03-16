@@ -46,9 +46,11 @@ import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxDbException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxNoAccessException;
+import com.flexive.shared.impex.FxDivisionExportInfo;
 import com.flexive.shared.interfaces.DivisionConfigurationEngine;
 import com.flexive.shared.interfaces.DivisionConfigurationEngineLocal;
 import com.flexive.shared.structure.TypeStorageMode;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -556,6 +558,27 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
     /**
      * {@inheritDoc}
      */
+    @TransactionAttribute(TransactionAttributeType.SUPPORTS)
+    public FxDivisionExportInfo getDivisionExportInfo(String localFileName) throws FxApplicationException {
+        if (!FxContext.getUserTicket().isGlobalSupervisor())
+            throw new FxNoAccessException("ex.import.noAccess");
+        if(StringUtils.isEmpty(localFileName))
+            throw new FxInvalidParameterException("localFileName", "ex.import.noFile", localFileName);
+        File data = new File(localFileName);
+        if (!data.exists() || !data.isFile())
+            throw new FxInvalidParameterException("localFileName", "ex.import.noFile", localFileName);
+        ZipFile zip;
+        try {
+            zip = new ZipFile(data);
+        } catch (IOException e) {
+            throw new FxInvalidParameterException("localFileName", "ex.import.noZIP", localFileName);
+        }
+        return StorageManager.getStorageImpl().getDivisionExportInfo(zip);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     public void importDivision(String localFileName) throws FxApplicationException {
         if (!FxContext.getUserTicket().isGlobalSupervisor())
@@ -571,6 +594,7 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
         }
         Connection con = null;
         try {
+//            con = Database.getNonTXDataSource().getConnection();
             con = Database.getDbConnection();
             StorageManager.getStorageImpl().importDivision(con, zip);
         } catch (Exception e) {

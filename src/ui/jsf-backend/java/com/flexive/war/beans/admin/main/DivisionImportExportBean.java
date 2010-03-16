@@ -34,9 +34,13 @@ package com.flexive.war.beans.admin.main;
 
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.faces.messages.FxFacesMsgInfo;
+import com.flexive.faces.messages.FxFacesMsgWarn;
 import com.flexive.shared.EJBLookup;
+import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.impex.FxDivisionExportInfo;
 
+import java.io.File;
 import java.io.Serializable;
 
 /**
@@ -49,6 +53,19 @@ public class DivisionImportExportBean implements Serializable {
     private static final long serialVersionUID = 6097763705884318936L;
 
     private String source;
+    private FxDivisionExportInfo exportInfo;
+    private String status = "init";
+    private boolean schemaMatch = false;
+    private boolean flatStorageImportable = false;
+    private boolean ignoreWarning = false;
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
 
     public String getSource() {
         return source;
@@ -58,25 +75,102 @@ public class DivisionImportExportBean implements Serializable {
         this.source = source;
     }
 
-    public String importDivision() {
-        System.out.println("importing " + source);
-        try {
-            EJBLookup.getDivisionConfigurationEngine().importDivision(source);
-            new FxFacesMsgInfo("DivisionImportExport.import.success").addToContext();
-        } catch (FxApplicationException e) {
-            new FxFacesMsgErr(e).addToContext();
-        }
-        return "import";
+    public FxDivisionExportInfo getExportInfo() {
+        return exportInfo;
     }
 
-    public String exportDivision() {
-        System.out.println("exporting " + source);
+    public void setExportInfo(FxDivisionExportInfo exportInfo) {
+        this.exportInfo = exportInfo;
+    }
+
+    public boolean isSchemaMatch() {
+        return schemaMatch;
+    }
+
+    public void setSchemaMatch(boolean schemaMatch) {
+        this.schemaMatch = schemaMatch;
+    }
+
+    public boolean isFlatStorageImportable() {
+        return flatStorageImportable;
+    }
+
+    public void setFlatStorageImportable(boolean flatStorageImportable) {
+        this.flatStorageImportable = flatStorageImportable;
+    }
+
+    public boolean isIgnoreWarning() {
+        return ignoreWarning;
+    }
+
+    public void setIgnoreWarning(boolean ignoreWarning) {
+        System.out.println("set boolean to "+ignoreWarning);
+        this.ignoreWarning = ignoreWarning;
+    }
+
+    public void acceptWarning() {
+        this.ignoreWarning = true;
+    }
+
+    /**
+     * Examine the export file and get exportInfo
+     */
+    public void examineExport() {
         try {
-            EJBLookup.getDivisionConfigurationEngine().exportDivision(source);
-            new FxFacesMsgInfo("DivisionImportExport.export.success").addToContext();
+            schemaMatch = false;
+            flatStorageImportable = false;
+            exportInfo = EJBLookup.getDivisionConfigurationEngine().getDivisionExportInfo(source);
+            processWarnings();
+            setStatus("examine");
         } catch (FxApplicationException e) {
             new FxFacesMsgErr(e).addToContext();
         }
-        return "export";
+    }
+
+    /**
+     * Process warnings for import and set faces messages if needed
+     */
+    private void processWarnings() {
+        schemaMatch = exportInfo.getSchemaVersion() == FxSharedUtils.getDBVersion();
+        boolean isMySQL = EJBLookup.getDivisionConfigurationEngine().getDatabaseInfo().toLowerCase().indexOf("mysql") >= 0;
+        //MySQL can only import a flatstorage exported from a MySQL database ...
+        flatStorageImportable = !(isMySQL && exportInfo.getDatabaseInfo().toLowerCase().indexOf("mysql") == -1);
+        if(!schemaMatch)
+            new FxFacesMsgWarn("DivisionImportExport.warning.schemaMismatch", exportInfo.getSchemaVersion(), FxSharedUtils.getDBVersion()).addToContext();
+        if(!flatStorageImportable)
+            new FxFacesMsgWarn("DivisionImportExport.warning.flatstorageNotImportable").addToContext();
+    }
+
+
+    /**
+     * Import division
+     */
+    public void importDivision() {
+        if( !ignoreWarning && (!schemaMatch || !flatStorageImportable)) {
+            new FxFacesMsgErr("DivisionImportExport.warning.acceptWarnings").addToContext();
+            processWarnings();
+            setStatus("examine");
+            return;
+        }
+        try {
+            EJBLookup.getDivisionConfigurationEngine().importDivision(source);
+            setStatus("import");
+            new FxFacesMsgInfo("DivisionImportExport.import.success").addToContext();
+        } catch (Exception e) {
+            new FxFacesMsgErr(e).addToContext();
+        }
+    }
+
+    /**
+     * Export division
+     */
+    public void exportDivision() {
+        try {
+            EJBLookup.getDivisionConfigurationEngine().exportDivision(source);
+            setStatus("export");
+            new FxFacesMsgInfo("DivisionImportExport.export.success", new File(source).getAbsolutePath()).addToContext();
+        } catch (Exception e) {
+            new FxFacesMsgErr(e).addToContext();
+        }
     }
 }

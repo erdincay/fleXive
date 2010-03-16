@@ -31,6 +31,7 @@
  ***************************************************************/
 package com.flexive.core.storage;
 
+import com.flexive.core.Database;
 import com.flexive.core.DatabaseConst;
 import com.flexive.core.storage.genericSQL.GenericLockStorage;
 import com.flexive.shared.FxFormatUtils;
@@ -43,6 +44,7 @@ import org.apache.commons.logging.LogFactory;
 
 import java.io.OutputStream;
 import java.sql.Connection;
+import java.sql.Statement;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
@@ -214,30 +216,100 @@ public abstract class GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
-    public void importDivision(Connection con, ZipFile zip) throws Exception {
-        GenericDivisionImporter importer = GenericDivisionImporter.getInstance();
+    public void importDivision(Connection _con, ZipFile zip) throws Exception {
+        GenericDivisionImporter importer = getDivisionImporter();
         FxDivisionExportInfo exportInfo = importer.getDivisionExportInfo(zip);
         if (FxSharedUtils.getDBVersion() != exportInfo.getSchemaVersion()) {
             LOG.warn("DB Version mismatch! Current:" + FxSharedUtils.getDBVersion() +
                     ", exported schema:" + exportInfo.getSchemaVersion());
         }
-        importer.wipeDivisionData(con);
-        importer.importLanguages(con, zip);
-        importer.importMandators(con, zip);
-        importer.importSecurity(con, zip);
-        importer.importWorkflows(con, zip);
-        importer.importConfigurations(con, zip);
-        importer.importBinaries(con, zip);
-        importer.importStructures(con, zip);
-        importer.importHierarchicalContents(con, zip);
-        importer.importScripts(con, zip);
-        importer.importTree(con, zip);
-        importer.importHistory(con, zip);
-        importer.importBriefcases(con, zip);
-        importer.importFlatStorages(con, zip);
-        importer.importSequencers(con, zip);
-        //rebuild fulltext index
-        FulltextIndexer ft = StorageManager.getStorageImpl().getContentStorage(TypeStorageMode.Hierarchical).getFulltextIndexer(null, con);
-        ft.rebuildIndex();
+        boolean isNonTX = importer.importRequiresNonTXConnection();
+        Connection con = isNonTX ? Database.getNonTXDataSource().getConnection() : _con;
+        
+        boolean autoCommit = false;
+        if (isNonTX) {
+            autoCommit = con.getAutoCommit();
+            con.setAutoCommit(false);
+            con.commit(); //ensure a "clean" connection
+        }
+        Exception inner = null;
+        try {
+            importer.wipeDivisionData(con);
+            if (isNonTX) con.commit();
+            Statement stmt = con.createStatement();
+            if (isNonTX) con.commit();
+            try {
+                importer.importLanguages(con, zip);
+                if (isNonTX) con.commit();
+                importer.importMandators(con, zip);
+                if (isNonTX) con.commit();
+                importer.importSecurity(con, zip);
+                if (isNonTX) con.commit();
+                importer.importWorkflows(con, zip);
+                if (isNonTX) con.commit();
+                importer.importConfigurations(con, zip);
+                if (isNonTX) con.commit();
+                importer.importBinaries(con, zip);
+                if (isNonTX) con.commit();
+                stmt.execute(getReferentialIntegrityChecksStatement(false));
+                importer.importStructures(con, zip);
+                if (isNonTX) con.commit();
+                importer.importHierarchicalContents(con, zip);
+                if (isNonTX) con.commit();
+                importer.importScripts(con, zip);
+                if (isNonTX) con.commit();
+                importer.importTree(con, zip);
+                if (isNonTX) con.commit();
+                importer.importHistory(con, zip);
+                if (isNonTX) con.commit();
+                importer.importBriefcases(con, zip);
+                if (isNonTX) con.commit();
+                importer.importFlatStorages(con, zip, exportInfo);
+                if (isNonTX) con.commit();
+                importer.importSequencers(con, zip);
+                if (isNonTX) con.commit();
+            } catch (Exception e) {
+                if (isNonTX) con.rollback();
+                inner = e;
+                throw e;
+            } finally {
+                if (isNonTX) con.commit();
+                stmt.execute(getReferentialIntegrityChecksStatement(true));
+            }
+            if (isNonTX) con.commit();
+            //rebuild fulltext index
+            FulltextIndexer ft = StorageManager.getStorageImpl().getContentStorage(TypeStorageMode.Hierarchical).getFulltextIndexer(null, con);
+            ft.rebuildIndex();
+            if (isNonTX) con.commit();
+        } catch (Exception e) {
+            if (isNonTX) con.rollback();
+            if (inner != null) {
+                LOG.error(e);
+                throw inner;
+            }
+            throw e;
+        } finally {
+            if (isNonTX) {
+                con.commit();
+                con.setAutoCommit(autoCommit);
+                Database.closeObjects(GenericDBStorage.class, con, null);
+            }
+        }
+    }
+
+    /**
+     * Get the DivisionImporter in use
+     *
+     * @return DivisionImporter
+     */
+    protected GenericDivisionImporter getDivisionImporter() {
+        return GenericDivisionImporter.getInstance();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public FxDivisionExportInfo getDivisionExportInfo(ZipFile zip) throws FxApplicationException {
+        return getDivisionImporter().getDivisionExportInfo(zip);
     }
 }

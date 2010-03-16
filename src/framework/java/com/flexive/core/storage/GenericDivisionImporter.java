@@ -79,6 +79,7 @@ public class GenericDivisionImporter implements FxImportExportConstants {
 
     private static final Log LOG = LogFactory.getLog(GenericDivisionImporter.class);
 
+    @SuppressWarnings({"FieldCanBeLocal"})
     private static GenericDivisionImporter INSTANCE = new GenericDivisionImporter();
 
     private static boolean DBG = false;
@@ -93,6 +94,15 @@ public class GenericDivisionImporter implements FxImportExportConstants {
     }
 
     /**
+     * Does importing a division require a non-transactional connection?
+     *
+     * @return need non-TX Connection or use "regular"?
+     */
+    public boolean importRequiresNonTXConnection() {
+        return false;
+    }
+
+    /**
      * Get a file from the zip archive
      *
      * @param zip  zip archive containing the file
@@ -100,7 +110,7 @@ public class GenericDivisionImporter implements FxImportExportConstants {
      * @return ZipEntry
      * @throws FxNotFoundException if the archive does not contain the file
      */
-    private ZipEntry getZipEntry(ZipFile zip, String file) throws FxNotFoundException {
+    protected ZipEntry getZipEntry(ZipFile zip, String file) throws FxNotFoundException {
         ZipEntry ze = zip.getEntry(file);
         if (ze == null)
             throw new FxNotFoundException("ex.import.missingFile", file, zip.getName());
@@ -140,7 +150,7 @@ public class GenericDivisionImporter implements FxImportExportConstants {
                     xPath.evaluate("/flexive/database", document),
                     xPath.evaluate("/flexive/dbdriver", document),
                     xPath.evaluate("/flexive/domain", document),
-                    drops,
+                    Arrays.asList(drops),
                     xPath.evaluate("/flexive/user", document),
                     FxFormatUtils.getDateTimeFormat().parse(xPath.evaluate("/flexive/date", document))
             );
@@ -264,7 +274,7 @@ public class GenericDivisionImporter implements FxImportExportConstants {
      * @param table name of the table to drop
      * @throws SQLException on errors
      */
-    private void dropTable(Statement stmt, String table) throws SQLException {
+    protected void dropTable(Statement stmt, String table) throws SQLException {
         stmt.executeUpdate("DROP TABLE " + table);
         LOG.info("Dropped table [" + table + "]");
     }
@@ -305,7 +315,7 @@ public class GenericDivisionImporter implements FxImportExportConstants {
      * @param table name of the table
      * @throws Exception on errors
      */
-    private void importTable(Statement stmt, final ZipFile zip, final ZipEntry ze, final String xpath, final String table) throws Exception {
+    protected void importTable(Statement stmt, final ZipFile zip, final ZipEntry ze, final String xpath, final String table) throws Exception {
         importTable(stmt, zip, ze, xpath, table, true, false);
     }
 
@@ -322,11 +332,12 @@ public class GenericDivisionImporter implements FxImportExportConstants {
      * @param updateColumns      columns that should be set to <code>null</code> in a first pass (insert)
      *                           and updated to the provided values in a second pass (update),
      *                           columns that should be used in the where clause have to be prefixed
-     *                           with "KEY:"
+     *                           with "KEY:", to assign a default value use the expression "columnname:default value",
+     *                           if the default value is "@", it will be a negative counter starting at 0, decreasing
      * @throws Exception on errors
      */
-    private void importTable(Statement stmt, final ZipFile zip, final ZipEntry ze, final String xpath, final String table,
-                             final boolean executeInsertPhase, final boolean executeUpdatePhase, final String... updateColumns) throws Exception {
+    protected void importTable(Statement stmt, final ZipFile zip, final ZipEntry ze, final String xpath, final String table,
+                               final boolean executeInsertPhase, final boolean executeUpdatePhase, final String... updateColumns) throws Exception {
         //analyze the table
         final ResultSet rs = stmt.executeQuery("SELECT * FROM " + table + " WHERE 1=2");
         StringBuilder sbInsert = new StringBuilder(500);
@@ -342,14 +353,20 @@ public class GenericDivisionImporter implements FxImportExportConstants {
                     continue;
                 if (counter++ > 0)
                     sbUpdate.append(',');
-                sbUpdate.append(updateColumn).append("=?");
+                if (updateColumn.indexOf(':') > 0)
+                    sbUpdate.append(updateColumn.substring(0, updateColumn.indexOf(':')));
+                else
+                    sbUpdate.append(updateColumn);
+                sbUpdate.append("=?");
             }
             sbUpdate.append(" WHERE ");
         }
         final ResultSetMetaData md = rs.getMetaData();
-        final Map<String, ColumnInfo> insertColumns = new HashMap<String, ColumnInfo>(md.getColumnCount());
         final Map<String, ColumnInfo> updateClauseColumns = updateColumns.length > 0 ? new HashMap<String, ColumnInfo>(md.getColumnCount()) : null;
         final Map<String, ColumnInfo> updateSetColumns = updateColumns.length > 0 ? new HashMap<String, ColumnInfo>(md.getColumnCount()) : null;
+        final Map<String, String> presetColumns = updateColumns.length > 0 ? new HashMap<String, String>(10) : null;
+        final Map<String, Integer> counters = updateColumns.length > 0 ? new HashMap<String, Integer>(10) : null;
+        final Map<String, ColumnInfo> insertColumns = new HashMap<String, ColumnInfo>(md.getColumnCount() + (counters != null ? counters.size() : 0));
         int insertIndex = 1;
         int updateSetIndex = 1;
         int updateClauseIndex = 1;
@@ -359,6 +376,18 @@ public class GenericDivisionImporter implements FxImportExportConstants {
             if (updateColumns.length > 0) {
                 boolean abort = false;
                 for (String col : updateColumns) {
+                    if (col.indexOf(':') > 0 && !col.startsWith("KEY:")) {
+                        String value = col.substring(col.indexOf(':') + 1);
+                        col = col.substring(0, col.indexOf(':'));
+                        if ("@".equals(value)) {
+                            if (currCol.equalsIgnoreCase(col)) {
+                                counters.put(col, 0);
+                                insertColumns.put(col, new ColumnInfo(md.getColumnType(i + 1), insertIndex++));
+                                sbInsert.append(',').append(currCol);
+                            }
+                        } else if (!presetColumns.containsKey(col))
+                            presetColumns.put(col, value);
+                    }
                     if (currCol.equalsIgnoreCase(col)) {
                         abort = true;
                         updateSetColumns.put(currCol, new ColumnInfo(md.getColumnType(i + 1), updateSetIndex++));
@@ -400,11 +429,19 @@ public class GenericDivisionImporter implements FxImportExportConstants {
                 ci.index += (updateSetIndex - 1);
             }
         }
+        if (presetColumns != null) {
+            for (String key : presetColumns.keySet())
+                sbInsert.append(',').append(key);
+        }
         sbInsert.append(")VALUES(");
         for (int i = 0; i < insertColumns.size(); i++) {
             if (i > 0)
                 sbInsert.append(',');
             sbInsert.append('?');
+        }
+        if (presetColumns != null) {
+            for (String key : presetColumns.keySet())
+                sbInsert.append(',').append(presetColumns.get(key));
         }
         sbInsert.append(')');
         if (DBG) {
@@ -601,6 +638,12 @@ public class GenericDivisionImporter implements FxImportExportConstants {
                     for (String col : columns.keySet()) {
                         ColumnInfo ci = columns.get(col);
                         String value = StringEscapeUtils.unescapeXml(data.get(col));
+                        if (insertMode && counters != null && counters.get(col) != null) {
+                            final int newVal = counters.get(col) - 1;
+                            value = String.valueOf(newVal);
+                            counters.put(col, newVal);
+//                            System.out.println("new value for " + col + ": " + newVal);
+                        }
 
                         if (value == null)
                             ps.setNull(ci.index, ci.columnType);
@@ -826,13 +869,13 @@ public class GenericDivisionImporter implements FxImportExportConstants {
             importTable(stmt, zip, ze, "structures/types/tdef_t", DatabaseConst.TBL_STRUCT_TYPES + DatabaseConst.ML);
             importTable(stmt, zip, ze, "structures/properties/property", DatabaseConst.TBL_STRUCT_PROPERTIES);
             importTable(stmt, zip, ze, "structures/properties/property_t", DatabaseConst.TBL_STRUCT_PROPERTIES + DatabaseConst.ML);
-            importTable(stmt, zip, ze, "structures/properties/poption", DatabaseConst.TBL_STRUCT_PROPERTY_OPTIONS);
             importTable(stmt, zip, ze, "structures/groups/group", DatabaseConst.TBL_STRUCT_GROUPS);
             importTable(stmt, zip, ze, "structures/groups/group_t", DatabaseConst.TBL_STRUCT_GROUPS + DatabaseConst.ML);
-            importTable(stmt, zip, ze, "structures/assignments/assignment", DatabaseConst.TBL_STRUCT_ASSIGNMENTS);
+            importTable(stmt, zip, ze, "structures/assignments/assignment", DatabaseConst.TBL_STRUCT_ASSIGNMENTS, true, true, "base:0", "parentgroup:@", "KEY:id");
             importTable(stmt, zip, ze, "structures/assignments/assignment_t", DatabaseConst.TBL_STRUCT_ASSIGNMENTS + DatabaseConst.ML);
             importTable(stmt, zip, ze, "structures/selectlists/item", DatabaseConst.TBL_STRUCT_SELECTLIST_ITEM);
             importTable(stmt, zip, ze, "structures/selectlists/item_t", DatabaseConst.TBL_STRUCT_SELECTLIST_ITEM + DatabaseConst.ML);
+            importTable(stmt, zip, ze, "structures/properties/poption", DatabaseConst.TBL_STRUCT_PROPERTY_OPTIONS);
         } finally {
             Database.closeObjects(GenericDivisionImporter.class, stmt);
         }
@@ -996,11 +1039,15 @@ public class GenericDivisionImporter implements FxImportExportConstants {
     /**
      * Import briefcases
      *
-     * @param con an open and valid connection to store imported data
-     * @param zip zip file containing the data
+     * @param con        an open and valid connection to store imported data
+     * @param zip        zip file containing the data
+     * @param exportInfo information about the exported data
      * @throws Exception on errors
      */
-    public void importFlatStorages(Connection con, ZipFile zip) throws Exception {
+    public void importFlatStorages(Connection con, ZipFile zip, FxDivisionExportInfo exportInfo) throws Exception {
+        if (!canImportFlatStorages(exportInfo)) {
+            return;
+        }
         ZipEntry ze = getZipEntry(zip, FILE_FLATSTORAGE_META);
         Statement stmt = con.createStatement();
         try {
@@ -1051,6 +1098,16 @@ public class GenericDivisionImporter implements FxImportExportConstants {
         } finally {
             Database.closeObjects(GenericDivisionImporter.class, stmt);
         }
+    }
+
+    /**
+     * Can this importer import flatstorages from the given export?
+     *
+     * @param exportInfo info about the export
+     * @return flatstorages can be imported
+     */
+    protected boolean canImportFlatStorages(FxDivisionExportInfo exportInfo) {
+        return true;
     }
 
     /**

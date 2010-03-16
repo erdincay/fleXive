@@ -36,8 +36,10 @@ import com.flexive.core.search.DataSelector;
 import com.flexive.core.search.SqlSearch;
 import com.flexive.core.search.cmis.impl.CmisSqlQuery;
 import com.flexive.core.search.cmis.impl.sql.SqlDialect;
+import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.exceptions.FxSqlSearchException;
+import com.flexive.shared.impex.FxDivisionExportInfo;
 import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.structure.TypeStorageMode;
@@ -403,4 +405,13 @@ public interface DBStorage {
      * @throws Exception on errors
      */
     void importDivision(Connection con, ZipFile zip) throws Exception;
+
+    /**
+     * Get information about a previously exported division
+     *
+     * @param zip  zip archive that contains an exported division
+     * @return FxDivisionExportInfo
+     * @throws FxApplicationException on errors
+     */
+    FxDivisionExportInfo getDivisionExportInfo(ZipFile zip) throws FxApplicationException;
 }

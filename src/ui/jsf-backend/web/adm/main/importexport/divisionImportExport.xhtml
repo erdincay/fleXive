@@ -22,27 +22,106 @@
 
         <adm:tab label="#{fxMessageBean['DivisionImportExport.tabtitle']}" active="true" id="tabChoose"/>
 
-        <h:form id="frm" enctype="multipart/form-data">
 
-            <fx:fieldSet id="fileSet" legendKey="DivisionImportExport.field.localFileName">
-                <h:inputText id="file" value="#{divisionImportExportBean.source}" readonly="false"/>
-                <br/>
-            </fx:fieldSet>
+        <a4j:outputPanel id="impex" layout="block" ajaxRendered="true">
+            <a4j:form id="frm" enctype="multipart/form-data">
+                <t:saveState id="source" value="#{divisionImportExportBean.source}"/>
+                <t:saveState id="status" value="#{divisionImportExportBean.status}"/>
+                <t:saveState id="exportInfo" value="#{divisionImportExportBean.exportInfo}"/>
+                <t:saveState id="schemaMatch" value="#{divisionImportExportBean.schemaMatch}"/>
+                <t:saveState id="flatStorageImportable" value="#{divisionImportExportBean.flatStorageImportable}"/>
+
+                <a4j:outputPanel rendered="#{divisionImportExportBean.status == 'init'}" ajaxRendered="true">
+                    <fx:fieldSet id="fileSet" legendKey="DivisionImportExport.legend.localFileName">
+                        <h:inputText id="file" value="#{divisionImportExportBean.source}" readonly="false"/>
+                        <br/>
+                    </fx:fieldSet>
+                </a4j:outputPanel>
+                <a4j:outputPanel id="examineInfo" rendered="#{divisionImportExportBean.status == 'examine'}"
+                                 ajaxRendered="true">
+                    <fx:fieldSet id="infoSet" legendKey="DivisionImportExport.legend.exportInfo">
+                        <table>
+                            <tr>
+                                <td>#{fxMessageBean['DivisionImportExport.label.source']}</td>
+                                <td>#{divisionImportExportBean.source}</td>
+                            </tr>
+                            <tr>
+                                <td>#{fxMessageBean['DivisionImportExport.label.divisionId']}</td>
+                                <td>#{divisionImportExportBean.exportInfo.divisionId}</td>
+                            </tr>
+                            <tr>
+                                <td>#{fxMessageBean['DivisionImportExport.label.schemaVersion']}</td>
+                                <td>#{divisionImportExportBean.exportInfo.schemaVersion}</td>
+                            </tr>
+                            <tr>
+                                <td>#{fxMessageBean['DivisionImportExport.label.buildInfo']}</td>
+                                <td>#{divisionImportExportBean.exportInfo.buildInfo}</td>
+                            </tr>
+                            <tr>
+                                <td>#{fxMessageBean['DivisionImportExport.label.appServerInfo']}</td>
+                                <td>#{divisionImportExportBean.exportInfo.appServerInfo}</td>
+                            </tr>
+                            <tr>
+                                <td>#{fxMessageBean['DivisionImportExport.label.databaseInfo']}</td>
+                                <td>#{divisionImportExportBean.exportInfo.databaseInfo}</td>
+                            </tr>
+                            <tr>
+                                <td>#{fxMessageBean['DivisionImportExport.label.databaseDriverInfo']}</td>
+                                <td>#{divisionImportExportBean.exportInfo.databaseDriverInfo}</td>
+                            </tr>
+                            <tr>
+                                <td>#{fxMessageBean['DivisionImportExport.label.domainMatcher']}</td>
+                                <td>#{divisionImportExportBean.exportInfo.domainMatcher}</td>
+                            </tr>
+                            <tr>
+                                <td>#{fxMessageBean['DivisionImportExport.label.drops']}</td>
+                                <td>#{divisionImportExportBean.exportInfo.drops}</td>
+                            </tr>
+                            <tr>
+                                <td>#{fxMessageBean['DivisionImportExport.label.exportUser']}</td>
+                                <td>#{divisionImportExportBean.exportInfo.exportUser}</td>
+                            </tr>
+                            <tr>
+                                <td>#{fxMessageBean['DivisionImportExport.label.exportDate']}</td>
+                                <td>#{divisionImportExportBean.exportInfo.exportDate}</td>
+                            </tr>
+                        </table>
+                    </fx:fieldSet>
+
+                    <a4j:outputPanel rendered="#{(not divisionImportExportBean.schemaMatch)or(not divisionImportExportBean.flatStorageImportable)}">
+                        <h:selectBooleanCheckbox id="chkWarn" value="#{divisionImportExportBean.ignoreWarning}">
+                        </h:selectBooleanCheckbox>
+                        <b>#{fxMessageBean['DivisionImportExport.label.acceptWarnings']}</b><br/><br/>
+                    </a4j:outputPanel>
+
+                </a4j:outputPanel>
+
+                <a4j:outputPanel id="buttonPanel" ajaxRendered="true">
+                    <adm:ajaxCommandButton labelKey="DivisionImportExport.button.examine" location="both"
+                                           bean="#{divisionImportExportBean}" lockscreen="false"
+                                           icon="search" action="examineExport" id="examineButton"
+                                           rendered="#{divisionImportExportBean.status == 'init'}"
+                                           reRender="impex"/>
+                    <adm:ajaxCommandButton labelKey="DivisionImportExport.button.import" location="both"
+                                           bean="#{divisionImportExportBean}" lockscreen="true"
+                                           confirmKey="DivisionImportExport.warning.confirmImport"
+                                           icon="paste" action="importDivision" id="importButton"
+                                           rendered="#{divisionImportExportBean.status == 'examine'}"
+                                           reRender="impex"/>
+                    <adm:ajaxCommandButton labelKey="DivisionImportExport.button.export" location="both"
+                                           bean="#{divisionImportExportBean}" lockscreen="true"
+                                           rendered="#{divisionImportExportBean.status == 'init'}"
+                                           icon="export" action="exportDivision" id="exportButton" reRender="impex"/>
 
 
-            <br/><br/>
+                </a4j:outputPanel>
 
-            <adm:commandButton labelKey="DivisionImportExport.button.import" location="both"
-                               bean="#{divisionImportExportBean}" lockscreen="true"
-                               confirmKey="DivisionImportExport.warning.confirmImport"
-                               icon="paste" action="importDivision" id="importButton"/>
-            <adm:commandButton labelKey="DivisionImportExport.button.export" location="both"
-                               bean="#{divisionImportExportBean}" lockscreen="true"
-                               icon="export" action="exportDivision" id="exportButton"/>
-            <adm:toolbarPluginButtons/>
+                <adm:toolbarPluginButtons/>
+            </a4j:form>
+        </a4j:outputPanel>
 
+        <br/><br/>
 
-        </h:form>
     </ui:define>
 
 </ui:composition>

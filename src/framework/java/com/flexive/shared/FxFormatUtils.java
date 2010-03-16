@@ -700,4 +700,40 @@ public final class FxFormatUtils {
         else
             return String.valueOf(value);
     }
+
+    /**
+     * Format a timespan given in ms as human readable output
+     *
+     * @param time time in ms
+     * @return human readable time
+     */
+    public static String formatTimeSpan(long time) {
+        StringBuilder res = new StringBuilder(10);
+        long ms = time % 1000;
+        long s = time / 1000;
+        long min = 0;
+        long hr = 0;
+        if (s > 60) {
+            min = s / 60;
+            s = s - (min * 60);
+        }
+        if (min > 60) {
+            hr = min / 60;
+            min = min - (hr * 60);
+        }
+        if (hr > 0)
+            res.append(hr).append("hr:");
+        if (min > 0) {
+            if (res.length() > 0 && min < 10)
+                res.append('0');
+            res.append(min).append("min:");
+        }
+        if (s > 0) {
+            if (res.length() > 0 && s < 10)
+                res.append('0');
+            res.append(s).append("s:");
+        }
+        res.append(ms).append("ms");
+        return res.toString();
+    }
 }

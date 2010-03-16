@@ -64,11 +64,11 @@ public class SystemInformation implements Serializable {
         StringBuilder sb = new StringBuilder(1000);
         sb.append("<table class=\"initTable\">");
         try {
-            sb.append("<tr><td class=\"initHeader2\">Status</td><td class=\"initHeader2\">Application</td><td class=\"initHeader2\">Script</td><td class=\"initHeader2\">Duration [ms]</td></tr>");
+            sb.append("<tr><td class=\"initHeader2\">Status</td><td class=\"initHeader2\">Application</td><td class=\"initHeader2\">Script</td><td class=\"initHeader2\">Duration</td></tr>");
             for (FxScriptRunInfo ri : EJBLookup.getScriptingEngine().getRunOnceInformation()) {
                 String duration = ri.isRunning()
                         ? "Started " + FxFormatUtils.getDateTimeFormat().format(new Date(ri.getStartTime())) + " ..."
-                        : (ri.getEndTime() - ri.getStartTime()) + "";
+                        : FxFormatUtils.formatTimeSpan(ri.getEndTime() - ri.getStartTime()) + "";
                 sb.append("<tr class=\"initRow").append(ri.isRunning() ? "Running" : "").append("\">\n");
                 if (ri.isRunning())
                     sb.append("  <td class=\"initStatusRunning\">Running");
