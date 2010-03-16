@@ -9,6 +9,11 @@
 	<artifactId>${artifactId}</artifactId>
 	<packaging>ear</packaging>
 	<name>ear</name>
+
+    <properties>
+        <ear.name>${rootArtifactId}.ear</ear.name>
+    </properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>${groupId}</groupId>
@@ -54,7 +59,7 @@
 
 	</dependencies>
 	<build>
-		<finalName>your-ear-name</finalName>
+        <finalName>${rootArtifactId}</finalName>
 		<plugins>
 			<plugin>
 				<artifactId>maven-ear-plugin</artifactId>
@@ -69,10 +74,15 @@
 							<groupId>${groupId}</groupId>
 							<artifactId>war</artifactId>
 						</webModule>
+                        <webModule>
+                            <groupId>com.flexive</groupId>
+                            <artifactId>flexive-backend-war</artifactId>
+                            <contextRoot>/flexive</contextRoot>
+                        </webModule>
 					</modules>
 					<jboss>
              			<version>4</version>
-             			<loader-repository>${groupId}:archive=your-ear-name.ear</loader-repository>
+             			<loader-repository>${groupId}:archive=${ear.name}</loader-repository>
            			</jboss>					
 				</configuration>
 			</plugin>

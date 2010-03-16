@@ -5,7 +5,7 @@
     <artifactId>flexive-archetype-ear</artifactId>
     <packaging>maven-archetype</packaging>
     <name>[fleXive] EAR archetype (http://www.flexive.org)</name>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.7</version>
     <build>
         <extensions>
             <extension>
