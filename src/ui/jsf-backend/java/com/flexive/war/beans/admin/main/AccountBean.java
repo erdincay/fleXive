@@ -145,6 +145,8 @@ public class AccountBean implements Serializable {
 
         public void setLanguage(FxLanguage language) {
             this.language = language;
+            // save the language right in the Ticket, so that the update message has the right language
+            FxJsfUtils.getRequest().getUserTicket().setLanguage(language);
         }
 
         public void setActive(boolean active) {
@@ -588,12 +590,51 @@ public class AccountBean implements Serializable {
     /**
      * Navigate back to the overview and reset all form data
      *
-     * @return overview oage
+     * @return overview page
      */
     public String overview() {
         //keep filter but reset account data
         resetAccount();
         return "accountOverview";
+    }
+
+    public void showChangePassword() {
+    }
+
+    public void savePassword() {
+        try {
+            // Determine if the password must be set (and check the old one)
+            if (password != null && password.trim().length() > 0) {
+                final UserTicket userTicket = FxJsfUtils.getRequest().getUserTicket();
+                try {
+                    if (StringUtils.isBlank(oldPassword) || !getAccountEngine().loginCheck(/*account.getName()*/userTicket.getLoginName(), oldPassword, userTicket)) {
+                        new FxFacesMsgErr("User.err.noOldPasswordMatch").addToContext();
+                        return;
+                    }
+                } catch (FxLoginFailedException e) {
+                    new FxFacesMsgErr("User.err.settingsNotSaved").addToContext();
+                    new FxFacesMsgErr(e).addToContext();
+                    return;
+                }
+                // actual pw
+                if (!password.equals(passwordConfirm)) {
+                    new FxFacesMsgErr("User.err.passwordsDontMatch").addToContext();
+                    return;
+                }
+                getAccountEngine().updateUser(userTicket.getUserId(), password, null, null, null /*email*/, null/*language*/);
+                new FxFacesMsgInfo("User.nfo.passwordSaved").addToContext();
+            }
+
+        } catch (FxApplicationException e) {
+            new FxFacesMsgErr("User.err.settingsNotSaved").addToContext();
+            new FxFacesMsgErr(e).addToContext();
+        } finally {
+            FxContext.get()._reloadUserTicket();
+        }
+    }
+
+    public void cancelPasswordChange() {
+        password = passwordConfirm = null;
     }
 
     /**
@@ -603,28 +644,7 @@ public class AccountBean implements Serializable {
      */
     public String saveUserPref() {
         try {
-            String newPasswd = null;
-
-            // Determine if the password must be set (and check the old one)
-            if (password != null && password.trim().length() > 0) {
-                try {
-                    if (StringUtils.isBlank(oldPassword) || !getAccountEngine().loginCheck(account.getName(), oldPassword, FxJsfUtils.getRequest().getUserTicket())) {
-                        new FxFacesMsgErr("User.err.noOldPasswordMatch").addToContext();
-                        return editUserPref();
-                    }
-                } catch (FxLoginFailedException e) {
-                    new FxFacesMsgErr("User.err.settingsNotSaved").addToContext();
-                    new FxFacesMsgErr(e).addToContext();
-                    return editUserPref();
-                }
-                // actual pw
-                if (!password.equals(passwordConfirm)) {
-                    new FxFacesMsgErr("User.err.passwordsDontMatch").addToContext();
-                    return editUserPref();
-                }
-                newPasswd = password;
-            }
-            getAccountEngine().updateUser(this.accountIdFilter, newPasswd, null, null, this.account.getEmail(), this.account.getLanguage().getId());
+            getAccountEngine().updateUser(this.accountIdFilter, null/*password*/, null, null, this.account.getEmail(), this.account.getLanguage().getId());
             languageChanged = true; //currently a "fake" ...
             // update user configuration
             if (getDefaultInputLanguage() != null) {

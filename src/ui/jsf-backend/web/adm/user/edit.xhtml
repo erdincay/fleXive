@@ -5,6 +5,8 @@
       xmlns:f="http://java.sun.com/jsf/core"
       xmlns:t="http://myfaces.apache.org/tomahawk"
       xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+      xmlns:rich="http://richfaces.org/rich"
       xmlns:adm="http://www.flexive.com/jsf/admin"
       xmlns:fx="http://www.flexive.com/jsf/core">
 <body>
@@ -36,17 +38,6 @@
         </fx:formRow>
         <fx:formRow labelKey="Account.field.loginName" id="loginName">
             <h:inputText id="loginName" value="#{accountBean.account.loginName}" readonly="true"/>
-        </fx:formRow>
-
-        <!-- ============================================ -->
-        <fx:formRow label="#{fxMessageBean['Account.field.oldPassword']}" id="oldPassword" newLine="true">
-            <h:inputSecret id="oldPassword" value="#{accountBean.oldPassword}"/>
-        </fx:formRow>
-        <fx:formRow labelKey="Account.field.password" id="updatePassword">
-            <h:inputSecret id="updatePassword" value="#{accountBean.password}"/>
-        </fx:formRow>
-        <fx:formRow labelKey="Account.field.retypePassword" id="passwordConfirm" newLine="false">
-            <h:inputSecret id="passwordConfirm" value="#{accountBean.passwordConfirm}"/>
         </fx:formRow>
 
         <!-- ============================================ -->
@@ -91,12 +82,64 @@
 
         <adm:commandButton id="saveButton" labelKey="User.button.save"
                           icon="save"  bean="#{accountBean}" action="saveUserPref"/>
+        <adm:ajaxCommandButton id="ChangePasswordButton" labelKey="Account.changePassword"
+                           icon="edit" bean="#{accountBean}" action="showChangePassword"
+                           reRender="changePasswordPanel" oncomplete="#{rich:component('changePassword')}.show();"/>
         <adm:commandButton id="refreshButton" labelKey="User.button.refresh"
                           icon="reload"  bean="#{accountBean}" action="editUserPref"/>
         <adm:commandButton id="cancelButton" labelKey="User.button.cancel"
                           icon="cancel" action="contentPage"/>
         <adm:toolbarPluginButtons/>
     </h:form>
+
+    <rich:modalPanel id="changePassword" width="300" height="120" autosized="true">
+        <f:facet name="header">
+            <h:panelGroup>
+                #{fxMessageBean['Account.changePassword']}
+            </h:panelGroup>
+        </f:facet>
+        <f:facet name="controls">
+            <h:panelGroup>
+                <h:form>
+                    <adm:ajaxCommandIcon titleKey="User.button.cancel"
+                                               icon="cancel"
+                                               id="cancelPasswordChange"
+                                               bean="#{accountBean}" action="cancelPasswordChange"
+                                               onclick="#{rich:component('changePassword')}.hide();"
+                                               reRender="changePasswordPanel"/>
+                </h:form>
+            </h:panelGroup>
+        </f:facet>
+
+        <a4j:outputPanel id="changePasswordPanel">
+            <h:form id="panelForm">
+                <fx:formRow labelKey="Account.field.oldPassword" id="oldPassword" width="250">
+                    <h:inputSecret id="oldPassword" value="#{accountBean.oldPassword}" />
+                </fx:formRow>
+                <fx:formRow labelKey="Account.field.password" id="updatePassword" width="250">
+                    <h:inputSecret id="updatePassword" value="#{accountBean.password}"/>
+                </fx:formRow>
+                <fx:formRow labelKey="Account.field.retypePassword" id="passwordConfirm" width="250">
+                    <h:inputSecret id="passwordConfirm" value="#{accountBean.passwordConfirm}"/>
+                </fx:formRow>
+
+                <div align="center">
+
+                <adm:ajaxCommandButton labelKey="User.button.save"
+                                       icon="ok" bean="#{accountBean}" action="savePassword"
+                                       id="commitPasswordChanges" reRender="changePasswordPanel"
+                                       onclick="#{rich:component('changePassword')}.hide();">
+                </adm:ajaxCommandButton>
+
+                <adm:ajaxCommandButton labelKey="User.button.cancel"
+                                       icon="cancel" bean="#{accountBean}" action="cancelPasswordChange"
+                                       id="cancelPasswordChanges" reRender="changePasswordPanel"
+                                       onclick="#{rich:component('changePassword')}.hide();"/>
+                </div>
+                <fx:yuiSetup/>
+            </h:form>
+        </a4j:outputPanel>
+    </rich:modalPanel>
     <br/>
 
 </ui:define>

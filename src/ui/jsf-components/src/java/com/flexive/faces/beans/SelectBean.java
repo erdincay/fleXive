@@ -77,6 +77,8 @@ public class SelectBean implements Serializable {
     private List<SelectItem> globalUserGroups = null;
     private List<SelectItem> globalUserGroupsNonSystem = null;
     private List<SelectItem> languages = null;
+    // if the language is changed durring the request, we need to know that and rerender the language list
+    private FxLanguage languageListLanguage = null;
     private List<SelectItem> languagesById = null;
     private List<SelectItem> mandators = null;
     private List<SelectItem> mandatorsForEdit = null;
@@ -344,11 +346,12 @@ public class SelectBean implements Serializable {
      * @return all available languages.
      */
     public List<SelectItem> getLanguages() {
-        if (languages == null) {
-            final UserTicket ticket = FxJsfUtils.getRequest().getUserTicket();
+        final UserTicket ticket = FxJsfUtils.getRequest().getUserTicket();
+        // we need to rerender the languageList if it is empty or the language hase changed since the last rendering
+        if (languages == null || !ticket.getLanguage().equals(languageListLanguage)) {
             try {
                 List<FxLanguage> list = EJBLookup.getLanguageEngine().loadAvailable();
-                ArrayList<SelectItem> result = new ArrayList<SelectItem>(list.size());
+                List<SelectItem> result = new ArrayList<SelectItem>(list.size());
                 for (FxLanguage item : list) {
                     String label = item.getLabel().getBestTranslation(ticket);
                     result.add(new SelectItem(item, label/*label*/, label/*description*/));
@@ -357,6 +360,8 @@ public class SelectBean implements Serializable {
             } catch (Exception exc) {
                 new FxFacesMsgErr(exc).addToContext();
                 languages = new ArrayList<SelectItem>(0);
+            } finally {
+                languageListLanguage = ticket.getLanguage();
             }
         }
         return languages;
