@@ -50,6 +50,7 @@ import com.flexive.shared.exceptions.FxLogoutFailedException;
 import com.flexive.shared.search.FxPaths;
 import com.flexive.shared.structure.FxSelectListItem;
 import com.flexive.shared.structure.FxType;
+import com.flexive.shared.structure.FxTypeEdit;
 import com.flexive.shared.value.BinaryDescriptor;
 import com.flexive.shared.value.FxNoAccess;
 import com.flexive.shared.value.FxNumber;
@@ -974,6 +975,39 @@ public class CmisSearchEngineTest {
         );
         assertTrue(invResult.getRowCount() > 0, "NOT IN query returned no rows");
 
+    }
+
+    @Test(groups = {"search", "cmis", "ejb"})
+    public void useNullProperty_FX814() throws FxApplicationException {
+        final FxTypeEdit type;
+        try {
+            FxContext.startRunningAsSystem();
+            type  = FxTypeEdit.createNew("FX814").save();
+        } finally {
+            FxContext.stopRunningAsSystem();
+        }
+        try {
+            // use unmapped CMIS property in order by
+            getCmisSearchEngine().search(
+                    "SELECT ObjectId, Name " +
+                    "FROM FX814 " +
+                    "ORDER BY Name"
+            );
+
+            // use unmapped CMIS property in where
+            getCmisSearchEngine().search(
+                    "SELECT ObjectId, Name "
+                    + "FROM FX814 "
+                    + "WHERE Name IS NOT NULL");
+
+        } finally {
+            try {
+                FxContext.startRunningAsSystem();
+                EJBLookup.getTypeEngine().remove(type.getId());
+            } finally {
+                FxContext.stopRunningAsSystem();
+            }
+        }
     }
 
     private int getExpectedPartialMatches(CmisResultSet result, final List<FxSelectListItem> queryItems) {

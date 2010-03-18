@@ -31,6 +31,7 @@
  ***************************************************************/
 package com.flexive.shared.value.mapper;
 
+import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.search.query.PropertyValueComparator;
 import com.flexive.shared.search.query.ValueComparator;
@@ -108,7 +109,9 @@ public class FxPkSelectOneInputMapper extends InputMapper<FxReference, FxSelectO
     @Override
     protected FxReference doDecode(FxSelectOne value) {
         final FxReference reference;
-        if (value.isMultiLanguage()) {
+        if (value.isEmpty()) {
+            reference = new FxReference(value.isMultiLanguage(), new FxPK()).setEmpty();
+        } else if (value.isMultiLanguage()) {
             reference = new FxReference(value.getDefaultLanguage(),
                     new ReferencedContent(value.getDefaultTranslation().getId()));
             for (long languageId: value.getTranslatedLanguages()) {

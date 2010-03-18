@@ -40,6 +40,8 @@ import com.flexive.core.search.cmis.impl.sql.mapper.ConditionMapper;
 import com.flexive.core.search.cmis.model.ColumnReference;
 import com.flexive.core.search.cmis.model.Condition;
 import com.flexive.core.search.cmis.model.TableReference;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 
 /**
@@ -51,6 +53,7 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
  * @since 3.1
  */
 public abstract class AbstractColumnReferenceCondition<T extends Condition> implements ConditionMapper<T> {
+    private static final Log LOG = LogFactory.getLog(AbstractColumnReferenceCondition.class);
 
     public String getConditionSql(SqlMapperFactory sqlMapperFactory, T condition, SelectedTableVisitor joinedTables) {
         final ColumnReference ref = getColumnReference(condition);
@@ -61,7 +64,16 @@ public abstract class AbstractColumnReferenceCondition<T extends Condition> impl
         final String matchConditions;
         final SqlDialect dialect = sqlMapperFactory.getSqlDialect();
         final String filterTableName;
-        if (negationQuery(condition)) {
+        if (ref.getPropertyEntry() == null) {
+            // no property set, currently possible for CMIS properties
+            // see: com.flexive.core.search.cmis.model.ColumnReference constructor
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Condition references invalid property for the table "
+                        + table.getAlias() + ": " + ref.getAlias());
+            }
+            filterTableName = PropertyResolver.Table.T_CONTENT.getTableName();
+            matchConditions = "1=1";
+        } else if (negationQuery(condition)) {
             // we select the difference between all types of this table AND the selected ones (i.e. a MINUS query)
             final String assignmentFilter = dialect.getAssignmentFilter(ref.getFilterTableType(), "sub", true, ref.getReferencedAssignments());
             filterTableName = PropertyResolver.Table.T_CONTENT.getTableName();

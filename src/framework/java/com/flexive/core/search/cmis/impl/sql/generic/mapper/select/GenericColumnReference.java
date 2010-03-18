@@ -85,7 +85,7 @@ public class GenericColumnReference implements ResultColumnMapper<ResultColumnRe
         final PropertyEntry entry = column.getPropertyEntry();
         if (entry == null) {
             index.increment();
-            return "null";  // don't select anything
+            return "null AS " + column.getResultSetAlias();  // don't select anything
         }
         final FxDataType dataType = entry.getProperty() == null ? null : entry.getProperty().getDataType();
         final String[] readColumns = entry.getReadColumns();

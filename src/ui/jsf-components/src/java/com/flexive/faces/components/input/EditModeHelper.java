@@ -340,7 +340,10 @@ class EditModeHelper extends RenderHelper {
         selectItems.setId(stripForm(listbox.getId()) + "_items");
         final List<SelectItem> items = FxJsfUtils.asSelectList(selectList);
         if (includeEmptyElement) {
-            items.add(0, new SelectItem(-1L, ""));
+            // include only if no empty element (with ID -1) exists
+            if (!FxSharedUtils.getSelectableObjectIdList(selectList.getItems()).contains(-1L)) {
+                items.add(0, new SelectItem(-1L, ""));
+            }
         }
         selectItems.setValue(items);
         listbox.setConverter(FxJsfUtils.getApplication().createConverter(Long.class));

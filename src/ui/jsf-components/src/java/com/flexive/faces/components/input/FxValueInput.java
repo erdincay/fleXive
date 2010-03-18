@@ -339,22 +339,33 @@ public class FxValueInput extends UIInput {
         
         // cache list for the given type in request since this involves an EJB call
         final String cacheId = REQ_REFERENCE_ITEMS + property.getReferencedType().getName();
+        final FxEnvironment env = CacheAdmin.getEnvironment();
         if (FxContext.get().getAttribute(cacheId) == null) {
             // retrieve items
             final FxSelectList list = new FxSelectList("");
+            // add empty item
+            new FxSelectListItem(-1, "", list, -1, new FxString(false, ""));
             try {
                 final CmisResultSet result = EJBLookup.getCmisSearchEngine().search(
-                        "SELECT id, Name FROM " + property.getReferencedType().getName()
+                        "SELECT id, Name, ObjectTypeId FROM " + property.getReferencedType().getName()
                         + " ORDER BY Name"
                 );
                 // create selectlist items
                 for (CmisResultRow row : result) {
+                    final String label;
+                    final String name = row.getColumn(2).getString();
+                    if (StringUtils.isBlank(name)) {
+                        // caption not defined or not set - use dummy label
+                        label = env.getType(row.getColumn(3).getLong()).getLabel()
+                                + "[id=" + row.getColumn(1).getLong() + "]";
+                    } else {
+                        label = name;
+                    }
                     new FxSelectListItem(
                             row.getColumn(1).getLong(),
-                            row.getColumn(2).getString(),
-                            list,
+                            label, list,
                             -1,
-                            new FxString(false, row.getColumn(2).getString())
+                            new FxString(false, label)
                     );
                 }
             } catch (FxApplicationException e) {
