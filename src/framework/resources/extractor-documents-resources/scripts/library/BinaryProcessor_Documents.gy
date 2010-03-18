@@ -49,7 +49,7 @@ if (processed) {
 // check which renderer to use, if both are active PDFRenderer will be used first and 
 // ICEpdf as fallback in case of errors
 boolean usePDFRenderer = false
-boolean useICEPdf = true
+boolean useICEpdf = true
 
 
 boolean isDocument = true
@@ -96,7 +96,7 @@ processed = true
 useDefaultPreview = true
 defaultId = doc_previewId
 if (docType == Extractor.DocumentType.PDF) {
-  if (!(usePDFRenderer || useICEPdf)) {
+  if (!(usePDFRenderer || useICEpdf)) {
     println "Warning: no PDF renderer active!"
     return
   }
@@ -105,10 +105,10 @@ if (docType == Extractor.DocumentType.PDF) {
   try {
     String ext = ".PNG"
     File imgFile = File.createTempFile("PDFIMG", ext)
-    BufferedImage img;
+    BufferedImage img = null;
 
     if (usePDFRenderer) {
-      println "Using PDFRenderer"
+      println "Using PDFRenderer for rendering"
       // set up the PDF reading
       RandomAccessFile raf = new RandomAccessFile((File) binaryFile, "r");
       FileChannel channel = raf.getChannel();
@@ -131,8 +131,8 @@ if (docType == Extractor.DocumentType.PDF) {
       renderer.run();
       success = renderer.getStatus() == Watchable.COMPLETED
     }
-    if(!success && useICEPdf) {
-      println "Using ICEPdf"
+    if(!success && useICEpdf) {
+      println "Using ICEpdf for rendering"
       //try ICEPdf
       org.icepdf.core.pobjects.Document doc = new org.icepdf.core.pobjects.Document()
       doc.setFile(((File) binaryFile).getAbsolutePath())
@@ -158,7 +158,7 @@ if (docType == Extractor.DocumentType.PDF) {
     if (!imgFile.delete())
       imgFile.deleteOnExit()
   } catch (Throwable e) {
-    println "PDF rendering failed: " + e.message + " - using default preview"
+    println "PDF rendering failed: " + e.message
   }
 }
 
