@@ -29,6 +29,7 @@ Parameters:
  iconUrl - [optional] the url (aboslute, including the context path)
                       of the icon to be displayed (i.e. /flexive/images/myIcon.png)
  rendered - [optional] flag to supress rendering of the whole component
+ buttonDisabled - [optional] renders the button, but disables its functionality
 
 <ui:composition template="/adm/templates/commandElement.xhtml">
 
@@ -38,9 +39,18 @@ Parameters:
             <c:set var="iconUrl" value="/pub/images/commandButton/#{icon}.png"/>
         </c:if>
 
-        <a href="javascript:void(0)" onclick="triggerCommandElement_#{id}();return false" >
-            <img alt="#{id}_icon" src="#{iconUrl}" class="commandIcon" title="#{title}"/>
-        </a>
+        <!--Render the link only if buttonDisabled == false and use the right class-->
+
+        <c:set var="needLink" value="true"/>
+        <c:if test="#{buttonDisabled}">
+            <img alt="#{id}_icon" src="#{iconUrl}" class="commandIconDisabled" title="#{title}"/>
+            <c:set var="needLink" value="false"/>
+        </c:if>
+        <c:if test="#{needLink}">
+            <a href="javascript:void(0)" onclick="triggerCommandElement_#{id}();return false" >
+                <img alt="#{id}_icon" src="#{iconUrl}" class="commandIcon" title="#{title}"/>
+            </a>
+        </c:if>
 
     </ui:define>
 

@@ -119,8 +119,11 @@ fieldset.formFields {
     background-image: url("../images/commandButton/buttonRight_hover.gif");
 }
 
-.commandIcon, .commandIconDisabled {
+.commandIcon {
     cursor: pointer;
+}
+
+.commandIcon, .commandIconDisabled {
     padding: 3px;
     border: 0;
 }
@@ -132,10 +135,6 @@ fieldset.formFields {
 
 .commandIconDisabled {
     opacity:0.50;
-}
-
-.commandIconDisabled:hover {
-    opacity:0.30;
 }
 
 .errorMessage {

@@ -228,6 +228,12 @@
             <rtexprvalue>false</rtexprvalue>
             <description>[optional] flag to supress rendering of the whole component</description>
         </attribute>
+        <attribute>
+            <name>buttonDisabled</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>[optional] renders the button, but disables its functionality</description>
+        </attribute>
     </tag>
     <tag>
         <name>ajaxCommandButton</name>
