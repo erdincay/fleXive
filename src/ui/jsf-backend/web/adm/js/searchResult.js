@@ -342,6 +342,10 @@ function copyToBriefcase(briefcaseId, menuItem) {
 }
 
 function moveToBriefcase(briefcaseId, menuItem) {
+    if (briefcaseId == getBriefcaseId()) {
+        parent.showStatusMessage(MESSAGES["Briefcase.nfo.sameBriefcase"]);
+        return;
+    }
     itemsToBriefcase(briefcaseId, menuItem,
             function(briefcaseId, ids) {
                 var result = eval("(" + flexive.util.getJsonRpc().BriefcaseEditor.move(getBriefcaseId(), briefcaseId, ids) + ")");
