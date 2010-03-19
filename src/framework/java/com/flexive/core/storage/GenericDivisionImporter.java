@@ -40,9 +40,12 @@ import com.flexive.core.storage.binary.FxBinaryUtils;
 import com.flexive.shared.*;
 import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.exceptions.FxDbException;
+import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.impex.FxDivisionExportInfo;
 import com.flexive.shared.impex.FxImportExportConstants;
+import com.flexive.shared.structure.FxDataType;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -76,7 +79,38 @@ import java.util.zip.ZipFile;
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public class GenericDivisionImporter implements FxImportExportConstants {
+/*
 
+//test script for flatstorage as hierarchical:
+
+// Default [fleXive] imports for Groovy
+import com.flexive.shared.*
+import com.flexive.shared.interfaces.*
+import com.flexive.shared.value.*
+import com.flexive.shared.content.*
+import com.flexive.shared.search.*
+import com.flexive.shared.search.query.*
+import com.flexive.shared.tree.*
+import com.flexive.shared.workflow.*
+import com.flexive.shared.media.*
+import com.flexive.shared.scripting.groovy.*
+import com.flexive.shared.structure.*
+import com.flexive.shared.security.*
+import com.flexive.shared.impex.*
+import com.flexive.core.*
+import com.flexive.core.storage.*
+import java.util.zip.*
+
+File data = new File("/home/mplesser/impex/export_pg.zip")
+ZipFile zip = new ZipFile(data)
+java.sql.Connection con = Database.getDbConnection()
+try {
+  FxDivisionExportInfo ei = GenericDivisionImporter.getInstance().getDivisionExportInfo(zip)
+  GenericDivisionImporter.getInstance().importFlatStoragesHierarchical(con, zip, ei)
+} finally {
+  con.close()
+}
+ */
     private static final Log LOG = LogFactory.getLog(GenericDivisionImporter.class);
 
     @SuppressWarnings({"FieldCanBeLocal"})
@@ -250,8 +284,9 @@ public class GenericDivisionImporter implements FxImportExportConstants {
         dropTableData(stmt, DatabaseConst.TBL_LANG + DatabaseConst.ML);
         dropTableData(stmt, DatabaseConst.TBL_LANG);
 
-        FxFileUtils.removeDirectory(FxBinaryUtils.getBinaryDirectory() + File.separatorChar + String.valueOf(FxContext.get().getDivisionId()));
-        FxFileUtils.removeDirectory(FxBinaryUtils.getTransitDirectory() + File.separatorChar + String.valueOf(FxContext.get().getDivisionId()));
+        final String divisionPath = File.separatorChar + String.valueOf(FxContext.get().getDivisionId());
+        FxFileUtils.removeDirectory(FxBinaryUtils.getBinaryDirectory() + divisionPath);
+        FxFileUtils.removeDirectory(FxBinaryUtils.getTransitDirectory() + divisionPath);
     }
 
     /**
@@ -955,8 +990,6 @@ public class GenericDivisionImporter implements FxImportExportConstants {
         try {
             importTable(stmt, zip, ze, "hierarchical/content", DatabaseConst.TBL_CONTENT);
             importTable(stmt, zip, ze, "hierarchical/data", DatabaseConst.TBL_CONTENT_DATA);
-            //TODO: fulltext table has to be rebuilt!
-//            importTable(stmt, zip, ze, "hierarchical/ft", DatabaseConst.TBL_CONTENT_DATA_FT);
             importTable(stmt, zip, ze, "hierarchical/acl", DatabaseConst.TBL_CONTENT_ACLS);
             importTable(stmt, zip, ze_struct, "structures/types/tdef", DatabaseConst.TBL_STRUCT_TYPES, false, true, "icon_ref", "KEY:id");
         } finally {
@@ -1037,6 +1070,411 @@ public class GenericDivisionImporter implements FxImportExportConstants {
     }
 
     /**
+     * Import flat storages to the hierarchical storage
+     *
+     * @param con an open and valid connection to store imported data
+     * @param zip zip file containing the data
+     * @throws Exception on errors
+     */
+    protected void importFlatStoragesHierarchical(Connection con, ZipFile zip) throws Exception {
+        //mapping: storage->level->columnname->assignment id
+        final Map<String, Map<Integer, Map<String, Long>>> flatAssignmentMapping = new HashMap<String, Map<Integer, Map<String, Long>>>(5);
+        //mapping: assignment id->position index
+        final Map<Long, Integer> assignmentPositions = new HashMap<Long, Integer>(100);
+        //mapping: flatstorage->column sizes [string,bigint,double,select,text]
+        final Map<String, Integer[]> flatstoragesColumns = new HashMap<String, Integer[]>(5);
+        ZipEntry zeMeta = getZipEntry(zip, FILE_FLATSTORAGE_META);
+        DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+        Document document = builder.parse(zip.getInputStream(zeMeta));
+        XPath xPath = XPathFactory.newInstance().newXPath();
+
+        //calculate column sizes
+        NodeList nodes = (NodeList) xPath.evaluate("/flatstorageMeta/storageMeta", document, XPathConstants.NODESET);
+        Node currNode;
+        for (int i = 0; i < nodes.getLength(); i++) {
+            currNode = nodes.item(i);
+            int cbigInt = Integer.parseInt(currNode.getAttributes().getNamedItem("bigInt").getNodeValue());
+            int cdouble = Integer.parseInt(currNode.getAttributes().getNamedItem("double").getNodeValue());
+            int cselect = Integer.parseInt(currNode.getAttributes().getNamedItem("select").getNodeValue());
+            int cstring = Integer.parseInt(currNode.getAttributes().getNamedItem("string").getNodeValue());
+            int ctext = Integer.parseInt(currNode.getAttributes().getNamedItem("text").getNodeValue());
+            String tableName = null;
+            if (currNode.hasChildNodes()) {
+                for (int j = 0; j < currNode.getChildNodes().getLength(); j++)
+                    if (currNode.getChildNodes().item(j).getNodeName().equals("name")) {
+                        tableName = currNode.getChildNodes().item(j).getTextContent();
+                    }
+            }
+            if (tableName != null) {
+                flatstoragesColumns.put(tableName, new Integer[]{cstring, cbigInt, cdouble, cselect, ctext});
+            }
+        }
+
+        //parse mappings
+        nodes = (NodeList) xPath.evaluate("/flatstorageMeta/mapping", document, XPathConstants.NODESET);
+        for (int i = 0; i < nodes.getLength(); i++) {
+            currNode = nodes.item(i);
+            long assignment = Long.valueOf(currNode.getAttributes().getNamedItem("assid").getNodeValue());
+            int level = Integer.valueOf(currNode.getAttributes().getNamedItem("lvl").getNodeValue());
+            String storage = null;
+            String columnname = null;
+            final NodeList childNodes = currNode.getChildNodes();
+            for (int c = 0; c < childNodes.getLength(); c++) {
+                Node child = childNodes.item(c);
+                if ("tblname".equals(child.getNodeName()))
+                    storage = child.getTextContent();
+                else if ("colname".equals(child.getNodeName()))
+                    columnname = child.getTextContent();
+            }
+            if (storage == null || columnname == null)
+                throw new Exception("Invalid flatstorage export: could not read storage or column name!");
+            if (!flatAssignmentMapping.containsKey(storage))
+                flatAssignmentMapping.put(storage, new HashMap<Integer, Map<String, Long>>(20));
+            Map<Integer, Map<String, Long>> levelMap = flatAssignmentMapping.get(storage);
+            if (!levelMap.containsKey(level))
+                levelMap.put(level, new HashMap<String, Long>(30));
+            Map<String, Long> columnMap = levelMap.get(level);
+            if (!columnMap.containsKey(columnname))
+                columnMap.put(columnname, assignment);
+            //calculate position
+            assignmentPositions.put(assignment, getAssignmentPosition(flatstoragesColumns.get(storage), columnname));
+        }
+        if (flatAssignmentMapping.size() == 0) {
+            LOG.warn("No flatstorage assignments found to process!");
+            return;
+        }
+        ZipEntry zeData = getZipEntry(zip, FILE_DATA_FLAT);
+
+        final String xpathStorage = "flatstorages/storage";
+        final String xpathData = "flatstorages/storage/data";
+
+        final PreparedStatement psGetAssInfo = con.prepareStatement("SELECT DISTINCT a.APROPERTY,a.XALIAS,p.DATATYPE FROM " + DatabaseConst.TBL_STRUCT_ASSIGNMENTS + " a, " + DatabaseConst.TBL_STRUCT_PROPERTIES + " p WHERE a.ID=? AND p.ID=a.APROPERTY");
+        final Map<Long, Object[]> assignmentPropAlias = new HashMap<Long, Object[]>(assignmentPositions.size());
+        final String insert1 = "INSERT INTO " + DatabaseConst.TBL_CONTENT_DATA +
+                //1  2   3   4    5     6             7     8                                              9         10                 11
+                "(ID,VER,POS,LANG,TPROP,ASSIGN,XDEPTH,XPATH,XPATHMULT,XMULT,XINDEX,PARENTXMULT,PARENTXPATH,ISMAX_VER,ISLIVE_VER,ISGROUP,ISMLDEF,";
+        final String insert2 = "(?,?,?,?,?,?,1,?,?,1,1,1,'/',?,?," + StorageManager.getBooleanFalseExpression() + ",?,";
+        final PreparedStatement psString = con.prepareStatement(insert1 + "FTEXT1024,UFTEXT1024,FSELECT)VALUES" +
+                insert2 + "?,?,0)");
+        final PreparedStatement psText = con.prepareStatement(insert1 + "FCLOB,UFCLOB,FSELECT)VALUES" +
+                insert2 + "?,?,0)");
+        final PreparedStatement psDouble = con.prepareStatement(insert1 + "FDOUBLE,FSELECT)VALUES" +
+                insert2 + "?,0)");
+        final PreparedStatement psNumber = con.prepareStatement(insert1 + "FINT,FSELECT)VALUES" +
+                insert2 + "?,0)");
+        final PreparedStatement psLargeNumber = con.prepareStatement(insert1 + "FBIGINT,FSELECT)VALUES" +
+                insert2 + "?,0)");
+        final PreparedStatement psFloat = con.prepareStatement(insert1 + "FFLOAT,FSELECT)VALUES" +
+                insert2 + "?,0)");
+        final PreparedStatement psBoolean = con.prepareStatement(insert1 + "FBOOL,FSELECT)VALUES" +
+                insert2 + "?,0)");
+        final PreparedStatement psReference = con.prepareStatement(insert1 + "FREF,FSELECT)VALUES" +
+                insert2 + "?,0)");
+        final PreparedStatement psSelectOne = con.prepareStatement(insert1 + "FSELECT)VALUES" +
+                insert2 + "?)");
+        try {
+            final SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
+            final DefaultHandler handler = new DefaultHandler() {
+                private String currentElement = null;
+                private String currentStorage = null;
+                private Map<String, String> data = new HashMap<String, String>(10);
+                private StringBuilder sbData = new StringBuilder(10000);
+                boolean inTag = false;
+                boolean inElement = false;
+                List<String> path = new ArrayList<String>(10);
+                StringBuilder currPath = new StringBuilder(100);
+                int insertCount = 0;
+
+
+                /**
+                 * {@inheritDoc}
+                 */
+                @Override
+                public void startDocument() throws SAXException {
+                    inTag = false;
+                    inElement = false;
+                    path.clear();
+                    currPath.setLength(0);
+                    sbData.setLength(0);
+                    data.clear();
+                    currentElement = null;
+                    currentStorage = null;
+                    insertCount = 0;
+                }
+
+                /**
+                 * {@inheritDoc}
+                 */
+                @Override
+                public void endDocument() throws SAXException {
+                    LOG.info("Imported [" + insertCount + "] flatstorage entries into the hierarchical storage");
+                }
+
+                /**
+                 * {@inheritDoc}
+                 */
+                @Override
+                public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+                    pushPath(qName, attributes);
+                    if (currPath.toString().equals(xpathData)) {
+                        inTag = true;
+                        data.clear();
+                        for (int i = 0; i < attributes.getLength(); i++) {
+                            String name = attributes.getLocalName(i);
+                            if (StringUtils.isEmpty(name))
+                                name = attributes.getQName(i);
+                            data.put(name, attributes.getValue(i));
+                        }
+                    } else if (currPath.toString().equals(xpathStorage)) {
+                        currentStorage = attributes.getValue("name");
+                        LOG.info("Processing storage: " + currentStorage);
+                    } else {
+                        currentElement = qName;
+                    }
+                    inElement = true;
+                    sbData.setLength(0);
+                }
+
+                /**
+                 * Push a path element from the stack
+                 *
+                 * @param qName element name to push
+                 * @param att attributes
+                 */
+                @SuppressWarnings({"UnusedDeclaration"})
+                private void pushPath(String qName, Attributes att) {
+                    path.add(qName);
+                    buildPath();
+                }
+
+                /**
+                 * Pop the top path element from the stack
+                 */
+                private void popPath() {
+                    path.remove(path.size() - 1);
+                    buildPath();
+                }
+
+                /**
+                 * Rebuild the current path
+                 */
+                private synchronized void buildPath() {
+                    currPath.setLength(0);
+                    for (String s : path)
+                        currPath.append(s).append('/');
+                    if (currPath.length() > 1)
+                        currPath.delete(currPath.length() - 1, currPath.length());
+//                    System.out.println("currPath: " + currPath);
+                }
+
+                /**
+                 * {@inheritDoc}
+                 */
+                @Override
+                public void endElement(String uri, String localName, String qName) throws SAXException {
+                    if (currPath.toString().equals(xpathData)) {
+//                        LOG.info("Insert [" + xpathData + "]: [" + data + "]");
+                        inTag = false;
+                        processData();
+                        /*try {
+                            if (insertMode) {
+                                if (executeInsertPhase) {
+                                    processColumnSet(insertColumns, psInsert);
+                                    counter += psInsert.executeUpdate();
+                                }
+                            } else {
+                                if (executeUpdatePhase) {
+                                    if (processColumnSet(updateSetColumns, psUpdate)) {
+                                        processColumnSet(updateClauseColumns, psUpdate);
+                                        counter += psUpdate.executeUpdate();
+                                    }
+                                }
+                            }
+                        } catch (SQLException e) {
+                            throw new SAXException(e);
+                        } catch (ParseException e) {
+                            throw new SAXException(e);
+                        }*/
+                    } else {
+                        if (inTag) {
+                            data.put(currentElement, sbData.toString());
+                        }
+                        currentElement = null;
+                    }
+                    popPath();
+                    inElement = false;
+                    sbData.setLength(0);
+                }
+
+                void processData() {
+//                    System.out.println("processing " + currentStorage + " -> " + data);
+                    final String[] cols = {"string", "bigint", "double", "select", "text"};
+                    for (String column : data.keySet()) {
+                        if (column.endsWith("_mld"))
+                            continue;
+                        for (String check : cols) {
+                            if (column.startsWith(check)) {
+                                if ("select".equals(check) && "0".equals(data.get(column)))
+                                    continue; //dont insert 0-referencing selects
+                                try {
+                                    insertData(column);
+                                } catch (SQLException e) {
+                                    //noinspection ThrowableInstanceNeverThrown
+                                    throw new FxDbException(e, "ex.db.sqlError", e.getMessage()).asRuntimeException();
+                                }
+                            }
+                        }
+                    }
+                }
+
+                private void insertData(String column) throws SQLException {
+                    final int level = Integer.parseInt(data.get("lvl"));
+                    long assignment = flatAssignmentMapping.get(currentStorage).get(level).get(column.toUpperCase());
+                    int pos = FxArrayUtils.getIntElementAt(data.get("positions"), ',', assignmentPositions.get(assignment));
+                    Object[] propXP = getPropertyXPathDataType(assignment);
+                    long prop = (Long) propXP[0];
+                    String xpath = (String) propXP[1];
+                    FxDataType dataType;
+                    try {
+                        dataType = FxDataType.getById((Long) propXP[2]);
+                    } catch (FxNotFoundException e) {
+                        throw e.asRuntimeException();
+                    }
+                    long id = Long.parseLong(data.get("id"));
+                    int ver = Integer.parseInt(data.get("ver"));
+                    long lang = Integer.parseInt(data.get("lang"));
+                    boolean isMaxVer = "1".equals(data.get("ismax_ver"));
+                    boolean isLiveVer = "1".equals(data.get("islive_ver"));
+                    boolean mlDef = "1".equals(data.get(column + "_mld"));
+                    PreparedStatement ps;
+                    switch (dataType) {
+                        case String1024:
+                            ps = psString;
+                            ps.setString(12, data.get(column));
+                            ps.setString(13, data.get(column).toUpperCase());
+                            break;
+                        case Text:
+                        case HTML:
+                            ps = psText;
+                            ps.setString(12, data.get(column));
+                            ps.setString(13, data.get(column).toUpperCase());
+                            break;
+                        case Number:
+                            ps = psNumber;
+                            ps.setLong(12, Long.valueOf(data.get(column)));
+                            break;
+                        case LargeNumber:
+                            ps = psLargeNumber;
+                            ps.setLong(12, Long.valueOf(data.get(column)));
+                            break;
+                        case Reference:
+                            ps = psReference;
+                            ps.setLong(12, Long.valueOf(data.get(column)));
+                            break;
+                        case Float:
+                            ps = psFloat;
+                            ps.setFloat(12, Float.valueOf(data.get(column)));
+                            break;
+                        case Double:
+                            ps = psDouble;
+                            ps.setDouble(12, Double.valueOf(data.get(column)));
+                            break;
+                        case Boolean:
+                            ps = psBoolean;
+                            ps.setBoolean(12, "1".equals(data.get(column)));
+                            break;
+                        case SelectOne:
+                            ps = psSelectOne;
+                            ps.setLong(12, Long.valueOf(data.get(column)));
+                            break;
+                        default:
+                            //noinspection ThrowableInstanceNeverThrown
+                            throw new FxInvalidParameterException("assignment", "ex.structure.flatstorage.datatype.unsupported", dataType.name()).asRuntimeException();
+                    }
+                    ps.setLong(1, id);
+                    ps.setInt(2, ver);
+                    ps.setInt(3, pos);
+                    ps.setLong(4, lang);
+                    ps.setLong(5, prop);
+                    ps.setLong(6, assignment);
+                    ps.setString(7, "/" + xpath);
+                    ps.setString(8, "/" + xpath + "[1]");
+                    ps.setBoolean(9, isMaxVer);
+                    ps.setBoolean(10, isLiveVer);
+                    ps.setBoolean(11, mlDef);
+                    ps.executeUpdate();
+                    insertCount++;
+                }
+
+                /**
+                 * Get property id, xpath and data type for an assignment
+                 *
+                 * @param assignment assignment id
+                 * @return Object[] {propertyId, xpath, datatype}
+                 */
+                private Object[] getPropertyXPathDataType(long assignment) {
+                    if (assignmentPropAlias.get(assignment) != null)
+                        return assignmentPropAlias.get(assignment);
+                    try {
+                        psGetAssInfo.setLong(1, assignment);
+                        ResultSet rs = psGetAssInfo.executeQuery();
+                        if (rs != null && rs.next()) {
+                            Object[] data = new Object[]{rs.getLong(1), rs.getString(2), rs.getLong(3)};
+                            assignmentPropAlias.put(assignment, data);
+                            return data;
+                        }
+                    } catch (SQLException e) {
+                        throw new IllegalArgumentException("Could not load data for assignment " + assignment + ": " + e.getMessage());
+                    }
+                    throw new IllegalArgumentException("Could not load data for assignment " + assignment + "!");
+                }
+
+                /**
+                 * {@inheritDoc}
+                 */
+                @Override
+                public void characters(char[] ch, int start, int length) throws SAXException {
+                    if (inElement)
+                        sbData.append(ch, start, length);
+                }
+
+
+            };
+            parser.parse(zip.getInputStream(zeData), handler);
+        } finally {
+            Database.closeObjects(GenericDivisionImporter.class, psGetAssInfo, psString, psBoolean, psDouble, psFloat,
+                    psLargeNumber, psNumber, psReference, psSelectOne, psText);
+        }
+    }
+
+    /**
+     * Get the assignment position based on the column name
+     *
+     * @param columnSizes number of columns o feach type
+     * @param columnname  name of the column to evaluate
+     * @return position
+     */
+    private int getAssignmentPosition(Integer[] columnSizes, String columnname) {
+        if (columnSizes == null)
+            throw new IllegalArgumentException("No columnSizes available!");
+        //[string,bigint,double,select,text]
+        int start;
+        if (columnname.startsWith("STRING"))
+            start = 0;
+        else if (columnname.startsWith("BIGINT"))
+            start = columnSizes[0];
+        else if (columnname.startsWith("DOUBLE"))
+            start = columnSizes[0] + columnSizes[1];
+        else if (columnname.startsWith("SELECT"))
+            start = columnSizes[0] + columnSizes[1] + columnSizes[2];
+        else if (columnname.startsWith("TEXT"))
+            start = columnSizes[0] + columnSizes[1] + columnSizes[2] + columnSizes[3];
+        else
+            throw new IllegalArgumentException("Unknown column: " + columnname);
+        return start + Integer.parseInt(columnname.substring(columnname.length() - 3)); //format COLUMNxxx, xxx=number
+    }
+
+    /**
      * Import briefcases
      *
      * @param con        an open and valid connection to store imported data
@@ -1046,6 +1484,7 @@ public class GenericDivisionImporter implements FxImportExportConstants {
      */
     public void importFlatStorages(Connection con, ZipFile zip, FxDivisionExportInfo exportInfo) throws Exception {
         if (!canImportFlatStorages(exportInfo)) {
+            importFlatStoragesHierarchical(con, zip);
             return;
         }
         ZipEntry ze = getZipEntry(zip, FILE_FLATSTORAGE_META);
@@ -1084,7 +1523,7 @@ public class GenericDivisionImporter implements FxImportExportConstants {
                             flatStorage.removeFlatStorage(tableName);
                             break;
                         }
-                    } //TODO: check if a flatstorage with these parameters can be created and migrate to a supported one if not
+                    } 
                     flatStorage.createFlatStorage(con, tableName, description, cstring, ctext, cbigInt, cdouble, cselect);
                     storages.add(tableName);
                 }

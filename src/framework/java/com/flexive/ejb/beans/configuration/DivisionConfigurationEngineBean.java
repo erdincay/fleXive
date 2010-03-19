@@ -594,7 +594,6 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
         }
         Connection con = null;
         try {
-//            con = Database.getNonTXDataSource().getConnection();
             con = Database.getDbConnection();
             StorageManager.getStorageImpl().importDivision(con, zip);
         } catch (Exception e) {
