@@ -31,6 +31,7 @@ Parameters:
  buttonDisabled - [optional] renders the button, but disables its functionality
  oncomplete - [optional] the oncomplete event of the action link
  lockscreen - [optional] if true, the screen will be locked when clicking the button
+ confirmKey - [optional] message key for a confirm dialog that will be displayed before the action is called
 
 <ui:composition>
     <c:if test="#{empty id}">
@@ -125,8 +126,13 @@ Parameters:
                      </a4j:commandLink>
                 </div>
 
-                <div id="commandButton_#{id}" onclick="getOnClick('commandElement_#{id}', &quot;#{onclick}&quot;, #{lockscreen});" class="#{commandButtonStyle}"
-                     title="#{title}">
+                <c:set var="newOnclick" value="getOnClick('commandElement_#{id}', &quot;#{onclick}&quot;, #{lockscreen});"/>
+                <c:if test="#{confirmKey != null}">
+                    <c:set var="currentFunction" value="confirmDialog('#{fxMessageBean[confirmKey]}', function() { #{newOnclick} })"/>
+                    <c:set var="newOnclick" value="try {#{currentFunction}}catch(err){alert(err);}"/>
+                </c:if>
+
+                <div id="commandButton_#{id}" onclick="#{newOnclick}" class="#{commandButtonStyle}" title="#{title}">
                     <div style="display:table-row; height:22px; float:left">
                         <div class="#{commandButtonIconStyle}">
                             <img alt="#{id}_icon" id="#{id}_icon" src="#{iconUrl}" border="0"/>

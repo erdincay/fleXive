@@ -341,6 +341,12 @@
             <rtexprvalue>false</rtexprvalue>
             <description>[optional] if true, the screen will be locked when clicking the button</description>
         </attribute>
+        <attribute>
+            <name>confirmKey</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>[optional] message key for a confirm dialog that will be displayed before the action is called</description>
+        </attribute>
     </tag>
     <tag>
         <name>ajaxCommandIcon</name>
