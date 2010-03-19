@@ -75,6 +75,15 @@ public interface FulltextIndexer {
     void remove();
 
     /**
+     * Remove a specific version and a specific assignment specified by the assignment id
+     *
+     * @param assignmentId the assignment's id t.b. removed
+     *
+     * @since 3.1
+     */
+    void remove(long assignmentId);
+
+    /**
      * Remove all versions of the primary key
      */
     void removeAllVersions();

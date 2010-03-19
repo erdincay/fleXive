@@ -312,6 +312,32 @@ public class GenericSQLFulltextIndexer implements FulltextIndexer {
     /**
      * {@inheritDoc}
      */
+    public void remove(long assignmentId) {
+        if (pk == null) {
+            LOG.warn("Tried to remove a fulltext version with no pk provided!");
+            return;
+        }
+        PreparedStatement ps = null;
+        try {
+            ps = con.prepareStatement(CONTENT_DATA_FT_REMOVE + " AND VER=? AND ASSIGN=?");
+            ps.setLong(1, pk.getId());
+            ps.setInt(2, pk.getVersion());
+            ps.setLong(3, assignmentId);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            LOG.error(e);
+        } finally {
+            try {
+                if (ps != null) ps.close();
+            } catch (SQLException e) {
+                LOG.error(e);
+            }
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public void removeAllVersions() {
         if (pk == null) {
             LOG.warn("Tried to remove all fulltext versions with no pk provided!");

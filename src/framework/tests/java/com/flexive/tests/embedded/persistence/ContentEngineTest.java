@@ -42,6 +42,7 @@ import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.interfaces.TypeEngine;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.ACLCategory;
+import com.flexive.shared.security.ACLPermission;
 import com.flexive.shared.security.Mandator;
 import com.flexive.shared.stream.FxStreamUtils;
 import com.flexive.shared.structure.*;
@@ -65,6 +66,7 @@ import org.testng.annotations.Test;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Arrays;
 import org.apache.commons.logging.Log;
@@ -75,13 +77,12 @@ import org.apache.commons.logging.LogFactory;
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-@Test(groups = {"ejb", "content"})
 public class ContentEngineTest {
     private static final Log LOG = LogFactory.getLog(ContentEngineTest.class);
 
-    private ContentEngine co;
+    private ContentEngine ce;
     private ACLEngine acl;
-    private TypeEngine type;
+    private TypeEngine te;
     private AssignmentEngine ass;
     public static final String TEST_EN = "Test value in english";
     public static final String TEST_DE = "Test datensatz in deutsch mit \u00E4ml\u00E5ut te\u00DFt";
@@ -98,29 +99,29 @@ public class ContentEngineTest {
      *
      * @throws Exception on errors
      */
-    @BeforeClass
+    @BeforeClass(groups = {"ejb", "content", "contentconversion"})
     public void beforeClass() throws Exception {
-        co = EJBLookup.getContentEngine();
+        ce = EJBLookup.getContentEngine();
         acl = EJBLookup.getAclEngine();
-        type = EJBLookup.getTypeEngine();
+        te = EJBLookup.getTypeEngine();
         ass = EJBLookup.getAssignmentEngine();
         login(TestUsers.SUPERVISOR);
     }
 
 
-    @AfterClass(dependsOnMethods = {"tearDownStructures"})
+    @AfterClass(groups = {"ejb", "content", "contentconversion"}, dependsOnMethods = {"tearDownStructures"})
     public void afterClass() throws FxLogoutFailedException {
         logout();
     }
 
-    @AfterClass
+    @AfterClass(groups = {"ejb", "content", "contentconversion"})
     public void tearDownStructures() throws Exception {
         long typeId = CacheAdmin.getEnvironment().getType(TEST_TYPE).getId();
-        co.removeForType(typeId);
-        type.remove(typeId);
+        ce.removeForType(typeId);
+        te.remove(typeId);
         typeId = CacheAdmin.getEnvironment().getType(TYPE_ARTICLE).getId();
-        co.removeForType(typeId);
-        type.remove(typeId);
+        ce.removeForType(typeId);
+        te.remove(typeId);
         //remove the test group
         ass.removeAssignment(CacheAdmin.getEnvironment().getAssignment("ROOT/" + TEST_GROUP).getId(), true, false);
     }
@@ -153,7 +154,7 @@ public class ContentEngineTest {
      *
      * @throws Exception on errors
      */
-    @BeforeClass(dependsOnMethods = {"setupACL"})
+    @BeforeClass(groups = {"ejb", "content", "contentconversion"}, dependsOnMethods = {"setupACL"})
     public void setupStructures() throws Exception {
         try {
             if (CacheAdmin.getEnvironment().getType(TEST_TYPE) != null)
@@ -249,19 +250,19 @@ public class ContentEngineTest {
             pe.setMultiplicity(new FxMultiplicity(0, 2));
             ass.createProperty(pe, "/" + TEST_GROUP);
         }
-        //create article type
+        //create article te
         FxPropertyEdit pe = FxPropertyEdit.createNew("MyTitle", new FxString("Description"), new FxString("Hint"),
                 true, new FxMultiplicity(0, 1),
                 true, structACL, FxDataType.String1024, new FxString(FxString.EMPTY),
                 true, null, null, null).setAutoUniquePropertyName(true).setMultiLang(true).setOverrideMultiLang(true);
-        long articleId = type.save(FxTypeEdit.createNew(TYPE_ARTICLE, new FxString("Article test type"), CacheAdmin.getEnvironment().getACLs(ACLCategory.STRUCTURE).get(0), null));
+        long articleId = te.save(FxTypeEdit.createNew(TYPE_ARTICLE, new FxString("Article test type"), CacheAdmin.getEnvironment().getACLs(ACLCategory.STRUCTURE).get(0), null));
         ass.createProperty(articleId, pe, "/");
         pe.setName("Text");
         pe.setDataType(FxDataType.Text);
         pe.setMultiplicity(new FxMultiplicity(0, 2));
         ass.createProperty(articleId, pe, "/");
 
-        long testDataId = type.save(FxTypeEdit.createNew(TEST_TYPE, new FxString("Test data"), CacheAdmin.getEnvironment().getACLs(ACLCategory.STRUCTURE).get(0), null));
+        long testDataId = te.save(FxTypeEdit.createNew(TEST_TYPE, new FxString("Test data"), CacheAdmin.getEnvironment().getACLs(ACLCategory.STRUCTURE).get(0), null));
         FxGroupAssignment ga = (FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment("ROOT/" + TEST_GROUP);
         FxGroupAssignmentEdit gae = FxGroupAssignmentEdit.createNew(ga, CacheAdmin.getEnvironment().getType(TEST_TYPE), null, "/");
         ass.save(gae, true);
@@ -285,7 +286,7 @@ public class ContentEngineTest {
      *
      * @throws Exception on errors
      */
-    @BeforeClass(dependsOnMethods = {"beforeClass"})
+    @BeforeClass(groups = {"ejb", "content", "contentconversion"}, dependsOnMethods = {"beforeClass"})
     public void setupACL() throws Exception {
         try {
             CacheAdmin.getEnvironment().getACL("Test ACL Content 1");
@@ -309,11 +310,11 @@ public class ContentEngineTest {
         }
     }
 
-    @Test
+    @Test(groups = {"ejb", "content"})
     public void removeAddData() throws Exception {
         FxType testType = CacheAdmin.getEnvironment().getType(TEST_TYPE);
         assertTrue(testType != null);
-        FxContent test = co.initialize(testType.getId());
+        FxContent test = ce.initialize(testType.getId());
         assertTrue(test != null);
         test.setAclId(CacheAdmin.getEnvironment().getACL("Test ACL Content 1").getId());
 
@@ -388,12 +389,12 @@ public class ContentEngineTest {
         }
     }
 
-    @Test
+    @Test(groups = {"ejb", "content"})
     public void contentComplex() throws Exception {
         FxType testType = CacheAdmin.getEnvironment().getType(TEST_TYPE);
         assertTrue(testType != null);
         //initialize tests start
-        FxContent test = co.initialize(testType.getId());
+        FxContent test = ce.initialize(testType.getId());
         test.setAclId(CacheAdmin.getEnvironment().getACL("Test ACL Content 1").getId());
         assertTrue(test != null);
         int rootSize = 9 + CacheAdmin.getEnvironment().getSystemInternalRootPropertyAssignments().size();
@@ -463,8 +464,8 @@ public class ContentEngineTest {
         } catch (FxInvalidParameterException e) {
             fail("checkValidity() did not succeed when it should!");
         }
-        FxPK pk = co.save(test);
-        co.remove(pk);
+        FxPK pk = ce.save(test);
+        ce.remove(pk);
         //test /TestGroup1[2]...
         FxGroupData gd = test.getGroupData("/TestGroup1");
         assertTrue(gd.mayCreateMore());
@@ -479,13 +480,13 @@ public class ContentEngineTest {
         }
         test.setValue("/TestGroup1[2]/TestProperty1_2", testValue);
         test.setValue("/TestGroup1[2]/TestProperty1_3", testValue);
-        pk = co.save(test);
-        FxContent testLoad = co.load(pk);
+        pk = ce.save(test);
+        FxContent testLoad = ce.load(pk);
         final String transIt = ((FxString) testLoad.getPropertyData("/TestGroup1[2]/TestProperty1_3").getValue()).getTranslation(FxLanguage.ITALIAN);
         assertTrue(TEST_IT.equals(transIt), "Expected italian translation '" + TEST_IT + "', got: '" + transIt + "' for pk " + pk);
-        co.remove(pk);
-        pk = co.save(test);
-        FxContent testLoad2 = co.load(pk);
+        ce.remove(pk);
+        pk = ce.save(test);
+        FxContent testLoad2 = ce.load(pk);
         FxNumber number = new FxNumber(true, FxLanguage.GERMAN, 42);
         number.setTranslation(FxLanguage.ENGLISH, 43);
         testLoad2.setValue("/TestNumber", number);
@@ -504,8 +505,8 @@ public class ContentEngineTest {
         assertEquals(42.42f, ((FxFloat) testLoad2.getPropertyData("/TestFloat").getValue()).getDefaultTranslation(), "Default translation invalid (should be 42.42f for german, before save)");
         assertEquals(43.43f, ((FxFloat) testLoad2.getPropertyData("/TestFloat").getValue()).getTranslation(FxLanguage.ENGLISH), "English translation invalid (should be 43.43f, before save)");
         assertTrue(testLoad2.getPropertyData("/TestFloat").getValue().hasDefaultLanguage());
-        FxPK saved = co.save(testLoad2);
-        FxContent testLoad3 = co.load(saved);
+        FxPK saved = ce.save(testLoad2);
+        FxContent testLoad3 = ce.load(saved);
         assertEquals(42, (int)((FxNumber) testLoad3.getPropertyData("/TestNumber").getValue()).getDefaultTranslation(), "Default translation invalid (should be 42 for german, after load)");
         assertEquals(43, (int)((FxNumber) testLoad3.getPropertyData("/TestNumber").getValue()).getTranslation(FxLanguage.ENGLISH), "English translation invalid (should be 43, after load)");
         assertEquals(13, (int)((FxNumber) testLoad3.getPropertyData("/TestNumberSL").getValue()).getTranslation(FxLanguage.ENGLISH), "English translation invalid (should be 13, after load)");
@@ -516,8 +517,8 @@ public class ContentEngineTest {
         assertTrue(testLoad3.getPropertyData("/TestFloat").getValue().hasDefaultLanguage(), "Missing default language after load");
         final String transIt2 = ((FxString) testLoad3.getPropertyData("/TestGroup1[2]/TestProperty1_3").getValue()).getTranslation(FxLanguage.ITALIAN);
         assertTrue(TEST_IT.equals(transIt2), "Expected italian translation '" + TEST_IT + "', got: '" + transIt2 + "'");
-        assertTrue(1 == co.removeForType(testType.getId()), "Only one instance should be removed!");
-        assertTrue(0 == co.removeForType(testType.getId()), "No instance should be left to remove!");
+        assertTrue(1 == ce.removeForType(testType.getId()), "Only one instance should be removed!");
+        assertTrue(0 == ce.removeForType(testType.getId()), "No instance should be left to remove!");
 
         // /TestNumberSL has a max. multiplicity of 2
         //since FX-473 null should be returned if not set
@@ -536,14 +537,14 @@ public class ContentEngineTest {
         } catch (FxRuntimeException re) {
             //expected
         }
-        co.initialize(testType.getId()).randomize();
+        ce.initialize(testType.getId()).randomize();
     }
 
-    @Test
+    @Test(groups = {"ejb", "content"})
     public void getValues() throws Exception {
         FxType testType = CacheAdmin.getEnvironment().getType(TEST_TYPE);
         assertTrue(testType != null);
-        FxContent test = co.initialize(testType.getId());
+        FxContent test = ce.initialize(testType.getId());
         final String XP = "/TestProperty3";
         assertEquals(test.getValues(XP).size(), 1); //initialized with 1 empty entry
         test.setValue(XP + "[1]", new FxString(true, "1"));
@@ -564,36 +565,36 @@ public class ContentEngineTest {
         assertEquals(values.get(2).getBestTranslation(), "3");
     }
 
-    @Test
+    @Test(groups = {"ejb", "content"})
     public void setValue() throws Exception {
         FxType testType = CacheAdmin.getEnvironment().getType(TEST_TYPE);
-        FxContent test = co.initialize(testType.getId());
+        FxContent test = ce.initialize(testType.getId());
         //set required properties
         test.setValue("/TestProperty2", new FxString(true, "Test2"));
         test.setValue("/TestProperty4", new FxString(true, "Test4"));
         FxPK pk = test.save().getPk();
         try {
-            FxContent loaded = co.load(pk);
+            FxContent loaded = ce.load(pk);
             //test setting a value that is not present in the loaded content
             assertFalse(loaded.containsValue("/TestProperty1"));
             assertFalse(loaded.containsXPath("/TestProperty1"));
             loaded.setValue(
-                    testType.getPropertyAssignment("/TestProperty1").getXPath(), 
+                    testType.getPropertyAssignment("/TestProperty1").getXPath(),
                     "Test1"
             );
             loaded.save();
-            loaded = co.load(pk);
+            loaded = ce.load(pk);
             Assert.assertEquals(loaded.getValue("/TestProperty1").getBestTranslation(), "Test1");
         } finally {
-            co.remove(pk);
+            ce.remove(pk);
         }
     }
 
-    @Test
+    @Test(groups = {"ejb", "content"})
     public void contentInitialize() throws Exception {
         try {
             FxType article = CacheAdmin.getEnvironment().getType(TYPE_ARTICLE);
-            FxContent test = co.initialize(article.getId());
+            FxContent test = ce.initialize(article.getId());
             test.setAclId(CacheAdmin.getEnvironment().getACL("Article ACL").getId());
             test.getData("/");
             test.getData("/MYTITLE");
@@ -609,7 +610,7 @@ public class ContentEngineTest {
         }
     }
 
-    @Test
+    @Test(groups = {"ejb", "content"})
     public void defaultMultiplicity() throws Exception {
         try {
             FxType article = CacheAdmin.getEnvironment().getType(TYPE_ARTICLE);
@@ -619,12 +620,12 @@ public class ContentEngineTest {
             assertTrue(2 == pe.getDefaultMultiplicity(), "Wrong default multiplicity");
             ass.save(pe, false);
 
-            FxContent test = co.initialize(article.getId());
+            FxContent test = ce.initialize(article.getId());
             test.getData("/TEXT[1]");
             test.getData("/TEXT[2]");
             pe.setDefaultMultiplicity(1);
             ass.save(pe, false);
-            test = co.initialize(article.getId());
+            test = ce.initialize(article.getId());
             test.getData("/TEXT[1]");
             try {
                 test.getData("/TEXT[2]");
@@ -638,10 +639,10 @@ public class ContentEngineTest {
     }
 
 
-    @Test
+    @Test(groups = {"ejb", "content"})
     public void contentCreate() throws Exception {
         FxType article = CacheAdmin.getEnvironment().getType(TYPE_ARTICLE);
-        FxContent test = co.initialize(article.getId());
+        FxContent test = ce.initialize(article.getId());
         test.setAclId(CacheAdmin.getEnvironment().getACL("Article ACL").getId());
         FxString title = new FxString(FxLanguage.ENGLISH, "Title english");
         title.setTranslation(FxLanguage.GERMAN, "Titel deutsch");
@@ -660,7 +661,7 @@ public class ContentEngineTest {
         }
         //            for( int i=0; i<100;i++)
         FxPK pk = test.save().getPk();
-        FxContent comp = co.load(pk);
+        FxContent comp = ce.load(pk);
         assertTrue(comp != null);
         assertTrue(comp.getPk().getId() == pk.getId(), "Id failed");
         assertTrue(comp.getPk().getId() == comp.getId(), "Id of content not equal the Id of contents pk");
@@ -678,46 +679,46 @@ public class ContentEngineTest {
         assertTrue(titlePos == comp.getPropertyData("/TEXT").getPos(), "Text[1] position should be " + (titlePos) + " but is " + comp.getPropertyData("/TEXT").getPos());
         assertTrue(titlePos + 1 == comp.getPropertyData("/MYTITLE[1]").getPos());
         assertTrue(titlePos + 2 == comp.getPropertyData("/TEXT[2]").getPos());
-        FxPK pk2 = co.createNewVersion(comp);
+        FxPK pk2 = ce.createNewVersion(comp);
         assertTrue(2 == pk2.getVersion());
         comp.setValue("/TEXT", new FxString(FxLanguage.GERMAN, "Different text"));
-        FxPK pk3 = co.createNewVersion(comp);
+        FxPK pk3 = ce.createNewVersion(comp);
         assertTrue(3 == pk3.getVersion());
-        FxContentVersionInfo cvi = co.getContentVersionInfo(pk3);
+        FxContentVersionInfo cvi = ce.getContentVersionInfo(pk3);
         assertTrue(3 == cvi.getLastModifiedVersion());
         assertTrue(3 == cvi.getLiveVersion());
         assertTrue(1 == cvi.getMinVersion());
 
-        FxContentContainer cc = co.loadContainer(cvi.getId());
+        FxContentContainer cc = ce.loadContainer(cvi.getId());
         assertEquals(cc.getVersionInfo().getLastModifiedVersion(), cvi.getLastModifiedVersion());
         assertEquals(cc.getVersionInfo().getLiveVersion(), cvi.getLiveVersion());
         assertEquals(cc.getVersionInfo().getMinVersion(), cvi.getMinVersion());
-        assertEquals(cc.getVersion(2), co.load(pk2));
-        assertEquals(cc.getVersion(3), co.load(pk3));
+        assertEquals(cc.getVersion(2), ce.load(pk2));
+        assertEquals(cc.getVersion(3), ce.load(pk3));
         Assert.assertNotSame(cc.getVersion(1), cc.getVersion(2));
         assertTrue(FxDelta.processDelta(cc.getVersion(1), cc.getVersion(2)).isOnlyInternalPropertyChanges());
         Assert.assertNotSame(cc.getVersion(1), cc.getVersion(3));
         assertFalse(FxDelta.processDelta(cc.getVersion(2), cc.getVersion(3)).isOnlyInternalPropertyChanges());
 
-        co.removeVersion(new FxPK(pk.getId(), 1));
-        cvi = co.getContentVersionInfo(pk3);
+        ce.removeVersion(new FxPK(pk.getId(), 1));
+        cvi = ce.getContentVersionInfo(pk3);
         assertTrue(2 == cvi.getMinVersion());
         assertTrue(3 == cvi.getMaxVersion());
-        co.removeVersion(new FxPK(pk.getId(), 3));
-        cvi = co.getContentVersionInfo(pk3);
+        ce.removeVersion(new FxPK(pk.getId(), 3));
+        cvi = ce.getContentVersionInfo(pk3);
         assertTrue(2 == cvi.getMinVersion());
         assertTrue(2 == cvi.getMaxVersion());
         assertTrue(!cvi.hasLiveVersion());
-        co.removeVersion(new FxPK(pk.getId(), 2));
+        ce.removeVersion(new FxPK(pk.getId(), 2));
         try {
-            co.getContentVersionInfo(new FxPK(pk.getId()));
+            ce.getContentVersionInfo(new FxPK(pk.getId()));
             fail("VersionInfo available for a removed instance!");
         } catch (FxApplicationException e) {
             //ok
         }
     }
 
-    @Test
+    @Test(groups = {"ejb", "content"})
     public void binaryUploadTest() throws Exception {
         //        File testFile = new File("/home/mplesser/install/java/testng-5.1.zip");
         File testFile = new File("test.file");
@@ -731,7 +732,7 @@ public class ContentEngineTest {
         fis.close();
     }
 
-    @Test
+    @Test(groups = {"ejb", "content"})
     public void typeValidityTest() throws Exception {
         FxType t = CacheAdmin.getEnvironment().getType(TEST_TYPE);
         assertTrue(t.isXPathValid("/", false), "Root group should be valid for groups");
@@ -752,10 +753,10 @@ public class ContentEngineTest {
         assertTrue(!t.isXPathValid("/TestGroup1[1]/TestGroup1_2[42]/TestProperty1_2_2[6]", true));
     }
 
-    @Test
+    @Test(groups = {"ejb", "content"})
     public void setValueTest() throws Exception {
         FxType testType = CacheAdmin.getEnvironment().getType(TEST_TYPE);
-        FxContent test = co.initialize(testType.getId());
+        FxContent test = ce.initialize(testType.getId());
         final String TEST_VALUE_EN = "Hello world";
         final String TEST_VALUE_DE = "Hallo welt";
         final String TEST_XPATH = "/TestGroup1[2]/TestGroup1_2[3]/TestProperty1_2_2[4]";
@@ -770,10 +771,10 @@ public class ContentEngineTest {
         assertTrue(test.getValue(TEST_XPATH).getDefaultTranslation().equals(TEST_VALUE_EN));
     }
 
-    @Test
+    @Test(groups = {"ejb", "content"})
     public void deltaTest() throws Exception {
         FxType testType = CacheAdmin.getEnvironment().getType(TEST_TYPE);
-        FxContent org = co.initialize(testType.getId());
+        FxContent org = ce.initialize(testType.getId());
         FxString testValue1 = new FxString("Hello world1");
         FxString testValue2 = new FxString("Hello world2");
         //set required properties to allow saving ..
@@ -785,10 +786,10 @@ public class ContentEngineTest {
         org.setValue("/TestProperty3[2]", testValue2);
         org.setValue("/TestProperty3[3]", testValue1);
 
-        FxPK pk = co.save(org);
+        FxPK pk = ce.save(org);
         try {
-            org = co.load(pk);
-            FxContent test = co.load(pk);
+            org = ce.load(pk);
+            FxContent test = ce.load(pk);
             FxDelta d = FxDelta.processDelta(org, test);
             System.out.println(d.dump());
             assertTrue(d.getAdds().size() == 0, "Expected no adds, but got " + d.getAdds().size());
@@ -804,7 +805,7 @@ public class ContentEngineTest {
             assertTrue(d.getRemoves().get(0).getXPath().equals("/TESTPROPERTY3[3]"), "Expected /TESTPROPERTY3[3] but got: " + d.getRemoves().get(0).getXPath());
             assertTrue(d.getUpdates().get(0).getXPath().equals("/TESTPROPERTY3[2]"), "Expected /TESTPROPERTY3[2] but got: " + d.getUpdates().get(0).getXPath());
 
-            test = co.load(pk);
+            test = ce.load(pk);
             test.setValue("/TestGroup1/TestProperty1_2", testValue1);
             test.setValue("/TestGroup1/TestProperty1_3", testValue1);
             test.getGroupData("/TestGroup1").removeEmptyEntries();
@@ -816,7 +817,7 @@ public class ContentEngineTest {
             assertTrue(d.getRemoves().size() == 0, "Expected 0 deletes but got " + d.getRemoves().size());
             assertTrue(d.getUpdates().size() == 0, "Expected 0 updates but got " + d.getUpdates().size());
         } finally {
-            co.remove(pk);
+            ce.remove(pk);
         }
     }
 
@@ -825,9 +826,9 @@ public class ContentEngineTest {
      *
      * @throws Exception on errors
      */
-    @Test
+    @Test(groups = {"ejb", "content"})
     public void compactTest() throws Exception {
-        FxContent org = co.initialize(TEST_TYPE);
+        FxContent org = ce.initialize(TEST_TYPE);
         FxString testValue1 = new FxString("Hello world1");
         FxString testValue2 = new FxString("Hello world2");
         FxString testValue3 = new FxString("Hello world3");
@@ -849,6 +850,7 @@ public class ContentEngineTest {
      *
      * @throws Exception on errors
      */
+    @Test(groups = {"ejb", "content"})
     public void defaultValueTest() throws Exception {
         final String defaultXPath = "/TestProperty5";
         final String req1 = "/TestProperty2";
@@ -863,42 +865,42 @@ public class ContentEngineTest {
             assertEquals(
                     CacheAdmin.getEnvironment().getAssignment(TEST_TYPE + defaultXPath).getDefaultMultiplicity(),
                     1);
-            FxContent c = co.initialize(TEST_TYPE);
+            FxContent c = ce.initialize(TEST_TYPE);
             assertEquals(c.getValue(defaultXPath), DEFAULT_STRING);
             c.setValue(req1, tmpValue);
             c.setValue(req2, tmpValue);
-            pk = co.save(c);
-            FxContent test = co.load(pk);
+            pk = ce.save(c);
+            FxContent test = ce.load(pk);
             assertEquals(test.getValue(defaultXPath), DEFAULT_STRING);
             test.setValue(defaultXPath, tmpValue);
             assertEquals(test.getValue(defaultXPath), tmpValue);
-            co.save(test);
-            test = co.load(test.getPk());
+            ce.save(test);
+            test = ce.load(test.getPk());
             assertEquals(test.getValue(defaultXPath), tmpValue, "Default value should have been overwritten.");
             test.remove(defaultXPath);
             assertFalse(test.containsValue(defaultXPath), "Default value should have been removed (before save)");
-            co.save(test);
-            test = co.load(test.getPk());
+            ce.save(test);
+            test = ce.load(test.getPk());
             assertFalse(test.containsValue(defaultXPath), "Default value should have been removed (after save with a default multiplicity of 1)");
 
             FxPropertyAssignment pa = (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(TEST_TYPE + defaultXPath);
             ass.save(pa.asEditable().setDefaultMultiplicity(0), false);
             pa = (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(TEST_TYPE + defaultXPath);
             assertEquals(pa.getDefaultMultiplicity(), 0);
-            test = co.load(test.getPk());
+            test = ce.load(test.getPk());
             assertFalse(test.containsValue(defaultXPath), "Default value should have been removed (after save with a default multiplicity of 0)");
         } finally {
             if (pk != null)
-                co.remove(pk);
+                ce.remove(pk);
             FxPropertyAssignment pa = (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(TEST_TYPE + defaultXPath);
             //reset the def. multiplicity to 1
             ass.save(pa.asEditable().setDefaultMultiplicity(1), false);
         }
     }
 
-    @Test
+    @Test(groups = {"ejb", "content"})
     public void removeXPathTest() throws FxApplicationException {
-        FxContent test = co.initialize(TEST_TYPE);
+        FxContent test = ce.initialize(TEST_TYPE);
         FxString testValue1 = new FxString("Hello world1");
         FxString testValue2 = new FxString("Hello world2");
         FxString testValue3 = new FxString("Hello world3");
@@ -929,10 +931,10 @@ public class ContentEngineTest {
      *
      * @throws FxApplicationException on errors
      */
-    @Test
+    @Test(groups = {"ejb", "content"})
     public void maxLengthTest() throws FxApplicationException {
 
-        long typeId = type.save(FxTypeEdit.createNew("MAXLENGTHTEST"));
+        long typeId = te.save(FxTypeEdit.createNew("MAXLENGTHTEST"));
         FxPropertyEdit ped = FxPropertyEdit.createNew("LENGTHPROP1", new FxString(true, "LENGTHPROP1"), new FxString(true, ""), FxMultiplicity.MULT_0_1,
                 CacheAdmin.getEnvironment().getACL("Default Structure ACL"), FxDataType.String1024);
         ped.setMaxLength(3);
@@ -945,10 +947,10 @@ public class ContentEngineTest {
         assertEquals(CacheAdmin.getEnvironment().getProperty("LENGTHPROP2").getMaxLength(), -1); // "no" length restriction
 
         try {
-            FxContent c = co.initialize(typeId);
+            FxContent c = ce.initialize(typeId);
             c.setValue("/LENGTHPROP1", new FxString(false, "1234"));
             try {
-                co.save(c);
+                ce.save(c);
                 fail("Setting a content String with length = 4 for a property w/ maxLength = 3 should have failed");
             } catch (FxApplicationException e) {
                 // expected
@@ -965,13 +967,13 @@ public class ContentEngineTest {
             assertEquals(c.getValue("/LENGTHPROP2").toString(), "1234");
 
         } finally {
-            type.remove(typeId);
+            te.remove(typeId);
         }
     }
 
-    @Test
+    @Test(groups = {"ejb", "content"})
     public void removeAssignedACLTest() throws FxApplicationException {
-        FxContent test = co.initialize(FxType.CONTACTDATA);
+        FxContent test = ce.initialize(FxType.CONTACTDATA);
         final FxEnvironment env = CacheAdmin.getEnvironment();
         final long defaultInstanceAclId = env.getDefaultACL(ACLCategory.INSTANCE).getId();
         test.setAclIds(Arrays.asList(
@@ -986,13 +988,13 @@ public class ContentEngineTest {
             test = test.save();
             assertEquals(test.getAclIds(), Arrays.asList(defaultInstanceAclId));
         } finally {
-            co.remove(test.getPk());
+            ce.remove(test.getPk());
         }
     }
 
-    @Test
+    @Test(groups = {"ejb", "content"})
     public void nullAclAssignmentTest() throws FxApplicationException {
-        FxContent test = co.initialize(FxType.CONTACTDATA);
+        FxContent test = ce.initialize(FxType.CONTACTDATA);
         try {
             test.setAclId(ACL.NULL_ACL_ID);
             fail("Null ACL cannot be assigned.");
@@ -1019,8 +1021,8 @@ public class ContentEngineTest {
         }
         test.setAclIds(Arrays.asList(ACL.ACL_CONTACTDATA));
     }
-
-    @Test
+    
+    @Test(groups = {"ejb", "content"})
     public void removeLiveVersionTest_FX807() throws FxApplicationException {
 
         // create a content in live version, attach it to the root node
@@ -1060,4 +1062,836 @@ public class ContentEngineTest {
             }
         }
     }
+
+    /**
+     * Test the conversion of a content type to another
+     *
+     * @throws FxApplicationException on errors
+     */
+    @Test(groups = {"ejb", "content", "contentconversion"})
+    public void contentTypeConversionTest() throws FxApplicationException {
+        // create the structures
+        FxPK contentPK;
+        FxContent content;
+        String destTypeName;
+        try {
+            /**
+             * hierarchical structures
+              */
+            createStructForContentTypeConversionTest(false, false);
+
+            final FxType convParent = CacheAdmin.getEnvironment().getType("CONVPARENT");
+            final FxType convDerived1 = CacheAdmin.getEnvironment().getType("CONVDERIVED1");
+            final FxType convDerived2 = CacheAdmin.getEnvironment().getType("CONVDERIVED2");
+            final FxType convDerived3 = CacheAdmin.getEnvironment().getType("CONVDERIVED3");
+            final FxType convDerived4 = CacheAdmin.getEnvironment().getType("CONVDERIVED4");
+
+            final String p1 = "/PROP1";
+            final String p1c = "1234";
+            final String p2 = "/PROP2";
+            final String p2c = "5678";
+            final String p3 = "/GROUP1/PROP3";
+            final String p3c = "9090";
+
+            // create content for the parent
+            contentPK = conversionContent(convParent);
+            destTypeName = convDerived1.getName();
+            Assert.assertEquals(ce.load(contentPK).getTypeId(), convParent.getId());
+            // convert (lossy), test and delete
+            ce.convertContentType(contentPK, convDerived1.getId(), true, true);
+            Assert.assertEquals(ce.load(contentPK).getTypeId(), convDerived1.getId());
+            Assert.assertTrue(ce.getPKsForType(convParent.getId(), true).size() == 0);
+            Assert.assertTrue(ce.getPKsForType(convDerived1.getId(), true).size() == 1);
+            // test that all content still exists
+            content = ce.load(contentPK);
+            Assert.assertEquals(content.getValue(destTypeName + p1).toString(), p1c);
+            Assert.assertEquals(content.getValue(destTypeName + p2).toString(), p2c);
+            Assert.assertEquals(content.getValue(destTypeName + p3).toString(), p3c);
+            removeConversionStruct(true);
+
+            // create
+            contentPK = conversionContent(convParent);
+            destTypeName = convDerived1.getName();
+            // convert (lossless), test and delete
+            ce.convertContentType(contentPK, convDerived1.getId(), false, true);
+            Assert.assertEquals(ce.load(contentPK).getTypeId(), convDerived1.getId());
+            Assert.assertTrue(ce.getPKsForType(convParent.getId(), true).size() == 0);
+            Assert.assertTrue(ce.getPKsForType(convDerived1.getId(), true).size() == 1);
+            // test that all content still exists
+            content = ce.load(contentPK);
+            Assert.assertEquals(content.getValue(destTypeName + p1).toString(), p1c);
+            Assert.assertEquals(content.getValue(destTypeName + p2).toString(), p2c);
+            Assert.assertEquals(content.getValue(destTypeName + p3).toString(), p3c);
+            removeConversionStruct(true);
+
+            // convderived2 -> derived + additional property
+            // create
+            contentPK = conversionContent(convParent);
+            destTypeName = convDerived2.getName();
+            // convert (lossy), test and delete
+            ce.convertContentType(contentPK, convDerived2.getId(), true, true);
+            Assert.assertEquals(ce.load(contentPK).getTypeId(), convDerived2.getId());
+            Assert.assertTrue(ce.getPKsForType(convParent.getId(), true).size() == 0);
+            Assert.assertTrue(ce.getPKsForType(convDerived2.getId(), true).size() == 1);
+            // test that all content still exists
+            content = ce.load(contentPK);
+            Assert.assertEquals(content.getValue(destTypeName + p1).toString(), p1c);
+            Assert.assertEquals(content.getValue(destTypeName + p2).toString(), p2c);
+            Assert.assertEquals(content.getValue(destTypeName + p3).toString(), p3c);
+            removeConversionStruct(true);
+
+            // create
+            contentPK = conversionContent(convParent);
+            destTypeName = convDerived2.getName();
+            // convert (lossless), test and delete
+            ce.convertContentType(contentPK, convDerived2.getId(), false, true);
+            Assert.assertEquals(ce.load(contentPK).getTypeId(), convDerived2.getId());
+            Assert.assertTrue(ce.getPKsForType(convParent.getId(), true).size() == 0);
+            Assert.assertTrue(ce.getPKsForType(convDerived2.getId(), true).size() == 1);
+            // test that all content still exists
+            content = ce.load(contentPK);
+            Assert.assertEquals(content.getValue(destTypeName + p1).toString(), p1c);
+            Assert.assertEquals(content.getValue(destTypeName + p2).toString(), p2c);
+            Assert.assertEquals(content.getValue(destTypeName + p3).toString(), p3c);
+            removeConversionStruct(true);
+
+            // convderived3 -> derived - property "prop1"
+            // create
+            contentPK = conversionContent(convParent);
+            destTypeName = convParent.getName();
+            content = ce.load(contentPK);
+            Assert.assertEquals(content.getValue(destTypeName + p1).toString(), p1c);
+            Assert.assertEquals(content.getValue(destTypeName + p2).toString(), p2c);
+            Assert.assertEquals(content.getValue(destTypeName + p3).toString(), p3c);
+            // convert (lossy), test and delete
+            ce.convertContentType(contentPK, convDerived3.getId(), true, true);
+            Assert.assertEquals(ce.load(contentPK).getTypeId(), convDerived3.getId());
+            Assert.assertTrue(ce.getPKsForType(convParent.getId(), true).size() == 0);
+            Assert.assertTrue(ce.getPKsForType(convDerived3.getId(), true).size() == 1);
+            // test that all content still exists
+            content = ce.load(contentPK);
+            destTypeName = convDerived3.getName();
+            Assert.assertFalse(content.containsXPath(destTypeName + p1));
+            Assert.assertEquals(content.getValue(destTypeName + p2).toString(), p2c);
+            Assert.assertEquals(content.getValue(destTypeName + p3).toString(), p3c);
+            removeConversionStruct(true);
+
+            // create
+            contentPK = conversionContent(convParent);
+            // convert (lossless), test and delete (should fail during conversion)
+
+            try {
+                ce.convertContentType(contentPK, convDerived3.getId(), false, true);
+            } catch (FxApplicationException e) {
+                Assert.assertTrue(e instanceof FxContentTypeConversionException);
+            }
+            removeConversionStruct(true);
+
+            /**
+             * differing ACL test
+             */
+            // create
+            contentPK = conversionContent(convParent);
+            // convert (lossless), test and delete (should fail during conversion)
+
+            // create a new testuser having the typeconvtest-acl2 acl
+            final long aclId = CacheAdmin.getEnvironment().getACL("typeconvtest-acl1").getId();
+            TestUsers.assignACL(TestUsers.REGULAR, aclId, ACLPermission.CREATE, ACLPermission.DELETE, ACLPermission.EDIT, ACLPermission.READ);
+
+            try {
+                logout();
+            } catch (FxLogoutFailedException e) {
+                e.printStackTrace();
+            }
+
+            try {
+                login(TestUsers.REGULAR);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            try {
+                // convert (lossy), test and delete
+                ce.convertContentType(contentPK, convDerived4.getId(), true, true);
+            } catch (FxApplicationException e) {
+                Assert.assertTrue(e instanceof FxContentTypeConversionException);
+                
+            }
+
+            try {
+                logout();
+                login(TestUsers.SUPERVISOR);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            // remove acl from TestUsers.REGULAR
+            EJBLookup.getAclEngine().unassign(aclId, TestUsers.REGULAR.getUserGroupId());
+
+            // Test exception if source and destination are the same
+            final long convParentId = convParent.getId();
+            // create
+            contentPK = conversionContent(convParent);
+            try {
+                ce.convertContentType(contentPK, convParentId, false, true);
+            } catch(FxApplicationException e) {
+                Assert.assertTrue(e instanceof FxContentTypeConversionException);
+            }
+
+        } catch (FxApplicationException e) {
+            // silent death
+        } finally {
+            removeConversionStruct(false);
+        }
+    }
+
+    @Test(groups = {"ejb", "content", "contentconversion"})
+    public void flatToFlatConversionTest() throws FxApplicationException {
+        // conversion FLAT --> FLAT
+        FxPK contentPK;
+        String destTypeName;
+        FxContent content;
+        try {
+            createStructForContentTypeConversionTest(true, false);
+
+            final FxType convParent = CacheAdmin.getEnvironment().getType("CONVPARENT");
+            final FxType convDerived1 = CacheAdmin.getEnvironment().getType("CONVDERIVED1");
+
+            final String p1 = "/PROP1";
+            final String p1c = "1234";
+            final String p2 = "/PROP2";
+            final String p2c = "5678";
+            final String p3 = "/GROUP1/PROP3";
+            final String p3c = "9090";
+
+            // create content for the parent
+            contentPK = conversionContent(convParent);
+            destTypeName = convDerived1.getName();
+            Assert.assertEquals(ce.load(contentPK).getTypeId(), convParent.getId());
+            // convert (lossy), test and delete
+            ce.convertContentType(contentPK, convDerived1.getId(), true, true);
+            Assert.assertEquals(ce.load(contentPK).getTypeId(), convDerived1.getId());
+            Assert.assertTrue(ce.getPKsForType(convParent.getId(), true).size() == 0);
+            Assert.assertTrue(ce.getPKsForType(convDerived1.getId(), true).size() == 1);
+            // test that all content still exists
+            content = ce.load(contentPK);
+            Assert.assertEquals(content.getValue(destTypeName + p1).toString(), p1c);
+            Assert.assertEquals(content.getValue(destTypeName + p2).toString(), p2c);
+            Assert.assertEquals(content.getValue(destTypeName + p3).toString(), p3c);
+
+        } finally {
+            removeConversionStruct(false);
+        }
+    }
+
+    @Test(groups = {"ejb", "content", "contentconversion"})
+    public void flatToHierarchicalConversionTest() throws FxApplicationException {
+        // conversion FLAT --> HIERARCHICAL
+        FxPK contentPK;
+        String destTypeName;
+        FxContent content;
+        try {
+            createStructForContentTypeConversionTest(true, true);
+
+            final FxType convParent = CacheAdmin.getEnvironment().getType("CONVPARENT");
+            final FxType convDerived1 = CacheAdmin.getEnvironment().getType("CONVDERIVED1");
+
+            final String p1 = "/PROP1";
+            final String p1c = "1234";
+            final String p2 = "/PROP2";
+            final String p2c = "5678";
+            final String p3 = "/GROUP1/PROP3";
+            final String p3c = "9090";
+
+            // create content for the parent
+            contentPK = conversionContent(convParent);
+            destTypeName = convDerived1.getName();
+            Assert.assertEquals(ce.load(contentPK).getTypeId(), convParent.getId());
+            // convert (lossy), test and delete
+            ce.convertContentType(contentPK, convDerived1.getId(), true, true);
+            Assert.assertEquals(ce.load(contentPK).getTypeId(), convDerived1.getId());
+            Assert.assertTrue(ce.getPKsForType(convParent.getId(), true).size() == 0);
+            Assert.assertTrue(ce.getPKsForType(convDerived1.getId(), true).size() == 1);
+            // test that all content still exists
+            content = ce.load(contentPK);
+            Assert.assertEquals(content.getValue(destTypeName + p1).toString(), p1c);
+            Assert.assertEquals(content.getValue(destTypeName + p2).toString(), p2c);
+            Assert.assertEquals(content.getValue(destTypeName + p3).toString(), p3c);
+
+        } finally {
+            removeConversionStruct(false);
+        }
+    }
+
+    @Test(groups = {"ejb", "content", "contentconversion"})
+    public void hierarchicalToFlatConversionTest() throws FxApplicationException {
+        // conversion HIERARCHICAL --> FLAT
+        FxPK contentPK;
+        String destTypeName;
+        FxContent content;
+        try {
+            createStructForContentTypeConversionTest(true, true);
+
+            final FxType convParent = CacheAdmin.getEnvironment().getType("CONVPARENT");
+            final FxType convDerived1 = CacheAdmin.getEnvironment().getType("CONVDERIVED1");
+
+            final String p1 = "/PROP1";
+            final String p1c = "1234";
+            final String p2 = "/PROP2";
+            final String p2c = "5678";
+            final String p3 = "/GROUP1/PROP3";
+            final String p3c = "9090";
+
+            contentPK = conversionContent(convDerived1);
+            destTypeName = convParent.getName();
+            Assert.assertEquals(ce.load(contentPK).getTypeId(), convDerived1.getId());
+            // convert, test and delete
+            ce.convertContentType(contentPK, convParent.getId(), false, true);
+            Assert.assertEquals(ce.load(contentPK).getTypeId(), convParent.getId());
+            Assert.assertTrue(ce.getPKsForType(convDerived1.getId(), true).size() == 0);
+            Assert.assertTrue(ce.getPKsForType(convParent.getId(), true).size() == 1);
+            // test that all content still exists
+            content = ce.load(contentPK);
+            Assert.assertEquals(content.getValue(destTypeName + p1).toString(), p1c);
+            Assert.assertEquals(content.getValue(destTypeName + p2).toString(), p2c);
+            Assert.assertEquals(content.getValue(destTypeName + p3).toString(), p3c);
+
+        } finally {
+            removeConversionStruct(false);
+        }
+    }
+
+    @Test(groups = {"ejb", "content", "contentconversion"})
+    public void mixedStructureConversionTest() throws FxApplicationException {
+        // conversion of mixed structures
+         FxPK contentPK;
+        String destTypeName;
+        FxContent content;
+        /**
+         * + ... = flat
+         * - ... = hierarchical
+         * lossless conversion of
+         * CONVPARENT (prop1+, prop2+, prop3+) --> CONVDERIVED1 (prop1-, prop2-, prop3-)
+         * --> CONVDERIVED4 (prop1-, prop2+, prop3-) --> CONVPARENT
+         */
+        try {
+            createStructForContentTypeConversionTest(true, true);
+
+            final FxType convParent = CacheAdmin.getEnvironment().getType("CONVPARENT");
+            final FxType convDerived1 = CacheAdmin.getEnvironment().getType("CONVDERIVED1");
+            final FxType convDerived4 = CacheAdmin.getEnvironment().getType("CONVDERIVED4");
+
+            final String p1 = "/PROP1";
+            final String p1c = "1234";
+            final String p2 = "/PROP2";
+            final String p2c = "5678";
+            final String p3 = "/GROUP1/PROP3";
+            final String p3c = "9090";
+
+            // convparent --> convderived1
+            contentPK = conversionContent(convParent);
+            destTypeName = convDerived1.getName();
+            Assert.assertEquals(ce.load(contentPK).getTypeId(), convParent.getId());
+            ce.convertContentType(contentPK, convDerived1.getId(), false, true);
+
+            content = ce.load(contentPK);
+            Assert.assertEquals(content.getTypeId(), convDerived1.getId());
+            Assert.assertTrue(ce.getPKsForType(convDerived1.getId(), true).size() == 1);
+            Assert.assertTrue(ce.getPKsForType(convParent.getId(), true).size() == 0);
+            // test that all content still exists
+            Assert.assertEquals(content.getValue(destTypeName + p1).toString(), p1c);
+            Assert.assertEquals(content.getValue(destTypeName + p2).toString(), p2c);
+            Assert.assertEquals(content.getValue(destTypeName + p3).toString(), p3c);
+
+            // convderived1 --> convderived4
+            contentPK = content.getPk();
+            destTypeName = convDerived4.getName();
+            ce.convertContentType(contentPK, convDerived4.getId(), false, true);
+
+            content = ce.load(contentPK);
+            Assert.assertEquals(content.getTypeId(), convDerived4.getId());
+            Assert.assertTrue(ce.getPKsForType(convDerived4.getId(), true).size() == 1);
+            Assert.assertTrue(ce.getPKsForType(convDerived1.getId(), true).size() == 0);
+            // test that all content still exists
+            Assert.assertEquals(content.getValue(destTypeName + p1).toString(), p1c);
+            Assert.assertEquals(content.getValue(destTypeName + p2).toString(), p2c);
+            Assert.assertEquals(content.getValue(destTypeName + p3).toString(), p3c);
+
+            // convderived4 --> convparent
+            contentPK = content.getPk();
+            destTypeName = convParent.getName();
+            ce.convertContentType(contentPK, convParent.getId(), false, true);
+
+            content = ce.load(contentPK);
+            Assert.assertEquals(content.getTypeId(), convParent.getId());
+            Assert.assertTrue(ce.getPKsForType(convParent.getId(), true).size() == 1);
+            Assert.assertTrue(ce.getPKsForType(convDerived4.getId(), true).size() == 0);
+            // test that all content still exists
+            Assert.assertEquals(content.getValue(destTypeName + p1).toString(), p1c);
+            Assert.assertEquals(content.getValue(destTypeName + p2).toString(), p2c);
+            Assert.assertEquals(content.getValue(destTypeName + p3).toString(), p3c);
+
+        } finally {
+            removeConversionStruct(false);
+        }
+    }
+
+    /**
+     * Test the correct conversion of multiple versions of a given content
+     *
+     * @throws FxApplicationException on errors
+     */
+    @Test(groups = {"ejb", "content", "contentconversion"})
+    public void multipleContentVersionConversionTest() throws FxApplicationException {
+        // conversion HIERARCHICAL --> FLAT
+        FxPK contentPKv1, contentPKv2;
+        String destTypeName, sourceTypeName;
+        FxContent content;
+        FxType convParent, convDerived1, convDerived4;
+        try {
+            // flat structure only ///////////////////////////////////////////
+            createStructForContentTypeConversionTest(false, false);
+
+            convParent = CacheAdmin.getEnvironment().getType("CONVPARENT");
+            convDerived1 = CacheAdmin.getEnvironment().getType("CONVDERIVED1");
+
+            final String p1 = "/PROP1";
+            final String p1c = "1234";
+            final String p2 = "/PROP2";
+            final String p2c = "5678";
+            final String p3 = "/GROUP1/PROP3";
+            final String p3c = "9090";
+
+            final String p1cv2 = "1234-2";
+            final String p2cv2 = "5678-2";
+            final String p3cv2 = "9090-2";
+
+            contentPKv1 = conversionContent(convParent);
+            destTypeName = convDerived1.getName();
+            sourceTypeName = convParent.getName();
+
+            // create new version & save
+            content = ce.load(contentPKv1);
+            content.setValue(sourceTypeName + p1, p1cv2);
+            content.setValue(sourceTypeName + p2, p2cv2);
+            content.setValue(sourceTypeName + p3, p3cv2);
+            contentPKv2 = ce.createNewVersion(content);
+
+            Assert.assertEquals(ce.load(contentPKv1).getTypeId(), convParent.getId());
+
+            // convert, test and delete
+            ce.convertContentType(contentPKv1, convDerived1.getId(), false, true);
+            Assert.assertEquals(ce.load(contentPKv1).getTypeId(), convDerived1.getId());
+            Assert.assertTrue(ce.getPKsForType(convDerived1.getId(), true).size() == 1);
+            Assert.assertTrue(ce.getPKsForType(convParent.getId(), true).size() == 0);
+
+            // test that all content still exists
+            content = ce.load(contentPKv1);
+            Assert.assertEquals(content.getValue(destTypeName + p1).toString(), p1c);
+            Assert.assertEquals(content.getValue(destTypeName + p2).toString(), p2c);
+            Assert.assertEquals(content.getValue(destTypeName + p3).toString(), p3c);
+
+            content = ce.load(contentPKv2);
+            Assert.assertEquals(content.getValue(destTypeName + p1).toString(), p1cv2);
+            Assert.assertEquals(content.getValue(destTypeName + p2).toString(), p2cv2);
+            Assert.assertEquals(content.getValue(destTypeName + p3).toString(), p3cv2);
+
+            removeConversionStruct(false);
+
+            // mixed structure ////////////////////////////////////////////////////////////
+            createStructForContentTypeConversionTest(true, true);
+
+            convDerived1 = CacheAdmin.getEnvironment().getType("CONVDERIVED1");
+            convDerived4 = CacheAdmin.getEnvironment().getType("CONVDERIVED4");
+
+            contentPKv1 = conversionContent(convDerived1);
+            destTypeName = convDerived4.getName();
+            sourceTypeName = convDerived1.getName();
+            
+            // create new version & save
+            content = ce.load(contentPKv1);
+            content.setValue(sourceTypeName + p1, p1cv2);
+            content.setValue(sourceTypeName + p2, p2cv2);
+            content.setValue(sourceTypeName + p3, p3cv2);
+            contentPKv2 = ce.createNewVersion(content);
+
+            Assert.assertEquals(ce.load(contentPKv1).getTypeId(), convDerived1.getId());
+
+            // convert, test and delete
+            ce.convertContentType(contentPKv1, convDerived4.getId(), false, true);
+            Assert.assertEquals(ce.load(contentPKv1).getTypeId(), convDerived4.getId());
+            Assert.assertTrue(ce.getPKsForType(convDerived4.getId(), true).size() == 1);
+            Assert.assertTrue(ce.getPKsForType(convDerived1.getId(), true).size() == 0);
+
+            // test that all content still exists
+            content = ce.load(contentPKv1);
+            Assert.assertEquals(content.getValue(destTypeName + p1).toString(), p1c);
+            Assert.assertEquals(content.getValue(destTypeName + p2).toString(), p2c);
+            Assert.assertEquals(content.getValue(destTypeName + p3).toString(), p3c);
+
+            content = ce.load(contentPKv2);
+            Assert.assertEquals(content.getValue(destTypeName + p1).toString(), p1cv2);
+            Assert.assertEquals(content.getValue(destTypeName + p2).toString(), p2cv2);
+            Assert.assertEquals(content.getValue(destTypeName + p3).toString(), p3cv2);
+            
+        } finally {
+            removeConversionStruct(false);
+        }
+    }
+
+    /**
+     * Test conversion of a single version of a given content
+     *
+     * @throws FxApplicationException on errors
+     */
+    @Test(groups = {"ejb", "content", "contentconversion"})
+    public void singleVersionConversionTest() throws FxApplicationException {
+        // TODO: needs to be implemented, atm all versions are converted!
+        FxPK contentPKv1, contentPKv2;
+        String destTypeName, sourceTypeName;
+        FxContent content;
+        FxType convParent, convDerived1, convDerived4;
+
+
+
+        try {
+             // flat structure
+            createStructForContentTypeConversionTest(false, false);
+
+            convParent = CacheAdmin.getEnvironment().getType("CONVPARENT");
+            convDerived1 = CacheAdmin.getEnvironment().getType("CONVDERIVED1");
+
+            final String p1 = "/PROP1";
+            final String p1c = "1234";
+            final String p2 = "/PROP2";
+            final String p2c = "5678";
+            final String p3 = "/GROUP1/PROP3";
+            final String p3c = "9090";
+
+            final String p1cv2 = "1234-2";
+            final String p2cv2 = "5678-2";
+            final String p3cv2 = "9090-2";
+
+            contentPKv1 = conversionContent(convParent);
+            destTypeName = convDerived1.getName();
+            sourceTypeName = convParent.getName();
+
+            // create new version & save
+            content = ce.load(contentPKv1);
+            content.setValue(sourceTypeName + p1, p1cv2);
+            content.setValue(sourceTypeName + p2, p2cv2);
+            content.setValue(sourceTypeName + p3, p3cv2);
+            contentPKv2 = ce.createNewVersion(content);
+
+            Assert.assertEquals(ce.load(contentPKv1).getTypeId(), convParent.getId());
+            Assert.assertFalse(contentPKv1.getVersion() == contentPKv2.getVersion());
+
+            // now convert version 1 only:
+            ce.convertContentType(contentPKv1, convDerived1.getId(), false, false);
+            Assert.assertEquals(ce.load(contentPKv1).getTypeId(), convDerived1.getId());
+            Assert.assertTrue(ce.getPKsForType(convDerived1.getId(), true).size() == 1);
+            // we should have one pk left for the source
+            Assert.assertTrue(ce.getPKsForType(convParent.getId(), true).size() == 1);
+
+            // test that all content still exists
+            content = ce.load(contentPKv1);
+            Assert.assertEquals(content.getValue(destTypeName + p1).toString(), p1c);
+            Assert.assertEquals(content.getValue(destTypeName + p2).toString(), p2c);
+            Assert.assertEquals(content.getValue(destTypeName + p3).toString(), p3c);
+
+            content = ce.load(contentPKv2);
+            Assert.assertEquals(content.getValue(destTypeName + p1).toString(), p1cv2);
+            Assert.assertEquals(content.getValue(destTypeName + p2).toString(), p2cv2);
+            Assert.assertEquals(content.getValue(destTypeName + p3).toString(), p3cv2);
+
+            // CONVERT BACK to parent type
+            ce.convertContentType(contentPKv1, convParent.getId(), false, false);
+            Assert.assertEquals(ce.load(contentPKv1).getTypeId(), convParent.getId());
+            Assert.assertTrue(ce.getPKsForType(convDerived1.getId(), true).size() == 0);
+            Assert.assertTrue(ce.getPKsForType(convParent.getId(), true).size() == 1);
+
+            // test that all content still exists
+            content = ce.load(contentPKv1);
+            Assert.assertEquals(content.getValue(destTypeName + p1).toString(), p1c);
+            Assert.assertEquals(content.getValue(destTypeName + p2).toString(), p2c);
+            Assert.assertEquals(content.getValue(destTypeName + p3).toString(), p3c);
+
+            content = ce.load(contentPKv2);
+            Assert.assertEquals(content.getValue(destTypeName + p1).toString(), p1cv2);
+            Assert.assertEquals(content.getValue(destTypeName + p2).toString(), p2cv2);
+            Assert.assertEquals(content.getValue(destTypeName + p3).toString(), p3cv2);
+
+            // delete
+            removeConversionStruct(false);
+
+            // mixed structure ////////////////////////////////////////////////////////////
+            createStructForContentTypeConversionTest(true, true);
+
+            convDerived1 = CacheAdmin.getEnvironment().getType("CONVDERIVED1");
+            convDerived4 = CacheAdmin.getEnvironment().getType("CONVDERIVED4");
+
+            contentPKv1 = conversionContent(convDerived1);
+            destTypeName = convDerived4.getName();
+            sourceTypeName = convDerived1.getName();
+
+            // create new version & save
+            content = ce.load(contentPKv1);
+            content.setValue(sourceTypeName + p1, p1cv2);
+            content.setValue(sourceTypeName + p2, p2cv2);
+            content.setValue(sourceTypeName + p3, p3cv2);
+            contentPKv2 = ce.createNewVersion(content);
+
+            Assert.assertEquals(ce.load(contentPKv1).getTypeId(), convDerived1.getId());
+
+            // convert, test and delete
+            ce.convertContentType(contentPKv1, convDerived4.getId(), false, false);
+            Assert.assertEquals(ce.load(contentPKv1).getTypeId(), convDerived4.getId());
+            Assert.assertTrue(ce.getPKsForType(convDerived4.getId(), true).size() == 1);
+            Assert.assertTrue(ce.getPKsForType(convDerived1.getId(), true).size() == 1);
+
+            // test that all content still exists
+            content = ce.load(contentPKv1);
+            Assert.assertEquals(content.getValue(destTypeName + p1).toString(), p1c);
+            Assert.assertEquals(content.getValue(destTypeName + p2).toString(), p2c);
+            Assert.assertEquals(content.getValue(destTypeName + p3).toString(), p3c);
+            Assert.assertEquals(content.getTypeId(), convDerived4.getId());
+
+            content = ce.load(contentPKv2);
+            Assert.assertEquals(content.getValue(destTypeName + p1).toString(), p1cv2);
+            Assert.assertEquals(content.getValue(destTypeName + p2).toString(), p2cv2);
+            Assert.assertEquals(content.getValue(destTypeName + p3).toString(), p3cv2);
+            Assert.assertEquals(content.getTypeId(), convDerived1.getId());
+
+            // CONVERT BACK to parent type
+            // convert, test and delete
+            ce.convertContentType(contentPKv1, convDerived1.getId(), false, false);
+            Assert.assertEquals(ce.load(contentPKv1).getTypeId(), convDerived1.getId());
+            Assert.assertTrue(ce.getPKsForType(convDerived4.getId(), true).size() == 0);
+            Assert.assertTrue(ce.getPKsForType(convDerived1.getId(), true).size() == 1);
+
+            // test that all content still exists
+            content = ce.load(contentPKv1);
+            Assert.assertEquals(content.getValue(destTypeName + p1).toString(), p1c);
+            Assert.assertEquals(content.getValue(destTypeName + p2).toString(), p2c);
+            Assert.assertEquals(content.getValue(destTypeName + p3).toString(), p3c);
+            Assert.assertEquals(content.getTypeId(), convDerived1.getId());
+
+            content = ce.load(contentPKv2);
+            Assert.assertEquals(content.getValue(destTypeName + p1).toString(), p1cv2);
+            Assert.assertEquals(content.getValue(destTypeName + p2).toString(), p2cv2);
+            Assert.assertEquals(content.getValue(destTypeName + p3).toString(), p3cv2);
+            Assert.assertEquals(content.getTypeId(), convDerived1.getId());
+
+        } finally {
+            removeConversionStruct(false);
+        }
+    }
+
+    /**
+     * Test content casts between multiple derived types and parents
+     *
+     * @throws FxApplicationException on errors
+     */
+    @Test(groups = {"ejb", "content", "contentconversion"})
+    public void multipleInheritanceTest() throws FxApplicationException {
+        FxPK pk;
+        FxContent co;
+        FxPropertyData data;
+        try {
+            createMultipleInheritanceStructure();
+            final FxType convParent = CacheAdmin.getEnvironment().getType("CONVPARENT");
+            final FxType convDerived4 = CacheAdmin.getEnvironment().getType("CONVDERIVED4");
+
+            // convParent --> convDerived4
+            pk = conversionContent(convParent, "CONVPARENT/PROP1");
+            co = ce.load(pk);
+            Assert.assertEquals(co.getTypeId(), convParent.getId());
+
+            ce.convertContentType(pk, convDerived4.getId(), false, true);
+            co = ce.load(pk);
+            Assert.assertEquals(co.getTypeId(), convDerived4.getId());
+            data = co.getPropertyData("CONVDERIVED4/PROP1");
+            Assert.assertEquals(data.getAssignment().getId(), CacheAdmin.getEnvironment().getAssignment("CONVDERIVED4/PROP1").getId());
+
+        } finally {
+            removeConversionStruct(false);
+        }
+    }
+
+    /**
+     * Required structures for the type conversion tests
+     * "mixed" disregarded if flat set to "false"
+     * 
+     * @param flat set to true to create properties in the flatstorage
+     * @param mixed set to true to create a structure having both hierarchical entries and flatstorage entries: parent = flat, CONVDERIVED1 = hierarchical
+     * @throws FxApplicationException on errors
+     */
+    private void createStructForContentTypeConversionTest(boolean flat, boolean mixed) throws FxApplicationException {
+        final long aclId1 = EJBLookup.getAclEngine().create("typeconvtest-acl1", new FxString("typeconvtest-acl1"), TestUsers.getTestMandator(),
+                "#000000", "", ACLCategory.STRUCTURE);
+        final long aclId2 = EJBLookup.getAclEngine().create("typeconvtest-acl2", new FxString("typeconvtest-acl2"), TestUsers.getTestMandator(),
+                "#000000", "", ACLCategory.STRUCTURE);
+
+        final StringBuilder code = new StringBuilder(500);
+
+        if (flat) {
+            if (mixed) {
+                // convparent = flatten:true
+                // convderived1 = flatten:false
+                // convderived4 = convparent, only prop2 = flat, ACL = the same
+                code.append("import com.flexive.shared.*\nimport com.flexive.shared.value.FxString\nimport com.flexive.shared.scripting.groovy.*\n")
+                        .append("new GroovyTypeBuilder().convparent(generalACL: \"typeconvtest-acl1\") {\n")
+                        .append("prop1()\nprop1(flatten:true)\nprop2()\nprop2(flatten:true)\nGroup1() {\nprop3()\nprop3(flatten:true)\n}\n}\n")
+                        .append("new GroovyTypeBuilder().convDerived1(parentTypeName: \"CONVPARENT\", generalACL: \"typeconvtest-acl1\") {\nprop1(flatten:false)\nprop2(flatten:false)\nGroup1() {\nprop3(flatten:false)\n}\n}\n")
+                        .append("new GroovyTypeBuilder().convDerived2(parentTypeName: \"CONVPARENT\", generalACL: \"typeconvtest-acl1\") {\nprop4()\n}\n")
+                        .append("new GroovyTypeBuilder().convDerived3(parentTypeName: \"CONVPARENT\", generalACL: \"typeconvtest-acl1\")\n")
+                        .append("new GroovyTypeBuilder().convDerived4(parentTypeName: \"CONVPARENT\", generalACL: \"typeconvtest-acl1\") {\nprop1(flatten:false)\nprop2(flatten:true)\nGroup1() {\nprop3(flatten:false)\n}\n}\n");
+            } else {
+                code.append("import com.flexive.shared.*\nimport com.flexive.shared.value.FxString\nimport com.flexive.shared.scripting.groovy.*\n")
+                        .append("new GroovyTypeBuilder().convparent(generalACL: \"typeconvtest-acl1\") {\n")
+                        .append("prop1()\nprop1(flatten:true)\nprop2()\nprop2(flatten:true)\nGroup1() {\nprop3()\nprop3(flatten:true)\n}\n}\n")
+                        .append("new GroovyTypeBuilder().convDerived1(parentTypeName: \"CONVPARENT\", generalACL: \"typeconvtest-acl1\")\n")
+                        .append("new GroovyTypeBuilder().convDerived2(parentTypeName: \"CONVPARENT\", generalACL: \"typeconvtest-acl1\") {\nprop4()\n}\n")
+                        .append("new GroovyTypeBuilder().convDerived3(parentTypeName: \"CONVPARENT\", generalACL: \"typeconvtest-acl1\")\n")
+                        .append("new GroovyTypeBuilder().convDerived4(parentTypeName: \"CONVPARENT\", generalACL: \"typeconvtest-acl2\")\n");
+            }
+        } else {
+            code.append("import com.flexive.shared.*\nimport com.flexive.shared.value.FxString\nimport com.flexive.shared.scripting.groovy.*\n")
+                    .append("new GroovyTypeBuilder().convparent(generalACL: \"typeconvtest-acl1\") {\n")
+                    .append("prop1()\nprop1(flatten:false)\nprop2()\nprop2(flatten:false)\nGroup1() {\nprop3()\nprop3(flatten:false)\n}\n}\n")
+                    .append("new GroovyTypeBuilder().convDerived1(parentTypeName: \"CONVPARENT\", generalACL: \"typeconvtest-acl1\")\n")
+                    .append("new GroovyTypeBuilder().convDerived2(parentTypeName: \"CONVPARENT\", generalACL: \"typeconvtest-acl1\") {\nprop4()\n}\n")
+                    .append("new GroovyTypeBuilder().convDerived3(parentTypeName: \"CONVPARENT\", generalACL: \"typeconvtest-acl1\")\n")
+                    .append("new GroovyTypeBuilder().convDerived4(parentTypeName: \"CONVPARENT\", generalACL: \"typeconvtest-acl2\")\n");
+        }
+        code.trimToSize();
+
+        // run the groovy script
+        EJBLookup.getScriptingEngine().runScript("structureCreation.groovy", null, code.toString()).getResult();
+        // remove prop1() in convDerived3
+        long removeId = CacheAdmin.getEnvironment().getAssignment("CONVDERIVED3/PROP1").getId();
+        EJBLookup.getAssignmentEngine().removeAssignment(removeId);
+    }
+
+    /**
+     * Multiple inheritance type conversion test structures
+     * @throws FxApplicationException on errors
+     */
+    private void createMultipleInheritanceStructure() throws FxApplicationException {
+        final StringBuilder code = new StringBuilder(500);
+        code.append("import com.flexive.shared.scripting.groovy.*\n")
+                .append("new GroovyTypeBuilder().convparent() {\nprop1()\n}\n")
+                .append("new GroovyTypeBuilder().convderived1(parentTypeName: \"CONVPARENT\")\n")
+                .append("new GroovyTypeBuilder().convderived2(parentTypeName: \"CONVDERIVED1\")\n")
+                .append("new GroovyTypeBuilder().convderived3(parentTypeName: \"CONVDERIVED2\")\n")
+                .append("new GroovyTypeBuilder().convderived4(parentTypeName: \"CONVDERIVED3\")\n");
+        code.trimToSize();
+        // run
+        EJBLookup.getScriptingEngine().runScript("structureCreation.groovy", null, code.toString()).getResult();
+    }
+
+    // Create content for the contenttype conversion test
+    private FxPK conversionContent(FxType t, String... XPath) throws FxApplicationException {
+        FxPK contentPK = null;
+        FxContent co = ce.initialize(t.getId());
+        final FxString pco1 = new FxString(false, "1234");
+        final FxString pco2 = new FxString(false, "5678");
+        final FxString pco3 = new FxString(false, "9090");
+
+        if (XPath.length > 0) {
+            for (String p : XPath) {
+                co.setValue(p, pco1);
+            }
+            contentPK = ce.save(co);
+        } else {
+            if ("CONVPARENT".equals(t.getName())) {
+                co.setValue("CONVPARENT/PROP1", pco1);
+                co.setValue("CONVPARENT/PROP2", pco2);
+                co.setValue("CONVPARENT/GROUP1/PROP3", pco3);
+                contentPK = ce.save(co);
+            } else if ("CONVDERIVED1".equals(t.getName())) {
+                co.setValue("CONVDERIVED1/PROP1", pco1);
+                co.setValue("CONVDERIVED1/PROP2", pco2);
+                co.setValue("CONVDERIVED1/GROUP1/PROP3", pco3);
+                contentPK = ce.save(co);
+            } else if ("CONVDERIVED2".equals(t.getName())) {
+                co.setValue("CONVDERIVED2/PROP1", pco1);
+                co.setValue("CONVDERIVED2/PROP2", pco2);
+                co.setValue("CONVDERIVED2/GROUP1/PROP3", pco3);
+                contentPK = ce.save(co);
+            } else if ("CONVDERIVED3".equals(t.getName())) {
+                // co.setValue("CONVDERIVED3/PROP1", pco1); removed
+                co.setValue("CONVDERIVED3/PROP2", pco2);
+                co.setValue("CONVDERIVED3/GROUP1/PROP3", pco3);
+                contentPK = ce.save(co);
+            } else if ("CONVDERIVED4".equals(t.getName())) {
+                co.setValue("CONVDERIVED4/PROP1", pco1);
+                co.setValue("CONVDERIVED4/PROP2", pco2);
+                co.setValue("CONVDERIVED4/GROUP1/PROP3", pco3);
+                contentPK = ce.save(co);
+            }
+        }
+        return contentPK;
+    }
+
+    /**
+     * Remove required structures for the type conversion test
+     *
+     * @param contentOnly true = remove content for conversion test types only
+     * @throws FxApplicationException on errors
+     */
+    private void removeConversionStruct(boolean contentOnly) throws FxApplicationException {
+        TypeEngine te = EJBLookup.getTypeEngine();
+        // find and remove any contents, then structures, then acls
+        final List<Long> typeIds = new ArrayList<Long>(5);
+        if(CacheAdmin.getEnvironment().typeExists("CONVDERIVED4"))
+            typeIds.add(CacheAdmin.getEnvironment().getType("CONVDERIVED4").getId());
+        if(CacheAdmin.getEnvironment().typeExists("CONVDERIVED3"))
+            typeIds.add(CacheAdmin.getEnvironment().getType("CONVDERIVED3").getId());
+        if(CacheAdmin.getEnvironment().typeExists("CONVDERIVED2"))
+            typeIds.add(CacheAdmin.getEnvironment().getType("CONVDERIVED2").getId());
+        if(CacheAdmin.getEnvironment().typeExists("CONVDERIVED1"))
+            typeIds.add(CacheAdmin.getEnvironment().getType("CONVDERIVED1").getId());
+        if(CacheAdmin.getEnvironment().typeExists("CONVPARENT"))
+            typeIds.add(CacheAdmin.getEnvironment().getType("CONVPARENT").getId());
+
+        long[] aclIds = null;
+        if(CacheAdmin.getEnvironment().aclExists("typeconvtest-acl1") && CacheAdmin.getEnvironment().aclExists("typeconvtest-acl2")) {
+            aclIds = new long[2];
+            aclIds[0] = CacheAdmin.getEnvironment().getACL("typeconvtest-acl1").getId();
+            aclIds[1] = CacheAdmin.getEnvironment().getACL("typeconvtest-acl2").getId();
+        }
+
+        try {
+            // contents
+            for (long typeId : typeIds) {
+                final List<FxPK> pkList = ce.getPKsForType(typeId, false);
+                for (FxPK pk : pkList) {
+                    ce.remove(pk);
+                }
+            }
+            if (!contentOnly) {
+                // remove structures separately
+                for (Long typeId : typeIds) {
+                    te.remove(typeId);
+                }
+                // remove custom acls
+                if (aclIds != null) {
+                    for (long aclId : aclIds) {
+                        acl.remove(aclId);
+                    }
+                }
+            }
+        } catch (FxApplicationException e) {
+            // silent death
+        }
+    }
+
+    /**
+     * Test the automatic conversion of documentFile types
+     */
+//    @Test(groups = {"ejb", "content"})
+//    public void testDocumentFileMimeConversion() {
+//
+//    }
 }

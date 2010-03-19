@@ -141,6 +141,28 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             //        17        18         19           20              21
             "WHERE ID=? AND VER=? AND LANG=? AND ASSIGN=? AND XPATHMULT=?";
 
+    /**
+     * update statements for content type conversion
+     */
+    protected static final String CONTENT_CONVERT_ALL_VERSIONS_UPDATE = "UPDATE " + TBL_CONTENT + " SET " +
+            //    1             2             3          4
+            "TDEF=?, MODIFIED_BY=?, MODIFIED_AT=? WHERE ID=?";
+    protected static final String CONTENT_CONVERT_SINGLE_VERSION_UPDATE = "UPDATE " + TBL_CONTENT + " SET " +
+            //    1             2             3          4          5
+            "TDEF=?, MODIFIED_BY=?, MODIFIED_AT=? WHERE ID=? AND VER=?";
+    protected static final String CONTENT_DATA_CONVERT_ALL_VERSIONS_UPDATE = "UPDATE " + TBL_CONTENT_DATA + " SET " +
+            //      1          2            3
+            "ASSIGN=? WHERE ID=? AND ASSIGN=?";
+    protected static final String CONTENT_DATA_CONVERT_SINGLE_VERSION_UPDATE = "UPDATE " + TBL_CONTENT_DATA + " SET " +
+            //      1          2            3         4
+            "ASSIGN=? WHERE ID=? AND ASSIGN=? AND VER=?";
+    protected static final String CONTENT_DATA_FT_CONVERT_ALL_VERSIONS_UPDATE = "UPDATE " + TBL_CONTENT_DATA_FT + " SET " +
+            //      1          2            3
+            "ASSIGN=? WHERE ID=? AND ASSIGN=?";
+    protected static final String CONTENT_DATA_FT_CONVERT_SINGLE_VERSION_UPDATE = "UPDATE " + TBL_CONTENT_DATA_FT + " SET " +
+            //      1          2            3         4
+            "ASSIGN=? WHERE ID=? AND ASSIGN=? AND VER=?";
+
     //                                                                                                       1         2
 //    protected static final String CONTENT_DATA_REMOVE_VERSION = "DELETE FROM " + TBL_CONTENT_DATA + " WHERE ID=? AND VER=?";
 
@@ -795,7 +817,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             ps.executeUpdate();
 
             updateACLEntries(con, content, pk, true);
-            
+
         } catch (SQLException e) {
             throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
         } catch (FxUpdateException e) {
@@ -866,6 +888,28 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     protected void createDetailEntries(Connection con, PreparedStatement ps, FulltextIndexer ft, StringBuilder sql,
                                        FxPK pk, boolean maxVersion, boolean liveVersion, List<FxData> data)
             throws FxNotFoundException, FxDbException, FxCreateException {
+        createDetailEntries(con, ps, ft, sql, pk, maxVersion, liveVersion, data, false);
+    }
+
+    /**
+     * Create all detail entries for a content instance
+     *
+     * @param con                       an open and valid connection
+     * @param ps                        batch prepared statement for detail inserts
+     * @param ft                        fulltext indexer
+     * @param sql                       an optional StringBuffer
+     * @param pk                        primary key of the content
+     * @param maxVersion                is this content the maximum available version?
+     * @param liveVersion               is this content the live version?
+     * @param data                      FxData to create
+     * @param disregardFlatStorageEntry true = do not check if the data is in the flatstorage (contentTypeConversion)
+     * @throws FxNotFoundException on errors
+     * @throws FxDbException       on errors
+     * @throws FxCreateException   on errors
+     */
+    private void createDetailEntries(Connection con, PreparedStatement ps, FulltextIndexer ft, StringBuilder sql,
+                                     FxPK pk, boolean maxVersion, boolean liveVersion, List<FxData> data,
+                                     boolean disregardFlatStorageEntry) throws FxNotFoundException, FxDbException, FxCreateException {
         try {
             FxProperty prop;
             for (FxData curr : data) {
@@ -873,7 +917,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                     FxPropertyData pdata = ((FxPropertyData) curr);
                     prop = pdata.getPropertyAssignment().getProperty();
                     if (!prop.isSystemInternal())
-                        insertPropertyData(prop, data, con, ps, ft, pk, pdata, maxVersion, liveVersion);
+                        insertPropertyData(prop, data, con, ps, ft, pk, pdata, maxVersion, liveVersion, disregardFlatStorageEntry);
                 } else {
                     insertGroupData(con, sql, pk, ((FxGroupData) curr), maxVersion, liveVersion);
                     createDetailEntries(con, ps, ft, sql, pk, maxVersion, liveVersion, ((FxGroupData) curr).getChildren());
@@ -923,12 +967,38 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     protected void insertPropertyData(FxProperty prop, List<FxData> allData, Connection con,
                                       PreparedStatement ps, FulltextIndexer ft, FxPK pk,
                                       FxPropertyData data, boolean isMaxVer, boolean isLiveVer) throws SQLException, FxDbException, FxUpdateException, FxNoAccessException {
+        insertPropertyData(prop, allData, con, ps, ft, pk, data, isMaxVer, isLiveVer, false);
+    }
+
+    /**
+     * Insert property detail data into the database
+     *
+     * @param prop                      thepropery
+     * @param allData                   List of all data belonging to this property (for cascaded updates like binaries to avoid duplicates)
+     * @param con                       an open and valid connection
+     * @param ps                        batch prepared statement for detail inserts
+     * @param ft                        fulltext indexer
+     * @param pk                        primary key of the content
+     * @param data                      the value
+     * @param isMaxVer                  is this content in the max. version?
+     * @param isLiveVer                 is this content in the live version?
+     * @param disregardFlatStorageEntry true = do not check if the data is in the flatstorage (contentTypeConversion)
+     * @throws FxDbException       on errors
+     * @throws FxUpdateException   on errors
+     * @throws FxNoAccessException for FxNoAccess values
+     * @throws SQLException        on SQL errors
+     */
+    private void insertPropertyData(FxProperty prop, List<FxData> allData, Connection con, PreparedStatement ps,
+                                    FulltextIndexer ft, FxPK pk, FxPropertyData data, boolean isMaxVer, boolean isLiveVer,
+                                    boolean disregardFlatStorageEntry) throws SQLException, FxDbException, FxUpdateException, FxNoAccessException {
         if (data == null || data.isEmpty())
             return;
-        if (data.getPropertyAssignment().isFlatStorageEntry()) {
-            if (ft != null && prop.isFulltextIndexed())
-                ft.index(data);
-            return;
+        if (!disregardFlatStorageEntry) {
+            if (data.getPropertyAssignment().isFlatStorageEntry()) {
+                if (ft != null && prop.isFulltextIndexed())
+                    ft.index(data);
+                return;
+            }
         }
         clearPreparedStatement(ps, INSERT_VALUE_POS, INSERT_END_POS);
         ps.setLong(18, 0); //FSELECT has to be set to 0 and not null
@@ -2283,7 +2353,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             ps.setLong(16, userId);
             ps.setLong(17, System.currentTimeMillis());
             ps.executeUpdate();
-            
+
             updateACLEntries(con, content, content.getPk(), false);
 
         } catch (SQLException e) {
@@ -2420,7 +2490,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                 long refCount = refuse ? rs.getLong(1) : 0;
                 if (!refuse) {
                     refuse = FxFlatStorageManager.getInstance().checkContentRemoval(con, typeId, id, allForType);
-                    if( refuse )
+                    if (refuse)
                         refCount += FxFlatStorageManager.getInstance().getReferencedContentCount(con, id);
                 }
                 if (refuse) {
@@ -3051,5 +3121,223 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     public void prepareBinary(Connection con, FxBinary binary) throws SQLException, FxApplicationException {
         binaryStorage.prepareBinary(con, null, binary);
     }
-}
 
+    /**
+     * {@inheritDoc}
+     */
+    public void convertContentType(Connection con, FxPK pk, long sourceTypeId, long destinationTypeId, boolean allVersions,
+                                   Map<Long, Long> assignmentMap, List<Long> flatStoreAssignments, List<Long> nonFlatSourceAssignments,
+                                   List<Long> nonFlatDestinationAssignments, Map<Long, String> sourcePathsMap,
+                                   Map<Long, String> destPathsMap, Map<Long, String> sourceRemoveMap, FxEnvironment env)
+            throws SQLException, FxApplicationException {
+
+        PreparedStatement ps = null;
+        final long pkId = pk.getId();
+        final Integer[] versions;
+        // check if all versions should be converted or the current one only
+        if(allVersions) {
+            final FxContentVersionInfo versionInfo = getContentVersionInfo(con, pkId);
+            versions = versionInfo.getVersions();
+        } else {
+            versions = new Integer[]{pk.getVersion()};
+        }
+
+        // cache the content versions
+        final List<FxContent> contentVersions = new ArrayList<FxContent>(versions.length);
+        for(int v : versions) {
+            contentVersions.add(contentLoad(con, new FxPK(pkId, v), env, new StringBuilder(2000)));
+        }
+        long userId = FxContext.getUserTicket().getUserId();
+        FxFlatStorage flatStorage = FxFlatStorageManager.getInstance();
+        boolean flatRewrite = false;
+
+        // lossy conversion source remove map
+        if (sourceRemoveMap.size() > 0) {
+            final Set<Long> removeSet = sourceRemoveMap.keySet();
+            for (Long removeId : removeSet) {
+                for (FxContent content : contentVersions) {
+                    List<FxData> data = content.getData(sourceRemoveMap.get(removeId));
+                    FulltextIndexer ft = getFulltextIndexer(pk, con);
+                    ft.remove(removeId);
+                    for (FxData d : data) {
+                        deleteDetailData(con, new StringBuilder(2000), content.getPk(), d);
+                    }
+                }
+            }
+            // if no flatstorage assignments remain, delete all orphaned flat entries
+            final List<Long> compareRemoveList = new ArrayList<Long>(removeSet.size());
+            for (Long flatStoreId : flatStoreAssignments) {
+                for (Long removeId : removeSet) {
+                    if (assignmentMap.containsKey(removeId)) {
+                        final Long mappedItem = assignmentMap.get(removeId);
+                        if (mappedItem == null || (mappedItem != null && mappedItem.equals(flatStoreId)))
+                            compareRemoveList.add(flatStoreId);
+                    }
+                }
+            }
+            Collections.sort(flatStoreAssignments);
+            Collections.sort(compareRemoveList);
+            // compare compareRemoveList & flatStoreAssignments, if no differences found, remove all source flat store content
+            final FxDiff diff = new FxDiff(compareRemoveList, flatStoreAssignments);
+            if(diff.diff().size() == 0) {
+                flatStorage.removeContent(con, sourceTypeId, pkId);
+            }
+        }
+
+        /**
+         * use cases:
+         * 1. hierarchical --> flat conversion
+         * 2. flat --> hierrarchical conversion
+         * 3. hierarchical --> hierarchical conversion
+         * 4. flat --> flat conversion
+         */
+        try {
+            for (Long sourceId : assignmentMap.keySet()) {
+                // do not convert any removed source content assignments
+                if(sourceRemoveMap.containsKey(sourceId))
+                    continue;
+
+                final String sourceXPath = sourcePathsMap.get(sourceId);
+                final Long destinationId = assignmentMap.get(sourceId);
+                final String destXPath = destPathsMap.get(destinationId);
+
+                for (FxContent content : contentVersions) {
+                    if (destinationId == null) {
+                        // delete from the source
+                        if (nonFlatSourceAssignments.contains(sourceId) && content.getValue(destXPath) != null) { // source is hierarchical
+                            final List<FxData> data = content.getData(destXPath);
+                            for (FxData d : data) {
+                                deleteDetailData(con, new StringBuilder(2000), content.getPk(), d);
+                            }
+                        }
+                        continue; // goto next source id
+                    }
+
+                    // move on if no value was set
+                    if(content.getValue(sourceXPath) == null)
+                        continue;
+
+                    final FxPropertyData propData = content.getPropertyData(destXPath);
+                    final List<FxData> data = content.getData(destXPath);
+                    // use case 1: hierarchical --> flat
+                    if (nonFlatSourceAssignments.contains(sourceId) && flatStoreAssignments.contains(destinationId)) {
+                        for (FxData d : data) {
+                            deleteDetailData(con, new StringBuilder(2000), content.getPk(), d);
+                        }
+                        flatRewrite = true;
+                    }
+                    // use case 2: flat --> hierarchical
+                    if (!nonFlatSourceAssignments.contains(sourceId) && nonFlatDestinationAssignments.contains(destinationId)) {
+                        ps = con.prepareStatement(CONTENT_DATA_INSERT);
+                        // data for the current xpath
+                        createDetailEntries(con, ps, null, new StringBuilder(2000), content.getPk(), content.isMaxVersion(), content.isLiveVersion(), data, true);
+                        ps.executeBatch();
+                        ps.close();
+
+                        // remove the old entry from the flatstorage
+                        flatStorage.deletePropertyData(con, content.getPk(), propData);
+                        flatRewrite = true;
+                    }
+                }
+
+            }
+
+            if (flatRewrite || flatStoreAssignments.size() > 0) {
+                // re-create (remove old entries first) all flat storage entries with correct column settings
+                flatStorage.removeContent(con, sourceTypeId, pkId);
+                for (FxContent content : contentVersions) {
+                    List<FxPropertyData> data = new ArrayList<FxPropertyData>(5);
+                    for (Long id : flatStoreAssignments) {
+                        final String destXPath = destPathsMap.get(id);
+                        if (content.getValue(destXPath) != null)
+                            data.add(content.getPropertyData(destXPath));
+                    }
+
+                    if (data.size() > 0) {
+                        flatStorage.setConvertedPropertyData(con, content.getPk(), sourceTypeId, destinationTypeId, content.getStepId(), content.isMaxVersion(), content.isLiveVersion(), data);
+                    }
+                }
+            }
+
+            // update tables w/ new assignment ids (valid for all use cases)
+            if (allVersions) {
+                ps = con.prepareStatement(CONTENT_CONVERT_ALL_VERSIONS_UPDATE);
+                ps.setLong(1, destinationTypeId);
+                ps.setLong(2, userId);
+                ps.setLong(3, System.currentTimeMillis());
+                ps.setLong(4, pkId);
+                ps.executeUpdate();
+                ps.close();
+
+                ps = con.prepareStatement(CONTENT_DATA_CONVERT_ALL_VERSIONS_UPDATE);
+                // perform one update per assignmentMap entry
+                for (Long sourceId : assignmentMap.keySet()) {
+                    final Long destId = assignmentMap.get(sourceId);
+                    if (destId != null) {
+                        ps.setLong(1, destId);
+                        ps.setLong(2, pkId);
+                        ps.setLong(3, sourceId);
+                        ps.executeUpdate();
+                    }
+                }
+                ps.close();
+
+                ps = con.prepareStatement(CONTENT_DATA_FT_CONVERT_ALL_VERSIONS_UPDATE);
+                // perform one update per assignmentMap entry
+                for (Long sourceId : assignmentMap.keySet()) {
+                    final Long destId = assignmentMap.get(sourceId);
+                    if (destId != null) {
+                        ps.setLong(1, destId);
+                        ps.setLong(2, pkId);
+                        ps.setLong(3, sourceId);
+                        ps.executeUpdate();
+                    }
+                }
+                ps.close();
+            } else { // convert single version
+                ps = con.prepareStatement(CONTENT_CONVERT_SINGLE_VERSION_UPDATE);
+                ps.setLong(1, destinationTypeId);
+                ps.setLong(2, userId);
+                ps.setLong(3, System.currentTimeMillis());
+                ps.setLong(4, pkId);
+                ps.setInt(5, pk.getVersion());
+                ps.executeUpdate();
+                ps.close();
+
+                ps = con.prepareStatement(CONTENT_DATA_CONVERT_SINGLE_VERSION_UPDATE);
+                // perform one update per assignmentMap entry
+                for (Long sourceId : assignmentMap.keySet()) {
+                    final Long destId = assignmentMap.get(sourceId);
+                    if (destId != null) {
+                        ps.setLong(1, destId);
+                        ps.setLong(2, pkId);
+                        ps.setLong(3, sourceId);
+                        ps.setInt(4, pk.getVersion());
+                        ps.executeUpdate();
+                    }
+                }
+                ps.close();
+
+                ps = con.prepareStatement(CONTENT_DATA_FT_CONVERT_SINGLE_VERSION_UPDATE);
+                // perform one update per assignmentMap entry
+                for (Long sourceId : assignmentMap.keySet()) {
+                    final Long destId = assignmentMap.get(sourceId);
+                    if (destId != null) {
+                        ps.setLong(1, destId);
+                        ps.setLong(2, pkId);
+                        ps.setLong(3, sourceId);
+                        ps.setInt(4, pk.getVersion());
+                        ps.executeUpdate();
+                    }
+                }
+                ps.close();
+            }
+
+        } catch (SQLException e) {
+            throw new FxUpdateException(LOG, e, "ex.db.sqlError", e.getMessage());
+        } finally {
+            if (ps != null)
+                ps.close();
+        }
+    }
+}

@@ -48,6 +48,7 @@ import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
 
 /**
  * SQL storage interface for contents
@@ -414,4 +415,28 @@ public interface ContentStorage {
      * @return meta data
      */
     String getBinaryMetaData(Connection con, long binaryId);
+
+    /**
+     * Convert all versions of the content type. If the source is in the flatstorage, the converted destination assignments
+     * will also be automatically commited to the flatstorage
+     *
+     * @param con                           an open and valid connection
+     * @param pk                            content pk
+     * @param sourceTypeId                  the id of the source type
+     * @param destinationTypeId             the id of the destination type
+     * @param allVersions                   convert all versions of the given content?
+     * @param assignmentMap                 the map of assignments to be changed
+     * @param flatStoreAssignments          source and destination assignment ids whose destination entries are in the flatstore
+     * @param nonFlatSourceAssignments      all source assignment ids which are not in the flatstore
+     * @param nonFlatDestinationAssignments all destination assignments which are not in the flatstore
+     * @param sourcePathsMap                the map if source ids --> xpaths
+     * @param destPathsMap                  the map of destination ids --> xpaths
+     * @param sourceRemoveMap               the map of ids / xpath content assignments t.b. removed from the source type (lossy conversion)
+     * @param env                           Environment
+     * @throws SQLException           on db errors
+     * @throws FxApplicationException on errors
+     *
+     * @since 3.1
+     */
+    void convertContentType(Connection con, FxPK pk, long sourceTypeId, long destinationTypeId, boolean allVersions, Map<Long, Long> assignmentMap, List<Long> flatStoreAssignments, List<Long> nonFlatSourceAssignments, List<Long> nonFlatDestinationAssignments, Map<Long, String> sourcePathsMap, Map<Long, String> destPathsMap, Map<Long, String> sourceRemoveMap, FxEnvironment env) throws SQLException, FxApplicationException;
 }

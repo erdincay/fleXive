@@ -49,10 +49,7 @@ import com.flexive.shared.scripting.FxScriptEvent;
 import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.security.ACLPermission;
 import com.flexive.shared.security.UserTicket;
-import com.flexive.shared.structure.FxAssignment;
-import com.flexive.shared.structure.FxEnvironment;
-import com.flexive.shared.structure.FxType;
-import com.flexive.shared.structure.TypeStorageMode;
+import com.flexive.shared.structure.*;
 import com.flexive.shared.value.BinaryDescriptor;
 import com.flexive.shared.value.FxBinary;
 import com.flexive.shared.workflow.Step;
@@ -65,9 +62,7 @@ import javax.ejb.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * Content Engine implementation
@@ -1155,6 +1150,178 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             throw new FxLockException(e);
         } finally {
             Database.closeObjects(ContentEngineBean.class, con, null);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void convertContentType(FxPK contentPK, long destinationTypeId, boolean allowLossy, boolean allVersions) throws FxApplicationException {
+        final FxContent content = load(contentPK);
+        final FxType sourceType = CacheAdmin.getEnvironment().getType(content.getTypeId());
+        FxPermissionUtils.checkTypeAvailable(destinationTypeId, false);
+        final FxType destinationType = CacheAdmin.getEnvironment().getType(destinationTypeId);
+        final UserTicket ticket = FxContext.getUserTicket();
+        Connection con = null;
+        final long sourceTypeId = sourceType.getId();
+        try {
+            if (sourceTypeId == destinationTypeId)
+                throw new FxContentTypeConversionException("ex.content.typeconversion.desteqSourceError");
+
+            // only a supervisor or a user whose ACL both belongs to the current content, to the current type and the destination type may
+            // move the content
+            boolean userPermitted = false;
+            if (ticket.isGlobalSupervisor() || ticket.isMandatorSupervisor())
+                userPermitted = true;
+            if (!userPermitted) {
+                if (!FxPermissionUtils.currentUserInACLList(ticket, Arrays.asList(sourceType.getACL().getId())))
+                    throw new FxContentTypeConversionException("ex.content.typeconversion.sourceTypeACLError");
+                if (!FxPermissionUtils.currentUserInACLList(ticket, Arrays.asList(destinationType.getACL().getId())))
+                    throw new FxContentTypeConversionException("ex.content.typeconversion.destinationTypeACLError");
+                if (!FxPermissionUtils.currentUserInACLList(ticket, content.getAclIds()))
+                    throw new FxContentTypeConversionException("ex.content.typeconversion.notInContentACL");
+            }
+
+            // either destination ist derived from source or vice versa, or both types have to have the same supertype
+            if(sourceType.getParent() == null && destinationType.getParent() == null)
+                throw new FxContentTypeConversionException("ex.content.typeconversion.derivedTypeError");
+            if(!sourceType.isDerivedFrom(destinationTypeId) && !destinationType.isDerivedFrom(sourceTypeId)) {
+                // check for an indirect parentage (same supertype)
+                FxType o1 = null;
+                FxType o2 = null;
+                for(FxType t = sourceType; t != null; t = t.getParent())
+                    o1 = t;
+                for(FxType t = destinationType; t != null; t = t.getParent())
+                    o2 = t;
+
+                if(o1.getId() != o2.getId())
+                    throw new FxContentTypeConversionException("ex.content.typeconversion.derivedTypeError");
+            }
+
+            /**
+             * Inner class to convert a List of FxAssignments to a Map of ids / XPaths w/o leading types
+             * The method omits systeminternal fields
+             */
+            final class XPathConverter {
+                Map<Long, String> convertNoTypesAsMap(List<FxAssignment> ass, boolean propAssignsOnly) {
+                    final Map<Long, String> out = new HashMap<Long, String>(ass.size());
+                    for (FxAssignment a : ass) {
+                        if (!a.isSystemInternal()) {
+                            if (propAssignsOnly && a instanceof FxPropertyAssignment)
+                                out.put(a.getId(), XPathElement.stripType(a.getXPath()));
+                            else if(!propAssignsOnly)
+                                out.put(a.getId(), XPathElement.stripType(a.getXPath()));
+                        }
+                    }
+                    return out;
+                }
+            }
+
+            final List<FxAssignment> sourceTypeAssignments = sourceType.getAllAssignments();
+            final List<FxAssignment> destinationTypeAssignments = destinationType.getAllAssignments();
+            final XPathConverter xPathConverter = new XPathConverter();
+            // determine outcome for lossy / lossless conversion - evaluation is based on XPaths (their names, resp)
+            final Map<Long, String> sourcePathsMap = xPathConverter.convertNoTypesAsMap(sourceTypeAssignments, true);
+            final Map<Long, String> destPathsMap = xPathConverter.convertNoTypesAsMap(destinationTypeAssignments, true);
+            final List<String> sourcePaths = new ArrayList<String>(sourcePathsMap.values());
+            Collections.sort(sourcePaths);
+            final List<String> destPaths = new ArrayList<String>(destPathsMap.values());
+            Collections.sort(destPaths);
+
+            final FxDiff diff = new FxDiff(sourcePaths, destPaths);
+            final List<FxDiff.Difference> diffList = diff.diff();
+            // a map which holds assignment ids / xpaths which will be removed from the source content (lossy conversion)
+            final Map<Long, String> sourceRemoveMap = new HashMap<Long, String>(2);
+            if (diffList.size() > 0) { // check if the differences have an impact on !lossy conversion
+                for (FxDiff.Difference d : diffList) {
+                    if (d.getDeletedStart() == d.getDeletedEnd() && d.getAddedStart() == d.getAddedEnd()) {
+                        throw new FxContentTypeConversionException("ex.content.typeconversion.xpathsDiffError");
+                    } else if (d.getDeletedStart() == d.getDeletedEnd() && d.getAddedStart() != d.getAddedEnd()) {
+                        // lossy conversion check
+                        if(!allowLossy) {
+                            throw new FxContentTypeConversionException("ex.content.typeconversion.sourceLossError");
+                        } else { // add to list of xPaths / assignments t.b. removed
+                            // sourcePathsMap.
+                            final String removePath = sourcePaths.get(d.getDeletedStart());
+                            for(Long removeId : sourcePathsMap.keySet()) {
+                                if(sourcePathsMap.get(removeId).equals(removePath))
+                                    sourceRemoveMap.put(removeId, removePath);
+                            }
+                        }
+                    } // else: del start != del end (del end is neg.) and add start & end the same, then dest has an add. prop
+                }
+            }
+
+            // a map for all sourceTypePropAssignmentIds vs. destinationTypePropAssignmentIds,
+            // where null values mean that the destination assignments do not exist (data will be lost)
+            final Map<Long, Long> assignmentMap = new HashMap<Long, Long>(5);
+            // a List containing all destination assignments which are in the flatstore
+            final List<Long> flatStoreAssignments = new ArrayList<Long>(5);
+            final List<Long> nonFlatSourceAssignments = new ArrayList<Long>(5);
+            final List<Long> nonFlatDestinationAssignments = new ArrayList<Long>(5);
+
+            for(FxAssignment a : sourceTypeAssignments) {
+                if(a.isSystemInternal() || a instanceof FxGroupAssignment)
+                    continue;
+
+                final String sourceXPath = XPathElement.stripType(a.getXPath());
+                // get the corresponding assignment from the destination type
+                final String destinationXPath =  destinationType.getName() + sourceXPath;
+                if(destPaths.contains(sourceXPath) && CacheAdmin.getEnvironment().assignmentExists(destinationXPath)) {
+                    // if the dest assignment exists, test that the datatype is the same as for the source
+                    final FxAssignment destAssignment = CacheAdmin.getEnvironment().getAssignment(destinationXPath);
+                    if(a instanceof FxPropertyAssignment) {
+                        if(!(destAssignment instanceof FxPropertyAssignment))
+                            throw new FxContentTypeConversionException("ex.content.typeconversion.destneqprop", destAssignment.getId());
+
+                        final FxDataType sourceDT = ((FxPropertyAssignment)a).getProperty().getDataType();
+                        final FxDataType destDT = ((FxPropertyAssignment)destAssignment).getProperty().getDataType();
+                        if(sourceDT != destDT)
+                            throw new FxContentTypeConversionException("ex.content.typeconversion.destDTneqsourceDT", destinationXPath);
+                    }
+                    if(((FxPropertyAssignment)destAssignment).isFlatStorageEntry()) {
+                        flatStoreAssignments.add(destAssignment.getId());
+                    } else {
+                        nonFlatDestinationAssignments.add(destAssignment.getId());
+                    }
+                    if(!((FxPropertyAssignment)a).isFlatStorageEntry()) {
+                        nonFlatSourceAssignments.add(a.getId());
+                    }
+                    assignmentMap.put(a.getId(), destAssignment.getId());
+                } else {
+                    assignmentMap.put(a.getId(), null);
+                }
+            }
+
+            // check if we have any mandatory assignments in our destination type and if we've got data for it
+            for(FxAssignment a : destinationTypeAssignments) {
+                if(a instanceof FxPropertyAssignment && !a.isSystemInternal()) {
+                    final int minMult = a.getMultiplicity().getMin();
+                    if(minMult > 0) {
+                        final String destXPath = XPathElement.stripType(a.getXPath());
+                        if(content.getData(destXPath).size() < minMult)
+                            throw new FxContentTypeConversionException("ex.content.typeconversion.destMultiplicityError", destXPath, a.getId(), minMult);
+                    }
+                }
+            }
+
+            // passed all tests, start moving the content after retrieving all versions
+            con = Database.getDbConnection();
+            ContentStorage storage = StorageManager.getContentStorage(contentPK.getStorageMode());
+            FxEnvironment env = CacheAdmin.getEnvironment();
+            storage.convertContentType(con, contentPK, sourceTypeId, destinationTypeId, allVersions, assignmentMap, flatStoreAssignments,
+                    nonFlatSourceAssignments, nonFlatDestinationAssignments, sourcePathsMap, destPathsMap, sourceRemoveMap, env);
+
+        } catch (FxApplicationException e) {
+            EJBUtils.rollback(ctx);
+            throw new FxContentTypeConversionException("ex.content.typeconversion.error", e.getMessage(), contentPK, sourceTypeId, destinationType.getId());
+        } catch(SQLException e) {
+            EJBUtils.rollback(ctx);
+            LOG.error(e);
+        } finally { // flush cache after update was completed
+            Database.closeObjects(ContentEngineBean.class, con, null);
+            CacheAdmin.expireCachedContent(contentPK.getId());
         }
     }
 }

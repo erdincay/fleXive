@@ -369,4 +369,20 @@ public interface ContentEngine {
      * @throws FxLockException on errors
      */
     List<FxLock> getLocks(FxLockType lockType, long userId, long typeId, String resource) throws FxLockException;
+
+
+    /**
+     * Convert (all versions of) a given content to another content type
+     * The destinationType must either be derived from the given content's type or must be the parent of the given
+     * content's type
+     *
+     * @param contentPK the given FxPK of the content to be converted (any version of the content)
+     * @param destinationTypeId the id of the type to which the content instance should be converted
+     * @param allowLossy set to true for a "lossy" conversion, ie. fields which do not exist in the destination type will be skipped
+     * @param allVersions set to true to convert ALL versions of the given content (PK), false otherwise
+     * @throws FxApplicationException on errors
+     *
+     * @since 3.1
+     */
+    void convertContentType(FxPK contentPK, long destinationTypeId, boolean allowLossy, boolean allVersions) throws FxApplicationException;
 }

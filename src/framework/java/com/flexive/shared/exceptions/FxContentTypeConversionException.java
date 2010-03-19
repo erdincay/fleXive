@@ -34,9 +34,13 @@ package com.flexive.shared.exceptions;
 import org.apache.commons.logging.Log;
 
 /**
+ * An exception class specifically used f. content type conversion
+ *
  * @author Christopher Blasnik (c.blasnik@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public class FxContentTypeConversionException extends FxApplicationException {
+    private static final long serialVersionUID = 6589005115868426502L;
+
     public FxContentTypeConversionException(Log log, String messageKey, Object... args) {
         super(log, messageKey, args);
     }

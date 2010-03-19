@@ -49,7 +49,8 @@ import org.testng.annotations.Test;
 @Test(groups = {"bootstrap", "ejb", "configuration", "content", "structure", "jsf", "security",
         "workflow", "streaming", "scripting", "valuetest", "cache", "image", "tree", "relation",
         "search", "tutorial", "benchmark", "environment", "mandator", "importexport", "uniquemode",
-        "roles", "reference", "binary", "flatstorage", "briefcase", "cmis", "lock", "sequencer", "resultset"})
+        "roles", "reference", "binary", "flatstorage", "briefcase", "cmis", "lock", "sequencer", "resultset",
+        "contentconversion"})
 public class ContainerBootstrap {
 
     /**
