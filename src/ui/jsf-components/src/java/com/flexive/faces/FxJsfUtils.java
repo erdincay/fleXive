@@ -50,6 +50,7 @@ import com.flexive.shared.scripting.FxScriptInfo;
 import com.flexive.shared.security.Account;
 import com.flexive.shared.structure.FxSelectList;
 import com.flexive.shared.structure.FxSelectListItem;
+import com.flexive.shared.value.FxBoolean;
 import com.flexive.war.FxRequest;
 import com.flexive.war.servlet.ThumbnailServlet;
 import com.flexive.war.filter.FxResponseWrapper;
@@ -172,6 +173,10 @@ public class FxJsfUtils {
                     + "\" alt=\""
                     + FxFormatUtils.escapeForJavaScript(binary.getBestTranslation().getName())
                     + "\" class=\"" + Thumbnail.CSS_CLASS + "\"/>";
+        } else if (value instanceof FxBoolean) {
+            return MessageBean.getInstance().getMessage(
+                    "shared.result.value." + ((FxBoolean) value).getBestTranslation()
+            );
         } else if (value instanceof FxValue) {
             return FxValueRendererFactory.getInstance().format((FxValue) value);
         } else if (value instanceof FxPK) {

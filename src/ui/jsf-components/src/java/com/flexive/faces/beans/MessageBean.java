@@ -261,6 +261,7 @@ public class MessageBean extends HashMap {
             resourceBundles.addAll(FxSharedUtils.addMessageResources(BUNDLE_APPLICATIONS));
             resourceBundles.addAll(FxSharedUtils.addMessageResources(BUNDLE_PLUGINS));
             resourceBundles.addAll(FxSharedUtils.addMessageResources(BUNDLE_EXCEPTIONS));
+            resourceBundles.addAll(FxSharedUtils.addMessageResources(FxSharedUtils.SHARED_BUNDLE));
         } catch (IOException e) {
             LOG.error("Failed to initialize plugin message resources: " + e.getMessage(), e);
         } finally {

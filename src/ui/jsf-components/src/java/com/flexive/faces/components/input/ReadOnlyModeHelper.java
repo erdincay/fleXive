@@ -49,6 +49,7 @@ import javax.faces.component.html.HtmlGraphicImage;
 import javax.faces.component.html.HtmlOutputLink;
 import javax.faces.component.html.HtmlOutputText;
 import java.io.IOException;
+import javax.faces.component.html.HtmlSelectBooleanCheckbox;
 
 /**
  * Renders a FxValue component in read-only mode.
@@ -106,10 +107,11 @@ class ReadOnlyModeHelper extends RenderHelper {
 
         final FxLanguage outputLanguage = FxContext.getUserTicket().getLanguage();
         final String langInputId = inputId + (language != null ? "_" + language.getId() : "");
+        String formattedValue = null;
         if (component.getValueFormatter() != null &&
-                component.getValueFormatter().format(value, value.getBestTranslation(language), outputLanguage) !=null) {
+                (formattedValue = component.getValueFormatter().format(value, value.getBestTranslation(language), outputLanguage)) != null) {
             // use custom formatter if retuned value != null, otherwise use default
-            addOutputComponent(component.getValueFormatter().format(value, value.getBestTranslation(language), outputLanguage), language, langInputId);
+            addOutputComponent(formattedValue, language, langInputId);
         } else if (value instanceof FxBinary && !value.isEmpty()) {
             // render preview image
             renderPreviewImage(language, langInputId);
@@ -125,6 +127,12 @@ class ReadOnlyModeHelper extends RenderHelper {
             ));
             // render reference label
             addOutputComponent(FxValueRendererFactory.getInstance(outputLanguage).format(value, language), language, langInputId);
+        } else if (value instanceof FxBoolean && !value.isTranslationEmpty(language)) {
+            // render disabled checkbox
+            final HtmlSelectBooleanCheckbox checkbox = (HtmlSelectBooleanCheckbox) FxJsfUtils.addChildComponent(parent, HtmlSelectBooleanCheckbox.COMPONENT_TYPE);
+            checkbox.setDisabled(true);
+            checkbox.setReadonly(true);
+            checkbox.setValue(value.getTranslation(language));
         } else if (component.isFilter() && !(useHTMLEditor || value instanceof FxHTML)) {
             // escape HTML code and generate <br/> tags for newlines
             addOutputComponent(FxFormatUtils.escapeForJavaScript(FxValueRendererFactory.getInstance(outputLanguage).format(value, language), true, true), language, langInputId);
