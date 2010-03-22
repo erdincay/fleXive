@@ -33,8 +33,8 @@ package com.flexive.tests.embedded.persistence;
 
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
-import com.flexive.shared.content.FxPK;
 import com.flexive.shared.content.FxContent;
+import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxLogoutFailedException;
 import com.flexive.shared.interfaces.ContentEngine;
@@ -44,20 +44,21 @@ import com.flexive.shared.structure.FxDataType;
 import com.flexive.shared.structure.FxMultiplicity;
 import com.flexive.shared.structure.FxPropertyEdit;
 import com.flexive.shared.structure.FxTypeEdit;
-import com.flexive.shared.value.FxString;
 import com.flexive.shared.value.FxReference;
+import com.flexive.shared.value.FxString;
 import com.flexive.shared.value.ReferencedContent;
-import static com.flexive.tests.embedded.FxTestUtils.login;
-import static com.flexive.tests.embedded.FxTestUtils.logout;
 import com.flexive.tests.embedded.TestUsers;
 import org.apache.commons.lang.RandomStringUtils;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.testng.Assert;
+
+import static com.flexive.tests.embedded.FxTestUtils.login;
+import static com.flexive.tests.embedded.FxTestUtils.logout;
 
 /**
- * Tests for references contents
+ * Tests for referenced contents
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
@@ -90,12 +91,13 @@ public class ReferenceTest {
         typeA = type.save(teA);
         typeB = type.save(teB);
 
-        FxPropertyEdit peA = FxPropertyEdit.createNew("REFB", new FxString(true, "Reference to B"),
+        FxPropertyEdit peRefB = FxPropertyEdit.createNew("REFB", new FxString(true, "Reference to B"),
                 new FxString(true, "Hint"), FxMultiplicity.MULT_0_1,
                 CacheAdmin.getEnvironment().getDefaultACL(ACLCategory.STRUCTURE),
-                FxDataType.Reference);
-        peA.setReferencedType(CacheAdmin.getEnvironment().getType(typeB));
-        EJBLookup.getAssignmentEngine().createProperty(typeA, peA, "/");
+                FxDataType.Reference).setAutoUniquePropertyName(true);
+        peRefB.setReferencedType(CacheAdmin.getEnvironment().getType(typeB));
+        EJBLookup.getAssignmentEngine().createProperty(typeA, peRefB, "/"); //A -> B
+        EJBLookup.getAssignmentEngine().createProperty(typeB, peRefB, "/"); //B -> B
     }
 
     /**
@@ -125,13 +127,78 @@ public class ReferenceTest {
 
         FxContent coA = co.initialize(typeA);
         coA.setValue("/REFB", new FxReference(false, new ReferencedContent(pkB.getId())));
-        co.save(coA);
+        FxPK pkA = co.save(coA);
         try {
             co.remove(pkB);
             Assert.fail("Removing referenced content B should not be possible! Probably no referential integrity checks in place!");
         } catch (FxApplicationException e) {
             //expected
         }
+        //cleanup
+        co.remove(pkA);
+        co.remove(pkB);
+    }
+
+    /**
+     * B references B
+     * Reference should be removeable (instance)
+     *
+     * @throws FxApplicationException on errors
+     */
+    private void selfReferenceInstanceRemove() throws FxApplicationException {
+        FxContent coB = co.initialize(typeB);
+        coB = co.load(co.save(coB));
+        coB.setValue("/REFB", new FxReference(false, new ReferencedContent(coB.getId())));
+        coB = co.load(co.save(coB));
+        try {
+            co.remove(coB.getPk());
+        } catch (FxApplicationException e) {
+            Assert.fail("Removing self-referenced content B should be possible!", e);
+        }
+    }
+
+    /**
+     * B references B
+     * Reference should be removeable (all for type)
+     *
+     * @throws FxApplicationException on errors
+     */
+    private void selfReferenceTypeRemove() throws FxApplicationException {
+        FxContent coB = co.initialize(typeB);
+        coB = co.load(co.save(coB));
+        coB.setValue("/REFB", new FxReference(false, new ReferencedContent(coB.getId())));
+        co.save(coB);
+        try {
+            co.removeForType(typeB);
+        } catch (FxApplicationException e) {
+            Assert.fail("Removing self-referenced content B should be possible!", e);
+        }
+    }
+
+    /**
+     * Test self referenced removal for hierarchical storage
+     *
+     * @throws FxApplicationException on errors
+     */
+    @Test
+    public void selfReferenceHierarchicalRemove() throws FxApplicationException {
+        type.unflatten(typeA);
+        type.unflatten(typeB);
+        selfReferenceInstanceRemove();
+        selfReferenceTypeRemove();
+    }
+
+    /**
+     * Test self referenced removal for flat storage
+     *
+     * @throws FxApplicationException on errors
+     */
+    @Test
+    public void selfReferenceFlatstorageRemove() throws FxApplicationException {
+        type.flatten(typeA);
+        type.flatten(typeB);
+        selfReferenceInstanceRemove();
+        selfReferenceTypeRemove();
     }
 
     /**
@@ -146,13 +213,16 @@ public class ReferenceTest {
 
         FxContent coA = co.initialize(typeA);
         coA.setValue("/REFB", new FxReference(false, new ReferencedContent(pkB.getId())));
-        co.save(coA);
+        FxPK pkA = co.save(coA);
         try {
             co.removeForType(typeB);
             Assert.fail("Removing referenced type B should not be possible! Probably no referential integrity checks in place!");
         } catch (FxApplicationException e) {
             //expected
         }
+        //cleanup
+        co.remove(pkA);
+        co.remove(pkB);
     }
 
     /**
@@ -170,11 +240,14 @@ public class ReferenceTest {
 
         FxContent coA = co.initialize(typeA);
         coA.setValue("/REFB", new FxReference(false, new ReferencedContent(pkB.getId())));
-        co.save(coA);
+        FxPK pkA = co.save(coA);
         try {
             co.removeVersion(pkB);
         } catch (FxApplicationException e) {
-            Assert.fail("Removing first version of B should be possible! Error: "+e.getMessage(), e);
+            Assert.fail("Removing first version of B should be possible! Error: " + e.getMessage(), e);
         }
+        //cleanup
+        co.remove(pkA);
+        co.remove(pkB);
     }
 }

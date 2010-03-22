@@ -991,6 +991,12 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
             ps.setLong(1, type.getId());
             ps.executeUpdate();
             ps.close();
+             sql.setLength(0);
+            sql.append("UPDATE ").append(TBL_STRUCT_PROPERTIES).append(" SET REFTYPE=NULL WHERE REFTYPE=?");
+            ps = con.prepareStatement(sql.toString());
+            ps.setLong(1, type.getId());
+            ps.executeUpdate();
+            ps.close();
             sql.setLength(0);
             sql.append("DELETE FROM ").append(TBL_STRUCT_TYPES).append(" WHERE ID=?");
             ps = con.prepareStatement(sql.toString());

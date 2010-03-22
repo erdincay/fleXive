@@ -192,7 +192,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     protected static final String CONTENT_REFERENCE_CAPTION = "SELECT FTEXT1024 FROM " + TBL_CONTENT_DATA + " WHERE ID=? AND VER=? AND TPROP=?";
     protected static final String CONTENT_REFERENCE_BYTYPE = "SELECT COUNT(DISTINCT d.ID) FROM " + TBL_CONTENT + " c, " +
             TBL_CONTENT_DATA + " d, " + TBL_STRUCT_ASSIGNMENTS + " a, " + TBL_STRUCT_PROPERTIES + " p " +
-            "WHERE c.TDEF=a.TYPEDEF AND a.APROPERTY=p.ID AND p.REFTYPE=? AND d.ASSIGN=a.ID AND d.TPROP=p.ID";
+            "WHERE c.TDEF=a.TYPEDEF AND a.APROPERTY=p.ID AND p.REFTYPE=? AND d.ASSIGN=a.ID AND d.TPROP=p.ID AND d.FREF<>d.ID";
 
     //getContentVersionInfo() statement
     protected static final String CONTENT_VER_INFO = "SELECT ID, VER, MAX_VER, LIVE_VER, CREATED_BY, CREATED_AT, MODIFIED_BY, MODIFIED_AT, STEP FROM " + TBL_CONTENT + " WHERE ID=?";
@@ -2481,7 +2481,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                     ps = con.prepareStatement(CONTENT_REFERENCE_BYTYPE);
                     ps.setLong(1, typeId);
                 } else {
-                    ps = con.prepareStatement("SELECT COUNT(*) FROM " + TBL_CONTENT_DATA + " WHERE FREF=?");
+                    ps = con.prepareStatement("SELECT COUNT(*) FROM " + TBL_CONTENT_DATA + " WHERE FREF=? AND ID<>FREF");
                     ps.setLong(1, id);
                 }
                 ResultSet rs = ps.executeQuery();
