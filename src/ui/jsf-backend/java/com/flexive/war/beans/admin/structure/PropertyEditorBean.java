@@ -41,6 +41,7 @@ import com.flexive.faces.messages.FxFacesMsgInfo;
 import com.flexive.shared.*;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
+import com.flexive.shared.exceptions.FxRuntimeException;
 import com.flexive.shared.scripting.FxScriptInfo;
 import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.security.Role;
@@ -474,8 +475,8 @@ public class PropertyEditorBean implements ActionBean, Serializable {
             return FxLanguage.DEFAULT;
         } else {
             try {
-                return EJBLookup.getLanguageEngine().load(assignment.getDefaultLanguage());
-            } catch (FxApplicationException e) {
+                return CacheAdmin.getEnvironment().getLanguage(assignment.getDefaultLanguage());
+            } catch (FxRuntimeException e) {
                 new FxFacesMsgErr(e).addToContext();
                 return FxLanguage.DEFAULT;
             }
@@ -952,7 +953,7 @@ public class PropertyEditorBean implements ActionBean, Serializable {
             if (assignment.getDefaultLanguage() == FxLanguage.SYSTEM_ID) {
                 originalLanguageSystemLanguage = true;
             } else {
-                setDefaultLanguage(EJBLookup.getLanguageEngine().load(assignment.getDefaultLanguage()));
+                setDefaultLanguage(CacheAdmin.getEnvironment().getLanguage(assignment.getDefaultLanguage()));
             }
         } catch (Throwable t) {
             LOG.error("Failed to initialize the Editing process: " + t.getMessage(), t);

@@ -350,7 +350,7 @@ public class SelectBean implements Serializable {
         // we need to rerender the languageList if it is empty or the language hase changed since the last rendering
         if (languages == null || !ticket.getLanguage().equals(languageListLanguage)) {
             try {
-                List<FxLanguage> list = EJBLookup.getLanguageEngine().loadAvailable();
+                List<FxLanguage> list = CacheAdmin.getEnvironment().getLanguages();
                 List<SelectItem> result = new ArrayList<SelectItem>(list.size());
                 for (FxLanguage item : list) {
                     String label = item.getLabel().getBestTranslation(ticket);
@@ -370,8 +370,8 @@ public class SelectBean implements Serializable {
     public List<SelectItem> getLanguagesById() {
         if (languagesById == null) {
             try {
-                languagesById = FxJsfUtils.asSelectListWithLabel(EJBLookup.getLanguageEngine().loadAvailable());
-            } catch (FxApplicationException e) {
+                languagesById = FxJsfUtils.asSelectListWithLabel(CacheAdmin.getEnvironment().getLanguages());
+            } catch (Exception e) {
                 new FxFacesMsgErr(e).addToContext();
                 languagesById = new ArrayList<SelectItem>(0);
             }

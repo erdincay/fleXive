@@ -205,8 +205,8 @@ public class FxExceptionMessage implements Serializable {
     public String getLocalizedMessage(String localeIso) {
         FxLanguage locale;
         try {
-            locale = EJBLookup.getLanguageEngine().load(localeIso);
-        } catch (FxApplicationException e) {
+            locale = CacheAdmin.getEnvironment().getLanguage(localeIso);
+        } catch (FxRuntimeException e) {
             String msg = "[Invalid locale code (" + localeIso + ") requested for " + key + "!]";
             LOG.warn(msg);
             return msg;

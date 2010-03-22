@@ -36,8 +36,6 @@ import com.flexive.shared.EJBLookup;
 import com.flexive.shared.XPathElement;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxConversionException;
-import com.flexive.shared.exceptions.FxInvalidParameterException;
-import com.flexive.shared.interfaces.LanguageEngine;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.FxString;
@@ -68,7 +66,7 @@ public class FxPropertyAssignmentConverter extends FxAssignmentConverter {
         writer.addAttribute("property", p.getName());
         writer.addAttribute("acl", prop.getACL().getName());
         try {
-            writer.addAttribute("defaultLanguage", ConversionEngine.getLang(EJBLookup.getLanguageEngine(), prop.getDefaultLanguage()));
+            writer.addAttribute("defaultLanguage", ConversionEngine.getLang(CacheAdmin.getEnvironment(), prop.getDefaultLanguage()));
         } catch (FxApplicationException e) {
             throw e.asRuntimeException();
         }
@@ -118,10 +116,9 @@ public class FxPropertyAssignmentConverter extends FxAssignmentConverter {
         String property = reader.getAttribute(ConversionEngine.KEY_PROPERTY);
         FxEnvironment env = CacheAdmin.getEnvironment();
         ACL acl = env.getACL(reader.getAttribute("acl"));
-        LanguageEngine lang = EJBLookup.getLanguageEngine();
         long defaultLanguage;
         try {
-            defaultLanguage = ConversionEngine.getLang(lang, reader.getAttribute("defaultLanguage"));
+            defaultLanguage = ConversionEngine.getLang(CacheAdmin.getEnvironment(), reader.getAttribute("defaultLanguage"));
         } catch (FxApplicationException e) {
             throw e.asRuntimeException();
         }

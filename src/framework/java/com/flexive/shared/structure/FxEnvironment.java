@@ -31,6 +31,7 @@
  ***************************************************************/
 package com.flexive.shared.structure;
 
+import com.flexive.shared.FxLanguage;
 import com.flexive.shared.scripting.FxScriptInfo;
 import com.flexive.shared.scripting.FxScriptMapping;
 import com.flexive.shared.security.ACL;
@@ -660,4 +661,35 @@ public interface FxEnvironment extends Serializable {
      * @return Mappings for the requested storage, type and leveĺ
      */
     List<FxFlatStorageMapping> getFlatStorageMappings(String storage, long typeId, int level);
+
+    /**
+     * Return all activated languages.
+     *
+     * @return                          a list with all available language objects
+     *
+     * @since   3.1
+     */
+    List<FxLanguage> getLanguages();
+
+    /**
+     * Return the language for the given ID. If the language is not found or disabled, a FxRuntimeException
+     * is thrown.
+     *
+     * @param id    the language ID
+     * @return      the language
+     *
+     * @since   3.1
+     */
+    FxLanguage getLanguage(long id);
+
+    /**
+     * Return the language for the given ISO code. If the language is not found or disabled, a FxRuntimeException
+     * is thrown.
+     *
+     * @param isoCode the language ISO code
+     * @return      the language
+     *
+     * @since   3.1
+     */
+    FxLanguage getLanguage(String isoCode);
 }

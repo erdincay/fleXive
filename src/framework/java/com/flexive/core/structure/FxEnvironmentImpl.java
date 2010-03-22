@@ -33,6 +33,7 @@ package com.flexive.core.structure;
 
 import com.flexive.shared.FxArrayUtils;
 import com.flexive.shared.FxContext;
+import com.flexive.shared.FxLanguage;
 import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.XPathElement;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
@@ -50,6 +51,7 @@ import com.flexive.shared.workflow.Route;
 import com.flexive.shared.workflow.Step;
 import com.flexive.shared.workflow.StepDefinition;
 import com.flexive.shared.workflow.Workflow;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 import java.util.*;
@@ -85,6 +87,8 @@ public final class FxEnvironmentImpl implements FxEnvironment {
     private List<Step> steps;
     private List<FxScriptInfo> scripts;
     private List<FxScriptMapping> scriptMappings;
+    private List<FxLanguage> languages;
+    private FxLanguage systemInternalLanguage;
     private long timeStamp = 0;
     //storage-type-level-mapping
     private Map<String, Map<Long, Map<Integer, List<FxFlatStorageMapping>>>> flatMappings;
@@ -122,6 +126,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
             this.scriptMappings = new ArrayList<FxScriptMapping>(e.scriptMappings);
         }
         this.selectLists = new ArrayList<FxSelectList>(e.selectLists);
+        this.languages = new ArrayList<FxLanguage>(e.languages);
         this.timeStamp = e.timeStamp;
         this.resolveFlatMappings();
     }
@@ -385,6 +390,16 @@ public final class FxEnvironmentImpl implements FxEnvironment {
      */
     public void setScriptMappings(List<FxScriptMapping> scriptMappings) {
         this.scriptMappings = scriptMappings;
+    }
+
+    /**
+     * Set the available languages.
+     *
+     * @param languages the available languages
+     * @since 3.1
+     */
+    public void setLanguages(List<FxLanguage> languages) {
+        this.languages = Collections.unmodifiableList(languages);
     }
 
     /**
@@ -1343,5 +1358,40 @@ public final class FxEnvironmentImpl implements FxEnvironment {
         } catch (Exception e) {
             return EMPTY_FLAT_MAPPINGS;
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public FxLanguage getLanguage(long id) {
+        if (id == FxLanguage.SYSTEM_ID) {
+            return FxLanguage.SYSTEM;
+        }
+        for (FxLanguage language : languages) {
+            if (language.getId() == id) {
+                return language;
+            }
+        }
+        throw new FxNotFoundException("ex.language.notFound.id", id).asRuntimeException();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public FxLanguage getLanguage(String isoCode) {
+        isoCode = isoCode.toLowerCase();
+        for (FxLanguage language : languages) {
+            if (language.getIso2digit().equals(isoCode)) {
+                return language;
+            }
+        }
+        throw new FxNotFoundException("ex.language.notFound.iso", isoCode).asRuntimeException();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public List<FxLanguage> getLanguages() {
+        return languages;   // already unmodifiable
     }
 }

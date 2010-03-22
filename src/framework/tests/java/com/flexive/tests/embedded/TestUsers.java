@@ -139,7 +139,7 @@ public class TestUsers {
                 // ignore, since setup probably wasn't complete
             }
             e.printStackTrace();
-            throw new RuntimeException("Failed to initialize test users: " + e.getMessage());
+            throw new RuntimeException("Failed to initialize test users: " + e.getMessage(), e);
         } finally {
             FxContext.get().stopRunAsSystem();
         }

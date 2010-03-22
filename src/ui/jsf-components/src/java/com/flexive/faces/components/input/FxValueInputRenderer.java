@@ -31,11 +31,10 @@
  ***************************************************************/
 package com.flexive.faces.components.input;
 
-import com.flexive.shared.EJBLookup;
+import com.flexive.shared.CacheAdmin;
 import static com.flexive.shared.FxFormatUtils.toDate;
 import static com.flexive.shared.FxFormatUtils.toDateTime;
 import com.flexive.shared.FxLanguage;
-import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxUpdateException;
 import com.flexive.shared.security.ACL;
@@ -299,13 +298,7 @@ public class FxValueInputRenderer extends Renderer {
      * @return all available languages.
      */
     protected static List<FxLanguage> getLanguages() {
-        List<FxLanguage> languages;
-        try {
-            languages = EJBLookup.getLanguageEngine().loadAvailable(true);
-        } catch (FxApplicationException e) {
-            throw e.asRuntimeException();
-        }
-        return languages;
+        return CacheAdmin.getEnvironment().getLanguages();
     }
 
     /**

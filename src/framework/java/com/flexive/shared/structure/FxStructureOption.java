@@ -244,7 +244,7 @@ public class FxStructureOption implements Serializable {
      * @return an unknown option
      */
     private static FxStructureOption getUnknownOption(String key) {
-        return new FxStructureOption(key, true, false, "");
+        return new FxStructureOption(key, true, false, false, "");
     }
 
     /**

@@ -38,7 +38,6 @@ import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxConversionException;
 import com.flexive.shared.exceptions.FxStreamException;
-import com.flexive.shared.interfaces.LanguageEngine;
 import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.structure.FxSelectList;
 import com.flexive.shared.structure.FxSelectListItem;
@@ -207,13 +206,13 @@ public class FxValueConverter implements Converter {
         FxValue value = (FxValue) o;
         writer.addAttribute("t", value.getClass().getSimpleName());
         writer.addAttribute("ml", String.valueOf(value.isMultiLanguage()));
-        final LanguageEngine le = EJBLookup.getLanguageEngine();
+        final FxEnvironment env = CacheAdmin.getEnvironment();
         try {
-            writer.addAttribute("dl", ConversionEngine.getLang(le, value.getDefaultLanguage()));
+            writer.addAttribute("dl", ConversionEngine.getLang(env, value.getDefaultLanguage()));
             if (!value.isEmpty()) {
                 for (long lang : value.getTranslatedLanguages()) {
                     writer.startNode("d");
-                    writer.addAttribute("l", ConversionEngine.getLang(le, lang));
+                    writer.addAttribute("l", ConversionEngine.getLang(env, lang));
                     if (value instanceof FxBinary) {
                         marshalBinary(writer, ctx, (FxBinary) value, lang);
                     } else if (value instanceof FxSelectOne) { //format LISTNAME.ITEMNAME
@@ -244,11 +243,11 @@ public class FxValueConverter implements Converter {
     @SuppressWarnings("unchecked")
     public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext ctx) {
         final FxValue v;
-        final LanguageEngine le = EJBLookup.getLanguageEngine();
+        final FxEnvironment env = CacheAdmin.getEnvironment();
         final String type = reader.getAttribute("t");
         try {
             boolean multiLanguage = Boolean.valueOf(reader.getAttribute("ml"));
-            long defaultLanguage = ConversionEngine.getLang(le, reader.getAttribute("dl"));
+            long defaultLanguage = ConversionEngine.getLang(env, reader.getAttribute("dl"));
             if ("FxBoolean".equals(type)) {
                 v = new FxBoolean(defaultLanguage);
             } else {
@@ -262,7 +261,7 @@ public class FxValueConverter implements Converter {
                 reader.moveDown();
 
                 if ("d".equals(reader.getNodeName())) {
-                    final long lang = ConversionEngine.getLang(le, reader.getAttribute("l"));
+                    final long lang = ConversionEngine.getLang(env, reader.getAttribute("l"));
                     Object value;
                     if (v instanceof FxBinary) {
                         value = unmarshalBinary(reader, ctx, v);

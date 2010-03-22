@@ -36,13 +36,13 @@ import com.flexive.shared.content.FxGroupData;
 import com.flexive.shared.content.FxPropertyData;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxConversionException;
-import com.flexive.shared.interfaces.LanguageEngine;
 import com.flexive.shared.structure.FxGroupAssignment;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.value.FxValue;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.ACLAssignment;
+import com.flexive.shared.structure.FxEnvironment;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.converters.UnmarshallingContext;
 import com.thoughtworks.xstream.io.HierarchicalStreamReader;
@@ -99,13 +99,13 @@ public class ConversionEngine {
     /**
      * Get language code
      *
-     * @param le   reference to the LanguageEngine
+     * @param environment   the environment
      * @param code language code as long
      * @return 2-digit ISO language code
      * @throws FxApplicationException on errors
      */
-    static String getLang(LanguageEngine le, long code) throws FxApplicationException {
-        return code == 0 ? SYS_LANG : le.load(code).getIso2digit();
+    static String getLang(FxEnvironment environment, long code) throws FxApplicationException {
+        return code == 0 ? SYS_LANG : environment.getLanguage(code).getIso2digit();
     }
 
     /**
@@ -116,8 +116,8 @@ public class ConversionEngine {
      * @return language code as long
      * @throws FxApplicationException on errors
      */
-    static long getLang(LanguageEngine le, String code) throws FxApplicationException {
-        return SYS_LANG.equals(code) ? 0 : le.load(code).getId();
+    static long getLang(FxEnvironment environment, String code) throws FxApplicationException {
+        return SYS_LANG.equals(code) ? 0 : environment.getLanguage(code).getId();
     }
 
     /**

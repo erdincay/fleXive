@@ -305,11 +305,7 @@ public class MapBean implements Serializable {
                         return null;
                     }
                     final long id = key instanceof Long ? (Long) key : Long.valueOf(key.toString());
-                    try {
-                        return EJBLookup.getLanguageEngine().load(id);
-                    } catch (FxApplicationException e) {
-                        throw e.asRuntimeException();
-                    }
+                    return CacheAdmin.getEnvironment().getLanguage(id);
                 }
             }, true);
         }

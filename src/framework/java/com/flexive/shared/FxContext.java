@@ -662,18 +662,14 @@ public class FxContext implements Serializable {
             if (si.ticket.isGuest()) {
                 try {
                     if (last == null)
-                        si.ticket.setLanguage(EJBLookup.getLanguageEngine().load(request.getLocale().getLanguage()));
+                        si.ticket.setLanguage(CacheAdmin.getEnvironment().getLanguage(request.getLocale().getLanguage()));
                     else
                         si.ticket.setLanguage(last.getLanguage());
-                } catch (FxInvalidLanguageException e) {
+                } catch (FxRuntimeException e) {
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("Failed to use request locale from browser - unknown language: " + request.getLocale().getLanguage());
                     }
-                } catch (FxApplicationException e) {
-                    if (LOG.isInfoEnabled()) {
-                        LOG.info("Failed to use request locale from browser: " + e.getMessage(), e);
-                    }
-                }
+                } 
             }
         } else {
             // For static content like images we use the last user ticket stored in the session

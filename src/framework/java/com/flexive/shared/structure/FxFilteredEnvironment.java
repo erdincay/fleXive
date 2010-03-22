@@ -32,6 +32,7 @@
 package com.flexive.shared.structure;
 
 import com.flexive.shared.FxContext;
+import com.flexive.shared.FxLanguage;
 import com.flexive.shared.exceptions.FxNoAccessException;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.scripting.FxScriptInfo;
@@ -630,4 +631,26 @@ public final class FxFilteredEnvironment implements FxEnvironment {
     public List<FxFlatStorageMapping> getFlatStorageMappings(String storage, long typeId, int level) {
         return environment.getFlatStorageMappings(storage, typeId, level);
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public FxLanguage getLanguage(long id) {
+        return environment.getLanguage(id);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public FxLanguage getLanguage(String isoCode) {
+        return environment.getLanguage(isoCode);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public List<FxLanguage> getLanguages() {
+        return environment.getLanguages();
+    }
+
 }

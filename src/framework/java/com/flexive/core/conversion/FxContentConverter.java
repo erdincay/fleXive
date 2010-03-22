@@ -33,7 +33,6 @@ package com.flexive.core.conversion;
 
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
-import com.flexive.shared.FxSharedUtils;
 import static com.flexive.shared.FxSharedUtils.*;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxGroupData;
@@ -66,39 +65,35 @@ public class FxContentConverter implements Converter {
         FxContent co = ((FxContent) o).copy(); //remove/compacts will be performed -> so work on a copy
         FxEnvironment env = CacheAdmin.getEnvironment();
         ctx.put("pk", co.getPk());
-        try {
-            writer.addAttribute("pk", co.getPk().toString());
-            writer.addAttribute("type", env.getType(co.getTypeId()).getName());
-            writer.addAttribute("mandator", env.getMandator(co.getMandatorId()).getName());
-            writer.addAttribute("acls", StringUtils.join(
-                    getSelectableObjectNameList(
-                            filterSelectableObjectsById(env.getACLs(), co.getAclIds())
-                    ), ','
-            ));
-            final Step step = env.getStep(co.getStepId());
-            final String stepName = env.getStepDefinition(step.getStepDefinitionId()).getName();
-            final String wfName = env.getWorkflow(step.getWorkflowId()).getName();
-            writer.addAttribute("workflow", wfName);
-            writer.addAttribute("step", stepName);
-            writer.addAttribute("mainLanguage", EJBLookup.getLanguageEngine().load(co.getMainLanguage()).getIso2digit());
-            writer.addAttribute("relation", String.valueOf(co.isRelation()));
-            if (co.isRelation()) {
-                writer.startNode("relation");
-                writer.startNode("source");
-                writer.addAttribute("pk", co.getRelatedSource().toString());
-                writer.addAttribute("pos", String.valueOf(co.getRelatedSourcePosition()));
-                writer.endNode();
-                writer.startNode("destination");
-                writer.addAttribute("pk", co.getRelatedDestination().toString());
-                writer.addAttribute("pos", String.valueOf(co.getRelatedDestinationPosition()));
-                writer.endNode();
-                writer.endNode();
-            }
-            ctx.convertAnother(co.getLifeCycleInfo());
-            ctx.convertAnother(co.getRootGroup());
-        } catch (FxApplicationException e) {
-            throw e.asRuntimeException();
+        writer.addAttribute("pk", co.getPk().toString());
+        writer.addAttribute("type", env.getType(co.getTypeId()).getName());
+        writer.addAttribute("mandator", env.getMandator(co.getMandatorId()).getName());
+        writer.addAttribute("acls", StringUtils.join(
+                getSelectableObjectNameList(
+                        filterSelectableObjectsById(env.getACLs(), co.getAclIds())
+                ), ','
+        ));
+        final Step step = env.getStep(co.getStepId());
+        final String stepName = env.getStepDefinition(step.getStepDefinitionId()).getName();
+        final String wfName = env.getWorkflow(step.getWorkflowId()).getName();
+        writer.addAttribute("workflow", wfName);
+        writer.addAttribute("step", stepName);
+        writer.addAttribute("mainLanguage", CacheAdmin.getEnvironment().getLanguage(co.getMainLanguage()).getIso2digit());
+        writer.addAttribute("relation", String.valueOf(co.isRelation()));
+        if (co.isRelation()) {
+            writer.startNode("relation");
+            writer.startNode("source");
+            writer.addAttribute("pk", co.getRelatedSource().toString());
+            writer.addAttribute("pos", String.valueOf(co.getRelatedSourcePosition()));
+            writer.endNode();
+            writer.startNode("destination");
+            writer.addAttribute("pk", co.getRelatedDestination().toString());
+            writer.addAttribute("pos", String.valueOf(co.getRelatedDestinationPosition()));
+            writer.endNode();
+            writer.endNode();
         }
+        ctx.convertAnother(co.getLifeCycleInfo());
+        ctx.convertAnother(co.getRootGroup());
     }
 
     /**
@@ -112,7 +107,7 @@ public class FxContentConverter implements Converter {
                     env.getMandator(reader.getAttribute("mandator")).getId(),
                     -1,
                     env.getStep(env.getWorkflow(reader.getAttribute("workflow")).getId(), reader.getAttribute("step")).getId(),
-                    EJBLookup.getLanguageEngine().load(reader.getAttribute("mainLanguage")).getId());
+                    CacheAdmin.getEnvironment().getLanguage(reader.getAttribute("mainLanguage")).getId());
             co.setAclIds(
                     getSelectableObjectIdList(
                         filterSelectableObjectsByName(

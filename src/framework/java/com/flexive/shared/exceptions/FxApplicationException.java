@@ -31,7 +31,7 @@
  ***************************************************************/
 package com.flexive.shared.exceptions;
 
-import com.flexive.shared.EJBLookup;
+import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxLanguage;
 import com.flexive.shared.LogLevel;
@@ -365,11 +365,7 @@ public class FxApplicationException extends Exception implements FxLocalizedExce
      * {@inheritDoc}
      */
     public String getMessage(long localeId) {
-        try {
-            return message.getLocalizedMessage(localeId) + evaluateCause(EJBLookup.getLanguageEngine().load(localeId));
-        } catch (FxApplicationException e) {
-            throw e.asRuntimeException();
-        }
+        return message.getLocalizedMessage(localeId) + evaluateCause(CacheAdmin.getEnvironment().getLanguage(localeId));
     }
 
     /**

@@ -31,6 +31,7 @@
  ***************************************************************/
 package com.flexive.shared.media;
 
+import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxLanguage;
 import com.flexive.shared.content.FxPK;
@@ -406,7 +407,7 @@ public class FxMediaSelector implements Serializable {
      *          on errors
      */
     public FxLanguage getLanguage() throws FxApplicationException {
-        return StringUtils.isNotBlank(lang) ? EJBLookup.getLanguageEngine().load(lang) : null;
+        return StringUtils.isNotBlank(lang) ? CacheAdmin.getEnvironment().getLanguage(lang) : null;
     }
 
     /**

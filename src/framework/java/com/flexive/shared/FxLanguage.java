@@ -61,6 +61,11 @@ public class FxLanguage extends AbstractSelectableObjectWithName implements Seri
      * default language object
      */
     public static final FxLanguage DEFAULT = new FxLanguage(DEFAULT_ID, DEFAULT_ISO, new FxString("English"), true);
+    /**
+     * System language object.
+     * @since 3.1
+     */
+    public static final FxLanguage SYSTEM = new FxLanguage(SYSTEM_ID, DEFAULT_ISO, new FxString("System"), true);
 
     private long id;
     private String iso2digit;

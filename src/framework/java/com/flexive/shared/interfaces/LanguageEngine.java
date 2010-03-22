@@ -86,7 +86,7 @@ public interface LanguageEngine {
      * Loads all available languages.
      *
      * @param excludeSystemLanguage if true the system language is exluded from the result
-     * @return a array with all available language objects
+     * @return a list with all available language objects
      * @throws FxApplicationException if the function fails
      */
     public List<FxLanguage> loadAvailable(boolean excludeSystemLanguage) throws FxApplicationException;

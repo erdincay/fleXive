@@ -37,6 +37,8 @@ import com.flexive.shared.FxLanguage;
 import static com.flexive.shared.EJBLookup.getLanguageEngine;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.faces.messages.FxFacesMsgErr;
+import com.flexive.shared.CacheAdmin;
+import com.google.common.collect.Lists;
 
 import java.util.List;
 import java.io.Serializable;
@@ -65,13 +67,13 @@ public class LanguagesBean implements Serializable {
 
     public List<FxLanguage> getAvailable() throws FxApplicationException {
         if (available == null)
-            available = getLanguageEngine().loadAvailable(true);
+            available = Lists.newArrayList(CacheAdmin.getEnvironment().getLanguages());
         return available;
     }
 
     public List<FxLanguage> getDisabled() throws FxApplicationException {
         if (disabled == null)
-            disabled = getLanguageEngine().loadDisabled();
+            disabled = Lists.newArrayList(getLanguageEngine().loadDisabled());
         return disabled;
     }
 

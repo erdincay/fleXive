@@ -31,6 +31,7 @@
  ***************************************************************/
 package com.flexive.tests.embedded;
 
+import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxLanguage;
 import com.flexive.shared.exceptions.FxApplicationException;
@@ -113,6 +114,9 @@ public class LanguageTest {
         assertEquals(testLanguages.size(), 2);
         assertEquals(testLanguages.get(0).getIso2digit(), "it");
 
+        // check environment
+        assertEquals(CacheAdmin.getEnvironment().getLanguages(), testLanguages);
+
         // reset the db langs
         le.setAvailable(origLanguages, true);
         testLanguages.add(new FxLanguage("fr"));
@@ -132,6 +136,7 @@ public class LanguageTest {
 
         // reset the db langs
         le.setAvailable(origLanguages, true);
+        assertEquals(CacheAdmin.getEnvironment().getLanguages(), origLanguages);
     }
 
     /**

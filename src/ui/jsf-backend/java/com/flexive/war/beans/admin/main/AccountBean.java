@@ -574,7 +574,7 @@ public class AccountBean implements Serializable {
             // load configuration parameters
             final long inputLanguageId = EJBLookup.getConfigurationEngine().get(SystemParameters.USER_DEFAULTINPUTLANGUAGE);
             if (inputLanguageId != -1) {
-                this.defaultInputLanguage = EJBLookup.getLanguageEngine().load(inputLanguageId);
+                this.defaultInputLanguage = CacheAdmin.getEnvironment().getLanguage(inputLanguageId);
             }
             return "userEdit";
         } catch (Throwable t) {

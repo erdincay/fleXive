@@ -79,9 +79,6 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
     javax.ejb.SessionContext ctx;
 
     @EJB
-    LanguageEngine language;
-
-    @EJB
     SequencerEngineLocal seq;
 
     @EJB
@@ -136,8 +133,8 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
             throw new FxInvalidParameterException("STEP", "ex.content.noSuitableStep", type.getName(), type.getWorkflow().getName());
         long lang = prefLang;
         try {
-            language.load(lang);
-        } catch (FxInvalidLanguageException e) {
+            environment.getLanguage(lang);
+        } catch (FxRuntimeException e) {
             lang = ticket.getLanguage().getId();
         }
         FxPK sourcePK = null, destinationPK = null;

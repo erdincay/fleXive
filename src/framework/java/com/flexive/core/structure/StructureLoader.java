@@ -124,6 +124,7 @@ public final class StructureLoader {
             environment.setAssignments(loader.loadAssignments(con, environment));
             environment.setScripts(loader.loadScripts(con));
             environment.setScriptMappings(loader.loadScriptMapping(con, environment));
+            environment.setLanguages(EJBLookup.getLanguageEngine().loadAvailable(true));
             environment.resolveDependencies();
             environment.updateTimeStamp();
             CacheAdmin.environmentChanged();
@@ -145,9 +146,7 @@ public final class StructureLoader {
                 }
                 CacheAdmin.expireCachedContents();
             }
-        } catch (FxNotFoundException e) {
-            throw new FxLoadException(LOG, e);
-        } catch (FxInvalidParameterException e) {
+        } catch (FxApplicationException e) {
             throw new FxLoadException(LOG, e);
         } finally {
             if (_con == null)

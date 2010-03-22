@@ -4,12 +4,9 @@ import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.content.FxContent;
-import com.flexive.shared.configuration.Parameter;
-import com.flexive.shared.configuration.SystemParameterPaths;
-import com.flexive.shared.configuration.ParameterScope;
-import com.flexive.shared.configuration.parameters.ParameterFactory;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.faces.FxJsfUtils;
+import com.flexive.shared.CacheAdmin;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -143,9 +140,9 @@ public class PageBean implements Serializable {
         if (StringUtils.isNotBlank(languageCode)) {
             try {
                 FxContext.get().getTicket().setLanguage(
-                        EJBLookup.getLanguageEngine().load(languageCode)
+                        CacheAdmin.getEnvironment().getLanguage(languageCode)
                 );
-            } catch (FxApplicationException e) {
+            } catch (Exception e) {
                 if (LOG.isWarnEnabled()) {
                     LOG.warn("Failed to set request locale from URL: " + e.getMessage(), e);
                 }
