@@ -210,7 +210,7 @@ public class FxTypeEdit extends FxType implements Serializable {
      * @return FxTypeEdit instance for creating a new FxType
      */
     public static FxTypeEdit createNew(String name, FxString label, ACL acl, FxType parent) {
-        List<FxTypeOption> options = parent == null ? FxTypeOption.getEmptyTypeOptionList(2) : parent.getPassedOnOptions();
+        List<FxTypeOption> options = parent == null ? FxTypeOption.getEmptyTypeOptionList(2) : parent.getInheritedOptions();
         if(parent != null && parent.isMimeTypeSet()) {
             options = removeMimeTypes(options);
         }
@@ -934,7 +934,7 @@ public class FxTypeEdit extends FxType implements Serializable {
     }
 
     /**
-     * Set an overridable option (not passed on to derived types if it doesn't exist)
+     * Set an overridable option (not inherited by derived types if it doesn't exist)
      *
      * @param key   option key
      * @param value value of the option
@@ -944,7 +944,7 @@ public class FxTypeEdit extends FxType implements Serializable {
     public FxTypeEdit setOption(String key, String value) throws FxInvalidParameterException {
         if (FxTypeOption.hasOption(key, options)) {
             FxTypeOption o = this.getOption(key);
-            setOption(key, value, o.isOverrideable(), o.isPassedOn());
+            setOption(key, value, o.isOverrideable(), o.isInherited());
         } else {
             setOption(key, value, true, false);
             this.changed = true;
@@ -958,31 +958,31 @@ public class FxTypeEdit extends FxType implements Serializable {
      * @param key   option key
      * @param value value of the option
      * @param overridable may derived types override the option?
-     * @param passedOn will the option be passed on to derived types?
+     * @param isInherited will the option be inherited by derived types?
      * @return the assignment itself, useful for chained calls
      * @throws FxInvalidParameterException if the property does not allow overriding
      */
-    public FxTypeEdit setOption(String key, String value, boolean overridable, boolean passedOn) throws FxInvalidParameterException {
+    public FxTypeEdit setOption(String key, String value, boolean overridable, boolean isInherited) throws FxInvalidParameterException {
         if(FxTypeOption.OPTION_MIMETYPE.equals(key)) {
             if(!mayAssignMimeType())
                 throw new FxInvalidParameterException(key, "ex.structure.type.mimetype.err");
         }
         final FxTypeOption pOpt = getOption(key);
         if (parent != null) {
-            if (pOpt.isSet() && !pOpt.isOverrideable() && pOpt.isPassedOn()) {
-                // check if it was passed on from the supertype
+            if (pOpt.isSet() && !pOpt.isOverrideable() && pOpt.isInherited()) {
+                // check if it was inherited from the supertype
                 final FxTypeOption parentOption = parent.getOption(pOpt.getKey());
-                if(parentOption.isSet() && parentOption.isPassedOn() && (!parentOption.equals(pOpt) || !pOpt.getValue().equals(value)))
+                if(parentOption.isSet() && parentOption.isInherited() && (!parentOption.equals(pOpt) || !pOpt.getValue().equals(value)))
                     throw new FxInvalidParameterException(key, "ex.structure.type.override.forbidden", key, parent.getName());
             }
         }
-        FxTypeOption.setOption(options, key, overridable, passedOn, value);
+        FxTypeOption.setOption(options, key, overridable, isInherited, value);
         this.changed = true;
         return this;
     }
 
     /**
-     * Set an overridable boolean option (not passed on to derived types if it doesn't exist)
+     * Set an overridable boolean option (not inherited by derived types if it doesn't exist)
      *
      * @param key   option key
      * @param value value of the option
@@ -992,7 +992,7 @@ public class FxTypeEdit extends FxType implements Serializable {
     public FxTypeEdit setOption(String key, boolean value) throws FxInvalidParameterException {
         if (FxTypeOption.hasOption(key, options)) {
             FxTypeOption o = this.getOption(key);
-            setOption(key, value, o.isOverrideable(), o.isPassedOn());
+            setOption(key, value, o.isOverrideable(), o.isInherited());
         } else {
             setOption(key, value, true, false);
             this.changed = true;
@@ -1006,22 +1006,22 @@ public class FxTypeEdit extends FxType implements Serializable {
      * @param key   option key
      * @param value value of the option
      * @param overridable may derived types override the option?
-     * @param passedOn is the option passed on to derived types?
+     * @param isInherited is the option inherited by derived types?
      * @return the assignemnt itself, useful for chained calls
      * @throws FxInvalidParameterException if the property does not allow overriding
      */
-    public FxTypeEdit setOption(String key, boolean value, boolean overridable, boolean passedOn) throws FxInvalidParameterException {
+    public FxTypeEdit setOption(String key, boolean value, boolean overridable, boolean isInherited) throws FxInvalidParameterException {
 
         final FxTypeOption pOpt = getOption(key);
         if (parent != null) {
-            if (pOpt.isSet() && !pOpt.isOverrideable() && pOpt.isPassedOn()) {
-                // check if it was passed on from the supertype
+            if (pOpt.isSet() && !pOpt.isOverrideable() && pOpt.isInherited()) {
+                // check if it was inherited from the supertype
                 final FxTypeOption parentOption = parent.getOption(pOpt.getKey());
-                if(parentOption.isSet() && parentOption.isPassedOn() && (!parentOption.equals(pOpt) || !pOpt.isValueTrue() == value))
+                if(parentOption.isSet() && parentOption.isInherited() && (!parentOption.equals(pOpt) || !pOpt.isValueTrue() == value))
                     throw new FxInvalidParameterException(key, "ex.structure.type.override.forbidden", key, parent.getName());
             }
         }
-        FxTypeOption.setOption(options, key, overridable, passedOn, value);
+        FxTypeOption.setOption(options, key, overridable, isInherited, value);
         this.changed = true;
         return this;
     }

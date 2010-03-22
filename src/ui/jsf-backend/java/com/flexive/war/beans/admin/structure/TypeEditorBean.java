@@ -113,7 +113,7 @@ public class TypeEditorBean implements Serializable {
     private String typeOptionValue = null;
     private String typeOptionKey = null;
     private boolean typeOptionOverridable = true; // def. value
-    private boolean typeOptionPassedOn = false; // def. value
+    private boolean typeOptionIsInherited = false; // def. value
 
     public String getParseRequestParameters() {
         try {
@@ -315,7 +315,7 @@ public class TypeEditorBean implements Serializable {
                 //add options (check if they may be set)
                 List<FxTypeOption> opts = optionWrapper.asFxTypeOptionList(optionWrapper.getTypeOptions());
                 for (FxTypeOption o : opts) {
-                    type.setOption(o.getKey(), o.getValue(), o.isOverrideable(), o.isPassedOn());
+                    type.setOption(o.getKey(), o.getValue(), o.isOverrideable(), o.isInherited());
                 }
 
                 //delete current options
@@ -326,7 +326,7 @@ public class TypeEditorBean implements Serializable {
 
                 //add options
                 for (FxTypeOption o : opts) {
-                    type.setOption(o.getKey(), o.getValue(), o.isOverrideable(), o.isPassedOn());
+                    type.setOption(o.getKey(), o.getValue(), o.isOverrideable(), o.isInherited());
                 }
 
                 type.setHistoryAge(historyAgeToMilis());
@@ -969,11 +969,11 @@ public class TypeEditorBean implements Serializable {
      */
     public void addTypeOption() {
         try {
-            optionWrapper.addTypeOption(optionWrapper.getTypeOptions(), typeOptionKey, typeOptionValue, typeOptionOverridable, typeOptionPassedOn);
+            optionWrapper.addTypeOption(optionWrapper.getTypeOptions(), typeOptionKey, typeOptionValue, typeOptionOverridable, typeOptionIsInherited);
             typeOptionKey = null;
             typeOptionValue = null;
             typeOptionOverridable = true;
-            typeOptionPassedOn = false;
+            typeOptionIsInherited = false;
         }
         catch (Throwable t) {
             new FxFacesMsgErr(t).addToContext();
@@ -1033,12 +1033,12 @@ public class TypeEditorBean implements Serializable {
         this.typeOptionOverridable = typeOptionOverridable;
     }
 
-    public boolean isTypeOptionPassedOn() {
-        return typeOptionPassedOn;
+    public boolean isTypeOptionIsInherited() {
+        return typeOptionIsInherited;
     }
 
-    public void setTypeOptionPassedOn(boolean typeOptionPassedOn) {
-        this.typeOptionPassedOn = typeOptionPassedOn;
+    public void setTypeOptionIsInherited(boolean typeOptionIsInherited) {
+        this.typeOptionIsInherited = typeOptionIsInherited;
     }
 
     public OptionWrapper getOptionWrapperParent() {

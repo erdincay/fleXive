@@ -383,7 +383,7 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
         Map<Long, List<FxTypeOption>> result = new HashMap<Long, List<FxTypeOption>>(50);
         try {
             stmt = con.createStatement();
-            final ResultSet rs = stmt.executeQuery("SELECT " + idColumn + ",OPTKEY,MAYOVERRIDE,PASSEDON,OPTVALUE FROM " + table);
+            final ResultSet rs = stmt.executeQuery("SELECT " + idColumn + ",OPTKEY,MAYOVERRIDE,ISINHERITED,OPTVALUE FROM " + table);
             while (rs.next()) {
                 final long id = rs.getLong(1);
                 if (!result.containsKey(id)) {

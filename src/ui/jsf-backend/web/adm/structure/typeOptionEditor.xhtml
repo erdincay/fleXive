@@ -69,8 +69,8 @@
                                 <th class="tblHeader" field="overridable" dataType="html" align="left">
                                     #{fxMessageBean['TypeEditor.table.overridable']}
                                 </th>
-                                <th class="tblHeader" field="passedOn" dataType="html" align="left">
-                                    #{fxMessageBean['TypeEditor.table.passedOn']}
+                                <th class="tblHeader" field="isInherited" dataType="html" align="left">
+                                    #{fxMessageBean['TypeEditor.table.isInherited']}
                                 </th>
                             </tr>
                         </thead>
@@ -88,7 +88,7 @@
                                         <h:selectBooleanCheckbox value="#{option.overridable}" style="color:gray" disabled="true"/>
                                     </td>
                                     <td align="left">
-                                        <h:selectBooleanCheckbox value="#{option.passedOn}" style="color:gray" disabled="true"/>
+                                        <h:selectBooleanCheckbox value="#{option.isInherited}" style="color:gray" disabled="true"/>
                                     </td>
                                 </h:panelGroup>
                             </tr>
@@ -114,7 +114,7 @@
                             #{fxMessageBean['TypeEditor.table.overridable']}
                         </th>
                         <th class="tblHeader" field="overridable" dataType="html" align="left">
-                            #{fxMessageBean['TypeEditor.table.passedOn']}
+                            #{fxMessageBean['TypeEditor.table.isInherited']}
                         </th>
                         <ui:fragment rendered="#{typeEditorBean.editMode}">
                             <th class="tblHeader" dataType="html" align="left">
@@ -135,10 +135,10 @@
                                 </td>
                                 <td align="left">
                                     <h:selectBooleanCheckbox value="#{option.overridable}" onchange="submit();" style="color:green"
-                                                             disabled="#{not typeEditorBean.editMode or (typeEditorBean.editMode and option.passedOn)}"/>
+                                                             disabled="#{not typeEditorBean.editMode or (typeEditorBean.editMode and option.isInherited)}"/>
                                 </td>
                                 <td align="left">
-                                    <h:selectBooleanCheckbox value="#{option.passedOn}" onchange="submit();" style="color:green"
+                                    <h:selectBooleanCheckbox value="#{option.isInherited}" onchange="submit();" style="color:green"
                                                              disabled="#{not typeEditorBean.editMode}"/>
                                 </td>
                             </h:panelGroup>
@@ -152,10 +152,10 @@
                                 </td>
                                 <td align="left">
                                     <h:selectBooleanCheckbox value="#{option.overridable}" onchange="submit();" style="color:red"
-                                                             disabled="#{not typeEditorBean.editMode or (typeEditorBean.editMode and option.passedOn)}"/>
+                                                             disabled="#{not typeEditorBean.editMode or (typeEditorBean.editMode and option.isInherited)}"/>
                                 </td>
                                 <td align="left">
-                                    <h:selectBooleanCheckbox value="#{option.passedOn}" onchange="submit();" style="color:red"
+                                    <h:selectBooleanCheckbox value="#{option.isInherited}" onchange="submit();" style="color:red"
                                                              disabled="#{not typeEditorBean.editMode}"/>
                                 </td>
                             </h:panelGroup>
@@ -185,7 +185,7 @@
                                 <h:selectBooleanCheckbox value="#{typeEditorBean.typeOptionOverridable}"/>
                             </td>
                             <td align="left">
-                                <h:selectBooleanCheckbox value="#{typeEditorBean.typeOptionPassedOn}"/>
+                                <h:selectBooleanCheckbox value="#{typeEditorBean.typeOptionIsInherited}"/>
                             </td>
                             <td align="left">
                                 <adm:commandButton labelKey="TypeEditor.table.button.add" location="content"

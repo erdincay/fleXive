@@ -806,15 +806,15 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
             boolean optionsChanged = updateTypeOptions(con, type, orgType);
             // check if any type options must be propagated to derived types
             if(type.getDerivedTypes().size() > 0) {
-                final List<FxTypeOption> passOn = new ArrayList<FxTypeOption>(type.getOptions().size());
+                final List<FxTypeOption> inherit = new ArrayList<FxTypeOption>(type.getOptions().size());
                 for(FxTypeOption o : type.getOptions()) {
-                    if(o.isPassedOn()) {
-                        passOn.add(o);
+                    if(o.isInherited()) {
+                        inherit.add(o);
                     }
                 }
-                if(passOn.size() > 0) {
+                if(inherit.size() > 0) {
                     for(FxType derived : type.getDerivedTypes()) {
-                        updateDerivedTypeOptions(con, derived, passOn);
+                        updateDerivedTypeOptions(con, derived, inherit);
                     }
                 }
             }
@@ -1167,14 +1167,14 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
             if (options == null || options.size() == 0)
                 return;
             //                                                        1                 2      3           4        5
-            ps = con.prepareStatement("INSERT INTO " + table + " (" + primaryColumn + ",OPTKEY,MAYOVERRIDE,PASSEDON,OPTVALUE)VALUES(?,?,?,?,?)");
+            ps = con.prepareStatement("INSERT INTO " + table + " (" + primaryColumn + ",OPTKEY,MAYOVERRIDE,ISINHERITED,OPTVALUE)VALUES(?,?,?,?,?)");
             for (FxTypeOption option : options) {
                 ps.setLong(1, id);
                 if (StringUtils.isEmpty(option.getKey()))
                     throw new FxInvalidParameterException("key", "ex.structure.option.key.empty", option.getValue());
                 ps.setString(2, option.getKey());
                 ps.setBoolean(3, option.isOverrideable());
-                ps.setBoolean(4, option.isPassedOn());
+                ps.setBoolean(4, option.isInherited());
                 ps.setString(5, option.getValue());
                 ps.addBatch();
             }
@@ -1223,17 +1223,17 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
      * 
      * @param con an open and valid connection
      * @param derived the derived type t.b. updated
-     * @param passedOnOpts the options of the source type t.b. passed on to the derived type
+     * @param inheritedOpts the options of the source type t.b. inherited by the derived type
      * @return true if any changes had to be made
      * @throws SQLException on errors
      * @throws FxInvalidParameterException on errors
      */
-    private boolean updateDerivedTypeOptions(Connection con, FxType derived, List<FxTypeOption> passedOnOpts)
+    private boolean updateDerivedTypeOptions(Connection con, FxType derived, List<FxTypeOption> inheritedOpts)
         throws SQLException, FxInvalidParameterException {
         boolean changed = false;
         final List<FxTypeOption> current = derived.getOptions();
-        final List<FxTypeOption> newOpts = new ArrayList<FxTypeOption>(passedOnOpts.size());
-        for(FxTypeOption o : passedOnOpts) {
+        final List<FxTypeOption> newOpts = new ArrayList<FxTypeOption>(inheritedOpts.size());
+        for(FxTypeOption o : inheritedOpts) {
             if(!FxTypeOption.hasOption(o.getKey(), current))
                 newOpts.add(o);
         }
@@ -1261,7 +1261,7 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
         List<FxTypeOption> result = new ArrayList<FxTypeOption>(4);
         try {
             //                                1      2           3        4
-            ps = con.prepareStatement("SELECT OPTKEY,MAYOVERRIDE,PASSEDON,OPTVALUE FROM " + table + " WHERE " + idColumn + "=?");
+            ps = con.prepareStatement("SELECT OPTKEY,MAYOVERRIDE,ISINHERITED,OPTVALUE FROM " + table + " WHERE " + idColumn + "=?");
             ps.setLong(1, typeId);
             final ResultSet rs = ps.executeQuery();
             while (rs.next()) {

@@ -41,7 +41,7 @@ import com.flexive.shared.scripting.groovy.GroovyContentBuilder
 import com.flexive.shared.scripting.groovy.GroovyTypeBuilder
 import com.flexive.shared.structure.*
 import com.flexive.shared.value.FxString
-import com.flexive.tests.embedded.TestUsers
+
 import static org.testng.Assert.assertEquals
 import org.testng.annotations.AfterClass
 import org.testng.annotations.BeforeClass
@@ -1683,9 +1683,9 @@ class GroovyTypeBuilderTest {
             Assert.assertEquals(t.getOption("OPT_B").getValue(), "ASDF")
             // default settings
             Assert.assertTrue(t.getOption("OPT_A").isOverrideable())
-            Assert.assertFalse(t.getOption("OPT_A").isPassedOn())
+            Assert.assertFalse(t.getOption("OPT_A").isInherited())
             Assert.assertTrue(t.getOption("OPT_B").isOverrideable())
-            Assert.assertFalse(t.getOption("OPT_B").isPassedOn())
+            Assert.assertFalse(t.getOption("OPT_B").isInherited())
             
         } finally {
             removeTestType()

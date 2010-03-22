@@ -40,7 +40,7 @@ import java.util.List;
 
 /**
  * A class to handle structure options for FxTypes. Extends FxStructureOption
- * Overridable structure options: the flag has no impact whatsoever if the options is not passed on to a derived type
+ * Overridable structure options: the flag has no impact whatsoever if the options are not inherited by a derived type
  *
  * @author Christopher Blasnik (c.blasnik@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
@@ -48,17 +48,17 @@ public class FxTypeOption extends FxStructureOption {
 
     public final static String OPTION_MIMETYPE = "MIMETYPE";
 
-    private boolean passedOn;
+    private boolean isInherited;
     private static final long serialVersionUID = 7709132491233564725L;
 
-    public FxTypeOption(String key, boolean overridable, boolean passedOn, boolean set, String value) {
+    public FxTypeOption(String key, boolean overridable, boolean isInherited, boolean set, String value) {
         super(key, overridable, set, value);
-        this.passedOn = passedOn;
+        this.isInherited = isInherited;
     }
 
     public FxTypeOption(String key, boolean overrideable, boolean set, String value) {
         super(key, overrideable, set, value);
-        this.passedOn = false;
+        this.isInherited = false;
     }
 
     /**
@@ -68,16 +68,16 @@ public class FxTypeOption extends FxStructureOption {
      */
     public FxTypeOption(FxTypeOption o) {
         super(o);
-        this.passedOn = o.isPassedOn();
+        this.isInherited = o.isInherited();
     }
 
     /**
-     * Type option only: Will the option be passed on to derived types?
+     * Type option only: Will the option be inherited by derived types?
      *
-     * @return option passed on (to derived types)?
+     * @return option inherited by derived types)?
      */
-    public boolean isPassedOn() {
-        return passedOn;
+    public boolean isInherited() {
+        return isInherited;
     }
 
     /**
@@ -138,10 +138,10 @@ public class FxTypeOption extends FxStructureOption {
      * @param options      list of existing options
      * @param key          option key
      * @param overrideable should the option be overrideable?
-     * @param passedOn     FxTypes only: should the option be passed on to derived types?
+     * @param isInherited     FxTypes only: should the option be inherited by derived types?
      * @param value        String value to set for the option
      */
-    public static void setOption(List<FxTypeOption> options, String key, boolean overrideable, boolean passedOn, String value) {
+    public static void setOption(List<FxTypeOption> options, String key, boolean overrideable, boolean isInherited, String value) {
         synchronized (options) {
             if (StringUtils.isEmpty(key))
                 throw new FxInvalidParameterException("key", "ex.structure.option.key.empty", value).asRuntimeException();
@@ -150,10 +150,10 @@ public class FxTypeOption extends FxStructureOption {
                 opt.overrideable = overrideable;
                 opt.value = value;
                 opt.set = true;
-                opt.passedOn = passedOn;
+                opt.isInherited = isInherited;
                 return;
             }
-            FxTypeOption opt = new FxTypeOption(key, overrideable, passedOn, true, value);
+            FxTypeOption opt = new FxTypeOption(key, overrideable, isInherited, true, value);
             options.add(opt);
         }
     }
@@ -194,11 +194,11 @@ public class FxTypeOption extends FxStructureOption {
      * @param options      list of existing options
      * @param key          option key
      * @param overrideable should the option be overrideable?
-     * @param passedOn     FxTypes only: should the option be passed on to derived types?
+     * @param isInherited     FxTypes only: should the option be inherited by derived types?
      * @param value        boolean value to set for the option (will be converted internally to a String)
      */
-    public static void setOption(List<FxTypeOption> options, String key, boolean overrideable, boolean passedOn, boolean value) {
-        setOption(options, key, overrideable, passedOn, value ? VALUE_TRUE : VALUE_FALSE);
+    public static void setOption(List<FxTypeOption> options, String key, boolean overrideable, boolean isInherited, boolean value) {
+        setOption(options, key, overrideable, isInherited, value ? VALUE_TRUE : VALUE_FALSE);
     }
 
     /**
@@ -263,7 +263,7 @@ public class FxTypeOption extends FxStructureOption {
             return true;
         final FxTypeOption other = (FxTypeOption) o;
         return !(!this.key.equals(other.key) || !this.value.equals(other.value)
-                || this.overrideable != other.overrideable || this.passedOn != other.passedOn
+                || this.overrideable != other.overrideable || this.isInherited != other.isInherited
                 || this.set != other.set);
     }
 
@@ -275,7 +275,7 @@ public class FxTypeOption extends FxStructureOption {
         int result;
         result = (key != null ? key.hashCode() : 0);
         result = 31 * result + (overrideable ? 1 : 0);
-        result = 31 * result + (passedOn ? 1 : 0);
+        result = 31 * result + (isInherited ? 1 : 0);
         result = 31 * result + (value != null ? value.hashCode() : 0);
         result = 31 * result + (set ? 1 : 0);
         return result;

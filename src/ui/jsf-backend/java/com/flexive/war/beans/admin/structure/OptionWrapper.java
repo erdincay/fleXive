@@ -210,7 +210,7 @@ public class OptionWrapper implements Serializable {
     public void setTypeOption(String key, boolean value) {
         WrappedTypeOption o = new WrappedTypeOption(key, value, true, false, true);
             if (!typeOptions.contains(o))
-                typeOptions.add(new WrappedTypeOption(key, value, o.isOverridable(), o.isPassedOn(), true));
+                typeOptions.add(new WrappedTypeOption(key, value, o.isOverridable(), o.getIsInherited(), true));
             else {
                 List<WrappedTypeOption> options = getAllForType(typeOptions, key);
                 for (WrappedTypeOption wo : options)
@@ -229,7 +229,7 @@ public class OptionWrapper implements Serializable {
     public void setTypeOption(String key, String value) {
         WrappedTypeOption o = new WrappedTypeOption(key, value, false, true);
             if (!typeOptions.contains(o))
-                typeOptions.add(new WrappedTypeOption(key, value, o.isOverridable(), o.isPassedOn(), true));
+                typeOptions.add(new WrappedTypeOption(key, value, o.isOverridable(), o.getIsInherited(), true));
             else {
                 List<WrappedTypeOption> options = getAllForType(typeOptions, key);
                 for (WrappedTypeOption wo : options)
@@ -350,13 +350,13 @@ public class OptionWrapper implements Serializable {
      * @param key           the option key
      * @param value         the option value
      * @param overridable   the option overrideable flag
-     * @param passedOn      the option passedOn flag (FxTypes)
+     * @param isInherited      the option isInherited flag (FxTypes)
      * @throws FxInvalidParameterException    on errors (empty key or empty value)
      */
-    public void addTypeOption(List<WrappedTypeOption> options, String key, String value, boolean overridable, boolean passedOn) throws FxInvalidParameterException {
+    public void addTypeOption(List<WrappedTypeOption> options, String key, String value, boolean overridable, boolean isInherited) throws FxInvalidParameterException {
         if (!StringUtils.isEmpty(key)) {
             if (!StringUtils.isEmpty(value)) {
-                options.add(new WrappedTypeOption(key, value, overridable, passedOn, true));
+                options.add(new WrappedTypeOption(key, value, overridable, isInherited, true));
             } else
                 throw new FxInvalidParameterException("value", "ex.optionWrapper.noValue");
         } else
@@ -686,44 +686,45 @@ public class OptionWrapper implements Serializable {
      */
     public static class WrappedTypeOption extends WrappedOption {
 
-        private boolean passedOn = false;
+        private boolean isInherited = false;
+        private static final long serialVersionUID = -9043623785138219106L;
 
         // constructors
-        public WrappedTypeOption(String key, String value, boolean overridable, boolean passedOn, boolean set) {
+        public WrappedTypeOption(String key, String value, boolean overridable, boolean isInherited, boolean set) {
             super(key, value, overridable, set);
-            this.passedOn = passedOn;
+            this.isInherited = isInherited;
         }
 
-        public WrappedTypeOption(String key, boolean value, boolean overridable, boolean passedOn, boolean set) {
+        public WrappedTypeOption(String key, boolean value, boolean overridable, boolean isInherited, boolean set) {
             super(key, value, overridable, set);
-            this.passedOn = passedOn;
+            this.isInherited = isInherited;
         }
 
         public WrappedTypeOption(String key, String value, boolean overridable, boolean set) {
             super(key, value, overridable, set);
-            this.passedOn = false;
+            this.isInherited = false;
         }
 
         public WrappedTypeOption(String key, boolean value, boolean overridable, boolean set) {
             super(key, value, overridable, set);
-            this.passedOn = false;
+            this.isInherited = false;
         }
 
         public WrappedTypeOption(FxTypeOption option) {
             super(option);
-            this.passedOn = option.isPassedOn();
+            this.isInherited = option.isInherited();
         }
 
-        public boolean isPassedOn() {
-            return passedOn;
+        public boolean getIsInherited() {
+            return isInherited;
         }
 
-        public void setPassedOn(boolean passedOn) {
-            this.passedOn = passedOn;
+        public void setIsInherited(boolean isInherited) {
+            this.isInherited = isInherited;
         }
 
         public FxTypeOption asFxTypeOption() {
-            return new FxTypeOption(super.key, super.overridable, this.passedOn, super.set, super.value);
+            return new FxTypeOption(super.key, super.overridable, this.isInherited, super.set, super.value);
         }
 
         @Override
@@ -734,7 +735,7 @@ public class OptionWrapper implements Serializable {
         public boolean equalsCompletely(WrappedTypeOption o) {
             if (o == null)
                 return false;
-            if (super.key.equals(o.getKey()) && super.set == o.isSet() && super.overridable == o.isOverridable() && this.passedOn == o.passedOn)
+            if (super.key.equals(o.getKey()) && super.set == o.isSet() && super.overridable == o.isOverridable() && this.isInherited == o.isInherited)
                 if (super.value != null && super.value.equals(o.getValue()) || super.value == null && o.getValue() == null)
                     return true;
             return false;
@@ -752,7 +753,7 @@ public class OptionWrapper implements Serializable {
             int result;
             result = (super.key != null ? super.key.hashCode() : 0);
             result = 31 * result + (super.overridable ? 1 : 0);
-            result = 31 * result + (passedOn ? 1 : 0);
+            result = 31 * result + (isInherited ? 1 : 0);
             result = 31 * result + (super.value != null ? super.value.hashCode() : 0);
             result = 31 * result + (super.set ? 1 : 0);
             if (result < 0)

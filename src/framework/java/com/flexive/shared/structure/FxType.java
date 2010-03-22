@@ -1214,14 +1214,14 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
     }
 
     /**
-     * Retrieve the List of options which are passed on to derived types
+     * Retrieve the List of options which are inherited by derived types
      *
-     * @return (modifiable) list of all options passed on to derived types
+     * @return (modifiable) list of all options inherited by derived types
      */
-    public List<FxTypeOption> getPassedOnOptions() {
+    public List<FxTypeOption> getInheritedOptions() {
         final List<FxTypeOption> out = new ArrayList<FxTypeOption>(options.size());
         for(FxTypeOption o : options) {
-            if(o.isPassedOn()) {
+            if(o.isInherited()) {
                 out.add(o);
             }
         }

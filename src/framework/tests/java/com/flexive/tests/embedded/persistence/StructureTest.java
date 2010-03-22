@@ -1534,11 +1534,11 @@ public class StructureTest {
         FxType t1der = null;
         try {
             type = FxTypeEdit.createNew("STRUCTOPTTEST");
-            type.setOption("OPTION_A", "a value"); // overrideable, not passed on
-            type.setOption("OPTION_B", "another value", false, true); // non-overrideable, passed on
-            type.setOption("OPTION_BOOL_A", true); // overrideable, not passed on
-            type.setOption("OPTION_BOOL_B", false, false, true); // non-overrideable, passed on
-            type.setOption("OPTION_C", "C", true, true); // overrideable, passed on
+            type.setOption("OPTION_A", "a value"); // overrideable, not inherited
+            type.setOption("OPTION_B", "another value", false, true); // non-overrideable, inherited
+            type.setOption("OPTION_BOOL_A", true); // overrideable, not inherited
+            type.setOption("OPTION_BOOL_B", false, false, true); // non-overrideable, inherited
+            type.setOption("OPTION_C", "C", true, true); // overrideable, inherited
             type = type.save();
 
             // create a derived type
@@ -1550,19 +1550,19 @@ public class StructureTest {
 
             Assert.assertEquals(t1.getOption("OPTION_A").getValue(), "a value");
             Assert.assertTrue(t1.getOption("OPTION_A").isOverrideable());
-            Assert.assertFalse(t1.getOption("OPTION_A").isPassedOn());
+            Assert.assertFalse(t1.getOption("OPTION_A").isInherited());
             Assert.assertEquals(t1.getOption("OPTION_B").getValue(), "another value");
             Assert.assertFalse(t1.getOption("OPTION_B").isOverrideable());
-            Assert.assertTrue(t1.getOption("OPTION_B").isPassedOn());
+            Assert.assertTrue(t1.getOption("OPTION_B").isInherited());
             Assert.assertEquals(t1.getOption("OPTION_BOOL_A").isValueTrue(), true);
             Assert.assertTrue(t1.getOption("OPTION_BOOL_A").isOverrideable());
-            Assert.assertFalse(t1.getOption("OPTION_BOOL_A").isPassedOn());
+            Assert.assertFalse(t1.getOption("OPTION_BOOL_A").isInherited());
             Assert.assertEquals(t1.getOption("OPTION_BOOL_B").isValueTrue(), false);
             Assert.assertFalse(t1.getOption("OPTION_BOOL_B").isOverrideable());
-            Assert.assertTrue(t1.getOption("OPTION_BOOL_B").isPassedOn());
+            Assert.assertTrue(t1.getOption("OPTION_BOOL_B").isInherited());
             Assert.assertEquals(t1.getOption("OPTION_C").getValue(), "C");
             Assert.assertTrue(t1.getOption("OPTION_C").isOverrideable());
-            Assert.assertTrue(t1.getOption("OPTION_C").isPassedOn());
+            Assert.assertTrue(t1.getOption("OPTION_C").isInherited());
 
             Assert.assertEquals(t1der.getOption("OPTION_B").getValue(), "another value");
             Assert.assertFalse(t1der.getOption("OPTION_BOOL_B").isValueTrue());
