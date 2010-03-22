@@ -922,7 +922,9 @@ public class GenericSQLDataFilter extends DataFilter {
         String value = null;
         switch (entry.getProperty().getDataType()) {
             case SelectMany:
-                if (comparator == ValueComparator.EQUAL || comparator == ValueComparator.NOT_EQUAL) {
+                if (comparator == ValueComparator.IS_NOT && constant.isNull()) {
+                    value = "NULL";
+                } else if (comparator == ValueComparator.EQUAL || comparator == ValueComparator.NOT_EQUAL) {
                     // exact match, so we use the text column that stores the comma-separated list of selected items
                     column = "FTEXT1024";
                     final List<String> ids = Lists.newArrayList();

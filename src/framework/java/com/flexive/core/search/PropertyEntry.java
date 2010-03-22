@@ -948,7 +948,11 @@ public class PropertyEntry {
                 }
                 break;
             case Reference:
-                value = String.valueOf(FxPK.fromString(constantValue).getId());
+                if (constantValue == null) {
+                    value = "NULL";
+                } else {
+                    value = String.valueOf(FxPK.fromString(constantValue).getId());
+                }
                 break;
         }
         return value == null ? null : new Pair<String, String>(column, value);
@@ -962,16 +966,17 @@ public class PropertyEntry {
      * @return              the mapped value
      */
     public static String mapSelectConstant(FxProperty property, String constantValue) {
-        String value;
-        if (StringUtils.isNumeric(constantValue)) {
+        if (constantValue == null) {
+            return "null";
+        } else if (StringUtils.isNumeric(constantValue)) {
             //list item id, nothing to lookup
-            value = constantValue;
+            return constantValue;
         } else {
             //list item data (of first matching item)
-            value = "" + property.getReferencedList().
-                    getItemByData(FxFormatUtils.unquote(constantValue)).getId();
+            return String.valueOf(property.getReferencedList().
+                    getItemByData(FxFormatUtils.unquote(constantValue)).getId()
+            );
         }
-        return value;
     }
 
 

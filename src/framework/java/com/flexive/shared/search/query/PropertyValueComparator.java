@@ -111,7 +111,10 @@ public enum PropertyValueComparator implements ValueComparator {
             EMPTY, NOT_EMPTY
     ));
     private static final List<PropertyValueComparator> SELECT_OPERATORS = Collections.unmodifiableList(Arrays.asList(
-            EQ, NE, IN, NOT_IN
+            EQ, NE, IN, NOT_IN, EMPTY, NOT_EMPTY
+    ));
+    private static final List<PropertyValueComparator> REFERENCE_OPERATORS = Collections.unmodifiableList(Arrays.asList(
+            EQ, NE, EMPTY, NOT_EMPTY
     ));
 
     private String id;
@@ -243,6 +246,8 @@ public enum PropertyValueComparator implements ValueComparator {
             case SelectOne:
             case SelectMany:
                 return SELECT_OPERATORS;
+            case Reference:
+                return REFERENCE_OPERATORS;
             default:
                 return ORDINAL_OPERATORS;
         }
