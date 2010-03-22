@@ -902,10 +902,13 @@ try {
             importTable(stmt, zip, ze, "structures/datatypes/type_t", DatabaseConst.TBL_STRUCT_DATATYPES + DatabaseConst.ML);
             importTable(stmt, zip, ze, "structures/types/tdef", DatabaseConst.TBL_STRUCT_TYPES, true, false, "icon_ref");
             importTable(stmt, zip, ze, "structures/types/tdef_t", DatabaseConst.TBL_STRUCT_TYPES + DatabaseConst.ML);
+            importTable(stmt, zip, ze, "structures/types/trel", DatabaseConst.TBL_STRUCT_TYPERELATIONS);
+            importTable(stmt, zip, ze, "structures/types/topts", DatabaseConst.TBL_STRUCT_TYPES_OPTIONS);
             importTable(stmt, zip, ze, "structures/properties/property", DatabaseConst.TBL_STRUCT_PROPERTIES);
             importTable(stmt, zip, ze, "structures/properties/property_t", DatabaseConst.TBL_STRUCT_PROPERTIES + DatabaseConst.ML);
             importTable(stmt, zip, ze, "structures/groups/group", DatabaseConst.TBL_STRUCT_GROUPS);
             importTable(stmt, zip, ze, "structures/groups/group_t", DatabaseConst.TBL_STRUCT_GROUPS + DatabaseConst.ML);
+            importTable(stmt, zip, ze, "structures/groups/goption", DatabaseConst.TBL_STRUCT_GROUP_OPTIONS);
             importTable(stmt, zip, ze, "structures/assignments/assignment", DatabaseConst.TBL_STRUCT_ASSIGNMENTS, true, true, "base:0", "parentgroup:@", "KEY:id");
             importTable(stmt, zip, ze, "structures/assignments/assignment_t", DatabaseConst.TBL_STRUCT_ASSIGNMENTS + DatabaseConst.ML);
             importTable(stmt, zip, ze, "structures/selectlists/item", DatabaseConst.TBL_STRUCT_SELECTLIST_ITEM);
