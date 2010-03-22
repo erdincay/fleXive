@@ -518,6 +518,20 @@ public final class FxFormatUtils {
         }
     }
 
+    /**
+     * Escape the given value for CSV.
+     *
+     * @param value the value to be formatted
+     * @return      the escaped value.
+     * @since       3.1
+     */
+    public static String escapeForCsv(Object value) {
+        if (value == null) {
+            return "";
+        }
+        return "\"" + value.toString().replace("\"", "\"\"").replace('\n', ' ').replace('\r', ' ') + "\"";
+    }
+
     private static String makeTuple(Collection values) {
         final List<String> result = new ArrayList<String>(values.size());
         for (Object value : values) {

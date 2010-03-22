@@ -37,6 +37,7 @@ import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.faces.messages.FxFacesMsgInfo;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.FxFormatUtils;
 import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.tree.FxTreeMode;
@@ -47,7 +48,10 @@ import com.flexive.shared.search.query.PropertyValueComparator;
 import com.flexive.shared.search.query.SqlQueryBuilder;
 import com.flexive.shared.search.query.VersionFilter;
 import com.flexive.shared.value.BinaryDescriptor;
+import com.flexive.shared.value.FxValue;
+import com.flexive.war.filter.FxResponseWrapper;
 import com.google.common.collect.Iterables;
+import java.io.PrintWriter;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -55,9 +59,11 @@ import org.apache.commons.logging.LogFactory;
 import javax.faces.model.SelectItem;
 import java.io.IOException;
 import java.io.Serializable;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Arrays;
+import javax.faces.context.FacesContext;
 
 public class SearchResultBean implements ActionBean, Serializable {
     private static final long serialVersionUID = -3167186971609121457L;
@@ -232,6 +238,63 @@ public class SearchResultBean implements ActionBean, Serializable {
         resetTableView();
         return show();
     }
+
+    /**
+     * Send the current result as CSV to the response.
+     *
+     * @throws IOException  on I/O errors
+     * @since 3.1
+     */
+    public void exportSpreadsheet() throws IOException {
+        renderResultCsv(
+                getResult(),
+                FxJsfUtils.getResponse().getWriter(),
+                "search-result_" + System.currentTimeMillis() + ".xls",
+                '\t'
+        );
+
+        FacesContext.getCurrentInstance().responseComplete();
+    }
+
+    /**
+     * Render a result set as a CSV file to the response.
+     *
+     * @param result        the result to be rendered
+     * @param writer        the output writer
+     * @param filename      the filename that should be shown in the browser
+     * @param delimiter     the delimiter between fields ('\t' is best for Excel compatibility)
+     * @throws IOException  if the result could not be rendered
+     * 
+     * @since               3.1
+     */
+    public static void renderResultCsv(FxResultSet result, Writer writer, String filename, char delimiter) throws IOException {
+        final int firstColumnIndex = Math.max(1, result.getUserWildcardIndex());
+        final FxResponseWrapper response = FxJsfUtils.getResponse();
+        response.setContentType("text/csv");
+        response.setCharacterEncoding("UTF-8");
+        response.setHeader("Content-Disposition", "attachment; filename=\"" + filename + "\";");
+        // write column headers
+        for (int i = firstColumnIndex; i <= result.getColumnCount(); i++) {
+            if (i > firstColumnIndex) {
+                writer.write(delimiter);
+            }
+            writer.write(FxFormatUtils.escapeForCsv(result.getColumnLabel(i)));
+        }
+        writer.write("\n");
+        // write rows
+        for (FxResultRow row : result.getResultRows()) {
+            for (int i = firstColumnIndex; i <= result.getColumnCount(); i++) {
+                final Object value = row.getValue(i);
+                if (value != null && (!(value instanceof FxValue) || !((FxValue) value).isEmpty())) {
+                    // render not-empty value
+                    writer.write(FxFormatUtils.escapeForCsv(value.toString()));
+                }
+                writer.write(delimiter);
+            }
+            writer.write('\n');
+        }
+    }
+
 
     /**
      * Refresh the current results (clear cache).

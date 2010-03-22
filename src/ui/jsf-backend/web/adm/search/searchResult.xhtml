@@ -208,10 +208,13 @@
                                icon="reload" location="toolbar" lockscreen="false" separator="after"/>
             <adm:commandButton id="preferencesButton" labelKey="ResultPreferences.button.open"
                                bean="#{resultPreferencesBean}" action="show"
-                               icon="configure" lockscreen="false" location="both">
+                               icon="configure" lockscreen="false" location="both" separator="after">
                 <f:setPropertyActionListener value="#{fxSearchResultBean.typeId}" target="#{resultPreferencesBean.type}"/>
                 <f:setPropertyActionListener value="#{fxSearchResultBean.viewType}" target="#{resultPreferencesBean.viewType}"/>
             </adm:commandButton>
+            <adm:commandButton id="exportSpreadsheetButton" labelKey="SearchResult.button.export.spreadsheet"
+                               bean="#{fxSearchResultBean}" action="exportSpreadsheet"
+                               icon="export_spreadsheet" location="toolbar" lockscreen="false"/>
 
             <a4j:outputPanel id="emptyPanel">
             </a4j:outputPanel>

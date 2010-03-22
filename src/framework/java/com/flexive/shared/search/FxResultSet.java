@@ -57,14 +57,14 @@ public interface FxResultSet {
      * 
      * @return the creation time of the resultset
      */
-    public long getCreationTime();
+    long getCreationTime();
 
     /**
      * Returns the start index specified with the search.
      *
      * @return the start index specified with the search
      */
-    public int getStartIndex();
+    int getStartIndex();
 
 
     /**
@@ -72,7 +72,7 @@ public interface FxResultSet {
      *
      * @return the maximum rows parameter specified with the search
      */
-    public int getMaxFetchRows();
+    int getMaxFetchRows();
 
 
     /**
@@ -80,7 +80,7 @@ public interface FxResultSet {
      *
      * @return the column names.
      */
-    public String[] getColumnNames();
+    String[] getColumnNames();
 
     /**
      * Returns the column label of the given index in the calling user's language.
@@ -89,21 +89,21 @@ public interface FxResultSet {
      * @return  the column label of the given index in the calling user's language.
      * @throws ArrayIndexOutOfBoundsException if the given position is not valid
      */
-    public String getColumnLabel(int index) throws ArrayIndexOutOfBoundsException;
+    String getColumnLabel(int index) throws ArrayIndexOutOfBoundsException;
 
     /**
      * Returns the column labels in the calling user's language.
      *
      * @return  the column labels in the calling user's language.
      */
-    public String[] getColumnLabels();
+    String[] getColumnLabels();
 
     /**
      * Returns all rows.
      *
      * @return the rows
      */
-    public List<Object[]> getRows();
+    List<Object[]> getRows();
 
     /**
      * Get the designated column's name.
@@ -112,7 +112,7 @@ public interface FxResultSet {
      * @param pos the first column is 1, the second is 2, ...
      * @throws ArrayIndexOutOfBoundsException if the given position is not valid
      */
-    public String getColumnName(int pos) throws ArrayIndexOutOfBoundsException;
+    String getColumnName(int pos) throws ArrayIndexOutOfBoundsException;
 
     /**
      * Get the index for the given column. Returns -1 if the column name
@@ -121,28 +121,28 @@ public interface FxResultSet {
      * @param name  the column name
      * @return  the index for the given column name, 1-based
      */
-    public int getColumnIndex(String name);
+    int getColumnIndex(String name);
 
     /**
      * Returns a map returning the column index using the lowercase column name as a key.
      *
      * @return  a map returning the column index using the lowercase column name as a key.
      */
-    public Map<String, Integer> getColumnIndexMap();
+    Map<String, Integer> getColumnIndexMap();
 
     /**
      * Returns the number of columns in this FxResultSet object.
      *
      * @return the number of columns
      */
-    public int getColumnCount();
+    int getColumnCount();
 
     /**
      * Returns the number of rows in this FxResultSet object.
      *
      * @return the number of rows
      */
-    public int getRowCount();
+    int getRowCount();
 
 
     /**
@@ -153,14 +153,14 @@ public interface FxResultSet {
      *
      * @return the total row count
      */
-    public int getTotalRowCount() ;
+    int getTotalRowCount() ;
 
     /**
      * Returns true if the found entry set was truncted.
      *
      * @return true if the result was truncated
      */
-    public boolean isTruncated() ;
+    boolean isTruncated() ;
 
     /**
      * Retrieves the value of the designated column in the current row of this FxResultSet object as a
@@ -171,7 +171,7 @@ public interface FxResultSet {
      * @return the column value; if the value is SQL NULL, the value returned is null
      * @throws ArrayIndexOutOfBoundsException if the given row/column combination is out of range
      */
-    public Object getObject(int rowIndex,int columnIndex) throws ArrayIndexOutOfBoundsException;
+    Object getObject(int rowIndex,int columnIndex) throws ArrayIndexOutOfBoundsException;
 
     /**
      * Retrieves the value of the designated column in the current row of this FxResultSet object as a
@@ -182,28 +182,28 @@ public interface FxResultSet {
      * @return the column value; if the value is SQL NULL, the value returned is null
      * @throws ArrayIndexOutOfBoundsException if the given row/column combination is out of range
      */
-    public String getString(int rowIndex,int columnIndex) throws ArrayIndexOutOfBoundsException;
+    String getString(int rowIndex,int columnIndex) throws ArrayIndexOutOfBoundsException;
 
     /**
      * Returns the time that was spent parsing the statement.
      *
      * @return the time that was spent parsing the statement
      */
-    public int getParserExecutionTime();
+    int getParserExecutionTime();
 
     /**
      * Returns the time needed to find all matching records in the database.
      *
      * @return the time needed to find all matching records in the database
      */
-    public int getDbSearchTime();
+    int getDbSearchTime();
 
     /**
      * Returns the time needed to find fetch the matching records from the database.
      *
      * @return the time needed to find fetch the matching records from the database
      */
-    public int getFetchTime();
+    int getFetchTime();
 
     /**
      * Returns the total time spent for the search.
@@ -213,14 +213,14 @@ public interface FxResultSet {
      *
      * @return the total time spent for the search
      */
-    public int getTotalTime();
+    int getTotalTime();
 
     /**
      * Returns the location for which the query was executed.
      *
      * @return  the location for which the query was executed.
      */
-    public ResultLocation getLocation();
+    ResultLocation getLocation();
 
 
     /**
@@ -228,7 +228,7 @@ public interface FxResultSet {
      *
      * @return  the view type for which the query was executed.
      */
-    public ResultViewType getViewType();
+    ResultViewType getViewType();
 
 
     /**
@@ -238,14 +238,14 @@ public interface FxResultSet {
      *
      * @return a list of all content types that are part of the resultset
      */
-    public List<FxFoundType> getContentTypes();
+    List<FxFoundType> getContentTypes();
 
     /**
      * Return a result row iterator for this result set.
      *
      * @return  a result row iterator for this result set.
      */
-    public Iterable<FxResultRow> getResultRows();
+    Iterable<FxResultRow> getResultRows();
 
     /**
      * Return a result row wrapper for the given row number.
@@ -253,7 +253,7 @@ public interface FxResultSet {
      * @param index the row number
      * @return  a result row wrapper for the given row number.
      */
-    public FxResultRow getResultRow(int index);
+    FxResultRow getResultRow(int index);
 
     /**
      * Return a result row wrapper for the given pk,
@@ -264,14 +264,14 @@ public interface FxResultSet {
      * @return  a result row wrapper for the given pk,
      * or null if the result row can't be determined.
      */
-    public FxResultRow getResultRow(FxPK pk);
+    FxResultRow getResultRow(FxPK pk);
 
     /**
      * If the query created a new briefcase, its ID can be retrieved with this method.
      *
      * @return  the ID of the created briefcase, or -1 if no briefcase was created
      */
-    public long getCreatedBriefcaseId();
+    long getCreatedBriefcaseId();
 
     /**
      * Projects a single column to a list.
