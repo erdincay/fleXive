@@ -70,16 +70,24 @@ public class FxStructureOption implements Serializable {
      * @since 3.1
      */
     public static final String OPTION_SELECTMANY_CHECKBOXES = "SELECTMANY.CHECKBOXES";
-
+    /**
+     * Mime type option
+     *
+     * @since 3.1
+     */
+    public final static String OPTION_MIMETYPE = "MIMETYPE";
     public final static String OPTION_MULTILINE = "MULTILINE";
     public final static String VALUE_TRUE = "1";
-
-
     public final static String VALUE_FALSE = "0";
-    protected String key;
+    
+    private String key;
     protected boolean overrideable;
-    protected String value;
-    protected boolean set;
+    private String value;
+    private boolean set;
+    /**
+     * @since 3.1
+     */
+    private boolean isInherited;
 
     /**
      * Ctor
@@ -94,7 +102,28 @@ public class FxStructureOption implements Serializable {
         this.overrideable = overrideable;
         this.set = set;
         this.value = value;
+        this.isInherited = false;
     }
+
+    /**
+     * Ctor w/ inheritance option
+     *
+     * @param key          key identifying the option
+     * @param overrideable is the option overridable in assignments
+     * @param set          is the option set? (non-existing options are returned as not-set options!)
+     * @param isInherited  option inherited by derived structures?
+     * @param value        the options value
+     *
+     * @since 3.1
+     */
+    public FxStructureOption(String key, boolean overrideable, boolean set, boolean isInherited, String value) {
+        this.key = key.toUpperCase();
+        this.overrideable = overrideable;
+        this.set = set;
+        this.value = value;
+        this.isInherited = isInherited;
+    }
+
 
     /**
      * Copy Constructor
@@ -106,6 +135,7 @@ public class FxStructureOption implements Serializable {
         this.overrideable = o.overrideable;
         this.set = o.set;
         this.value = o.value;
+        this.isInherited = o.isInherited;
     }
 
     /**
@@ -142,6 +172,28 @@ public class FxStructureOption implements Serializable {
      */
     public String getValue() {
         return value;
+    }
+
+    /**
+     * Is the option inherited by derived structures?
+     *
+     * @return true if the option is inherited by derived structures
+     *
+     * @since 3.1
+     */
+    public boolean getIsInherited() {
+        return isInherited;
+    }
+
+    /**
+     * Set to true if the option should be inherited by derived structures
+     *
+     * @param isInherited flag
+     *
+     * @since 3.1
+     */
+    public void setIsInherited(boolean isInherited) {
+        this.isInherited = isInherited;
     }
 
     /**
@@ -192,7 +244,7 @@ public class FxStructureOption implements Serializable {
      * @return an unknown option
      */
     private static FxStructureOption getUnknownOption(String key) {
-        return new FxStructureOption(key, false, false, "");
+        return new FxStructureOption(key, false, false, false, "");
     }
 
     /**
@@ -234,6 +286,21 @@ public class FxStructureOption implements Serializable {
      * @param value        String value to set for the option
      */
     public static void setOption(List<FxStructureOption> options, String key, boolean overrideable, String value) {
+        setOption(options, key, overrideable, false, value);
+    }
+
+    /**
+     * Set or add a String value in a list of options
+     *
+     * @param options      list of existing options
+     * @param key          option key
+     * @param overrideable should the option be overrideable?
+     * @param isInherited  is the option inherited by derived structures?
+     * @param value        String value to set for the option
+     *
+     * @since 3.1
+     */
+    public static void setOption(List<FxStructureOption> options, String key, boolean overrideable, boolean isInherited, String value) {
         synchronized (options) {
             if (StringUtils.isEmpty(key))
                 throw new FxInvalidParameterException("key","ex.structure.option.key.empty", value).asRuntimeException();
@@ -242,9 +309,10 @@ public class FxStructureOption implements Serializable {
                 opt.overrideable = overrideable;
                 opt.value = value;
                 opt.set = true;
+                opt.isInherited = isInherited;
                 return;
             }
-            FxStructureOption opt = new FxStructureOption(key, overrideable, true, value);
+            FxStructureOption opt = new FxStructureOption(key, overrideable, true, isInherited, value);
             options.add(opt);
         }
     }
@@ -258,7 +326,20 @@ public class FxStructureOption implements Serializable {
      * @param value        boolean value to set for the option (will be converted internally to a String)
      */
     public static void setOption(List<FxStructureOption> options, String key, boolean overrideable, boolean value) {
-        setOption(options, key, overrideable, value ? VALUE_TRUE : VALUE_FALSE);
+        setOption(options, key, overrideable, false, value ? VALUE_TRUE : VALUE_FALSE);
+    }
+
+    /**
+     * Set or add a boolean value in a list of options
+     *
+     * @param options      list of existing options
+     * @param key          option key
+     * @param overrideable should the option be overrideable?
+     * @param isInherited  should the option be inherited by derived structures?
+     * @param value        boolean value to set for the option (will be converted internally to a String)
+     */
+    public static void setOption(List<FxStructureOption> options, String key, boolean overrideable, boolean isInherited, boolean value) {
+        setOption(options, key, overrideable, isInherited, value ? VALUE_TRUE : VALUE_FALSE);
     }
 
     /**
@@ -322,7 +403,8 @@ public class FxStructureOption implements Serializable {
             return true;
         final FxStructureOption other = (FxStructureOption) o;
         return !(!this.key.equals(other.key) || !this.value.equals(other.value) ||
-                this.overrideable != other.overrideable || this.set != other.set);
+                this.overrideable != other.overrideable || this.set != other.set ||
+                this.isInherited != other.isInherited);
     }
 
     /**
@@ -335,6 +417,7 @@ public class FxStructureOption implements Serializable {
         result = 31 * result + (overrideable ? 1 : 0);
         result = 31 * result + (value != null ? value.hashCode() : 0);
         result = 31 * result + (set ? 1 : 0);
+        result = 31 * result + (isInherited ? 1 : 0);
         return result;
     }
 }

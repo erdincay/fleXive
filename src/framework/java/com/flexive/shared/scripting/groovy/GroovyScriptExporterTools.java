@@ -184,7 +184,7 @@ public final class GroovyScriptExporterTools {
                 sopts.put("parentTypeName", "\"" + type.getParent().getName() + "\"");
             }
 
-            // retrieve any FxTypeOptions
+            // retrieve any type options
             sopts.putAll(getOptions(type));
 
             // append options to script
@@ -1177,11 +1177,11 @@ public final class GroovyScriptExporterTools {
      * Retrieve all set structure options for an FxType (or FxTypeEdit)
      * // TODO: add boolean attributes f. options
      * @param element the FxType
-     * @return returns a Map<String, String> containing the FxTypeOption --> Value mappings
+     * @return returns a Map<String, String> containing the FxStructureOption --> Value mappings
      */
     private static <T extends FxType> Map<String, String> getOptions(T element) {
         Map<String, String> opts = new HashMap<String, String>();
-        for (FxTypeOption o : element.getOptions()) {
+        for (FxStructureOption o : element.getOptions()) {
             if (o.isSet())
                 opts.put("\"" + o.getKey() + "\"", "\"" + o.getValue() + "\"");
         }

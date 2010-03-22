@@ -109,7 +109,7 @@ public class TypeEditorBean implements Serializable {
     // type option editor tab
     private OptionWrapper optionWrapper = null;
     private OptionWrapper optionWrapperParent = null;
-    private OptionWrapper.WrappedTypeOption optionFiler = null;
+    private OptionWrapper.WrappedOption optionFiler = null;
     private String typeOptionValue = null;
     private String typeOptionKey = null;
     private boolean typeOptionOverridable = true; // def. value
@@ -313,9 +313,9 @@ public class TypeEditorBean implements Serializable {
                 updateRelations();
 
                 //add options (check if they may be set)
-                List<FxTypeOption> opts = optionWrapper.asFxTypeOptionList(optionWrapper.getTypeOptions());
-                for (FxTypeOption o : opts) {
-                    type.setOption(o.getKey(), o.getValue(), o.isOverrideable(), o.isInherited());
+                List<FxStructureOption> opts = optionWrapper.asFxStructureOptionList(optionWrapper.getTypeOptions());
+                for (FxStructureOption o : opts) {
+                    type.setOption(o.getKey(), o.getValue(), o.isOverrideable(), o.getIsInherited());
                 }
 
                 //delete current options
@@ -325,8 +325,8 @@ public class TypeEditorBean implements Serializable {
                 }
 
                 //add options
-                for (FxTypeOption o : opts) {
-                    type.setOption(o.getKey(), o.getValue(), o.isOverrideable(), o.isInherited());
+                for (FxStructureOption o : opts) {
+                    type.setOption(o.getKey(), o.getValue(), o.isOverrideable(), o.getIsInherited());
                 }
 
                 type.setHistoryAge(historyAgeToMilis());
@@ -969,7 +969,7 @@ public class TypeEditorBean implements Serializable {
      */
     public void addTypeOption() {
         try {
-            optionWrapper.addTypeOption(optionWrapper.getTypeOptions(), typeOptionKey, typeOptionValue, typeOptionOverridable, typeOptionIsInherited);
+            optionWrapper.addOption(optionWrapper.getTypeOptions(), typeOptionKey, typeOptionValue, typeOptionOverridable, typeOptionIsInherited);
             typeOptionKey = null;
             typeOptionValue = null;
             typeOptionOverridable = true;
@@ -1001,11 +1001,11 @@ public class TypeEditorBean implements Serializable {
         this.optionWrapper = optionWrapper;
     }
 
-    public OptionWrapper.WrappedTypeOption getOptionFiler() {
+    public OptionWrapper.WrappedOption getOptionFiler() {
         return optionFiler;
     }
 
-    public void setOptionFiler(OptionWrapper.WrappedTypeOption optionFiler) {
+    public void setOptionFiler(OptionWrapper.WrappedOption optionFiler) {
         this.optionFiler = optionFiler;
     }
 

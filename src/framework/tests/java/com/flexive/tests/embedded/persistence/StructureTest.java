@@ -1550,19 +1550,19 @@ public class StructureTest {
 
             Assert.assertEquals(t1.getOption("OPTION_A").getValue(), "a value");
             Assert.assertTrue(t1.getOption("OPTION_A").isOverrideable());
-            Assert.assertFalse(t1.getOption("OPTION_A").isInherited());
+            Assert.assertFalse(t1.getOption("OPTION_A").getIsInherited());
             Assert.assertEquals(t1.getOption("OPTION_B").getValue(), "another value");
             Assert.assertFalse(t1.getOption("OPTION_B").isOverrideable());
-            Assert.assertTrue(t1.getOption("OPTION_B").isInherited());
+            Assert.assertTrue(t1.getOption("OPTION_B").getIsInherited());
             Assert.assertEquals(t1.getOption("OPTION_BOOL_A").isValueTrue(), true);
             Assert.assertTrue(t1.getOption("OPTION_BOOL_A").isOverrideable());
-            Assert.assertFalse(t1.getOption("OPTION_BOOL_A").isInherited());
+            Assert.assertFalse(t1.getOption("OPTION_BOOL_A").getIsInherited());
             Assert.assertEquals(t1.getOption("OPTION_BOOL_B").isValueTrue(), false);
             Assert.assertFalse(t1.getOption("OPTION_BOOL_B").isOverrideable());
-            Assert.assertTrue(t1.getOption("OPTION_BOOL_B").isInherited());
+            Assert.assertTrue(t1.getOption("OPTION_BOOL_B").getIsInherited());
             Assert.assertEquals(t1.getOption("OPTION_C").getValue(), "C");
             Assert.assertTrue(t1.getOption("OPTION_C").isOverrideable());
-            Assert.assertTrue(t1.getOption("OPTION_C").isInherited());
+            Assert.assertTrue(t1.getOption("OPTION_C").getIsInherited());
 
             Assert.assertEquals(t1der.getOption("OPTION_B").getValue(), "another value");
             Assert.assertFalse(t1der.getOption("OPTION_BOOL_B").isValueTrue());
@@ -1598,9 +1598,7 @@ public class StructureTest {
      */
     @Test(groups = {"ejb", "structure"})
     public void mimeTypeTest() throws FxApplicationException {
-        //
         // FxTypeEdit document;
-
         // TODO
     }
 

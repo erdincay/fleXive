@@ -164,7 +164,7 @@
                                     <adm:commandButton labelKey="TypeEditor.table.button.delete" location="content"
                                                        icon="delete" action="deleteTypeOption"
                                                        bean="#{typeEditorBean}"
-                                                       id="deleteTypeOptionButton_#{option.id}"
+                                                       id="deleteOptionButton_#{option.id}"
                                                        confirmKey="TypeEditor.message.deleteOption">
                                         <f:setPropertyActionListener target="#{typeEditorBean.optionFiler}"
                                                                      value="#{option}"/>
@@ -190,7 +190,7 @@
                             <td align="left">
                                 <adm:commandButton labelKey="TypeEditor.table.button.add" location="content"
                                                    icon="new" action="addTypeOption" bean="#{typeEditorBean}"
-                                                   id="addTypeOptionButton"/>
+                                                   id="addOptionButton"/>
                             </td>
                         </tr>
                     </ui:fragment>

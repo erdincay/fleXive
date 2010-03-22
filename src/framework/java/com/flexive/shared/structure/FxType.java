@@ -115,13 +115,13 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
     protected List<FxAssignment> scriptedAssignments;
     protected Map<FxScriptEvent, long[]> scriptMapping;
     protected FxReference icon;
-    protected List<FxTypeOption> options;
+    protected List<FxStructureOption> options;
 
     public FxType(long id, ACL acl, Workflow workflow, String name, FxString label, FxType parent, TypeStorageMode storageMode,
                   TypeCategory category, TypeMode mode, LanguageMode language, TypeState state, byte permissions,
                   boolean multipleContentACLs, boolean includedInSupertypeQueries, boolean trackHistory,
                   long historyAge, long maxVersions, int maxRelSource, int maxRelDestination, LifeCycleInfo lifeCycleInfo,
-                  List<FxType> derivedTypes, List<FxTypeRelation> relations, List<FxTypeOption> options) {
+                  List<FxType> derivedTypes, List<FxTypeRelation> relations, List<FxStructureOption> options) {
         this.id = id;
         this.ACL = acl;
         this.workflow = workflow;
@@ -149,7 +149,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
         this.icon = new FxReference(false, FxReference.EMPTY).setEmpty();
         this.options = options;
         if (this.options == null)
-            this.options = FxTypeOption.getEmptyTypeOptionList(2);
+            this.options = FxStructureOption.getEmptyOptionList(2);
     }
 
     /**
@@ -1187,9 +1187,11 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      *
      * @param key option key
      * @return if an option is set for the requested key
+     *
+     * @since 3.1
      */
     public boolean hasOption(String key) {
-        return FxTypeOption.hasOption(key, options);
+        return FxStructureOption.hasOption(key, options);
     }
 
     /**
@@ -1199,29 +1201,35 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      *
      * @param key option key
      * @return the found option or an object that indicates that the option is not set
+     *
+     * @since 3.1
      */
-    public FxTypeOption getOption(String key) {
-        return FxTypeOption.getOption(key, options);
+    public FxStructureOption getOption(String key) {
+        return FxStructureOption.getOption(key, options);
     }
 
     /**
      * Get a (unmodifiable) list of all options set for this group
      *
      * @return (unmodifiable) list of all options set for this group
+     *
+     * @since 3.1
      */
-    public List<FxTypeOption> getOptions() {
-        return FxTypeOption.getUnmodifiableOptions(options);
+    public List<FxStructureOption> getOptions() {
+        return FxStructureOption.getUnmodifieableOptions(options);
     }
 
     /**
      * Retrieve the List of options which are inherited by derived types
      *
      * @return (modifiable) list of all options inherited by derived types
+     *
+     * @since 3.1
      */
-    public List<FxTypeOption> getInheritedOptions() {
-        final List<FxTypeOption> out = new ArrayList<FxTypeOption>(options.size());
-        for(FxTypeOption o : options) {
-            if(o.isInherited()) {
+    public List<FxStructureOption> getInheritedOptions() {
+        final List<FxStructureOption> out = new ArrayList<FxStructureOption>(options.size());
+        for(FxStructureOption o : options) {
+            if(o.getIsInherited()) {
                 out.add(o);
             }
         }
@@ -1232,10 +1240,12 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      * Retrieve the mime types for a given FxType
      *
      * @return return the mime types for a given FxType as a FxMimeType obj., or null if none are set
+     *
+     * @since 3.1
      */
     public FxMimeTypeWrapper getMimeType() {
         if(isMimeTypeSet()) {
-            return new FxMimeTypeWrapper(getOption(FxTypeOption.OPTION_MIMETYPE).getValue());
+            return new FxMimeTypeWrapper(getOption(FxStructureOption.OPTION_MIMETYPE).getValue());
         }
         return null;
     }
@@ -1244,9 +1254,11 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      * Convenience method to check if ANY mime type was set for this FxType
      *
      * @return true if a mime type was set
+     *
+     * @since 3.1
      */
     public boolean isMimeTypeSet() {
-        return getOption(FxTypeOption.OPTION_MIMETYPE).isSet();
+        return getOption(FxStructureOption.OPTION_MIMETYPE).isSet();
     }
 
     /**

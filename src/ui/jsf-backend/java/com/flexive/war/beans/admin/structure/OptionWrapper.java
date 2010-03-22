@@ -35,7 +35,6 @@ package com.flexive.war.beans.admin.structure;
 
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.structure.FxStructureOption;
-import com.flexive.shared.structure.FxTypeOption;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.*;
@@ -59,11 +58,11 @@ public class OptionWrapper implements Serializable {
             FxStructureOption.OPTION_SHOW_OVERVIEW};
 
     private static String[] blacklistedOptionKeys = {
-        FxStructureOption.OPTION_MULTILANG
+            FxStructureOption.OPTION_MULTILANG
     };
 
     private static String[] standardTypeOptionKeys = {
-        // empty for now
+            // empty for now
     };
 
     private static String[] blacklistedTypeOptionKeys = {
@@ -74,8 +73,8 @@ public class OptionWrapper implements Serializable {
     };
 
     private List<WrappedOption> structureOptions = null;
-    private List<WrappedTypeOption> typeOptions = null;
     private List<WrappedOption> assignmentOptions = null;
+    private List<WrappedOption> typeOptions = null;
     private Map<String, Boolean> assignmentOptionValidMap = null;
     private Map<String, Boolean> assignmentOptionOverridableMap = null;
     private Map<String, Boolean> structureOptionValidMap = null;
@@ -84,27 +83,27 @@ public class OptionWrapper implements Serializable {
     /**
      * Creates the OptionWrapper (For FxTypes)
      *
-     * @param options      optionlist of the structure element (e.g. group or property)
-     * @param addStandardOptions    if the standard options (FxStructureOption.OPTION_...) should be added to the
-     *                              structureOptions, if not alaready present
+     * @param options            optionlist of the structure element (e.g. group or property)
+     * @param addStandardOptions if the standard options (FxStructureOption.OPTION_...) should be added to the
+     *                           structureOptions, if not alaready present
      */
-    public OptionWrapper(List<FxTypeOption> options, boolean addStandardOptions) {
-        this.typeOptions = new ArrayList<WrappedTypeOption>();
+    public OptionWrapper(List<FxStructureOption> options, boolean addStandardOptions) {
+        this.typeOptions = new ArrayList<WrappedOption>();
 
         List<String> blacklisted = Arrays.asList(blacklistedTypeOptionKeys);
 
         if (options != null)
-            for (FxTypeOption o : options) {
+            for (FxStructureOption o : options) {
                 if (!blacklisted.contains(o.getKey()))
-                    this.typeOptions.add(new WrappedTypeOption(o));
+                    this.typeOptions.add(new WrappedOption(o));
             }
 
         if (addStandardOptions) {
-            List<WrappedTypeOption> standardOptions = new ArrayList<WrappedTypeOption>();
+            List<WrappedOption> standardOptions = new ArrayList<WrappedOption>();
             for (String standardOptionKey : standardTypeOptionKeys) {
-                standardOptions.add(new WrappedTypeOption(standardOptionKey, FxTypeOption.VALUE_FALSE, true, true, true));
+                standardOptions.add(new WrappedOption(standardOptionKey, FxStructureOption.VALUE_FALSE, true, true, true));
             }
-            for (WrappedTypeOption o : standardOptions) {
+            for (WrappedOption o : standardOptions) {
                 if (!this.typeOptions.contains(o))
                     this.typeOptions.add(o);
             }
@@ -114,10 +113,10 @@ public class OptionWrapper implements Serializable {
     /**
      * Creates the OptionWrapper
      *
-     * @param structureOptions      optionlist of the structure element (e.g. group or property)
-     * @param assignmentOptions     optionlist of the according assignment (e.g. groupassignment or propertyassignment)
-     * @param addStandardOptions    if the standard options (FxStructureOption.OPTION_...) should be added to the
-     *                              structureOptions, if not alaready present
+     * @param structureOptions   optionlist of the structure element (e.g. group or property)
+     * @param assignmentOptions  optionlist of the according assignment (e.g. groupassignment or propertyassignment)
+     * @param addStandardOptions if the standard options (FxStructureOption.OPTION_...) should be added to the
+     *                           structureOptions, if not alaready present
      */
     public OptionWrapper(List<FxStructureOption> structureOptions, List<FxStructureOption> assignmentOptions, boolean addStandardOptions) {
         this.structureOptions = new ArrayList<WrappedOption>();
@@ -139,7 +138,7 @@ public class OptionWrapper implements Serializable {
         if (addStandardOptions) {
             List<WrappedOption> standardOptions = new ArrayList<WrappedOption>();
             for (String standardOptionKey : standardOptionKeys) {
-                standardOptions.add(new WrappedOption(standardOptionKey, FxStructureOption.VALUE_FALSE, true, true));
+                standardOptions.add(new WrappedOption(standardOptionKey, FxStructureOption.VALUE_FALSE, true, true, true));
             }
             for (WrappedOption o : standardOptions) {
                 if (!this.structureOptions.contains(o))
@@ -149,18 +148,18 @@ public class OptionWrapper implements Serializable {
     }
 
     /**
-    * Creates the OptionWrapper
-    *
-    * @param structureOptions          optionlist of the structure element (e.g. group or property)
-    * @param assignmentOptions         optionlist of the according assignment (e.g. groupassignment or propertyassignment)
-    * @param standardOptionKeyList    a List of option keys from which new options will be created and added,
-    *                                  if not alaready present
-    */
+     * Creates the OptionWrapper
+     *
+     * @param structureOptions      optionlist of the structure element (e.g. group or property)
+     * @param assignmentOptions     optionlist of the according assignment (e.g. groupassignment or propertyassignment)
+     * @param standardOptionKeyList a List of option keys from which new options will be created and added,
+     *                              if not alaready present
+     */
     public OptionWrapper(List<FxStructureOption> structureOptions, List<FxStructureOption> assignmentOptions, List<String> standardOptionKeyList) {
         this(structureOptions, assignmentOptions, false);
         List<WrappedOption> standardOptions = new ArrayList<WrappedOption>();
         for (String key : standardOptionKeyList) {
-            standardOptions.add(new WrappedOption(key, FxStructureOption.VALUE_FALSE, false, true));
+            standardOptions.add(new WrappedOption(key, FxStructureOption.VALUE_FALSE, false, true, true));
         }
         for (WrappedOption o : standardOptions) {
             if (!this.structureOptions.contains(o))
@@ -173,24 +172,23 @@ public class OptionWrapper implements Serializable {
      * in the structureOptions list, else in the assignmentOptions list.
      * If the option is not present a new option will be created and set accordingly.
      *
-     * @param isStructureOption     if the option should be set/created in the structureOptions or assignmentOptions list
-     * @param key                   the Key
-     * @param value                 the Value as String
+     * @param isStructureOption if the option should be set/created in the structureOptions or assignmentOptions list
+     * @param key               the Key
+     * @param value             the Value as String
      */
     public void setOption(boolean isStructureOption, String key, String value) {
-        WrappedOption o = new WrappedOption(key, value, false, true);
+        WrappedOption o = new WrappedOption(key, value, false, true, false);
         if (isStructureOption) {
             if (!structureOptions.contains(o))
-                structureOptions.add(new WrappedOption(key, value, false, true));
+                structureOptions.add(new WrappedOption(key, value, false, true, true));
             else {
                 List<WrappedOption> options = getAll(structureOptions, key);
                 for (WrappedOption wo : options)
                     wo.setValue(value);
             }
-        }
-        else {
+        } else {
             if (!assignmentOptions.contains(o))
-                assignmentOptions.add(new WrappedOption(key, value, false, true));
+                assignmentOptions.add(new WrappedOption(key, value, false, true, true));
             else {
                 List<WrappedOption> options = getAll(assignmentOptions, key);
                 for (WrappedOption wo : options)
@@ -204,62 +202,23 @@ public class OptionWrapper implements Serializable {
      * in the structureOptions list, else in the assignmentOptions list.
      * If the option is not present a new option will be created and set accordingly
      *
-     * @param key                   the Key
-     * @param value                 the Value as boolean
-     */
-    public void setTypeOption(String key, boolean value) {
-        WrappedTypeOption o = new WrappedTypeOption(key, value, true, false, true);
-            if (!typeOptions.contains(o))
-                typeOptions.add(new WrappedTypeOption(key, value, o.isOverridable(), o.getIsInherited(), true));
-            else {
-                List<WrappedTypeOption> options = getAllForType(typeOptions, key);
-                for (WrappedTypeOption wo : options)
-                    wo.setValue(value);
-            }
-    }
-
-    /**
-     * Sets an option with Key key to Value value. If isStructure==true, the option will be set
-     * in the structureOptions list, else in the assignmentOptions list.
-     * If the option is not present a new option will be created and set accordingly.
-     *
-     * @param key                   the Key
-     * @param value                 the Value as String
-     */
-    public void setTypeOption(String key, String value) {
-        WrappedTypeOption o = new WrappedTypeOption(key, value, false, true);
-            if (!typeOptions.contains(o))
-                typeOptions.add(new WrappedTypeOption(key, value, o.isOverridable(), o.getIsInherited(), true));
-            else {
-                List<WrappedTypeOption> options = getAllForType(typeOptions, key);
-                for (WrappedTypeOption wo : options)
-                    wo.setValue(value);
-            }
-    }
-
-    /**
-     * Sets an option with Key key to Value value. If isStructure==true, the option will be set
-     * in the structureOptions list, else in the assignmentOptions list.
-     * If the option is not present a new option will be created and set accordingly
-     *
-     * @param isStructureOption     if the option should be set/created in the structureOptions or assignmentOptions list
-     * @param key                   the Key
-     * @param value                 the Value as boolean
+     * @param isStructureOption if the option should be set/created in the structureOptions or assignmentOptions list
+     * @param key               the Key
+     * @param value             the Value as boolean
      */
     public void setOption(boolean isStructureOption, String key, boolean value) {
-        WrappedOption o = new WrappedOption(key, value, false, true);
+        WrappedOption o = new WrappedOption(key, value, false, true, true);
         if (isStructureOption) {
             if (!structureOptions.contains(o))
-                structureOptions.add(new WrappedOption(key, value, false, true));
+                structureOptions.add(new WrappedOption(key, value, false, true, true));
             else {
                 List<WrappedOption> options = getAll(structureOptions, key);
                 for (WrappedOption wo : options)
                     wo.setValue(value);
             }
-        }
-        else  {
+        } else {
             if (!assignmentOptions.contains(o))
-                assignmentOptions.add(new WrappedOption(key, value, false, true));
+                assignmentOptions.add(new WrappedOption(key, value, false, true, true));
             else {
                 List<WrappedOption> options = getAll(assignmentOptions, key);
                 for (WrappedOption wo : options)
@@ -273,24 +232,22 @@ public class OptionWrapper implements Serializable {
      * structureOptions list, else from the assignmentOptions list.
      * If the option is not present a new option will be created and set with default values.
      *
-     * @param isStructureOption     if the option should be set/created in the structureOptions or assignmentOptions list
-     * @param key                   the Key
-     *
+     * @param isStructureOption if the option should be set/created in the structureOptions or assignmentOptions list
+     * @param key               the Key
      * @return the option with the matching key.
      */
     public WrappedOption getOption(boolean isStructureOption, String key) {
-        WrappedOption o = new WrappedOption(key, FxStructureOption.VALUE_FALSE, false, true);
+        WrappedOption o = new WrappedOption(key, FxStructureOption.VALUE_FALSE, false, true, true);
         if (isStructureOption) {
             if (!structureOptions.contains(o)) {
-                WrappedOption newOption = new WrappedOption(key, FxStructureOption.VALUE_FALSE, false, true);
+                WrappedOption newOption = new WrappedOption(key, FxStructureOption.VALUE_FALSE, false, true, true);
                 structureOptions.add(newOption);
                 return newOption;
             } else
                 return getFirst(structureOptions, key);
-        }
-        else {
+        } else {
             if (!assignmentOptions.contains(o)) {
-                WrappedOption newOption = new WrappedOption(key, FxStructureOption.VALUE_FALSE, false, true);
+                WrappedOption newOption = new WrappedOption(key, FxStructureOption.VALUE_FALSE, false, true, true);
                 assignmentOptions.add(newOption);
                 return newOption;
             } else
@@ -303,20 +260,18 @@ public class OptionWrapper implements Serializable {
      * structureOptions list, else from the assignmentOptions list.
      * If the option is not present, null will be returned.
      *
-     * @param isStructureOption     if the option should be set/created in the structureOptions or assignmentOptions list
-     * @param key                   the Key
-     *
+     * @param isStructureOption if the option should be set/created in the structureOptions or assignmentOptions list
+     * @param key               the Key
      * @return the option with the matching key or null if the option is not present.
      */
     public WrappedOption getOptionNoCreate(boolean isStructureOption, String key) {
-        WrappedOption o = new WrappedOption(key, FxStructureOption.VALUE_FALSE, false, true);
+        WrappedOption o = new WrappedOption(key, FxStructureOption.VALUE_FALSE, false, true, true);
         if (isStructureOption) {
             if (!structureOptions.contains(o)) {
                 return null;
             } else
                 return getFirst(structureOptions, key);
-        }
-        else {
+        } else {
             if (!assignmentOptions.contains(o)) {
                 return null;
             } else
@@ -327,54 +282,34 @@ public class OptionWrapper implements Serializable {
     /**
      * Adds a new option to the specified options list.
      *
-     * @param options       the option list to add the new option to
-     * @param key           the option key
-     * @param value         the option value
-     * @param overridable   the option overridable flag
-     * @throws FxInvalidParameterException    on errors (empty key or empty value)
+     * @param options     the option list to add the new option to
+     * @param key         the option key
+     * @param value       the option value
+     * @param overridable the option overridable flag
+     * @throws FxInvalidParameterException on errors (empty key or empty value)
      */
     public void addOption(List<WrappedOption> options, String key, String value, boolean overridable) throws FxInvalidParameterException {
-        if (!StringUtils.isEmpty(key)) {
-            if (!StringUtils.isEmpty(value)) {
-                options.add(new WrappedOption(key, value, overridable, true));
-            } else
-                throw new FxInvalidParameterException("value", "ex.optionWrapper.noValue");
-        } else
-            throw new FxInvalidParameterException("key", "ex.optionWrapper.noKey");
+        addOption(options, key, value, overridable, true);
     }
 
     /**
-     * Adds a new option to the specified options list (f. FxTypes)
+     * Adds a new option to the specified options list.
      *
-     * @param options       the option list to add the new option to
-     * @param key           the option key
-     * @param value         the option value
-     * @param overridable   the option overrideable flag
-     * @param isInherited      the option isInherited flag (FxTypes)
-     * @throws FxInvalidParameterException    on errors (empty key or empty value)
+     * @param options     the option list to add the new option to
+     * @param key         the option key
+     * @param value       the option value
+     * @param overridable the option overridable flag
+     * @param isInherited the option isInherited flag
+     * @throws FxInvalidParameterException on errors (empty key or empty value)
      */
-    public void addTypeOption(List<WrappedTypeOption> options, String key, String value, boolean overridable, boolean isInherited) throws FxInvalidParameterException {
+    public void addOption(List<WrappedOption> options, String key, String value, boolean overridable, boolean isInherited) throws FxInvalidParameterException {
         if (!StringUtils.isEmpty(key)) {
             if (!StringUtils.isEmpty(value)) {
-                options.add(new WrappedTypeOption(key, value, overridable, isInherited, true));
+                options.add(new WrappedOption(key, value, overridable, true, isInherited));
             } else
                 throw new FxInvalidParameterException("value", "ex.optionWrapper.noValue");
         } else
             throw new FxInvalidParameterException("key", "ex.optionWrapper.noKey");
-    }
-
-    public void deleteOption(List<WrappedTypeOption> options, WrappedTypeOption o) {
-        int deleteIndex = -1;
-        for (int i = 0; i < options.size(); i++) {
-            if (options.get(i).equalsCompletely(o)) {
-                deleteIndex = i;
-                break;
-            }
-        }
-        if (deleteIndex != -1)
-            options.remove(deleteIndex);
-        else
-            options.remove(o);
     }
 
     public void deleteOption(List<WrappedOption> options, WrappedOption o) {
@@ -399,7 +334,7 @@ public class OptionWrapper implements Serializable {
         return assignmentOptions;
     }
 
-    public List<WrappedTypeOption> getTypeOptions() {
+    public List<WrappedOption> getTypeOptions() {
         return typeOptions;
     }
 
@@ -407,14 +342,6 @@ public class OptionWrapper implements Serializable {
         List<FxStructureOption> converted = new ArrayList<FxStructureOption>(options.size());
         for (WrappedOption o : options) {
             converted.add(o.asFxStructureOption());
-        }
-        return converted;
-    }
-
-    public List<FxTypeOption> asFxTypeOptionList(List<WrappedTypeOption> options) {
-        List<FxTypeOption> converted = new ArrayList<FxTypeOption>(options.size());
-        for (WrappedTypeOption o : options) {
-            converted.add(o.asFxTypeOption());
         }
         return converted;
     }
@@ -442,28 +369,14 @@ public class OptionWrapper implements Serializable {
     }
 
     /**
-     * @param options   the options list
-     * @param key       the key
-     * @return  all options with Key key
+     * @param options the options list
+     * @param key     the key
+     * @return all options with Key key
      */
     private List<WrappedOption> getAll(List<WrappedOption> options, String key) {
         List<WrappedOption> result = new ArrayList<WrappedOption>();
         for (WrappedOption o : options) {
             if (o.key.equals(key))
-                result.add(o);
-        }
-        return result;
-    }
-
-    /**
-     * @param options   the type options list
-     * @param key       the key
-     * @return  all options with Key key
-     */
-    private List<WrappedTypeOption> getAllForType(List<WrappedTypeOption> options, String key) {
-        List<WrappedTypeOption> result = new ArrayList<WrappedTypeOption>();
-        for (WrappedTypeOption o : options) {
-            if (o.getKey().equals(key))
                 result.add(o);
         }
         return result;
@@ -482,19 +395,6 @@ public class OptionWrapper implements Serializable {
         return c;
     }
 
-    public boolean hasTypeOption(List<WrappedTypeOption> options, String key) {
-        return countTypeKeyOccurence(options, key) > 0;
-    }
-
-    private int countTypeKeyOccurence(List<WrappedTypeOption> options, String key) {
-        int c = 0;
-        for (WrappedTypeOption o : options) {
-            if (o.getKey().toUpperCase().equals(key.toUpperCase()))
-                c++;
-        }
-        return c;
-    }
-
     /**
      * A Map to indicate if an assignment option for a given key is valid.
      *
@@ -502,7 +402,7 @@ public class OptionWrapper implements Serializable {
      */
     public Map<String, Boolean> getIsAssignmentOptionValidMap() {
         if (assignmentOptionValidMap == null) {
-            assignmentOptionValidMap = new HashMap<String,Boolean>() {
+            assignmentOptionValidMap = new HashMap<String, Boolean>() {
                 public Boolean get(Object key) {
                     return !(key == null || "".equals(key.toString().trim()) || countKeyOccurence(assignmentOptions, (String) key) > 1
                             || isRedundant((String) key));
@@ -519,7 +419,7 @@ public class OptionWrapper implements Serializable {
      */
     public Map<String, Boolean> getIsAssignmentOptionOverridableMap() {
         if (assignmentOptionOverridableMap == null) {
-            assignmentOptionOverridableMap =  new HashMap<String,Boolean>() {
+            assignmentOptionOverridableMap = new HashMap<String, Boolean>() {
                 public Boolean get(Object key) {
                     return mayOverrideOption((String) key);
                 }
@@ -535,7 +435,7 @@ public class OptionWrapper implements Serializable {
      */
     public Map<String, Boolean> getIsStructureOptionValidMap() {
         if (structureOptionValidMap == null) {
-            structureOptionValidMap =  new HashMap<String,Boolean>() {
+            structureOptionValidMap = new HashMap<String, Boolean>() {
                 public Boolean get(Object key) {
                     return !(key == null || "".equals(key.toString().trim()) || countKeyOccurence(structureOptions, (String) key) > 1);
                 }
@@ -544,11 +444,16 @@ public class OptionWrapper implements Serializable {
         return structureOptionValidMap;
     }
 
+    /**
+     * A Map to indicate if a structure option (for types) for a given key is valid.
+     *
+     * @return a Map for JSF pages which indicates if a structure option for a given key is valid.
+     */
     public Map<String, Boolean> getIsTypeOptionValidMap() {
         if (typeOptionValidMap == null) {
-            typeOptionValidMap =  new HashMap<String,Boolean>() {
+            typeOptionValidMap = new HashMap<String, Boolean>() {
                 public Boolean get(Object key) {
-                    return !(key == null || "".equals(key.toString().trim()) || countTypeKeyOccurence(typeOptions, (String) key) > 1);
+                    return !(key == null || "".equals(key.toString().trim()) || countKeyOccurence(typeOptions, (String) key) > 1);
                 }
             };
         }
@@ -556,7 +461,7 @@ public class OptionWrapper implements Serializable {
     }
 
     /**
-     *  Wraps the GUI relevant information of FxStructureOption Objects and provides convenient setters and getters
+     * Wraps the GUI relevant information of FxStructureOption Objects and provides convenient setters and getters
      */
     public static class WrappedOption implements Serializable {
         private static final long serialVersionUID = -2746571577512522976L;
@@ -565,19 +470,22 @@ public class OptionWrapper implements Serializable {
         private String value;
         private boolean overridable;
         private boolean set;
+        private boolean isInherited;
 
-        public WrappedOption(String key, String value, boolean overridable, boolean set) {
+        public WrappedOption(String key, String value, boolean overridable, boolean set, boolean isInherited) {
             setKey(key);
             this.value = value;
             this.overridable = overridable;
             this.set = set;
+            this.isInherited = isInherited;
         }
 
-        public WrappedOption(String key, boolean value, boolean overridable, boolean set) {
+        public WrappedOption(String key, boolean value, boolean overridable, boolean set, boolean isInherited) {
             setKey(key);
             this.value = asStringValue(value);
             this.overridable = overridable;
             this.set = set;
+            this.isInherited = isInherited;
         }
 
         public WrappedOption(FxStructureOption option) {
@@ -585,6 +493,7 @@ public class OptionWrapper implements Serializable {
             this.value = option.getValue();
             this.overridable = option.isOverrideable();
             this.set = option.isSet();
+            this.isInherited = option.getIsInherited();
         }
 
         private String asStringValue(boolean value) {
@@ -594,7 +503,7 @@ public class OptionWrapper implements Serializable {
         }
 
         public FxStructureOption asFxStructureOption() {
-            return new FxStructureOption(this.key, this.overridable, this.set, this.value);
+            return new FxStructureOption(this.key, this.overridable, this.set, this.isInherited, this.value);
         }
 
         public void setValue(String value) {
@@ -627,8 +536,8 @@ public class OptionWrapper implements Serializable {
             result = 31 * result + (overridable ? 1 : 0);
             result = 31 * result + (value != null ? value.hashCode() : 0);
             result = 31 * result + (set ? 1 : 0);
-            if (result <0)
-                result=result*-1;
+            if (result < 0)
+                result = result * -1;
             return String.valueOf(result);
         }
 
@@ -652,6 +561,14 @@ public class OptionWrapper implements Serializable {
             return set;
         }
 
+        public boolean getIsInherited() {
+            return isInherited;
+        }
+
+        public void setIsInherited(boolean inherited) {
+            isInherited = inherited;
+        }
+
         @Override
         public boolean equals(Object o) {
             return !(o == null || !(o instanceof WrappedOption)) && this.key.equals(((WrappedOption) o).getKey().toUpperCase());
@@ -665,7 +582,7 @@ public class OptionWrapper implements Serializable {
         public boolean equalsCompletely(WrappedOption o) {
             if (o == null)
                 return false;
-            if (this.key.equals(o.key) && this.set == o.set && this.overridable == o.overridable)
+            if (this.key.equals(o.key) && this.set == o.set && this.overridable == o.overridable && this.isInherited == o.isInherited)
                 if (this.value != null && this.value.equals(o.value) || this.value == null && o.value == null)
                     return true;
             return false;
@@ -678,87 +595,6 @@ public class OptionWrapper implements Serializable {
                 if (this.value != null && this.value.equals(o.value) || this.value == null && o.value == null)
                     return true;
             return false;
-        }
-    }
-
-    /**
-     * Option wrapper class for FxTypes
-     */
-    public static class WrappedTypeOption extends WrappedOption {
-
-        private boolean isInherited = false;
-        private static final long serialVersionUID = -9043623785138219106L;
-
-        // constructors
-        public WrappedTypeOption(String key, String value, boolean overridable, boolean isInherited, boolean set) {
-            super(key, value, overridable, set);
-            this.isInherited = isInherited;
-        }
-
-        public WrappedTypeOption(String key, boolean value, boolean overridable, boolean isInherited, boolean set) {
-            super(key, value, overridable, set);
-            this.isInherited = isInherited;
-        }
-
-        public WrappedTypeOption(String key, String value, boolean overridable, boolean set) {
-            super(key, value, overridable, set);
-            this.isInherited = false;
-        }
-
-        public WrappedTypeOption(String key, boolean value, boolean overridable, boolean set) {
-            super(key, value, overridable, set);
-            this.isInherited = false;
-        }
-
-        public WrappedTypeOption(FxTypeOption option) {
-            super(option);
-            this.isInherited = option.isInherited();
-        }
-
-        public boolean getIsInherited() {
-            return isInherited;
-        }
-
-        public void setIsInherited(boolean isInherited) {
-            this.isInherited = isInherited;
-        }
-
-        public FxTypeOption asFxTypeOption() {
-            return new FxTypeOption(super.key, super.overridable, this.isInherited, super.set, super.value);
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            return !(o == null || !(o instanceof WrappedTypeOption)) && super.key.equals(((WrappedTypeOption) o).getKey().toUpperCase());
-        }
-
-        public boolean equalsCompletely(WrappedTypeOption o) {
-            if (o == null)
-                return false;
-            if (super.key.equals(o.getKey()) && super.set == o.isSet() && super.overridable == o.isOverridable() && this.isInherited == o.isInherited)
-                if (super.value != null && super.value.equals(o.getValue()) || super.value == null && o.getValue() == null)
-                    return true;
-            return false;
-        }
-
-        /**
-         * Hack used for commandButtons to concatenate id's and gain "unique" id's for buttons in
-         * &lt;ui:repeat&gt; tags
-         *
-         * @return id
-         */
-        @Override
-        public String getId() {
-
-            int result;
-            result = (super.key != null ? super.key.hashCode() : 0);
-            result = 31 * result + (super.overridable ? 1 : 0);
-            result = 31 * result + (isInherited ? 1 : 0);
-            result = 31 * result + (super.value != null ? super.value.hashCode() : 0);
-            result = 31 * result + (super.set ? 1 : 0);
-            if (result < 0)
-                result = result * -1;
-            return String.valueOf(result);
         }
     }
 }

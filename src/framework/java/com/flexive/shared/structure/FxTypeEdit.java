@@ -98,7 +98,7 @@ public class FxTypeEdit extends FxType implements Serializable {
                        LanguageMode language, TypeState state, byte permissions, boolean multipleContentACLs,
                        boolean includedInSupertypeQueries,
                        boolean trackHistory, long historyAge, long maxVersions, int maxRelSource,
-                       int maxRelDestination, List<FxTypeOption> options) {
+                       int maxRelDestination, List<FxStructureOption> options) {
         super(-1, acl, workflow, name, label, parent, storageMode, category, mode, language, state, permissions,
                 multipleContentACLs, includedInSupertypeQueries, trackHistory, historyAge,
                 maxVersions, maxRelSource, maxRelDestination, null, null, new ArrayList<FxTypeRelation>(5), options);
@@ -121,7 +121,7 @@ public class FxTypeEdit extends FxType implements Serializable {
                 type.getName(), type.getLabel(), type.getParent(), type.getStorageMode(), type.getCategory(),
                 type.getMode(), type.getLanguage(), type.getState(), type.permissions, type.isMultipleContentACLs(),
                 type.isIncludedInSupertypeQueries(), type.isTrackHistory(), type.getHistoryAge(), type.getMaxVersions(), type.getMaxRelSource(),
-                type.getMaxRelDestination(), type.getLifeCycleInfo(), type.getDerivedTypes(), type.getRelations(), FxTypeOption.cloneOptions(type.options));
+                type.getMaxRelDestination(), type.getLifeCycleInfo(), type.getDerivedTypes(), type.getRelations(), FxStructureOption.cloneOptions(type.options));
         FxSharedUtils.checkParameterMultilang(label, "label");
         this.isNew = false;
         this.scriptMapping = type.scriptMapping;
@@ -210,7 +210,7 @@ public class FxTypeEdit extends FxType implements Serializable {
      * @return FxTypeEdit instance for creating a new FxType
      */
     public static FxTypeEdit createNew(String name, FxString label, ACL acl, FxType parent) {
-        List<FxTypeOption> options = parent == null ? FxTypeOption.getEmptyTypeOptionList(2) : parent.getInheritedOptions();
+        List<FxStructureOption> options = parent == null ? FxStructureOption.getEmptyOptionList(2) : parent.getInheritedOptions();
         if(parent != null && parent.isMimeTypeSet()) {
             options = removeMimeTypes(options);
         }
@@ -250,10 +250,10 @@ public class FxTypeEdit extends FxType implements Serializable {
      * @param typeOptions the type options
      * @return type options w/o MIMETYPE values
      */
-    private static List<FxTypeOption> removeMimeTypes(List<FxTypeOption> typeOptions) {
-        final List<FxTypeOption> out = FxTypeOption.cloneOptions(typeOptions);
-        if(FxTypeOption.hasOption(FxTypeOption.OPTION_MIMETYPE, out)) {
-            FxTypeOption.setOption(out, FxTypeOption.OPTION_MIMETYPE, true, true, new FxMimeTypeWrapper(FxMimeType.PLACEHOLDER).toString());
+    private static List<FxStructureOption> removeMimeTypes(List<FxStructureOption> typeOptions) {
+        final List<FxStructureOption> out = FxStructureOption.cloneOptions(typeOptions);
+        if(FxStructureOption.hasOption(FxStructureOption.OPTION_MIMETYPE, out)) {
+            FxStructureOption.setOption(out, FxStructureOption.OPTION_MIMETYPE, true, true, new FxMimeTypeWrapper(FxMimeType.PLACEHOLDER).toString());
         }
 
         return out;
@@ -321,7 +321,7 @@ public class FxTypeEdit extends FxType implements Serializable {
                                        TypeStorageMode storageMode, TypeCategory category, TypeMode mode,
                                        LanguageMode language, TypeState state, byte permissions,
                                        boolean trackHistory, long historyAge, long maxVersions, int maxRelSource,
-                                       int maxRelDestination, List<FxTypeOption> options) {
+                                       int maxRelDestination, List<FxStructureOption> options) {
         return new FxTypeEdit(name, label, acl, workflow, parent, enableParentAssignments,
                 storageMode, category, mode, language, state, permissions, parent == null || parent.isMultipleContentACLs(),
                 parent == null || parent.isIncludedInSupertypeQueries(), trackHistory, historyAge,
@@ -927,8 +927,10 @@ public class FxTypeEdit extends FxType implements Serializable {
      *
      * @param options a List of FxTypeStructureOptions
      * @return itself
+     *
+     * @since 3.1
      */
-    public FxTypeEdit setOptions(List<FxTypeOption> options) {
+    public FxTypeEdit setOptions(List<FxStructureOption> options) {
         this.options = options;
         return this;
     }
@@ -940,11 +942,13 @@ public class FxTypeEdit extends FxType implements Serializable {
      * @param value value of the option
      * @return the assignment itself, useful for chained calls
      * @throws FxInvalidParameterException if the property does not allow overriding
+     *
+     * @since 3.1
      */
     public FxTypeEdit setOption(String key, String value) throws FxInvalidParameterException {
-        if (FxTypeOption.hasOption(key, options)) {
-            FxTypeOption o = this.getOption(key);
-            setOption(key, value, o.isOverrideable(), o.isInherited());
+        if (FxStructureOption.hasOption(key, options)) {
+            FxStructureOption o = this.getOption(key);
+            setOption(key, value, o.isOverrideable(), o.getIsInherited());
         } else {
             setOption(key, value, true, false);
             this.changed = true;
@@ -961,22 +965,24 @@ public class FxTypeEdit extends FxType implements Serializable {
      * @param isInherited will the option be inherited by derived types?
      * @return the assignment itself, useful for chained calls
      * @throws FxInvalidParameterException if the property does not allow overriding
+     *
+     * @since 3.1
      */
     public FxTypeEdit setOption(String key, String value, boolean overridable, boolean isInherited) throws FxInvalidParameterException {
-        if(FxTypeOption.OPTION_MIMETYPE.equals(key)) {
+        if(FxStructureOption.OPTION_MIMETYPE.equals(key)) {
             if(!mayAssignMimeType())
                 throw new FxInvalidParameterException(key, "ex.structure.type.mimetype.err");
         }
-        final FxTypeOption pOpt = getOption(key);
+        final FxStructureOption pOpt = getOption(key);
         if (parent != null) {
-            if (pOpt.isSet() && !pOpt.isOverrideable() && pOpt.isInherited()) {
+            if (pOpt.isSet() && !pOpt.isOverrideable() && pOpt.getIsInherited()) {
                 // check if it was inherited from the supertype
-                final FxTypeOption parentOption = parent.getOption(pOpt.getKey());
-                if(parentOption.isSet() && parentOption.isInherited() && (!parentOption.equals(pOpt) || !pOpt.getValue().equals(value)))
+                final FxStructureOption parentOption = parent.getOption(pOpt.getKey());
+                if(parentOption.isSet() && parentOption.getIsInherited() && (!parentOption.equals(pOpt) || !pOpt.getValue().equals(value)))
                     throw new FxInvalidParameterException(key, "ex.structure.type.override.forbidden", key, parent.getName());
             }
         }
-        FxTypeOption.setOption(options, key, overridable, isInherited, value);
+        FxStructureOption.setOption(options, key, overridable, isInherited, value);
         this.changed = true;
         return this;
     }
@@ -988,11 +994,13 @@ public class FxTypeEdit extends FxType implements Serializable {
      * @param value value of the option
      * @return the assignemnt itself, useful for chained calls
      * @throws FxInvalidParameterException if the property does not allow overriding
+     *
+     * @since 3.1
      */
     public FxTypeEdit setOption(String key, boolean value) throws FxInvalidParameterException {
-        if (FxTypeOption.hasOption(key, options)) {
-            FxTypeOption o = this.getOption(key);
-            setOption(key, value, o.isOverrideable(), o.isInherited());
+        if (FxStructureOption.hasOption(key, options)) {
+            FxStructureOption o = this.getOption(key);
+            setOption(key, value, o.isOverrideable(), o.getIsInherited());
         } else {
             setOption(key, value, true, false);
             this.changed = true;
@@ -1009,19 +1017,21 @@ public class FxTypeEdit extends FxType implements Serializable {
      * @param isInherited is the option inherited by derived types?
      * @return the assignemnt itself, useful for chained calls
      * @throws FxInvalidParameterException if the property does not allow overriding
+     *
+     * @since 3.1
      */
     public FxTypeEdit setOption(String key, boolean value, boolean overridable, boolean isInherited) throws FxInvalidParameterException {
 
-        final FxTypeOption pOpt = getOption(key);
+        final FxStructureOption pOpt = getOption(key);
         if (parent != null) {
-            if (pOpt.isSet() && !pOpt.isOverrideable() && pOpt.isInherited()) {
+            if (pOpt.isSet() && !pOpt.isOverrideable() && pOpt.getIsInherited()) {
                 // check if it was inherited from the supertype
-                final FxTypeOption parentOption = parent.getOption(pOpt.getKey());
-                if(parentOption.isSet() && parentOption.isInherited() && (!parentOption.equals(pOpt) || !pOpt.isValueTrue() == value))
+                final FxStructureOption parentOption = parent.getOption(pOpt.getKey());
+                if(parentOption.isSet() && parentOption.getIsInherited() && (!parentOption.equals(pOpt) || !pOpt.isValueTrue() == value))
                     throw new FxInvalidParameterException(key, "ex.structure.type.override.forbidden", key, parent.getName());
             }
         }
-        FxTypeOption.setOption(options, key, overridable, isInherited, value);
+        FxStructureOption.setOption(options, key, overridable, isInherited, value);
         this.changed = true;
         return this;
     }
@@ -1030,22 +1040,26 @@ public class FxTypeEdit extends FxType implements Serializable {
      * Clear an option entry
      *
      * @param key option name
+     *
+     * @since 3.1
      */
     public void clearOption(String key) {
-        FxTypeOption.clearOption(options, key);
+        FxStructureOption.clearOption(options, key);
     }
 
     /**
      * Set 1* MimeTypes for a given FxType. The mimetype can only be set for descendents of "DOCUMENTFILE"
      * 
-     *  @param mimeTypeWrapper the MimeType to set
+     * @param mimeTypeWrapper the MimeType to set
      * @return this
+     *
+     * @since 3.1
      */
     public FxTypeEdit setMimeType(FxMimeTypeWrapper mimeTypeWrapper) {
         if(!mayAssignMimeType())
             throw new FxApplicationException("ex.structure.type.mimetype.err", this).asRuntimeException();
 
-        FxTypeOption.setOption(options, FxTypeOption.OPTION_MIMETYPE, true, true, mimeTypeWrapper.toString());
+        FxStructureOption.setOption(options, FxStructureOption.OPTION_MIMETYPE, true, true, mimeTypeWrapper.toString());
         this.changed = true;
         return this;
     }
@@ -1055,6 +1069,8 @@ public class FxTypeEdit extends FxType implements Serializable {
      * or any of its derived types
      * 
      * @return returns true if a mime type may be assigned to this FxType
+     *
+     * @since 3.1
      */
     public boolean mayAssignMimeType() {
         return name.equals(DOCUMENTFILE) || parent != null && this.isDerivedFrom(DOCUMENTFILE);

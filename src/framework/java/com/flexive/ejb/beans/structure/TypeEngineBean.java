@@ -806,9 +806,9 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
             boolean optionsChanged = updateTypeOptions(con, type, orgType);
             // check if any type options must be propagated to derived types
             if(type.getDerivedTypes().size() > 0) {
-                final List<FxTypeOption> inherit = new ArrayList<FxTypeOption>(type.getOptions().size());
-                for(FxTypeOption o : type.getOptions()) {
-                    if(o.isInherited()) {
+                final List<FxStructureOption> inherit = new ArrayList<FxStructureOption>(type.getOptions().size());
+                for(FxStructureOption o : type.getOptions()) {
+                    if(o.getIsInherited()) {
                         inherit.add(o);
                     }
                 }
@@ -1060,7 +1060,7 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
         FxEnvironment environment = CacheAdmin.getEnvironment();
         try {
             // load structure options for a given type
-            final List<FxTypeOption> options = loadTypeOptions(con, id, "ID", TBL_STRUCT_TYPES_OPTIONS);
+            final List<FxStructureOption> options = loadTypeOptions(con, id, "ID", TBL_STRUCT_TYPES_OPTIONS);
 
             //                                 1         2       3        4
             ps = con.prepareStatement("SELECT TYPESRC, TYPEDST, MAXSRC, MAXDST FROM " + TBL_STRUCT_TYPERELATIONS + " WHERE TYPEDEF=?");
@@ -1160,7 +1160,7 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
      * @param update set to true if an update should be performed
      */
     private void storeTypeOptions(Connection con, String table, String primaryColumn, long id, // Long assignmentId,
-                              List<FxTypeOption> options, boolean update) throws SQLException, FxInvalidParameterException {
+                              List<FxStructureOption> options, boolean update) throws SQLException, FxInvalidParameterException {
         PreparedStatement ps = null;
         try {
             if(update) {
@@ -1174,13 +1174,13 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
                 return;
             //                                                        1                 2      3           4        5
             ps = con.prepareStatement("INSERT INTO " + table + " (" + primaryColumn + ",OPTKEY,MAYOVERRIDE,ISINHERITED,OPTVALUE)VALUES(?,?,?,?,?)");
-            for (FxTypeOption option : options) {
+            for (FxStructureOption option : options) {
                 ps.setLong(1, id);
                 if (StringUtils.isEmpty(option.getKey()))
                     throw new FxInvalidParameterException("key", "ex.structure.option.key.empty", option.getValue());
                 ps.setString(2, option.getKey());
                 ps.setBoolean(3, option.isOverrideable());
-                ps.setBoolean(4, option.isInherited());
+                ps.setBoolean(4, option.getIsInherited());
                 ps.setString(5, option.getValue());
                 ps.addBatch();
             }
@@ -1210,8 +1210,8 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
             changed = true;
         } else {
             for (int i = 0; i < orig.getOptions().size(); i++) {
-                FxTypeOption origOpt = orig.getOptions().get(i);
-                FxTypeOption newOpt = type.getOption(origOpt.getKey());
+                FxStructureOption origOpt = orig.getOptions().get(i);
+                FxStructureOption newOpt = type.getOption(origOpt.getKey());
                 if (!origOpt.equals(newOpt)) {
                     changed = true;
                     break;
@@ -1234,13 +1234,13 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
      * @throws SQLException on errors
      * @throws FxInvalidParameterException on errors
      */
-    private boolean updateDerivedTypeOptions(Connection con, FxType derived, List<FxTypeOption> inheritedOpts)
+    private boolean updateDerivedTypeOptions(Connection con, FxType derived, List<FxStructureOption> inheritedOpts)
         throws SQLException, FxInvalidParameterException {
         boolean changed = false;
-        final List<FxTypeOption> current = derived.getOptions();
-        final List<FxTypeOption> newOpts = new ArrayList<FxTypeOption>(inheritedOpts.size());
-        for(FxTypeOption o : inheritedOpts) {
-            if(!FxTypeOption.hasOption(o.getKey(), current))
+        final List<FxStructureOption> current = derived.getOptions();
+        final List<FxStructureOption> newOpts = new ArrayList<FxStructureOption>(inheritedOpts.size());
+        for(FxStructureOption o : inheritedOpts) {
+            if(!FxStructureOption.hasOption(o.getKey(), current))
                 newOpts.add(o);
         }
 
@@ -1262,16 +1262,16 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
      * @return structure options
      * @throws SQLException on errors
      */
-    private List<FxTypeOption> loadTypeOptions(Connection con, long typeId, String idColumn, String table) throws SQLException {
+    private List<FxStructureOption> loadTypeOptions(Connection con, long typeId, String idColumn, String table) throws SQLException {
         PreparedStatement ps = null;
-        List<FxTypeOption> result = new ArrayList<FxTypeOption>(4);
+        List<FxStructureOption> result = new ArrayList<FxStructureOption>(4);
         try {
             //                                1      2           3        4
             ps = con.prepareStatement("SELECT OPTKEY,MAYOVERRIDE,ISINHERITED,OPTVALUE FROM " + table + " WHERE " + idColumn + "=?");
             ps.setLong(1, typeId);
             final ResultSet rs = ps.executeQuery();
             while (rs.next()) {
-                FxTypeOption.setOption(result, rs.getString(1), rs.getBoolean(2), rs.getBoolean(3), rs.getString(4));
+                FxStructureOption.setOption(result, rs.getString(1), rs.getBoolean(2), rs.getBoolean(3), rs.getString(4));
             }
             ps.close();
             return result;

@@ -374,22 +374,22 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
      * @return options
      * @throws SQLException on errors
      */
-    private Map<Long, List<FxTypeOption>> loadAllTypeOptions(Connection con) throws SQLException {
+    private Map<Long, List<FxStructureOption>> loadAllTypeOptions(Connection con) throws SQLException {
         return loadAllTypeOptions(con, "ID", TBL_STRUCT_TYPES_OPTIONS);
     }
 
-    private Map<Long, List<FxTypeOption>> loadAllTypeOptions(Connection con, String idColumn, String table) throws SQLException {
+    private Map<Long, List<FxStructureOption>> loadAllTypeOptions(Connection con, String idColumn, String table) throws SQLException {
         Statement stmt = null;
-        Map<Long, List<FxTypeOption>> result = new HashMap<Long, List<FxTypeOption>>(50);
+        Map<Long, List<FxStructureOption>> result = new HashMap<Long, List<FxStructureOption>>(50);
         try {
             stmt = con.createStatement();
             final ResultSet rs = stmt.executeQuery("SELECT " + idColumn + ",OPTKEY,MAYOVERRIDE,ISINHERITED,OPTVALUE FROM " + table);
             while (rs.next()) {
                 final long id = rs.getLong(1);
                 if (!result.containsKey(id)) {
-                    result.put(id, new ArrayList<FxTypeOption>());
+                    result.put(id, new ArrayList<FxStructureOption>());
                 }
-                FxTypeOption.setOption(result.get(id), rs.getString(2), rs.getBoolean(3), rs.getBoolean(4), rs.getString(5));
+                FxStructureOption.setOption(result.get(id), rs.getString(2), rs.getBoolean(3), rs.getBoolean(4), rs.getString(5));
             }
             return result;
         } finally {
@@ -437,7 +437,7 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
         String curSql;
         ArrayList<FxType> result = new ArrayList<FxType>(20);
         try {
-            final Map<Long, List<FxTypeOption>> typeOptions = loadAllTypeOptions(con);
+            final Map<Long, List<FxStructureOption>> typeOptions = loadAllTypeOptions(con);
 
             //                                 1         2       3        4
             ps = con.prepareStatement("SELECT TYPESRC, TYPEDST, MAXSRC, MAXDST FROM " + TBL_STRUCT_TYPERELATIONS + " WHERE TYPEDEF=?");
