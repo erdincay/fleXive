@@ -48,7 +48,7 @@ if (processed) {
 
 // check which renderer to use, if both are active PDFRenderer will be used first and 
 // ICEpdf as fallback in case of errors
-boolean usePDFRenderer = false
+boolean usePDFRenderer = true
 boolean useICEpdf = true
 
 

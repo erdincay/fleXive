@@ -1087,6 +1087,7 @@ database.vendor=MySQL
 
         <!-- Also package libraries that are not available on common public servers -->
         <maven-deploy file="${flexive.lib.dir}/sanselan.jar" pom="sanselan.pom"/>
+        <maven-deploy file="${flexive.lib.dir}/icepdf-core.jar" pom="icepdf-core.pom"/>
         <maven-deploy file="${flexive.lib.dir}/jsf/jsf-facelets.jar" pom="jsf-facelets.pom">
             <attach file="${flexive.lib.dir}/jsf/jsf-facelets-src.jar" classifier="sources"/>
         </maven-deploy>

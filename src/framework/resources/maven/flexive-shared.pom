@@ -121,7 +121,7 @@
         <dependency>
             <groupId>com.flexive</groupId>
             <artifactId>sanselan</artifactId>
-            <version>0.98-SNAPSHOT</version>
+            <version>0.98-20090914</version>
             <optional>false</optional>
         </dependency>
 

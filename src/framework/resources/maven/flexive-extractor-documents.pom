@@ -96,5 +96,12 @@
             <version>1.0-20090423</version>
         </dependency>
 
+        <!-- ICEpdf renderer -->
+        <dependency>
+            <groupId>com.flexive</groupId>
+            <artifactId>icepdf-core</artifactId>
+            <version>4.0.0_7</version>
+        </dependency>
+
     </dependencies>
 </project>

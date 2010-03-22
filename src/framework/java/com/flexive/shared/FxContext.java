@@ -666,8 +666,8 @@ public class FxContext implements Serializable {
                     else
                         si.ticket.setLanguage(last.getLanguage());
                 } catch (FxInvalidLanguageException e) {
-                    if (LOG.isInfoEnabled()) {
-                        LOG.info("Failed to use request locale from browser - unknown language: " + request.getLocale().getLanguage());
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Failed to use request locale from browser - unknown language: " + request.getLocale().getLanguage());
                     }
                 } catch (FxApplicationException e) {
                     if (LOG.isInfoEnabled()) {
