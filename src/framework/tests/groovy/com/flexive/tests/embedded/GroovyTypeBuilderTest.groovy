@@ -58,12 +58,12 @@ import com.flexive.shared.FxLanguage
  */
 class GroovyTypeBuilderTest {
     @BeforeClass (groups = ["ejb", "scripting", "structure"])
-    def beforeClass() {
+    void beforeClass() {
         com.flexive.tests.embedded.FxTestUtils.login(TestUsers.SUPERVISOR);
     }
 
     @AfterClass (groups = ["ejb", "scripting", "structure"])
-    def afterClass() {
+    void afterClass() {
         com.flexive.tests.embedded.FxTestUtils.logout()
     }
 
@@ -84,7 +84,7 @@ class GroovyTypeBuilderTest {
     }
 
     @Test (groups = ["ejb", "scripting", "structure"])
-    def simpleStructureBuilder() {
+    void simpleStructureBuilder() {
         try {
             // create the type "builderTest"
             new GroovyTypeBuilder().builderTest {
@@ -167,7 +167,7 @@ class GroovyTypeBuilderTest {
     }
 
     @Test (groups = ["ejb", "scripting", "structure"])
-    def typeConstructorArguments() {
+    void typeConstructorArguments() {
         // test miscellaneous arguments to the type constructor
         try {
             new GroovyTypeBuilder().builderTest(usePermissions: false)
@@ -232,7 +232,7 @@ class GroovyTypeBuilderTest {
     }
 
     @Test (groups = ["ejb", "scripting", "structure"])
-    def invalidPropertyAssignmentBuilder() {
+    void invalidPropertyAssignmentBuilder() {
         // try to create a property assignment using a group assignment
         try {
             new GroovyTypeBuilder().builderTest {
@@ -251,7 +251,7 @@ class GroovyTypeBuilderTest {
     }
 
     @Test (groups = ["ejb", "scripting", "structure"])
-    def invalidGroupAssignmentBuilder() {
+    void invalidGroupAssignmentBuilder() {
         // try to create a group assignment using a property assignment
         try {
             new GroovyTypeBuilder().builderTest {
@@ -287,7 +287,7 @@ class GroovyTypeBuilderTest {
      * Also tests changes to a prop assignment after setting an alias
      */
     @Test (groups = ["ejb", "scripting", "structure"])
-    def propertyArgumentsTest() {
+    void propertyArgumentsTest() {
         // create custom ACL
         def aclEngine = EJBLookup.getAclEngine()
         def aclId = aclEngine.create("Testicus ACL", new FxString(true, "TESTICUS"), TestUsers.getTestMandator(), "#000000", "Testicus ACL Description", ACLCategory.STRUCTURE);
@@ -433,7 +433,7 @@ class GroovyTypeBuilderTest {
      * mixture of nodes, mixing calls w/ and w/o changes
      */
     @Test (groups = ["ejb", "scripting", "structure"])
-    def groupAssignmentTest() {
+    void groupAssignmentTest() {
         def aclEngine = EJBLookup.getAclEngine()
         def aclId = aclEngine.create("Testicus ACL", new FxString(true, "TESTICUS"), TestUsers.getTestMandator(), "#000000", "Testicus ACL Description", ACLCategory.STRUCTURE);
         def acl = environment().getACL(aclId);
@@ -617,7 +617,7 @@ class GroovyTypeBuilderTest {
      * Test creation of props / assignments within existing groups
      */
     @Test (groups = ["ejb", "scripting", "structure"])
-    def groupChildAssignmentTest() {
+    void groupChildAssignmentTest() {
         try {
             // let's create a type with several (sub) groups and one property in the root
             new GroovyTypeBuilder().builderTest {
@@ -740,7 +740,7 @@ class GroovyTypeBuilderTest {
      * Create a simple type and derive a new one
      */
     @Test (groups = ["ejb", "scripting", "structure"])
-    def derivedTypeTest() {
+    void derivedTypeTest() {
         try {
             new GroovyTypeBuilder().builderBase {
                 prop1()
@@ -800,7 +800,7 @@ class GroovyTypeBuilderTest {
      * Tests the various options / attributes for a group (assignment)
      */
     @Test (groups = ["ejb", "scripting", "structure"])
-    def groupAttributesTest() {
+    void groupAttributesTest() {
         try {
             new GroovyTypeBuilder().builderTest {
                 Group1(defaultMultiplicity: 0,
@@ -862,7 +862,7 @@ class GroovyTypeBuilderTest {
      * Test settings type / list references f. properties
      */
     @Test (groups = ["ejb", "scripting", "structure"])
-    def referenceTest() {
+    void referenceTest() {
         try {
             // ty[es
             new GroovyTypeBuilder().builderTest {
@@ -914,7 +914,7 @@ class GroovyTypeBuilderTest {
      * Tests alias changes for assignments
      */
     @Test (groups = ["ejb", "scripting", "structure"])
-    def aliasChangeTest() {
+    void aliasChangeTest() {
         try {
             new GroovyTypeBuilder().builderTest {
                 prop1()
@@ -1060,7 +1060,7 @@ class GroovyTypeBuilderTest {
      * Tests creating properties groups which already exist within other structures
      */
     @Test (groups = ["ejb", "scripting", "structure"])
-    def existingStructuretest() {
+    void existingStructuretest() {
         try {
             new GroovyTypeBuilder().testicus {
                 prop1()
@@ -1135,7 +1135,7 @@ class GroovyTypeBuilderTest {
      * Tests a walk through a structure
      */
     @Test (groups = ["ejb", "scripting", "structure"])
-    def structureWalkthroughTest() {
+    void structureWalkthroughTest() {
         try {
             new GroovyTypeBuilder().builderTest {
                 propA()
@@ -1197,7 +1197,7 @@ class GroovyTypeBuilderTest {
      * (for "label" and "hint")
      */
     @Test (groups = ["ejb", "scripting", "structure"])
-    def defaultTranslationTest() {
+    void defaultTranslationTest() {
         new GroovyTypeBuilder().builderTest {
             prop1(label: new FxString(true, FxLanguage.GERMAN, "Ein Label"))
             prop2(label: new FxString(true, "A label"))
@@ -1221,7 +1221,7 @@ class GroovyTypeBuilderTest {
      * hierarchical levels)
      */
     @Test (groups = ["ejb", "scripting", "structure"])
-    def createUniquePropsTest() {
+    void createUniquePropsTest() {
         new GroovyTypeBuilder().builderTest {
             prop1()
             prop1(dataType: FxDataType.Number, alias: "prop1alias")
@@ -1266,7 +1266,7 @@ class GroovyTypeBuilderTest {
      * reference documentation's chapter "GroovyTypeBuilder: Property and Group Creation - Default Values"
      */
     @Test (groups = ["ejb", "scripting", "structure"])
-    def defaultValueTest() {
+    void defaultValueTest() {
         new GroovyTypeBuilder().defValueTest {
             defprop1()
             defGroup1()
@@ -1309,7 +1309,7 @@ class GroovyTypeBuilderTest {
      * (i.e. only throw exceptions IFF the given overridable attribute != the base property's attribute
      */
     @Test (groups = ["ejb", "scripting", "structure"])
-    def assignmentOverrideTest() {
+    void assignmentOverrideTest() {
         // default values (actual attrib values in () )
         /*
         Properties:
@@ -1546,7 +1546,7 @@ class GroovyTypeBuilderTest {
      * as if creating a new one
      */
     @Test (groups = ["ejb", "scripting", "structure"])
-    def constructorCallTest() {
+    void constructorCallTest() {
         new GroovyTypeBuilder().builderTest {
             p1()
         }
@@ -1581,7 +1581,7 @@ class GroovyTypeBuilderTest {
      * except when "acl" is present as well.
      */
     @Test (groups = ["ejb", "scripting", "structure"])
-    def generalAclSettingTest() {
+    void generalAclSettingTest() {
         // create custom ACL
         def aclEngine = EJBLookup.getAclEngine()
         def aclId = aclEngine.create("Testicus ACL", new FxString(true, "TESTICUS"), TestUsers.getTestMandator(), "#000000", "Testicus ACL Description", ACLCategory.STRUCTURE);
@@ -1638,7 +1638,7 @@ class GroovyTypeBuilderTest {
      * Tests the GTB "flatten" option
      */
     @Test (groups = ["ejb", "scripting", "structure"])
-    def flatStorageTest() {
+    void flatStorageTest() {
         try {
             new GroovyTypeBuilder().builderTest() {
                 flprop1()
@@ -1671,7 +1671,7 @@ class GroovyTypeBuilderTest {
      * Test setting type options
      */
     @Test (groups = ["ejb", "scripting", "structure"])
-    def typeOptionTest() {
+    void typeOptionTest() {
         try {
             new GroovyTypeBuilder().builderTest("OPT_A": true,
                                                 "OPT_B": "ASDF") {

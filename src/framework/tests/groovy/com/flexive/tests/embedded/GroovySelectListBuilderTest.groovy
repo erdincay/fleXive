@@ -48,17 +48,17 @@ import org.testng.annotations.Test
  */
 public class GroovySelectListBuilderTest {
   @BeforeClass (groups = ["ejb", "scripting", "structure"])
-  def beforeClass() {
+  void beforeClass() {
     com.flexive.tests.embedded.FxTestUtils.login(TestUsers.SUPERVISOR);
   }
 
   @AfterClass (groups = ["ejb", "scripting", "structure"])
-  def afterClass() {
+  void afterClass() {
     com.flexive.tests.embedded.FxTestUtils.logout()
   }
 
   @Test (groups = ["ejb", "scripting", "structure"])
-  def simpleListBuilder() {
+  void simpleListBuilder() {
     def builderList = new GroovySelectListBuilder().testList(
             name: "TestList",
             label: new FxString("List Label"),

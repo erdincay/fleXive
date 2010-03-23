@@ -47,7 +47,7 @@ import org.testng.Assert
 class GroovyQueryBuilderTest {
 
     @Test (groups = ["scripting", "ejb", "search"])
-    def simpleBuilderTest() {
+    void simpleBuilderTest() {
         def root = new GroovyQueryBuilder().select(["@pk", "caption", "*"]) {
             eq("caption", "bla")
             not_empty("filename")
@@ -63,7 +63,7 @@ class GroovyQueryBuilderTest {
     }
 
     @Test (groups = ["scripting", "ejb", "search"])
-    def repeatableSqlQueryTest() {
+    void repeatableSqlQueryTest() {
         def root = new GroovyQueryBuilder().select(["caption"]) {
             like("caption", "test%")
             gt("id", 0)
@@ -74,7 +74,7 @@ class GroovyQueryBuilderTest {
     }
 
     @Test (groups = ["scripting", "ejb", "search"])
-    def filterBriefcaseTest() {
+    void filterBriefcaseTest() {
         def root = new GroovyQueryBuilder().select(["@pk"]) {
             filterBriefcase(21)
         }
@@ -85,7 +85,7 @@ class GroovyQueryBuilderTest {
     }
 
     @Test (groups = ["scripting", "ejb", "search"])
-    def filterBriefcaseTestExternalBuilder() {
+    void filterBriefcaseTestExternalBuilder() {
         def builder = new SqlQueryBuilder()
         new GroovyQueryBuilder(builder).select(["@pk"]) {
             filterBriefcase(21)
