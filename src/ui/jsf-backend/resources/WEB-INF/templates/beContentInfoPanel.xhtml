@@ -76,11 +76,12 @@ wrappedContent... value binding to wrapped content object provided by fxConentEd
                                     lockscreen="false" location="content"
                                icon="export"
                                onclick="exportContent('#{myContent.content.pk}');return false;"/>
-                
-                <adm:commandButton id="exportCopyClipboardButton" location="content" labelKey="Content.button.copyToClipboard"
-                                   icon="paste" lockscreen="false"
-                                   onclick="copy2clipboard(getPreElementContent('exportArea'),'#{fxMessageBean['Global.clipboard.error']}','#{fxMessageBean['Global.clipboard.success']}'); return false"
-                        />
+
+                <c:if test="#{fxSystemBean.browserAsString=='IE'}">
+                    <adm:commandButton id="exportCopyClipboardButton" location="content" labelKey="Content.button.copyToClipboard"
+                                       icon="paste" lockscreen="false"
+                                       onclick="copy2clipboard(getPreElementContent('exportArea'),'#{fxMessageBean['Global.clipboard.error']}','#{fxMessageBean['Global.clipboard.success']}'); return false"/>
+                </c:if>
 
                 <br clear="all"/>
             </div>

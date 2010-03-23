@@ -133,7 +133,7 @@ function escapeQuotes(string) {
 }
 
 /**
- * copy cliptext to the OS's clipboard
+ * copy cliptext to the OS's clipboard - works in IE only!
  *
  * @param cliptext text to copy to the clipboard
  * @param errorMessage error message to display if copying failed (usually a how to enable the clipboard in mozilla/firefox)
@@ -143,48 +143,6 @@ function copy2clipboard(cliptext, errorMessage, successMessage) {
 
     if (window.clipboardData) {
         window.clipboardData.setData("Text", ""+cliptext);
-    } else if (window.netscape) {
-//this code seems to work on FF3 but not FF2 ...        
-//        try {
-//            netscape.security.PrivilegeManager.enablePrivilege('UniversalXPConnect');
-//        } catch(ex) {
-//            if( errorMessage ) alertDialog(errorMessage); else alertDialog(ex);
-//            return false;
-//        }
-//        var clip = Components.classes['@mozilla.org/widget/clipboard;1'].createInstance(Components.interfaces.nsIClipboard);
-//        if (!clip) {
-//            if( errorMessage ) alertDialog(errorMessage);
-//            return false;
-//        }
-//        var trans = Components.classes['@mozilla.org/widget/transferable;1'].createInstance(Components.interfaces.nsITransferable);
-//        if (!trans) {
-//            if( errorMessage ) alertDialog(errorMessage);
-//            return false;
-//        }
-//        trans.addDataFlavor('text/unicode');
-//        var len = new Object();
-//        var str = Components.classes["@mozilla.org/supports-string;1"].createInstance(Components.interfaces.nsISupportsString);
-//        var copytext = cliptext;
-//        str.data = copytext;
-//        trans.setTransferData("text/unicode", str, copytext.length * 2);
-//        var clipid = Components.interfaces.nsIClipboard;
-//        if (!clip) {
-//            if( errorMessage ) alertDialog(errorMessage);
-//            return false;
-//        }
-//        clip.setData(trans, null, clipid.kGlobalClipboard);
-
-        //try flash
-        var fxClipboard = 'fxClipboard';
-        if (!document.getElementById(fxClipboard)) {
-            //create the div
-            var _div = document.createElement('div');
-            _div.id = fxClipboard;
-            document.body.appendChild(_div);
-        }
-        document.getElementById(fxClipboard).innerHTML = '';
-        document.getElementById(fxClipboard).innerHTML = '<embed src="'+getBase()+'adm/js/fxClipCopy.swf" FlashVars="cliptext=' +
-                                                         encodeURIComponent(cliptext) + '" width="0" height="0" type="application/x-shockwave-flash"></embed>';
     }
     if( successMessage ) alertDialog(successMessage);
     return false;
