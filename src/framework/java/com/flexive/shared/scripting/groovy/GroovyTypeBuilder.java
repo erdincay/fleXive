@@ -1293,10 +1293,9 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
                 if (multilang) { // only set if "true", prop default fallback otherwise
                     property.setMultiLang(multilang);
                 }
+            // overrides will be true by default (unless explicitly set to false)!
             if (attributes.containsKey("overrideMultilang"))
-                if (overrideMultilang) { // only set if "true", prop default fallback otherwise
-                    property.setOverrideMultiLang(overrideMultilang);
-                }
+                property.setOverrideMultiLang(overrideMultilang);
             if (attributes.containsKey("overrideACL"))
                 property.setOverrideACL(overrideACL);
             if (attributes.containsKey("overrideMultiplicity"))
@@ -1327,9 +1326,7 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
                 }
             }
             if (attributes.containsKey("overrideMaxLength"))
-                if (overrideMaxLength) { // only set this property if set to true, will fall back to prop default
-                    property.setOverrideMaxLength(overrideMaxLength);
-                }
+                property.setOverrideMaxLength(overrideMaxLength);
             if (defaultValue != null)
                 property.setDefaultValue(defaultValue);
             if (attributes.containsKey("uniqueMode"))

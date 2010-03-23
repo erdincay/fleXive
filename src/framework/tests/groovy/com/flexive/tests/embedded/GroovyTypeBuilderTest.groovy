@@ -1276,14 +1276,14 @@ class GroovyTypeBuilderTest {
             def FxProperty p = environment().getProperty("DEFPROP1")
             def pa = (FxPropertyAssignment) environment().getAssignment("DEFVALUETEST/DEFPROP1")
             // overrides
-            Assert.assertFalse(p.mayOverrideMultiLang())
+            Assert.assertTrue(p.mayOverrideMultiLang())
             Assert.assertTrue(p.mayOverrideACL())
-            Assert.assertFalse(p.mayOverrideMultiLine())
-            Assert.assertFalse(p.mayOverrideInOverview())
+            Assert.assertTrue(p.mayOverrideMultiLine())
+            Assert.assertTrue(p.mayOverrideInOverview())
             Assert.assertTrue(p.mayOverrideBaseMultiplicity())
-            Assert.assertFalse(p.mayOverrideMaxLength())
+            Assert.assertTrue(p.mayOverrideMaxLength())
             Assert.assertTrue(p.mayOverrideSearchable())
-            Assert.assertFalse(p.mayOverrideUseHTMLEditor())
+            Assert.assertTrue(p.mayOverrideUseHTMLEditor())
 
             // attributes (assignment & base prop)
             Assert.assertFalse(p.isMultiLang())
@@ -1311,17 +1311,19 @@ class GroovyTypeBuilderTest {
     @Test (groups = ["ejb", "scripting", "structure"])
     void assignmentOverrideTest() {
         // default values (actual attrib values in () )
+        // default OVERRIDE values are always TRUE unless explicitly set
+        // --> FxStructureOptions - unknown options - return "true"
         /*
         Properties:
 
         # overrideACL: true (acl: "Default Structure ACL")
         # overrideMultiplicity: true (multiplicity: FxMultiplicity.MULT_0_1)
-        # overrideMultilang: false (multilang: false)
-        # overrideMultiline: false (multiline: false)
-        # overrideInOverview: false (inOverview: false)
-        # overrideMaxLength: false (maxLength / not set))
+        # overrideMultilang: true (multilang: false)
+        # overrideMultiline: true (multiline: false)
+        # overrideInOverview: true (inOverview: false)
+        # overrideMaxLength: true (maxLength / not set))
         # overrideSearchable: true  (searchable: true)
-        # overrideUseHtmlEditor: false (useHtmlEditor: false)
+        # overrideUseHtmlEditor: true (useHtmlEditor: false)
 
         Groups:
 
@@ -1329,9 +1331,10 @@ class GroovyTypeBuilderTest {
         */
 
         new GroovyTypeBuilder().builderTest {
-            prop1(overrideMultiplicity: false, overrideACL: false, overrideSearchable: false)
-            prop2(dataType: FxDataType.Text, overrideMultiplicity: true, overrideACL: true,
-                    overrideMultilang: true, overrideMultiline: true, overrideInOverview: true)
+            prop1(overrideMultiplicity: false, overrideACL: false, overrideSearchable: false,
+                    overrideMultiline: false, overrideInOverview: false, overrideMultilang: false,
+                    overrideMaxLength: false, overrideUseHtmlEditor: false)
+            prop2(dataType: FxDataType.Text)
             Group1()
         }
 
@@ -1372,11 +1375,12 @@ class GroovyTypeBuilderTest {
             Assert.assertFalse(removeAssignment("BUILDERTEST/PROP1DER"))
 
             // multiline /////////////////////////////////////////
+            // prop2 may override multiline, prop1 may not
             builder = new GroovyTypeBuilder("BUILDERTEST")
             builder {
-                prop1der(assignment: "BUILDERTEST/PROP1", multiline: false)
+                prop2der(assignment: "BUILDERTEST/PROP2", multiline: false)
             }
-            Assert.assertTrue(removeAssignment("BUILDERTEST/PROP1DER"))
+            Assert.assertTrue(removeAssignment("BUILDERTEST/PROP2DER"))
 
             try {
                 builder = new GroovyTypeBuilder("BUILDERTEST")
@@ -1437,12 +1441,13 @@ class GroovyTypeBuilderTest {
             Assert.assertFalse(removeAssignment("BUILDERTEST/PROP1DER"))
 
             // maxLength /////////////////////////////////////////
+            // override in prop2, may not in prop1
             builder = new GroovyTypeBuilder("BUILDERTEST")
             builder {
-                prop1der(assignment: "BUILDERTEST/PROP1", maxLength: 0)
+                prop2der(assignment: "BUILDERTEST/PROP2", maxLength: 0)
                 // 0 is the default setting upon property initialisation
             }
-            Assert.assertTrue(removeAssignment("BUILDERTEST/PROP1DER"))
+            Assert.assertTrue(removeAssignment("BUILDERTEST/PROP2DER"))
 
             try {
                 builder = new GroovyTypeBuilder("BUILDERTEST")
@@ -1676,17 +1681,14 @@ class GroovyTypeBuilderTest {
             new GroovyTypeBuilder().builderTest("OPT_A": true,
                                                 "OPT_B": "ASDF") {
             }
-
             def t = environment().getType("BUILDERTEST")
-
             Assert.assertTrue(t.getOption("OPT_A").isValueTrue())
             Assert.assertEquals(t.getOption("OPT_B").getValue(), "ASDF")
             // default settings
             Assert.assertTrue(t.getOption("OPT_A").isOverrideable())
-            Assert.assertFalse(t.getOption("OPT_A").isInherited())
+            Assert.assertFalse(t.getOption("OPT_A").getIsInherited())
             Assert.assertTrue(t.getOption("OPT_B").isOverrideable())
-            Assert.assertFalse(t.getOption("OPT_B").isInherited())
-            
+            Assert.assertFalse(t.getOption("OPT_B").getIsInherited())
         } finally {
             removeTestType()
         }
