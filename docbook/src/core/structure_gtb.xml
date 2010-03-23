@@ -261,6 +261,11 @@ builder {
                         Attributes in the wrong case will be
                         ignored, misspelled attributes *might* be interpreted as generic structure options.
                     </para>
+                    <para>
+                        Override options which are not explicitly set will by default return &quot;true&quot;.
+                        The following overrides are affected: &quot;overrideMultiplicity&quot;, &quot;overrideACL&quot;, &quot;overrideSearchable&quot;,
+                        &quot;overrideMultiline&quot;, &quot;overrideInOverview&quot;, &quot;overrideMultilang&quot;, &quot;overrideMaxLength&quot;, &quot;overrideUseHtmlEditor&quot;
+                    </para>
                 </warning>
             </para>
             <para>
