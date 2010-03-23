@@ -64,11 +64,11 @@ database.H2.username=sa
 # if the password is not set, use "()" to set it to empty
 database.H2.password=()
 # division database to use
-database.H2.database.division=~/flexive
+database.H2.database.division=${basedir}/flexive-db/h2/flexive
 # configuration database to use
-database.H2.database.config=~/flexive
+database.H2.database.config=${basedir}/flexive-db/h2/flexive
 # test database to use
-database.H2.database.test=~/flexive
+database.H2.database.test=${basedir}/flexive-db/h2/flexive
 # division schema
 database.H2.schema.division=flexive
 # configuration schema
@@ -76,7 +76,10 @@ database.H2.schema.config=flexiveConfiguration
 # test schema
 database.H2.schema.test=flexiveTest
 # JDBC base URL, will be appended by the database name and the url parameters
-database.H2.url.base=jdbc:h2:tcp://${database.H2.host}:${database.H2.port}/
+# Server mode
+#database.H2.url.base=jdbc:h2:tcp://${database.H2.host}:${database.H2.port}/
+# Embedded mode
+database.H2.url.base=jdbc:h2:
 # Optional URL parameters to append to the JDBC connect string
 database.H2.url.parameters=;MVCC=TRUE
 

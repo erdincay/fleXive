@@ -13,21 +13,39 @@
         UserName root
         Password a
     </Resource>
-    <!-- H2 settings -->
+
+    <!-- H2 settings (Embedded mode, faster, but no external connection possible) -->
     <!--
     <Resource id="jdbc/flexiveConfiguration" type="DataSource">
         JdbcDriver org.h2.Driver
-        JdbcUrl jdbc:h2:tcp://localhost:9092/~/flexive;SCHEMA=flexiveConfiguration;LOCK_TIMEOUT=10000;MVCC=TRUE;TRACE_LEVEL_FILE=0
+        JdbcUrl jdbc:h2:flexive-db/h2/flexive;SCHEMA=flexiveConfiguration;LOCK_TIMEOUT=10000;MVCC=TRUE;TRACE_LEVEL_FILE=0
         UserName sa
         Password
     </Resource>
     <Resource id="jdbc/flexiveTest" type="DataSource">
         JdbcDriver org.h2.Driver
-        JdbcUrl jdbc:h2:tcp://localhost:9092/~/flexive;SCHEMA=flexiveTest;LOCK_TIMEOUT=10000;MVCC=TRUE;TRACE_LEVEL_FILE=0
+        JdbcUrl jdbc:h2:flexive-db/h2/flexive;SCHEMA=flexiveTest;LOCK_TIMEOUT=10000;MVCC=TRUE;TRACE_LEVEL_FILE=0
         UserName sa
         Password
     </Resource>
     -->
+
+    <!-- H2 settings (Server mode) - please set the absolute path to your flexive-db directory -->
+    <!--
+    <Resource id="jdbc/flexiveConfiguration" type="DataSource">
+        JdbcDriver org.h2.Driver
+        JdbcUrl jdbc:h2:tcp://localhost:9092/[flexive-db-path]/flexive;SCHEMA=flexiveConfiguration;LOCK_TIMEOUT=10000;MVCC=TRUE;TRACE_LEVEL_FILE=0
+        UserName sa
+        Password
+    </Resource>
+    <Resource id="jdbc/flexiveTest" type="DataSource">
+        JdbcDriver org.h2.Driver
+        JdbcUrl jdbc:h2:tcp://localhost:9092/[flexive-db-path]/flexive;SCHEMA=flexiveTest;LOCK_TIMEOUT=10000;MVCC=TRUE;TRACE_LEVEL_FILE=0
+        UserName sa
+        Password
+    </Resource>
+    -->
+
     <!-- PostgreSQL settings -->
     <!--
     <Resource id="jdbc/flexiveConfiguration" type="DataSource">
