@@ -274,8 +274,7 @@
     <adm:ajaxCommandButton id="clearResultsButton" bean="#{exportBean}" action="clearExportResults"
                            labelKey="StructureExport.btn.clear" icon="cancel"
                            buttonDisabled="#{!exportBean.exportPerformed}"
-                           oncomplete="flexive.yui.processOnYahoo();" reRender="msgPanel1, resultPanelFlat,
-                                       resultPanelGroovy, buttonPanel, msgPanel2, msgPanel3, hrPanel"/>
+                           reRender="msgPanel1, resultPanelFlat, resultPanelGroovy, buttonPanel, msgPanel2, msgPanel3, hrPanel"/>
 
     <adm:ajaxCommandButton id="downloadGroovy" bean="#{exportBean}" action="exportGroovyScript"
                            labelKey="StructureExport.btn.downloadGroovy"

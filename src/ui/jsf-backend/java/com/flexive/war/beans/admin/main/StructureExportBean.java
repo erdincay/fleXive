@@ -71,6 +71,7 @@ public class StructureExportBean {
     private StructureExporterCallback callback;
     private boolean exportWithoutDependencies = false; // default: export w/ dependencies
     private List<FxType> typeList;
+    private int tableRows;
     private List<FxType> exportedTypesList;
     private Map<Long, Boolean> assignmentIsGroupMap; // dump all assignment ids in there to see whether they are goups
     private List<FxGroupAssignment> exportedGroupsList;
@@ -245,6 +246,10 @@ public class StructureExportBean {
             typeList = CacheAdmin.getEnvironment().getTypes(showBaseTypes, showDerivedTypes, true, showRelations);
         else
             typeList = CacheAdmin.getEnvironment().getTypes(showBaseTypes, showDerivedTypes, true, showRelations);
+
+        // init table rows
+        tableRows = typeList.size();
+        
         return typeList;
     }
 
@@ -730,6 +735,14 @@ public class StructureExportBean {
 
     public void setUserLang(String userLang) {
         this.userLang = userLang;
+    }
+
+    public int getTableRows() {
+        return tableRows;
+    }
+
+    public void setTableRows(int tableRows) {
+        this.tableRows = tableRows;
     }
 
     /**
