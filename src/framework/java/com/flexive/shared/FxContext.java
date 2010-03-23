@@ -661,11 +661,18 @@ public class FxContext implements Serializable {
             si.setTicket(getTicketFromEJB(session));
             if (si.ticket.isGuest()) {
                 try {
-                    if (last == null)
-                        si.ticket.setLanguage(CacheAdmin.getEnvironment().getLanguage(request.getLocale().getLanguage()));
-                    else
-                        si.ticket.setLanguage(last.getLanguage());
-                } catch (FxRuntimeException e) {
+                    final FxLanguage language;
+                    if (last == null) {
+                        if (CacheAdmin.isNewInstallation()) {
+                            language = EJBLookup.getLanguageEngine().load(request.getLocale().getLanguage());
+                        } else {
+                            language = CacheAdmin.getEnvironment().getLanguage(request.getLocale().getLanguage());
+                        }
+                    } else {
+                        language = last.getLanguage();
+                    }
+                    si.ticket.setLanguage(language);
+                } catch (Exception e) {
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("Failed to use request locale from browser - unknown language: " + request.getLocale().getLanguage());
                     }

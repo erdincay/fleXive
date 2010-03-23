@@ -31,10 +31,10 @@
  ***************************************************************/
 package com.flexive.tools;
 
-import org.h2.util.StartBrowser;
+import org.h2.tools.Server;
 
 /**
- * Launch a browser using H2's StartBrowser class.
+ * Launch a browser using H2's Server.openBrowser method.
  * <p>Usage:
  * {@code java -jar openUrl.jar URL}
  * </p>
@@ -49,7 +49,7 @@ public class OpenUrl {
             System.err.println("\nUsage: java -jar openUrl.jar URL\n");
             System.exit(-1);
         }
-        StartBrowser.openURL(args[0]);
+        Server.openBrowser(args[0]);
     }
     
 }
