@@ -370,8 +370,7 @@
                             </ui:insert>
                         </ui:fragment>
                         <!-- unlock button -->
-                        <ui:fragment rendered="#{(_ceContent.guiSettings.looseLock and not _ceContent.guiSettings.editMode and not _ceContent.new
-                                                  and _ceContent.guiSettings.userMayUnlock) or _ceContent.guiSettings.permLock}">
+                        <ui:fragment rendered="#{not _ceContent.guiSettings.editMode and _ceContent.guiSettings.userMayUnlock and _ceContent.content.permissions.mayEdit}">
                         <ui:insert name="unlockButton">
                                 <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.unlock']}"
                                         title="#{fxMessageBean['ContentEditor.button.unlock.title']}"
@@ -383,7 +382,7 @@
                             </ui:insert>
                         </ui:fragment>
                         <!-- extend lock features -->
-                        <ui:fragment rendered="#{_ceContent.guiSettings.contentLocked}">
+                        <ui:fragment rendered="#{_ceContent.guiSettings.contentLocked and _ceContent.content.permissions.mayEdit}">
                             <ui:fragment rendered="#{_ceContent.guiSettings.looseLock or _ceContent.guiSettings.permLock and not _ceContent.new}">
                                 <!-- show  remaining lock time -->
                                 <ui:insert name="lockTimeButton">

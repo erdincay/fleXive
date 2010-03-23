@@ -378,7 +378,7 @@ disableTab... false if the <adm:tab/> component should be rendered, true otherwi
         </ui:define>
         <!-- unlock content -->
         <ui:define name="unlockButton">
-            <ui:fragment rendered="#{not myContent.guiSettings.editMode and _ceContent.guiSettings.userMayUnlock}">
+            <ui:fragment rendered="#{not myContent.guiSettings.editMode and _ceContent.guiSettings.userMayUnlock and _ceContent.content.permissions.mayEdit}">
                 <adm:ajaxCommandButton id="#{editorId}_unlockButtonBottom" labelKey="ContentEditor.button.unlock" bean="#{srcEditor}"
                                        icon="unlock" action="unLock" onclick="flexive.contentEditor.saveGroupFolding('#{srcEditor.formId}');"
                                        oncomplete="#{jsfunc}">
