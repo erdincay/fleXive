@@ -56,6 +56,8 @@ import com.sun.facelets.el.VariableMapperWrapper;
 import com.sun.facelets.tag.TagConfig;
 import com.sun.facelets.tag.TagHandler;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import javax.el.ELException;
 import javax.el.VariableMapper;
@@ -115,9 +117,10 @@ import java.util.HashMap;
  * <b>disableRemoveAssignment</b> (optional, default: false)... True if icons for removing assignments should not be rendered.<br/>
  * <b>disablePositionAssignment</b> (optional, default: false)... True if icons for positioning assignments should not be rendered.<br/>
  * <b>disableMessages</b> (optional, default: false)... True if the &lt;h:messages/&gt; tag inside the content editor should not be rendered.<br/>
+ * <b>showLockOwner</b> (optional, default: false)...True if the owner of the lock should be shown.<br/>
  */
 public class FxProvideContent extends TagHandler {
-    // private static final Log LOG = LogFactory.getLog(FxProvideContent.class);
+    private static final Log LOG = LogFactory.getLog(FxProvideContent.class);
 
     public FxProvideContent(TagConfig tagConfig) {
         super(tagConfig);
@@ -184,6 +187,8 @@ public class FxProvideContent extends TagHandler {
         final Boolean userMayLooseLock = isAttributeSet(ctx, "userMayLooseLock") && Boolean.valueOf(getAttribute("userMayLooseLock").getValue(ctx));
         final Boolean userMayPermLock = isAttributeSet(ctx, "userMayPermLock") && Boolean.valueOf(getAttribute("userMayPermLock").getValue(ctx));
         final String closePanelScript = isAttributeSet(ctx, "closePanelScript") ? getAttribute("closePanelScript").getValue(ctx) : "";
+        final Boolean showLockOwner = isAttributeSet(ctx, "showLockOwner") ? Boolean.valueOf(getAttribute("showLockOwner").getValue(ctx)) : true;
+        String lockOwner = "";
 
         //encapsulate gui-relevant attributes in wrapper object
         FxWrappedContent.GuiSettings guiSettings = new FxWrappedContent.GuiSettings(editMode, disableAcl,
@@ -192,7 +197,7 @@ public class FxProvideContent extends TagHandler {
                 disablePositionAssignment, disableMessages, formPrefix, reRender, valueFormatter, askLockedMode,
                 lockedContentOverride, cannotTakeOverPermLock, askCreateNewVersion, lockStatus, lockStatusTooltip,
                 contentLocked, looseLock, permLock, takeOver, userMayTakeover, userMayUnlock, userMayLooseLock, userMayPermLock,
-                disableReferenceEditor);
+                disableReferenceEditor, showLockOwner, lockOwner);
 
         if (contentEditor.getContentStorage() == null) {
             contentEditor.setContentStorage(new HashMap<String, FxWrappedContent>(3));
@@ -339,7 +344,7 @@ public class FxProvideContent extends TagHandler {
      *
      * @param wc the FxWrappedContent
      */
-    private static void setLockStatusMessage(FxWrappedContent wc) {
+    private void setLockStatusMessage(FxWrappedContent wc) {
         final FxLock lock = wc.getContent().getLock();
         final UserTicket ticket = FxContext.getUserTicket();
 
@@ -350,14 +355,32 @@ public class FxProvideContent extends TagHandler {
             } else {
                 setLockStatus(wc, false, true, true, false, "ContentEditor.msg.permLock", "ContentEditor.msg.permLock.tooltip", "ContentEditor.msg.lockOther.tooltip");
             }
+            setLockOwner(wc);
         } else if (lock.getLockType() == FxLockType.Loose) {
             if (ticket.getUserId() == lock.getUserId() && !wc.getGuiSettings().isTakeOver()) {
                 setLockStatus(wc, true, false, true, false, "ContentEditor.msg.looseLock", "ContentEditor.msg.looseLock.tooltip", "ContentEditor.msg.lockYou.tooltip");
             } else {
                 setLockStatus(wc, true, false, true, false, "ContentEditor.msg.looseLock", "ContentEditor.msg.looseLock.tooltip", "ContentEditor.msg.lockOther.tooltip");
             }
+            setLockOwner(wc);
         } else { // None
             setLockStatus(wc, false, false, false, false, "ContentEditor.msg.noLock", "ContentEditor.msg.noLock.tooltip",  "");
+        }
+    }
+
+    /**
+     * Set the lock owner's login name
+     * @param wc FxWrappedContent instance
+     */
+    private void setLockOwner(FxWrappedContent wc) {
+        if(wc.getGuiSettings().isShowLockOwner()) {
+            String lockOwner = "";
+            try {
+                lockOwner = EJBLookup.getAccountEngine().load(wc.getContent().getLock().getUserId()).getLoginName();
+                wc.getGuiSettings().setLockOwner(lockOwner);
+            } catch (FxApplicationException e) {
+                LOG.error("Could not retrieve the lock owner's login name", e.getCause());
+            }
         }
     }
 
@@ -371,7 +394,7 @@ public class FxProvideContent extends TagHandler {
      * @param messageKeyLST the message key for the lockStatusTooltip message
      * @param messageKeyLOWNER the message key for the lock owner ("you" or "another user")
      */
-    private static void setLockStatus(FxWrappedContent wc, boolean looseLock, boolean permLock, boolean contentLocked,
+    private void setLockStatus(FxWrappedContent wc, boolean looseLock, boolean permLock, boolean contentLocked,
                                       boolean takeOver, String messageKeyLS, String messageKeyLST,
                                       String messageKeyLOWNER) {
         wc.getGuiSettings().setLooseLock(looseLock);

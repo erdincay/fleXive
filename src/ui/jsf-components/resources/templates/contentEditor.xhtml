@@ -28,7 +28,7 @@
         contentLocked="#{contentLocked}" looseLock="#{looseLock}" permLock="#{permLock}" takeOver="#{takeOver}"
         userMayTakeover="#{userMayTakeover}" userMayUnlock="#{userMayUnlock}" userMayLooseLock="#{userMayLooseLock}"
         userMayPermLock="#{userMayPermLock}" disableReferenceEditor="#{disableReferenceEditor}"
-        closePanelScript="#{closePanelScript}">
+        closePanelScript="#{closePanelScript}" showLockOwner="#{showLockOwner}">
 
         <c:if test="#{not _ceContent.guiSettings.disableMessages and __ceError}">
                 <!-- error messages outside of container output panel
@@ -108,7 +108,12 @@
                     <ui:fragment rendered="#{not empty _ceContent.guiSettings.lockStatus and not _ceContent.new}">
                         <h:outputText value="#{fxMessageBean['ContentEditor.field.lockAdmin']}: #{_ceContent.guiSettings.lockStatus}"
                                       title="#{_ceContent.guiSettings.lockStatusTooltip}"/>
+                        <ui:fragment rendered="#{_ceContent.guiSettings.contentLocked and _ceContent.guiSettings.showLockOwner and not empty _ceContent.guiSettings.lockOwner}">
+                            <br />
+                            <h:outputText value="#{fxMessageBean['ContentEditor.field.lockOwner']}: #{_ceContent.guiSettings.lockOwner}" />
+                        </ui:fragment>
                         <br/><br/>
+
                     </ui:fragment>
                 </ui:insert>
 

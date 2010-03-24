@@ -193,6 +193,11 @@ disableTab... false if the <adm:tab/> component should be rendered, true otherwi
                                         <h:outputText value=" #{__ceBean.remainingLockTime} #{fxMessageBean['ContentEditor.msg.expiresAt']} #{__ceBean.expiresTime}"/>
                                     </a4j:outputPanel>
                                 </ui:fragment>
+                                <ui:fragment rendered="#{_ceContent.guiSettings.contentLocked and _ceContent.guiSettings.showLockOwner and not empty _ceContent.guiSettings.lockOwner}">
+                                    <div style="float:left; padding-top:5px; padding-left:5px;">
+                                        <h:outputText value="#{fxMessageBean['ContentEditor.field.lockOwner']}: #{_ceContent.guiSettings.lockOwner}" />
+                                    </div>
+                                </ui:fragment>
                             </fx:formRow>
                         </ui:fragment>
 

@@ -1018,6 +1018,12 @@
             <rtexprvalue>true</rtexprvalue>
             <description>True if the &lt;h:messages/&gt; tag inside the content editor should not be rendered (default:false).</description>
         </attribute>
+        <attribute>
+            <name>showLockOwner</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>True if the owner of the lock should be shown (default: true).</description>
+        </attribute>
     </tag>
 
     <tag>
