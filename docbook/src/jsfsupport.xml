@@ -622,7 +622,8 @@
             [editMode="true|false"] [disableAcl="true|false"] [disableWorkflow="true|false"] [disableEdit="true|false"]
             [disableDelete="true|false"] [disableVersion="true|false"] [disableCompact="true|false"] [disableSave="true|false"]
             [disableCancel="true|false"] [disableButtons="true|false"] [disableAddAssignment="true|false"]
-            [disableRemoveAssignment="true|false"] [disablePositionAssignment="true|false"] [disableMessages="true|false"]>
+            [disableRemoveAssignment="true|false"] [disablePositionAssignment="true|false"] [disableMessages="true|false"]
+            [showLockOwner="true|false"]>
 ...
 </fx:contentEditor>
 ]]></programlisting>
@@ -964,6 +965,18 @@
                             </varlistentry>
                         </variablelist>
                     </para>
+                    <para>
+                        <variablelist>
+                            <varlistentry>
+                                <term>showLockOwner</term>
+                                <listitem>
+                                    <para>
+                                        True if the the respective content's lock owner should be shown (default: true).
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+                        </variablelist>
+                    </para>
                 </section>
 
                 <section xml:id="jcl_fx_contentEditor_customization">
@@ -1036,7 +1049,10 @@
                                                 <term>compactVersionButton: replaces the "Compact" button</term>
                                             </varlistentry>
                                             <varlistentry>
-                                                <term>cancelButton: replaces the "Cancel" button</term>
+                                                <term>cancelButton: replaces the "Stop Editing" button</term>
+                                            </varlistentry>
+                                            <varlistentry>
+                                                <term>saveAndCancelButton: replaces the "Save and Stop Editing" button</term>
                                             </varlistentry>
                                             <varlistentry>
                                                 <term>additionalButtons: located right after the previous buttons</term>

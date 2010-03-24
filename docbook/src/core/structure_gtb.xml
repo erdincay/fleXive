@@ -1406,7 +1406,7 @@ new GroovyTypeBuilder {
                     multilang: false
                 </listitem>
                 <listitem>
-                    overrideMultilang: false
+                    overrideMultilang: true
                 </listitem>
                 <listitem>
                     acl: &quot;Default Structure ACL&quot;
@@ -1421,13 +1421,13 @@ new GroovyTypeBuilder {
                     multiLine: false
                 </listitem>
                 <listitem>
-                    overrideMultiline: false
+                    overrideMultiline: true
                 </listitem>
                 <listitem>
                     inOverview: false
                 </listitem>
                 <listitem>
-                    overrideInOverview: false
+                    overrideInOverview: true
                 </listitem>
                 <listitem>
                     label: &quot;Prop1&quot; (created automatically from the element's name)
@@ -1457,7 +1457,7 @@ new GroovyTypeBuilder {
                     maxLength: 0 (~ not set)
                 </listitem>
                 <listitem>
-                    overrideMaxLength: false
+                    overrideMaxLength: true
                 </listitem>
                 <listitem>
                     defaultMultiplicity: 1
@@ -1466,7 +1466,7 @@ new GroovyTypeBuilder {
                     useHtmlEditor: false (except for FxDataType.HTML)
                 </listitem>
                 <listitem>
-                    overrideUseHtmlEditor: false (except for FxDataType.HTML)
+                    overrideUseHtmlEditor: true
                 </listitem>
                 <listitem>
                     FxStructureOptions:
@@ -1504,7 +1504,7 @@ new GroovyTypeBuilder {
                     multiplicity: &quot;0,1&quot;
                 </listitem>
                 <listitem>
-                    overrideMultiplicity: false
+                    overrideMultiplicity: true
                 </listitem>
                 <listitem>
                     name: &quot;GROUP1&quot;
