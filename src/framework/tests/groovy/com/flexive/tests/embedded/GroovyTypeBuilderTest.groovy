@@ -49,6 +49,7 @@ import org.testng.annotations.Test
 import org.testng.Assert
 import com.flexive.shared.security.ACLCategory
 import com.flexive.shared.FxLanguage
+import com.flexive.core.flatstorage.FxFlatStorageManager
 
 /**
  * Tests for the                                   {@link com.flexive.shared.scripting.groovy.GroovyTypeBuilder GroovyTypeBuilder}                                   class.
@@ -1644,31 +1645,34 @@ class GroovyTypeBuilderTest {
      */
     @Test (groups = ["ejb", "scripting", "structure"])
     void flatStorageTest() {
-        try {
-            new GroovyTypeBuilder().builderTest() {
-                flprop1()
-                flprop1(flatten: false)
-                flprop2()
-                flprop2(flatten: true)
+        // don't run this w/ the flatstorage disabled
+        if(FxFlatStorageManager.getInstance().isEnabled()) {
+            try {
+                new GroovyTypeBuilder().builderTest() {
+                    flprop1()
+                    flprop1(flatten: false)
+                    flprop2()
+                    flprop2(flatten: true)
+                }
+
+                def t = environment().getType("BUILDERTEST")
+                Assert.assertFalse(getPropertyAssignment(t, "BUILDERTEST/FLPROP1").isFlatStorageEntry())
+                Assert.assertTrue(getPropertyAssignment(t, "BUILDERTEST/FLPROP2").isFlatStorageEntry())
+
+                // reverse the settings
+                def builder = new GroovyTypeBuilder("BUILDERTEST")
+                builder {
+                    flprop1(flatten: true)
+                    flprop2(flatten: false)
+                }
+
+                t = environment().getType("BUILDERTEST")
+                Assert.assertTrue(getPropertyAssignment(t, "BUILDERTEST/FLPROP1").isFlatStorageEntry())
+                Assert.assertFalse(getPropertyAssignment(t, "BUILDERTEST/FLPROP2").isFlatStorageEntry())
+
+            } finally {
+                removeTestType()
             }
-
-            def t = environment().getType("BUILDERTEST")
-            Assert.assertFalse(getPropertyAssignment(t, "BUILDERTEST/FLPROP1").isFlatStorageEntry())
-            Assert.assertTrue(getPropertyAssignment(t, "BUILDERTEST/FLPROP2").isFlatStorageEntry())
-
-            // reverse the settings
-            def builder = new GroovyTypeBuilder("BUILDERTEST")
-            builder {
-                flprop1(flatten: true)
-                flprop2(flatten: false)
-            }
-
-            t = environment().getType("BUILDERTEST")
-            Assert.assertTrue(getPropertyAssignment(t, "BUILDERTEST/FLPROP1").isFlatStorageEntry())
-            Assert.assertFalse(getPropertyAssignment(t, "BUILDERTEST/FLPROP2").isFlatStorageEntry())
-
-        } finally {
-            removeTestType()
         }
     }
 
