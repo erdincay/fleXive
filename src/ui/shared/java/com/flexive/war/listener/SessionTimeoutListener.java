@@ -80,14 +80,16 @@ public class SessionTimeoutListener implements HttpSessionListener {
             if (session.getAttribute(divisionIdKey) != null) {
                 ctx.setDivisionId((Integer) session.getAttribute(divisionIdKey));
             }
-            ctx.setTicket(FxContext.getTicketFromEJB(session));
-            if (!ctx.getTicket().isGuest()) {
-                // perform logout only when the user is logged in
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Performing logout for user of destroyed session (possible session timeout): "
-                            + session.getId());
+            if (ctx.getDivisionId() != -1) {
+                ctx.setTicket(FxContext.getTicketFromEJB(session));
+                if (!ctx.getTicket().isGuest()) {
+                    // perform logout only when the user is logged in
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Performing logout for user of destroyed session (possible session timeout): "
+                                + session.getId());
+                    }
+                    ctx.logout();
                 }
-                ctx.logout();
             }
         } catch (FxLogoutFailedException e) {
             LOG.error("Failed to logout user after session timeout: " + e.getMessage(), e);

@@ -1012,6 +1012,9 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      */
     @SuppressWarnings({"unchecked"})
     public int compareTo(FxValue o) {
+        if (o == null) {
+            return 1;
+        }
         if (isEmpty() && !o.isEmpty()) {
             return -1;
         }

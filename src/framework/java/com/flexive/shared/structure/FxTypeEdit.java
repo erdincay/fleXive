@@ -218,7 +218,7 @@ public class FxTypeEdit extends FxType implements Serializable {
         if (parent == null) {
             return createNew(name, label, acl,
                     CacheAdmin.getEnvironment().getWorkflows().get(0),
-                    parent, false, TypeStorageMode.Hierarchical,
+                    null, false, TypeStorageMode.Hierarchical,
                     TypeCategory.User, TypeMode.Content, LanguageMode.Multiple, TypeState.Available,
                     getDefaultTypePermissions(), false, 0, -1, 0, 0, options);
         } else {

@@ -321,6 +321,11 @@
         <welcome-file>main.xhtml</welcome-file>
     </welcome-file-list>
 
+    <error-page>
+        <exception-type>javax.faces.application.ViewExpiredException</exception-type>
+        <location>/view-expired.jsp</location>
+    </error-page>
+
     <listener>
         <listener-class>net.java.dev.weblets.WebletsContextListener</listener-class>
     </listener>
