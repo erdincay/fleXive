@@ -298,11 +298,9 @@
                                     </a4j:commandButton>
                                 </ui:insert>
                             </ui:fragment>
-
-                            <ui:fragment rendered="#{not _ceContent.new and not _ceContent.guiSettings.disableCancel
-                                                    and empty _ceContent.guiSettings.openedReferenceId
-                                                    and _ceContent.guiSettings.editMode}">
-                                <ui:insert name="cancelButton">
+                            <!-- save and cancel button -->
+                            <ui:fragment rendered="#{not _ceContent.new and not _ceContent.guiSettings.disableCancel and empty _ceContent.guiSettings.openedReferenceId and _ceContent.guiSettings.editMode}">
+                            <ui:insert name="saveAndCancelButton">
                                     <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.saveAndCancel']}"
                                                action="#{__ceBean.saveAndCancel}" onclick="flexive.contentEditor.preSubmit();#{_ceContent.closePanelScript}"
                                                title="#{fxMessageBean['ContentEditor.button.saveAndCancel.title']}"
@@ -310,6 +308,11 @@
                                         <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
                                         <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
                                     </a4j:commandButton>
+                                </ui:insert>
+                            </ui:fragment>
+                            <!-- cancel button -->
+                            <ui:fragment rendered="#{not _ceContent.guiSettings.disableCancel and empty _ceContent.guiSettings.openedReferenceId and _ceContent.guiSettings.editMode}">
+                                <ui:insert name="cancelButton">
                                     <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.cancel']}"
                                                action="#{__ceBean.cancel}" onclick="flexive.contentEditor.preSubmit();#{_ceContent.closePanelScript}"
                                                title="#{fxMessageBean['ContentEditor.button.cancel.title']}"
