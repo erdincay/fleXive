@@ -191,12 +191,14 @@
             // attach the selected rows from the content frame
             function attachContentSelection(menuItem) {
                 try {
+                    parent.lockScreen();
                     flexive.util.getJsonRpc().ContentTreeEditor.addReferences(getObjectId(menuItem), parent.getContentClipboard().get().slice());
                     parent.getContentClipboard().clear();
                     reloadContentTree();
                 } catch (e) {
                     alertDialog(e.message);
                 }
+                parent.unlockScreen();
             }
 
             // start inline editing of a tree node
@@ -247,28 +249,38 @@
             // activate the tree node
             function activateNode(menuItem) {
                 try {
+                    parent.lockScreen();
                     flexive.util.getJsonRpc().ContentTreeEditor.activate(getObjectId(menuItem), false);
                     reloadContentTree();
                 } catch (e) {
                     alertDialog(e.message);
                 }
+                parent.unlockScreen();
             }
 
             // activate the tree node and its children
             function activateNodeAndChildren(menuItem) {
                 try {
+                    parent.lockScreen();
                     flexive.util.getJsonRpc().ContentTreeEditor.activate(getObjectId(menuItem), true);
                     reloadContentTree();
                 } catch (e) {
                     alertDialog(e.message);
                 }
+                parent.unlockScreen();
             }
 
             // deactivate a subtree
             function deactivateNodeAndChildren(menuItem) {
                 confirmDialog("#{fxMessageBean['ContentTree.dialog.confirm.deactivateNodeWithChildren']}", function() {
+                    parent.lockScreen();
                     getFxController().removeContent = false;
-                    getFxController().destroyChild(menuItem.getTreeNode());
+                    try {
+                        getFxController().destroyChild(menuItem.getTreeNode());
+                    } catch (e) {
+                        alertDialog(e.message);
+                    }
+                    parent.unlockScreen();
                 });
             }
 
@@ -277,12 +289,14 @@
             function deactivateNode(menuItem) {
                 confirmDialog("#{fxMessageBean['ContentTree.dialog.confirm.deactivateNode']}", function() {
                     try {
+                        parent.lockScreen();
                         flexive.util.getJsonRpc().ContentTreeEditor.remove(getObjectId(menuItem), /* remove content */ false,
                                 /* live tree */ true, /* delete children */ false);
                         reloadContentTree();
                     } catch (e) {
                         alertDialog(e.message);
                     }
+                    parent.unlockScreen();
                 });
             }
 
@@ -321,6 +335,7 @@
                     return;
                 }
                 try {
+                    parent.lockScreen();
                     if (cutNodeId != -1) {
                         moveFun(cutNodeId, getObjectId(menuItem), 0, treeLiveMode);
                     } else if (copyNodeId != -1) {
@@ -330,6 +345,7 @@
                 } catch (e) {
                     alertDialog(e.message);
                 }
+                parent.unlockScreen();
                 cutNodeId = copyNodeId = -1;
             }
 

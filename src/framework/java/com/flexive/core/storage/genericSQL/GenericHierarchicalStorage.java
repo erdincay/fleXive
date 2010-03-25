@@ -2521,7 +2521,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             //sync with tree
             StorageManager.getTreeStorage().contentRemoved(con, pk.getId(), false);
             ft.removeAllVersions();
-            binaryStorage.removeBinaries(con, BinaryStorage.SelectOperation.SelectId, pk, -1L);
+            binaryStorage.removeBinaries(con, BinaryStorage.SelectOperation.SelectId, pk, type);
             ps = con.prepareStatement(CONTENT_DATA_REMOVE);
             ps.setLong(1, pk.getId());
             ps.executeUpdate();
@@ -2574,7 +2574,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             if (cvi.hasLiveVersion() && cvi.getLiveVersion() == ver)
                 StorageManager.getTreeStorage().contentRemoved(con, pk.getId(), true);
             ft.remove();
-            binaryStorage.removeBinaries(con, BinaryStorage.SelectOperation.SelectVersion, pk, -1L);
+            binaryStorage.removeBinaries(con, BinaryStorage.SelectOperation.SelectVersion, pk, type);
             ps = con.prepareStatement(CONTENT_DATA_REMOVE_VER);
             ps.setLong(1, pk.getId());
             ps.setInt(2, ver);
@@ -2624,7 +2624,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             ps.close();
 
             ft.removeType(type.getId());
-            binaryStorage.removeBinaries(con, BinaryStorage.SelectOperation.SelectType, null, type.getId());
+            binaryStorage.removeBinaries(con, BinaryStorage.SelectOperation.SelectType, null, type);
             ps = con.prepareStatement(CONTENT_DATA_REMOVE_TYPE);
             ps.setLong(1, type.getId());
             ps.executeUpdate();
@@ -2933,25 +2933,30 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         try {
             s = con.createStatement();
             //references within contents
-            ResultSet rs = s.executeQuery("SELECT DISTINCT ID FROM " + TBL_CONTENT_DATA + " WHERE FREF=" + id);
-            while (rs != null && rs.next())
-                count++;
+            ResultSet rs = s.executeQuery("SELECT COUNT(DISTINCT ID) FROM " + TBL_CONTENT_DATA + " WHERE FREF=" + id);
+            if (rs.next()) {
+                count += rs.getInt(1);
+            }
             //Edit tree references
-            rs = s.executeQuery("SELECT DISTINCT ID FROM " + TBL_TREE + " WHERE REF=" + id);
-            while (rs != null && rs.next())
-                count++;
+            rs = s.executeQuery("SELECT COUNT(DISTINCT ID) FROM " + TBL_TREE + " WHERE REF=" + id);
+            if (rs.next()) {
+                count += rs.getInt(1);
+            }
             //Live tree references
-            rs = s.executeQuery("SELECT DISTINCT ID FROM " + TBL_TREE + "_LIVE WHERE REF=" + id);
-            while (rs != null && rs.next())
-                count++;
+            rs = s.executeQuery("SELECT COUNT(DISTINCT ID) FROM " + TBL_TREE + "_LIVE WHERE REF=" + id);
+            if (rs.next()) {
+                count += rs.getInt(1);
+            }
             //Contact Data references
-            rs = s.executeQuery("SELECT DISTINCT ID FROM " + TBL_ACCOUNTS + " WHERE CONTACT_ID=" + id);
-            while (rs != null && rs.next())
-                count++;
+            rs = s.executeQuery("SELECT COUNT(DISTINCT ID) FROM " + TBL_ACCOUNTS + " WHERE CONTACT_ID=" + id);
+            if (rs.next()) {
+                count += rs.getInt(1);
+            }
             //Briefcase references
-            rs = s.executeQuery("SELECT DISTINCT BRIEFCASE_ID FROM " + TBL_BRIEFCASE_DATA + " WHERE ID=" + id);
-            while (rs != null && rs.next())
-                count++;
+            rs = s.executeQuery("SELECT COUNT(DISTINCT BRIEFCASE_ID) FROM " + TBL_BRIEFCASE_DATA + " WHERE ID=" + id);
+            if (rs.next()) {
+                count += rs.getInt(1);
+            }
             return count;
         } catch (SQLException e) {
             throw new FxDbException(LOG, e, "ex.db.sqlError", e.getMessage());

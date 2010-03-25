@@ -60,6 +60,8 @@ import com.flexive.shared.tree.FxTreeNode;
 import com.flexive.shared.value.FxString;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -1112,6 +1114,17 @@ public abstract class GenericTreeStorage implements TreeStorage {
     protected abstract boolean lockForUpdate(Connection con, String table, Iterable<Long> nodeIds) throws FxDbException;
 
     /**
+     * Lock tree nodes for updates.
+     *
+     * @param con     an existing connection
+     * @param table   the table name to be locked
+     * @param referenceIds the reference ID(s) to be locked. If null or empty, the entire table will be locked.
+     * @return true if a lock could be required, false if the DBMS indicated a deadlock
+     * @throws FxDbException on non-deadlock DB errors
+     */
+    protected abstract boolean lockForUpdateReference(Connection con, String table, Iterable<Long> referenceIds) throws FxDbException;
+
+    /**
      * Acquire update locks for updating tree nodes. To lock the entire tree, pass {@code null}
      * or an empty list for {@code nodeIds}.
      * <p>
@@ -1163,6 +1176,20 @@ public abstract class GenericTreeStorage implements TreeStorage {
         );
     }
 
+    protected void acquireLocksByReference(Connection con, FxTreeMode mode, Iterable<Long> referenceIds) throws FxDbException {
+        while (!lockForUpdateReference(con, getTable(mode), referenceIds)) {
+            if (LOG.isInfoEnabled()) {
+                LOG.info("Failed to lock " + getTable(mode) + " for reference list "
+                        + referenceIds + ", waiting 100ms and retrying...");
+            }
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                // ignore
+            }
+        }
+    }
+
     /**
      * Acquire update locks for the entire node tree.
      * <p>
@@ -1198,6 +1225,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
         Statement stmt = null;
         if (nodeId == FxTreeNode.ROOT_NODE)
             throw new FxNoAccessException("ex.tree.delete.root");
+
         FxTreeNodeInfo nodeInfo = getTreeNodeInfo(con, mode, nodeId);
         ScriptingEngine scripting = EJBLookup.getScriptingEngine();
         final List<Long> scriptBeforeIds = scripting.getByScriptEvent(FxScriptEvent.BeforeTreeNodeRemoved);
@@ -1214,9 +1242,9 @@ public abstract class GenericTreeStorage implements TreeStorage {
             UserTicket ticket = FxContext.getUserTicket();
 
             // lock all affected rows
-            final List<Long> removeNodeIds = selectAllChildNodeIds(con, mode, nodeInfo.getLeft(), nodeInfo.getRight());
-            removeNodeIds.add(nodeId);
+            final List<Long> removeNodeIds = selectAllChildNodeIds(con, mode, nodeInfo.getLeft(), nodeInfo.getRight(), true);
             acquireLocksForUpdate(con, mode, Iterables.concat(removeNodeIds, Arrays.asList(nodeInfo.getParentId())));
+            final Map<FxPK, FxContentSecurityInfo> securityInfos = Maps.newHashMapWithExpectedSize(removeNodeIds.size());
 
             if (removeChildren) {
                 //FX-102: edit permission checks on references
@@ -1224,8 +1252,12 @@ public abstract class GenericTreeStorage implements TreeStorage {
                         + " LFT>=" + nodeInfo.getLeft() + " AND RGT<=" + nodeInfo.getRight() + " ");
                 while (rs != null && rs.next()) {
                     try {
-                        if (ce != null)
-                            FxPermissionUtils.checkPermission(ticket, ACLPermission.EDIT, ce.getContentSecurityInfo(new FxPK(rs.getLong(1))), true);
+                        if (ce != null) {
+                            final FxPK pk = new FxPK(rs.getLong(1));
+                            final FxContentSecurityInfo info = ce.getContentSecurityInfo(pk);
+                            FxPermissionUtils.checkPermission(ticket, ACLPermission.EDIT, info, true);
+                            securityInfos.put(pk, info);
+                        }
                         references.add(new FxPK(rs.getLong(1)));
                     } catch (FxLoadException e) {
                         //ignore, might have been removed meanwhile
@@ -1256,8 +1288,11 @@ public abstract class GenericTreeStorage implements TreeStorage {
             } else {
                 //FX-102: edit permission checks on references
                 try {
-                    if (ce != null)
-                        FxPermissionUtils.checkPermission(FxContext.getUserTicket(), ACLPermission.EDIT, ce.getContentSecurityInfo(nodeInfo.getReference()), true);
+                    if (ce != null) {
+                        final FxContentSecurityInfo info = ce.getContentSecurityInfo(nodeInfo.getReference());
+                        FxPermissionUtils.checkPermission(FxContext.getUserTicket(), ACLPermission.EDIT, info, true);
+                        securityInfos.put(nodeInfo.getReference(), info);
+                    }
                     references.add(nodeInfo.getReference());
                 } catch (FxLoadException e) {
                     //ignore, might have been removed meanwhile
@@ -1288,8 +1323,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
                 //check if a node with the same id that has been removed in the live tree exists in the edit tree,
                 //the node and all its children will be flagged as dirty in the edit tree
                 FxTreeNodeInfo editNode = getTreeNodeInfo(con, FxTreeMode.Edit, nodeId);
-                List<Long> editNodeIds = selectAllChildNodeIds(con, FxTreeMode.Edit, editNode.getLeft(), editNode.getRight());
-                editNodeIds.add(nodeId); //add the node itself as well, see FX-754
+                List<Long> editNodeIds = selectAllChildNodeIds(con, FxTreeMode.Edit, editNode.getLeft(), editNode.getRight(), true);
 
                 acquireLocksForUpdate(con, FxTreeMode.Edit, editNodeIds);
                 for (List<Long> part : Iterables.partition(editNodeIds, SQL_IN_PARTSIZE)) {
@@ -1300,14 +1334,19 @@ public abstract class GenericTreeStorage implements TreeStorage {
             stmt.executeBatch();
             if (ce != null) {
                 //if the referenced content is a folder, remove it
-                long folderTypeId = CacheAdmin.getEnvironment().getType(FxType.FOLDER).getId();
+                final Set<Long> folderTypeIds = Sets.newHashSet(FxSharedUtils.getSelectableObjectIdList(
+                        CacheAdmin.getEnvironment().getType(FxType.FOLDER).getDerivedTypes(true, true)
+                ));
                 for (FxPK ref : references) {
-                    FxContentSecurityInfo si = ce.getContentSecurityInfo(ref);
-                    int contentCount = ce.getReferencedContentCount(si.getPk());
-//                System.out.println("ContentCount for " + si.getPk() + ": " + contentCount);
-                    if (si.getTypeId() == folderTypeId && contentCount == 0) {
-//                    System.out.println("Removing "+ref);
-                        ce.remove(ref);
+                    FxContentSecurityInfo si = securityInfos.get(ref);
+                    if (si == null) {
+                        si = ce.getContentSecurityInfo(ref);
+                    }
+                    if (folderTypeIds.contains(si.getTypeId())) {
+                        final int contentCount = ce.getReferencedContentCount(si.getPk());
+                        if (contentCount == 0) {
+                            ce.remove(ref);
+                        }
                     }
                 }
             }
@@ -1352,13 +1391,16 @@ public abstract class GenericTreeStorage implements TreeStorage {
      * @param mode  tree mode
      * @param left  left boundary
      * @param right right boundary
+     * @param includeRoot if the root node (of the subtree) itself should be included
      * @return node id's between the boundaries
      * @throws SQLException on errors
      */
-    protected List<Long> selectAllChildNodeIds(Connection con, FxTreeMode mode, Number left, Number right) throws SQLException {
+    protected List<Long> selectAllChildNodeIds(Connection con, FxTreeMode mode, Number left, Number right, boolean includeRoot) throws SQLException {
         PreparedStatement stmt = null;
         try {
-            stmt = con.prepareStatement("SELECT id FROM " + getTable(mode) + " WHERE lft > ? AND rgt < ?");
+            final String rangeIncl = includeRoot ? "=" : "";
+            stmt = con.prepareStatement("SELECT id FROM " + getTable(mode) 
+                    + " WHERE lft >" + rangeIncl + " ? AND rgt <" + rangeIncl + " ?");
             stmt.setBigDecimal(1, toBigDecimal(left));
             stmt.setBigDecimal(2, toBigDecimal(right));
             return collectNodeIds(stmt);
@@ -1557,7 +1599,10 @@ public abstract class GenericTreeStorage implements TreeStorage {
     public void contentRemoved(Connection con, long contentId, boolean liveVersionRemovedOnly) throws FxApplicationException {
         PreparedStatement ps = null;
         try {
-            //  nid
+            // lock affected nodes
+            acquireLocksByReference(con, FxTreeMode.Edit, Arrays.asList(contentId));
+            acquireLocksByReference(con, FxTreeMode.Live, Arrays.asList(contentId));
+
             List<Long> edit = new ArrayList<Long>(10), live = new ArrayList<Long>(10);
             long typeId = -1;
             ps = con.prepareStatement(TREE_REF_USAGE_EDIT);

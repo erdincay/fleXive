@@ -495,4 +495,14 @@ public class GenericTreeStorageSimple extends GenericTreeStorage {
     protected boolean lockForUpdate(Connection con, String table, Iterable<Long> nodeIds) throws FxDbException {
         return true;    // NOP
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected boolean lockForUpdateReference(Connection con, String table, Iterable<Long> referenceIds) throws FxDbException {
+        return true;    // NOP
+    }
+
+
 }

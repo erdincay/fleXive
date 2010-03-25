@@ -87,6 +87,7 @@ public class SearchBenchmark {
     }
 
     public void selectTreePathsBenchmark() throws FxApplicationException, FxLoginFailedException, FxAccountInUseException, FxLogoutFailedException {
+        createDataVolumeType();
         final int numNodes = 2000;
         long rootNode = -1;
         try {
@@ -96,8 +97,14 @@ public class SearchBenchmark {
             rootNode = EJBLookup.getTreeEngine().save(FxTreeNodeEdit.createNew("selectTreePathsBenchmark"));
             for (int i = 0; i < numNodes; i++) {
                 final FxString label = new FxString(FxLanguage.ENGLISH, "English label " + i).setTranslation(FxLanguage.GERMAN, "Deutsches Label " + i);
+                final FxContent content = EJBLookup.getContentEngine().initialize(TYPE_VOLUME);
+                content.setValue("/string01", "a value");
+                content.setValue("/string02", "b value");
+                content.setValue("/number01", 21);
                 EJBLookup.getTreeEngine().save(FxTreeNodeEdit.createNew("test test test " + i)
-                        .setParentNodeId(rootNode).setLabel(label));
+                        .setParentNodeId(rootNode).setLabel(label)
+                        .setReference(EJBLookup.getContentEngine().save(content))
+                );
                 if (i % 500 == 499) {
                     getResultLogger().logTime("createTreeNodes[" + (i - 499) + "-" + i + "]", startCreateNode, 500, "tree node");
                     startCreateNode = System.currentTimeMillis();
@@ -115,7 +122,9 @@ public class SearchBenchmark {
             assertTrue(result.getRowCount() == numNodes, "Expected " + numNodes + " rows, got: " + result.getRowCount());
         } finally {
             if (rootNode != -1) {
+                final long startRemove = System.currentTimeMillis();
                 EJBLookup.getTreeEngine().remove(FxTreeNodeEdit.createNew("").setId(rootNode), FxTreeRemoveOp.Remove, true);
+                getResultLogger().logTime("removeTreeContent", startRemove, numNodes, "tree node");
             }
             FxTestUtils.logout();
         }

@@ -35,6 +35,7 @@ import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxDbException;
 import com.flexive.shared.exceptions.FxUpdateException;
+import com.flexive.shared.structure.FxType;
 import com.flexive.shared.value.BinaryDescriptor;
 import com.flexive.shared.value.FxBinary;
 import com.flexive.stream.ServerLocation;
@@ -189,10 +190,10 @@ public interface BinaryStorage {
      * @param con      an open and valid connection
      * @param remOp    what to remove
      * @param pk       primary key if content removal
-     * @param typeId   type id for type removal
+     * @param type     type of the removed content
      * @throws FxApplicationException on errors
      */
-    void removeBinaries(Connection con, SelectOperation remOp, FxPK pk, long typeId) throws FxApplicationException;
+    void removeBinaries(Connection con, SelectOperation remOp, FxPK pk, FxType type) throws FxApplicationException;
 
     /**
      * Remove all binaries in the transit space that have expired

@@ -32,7 +32,7 @@ dojo.widget.defineWidget(
     methodMappings: {
         "getChildren": {
             name: "ContentTreeWriter.renderContentTree",
-            params: ["kw.params.node.objectId", "kw.params.node.objectId == this.rootNodeId ? this.maxExpandedLevel : 2", "this.liveMode", "this.pathMode"]
+            params: ["kw.params.node.objectId", "kw.params.node.objectId == this.rootNodeId ? this.maxExpandedLevel : 1", "this.liveMode", "this.pathMode"]
         },
         "editLabelSave": {
             name: "ContentTreeEditor.saveLabel",

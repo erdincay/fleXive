@@ -46,7 +46,11 @@ import com.flexive.shared.structure.FxType;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNode;
 import com.flexive.shared.value.FxString;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
+import java.util.Collection;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.logging.Log;
@@ -58,6 +62,7 @@ import java.sql.*;
 import java.util.List;
 import java.util.Stack;
 import java.util.Arrays;
+import java.util.Map;
 
 /**
  * Generic tree storage implementation using a spreaded nested set tree
@@ -701,8 +706,8 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
                 stmt.addBatch("UPDATE " + getTable(mode) + " SET CHILDCOUNT=CHILDCOUNT+1 WHERE ID=" + newParentId);
                 stmt.addBatch("UPDATE " + getTable(mode) + " SET CHILDCOUNT=CHILDCOUNT-1 WHERE ID=" + oldParent);
                 if (mode != FxTreeMode.Live) {
-                    final List<Long> newChildren = selectAllChildNodeIds(con, mode, node.getLeft(), node.getRight());
-                    acquireLocksForUpdate(con, mode, newChildren);
+                    final List<Long> newChildren = selectAllChildNodeIds(con, mode, node.getLeft(), node.getRight(), false);
+                    acquireLocksForUpdate(con, mode, Iterables.concat(newChildren, Arrays.asList(nodeId)));
 
                     for (List<Long> part : Iterables.partition(newChildren, SQL_IN_PARTSIZE)) {
                         stmt.addBatch("UPDATE " + getTable(mode) + " SET DIRTY=" + TRUE +
@@ -876,13 +881,13 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
             acquireLocksForUpdate(
                     con,
                     mode,
-                    selectAllChildNodeIds(con, mode, sourceNode.getLeft(), sourceNode.getRight())
+                    selectAllChildNodeIds(con, mode, sourceNode.getLeft(), sourceNode.getRight(), true)
             );
             // lock live tree
             acquireLocksForUpdate(
                     con,
                     FxTreeMode.Live,
-                    selectAllChildNodeIds(con, mode, sourceNode.getLeft(), sourceNode.getRight())
+                    selectAllChildNodeIds(con, mode, sourceNode.getLeft(), sourceNode.getRight(), true)
             );
         } catch (SQLException e) {
             throw new FxDbException(e);
@@ -1059,72 +1064,88 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
      */
     @Override
     public void checkTree(Connection con, FxTreeMode mode) throws FxApplicationException {
-        Statement stmt = null;
-        Statement stmt2 = null;
+        PreparedStatement stmt = null;
         try {
-            stmt = con.createStatement();
-            final String sql;
-            if (mode == FxTreeMode.Live) {
-                sql = "SELECT t.ID FROM " + getTable(mode) + " t, " + TBL_CONTENT + " c "
-                        + " WHERE c.id=t.ref AND c.islive_ver=" + StorageManager.getBooleanTrueExpression();
-            } else {
-                sql = "SELECT ID FROM " + getTable(mode);
-            }
-            ResultSet rs = stmt.executeQuery(sql);
-            long nodes = 0;
+            // 1 - ID, 2 - LFT, 3 - RGT, 4 - CHILDCOUNT, 5 - DEPTH, 6 - PARENT
+            final String sql = "SELECT t.id, t.LFT, T.RGT, t.CHILDCOUNT, t.DEPTH, t.PARENT " +
+                    "FROM " + getTable(mode) + " t";
+            stmt = con.prepareStatement(sql);
+            final ResultSet rs = stmt.executeQuery();
+
+            // collect nodes, build lookup tables
+            final Map<Long, CheckedNodeInfo> nodeMap = Maps.newHashMap();           // node ID -> node info
+            final Multimap<Long, CheckedNodeInfo> childMap = HashMultimap.create();    // node ID -> children
             while (rs.next()) {
-                Long id = rs.getLong(1);
-                FxTreeNodeInfoSpreaded node = (FxTreeNodeInfoSpreaded) getTreeNodeInfo(con, mode, id);
-                stmt2 = con.createStatement();
-                ResultSet rs2 = stmt2.executeQuery("SELECT MAX(LFT),MAX(RGT),MIN(LFT),MIN(RGT) FROM " +
-                        getTable(mode) + " WHERE PARENT=" + id);
-                rs2.next();
-                BigDecimal maxLft = rs2.getBigDecimal(1);
-                BigDecimal maxRgt = rs2.getBigDecimal(2);
-                BigDecimal minLft = rs2.getBigDecimal(3);
-                BigDecimal minRgt = rs2.getBigDecimal(4);
-                stmt2.close();
-                if (maxLft != null) {
-                    BigDecimal max = maxLft.max(maxRgt).max(minLft).max(minRgt);
-                    BigDecimal min = maxLft.min(maxRgt).min(minLft).min(minRgt);
-                    if (max.compareTo(node.getRight()) > 0)
-                        throw new FxTreeException(LOG, "ex.tree.check.failed", mode, "#" + id + " out of bounds (right)");
-                    if (min.compareTo(node.getLeft()) < 0)
-                        throw new FxTreeException(LOG, "ex.tree.check.failed", mode, "#" + id + " out of bounds (left)");
+                final CheckedNodeInfo info = new CheckedNodeInfo(rs.getLong(1), rs.getLong(6), rs.getBigDecimal(2),
+                        rs.getBigDecimal(3), rs.getInt(4), rs.getInt(5));
+                nodeMap.put(info.id, info);
+                childMap.put(info.parentId, info);
+            }
+
+            // process all nodes
+            for (CheckedNodeInfo node : nodeMap.values()) {
+                
+                // check node boundaries
+                if (node.left.compareTo(node.right) > 0) {
+                    throw new FxTreeException(LOG, "ex.tree.check.failed", mode, "#" + node.id + ": left boundary greater than right.");
                 }
 
-                // Direct child count check
-                stmt2 = con.createStatement();
-                rs2 = stmt2.executeQuery("SELECT COUNT(*) FROM " + getTable(mode) + " WHERE PARENT=" + id);
-                rs2.next();
-                int directChilds = rs2.getInt(1);
-                if (directChilds != node.getDirectChildCount())
-                    throw new FxTreeException(LOG, "ex.tree.check.failed", mode, "#" + id + " invalid direct child count [" + directChilds + "!=" + node.getDirectChildCount() + "]");
-                stmt2.close();
-
-                // Depth check
-                if (!node.isRoot()) {
-                    stmt2 = con.createStatement();
-                    rs2 = stmt2.executeQuery("SELECT DEPTH FROM " + getTable(mode) + " WHERE ID=" + node.getParentId());
-                    rs2.next();
-                    int depth = rs2.getInt(1);
-                    stmt2.close();
-                    if ((node.getDepth() - 1) != depth)
-                        throw new FxTreeException(LOG, "ex.tree.check.failed", mode, "#" + id + " invalid depth: " + node.getDepth() + ", parent depth=" + depth);
+                // check node bounds of children
+                BigDecimal min = MAX_RIGHT;
+                BigDecimal max = new BigDecimal(0);
+                final Collection<CheckedNodeInfo> children = childMap.get(node.id);
+                for (CheckedNodeInfo child : children) {
+                    if (child.left.compareTo(min) < 0) {
+                        min = child.left;
+                    }
+                    if (child.right.compareTo(max) > 0) {
+                        max = child.right;
+                    }
                 }
-                nodes++;
+                if (max.compareTo(node.right) > 0) {
+                    throw new FxTreeException(LOG, "ex.tree.check.failed", mode, "#" + node.id + " out of bounds (right)");
+                }
+                if (min.compareTo(node.left) < 0) {
+                    throw new FxTreeException(LOG, "ex.tree.check.failed", mode, "#" + node.id + " out of bounds (left)");
+                }
+
+                // Check stored child count
+                if (node.directChildCount != children.size()) {
+                    throw new FxTreeException(LOG, "ex.tree.check.failed", mode, "#" + node.id
+                            + " invalid direct child count [" + node.directChildCount
+                            + "!=" + children.size() + "]");
+                }
+
+                // Check depth
+                if (node.id != FxTreeNode.ROOT_NODE && node.depth != nodeMap.get(node.parentId).depth + 1) {
+                    throw new FxTreeException(LOG, "ex.tree.check.failed", mode, "#" + node.id + " invalid depth: "
+                            + node.depth + ", parent depth=" + nodeMap.get(node.parentId).depth);
+                }
             }
             if (LOG.isDebugEnabled())
-                LOG.debug("Successfully checked [" + nodes + "] tree nodes in mode [" + mode.name() + "]!");
+                LOG.debug("Successfully checked [" + childMap.size() + "] tree nodes in mode [" + mode.name() + "]!");
         } catch (SQLException e) {
             throw new FxTreeException(LOG, e, "ex.tree.check.failed", mode, e.getMessage());
         } finally {
-            try {
-                if (stmt != null) stmt.close();
-            } catch (Exception exc) {/*ignore*/}
-            try {
-                if (stmt2 != null) stmt2.close();
-            } catch (Exception exc) {/*ignore*/}
+            Database.closeObjects(GenericTreeStorageSpreaded.class, stmt);
+        }
+    }
+
+    private static class CheckedNodeInfo {
+        private final long id;
+        private final long parentId;
+        private final BigDecimal left;
+        private final BigDecimal right;
+        private final int directChildCount;
+        private final int depth;
+
+        public CheckedNodeInfo(long id, long parentId, BigDecimal left, BigDecimal right, int directChildCount, int depth) {
+            this.id = id;
+            this.parentId = parentId;
+            this.left = left;
+            this.right = right;
+            this.directChildCount = directChildCount;
+            this.depth = depth;
         }
     }
 
@@ -1134,18 +1155,29 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
      */
     @Override
     protected boolean lockForUpdate(Connection con, String table, Iterable<Long> nodeIds) throws FxDbException {
-        if (nodeIds == null || !nodeIds.iterator().hasNext()) {
-            return tryLock(con, table, null);
-        }
+        return lockForUpdate(con, table, nodeIds, "id");
+    }
 
-        // process nodes in partitions since some DBMS choke on large IN conditions
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected boolean lockForUpdateReference(Connection con, String table, Iterable<Long> referenceIds) throws FxDbException {
+        return lockForUpdate(con, table, referenceIds, "ref");
+    }
+
+    private boolean lockForUpdate(Connection con, String table, Iterable<Long> nodeIds, String field) throws FxDbException {
+        if (nodeIds == null || !nodeIds.iterator().hasNext()) {
+            return tryLock(con, table, null, "id");
+        }
         for (List<Long> part : Iterables.partition(nodeIds, 500)) {
-            if (!tryLock(con, table, part)) {
-                return false;   // deadlock detected
+            if (!tryLock(con, table, part, "id")) {
+                return false; // deadlock detected
             }
         }
-        return true;    // sucess
+        return true; // sucess
     }
+
 
     /**
      * Get the database specific "for update" clause to lock tables rows
@@ -1156,12 +1188,12 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
         return " FOR UPDATE";
     }
 
-    private boolean tryLock(Connection con, String table, List<Long> part) throws FxDbException {
+    private boolean tryLock(Connection con, String table, List<Long> part, String column) throws FxDbException {
         PreparedStatement stmt = null;
         try {
             stmt = con.prepareStatement("SELECT id FROM " + table + " t "
                     + (part == null || part.isEmpty() ? ""
-                    : " WHERE id IN (" + StringUtils.join(part, ',') + ")")
+                    : " WHERE " + column + " IN (" + StringUtils.join(part, ',') + ")")
                     + getForUpdateClause());
             stmt.executeQuery();
 

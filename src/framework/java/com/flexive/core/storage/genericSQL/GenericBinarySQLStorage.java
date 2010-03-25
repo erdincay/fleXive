@@ -53,6 +53,9 @@ import com.flexive.shared.scripting.FxScriptEvent;
 import com.flexive.shared.scripting.FxScriptResult;
 import com.flexive.shared.stream.BinaryUploadPayload;
 import com.flexive.shared.stream.FxStreamUtils;
+import com.flexive.shared.structure.FxDataType;
+import com.flexive.shared.structure.FxPropertyAssignment;
+import com.flexive.shared.structure.FxType;
 import com.flexive.shared.value.BinaryDescriptor;
 import static com.flexive.shared.value.BinaryDescriptor.PreviewSizes;
 import static com.flexive.shared.value.BinaryDescriptor.SYS_UNKNOWN;
@@ -864,7 +867,20 @@ public class GenericBinarySQLStorage implements BinaryStorage {
     /**
      * {@inheritDoc}
      */
-    public void removeBinaries(Connection con, SelectOperation remOp, FxPK pk, long typeId) throws FxApplicationException {
+    public void removeBinaries(Connection con, SelectOperation remOp, FxPK pk, FxType type) throws FxApplicationException {
+        if (type != null) {
+            // bail out early if type has no binary properties
+            boolean hasBinaryProperties = false;
+            for (FxPropertyAssignment pa : type.getAllProperties()) {
+                if (pa.getProperty().getDataType() == FxDataType.Binary) {
+                    hasBinaryProperties = true;
+                    break;
+                }
+            }
+            if (!hasBinaryProperties) {
+                return;
+            }
+        }
         PreparedStatement ps = null;
         List<Long> binaries = null;
         try {
@@ -881,7 +897,7 @@ public class GenericBinarySQLStorage implements BinaryStorage {
                     break;
                 case SelectType:
                     ps = con.prepareStatement(CONTENT_BINARY_REMOVE_TYPE_GET);
-                    ps.setLong(1, typeId);
+                    ps.setLong(1, type.getId());
                     break;
                 default:
                     return;
@@ -895,41 +911,42 @@ public class GenericBinarySQLStorage implements BinaryStorage {
             ps.close();
 
             //reset data
-            switch (remOp) {
-                case SelectId:
-                    ps = con.prepareStatement(CONTENT_BINARY_REMOVE_RESETDATA_ID);
-                    ps.setLong(1, pk.getId());
-                    ps.executeUpdate();
-                    ps.close();
-                    ps = con.prepareStatement(CONTENT_BINARY_REMOVE_RESET_ID);
-                    ps.setLong(1, pk.getId());
-                    ps.executeUpdate();
-                    break;
-                case SelectVersion:
-                    ps = con.prepareStatement(CONTENT_BINARY_REMOVE_RESETDATA_ID + " AND VER=?");
-                    ps.setLong(1, pk.getId());
-                    ps.setInt(2, pk.getVersion());
-                    ps.executeUpdate();
-                    ps.close();
-                    ps = con.prepareStatement(CONTENT_BINARY_REMOVE_RESET_ID + " AND VER=?");
-                    ps.setLong(1, pk.getId());
-                    ps.setInt(2, pk.getVersion());
-                    ps.executeUpdate();
-                    break;
-                case SelectType:
-                    ps = con.prepareStatement(CONTENT_BINARY_REMOVE_RESETDATA_TYPE);
-                    ps.setLong(1, typeId);
-                    ps.executeUpdate();
-                    ps.close();
-                    ps = con.prepareStatement(CONTENT_BINARY_REMOVE_RESET_TYPE);
-                    ps.setLong(1, typeId);
-                    ps.executeUpdate();
-                    break;
-                default:
-                    return;
-            }
-            if (binaries != null)
+            if (binaries != null) {
+                switch (remOp) {
+                    case SelectId:
+                        ps = con.prepareStatement(CONTENT_BINARY_REMOVE_RESETDATA_ID);
+                        ps.setLong(1, pk.getId());
+                        ps.executeUpdate();
+                        ps.close();
+                        ps = con.prepareStatement(CONTENT_BINARY_REMOVE_RESET_ID);
+                        ps.setLong(1, pk.getId());
+                        ps.executeUpdate();
+                        break;
+                    case SelectVersion:
+                        ps = con.prepareStatement(CONTENT_BINARY_REMOVE_RESETDATA_ID + " AND VER=?");
+                        ps.setLong(1, pk.getId());
+                        ps.setInt(2, pk.getVersion());
+                        ps.executeUpdate();
+                        ps.close();
+                        ps = con.prepareStatement(CONTENT_BINARY_REMOVE_RESET_ID + " AND VER=?");
+                        ps.setLong(1, pk.getId());
+                        ps.setInt(2, pk.getVersion());
+                        ps.executeUpdate();
+                        break;
+                    case SelectType:
+                        ps = con.prepareStatement(CONTENT_BINARY_REMOVE_RESETDATA_TYPE);
+                        ps.setLong(1, type.getId());
+                        ps.executeUpdate();
+                        ps.close();
+                        ps = con.prepareStatement(CONTENT_BINARY_REMOVE_RESET_TYPE);
+                        ps.setLong(1, type.getId());
+                        ps.executeUpdate();
+                        break;
+                    default:
+                        return;
+                }
                 removeBinaries(con, binaries);
+            }
         } catch (SQLException e) {
             throw new FxDbException(e, "ex.db.sqlError", e.getMessage());
         } finally {
