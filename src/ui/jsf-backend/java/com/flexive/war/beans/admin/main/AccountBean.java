@@ -146,7 +146,9 @@ public class AccountBean implements Serializable {
         public void setLanguage(FxLanguage language) {
             this.language = language;
             // save the language right in the Ticket, so that the update message has the right language
-            FxJsfUtils.getRequest().getUserTicket().setLanguage(language);
+            final UserTicket currentTicket = FxJsfUtils.getRequest().getUserTicket();
+            if (currentTicket.getUserId() == id)    // only change the language of the current user if the IDs are the same
+             currentTicket.setLanguage(language);
         }
 
         public void setActive(boolean active) {
