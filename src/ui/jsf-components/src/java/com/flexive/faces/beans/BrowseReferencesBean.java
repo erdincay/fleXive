@@ -35,6 +35,7 @@ package com.flexive.faces.beans;
 
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.XPathElement;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
@@ -42,6 +43,7 @@ import com.flexive.shared.search.FxResultSet;
 import com.flexive.shared.search.AdminResultLocations;
 import com.flexive.shared.search.ResultViewType;
 import com.flexive.shared.search.query.PropertyValueComparator;
+import com.flexive.shared.search.query.QueryOperatorNode.Operator;
 import com.flexive.shared.search.query.SqlQueryBuilder;
 import com.flexive.shared.structure.FxAssignment;
 import com.flexive.shared.structure.FxPropertyAssignment;
@@ -89,11 +91,15 @@ public class BrowseReferencesBean implements ActionBean, Serializable {
             return null;
         }
         if (!XPathElement.isValidXPath(xPath)) {
-            //might be a property
-            if (CacheAdmin.getEnvironment().propertyExists(xPath)) {
+            if (xPath.endsWith("/")) {
+                // only type part of XPath present
+                return CacheAdmin.getEnvironment().getType(xPath.substring(0, xPath.length() - 1));
+            } else if (CacheAdmin.getEnvironment().propertyExists(xPath)) {
+                // only a property name
                 return CacheAdmin.getEnvironment().getProperty(xPath).getReferencedType();
-            } else
+            } else {
                 throw new FxInvalidParameterException("xPath", LOG, "ex.browseReferences.xpath.invalid", xPath).asRuntimeException();
+            }
         }
         final FxAssignment fxAssignment = CacheAdmin.getEnvironment().getAssignment(xPath);
         if (!(fxAssignment instanceof FxPropertyAssignment)) {
@@ -107,7 +113,8 @@ public class BrowseReferencesBean implements ActionBean, Serializable {
         final SqlQueryBuilder builder = new SqlQueryBuilder(AdminResultLocations.BROWSE_REFERENCES, ResultViewType.LIST)
                 .select("@pk", "@*");
         if (referencedType != null) {
-            builder.type(referencedType.getId());
+            // include type and its subtypes
+            builder.type(referencedType.getName(), true);
         }
         if (StringUtils.isNotBlank(query)) {
             builder.condition("*", PropertyValueComparator.EQ, query.trim());

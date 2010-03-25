@@ -236,11 +236,14 @@ public class TypeEditorBean implements Serializable {
         if (!icon.isEmpty() && !icon.getDefaultTranslation().hasContent()) {
             //load the content to be able to display the caption
             try {
-                icon.getDefaultTranslation().setContent(EJBLookup.getContentEngine().load(new FxPK(icon.getDefaultTranslation().getId())));
+                icon.getDefaultTranslation().setContent(
+                        EJBLookup.getContentEngine().load(new FxPK(icon.getDefaultTranslation().getId()))
+                );
             } catch (FxApplicationException e) {
                 LOG.warn(e);
             }
         }
+        icon.setXPath("IMAGE/"); // set base type as XPath
         return icon;
     }
 

@@ -34,6 +34,7 @@ package com.flexive.shared.structure;
 import com.flexive.shared.AbstractSelectableObjectWithLabel;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.SelectableObjectWithLabel;
+import com.flexive.shared.SelectableObjectWithName;
 import com.flexive.shared.XPathElement;
 import com.flexive.shared.media.FxMimeTypeWrapper;
 import com.flexive.shared.content.FxGroupData;
@@ -61,13 +62,19 @@ import java.util.*;
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-public class FxType extends AbstractSelectableObjectWithLabel implements Serializable, SelectableObjectWithLabel {
+public class FxType extends AbstractSelectableObjectWithLabel implements Serializable, SelectableObjectWithLabel, SelectableObjectWithName {
     private static final long serialVersionUID = 5598974905776911393L;
 
     /**
-     * Virtual ROOT_ID type
+     * Root type ID.
      */
     public final static long ROOT_ID = 0;
+    /**
+     * ROOT type name.
+     *
+     * @since 3.1
+     */
+    public static final String ROOT = "ROOT";
     /**
      * Name of the account contact data type
      */
@@ -747,7 +754,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
             for (FxType derived : fxStructure.getTypes(true, true, true, true)) {
                 if (derived.getParent() != null && derived.getParent().getId() == getId())
                     derivedTypes.add(derived);
-            }
+                }
             if (relations.size() > 0) {
                 for (FxTypeRelation relation : relations)
                     relation.resolveReferences(fxStructure);

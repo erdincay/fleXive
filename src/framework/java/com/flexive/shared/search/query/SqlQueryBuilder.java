@@ -41,8 +41,11 @@ import com.flexive.shared.exceptions.FxInvalidStateException;
 import com.flexive.shared.search.*;
 import com.flexive.shared.search.query.QueryOperatorNode.Operator;
 import com.flexive.shared.structure.FxAssignment;
+import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.structure.FxProperty;
+import com.flexive.shared.structure.FxType;
 import com.flexive.shared.value.FxValue;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 
@@ -337,6 +340,31 @@ public class SqlQueryBuilder implements Serializable {
 
     /**
      * Adds a condition that selects only objects of the given type. Note that this is different
+     * to {@link #filterType(String)}, since filtering is applied on the result that also may contain
+     * other types, but this is a standard search condition that restrains the search result.
+     *
+     * @param typeName  the type name to be selected
+     * @param includeSubTypes   if subtypes should be included
+     * @return  this
+     * @since 3.1
+     */
+    public SqlQueryBuilder type(String typeName, boolean includeSubTypes) {
+        if (includeSubTypes) {
+            final List<FxType> types;
+            if (typeName.equalsIgnoreCase(FxType.ROOT)) {
+                types = CacheAdmin.getEnvironment().getTypes();
+            } else {
+                types = CacheAdmin.getEnvironment().getType(typeName).getDerivedTypes(true, true);
+            }
+            condition("typedef", PropertyValueComparator.IN, FxSharedUtils.getSelectableObjectNameList(types));
+            return this;
+        } else {
+            return type(typeName);
+        }
+    }
+
+    /**
+     * Adds a condition that selects only objects of the given type. Note that this is different
      * to {@link #filterType(long)}, since filtering is applied on the result that also may contain
      * other types, but this is a standard search condition that restrains the search result.
      *
@@ -346,6 +374,23 @@ public class SqlQueryBuilder implements Serializable {
     public SqlQueryBuilder type(long typeId) {
         condition("typedef", PropertyValueComparator.EQ, CacheAdmin.getEnvironment().getType(typeId).getName());
         return this;
+    }
+
+    /**
+     * Adds a condition that selects only objects of the given type. Note that this is different
+     * to {@link #filterType(long)}, since filtering is applied on the result that also may contain
+     * other types, but this is a standard search condition that restrains the search result.
+     *
+     * @param typeId the type id to be selected
+     * @param includeSubTypes   if subtypes should be included
+     * @return  this
+     * @since 3.1
+     */
+    public SqlQueryBuilder type(long typeId, boolean includeSubTypes) {
+        return type(
+                CacheAdmin.getEnvironment().getType(typeId).getName(),
+                includeSubTypes
+        );
     }
 
     /**

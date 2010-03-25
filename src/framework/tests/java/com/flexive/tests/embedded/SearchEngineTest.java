@@ -1596,6 +1596,12 @@ public class SearchEngineTest {
         }
     }
 
+    @Test
+    public void testSelectAllTypesWithQueryBuilder() throws FxApplicationException {
+        final FxResultSet result = new SqlQueryBuilder().type("ROOT", true).getResult();
+        assertTrue(result.getRowCount() > 0);
+    }
+
     private void queryForCaption(String name) throws FxApplicationException {
         final FxResultSet result = new SqlQueryBuilder().select("caption").condition("caption", PropertyValueComparator.EQ, name).getResult();
         assertTrue(result.getRowCount() == 1, "Expected one result row, got: " + result.getRowCount());
