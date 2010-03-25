@@ -122,7 +122,7 @@ disableTab... false if the <adm:tab/> component should be rendered, true otherwi
                                         <adm:ajaxCommandIcon id="#{editorId}_looseLockButton" titleKey="ContentEditor.button.acquireLooseLock.title"
                                                                bean="#{srcEditor}" icon="looseLock" action="acquireLooseLock"
                                                                onclick="flexive.contentEditor.saveGroupFolding('#{srcEditor.formId}');"
-                                                               oncomplete="#{jsfunc}">
+                                                               oncomplete="#{jsfuncTreeReload}">
                                             <f:setPropertyActionListener value="#{myContent}" target="#{srcEditor.wrappedContent}"/>
                                             <!-- set properties for fxContentEditorBean -->
                                             <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
@@ -136,7 +136,7 @@ disableTab... false if the <adm:tab/> component should be rendered, true otherwi
                                         <adm:ajaxCommandIcon id="#{editorId}_permLockButton" titleKey="ContentEditor.button.acquirePermLock.title"
                                                              bean="#{srcEditor}" icon="lock" action="acquirePermLock"
                                                              onclick="flexive.contentEditor.saveGroupFolding('#{srcEditor.formId}');"
-                                                             oncomplete="#{jsfunc}">
+                                                             oncomplete="#{jsfuncTreeReload}">
                                             <f:setPropertyActionListener value="#{myContent}" target="#{srcEditor.wrappedContent}"/>
                                             <!-- set properties for fxContentEditorBean -->
                                             <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
@@ -174,7 +174,7 @@ disableTab... false if the <adm:tab/> component should be rendered, true otherwi
                                                                      titleKey="ContentEditor.button.unlock" bean="#{srcEditor}"
                                                                      icon="unlock" action="unLock"
                                                                      onclick="flexive.contentEditor.saveGroupFolding('#{srcEditor.formId}');"
-                                                                     oncomplete="#{jsfunc}">
+                                                                     oncomplete="#{jsfuncTreeReload}">
                                                     <f:setPropertyActionListener value="#{myContent}" target="#{srcEditor.wrappedContent}"/>
                                                     <!-- set properties for fxContentEditorBean -->
                                                     <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
@@ -328,7 +328,7 @@ disableTab... false if the <adm:tab/> component should be rendered, true otherwi
                           location="#{empty myContent.guiSettings.openedReferenceId
                                          and not myContent.referenced ? 'both' : 'content'}"
                           bean="#{srcEditor}" icon="save" action="saveAndCancel"
-                          onclick="flexive.contentEditor.saveGroupFolding('#{srcEditor.formId}');ceReloadTree();">
+                          onclick="flexive.contentEditor.saveGroupFolding('#{srcEditor.formId}');">
                  <f:setPropertyActionListener value="#{myContent}" target="#{srcEditor.wrappedContent}"/>
                  <!-- set properties for fxContentEditorBean -->
                 <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
@@ -341,7 +341,7 @@ disableTab... false if the <adm:tab/> component should be rendered, true otherwi
                           location="#{empty myContent.guiSettings.openedReferenceId
                                          and not myContent.referenced ? 'both' : 'content'}"
                           bean="#{srcEditor}" confirmKey="Content.confirm.abort"
-                          icon="cancel" action="cancel" onclick="flexive.contentEditor.saveGroupFolding('#{srcEditor.formId}');ceReloadTree();">
+                          icon="cancel" action="cancel" onclick="flexive.contentEditor.saveGroupFolding('#{srcEditor.formId}');">
                  <f:setPropertyActionListener value="#{myContent}" target="#{srcEditor.wrappedContent}"/>
                  <!-- set properties for fxContentEditorBean -->
                 <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
@@ -367,7 +367,7 @@ disableTab... false if the <adm:tab/> component should be rendered, true otherwi
             <ui:fragment rendered="#{not myContent.guiSettings.editMode and _ceContent.guiSettings.userMayPermLock}">
                 <adm:ajaxCommandButton id="#{editorId}_permLockButtonBottom" labelKey="ContentEditor.button.acquirePermLock" bean="#{srcEditor}"
                                        icon="lock" action="acquirePermLock" onclick="flexive.contentEditor.saveGroupFolding('#{srcEditor.formId}');"
-                                       oncomplete="#{jsfunc}">
+                                       oncomplete="#{jsfuncTreeReload}">
                      <f:setPropertyActionListener value="#{myContent}" target="#{srcEditor.wrappedContent}"/>
                      <!-- set properties for fxContentEditorBean -->
                     <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
@@ -380,7 +380,7 @@ disableTab... false if the <adm:tab/> component should be rendered, true otherwi
             <ui:fragment rendered="#{not myContent.guiSettings.editMode and _ceContent.guiSettings.userMayLooseLock}">
                 <adm:ajaxCommandButton id="#{editorId}_looseLockButtonBottom" labelKey="ContentEditor.button.acquireLooseLock" bean="#{srcEditor}"
                                        icon="looseLock" action="acquireLooseLock" onclick="flexive.contentEditor.saveGroupFolding('#{srcEditor.formId}');"
-                                       oncomplete="#{jsfunc}">
+                                       oncomplete="#{jsfuncTreeReload}">
                      <f:setPropertyActionListener value="#{myContent}" target="#{srcEditor.wrappedContent}"/>
                      <!-- set properties for fxContentEditorBean -->
                     <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
@@ -393,7 +393,7 @@ disableTab... false if the <adm:tab/> component should be rendered, true otherwi
             <ui:fragment rendered="#{_ceContent.guiSettings.contentLocked and not _ceContent.guiSettings.editMode and _ceContent.guiSettings.userMayUnlock and _ceContent.content.permissions.mayEdit}">
                 <adm:ajaxCommandButton id="#{editorId}_unlockButtonBottom" labelKey="ContentEditor.button.unlock" bean="#{srcEditor}"
                                        icon="unlock" action="unLock" onclick="flexive.contentEditor.saveGroupFolding('#{srcEditor.formId}');"
-                                       oncomplete="#{jsfunc}">
+                                       oncomplete="#{jsfuncTreeReload}">
                      <f:setPropertyActionListener value="#{myContent}" target="#{srcEditor.wrappedContent}"/>
                      <!-- set properties for fxContentEditorBean -->
                     <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>

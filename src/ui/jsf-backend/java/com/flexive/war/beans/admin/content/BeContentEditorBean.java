@@ -121,6 +121,8 @@ public class BeContentEditorBean implements ActionBean, Serializable {
 
     // Flag indicating if the content is opened/edited from a result set
     private boolean fromResultSet;
+    // reload the content tree - flag checked in contenteditor.xhtml main page
+    private boolean reloadContentTree = false;
 
     /**
      * {@inheritDoc}
@@ -283,6 +285,14 @@ public class BeContentEditorBean implements ActionBean, Serializable {
 
     public void setBeBeanInUse(boolean beBeanInUse) {
         this.beBeanInUse = beBeanInUse;
+    }
+
+    public boolean isReloadContentTree() {
+        return reloadContentTree;
+    }
+
+    public void setReloadContentTree(boolean reloadContentTree) {
+        this.reloadContentTree = reloadContentTree;
     }
 
     /**
@@ -720,6 +730,7 @@ public class BeContentEditorBean implements ActionBean, Serializable {
                 treeNodes = null;
             }
         }
+        reloadContentTree = true;
         return null;
     }
 
@@ -999,6 +1010,7 @@ public class BeContentEditorBean implements ActionBean, Serializable {
      */
     public String enableEdit() {
         ((FxContentEditorBean) FxJsfUtils.getManagedBean("fxContentEditorBean")).enableEdit();
+        reloadContentTree = true;
         return null;
     }
 
