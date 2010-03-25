@@ -38,6 +38,7 @@ import com.flexive.shared.search.ResultViewType;
 import com.flexive.shared.search.FxResultSet;
 import com.flexive.shared.search.query.SqlQueryBuilder;
 import com.flexive.shared.search.query.VersionFilter;
+import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.value.BinaryDescriptor;
 
 import javax.servlet.http.HttpSession;
@@ -60,6 +61,9 @@ public class ResultSessionData implements Serializable {
     private SqlQueryBuilder queryBuilder;
     private BinaryDescriptor.PreviewSizes previewSize;
     private long briefcaseId;
+    private long folderId;
+    private FxTreeMode treeMode;
+    private boolean enableFolderActions;
     private ResultViewType viewType = ResultViewType.LIST;
     private int startRow;
     private int fetchRows = 25;
@@ -271,4 +275,33 @@ public class ResultSessionData implements Serializable {
         this.tabTitle = tabTitle;
         saveInSession();
     }
+
+    public long getFolderId() {
+        return folderId;
+    }
+
+    public void setFolderId(long folderId) {
+        this.folderId = folderId;
+        saveInSession();
+    }
+
+    public boolean isEnableFolderActions() {
+        return enableFolderActions;
+    }
+
+    public void setEnableFolderActions(boolean enableFolderActions) {
+        this.enableFolderActions = enableFolderActions;
+        saveInSession();
+    }
+
+    public FxTreeMode getTreeMode() {
+        return treeMode;
+    }
+
+    public void setTreeMode(FxTreeMode treeMode) {
+        this.treeMode = treeMode;
+        saveInSession();
+    }
+
+
 }

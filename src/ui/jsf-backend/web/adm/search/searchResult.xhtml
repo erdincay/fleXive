@@ -35,6 +35,18 @@
                 return "#{fx:encodeEnum(fxSearchResultBean.location)}";
             }
 
+            function getFolderId() {
+                return #{fxSearchResultBean.folderId};
+            }
+
+            function isEnableFolderActions() {
+                return #{fxSearchResultBean.enableFolderActions};
+            }
+
+            function isLiveFolder() {
+                return #{fxSearchResultBean.treeMode eq 'Live'};
+            }
+
             var MESSAGES = {
                 "SearchResult.dialog.confirm.deleteSelection": "#{fxMessageBean['SearchResult.dialog.confirm.deleteSelection']}",
                 "SearchResult.dialog.confirm.deleteRow": "#{fxMessageBean['SearchResult.dialog.confirm.deleteRow']}",
@@ -51,7 +63,10 @@
                 "Briefcase.status.movedSelection": "#{fxMessageBean['Briefcase.status.movedSelection']}",
                 "Briefcase.nfo.sameBriefcase": "#{fxMessageBean['Briefcase.nfo.sameBriefcase']}",
                 "Briefcase.dialog.prompt.briefcaseName": "#{fxMessageBean['Briefcase.dialog.prompt.briefcaseName']}",
-                "Briefcase.dialog.prompt.briefcaseName.default": "#{fxMessageBean['Briefcase.dialog.prompt.briefcaseName.default']}"
+                "Briefcase.dialog.prompt.briefcaseName.default": "#{fxMessageBean['Briefcase.dialog.prompt.briefcaseName.default']}",
+                "SearchResult.dialog.confirm.detachSelection": "#{fxMessageBean['SearchResult.dialog.confirm.detachSelection']}",
+                "SearchResult.dialog.confirm.detachRow": "#{fxMessageBean['SearchResult.dialog.confirm.detachRow']}",
+                "ContentTree.status.removedNode": "#{fxMessageBean['ContentTree.status.removedNode']}"
             };
 
         //-->
@@ -174,7 +189,13 @@
                             </fx:menuItem>
                             <fx:menuItem id="deleteBriefcase" labelKey="SearchResult.menu.deleteBriefcase" icon="removeBriefcaseItems"/>
                         </c:if>
+
+                        <c:if test="#{fxSearchResultBean.folderId != -1 and fxSearchResultBean.enableFolderActions}">
+                            <fx:menuItem id="deleteFromFolder" labelKey="SearchResult.menu.deleteFromFolder" icon="detach"/>
+                        </c:if>
+                                    
                         <fx:menuItem id="delete" labelKey="SearchResult.menu.delete" icon="remove"/>
+
                     </fx:menuItemGroup>
 
                     <fx:menuItemGroup>

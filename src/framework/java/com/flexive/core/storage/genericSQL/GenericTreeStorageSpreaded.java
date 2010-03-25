@@ -1067,7 +1067,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
         PreparedStatement stmt = null;
         try {
             // 1 - ID, 2 - LFT, 3 - RGT, 4 - CHILDCOUNT, 5 - DEPTH, 6 - PARENT
-            final String sql = "SELECT t.id, t.LFT, T.RGT, t.CHILDCOUNT, t.DEPTH, t.PARENT " +
+            final String sql = "SELECT t.id, t.LFT, t.RGT, t.CHILDCOUNT, t.DEPTH, t.PARENT " +
                     "FROM " + getTable(mode) + " t";
             stmt = con.prepareStatement(sql);
             final ResultSet rs = stmt.executeQuery();

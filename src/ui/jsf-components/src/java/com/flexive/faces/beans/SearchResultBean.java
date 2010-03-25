@@ -51,7 +51,6 @@ import com.flexive.shared.value.BinaryDescriptor;
 import com.flexive.shared.value.FxValue;
 import com.flexive.war.filter.FxResponseWrapper;
 import com.google.common.collect.Iterables;
-import java.io.PrintWriter;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -129,14 +128,19 @@ public class SearchResultBean implements ActionBean, Serializable {
                                     Iterables.concat(Arrays.asList(folderType), folderType.getDerivedTypes())
                             )
                     );
+                    setEnableFolderActions(true);
                 } else {
                     sqb.isChild(id);
+                    // don't enable folder actions it would affect many folders at once
+                    setEnableFolderActions(false);
                 }
                 setQueryBuilder(sqb.maxRows(Integer.MAX_VALUE));
                 setTabTitle(MessageBean.getInstance().getMessage(
                         "SearchResult.tabtitle.folder",
                         EJBLookup.getTreeEngine().getNode(liveTree ? FxTreeMode.Live : FxTreeMode.Edit, id).getLabel()
                 ));
+                setFolderId(id);
+                setTreeMode(liveTree ? FxTreeMode.Live : FxTreeMode.Edit);
                 show();
             } else if ("typeSearch".equals(action)) {
                 // search for contents of a type
@@ -196,6 +200,9 @@ public class SearchResultBean implements ActionBean, Serializable {
         setVersionFilter(VersionFilter.MAX);
         setPaginatorPage(1);
         setSortColumnKey(null);
+        setFolderId(-1);
+        setEnableFolderActions(false);
+        setTreeMode(FxTreeMode.Edit);
     }
 
     /**
@@ -617,6 +624,42 @@ public class SearchResultBean implements ActionBean, Serializable {
             setResult(null);
         }
     }
+
+    /**
+     * @return the current folder ID, if the current result was built for a folder.
+     * @since 3.1
+     */
+    public long getFolderId() {
+        return getSessionData().getFolderId();
+    }
+
+    public void setFolderId(long folderId) {
+        getSessionData().setFolderId(folderId);
+    }
+
+    /**
+     * @return  true if folder actions (e.g. removing objects) should be activated.
+     * @since 3.1
+     */
+    public boolean isEnableFolderActions() {
+        return getSessionData().isEnableFolderActions();
+    }
+
+    public void setEnableFolderActions(boolean enableFolderActions) {
+        getSessionData().setEnableFolderActions(enableFolderActions);
+    }
+
+    /**
+     * @return  the tree mode, if a folder query was submitted
+     */
+    public FxTreeMode getTreeMode() {
+        return getSessionData().getTreeMode();
+    }
+
+    public void setTreeMode(FxTreeMode treeMode) {
+        getSessionData().setTreeMode(treeMode);
+    }
+
     /**
      * Reset the client-side table view parameters (sort, page number),
      * called e.g. when the content type filter changed.

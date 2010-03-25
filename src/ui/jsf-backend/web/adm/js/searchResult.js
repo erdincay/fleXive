@@ -123,7 +123,7 @@ function addBriefcaseMenuItem(menu, itemIdPrefix, briefcase) {
     var newItem = new YAHOO.widget.MenuItem(briefcaseMenuText(briefcase), {
         "id": getBriefcaseMenuItemId(itemIdPrefix, briefcase),
         "onclick": {
-            "fn": function(_name, _event, _menuItem) { fn(briefcase.id, _menuItem); }
+            "fn": function(_name, _event, _menuItem) {fn(briefcase.id, _menuItem);}
         }
     });
     menu.addItem(newItem, 1);
@@ -163,11 +163,7 @@ function onContextMenu(type, args) {
                 confirmDialog(MESSAGES["SearchResult.dialog.confirm.deleteSelection"], function() {
                     try {
                         flexive.util.getJsonRpc().ContentEditor.removeMultiple(selectedIds);
-                        if (getViewType() == "LIST") {
-                            deleteRowsForIds(selectedIds);
-                        } else {
-                            reload();
-                        }
+                        removeSelectedIdsFromTable(selectedIds);
                     } catch (e) {
                         alertDialog(e);
                     }
@@ -180,19 +176,27 @@ function onContextMenu(type, args) {
             if (selectedIds.length > 0) {
                 try {
                     flexive.util.getJsonRpc().BriefcaseEditor.removeItems(briefcaseId, selectedIds);
-                    if (getViewType() == "LIST") {
-                        deleteRowsForIds(selectedIds);
-                        if (parent.reloadBriefcases) {
-                            parent.reloadBriefcases();
-                        }
-                    } else {
-                        reload();
-                    }
+                    removeSelectedIdsFromTable(selectedIds);
                 } catch (e) {
                     alertDialog(e);
                 }
             } else {
                 deleteFromBriefcase(pk);
+            }
+            break;
+        case "deleteFromFolder":
+            if (selectedIds.length > 0) {
+                confirmDialog(MESSAGES["SearchResult.dialog.confirm.detachSelection"], function() {
+                    try {
+                        flexive.util.getJsonRpc().ContentEditor.detachMultiple(getFolderId(), selectedIds, isLiveFolder());
+                        removeSelectedIdsFromTable(selectedIds);
+                        parent.reloadContentTree();
+                    } catch (e) {
+                        alertDialog(e);
+                    }
+                });
+            } else {
+                detachContent(pk);
             }
             break;
         case "selectAll":
@@ -237,6 +241,17 @@ function onContextMenu(type, args) {
         default:
             // ignore, since a custom click handler could have been specified
             //alert("Unknown action: " + menuItem.id);
+    }
+}
+
+function removeSelectedIdsFromTable(selectedIds) {
+    if (getViewType() == "LIST") {
+        deleteRowsForIds(selectedIds);
+        if (parent.reloadBriefcases) {
+            parent.reloadBriefcases();
+        }
+    } else {
+        reload();
     }
 }
 
@@ -428,7 +443,7 @@ function deleteRowsForPks(pks) {
     }
     var rowsDeleted = flexive.yui.datatable.deleteMatchingRows(
             resultTable,
-            function(record) { return pkStrings[record.getData("pk")] != null; }
+            function(record) {return pkStrings[record.getData("pk")] != null;}
     );
     modifyTypeCount(-rowsDeleted);
     invalidateSessionCache();
@@ -441,7 +456,7 @@ function deleteRowsForIds(ids) {
     }
     var rowsDeleted = flexive.yui.datatable.deleteMatchingRows(
             resultTable,
-            function(record) { return lookup[flexive.util.parsePk(record.getData("pk")).id] != null; }
+            function(record) {return lookup[flexive.util.parsePk(record.getData("pk")).id] != null;}
     );
     modifyTypeCount(-rowsDeleted);
     invalidateSessionCache();
@@ -477,6 +492,23 @@ function deleteFromBriefcase(/* PK */ pk) {
     } catch (e) {
         alertDialog(e);
     }
+}
+
+function detachContent(/* PK */ pk) {
+    confirmDialog(MESSAGES["SearchResult.dialog.confirm.detachRow"], function() {
+        try {
+            flexive.util.getJsonRpc().ContentEditor.detach(getFolderId(), pk.id, isLiveFolder());
+            if (getViewType() == "LIST") {
+                deleteRowsForPks([pk]);
+            } else {
+                reload();
+            }
+            parent.reloadContentTree();
+        } catch (e) {
+            alertDialog(e);
+            reload();
+        }
+    });
 }
 
 function modifyTypeCount(/* int */ delta) {

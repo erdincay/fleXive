@@ -37,9 +37,13 @@ import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxLockType;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.content.FxPK;
+import com.flexive.shared.tree.FxTreeNode;
 import com.flexive.war.JsonWriter;
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.beans.SearchResultBean;
+import com.flexive.shared.exceptions.FxNotFoundException;
+import com.flexive.shared.tree.FxTreeMode;
+import com.flexive.shared.tree.FxTreeRemoveOp;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -111,6 +115,32 @@ public class ContentEditor implements Serializable {
             }
         }
         return writeUpdateCount(count);
+    }
+
+    public String detach(long folderId, long contentId, boolean live) throws Exception {
+        return detachMultiple(folderId, new long[] { contentId }, live);
+    }
+
+    public String detachMultiple(long folderId, long[] contentIds, boolean live) throws Exception {
+        if (folderId == -1) {
+            return writeUpdateCount(0);
+        }
+        try {
+            int count = 0;
+            for (long contentId : contentIds) {
+                try {
+                    final FxTreeNode child = EJBLookup.getTreeEngine().findChild(live ? FxTreeMode.Live : FxTreeMode.Edit, folderId, contentId);
+                    EJBLookup.getTreeEngine().remove(child, FxTreeRemoveOp.Unfile, true);
+                    count++;
+                } catch (FxNotFoundException e) {
+                    // ignore
+                }
+            }
+            return writeUpdateCount(count);
+        } catch (Exception e) {
+            LOG.error("Failed to detach content: " + e.getMessage());
+            throw e;
+        }
     }
 
     private String writeUpdateCount(int count) throws IOException {
