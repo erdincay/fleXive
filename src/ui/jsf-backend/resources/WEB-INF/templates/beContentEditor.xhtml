@@ -145,8 +145,8 @@ disableTab... false if the <adm:tab/> component should be rendered, true otherwi
                                     </div>
                                 </ui:fragment>
                                 <!-- lock duration & extension -->
-                                <ui:fragment rendered="#{_ceContent.guiSettings.contentLocked}">
-                                    <ui:fragment rendered="#{_ceContent.content.permissions.mayEdit}">
+                                <ui:fragment rendered="#{_ceContent.guiSettings.contentLocked and _ceContent.content.permissions.mayEdit}">
+                                    <ui:fragment rendered="#{_ceContent.guiSettings.looseLock or _ceContent.guiSettings.permLock and not _ceContent.new}">
                                         <div id="#{editorId}_lockTimeAndUnlock" style="#{buttonStyle}">
                                             <!-- lock duration -->
                                             <adm:ajaxCommandIcon id="#{editorId}_lockTimeButton" titleKey="ContentEditor.button.remainingTime" bean="#{srcEditor}"
@@ -158,18 +158,18 @@ disableTab... false if the <adm:tab/> component should be rendered, true otherwi
                                                 <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
                                             </adm:ajaxCommandIcon>
                                             <!-- extend lock -->
-                                            <adm:ajaxCommandIcon id="#{editorId}_extendLockTimeButton"
-                                                                 titleKey="ContentEditor.button.extendLock" bean="#{srcEditor}"
-                                                                 icon="timeExtend" action="extendLock"
-                                                                 onclick="flexive.contentEditor.saveGroupFolding('#{srcEditor.formId}');"
-                                                                 oncomplete="#{jsfunc}">
-                                                <f:setPropertyActionListener value="#{myContent}" target="#{srcEditor.wrappedContent}"/>
-                                                <!-- set properties for fxContentEditorBean -->
-                                                <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
-                                                <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
-                                            </adm:ajaxCommandIcon>
-                                            <!-- unlock button -->
-                                            <ui:fragment rendered="#{not myContent.guiSettings.editMode and myContent.guiSettings.userMayUnlock}">
+                                            <ui:fragment rendered="#{_ceContent.guiSettings.userMayUnlock}">
+                                                <adm:ajaxCommandIcon id="#{editorId}_extendLockTimeButton"
+                                                                     titleKey="ContentEditor.button.extendLock" bean="#{srcEditor}"
+                                                                     icon="timeExtend" action="extendLock"
+                                                                     onclick="flexive.contentEditor.saveGroupFolding('#{srcEditor.formId}');"
+                                                                     oncomplete="#{jsfunc}">
+                                                    <f:setPropertyActionListener value="#{myContent}" target="#{srcEditor.wrappedContent}"/>
+                                                    <!-- set properties for fxContentEditorBean -->
+                                                    <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
+                                                    <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
+                                                </adm:ajaxCommandIcon>
+                                                <!-- unlock button -->
                                                 <adm:ajaxCommandIcon id="#{editorId}_unlockButton"
                                                                      titleKey="ContentEditor.button.unlock" bean="#{srcEditor}"
                                                                      icon="unlock" action="unLock"
@@ -182,24 +182,24 @@ disableTab... false if the <adm:tab/> component should be rendered, true otherwi
                                                 </adm:ajaxCommandIcon>
                                             </ui:fragment>
                                         </div>
-                                        <!-- show lock owner -->
-                                        <ui:fragment rendered="#{_ceContent.guiSettings.showLockOwner and not empty _ceContent.guiSettings.lockOwner}">
-                                            <div style="float:left; padding-top:5px; padding-left:5px; padding-right:5px;">
-                                                <h:outputText value="#{fxMessageBean['ContentEditor.field.lockOwner']}: #{_ceContent.guiSettings.lockOwner}" />
-                                            </div>
-                                        </ui:fragment>
-                                        <!-- lock duration panel -->
-                                        <a4j:outputPanel id="#{editorId}_lockDurationPanel" rendered="#{not empty __ceBean.remainingLockTime and not empty __ceBean.expiresTime}">
-                                            <br/><br/>
-                                            <c:if test="#{_ceContent.guiSettings.permLock}">
-                                                <h:outputText value="#{fxMessageBean['ContentEditor.msg.permLockTimeRemaining']}"/>
-                                            </c:if>
-                                            <c:if test="#{_ceContent.guiSettings.looseLock}">
-                                                <h:outputText value="#{fxMessageBean['ContentEditor.msg.looseLockTimeRemaining']}"/>
-                                            </c:if>
-                                            <h:outputText value=" #{__ceBean.remainingLockTime} #{fxMessageBean['ContentEditor.msg.expiresAt']} #{__ceBean.expiresTime}"/>
-                                        </a4j:outputPanel>
                                     </ui:fragment>
+                                    <!-- show lock owner -->
+                                    <ui:fragment rendered="#{_ceContent.guiSettings.showLockOwner and not empty _ceContent.guiSettings.lockOwner}">
+                                        <div style="float:left; padding-top:5px; padding-left:5px; padding-right:5px;">
+                                            <h:outputText value="#{fxMessageBean['ContentEditor.field.lockOwner']}: #{_ceContent.guiSettings.lockOwner}" />
+                                        </div>
+                                    </ui:fragment>
+                                    <!-- lock duration panel -->
+                                    <a4j:outputPanel id="#{editorId}_lockDurationPanel" rendered="#{not empty __ceBean.remainingLockTime and not empty __ceBean.expiresTime}">
+                                        <br/><br/>
+                                        <c:if test="#{_ceContent.guiSettings.permLock}">
+                                            <h:outputText value="#{fxMessageBean['ContentEditor.msg.permLockTimeRemaining']}"/>
+                                        </c:if>
+                                        <c:if test="#{_ceContent.guiSettings.looseLock}">
+                                            <h:outputText value="#{fxMessageBean['ContentEditor.msg.looseLockTimeRemaining']}"/>
+                                        </c:if>
+                                        <h:outputText value=" #{__ceBean.remainingLockTime} #{fxMessageBean['ContentEditor.msg.expiresAt']} #{__ceBean.expiresTime}"/>
+                                    </a4j:outputPanel>
                                 </ui:fragment>
                             </fx:formRow>
                         </ui:fragment>
@@ -390,7 +390,7 @@ disableTab... false if the <adm:tab/> component should be rendered, true otherwi
         </ui:define>
         <!-- unlock content -->
         <ui:define name="unlockButton">
-            <ui:fragment rendered="#{not myContent.guiSettings.editMode and _ceContent.guiSettings.userMayUnlock and _ceContent.content.permissions.mayEdit}">
+            <ui:fragment rendered="#{_ceContent.guiSettings.contentLocked and not _ceContent.guiSettings.editMode and _ceContent.guiSettings.userMayUnlock and _ceContent.content.permissions.mayEdit}">
                 <adm:ajaxCommandButton id="#{editorId}_unlockButtonBottom" labelKey="ContentEditor.button.unlock" bean="#{srcEditor}"
                                        icon="unlock" action="unLock" onclick="flexive.contentEditor.saveGroupFolding('#{srcEditor.formId}');"
                                        oncomplete="#{jsfunc}">

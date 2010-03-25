@@ -214,211 +214,242 @@
                 <div style="clear:both;height:20px"><!-- __ --></div>
 
                 <a4j:outputPanel id="#{_ceContent.editorId}_buttons" rendered="#{not _ceContent.guiSettings.disableButtons and empty _ceContent.guiSettings.openedReferenceId}" layout="block">
-                    <ui:insert name="buttons">
-                        <ui:fragment rendered="#{not _ceContent.guiSettings.editMode and _ceContent.content.permissions.mayEdit
-                        and empty _ceContent.guiSettings.openedReferenceId}">
-                            <ui:fragment rendered="#{not _ceContent.guiSettings.disableEdit}">
-                                <ui:insert name="editButton">
-                                    <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.edit']}"
-                                            title="#{fxMessageBean['ContentEditor.button.edit.title']}"
-                                            action="#{__ceBean.enableEdit}" reRender="#{__ce_reRenderButton}"
-                                            status="#{_ceContent.editorId}_status">
-                                        <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
-                                        <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
-                                    </a4j:commandButton>
-                                </ui:insert>
-                            </ui:fragment>
-                        </ui:fragment>
-
-                        <ui:fragment rendered="#{_ceContent.guiSettings.editMode}">
-                            <ui:fragment rendered="#{_ceContent.new}">
-                                <ui:fragment rendered="#{not _ceContent.guiSettings.disableSave
-                                and empty _ceContent.guiSettings.openedReferenceId and _ceContent.guiSettings.editMode}">
-                                    <ui:insert name="createButton">
-                                        <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.create']}"
-                                                           title="#{fxMessageBean['ContentEditor.button.create.title']}"
-                                                   action="#{__ceBean.save}" onclick="flexive.contentEditor.preSubmit();#{_ceContent.closePanelScript}"
-                                                reRender="#{__ce_reRenderButton}" status="#{_ceContent.editorId}_status">
-                                             <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
-                                             <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
-                                        </a4j:commandButton>
-                                    </ui:insert>
-                                </ui:fragment>
-                            </ui:fragment>
-
-                            <ui:fragment rendered="#{not _ceContent.new}">
-                                <ui:fragment rendered="#{not _ceContent.guiSettings.disableSave
-                                and empty _ceContent.guiSettings.openedReferenceId and _ceContent.guiSettings.editMode}">
-                                    <ui:insert name="saveButton">
-                                        <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.save']}"
-                                                           title="#{fxMessageBean['ContentEditor.button.save']}"
-                                                   action="#{__ceBean.save}" onclick="flexive.contentEditor.preSubmit();"
-                                                reRender="#{__ce_reRenderButton}" status="#{_ceContent.editorId}_status">
-                                            <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
-                                            <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
-                                        </a4j:commandButton>
-                                    </ui:insert>
-                                </ui:fragment>
-
-                                <ui:fragment rendered="#{not _ceContent.guiSettings.disableVersion and not _ceContent.guiSettings.disableSave
-                                and empty _ceContent.guiSettings.openedReferenceId and _ceContent.guiSettings.editMode}">
-                                    <ui:insert name="saveInNewVersionButton">
-                                        <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.saveInNewVersion']}"
-                                                           title="#{fxMessageBean['ContentEditor.button.saveInNewVersion.title']}"
-                                                action="#{__ceBean.saveInNewVersion}" onclick="flexive.contentEditor.preSubmit();#{_ceContent.closePanelScript}"
-                                                reRender="#{__ce_reRenderButton}" status="#{_ceContent.editorId}_status">
-                                            <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
-                                            <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
-                                        </a4j:commandButton>
-                                    </ui:insert>
-                                </ui:fragment>
-
-                               <ui:fragment rendered="#{_ceContent.versionDeleteAble and
-                               not _ceContent.guiSettings.disableDelete and not _ceContent.guiSettings.disableVersion
-                               and empty _ceContent.guiSettings.openedReferenceId and _ceContent.guiSettings.editMode}">
-                                   <ui:insert name="deleteVersionButton">
-                                       <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.deleteVersion']}"
-                                                          title="#{fxMessageBean['ContentEditor.button.deleteVersion.title']}"
-                                               action="#{__ceBean.deleteCurrentVersion}" onclick="flexive.contentEditor.preSubmit();"
-                                               reRender="#{__ce_reRenderButton}"
-                                               status="#{_ceContent.editorId}_status">
-                                            <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
-                                            <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
-                                       </a4j:commandButton>
-                                   </ui:insert>
-                               </ui:fragment>
-                            </ui:fragment>
-
-                            <ui:fragment rendered="#{not _ceContent.guiSettings.disableCompact
-                                                     and empty _ceContent.guiSettings.openedReferenceId
-                                                     and _ceContent.guiSettings.editMode}">
-                                <ui:insert name="compactButton">
-                                    <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.compact']}"
-                                                       title="#{fxMessageBean['ContentEditor.button.compact.title']}"
-                                                   action="#{__ceBean.compact}" onclick="flexive.contentEditor.preSubmit();"
-                                            reRender="#{__ce_reRenderButton}"
-                                            status="#{_ceContent.editorId}_status">
-                                         <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
-                                         <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
-                                    </a4j:commandButton>
-                                </ui:insert>
-                            </ui:fragment>
-                            <!-- save and cancel button -->
-                            <ui:fragment rendered="#{not _ceContent.new and not _ceContent.guiSettings.disableCancel and empty _ceContent.guiSettings.openedReferenceId and _ceContent.guiSettings.editMode}">
-                            <ui:insert name="saveAndCancelButton">
-                                    <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.saveAndCancel']}"
-                                               action="#{__ceBean.saveAndCancel}" onclick="flexive.contentEditor.preSubmit();#{_ceContent.closePanelScript}"
-                                               title="#{fxMessageBean['ContentEditor.button.saveAndCancel.title']}"
-                                               reRender="#{__ce_reRenderButton}" status="#{_ceContent.editorId}_status">
-                                        <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
-                                        <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
-                                    </a4j:commandButton>
-                                </ui:insert>
-                            </ui:fragment>
-                            <!-- cancel button -->
-                            <ui:fragment rendered="#{not _ceContent.guiSettings.disableCancel and empty _ceContent.guiSettings.openedReferenceId and _ceContent.guiSettings.editMode}">
-                                <ui:insert name="cancelButton">
-                                    <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.cancel']}"
-                                               action="#{__ceBean.cancel}" onclick="flexive.contentEditor.preSubmit();#{_ceContent.closePanelScript}"
-                                               title="#{fxMessageBean['ContentEditor.button.cancel.title']}"
-                                               reRender="#{__ce_reRenderButton}" status="#{_ceContent.editorId}_status">
-                                        <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
-                                        <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
-                                    </a4j:commandButton>
-                                </ui:insert>
-                            </ui:fragment>
-                        </ui:fragment>
-                        <!-- delete button -->
-                        <ui:fragment rendered="#{not _ceContent.new and _ceContent.content.permissions.mayDelete
-                            and not _ceContent.guiSettings.disableDelete and empty _ceContent.guiSettings.openedReferenceId}">
-                            <ui:insert name="deleteButton">
-                                <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.delete']}"
-                                                   title="#{fxMessageBean['ContentEditor.button.delete.title']}"
-                                       action="#{__ceBean.delete}" onclick="flexive.contentEditor.preSubmit();#{_ceContent.closePanelScript}"
-                                       reRender="#{__ce_reRenderButton}" status="#{_ceContent.editorId}_status">
-                                     <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
-                                     <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
-                               </a4j:commandButton>
-                            </ui:insert>
-                        </ui:fragment>
-                        <!-- take over lock button -->
-                        <ui:fragment rendered="#{_ceContent.guiSettings.userMayTakeover and not _ceContent.new and _ceContent.content.permissions.mayEdit}">
-                            <ui:insert name="takeoverButton">
-                                <a4j:commandButton id="#{editorId}_overrideButton" value="#{fxMessageBean['ContentEditor.button.lockOverride']}"
-                                                   title="#{fxMessageBean['ContentEditor.button.lockOverride.title']}"
-                                                   action="#{__ceBean.lockOverride}" reRender="#{__ce_reRenderButton}"
+                <ui:insert name="buttons">
+                    <!-- EDIT button -->
+                    <ui:fragment rendered="#{not _ceContent.guiSettings.editMode and _ceContent.content.permissions.mayEdit and empty _ceContent.guiSettings.openedReferenceId}">
+                        <ui:fragment rendered="#{not _ceContent.guiSettings.disableEdit and _ceContent.guiSettings.userMayUnlock}">
+                            <ui:insert name="editButton">
+                                <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.edit']}"
+                                                   title="#{fxMessageBean['ContentEditor.button.edit.title']}"
+                                                   action="#{__ceBean.enableEdit}" reRender="#{__ce_reRenderButton}"
                                                    status="#{_ceContent.editorId}_status">
-                                    <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
+                                    <f:setPropertyActionListener value="#{_ceContent.editorId}"
+                                                                 target="#{__ceBean.editorId}"/>
                                     <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
                                 </a4j:commandButton>
                             </ui:insert>
                         </ui:fragment>
-                        <!-- loose lock button -->
-                        <ui:fragment rendered="#{not _ceContent.guiSettings.looseLock and not _ceContent.new and _ceContent.guiSettings.userMayLooseLock and _ceContent.content.permissions.mayEdit}">
-                            <ui:insert name="looseLockButton">
-                                <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.acquireLooseLock']}"
-                                        title="#{fxMessageBean['ContentEditor.button.acquirePermLock.title']}"
-                                        action="#{__ceBean.acquireLooseLock}" reRender="#{__ce_reRenderButton}"
-                                        status="#{_ceContent.editorId}_status">
-                                    <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
-                                    <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
-                                </a4j:commandButton>
-                            </ui:insert>
-                        </ui:fragment>
-                        <!-- permanent lock button -->
-                        <ui:fragment rendered="#{not _ceContent.guiSettings.permLock and not _ceContent.new and _ceContent.guiSettings.userMayPermLock and _ceContent.content.permissions.mayEdit}">
-                            <ui:insert name="permLockButton">
-                                <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.acquirePermLock']}"
-                                        title="#{fxMessageBean['ContentEditor.button.acquirePermLock.title']}"
-                                        action="#{__ceBean.acquirePermLock}" reRender="#{__ce_reRenderButton}"
-                                        status="#{_ceContent.editorId}_status">
-                                    <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
-                                    <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
-                                </a4j:commandButton>
-                            </ui:insert>
-                        </ui:fragment>
-                        <!-- unlock button -->
-                        <ui:fragment rendered="#{not _ceContent.guiSettings.editMode and _ceContent.guiSettings.userMayUnlock and _ceContent.content.permissions.mayEdit}">
-                        <ui:insert name="unlockButton">
-                                <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.unlock']}"
-                                        title="#{fxMessageBean['ContentEditor.button.unlock.title']}"
-                                        action="#{__ceBean.unLock}" reRender="#{__ce_reRenderButton}"
-                                        status="#{_ceContent.editorId}_status">
-                                    <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
-                                    <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
-                                </a4j:commandButton>
-                            </ui:insert>
-                        </ui:fragment>
-                        <!-- extend lock features -->
-                        <ui:fragment rendered="#{_ceContent.guiSettings.contentLocked and _ceContent.content.permissions.mayEdit}">
-                            <ui:fragment rendered="#{_ceContent.guiSettings.looseLock or _ceContent.guiSettings.permLock and not _ceContent.new}">
-                                <!-- show  remaining lock time -->
-                                <ui:insert name="lockTimeButton">
-                                    <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.remainingTime']}"
-                                                       title="#{fxMessageBean['ContentEditor.button.remainingTime.title']}"
-                                                       action="#{__ceBean.computeRemainingLockTime}"
-                                                       status="#{_ceContent.editorId}_status" reRender="#{__ce_reRenderButton}">
-                                        <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
-                                        <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
+                    </ui:fragment>
+                    <!-- create button -->
+                    <ui:fragment rendered="#{_ceContent.guiSettings.editMode}">
+                        <ui:fragment rendered="#{_ceContent.new}">
+                            <ui:fragment rendered="#{not _ceContent.guiSettings.disableSave
+                                    and empty _ceContent.guiSettings.openedReferenceId and _ceContent.guiSettings.editMode}">
+                                <ui:insert name="createButton">
+                                    <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.create']}"
+                                                       title="#{fxMessageBean['ContentEditor.button.create.title']}"
+                                                       action="#{__ceBean.save}"
+                                                       onclick="flexive.contentEditor.preSubmit();#{_ceContent.closePanelScript}"
+                                                       reRender="#{__ce_reRenderButton}"
+                                                       status="#{_ceContent.editorId}_status">
+                                        <f:setPropertyActionListener value="#{_ceContent.editorId}"
+                                                                     target="#{__ceBean.editorId}"/>
+                                        <f:setPropertyActionListener value="#{__ce_reRender}"
+                                                                     target="#{__ceBean.reRender}"/>
                                     </a4j:commandButton>
                                 </ui:insert>
-                                <!-- extend lock -->
+                            </ui:fragment>
+                        </ui:fragment>
+                        <!-- save button -->
+                        <ui:fragment rendered="#{not _ceContent.new}">
+                            <ui:fragment rendered="#{not _ceContent.guiSettings.disableSave
+                                    and empty _ceContent.guiSettings.openedReferenceId and _ceContent.guiSettings.editMode}">
+                                <ui:insert name="saveButton">
+                                    <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.save']}"
+                                                       title="#{fxMessageBean['ContentEditor.button.save']}"
+                                                       action="#{__ceBean.save}"
+                                                       onclick="flexive.contentEditor.preSubmit();"
+                                                       reRender="#{__ce_reRenderButton}"
+                                                       status="#{_ceContent.editorId}_status">
+                                        <f:setPropertyActionListener value="#{_ceContent.editorId}"
+                                                                     target="#{__ceBean.editorId}"/>
+                                        <f:setPropertyActionListener value="#{__ce_reRender}"
+                                                                     target="#{__ceBean.reRender}"/>
+                                    </a4j:commandButton>
+                                </ui:insert>
+                            </ui:fragment>
+                            <!-- save in new version button -->
+                            <ui:fragment rendered="#{not _ceContent.guiSettings.disableVersion and not _ceContent.guiSettings.disableSave
+                                    and empty _ceContent.guiSettings.openedReferenceId and _ceContent.guiSettings.editMode}">
+                                <ui:insert name="saveInNewVersionButton">
+                                    <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.saveInNewVersion']}"
+                                                       title="#{fxMessageBean['ContentEditor.button.saveInNewVersion.title']}"
+                                                       action="#{__ceBean.saveInNewVersion}"
+                                                       onclick="flexive.contentEditor.preSubmit();#{_ceContent.closePanelScript}"
+                                                       reRender="#{__ce_reRenderButton}"
+                                                       status="#{_ceContent.editorId}_status">
+                                        <f:setPropertyActionListener value="#{_ceContent.editorId}"
+                                                                     target="#{__ceBean.editorId}"/>
+                                        <f:setPropertyActionListener value="#{__ce_reRender}"
+                                                                     target="#{__ceBean.reRender}"/>
+                                    </a4j:commandButton>
+                                </ui:insert>
+                            </ui:fragment>
+                            <!-- delete version button -->
+                            <ui:fragment rendered="#{_ceContent.versionDeleteAble and
+                                   not _ceContent.guiSettings.disableDelete and not _ceContent.guiSettings.disableVersion
+                                   and empty _ceContent.guiSettings.openedReferenceId and _ceContent.guiSettings.editMode}">
+                                <ui:insert name="deleteVersionButton">
+                                    <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.deleteVersion']}"
+                                                       title="#{fxMessageBean['ContentEditor.button.deleteVersion.title']}"
+                                                       action="#{__ceBean.deleteCurrentVersion}"
+                                                       onclick="flexive.contentEditor.preSubmit();"
+                                                       reRender="#{__ce_reRenderButton}"
+                                                       status="#{_ceContent.editorId}_status">
+                                        <f:setPropertyActionListener value="#{_ceContent.editorId}"
+                                                                     target="#{__ceBean.editorId}"/>
+                                        <f:setPropertyActionListener value="#{__ce_reRender}"
+                                                                     target="#{__ceBean.reRender}"/>
+                                    </a4j:commandButton>
+                                </ui:insert>
+                            </ui:fragment>
+                        </ui:fragment>
+                        <!-- compact button -->
+                        <ui:fragment rendered="#{not _ceContent.guiSettings.disableCompact
+                                                         and empty _ceContent.guiSettings.openedReferenceId
+                                                         and _ceContent.guiSettings.editMode}">
+                            <ui:insert name="compactButton">
+                                <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.compact']}"
+                                                   title="#{fxMessageBean['ContentEditor.button.compact.title']}"
+                                                   action="#{__ceBean.compact}" onclick="flexive.contentEditor.preSubmit();"
+                                                   reRender="#{__ce_reRenderButton}"
+                                                   status="#{_ceContent.editorId}_status">
+                                    <f:setPropertyActionListener value="#{_ceContent.editorId}"
+                                                                 target="#{__ceBean.editorId}"/>
+                                    <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
+                                </a4j:commandButton>
+                            </ui:insert>
+                        </ui:fragment>
+                        <!-- save and cancel button -->
+                        <ui:fragment
+                                rendered="#{not _ceContent.new and not _ceContent.guiSettings.disableCancel and empty _ceContent.guiSettings.openedReferenceId and _ceContent.guiSettings.editMode}">
+                            <ui:insert name="saveAndCancelButton">
+                                <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.saveAndCancel']}"
+                                                   action="#{__ceBean.saveAndCancel}"
+                                                   onclick="flexive.contentEditor.preSubmit();#{_ceContent.closePanelScript}"
+                                                   title="#{fxMessageBean['ContentEditor.button.saveAndCancel.title']}"
+                                                   reRender="#{__ce_reRenderButton}" status="#{_ceContent.editorId}_status">
+                                    <f:setPropertyActionListener value="#{_ceContent.editorId}"
+                                                                 target="#{__ceBean.editorId}"/>
+                                    <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
+                                </a4j:commandButton>
+                            </ui:insert>
+                        </ui:fragment>
+                        <!-- cancel button -->
+                        <ui:fragment
+                                rendered="#{not _ceContent.guiSettings.disableCancel and empty _ceContent.guiSettings.openedReferenceId and _ceContent.guiSettings.editMode}">
+                            <ui:insert name="cancelButton">
+                                <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.cancel']}"
+                                                   action="#{__ceBean.cancel}"
+                                                   onclick="flexive.contentEditor.preSubmit();#{_ceContent.closePanelScript}"
+                                                   title="#{fxMessageBean['ContentEditor.button.cancel.title']}"
+                                                   reRender="#{__ce_reRenderButton}" status="#{_ceContent.editorId}_status">
+                                    <f:setPropertyActionListener value="#{_ceContent.editorId}"
+                                                                 target="#{__ceBean.editorId}"/>
+                                    <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
+                                </a4j:commandButton>
+                            </ui:insert>
+                        </ui:fragment>
+                    </ui:fragment>
+                    <!-- delete button -->
+                    <ui:fragment rendered="#{not _ceContent.new and _ceContent.content.permissions.mayDelete
+                                and not _ceContent.guiSettings.disableDelete and empty _ceContent.guiSettings.openedReferenceId}">
+                        <ui:insert name="deleteButton">
+                            <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.delete']}"
+                                               title="#{fxMessageBean['ContentEditor.button.delete.title']}"
+                                               action="#{__ceBean.delete}"
+                                               onclick="flexive.contentEditor.preSubmit();#{_ceContent.closePanelScript}"
+                                               reRender="#{__ce_reRenderButton}" status="#{_ceContent.editorId}_status">
+                                <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
+                                <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
+                            </a4j:commandButton>
+                        </ui:insert>
+                    </ui:fragment>
+                    <!-- take over lock button -->
+                    <ui:fragment
+                            rendered="#{_ceContent.guiSettings.userMayTakeover and not _ceContent.new and _ceContent.content.permissions.mayEdit}">
+                        <ui:insert name="takeoverButton">
+                            <a4j:commandButton id="#{editorId}_overrideButton"
+                                               value="#{fxMessageBean['ContentEditor.button.lockOverride']}"
+                                               title="#{fxMessageBean['ContentEditor.button.lockOverride.title']}"
+                                               action="#{__ceBean.lockOverride}" reRender="#{__ce_reRenderButton}"
+                                               status="#{_ceContent.editorId}_status">
+                                <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
+                                <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
+                            </a4j:commandButton>
+                        </ui:insert>
+                    </ui:fragment>
+                    <!-- loose lock button -->
+                    <ui:fragment
+                            rendered="#{not _ceContent.guiSettings.looseLock and not _ceContent.new and _ceContent.guiSettings.userMayLooseLock and _ceContent.content.permissions.mayEdit}">
+                        <ui:insert name="looseLockButton">
+                            <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.acquireLooseLock']}"
+                                               title="#{fxMessageBean['ContentEditor.button.acquirePermLock.title']}"
+                                               action="#{__ceBean.acquireLooseLock}" reRender="#{__ce_reRenderButton}"
+                                               status="#{_ceContent.editorId}_status">
+                                <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
+                                <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
+                            </a4j:commandButton>
+                        </ui:insert>
+                    </ui:fragment>
+                    <!-- permanent lock button -->
+                    <ui:fragment
+                            rendered="#{not _ceContent.guiSettings.permLock and not _ceContent.new and _ceContent.guiSettings.userMayPermLock and _ceContent.content.permissions.mayEdit}">
+                        <ui:insert name="permLockButton">
+                            <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.acquirePermLock']}"
+                                               title="#{fxMessageBean['ContentEditor.button.acquirePermLock.title']}"
+                                               action="#{__ceBean.acquirePermLock}" reRender="#{__ce_reRenderButton}"
+                                               status="#{_ceContent.editorId}_status">
+                                <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
+                                <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
+                            </a4j:commandButton>
+                        </ui:insert>
+                    </ui:fragment>
+                    <!-- unlock button -->
+                    <ui:fragment rendered="#{_ceContent.guiSettings.contentLocked and not _ceContent.guiSettings.editMode and _ceContent.guiSettings.userMayUnlock and _ceContent.content.permissions.mayEdit}">
+                        <ui:insert name="unlockButton">
+                            <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.unlock']}"
+                                               title="#{fxMessageBean['ContentEditor.button.unlock.title']}"
+                                               action="#{__ceBean.unLock}" reRender="#{__ce_reRenderButton}"
+                                               status="#{_ceContent.editorId}_status">
+                                <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
+                                <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
+                            </a4j:commandButton>
+                        </ui:insert>
+                    </ui:fragment>
+                    <!-- extend lock features -->
+                    <ui:fragment rendered="#{_ceContent.guiSettings.contentLocked and _ceContent.content.permissions.mayEdit}">
+                        <ui:fragment rendered="#{_ceContent.guiSettings.looseLock or _ceContent.guiSettings.permLock and not _ceContent.new}">
+                            <!-- show  remaining lock time -->
+                            <ui:insert name="lockTimeButton">
+                                <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.remainingTime']}"
+                                                   title="#{fxMessageBean['ContentEditor.button.remainingTime.title']}"
+                                                   action="#{__ceBean.computeRemainingLockTime}"
+                                                   status="#{_ceContent.editorId}_status" reRender="#{__ce_reRenderButton}">
+                                    <f:setPropertyActionListener value="#{_ceContent.editorId}"
+                                                                 target="#{__ceBean.editorId}"/>
+                                    <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
+                                </a4j:commandButton>
+                            </ui:insert>
+                            <!-- extend lock -->
+                            <ui:fragment rendered="#{_ceContent.guiSettings.userMayUnlock}">
                                 <ui:insert name="extendLockTimeButton">
                                     <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.extendLock']}"
                                                        title="#{fxMessageBean['ContentEditor.button.extendLock.title']}"
                                                        action="#{__ceBean.extendLock}"
                                                        status="#{_ceContent.editorId}_status"
                                                        reRender="#{__ce_reRenderButton}">
-                                        <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
+                                        <f:setPropertyActionListener value="#{_ceContent.editorId}"
+                                                                     target="#{__ceBean.editorId}"/>
                                         <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
                                     </a4j:commandButton>
                                 </ui:insert>
-
                             </ui:fragment>
+
                         </ui:fragment>
+                    </ui:fragment>
 
-
-                        <ui:insert name="additionalButtons"/>
+                <ui:insert name="additionalButtons"/>
                     </ui:insert>
                 </a4j:outputPanel>
                 <!-- lock options before editmode is / can be entered -->

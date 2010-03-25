@@ -381,8 +381,7 @@ public class BeContentEditorBean implements ActionBean, Serializable {
             } else {
                 return emptyResult;
             }
-        }
-        catch (FxApplicationException e) {
+        } catch (FxApplicationException e) {
             new FxFacesMsgErr(e).addToContext();
             return emptyResult;
         }
@@ -762,8 +761,7 @@ public class BeContentEditorBean implements ActionBean, Serializable {
             }
         } catch (Throwable t) {
             new FxFacesMsgErr(t).addToContext();
-        }
-        finally {
+        } finally {
             FxJsfUtils.resetFaceletsComponent(FORM_ID + ":" + EDITOR_ID);
         }
         return null;
@@ -792,8 +790,7 @@ public class BeContentEditorBean implements ActionBean, Serializable {
             }
         } catch (Throwable t) {
             new FxFacesMsgErr(t).addToContext();
-        }
-        finally {
+        } finally {
             FxJsfUtils.resetFaceletsComponent(FORM_ID + ":" + EDITOR_ID);
         }
         return null;
@@ -818,8 +815,7 @@ public class BeContentEditorBean implements ActionBean, Serializable {
             this.pk = new FxPK(pk.getId(), FxPK.MAX);
         } catch (Throwable t) {
             new FxFacesMsgErr(t).addToContext();
-        }
-        finally {
+        } finally {
             FxJsfUtils.resetFaceletsComponent(FORM_ID + ":" + EDITOR_ID);
         }
         return null;
@@ -872,11 +868,11 @@ public class BeContentEditorBean implements ActionBean, Serializable {
 
             } else {
                 _save(false);
+                cancel();
             }
         } catch (Throwable t) {
             new FxFacesMsgErr(t).addToContext();
         }
-        cancel();
     }
 
     /**

@@ -218,8 +218,7 @@ public class FxContentEditorBean implements Serializable {
             }
         } catch (Throwable t) {
             addErrorMessage(t, formPrefix);
-        }
-        finally {
+        } finally {
             resetForm(formPrefix);
         }
     }
@@ -348,8 +347,8 @@ public class FxContentEditorBean implements Serializable {
                 parent.getGuiSettings().setOpenedReferenceId(null);
             }
             return pk;
-        }
-        catch (FxApplicationException e) {
+
+        } catch (FxApplicationException e) {
             setAffectedXPath(e);
             throw e;
         }
@@ -364,8 +363,7 @@ public class FxContentEditorBean implements Serializable {
             _deleteCurrentVersion();
         } catch (Throwable t) {
             addErrorMessage(t, formPrefix);
-        }
-        finally {
+        } finally {
             resetForm(formPrefix);
         }
     }
@@ -415,11 +413,10 @@ public class FxContentEditorBean implements Serializable {
             FxWrappedContent wc = new FxWrappedContent(EJBLookup.getContentEngine().initialize(typeId),
                     referenceEditorId, guiSettings, true);
             contentStorage.put(referenceEditorId, wc);
-        }
-        catch (Throwable t) {
+
+        } catch (Throwable t) {
             addErrorMessage(t, formPrefix);
-        }
-        finally {
+        } finally {
             resetForm(formPrefix);
         }
     }
@@ -441,11 +438,10 @@ public class FxContentEditorBean implements Serializable {
             FxWrappedContent wc = new FxWrappedContent(EJBLookup.getContentEngine().load(pk),
                     referenceEditorId, guiSettings, true);
             contentStorage.put(referenceEditorId, wc);
-        }
-        catch (Throwable t) {
+
+        } catch (Throwable t) {
             addErrorMessage(t, formPrefix);
-        }
-        finally {
+        } finally {
             resetForm(formPrefix);
         }
     }
@@ -465,8 +461,8 @@ public class FxContentEditorBean implements Serializable {
     public void saveAndCancel() {
         final UserTicket ticket = FxContext.getUserTicket();
         final String formPrefix = contentStorage.get(editorId).getGuiSettings().getFormPrefix();
+        boolean ownerChange = false;
         try {
-            boolean ownerChange = false;
             // no owner change check if the current user is a supervisor
             if (!ticket.isGlobalSupervisor() || !ticket.isMandatorSupervisor()) {
                 ownerChange = checkOwnerChange();
@@ -478,11 +474,11 @@ public class FxContentEditorBean implements Serializable {
 
             } else {
                 _save(false);
+                cancel();
             }
         } catch (Throwable t) {
             addErrorMessage(t, formPrefix);
         }
-        cancel();
     }
 
     /**
