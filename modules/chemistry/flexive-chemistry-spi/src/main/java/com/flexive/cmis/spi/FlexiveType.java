@@ -73,7 +73,7 @@ public class FlexiveType implements Type {
     }
 
     public String getQueryName() {
-        return type.getName();
+        return SPIUtils.getTypeName(type);
     }
 
     public String getDisplayName() {
@@ -81,7 +81,16 @@ public class FlexiveType implements Type {
     }
 
     public String getParentId() {
-        return type.getParent() != null ? type.getParent().getName() : null;
+        if (type.getParent() == null) {
+            if (FxType.FOLDER.equals(type.getName())) {
+                return BaseType.FOLDER.getId();
+            }
+            return SPIUtils.getFolderTypeIds().contains(type.getId())
+                    ? BaseType.FOLDER.getId()
+                    : BaseType.DOCUMENT.getId();
+        } else {
+            return SPIUtils.getTypeName(type.getParent());
+        }
     }
 
     public BaseType getBaseType() {
@@ -90,11 +99,6 @@ public class FlexiveType implements Type {
         } else {
             return type.isRelation() ? BaseType.RELATIONSHIP : BaseType.DOCUMENT;
         }
-    }
-
-    public String getBaseTypeQueryName() {
-        // TODO: not supported by CMIS-SQL
-        return getBaseType().name();
     }
 
     public String getDescription() {

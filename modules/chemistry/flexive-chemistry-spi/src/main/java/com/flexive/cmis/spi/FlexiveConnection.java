@@ -166,6 +166,11 @@ public class FlexiveConnection implements Connection, SPI {
         return getContent(object);
     }
 
+    public ObjectEntry getObject(ObjectId object, Inclusion inclusion) {
+        return getContent(object);
+    }
+
+
     public Collection<CMISObject> query(String statement, boolean searchAllVersions) {
         final Collection<ObjectEntry> entries = query(statement, searchAllVersions, null, null);
         // hack because query signatures are inconsistent

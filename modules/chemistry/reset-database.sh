@@ -1,3 +1,3 @@
 #!/bin/sh
 
-cd database && rm -rf h2 && mvn test && cd ..
+cd test-database && rm -rf h2 && mvn test && cd ..

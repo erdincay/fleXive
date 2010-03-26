@@ -228,6 +228,20 @@ public class SPIUtils {
     }
 
     /**
+     * Map a flexive type name to a CMIS type name.
+     *
+     * @param fxTypeId  the flexive type name
+     * @return          the corresponding CMIS type name
+     */
+    public static String getTypeName(FxType type) {
+        if (FxType.FOLDER.equals(type.getName())) {
+            return BaseType.FOLDER.getId();
+        } else {
+            return type.getName();
+        }
+    }
+
+    /**
      * Return true if the given tree node should be treated as a folder, even
      * though it is (in flexive terms) a document.
      *

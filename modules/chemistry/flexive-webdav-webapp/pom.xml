@@ -52,12 +52,6 @@
                     </dependency>
 
                     <dependency>
-                        <groupId>com.h2database</groupId>
-                        <artifactId>h2</artifactId>
-                        <version>${h2.version}</version>
-                    </dependency>
-
-                    <dependency>
                         <groupId>com.flexive</groupId>
                         <artifactId>flexive-h2</artifactId>
                         <version>${flexive.version}</version>
@@ -94,6 +88,10 @@
                 <exclusion>
                     <groupId>org.apache.chemistry</groupId>
                     <artifactId>chemistry-commons</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>eu.medsea.mimeutil</groupId>
+                    <artifactId>mime-util</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>

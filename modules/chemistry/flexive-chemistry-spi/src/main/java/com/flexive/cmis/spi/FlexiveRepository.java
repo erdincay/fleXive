@@ -32,6 +32,7 @@
 package com.flexive.cmis.spi;
 
 import com.flexive.chemistry.webdav.extensions.CopyDocumentExtension;
+import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.structure.FxType;
 import com.google.common.collect.Lists;
 import org.apache.chemistry.*;
@@ -82,6 +83,7 @@ public class FlexiveRepository implements Repository {
     }
 
     public Collection<Type> getTypes() {
+        // TODO: return basetype (cmis:document, ...)
         final List<FxType> fxTypes = getEnvironment().getTypes();
         final List<Type> result = Lists.newArrayListWithCapacity(fxTypes.size());
         for (FxType fxType : fxTypes) {
@@ -133,7 +135,13 @@ public class FlexiveRepository implements Repository {
     }
 
     public PropertyDefinition getPropertyDefinition(String id) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        final VirtualProperties vprop = VirtualProperties.getByName(id);
+        if (vprop != null) {
+            return vprop.getDefinition();
+        }
+        return new FlexivePropertyDefinition(
+                CacheAdmin.getEnvironment().getPropertyAssignment(id)
+        );
     }
 
 
