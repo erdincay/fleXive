@@ -36,7 +36,9 @@ import com.flexive.core.DatabaseConst;
 import com.flexive.core.search.*;
 import com.flexive.core.storage.FxTreeNodeInfo;
 import com.flexive.core.storage.genericSQL.GenericTreeStorage;
+import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxContext;
+import com.flexive.shared.FxFormatUtils;
 import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.Pair;
 import com.flexive.shared.exceptions.FxApplicationException;
@@ -46,7 +48,9 @@ import com.flexive.shared.search.FxFoundType;
 import com.flexive.shared.search.query.VersionFilter;
 import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.structure.FxDataType;
+import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.structure.FxFlatStorageMapping;
+import com.flexive.shared.structure.FxType;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.sqlParser.*;
 import com.google.common.collect.HashMultimap;
@@ -867,7 +871,7 @@ public class GenericSQLDataFilter extends DataFilter {
         final Property prop = cond.getProperty();
         final Constant constant = cond.getConstant();
         final PropertyEntry entry = getPropertyResolver().get(stmt, prop);
-        final Pair<String, String> select = getValueCondition(prop, constant, entry, cond.getComperator());
+        final Pair<String, String> select = getValueCondition(prop, constant, entry, cond);
         if (select == null) {
             throw new FxSqlSearchException(LOG, "ex.sqlSearch.reader.unknownPropertyColumnType",
                     entry.getProperty().getDataType(), prop.getPropertyName());
@@ -917,7 +921,8 @@ public class GenericSQLDataFilter extends DataFilter {
         }
     }
 
-    protected Pair<String, String> getValueCondition(Property prop, Constant constant, PropertyEntry entry, ValueComparator comparator) throws FxSqlSearchException {
+    protected Pair<String, String> getValueCondition(Property prop, Constant constant, PropertyEntry entry, Condition cond) throws FxSqlSearchException {
+        final ValueComparator comparator = cond.getComperator();
         String column = entry.getFilterColumn();
         String value = null;
         switch (entry.getProperty().getDataType()) {
@@ -964,6 +969,52 @@ public class GenericSQLDataFilter extends DataFilter {
                 }
                 throw new FxSqlSearchException(LOG, "ex.sqlSearch.reader.type.invalidOperator",
                         entry.getProperty().getDataType(), comparator);
+            case LargeNumber:
+                if ("TDEF".equals(entry.getFilterColumn()) &&
+                        (comparator == ValueComparator.LESS || comparator == ValueComparator.LESS_OR_EQUAL
+                        || comparator == ValueComparator.GREATER || comparator == ValueComparator.GREATER_OR_EQUAL)) {
+                    // sub/supertype request
+                    final FxType type;
+                    final FxEnvironment environment = CacheAdmin.getEnvironment();
+                    if (FxSharedUtils.isQuoted(constant.getValue(), '\'')) {
+                        // get by name
+                        type = environment.getType(FxSharedUtils.stripQuotes(constant.getValue(), '\''));
+                    } else {
+                        // get by ID
+                        type = environment.getType(Long.parseLong(constant.getValue()));
+                    }
+                    final List<FxType> types;
+                    switch (comparator) {
+                        case GREATER:
+                            types = type.getId() == FxType.ROOT_ID
+                                    ? environment.getTypes() : type.getDerivedTypes(true, false);
+                            break;
+                        case GREATER_OR_EQUAL:
+                            types = type.getId() == FxType.ROOT_ID
+                                    ? environment.getTypes() : type.getDerivedTypes(true, true);
+                            break;
+                        case LESS:
+                        case LESS_OR_EQUAL:
+                            types = Lists.newArrayList();
+                            FxType parent = type;
+                            if (comparator == ValueComparator.LESS_OR_EQUAL) {
+                                types.add(type);
+                            }
+                            while ((parent = parent.getParent()) != null) {
+                                types.add(parent);
+                            }
+                            break;
+                        default:
+                            // cannot happen
+                            throw new IllegalArgumentException("Unexpected comparator: " + comparator);
+                    }
+
+                    // rewrite condition to "TDEF IN (...)"
+                    cond.setComparator(ValueComparator.IN);
+                    value = FxFormatUtils.escapeForSql(
+                            FxSharedUtils.getSelectableObjectIdList(types)
+                    );
+                }
         }
         return value != null ? new Pair<String, String>(column, value) : entry.getComparisonCondition(search.getStorage(), constant.getValue());
     }

@@ -98,4 +98,30 @@ public class FxFoundType implements Serializable {
     public String getDisplayName() {
         return displayName;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final FxFoundType other = (FxFoundType) obj;
+        if (this.contentTypeId != other.contentTypeId) {
+            return false;
+        }
+        if (this.foundEntries != other.foundEntries) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 41 * hash + (int) (this.contentTypeId ^ (this.contentTypeId >>> 32));
+        hash = 41 * hash + this.foundEntries;
+        return hash;
+    }
 }

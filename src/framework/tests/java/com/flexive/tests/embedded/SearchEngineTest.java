@@ -313,6 +313,23 @@ public class SearchEngineTest {
         }
     }
 
+    @Test
+    public void typeRangeTest() throws FxApplicationException {
+        final FxResultSet rs1 = getSearchEngine().search("SELECT @pk WHERE typedef >= \'ROOT\'");
+        assertTrue(rs1.getContentTypes().size() > 1, "Expected more than one type: " + rs1.getContentTypes());
+
+        final FxResultSet rs2 = getSearchEngine().search("SELECT @pk WHERE typedef='cmis_property_perm'");
+        assertTrue(rs2.getContentTypes().size() == 1, "Expected one type: " + rs2.getContentTypes());
+
+        final FxResultSet rs3 = getSearchEngine().search("SELECT @pk WHERE typedef>='cmis_property_perm'");
+        assertTrue(rs3.getContentTypes().size() == 2, "Expected two types: " + rs3.getContentTypes());
+        assertTrue(rs3.getContentTypes().contains(rs2.getContentTypes().get(0)));
+
+        final FxResultSet rs4 = getSearchEngine().search("SELECT @pk WHERE typedef < \'cmis_property_perm_secured\'");
+        assertTrue(rs4.getContentTypes().size() == 1, "Expected one type: " + rs4.getContentTypes());
+        assertTrue(rs4.getContentTypes().equals(rs2.getContentTypes()));
+    }
+
     /**
      * Generic tests on the SearchTest type.
      *

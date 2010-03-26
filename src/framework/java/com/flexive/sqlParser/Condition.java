@@ -195,6 +195,10 @@ public class Condition implements BraceElement {
         }
     }
 
+    public void setComparator(ValueComparator comparator) {
+        this.comparator = comparator;
+    }
+
     public boolean isProcessed() {
         return processed;
     }

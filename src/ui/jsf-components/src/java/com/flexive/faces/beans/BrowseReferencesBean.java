@@ -35,7 +35,6 @@ package com.flexive.faces.beans;
 
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.XPathElement;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
@@ -43,7 +42,6 @@ import com.flexive.shared.search.FxResultSet;
 import com.flexive.shared.search.AdminResultLocations;
 import com.flexive.shared.search.ResultViewType;
 import com.flexive.shared.search.query.PropertyValueComparator;
-import com.flexive.shared.search.query.QueryOperatorNode.Operator;
 import com.flexive.shared.search.query.SqlQueryBuilder;
 import com.flexive.shared.structure.FxAssignment;
 import com.flexive.shared.structure.FxPropertyAssignment;

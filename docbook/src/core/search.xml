@@ -375,6 +375,47 @@ ORDER BY 2]]></programlisting>
             </table>
         </section>
 
+        <section xml:id="css_type_conditions">
+            <title>Type conditions</title>
+
+            <para>
+                To explicitly limit the types returned by a query, you can use explicit type conditions.
+                &fxsql; also supports sub- and supertype queries.
+            </para>
+
+            <table xml:id="css_type_condition_table" class="flexive">
+                <caption>Date and Time functions provided in &fxsql;</caption>
+                <thead>
+                    <tr>
+                        <th>Condition</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>typedef = 'IMAGE'</td>
+                        <td>Returns only instances of the Image type.</td>
+                    </tr>
+                    <tr>
+                        <td>typedef >= 'IMAGE'</td>
+                        <td>Returns instances of the Image type or any type derived from image (inclusive subtype match).</td>
+                    </tr>
+                    <tr>
+                        <td>typedef > 'IMAGE'</td>
+                        <td>Returns instances of any type derived from Image, but not Image itself (exclusive subtype match).</td>
+                    </tr>
+                    <tr>
+                        <td>typedef &lt; 'DERIVED_TYPE'</td>
+                        <td>Returns instances of any supertype (parent type) of Derived_Type (exclusive supertype match).</td>
+                    </tr>
+                    <tr>
+                        <td>typedef &lt;= 'DERIVED_TYPE'</td>
+                        <td>Returns instances of Derived_Type or any of its parent types (inclusive supertype match).</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
         <section xml:id="css_selectone">
             <title>Select list properties</title>
             <para>

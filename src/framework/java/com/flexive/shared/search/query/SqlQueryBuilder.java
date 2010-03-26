@@ -350,13 +350,11 @@ public class SqlQueryBuilder implements Serializable {
      */
     public SqlQueryBuilder type(String typeName, boolean includeSubTypes) {
         if (includeSubTypes) {
-            final List<FxType> types;
-            if (typeName.equalsIgnoreCase(FxType.ROOT)) {
-                types = CacheAdmin.getEnvironment().getTypes();
-            } else {
-                types = CacheAdmin.getEnvironment().getType(typeName).getDerivedTypes(true, true);
-            }
-            condition("typedef", PropertyValueComparator.IN, FxSharedUtils.getSelectableObjectNameList(types));
+            condition(
+                    "typedef",
+                    includeSubTypes ? PropertyValueComparator.GE : PropertyValueComparator.GT,
+                    typeName
+            );
             return this;
         } else {
             return type(typeName);
