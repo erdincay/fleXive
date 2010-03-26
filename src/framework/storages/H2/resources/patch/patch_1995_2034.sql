@@ -2,4 +2,4 @@
 -- Change: FXS_TYPE_OPT / type options: change col name from "PASSEDON" to "ISINHERITED"
 -- Author: Christopher Blasnik (cblasnik@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
 
-ALTER TABLE FXS_TYPE_OPT ALTER COLUMN PASSEDON TO ISINHERITED;
+ALTER TABLE FXS_TYPE_OPT ALTER COLUMN PASSEDON RENAME TO ISINHERITED;
