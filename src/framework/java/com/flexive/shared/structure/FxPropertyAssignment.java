@@ -261,7 +261,7 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
      */
     public int getMultiLines() {
         final FxStructureOption opt = getOption(FxStructureOption.OPTION_MULTILINE);
-        return opt.isSet() ? opt.getIntValue() : null;
+        return opt.isSet() ? opt.getIntValue() : 0;
     }
 
     /**
