@@ -231,7 +231,8 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
      * @return has a max. input length been set?
      */
     public boolean hasMaxLength() {
-        return hasOption(FxStructureOption.OPTION_MAXLENGTH);
+        final FxStructureOption option = getOption(FxStructureOption.OPTION_MAXLENGTH);
+        return option.isSet() && option.getIntValue() > 0;
     }
 
     /**
@@ -249,15 +250,8 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
      * @return if this property appears in multiple lines
      */
     public boolean isMultiLine() {
-        FxStructureOption opt = getOption(FxStructureOption.OPTION_MULTILINE);
-        if (opt.isSet()) {
-            try {
-                return opt.getIntValue() > 0;
-            } catch (Exception e) {
-                return false;
-            }
-        }
-        return false;
+        final FxStructureOption opt = getOption(FxStructureOption.OPTION_MULTILINE);
+        return opt.isSet() && opt.getIntValue() > 0;
     }
 
     /**
@@ -266,15 +260,8 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
      * @return number of multilines to display or 0 if multiline is not set
      */
     public int getMultiLines() {
-        FxStructureOption opt = getOption(FxStructureOption.OPTION_MULTILINE);
-        if (opt.isSet()) {
-            try {
-                return opt.getIntValue();
-            } catch (Exception e) {
-                return 0;
-            }
-        }
-        return 0;
+        final FxStructureOption opt = getOption(FxStructureOption.OPTION_MULTILINE);
+        return opt.isSet() ? opt.getIntValue() : null;
     }
 
     /**

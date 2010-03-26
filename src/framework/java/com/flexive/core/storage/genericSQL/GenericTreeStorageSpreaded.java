@@ -38,6 +38,7 @@ import com.flexive.core.storage.FxTreeNodeInfo;
 import com.flexive.core.storage.FxTreeNodeInfoSpreaded;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.FxFormatUtils;
 import com.flexive.shared.content.*;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.ContentEngine;
@@ -591,7 +592,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
             ps.setBoolean(1, mode != FxTreeMode.Live);
             ps.setBigDecimal(2, left);
             ps.setBigDecimal(3, right);
-            ps.setString(4, nci.name);
+            ps.setString(4, FxFormatUtils.escapeTreePath(nci.name));
             if (StringUtils.isEmpty(data)) {
                 ps.setNull(5, java.sql.Types.VARCHAR);
             } else {
