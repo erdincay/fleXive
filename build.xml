@@ -995,34 +995,35 @@ database.vendor=MySQL
     <target name="jar.maven.sources" description="Creates the source JAR files">
         <mkdir dir="${flexive.build.repo.dir}"/>
 
-        <maven-build-sources artifactId="flexive-ejb"
-                             label="[fleXive] EJB classes"
-                             srcdir="${flexive.src.framework.dir}"
-                             prefix="com/flexive/ejb/" packagenames="com.flexive.ejb.*"/>
-        <maven-build-sources artifactId="flexive-core"
-                             label="[fleXive] core classes"
-                             srcdir="${flexive.src.framework.dir}"
-                             prefix="com/flexive/core/" packagenames="com.flexive.core.*"/>
+        <parallel>
+            <maven-build-sources artifactId="flexive-ejb"
+                                 label="[fleXive] EJB classes"
+                                 srcdir="${flexive.src.framework.dir}"
+                                 prefix="com/flexive/ejb/" packagenames="com.flexive.ejb.*"/>
+            <maven-build-sources artifactId="flexive-core"
+                                 label="[fleXive] core classes"
+                                 srcdir="${flexive.src.framework.dir}"
+                                 prefix="com/flexive/core/" packagenames="com.flexive.core.*"/>
 
-        <maven-build-sources artifactId="flexive-shared"
-                             label="[fleXive] shared classes"
-                             srcdir="${flexive.src.framework.dir}"
-                             prefix="com/flexive/shared/" packagenames="com.flexive.shared.*"/>
+            <maven-build-sources artifactId="flexive-shared"
+                                 label="[fleXive] shared classes"
+                                 srcdir="${flexive.src.framework.dir}"
+                                 prefix="com/flexive/shared/" packagenames="com.flexive.shared.*"/>
 
-        <maven-build-sources artifactId="flexive-web-shared" label="[fleXive] shared web classes" srcdir="${flexive.src.ui.shared.dir}"/>
-        <maven-build-sources artifactId="flexive-plugin-jsf-core" label="[fleXive] JSF components" srcdir="${flexive.src.ui.components.dir}"/>
-        <maven-build-sources artifactId="flexive-plugin-globalconfig" label="[fleXive] global (division) configuration plugin" srcdir="${flexive.base.ui.dir}/jsf-globalconfig/src/java"/>
-        <maven-build-sources artifactId="flexive-plugin-jsf-feedbackPlugin" label="[fleXive] backend feedback plugin" srcdir="${flexive.base.ui.dir}/jsf-feedbackPlugin/src/java"/>
-        <maven-build-sources artifactId="flexive-backend" label="[fleXive] backend application" srcdir="${flexive.src.ui.jsf.dir}"/>
+            <maven-build-sources artifactId="flexive-web-shared" label="[fleXive] shared web classes" srcdir="${flexive.src.ui.shared.dir}"/>
+            <maven-build-sources artifactId="flexive-plugin-jsf-core" label="[fleXive] JSF components" srcdir="${flexive.src.ui.components.dir}"/>
+            <maven-build-sources artifactId="flexive-plugin-globalconfig" label="[fleXive] global (division) configuration plugin" srcdir="${flexive.base.ui.dir}/jsf-globalconfig/src/java"/>
+            <maven-build-sources artifactId="flexive-plugin-jsf-feedbackPlugin" label="[fleXive] backend feedback plugin" srcdir="${flexive.base.ui.dir}/jsf-feedbackPlugin/src/java"/>
+            <maven-build-sources artifactId="flexive-backend" label="[fleXive] backend application" srcdir="${flexive.src.ui.jsf.dir}"/>
 
-        <maven-build-sources artifactId="flexive-extractor" label="[fleXive] document extraction library" srcdir="${flexive.src.framework.dir}"
-                             prefix="com/flexive/extractor/" packagenames="com.flexive.extractor.*"/>
-        <maven-build-sources artifactId="flexive-sqlParser" label="[fleXive] FxSQL parser" srcdir="${flexive.src.framework.dir}"
-                             prefix="com/flexive/sqlParser/" packagenames="com.flexive.sqlParser.*"/>
-        <maven-build-sources artifactId="flexive-h2" label="[fleXive] H2 database support" srcdir="${flexive.base.framework.dir}/storages/H2/java"/>
-        <maven-build-sources artifactId="flexive-mysql" label="[fleXive] MySQL database support" srcdir="${flexive.base.framework.dir}/storages/MySQL/java"/>
-        <maven-build-sources artifactId="flexive-postgresql" label="[fleXive] PostgreSQL database support" srcdir="${flexive.base.framework.dir}/storages/PostgreSQL/java"/>
-
+            <maven-build-sources artifactId="flexive-extractor" label="[fleXive] document extraction library" srcdir="${flexive.src.framework.dir}"
+                                 prefix="com/flexive/extractor/" packagenames="com.flexive.extractor.*"/>
+            <maven-build-sources artifactId="flexive-sqlParser" label="[fleXive] FxSQL parser" srcdir="${flexive.src.framework.dir}"
+                                 prefix="com/flexive/sqlParser/" packagenames="com.flexive.sqlParser.*"/>
+            <maven-build-sources artifactId="flexive-h2" label="[fleXive] H2 database support" srcdir="${flexive.base.framework.dir}/storages/H2/java"/>
+            <maven-build-sources artifactId="flexive-mysql" label="[fleXive] MySQL database support" srcdir="${flexive.base.framework.dir}/storages/MySQL/java"/>
+            <maven-build-sources artifactId="flexive-postgresql" label="[fleXive] PostgreSQL database support" srcdir="${flexive.base.framework.dir}/storages/PostgreSQL/java"/>
+        </parallel>
     </target>
 
     <macrodef name="maven-build-sources">
@@ -1093,7 +1094,6 @@ database.vendor=MySQL
         </maven-deploy>
         <maven-deploy file="${flexive.lib.dir}/jboss-common-core-42-compat.jar" pom="jboss-common-core-42-compat.pom"/>
         <maven-deploy file="${flexive.lib.dir}/PDFRenderer.jar" pom="pdf-renderer.pom"/>
-
 
         <!-- ZIP SQL Schemas - TODO: legacy package, remove after next release (schemas are also contained in flexive-h2 and flexive-mysql) -->
         <jar file="${flexive.base.build.dir}/flexive-sql-schemas.jar">

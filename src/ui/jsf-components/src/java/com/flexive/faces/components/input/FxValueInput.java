@@ -347,8 +347,8 @@ public class FxValueInput extends UIInput {
             new FxSelectListItem(-1, "", list, -1, new FxString(false, ""));
             try {
                 final CmisResultSet result = EJBLookup.getCmisSearchEngine().search(
-                        "SELECT id, Name, ObjectTypeId FROM " + property.getReferencedType().getName()
-                        + " ORDER BY Name"
+                        "SELECT id, cmis:Name, cmis:ObjectTypeId FROM " + property.getReferencedType().getName()
+                        + " ORDER BY cmis:Name"
                 );
                 // create selectlist items
                 for (CmisResultRow row : result) {

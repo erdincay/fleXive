@@ -86,8 +86,17 @@ public abstract class AbstractResultColumn<V, T extends AbstractResultColumn<V, 
     /** {@inheritDoc} */
     public String getResultSetAlias() {
         assert columnStart != -1 : "Start column not set, result set alias not available.";
-        return "c" + columnStart + "_" + getAlias();
+        return "c" + columnStart + "_" + getEscapedAlias();
     }
+
+    /**
+     * @return  the escaped alias for SQL queries, or null if no alias was defined.
+     */
+    protected String getEscapedAlias() {
+        // for a list of escaped chars see IDENT in CmisSql.g
+        return getAlias() == null ? null : getAlias().replace(':', '_');
+    }
+
 
     /** {@inheritDoc} */
     public boolean isScore() {

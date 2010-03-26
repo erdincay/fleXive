@@ -40,7 +40,6 @@ import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.cmis.CmisVirtualProperty;
 import com.flexive.shared.cmis.search.CmisResultRow;
 import com.flexive.shared.cmis.search.CmisResultSet;
-import com.flexive.shared.cmis.search.CmisResultValue;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxAccountInUseException;
@@ -268,28 +267,26 @@ public class CmisSearchEngineTest {
                 columns.add(vp.getFxPropertyName());
             }
         }
-        for (String table: new String[] { "document", "cmis:document" }) {
-            final CmisResultSet result = getCmisSearchEngine().search(
-                    "SELECT " + StringUtils.join(columns, ',') + " FROM " + table
+        final CmisResultSet result = getCmisSearchEngine().search(
+                "SELECT " + StringUtils.join(columns, ',') + " FROM cmis:document"
+        );
+        assertTrue(result.getRowCount() > 0);
+        for (CmisResultRow row : result) {
+            // check if the document/folder base types filter correctly
+            final FxType type = CacheAdmin.getEnvironment().getType(
+                    row.getColumn(CmisVirtualProperty.TypeId.getCmisPropertyName()).getLong()
             );
-            assertTrue(result.getRowCount() > 0);
-            for (CmisResultRow row : result) {
-                // check if the document/folder base types filter correctly
-                final FxType type = CacheAdmin.getEnvironment().getType(
-                        row.getColumn(CmisVirtualProperty.TypeId.getCmisPropertyName()).getLong()
-                );
-                assertEquals(type.isDerivedFrom(FxType.FOLDER), table.contains("folder"));
+            assertFalse(type.isDerivedFrom(FxType.FOLDER));
 
-                // check if the CMIS properties select the same value as the FX properties
-                for (int i = 0; i < result.getColumnCount() / 2; i++) {
-                    final int cmis = i * 2 + 1;
-                    final int flexive = i * 2 + 2;
-                    assertEquals(row.getColumn(cmis), row.getColumn(flexive),
-                            "CMIS property returned other result than flexive property: "
-                                    + row.getColumn(cmis) + " (" + result.getColumnAliases().get(cmis - 1) + ") vs. "
-                                    + row.getColumn(flexive) + " (" + result.getColumnAliases().get(flexive - 1) + ")"
-                    );
-                }
+            // check if the CMIS properties select the same value as the FX properties
+            for (int i = 0; i < result.getColumnCount() / 2; i++) {
+                final int cmis = i * 2 + 1;
+                final int flexive = i * 2 + 2;
+                assertEquals(row.getColumn(cmis), row.getColumn(flexive),
+                        "CMIS property returned other result than flexive property: "
+                                + row.getColumn(cmis) + " (" + result.getColumnAliases().get(cmis - 1) + ") vs. "
+                                + row.getColumn(flexive) + " (" + result.getColumnAliases().get(flexive - 1) + ")"
+                );
             }
         }
     }
@@ -297,16 +294,26 @@ public class CmisSearchEngineTest {
     @Test(groups = {"search", "cmis", "ejb"})
     public void selectParent() throws FxApplicationException {
         final CmisResultSet result = getCmisSearchEngine().search(
-                "SELECT ObjectId, ParentId, Name FROM folder WHERE Name NOT LIKE 'test caption%'"
+                "SELECT cmis:ObjectId, cmis:ParentId, cmis:Name FROM cmis:folder WHERE cmis:Name NOT LIKE 'test caption%'"
         );
         assertTrue(result.getRowCount() > 0);
         for (CmisResultRow row : result) {
-            assertNotNull(row.getColumn("ParentId").getValue());
-            if (!"root".equalsIgnoreCase(row.getColumn("name").getString())) {
-                final FxPaths paths = row.getColumn("ParentId").getPaths();
+            assertNotNull(row.getColumn("cmis:ParentId").getValue());
+            if (!"root".equalsIgnoreCase(row.getColumn("cmis:name").getString())) {
+                final FxPaths paths = row.getColumn("cmis:ParentId").getPaths();
                 assertTrue(paths.getPaths().size() > 0);
             }
         }
+    }
+
+    @Test(groups = {"search", "cmis", "ejb"})
+    public void selectDocumentType() throws FxApplicationException {
+        final CmisResultSet allInstances = getCmisSearchEngine().search("SELECT cmis:ObjectId FROM cmis:document");
+        // select all content instances
+        final CmisResultSet documents = getCmisSearchEngine().search("SELECT cmis:ObjectId FROM " + FxType.DOCUMENT);
+        assertTrue(documents.getRowCount() < allInstances.getRowCount(),
+                "Select all returned " + allInstances.getRowCount()
+                + " rows, select document returned " + documents.getRowCount());
     }
 
     @Test(groups = {"search", "cmis", "ejb"})
@@ -444,7 +451,7 @@ public class CmisSearchEngineTest {
         final CmisResultSet result;
         try {
             result = getCmisSearchEngine().search(
-                    "SELECT ObjectId, typedef FROM cmis_person WHERE step=0"
+                    "SELECT cmis:ObjectId, typedef FROM cmis_person WHERE step=0"
             );
         } finally {
             FxContext.get().stopRunAsSystem();
@@ -643,7 +650,7 @@ public class CmisSearchEngineTest {
     @Test(groups = {"search", "cmis", "ejb"})
     public void likeConditionConjunction() throws FxApplicationException {
         final CmisResultSet result = getCmisSearchEngine().search(
-                "SELECT ObjectId, name FROM contactData WHERE name LIKE 'First' AND surname LIKE 'nestedCondition'"
+                "SELECT cmis:ObjectId, name FROM contactData WHERE name LIKE 'First' AND surname LIKE 'nestedCondition'"
         );
         assertRowCount(result, 1);
         assertEquals(result.getRow(0).getColumn("name").getString(), "First");
@@ -989,16 +996,16 @@ public class CmisSearchEngineTest {
         try {
             // use unmapped CMIS property in order by
             getCmisSearchEngine().search(
-                    "SELECT ObjectId, Name " +
+                    "SELECT cmis:ObjectId, cmis:Name " +
                     "FROM FX814 " +
-                    "ORDER BY Name"
+                    "ORDER BY cmis:Name"
             );
 
             // use unmapped CMIS property in where
             getCmisSearchEngine().search(
-                    "SELECT ObjectId, Name "
+                    "SELECT cmis:ObjectId, cmis:Name "
                     + "FROM FX814 "
-                    + "WHERE Name IS NOT NULL");
+                    + "WHERE cmis:Name IS NOT NULL");
 
         } finally {
             try {

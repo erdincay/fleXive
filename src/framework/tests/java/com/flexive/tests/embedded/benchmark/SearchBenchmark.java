@@ -82,7 +82,7 @@ public class SearchBenchmark {
         // warm up search engines
         for (int i = 0; i < 100; i++) {
             new SqlQueryBuilder().type(FxType.FOLDER).condition("id", PropertyValueComparator.GE, 0).getResult();
-            EJBLookup.getCmisSearchEngine().search("SELECT ObjectId FROM folder WHERE id > 0");
+            EJBLookup.getCmisSearchEngine().search("SELECT cmis:ObjectId FROM cmis:folder WHERE id > 0");
         }
     }
 
@@ -198,7 +198,7 @@ public class SearchBenchmark {
         start = System.currentTimeMillis();
         assertEquals(
                 EJBLookup.getCmisSearchEngine().search(
-                        "SELECT ObjectId, string01, string02, string03 FROM " + TYPE_VOLUME,
+                        "SELECT cmis:ObjectId, string01, string02, string03 FROM " + TYPE_VOLUME,
                         true, 0, Integer.MAX_VALUE
                 ).getRowCount(),
                 dbInstanceCount,
@@ -208,7 +208,7 @@ public class SearchBenchmark {
 
         // perform a CMIS-SQL query with a condition
         start = System.currentTimeMillis();
-        final String baseCmisQuery = "SELECT ObjectId, string01, string02, string03, text, number01, date01 "
+        final String baseCmisQuery = "SELECT cmis:ObjectId, string01, string02, string03, text, number01, date01 "
                 + " FROM " + TYPE_VOLUME
                 + " WHERE number01 >= " + rangeStart + " AND number01 < " + rangeEnd;
         final CmisResultSet cmisResult = EJBLookup.getCmisSearchEngine().search(

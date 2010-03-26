@@ -86,7 +86,7 @@ public enum CmisVirtualProperty {
     }
 
     public String getCmisPropertyName() {
-        return cmisPropertyName;
+        return "cmis:" + cmisPropertyName;
     }
 
     public String getFxPropertyName() {

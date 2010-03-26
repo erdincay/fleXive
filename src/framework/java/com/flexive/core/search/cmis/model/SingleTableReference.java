@@ -32,7 +32,6 @@
 package com.flexive.core.search.cmis.model;
 
 import com.flexive.shared.cmis.CmisVirtualProperty;
-import com.flexive.shared.exceptions.FxCmisQueryException;
 import com.flexive.shared.exceptions.FxRuntimeException;
 import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.structure.FxProperty;
@@ -71,7 +70,7 @@ public class SingleTableReference implements TableReference {
                     types.add(type);
                 }
             }
-        } else if ("document".equalsIgnoreCase(name) || "cmis:document".equalsIgnoreCase(name)) {
+        } else if ("cmis:document".equalsIgnoreCase(name)) {
             // select all types that are not folders
             this.baseType = env.getType(FxType.ROOT_ID);
             types = Lists.newArrayList();
@@ -80,7 +79,7 @@ public class SingleTableReference implements TableReference {
                     types.add(type);
                 }
             }
-        } else if ("folder".equalsIgnoreCase(name) || "cmis:folder".equalsIgnoreCase(name)) {
+        } else if ("cmis:folder".equalsIgnoreCase(name)) {
             this.baseType = env.getType(FxType.FOLDER);
             types = Lists.newArrayList(baseType.getDerivedTypes(true, true));
         } else {
