@@ -69,21 +69,46 @@ if (mimeType.endsWith("/png"))
     ext = ".PNG"
 else if (mimeType.endsWith("/gif"))
     ext = ".GIF"
-previewFile1 = File.createTempFile("PREV1", ext)
-previewFile2 = File.createTempFile("PREV2", ext)
-previewFile3 = File.createTempFile("PREV3", ext)
-previewFile4 = File.createTempFile("PREV4", ext)
-if( meta.asImageMetadata().getWidth() <= 256 && meta.asImageMetadata().getHeight() <= 256 ) {
+
+//check if upscaling is needed
+int orgWidth = meta.asImageMetadata().getWidth()
+int orgHeight = meta.asImageMetadata().getHeight()
+
+if(orgWidth > BinaryDescriptor.PREVIEW1_BOX || orgHeight > BinaryDescriptor.PREVIEW1_BOX)
+  previewFile1 = File.createTempFile("PREV1", ext)
+else
+  previewFile1 = null
+if(orgWidth > BinaryDescriptor.PREVIEW2_BOX || orgHeight > BinaryDescriptor.PREVIEW2_BOX)
+  previewFile2 = File.createTempFile("PREV2", ext)
+else
+  previewFile2 = null
+if(orgWidth > BinaryDescriptor.PREVIEW3_BOX || orgHeight > BinaryDescriptor.PREVIEW3_BOX)
+  previewFile3 = File.createTempFile("PREV3", ext)
+else
+  previewFile3 = null
+if(orgWidth > BinaryDescriptor.SCREENVIEW_WIDTH || orgHeight > BinaryDescriptor.SCREENVIEW_HEIGHT)
+  previewFile4 = File.createTempFile("PREV4", ext)
+else
+  previewFile4 = null
+if( orgWidth <= 256 && orgHeight <= 256 ) {
     // avoid overhead of launching ImageMagick for small images
-    dimensionsPreview1 = FxMediaNativeEngine.scale(binaryFile, previewFile1, ext, BinaryDescriptor.PREVIEW1_BOX, BinaryDescriptor.PREVIEW1_BOX)
-    dimensionsPreview2 = FxMediaNativeEngine.scale(binaryFile, previewFile2, ext, BinaryDescriptor.PREVIEW2_BOX, BinaryDescriptor.PREVIEW2_BOX)
-    dimensionsPreview3 = FxMediaNativeEngine.scale(binaryFile, previewFile3, ext, BinaryDescriptor.PREVIEW3_BOX, BinaryDescriptor.PREVIEW3_BOX)
-    dimensionsPreview4 = FxMediaNativeEngine.scale(binaryFile, previewFile4, ext, BinaryDescriptor.SCREENVIEW_WIDTH, BinaryDescriptor.SCREENVIEW_HEIGHT)
+    if( previewFile1 != null)
+      dimensionsPreview1 = FxMediaNativeEngine.scale(binaryFile, previewFile1, ext, BinaryDescriptor.PREVIEW1_BOX, BinaryDescriptor.PREVIEW1_BOX)
+    if( previewFile2 != null)
+      dimensionsPreview2 = FxMediaNativeEngine.scale(binaryFile, previewFile2, ext, BinaryDescriptor.PREVIEW2_BOX, BinaryDescriptor.PREVIEW2_BOX)
+    if( previewFile3 != null)
+      dimensionsPreview3 = FxMediaNativeEngine.scale(binaryFile, previewFile3, ext, BinaryDescriptor.PREVIEW3_BOX, BinaryDescriptor.PREVIEW3_BOX)
+    if( previewFile4 != null)
+      dimensionsPreview4 = FxMediaNativeEngine.scale(binaryFile, previewFile4, ext, BinaryDescriptor.SCREENVIEW_WIDTH, BinaryDescriptor.SCREENVIEW_HEIGHT)
 } else {
-    dimensionsPreview1 = FxMediaEngine.scale(binaryFile, previewFile1, ext, BinaryDescriptor.PREVIEW1_BOX, BinaryDescriptor.PREVIEW1_BOX)
-    dimensionsPreview2 = FxMediaEngine.scale(binaryFile, previewFile2, ext, BinaryDescriptor.PREVIEW2_BOX, BinaryDescriptor.PREVIEW2_BOX)
-    dimensionsPreview3 = FxMediaEngine.scale(binaryFile, previewFile3, ext, BinaryDescriptor.PREVIEW3_BOX, BinaryDescriptor.PREVIEW3_BOX)
-    dimensionsPreview4 = FxMediaEngine.scale(binaryFile, previewFile4, ext, BinaryDescriptor.SCREENVIEW_WIDTH, BinaryDescriptor.SCREENVIEW_HEIGHT)
+    if( previewFile1 != null)
+      dimensionsPreview1 = FxMediaEngine.scale(binaryFile, previewFile1, ext, BinaryDescriptor.PREVIEW1_BOX, BinaryDescriptor.PREVIEW1_BOX)
+    if( previewFile2 != null)
+      dimensionsPreview2 = FxMediaEngine.scale(binaryFile, previewFile2, ext, BinaryDescriptor.PREVIEW2_BOX, BinaryDescriptor.PREVIEW2_BOX)
+    if( previewFile3 != null)
+      dimensionsPreview3 = FxMediaEngine.scale(binaryFile, previewFile3, ext, BinaryDescriptor.PREVIEW3_BOX, BinaryDescriptor.PREVIEW3_BOX)
+    if( previewFile4 != null)
+      dimensionsPreview4 = FxMediaEngine.scale(binaryFile, previewFile4, ext, BinaryDescriptor.SCREENVIEW_WIDTH, BinaryDescriptor.SCREENVIEW_HEIGHT)
 }
 processed = true
 useDefaultPreview = false

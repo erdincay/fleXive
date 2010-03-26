@@ -33,7 +33,6 @@ package com.flexive.core.storage.genericSQL;
 
 import com.flexive.core.Database;
 import com.flexive.core.DatabaseConst;
-import static com.flexive.core.DatabaseConst.*;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.core.storage.binary.BinaryInputStream;
 import com.flexive.core.storage.binary.BinaryStorage;
@@ -57,12 +56,9 @@ import com.flexive.shared.structure.FxDataType;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.value.BinaryDescriptor;
-import static com.flexive.shared.value.BinaryDescriptor.PreviewSizes;
-import static com.flexive.shared.value.BinaryDescriptor.SYS_UNKNOWN;
 import com.flexive.shared.value.FxBinary;
 import com.flexive.stream.ServerLocation;
 import org.apache.commons.lang.StringUtils;
-import static org.apache.commons.lang.StringUtils.defaultString;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -71,6 +67,11 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static com.flexive.core.DatabaseConst.*;
+import static com.flexive.shared.value.BinaryDescriptor.PreviewSizes;
+import static com.flexive.shared.value.BinaryDescriptor.SYS_UNKNOWN;
+import static org.apache.commons.lang.StringUtils.defaultString;
 
 /**
  * Generic SQL based implementation to access binaries
@@ -167,6 +168,25 @@ public class GenericBinarySQLStorage implements BinaryStorage {
                 _con = Database.getDbConnection(divisionId);
             String column = "FBLOB";
             String sizeColumn = "BLOBSIZE";
+            long previewId = 0;
+            ResultSet rs;
+            if (size != PreviewSizes.ORIGINAL) {
+                //unless the real content is requested, try to find the correct preview image
+                //                                 1           2         3         4         5         6     7
+                ps = _con.prepareStatement("SELECT PREVIEW_REF,PREV1SIZE,PREV2SIZE,PREV3SIZE,PREV4SIZE,WIDTH,HEIGHT FROM " + TBL_CONTENT_BINARY +
+                        " WHERE ID=? AND VER=? AND QUALITY=?");
+                ps.setLong(1, binaryId);
+                ps.setInt(2, binaryVersion);
+                ps.setInt(3, binaryQuality);
+                rs = ps.executeQuery();
+                if (rs != null && rs.next()) {
+                    previewId = rs.getLong(1);
+                    if (rs.wasNull())
+                        previewId = 0;
+                    size = getAvailablePreviewSize(size, rs.getInt(2), rs.getInt(3), rs.getInt(4), rs.getInt(5), rs.getInt(6), rs.getInt(7));
+                }
+                ps.close();
+            }
             switch (size) {
                 case PREVIEW1:
                     column = "PREV1";
@@ -184,23 +204,6 @@ public class GenericBinarySQLStorage implements BinaryStorage {
                     column = "PREV4";
                     sizeColumn = "PREV4SIZE";
                     break;
-            }
-            long previewId = 0;
-            ResultSet rs;
-            if (!"FBLOB".equals(column)) {
-                //unless the real content is requested, try to find the correct preview image
-                ps = _con.prepareStatement("SELECT PREVIEW_REF FROM " + TBL_CONTENT_BINARY +
-                        " WHERE ID=? AND VER=? AND QUALITY=?");
-                ps.setLong(1, binaryId);
-                ps.setInt(2, binaryVersion);
-                ps.setInt(3, binaryQuality);
-                rs = ps.executeQuery();
-                if (rs != null && rs.next()) {
-                    previewId = rs.getLong(1);
-                    if (rs.wasNull())
-                        previewId = 0;
-                }
-                ps.close();
             }
             ps = _con.prepareStatement("SELECT " + column + ",MIMETYPE," + sizeColumn + " FROM " + TBL_CONTENT_BINARY +
                     " WHERE ID=? AND VER=? AND QUALITY=?");
@@ -252,6 +255,43 @@ public class GenericBinarySQLStorage implements BinaryStorage {
             Database.closeObjects(GenericBinarySQLInputStream.class, con == null ? _con : null, ps);
             return new GenericBinarySQLInputStream(false);
         }
+    }
+
+    /**
+     * "Downgrade" the requested size to the first available size
+     *
+     * @param requestedSize requested size
+     * @param prev1size     length of preview 1
+     * @param prev2size     length of preview 2
+     * @param prev3size     length of preview 3
+     * @param prev4size     length of preview 4 (screenview)
+     * @param width         original width
+     * @param height        original height
+     * @return downgraded previewsize
+     */
+    private PreviewSizes getAvailablePreviewSize(PreviewSizes requestedSize, int prev1size, int prev2size, int prev3size,
+                                                 int prev4size, int width, int height) {
+        PreviewSizes result = requestedSize;
+        if (result == PreviewSizes.SCREENVIEW && prev4size == 0) {
+            result = PreviewSizes.PREVIEW3;
+            if( width < BinaryDescriptor.SCREENVIEW_WIDTH && height < BinaryDescriptor.SCREENVIEW_HEIGHT)
+                result = PreviewSizes.ORIGINAL;
+        }
+        if (result == PreviewSizes.PREVIEW3 && prev3size == 0) {
+            result = PreviewSizes.PREVIEW2;
+            if( width < result.getSize() || height < result.getSize())
+                result = PreviewSizes.ORIGINAL;
+        }
+        if (result == PreviewSizes.PREVIEW2 && prev2size == 0) {
+            result = PreviewSizes.PREVIEW1;
+            if( width < result.getSize() || height < result.getSize())
+                result = PreviewSizes.ORIGINAL;
+        }
+        if (result == PreviewSizes.PREVIEW1 && prev1size == 0)
+            result = PreviewSizes.ORIGINAL;
+        if (result != requestedSize)
+            LOG.info("Delivering PreviewSize " + result + " for " + requestedSize);
+        return result;
     }
 
     /**
@@ -659,7 +699,7 @@ public class GenericBinarySQLStorage implements BinaryStorage {
                 }
             }
             //check if values for preview are valid
-            if (!useDefaultPreview) {
+            /*if (!useDefaultPreview) {
                 if (previewFile1 == null || !previewFile1.exists() ||
                         previewFile2 == null || !previewFile2.exists() ||
                         previewFile3 == null || !previewFile3.exists() ||
@@ -673,36 +713,20 @@ public class GenericBinarySQLStorage implements BinaryStorage {
                     useDefaultPreview = true;
                     defaultId = SYS_UNKNOWN;
                 }
-            } else {
-                //only negative values are allowed
-                if (defaultId >= 0) {
-                    defaultId = SYS_UNKNOWN;
-                    LOG.warn("Only default preview id's that are negative and defined in BinaryDescriptor as constants are allowed!");
-                }
+            } else {*/
+            //only negative values are allowed for default previews
+            if (useDefaultPreview && defaultId >= 0) {
+                defaultId = SYS_UNKNOWN;
+                LOG.warn("Only default preview id's that are negative and defined in BinaryDescriptor as constants are allowed!");
             }
+//            }
 
             if (!useDefaultPreview) {
                 ps = con.prepareStatement(BINARY_TRANSIT_PREVIEWS);
-                pin1 = new FileInputStream(previewFile1);
-                pin2 = new FileInputStream(previewFile2);
-                pin3 = new FileInputStream(previewFile3);
-                pin4 = new FileInputStream(previewFile4);
-                ps.setBinaryStream(1, pin1, (int) previewFile1.length());
-                ps.setInt(2, dimensionsPreview1[0]);
-                ps.setInt(3, dimensionsPreview1[1]);
-                ps.setBinaryStream(4, pin2, (int) previewFile2.length());
-                ps.setInt(5, dimensionsPreview2[0]);
-                ps.setInt(6, dimensionsPreview2[1]);
-                ps.setBinaryStream(7, pin3, (int) previewFile3.length());
-                ps.setInt(8, dimensionsPreview3[0]);
-                ps.setInt(9, dimensionsPreview3[1]);
-                ps.setBinaryStream(10, pin4, (int) previewFile4.length());
-                ps.setInt(11, dimensionsPreview4[0]);
-                ps.setInt(12, dimensionsPreview4[1]);
-                ps.setInt(13, (int) previewFile1.length());
-                ps.setInt(14, (int) previewFile2.length());
-                ps.setInt(15, (int) previewFile3.length());
-                ps.setInt(16, (int) previewFile4.length());
+                pin1 = setPreviewTransferParameters(ps, previewFile1, dimensionsPreview1, 1, 13);
+                pin2 = setPreviewTransferParameters(ps, previewFile2, dimensionsPreview2, 4, 14);
+                pin3 = setPreviewTransferParameters(ps, previewFile3, dimensionsPreview3, 7, 15);
+                pin4 = setPreviewTransferParameters(ps, previewFile4, dimensionsPreview4, 10, 16);
                 ps.setString(17, binary.getHandle());
                 ps.executeUpdate();
             } else {
@@ -745,6 +769,36 @@ public class GenericBinarySQLStorage implements BinaryStorage {
         }
         return new BinaryDescriptor(binary.getHandle(), binary.getName(), binary.getSize(),
                 binaryTransitFileInfo.getMimeType(), metaData, md5sum);
+    }
+
+    /**
+     * Set insert parameters for a preview image
+     *
+     * @param ps                the prepared statement to use
+     * @param previewFile       the preview file
+     * @param dimensionsPreview dimensions (width, height)
+     * @param positionBinary    position in the prepared statement
+     * @param positionSize      position of the file size parameter in the prepared statement
+     * @return FileInputStream
+     * @throws FileNotFoundException if the file does not exist
+     * @throws SQLException          on errors
+     */
+    private FileInputStream setPreviewTransferParameters(PreparedStatement ps, File previewFile,
+                                                         int[] dimensionsPreview, int positionBinary, int positionSize) throws FileNotFoundException, SQLException {
+        FileInputStream pin = null;
+        if (previewFile != null && previewFile.exists()) {
+            pin = new FileInputStream(previewFile);
+            ps.setBinaryStream(positionBinary, pin, (int) previewFile.length());
+            ps.setInt(positionBinary + 1, dimensionsPreview[0]);
+            ps.setInt(positionBinary + 2, dimensionsPreview[1]);
+            ps.setInt(positionSize, (int) previewFile.length());
+        } else {
+            ps.setNull(positionBinary, Types.BLOB);
+            ps.setInt(positionBinary + 1, 0);
+            ps.setInt(positionBinary + 2, 0);
+            ps.setInt(positionSize, 0);
+        }
+        return pin;
     }
 
     /**
