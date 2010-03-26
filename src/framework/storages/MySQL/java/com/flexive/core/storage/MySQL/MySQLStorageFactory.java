@@ -277,6 +277,13 @@ public class MySQLStorageFactory extends GenericDBStorage  implements DBStorage 
     /**
      * {@inheritDoc}
      */
+    public boolean isDuplicateKeyViolation(SQLException exc) {
+        return Database.getSqlErrorCode(exc) == 1062; 
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public boolean requiresConfigSchema() {
         return false;
     }

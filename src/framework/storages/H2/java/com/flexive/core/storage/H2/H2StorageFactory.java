@@ -251,6 +251,14 @@ public class H2StorageFactory extends GenericDBStorage implements DBStorage {
     /**
      * {@inheritDoc}
      */
+    public boolean isDuplicateKeyViolation(SQLException exc) {
+        //see http://h2database.com/javadoc/org/h2/constant/ErrorCode.html
+        return Database.getSqlErrorCode(exc) == 23001;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public boolean requiresConfigSchema() {
         return false;
     }

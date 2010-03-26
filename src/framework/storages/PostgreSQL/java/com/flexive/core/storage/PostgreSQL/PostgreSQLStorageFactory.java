@@ -31,6 +31,7 @@
  ***************************************************************/
 package com.flexive.core.storage.PostgreSQL;
 
+import com.flexive.core.Database;
 import com.flexive.core.search.DataFilter;
 import com.flexive.core.search.DataSelector;
 import com.flexive.core.search.PostgreSQL.PostgreSQLDataFilter;
@@ -227,6 +228,14 @@ public class PostgreSQLStorageFactory extends GenericDBStorage implements DBStor
             return false;
         //see http://www.postgresql.org/docs/8.4/interactive/errcodes-appendix.html
         return "40P01".equals(((SQLException) exc).getSQLState());
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean isDuplicateKeyViolation(SQLException exc) {
+        //see http://www.postgresql.org/docs/8.4/interactive/errcodes-appendix.html
+        return "42710".equals(exc.getSQLState()) || "23505".equals(exc.getSQLState());
     }
 
     /**

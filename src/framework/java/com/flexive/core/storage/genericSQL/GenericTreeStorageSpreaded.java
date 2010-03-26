@@ -510,6 +510,8 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
             String next = "";
             if (e.getNextException() != null)
                 next = " next:" + e.getNextException().getMessage();
+            if(StorageManager.isDuplicateKeyViolation(e))
+                throw new FxTreeException(LOG, e, "ex.tree.reorganize.duplicateKey");
             throw new FxTreeException(LOG, e, "ex.tree.reorganize.failed", counter, left, right, e.getMessage() + next);
         } catch (Exception e) {
             throw new FxTreeException(e);

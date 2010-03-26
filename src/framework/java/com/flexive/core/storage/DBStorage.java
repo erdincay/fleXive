@@ -47,9 +47,9 @@ import com.flexive.shared.structure.TypeStorageMode;
 import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.zip.ZipFile;
-import java.util.zip.ZipInputStream;
 
 /**
  * Database vendor specific storage
@@ -340,6 +340,15 @@ public interface DBStorage {
      * @since 3.1
      */
     boolean isDeadlock(Exception exc);
+
+    /**
+     * Returns true if the SqlError is a duplicate key violation.
+     *
+     * @param exc the exception
+     * @return true if the SqlError is a duplicate key violation
+     * @since 3.1
+     */
+    boolean isDuplicateKeyViolation(SQLException exc);
 
     /**
      * When accessing the global configuration - does the config table has to be prefixed with the schema?

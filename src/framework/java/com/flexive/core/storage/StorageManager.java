@@ -49,6 +49,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -322,6 +323,17 @@ public class StorageManager {
      */
     public static boolean isUniqueConstraintViolation(Exception exc) {
         return getStorageImpl().isUniqueConstraintViolation(exc);
+    }
+
+    /**
+     * Returns true if the SqlError is a duplicate key violation.
+     *
+     * @param exc the exception
+     * @return true if the SqlError is a duplicate key violation
+     * @since 3.1
+     */
+    public static boolean isDuplicateKeyViolation(SQLException exc) {
+        return getStorageImpl().isDuplicateKeyViolation(exc);
     }
 
     /**
