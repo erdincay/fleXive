@@ -289,8 +289,8 @@ public class GenericBinarySQLStorage implements BinaryStorage {
         }
         if (result == PreviewSizes.PREVIEW1 && prev1size == 0)
             result = PreviewSizes.ORIGINAL;
-        if (result != requestedSize)
-            LOG.info("Delivering PreviewSize " + result + " for " + requestedSize);
+        if (LOG.isDebugEnabled() && result != requestedSize)
+            LOG.debug("Delivering PreviewSize " + result + " for " + requestedSize);
         return result;
     }
 
