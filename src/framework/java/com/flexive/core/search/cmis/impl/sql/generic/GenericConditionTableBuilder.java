@@ -162,6 +162,22 @@ public class GenericConditionTableBuilder implements ConditionNodeVisitor {
         visitCondition(factory.conditionNull().getConditionSql(factory, nullCondition, joinedTables));
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public void visit(FolderCondition folderCondition) {
+        onTableVisited(folderCondition.getTableReference());
+        visitCondition(factory.conditionFolder().getConditionSql(factory, folderCondition, joinedTables));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void visit(TreeCondition treeCondition) {
+        onTableVisited(treeCondition.getTableReference());
+        visitCondition(factory.conditionTree().getConditionSql(factory, treeCondition, joinedTables));
+    }
+
     protected void onTableVisited(TableReference table) {
         // place generic bookkeeping that's dependent on the condition's table reference here
     }

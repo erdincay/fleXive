@@ -145,11 +145,20 @@ public class SingleTableReference implements TableReference {
 
         final String alias = getAssignmentAlias(environment, name, cmisProperty);
         if (alias != null) {
-            final FxPropertyAssignment base = baseType.getPropertyAssignment("/" + alias);
-            result.add(base);
+            if (baseType.getId() == FxType.ROOT_ID && 
+                    ("caption".equalsIgnoreCase(alias) || "fqn".equalsIgnoreCase(alias))) {
+                // caption and FQN is a special case since they are the only "real" properties that can be
+                // selected from the root type
+                result.addAll(environment.getReferencingPropertyAssignments(
+                        environment.getProperty(alias).getId()
+                ));
+            } else {
+                final FxPropertyAssignment base = baseType.getPropertyAssignment("/" + alias);
+                result.add(base);
 
-            // add all derived assignments
-            result.addAll(base.getDerivedAssignments(environment));
+                // add all derived assignments
+                result.addAll(base.getDerivedAssignments(environment));
+            }
         }
 
         return result;

@@ -143,15 +143,16 @@ public class GenericSelectedTableVisitor implements SelectedTableVisitor {
     }
 
     /** {@inheritDoc} */
-    public String outerJoin(String tableAlias, SelectedTableVisitor subtables) {
+    public String join(String tableAlias, SelectedTableVisitor subtables) {
         assert tableAliases.size() == subtables.getTableAliases().size();
         final List<String> result = new ArrayList<String>(tableAliases.size());
+        final boolean outer = tableAliases.size() > 1;
         for (Map.Entry<TableReference, String> entry : tableAliases.entrySet()) {
             // "other" table already is a joined view, thus we need to use the proper column aliases
             final String alias = entry.getValue();
             final TableReference table = entry.getKey();
             result.add(
-                    "(" + tableAlias + "." + table.getIdFilterColumn() + " IS NULL OR "
+                    "(" + (outer ? tableAlias + "." + table.getIdFilterColumn() + " IS NULL OR " : "")
                             + "(" + alias + ".id = " + tableAlias + "." + table.getIdFilterColumn()
                             + " AND " + alias + ".ver = " + tableAlias + "." + table.getVersionFilterColumn()
                             + "))"

@@ -1075,6 +1075,18 @@ public class SearchEngineTest {
     }
 
     @Test
+    public void directChildConditions() throws FxApplicationException {
+        final FxResultSet result = new SqlQueryBuilder().select("@pk").isDirectChild(FxTreeNode.ROOT_NODE).getResult();
+        assertTrue(result.getRowCount() > 0);
+        for (FxResultRow row : result.getResultRows()) {
+            assertNotNull(
+                    getTreeEngine().findChild(FxTreeMode.Edit, FxTreeNode.ROOT_NODE, row.getPk(1)),
+                    "No direct child with PK " + row.getPk(1) + " found under the root node."
+            );
+        }
+    }
+
+    @Test
     public void treeConditionTest_FX263() throws FxApplicationException {
         // Bug FX-263: all versions of a content are returned in the edit(=max version) tree
 

@@ -86,4 +86,18 @@ public interface ConditionNodeVisitor {
      * @param nullCondition the visited condition
      */
     void visit(NullCondition nullCondition);
+
+    /**
+     * Visit an IN_FOLDER condition.
+     *
+     * @param folderCondition   the visited condition
+     */
+    void visit(FolderCondition folderCondition);
+
+    /**
+     * Visit an IN_TREE condition.
+     *
+     * @param treeCondition     the tree condition
+     */
+    void visit(TreeCondition treeCondition);
 }

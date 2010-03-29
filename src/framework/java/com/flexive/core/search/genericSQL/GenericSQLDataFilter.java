@@ -668,8 +668,11 @@ public class GenericSQLDataFilter extends DataFilter {
                 search.getStorage().getBooleanTrueExpression();
         return "(SELECT DISTINCT cd.id,cd.ver," + getEmptyLanguage() + " AS lang FROM " + tableMain + " cd WHERE " +
                 "cd.id IN (SELECT ref FROM " + GenericTreeStorage.getTable(mode) + " WHERE " +
-                "LFT>" + nodeInfo.getLeft() + " AND RGT<" + nodeInfo.getRight() + " AND ref IS NOT NULL " +
-                (direct ? " AND depth=" + (nodeInfo.getDepth() + 1) : "") +
+                (direct
+                // select all direct children
+                ? "PARENT=" + parentNode
+                // select subtree with ranges
+                : "LFT>" + nodeInfo.getLeft() + " AND RGT<" + nodeInfo.getRight()) +
                 ")" + mandatorFilter + typeFilter + versionFilter + ")";
 
     }

@@ -81,15 +81,17 @@ public interface SelectedTableVisitor extends TableReferenceVisitor {
     List<String> getConditions();
 
     /**
-     * Create an outer JOIN between the given table and all tables returned by {@link #getFrom()}.
+     * Create an JOIN between the given table and all tables returned by {@link #getFrom()}.
+     * The method will perform an outer join if necessary (i.e. more than one table will be joined
+     * on different id/version columns).
      *
      * @param tableAlias    the target table alias
      * @param subtables     the subtable visitor of the target table (defines the ID and version filter columns
      * to be used for joining)
      *
-     * @return              an outer JOIN between the given table and all tables returned by {@link #getFrom()}.
+     * @return              a JOIN between the given table and all tables returned by {@link #getFrom()}.
      */
-    String outerJoin(String tableAlias, SelectedTableVisitor subtables);
+    String join(String tableAlias, SelectedTableVisitor subtables);
 
     /**
      * Return the table alias prefix that was specified at visitor creation time (all table aliases

@@ -33,7 +33,9 @@ package com.flexive.core.search.cmis.parser;
 
 import com.flexive.core.search.cmis.model.Statement;
 import com.flexive.core.storage.ContentStorage;
+import com.flexive.core.storage.TreeStorage;
 import com.flexive.shared.exceptions.FxCmisSqlParseException;
+import java.sql.Connection;
 import static com.flexive.shared.exceptions.FxCmisSqlParseException.ErrorCause;
 import org.antlr.runtime.NoViableAltException;
 import org.antlr.runtime.RecognitionException;
@@ -80,8 +82,8 @@ public class CmisSqlUtils {
         return (CommonTree) result.getReturnValue().getTree();
     }
 
-    public static Statement buildStatement(ContentStorage storage, String query) throws FxCmisSqlParseException {
-        return new StatementBuilder(storage, parse(query)).build();
+    public static Statement buildStatement(Connection con, ContentStorage storage, TreeStorage treeStorage, String query) throws FxCmisSqlParseException {
+        return new StatementBuilder(con, storage, treeStorage, parse(query)).build();
     }
 
     private static FxCmisSqlParseException translateException(String query, RecognitionException e) {

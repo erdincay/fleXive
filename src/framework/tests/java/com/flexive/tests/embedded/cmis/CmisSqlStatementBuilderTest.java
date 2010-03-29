@@ -31,26 +31,34 @@
  ***************************************************************/
 package com.flexive.tests.embedded.cmis;
 
+import com.flexive.core.Database;
 import com.flexive.core.search.cmis.model.*;
 import static com.flexive.core.search.cmis.model.ConditionList.Connective;
 import static com.flexive.core.search.cmis.parser.CmisSqlUtils.buildStatement;
 import com.flexive.core.storage.ContentStorage;
 import com.flexive.core.storage.StorageManager;
+import com.flexive.core.storage.TreeStorage;
+import com.flexive.shared.EJBLookup;
+import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxCmisSqlParseException;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.search.SortDirection;
 import com.flexive.shared.search.query.PropertyValueComparator;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.structure.TypeStorageMode;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.assertEquals;
+import com.flexive.shared.tree.FxTreeMode;
+import com.flexive.shared.tree.FxTreeNode;
+import com.flexive.shared.tree.FxTreeRemoveOp;
+import java.sql.Connection;
+import java.sql.SQLException;
+import static org.testng.Assert.*;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.testng.Assert;
 
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import org.testng.annotations.AfterClass;
 
 /**
  * Tests for the CMIS SQL statement builder. Disabled tests are expected to fail because they
@@ -62,10 +70,21 @@ import java.util.List;
  */
 public class CmisSqlStatementBuilderTest {
     private ContentStorage storage;
+    private TreeStorage treeStorage;
+    private Connection con;
 
     @BeforeClass(groups = {"search", "cmis"})
-    public void beforeClass() throws FxNotFoundException {
-        storage = StorageManager.getContentStorage(TypeStorageMode.Hierarchical); 
+    public void beforeClass() throws FxNotFoundException, SQLException {
+        storage = StorageManager.getContentStorage(TypeStorageMode.Hierarchical);
+        treeStorage = StorageManager.getTreeStorage();
+        con = Database.getDbConnection();
+    }
+
+    @AfterClass(groups = {"search", "cmis"})
+    public void afterClass() throws SQLException {
+        if (con != null) {
+            con.close();
+        }
     }
 
     @Test(groups = {"search", "cmis"})
@@ -168,7 +187,7 @@ public class CmisSqlStatementBuilderTest {
 
     @Test(groups = {"search", "cmis"})
     public void basicJoin() throws FxCmisSqlParseException {
-        final Statement stmt = buildStatement(storage,
+        final Statement stmt = buildStatement(con, storage, treeStorage,
                 "SELECT p1.name, p2.name FROM contactData AS p1 JOIN contactData AS p2 ON (p1.surname=p2.surname)"
         );
         assertTrue(stmt.getTables().size() == 1, "JOINed table should be the only root table");
@@ -179,7 +198,7 @@ public class CmisSqlStatementBuilderTest {
 
     @Test(groups = {"search", "cmis"})
     public void columnAlias() throws FxCmisSqlParseException {
-        final Statement stmt = buildStatement(storage,
+        final Statement stmt = buildStatement(con, storage, treeStorage,
                 "SELECT p1.name AS myname FROM contactData AS p1"
         );
         assertEquals(stmt.getSelectedColumns().get(0).getAlias(), "myname", "Column alias not set correctly");
@@ -187,7 +206,7 @@ public class CmisSqlStatementBuilderTest {
 
     @Test(groups = {"search", "cmis"})
     public void implicitColumnAlias() throws FxCmisSqlParseException {
-        final Statement stmt = buildStatement(storage,
+        final Statement stmt = buildStatement(con, storage, treeStorage,
                 "SELECT p1.name FROM contactData AS p1"
         );
         assertEquals(stmt.getSelectedColumns().get(0).getAlias(), "name", "Implicit column alias not set correctly");
@@ -195,7 +214,7 @@ public class CmisSqlStatementBuilderTest {
 
     @Test(groups = {"search", "cmis"})
     public void fulltextCondition() throws FxCmisSqlParseException {
-        final Statement stmt = buildStatement(storage,
+        final Statement stmt = buildStatement(con, storage, treeStorage,
                 "SELECT longtext FROM article WHERE CONTAINS('summer')"
         );
         assertTrue(stmt.getRootCondition() != null);
@@ -207,7 +226,7 @@ public class CmisSqlStatementBuilderTest {
         testOrderByColumn("name ASC", "name", SortDirection.ASCENDING);
         testOrderByColumn("name DESC", "name", SortDirection.DESCENDING);
         try {
-            buildStatement(storage,
+            buildStatement(con, storage, treeStorage,
                     "SELECT c.name FROM contactData AS c ORDER BY c.notSelected"
             );
             assertTrue(false, "Order by unselected column should not be allowed");
@@ -300,6 +319,34 @@ public class CmisSqlStatementBuilderTest {
         assertNamePropertiesSelected(stmt);
     }
 
+    @Test(groups = {"search", "cmis"})
+    public void folderCondition() throws FxCmisSqlParseException, FxApplicationException {
+        final long nodeId = EJBLookup.getTreeEngine().createNodes(FxTreeMode.Edit, FxTreeNode.ROOT_NODE, -1, "/test")[0];
+        try {
+            for (String fun : new String[] { "IN_FOLDER", "IN_TREE" }) {
+                build("SELECT * FROM cmis_person WHERE " + fun + "('/test')");
+                build("SELECT * FROM cmis_person WHERE " + fun + "('" + nodeId + "')");
+                build("SELECT * FROM cmis_person WHERE " + fun + "(cmis_person, '/test')");
+                build("SELECT * FROM cmis_person AS p WHERE " + fun + "(p, '/test')");
+                build("SELECT p1.* FROM cmis_person AS p1 JOIN cmis_person AS p2 ON (p1.name=p2.name) WHERE " + fun + "(p1, '/test')");
+                try {
+                    build("SELECT * FROM cmis_person WHERE " + fun + "(p, '/test')");
+                    fail("Invalid table reference not caught");
+                } catch (FxCmisSqlParseException e) {
+                    // pass
+                }
+                try {
+                    build("SELECT p1.* FROM cmis_person AS p1 JOIN cmis_person AS p2 ON (p1.name=p2.name) WHERE " + fun + "('/test')");
+                    fail("Queries with join must specify table reference for " + fun);
+                } catch (FxCmisSqlParseException e) {
+                    // pass
+                }
+            }
+        } finally {
+            EJBLookup.getTreeEngine().remove(FxTreeMode.Edit, nodeId, FxTreeRemoveOp.Remove, true);
+        }
+    }
+
     private void assertNamePropertiesSelected(Statement stmt) {
         assertTrue(stmt.getSelectedColumns().size() >= 3);
         assertEquals(stmt.getSelectedColumns().get(0).getAlias(), "name");
@@ -309,11 +356,11 @@ public class CmisSqlStatementBuilderTest {
 
 
     private Statement build(String query) throws FxCmisSqlParseException {
-        return buildStatement(storage, query);
+        return buildStatement(con, storage, treeStorage, query);
     }
 
     private void testOrderByColumn(String orderBy, String expectedName, SortDirection expectedSortDirection) throws FxCmisSqlParseException {
-        final Statement stmt = buildStatement(storage,
+        final Statement stmt = buildStatement(con, storage, treeStorage,
                 "SELECT c.name FROM contactData AS c ORDER BY " + orderBy
         );
         assertEquals(stmt.getOrderByColumns().size(), 1, "Expected one ORDER BY column");

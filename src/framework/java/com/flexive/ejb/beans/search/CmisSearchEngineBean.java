@@ -6,6 +6,7 @@ import com.flexive.core.storage.ContentStorage;
 import com.flexive.core.search.cmis.impl.CmisSqlQuery;
 import com.flexive.core.search.cmis.impl.sql.SqlDialect;
 import com.flexive.core.search.cmis.parser.CmisSqlUtils;
+import com.flexive.core.storage.TreeStorage;
 import static com.flexive.shared.FxContext.getUserTicket;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxCmisQueryException;
@@ -58,13 +59,14 @@ public class CmisSearchEngineBean implements CmisSearchEngine, CmisSearchEngineL
             }
             con = Database.getDbConnection();
             final ContentStorage storage = StorageManager.getContentStorage(TypeStorageMode.Hierarchical);
+            final TreeStorage treeStorage = StorageManager.getTreeStorage();
 
             final TimestampRecorder tsr = new TimestampRecorder();
             tsr.begin();
             final CmisSqlQuery cmisQuery = new CmisSqlQuery(
                     environment,
                     storage,
-                    CmisSqlUtils.buildStatement(storage, query),
+                    CmisSqlUtils.buildStatement(con, storage, treeStorage, query),
                     getUserTicket().getLanguage().getId(),
                     startRow,
                     maxRows,

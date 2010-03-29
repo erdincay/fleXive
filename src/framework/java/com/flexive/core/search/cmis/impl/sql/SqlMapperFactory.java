@@ -66,6 +66,10 @@ public interface SqlMapperFactory {
     ConditionMapper<InCondition> conditionIn();
 
     ConditionMapper<NullCondition> conditionNull();
+    
+    ConditionMapper<TreeCondition> conditionTree();
+    
+    ConditionMapper<FolderCondition> conditionFolder();
 
     ConditionColumnMapper<ColumnReference> filterColumnReference();
     

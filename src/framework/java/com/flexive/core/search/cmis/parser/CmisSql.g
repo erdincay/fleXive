@@ -224,7 +224,7 @@ textSearchPredicate
 		
 folderPredicate
 	:	(fun=IN_FOLDER | fun=IN_TREE) 
-		'(' qualifier? ',' folderId ')'		-> ^($fun folderId qualifier?);
+		'(' (qualifier ',')? folderId ')'		-> ^($fun folderId ^(TREF qualifier)?);
 	
 orderByClause
 	:	ORDER BY sortSpecification 

@@ -23,7 +23,9 @@ public class FxCmisSqlParseException extends FxApplicationException {
         JOIN_ON_MV_COLUMN("ex.cmis.sql.join.multivalued"),
         JOIN_ON_MULTILANG_COLUMN("ex.cmis.sql.join.multilang"),
         EXPECTED_MVREF("ex.cmis.sql.expectedMultivaluedRef"),
-        FX_EXCEPTION("ex.cmis.sql.exception");
+        FX_EXCEPTION("ex.cmis.sql.exception"),
+        AMBIGUOUS_TABLE_REF("ex.cmis.sql.ambiguousTableReference"),
+        INVALID_NODE_PATH("ex.cmis.sql.invalidTreePath");
 
         private final String messageKey;
 

@@ -35,6 +35,7 @@ import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import static com.flexive.shared.EJBLookup.getCmisSearchEngine;
 import static com.flexive.shared.EJBLookup.getContentEngine;
+import static com.flexive.shared.EJBLookup.getTreeEngine;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.cmis.CmisVirtualProperty;
@@ -50,6 +51,10 @@ import com.flexive.shared.search.FxPaths;
 import com.flexive.shared.structure.FxSelectListItem;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.structure.FxTypeEdit;
+import com.flexive.shared.tree.FxTreeMode;
+import com.flexive.shared.tree.FxTreeNode;
+import com.flexive.shared.tree.FxTreeNodeEdit;
+import com.flexive.shared.tree.FxTreeRemoveOp;
 import com.flexive.shared.value.BinaryDescriptor;
 import com.flexive.shared.value.FxNoAccess;
 import com.flexive.shared.value.FxNumber;
@@ -1015,6 +1020,62 @@ public class CmisSearchEngineTest {
                 FxContext.stopRunningAsSystem();
             }
         }
+    }
+
+    @Test(groups = {"search", "cmis", "ejb"})
+    public void inFolderTest() throws FxApplicationException {
+        final List<Long> nodeIds = Lists.newArrayList(createTestFolderContents("searchFolderTest"));
+        try {
+            final CmisResultSet result = getCmisSearchEngine().search("SELECT cmis:ObjectId FROM cmis:document WHERE IN_FOLDER('/')");
+            assertTrue(result.getRowCount() > 0, "No rows returned for root tree query");
+
+            nodeIds.add(
+                    getTreeEngine().createNodes(FxTreeMode.Edit, FxTreeNode.ROOT_NODE, -1, "/searchFolderTestEmpty")[0]
+            );
+            final CmisResultSet emptyResult = getCmisSearchEngine().search(
+                    "SELECT cmis:ObjectId FROM cmis:document WHERE IN_FOLDER('/searchFolderTestEmpty')"
+            );
+            assertTrue(emptyResult.getRowCount() == 0, "No rows should be returned for empty folder");
+
+            // new PK should be returned
+            assertRowCount(getCmisSearchEngine().search(
+                    "SELECT cmis:ObjectId FROM cmis:document WHERE IN_FOLDER('/searchFolderTest')"
+            ), 1);
+        } finally {
+            for (long id : nodeIds) {
+                EJBLookup.getTreeEngine().remove(FxTreeMode.Edit, id, FxTreeRemoveOp.Remove, true);
+            }
+        }
+    }
+
+    @Test(groups = {"search", "cmis", "ejb"})
+    public void inTreeTest() throws FxApplicationException {
+        final List<Long> nodeIds = createTestFolderContents("inTreeTest");
+        try {
+            final CmisResultSet result = getCmisSearchEngine().search("SELECT cmis:ObjectId FROM cmis:document WHERE IN_TREE('/')");
+            assertTrue(result.getRowCount() > 0, "No rows returned for root tree query");
+
+            final CmisResultSet directChildren = getCmisSearchEngine().search("SELECT cmis:ObjectId FROM cmis:document WHERE IN_FOLDER('/')");
+            assertTrue(directChildren.getRowCount() < result.getRowCount(), "More direct children than total children: "
+                    + directChildren.getRowCount() + " >= " + result.getRowCount());
+        } finally {
+            for (long id : nodeIds) {
+                getTreeEngine().remove(FxTreeMode.Edit, id, FxTreeRemoveOp.Remove, true);
+            }
+        }
+    }
+
+    private List<Long> createTestFolderContents(String folderName) throws FxApplicationException {
+        // create a content in the root folder
+        final FxPK rootPk = getContentEngine().save(getContentEngine().initialize("cmis_person"));
+        final long rootNodeId = getTreeEngine().save(FxTreeNodeEdit.createNew("").setParentNodeId(FxTreeNode.ROOT_NODE).setReference(rootPk));
+
+        // create a folder with another content instance
+        final long folderId = getTreeEngine().createNodes(FxTreeMode.Edit, FxTreeNode.ROOT_NODE, -1, "/" + folderName)[0];
+        final FxPK pk = getContentEngine().save(getContentEngine().initialize("cmis_person"));
+        getTreeEngine().save(FxTreeNodeEdit.createNew("").setParentNodeId(folderId).setReference(pk));
+
+        return Arrays.asList(rootNodeId, folderId);
     }
 
     private int getExpectedPartialMatches(CmisResultSet result, final List<FxSelectListItem> queryItems) {

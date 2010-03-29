@@ -35,7 +35,6 @@ import com.flexive.core.search.cmis.parser.CmisSqlUtils;
 import com.flexive.shared.exceptions.FxCmisSqlParseException;
 import org.antlr.runtime.RecognitionException;
 import org.testng.annotations.Test;
-import org.testng.Assert;
 import static org.testng.Assert.assertTrue;
 
 /**
@@ -49,10 +48,13 @@ public class CmisSqlParserTest {
 
     @Test(groups = {"search", "cmis"})
     public void inTree() throws RecognitionException {
-        assertValid("SELECT TITLE, AUTHORS, DATE\n" +
-                "FROM WHITE_PAPER\n" +
-                "WHERE (IN_TREE(,'ID00283213')) AND ('SMITH' = ANY AUTHORS)"
-        );
+        for (String prefix: new String[] { "WHITE_PAPER, ", "" }) {
+            for (String fun : new String[] { "IN_TREE", "IN_FOLDER" }) {
+                assertValid("SELECT TITLE, AUTHORS, DATE\n"
+                        + "FROM WHITE_PAPER\n"
+                        + "WHERE (" + fun + "(" + prefix + "'ID00283213')) AND ('SMITH' = ANY AUTHORS)");
+            }
+        }
     }
 
     @Test(groups = {"search", "cmis"})

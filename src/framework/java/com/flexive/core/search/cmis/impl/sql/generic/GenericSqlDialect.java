@@ -528,7 +528,7 @@ public class GenericSqlDialect implements SqlMapperFactory, SqlDialect {
         query.getStatement().getRootCondition().accept(visitor);
         out.append(" cmis_cond");
 
-        return joinedTables.outerJoin("cmis_cond", subTables);
+        return joinedTables.join("cmis_cond", subTables);
     }
 
     /**
@@ -909,6 +909,18 @@ public class GenericSqlDialect implements SqlMapperFactory, SqlDialect {
     public ConditionMapper<NullCondition> conditionNull() {
         return GenericNullColumnReferenceCondition.getInstance();
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public ConditionMapper<FolderCondition> conditionFolder() {
+        return GenericInFolderCondition.getInstance();
+    }
+
+    public ConditionMapper<TreeCondition> conditionTree() {
+        return GenericInTreeCondition.getInstance();
+    }
+
 
     /**
      * {@inheritDoc}

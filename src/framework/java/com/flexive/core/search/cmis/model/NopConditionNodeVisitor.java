@@ -67,4 +67,12 @@ public class NopConditionNodeVisitor implements ConditionNodeVisitor {
     public void visit(NullCondition nullCondition) {
         // nop
     }
+
+    public void visit(FolderCondition folderCondition) {
+        // nop
+    }
+
+    public void visit(TreeCondition treeCondition) {
+        // nop
+    }
 }

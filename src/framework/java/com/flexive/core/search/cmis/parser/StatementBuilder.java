@@ -33,8 +33,11 @@ package com.flexive.core.search.cmis.parser;
 
 import com.flexive.core.search.cmis.model.*;
 import com.flexive.core.storage.ContentStorage;
+import com.flexive.core.storage.TreeStorage;
 import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.EJBLookup;
 import com.flexive.shared.cmis.CmisVirtualProperty;
+import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxCmisSqlParseException;
 import static com.flexive.shared.exceptions.FxCmisSqlParseException.ErrorCause;
 import com.flexive.shared.exceptions.FxRuntimeException;
@@ -44,11 +47,17 @@ import com.flexive.shared.structure.FxDataType;
 import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.structure.FxType;
+import com.flexive.shared.tree.FxTreeMode;
+import com.flexive.shared.tree.FxTreeNode;
+import java.sql.Connection;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.antlr.runtime.tree.Tree;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.util.*;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * Translates a CMIS SQL AST to a {@link Statement}.
@@ -62,12 +71,16 @@ class StatementBuilder {
 
     private final Tree root;
     private final Statement stmt = new Statement();
+    private final Connection con;
     private final ContentStorage storage;
+    private final TreeStorage treeStorage;
     private final FxEnvironment environment;
 
-    StatementBuilder(ContentStorage storage, Tree root) {
+    StatementBuilder(Connection con, ContentStorage storage, TreeStorage treeStorage, Tree root) {
         this.root = root;
+        this.con = con;
         this.storage = storage;
+        this.treeStorage = treeStorage;
         this.environment = CacheAdmin.getEnvironment();
     }
 
@@ -242,6 +255,55 @@ class StatementBuilder {
                         decodeColumnReference(getFirstChildWithType(root, CmisSqlLexer.CREF), false),
                         getFirstChildWithType(root, CmisSqlLexer.NOT) != null
                 );
+
+            case CmisSqlLexer.IN_FOLDER:
+            case CmisSqlLexer.IN_TREE:
+                // optional table qualifier
+                final TableReference folderQualifier = root.getChildCount() > 1 
+                        ? stmt.getTable(decodeIdent(root.getChild(1).getChild(0)))
+                        : null;
+                if (folderQualifier == null && stmt.getTableCount() > 1) {
+                    // table must be specified for JOINs
+                    throw new FxCmisSqlParseException(
+                            LOG,
+                            ErrorCause.AMBIGUOUS_TABLE_REF,
+                            (root.getType() == CmisSqlLexer.IN_FOLDER ? "IN_FOLDER" : "IN_TREE")
+                    );
+                }
+                final TableReference sourceTable = folderQualifier == null ? stmt.getTables().get(0) : folderQualifier;
+
+                // find folder - TODO: Edit/Live tree selection?
+                final String folderIdent = decodeCharLiteral(root.getChild(0));
+                final long folderId;
+                try {
+                    if (StringUtils.isNumeric(folderIdent)) {
+                        // folder ID as used by the CMIS interfaces
+                        folderId = Long.parseLong(folderIdent);
+                        // check if the folder is actually valid
+                        treeStorage.getTreeNodeInfo(con, FxTreeMode.Edit, folderId);
+                    } else if (folderIdent != null && folderIdent.startsWith("/")) {
+                       // lookup folder path
+                        folderId = treeStorage.getIdByFQNPath(con, FxTreeMode.Edit, FxTreeNode.ROOT_NODE, folderIdent);
+                        if (folderId == -1) {
+                            throw new FxCmisSqlParseException(
+                                    LOG,
+                                    ErrorCause.INVALID_NODE_PATH,
+                                    folderIdent
+                            );
+                        }
+                    } else {
+                        throw new IllegalArgumentException("No folder ID or path for tree condition");
+                    }
+
+                    return root.getType() == CmisSqlLexer.IN_FOLDER
+                            // IN_FOLDER
+                            ? new FolderCondition(parent, sourceTable, folderId)
+                            // IN_TREE (needs node info for bounds checks)
+                            : new TreeCondition(parent, sourceTable, treeStorage.getTreeNodeInfo(con, FxTreeMode.Edit, folderId));
+                    
+                } catch (FxApplicationException e) {
+                    throw new FxCmisSqlParseException(LOG, e);
+                }
             default:
                 throw new UnsupportedOperationException("Unsupported condition: " + root.toStringTree());
         }

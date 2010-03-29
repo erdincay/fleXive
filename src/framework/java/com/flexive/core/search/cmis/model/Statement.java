@@ -78,6 +78,14 @@ public class Statement {
         return Collections.unmodifiableList(orderByColumns);
     }
 
+    public int getTableCount() {
+        int count = 0;
+        for (TableReference table : tables) {
+            count += table.getSubTables().size();
+        }
+        return count;
+    }
+
     public TableReference getTable(String alias) {
         for (TableReference table : tables) {
             final TableReference result = table.findByAlias(alias);

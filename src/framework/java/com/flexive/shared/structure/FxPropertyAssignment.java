@@ -402,7 +402,13 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
                         : getId();
 
         // check for reusage of our assignment
-        for (FxType derivedType : getAssignedType().getDerivedTypes(true, false)) {
+        final List<FxType> types = getAssignedType().getId() == FxType.ROOT_ID
+                // FX-825 - ROOT does not return subtypes, just get all types from the environment
+                ? environment.getTypes()
+                // normal type, just get all subtypes
+                : getAssignedType().getDerivedTypes(true, false);
+        
+        for (FxType derivedType : types) {
             try {
                 final FxAssignment derivedAssignment = derivedType.getAssignment(getXPath());
                 if (derivedAssignment.isDerivedFrom(environment, baseAssignmentId)) {
