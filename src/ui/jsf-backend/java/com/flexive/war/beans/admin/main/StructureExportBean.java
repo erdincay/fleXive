@@ -107,7 +107,8 @@ public class StructureExportBean {
     private String currentScriptCode;
     private GroovyScriptExporterBean gbean;
     private String userLang = "en";
-    private String toggleEditor = "later";
+    private String toggleEditor = "onload";
+    private boolean activateEditor = false;
 
     // constructor
     public StructureExportBean() {
@@ -822,5 +823,19 @@ public class StructureExportBean {
 
     public void setToggleEditor(String toggleEditor) {
         this.toggleEditor = toggleEditor;
+    }
+
+    public boolean isActivateEditor() {
+        return activateEditor;
+    }
+
+    /**
+     * Activate the editor and also control the "toggleEditor" variable f. editarea
+     *
+     * @param activateEditor flag
+     */
+    public void setActivateEditor(boolean activateEditor) {
+        toggleEditor = activateEditor ? "onload" : "later";
+        this.activateEditor = activateEditor;
     }
 }

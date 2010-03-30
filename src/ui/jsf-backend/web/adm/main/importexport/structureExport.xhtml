@@ -13,204 +13,270 @@
       xmlns:adm="http://www.flexive.com/jsf/admin"
       xmlns:fx="http://www.flexive.com/jsf/core">
 
-<ui:composition template="/adm/main/importexport/structureExportTemplate.xhtml">
+<ui:composition template="/adm/contentTemplate.xhtml">
 
-    <ui:define name="content">
+    <ui:define name="head">
+        <t:stylesheet path="#{adm:versionedUrl('/pub/css/content.css')}"/>
+        <t:stylesheet path="css/components.css"/>
+        <style type="text/css">
+            hr { border: 0; border-bottom: solid 1px #000000; }
+            th { padding: 4px; }
+            .columnMain { padding-right: 5px; padding-left: 5px; vertical-align: top; }
+            .mainColDiv { padding-top: 5px; }
+            .nestTableDiv { padding-right: 5px; padding-left: 5px; }
+            .columnNestTable { padding-right: 5px; padding-left: 5px; }
+            .depOn { font-style: italic; padding-left: 20px; }
+            .fxFont { color: black; font-family: Arial,Helvetica,sans-serif; font-size: 11px; }
+        </style>
+        <!-- vintage XML export -->
+        <script type="text/javascript">
+            function exportType(types) {
+                try {
+                    document.getElementById('exportFrame').src = getBase() + "export/type/" + types;
+                    /* loadContentPage("export/type/" + types); */
+                } catch(ex) {
+                    alertDialog(ex)
+                }
+            }
+        </script>
+    </ui:define>
 
-        <adm:tab label="#{fxMessageBean['StructureExport.tabtitle.main']}" active="true" id="tab1"
-                 bean="#{exportBean}" action="showMainTab" rendered="true" lockscreen="false"/>
+    <ui:define name="body">
+        <!-- XML export -->
+        <div style="display:none;"><iframe id="exportFrame" ><!--empty--></iframe></div>
 
-        <adm:tab label="#{fxMessageBean['StructureExport.tabtitle.export']}" active="false" id="tab2"
-                 bean="#{exportBean}" action="showResultTab" rendered="true" lockscreen="false"/>
+        <h:form id="frm">
 
-        <a4j:outputPanel id="dependencyPanel">
-            <fx:fieldSet legendKey="StructureExport.lbl.ignoreDependenciesFieldset">
-                <table id="dependencyOptions" class="fxFont">
-                    <tbody>
-                        <tr>
-                            <td>
-                                <fx:formRow overrideInputStyle="float:none" id="ignoreDependencies" labelKey="StructureExport.lbl.ignoreDependencies" newLine="false">
-                                    <h:selectBooleanCheckbox id="ignoreDependencies" value="#{exportBean.exportWithoutDependencies}"/>
-                                </fx:formRow>
-                            </td>
-                            <td>
-                                <fx:formRow overrideInputStyle="float:none" id="showScripts" labelKey="StructureExport.lbl.showScripts">
-                                    <h:selectBooleanCheckbox id="showScripts" value="#{exportBean.showScripts}"/>
-                                </fx:formRow>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </fx:fieldSet>
-        </a4j:outputPanel>
+            <t:saveState value="#{exportBean.showAllTypes}"/>
+            <t:saveState value="#{exportBean.showBaseTypes}"/>
+            <t:saveState value="#{exportBean.showDerivedTypes}"/>
+            <t:saveState value="#{exportBean.showRelations}"/>
+            <t:saveState value="#{exportBean.exportedTypesList}"/>
+            <t:saveState value="#{exportBean.exportPerformed}"/>
+            <t:saveState value="#{exportBean.callback}"/>
+            <t:saveState value="#{exportBean.hasDependencies}"/>
+            <t:saveState value="#{exportBean.dependencyStructures}"/>
+            <t:saveState value="#{exportBean.expDepTypeList}"/>
+            <t:saveState value="#{exportBean.exportedGroupsList}"/>
+            <t:saveState value="#{exportBean.assignmentIsGroupMap}"/>
+            <t:saveState value="#{exportBean.open_1}"/>
+            <t:saveState value="#{exportBean.open_2}"/>
+            <t:saveState value="#{exportBean.open_3}"/>
+            <t:saveState value="#{exportBean.open_4}"/>
+            <t:saveState value="#{exportBean.open_5}"/>
+            <t:saveState value="#{exportBean.open_6}"/>
+            <t:saveState value="#{exportBean.exportIds}"/>
+            <t:saveState value="#{exportBean.allTypesMarked}"/>
+            <t:saveState value="#{exportBean.expDepGroupList}"/>
+            <t:saveState value="#{exportBean.dependentOnMapping}"/>
+            <t:saveState value="#{exportBean.showScripts}"/>
+            <t:saveState value="#{exportBean.typesWithScripts}"/>
+            <t:saveState value="#{exportBean.assignsWithScripts}"/>
+            <t:saveState value="#{exportBean.typeScripts}"/>
+            <t:saveState value="#{exportBean.typeScriptEvents}"/>
+            <t:saveState value="#{exportBean.assignScriptEvents}"/>
+            <t:saveState value="#{exportBean.assignScripts}"/>
+            <t:saveState value="#{exportBean.scriptIdNameMap}"/>
+            <t:saveState value="#{exportBean.gbean}"/>
+            <t:saveState value="#{exportBean.userLang}"/>
+            <t:saveState value="#{exportBean.activateEditor}"/>
 
-        <a4j:outputPanel id="groovyOptionPanel">
-            <fx:fieldSet legendKey="StructureExport.lbl.groovyOptions">
-                <table id="scriptOptions" class="fxFont">
-                    <tbody>
-                        <tr>
-                            <td>
-                                <fx:formRow overrideInputStyle="float:none" id="deleteStructures" labelKey="StructureExport.lbl.addDeleteStructures" newLine="false">
-                                    <h:selectBooleanCheckbox id="deleteStructures" value="#{exportBean.deleteStructures}"/>
-                                </fx:formRow>
-                            </td>
-                            <td>
-                                <fx:formRow overrideInputStyle="float:none" id="importStatements" labelKey="StructureExport.lbl.addImportSatements" newLine="false">
-                                    <h:selectBooleanCheckbox id="importStatements" value="#{exportBean.generateImportStatements}"/>
-                                </fx:formRow>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <fx:formRow overrideInputStyle="float:none" id="defaultsOnly" labelKey="StructureExport.lbl.defaultsOnly" newLine="false">
-                                    <h:selectBooleanCheckbox id="defaultsOnly" value="#{exportBean.defaultsOnly}"/>
-                                </fx:formRow>
-                            </td>
-                            <td>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <fx:formRow overrideInputStyle="float:none" id="scriptAssignments" labelKey="StructureExport.lbl.scriptAssignments" newLine="false">
-                                    <h:selectBooleanCheckbox id="scriptAssignments" value="#{exportBean.generateScriptAssignments}">
-                                        <a4j:support event="onclick" reRender="overrideSwitch"/>
-                                    </h:selectBooleanCheckbox>
-                                </fx:formRow>
-                            </td>
-                            <td>
-                                <a4j:outputPanel id="overrideSwitch" ajaxRendered="true">
-                                    <fx:formRow overrideInputStyle="float:none" id="scriptOverrideSwitch" labelKey="StructureExport.lbl.scriptOverride" newLine="false">
-                                        <h:selectBooleanCheckbox id="scriptOverrideSwitch" value="#{exportBean.scriptOverride}" disabled="#{not exportBean.generateScriptAssignments}"/>
+            <adm:tab label="#{fxMessageBean['StructureExport.tabtitle.main']}" active="true" id="tab1"
+                     bean="#{exportBean}" action="showMainTab" rendered="true" lockscreen="true" />
+
+            <adm:tab label="#{fxMessageBean['StructureExport.tabtitle.export']}" active="false" id="tab2"
+                     bean="#{exportBean}" action="showResultTab" rendered="true" lockscreen="true" />
+
+            <a4j:outputPanel id="dependencyPanel">
+                <fx:fieldSet legendKey="StructureExport.lbl.ignoreDependenciesFieldset">
+                    <table id="dependencyOptions" class="fxFont">
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <fx:formRow overrideInputStyle="float:none" id="ignoreDependencies" labelKey="StructureExport.lbl.ignoreDependencies" newLine="false">
+                                        <h:selectBooleanCheckbox id="ignoreDependencies" value="#{exportBean.exportWithoutDependencies}"/>
                                     </fx:formRow>
-                                </a4j:outputPanel>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <fx:formRow overrideInputStyle="float:none" id="addSystemTypes" labelKey="StructureExport.lbl.addSystemTypes" newLine="false">
-                                    <h:selectBooleanCheckbox id="addSystemTypes" value="#{exportBean.addSystemTypes}"/>
-                                </fx:formRow>
-                            </td>
-                            <td>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </fx:fieldSet>
-        </a4j:outputPanel>
+                                </td>
+                                <td>
+                                    <fx:formRow overrideInputStyle="float:none" id="showScripts" labelKey="StructureExport.lbl.showScripts">
+                                        <h:selectBooleanCheckbox id="showScripts" value="#{exportBean.showScripts}"/>
+                                    </fx:formRow>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </fx:fieldSet>
+            </a4j:outputPanel>
 
-        <a4j:outputPanel id="typePanel">
-            <fx:fieldSet legendKey="StructureExport.lbl.typesDisplay">
-                <table id="dependencyOptions" class="fxFont">
-                    <tbody>
-                        <tr>
-                            <td>
-                                <fx:formRow overrideInputStyle="float:none" id="showAllTypes"
-                                            labelKey="StructureExport.lbl.all">
-                                    <h:selectBooleanCheckbox id="showAllTypes" value="#{exportBean.showAllTypes}">
-                                        <a4j:support reRender="typeOverview" event="onclick"/>
-                                    </h:selectBooleanCheckbox>
-                                </fx:formRow>
-                            </td>
-                            <td>
-                                <fx:formRow overrideInputStyle="float:none" id="showBaseTypes"
-                                            labelKey="StructureExport.lbl.base">
-                                    <h:selectBooleanCheckbox id="showBaseTypes" value="#{exportBean.showBaseTypes}">
-                                        <a4j:support reRender="typeOverview" event="onclick"/>
-                                    </h:selectBooleanCheckbox>
-                                </fx:formRow>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                               <fx:formRow overrideInputStyle="float:none" id="showDerivedTypes" labelKey="StructureExport.lbl.derived">
-                                    <h:selectBooleanCheckbox id="showDerivedTypes" value="#{exportBean.showDerivedTypes}">
-                                        <a4j:support reRender="typeOverview" event="onclick"/>
-                                    </h:selectBooleanCheckbox>
-                                </fx:formRow>
-                            </td>
-                            <td>
-                                <fx:formRow overrideInputStyle="float:none" id="showRelations" labelKey="StructureExport.lbl.relations">
-                                    <h:selectBooleanCheckbox id="showRelations" value="#{exportBean.showRelations}" disabled="true">
-                                        <a4j:support reRender="typeOverview" event="onclick"/>
-                                    </h:selectBooleanCheckbox>
-                                </fx:formRow>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </fx:fieldSet>
-        </a4j:outputPanel>
+            <a4j:outputPanel id="groovyOptionPanel">
+                <fx:fieldSet legendKey="StructureExport.lbl.groovyOptions">
+                    <table id="scriptOptions" class="fxFont">
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <fx:formRow overrideInputStyle="float:none" id="deleteStructures" labelKey="StructureExport.lbl.addDeleteStructures" newLine="false">
+                                        <h:selectBooleanCheckbox id="deleteStructures" value="#{exportBean.deleteStructures}"/>
+                                    </fx:formRow>
+                                </td>
+                                <td>
+                                    <fx:formRow overrideInputStyle="float:none" id="importStatements" labelKey="StructureExport.lbl.addImportSatements" newLine="false">
+                                        <h:selectBooleanCheckbox id="importStatements" value="#{exportBean.generateImportStatements}"/>
+                                    </fx:formRow>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <fx:formRow overrideInputStyle="float:none" id="defaultsOnly" labelKey="StructureExport.lbl.defaultsOnly" newLine="false">
+                                        <h:selectBooleanCheckbox id="defaultsOnly" value="#{exportBean.defaultsOnly}"/>
+                                    </fx:formRow>
+                                </td>
+                                <td>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <fx:formRow overrideInputStyle="float:none" id="scriptAssignments" labelKey="StructureExport.lbl.scriptAssignments" newLine="false">
+                                        <h:selectBooleanCheckbox id="scriptAssignments" value="#{exportBean.generateScriptAssignments}">
+                                            <a4j:support event="onclick" reRender="overrideSwitch"/>
+                                        </h:selectBooleanCheckbox>
+                                    </fx:formRow>
+                                </td>
+                                <td>
+                                    <a4j:outputPanel id="overrideSwitch" ajaxRendered="true">
+                                        <fx:formRow overrideInputStyle="float:none" id="scriptOverrideSwitch" labelKey="StructureExport.lbl.scriptOverride" newLine="false">
+                                            <h:selectBooleanCheckbox id="scriptOverrideSwitch" value="#{exportBean.scriptOverride}" disabled="#{not exportBean.generateScriptAssignments}"/>
+                                        </fx:formRow>
+                                    </a4j:outputPanel>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <fx:formRow overrideInputStyle="float:none" id="addSystemTypes" labelKey="StructureExport.lbl.addSystemTypes" newLine="false">
+                                        <h:selectBooleanCheckbox id="addSystemTypes" value="#{exportBean.addSystemTypes}"/>
+                                    </fx:formRow>
+                                </td>
+                                <td>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </fx:fieldSet>
+            </a4j:outputPanel>
 
-        <a4j:outputPanel id="markallpanel" layout="block">
-            <fx:fieldSet legendKey="StructureExport.lbl.markallhd">
-                <table id="dependencyOptions" class="fxFont">
-                    <tbody>
-                        <tr>
-                            <td>
-                               <fx:formRow overrideInputStyle="float:none" id="markall" labelKey="StructureExport.lbl.markall">
-                                    <h:selectBooleanCheckbox id="markall" value="#{exportBean.allTypesMarked}">
-                                        <a4j:support reRender="typeOverview" event="onclick" action="#{exportBean.markAllTypes}"/>
-                                    </h:selectBooleanCheckbox>
-                                </fx:formRow>
-                            </td>
-                            <td>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </fx:fieldSet>
-        </a4j:outputPanel>
+            <a4j:outputPanel id="typePanel">
+                <fx:fieldSet legendKey="StructureExport.lbl.typesDisplay">
+                    <table id="dependencyOptions" class="fxFont">
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <fx:formRow overrideInputStyle="float:none" id="showAllTypes"
+                                                labelKey="StructureExport.lbl.all">
+                                        <h:selectBooleanCheckbox id="showAllTypes" value="#{exportBean.showAllTypes}">
+                                            <a4j:support reRender="typeOverview" event="onclick"/>
+                                        </h:selectBooleanCheckbox>
+                                    </fx:formRow>
+                                </td>
+                                <td>
+                                    <fx:formRow overrideInputStyle="float:none" id="showBaseTypes"
+                                                labelKey="StructureExport.lbl.base">
+                                        <h:selectBooleanCheckbox id="showBaseTypes" value="#{exportBean.showBaseTypes}">
+                                            <a4j:support reRender="typeOverview" event="onclick"/>
+                                        </h:selectBooleanCheckbox>
+                                    </fx:formRow>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                   <fx:formRow overrideInputStyle="float:none" id="showDerivedTypes" labelKey="StructureExport.lbl.derived">
+                                        <h:selectBooleanCheckbox id="showDerivedTypes" value="#{exportBean.showDerivedTypes}">
+                                            <a4j:support reRender="typeOverview" event="onclick"/>
+                                        </h:selectBooleanCheckbox>
+                                    </fx:formRow>
+                                </td>
+                                <td>
+                                    <fx:formRow overrideInputStyle="float:none" id="showRelations" labelKey="StructureExport.lbl.relations">
+                                        <h:selectBooleanCheckbox id="showRelations" value="#{exportBean.showRelations}" disabled="true">
+                                            <a4j:support reRender="typeOverview" event="onclick"/>
+                                        </h:selectBooleanCheckbox>
+                                    </fx:formRow>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </fx:fieldSet>
+            </a4j:outputPanel>
 
-        <a4j:outputPanel id="typeOverview" layout="block" ajaxRendered="true" style="padding-left:4px;">
-            <rich:dataTable width="483" id="typeOverviewTable" rows="#{exportBean.tableRows}" value="#{exportBean.typeList}" var="type">
-                <f:facet name="header">
-                    <rich:columnGroup>
-                        <rich:column>
-                            <h:outputText value="#{fxMessageBean['StructureExport.tbl.typeId']}" />
-                        </rich:column>
-                        <rich:column>
-                            <h:outputText value="#{fxMessageBean['StructureExport.tbl.typeName']}" />
-                        </rich:column>
-                        <rich:column>
-                            <h:outputText value="#{fxMessageBean['StructureExport.tbl.typeClass']}" />
-                        </rich:column>
-                        <rich:column>
-                            <h:outputText value="#{fxMessageBean['StructureExport.tbl.export']}" />
-                        </rich:column>
-                    </rich:columnGroup>
-                </f:facet>
-                <rich:column>
-                    <h:outputText value="##{type.id}" />
-                </rich:column>
-                <rich:column>
-                    <h:outputText value="#{type.name}" />
-                </rich:column>
-                <rich:column>
-                    <h:outputText escape="false" value="#{fxMessageBean['StructureExport.tbl.isBase']}&lt;br/&gt;"
-                                  rendered="#{type.parent eq null and type.mode != 'Relation'}"/>
-                    <h:outputText escape="false" value="#{fxMessageBean['StructureExport.tbl.isDerived']}&lt;br/&gt;"
-                                  rendered="#{type.parent ne null}"/>
-                    <h:outputText value="#{fxMessageBean['StructureExport.tbl.isRelation']}" rendered="#{type.mode eq 'Relation'}"/>
-                </rich:column>
-                <rich:column style="padding-left:50px;">
-                    <h:selectBooleanCheckbox value="#{exportBean.exportIds[type.id]}" disabled="#{type.mode eq 'Relation'}" />
-                </rich:column>
-            </rich:dataTable>
-        </a4j:outputPanel>
+            <a4j:outputPanel id="markallpanel" layout="block">
+                <fx:fieldSet legendKey="StructureExport.lbl.markallhd">
+                    <table id="dependencyOptions" class="fxFont">
+                        <tbody>
+                            <tr>
+                                <td>
+                                   <fx:formRow overrideInputStyle="float:none" id="markall" labelKey="StructureExport.lbl.markall">
+                                        <h:selectBooleanCheckbox id="markall" value="#{exportBean.allTypesMarked}">
+                                            <a4j:support reRender="typeOverview" event="onclick" action="#{exportBean.markAllTypes}"/>
+                                        </h:selectBooleanCheckbox>
+                                    </fx:formRow>
+                                </td>
+                                <td>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </fx:fieldSet>
+            </a4j:outputPanel>
 
-        <br/>
+            <a4j:outputPanel id="typeOverview" layout="block" ajaxRendered="true" style="padding-left:4px;">
+                <rich:dataTable width="483" id="typeOverviewTable" rows="#{exportBean.tableRows}" value="#{exportBean.typeList}" var="type">
+                    <f:facet name="header">
+                        <rich:columnGroup>
+                            <rich:column>
+                                <h:outputText value="#{fxMessageBean['StructureExport.tbl.typeId']}" />
+                            </rich:column>
+                            <rich:column>
+                                <h:outputText value="#{fxMessageBean['StructureExport.tbl.typeName']}" />
+                            </rich:column>
+                            <rich:column>
+                                <h:outputText value="#{fxMessageBean['StructureExport.tbl.typeClass']}" />
+                            </rich:column>
+                            <rich:column>
+                                <h:outputText value="#{fxMessageBean['StructureExport.tbl.export']}" />
+                            </rich:column>
+                        </rich:columnGroup>
+                    </f:facet>
+                    <rich:column>
+                        <h:outputText value="##{type.id}" />
+                    </rich:column>
+                    <rich:column>
+                        <h:outputText value="#{type.name}" />
+                    </rich:column>
+                    <rich:column>
+                        <h:outputText escape="false" value="#{fxMessageBean['StructureExport.tbl.isBase']}&lt;br/&gt;"
+                                      rendered="#{type.parent eq null and type.mode != 'Relation'}"/>
+                        <h:outputText escape="false" value="#{fxMessageBean['StructureExport.tbl.isDerived']}&lt;br/&gt;"
+                                      rendered="#{type.parent ne null}"/>
+                        <h:outputText value="#{fxMessageBean['StructureExport.tbl.isRelation']}" rendered="#{type.mode eq 'Relation'}"/>
+                    </rich:column>
+                    <rich:column style="padding-left:50px;">
+                        <h:selectBooleanCheckbox value="#{exportBean.exportIds[type.id]}" disabled="#{type.mode eq 'Relation'}" />
+                    </rich:column>
+                </rich:dataTable>
+            </a4j:outputPanel>
 
-        <adm:ajaxCommandButton id="exportButton" bean="#{exportBean}" action="export" labelKey="StructureExport.btn.export" icon="export"/>
+            <br/>
 
-        <div id="xmlexport">
-            <adm:ajaxCommandButton id="exportButtonXML" bean="#{exportBean}" action="exportAsXML" labelKey="StructureExport.btn.exportXML" icon="export"
-                                   oncomplete="exportType('#{exportBean.typeIdsXML}');"/>
+            <adm:commandButton id="exportButton" bean="#{exportBean}" action="export" labelKey="StructureExport.btn.export" icon="export"/>
 
-        </div>
-        <rich:toolTip for="xmlexport" layout="block" styleClass="tooltip" direction="top-right">
-            #{fxMessageBean['StructureExport.btn.exportXML.tooltip']}
-        </rich:toolTip>
+            <div id="xmlexport">
+                <adm:ajaxCommandButton id="exportButtonXML" bean="#{exportBean}" action="exportAsXML" labelKey="StructureExport.btn.exportXML" icon="export"
+                                       oncomplete="exportType('#{exportBean.typeIdsXML}');"/>
+
+            </div>
+            <rich:toolTip for="xmlexport" layout="block" styleClass="tooltip" direction="top-right">
+                #{fxMessageBean['StructureExport.btn.exportXML.tooltip']}
+            </rich:toolTip>
+
+        </h:form>
 
     </ui:define>
 

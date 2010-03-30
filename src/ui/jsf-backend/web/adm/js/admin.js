@@ -650,7 +650,7 @@ function linearSearch(searchItem, targetArray, regEx) {
  * @param id the form's id
  * @param init boolean value whether the EditArea should be initialised
  */
-function activateEditArea(id, init, userLang, syntax, displayToggle, toggleOnFunction, toggleOffFunction) {
+function activateEditArea(id, init, userLang, syntax, displayToggle, toggleOnFunction, toggleOffFunction, allowToggle) {
     if (init) {
         if (userLang == null)
             userLang = "en";
@@ -668,10 +668,13 @@ function activateEditArea(id, init, userLang, syntax, displayToggle, toggleOnFun
             toggleOnFunction = "eaToggleOnAdmin";
         if(toggleOffFunction == null)
             toggleOffFunction = "eaToggleOffAdmin";
+        if(allowToggle == null)
+            allowToggle = true;
 
         parent.contentFrameObj.contentWindow.editAreaLoader.init({
             id : id,
             syntax: syntax,
+            allow_toggle: allowToggle,
             start_highlight: true,
             language: userLang,
             font_size: 8,

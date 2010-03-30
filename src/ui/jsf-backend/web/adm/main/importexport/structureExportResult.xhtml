@@ -13,282 +13,354 @@
       xmlns:adm="http://www.flexive.com/jsf/admin"
       xmlns:fx="http://www.flexive.com/jsf/core">
 
-<ui:composition template="/adm/main/importexport/structureExportTemplate.xhtml">
+<ui:composition template="/adm/contentTemplate.xhtml">
 
-<ui:define name="content">
+    <ui:define name="head">
+        <t:stylesheet path="#{adm:versionedUrl('/pub/css/content.css')}"/>
+        <t:stylesheet path="css/components.css"/>
+        <style type="text/css">
+            hr { border: 0; border-bottom: solid 1px #000000; }
+            th { padding: 4px; }
+            .columnMain { padding-right: 5px; padding-left: 5px; vertical-align: top; }
+            .mainColDiv { padding-top: 5px; }
+            .nestTableDiv { padding-right: 5px; padding-left: 5px; }
+            .columnNestTable { padding-right: 5px; padding-left: 5px; }
+            .depOn { font-style: italic; padding-left: 20px; }
+            .fxFont { color: black; font-family: Arial,Helvetica,sans-serif; font-size: 11px; }
+        </style>
+        <!-- vintage XML export -->
+        <script type="text/javascript">
+            function exportType(types) {
+                try {
+                    document.getElementById('exportFrame').src = getBase() + "export/type/" + types;
+                    /* loadContentPage("export/type/" + types); */
+                } catch(ex) {
+                    alertDialog(ex)
+                }
+            }
+        </script>
+        <!-- editArea f. result code -->
+        <script language="javascript" type="text/javascript" src="#{fxSystemBean.contextPath}/adm/js/edit_area/edit_area_full.js"/>
+        <c:if test="#{exportBean.activateEditor}">
+            <script type="text/javascript">
+                activateEditArea('frm:groovyCode', true, "#{exportBean.userLang}", null, '#{exportBean.toggleEditor}', null, null, false);
+            </script>
+        </c:if>
 
-<adm:tab label="#{fxMessageBean['StructureExport.tabtitle.main']}" active="false" id="tab1"
-         bean="#{exportBean}" action="showMainTab" rendered="true" lockscreen="false" ajax="true">
-    <a4j:actionparam name="editAreaToggle" noEscape="true" assignTo="#{exportBean.toggleEditor}"
-                     value="eaToggleState"/>
-</adm:tab>
+    </ui:define>
 
-<adm:tab label="#{fxMessageBean['StructureExport.tabtitle.export']}" active="true" id="tab2"
-         bean="#{exportBean}" action="showResultTab" rendered="true" lockscreen="false"/>
+    <ui:define name="body">
+        <!-- XML export -->
+        <div style="display:none;"><iframe id="exportFrame" ><!--empty--></iframe></div>
 
+        <a4j:form id="frm">
 
-<a4j:outputPanel id="msgPanel1" ajaxRendered="true">
-    <h:outputText value="#{fxMessageBean['StructureExport.msg.noresult']}"
-                  rendered="#{!exportBean.exportPerformed}"/>
-</a4j:outputPanel>
+            <t:saveState value="#{exportBean.showAllTypes}"/>
+            <t:saveState value="#{exportBean.showBaseTypes}"/>
+            <t:saveState value="#{exportBean.showDerivedTypes}"/>
+            <t:saveState value="#{exportBean.showRelations}"/>
+            <t:saveState value="#{exportBean.exportedTypesList}"/>
+            <t:saveState value="#{exportBean.exportPerformed}"/>
+            <t:saveState value="#{exportBean.callback}"/>
+            <t:saveState value="#{exportBean.hasDependencies}"/>
+            <t:saveState value="#{exportBean.dependencyStructures}"/>
+            <t:saveState value="#{exportBean.expDepTypeList}"/>
+            <t:saveState value="#{exportBean.exportedGroupsList}"/>
+            <t:saveState value="#{exportBean.assignmentIsGroupMap}"/>
+            <t:saveState value="#{exportBean.open_1}"/>
+            <t:saveState value="#{exportBean.open_2}"/>
+            <t:saveState value="#{exportBean.open_3}"/>
+            <t:saveState value="#{exportBean.open_4}"/>
+            <t:saveState value="#{exportBean.open_5}"/>
+            <t:saveState value="#{exportBean.open_6}"/>
+            <t:saveState value="#{exportBean.exportIds}"/>
+            <t:saveState value="#{exportBean.allTypesMarked}"/>
+            <t:saveState value="#{exportBean.expDepGroupList}"/>
+            <t:saveState value="#{exportBean.dependentOnMapping}"/>
+            <t:saveState value="#{exportBean.showScripts}"/>
+            <t:saveState value="#{exportBean.typesWithScripts}"/>
+            <t:saveState value="#{exportBean.assignsWithScripts}"/>
+            <t:saveState value="#{exportBean.typeScripts}"/>
+            <t:saveState value="#{exportBean.typeScriptEvents}"/>
+            <t:saveState value="#{exportBean.assignScriptEvents}"/>
+            <t:saveState value="#{exportBean.assignScripts}"/>
+            <t:saveState value="#{exportBean.scriptIdNameMap}"/>
+            <t:saveState value="#{exportBean.gbean}"/>
+            <t:saveState value="#{exportBean.userLang}"/>
+            <t:saveState value="#{exportBean.activateEditor}"/>
 
-<br/>
-<!-- export summary -->
-<a4j:outputPanel id="resultPanelFlat" ajaxRendered="true">
-    <rich:simpleTogglePanel id="exportSummary" rendered="#{exportBean.exportPerformed}"
-                            opened="#{exportBean.open_1}"
-                            switchType="client"
-                            label="#{fxMessageBean['StructureExport.lbl.exportSummary']}">
+            <adm:tab label="#{fxMessageBean['StructureExport.tabtitle.main']}" active="false" id="tab1"
+                     bean="#{exportBean}" action="showMainTab" rendered="true" lockscreen="true" />
 
-        <!-- type assignments -->
-        <ui:include src="/adm/main/importexport/structureExportResultTable.xhtml">
-            <ui:param name="mainTableDataSource" value="#{exportBean.exportedTypesList}"/>
-            <ui:param name="mainTableHeader" value="StructureExport.lbl.typeAssignments"/>
-            <ui:param name="mainTableHeaderLabel" value="StructureExport.lbl.exportedTypeNames"/>
-            <ui:param name="nestTableHeader" value="StructureExport.lbl.exportedtypeAssignments"/>
-            <ui:param name="nestTableDataSource" value="#{exportBean.callback.typeAssignments[mainVar]}"/>
-        </ui:include>
+            <adm:tab label="#{fxMessageBean['StructureExport.tabtitle.export']}" active="true" id="tab2"
+                     bean="#{exportBean}" action="showResultTab" rendered="true" lockscreen="false" />
 
-        <!-- group assignments -->
-        <rich:simpleTogglePanel id="exportGroups" rendered="#{not empty exportBean.callback.groupAssignments}"
-                                opened="#{exportBean.open_2}"
-                                label="#{fxMessageBean['StructureExport.lbl.groups']}" switchType="client">
-
-            <ui:include src="/adm/main/importexport/structureExportResultTable.xhtml">
-                <ui:param name="tableType" value="group"/>
-                <ui:param name="mainTableDataSource" value="#{exportBean.exportedGroupsList}"/>
-                <ui:param name="mainTableHeader" value="StructureExport.lbl.groups"/>
-                <ui:param name="mainTableHeaderLabel" value="StructureExport.lbl.groupName"/>
-                <ui:param name="nestTableHeader" value="StructureExport.lbl.children"/>
-                <ui:param name="nestTableDataSource" value="#{exportBean.callback.groupAssignments[mainVar]}"/>
-            </ui:include>
-
-        </rich:simpleTogglePanel>
-
-        <br/>
-
-        <!-- dependencies -->
-        <ui:fragment rendered="#{!exportBean.hasDependencies}">
-            <h:outputText value="#{fxMessageBean['StructureExport.lbl.dependencyStruct.notavail']}&lt;br/&gt;"
-                          escape="false" style="color:blue;"/>
-        </ui:fragment>
-
-        <rich:simpleTogglePanel id="dependenciesSummary" rendered="#{exportBean.hasDependencies}"
-                                opened="#{exportBean.open_3}"
-                                switchType="client"
-                                label="#{fxMessageBean['StructureExport.lbl.dependencyStructure']}">
-
-            <ui:include src="/adm/main/importexport/structureExportResultTable.xhtml">
-                <ui:param name="mainTableDataSource" value="#{exportBean.expDepTypeList}"/>
-                <ui:param name="mainTableHeader" value="StructureExport.lbl.typeAssignments"/>
-                <ui:param name="mainTableHeaderLabel" value="StructureExport.lbl.exportedTypeNames"/>
-                <ui:param name="nestTableHeader" value="StructureExport.lbl.exportedtypeAssignments"/>
-                <ui:param name="nestTableDataSource" value="#{repeatVar.typeAssignments[mainVar]}"/>
-                <ui:param name="nestTableRepeatDS" value="#{exportBean.dependencyStructures}"/>
-                <ui:param name="nestTableRepeat" value="true"/>
-                <ui:param name="showDependentOn" value="true"/>
-            </ui:include>
-
-            <!-- dependency group assignments -->
-            <rich:simpleTogglePanel id="depGroupPanel" rendered="#{not empty exportBean.expDepGroupList}"
-                                    opened="#{exportBean.open_5}"
-                                    label="#{fxMessageBean['StructureExport.lbl.groups']}"
-                                    switchType="client">
-
-                <ui:include src="/adm/main/importexport/structureExportResultTable.xhtml">
-                    <ui:param name="tableType" value="group"/>
-                    <ui:param name="mainTableDataSource" value="#{exportBean.expDepGroupList}"/>
-                    <ui:param name="mainTableHeader" value="StructureExport.lbl.groupsDeps"/>
-                    <ui:param name="mainTableHeaderLabel" value="StructureExport.lbl.groupName"/>
-                    <ui:param name="nestTableHeader" value="StructureExport.lbl.children"/>
-                    <ui:param name="nestTableDataSource" value="#{repeatVar.groupAssignments[mainVar]}"/>
-                    <ui:param name="nestTableRepeatDS" value="#{exportBean.dependencyStructures}"/>
-                    <ui:param name="nestTableRepeat" value="true"/>
-                    <ui:param name="showDependentOn" value="true"/>
-                </ui:include>
-
-            </rich:simpleTogglePanel>
-            <!-- end dependency group assignments -->
-        </rich:simpleTogglePanel>
-
-        <br/>
-
-        <!-- script assignments -->
-        <rich:simpleTogglePanel id="scriptTogglePanel" rendered="#{exportBean.showScripts}"
-                                opened="#{exportBean.open_6}"
-                                label="#{fxMessageBean['StructureExport.lbl.scripts']}"
-                                switchType="client">
-
-            <a4j:outputPanel id="msgPanel2" ajaxRendered="true">
-                <h:outputText value="&lt;br/&gt;#{fxMessageBean['StructureExport.msg.notypeswithscripts']}&lt;br/&gt;"
-                              rendered="#{empty exportBean.typesWithScripts}" escape="false" style="color:blue;"/>
+            <a4j:outputPanel id="msgPanel1" ajaxRendered="true">
+                <h:outputText value="#{fxMessageBean['StructureExport.msg.noresult']}" rendered="#{!exportBean.exportPerformed}"/>
             </a4j:outputPanel>
 
-            <!-- type script assignments -->
-            <ui:include src="/adm/main/importexport/structureExportResultTable.xhtml">
-                <ui:param name="tableType" value="typeScript"/>
-                <ui:param name="mainTableDataSource" value="#{exportBean.typesWithScripts}"/>
-                <ui:param name="mainTableHeader" value="StructureExport.lbl.scriptsType"/>
-                <ui:param name="mainTableHeaderLabel" value="StructureExport.lbl.exportedTypeNames"/>
-                <ui:param name="nestTableHeader" value="StructureExport.lbl.children"/>
-                <ui:param name="nestTableDataSource" value="#{exportBean.typeScriptEvents[mainVar.id]}"/>
-                <ui:param name="nestAssociatedScripts" value="#{exportBean.typeScripts[mainVar.id][eventVar]}"/>
-            </ui:include>
+            <br/>
+            <!-- export summary -->
+            <a4j:outputPanel id="resultPanelFlat" ajaxRendered="true">
+                <rich:simpleTogglePanel id="exportSummary" rendered="#{exportBean.exportPerformed}"
+                                        opened="#{exportBean.open_1}"
+                                        switchType="client"
+                                        label="#{fxMessageBean['StructureExport.lbl.exportSummary']}">
+
+                    <!-- type assignments -->
+                    <ui:include src="/adm/main/importexport/structureExportResultTable.xhtml">
+                        <ui:param name="mainTableDataSource" value="#{exportBean.exportedTypesList}"/>
+                        <ui:param name="mainTableHeader" value="StructureExport.lbl.typeAssignments"/>
+                        <ui:param name="mainTableHeaderLabel" value="StructureExport.lbl.exportedTypeNames"/>
+                        <ui:param name="nestTableHeader" value="StructureExport.lbl.exportedtypeAssignments"/>
+                        <ui:param name="nestTableDataSource" value="#{exportBean.callback.typeAssignments[mainVar]}"/>
+                    </ui:include>
+
+                    <!-- group assignments -->
+                    <rich:simpleTogglePanel id="exportGroups" rendered="#{not empty exportBean.callback.groupAssignments}"
+                                            opened="#{exportBean.open_2}"
+                                            label="#{fxMessageBean['StructureExport.lbl.groups']}" switchType="client">
+
+                        <ui:include src="/adm/main/importexport/structureExportResultTable.xhtml">
+                            <ui:param name="tableType" value="group"/>
+                            <ui:param name="mainTableDataSource" value="#{exportBean.exportedGroupsList}"/>
+                            <ui:param name="mainTableHeader" value="StructureExport.lbl.groups"/>
+                            <ui:param name="mainTableHeaderLabel" value="StructureExport.lbl.groupName"/>
+                            <ui:param name="nestTableHeader" value="StructureExport.lbl.children"/>
+                            <ui:param name="nestTableDataSource" value="#{exportBean.callback.groupAssignments[mainVar]}"/>
+                        </ui:include>
+
+                    </rich:simpleTogglePanel>
+
+                    <br/>
+
+                    <!-- dependencies -->
+                    <ui:fragment rendered="#{!exportBean.hasDependencies}">
+                        <h:outputText value="#{fxMessageBean['StructureExport.lbl.dependencyStruct.notavail']}&lt;br/&gt;"
+                                      escape="false" style="color:blue;"/>
+                    </ui:fragment>
+
+                    <rich:simpleTogglePanel id="dependenciesSummary" rendered="#{exportBean.hasDependencies}"
+                                            opened="#{exportBean.open_3}"
+                                            switchType="client"
+                                            label="#{fxMessageBean['StructureExport.lbl.dependencyStructure']}">
+
+                        <ui:include src="/adm/main/importexport/structureExportResultTable.xhtml">
+                            <ui:param name="mainTableDataSource" value="#{exportBean.expDepTypeList}"/>
+                            <ui:param name="mainTableHeader" value="StructureExport.lbl.typeAssignments"/>
+                            <ui:param name="mainTableHeaderLabel" value="StructureExport.lbl.exportedTypeNames"/>
+                            <ui:param name="nestTableHeader" value="StructureExport.lbl.exportedtypeAssignments"/>
+                            <ui:param name="nestTableDataSource" value="#{repeatVar.typeAssignments[mainVar]}"/>
+                            <ui:param name="nestTableRepeatDS" value="#{exportBean.dependencyStructures}"/>
+                            <ui:param name="nestTableRepeat" value="true"/>
+                            <ui:param name="showDependentOn" value="true"/>
+                        </ui:include>
+
+                        <!-- dependency group assignments -->
+                        <rich:simpleTogglePanel id="depGroupPanel" rendered="#{not empty exportBean.expDepGroupList}"
+                                                opened="#{exportBean.open_5}"
+                                                label="#{fxMessageBean['StructureExport.lbl.groups']}"
+                                                switchType="client">
+
+                            <ui:include src="/adm/main/importexport/structureExportResultTable.xhtml">
+                                <ui:param name="tableType" value="group"/>
+                                <ui:param name="mainTableDataSource" value="#{exportBean.expDepGroupList}"/>
+                                <ui:param name="mainTableHeader" value="StructureExport.lbl.groupsDeps"/>
+                                <ui:param name="mainTableHeaderLabel" value="StructureExport.lbl.groupName"/>
+                                <ui:param name="nestTableHeader" value="StructureExport.lbl.children"/>
+                                <ui:param name="nestTableDataSource" value="#{repeatVar.groupAssignments[mainVar]}"/>
+                                <ui:param name="nestTableRepeatDS" value="#{exportBean.dependencyStructures}"/>
+                                <ui:param name="nestTableRepeat" value="true"/>
+                                <ui:param name="showDependentOn" value="true"/>
+                            </ui:include>
+
+                        </rich:simpleTogglePanel>
+                        <!-- end dependency group assignments -->
+                    </rich:simpleTogglePanel>
+
+                    <br/>
+
+                    <!-- script assignments -->
+                    <rich:simpleTogglePanel id="scriptTogglePanel" rendered="#{exportBean.showScripts}"
+                                            opened="#{exportBean.open_6}"
+                                            label="#{fxMessageBean['StructureExport.lbl.scripts']}"
+                                            switchType="client">
+
+                        <a4j:outputPanel id="msgPanel2" ajaxRendered="true">
+                            <h:outputText value="&lt;br/&gt;#{fxMessageBean['StructureExport.msg.notypeswithscripts']}&lt;br/&gt;"
+                                          rendered="#{empty exportBean.typesWithScripts}" escape="false" style="color:blue;"/>
+                        </a4j:outputPanel>
+
+                        <!-- type script assignments -->
+                        <ui:include src="/adm/main/importexport/structureExportResultTable.xhtml">
+                            <ui:param name="tableType" value="typeScript"/>
+                            <ui:param name="mainTableDataSource" value="#{exportBean.typesWithScripts}"/>
+                            <ui:param name="mainTableHeader" value="StructureExport.lbl.scriptsType"/>
+                            <ui:param name="mainTableHeaderLabel" value="StructureExport.lbl.exportedTypeNames"/>
+                            <ui:param name="nestTableHeader" value="StructureExport.lbl.children"/>
+                            <ui:param name="nestTableDataSource" value="#{exportBean.typeScriptEvents[mainVar.id]}"/>
+                            <ui:param name="nestAssociatedScripts" value="#{exportBean.typeScripts[mainVar.id][eventVar]}"/>
+                        </ui:include>
+
+                        <br/>
+
+                        <h:outputText escape="false" value="&lt;hr/&gt;&lt;br/&gt;"/>
+
+                        <a4j:outputPanel id="msgPanel3" ajaxRendered="true">
+                            <h:outputText value="#{fxMessageBean['StructureExport.msg.noassignswithscripts']}&lt;br/&gt;"
+                                          rendered="#{empty exportBean.assignsWithScripts}" escape="false" style="color:blue;"/>
+                        </a4j:outputPanel>
+
+                        <a4j:outputPanel id="hrPanel" rendered="false">
+                            <h:outputText value="&lt;hr/&gt;"
+                                          rendered="#{not empty exportBean.assignsWithScripts and not empty exportBean.typesWithScripts}"
+                                          escape="false"/>
+                        </a4j:outputPanel>
+
+                        <!-- assignment scripts -->
+                        <ui:include src="/adm/main/importexport/structureExportResultTable.xhtml">
+                            <ui:param name="tableType" value="assignmentScript"/>
+                            <ui:param name="mainTableDataSource" value="#{exportBean.assignsWithScripts}"/>
+                            <ui:param name="mainTableHeader" value="StructureExport.lbl.scriptsAssign"/>
+                            <ui:param name="mainTableHeaderLabel" value="StructureExport.lbl.assignmentNames"/>
+                            <ui:param name="nestTableHeader" value="StructureExport.lbl.children"/>
+                            <ui:param name="nestTableDataSource" value="#{exportBean.assignScriptEvents[mainVar.id]}"/>
+                            <ui:param name="nestAssociatedScripts" value="#{exportBean.assignScripts[mainVar.id][eventVar]}"/>
+                        </ui:include>
+
+                    </rich:simpleTogglePanel>
+
+                </rich:simpleTogglePanel>
+            </a4j:outputPanel>
+
+            <!-- script code display panel -->
+            <rich:modalPanel id="scriptCodePanel" autosized="true">
+                <f:facet name="header">
+                    <h:outputText value="#{fxMessageBean['StructureExport.lbl.scriptCode']}"/>
+                </f:facet>
+                <f:facet name="controls">
+                    <h:panelGroup>
+                        <!--cancel icon-->
+                        <adm:ajaxCommandIcon id="cancelIcon" titleKey="SysParamConfig.button.cancel" icon="cancel"
+                                             bean="#{exportBean}" action="cancelScriptPanel"
+                                             onclick="#{rich:component('scriptCodePanel')}.hide();" reRender="scriptPanel"/>
+                    </h:panelGroup>
+                </f:facet>
+                <a4j:outputPanel id="scriptCodePanelOutput" ajaxRendered="true" layout="block">
+                    <h:inputTextarea rows="20" cols="60" disabled="true" value="#{exportBean.currentScriptCode}"/>
+                </a4j:outputPanel>
+            </rich:modalPanel>
 
             <br/>
 
-            <h:outputText escape="false" value="&lt;hr/&gt;&lt;br/&gt;"/>
+            <!-- Groovy script export -->
+            <a4j:outputPanel id="resultPanelGroovy" ajaxRendered="true">
+                <rich:simpleTogglePanel id="exportGroovy" rendered="#{exportBean.exportPerformed}"
+                                        opened="#{exportBean.open_4}"
+                                        label="#{fxMessageBean['StructureExport.lbl.exportGroovy']}" switchType="client">
 
-            <a4j:outputPanel id="msgPanel3" ajaxRendered="true">
-                <h:outputText value="#{fxMessageBean['StructureExport.msg.noassignswithscripts']}&lt;br/&gt;"
-                              rendered="#{empty exportBean.assignsWithScripts}" escape="false" style="color:blue;"/>
+                    <a4j:outputPanel id="groovyOptionPanel">
+                        <fx:fieldSet legendKey="StructureExport.lbl.groovyOptions">
+                            <table id="groovyOptions" class="fxFont">
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <fx:formRow overrideInputStyle="float:none" id="deleteStructures" labelKey="StructureExport.lbl.addDeleteStructures" newLine="false">
+                                                <h:selectBooleanCheckbox id="deleteStructures" value="#{exportBean.deleteStructures}">
+                                                    <a4j:support reRender="codePanel" event="onclick" oncomplete="activateEditArea('frm:groovyCode', true, '#{scriptConsoleBean.userLang}', null, '#{exportBean.toggleEditor}', null, null, false);"/>
+                                                </h:selectBooleanCheckbox>
+                                            </fx:formRow>
+                                        </td>
+                                        <td>
+                                            <fx:formRow overrideInputStyle="float:none" id="importStatements" labelKey="StructureExport.lbl.addImportSatements" newLine="false">
+                                                <h:selectBooleanCheckbox id="importStatements" value="#{exportBean.generateImportStatements}">
+                                                    <a4j:support reRender="codePanel" event="onclick" oncomplete="activateEditArea('frm:groovyCode', true, '#{scriptConsoleBean.userLang}', null, '#{exportBean.toggleEditor}', null, null, false);"/>
+                                                </h:selectBooleanCheckbox>
+                                            </fx:formRow>
+                                        </td>
+                                        </tr>
+                                    <tr>
+                                        <td>
+                                            <fx:formRow overrideInputStyle="float:none" id="defaultsOnly" labelKey="StructureExport.lbl.defaultsOnly" newLine="false">
+                                                <h:selectBooleanCheckbox id="defaultsOnly" value="#{exportBean.defaultsOnly}">
+                                                    <a4j:support reRender="codePanel" event="onclick" oncomplete="activateEditArea('frm:groovyCode', true, '#{scriptConsoleBean.userLang}', null, '#{exportBean.toggleEditor}', null, null, false);"/>
+                                                </h:selectBooleanCheckbox>
+                                            </fx:formRow>
+                                        </td>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <fx:formRow overrideInputStyle="float:none" id="scriptAssignments" labelKey="StructureExport.lbl.scriptAssignments" newLine="false">
+                                                <h:selectBooleanCheckbox id="scriptAssignments" value="#{exportBean.generateScriptAssignments}">
+                                                    <a4j:support reRender="codePanel, overrideSwitch" event="onclick" oncomplete="activateEditArea('frm:groovyCode', true, '#{scriptConsoleBean.userLang}', null, '#{exportBean.toggleEditor}', null, null, false);"/>
+                                                </h:selectBooleanCheckbox>
+                                            </fx:formRow>
+                                        </td>
+                                        <td>
+                                            <a4j:outputPanel id="overrideSwitch" ajaxRendered="true">
+                                                <fx:formRow overrideInputStyle="float:none" id="scriptOverrideSwitch" labelKey="StructureExport.lbl.scriptOverride" newLine="false">
+                                                    <h:selectBooleanCheckbox id="scriptOverrideSwitch" value="#{exportBean.scriptOverride}" disabled="#{not exportBean.generateScriptAssignments}">
+                                                        <a4j:support reRender="codePanel" event="onclick" oncomplete="activateEditArea('frm:groovyCode', true, '#{scriptConsoleBean.userLang}', null, '#{exportBean.toggleEditor}', null, null, false);"/>
+                                                    </h:selectBooleanCheckbox>
+                                                </fx:formRow>
+                                            </a4j:outputPanel>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <fx:formRow overrideInputStyle="float:none" id="addSystemTypes" labelKey="StructureExport.lbl.addSystemTypes" newLine="false">
+                                                <h:selectBooleanCheckbox id="addSystemTypes" value="#{exportBean.addSystemTypes}">
+                                                    <a4j:support reRender="codePanel" event="onclick" oncomplete="activateEditArea('frm:groovyCode', true, '#{scriptConsoleBean.userLang}', null, '#{exportBean.toggleEditor}', null, null, false);"/>
+                                                </h:selectBooleanCheckbox>
+                                            </fx:formRow>
+                                        </td>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </fx:fieldSet>
+                    </a4j:outputPanel>
+
+                    <a4j:outputPanel id="codePanel" ajaxRendered="true" layout="block" style="margin-left:3px;">
+                        <h:inputTextarea id="groovyCode" rows="30" cols="100" value="#{exportBean.scriptCode}" />
+                    </a4j:outputPanel>
+
+                    <a4j:outputPanel id="editorToggleBox" ajaxRendered="true" layout="block">
+                        <fx:formRow overrideInputStyle="float:none" id="activateEditorLabel" labelKey="StructureExport.lbl.activateEditor" newLine="false">
+                            <h:selectBooleanCheckbox id="activateEditor" value="#{exportBean.activateEditor}">
+                                <a4j:support reRender="codePanel" event="onclick" oncomplete="activateEditArea('frm:groovyCode', true, '#{scriptConsoleBean.userLang}', null, '#{exportBean.toggleEditor}', null, null, false);"/>
+                            </h:selectBooleanCheckbox>
+                        </fx:formRow>
+                    </a4j:outputPanel>
+
+                </rich:simpleTogglePanel>
             </a4j:outputPanel>
 
-            <a4j:outputPanel id="hrPanel" rendered="false">
-                <h:outputText value="&lt;hr/&gt;"
-                              rendered="#{not empty exportBean.assignsWithScripts and not empty exportBean.typesWithScripts}"
-                              escape="false"/>
+            <br/>
+
+            <a4j:outputPanel id="buttonPanel" ajaxRendered="true">
+                <adm:ajaxCommandButton id="clearResultsButton" bean="#{exportBean}" action="clearExportResults"
+                                       labelKey="StructureExport.btn.clear" icon="cancel"
+                                       buttonDisabled="#{!exportBean.exportPerformed}"
+                                       reRender="msgPanel1, resultPanelFlat, resultPanelGroovy, buttonPanel, msgPanel2, msgPanel3, hrPanel"/>
+
+                <adm:ajaxCommandButton id="downloadGroovy" bean="#{exportBean}" action="exportGroovyScript"
+                                       labelKey="StructureExport.btn.downloadGroovy"
+                                       buttonDisabled="#{!exportBean.exportPerformed}" icon="down"/>
+
+                <c:if test="#{fxSystemBean.browserAsString=='IE'}">
+                    <adm:ajaxCommandButton id="clipboardcopyFunction" labelKey="StructureExport.btn.copyClipboard" bean="#{exportBean}" action="copy2clipboard"
+                                           onclick="copy2clipboard(getPreElementContent('frm:groovyCode'),'#{fxMessageBean['StructureExport.btn.copyClipboard.error']}', '#{fxMessageBean['StructureExport.btn.copyClipboard.success']}');"
+                                           buttonDisabled="#{!exportBean.exportPerformed}" icon="down"/>
+                </c:if>
+
             </a4j:outputPanel>
 
-            <!-- assignment scripts -->
-            <ui:include src="/adm/main/importexport/structureExportResultTable.xhtml">
-                <ui:param name="tableType" value="assignmentScript"/>
-                <ui:param name="mainTableDataSource" value="#{exportBean.assignsWithScripts}"/>
-                <ui:param name="mainTableHeader" value="StructureExport.lbl.scriptsAssign"/>
-                <ui:param name="mainTableHeaderLabel" value="StructureExport.lbl.assignmentNames"/>
-                <ui:param name="nestTableHeader" value="StructureExport.lbl.children"/>
-                <ui:param name="nestTableDataSource" value="#{exportBean.assignScriptEvents[mainVar.id]}"/>
-                <ui:param name="nestAssociatedScripts" value="#{exportBean.assignScripts[mainVar.id][eventVar]}"/>
-            </ui:include>
+        </a4j:form>
 
-        </rich:simpleTogglePanel>
-
-    </rich:simpleTogglePanel>
-</a4j:outputPanel>
-
-<!-- script code display panel -->
-<rich:modalPanel id="scriptCodePanel" autosized="true">
-    <f:facet name="header">
-        <h:outputText value="#{fxMessageBean['StructureExport.lbl.scriptCode']}"/>
-    </f:facet>
-    <f:facet name="controls">
-        <h:panelGroup>
-            <!--cancel icon-->
-            <adm:ajaxCommandIcon id="cancelIcon" titleKey="SysParamConfig.button.cancel" icon="cancel"
-                                 bean="#{exportBean}" action="cancelScriptPanel"
-                                 onclick="#{rich:component('scriptCodePanel')}.hide();" reRender="scriptPanel"/>
-        </h:panelGroup>
-    </f:facet>
-    <a4j:outputPanel id="scriptCodePanelOutput" ajaxRendered="true" layout="block">
-        <h:inputTextarea rows="20" cols="60" disabled="true" value="#{exportBean.currentScriptCode}"/>
-    </a4j:outputPanel>
-</rich:modalPanel>
-
-<br/>
-
-<!-- Groovy script export -->
-<a4j:outputPanel id="resultPanelGroovy" ajaxRendered="true">
-    <rich:simpleTogglePanel id="exportGroovy" rendered="#{exportBean.exportPerformed}"
-                            opened="#{exportBean.open_4}"
-                            label="#{fxMessageBean['StructureExport.lbl.exportGroovy']}" switchType="client">
-
-        <a4j:outputPanel id="groovyOptionPanel">
-            <fx:fieldSet legendKey="StructureExport.lbl.groovyOptions">
-                <table id="groovyOptions" class="fxFont">
-                    <tbody>
-                        <tr>
-                            <td>
-                                <fx:formRow overrideInputStyle="float:none" id="deleteStructures" labelKey="StructureExport.lbl.addDeleteStructures" newLine="false">
-                                    <h:selectBooleanCheckbox id="deleteStructures" value="#{exportBean.deleteStructures}">
-                                        <a4j:support reRender="codePanel" event="onclick" oncomplete="activateEditArea('frm:groovyCode', true, '#{scriptConsoleBean.userLang}', null, '#{exportBean.toggleEditor}');"/>
-                                    </h:selectBooleanCheckbox>
-                                </fx:formRow>
-                            </td>
-                            <td>
-                                <fx:formRow overrideInputStyle="float:none" id="importStatements" labelKey="StructureExport.lbl.addImportSatements" newLine="false">
-                                    <h:selectBooleanCheckbox id="importStatements" value="#{exportBean.generateImportStatements}">
-                                        <a4j:support reRender="codePanel" event="onclick" oncomplete="activateEditArea('frm:groovyCode', true, '#{scriptConsoleBean.userLang}', null, '#{exportBean.toggleEditor}');"/>
-                                    </h:selectBooleanCheckbox>
-                                </fx:formRow>
-                            </td>
-                            </tr>
-                        <tr>
-                            <td>
-                                <fx:formRow overrideInputStyle="float:none" id="defaultsOnly" labelKey="StructureExport.lbl.defaultsOnly" newLine="false">
-                                    <h:selectBooleanCheckbox id="defaultsOnly" value="#{exportBean.defaultsOnly}">
-                                        <a4j:support reRender="codePanel" event="onclick" oncomplete="activateEditArea('frm:groovyCode', true, '#{scriptConsoleBean.userLang}', null, '#{exportBean.toggleEditor}');"/>
-                                    </h:selectBooleanCheckbox>
-                                </fx:formRow>
-                            </td>
-                            <td>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <fx:formRow overrideInputStyle="float:none" id="scriptAssignments" labelKey="StructureExport.lbl.scriptAssignments" newLine="false">
-                                    <h:selectBooleanCheckbox id="scriptAssignments" value="#{exportBean.generateScriptAssignments}">
-                                        <a4j:support reRender="codePanel, overrideSwitch" event="onclick" oncomplete="activateEditArea('frm:groovyCode', true, '#{scriptConsoleBean.userLang}', null, '#{exportBean.toggleEditor}');"/>
-                                    </h:selectBooleanCheckbox>
-                                </fx:formRow>
-                            </td>
-                            <td>
-                                <a4j:outputPanel id="overrideSwitch" ajaxRendered="true">
-                                    <fx:formRow overrideInputStyle="float:none" id="scriptOverrideSwitch" labelKey="StructureExport.lbl.scriptOverride" newLine="false">
-                                        <h:selectBooleanCheckbox id="scriptOverrideSwitch" value="#{exportBean.scriptOverride}" disabled="#{not exportBean.generateScriptAssignments}">
-                                            <a4j:support reRender="codePanel" event="onclick" oncomplete="activateEditArea('frm:groovyCode', true, '#{scriptConsoleBean.userLang}', null, '#{exportBean.toggleEditor}');"/>
-                                        </h:selectBooleanCheckbox>
-                                    </fx:formRow>
-                                </a4j:outputPanel>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <fx:formRow overrideInputStyle="float:none" id="addSystemTypes" labelKey="StructureExport.lbl.addSystemTypes" newLine="false">
-                                    <h:selectBooleanCheckbox id="addSystemTypes" value="#{exportBean.addSystemTypes}">
-                                        <a4j:support reRender="codePanel" event="onclick" oncomplete="activateEditArea('frm:groovyCode', true, '#{scriptConsoleBean.userLang}', null, '#{exportBean.toggleEditor}');"/>
-                                    </h:selectBooleanCheckbox>
-                                </fx:formRow>
-                            </td>
-                            <td>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </fx:fieldSet>
-        </a4j:outputPanel>
-
-        <a4j:outputPanel id="codePanel" ajaxRendered="true" layout="block">
-            <fx:resizable>
-                <h:inputTextarea id="groovyCode" rows="30" cols="100" value="#{exportBean.scriptCode}">
-
-                    </h:inputTextarea>
-            </fx:resizable>
-        </a4j:outputPanel>
-
-    </rich:simpleTogglePanel>
-</a4j:outputPanel>
-
-<br/>
-
-<a4j:outputPanel id="buttonPanel" ajaxRendered="true">
-    <adm:ajaxCommandButton id="clearResultsButton" bean="#{exportBean}" action="clearExportResults"
-                           labelKey="StructureExport.btn.clear" icon="cancel"
-                           buttonDisabled="#{!exportBean.exportPerformed}"
-                           reRender="msgPanel1, resultPanelFlat, resultPanelGroovy, buttonPanel, msgPanel2, msgPanel3, hrPanel"/>
-
-    <adm:ajaxCommandButton id="downloadGroovy" bean="#{exportBean}" action="exportGroovyScript"
-                           labelKey="StructureExport.btn.downloadGroovy"
-                           buttonDisabled="#{!exportBean.exportPerformed}" icon="down"/>
-
-    <c:if test="#{fxSystemBean.browserAsString=='IE'}">
-        <adm:ajaxCommandButton id="clipboardcopyFunction" labelKey="StructureExport.btn.copyClipboard" bean="#{exportBean}" action="copy2clipboard"
-                               onclick="copy2clipboard(getPreElementContent('frm:groovyCode'),'#{fxMessageBean['StructureExport.btn.copyClipboard.error']}', '#{fxMessageBean['StructureExport.btn.copyClipboard.success']}');"
-                               buttonDisabled="#{!exportBean.exportPerformed}" icon="down"/>
-    </c:if>
-
-</a4j:outputPanel>
-
-</ui:define>
-
+    </ui:define>
 </ui:composition>
 </html>
