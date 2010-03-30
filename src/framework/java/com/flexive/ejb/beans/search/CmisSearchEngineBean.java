@@ -55,7 +55,8 @@ public class CmisSearchEngineBean implements CmisSearchEngine, CmisSearchEngineL
         try {
             final FxEnvironment environment = CacheAdmin.getEnvironment();
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Executing CMIS search query: \n" + query);
+                LOG.debug("Executing CMIS search query: \n" + query + "\nStart row: " + startRow
+                        + ", max. rows: " + maxRows + ", return primitive values: " + returnPrimitiveValues);
             }
             con = Database.getDbConnection();
             final ContentStorage storage = StorageManager.getContentStorage(TypeStorageMode.Hierarchical);

@@ -30,7 +30,7 @@ BEGIN
       END IF;
       IF NOT done THEN
         IF (_result!='') THEN
-          _result = _result || "\n";
+          _result = _result || E'\n';
         END IF;
           _result = _result || _path;
       END IF;
@@ -48,7 +48,7 @@ BEGIN
       END IF;
       IF NOT done THEN
         IF (_result!='') THEN
-          _result = _result || "\n";
+          _result = _result || E'\n';
         END IF;
           _result = _result || _path;
       END IF;

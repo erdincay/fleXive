@@ -34,14 +34,13 @@ package com.flexive.cmis.spi;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.cmis.search.CmisResultColumnDefinition;
 import com.flexive.shared.cmis.search.CmisResultRow;
-import com.flexive.shared.search.FxPaths;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.structure.FxType;
-import com.flexive.shared.tree.FxTreeNode;
 import com.flexive.shared.value.BinaryDescriptor;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.value.FxValue;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import org.apache.chemistry.*;
 import org.apache.chemistry.impl.base.BaseObject;
 import org.apache.commons.logging.Log;
@@ -51,6 +50,8 @@ import javax.xml.namespace.QName;
 import java.io.Serializable;
 import java.io.IOException;
 import java.util.*;
+import org.apache.chemistry.impl.simple.SimpleChangeInfo;
+import static com.flexive.cmis.spi.SPIUtils.notImplemented;
 
 /**
  * An object wrapping a CMIS-SQL result row.
@@ -87,35 +88,31 @@ public class FlexiveResultObject extends BaseObject implements ObjectEntry {
     }
 
     public Folder getParent() {
-        final String parentId = (String) getValue(VirtualProperties.PARENT_ID.getId());
-        return parentId == null ? null : new FlexiveFolder(context, SPIUtils.getNodeId(parentId));
+        final Collection<Folder> parents = getParents();
+        if (parents.isEmpty()) {
+            return null;
+        } else if (parents.size() == 1) {
+            return parents.iterator().next();
+        } else {
+            throw new IllegalArgumentException("Cannot return single parent for multi-filed row instance: " + row);
+        }
     }
 
     public Collection<Folder> getParents() {
         if (row.indexOf(VirtualProperties.PARENT_ID.getId()) == -1) {
             return Lists.newArrayListWithCapacity(0);
         }
-        final Set<Long> parentIds = new HashSet<Long>();
-        final FxPaths paths = row.getColumn(VirtualProperties.PARENT_ID.getId()).getPaths();
-        if (paths != null) {
-            for (FxPaths.Path path : paths.getPaths()) {
-                final List<FxPaths.Item> items = path.getItems();
-                parentIds.add(
-                        items.size() > 1
-                                ? items.get(items.size() - 2).getNodeId()
-                                : FxTreeNode.ROOT_NODE
-                );
-            }
-        }
         final List<Folder> result = Lists.newArrayList();
-        for (Long id : parentIds) {
+        final Collection<Long> parentIds = row.getColumn(VirtualProperties.PARENT_ID.getId()).getValues();
+        for (long id : parentIds) {
             result.add(new FlexiveFolder(context, id));
         }
         return result;
     }
 
     public List<Relationship> getRelationships(RelationshipDirection direction, String typeId, boolean includeSubRelationshipTypes) {
-        return null;
+        notImplemented(getClass(), "getRelationships");
+        return Lists.newArrayList();
     }
 
     public void applyPolicy(Policy policy) {
@@ -127,7 +124,8 @@ public class FlexiveResultObject extends BaseObject implements ObjectEntry {
     }
 
     public Collection<Policy> getPolicies() {
-        return null;
+        notImplemented(getClass(), "getPolicies");
+        return Lists.newArrayList();
     }
 
     public Type getType() {
@@ -135,7 +133,7 @@ public class FlexiveResultObject extends BaseObject implements ObjectEntry {
     }
 
     public FxType getFxType() {
-        final int typeIndex = Math.max(row.indexOf("typdef"), row.indexOf(VirtualProperties.TYPE_ID.getId()));
+        final int typeIndex = Math.max(row.indexOf("typedef"), row.indexOf(VirtualProperties.TYPE_ID.getId()));
         return CacheAdmin.getEnvironment().getType(
                 typeIndex == -1
                         ? FxType.ROOT_ID
@@ -188,17 +186,31 @@ public class FlexiveResultObject extends BaseObject implements ObjectEntry {
                     // convert column value to the type expected by CMIS
                     : new VirtualProperty(vprop, vprop.convertValue(row.getColumn(colName).getValue()));
         } else {
-            // handle content stream-related binaries
             final BinaryDescriptor binary = getBinary();
-            if (vprop == VirtualProperties.CONTENT_STREAM_MIME_TYPE) {
-                value = binary == null ? null : binary.getMimeType();
-            } else if (vprop == VirtualProperties.CONTENT_STREAM_LENGTH) {
-                value = binary == null ? null : binary.getSize();
-            } else {
-                if (LOG.isWarnEnabled()) {
-                    LOG.warn("Cannot handle virtual property " + vprop);
-                }
-                value = null;
+            switch(vprop) {
+                case CONTENT_STREAM_MIME_TYPE:
+                    value = binary == null ? null : binary.getMimeType();
+                    break;
+                case CONTENT_STREAM_LENGTH:
+                    value = binary == null ? null : binary.getSize();
+                    break;
+                case BASE_TYPE_ID:
+                    value = getBaseType();
+                    break;
+                case PARENT_ID:
+                    // TODO: since any instance can be multi-filed, we cannot really return an ID here
+                    final int parentIdIndex = row.indexOf(VirtualProperties.PARENT_ID.getId());
+                    if (parentIdIndex != -1) {
+                        value = String.valueOf(row.getColumn(parentIdIndex).getValues());
+                    } else {
+                        value = null;
+                    }
+                    break;
+                default:
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("Cannot handle virtual property " + vprop);
+                    }
+                    value = null;
             }
         }
         return new VirtualProperty(vprop, value);
@@ -271,11 +283,13 @@ public class FlexiveResultObject extends BaseObject implements ObjectEntry {
     }
 
     public Set<QName> getAllowableActions() {
-        throw new UnsupportedOperationException();  // TODO: what to return?
+        notImplemented(getClass(), "getAllowableActions");
+        return Sets.newHashSet();
     }
 
     public Collection<ObjectEntry> getRelationships() {
-        return null;
+        notImplemented(getClass(), "getRelationships");
+        return Lists.newArrayList();
     }
 
     public BaseType getBaseType() {
@@ -283,15 +297,18 @@ public class FlexiveResultObject extends BaseObject implements ObjectEntry {
     }
 
     public ContentStream getContentStream(String contentStreamId) throws IOException {
-        throw new UnsupportedOperationException();
+        notImplemented(getClass(), "getContentStream");
+        return null;
     }
 
     public ChangeInfo getChangeInfo() {
-        throw new UnsupportedOperationException();
+        notImplemented(getClass(), "getChangeInfo");
+        return new SimpleChangeInfo(ChangeType.UPDATED, Calendar.getInstance());
     }
 
     public String getPathSegment() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        notImplemented(getClass(), "getPathSegment");
+        return "";
     }
 
 

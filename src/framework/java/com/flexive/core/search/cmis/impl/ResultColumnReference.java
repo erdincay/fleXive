@@ -67,6 +67,18 @@ public class ResultColumnReference extends AbstractResultColumn<ColumnReference,
 
     @Override
     public ResultColumnMapper<ResultColumnReference> getSqlMapper(SqlMapperFactory factory) {
+        if (reference.getCmisProperty() != null && !reference.getCmisProperty().isFxProperty()) {
+            // CMIS property, not mapped to a FxSQL property
+            switch (reference.getCmisProperty()) {
+                case ParentId:
+                    return factory.selectParentId();
+                default:
+                    throw new UnsupportedOperationException(
+                            "Unsupported CMIS property selected: " + reference.getCmisProperty().getCmisPropertyName()
+                    );
+            }
+        }
+        // FxSQL property or normal property assignment reference
         final PropertyEntry entry = reference.getPropertyEntry();
         if (entry == null) {
             return factory.selectColumnReference(); // default mapper

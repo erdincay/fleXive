@@ -74,15 +74,23 @@ public enum CmisVirtualProperty {
     /*
      * Folder
      */
-    ParentId("ParentId", "@path"),
+    ParentId("ParentId", true),
     AllowedChildObjectTypeIds("AllowedChildObjectTypeIds", null);
     
     private final String cmisPropertyName;
     private final String fxPropertyName;
+    private final boolean supportsQuery;
 
     CmisVirtualProperty(String cmisPropertyName, String fxPropertyName) {
         this.cmisPropertyName = cmisPropertyName;
         this.fxPropertyName = fxPropertyName;
+        this.supportsQuery = fxPropertyName != null;
+    }
+
+    CmisVirtualProperty(String cmisPropertyName, boolean supportsQuery) {
+        this.cmisPropertyName = cmisPropertyName;
+        this.fxPropertyName = null;
+        this.supportsQuery = supportsQuery;
     }
 
     public String getCmisPropertyName() {
@@ -93,6 +101,14 @@ public enum CmisVirtualProperty {
         return fxPropertyName;
     }
 
+    public boolean isSupportsQuery() {
+        return isFxProperty() || supportsQuery;
+    }
+
+    public boolean isFxProperty() {
+        return fxPropertyName != null;
+    }
+    
     public boolean isVirtualFxProperty() {
         return StringUtils.isNotBlank(fxPropertyName) && fxPropertyName.charAt(0) == '@';
     }

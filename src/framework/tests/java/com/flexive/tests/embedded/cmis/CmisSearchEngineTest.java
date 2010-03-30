@@ -303,10 +303,9 @@ public class CmisSearchEngineTest {
         );
         assertTrue(result.getRowCount() > 0);
         for (CmisResultRow row : result) {
-            assertNotNull(row.getColumn("cmis:ParentId").getValue());
             if (!"root".equalsIgnoreCase(row.getColumn("cmis:name").getString())) {
-                final FxPaths paths = row.getColumn("cmis:ParentId").getPaths();
-                assertTrue(paths.getPaths().size() > 0);
+                final Collection<Long> parentIds = row.getColumn("cmis:ParentId").getValues();
+                assertTrue(parentIds.size() > 0);
             }
         }
     }
@@ -835,8 +834,8 @@ public class CmisSearchEngineTest {
         assertTrue(result.getColumn(0, 2).isAggregate(), "Multivalued column should be create an aggregate result value");
         assertTrue(result.getColumn(0, 2).getValues().size() == 3, "Expected three dates, got: " + result.getColumn(0, 2).getValues());
         assertTrue(result.getColumn(0, 2).getValue() instanceof Date, "Expected value type java.util.Date, got: " + result.getColumn(0, 2).getValue().getClass());
-        assertTrue(result.getColumn(0, 2).getValues().get(0) instanceof Date,
-                "Expected value type java.util.Date, got: " + result.getColumn(0, 2).getValues().get(0).getClass()
+        assertTrue(result.getColumn(0, 2).getValues().iterator().next() instanceof Date,
+                "Expected value type java.util.Date, got: " + result.getColumn(0, 2).getValues().iterator().next().getClass()
         );
     }
 

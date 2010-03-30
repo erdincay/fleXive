@@ -67,7 +67,7 @@ public class ListPageUtils {
     }
 
     public static int getMaxItems(Paging paging) {
-        return paging == null || paging.maxItems == 0 ? Integer.MAX_VALUE - 1 : paging.maxItems;
+        return paging == null || paging.maxItems <= 0 ? Integer.MAX_VALUE - 1 : paging.maxItems;
     }
 
     public static <T> Iterator<T> skip(Iterator<T> iterator, Paging paging) {

@@ -36,6 +36,8 @@ import com.flexive.core.search.cmis.impl.ResultColumn;
 import com.flexive.core.search.cmis.model.ColumnReference;
 import com.flexive.core.search.cmis.model.TableReference;
 import com.flexive.shared.cmis.search.CmisResultSet;
+import com.flexive.shared.interfaces.ContentEngine;
+import com.flexive.shared.interfaces.TreeEngine;
 import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.structure.FxType;

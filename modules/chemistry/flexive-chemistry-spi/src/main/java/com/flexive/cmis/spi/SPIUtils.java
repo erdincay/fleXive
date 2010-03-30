@@ -285,4 +285,8 @@ public class SPIUtils {
         }
         return null;
     }
+
+    static void notImplemented(Class cls, String method) {
+        System.out.println(cls.getName() + "#" + method + " not implemented yet.");
+    }
 }

@@ -49,6 +49,7 @@ import javax.xml.namespace.QName;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
+import org.apache.chemistry.impl.simple.SimpleListPage;
 
 import static com.flexive.shared.EJBLookup.getCmisSearchEngine;
 import static com.flexive.shared.EJBLookup.getTreeEngine;
@@ -235,7 +236,8 @@ public class FlexiveConnection implements Connection, SPI {
     }
 
     public ListPage<ObjectEntry> getCheckedOutDocuments(ObjectId folder, Inclusion inclusion, Paging paging) {
-        throw new UnsupportedOperationException();
+        SPIUtils.notImplemented(getClass(), "getCheckedOutDocuments");
+        return new SimpleListPage<ObjectEntry>();
     }
 
     public ObjectId createDocument(Map<String, Serializable> properties, ObjectId folder, ContentStream contentStream, VersioningState versioningState) throws NameConstraintViolationException {

@@ -29,55 +29,45 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the file!
  ***************************************************************/
-package com.flexive.core.search.cmis.impl.sql;
+package com.flexive.core.search.cmis.impl.sql.generic.mapper.select;
 
-import com.flexive.core.search.cmis.impl.ResultColumnFunction;
 import com.flexive.core.search.cmis.impl.ResultColumnReference;
-import com.flexive.core.search.cmis.impl.ResultRowNumber;
-import com.flexive.core.search.cmis.impl.ResultScore;
-import com.flexive.core.search.cmis.impl.sql.mapper.ConditionColumnMapper;
-import com.flexive.core.search.cmis.impl.sql.mapper.ConditionMapper;
-import com.flexive.core.search.cmis.impl.sql.mapper.ResultColumnMapper;
-import com.flexive.core.search.cmis.model.*;
+import com.flexive.core.search.cmis.impl.sql.SqlMapperFactory;
+import com.flexive.shared.search.FxPaths;
+import com.flexive.shared.tree.FxTreeNode;
+import com.google.common.collect.Sets;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.Set;
 
 /**
+ * Maps the cmis:parentId column. In absence of a reliable GROUP_CONCAT alternative for
+ * all DBMS this generic implementation simply uses {@link GenericObjectPath} to extract the parent node ID.
+ * This is a lot slower than a custom subselect with an aggregate function, but also a lot faster than
+ * determining the parents in a separate query.
+ *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
- * @since 3.1
  */
-public interface SqlMapperFactory {
+public class GenericParentId extends GenericObjectPath {
+    private static final GenericParentId INSTANCE = new GenericParentId();
 
-    ResultColumnMapper<ResultRowNumber> selectRowNumber();
+    @Override
+    public Object decodeResultValue(SqlMapperFactory factory, ResultSet rs, ResultColumnReference column, long languageId) throws SQLException {
+        final FxPaths paths = new FxPaths(rs.getString(column.getColumnStart()));
+        final Set<Long> parentIds = Sets.newHashSet();
+        for (FxPaths.Path path : paths.getPaths()) {
+            final List<FxPaths.Item> items = path.getItems();
+            parentIds.add(
+                    items.size() > 1
+                    ? items.get(items.size() - 2).getNodeId()
+                    : FxTreeNode.ROOT_NODE);
+        }
+        return parentIds;
+    }
 
-    ResultColumnMapper<ResultColumnReference> selectColumnReference();
-
-    ResultColumnMapper<ResultColumnReference> selectPath();
-
-    ResultColumnMapper<ResultColumnFunction> selectColumnFunction();
-
-    ResultColumnMapper<ResultScore> selectScore();
-
-    ResultColumnMapper<ResultColumnReference> selectParentId();
-
-    ConditionMapper<ComparisonCondition> conditionCompare();
-
-    ConditionMapper<ContainsCondition> conditionContain();
-
-    ConditionMapper<LikeCondition> conditionLike();
-
-    ConditionMapper<InCondition> conditionIn();
-
-    ConditionMapper<NullCondition> conditionNull();
-    
-    ConditionMapper<TreeCondition> conditionTree();
-    
-    ConditionMapper<FolderCondition> conditionFolder();
-
-    ConditionColumnMapper<ColumnReference> filterColumnReference();
-    
-    ConditionColumnMapper<Literal> filterLiteral();
-
-    ConditionColumnMapper<ColumnValueFunction> filterColumnFunction();
-
-    SqlDialect getSqlDialect();
+    public static GenericParentId getInstance() {
+        return INSTANCE;
+    }
 }

@@ -52,10 +52,8 @@ import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.search.SortDirection;
-import com.flexive.shared.cmis.search.CmisResultValue;
-import com.flexive.shared.cmis.search.CmisResultColumnDefinition;
-import com.flexive.shared.cmis.search.CmisResultRow;
 import com.flexive.shared.cmis.search.*;
+import com.flexive.shared.interfaces.TreeEngine;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.security.ACLPermission;
@@ -67,6 +65,7 @@ import com.flexive.shared.value.FxValue;
 import com.flexive.shared.workflow.Step;
 import com.flexive.shared.workflow.Workflow;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import org.apache.commons.lang.StringUtils;
 import static org.apache.commons.lang.StringUtils.isBlank;
 
@@ -273,15 +272,16 @@ public class GenericSqlDialect implements SqlMapperFactory, SqlDialect {
         final ResultColumnMapper<ResultColumnReference> columnMapper = selectColumnReference();
         final List<Pair<ResultColumn, Integer>> mvColumns = getMultivaluedForPostProcessing(columnMapper);
         for (CmisResultRow row : rows) {
-            for (Pair<ResultColumn, Integer> column : mvColumns) {
-                final Integer index = column.getSecond();
+            for (Pair<ResultColumn, Integer> entry : mvColumns) {
+                final ResultColumn column = entry.getFirst();
+                final Integer index = entry.getSecond();
                 final CmisResultValue value = row.getColumn(index);
                 if (!(value.getValue() instanceof FxPK)) {
                     throw new IllegalArgumentException("Search must return FxPK for multivalued properties that " +
                             "cannot be selected directly.");
                 }
                 row.setValue(index,
-                        resolveMultivaluedProperty((ColumnReference) column.getFirst().getSelectedObject(),
+                        resolveMultivaluedProperty((ColumnReference) column.getSelectedObject(),
                                 (CmisResultValue<FxPK>) value)
                 );
             }
@@ -839,6 +839,14 @@ public class GenericSqlDialect implements SqlMapperFactory, SqlDialect {
     public ResultColumnMapper<ResultColumnReference> selectPath() {
         return GenericObjectPath.getInstance();
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public ResultColumnMapper<ResultColumnReference> selectParentId() {
+        return GenericParentId.getInstance();
+    }
+
 
     /**
      * {@inheritDoc}

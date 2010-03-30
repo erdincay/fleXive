@@ -34,13 +34,13 @@ package com.flexive.shared.cmis.search;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.value.FxValue;
 import com.flexive.shared.value.BinaryDescriptor;
-import com.flexive.shared.value.FxBinary;
 import com.flexive.shared.search.FxPaths;
 import com.flexive.shared.content.FxPK;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Date;
@@ -64,7 +64,7 @@ public abstract class CmisResultValue<T> implements Serializable {
             return new FxValueResult((FxValue) value);
         } else if (value instanceof String) {
             return new StringResult((String) value);
-        } else if (value instanceof List) {
+        } else if (value instanceof Collection) {
             return createListValue(value);
         } else {
             return new PrimitiveResult(value);
@@ -73,7 +73,7 @@ public abstract class CmisResultValue<T> implements Serializable {
 
     @SuppressWarnings({"unchecked"})
     private static CmisResultValue createListValue(Object value) {
-        final List list = (List) value;
+        final Collection list = (Collection) value;
         return list.isEmpty() ? new NullResult() : new MultivaluedResult(list);
     }
 
@@ -89,7 +89,7 @@ public abstract class CmisResultValue<T> implements Serializable {
         return value;
     }
 
-    public List<T> getValues() {
+    public Collection<T> getValues() {
         return Arrays.asList(value);
     }
 
@@ -325,11 +325,11 @@ public abstract class CmisResultValue<T> implements Serializable {
 
     private static class MultivaluedResult<T> extends CmisResultValue<T> {
         private static final long serialVersionUID = 354333942633247097L;
-        private final List<T> values;
+        private final Collection<T> values;
 
-        private MultivaluedResult(List<T> list) {
-            super(list != null && !list.isEmpty() ? list.get(0) : null);
-            this.values = Collections.unmodifiableList(list);
+        private MultivaluedResult(Collection<T> coll) {
+            super(coll != null && !coll.isEmpty() ? coll.iterator().next() : null);
+            this.values = coll;
         }
 
         @Override
@@ -338,7 +338,7 @@ public abstract class CmisResultValue<T> implements Serializable {
         }
 
         @Override
-        public List<T> getValues() {
+        public Collection<T> getValues() {
             return values;
         }
 

@@ -58,6 +58,7 @@ public class ColumnReference extends ValueExpression<ColumnReference> {
     private final TableReference tableReference;
     private final List<FxPropertyAssignment> assignments;
     private final PropertyEntry propertyEntry;
+    private final CmisVirtualProperty cmisProperty;
     private final boolean multivalued;
     private final boolean multilanguage;
 
@@ -66,15 +67,27 @@ public class ColumnReference extends ValueExpression<ColumnReference> {
         super(alias != null ? alias : column);
         this.tableReference = tableReference;
 
-        final CmisVirtualProperty cmisProperty = CmisVirtualProperty.getByCmisName(column);
-        if (cmisProperty != null && cmisProperty.isVirtualFxProperty()) {
-            final String[] columns = PropertyEntry.Type.createForProperty(cmisProperty.getFxPropertyName()).getReadColumns();
-            if (columns.length > 0 && StringUtils.isNotBlank(columns[0])) {
-                this.assignments = Arrays.asList(
-                        environment.getPropertyAssignment("ROOT/" + columns[0])
+        this.cmisProperty = CmisVirtualProperty.getByCmisName(column);
+        if (cmisProperty != null) {
+            if (cmisProperty.isVirtualFxProperty()) {
+                final String[] columns = PropertyEntry.Type.createForProperty(cmisProperty.getFxPropertyName()).getReadColumns();
+                if (columns.length > 0 && StringUtils.isNotBlank(columns[0])) {
+                    this.assignments = Arrays.asList(
+                            environment.getPropertyAssignment("ROOT/" + columns[0])
+                    );
+                } else {
+                    this.assignments = newArrayListWithCapacity(0);
+                }
+            } else if (cmisProperty.isFxProperty()) {
+                // mapped flexive property, e.g. cmis:TypeId
+                this.assignments = Collections.unmodifiableList(
+                        tableReference.resolvePropertyAssignment(environment, column)
                 );
-            } else {
+            } else if (cmisProperty.isSupportsQuery()) {
+                // virtual property, e.g. cmis:ParentId
                 this.assignments = newArrayListWithCapacity(0);
+            } else {
+                throw new IllegalArgumentException("CMIS property not supported in queries: " + cmisProperty);
             }
         } else {
             this.assignments = Collections.unmodifiableList(
@@ -194,6 +207,10 @@ public class ColumnReference extends ValueExpression<ColumnReference> {
 
     public PropertyEntry getPropertyEntry() {
         return propertyEntry;
+    }
+
+    public CmisVirtualProperty getCmisProperty() {
+        return cmisProperty;
     }
 
     @Override
