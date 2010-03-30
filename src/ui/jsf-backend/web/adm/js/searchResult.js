@@ -130,6 +130,19 @@ function addBriefcaseMenuItem(menu, itemIdPrefix, briefcase) {
     return newItem;
 }
 
+function storeAllPKs() {
+    try {
+    var records = resultTable.getRecordSet().getRecords();
+    var tmpStr = "";
+    if (records.length > 0) {
+        tmpStr = records[0].getData()["pk"];
+    }
+    for (var i = 1; i < records.length; i++) {
+        tmpStr += "," + records[i].getData()["pk"];
+    }
+    } catch (err) {alert(err);}
+    document.getElementById("frm:sortedPKs").value = tmpStr;
+}
 
 function onContextMenu(type, args) {
     // extract PK
@@ -416,6 +429,7 @@ function storePk(/* PK */ pk) {
         document.getElementById("frm:contentEditorId").value = pk.id;
         document.getElementById("frm:contentEditorVersion").value = pk.version;
     }
+    storeAllPKs();
 }
 
 function openContent(/* PK */ pk) {

@@ -19,35 +19,37 @@ pk... pk of the content to edit
 <ui:composition>
     <c:if test="#{beContentEditorBean.fromResultSet}">
         <c:set var="resultRow" value="#{beContentEditorBean.resultRow[pk]}"/>
+        <t:saveState id="sortedPKs" value="#{beContentEditorBean.sortedPKs}"/>
+        <c:set var="currentIndex" value="#{beContentEditorBean.index[pk]}"/>
         <c:if test="#{not empty resultRow}">
             <div class="contentSearchResultNavigation">
                 <div style="float:left;position:relative">
                     <adm:commandIcon id="firstResultRow" icon="first" titleKey="Content.button.firstResultRow.title"
                             bean="#{beContentEditorBean}" action="initEditorFromResultSet" location="content"
-                            immediate="true" confirmKey="#{beContentEditorBean.confirm}" buttonDisabled="#{resultRow.index == 0}">
+                            immediate="true" confirmKey="#{beContentEditorBean.confirm}" buttonDisabled="#{currentIndex == 0}">
                         <f:setPropertyActionListener value="#{beContentEditorBean.pkByIndex[0].id}" target="#{beContentEditorBean.id}"/>
                         <f:setPropertyActionListener value="#{beContentEditorBean.pkByIndex[0].version}" target="#{beContentEditorBean.version}"/>
                     </adm:commandIcon>
                     <adm:commandIcon id="previousResultRow" icon="previous" titleKey="Content.button.previousResultRow.title"
                             bean="#{beContentEditorBean}" action="initEditorFromResultSet" location="content"
-                            immediate="true" confirmKey="#{beContentEditorBean.confirm}" buttonDisabled="#{resultRow.index == 0}">
-                        <f:setPropertyActionListener value="#{beContentEditorBean.pkByIndex[resultRow.index-1].id}" target="#{beContentEditorBean.id}"/>
-                        <f:setPropertyActionListener value="#{beContentEditorBean.pkByIndex[resultRow.index-1].version}" target="#{beContentEditorBean.version}"/>
+                            immediate="true" confirmKey="#{beContentEditorBean.confirm}" buttonDisabled="#{currentIndex == 0}">
+                        <f:setPropertyActionListener value="#{beContentEditorBean.pkByIndex[currentIndex-1].id}" target="#{beContentEditorBean.id}"/>
+                        <f:setPropertyActionListener value="#{beContentEditorBean.pkByIndex[currentIndex-1].version}" target="#{beContentEditorBean.version}"/>
                     </adm:commandIcon>
                 </div>
                 <div class="navigationDisplay">
-                    #{resultRow.index+1} - #{fxSearchResultBean.result.rowCount}
+                    #{currentIndex+1} - #{fxSearchResultBean.result.rowCount}
                 </div>
                 <div style="float:left;position:relative">
                     <adm:commandIcon id="nextResultRow" icon="next" titleKey="Content.button.nextResultRow.title"
                             bean="#{beContentEditorBean}" action="initEditorFromResultSet" location="content"
-                            immediate="true" confirmKey="#{beContentEditorBean.confirm}" buttonDisabled="#{resultRow.index == fxSearchResultBean.result.rowCount-1}">
-                        <f:setPropertyActionListener value="#{beContentEditorBean.pkByIndex[resultRow.index+1].id}" target="#{beContentEditorBean.id}"/>
-                        <f:setPropertyActionListener value="#{beContentEditorBean.pkByIndex[resultRow.index+1].version}" target="#{beContentEditorBean.version}"/>
+                            immediate="true" confirmKey="#{beContentEditorBean.confirm}" buttonDisabled="#{currentIndex == fxSearchResultBean.result.rowCount-1}">
+                        <f:setPropertyActionListener value="#{beContentEditorBean.pkByIndex[currentIndex+1].id}" target="#{beContentEditorBean.id}"/>
+                        <f:setPropertyActionListener value="#{beContentEditorBean.pkByIndex[currentIndex+1].version}" target="#{beContentEditorBean.version}"/>
                     </adm:commandIcon>
                     <adm:commandIcon id="lastResultRow" icon="last" titleKey="Content.button.lastResultRow.title"
                             bean="#{beContentEditorBean}" action="initEditorFromResultSet" location="content"
-                            immediate="true" confirmKey="#{beContentEditorBean.confirm}" buttonDisabled="#{resultRow.index == fxSearchResultBean.result.rowCount-1}">
+                            immediate="true" confirmKey="#{beContentEditorBean.confirm}" buttonDisabled="#{currentIndex == fxSearchResultBean.result.rowCount-1}">
                         <f:setPropertyActionListener value="#{beContentEditorBean.pkByIndex[fxSearchResultBean.result.rowCount -1].id}" target="#{beContentEditorBean.id}"/>
                         <f:setPropertyActionListener value="#{beContentEditorBean.pkByIndex[fxSearchResultBean.result.rowCount -1].version}" target="#{beContentEditorBean.version}"/>
                     </adm:commandIcon>

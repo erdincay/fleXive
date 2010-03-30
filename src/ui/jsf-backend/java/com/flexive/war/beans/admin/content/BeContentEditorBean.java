@@ -49,6 +49,7 @@ import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.interfaces.TreeEngine;
 import com.flexive.shared.search.FxResultRow;
+import com.flexive.shared.search.FxResultSet;
 import com.flexive.shared.security.LifeCycleInfo;
 import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.structure.FxType;
@@ -123,6 +124,9 @@ public class BeContentEditorBean implements ActionBean, Serializable {
     private boolean fromResultSet;
     // reload the content tree - flag checked in contenteditor.xhtml main page
     private boolean reloadContentTree = false;
+
+    // hold the PKs in the order the user want them
+    private String sortedPKs = null;
 
     /**
      * {@inheritDoc}
@@ -1105,13 +1109,11 @@ public class BeContentEditorBean implements ActionBean, Serializable {
      */
     private FxPK updateSearchResult(boolean matchVersion) {
         SearchResultBean sb = (SearchResultBean) FxJsfUtils.getManagedBean("fxSearchResultBean");
-        int currentIndex = sb.getResult().getResultRow(getPk()).getIndex();
+        int currentIndex = getIndex().get(getPk());
         sb.refresh();
         if (!matchVersion && currentIndex > 0 && sb.getResult().getRowCount() > 0) {
-            if (sb.getResult().getRowCount() > currentIndex)
-                return sb.getResult().getResultRow(currentIndex).getPk(sb.getResult().getPrimaryKeyIndex());
-            if (sb.getResult().getRowCount() <= currentIndex)
-                return sb.getResult().getResultRow(sb.getResult().getRowCount() - 1).getPk(sb.getResult().getPrimaryKeyIndex());
+            // index handled by the getPkByIndex function
+                return getPkByIndex().get(currentIndex);
         } else if (matchVersion) {
             if (sb.getResult().getResultRow(getPk()) != null)
                 return getPk();
@@ -1132,6 +1134,32 @@ public class BeContentEditorBean implements ActionBean, Serializable {
         };
     }
 
+    public String getSortedPKs() {
+        return sortedPKs;
+    }
+
+    public Map<FxPK, Integer> getIndex() {
+        return new HashMap<FxPK, Integer>() {
+            public Integer get(Object key) {
+                if (sortedPKs == null)  // fallback if the client-sorted pks are not set
+                    return ((SearchResultBean) FxJsfUtils.getManagedBean("fxSearchResultBean")).getResult().getResultRow((FxPK) key).getIndex();
+                String [] tmpSortedPKs = sortedPKs.split(",");
+                int i = 0;
+                final String curPK = String.valueOf(key);
+                for (String s : tmpSortedPKs) {
+                    if (curPK.equals(s)) return i;
+                    i++;
+                }
+                return 0;
+            }
+        };
+    }
+
+    public void setSortedPKs(String sortedPKs) {
+        this.sortedPKs = sortedPKs;
+    }
+
+
     /**
      * Mapped access to the pk of the search result row, matching given index.
      *
@@ -1141,14 +1169,49 @@ public class BeContentEditorBean implements ActionBean, Serializable {
         return new HashMap<Integer, FxPK>() {
             public FxPK get(Object key) {
                 SearchResultBean sb = (SearchResultBean) FxJsfUtils.getManagedBean("fxSearchResultBean");
+                final FxResultSet currentResult = sb.getResult();
                 // avoid JSF integer/long conversion bug
                 Integer i = new Integer(key.toString());
                 // cap possible overflows
-                if (i < 0)
+                if (i < 0) {
                     i = 0;
-                if (sb.getResult().getRowCount() <= i)
-                    i = sb.getResult().getRowCount() - 1;
-                return sb.getResult().getResultRow(i).getPk(sb.getResult().getPrimaryKeyIndex());
+                }
+                if (currentResult.getRowCount() <= i) {
+                    i = currentResult.getRowCount() - 1;
+                }
+                if (sortedPKs == null) {    // fallback if the client-sorted pks are not set
+                    return sb.getResult().getResultRow(i).getPk(sb.getResult().getPrimaryKeyIndex());
+                }
+                String [] tmpSortedPKs = sortedPKs.split(",");
+                if (currentResult.getRowCount() < tmpSortedPKs.length) {
+                    Hashtable<String, Byte> tmpLUT = new Hashtable<String, Byte>();
+                    Byte b = 2;
+                    for (String s : tmpSortedPKs) {
+                        tmpLUT.put(s, b);
+                    }
+                    for (int j = 0; j < currentResult.getRowCount(); j++) {
+                        tmpLUT.remove(currentResult.getResultRow(j).getString(currentResult.getPrimaryKeyIndex()));
+                    }
+                    for (String currentKey : tmpLUT.keySet()) {
+                        sortedPKs = sortedPKs.replaceAll("," + currentKey, "").replaceAll(currentKey + "," , "");
+                    }
+                     tmpSortedPKs = sortedPKs.split(",");
+                } else if (currentResult.getRowCount() > tmpSortedPKs.length) {
+                    // if there are more results (which are not on the user-sorted-list) they are appended to the end of the list
+                    Hashtable<String, Byte> tmpLUT = new Hashtable<String, Byte>();
+                    Byte b = 2;
+                    for (int j = 0; j < currentResult.getRowCount(); j++) {
+                        tmpLUT.put(currentResult.getResultRow(j).getString(currentResult.getPrimaryKeyIndex()), b);
+                    }
+                    for (String s : tmpSortedPKs) {
+                        tmpLUT.remove(s);
+                    }
+                    for (String currentKey : tmpLUT.keySet()) {
+                        sortedPKs = sortedPKs + "," + currentKey;
+                    }
+                     tmpSortedPKs = sortedPKs.split(",");
+                }
+                return FxPK.fromString(tmpSortedPKs[i]);
             }
         };
     }
