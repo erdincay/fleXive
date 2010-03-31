@@ -566,11 +566,19 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public long copy(FxTreeMode mode, long source, long destination, int destinationPosition) throws FxApplicationException {
+        return copy(mode, source, destination, destinationPosition, false);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public long copy(FxTreeMode mode, long source, long destination, int destinationPosition, boolean deepReferenceCopy) throws FxApplicationException {
         Connection con = null;
         boolean success = false;
         try {
             con = Database.getDbConnection();
-            long nodeId = StorageManager.getTreeStorage().copy(con, seq, mode, source, destination, destinationPosition, false, "CopyOf_");
+            long nodeId = StorageManager.getTreeStorage().copy(con, seq, mode, source, destination, destinationPosition, deepReferenceCopy, "CopyOf_");
             // call scripts
             final List<Long> scriptIds = scripting.getByScriptEvent(FxScriptEvent.AfterTreeNodeAdded);
             if (scriptIds.size() == 0) {

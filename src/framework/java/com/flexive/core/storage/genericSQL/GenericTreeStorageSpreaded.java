@@ -38,6 +38,7 @@ import com.flexive.core.storage.FxTreeNodeInfo;
 import com.flexive.core.storage.FxTreeNodeInfoSpreaded;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxFormatUtils;
 import com.flexive.shared.content.*;
 import com.flexive.shared.exceptions.*;
@@ -758,6 +759,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
                 depthDelta, dstParentNodeId, true, false);
 
         Statement stmt = null;
+        PreparedStatement ps = null;
         try {
             // Update the childcount of the new parents
             stmt = con.createStatement();
@@ -765,24 +767,23 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
             stmt.executeBatch();
 
             if (deepReferenceCopy) {
-                //TODO: clone all references of this node and all children
-                throw new FxApplicationException("ex.general.notImplemented", "Deep reference copy of tree nodes");
-/*
-                int copyOfNr = getCopyOfCount(con, mode, copyOfPrefix, dstParentNodeId, firstCreatedNodeId);
-                // Make sure the name is unique
-                stmt.executeUpdate("UPDATE " + getTable(mode) + " SET NAME=" + StorageManager.concat("'" + copyOfPrefix + "'", "NAME", "(" + String.valueOf(copyOfNr) + ")") +
-                        " WHERE ID=" + firstCreatedNodeId);
-*/
+                FxTreeNodeInfoSpreaded nodeInfo = (FxTreeNodeInfoSpreaded)getTreeNodeInfo(con, mode, firstCreatedNodeId);
+                ps = con.prepareStatement("SELECT ID,REF FROM "+getTable(mode)+" WHERE LFT>=? AND RGT<=?");
+                ps.setBigDecimal(1, nodeInfo.getLeft());
+                ps.setBigDecimal(2, nodeInfo.getRight());
+                ResultSet rs = ps.executeQuery();
+                final ContentEngine ce = EJBLookup.getContentEngine();
+                while( rs != null && rs.next() ) {
+                    FxPK pkRef = new FxPK(rs.getLong(2));
+                    long nodeId = rs.getLong(1);
+                    FxPK pkNew = ce.save(ce.load(pkRef).copyAsNewInstance());
+                    updateReference(con, mode, nodeId, pkNew.getId());
+                }
             }
-
         } catch (SQLException exc) {
             throw new FxTreeException("MoveNode: Failed to update the parent of node#" + srcNodeId + ": " + exc.getMessage());
         } finally {
-            try {
-                if (stmt != null) stmt.close();
-            } catch (Exception exc) {
-                //ignore
-            }
+            Database.closeObjects(GenericTreeStorageSpreaded.class, stmt, ps);
         }
         return firstCreatedNodeId;
     }

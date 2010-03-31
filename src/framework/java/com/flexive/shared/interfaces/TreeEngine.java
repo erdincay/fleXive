@@ -174,8 +174,23 @@ public interface TreeEngine {
      * @param destinationPosition the position in the destination node's children @return the (root-)id the copy
      * @return the id of the new node (the "copy")
      * @throws FxApplicationException on errors
+     * @deprecated
      */
     long copy(FxTreeMode mode, long source, long destination, int destinationPosition) throws FxApplicationException;
+
+    /**
+     * Copies a node to the specified parent and the specified position.
+     *
+     * @param mode                tree mode to use (Live or Edit tree)
+     * @param source              the parent id of the structure to copy
+     * @param destination         the destination node
+     * @param destinationPosition the position in the destination node's children @return the (root-)id the copy
+     * @param deepReferenceCopy   create a copy of all referenced contents or reference the original contents?
+     * @return the id of the new node (the "copy")
+     * @throws FxApplicationException on errors
+     * @since 3.1
+     */
+    long copy(FxTreeMode mode, long source, long destination, int destinationPosition, boolean deepReferenceCopy) throws FxApplicationException;
 
     /**
      * Sets the data of the node.
