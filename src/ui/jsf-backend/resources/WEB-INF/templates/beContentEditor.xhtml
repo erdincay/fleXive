@@ -35,6 +35,28 @@ disableTab... false if the <adm:tab/> component should be rendered, true otherwi
                     rendered="#{not disableTab}"/>
              </c:if>
 
+
+            <c:if test="#{srcEditor.changed}">
+                <script language="JavaScript" type="text/javascript">
+                    try {
+                        confirmDialog("#{fxMessageBean['Content.confirm.abort']}", function() {#{srcEditor.callBackStr};});
+                    }catch(err){
+                        alert(err);
+                    }
+                </script>
+                <t:saveState id="nextOp" value="#{srcEditor.nextOp}"/>
+                <t:saveState id="nextID" value="#{beContentEditorBean.contentIdToInit}"/>
+                <t:saveState id="nextVersion" value="#{beContentEditorBean.version}"/>
+                <div style="display:none;">
+                    <adm:commandIcon id="#{editorId}_CallbackIcon" bean="#{srcEditor}" location="content"
+                                     action="callBack" icon="cancel">
+                        <f:setPropertyActionListener value="#{myContent}" target="#{srcEditor.wrappedContent}"/>
+                        <!-- set properties for fxContentEditorBean -->
+                        <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
+                        <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
+                    </adm:commandIcon>
+                </div>
+            </c:if>
                 <ui:fragment rendered="#{not myContent.new}">
                     <!-- export functionality -->
                     <div style="display:none;"><iframe id="exportFrame" ><!--empty--></iframe></div>
@@ -340,8 +362,8 @@ disableTab... false if the <adm:tab/> component should be rendered, true otherwi
             <adm:commandButton id="#{editorId}_cancelButton" labelKey="Content.button.cancel"
                           location="#{empty myContent.guiSettings.openedReferenceId
                                          and not myContent.referenced ? 'both' : 'content'}"
-                          bean="#{srcEditor}" confirmKey="Content.confirm.abort"
-                          icon="cancel" action="cancel" onclick="flexive.contentEditor.saveGroupFolding('#{srcEditor.formId}');">
+                          bean="#{srcEditor}"
+                          icon="cancel" action="preCancel" onclick="flexive.contentEditor.saveGroupFolding('#{srcEditor.formId}');">
                  <f:setPropertyActionListener value="#{myContent}" target="#{srcEditor.wrappedContent}"/>
                  <!-- set properties for fxContentEditorBean -->
                 <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>

@@ -69,6 +69,9 @@ public class FxWrappedContent implements Serializable {
 
     // actual content instance
     private FxContent content;
+
+    private FxContent loadedContent;
+
     /**
      * Map providing the {@link FxValue} for given xpath
      */
@@ -122,6 +125,7 @@ public class FxWrappedContent implements Serializable {
         this.referenced = referenced;
         this.propertyHint = new PropertyHint();
         this.isCaptionProperty = new IsCaptionProperty();
+        this.loadedContent = content.copy();
     }
 
     /**
@@ -453,6 +457,10 @@ public class FxWrappedContent implements Serializable {
      */
     public IsCaptionProperty getIsCaptionProperty() {
         return isCaptionProperty;     
+    }
+
+    public boolean wasChanged() {
+        return !content.equals(loadedContent);
     }
 
     /**

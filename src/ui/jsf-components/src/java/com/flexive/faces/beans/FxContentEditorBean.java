@@ -1073,7 +1073,16 @@ public class FxContentEditorBean implements Serializable {
     }
 
     public String getAllOpened() {
-        return allOpened;
+        return allOpened; 
+    }
+
+    /**
+     * Returns true if the user changed something
+     * 
+     * @return true if the user changed something
+     */
+    public boolean wasChanged() {
+        return contentStorage.get(editorId).wasChanged();
     }
 
     public void setAllOpened(String allOpened) {

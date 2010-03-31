@@ -128,6 +128,10 @@ public class BeContentEditorBean implements ActionBean, Serializable {
     // hold the PKs in the order the user want them
     private String sortedPKs = null;
 
+    private boolean changed = false;
+
+    private CallbackOpts nextOp = null;
+
     /**
      * {@inheritDoc}
      */
@@ -623,6 +627,14 @@ public class BeContentEditorBean implements ActionBean, Serializable {
         this.contentIdToInit = id;
     }
 
+    public long getContentIdToInit() {
+        return contentIdToInit;
+    }
+
+    public void setContentIdToInit(long contentIdToInit) {
+        this.contentIdToInit = contentIdToInit;
+    }
+
     public void setVersion(int version) {
         this.version = version;
     }
@@ -688,6 +700,11 @@ public class BeContentEditorBean implements ActionBean, Serializable {
     public String initEditorFromResultSet() {
         // save edit mode
         boolean editMode = this.editMode;
+        // loose the lock (FX828)
+        if (editMode && wrappedContent != null) {
+            ((FxContentEditorBean) FxJsfUtils.getManagedBean("fxContentEditorBean")).setEditorId(wrappedContent.getEditorId());
+            ((FxContentEditorBean) FxJsfUtils.getManagedBean("fxContentEditorBean")).cancel();
+        }
         resetViewStateVars();
         // restore edit mode
         this.editMode = editMode;
@@ -736,6 +753,47 @@ public class BeContentEditorBean implements ActionBean, Serializable {
         }
         reloadContentTree = true;
         return null;
+    }
+
+    public void callBack() {
+        switch (nextOp) {
+            case CANCEL:
+                cancel();
+                break;
+            case SET_NEXT_PK:
+                initEditorFromResultSet();
+                break;
+        }
+    }
+
+    public String getCallBackStr() {
+        return "triggerCommandElement_" + wrappedContent.getEditorId() + "_CallbackIcon()";
+    }
+
+    public CallbackOpts getNextOp() {
+        return nextOp;
+    }
+
+    public void setNextOp(CallbackOpts nextOp) {
+        this.nextOp = nextOp;
+    }
+
+    public void preCancel(){
+        changed = wrappedContent.wasChanged();
+        if (changed) {
+            nextOp = CallbackOpts.CANCEL;
+        } else {
+            cancel();
+        }
+    }
+
+    public void preInitEditorFromResultSet() {
+        changed = wrappedContent.wasChanged();
+        if (changed) {
+            nextOp = CallbackOpts.SET_NEXT_PK;
+        } else {
+            initEditorFromResultSet();
+        }
     }
 
     /**
@@ -959,7 +1017,7 @@ public class BeContentEditorBean implements ActionBean, Serializable {
                     content = null;
                     this.editMode = false;
                     // retrieve saved content from storage and set reset flag,
-                    // for edit mode to be deactivated 
+                    // for edit mode to be deactivated
                     ceBean.getContentStorage().get(wrappedContent.getEditorId()).setReset(true);
                 }
 
@@ -1070,6 +1128,11 @@ public class BeContentEditorBean implements ActionBean, Serializable {
             valueFormatter = new ReferenceValueFormatter();
         }
         return valueFormatter;
+    }
+
+
+    public boolean isChanged() {
+        return changed;
     }
 
     /**
@@ -1221,5 +1284,10 @@ public class BeContentEditorBean implements ActionBean, Serializable {
      */
     public String getConfirm() {
         return this.editMode ? "Content.confirm.abort" : null;
+    }
+
+    private static enum CallbackOpts {
+        CANCEL,
+        SET_NEXT_PK
     }
 }
