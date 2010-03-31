@@ -347,7 +347,7 @@ public class FolderResource extends ObjectResource<Folder>
      */
     public void delete() {
         try {
-            object.delete();
+            object.deleteTree(Unfiling.DELETE_SINGLE_FILED);
         } catch (CMISException e) {
             throw CMISExceptionWrapper.wrap(e);
         }

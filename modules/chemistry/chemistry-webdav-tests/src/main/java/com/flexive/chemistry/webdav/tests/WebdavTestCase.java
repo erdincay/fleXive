@@ -180,6 +180,18 @@ public abstract class WebdavTestCase extends TestCase {
         getDocument("/copy of doc 1").delete();
     }
 
+    public void testCopyFolder() {
+        // test that test document exists
+        getDocument("/folder 1/doc 1");
+
+        final FolderResource folder = getFolder("/folder 1");
+        folder.copyTo(getFolder("/"), "copy of folder 1");
+        getFolder("/copy of folder 1").delete();
+
+        // original document/folder should still exist
+        getDocument("/folder 1/doc 1");
+    }
+
     protected String getTextDocument(String path) throws IOException, NotAuthorizedException {
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
         getDocument(path).sendContent(bos, null, null, null);

@@ -155,10 +155,12 @@ public class TestFixture {
   }
 
   def createData() {
-// clear tree
+    // clear tree
     EJBLookup.treeEngine.clear(FxTreeMode.Edit)
+    // enable tree checks
+    EJBLookup.configurationEngine.put(SystemParameters.TREE_CHECKS_ENABLED, true)
 
-// init repository
+    // init repository
 
     Repository repo = new FlexiveRepository(null)
     Connection conn = repo.getConnection()

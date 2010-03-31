@@ -37,6 +37,7 @@ import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.interfaces.TreeEngine;
 import com.flexive.shared.security.LifeCycleInfo;
 import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.structure.FxPropertyAssignment;
@@ -213,14 +214,14 @@ public class FlexiveFolder extends FlexiveObjectEntry implements Folder {
             }
             switch(unfiling) {
                 case DELETE:
-                    EJBLookup.getTreeEngine().remove(getNode(), true, true);
+                    EJBLookup.getTreeEngine().remove(getNode(), FxTreeRemoveOp.Remove, true);
                     break;
                 case UNFILE:
-                    EJBLookup.getTreeEngine().remove(getNode(), false, true);
+                    EJBLookup.getTreeEngine().remove(getNode(), FxTreeRemoveOp.Unfile, true);
                     break;
                 case DELETE_SINGLE_FILED:
-                    // TODO: depends on FX-660
-                    throw new UnsupportedOperationException("Deleting only single filed children not supported yet");
+                    EJBLookup.getTreeEngine().remove(getNode(), FxTreeRemoveOp.RemoveSingleFiled, true);
+                    break;
                 default:
                     throw new IllegalArgumentException("Unkown argument: " + unfiling);
             }
@@ -559,27 +560,18 @@ public class FlexiveFolder extends FlexiveObjectEntry implements Folder {
     public FlexiveFolder copyTo(FlexiveFolder targetFolder, String newName, boolean includeContents) {
         try {
             if (includeContents) {
-                // TODO: should be performed by tree engine (FX-702)
-
-                final FlexiveFolder newFolder = (FlexiveFolder) targetFolder.newFolder(getTypeId());
-                newFolder.setName(newName);
-                newFolder.save();
-
-                final FxTreeNode tree = getTreeEngine().getTree(getTreeMode(), getNodeId(), Integer.MAX_VALUE);
-                copyNodes(newFolder.getNodeId(), tree.getChildren());
-                return new FlexiveFolder(context, newFolder.getNodeId());
-                /*final long newNodeId =
-                    getTreeEngine().copy(
-                            FxTreeMode.Edit,
-                            getNodeId(),
-                            SPIUtils.getNodeId(targetFolder.getId()),
-                            Integer.MAX_VALUE
-                    );
-
-                final FlexiveFolder newFolder = new FlexiveFolder(context, newNodeId);
-                newFolder.setName(newName);
-                newFolder.save();
-                return newFolder;*/
+                final TreeEngine treeEngine = EJBLookup.getTreeEngine();
+                final long newFolderId = treeEngine.copy(
+                        getTreeMode(), getNodeId(), targetFolder.getNodeId(), -1, true
+                );
+                if (newName != null && !newName.equals(getName())) {
+                    // set new name on copied node
+                    final FxTreeNodeEdit newNode = treeEngine.getNode(getTreeMode(), newFolderId).asEditable();
+                    newNode.setName(newName);
+                    newNode.setLabel(new FxString(true, newName));
+                    treeEngine.save(newNode);
+                }
+                return new FlexiveFolder(context, newFolderId);
             } else {
                 final FlexiveFolder newFolder = (FlexiveFolder) targetFolder.newFolder(getTypeId());
                 newFolder.setName(newName);
