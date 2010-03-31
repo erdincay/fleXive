@@ -85,7 +85,7 @@
                 <h:commandButton action="#{__ceBean.resolveA4jAction}" id="__ceResolveA4jAction"
                                  style="display:none;">
                     <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
-                 </h:commandButton>
+                </h:commandButton>
              </c:if>
 
             <c:set var="__ceRenderedBoxed" value="true"/>
@@ -175,7 +175,7 @@
                            onclick="flexive.contentEditor.toggleGroups('#{_ceContent.editorId}',false);"> </div>
                     </ui:fragment>
 
-                    <ui:fragment rendered="#{_ceContent.content.rootGroup.hasMultiLangProperty}">
+                    <ui:fragment rendered="#{_ceContent.content.rootGroup.hasMultiLangProperty and _ceContent.guiSettings.editMode}">
                         <!-- input language switch -->
                         <div class="fxContentEditor_languageSwitch">
                             <div style="#{not _ceContent.guiSettings.editMode or not empty _ceContent.guiSettings.openedReferenceId ? 'display:none' : ''}">
