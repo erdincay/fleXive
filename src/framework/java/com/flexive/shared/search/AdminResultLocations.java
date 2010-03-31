@@ -46,7 +46,7 @@ public enum AdminResultLocations implements ResultLocation {
     /**
      * Main admin search results
      */
-    ADMIN(true),
+    ADMIN(false),
     /**
      * Default location to be used when no location is specified
      */
