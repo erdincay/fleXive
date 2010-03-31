@@ -117,8 +117,8 @@ public class CmisSearchEngineBean implements CmisSearchEngine, CmisSearchEngineL
             }
         } finally {
             Database.closeObjects(CmisSearchEngineBean.class, con, stmt);
-            if (LOG.isDebugEnabled() && sql != null) {
-                LOG.debug("Generated SQL query:\n" + sql);
+            if (LOG.isTraceEnabled() && sql != null) {
+                LOG.trace("Generated SQL query:\n" + sql);
             }
         }
     }

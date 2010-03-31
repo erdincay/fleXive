@@ -19,7 +19,7 @@
     <!-- Special Debug Output for Development -->
     <context-param>
         <param-name>facelets.DEVELOPMENT</param-name>
-        <param-value>true</param-value>
+        <param-value>false</param-value>
     </context-param>
     <!--
         Facelets refresh period in seconds (-1 to disable automatic refresh of facelets pages).

@@ -311,7 +311,7 @@ public class FxValueInput extends UIInput {
                         property = ((FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(fxValue.getXPath())).getProperty();
                     }
 
-                    if (property.getOption(FxStructureOption.OPTION_REFERENCE_SELECTONE).isValueTrue()) {
+                    if (property.getOption(FxStructureOption.OPTION_REFERENCE_SELECTONE).isValueTrue() && !isReadOnly()) {
                         // render a select list with *all* valid choices (i.e. all instances visible to the user)
                         inputMapper = new FxPkSelectOneInputMapper(getValidReferenceList(property));
                     } else {

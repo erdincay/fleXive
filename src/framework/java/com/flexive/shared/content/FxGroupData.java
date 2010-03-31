@@ -39,10 +39,12 @@ import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.FxReference;
 import com.flexive.shared.value.FxValue;
-import com.google.common.collect.Lists;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Collections2;
 import org.apache.commons.lang.ArrayUtils;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -105,14 +107,16 @@ public class FxGroupData extends FxData {
      * @return child entries, excluding all internal properties.
      * @since 3.1
      */
-    public List<FxData> getChildrenWithoutInternal() {
-        final List<FxData> result = Lists.newArrayList();
-        for (FxData child : data) {
-            if (!child.isSystemInternal()) {
-                result.add(child);
-            }
+    public Collection<FxData> getChildrenWithoutInternal() {
+        return Collections2.filter(data, FILTER_REMOVE_INTERNAL);
+    }
+    
+    private static final RemoveInternalFilter FILTER_REMOVE_INTERNAL = new RemoveInternalFilter();
+    
+    private static class RemoveInternalFilter implements Predicate<FxData> {
+        public boolean apply(FxData t) {
+            return t != null && !t.isSystemInternal();
         }
-        return result;
     }
 
     /**

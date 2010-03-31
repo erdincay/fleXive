@@ -99,6 +99,7 @@ public class BeContentEditorBean implements ActionBean, Serializable {
     private int compareDestinationVersion;
     private FxValueFormatter valueFormatter;
     private Map<Long, String> treeLabelMap;
+    private Map<Long, String> displayTreeLabelMap;
     // content injected from the content editor component
     private FxWrappedContent wrappedContent;
     // edit mode
@@ -572,6 +573,30 @@ public class BeContentEditorBean implements ActionBean, Serializable {
             }, true);
         }
         return treeLabelMap;
+    }
+
+    /**
+     * Like {@link #getTreeLabelPath()}, but trimmed to a sensible maximum length for showing the path in the backend.
+     *
+     * @return  trimmed label path for a given tree node
+     */
+    public Map<Long, String> getTreeLabelPathDisplay() {
+        if (displayTreeLabelMap == null) {
+            displayTreeLabelMap = FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<Long, String>() {
+
+                public String get(Object key) {
+                    final int maxLen = 100;
+                    final String label = getTreeLabelPath().get((Long) key);
+                    if (label != null && label.length() > maxLen) {
+                        return label.substring(0, maxLen - 3) + "...";
+                    } else {
+                        return label;
+                    }
+                }
+                
+            }, false);
+        }
+        return displayTreeLabelMap;
     }
 
     /**
