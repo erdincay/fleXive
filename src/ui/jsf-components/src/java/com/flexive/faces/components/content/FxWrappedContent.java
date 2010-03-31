@@ -1001,6 +1001,7 @@ public class FxWrappedContent implements Serializable {
      * HashMap used to access the JSF-id of the parent FxData element.
      */
     private static class FxCeParentIdGenerator extends FxCeIdGenerator {
+        private static final long serialVersionUID = 847225974295679425L;
 
         /**
          * Constructor.
@@ -1038,6 +1039,7 @@ public class FxWrappedContent implements Serializable {
      * HashMap used to access the referenced type id of FxPropertyData.
      */
     private static class FxReferencedTypeId extends HashMap<FxPropertyData, Long> {
+        private static final long serialVersionUID = -3128914369835029991L;
 
         /**
          * HashMap used to access the referenced type id of FxPropertyData
@@ -1058,38 +1060,37 @@ public class FxWrappedContent implements Serializable {
         }
     }
 
-     /**
+    /**
      * HashMap used to access the hint of a group or property,
      * or if not set the hint of their assignment.
      */
     private static class PropertyHint extends HashMap<FxPropertyData, String> {
+        private static final long serialVersionUID = -3847802058651043377L;
+
         /**
-         * HashMap used to access the hint of a group or property,
-         * or if not set the hint of their assignment.
+         * HashMap used to access the hint of a property assignment, or, if not set, the property's hint.
          *
          * @param object FxData
-         * @return  hint of a group or property, or if not set the hint of their assignment.
+         * @return hint of a group or property, or if not set the hint of their assignment.
          */
         public String get(Object object) {
             try {
-                FxString hint=null;
+                FxString hint = null;
                 if (object instanceof FxPropertyData) {
-                    hint = CacheAdmin.getFilteredEnvironment().getProperty(((FxPropertyData)object).getPropertyId()).getHint();
+                    hint = ((FxPropertyData) object).getAssignment().getHint();
                     if (hint == null || hint.isEmpty()) {
-                        hint = ((FxPropertyData)object).getAssignment().getHint();
+                        hint = CacheAdmin.getFilteredEnvironment().getProperty(((FxPropertyData) object).getPropertyId()).getHint();
+                    }
+                } else if (object instanceof FxGroupData) {
+                    FxGroupAssignment ga = (FxGroupAssignment) ((FxGroupData) object).getAssignment();
+                    hint = ga.getHint();
+                    if (hint == null || hint.isEmpty()) {
+                        hint = ga.getGroup().getHint();
                     }
                 }
-                else if (object instanceof FxGroupData) {
-                    FxGroupAssignment ga = (FxGroupAssignment)((FxGroupData)object).getAssignment();
-                    hint = ga.getGroup().getHint();
-                    if (hint == null || hint.isEmpty()) {
-                        hint = ga.getHint();
-                    }
-                }
-                if (hint != null) {
-                    return hint.getBestTranslation();
-                }
-                return null;
+
+                return hint != null ? hint.getBestTranslation() : null;
+
             } catch (Throwable t) {
                 new FxFacesMsgErr(t).addToContext();
                 return null;
@@ -1110,7 +1111,9 @@ public class FxWrappedContent implements Serializable {
      */
     private static class IsCaptionProperty extends HashMap<FxPropertyData, Boolean> {
          private final static long captionId;
-         static {
+        private static final long serialVersionUID = -478666562614561688L;
+
+        static {
              long cId=-1;
              try {
                 cId = EJBLookup.getConfigurationEngine().get(TREE_CAPTION_PROPERTY);
