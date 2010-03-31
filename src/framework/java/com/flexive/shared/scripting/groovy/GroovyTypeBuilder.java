@@ -44,6 +44,7 @@ import com.flexive.shared.structure.*;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.value.FxValue;
 import com.flexive.shared.value.FxReference;
+import com.flexive.shared.workflow.Workflow;
 import groovy.util.BuilderSupport;
 import org.apache.commons.lang.StringUtils;
 
@@ -127,7 +128,7 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
      */
     private final static String[] TYPE_NONOPTION_KEYS = {
             "ACL", "GENERALACL", "LABEL", "PARENTTYPENAME", "LANGUAGEMODE", "TYPEMODE", "TRACKHISTORY", "HISTORYAGE",
-            "MAXVERSIONS", "USEINSTANCEPERMISSIONS", "USEPROPERTYPERMISSIONS", "USESTEPPERMISSIONS",
+            "MAXVERSIONS", "USEINSTANCEPERMISSIONS", "USEPROPERTYPERMISSIONS", "USESTEPPERMISSIONS", "WORKFLOW",
             "USETYPEPERMISSIONS", "USEPERMISSIONS", "ICON", "MIMETYPE", "STORAGEMODE", "NAME", "HINT", "DESCRIPTION"
     };
 
@@ -912,6 +913,7 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
         boolean isNew = true;
         boolean assignmentChanges = false;
         FxMimeTypeWrapper mimeTypeWrapper;
+        Workflow workflow;
 
         /**
          * Construct an AttributeMapper
@@ -965,6 +967,13 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
             historyAge = (Long) FxSharedUtils.get(attributes, "historyAge", 1L);
             maxVersions = (Long) FxSharedUtils.get(attributes, "maxVersions", -1L);
 
+            if(attributes.get("workflow") instanceof String) {
+                String wf = (String)attributes.get("workflow");
+                workflow = CacheAdmin.getEnvironment().getWorkflow(wf);
+            } else if(attributes.get("workflow") instanceof Workflow) {
+                workflow = (Workflow) FxSharedUtils.get(attributes, "workflow", null);
+            }
+
             if(attributes.get("mimeType") instanceof String) {
                 // a comma separated list of Strings is expected
                 final String s = (String)attributes.get("mimeType");
@@ -1011,6 +1020,9 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
             }
             if(attributes.containsKey("mimeType")) {
                 type.setMimeType(mimeTypeWrapper);
+            }
+            if(attributes.containsKey("workflow")) {
+                type.setWorkflow(workflow);
             }
 
             // set non-generic type options

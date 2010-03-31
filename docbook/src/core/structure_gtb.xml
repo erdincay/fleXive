@@ -477,6 +477,20 @@ builder {
                         </td>
                     </tr>
                     <tr>
+                        <td>workflow</td>
+                        <td>
+                            <classname>String</classname>
+                            or
+                            <classname>Workflow</classname>
+                        </td>
+                        <td>
+                            <code>testtype(workflow: "Editor Workflow")</code>
+                        </td>
+                        <td>
+                            Set the given Workflow for the type (Workflow must exist)
+                        </td>
+                    </tr>
+                    <tr>
                         <td>icon</td>
                         <td>
                             <classname>FxReference</classname>

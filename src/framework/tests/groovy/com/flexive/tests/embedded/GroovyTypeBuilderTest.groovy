@@ -50,6 +50,12 @@ import org.testng.Assert
 import com.flexive.shared.security.ACLCategory
 import com.flexive.shared.FxLanguage
 import com.flexive.core.flatstorage.FxFlatStorageManager
+import com.flexive.shared.workflow.StepDefinitionEdit
+import com.flexive.shared.workflow.StepDefinition
+import com.flexive.shared.workflow.Route
+import com.flexive.shared.security.UserGroup
+import com.flexive.shared.workflow.Workflow
+import com.flexive.shared.workflow.Step
 
 /**
  * Tests for the                                   {@link com.flexive.shared.scripting.groovy.GroovyTypeBuilder GroovyTypeBuilder}                                   class.
@@ -1697,4 +1703,47 @@ class GroovyTypeBuilderTest {
             removeTestType()
         }
     }
+
+    @Test (groups = ["ejb", "scripting", "structure"])
+    void setWorkflowTest() {
+
+        // create a test workflow w/ test steps
+        def StepDefinitionEdit stepDef1 = new StepDefinition(new FxString("testStep01"), "test step 01", -1).asEditable();
+        def StepDefinitionEdit stepDef2 = new StepDefinition(new FxString("testStep02"), "test step 02", -1).asEditable();
+        // store them in the database and store IDs
+        stepDef1.setId(EJBLookup.getWorkflowStepDefinitionEngine().create(stepDef1));
+        stepDef2.setId(EJBLookup.getWorkflowStepDefinitionEngine().create(stepDef2));
+        def Step stepD1 = new Step(-10, stepDef1.getId(), ACLCategory.WORKFLOW.getDefaultId());
+        def Step stepD2 = new Step(-20, stepDef2.getId(), ACLCategory.WORKFLOW.getDefaultId());
+
+        // create a route
+        def route = new Route(-1, UserGroup.GROUP_EVERYONE, -10, -20);
+        def workflow = new Workflow(-1, "Testflow", "my test workflow", Arrays.asList(stepD1, stepD2), Arrays.asList(route));
+        def workflowId = EJBLookup.getWorkflowEngine().create(workflow);
+
+        try {
+            // test workflow assignment from name
+            new GroovyTypeBuilder().builderTest(
+                    workflow: "Testflow"
+            )
+            def t = environment().getType("BUILDERTEST")
+            Assert.assertEquals(t.getWorkflow().getName(), "Testflow")
+            removeTestType()
+
+            // test workflow assignment from object
+            new GroovyTypeBuilder().builderTest(
+                    workflow: environment().getWorkflow("Testflow")
+            )
+            t = environment().getType("BUILDERTEST")
+            Assert.assertEquals(t.getWorkflow().getName(), "Testflow")
+
+        } finally {
+            removeTestType()
+            // remove workflow and associated objs
+            EJBLookup.getWorkflowEngine().remove(workflowId)
+            EJBLookup.getWorkflowStepDefinitionEngine().remove(stepDef1.getId())
+            EJBLookup.getWorkflowStepDefinitionEngine().remove(stepDef2.getId())
+        }
+    }
+
 }
