@@ -250,7 +250,11 @@ public class UserTicketImpl implements UserTicket, Serializable {
      * {@inheritDoc}
      */
     public long getUserId() {
-        return userId;
+        if( /*FxContext.get().getRunAsSystem() &&*/ FxContext.get().isExecutingRunOnceScripts()) {
+//            System.out.println("Executing run once scripts -> user id set to " + Account.USER_GLOBAL_SUPERVISOR);
+            return Account.USER_GLOBAL_SUPERVISOR;
+        } else
+            return userId;
     }
 
     /**
@@ -433,7 +437,9 @@ public class UserTicketImpl implements UserTicket, Serializable {
      * {@inheritDoc}
      */
     public UserTicketImpl cloneAsGlobalSupervisor() {
-        final UserTicketImpl clone = copy();
+        final UserTicketImpl clone = new UserTicketImpl(this.applicationId, this.webDav, this.userName, this.loginName,
+                1, this.contactData, this.mandator, this.multiLogin, this.groups.clone(), this.roles.clone(),
+                ACLAssignment.clone(this.assignments), this.language, this.failedLoginAttempts, this.authenticationSource);
         clone.globalSupervisor = true;
         return clone;
     }

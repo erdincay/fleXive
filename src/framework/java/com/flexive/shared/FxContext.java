@@ -31,13 +31,15 @@
  ***************************************************************/
 package com.flexive.shared;
 
+import com.flexive.core.flatstorage.FxFlatStorageManager;
 import com.flexive.shared.configuration.DivisionData;
-import com.flexive.shared.exceptions.*;
+import com.flexive.shared.exceptions.FxAccountInUseException;
+import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.exceptions.FxLoginFailedException;
+import com.flexive.shared.exceptions.FxLogoutFailedException;
 import com.flexive.shared.interfaces.AccountEngine;
 import com.flexive.shared.security.UserTicket;
-import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.tree.FxTreeMode;
-import com.flexive.core.flatstorage.FxFlatStorageManager;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -45,10 +47,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.io.Serializable;
 import java.net.URLDecoder;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.HashMap;
-import java.util.Collections;
 
 /**
  * The [fleXive] context - user session specific data like UserTickets, etc.
@@ -96,6 +98,7 @@ public class FxContext implements Serializable {
     private boolean globalAuthenticated;
     private int division;
     private int runAsSystem;
+    private boolean executingRunOnceScripts;
     private UserTicket ticket;
     private long nodeId = -1;
     private FxTreeMode treeMode;
@@ -124,7 +127,7 @@ public class FxContext implements Serializable {
      * Get the current users active tree node id, used for FxSQL tree queries
      *
      * @return the current users active tree node id
-     * @deprecated  will be removed as soon as tree search is fixed
+     * @deprecated will be removed as soon as tree search is fixed
      */
     public long getNodeId() {
         return nodeId;
@@ -134,7 +137,7 @@ public class FxContext implements Serializable {
      * Set the current users active tree node id used for FxSQL tree queries
      *
      * @param nodeId active tree node id
-     * @deprecated  will be removed as soon as tree search is fixed
+     * @deprecated will be removed as soon as tree search is fixed
      */
     public void setNodeId(long nodeId) {
         this.nodeId = nodeId;
@@ -144,7 +147,7 @@ public class FxContext implements Serializable {
      * Get the current users tree mode, used for FxSQL tree queries
      *
      * @return the current users active tree node id
-     * @deprecated  will be removed as soon as tree search is fixed
+     * @deprecated will be removed as soon as tree search is fixed
      */
     public FxTreeMode getTreeMode() {
         return treeMode;
@@ -153,8 +156,8 @@ public class FxContext implements Serializable {
     /**
      * Set the current users tree mode, used for FxSQL tree queries
      *
-     * @return the current users active tree node id
-     * @deprecated  will be removed as soon as tree search is fixed
+     * @param treeMode the active tree mode
+     * @deprecated will be removed as soon as tree search is fixed
      */
     public void setTreeMode(FxTreeMode treeMode) {
         this.treeMode = treeMode;
@@ -176,6 +179,31 @@ public class FxContext implements Serializable {
     public void setTreeWasModified() {
         this.treeWasModified = true;
         CacheAdmin.setTreeWasModified();
+    }
+
+    /**
+     * Is this context currently executing run-once scripts?
+     * This effectively returns the user id of the default global supervisor, but does not
+     * change any other behaviour. It is needed to avoid creating entries owned by the guest user
+     * when setting up a flexive division.
+     *
+     * @return context is currently executing run-once scripts
+     * @since 3.1
+     */
+    public boolean isExecutingRunOnceScripts() {
+        return executingRunOnceScripts;
+    }
+
+    /**
+     * Mark this context for executing run-once scripts.
+     * This method is used internally and should not be accessed otherwise as it will not provide the calling
+     * user with additional permissions, etc.
+     *
+     * @param executingRunOnceScripts flag
+     * @since 3.1
+     */
+    public void setExecutingRunOnceScripts(boolean executingRunOnceScripts) {
+        this.executingRunOnceScripts = executingRunOnceScripts;
     }
 
     /**
@@ -562,7 +590,7 @@ public class FxContext implements Serializable {
     /**
      * Returns an independent copy of this context. Also clones the user ticket.
      *
-     * @return  an independent copy of this context
+     * @return an independent copy of this context
      * @since 3.1
      */
     public FxContext copy() {
@@ -618,8 +646,8 @@ public class FxContext implements Serializable {
      * and that no overhead for setting or retrieving values exists.
      * </p>
      *
-     * @param key   the attribute key
-     * @return      the value stored under the given key.
+     * @param key the attribute key
+     * @return the value stored under the given key.
      * @since 3.1
      */
     public Object getAttribute(Object key) {
@@ -629,7 +657,7 @@ public class FxContext implements Serializable {
     /**
      * Return a (unmodifiable) map of all attributes stored in the context.
      *
-     * @return  a (unmodifiable) map of all attributes stored in the context.
+     * @return a (unmodifiable) map of all attributes stored in the context.
      * @since 3.1
      */
     public Map<Object, Object> getAttributeMap() {
@@ -676,7 +704,7 @@ public class FxContext implements Serializable {
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("Failed to use request locale from browser - unknown language: " + request.getLocale().getLanguage());
                     }
-                } 
+                }
             }
         } else {
             // For static content like images we use the last user ticket stored in the session
@@ -711,8 +739,8 @@ public class FxContext implements Serializable {
      * (e.g. in unit tests or an standalone application). Should only be called on application
      * startup. Will initialize a FxContext in the current thread with guest user privileges.
      *
-     * @param divisionId    the desired division ID (will determin the application datasource)
-     * @param applicationName   the application name (mostly used as "imaginary context path")
+     * @param divisionId      the desired division ID (will determin the application datasource)
+     * @param applicationName the application name (mostly used as "imaginary context path")
      * @since 3.1
      */
     public static synchronized void initializeSystem(int divisionId, String applicationName) {
@@ -729,7 +757,7 @@ public class FxContext implements Serializable {
         } finally {
             get().stopRunAsSystem();
         }
-        
+
         if (MANUAL_INIT_CALLED && divisionId == -2) {
             // don't replace userticket
             return;
@@ -770,7 +798,7 @@ public class FxContext implements Serializable {
     /**
      * Returns the user ticket associated to the current thread.
      *
-     * @return  the user ticket associated to the current thread.
+     * @return the user ticket associated to the current thread.
      */
     public static UserTicket getUserTicket() {
         final FxContext context = get();

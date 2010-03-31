@@ -32,7 +32,9 @@
 package com.flexive.ejb.beans;
 
 import com.flexive.core.Database;
+import com.flexive.core.security.FxPrincipal;
 import com.flexive.core.security.UserTicketImpl;
+import com.flexive.core.security.UserTicketStore;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.core.structure.FxEnvironmentImpl;
 import com.flexive.core.structure.StructureLoader;
@@ -60,10 +62,12 @@ import org.codehaus.groovy.control.CompilationFailedException;
 
 import javax.annotation.Resource;
 import javax.ejb.*;
+import javax.security.auth.Subject;
 import java.io.File;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.security.Principal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -983,7 +987,12 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
             LocalScriptingCache.runOnceInfos = new CopyOnWriteArrayList<FxScriptRunInfo>();
             LocalScriptingCache.runOnceInfos.addAll(divisionRunOnceInfos);
 
-            executeInitializerScripts("runonce", dropName, prefix, applicationName, new RunonceScriptExecutor(applicationName));
+            FxContext.get().setExecutingRunOnceScripts(true);
+            try {
+                executeInitializerScripts("runonce", dropName, prefix, applicationName, new RunonceScriptExecutor(applicationName));
+            } finally {
+                FxContext.get().setExecutingRunOnceScripts(false);
+            }
 
             // TODO: this fails to update the script infos when the transaction was rolled back because of a script error
             FxContext.get().runAsSystem();
