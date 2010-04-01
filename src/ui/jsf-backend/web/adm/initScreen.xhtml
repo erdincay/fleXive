@@ -12,23 +12,29 @@
       xmlns:fx="http://www.flexive.com/jsf/core">
 <head>
     <title>Initializing [fleXive] ...</title>
+
+    <t:stylesheet path="#{adm:versionedUrl('/pub/css/content.css')}"/>
+    <script type="text/javascript" src="#{request.contextPath}/pub/js/#{adm:versionedUrl('shared.js')}"></script>
     <t:stylesheet path="#{adm:versionedUrl('/adm/css/main.css')}"/>
+
     <fx:includes all="true"/>
 </head>
-<body>
+<body class="yui-skin-sam" style="overflow:auto;">
 
-<script type="text/javascript" src="#{fxSystemBean.contextPath}/pub/js/#{adm:versionedUrl('shared.js')}"></script>
 
-<div id="initStatus" style="height:1000px;margin-right:auto;margin-left:auto;">
+
+<div id="initStatus" style="margin-right:auto;margin-left:auto;">
     <center>
         <div class="initHeader"><br/><br/>#{fxMessageBean['Global.banner.initializing']}<br/><br/><br/>
             #{fxMessageBean['Global.banner.runOnceScriptStatus']}<br/><br/></div>
 
-        <div id="msg">&nbsp;</div>
+        <div id="msg" class="yui-dt">&nbsp;</div>
         <br/>
 
-        <div id="continue" style="text-align: center; border:1px solid black; width:150px; background-color: #cccccc;">
-            <a href="../adm/main.jsf">Continue</a>
+        <div id="continue" style="width: 100px">
+            <h:form id="continueForm">
+                <adm:commandButton id="continueButton" action="home" labelKey="Global.banner.init.continue" icon="ok"/>
+            </h:form>
         </div>
     </center>
 </div>
@@ -49,6 +55,11 @@
             document.getElementById('msg').innerHTML = result;
         });
     }
+
+    flexive.yui.require("datatable");
 </script>
+
+    <fx:yuiSetup/>
+    
 </body>
 </html>

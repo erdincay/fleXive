@@ -336,14 +336,17 @@ a > img {
     width:100%;
 }
 
-.initTable {
-    border: 1px solid black;
-    border-spacing: 0;
-    border-collapse: collapse;
-    width: 500px;
+/* initialization screen style */
+
+#initTable {
+    min-width: 500px;
 }
 
-/* initialization screen style */
+#initTable th,
+#initTable td {
+    margin: 0;
+    padding: 4px 10px;
+}
 
 .initHeader {
     font-weight: bold;
@@ -356,13 +359,9 @@ a > img {
 }
 
 .initRow {
-    border: 1px;
-    border-style: solid;
 }
 
 .initRowRunning {
-    border: 1px;
-    border-style: solid;
     background-color: lawngreen;
 }
 
@@ -381,7 +380,6 @@ a > img {
 .initStatusError {
     color: crimson;
     text-align:center;
-    border: 1px solid black;
 }
 
 .initStatusRunning {

@@ -62,14 +62,19 @@ public class SystemInformation implements Serializable {
         if (firstCall == -1)
             firstCall = System.currentTimeMillis();
         StringBuilder sb = new StringBuilder(1000);
-        sb.append("<table class=\"initTable\">");
+        sb.append("<table id=\"initTable\">");
         try {
-            sb.append("<tr><td class=\"initHeader2\">Status</td><td class=\"initHeader2\">Application</td><td class=\"initHeader2\">Script</td><td class=\"initHeader2\">Duration</td></tr>");
+            sb.append("<thead><tr><th>Status</th><th>Application</th><th>Script</th><th>Duration</th></tr></thead>");
+            sb.append("<tbody>");
+            int row = 0;
             for (FxScriptRunInfo ri : EJBLookup.getScriptingEngine().getRunOnceInformation()) {
                 String duration = ri.isRunning()
                         ? "Started " + FxFormatUtils.getDateTimeFormat().format(new Date(ri.getStartTime())) + " ..."
                         : FxFormatUtils.formatTimeSpan(ri.getEndTime() - ri.getStartTime()) + "";
-                sb.append("<tr class=\"initRow").append(ri.isRunning() ? "Running" : "").append("\">\n");
+                sb.append("<tr class=\"initRow").append(ri.isRunning() ? "Running" : "")
+                        .append(" yui-dt-").append(row % 2 == 0 ? "even" : "odd")
+                        .append(row == 0 ? " yui-dt-first" : "")
+                        .append("\">\n");
                 if (ri.isRunning())
                     sb.append("  <td class=\"initStatusRunning\">Running");
                 else if (ri.isSuccessful())
@@ -80,8 +85,9 @@ public class SystemInformation implements Serializable {
                 sb.append(getDropLabel(ri)).append("</td><td class=\"initName\">").append(ri.getName());
                 sb.append("</td><td class=\"initDuration\">").append(duration).append("</td>\n");
                 sb.append("</tr>\n");
+                row++;
             }
-            sb.append("</table>\n");
+            sb.append("</tbody></table>\n");
         } catch (FxApplicationException e) {
             sb.append("Failed to retrieve information: ").append(e.getMessage(FxContext.getUserTicket()));
         }
