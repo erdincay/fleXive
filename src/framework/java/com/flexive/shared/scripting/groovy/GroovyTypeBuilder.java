@@ -129,7 +129,8 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
     private final static String[] TYPE_NONOPTION_KEYS = {
             "ACL", "GENERALACL", "LABEL", "PARENTTYPENAME", "LANGUAGEMODE", "TYPEMODE", "TRACKHISTORY", "HISTORYAGE",
             "MAXVERSIONS", "USEINSTANCEPERMISSIONS", "USEPROPERTYPERMISSIONS", "USESTEPPERMISSIONS", "WORKFLOW",
-            "USETYPEPERMISSIONS", "USEPERMISSIONS", "ICON", "MIMETYPE", "STORAGEMODE", "NAME", "HINT", "DESCRIPTION"
+            "USETYPEPERMISSIONS", "USEPERMISSIONS", "ICON", "MIMETYPE", "STORAGEMODE", "NAME", "HINT", "DESCRIPTION",
+            "STRUCTUREOPTIONS"
     };
 
     /**
@@ -142,7 +143,8 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
             "OVERRIDEACL", "OVERRIDEMULTIPLICITY", "OVERRIDEINOVERVIEW", "OVERRIDEMAXLENGTH", "INOVERVIEW",
             "OVERRIDEMULTILINE", "OVERRIDESEARCHABLE", "OVERRIDEUSEHTMLEDITOR", "SEARCHABLE", "FLATTEN",
             "DEFAULTLANGUAGE", "PARENTGROUPASSIGNMENT", "ENABLED", "USEHTMLEDITOR", "MAXLENGTH",
-            "FULLTEXTINDEXED", "UNIQUEMODE", "AUTOUNIQUEPROPERTYNAME", "REFERENCEDLIST", "REFERENCEDTYPE"
+            "FULLTEXTINDEXED", "UNIQUEMODE", "AUTOUNIQUEPROPERTYNAME", "REFERENCEDLIST", "REFERENCEDTYPE",
+            "STRUCTUREOPTIONS"
     };
 
     /**
@@ -155,7 +157,8 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
             "OVERRIDEACL", "OVERRIDEMULTIPLICITY", "OVERRIDEINOVERVIEW", "OVERRIDEMAXLENGTH", "INOVERVIEW",
             "OVERRIDEMULTILINE", "OVERRIDESEARCHABLE", "OVERRIDEUSEHTMLEDITOR", "SEARCHABLE", "FLATTEN",
             "DEFAULTLANGUAGE", "PARENTGROUPASSIGNMENT", "ENABLED", "USEHTMLEDITOR", "MAXLENGTH",
-            "FULLTEXTINDEXED", "UNIQUEMODE", "AUTOUNIQUEPROPERTYNAME", "REFERENCEDLIST", "REFERENCEDTYPE"
+            "FULLTEXTINDEXED", "UNIQUEMODE", "AUTOUNIQUEPROPERTYNAME", "REFERENCEDLIST", "REFERENCEDTYPE",
+            "STRUCTUREOPTIONS"
     };
 
     /**
@@ -479,6 +482,7 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
     }
 
     @Override
+    @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     protected void setParent(Object parent, Object child) {
         if (parent == null) {
             return;
@@ -679,6 +683,7 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
      * @return returns a GroupAssignmentNode ojbect
      * @throws FxApplicationException on errors
      */
+    @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     private Object createNewGroupAssignmentNode(FxAssignment fxAssignment, AttributeMapper am)
             throws FxApplicationException {
         if (!(fxAssignment instanceof FxGroupAssignment)) {
@@ -726,6 +731,7 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
      * @return returns a GroupAssignmentNode object
      * @throws FxApplicationException on errors
      */
+    @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     private Object createNewPropertyAssignmentNode(FxAssignment fxAssignment, AttributeMapper am) throws FxApplicationException {
         if (!(fxAssignment instanceof FxPropertyAssignment)) {
             throw new FxInvalidParameterException("assignment", "ex.scripting.builder.assignment.property",
@@ -914,6 +920,7 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
         boolean assignmentChanges = false;
         FxMimeTypeWrapper mimeTypeWrapper;
         Workflow workflow;
+        List<FxStructureOption> structureOptions;
 
         /**
          * Construct an AttributeMapper
@@ -966,6 +973,8 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
             trackHistory = (Boolean) FxSharedUtils.get(attributes, "trackHistory", false);
             historyAge = (Long) FxSharedUtils.get(attributes, "historyAge", 1L);
             maxVersions = (Long) FxSharedUtils.get(attributes, "maxVersions", -1L);
+            //noinspection unchecked
+            structureOptions = (List<FxStructureOption>) FxSharedUtils.get(attributes, "structureOptions", null);
 
             if(attributes.get("workflow") instanceof String) {
                 String wf = (String)attributes.get("workflow");
@@ -1023,6 +1032,9 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
             }
             if(attributes.containsKey("workflow")) {
                 type.setWorkflow(workflow);
+            }
+            if(attributes.containsKey("structureOptions")) {
+                type.setOptions(structureOptions);
             }
 
             // set non-generic type options
@@ -1145,12 +1157,13 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
             multiline = (Boolean) FxSharedUtils.get(attributes, "multiline", false);
             defaultLanguage = (Long) FxSharedUtils.get(attributes, "defaultLanguage", 1L);
             enabled = (Boolean) FxSharedUtils.get(attributes, "enabled", true);
-
             fullTextIndexed = (Boolean) FxSharedUtils.get(attributes, "fullTextIndexed", true);
             autoUniquePropertyName = (Boolean) FxSharedUtils.get(attributes, "autoUniquePropertyName", true);
             uniqueMode = (UniqueMode) FxSharedUtils.get(attributes, "uniqueMode", UniqueMode.Type);
             // flatten default won't be set, dependends on FX configuration
             flatten = (Boolean) FxSharedUtils.get(attributes, "flatten", true);
+            //noinspection unchecked
+            structureOptions = (List<FxStructureOption>) FxSharedUtils.get(attributes, "structureOptions", null);
 
             return this;
         }
@@ -1229,6 +1242,9 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
                 }
             }
 
+            if(attributes.containsKey("structureOptions"))
+                    pa.setOptions(structureOptions);
+
             // set non-generic property-assignment options
             for (Object oEntry : attributes.entrySet()) {
                 final Map.Entry entry = (Map.Entry) oEntry;
@@ -1271,6 +1287,8 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
                 ga.setEnabled(enabled);
             if (attributes.containsKey("groupMode"))
                 ga.setMode(groupMode);
+            if(attributes.containsKey("structureOptions"))
+                ga.setOptions(structureOptions);
 
             // set options
             for (Object oEntry : attributes.entrySet()) {
@@ -1347,6 +1365,8 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
                 property.setReferencedType(referencedType);
             if (attributes.containsKey("referencedList"))
                 property.setReferencedList(referencedList);
+            if(attributes.containsKey("structureOptions"))
+                property.setOptions(structureOptions);
 
             for (Object oEntry : attributes.entrySet()) {
                 final Map.Entry entry = (Map.Entry) oEntry;
@@ -1374,6 +1394,8 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
             ge.setAssignmentDefaultMultiplicity(defaultMultiplicity);
             if (attributes.containsKey("groupMode"))
                 ge.setAssignmentGroupMode(groupMode);
+            if(attributes.containsKey("structureOptions"))
+                ge.setOptions(structureOptions);
 
             // set options
             for (Object oEntry : attributes.entrySet()) {

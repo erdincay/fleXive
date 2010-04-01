@@ -56,20 +56,21 @@ import com.flexive.shared.workflow.Route
 import com.flexive.shared.security.UserGroup
 import com.flexive.shared.workflow.Workflow
 import com.flexive.shared.workflow.Step
+import com.flexive.shared.scripting.groovy.GroovyOptionBuilder
 
 /**
- * Tests for the                                   {@link com.flexive.shared.scripting.groovy.GroovyTypeBuilder GroovyTypeBuilder}                                   class.
+ * Tests for the                                    {@link com.flexive.shared.scripting.groovy.GroovyTypeBuilder GroovyTypeBuilder}                                    class.
  *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
 class GroovyTypeBuilderTest {
-    @BeforeClass (groups = ["ejb", "scripting", "structure"])
+    @BeforeClass(groups = ["ejb", "scripting", "structure"])
     void beforeClass() {
         com.flexive.tests.embedded.FxTestUtils.login(TestUsers.SUPERVISOR);
     }
 
-    @AfterClass (groups = ["ejb", "scripting", "structure"])
+    @AfterClass(groups = ["ejb", "scripting", "structure"])
     void afterClass() {
         com.flexive.tests.embedded.FxTestUtils.logout()
     }
@@ -90,7 +91,7 @@ class GroovyTypeBuilderTest {
         return CacheAdmin.environment
     }
 
-    @Test (groups = ["ejb", "scripting", "structure"])
+    @Test(groups = ["ejb", "scripting", "structure"])
     void simpleStructureBuilder() {
         try {
             // create the type "builderTest"
@@ -173,7 +174,7 @@ class GroovyTypeBuilderTest {
         }
     }
 
-    @Test (groups = ["ejb", "scripting", "structure"])
+    @Test(groups = ["ejb", "scripting", "structure"])
     void typeConstructorArguments() {
         // test miscellaneous arguments to the type constructor
         try {
@@ -238,7 +239,7 @@ class GroovyTypeBuilderTest {
 
     }
 
-    @Test (groups = ["ejb", "scripting", "structure"])
+    @Test(groups = ["ejb", "scripting", "structure"])
     void invalidPropertyAssignmentBuilder() {
         // try to create a property assignment using a group assignment
         try {
@@ -247,8 +248,8 @@ class GroovyTypeBuilderTest {
             }
             assert false: "Successfully created a property assignment referencing to a group"
         } catch (FxRuntimeException e) {
-            if (!(e.converted != null && e.converted instanceof FxInvalidParameterException                                    \
-                                                   && ("assignment".equalsIgnoreCase(((FxInvalidParameterException) e.converted).parameter)))) {
+            if (!(e.converted != null && e.converted instanceof FxInvalidParameterException                                     \
+                                                    && ("assignment".equalsIgnoreCase(((FxInvalidParameterException) e.converted).parameter)))) {
                 throw e;
             }
             // else: success
@@ -257,7 +258,7 @@ class GroovyTypeBuilderTest {
         }
     }
 
-    @Test (groups = ["ejb", "scripting", "structure"])
+    @Test(groups = ["ejb", "scripting", "structure"])
     void invalidGroupAssignmentBuilder() {
         // try to create a group assignment using a property assignment
         try {
@@ -266,8 +267,8 @@ class GroovyTypeBuilderTest {
             }
             assert false: "Successfully created a group assignment referencing to a property"
         } catch (FxRuntimeException e) {
-            if (!(e.converted != null && e.converted instanceof FxInvalidParameterException                                    \
-                                                   && ("assignment".equalsIgnoreCase(((FxInvalidParameterException) e.converted).parameter)))) {
+            if (!(e.converted != null && e.converted instanceof FxInvalidParameterException                                     \
+                                                    && ("assignment".equalsIgnoreCase(((FxInvalidParameterException) e.converted).parameter)))) {
                 throw e;
             }
             // else: success
@@ -293,7 +294,7 @@ class GroovyTypeBuilderTest {
      * Change assignment of a newly created property by calling the builder for the same type / prop
      * Also tests changes to a prop assignment after setting an alias
      */
-    @Test (groups = ["ejb", "scripting", "structure"])
+    @Test(groups = ["ejb", "scripting", "structure"])
     void propertyArgumentsTest() {
         // create custom ACL
         def aclEngine = EJBLookup.getAclEngine()
@@ -439,7 +440,7 @@ class GroovyTypeBuilderTest {
      * Test group creation, group changes, equality of assignments for calls to the builder w/o changes,
      * mixture of nodes, mixing calls w/ and w/o changes
      */
-    @Test (groups = ["ejb", "scripting", "structure"])
+    @Test(groups = ["ejb", "scripting", "structure"])
     void groupAssignmentTest() {
         def aclEngine = EJBLookup.getAclEngine()
         def aclId = aclEngine.create("Testicus ACL", new FxString(true, "TESTICUS"), TestUsers.getTestMandator(), "#000000", "Testicus ACL Description", ACLCategory.STRUCTURE);
@@ -570,7 +571,6 @@ class GroovyTypeBuilderTest {
             def ga3 = getGroupAssignment(t, "BUILDERTEST/GROUP2/GROUP3/GROUP1")
             Assert.assertEquals(ga3.getLabel().toString(), "Group1 derived")
 
-
             /**
              * Test equality - groups (assignments) can be called w/o being changed
              */
@@ -601,8 +601,6 @@ class GroovyTypeBuilderTest {
         }
     }
 
-
-
     /**
      * Compares FxAssignmentfields (i.e. their string concatenation), since the equals / toString method
      * only yield the repect. id or xpath
@@ -623,7 +621,7 @@ class GroovyTypeBuilderTest {
     /**
      * Test creation of props / assignments within existing groups
      */
-    @Test (groups = ["ejb", "scripting", "structure"])
+    @Test(groups = ["ejb", "scripting", "structure"])
     void groupChildAssignmentTest() {
         try {
             // let's create a type with several (sub) groups and one property in the root
@@ -746,7 +744,7 @@ class GroovyTypeBuilderTest {
     /**
      * Create a simple type and derive a new one
      */
-    @Test (groups = ["ejb", "scripting", "structure"])
+    @Test(groups = ["ejb", "scripting", "structure"])
     void derivedTypeTest() {
         try {
             new GroovyTypeBuilder().builderBase {
@@ -801,12 +799,10 @@ class GroovyTypeBuilderTest {
         }
     }
 
-
-
     /**
      * Tests the various options / attributes for a group (assignment)
      */
-    @Test (groups = ["ejb", "scripting", "structure"])
+    @Test(groups = ["ejb", "scripting", "structure"])
     void groupAttributesTest() {
         try {
             new GroovyTypeBuilder().builderTest {
@@ -868,7 +864,7 @@ class GroovyTypeBuilderTest {
     /**
      * Test settings type / list references f. properties
      */
-    @Test (groups = ["ejb", "scripting", "structure"])
+    @Test(groups = ["ejb", "scripting", "structure"])
     void referenceTest() {
         try {
             // ty[es
@@ -920,7 +916,7 @@ class GroovyTypeBuilderTest {
     /**
      * Tests alias changes for assignments
      */
-    @Test (groups = ["ejb", "scripting", "structure"])
+    @Test(groups = ["ejb", "scripting", "structure"])
     void aliasChangeTest() {
         try {
             new GroovyTypeBuilder().builderTest {
@@ -1066,7 +1062,7 @@ class GroovyTypeBuilderTest {
     /**
      * Tests creating properties groups which already exist within other structures
      */
-    @Test (groups = ["ejb", "scripting", "structure"])
+    @Test(groups = ["ejb", "scripting", "structure"])
     void existingStructuretest() {
         try {
             new GroovyTypeBuilder().testicus {
@@ -1141,7 +1137,7 @@ class GroovyTypeBuilderTest {
     /**
      * Tests a walk through a structure
      */
-    @Test (groups = ["ejb", "scripting", "structure"])
+    @Test(groups = ["ejb", "scripting", "structure"])
     void structureWalkthroughTest() {
         try {
             new GroovyTypeBuilder().builderTest {
@@ -1197,13 +1193,11 @@ class GroovyTypeBuilderTest {
         }
     }
 
-
-
     /**
      * Tests the automatic setting of a translation to the default FxLanguage in case it is not present
      * (for "label" and "hint")
      */
-    @Test (groups = ["ejb", "scripting", "structure"])
+    @Test(groups = ["ejb", "scripting", "structure"])
     void defaultTranslationTest() {
         new GroovyTypeBuilder().builderTest {
             prop1(label: new FxString(true, FxLanguage.GERMAN, "Ein Label"))
@@ -1227,7 +1221,7 @@ class GroovyTypeBuilderTest {
      * Test the creation of properties having the same name within the same type (on various
      * hierarchical levels)
      */
-    @Test (groups = ["ejb", "scripting", "structure"])
+    @Test(groups = ["ejb", "scripting", "structure"])
     void createUniquePropsTest() {
         new GroovyTypeBuilder().builderTest {
             prop1()
@@ -1266,13 +1260,11 @@ class GroovyTypeBuilderTest {
         }
     }
 
-
-
     /**
      * This test assures the default values provided upon structure creation as given by the
      * reference documentation's chapter "GroovyTypeBuilder: Property and Group Creation - Default Values"
      */
-    @Test (groups = ["ejb", "scripting", "structure"])
+    @Test(groups = ["ejb", "scripting", "structure"])
     void defaultValueTest() {
         new GroovyTypeBuilder().defValueTest {
             defprop1()
@@ -1315,7 +1307,7 @@ class GroovyTypeBuilderTest {
      * Tests the default overrides in prop assignments
      * (i.e. only throw exceptions IFF the given overridable attribute != the base property's attribute
      */
-    @Test (groups = ["ejb", "scripting", "structure"])
+    @Test(groups = ["ejb", "scripting", "structure"])
     void assignmentOverrideTest() {
         // default values (actual attrib values in () )
         // default OVERRIDE values are always TRUE unless explicitly set
@@ -1551,13 +1543,11 @@ class GroovyTypeBuilderTest {
         return false;
     }
 
-
-
     /**
      * Tests the fact that the GTB can be called for an existing type
      * as if creating a new one
      */
-    @Test (groups = ["ejb", "scripting", "structure"])
+    @Test(groups = ["ejb", "scripting", "structure"])
     void constructorCallTest() {
         new GroovyTypeBuilder().builderTest {
             p1()
@@ -1586,13 +1576,11 @@ class GroovyTypeBuilderTest {
         }
     }
 
-
-
     /**
      * Test the "generalACL" type attribute - it sets the given ACL for every given element,
      * except when "acl" is present as well.
      */
-    @Test (groups = ["ejb", "scripting", "structure"])
+    @Test(groups = ["ejb", "scripting", "structure"])
     void generalAclSettingTest() {
         // create custom ACL
         def aclEngine = EJBLookup.getAclEngine()
@@ -1649,10 +1637,10 @@ class GroovyTypeBuilderTest {
     /**
      * Tests the GTB "flatten" option
      */
-    @Test (groups = ["ejb", "scripting", "structure"])
+    @Test(groups = ["ejb", "scripting", "structure"])
     void flatStorageTest() {
         // don't run this w/ the flatstorage disabled
-        if(FxFlatStorageManager.getInstance().isEnabled()) {
+        if (FxFlatStorageManager.getInstance().isEnabled()) {
             try {
                 new GroovyTypeBuilder().builderTest() {
                     flprop1()
@@ -1685,11 +1673,11 @@ class GroovyTypeBuilderTest {
     /**
      * Test setting type options
      */
-    @Test (groups = ["ejb", "scripting", "structure"])
+    @Test(groups = ["ejb", "scripting", "structure"])
     void typeOptionTest() {
         try {
             new GroovyTypeBuilder().builderTest("OPT_A": true,
-                                                "OPT_B": "ASDF") {
+                    "OPT_B": "ASDF") {
             }
             def t = environment().getType("BUILDERTEST")
             Assert.assertTrue(t.getOption("OPT_A").isValueTrue())
@@ -1704,9 +1692,106 @@ class GroovyTypeBuilderTest {
         }
     }
 
-    @Test (groups = ["ejb", "scripting", "structure"])
-    void setWorkflowTest() {
+    /**
+     * Test the "structureOptions" param (takes a List<FxStructureOption> as a value
+     */
+    @Test(groups = ["ejb", "scripting", "structure"])
+    void structureOptionsParamTest() {
+        def groupAssId = -1;
+        def propAssId = -1;
+        try {
+            // define various option lists
+            def typeOptions = new GroovyOptionBuilder().option1(value: "FOO", overrideable: false, isInherited: true) {
+                option2(value: "BAR", overrideable: false, isInherited: false)
+            }
+            def propOptions = new GroovyOptionBuilder().pOpt1(value: "value 1", overrideable: false) {
+                pOpt2(value: false)
+            }
+            def propAssOptions = new GroovyOptionBuilder().pOpt2(value: true) // overrides property setting
+            def groupOptions = new GroovyOptionBuilder().gOpt1(value: "group value") {
+                gOpt2(value: false, overrideable: false)
+            }
+            def groupAssOptions = new GroovyOptionBuilder().gOpt1(value: "overridden group value")
+            // create test type
+            new GroovyTypeBuilder().builderTest(structureOptions: typeOptions) {
+                prop01(structureOptions: propOptions)
+                prop01A(assignment: "BUILDERTEST/PROP01", structureOptions: propAssOptions)
+                GROUP01(structureOptions: groupOptions)
+                GROUP01A(assignment: "BUILDERTEST/GROUP01", structureOptions: groupAssOptions)
+            }
 
+            // type option tests
+            def t = environment().getType("BUILDERTEST")
+            def optionsList = t.getOptions();
+            def FxStructureOption o;
+            Assert.assertEquals(optionsList.size(), 2)
+            o = optionsList.get(0);
+            Assert.assertEquals(o.getKey(), "OPTION1")
+            Assert.assertEquals(o.getValue(), "FOO")
+            Assert.assertFalse(o.isOverrideable())
+            Assert.assertTrue(o.getIsInherited())
+            o = optionsList.get(1);
+            Assert.assertEquals(o.getKey(), "OPTION2")
+            Assert.assertEquals(o.getValue(), "BAR")
+            Assert.assertFalse(o.isOverrideable())
+            Assert.assertFalse(o.getIsInherited())
+
+            // property and property assignment options
+            def FxPropertyAssignment propAss = environment().getPropertyAssignment("BUILDERTEST/PROP01A")
+            propAssId = propAss.getId()
+            def FxProperty prop = environment().getProperty("PROP01")
+
+            optionsList = prop.getOptions();
+            Assert.assertEquals(optionsList.size(), 2);
+            o = optionsList.get(0);
+            Assert.assertEquals(o.getKey(), "POPT1")
+            Assert.assertEquals(o.getValue(), "value 1")
+            Assert.assertFalse(o.isOverrideable())
+            o = optionsList.get(1);
+            Assert.assertEquals(o.getKey(), "POPT2")
+            Assert.assertFalse(o.isValueTrue())
+
+            optionsList = propAss.getOptions();
+            Assert.assertEquals(optionsList.size(), 1)
+            o = optionsList.get(0)
+            Assert.assertEquals(o.getKey(), "POPT2")
+            Assert.assertTrue(o.isValueTrue())
+
+            // group and group assignment options
+            def FxGroupAssignment groupAss = (FxGroupAssignment)environment().getAssignment("BUILDERTEST/GROUP01A")
+            groupAssId = groupAss.getId()
+            def FxGroup group = environment().getGroup("GROUP01")
+
+            optionsList = group.getOptions();
+            Assert.assertEquals(optionsList.size(), 2)
+            o = optionsList.get(0)
+            Assert.assertEquals(o.getKey(), "GOPT1")
+            Assert.assertEquals(o.getValue(), "group value")
+            o = optionsList.get(1)
+            Assert.assertEquals(o.getKey(), "GOPT2")
+            Assert.assertFalse(o.isValueTrue())
+            Assert.assertFalse(o.isOverrideable())
+
+            optionsList = groupAss.getOptions();
+            Assert.assertEquals(optionsList.size(), 1)
+            o = optionsList.get(0)
+            Assert.assertEquals(o.getKey(), "GOPT1")
+            Assert.assertEquals(o.getValue(), "overridden group value")
+
+        } finally {
+            // remove assignments first
+            if(groupAssId != -1)
+                EJBLookup.getAssignmentEngine().removeAssignment(groupAssId)
+            if(propAssId != -1)
+                EJBLookup.getAssignmentEngine().removeAssignment(propAssId)
+            // remove type
+            removeTestType()
+        }
+
+    }
+
+    @Test(groups = ["ejb", "scripting", "structure"])
+    void setWorkflowTest() {
         // create a test workflow w/ test steps
         def StepDefinitionEdit stepDef1 = new StepDefinition(new FxString("testStep01"), "test step 01", -1).asEditable();
         def StepDefinitionEdit stepDef2 = new StepDefinition(new FxString("testStep02"), "test step 02", -1).asEditable();
@@ -1745,5 +1830,4 @@ class GroovyTypeBuilderTest {
             EJBLookup.getWorkflowStepDefinitionEngine().remove(stepDef2.getId())
         }
     }
-
 }

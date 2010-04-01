@@ -491,6 +491,43 @@ builder {
                         </td>
                     </tr>
                     <tr>
+                        <td>
+                            [GENERIC STRUCTURE OPTION]
+                        </td>
+                        <td>
+                            <classname>String</classname>
+                        </td>
+                        <td>
+                            <code>new GroovyTypeBuilder().ford(COLOUR:"black")</code>
+                        </td>
+                        <td>
+                            Set a generic option for the given type
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>[GENERIC STRUCTURE OPTIONS] as a <classname>List</classname>: &quot;structureOptions&quot;</td>
+                        <td>
+                            <classname>List&lt;FxStructureOption&gt;</classname>
+                        </td>
+                        <td>
+                            <para>
+                                <code>def myOptions = new GroovyOptionBuilder().opt1(value: true) {
+
+                                opt2(value: "An option value", isInherited: false)
+
+                                }
+                                </code>
+                            </para>
+                            <para>
+                                <code>testtype(structureOptions: myOptions)</code>
+                            </para>
+                        </td>
+                        <td>
+                            Set the type's options via a List of FxStructureOptions. The structureoptions can, for instance,
+                            be created using the <classname>GroovyOptionBuilder</classname> (refer to JavaDoc f. instructions)
+                        </td>
+                    </tr>
+                    <tr>
                         <td>icon</td>
                         <td>
                             <classname>FxReference</classname>
@@ -644,6 +681,28 @@ builder {
                         </td>
                         <td>
                             Set a generic option for the given property
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>[GENERIC STRUCTURE OPTIONS] as a <classname>List</classname>: &quot;structureOptions&quot;</td>
+                        <td>
+                            <classname>List&lt;FxStructureOption&gt;</classname>
+                        </td>
+                        <td>
+                            <para>
+                                <code>
+                                    def myPropOptions = new GroovyOptionBuilder().foo(value: "bar") {
+                                        foobar(value: "barfoo", overrideable: false)
+                                        barfoo(value: "foobar", overrideable: false, isInherited: false)
+                                    }
+                                </code>
+                            </para>
+                            <para>
+                                <code>testtype(structureOptions: myPropOptions)</code>
+                            </para>
+                        </td>
+                        <td>
+                            Set the group's or property's options via a <classname>List</classname> of <classname>FxStructureOption</classname>s.
                         </td>
                     </tr>
                 </tbody>
@@ -1174,6 +1233,28 @@ builder {
                         </td>
                         <td>
                             Set a generic option for the given assignment
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>[GENERIC STRUCTURE OPTIONS] as a <classname>List</classname>: &quot;structureOptions&quot;</td>
+                        <td>
+                            <classname>List&lt;FxStructureOption&gt;</classname>
+                        </td>
+                        <td>
+                            <para>
+                                <code>
+                                    def myPropOptions = new GroovyOptionBuilder().foo(value: "bar") {
+                                        foobar(value: "barfoo", overrideable: false)
+                                        barfoo(value: "foobar", overrideable: false, isInherited: false)
+                                    }
+                                </code>
+                            </para>
+                            <para>
+                                <code>testtype(structureOptions: myPropOptions)</code>
+                            </para>
+                        </td>
+                        <td>
+                            Set the group's or property's options via a <classname>List</classname> of <classname>FxStructureOption</classname>s.
                         </td>
                     </tr>
                 </tbody>
