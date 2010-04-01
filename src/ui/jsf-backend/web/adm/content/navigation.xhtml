@@ -228,22 +228,26 @@
 
             function lockSubtree(menuItem) {
                 try {
+                    parent.lockScreen();
                     flexive.util.getJsonRpc().ContentTreeEditor.lockSubtree(getObjectId(menuItem), treeLiveMode);
                     parent.showStatusMessage("#{fxMessageBean['ContentTree.status.lockedSubtree']}");
                     reloadContentTree();
                 } catch (e) {
                     alertDialog(e.message);
                 }
+                parent.unlockScreen();
             }
 
             function unlockSubtree(menuItem) {
                 try {
+                    parent.lockScreen();
                     flexive.util.getJsonRpc().ContentTreeEditor.unlockSubtree(getObjectId(menuItem), treeLiveMode);
                     parent.showStatusMessage("#{fxMessageBean['ContentTree.status.unlockedSubtree']}");
                     reloadContentTree();
                 } catch (e) {
                     alertDialog(e.message);
                 }
+                parent.unlockScreen();
             }
 
             // activate the tree node

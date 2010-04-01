@@ -35,10 +35,12 @@ import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.javascript.yui.YahooResultProvider;
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.faces.messages.FxFacesMsgInfo;
+import com.flexive.faces.messages.FxFacesMsgWarn;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxFormatUtils;
 import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.exceptions.FxApplicationException;
@@ -47,10 +49,12 @@ import com.flexive.shared.search.*;
 import com.flexive.shared.search.query.PropertyValueComparator;
 import com.flexive.shared.search.query.SqlQueryBuilder;
 import com.flexive.shared.search.query.VersionFilter;
+import com.flexive.shared.tree.FxTreeNode;
 import com.flexive.shared.value.BinaryDescriptor;
 import com.flexive.shared.value.FxValue;
 import com.flexive.war.filter.FxResponseWrapper;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -83,6 +87,8 @@ public class SearchResultBean implements ActionBean, Serializable {
     private Boolean createBriefcase;
 
     private boolean queryFailed;    // set to true in request when query execution failed to prevent re-submission during processing
+    private List<SelectItem> subFolderItems;
+    private long parentFolderId = -1;
 
 
     /**
@@ -118,29 +124,10 @@ public class SearchResultBean implements ActionBean, Serializable {
                 final boolean onlyDirect = FxJsfUtils.getBooleanParameter("onlyDirect", false);
 
                 setVersionFilter(liveTree ? VersionFilter.LIVE : VersionFilter.MAX);
-                final SqlQueryBuilder sqb = createSqlQueryBuilder();
-                if (onlyDirect) {
-                    sqb.isDirectChild(id);
-                    // exclude all folder types
-                    final FxType folderType = CacheAdmin.getEnvironment().getType(FxType.FOLDER);
-                    sqb.condition("typedef", PropertyValueComparator.NOT_IN,
-                            FxSharedUtils.getSelectableObjectIdList(
-                                    Iterables.concat(Arrays.asList(folderType), folderType.getDerivedTypes())
-                            )
-                    );
-                    setEnableFolderActions(true);
-                } else {
-                    sqb.isChild(id);
-                    // don't enable folder actions it would affect many folders at once
-                    setEnableFolderActions(false);
-                }
-                setQueryBuilder(sqb.maxRows(Integer.MAX_VALUE));
-                setTabTitle(MessageBean.getInstance().getMessage(
-                        "SearchResult.tabtitle.folder",
-                        EJBLookup.getTreeEngine().getNode(liveTree ? FxTreeMode.Live : FxTreeMode.Edit, id).getLabel()
-                ));
                 setFolderId(id);
                 setTreeMode(liveTree ? FxTreeMode.Live : FxTreeMode.Edit);
+                setOnlyDirectChildren(onlyDirect);
+                createFolderQueryBuilder();
                 show();
             } else if ("typeSearch".equals(action)) {
                 // search for contents of a type
@@ -191,6 +178,35 @@ public class SearchResultBean implements ActionBean, Serializable {
         final SqlQueryBuilder builder = new SqlQueryBuilder(location, getViewType());
         builder.filterVersion(getVersionFilter());
         return builder;
+    }
+
+    private void createFolderQueryBuilder() {
+        final SqlQueryBuilder sqb = createSqlQueryBuilder();
+        if (isOnlyDirectChildren()) {
+            sqb.isDirectChild(getFolderId());
+            // exclude all folder types
+            final FxType folderType = CacheAdmin.getEnvironment().getType(FxType.FOLDER);
+            sqb.condition("typedef",
+                    PropertyValueComparator.NOT_IN,
+                    FxSharedUtils.getSelectableObjectIdList(
+                        Iterables.concat(Arrays.asList(folderType), folderType.getDerivedTypes())
+                    )
+            );
+            setEnableFolderActions(true);
+        } else {
+            sqb.isChild(getFolderId());
+            // don't enable folder actions it would affect many folders at once
+            setEnableFolderActions(false);
+        }
+        setQueryBuilder(sqb.maxRows(Integer.MAX_VALUE));
+        try {
+            // update tab title
+            setTabTitle(MessageBean.getInstance().getMessage("SearchResult.tabtitle.folder",
+                    EJBLookup.getTreeEngine().getNode(getTreeMode(), getFolderId()).getLabel())
+            );
+        } catch (FxApplicationException e) {
+            new FxFacesMsgWarn(e).addToContext();
+        }
     }
 
     public void resetFilters() {
@@ -634,8 +650,36 @@ public class SearchResultBean implements ActionBean, Serializable {
     }
 
     public void setFolderId(long folderId) {
+        final boolean changed = folderId != getSessionData().getFolderId();
         getSessionData().setFolderId(folderId);
+        if (changed) {
+            subFolderItems = null;
+            parentFolderId = -1;
+            if (folderId != -1) {
+                createFolderQueryBuilder();
+            }
+        }
     }
+
+    /**
+     * @return  return the parent of folderId.
+     */
+    public long getParentFolderId() {
+        if (parentFolderId == -1 && getFolderId() != -1) {
+            if (getFolderId() == FxTreeNode.ROOT_NODE) {
+                parentFolderId = FxTreeNode.ROOT_NODE;
+            } else {
+                try {
+                    parentFolderId = EJBLookup.getTreeEngine().getNode(getTreeMode(), getFolderId()).getParentNodeId();
+                } catch (FxApplicationException e) {
+                    new FxFacesMsgErr(e).addToContext();
+                    parentFolderId = -1;
+                }
+            }
+        }
+        return parentFolderId;
+    }
+
 
     /**
      * @return  true if folder actions (e.g. removing objects) should be activated.
@@ -650,6 +694,34 @@ public class SearchResultBean implements ActionBean, Serializable {
     }
 
     /**
+     * @return  a list of the (immediate) subfolders of the current folder
+     * @since   3.1
+     */
+    public List<SelectItem> getSubFolderItems() {
+        if (getFolderId() == -1) {
+            return Lists.newArrayListWithCapacity(0);
+        }
+        if (subFolderItems == null) {
+            final FxEnvironment env = CacheAdmin.getEnvironment();
+            try {
+                subFolderItems = Lists.newArrayList();
+                // add all folder children
+                for (FxTreeNode node : EJBLookup.getTreeEngine().getTree(getTreeMode(), getFolderId(), 1).getChildren()) {
+                    if (env.getType(node.getReferenceTypeId()).isDerivedFrom(FxType.FOLDER)) {
+                        subFolderItems.add(new SelectItem(
+                                node.getId(),
+                                node.getLabel() == null ? node.getName() : node.getLabel().toString()
+                        ));
+                    }
+                }
+            } catch (FxApplicationException e) {
+                new FxFacesMsgErr(e).addToContext();
+            }
+        }
+        return subFolderItems;
+    }
+
+    /**
      * @return  the tree mode, if a folder query was submitted
      */
     public FxTreeMode getTreeMode() {
@@ -658,6 +730,17 @@ public class SearchResultBean implements ActionBean, Serializable {
 
     public void setTreeMode(FxTreeMode treeMode) {
         getSessionData().setTreeMode(treeMode);
+    }
+
+    /**
+     * @return  true if only direct children should be returned for a folder query
+     */
+    public boolean isOnlyDirectChildren() {
+        return getSessionData().isOnlyDirectChildren();
+    }
+
+    public void setOnlyDirectChildren(boolean value) {
+        getSessionData().setOnlyDirectChildren(value);
     }
 
     /**

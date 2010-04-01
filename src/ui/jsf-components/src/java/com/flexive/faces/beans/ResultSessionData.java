@@ -61,9 +61,6 @@ public class ResultSessionData implements Serializable {
     private SqlQueryBuilder queryBuilder;
     private BinaryDescriptor.PreviewSizes previewSize;
     private long briefcaseId;
-    private long folderId;
-    private FxTreeMode treeMode;
-    private boolean enableFolderActions;
     private ResultViewType viewType = ResultViewType.LIST;
     private int startRow;
     private int fetchRows = 25;
@@ -73,7 +70,13 @@ public class ResultSessionData implements Serializable {
     private int paginatorPage;
     private VersionFilter versionFilter = VersionFilter.MAX;
     private List<FxFoundType> contentTypes = new ArrayList<FxFoundType>(0);
-    private FxResultSet result;
+
+    private FxResultSet result; // only when ResultLocation#isCacheInSession is true
+
+    private long folderId;
+    private FxTreeMode treeMode;
+    private boolean onlyDirectChildren;
+    private boolean enableFolderActions;
 
     // Keep a reference on the current session if not retrieved from a JSF context
     private transient HttpSession session = null;
@@ -303,5 +306,12 @@ public class ResultSessionData implements Serializable {
         saveInSession();
     }
 
+    public boolean isOnlyDirectChildren() {
+        return onlyDirectChildren;
+    }
 
+    public void setOnlyDirectChildren(boolean onlyDirectChildren) {
+        this.onlyDirectChildren = onlyDirectChildren;
+        saveInSession();
+    }
 }

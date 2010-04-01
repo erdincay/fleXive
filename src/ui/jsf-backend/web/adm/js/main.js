@@ -148,6 +148,14 @@ function getNavFrameTop() {
     return document.getElementById('navFrameTop').contentWindow;
 }
 
+function expandContentTreeNode(/* long */ nodeId) {
+    if (getContentNavFrame() != null) {
+        getContentNavFrame().getFxController().expandToNode(nodeId);
+        //scroll node into view
+        getContentNavFrame().getFxController().getDomNode(nodeId).scrollIntoView(true);
+    }
+}
+
 function resize(leftAreaWidth) {
     if (leftAreaWidth<160) {
         leftAreaWidth=160;
@@ -676,7 +684,7 @@ function showStatusMessage(message, timeout) {
     if (timeout == null || timeout > 0) {
         _statusMessageTimeout = window.setTimeout(
                 function() {
-                    _statusMessageAnim = fadeOut("toolbarMessageWrapper", 1.0, function() { el.innerHTML = ""; });
+                    _statusMessageAnim = fadeOut("toolbarMessageWrapper", 1.0, function() {el.innerHTML = "";});
                 },
                 timeout != null ? timeout : 5000
         );
@@ -692,7 +700,7 @@ function fadeOut(elementId, /* seconds */ duration, /* function */ onComplete) {
 }
 
 function animateOpacity(elementId, /* seconds */ duration, /* function */ onComplete, opacityFrom, opacityTo) {
-    var anim = new YAHOO.util.Anim(elementId, { opacity: { from: opacityFrom, to: opacityTo} }, duration, YAHOO.util.Easing.easeInStrong);
+    var anim = new YAHOO.util.Anim(elementId, {opacity: {from: opacityFrom, to: opacityTo}}, duration, YAHOO.util.Easing.easeInStrong);
     if (onComplete) {
         anim.onComplete.subscribe(onComplete);
     }

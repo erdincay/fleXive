@@ -322,6 +322,14 @@ div.dojoDialog {
 
 /** Search results */
 
+#resultTableMenus select {
+    margin-right: 3px;
+}
+
+#resultTableContainer {
+    margin-top: 5px;
+}
+
 .resultThumbnail85 {
     position: relative;
     height: 106px;  /* boxsize + 4 (border) + 17 (label) */

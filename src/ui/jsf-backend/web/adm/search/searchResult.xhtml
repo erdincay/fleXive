@@ -94,34 +94,46 @@
                 <h:inputHidden id="contentEditorVersion" value="#{beContentEditorBean.version}"/>
                 <h:inputHidden id="sortedPKs" value="#{beContentEditorBean.sortedPKs}"/>
 
-                <h:selectOneListbox id="typeId" value="#{fxSearchResultBean.typeId}" size="1">
-                    <f:selectItems value="#{fxSearchResultBean.contentTypeItems}"/>
-                    <a4j:support event="onchange"
-                                 action="#{fxSearchResultBean.resetTableView}"
-                                 onsubmit="setBusyCursor();"
-                                 oncomplete="setDefaultCursor();"
-                                 reRender="refreshResults"
-                                 eventsQueue="updateResults"
-                            />
-                </h:selectOneListbox>
-                <h:selectOneListbox id="version" value="#{fxSearchResultBean.versionFilter}" size="1">
-                    <f:selectItems value="#{fxSearchResultBean.versionItems}"/>
-                    <a4j:support event="onchange" action="#{fxSearchResultBean.resetTableView}"
-                                 onsubmit="setBusyCursor();"
-                                 oncomplete="setDefaultCursor();"
-                                 reRender="refreshResults"
-                                 eventsQueue="updateResults"
-                            />
-                </h:selectOneListbox>
-                <h:selectOneListbox id="previewSize" value="#{fxSearchResultBean.previewSize}" size="1" rendered="#{fxSearchResultBean.viewType == 'THUMBNAILS'}">
-                    <f:selectItems value="#{fxSelectBean.previewSizes}"/>
-                    <a4j:support event="onchange" action="#{fxSearchResultBean.resetTableView}"
-                                 onsubmit="setBusyCursor();"
-                                 oncomplete="setDefaultCursor();"
-                                 reRender="refreshResults"
-                                 eventsQueue="updateResults"
-                            />
-                </h:selectOneListbox>
+                <div id="resultTableMenus">
+                    <h:selectOneListbox id="typeId" value="#{fxSearchResultBean.typeId}" size="1">
+                        <f:selectItems value="#{fxSearchResultBean.contentTypeItems}"/>
+                        <a4j:support event="onchange"
+                                     action="#{fxSearchResultBean.resetTableView}"
+                                     onsubmit="setBusyCursor();"
+                                     oncomplete="setDefaultCursor();"
+                                     reRender="refreshResults"
+                                     eventsQueue="updateResults"
+                                />
+                    </h:selectOneListbox>
+                    <h:selectOneListbox id="version" value="#{fxSearchResultBean.versionFilter}" size="1">
+                        <f:selectItems value="#{fxSearchResultBean.versionItems}"/>
+                        <a4j:support event="onchange" action="#{fxSearchResultBean.resetTableView}"
+                                     onsubmit="setBusyCursor();"
+                                     oncomplete="setDefaultCursor();"
+                                     reRender="refreshResults"
+                                     eventsQueue="updateResults"
+                                />
+                    </h:selectOneListbox>
+                    <h:selectOneListbox id="previewSize" value="#{fxSearchResultBean.previewSize}" size="1" rendered="#{fxSearchResultBean.viewType == 'THUMBNAILS'}">
+                        <f:selectItems value="#{fxSelectBean.previewSizes}"/>
+                        <a4j:support event="onchange" action="#{fxSearchResultBean.resetTableView}"
+                                     onsubmit="setBusyCursor();"
+                                     oncomplete="setDefaultCursor();"
+                                     reRender="refreshResults"
+                                     eventsQueue="updateResults"
+                                />
+                    </h:selectOneListbox>
+                    <c:if test="#{fxSearchResultBean.folderId != -1}">
+                        <h:selectOneListbox id="subfolder" value="#{fxSearchResultBean.folderId}" onchange="getElementById('frm:refreshButton').onclick()">
+                            <f:selectItem itemValue="#{fxSearchResultBean.folderId}" itemLabel="#{fxMessageBean['SearchResult.label.folder.current']}"/>
+                            <f:selectItems value="#{fxSearchResultBean.subFolderItems}"/>
+                            <c:if test="#{fxSearchResultBean.folderId != 1 and fxSearchResultBean.parentFolderId != -1}">
+                                <f:selectItem itemValue="#{fxSearchResultBean.parentFolderId}" itemLabel="#{fxMessageBean['SearchResult.label.folder.parent']}"/>
+                            </c:if>
+                        </h:selectOneListbox>
+                    </c:if>
+                </div>
+                
                 <a4j:commandButton reRender="refreshResults"
                                    id="refreshResultsButton"
                                    style="display:none"
@@ -252,6 +264,11 @@
         <!--
             if (parent.reloadBriefcases) {
                 parent.reloadBriefcases();
+            }
+
+            if (getFolderId() != -1) {
+                // select folder in content tree
+                parent.expandContentTreeNode(getFolderId());
             }
 
             flexive.yui.onYahooLoaded(function() {
