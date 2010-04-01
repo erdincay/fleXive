@@ -133,6 +133,9 @@ public class BeContentEditorBean implements ActionBean, Serializable {
 
     private CallbackOpts nextOp = null;
 
+    // keep the index of a requested PK for the reqeuest in the hashtable so that we don't need to search for it every time
+    private Hashtable<FxPK, Integer> currentIndexLUT = new Hashtable<FxPK, Integer>();
+
     /**
      * {@inheritDoc}
      */
@@ -542,7 +545,7 @@ public class BeContentEditorBean implements ActionBean, Serializable {
             } catch (Throwable t) {
                 /* ignore */
             }
-        } catch (Throwable t) {
+        } catch (Exception t) {
             new FxFacesMsgErr(t).addToContext();
         }
     }
@@ -791,10 +794,6 @@ public class BeContentEditorBean implements ActionBean, Serializable {
         }
     }
 
-    public String getCallBackStr() {
-        return "triggerCommandElement_" + wrappedContent.getEditorId() + "_CallbackIcon()";
-    }
-
     public CallbackOpts getNextOp() {
         return nextOp;
     }
@@ -841,24 +840,21 @@ public class BeContentEditorBean implements ActionBean, Serializable {
             boolean isReferenced = wrappedContent.isReferenced();
             // check if deleted content was part of result set
             // and update result set if necessary
-            boolean updateSearchResult = isPkInSearchResult(wrappedContent.getContent().getPk());
-            FxPK newPK = null;
+            FxPK newPK;
             boolean editModeSaved = editMode;
             ((FxContentEditorBean) FxJsfUtils.getManagedBean("fxContentEditorBean"))._delete();
-            if (updateSearchResult) {
-                newPK = updateSearchResult(isReferenced);
-            }
+            newPK = removePKindex(wrappedContent.getContent().getPk());
             if (!isReferenced) {
                 resetViewStateVars();
             }
-            if (updateSearchResult && newPK != null) {
+            if (newPK != null) {
                 // reinit content editor with saved values
                 this.editMode = editModeSaved;
                 this.pk = newPK;
                 this.fromResultSet = true;
             }
-        } catch (Throwable t) {
-            new FxFacesMsgErr(t).addToContext();
+        } catch (Exception e) {
+            new FxFacesMsgErr(e).addToContext();
         } finally {
             FxJsfUtils.resetFaceletsComponent(FORM_ID + ":" + EDITOR_ID);
         }
@@ -876,17 +872,14 @@ public class BeContentEditorBean implements ActionBean, Serializable {
             FxContentEditorBean ceBean = (FxContentEditorBean) FxJsfUtils.getManagedBean("fxContentEditorBean");
             // check if deleted content was part of result set
             // and update result set if necessary
-            boolean updateSearchResult = isPkInSearchResult(wrappedContent.getContent().getPk());
             ceBean._deleteCurrentVersion();
             // update search result
-            if (updateSearchResult) {
-                ((SearchResultBean) FxJsfUtils.getManagedBean("fxSearchResultBean")).refresh();
-            }
+            removePKindex(getPk());
             if (!isReferenced) {
                 // retrieve new pk from content storage
                 pk = new FxPK(pk.getId(), FxPK.MAX);
             }
-        } catch (Throwable t) {
+        } catch (Exception t) {
             new FxFacesMsgErr(t).addToContext();
         } finally {
             FxJsfUtils.resetFaceletsComponent(FORM_ID + ":" + EDITOR_ID);
@@ -902,16 +895,13 @@ public class BeContentEditorBean implements ActionBean, Serializable {
     public String deleteVersion() {
         try {
             FxPK pkToDelete = new FxPK(wrappedContent.getContent().getPk().getId(), version);
-            boolean updateSearchResult = isPkInSearchResult(pkToDelete);
             EJBLookup.getContentEngine().removeVersion(pkToDelete);
             new FxFacesMsgInfo("Content.nfo.deletedVersion", pkToDelete).addToContext();
             // update search result
-            if (updateSearchResult) {
-                ((SearchResultBean) FxJsfUtils.getManagedBean("fxSearchResultBean")).refresh();
-            }
+            removePKindex(pkToDelete);
             // load highest available version
             this.pk = new FxPK(pk.getId(), FxPK.MAX);
-        } catch (Throwable t) {
+        } catch (Exception t) {
             new FxFacesMsgErr(t).addToContext();
         } finally {
             FxJsfUtils.resetFaceletsComponent(FORM_ID + ":" + EDITOR_ID);
@@ -968,7 +958,7 @@ public class BeContentEditorBean implements ActionBean, Serializable {
                 _save(false);
                 cancel();
             }
-        } catch (Throwable t) {
+        } catch (Exception t) {
             new FxFacesMsgErr(t).addToContext();
         }
     }
@@ -1085,7 +1075,7 @@ public class BeContentEditorBean implements ActionBean, Serializable {
                 content = oldContent;
                 typeId = oldTypeId;
             }
-        } catch (Throwable t) {
+        } catch (Exception t) {
             new FxFacesMsgErr(t).addToContext();
         }
     }
@@ -1214,10 +1204,15 @@ public class BeContentEditorBean implements ActionBean, Serializable {
      *
      * @return Mapped access to search result row, matching given pk.
      */
-    public Map<FxPK, FxResultRow> getResultRow() {
-        return new HashMap<FxPK, FxResultRow>() {
-            public FxResultRow get(Object key) {
-                return ((SearchResultBean) FxJsfUtils.getManagedBean("fxSearchResultBean")).getResult().getResultRow((FxPK) key);
+    public Map<FxPK, FxContent> getResultRow() {
+        return new HashMap<FxPK, FxContent>() {
+            public FxContent get(Object key) {
+                FxPK pk = (FxPK) key;
+                try {
+                    return EJBLookup.getContentEngine().load(pk);
+                } catch (FxApplicationException e) {
+                    return get(removePKindex(pk));
+                }
             }
         };
     }
@@ -1226,27 +1221,55 @@ public class BeContentEditorBean implements ActionBean, Serializable {
         return sortedPKs;
     }
 
+    /**
+     * Removes a FxPK and return the following FxPK
+     * @param currentPK the FxPK to remove
+     * @return the following FxPK or <code>null</code> if the current PK was not found)
+     */
+    private FxPK removePKindex(FxPK currentPK) {
+        int currentIndex = getIndex().get(currentPK);
+        if (currentIndex < 0 || sortedPKArray.size() == 0)
+            return null;
+        sortedPKArray.remove(currentIndex);
+        if (currentIndex >= sortedPKArray.size()) {
+            currentIndex = sortedPKArray.size() - 1;
+        }
+        return sortedPKArray.get(currentIndex);
+    }
+
     public Map<FxPK, Integer> getIndex() {
         return new HashMap<FxPK, Integer>() {
             public Integer get(Object key) {
-                if (sortedPKs == null)  // fallback if the client-sorted pks are not set
-                    return ((SearchResultBean) FxJsfUtils.getManagedBean("fxSearchResultBean")).getResult().getResultRow((FxPK) key).getIndex();
-                String [] tmpSortedPKs = sortedPKs.split(",");
+
+                Integer tmp = currentIndexLUT.get(key);
+                if (tmp == null) {
+                    tmp = get_(key);
+                    currentIndexLUT.put((FxPK) key, tmp);
+                }
+                return tmp;
+            }
+
+            private Integer get_(Object key) {
                 int i = 0;
-                final String curPK = String.valueOf(key);
-                for (String s : tmpSortedPKs) {
+                final FxPK curPK = FxPK.fromObject(key);
+                for (FxPK s : sortedPKArray) {
                     if (curPK.equals(s)) return i;
                     i++;
                 }
-                return 0;
+                return -1;
             }
         };
     }
 
     public void setSortedPKs(String sortedPKs) {
         this.sortedPKs = sortedPKs;
+        for (String tmpS : sortedPKs.split(",")) {
+            sortedPKArray.add(FxPK.fromString(tmpS));
+        }
+        this.currentIndexLUT.clear();
     }
 
+    private ArrayList<FxPK> sortedPKArray = new ArrayList<FxPK>();
 
     /**
      * Mapped access to the pk of the search result row, matching given index.
@@ -1255,51 +1278,18 @@ public class BeContentEditorBean implements ActionBean, Serializable {
      */
     public Map<Integer, FxPK> getPkByIndex() {
         return new HashMap<Integer, FxPK>() {
+
             public FxPK get(Object key) {
-                SearchResultBean sb = (SearchResultBean) FxJsfUtils.getManagedBean("fxSearchResultBean");
-                final FxResultSet currentResult = sb.getResult();
                 // avoid JSF integer/long conversion bug
                 Integer i = new Integer(key.toString());
                 // cap possible overflows
+                if (sortedPKArray.size() <= i) {
+                    i = sortedPKArray.size() - 1;
+                }
                 if (i < 0) {
                     i = 0;
                 }
-                if (currentResult.getRowCount() <= i) {
-                    i = currentResult.getRowCount() - 1;
-                }
-                if (sortedPKs == null) {    // fallback if the client-sorted pks are not set
-                    return sb.getResult().getResultRow(i).getPk(sb.getResult().getPrimaryKeyIndex());
-                }
-                String [] tmpSortedPKs = sortedPKs.split(",");
-                if (currentResult.getRowCount() < tmpSortedPKs.length) {
-                    Hashtable<String, Byte> tmpLUT = new Hashtable<String, Byte>();
-                    Byte b = 2;
-                    for (String s : tmpSortedPKs) {
-                        tmpLUT.put(s, b);
-                    }
-                    for (int j = 0; j < currentResult.getRowCount(); j++) {
-                        tmpLUT.remove(currentResult.getResultRow(j).getString(currentResult.getPrimaryKeyIndex()));
-                    }
-                    for (String currentKey : tmpLUT.keySet()) {
-                        sortedPKs = sortedPKs.replaceAll("," + currentKey, "").replaceAll(currentKey + "," , "");
-                    }
-                     tmpSortedPKs = sortedPKs.split(",");
-                } else if (currentResult.getRowCount() > tmpSortedPKs.length) {
-                    // if there are more results (which are not on the user-sorted-list) they are appended to the end of the list
-                    Hashtable<String, Byte> tmpLUT = new Hashtable<String, Byte>();
-                    Byte b = 2;
-                    for (int j = 0; j < currentResult.getRowCount(); j++) {
-                        tmpLUT.put(currentResult.getResultRow(j).getString(currentResult.getPrimaryKeyIndex()), b);
-                    }
-                    for (String s : tmpSortedPKs) {
-                        tmpLUT.remove(s);
-                    }
-                    for (String currentKey : tmpLUT.keySet()) {
-                        sortedPKs = sortedPKs + "," + currentKey;
-                    }
-                     tmpSortedPKs = sortedPKs.split(",");
-                }
-                return FxPK.fromString(tmpSortedPKs[i]);
+                return sortedPKArray.get(i);
             }
         };
     }

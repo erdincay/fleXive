@@ -39,7 +39,9 @@ disableTab... false if the <adm:tab/> component should be rendered, true otherwi
             <c:if test="#{srcEditor.changed}">
                 <script language="JavaScript" type="text/javascript">
                     try {
-                        confirmDialog("#{fxMessageBean['Content.confirm.abort']}", function() {#{srcEditor.callBackStr};});
+                        confirmDialog("#{fxMessageBean['Content.confirm.abort']}", function() {
+                            eval(document.getElementById("#{formPrefix}:#{editorId}_CallbackIcon_be").onclick());
+                        });
                     }catch(err){
                         alert(err);
                     }
@@ -48,7 +50,7 @@ disableTab... false if the <adm:tab/> component should be rendered, true otherwi
                 <t:saveState id="nextID" value="#{beContentEditorBean.contentIdToInit}"/>
                 <t:saveState id="nextVersion" value="#{beContentEditorBean.version}"/>
                 <div style="display:none;">
-                    <adm:commandIcon id="#{editorId}_CallbackIcon" bean="#{srcEditor}" location="content"
+                    <adm:commandIcon id="#{editorId}_CallbackIcon_be" bean="#{srcEditor}" location="content"
                                      action="callBack" icon="cancel">
                         <f:setPropertyActionListener value="#{myContent}" target="#{srcEditor.wrappedContent}"/>
                         <!-- set properties for fxContentEditorBean -->

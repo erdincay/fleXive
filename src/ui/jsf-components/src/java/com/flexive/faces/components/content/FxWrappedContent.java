@@ -125,7 +125,8 @@ public class FxWrappedContent implements Serializable {
         this.referenced = referenced;
         this.propertyHint = new PropertyHint();
         this.isCaptionProperty = new IsCaptionProperty();
-        this.loadedContent = content.copy();
+        if (content != null)
+            this.loadedContent = content.copy();
     }
 
     /**

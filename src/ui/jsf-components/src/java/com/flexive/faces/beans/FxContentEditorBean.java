@@ -97,6 +97,7 @@ public class FxContentEditorBean implements Serializable {
     // remaining time on the lock
     private String remainingLockTime;
     private String expiresTime;
+    private boolean changed;
 
     public String getMessagesId() {
         return MESSAGES_ID;
@@ -1095,5 +1096,21 @@ public class FxContentEditorBean implements Serializable {
 
     public void setAffectedXPath(String affectedXPath) {
         this.affectedXPath = null;
+    }
+
+
+    public void callBack() {
+        cancel();
+    }
+
+    public void preCancel(){
+        changed = wasChanged();
+        if (!changed) {
+            cancel();
+        }
+    }
+
+    public boolean isChanged() {
+        return changed;
     }
 }

@@ -98,6 +98,24 @@
                     </f:facet>
                 </a4j:status>
 
+                <c:if test="#{__ceBean.changed}">
+                    <script language="JavaScript" type="text/javascript">
+                        try {
+                            if (confirm("#{fxMessageBean['Content.confirm.abort']}")){
+                                eval(document.getElementById("#{formPrefix}:#{editorId}_CallbackIcon").onclick());
+                            }
+                        }catch(err){
+                            alert(err);
+                        }
+                    </script>
+                    <div style="display:none;">
+                        <a4j:commandButton id="#{editorId}_CallbackIcon" location="content"
+                                         action="#{__ceBean.callBack}" icon="cancel" reRender="#{__ce_reRenderButton}">
+                            <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
+                            <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
+                        </a4j:commandButton>
+                    </div>
+                </c:if>
                 <c:if test="#{not _ceContent.guiSettings.disableMessages}">
                     <!-- error messages inside the container output panel
                     so that they update after an ajax reRender-->
@@ -340,7 +358,7 @@
                                 rendered="#{not _ceContent.guiSettings.disableCancel and empty _ceContent.guiSettings.openedReferenceId and _ceContent.guiSettings.editMode}">
                             <ui:insert name="cancelButton">
                                 <a4j:commandButton value="#{fxMessageBean['ContentEditor.button.cancel']}"
-                                                   action="#{__ceBean.cancel}"
+                                                   action="#{__ceBean.preCancel}"
                                                    onclick="flexive.contentEditor.preSubmit();#{_ceContent.closePanelScript}"
                                                    title="#{fxMessageBean['ContentEditor.button.cancel.title']}"
                                                    reRender="#{__ce_reRenderButton}" status="#{_ceContent.editorId}_status">
