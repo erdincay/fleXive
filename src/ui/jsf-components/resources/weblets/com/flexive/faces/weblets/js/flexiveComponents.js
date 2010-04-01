@@ -40,10 +40,10 @@ var flexive = new function() {
      * Enumeration of valid thumbnail preview sizes - see BinaryDescriptor#PreviewSizes
      */
     this.PreviewSizes = {
-        PREVIEW1: { id: 1, size: 42 },
-        PREVIEW2: { id: 2, size: 85 },
-        PREVIEW3: { id: 3, size: 232 },
-        ORIGINAL: { id: 0, size: -1}
+        PREVIEW1: {id: 1, size: 42},
+        PREVIEW2: {id: 2, size: 85},
+        PREVIEW3: {id: 3, size: 232},
+        ORIGINAL: {id: 0, size: -1}
     };
 
     /** Absolute application base URL (set by fx:includes) */
@@ -91,9 +91,9 @@ flexive.util = new function() {
         if (pk == null || pk.indexOf(".") == -1) {
             throw "Not a valid PK: " + pk;
         }
-        return { id: parseInt(pk.substr(0, pk.indexOf("."))),
+        return {id: parseInt(pk.substr(0, pk.indexOf("."))),
                  version: parseInt(pk.substr(pk.indexOf(".") + 1)), 
-                 toString: function() { return this.id + "." + this.version }
+                 toString: function() {return this.id + "." + this.version}
         };
     };
 
@@ -324,7 +324,7 @@ flexive.yui.datatable = new function() {
             "edit": (permissions & 8) > 0,
             "export": (permissions & 16) > 0,
             "relate": (permissions & 32) > 0,
-            encode: function() { return permissions; }
+            encode: function() {return permissions;}
         };
     };
 
@@ -422,7 +422,7 @@ flexive.yui.datatable = new function() {
             }
         }
         // delete in reversed row index order
-        indices.sort(function(a, b) { return b-a; });
+        indices.sort(function(a, b) {return b-a;});
         for (i = 0; i < indices.length; i++) {
             dataTable.deleteRow(indices[i]);
         }
@@ -552,7 +552,7 @@ flexive.yui.datatable.ThumbnailView.prototype = {
     getColumns: function() {
         var columns = [];
         for (var i = 0; i < this.gridColumns; i++) {
-            columns.push({ key: "c" + i, label: "" });
+            columns.push({key: "c" + i, label: ""});
         }
         return columns;
     },
@@ -627,7 +627,7 @@ flexive.yui.datatable.ThumbnailView.prototype = {
         for (var i = 0; i < this.gridColumns; i++) {
             fields.push("c" + i);
         }
-        return { "fields": fields };
+        return {"fields": fields};
     }
 };
 
@@ -735,11 +735,11 @@ flexive.yui.dialogs = new function() {
             visible:false,
             draggable:true,
             constraintoviewport: true,
-            buttons:  [   { text: yesButton,
+            buttons:  [   {text: yesButton,
                             handler: handleConfirm,
-                            isDefault:true },
-                          { text: noButton,
-                            handler: handleCancel }
+                            isDefault:true},
+                          {text: noButton,
+                            handler: handleCancel}
                       ]
         });
         dialog.disableButtons = function() {
@@ -751,7 +751,7 @@ flexive.yui.dialogs = new function() {
         dialog.cfg.setProperty("icon",YAHOO.widget.SimpleDialog.ICON_WARN);
         dialog.cfg.queueProperty("keylisteners", [
             // bind escape key to cancel button
-            new YAHOO.util.KeyListener(document, { keys: 27 }, { fn: handleCancel, scope: dialog, correctScope:true })
+            new YAHOO.util.KeyListener(document, {keys: 27}, {fn: handleCancel, scope: dialog, correctScope:true})
         ]);
         dialog.render(document.body);
         dialog.show();
@@ -774,9 +774,9 @@ flexive.yui.dialogs = new function() {
             visible:false,
             draggable:true,
             constraintoviewport: true,
-            buttons:  [   { text: okButton,
-                            handler: function() { dialog.hide(); dialog.destroy(); if (onConfirm) onConfirm(); },
-                            isDefault:true } ]
+            buttons:  [   {text: okButton,
+                            handler: function() {dialog.hide();dialog.destroy();if (onConfirm) onConfirm();},
+                            isDefault:true} ]
         });
         dialog.setHeader(title);
         dialog.setBody(message);
@@ -832,19 +832,19 @@ flexive.yui.dialogs = new function() {
                 draggable:true,
                 postmethod: "none",
                 constraintoviewport: true,
-                buttons:  [   { text: submitButton,
+                buttons:  [   {text: submitButton,
                                 handler: handleSubmit,
-                                isDefault:true },
-                              { text: cancelButton,
-                                handler:function() { e.dialog.hide();  if (e.onCancel) e.onCancel(); }
+                                isDefault:true},
+                              {text: cancelButton,
+                                handler:function() {e.dialog.hide();if (e.onCancel) e.onCancel();}
                               }
                           ]
             });
             e.dialog.cfg.queueProperty("keylisteners", [
                 // bind enter key to submit button
-                new YAHOO.util.KeyListener(e, { keys: 13 }, { fn: handleSubmit, scope: e.dialog, correctScope:true }),
+                new YAHOO.util.KeyListener(e, {keys: 13}, {fn: handleSubmit, scope: e.dialog, correctScope:true}),
                 // bind escape key to cancel button
-                new YAHOO.util.KeyListener(e, { keys: 27 }, { fn: function() { e.dialog.hide(); }, scope: e.dialog, correctScope:true })
+                new YAHOO.util.KeyListener(e, {keys: 27}, {fn: function() {e.dialog.hide();}, scope: e.dialog, correctScope:true})
             ]);
 
 
@@ -891,37 +891,69 @@ flexive.input = new function() {
         }
     };
 
+    this.htmlEditorConfigs = {
+        "default-basic": {
+            mode: "exact",
+            dialog_type: "modal",
+            editor_selector: "fxValueTextAreaHtml",
+            theme: "advanced",
+            plugins: "paste,fullscreen,inlinepopups,searchreplace,advlink",
+            language: flexive.guiTranslation,
+            entity_encoding: "raw",     // don't replace special characters (like umlaut) with HTML entities
+
+            // general layout options
+            theme_advanced_layout_manager: "SimpleLayout",
+            theme_advanced_toolbar_location : "top",
+            theme_advanced_buttons1: "undo,redo,removeformat,replace"
+            + ",separator,link,unlink,image,charmap,separator,bullist,numlist,separator,code,fullscreen",
+            theme_advanced_buttons2: "bold,italic,underline,separator,forecolor,formatselect,fontselect,fontsizeselect",
+            theme_advanced_buttons3: "",
+            theme_advanced_toolbar_align: "left",
+            theme_advanced_resizing : true,
+            theme_advanced_statusbar_location: "bottom",
+
+            // fix alert when switching between multiple editors
+            focus_alert: false,
+            strict_loading_mode: true,  /* Fixes Firefox HTML encoding problem with multiple editors */
+            relative_urls: false,        /* don't force relative URLs for images and links */
+            convert_urls : false
+            /*width: "100%"*/
+        },
+
+        "default-full": {
+            mode: "exact",
+            dialog_type: "modal",
+            editor_selector: "fxValueTextAreaHtml",
+            theme: "advanced",
+            plugins: "paste,fullscreen,inlinepopups,searchreplace,advlink",
+            language: flexive.guiTranslation,
+            entity_encoding: "raw",     // don't replace special characters (like umlaut) with HTML entities
+
+            // general layout options
+            theme_advanced_layout_manager: "SimpleLayout",
+            theme_advanced_toolbar_location : "top",
+            theme_advanced_buttons1: "paste,pastetext,pasteword,separator,undo,redo,removeformat,replace"
+            + ",separator,link,unlink,image,charmap,separator,bullist,numlist,separator,justifyleft,justifycenter,justifyright,justifyfull,separator,code,fullscreen",
+            theme_advanced_buttons2: "bold,italic,underline,strikethrough,separator,forecolor,formatselect,fontselect,fontsizeselect",
+            theme_advanced_buttons3: "",
+            theme_advanced_toolbar_align: "left",
+            theme_advanced_resizing : true,
+            theme_advanced_statusbar_location: "bottom",
+
+            // fix alert when switching between multiple editors
+            focus_alert: false,
+            strict_loading_mode: true,  /* Fixes Firefox HTML encoding problem with multiple editors */
+            relative_urls: false,        /* don't force relative URLs for images and links */
+            convert_urls : false
+            /*width: "100%"*/
+        }
+    };
+    
     // initialize the TinyMCE HTML editor
-    this.initHtmlEditor = function(autoPopulate) {
+    this.initHtmlEditor = function(autoPopulate, configName) {
         try {
             tinymce.baseURL = flexive.componentsWebletUrl + "js/tiny_mce";
-            tinyMCE.init({
-                    mode: autoPopulate ? "specific_textareas" : "exact",
-                    dialog_type: "modal",
-                    editor_selector: "fxValueTextAreaHtml",
-                    theme: "advanced",
-                    plugins: "paste,fullscreen,inlinepopups,searchreplace,advlink",
-                    language: flexive.guiTranslation,   
-                    entity_encoding: "raw",     // don't replace special characters (like umlaut) with HTML entities
-
-                    // general layout options
-                    theme_advanced_layout_manager: "SimpleLayout",
-                    theme_advanced_toolbar_location : "top",
-                    theme_advanced_buttons1: "paste,pastetext,pasteword,separator,undo,redo,removeformat,replace"
-                        + ",separator,link,unlink,image,charmap,separator,bullist,numlist,separator,justifyleft,justifycenter,justifyright,justifyfull,separator,code,fullscreen",
-                    theme_advanced_buttons2: "bold,italic,underline,strikethrough,separator,forecolor,formatselect,fontselect,fontsizeselect",
-                    theme_advanced_buttons3: "",
-                    theme_advanced_toolbar_align: "left",
-                    theme_advanced_resizing : true,
-                    theme_advanced_statusbar_location: "bottom",
-
-                    // fix alert when switching between multiple editors
-                    focus_alert: false,
-                    strict_loading_mode: true,  /* Fixes Firefox HTML encoding problem with multiple editors */
-                    relative_urls: false,        /* don't force relative URLs for images and links */
-                    convert_urls : false
-                    /*width: "100%"*/
-            });
+            tinyMCE.init(this.htmlEditorConfigs[configName == null ? "default-basic" : configName]);
         } catch (e) {
             alert("initHtml exception: " + e);
             // HTML editor component not configured
@@ -1353,12 +1385,13 @@ flexive.contentEditor = new function() {
         } catch (e) {
             alert ('Failed to save HTML editors: ' + e);
         }
-        for (var i in tinyMCE.editors) {
-            var editor = tinyMCE.editors[i];
+        var i = 10000;   // avoid looping forever if tinyMCE fails to clear the editor array
+        while (tinyMCE.editors.length > 0 && i-- > 0) {
+            var editor = tinyMCE.editors[0];
             try {
                 editor.remove();
             } catch (e) {
-                alert("Failed to remove editor: " + e);
+                alert("Failed to remove editor " + editor + ": " + e);
             }
         }
     };

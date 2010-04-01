@@ -33,6 +33,7 @@ package com.flexive.faces.components;
 
 import com.flexive.faces.FxJsfUtils;
 import static com.flexive.faces.FxJsfComponentUtils.getBooleanValue;
+import static com.flexive.faces.FxJsfComponentUtils.getStringValue;
 import com.flexive.faces.beans.SystemBean;
 import static com.flexive.faces.javascript.FxJavascriptUtils.beginJavascript;
 import static com.flexive.faces.javascript.FxJavascriptUtils.endJavascript;
@@ -40,6 +41,7 @@ import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.FxContext;
+import com.flexive.shared.FxFormatUtils;
 
 import javax.faces.component.UIOutput;
 import javax.faces.context.FacesContext;
@@ -73,6 +75,7 @@ public class WriteWebletIncludes extends UIOutput {
     private boolean yui = false;
     private boolean jsonRpc = false;
     private boolean all = false;
+    private String htmlEditorConfig;
 
     public WriteWebletIncludes() {
         weblets.put("com.flexive.faces.weblets/js/flexiveComponents.js", false);
@@ -163,7 +166,12 @@ public class WriteWebletIncludes extends UIOutput {
             renderWebletInclude(out, WEBLET_TINYMCE);
             out.write(PADDING);
             beginJavascript(out);
-            out.write("flexive.input.initHtmlEditor(false);");
+            final String config = getHtmlEditorConfig();
+            out.write("flexive.input.initHtmlEditor(false, "
+                    + (StringUtils.isNotBlank(config)
+                        ? "'" + FxFormatUtils.escapeForJavaScript(config) + "'"
+                        : "null")
+                    + ");");
             endJavascript(out);
         }
         if (isYui()) {
@@ -236,14 +244,26 @@ public class WriteWebletIncludes extends UIOutput {
         this.all = all;
     }
 
+    public String getHtmlEditorConfig() {
+        if (getStringValue(this, "htmlEditorConfig") != null) {
+            return getStringValue(this, "htmlEditorConfig");
+        }
+        return htmlEditorConfig;
+    }
+
+    public void setHtmlEditorConfig(String htmlEditorConfig) {
+        this.htmlEditorConfig = htmlEditorConfig;
+    }
+
     @Override
     public Object saveState(FacesContext context) {
-        final Object[] state = new Object[5];
+        final Object[] state = new Object[6];
         state[0] = super.saveState(context);
         state[1] = this.htmlEditor;
         state[2] = this.yui;
         state[3] = this.all;
         state[4] = this.jsonRpc;
+        state[5] = this.htmlEditorConfig;
         return state;
     }
 
@@ -255,5 +275,6 @@ public class WriteWebletIncludes extends UIOutput {
         this.yui = (Boolean) state[2];
         this.all = (Boolean) state[3];
         this.jsonRpc = (Boolean) state[4];
+        this.htmlEditorConfig = (String) state[5];
     }
 }

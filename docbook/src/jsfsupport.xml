@@ -2518,6 +2518,19 @@
                             </listitem>
                         </varlistentry>
                         <varlistentry>
+                            <term>htmlEditorConfig</term>
+                            <listitem>
+                                <para>
+                                    The name of a TinyMCE configuration in
+                                    <code>flexive.input.htmlEditorConfigs</code>.
+                                    Possible values:
+                                    <code>default-basic</code>
+                                    (the default setting),
+                                    <code>default-full</code>.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
                             <term>jsonRpc</term>
                             <listitem>
                                 <para>

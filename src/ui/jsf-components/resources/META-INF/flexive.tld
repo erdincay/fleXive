@@ -509,6 +509,14 @@
             </description>
         </attribute>
         <attribute>
+            <name>htmlEditorConfig</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>The name of a TinyMCE configuration in flexive.input.htmlEditorConfigs.
+                Possible values: default-basic (the default setting), default-full.
+            </description>
+        </attribute>
+        <attribute>
             <name>jsonRpc</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
