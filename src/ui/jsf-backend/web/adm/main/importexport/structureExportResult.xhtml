@@ -317,6 +317,11 @@
                                             </fx:formRow>
                                         </td>
                                         <td>
+                                            <fx:formRow overrideInputStyle="float:none" id="addWorkflow" labelKey="StructureExport.lbl.addWorkflow" newLine="false">
+                                                <h:selectBooleanCheckbox id="addWorkflow" value="#{exportBean.addWorkflow}">
+                                                    <a4j:support reRender="codePanel" event="onclick" oncomplete="activateEditArea('frm:groovyCode', true, '#{scriptConsoleBean.userLang}', null, '#{exportBean.toggleEditor}', null, null, false);"/>
+                                                </h:selectBooleanCheckbox>
+                                            </fx:formRow>
                                         </td>
                                     </tr>
                                 </tbody>

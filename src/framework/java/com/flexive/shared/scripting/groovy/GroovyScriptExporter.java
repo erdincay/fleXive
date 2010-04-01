@@ -81,6 +81,7 @@ public class GroovyScriptExporter {
     private boolean defaultsOnly = false;
     private boolean addSystemTypes = false;
     private boolean withoutDependencies = false;
+    private boolean addWorkflow = false;
     private static final Log LOG = LogFactory.getLog(GroovyScriptExporter.class);
     private Set<FxType> filteredTypes;
 
@@ -109,11 +110,13 @@ public class GroovyScriptExporter {
      * @param defaultsOnly              set to true if the script export should disregard any existing options and use the defaults only
      * @param addSystemTypes            set to true if the script export should include the [fleXive] system types
      * @param withoutDependencies       set to true if dependencies should be ignored (affects assignments from derived types on flat exports)
+     * @param addWorkflow               set to true if the script export should include names of workflows
      * @param reset                     set to true in order to regenerate any code
      * @return the GroovyScriptExporter itself for chained calls
      */
     public GroovyScriptExporter run(boolean generateImportStatements, boolean generateDeleteCode, boolean generateScriptAssignments,
-                                    boolean scriptOverride, boolean defaultsOnly, boolean addSystemTypes, boolean withoutDependencies, boolean reset) {
+                                    boolean scriptOverride, boolean defaultsOnly, boolean addSystemTypes, boolean withoutDependencies,
+                                    boolean addWorkflow, boolean reset) {
         this.generateImportStatements = generateImportStatements;
         this.generateDeleteCode = generateDeleteCode;
         this.generateScriptAssignments = generateScriptAssignments;
@@ -122,6 +125,7 @@ public class GroovyScriptExporter {
         this.addSystemTypes = addSystemTypes;
         filteredTypes = filterExportTypes(this.callback);
         this.withoutDependencies = withoutDependencies;
+        this.addWorkflow = addWorkflow;
         generateScriptCode(reset);
         return this;
     }
@@ -240,6 +244,14 @@ public class GroovyScriptExporter {
 
     public void setScriptOverride(boolean scriptOverride) {
         this.scriptOverride = scriptOverride;
+    }
+
+    public boolean isAddWorkflow() {
+        return addWorkflow;
+    }
+
+    public void setAddWorkflow(boolean addWorkflow) {
+        this.addWorkflow = addWorkflow;
     }
 
     /**
@@ -367,7 +379,7 @@ public class GroovyScriptExporter {
         // types / immed. assignments & groups
         for (FxType t : types) {
             if (createType) {
-                scriptCodeOnly.append(GroovyScriptExporterTools.createType(t, defaultsOnly));
+                scriptCodeOnly.append(GroovyScriptExporterTools.createType(t, defaultsOnly, addWorkflow));
             }
             scriptCodeOnly.append(GroovyScriptExporterTools.createTypeAssignments(t, callback.getTypeAssignments().get(t),
                     groupAssignments, defaultsOnly, callOnlyGroups, withoutDependencies, differingDerivedAssignments));

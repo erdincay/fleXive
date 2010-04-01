@@ -128,9 +128,10 @@ public final class GroovyScriptExporterTools {
      *
      * @param type         the FxType which should be exported
      * @param defaultsOnly use defaults only, do not analyse / script options
+     * @param addWorkflow  add the type's current workflow to the code
      * @return String returns the script code for a type
      */
-    public static String createType(FxType type, boolean defaultsOnly) {
+    public static String createType(FxType type, boolean defaultsOnly, boolean addWorkflow) {
         StringBuilder script = new StringBuilder(500);
         final int tabCount = 1;
 
@@ -180,6 +181,9 @@ public final class GroovyScriptExporterTools {
             sopts.put("useStepPermissions", type.isUseStepPermissions() + "");
             sopts.put("useTypePermissions", type.isUseTypePermissions() + "");
             sopts.put("usePermissions", type.isUsePermissions() + "");
+            if(addWorkflow) {
+                sopts.put("workflow", "\"" + type.getWorkflow().getName() + "\"");
+            }
             if (type.isDerived()) { // take out of !defaultsOnly option?
                 sopts.put("parentTypeName", "\"" + type.getParent().getName() + "\"");
             }
@@ -204,7 +208,7 @@ public final class GroovyScriptExporterTools {
     }
 
     /**
-     * Contains the logic to generate the script code for a a type's assignments
+     * Contains the logic to generate the script code for a type's assignments
      *
      * @param type                        a given type
      * @param assignments                 a List of the given types immediate assignments

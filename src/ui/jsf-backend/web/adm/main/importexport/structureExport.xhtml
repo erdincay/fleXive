@@ -80,6 +80,7 @@
             <t:saveState value="#{exportBean.gbean}"/>
             <t:saveState value="#{exportBean.userLang}"/>
             <t:saveState value="#{exportBean.activateEditor}"/>
+            <t:saveState value="#{exportBean.addWorkflow}"/>
 
             <adm:tab label="#{fxMessageBean['StructureExport.tabtitle.main']}" active="true" id="tab1"
                      bean="#{exportBean}" action="showMainTab" rendered="true" lockscreen="true" />
@@ -156,6 +157,9 @@
                                     </fx:formRow>
                                 </td>
                                 <td>
+                                    <fx:formRow overrideInputStyle="float:none" id="addWorkflow" labelKey="StructureExport.lbl.addWorkflow" newLine="false">
+                                        <h:selectBooleanCheckbox id="addWorkflow" value="#{exportBean.addWorkflow}"/>
+                                    </fx:formRow>
                                 </td>
                             </tr>
                         </tbody>

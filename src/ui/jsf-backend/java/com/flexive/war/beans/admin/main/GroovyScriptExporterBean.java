@@ -52,6 +52,7 @@ public class GroovyScriptExporterBean {
     private boolean scriptOverride = true;
     private boolean addSystemTypes = false;
     private boolean withoutDependencies = false;
+    private boolean addWorkflow = false; // generate code f. workflow names
     private boolean reset;
 
     /**
@@ -71,6 +72,9 @@ public class GroovyScriptExporterBean {
         this.generateImportStatements = generateImportStatements;
     }
 
+    /**
+     * @return the actual Groovy script code
+     */
     public String getScriptCode() {
         generateCode();
         return scriptCode;
@@ -85,9 +89,11 @@ public class GroovyScriptExporterBean {
      */
     private void generateCode() {
         if (exporter == null)
-            exporter = new GroovyScriptExporter(callback).run(generateImportStatements, deleteStructures, generateScriptAssignments, scriptOverride, defaultsOnly, addSystemTypes, withoutDependencies, reset);
+            exporter = new GroovyScriptExporter(callback).run(generateImportStatements, deleteStructures, generateScriptAssignments,
+                    scriptOverride, defaultsOnly, addSystemTypes, withoutDependencies, addWorkflow, reset);
         else
-            exporter.run(generateImportStatements, deleteStructures, generateScriptAssignments, scriptOverride, defaultsOnly, addSystemTypes, withoutDependencies, reset);
+            exporter.run(generateImportStatements, deleteStructures, generateScriptAssignments, scriptOverride, defaultsOnly,
+                    addSystemTypes, withoutDependencies, addWorkflow, reset);
 
         scriptCode = exporter.getScriptCode();
         reset = false; // reset reset
@@ -144,6 +150,14 @@ public class GroovyScriptExporterBean {
     public void setAddSystemTypes(boolean addSystemTypes) {
         reset = true;
         this.addSystemTypes = addSystemTypes;
+    }
+
+    public boolean isAddWorkflow() {
+        return addWorkflow;
+    }
+
+    public void setAddWorkflow(boolean addWorkflow) {
+        this.addWorkflow = addWorkflow;
     }
 
     public boolean isWithoutDependencies() {

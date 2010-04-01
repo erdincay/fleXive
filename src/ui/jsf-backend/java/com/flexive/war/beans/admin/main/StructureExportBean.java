@@ -202,7 +202,6 @@ public class StructureExportBean {
                     } catch (FxInvalidStateException e) {
                         // do nothing
                     }
-
                 }
             }
 
@@ -744,6 +743,14 @@ public class StructureExportBean {
 
     public void setTableRows(int tableRows) {
         this.tableRows = tableRows;
+    }
+
+    public boolean isAddWorkflow() {
+        return gbean.isAddWorkflow();
+    }
+
+    public void setAddWorkflow(boolean addWorkflow) {
+        gbean.setAddWorkflow(addWorkflow);
     }
 
     /**
