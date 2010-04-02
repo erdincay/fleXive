@@ -48,8 +48,6 @@ import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.interfaces.TreeEngine;
-import com.flexive.shared.search.FxResultRow;
-import com.flexive.shared.search.FxResultSet;
 import com.flexive.shared.security.LifeCycleInfo;
 import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.structure.FxType;
@@ -134,7 +132,9 @@ public class BeContentEditorBean implements ActionBean, Serializable {
     private CallbackOpts nextOp = null;
 
     // keep the index of a requested PK for the reqeuest in the hashtable so that we don't need to search for it every time
-    private Hashtable<FxPK, Integer> currentIndexLUT = new Hashtable<FxPK, Integer>();
+    private Hashtable<FxPK, Integer> currentIndexCache = new Hashtable<FxPK, Integer>();
+
+    private ArrayList<FxPK> sortedPKArray = new ArrayList<FxPK>();
 
     /**
      * {@inheritDoc}
@@ -1234,43 +1234,36 @@ public class BeContentEditorBean implements ActionBean, Serializable {
         if (currentIndex >= sortedPKArray.size()) {
             currentIndex = sortedPKArray.size() - 1;
         }
+        currentIndexCache.clear();
         return sortedPKArray.get(currentIndex);
     }
 
+    /**
+     * returns the index of the given PK according to the sortedPKArray
+     * @return the index in the sortedPKArray or -1 if not found
+     */
     public Map<FxPK, Integer> getIndex() {
         return new HashMap<FxPK, Integer>() {
             public Integer get(Object key) {
-
-                Integer tmp = currentIndexLUT.get(key);
+                Integer tmp = currentIndexCache.get(key);
                 if (tmp == null) {
-                    tmp = get_(key);
-                    currentIndexLUT.put((FxPK) key, tmp);
+                    tmp = sortedPKArray.indexOf(FxPK.fromObject(key));
+                    currentIndexCache.put((FxPK) key, tmp);
                 }
                 return tmp;
-            }
-
-            private Integer get_(Object key) {
-                int i = 0;
-                final FxPK curPK = FxPK.fromObject(key);
-                for (FxPK s : sortedPKArray) {
-                    if (curPK.equals(s)) return i;
-                    i++;
-                }
-                return -1;
             }
         };
     }
 
     public void setSortedPKs(String sortedPKs) {
-        if (sortedPKs.trim().length() <= 0) return;
+        if (StringUtils.isBlank(sortedPKs))
+            return;
         this.sortedPKs = sortedPKs;
         for (String tmpS : sortedPKs.split(",")) {
             sortedPKArray.add(FxPK.fromString(tmpS));
         }
-        this.currentIndexLUT.clear();
+        this.currentIndexCache.clear();
     }
-
-    private ArrayList<FxPK> sortedPKArray = new ArrayList<FxPK>();
 
     /**
      * Mapped access to the pk of the search result row, matching given index.
