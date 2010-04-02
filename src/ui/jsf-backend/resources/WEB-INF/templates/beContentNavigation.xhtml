@@ -40,22 +40,22 @@ pk... pk of the content to edit
                     </adm:commandIcon>
                 </div>
                 <div class="navigationDisplay">
-                    #{currentIndex+1} - #{fxSearchResultBean.result.rowCount}
+                    #{currentIndex+1} - #{beContentEditorBean.rowCount}
                 </div>
                 <div style="float:left;position:relative">
                     <adm:commandIcon id="nextResultRow" icon="next" titleKey="Content.button.nextResultRow.title"
                             bean="#{beContentEditorBean}" action="preInitEditorFromResultSet" location="content"
-                            buttonDisabled="#{currentIndex == fxSearchResultBean.result.rowCount-1}">
+                            buttonDisabled="#{currentIndex == beContentEditorBean.rowCount-1}">
                         <f:setPropertyActionListener value="#{myContent}" target="#{srcEditor.wrappedContent}"/>
                         <f:setPropertyActionListener value="#{beContentEditorBean.pkByIndex[currentIndex+1].id}" target="#{beContentEditorBean.id}"/>
                         <f:setPropertyActionListener value="#{beContentEditorBean.pkByIndex[currentIndex+1].version}" target="#{beContentEditorBean.version}"/>
                     </adm:commandIcon>
                     <adm:commandIcon id="lastResultRow" icon="last" titleKey="Content.button.lastResultRow.title"
                             bean="#{beContentEditorBean}" action="preInitEditorFromResultSet" location="content"
-                            buttonDisabled="#{currentIndex == fxSearchResultBean.result.rowCount-1}">
+                            buttonDisabled="#{currentIndex == beContentEditorBean.rowCount-1}">
                         <f:setPropertyActionListener value="#{myContent}" target="#{srcEditor.wrappedContent}"/>
-                        <f:setPropertyActionListener value="#{beContentEditorBean.pkByIndex[fxSearchResultBean.result.rowCount -1].id}" target="#{beContentEditorBean.id}"/>
-                        <f:setPropertyActionListener value="#{beContentEditorBean.pkByIndex[fxSearchResultBean.result.rowCount -1].version}" target="#{beContentEditorBean.version}"/>
+                        <f:setPropertyActionListener value="#{beContentEditorBean.pkByIndex[beContentEditorBean.rowCount -1].id}" target="#{beContentEditorBean.id}"/>
+                        <f:setPropertyActionListener value="#{beContentEditorBean.pkByIndex[beContentEditorBean.rowCount -1].version}" target="#{beContentEditorBean.version}"/>
                     </adm:commandIcon>
                 </div>
                 <br clear="all"/>

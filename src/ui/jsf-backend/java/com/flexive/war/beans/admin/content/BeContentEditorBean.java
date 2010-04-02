@@ -1175,7 +1175,7 @@ public class BeContentEditorBean implements ActionBean, Serializable {
      *         is part of the search result.
      */
     private boolean isPkInSearchResult(FxPK pk) {
-        return isFromResultSet() && pk != null && ((SearchResultBean) FxJsfUtils.getManagedBean("fxSearchResultBean")).getResult().getResultRow(getPk()) != null;
+        return isFromResultSet() && pk != null && sortedPKArray.size() > 0 && sortedPKArray.contains(pk);
     }
 
     /**
@@ -1262,6 +1262,7 @@ public class BeContentEditorBean implements ActionBean, Serializable {
     }
 
     public void setSortedPKs(String sortedPKs) {
+        if (sortedPKs.trim().length() <= 0) return;
         this.sortedPKs = sortedPKs;
         for (String tmpS : sortedPKs.split(",")) {
             sortedPKArray.add(FxPK.fromString(tmpS));
@@ -1299,6 +1300,10 @@ public class BeContentEditorBean implements ActionBean, Serializable {
      */
     public String getConfirm() {
         return this.editMode ? "Content.confirm.abort" : null;
+    }
+
+    public int getRowCount() {
+        return sortedPKArray.size();
     }
 
     private static enum CallbackOpts {
