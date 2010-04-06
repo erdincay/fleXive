@@ -65,6 +65,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.myfaces.custom.fileupload.UploadedFile;
 
 import javax.faces.model.SelectItem;
+import javax.servlet.http.HttpSession;
 import java.io.Serializable;
 import java.util.*;
 
@@ -135,6 +136,8 @@ public class BeContentEditorBean implements ActionBean, Serializable {
     private Hashtable<FxPK, Integer> currentIndexCache = new Hashtable<FxPK, Integer>();
 
     private ArrayList<FxPK> sortedPKArray = new ArrayList<FxPK>();
+    private transient HttpSession session = null;
+    private final static String SORTED_PK_KEY = "BeContentEditorBean/sortedPK";
 
     /**
      * {@inheritDoc}
@@ -1217,7 +1220,13 @@ public class BeContentEditorBean implements ActionBean, Serializable {
         };
     }
 
+
     public String getSortedPKs() {
+        if (sortedPKs != null) {
+            if (session == null)
+                session = FxJsfUtils.getSession();
+            session.setAttribute(SORTED_PK_KEY, sortedPKs);
+        }
         return sortedPKs;
     }
 
@@ -1252,6 +1261,8 @@ public class BeContentEditorBean implements ActionBean, Serializable {
             public Integer get(Object key) {
                 Integer tmp = currentIndexCache.get(key);
                 if (tmp == null) {
+                    if (StringUtils.isBlank(sortedPKs))
+                        setSortedPKs(null);
                     tmp = sortedPKArray.indexOf(FxPK.fromObject(key));
                     currentIndexCache.put((FxPK) key, tmp);
                 }
@@ -1261,10 +1272,15 @@ public class BeContentEditorBean implements ActionBean, Serializable {
     }
 
     public void setSortedPKs(String sortedPKs) {
-        if (StringUtils.isBlank(sortedPKs))
-            return;
-        this.sortedPKs = sortedPKs;
-        for (String tmpS : sortedPKs.split(",")) {
+        if (StringUtils.isBlank(sortedPKs)) {
+            if (session == null)
+                session = FxJsfUtils.getSession();
+            this.sortedPKs = (String) session.getAttribute(SORTED_PK_KEY);
+        }
+        else {
+            this.sortedPKs = sortedPKs;
+        }
+        for (String tmpS : this.sortedPKs.split(",")) {
             sortedPKArray.add(FxPK.fromString(tmpS));
         }
         this.currentIndexCache.clear();
