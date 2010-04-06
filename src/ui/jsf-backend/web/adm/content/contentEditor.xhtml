@@ -34,11 +34,6 @@
             <c:if test="#{fxSystemBean.browserAsString=='IE'}">
                 <c:set var="jsfunc" value="flexive.yui.load();"/>
             </c:if>
-            <!-- js function f. ajaxCommandButtons / icons (locking) -->
-            <c:set var="jsfuncTreeReload" value="beCeAjaxButtonRequest(true);"/>
-            <c:if test="#{fxSystemBean.browserAsString=='IE'}">
-                <c:set var="jsfunc" value="flexive.yui.load(); ceReloadTree();"/>
-            </c:if>
 
             <!-- content tree reloads from non-ajax requests (e.g. adm:commandButton) -->
             <c:if test="#{beContentEditorBean.reloadContentTree}">

@@ -782,7 +782,6 @@ public class BeContentEditorBean implements ActionBean, Serializable {
                 treeNodes = null;
             }
         }
-        reloadContentTree = true;
         return null;
     }
 
@@ -1090,7 +1089,6 @@ public class BeContentEditorBean implements ActionBean, Serializable {
      */
     public String enableEdit() {
         ((FxContentEditorBean) FxJsfUtils.getManagedBean("fxContentEditorBean")).enableEdit();
-        reloadContentTree = true;
         return null;
     }
 
