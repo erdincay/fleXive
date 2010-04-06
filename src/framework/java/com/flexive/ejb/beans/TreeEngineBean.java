@@ -394,6 +394,7 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
      * @throws FxApplicationException on errors
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    @Deprecated
     public void remove(FxTreeMode mode, long nodeId, boolean deleteReferencedContent, boolean deleteChildren) throws FxApplicationException {
         Connection con = null;
         if (nodeId < 0) {
@@ -435,6 +436,7 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    @Deprecated
     public void remove(FxTreeNode node, boolean removeReferencedContent, boolean removeChildren) throws FxApplicationException {
         remove(node.getMode(), node.getId(), removeReferencedContent, removeChildren);
     }
@@ -565,6 +567,7 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    @Deprecated
     public long copy(FxTreeMode mode, long source, long destination, int destinationPosition) throws FxApplicationException {
         return copy(mode, source, destination, destinationPosition, false);
     }
@@ -627,6 +630,7 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
     /**
      * {@inheritDoc}
      */
+    @Deprecated
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void activate(FxTreeMode mode, long nodeId, boolean includeChildren) throws FxApplicationException {
         activate(mode, nodeId, includeChildren, true);
@@ -898,11 +902,11 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
             long nodeId = createNode(node.getParentNodeId(), node.getName(), node.getLabel(), node.getPosition(),
                     node.getReference(), node.getData(), node.getMode());
             if ((node.getReference() == null || node.getReference().isNew()) &&
-                    node.getACLId() != ACLCategory.INSTANCE.getDefaultId()) {
+                    !Arrays.asList(ACLCategory.INSTANCE.getDefaultId()).equals(node.getACLIds())) {
                 //requested a non-default ACL for a folder
                 FxTreeNode created = getNode(node.getMode(), nodeId);
                 FxContent co = contentEngine.load(created.getReference());
-                co.setAclId(node.getACLId());
+                co.setAclIds(node.getACLIds());
                 contentEngine.save(co);
             }
             // call scripts
@@ -931,10 +935,10 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
             if (old.getParentNodeId() != node.getParentNodeId() || old.getPosition() != node.getPosition())
                 move(node.getMode(), node.getId(), node.getParentNodeId(), node.getPosition());
             if (node.isActivate() && node.getMode() != FxTreeMode.Live)
-                activate(FxTreeMode.Edit, node.getId(), node.isActivateWithChildren());
-            if (node.getACLId() != old.getACLId()) {
+                activate(FxTreeMode.Edit, node.getId(), node.isActivateWithChildren(), true);
+            if (!node.getACLIds().equals(old.getACLIds())) {
                 FxContent co = contentEngine.load(node.getReference());
-                co.setAclId(node.getACLId());
+                co.setAclIds(node.getACLIds());
                 contentEngine.save(co);
             }
         }

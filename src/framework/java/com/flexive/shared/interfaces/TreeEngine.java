@@ -79,6 +79,7 @@ public interface TreeEngine {
      * @throws FxApplicationException on errors
      * @deprecated use TreeEngine#remove(com.flexive.shared.tree.FxTreeNode, com.flexive.shared.tree.FxTreeRemoveOp, boolean)
      */
+    @Deprecated
     void remove(FxTreeNode node, boolean removeReferencedContent, boolean removeChildren) throws FxApplicationException;
 
     /**
@@ -97,6 +98,7 @@ public interface TreeEngine {
      * @throws FxApplicationException on errors
      * @deprecated use TreeEngine#remove(com.flexive.shared.tree.FxTreeMode, long, com.flexive.shared.tree.FxTreeRemoveOp, boolean)
      */
+    @Deprecated
     void remove(FxTreeMode mode, long nodeId, boolean removeReferencedContent, boolean removeChildren) throws FxApplicationException;
 
     /**
@@ -176,6 +178,7 @@ public interface TreeEngine {
      * @throws FxApplicationException on errors
      * @deprecated
      */
+    @Deprecated
     long copy(FxTreeMode mode, long source, long destination, int destinationPosition) throws FxApplicationException;
 
     /**
@@ -211,6 +214,7 @@ public interface TreeEngine {
      * @see com.flexive.shared.interfaces.TreeEngine#activate(com.flexive.shared.tree.FxTreeMode, long, boolean, boolean)
      * @deprecated use com.flexive.shared.interfaces.TreeEngine#activate(com.flexive.shared.tree.FxTreeMode, long, boolean, boolean)
      */
+    @Deprecated
     void activate(FxTreeMode mode, long nodeId, boolean includeChildren) throws FxApplicationException;
 
     /**

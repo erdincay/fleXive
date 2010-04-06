@@ -32,6 +32,7 @@
 package com.flexive.shared.media;
 
 import com.flexive.shared.media.impl.FxMimeType;
+import java.io.Serializable;
 import org.apache.commons.lang.StringUtils;
 
 import java.util.ArrayList;
@@ -44,8 +45,9 @@ import java.util.List;
  *
  * @since 3.1
  */
-public class FxMimeTypeWrapper {
-
+public class FxMimeTypeWrapper implements Serializable {
+    private static final long serialVersionUID = -3880163774501204024L;
+    
     private List<FxMimeType> mimeTypes;
 
     /**

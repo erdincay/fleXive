@@ -37,7 +37,6 @@ import com.flexive.shared.FxContext;
 import com.flexive.shared.FxLockType;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxUpdateException;
-import com.flexive.shared.exceptions.FxLockException;
 import static com.flexive.shared.EJBLookup.getTreeEngine;
 import static com.flexive.shared.EJBLookup.getContentEngine;
 import com.flexive.shared.content.FxPK;
@@ -56,8 +55,6 @@ import org.apache.commons.logging.LogFactory;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringWriter;
-import java.util.List;
-import java.util.ArrayList;
 
 /**
  * Content tree edit actions invoked via JSON/RPC.
@@ -293,7 +290,7 @@ public class ContentTreeEditor implements Serializable {
 
     public String copy(long nodeId, long newParentId, int index, boolean live) throws Exception {
         try {
-            getTreeEngine().copy(live ? Live : Edit, nodeId, newParentId, index);
+            getTreeEngine().copy(live ? Live : Edit, nodeId, newParentId, index, false);
         } catch (Exception e) {
             LOG.error("Failed to copy node: " + e.getMessage(), e);
             throw e;
@@ -321,7 +318,7 @@ public class ContentTreeEditor implements Serializable {
 
     private static class CopyOp implements TreeMoveOp {
         public void perform(FxTreeMode treeMode, long nodeId, long targetId, int position) throws FxApplicationException {
-            getTreeEngine().copy(treeMode, nodeId, targetId, position);
+            getTreeEngine().copy(treeMode, nodeId, targetId, position, false);
         }
     }
 
