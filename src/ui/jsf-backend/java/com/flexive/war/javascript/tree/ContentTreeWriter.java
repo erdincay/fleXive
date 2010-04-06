@@ -74,6 +74,12 @@ public class ContentTreeWriter implements Serializable {
     private static final String DOCTYPE_CONTENT = "Content_";   // content + type ID
 
     /**
+     * Maximum number of direct child nodes rendered by the content tree.
+     * This limit is not applied for the root node.
+     */
+    private static final int MAX_CHILD_NODES = 100;
+
+    /**
      * Render the content tree beginning at the given node up to maxDepth levels deep.
      * To be called via JSON-RPC-Java.
      *
@@ -84,7 +90,8 @@ public class ContentTreeWriter implements Serializable {
      * @param pathMode    true if node labels should be paths instead of content captions
      * @return the resulting tree
      */
-    public String renderContentTree(HttpServletRequest request, Long startNodeId, int maxDepth, boolean liveTree, boolean pathMode) {
+    public String renderContentTree(HttpServletRequest request, Long startNodeId, int maxDepth, boolean liveTree, 
+            boolean pathMode) {
         StringWriter localWriter = null;
         try {
             // if embedded in a tree component, use the component's tree writer
@@ -203,8 +210,15 @@ public class ContentTreeWriter implements Serializable {
             writer.startNode(new Node(String.valueOf(node.getId()), label + " [" + node.getDirectChildCount() + "]",
                     docType, properties));
             writer.startChildren();
-            for (FxTreeNode child : node.getChildren())
+            int count = 0;
+            for (FxTreeNode child : node.getChildren()) {
                 writeContentNode(environment, writer, child, properties, actionsDisabled, pathMode);
+                if (node.getId() != FxTreeNode.ROOT_NODE && ++count > MAX_CHILD_NODES) {
+                    // render placeholder, skip rest of nodes
+                    writer.writeNode(new Node("-1", "...", DOCTYPE_CONTENT, new HashMap<String, Object>(0)));
+                    break;
+                }
+            }
             writer.closeChildren();
             writer.closeNode();
         }

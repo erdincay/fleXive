@@ -210,10 +210,10 @@ public class TreeNodeWriter {
         /** {@inheritDoc} */
         public String format(Node node, RelativeUriMapper uriMapper) {
             final StringBuilder style = new StringBuilder();
-            if ((Boolean) node.properties.get("isDirty")) {
+            if (node.properties.containsKey("isDirty") && (Boolean) node.properties.get("isDirty")) {
                 style.append("dirty ");
             }
-            if (!(Boolean) node.properties.get("mayEdit")) {
+            if (node.properties.containsKey("mayEdit") && !(Boolean) node.properties.get("mayEdit")) {
                 style.append("readonly ");
             }
             if (style.length() > 0) {

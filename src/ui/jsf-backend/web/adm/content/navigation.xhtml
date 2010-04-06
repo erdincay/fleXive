@@ -67,10 +67,10 @@
                     if (node.referenceId && node.referenceId != -1 && (!node.isFolderType || node.isFolderType == null)) {
                         // open content editor
                         invokeContentAction("adm/content/contentEditor.jsf", "editInstance", {id: node.referenceId, liveMode: treeLiveMode, editMode: false});
-                    } else {
+                    } else if (node.objectId && node.objectId != -1) {
                         invokeContentAction("adm/search/searchResult.jsf", "nodeSearch", {nodeId: node.objectId, liveMode: treeLiveMode, onlyDirect: true});
                     }
-                } else if (parent.frames["contentFrame"].addTreeNode && !parent.frames["contentFrame"].isContentEditor) {
+                } else if (parent.frames["contentFrame"].addTreeNode && !parent.frames["contentFrame"].isContentEditor && node.objectId && node.objectId != -1) {
                     // add to query
                     parent.frames["contentFrame"].addTreeNode(node.objectId, treeLiveMode);
                 }
@@ -387,7 +387,7 @@
 
             function showTreeMenu() {
                 var menu = dojo.widget.byId("contentTreeMenu");
-                if (menu.getTreeNode() == null) {
+                if (menu.getTreeNode() == null || menu.getTreeNode().objectId == null || menu.getTreeNode().objectId == "") {
                     return;
                 }
                 var clipboardEmpty = parent.getContentClipboard().isEmpty();
