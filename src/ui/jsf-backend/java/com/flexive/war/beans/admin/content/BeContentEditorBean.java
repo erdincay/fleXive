@@ -1234,6 +1234,11 @@ public class BeContentEditorBean implements ActionBean, Serializable {
         if (currentIndex >= sortedPKArray.size()) {
             currentIndex = sortedPKArray.size() - 1;
         }
+        StringBuilder sb = new StringBuilder(sortedPKs.length());
+        for (FxPK tmpPK : sortedPKArray) {
+            sb.append(',').append(tmpPK);
+        }
+        sortedPKs = sb.toString().substring(1); // remove the starting ','
         currentIndexCache.clear();
         return sortedPKArray.get(currentIndex);
     }
