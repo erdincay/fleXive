@@ -271,7 +271,18 @@ public class GenericSQLDataFilter extends DataFilter {
                 contentTypes.add(type);
             }
 
-            if (foundEntryCount > search.getFxStatement().getMaxResultRows()) {
+            if (foundEntryCount >= search.getFxStatement().getMaxResultRows()) {
+                // TODO: this returns true when hitting exactly the result row count, but seems to be
+                // better than the alternatives at the moment:
+                //
+                // When setting the limit to (maxRows + 1), callers get confused because more rows
+                // are returned than were actually queried. Client-side trimming (i.e. in the result set)
+                // is not an option because FILTERS and fetchRows arbitrarily limit the number
+                // of returned rows, so which row should be removed?
+                //
+                // Removing the "marker row" from the temporary table seems to be another solution,
+                // but it's also a hack with performance implications (one more write on a busy table).
+                
                 foundEntryCount = search.getFxStatement().getMaxResultRows();
                 truncated = true;
             } else {

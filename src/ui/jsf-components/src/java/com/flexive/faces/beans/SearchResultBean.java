@@ -232,7 +232,9 @@ public class SearchResultBean implements ActionBean, Serializable {
             new FxFacesMsgErr("Briefcase.err.name").addToContext();
             return FxJsfUtils.getManagedBean(QueryEditorBean.class).show();
         }
-        getResult();
+        if (getResult().isTruncated()) {
+            new FxFacesMsgInfo("SearchResult.nfo.truncated", getResult().getTotalRowCount()).addToContext();
+        }
         return "contentResult";
     }
 

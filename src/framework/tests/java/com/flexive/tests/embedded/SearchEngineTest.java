@@ -1631,6 +1631,14 @@ public class SearchEngineTest {
         assertTrue(result.getRowCount() > 0);
     }
 
+    @Test
+    public void testTruncatedResult() throws FxApplicationException {
+        final FxResultSet result = new SqlQueryBuilder().maxRows(1).getResult();
+        assertTrue(result.isTruncated(), "Result must be truncated");
+        assertEquals(result.getRowCount(), 1, "Truncated result returned incorrect rowcount");
+        assertEquals(result.getTotalRowCount(), 1, "Wrong totalRowCount for truncated result");
+    }
+
     private void queryForCaption(String name) throws FxApplicationException {
         final FxResultSet result = new SqlQueryBuilder().select("caption").condition("caption", PropertyValueComparator.EQ, name).getResult();
         assertTrue(result.getRowCount() == 1, "Expected one result row, got: " + result.getRowCount());
