@@ -298,8 +298,33 @@ public class BinaryDescriptor implements Serializable {
      * @since 3.1
      */
     public BinaryDescriptor(String name, long streamLength, String mimeType, InputStream stream) throws FxStreamException {
-        this(FxStreamUtils.uploadBinary(streamLength, stream).getHandle(), name, streamLength,
-                mimeType, null);
+        this(FxStreamUtils.uploadBinary(streamLength, stream), name, mimeType);
+    }
+
+    /**
+     * Constructor (for new Binaries with unknown size)
+     *
+     * @param name         name of the binary
+     * @param mimeType     the MIME type to be used, regardless of the stream content
+     * @param stream       an open input stream for the binary to upload
+     * @throws FxStreamException on upload errors
+     * @since 3.1
+     */
+    public BinaryDescriptor(String name, String mimeType, InputStream stream) throws FxStreamException {
+        this(FxStreamUtils.uploadBinary(-1L, stream), name, mimeType);
+    }
+
+
+    /**
+     * Internal Constructor (for new Binaries with unknown size)
+     *
+     * @param payload      payload from the streaming server to read the actual size
+     * @param name         name of the binary
+     * @param mimeType     the MIME type to be used, regardless of the stream content
+     * @since 3.1
+     */
+    protected BinaryDescriptor(BinaryUploadPayload payload, String name, String mimeType) {
+        this(payload.getHandle(), name, payload.getActualLength(), mimeType, null, null);
     }
 
     /**
