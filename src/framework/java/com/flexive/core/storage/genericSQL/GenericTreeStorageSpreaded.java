@@ -52,6 +52,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Multiset.Entry;
 
 import java.util.*;
 
@@ -335,6 +336,10 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
             }
         }
 
+        if (insertBoundaries != null && insertPosition == -1) {
+            insertPosition = 0;     // insertPosition cannot be negative
+        }
+
         Statement stmt = null;
         PreparedStatement ps = null;
         ResultSet rs;
@@ -397,7 +402,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
                 _rgt = rs.getBigDecimal(5);
                 depth = rs.getInt(6);
                 if (createMode) {
-                    // Reading this properties is slow, only do it when needed
+                    // Reading these properties is slow, only do it when needed
                     ref = rs.getLong(8);
                     if (rs.wasNull()) ref = null;
                     name = rs.getString(9);
@@ -1073,16 +1078,21 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
             final String sql = "SELECT t.id, t.LFT, t.RGT, t.CHILDCOUNT, t.DEPTH, t.PARENT " +
                     "FROM " + getTable(mode) + " t";
             stmt = con.prepareStatement(sql);
+            stmt.setFetchSize(10000);
             final ResultSet rs = stmt.executeQuery();
 
             // collect nodes, build lookup tables
             final Map<Long, CheckedNodeInfo> nodeMap = Maps.newHashMap();           // node ID -> node info
             final Multimap<Long, CheckedNodeInfo> childMap = HashMultimap.create();    // node ID -> children
+            final Multimap<BigDecimal, CheckedNodeInfo> leftNodeInfos = HashMultimap.create(1000, 1);
+            final Multimap<BigDecimal, CheckedNodeInfo> rightNodeInfos = HashMultimap.create(1000, 1);
             while (rs.next()) {
                 final CheckedNodeInfo info = new CheckedNodeInfo(rs.getLong(1), rs.getLong(6), rs.getBigDecimal(2),
                         rs.getBigDecimal(3), rs.getInt(4), rs.getInt(5));
                 nodeMap.put(info.id, info);
                 childMap.put(info.parentId, info);
+                leftNodeInfos.put(info.left, info);
+                rightNodeInfos.put(info.right, info);
             }
 
             // process all nodes
@@ -1125,25 +1135,26 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
                             + node.depth + ", parent depth=" + nodeMap.get(node.parentId).depth);
                 }
             }
-            //check for duplicate boundaries
-            final String sqlBoundaries = "SELECT t.ID FROM " + getTable(mode) + " t, " + getTable(mode) + " c WHERE (t.RGT=c.RGT OR t.LFT=c.LFT) AND t.ID<>c.ID ";
-            stmt.close();
-            stmt = con.prepareStatement(sqlBoundaries);
-            List<Long> dupIds = null;
-            final ResultSet rsBoundaries = stmt.executeQuery();
-            while (rsBoundaries != null && rsBoundaries.next()) {
-                if (dupIds == null)
-                    dupIds = new ArrayList<Long>(50);
-                dupIds.add(rsBoundaries.getLong(1));
-            }
-            if (dupIds != null)
-                throw new FxTreeException(LOG, "ex.tree.check.failed", mode, "Duplicate boundaries for nodes " + dupIds);
+
+            checkUniqueBounds(mode, leftNodeInfos, "left");
+            checkUniqueBounds(mode, rightNodeInfos, "right");
+
             if (LOG.isDebugEnabled())
                 LOG.debug("Successfully checked [" + childMap.size() + "] tree nodes in mode [" + mode.name() + "]!");
         } catch (SQLException e) {
             throw new FxTreeException(LOG, e, "ex.tree.check.failed", mode, e.getMessage());
         } finally {
             Database.closeObjects(GenericTreeStorageSpreaded.class, stmt);
+        }
+    }
+
+    private void checkUniqueBounds( FxTreeMode mode, Multimap<BigDecimal, CheckedNodeInfo> infos, String name) throws FxTreeException {
+        // check for unique left/right tree bounds
+        for (Entry<BigDecimal> entry : infos.keys().entrySet()) {
+            if (entry.getCount() > 1) {
+                throw new FxTreeException(LOG, "ex.tree.check.failed", mode, "Duplicate boundaries (" + name
+                        + ") for nodes " + infos.get(entry.getElement()));
+            }
         }
     }
 
@@ -1162,6 +1173,11 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
             this.right = right;
             this.directChildCount = directChildCount;
             this.depth = depth;
+        }
+
+        @Override
+        public String toString() {
+            return String.valueOf(id);
         }
     }
 
