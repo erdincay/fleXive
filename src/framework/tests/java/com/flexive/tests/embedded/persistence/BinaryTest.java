@@ -36,19 +36,16 @@ import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxFileUtils;
-import com.flexive.shared.stream.FxStreamUtils;
 import com.flexive.shared.configuration.SystemParameters;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.ContentEngine;
+import com.flexive.shared.stream.FxStreamUtils;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.value.BinaryDescriptor;
-import static com.flexive.shared.value.BinaryDescriptor.PreviewSizes;
 import com.flexive.shared.value.FxBinary;
 import com.flexive.shared.value.FxString;
-import static com.flexive.tests.embedded.FxTestUtils.login;
-import static com.flexive.tests.embedded.FxTestUtils.logout;
 import com.flexive.tests.embedded.TestUsers;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.logging.Log;
@@ -60,6 +57,10 @@ import org.testng.annotations.Test;
 
 import java.io.*;
 
+import static com.flexive.shared.value.BinaryDescriptor.PreviewSizes;
+import static com.flexive.tests.embedded.FxTestUtils.login;
+import static com.flexive.tests.embedded.FxTestUtils.logout;
+
 /**
  * Tests for binaries
  *
@@ -70,6 +71,7 @@ public class BinaryTest {
     private static final Log LOG = LogFactory.getLog(BinaryTest.class);
 
     private static String IMAGE_TYPE = "Image";
+    private static String DOCUMENT_TYPE = "DocumentFile";
 
     private ContentEngine co;
 
@@ -96,6 +98,24 @@ public class BinaryTest {
         EJBLookup.getConfigurationEngine().put(SystemParameters.BINARY_TRANSIT_DB, true);
         FxFileUtils.removeDirectory(BASE_STORAGE);
         logout();
+    }
+
+    @Test
+    public void binaryFromStream() throws Exception {
+        final String CONTENT = "test document content";
+        BinaryDescriptor bin = new BinaryDescriptor("test document.txt", new ByteArrayInputStream(CONTENT.getBytes("UTF-8")));
+        FxType docType = CacheAdmin.getEnvironment().getType(DOCUMENT_TYPE);
+        FxContent doc = co.initialize(docType.getId());
+        doc.setValue("/DOCUMENT", new FxBinary(false, bin));
+        FxContent docLoaded = co.load(co.save(doc));
+        try {
+            FxBinary binLoaded = (FxBinary) docLoaded.getValue("/DOCUMENT");
+            ByteArrayOutputStream bout = new ByteArrayOutputStream();
+            binLoaded.getDefaultTranslation().download(bout);
+            Assert.assertEquals(bout.toString(), CONTENT);
+        } finally {
+            co.remove(docLoaded.getPk());
+        }
     }
 
     @Test
@@ -205,7 +225,7 @@ public class BinaryTest {
                 checkPreviewFile(prevThreshold, desc, bin, PreviewSizes.PREVIEW2);
                 checkPreviewFile(prevThreshold, desc, bin, PreviewSizes.PREVIEW3);
             }
-            
+
             InputStream is = FxStreamUtils.getBinaryStream(desc, PreviewSizes.ORIGINAL);
             File tmp = File.createTempFile("testTmpIS", "");
             FxFileUtils.copyStream2File(desc.getSize(), is, tmp);
@@ -215,7 +235,7 @@ public class BinaryTest {
             //create a new version and remove the first
             FxPK pkV2 = co.createNewVersion(loaded);
             co.removeVersion(pkV2);
-        } catch(Exception e) {
+        } catch (Exception e) {
             LOG.error(e);
             e.printStackTrace();
         } finally {
@@ -228,9 +248,9 @@ public class BinaryTest {
      * Check if a preview file is handled correctly
      *
      * @param prevThreshold threshold
-     * @param desc         descriptor
-     * @param bin          binary
-     * @param previewSize  evaluated size
+     * @param desc          descriptor
+     * @param bin           binary
+     * @param previewSize   evaluated size
      * @throws IOException       on errors
      * @throws FxStreamException on errors
      */

@@ -110,7 +110,7 @@ public class BinaryUploadProtocol extends StreamProtocol<BinaryUploadPayload> {
                     LOG.error(e);
                 }
             }
-            return new DataPacket<BinaryUploadPayload>(new BinaryUploadPayload(handle), false, this.expectedLength > 0);
+            return new DataPacket<BinaryUploadPayload>(new BinaryUploadPayload(handle), false, this.expectedLength > 0 || this.expectedLength == -1L);
         } else {
             cleanup();
         }

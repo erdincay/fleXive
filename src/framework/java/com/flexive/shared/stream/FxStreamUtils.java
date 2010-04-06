@@ -151,8 +151,14 @@ public class FxStreamUtils {
             DataPacket<BinaryUploadPayload> resp = client.connect(req);
             if (resp.getPayload().isServerError())
                 throw new FxStreamException("ex.stream.serverError", resp.getPayload().getErrorMessage());
-            if (resp.isExpectStream())
-                client.sendStream(stream, length);
+            if (resp.isExpectStream()) {
+                long actualLength;
+                if( length != -1L)
+                    actualLength = client.sendStream(stream, length);
+                else
+                    actualLength = client.sendStream(stream);
+                resp.getPayload().setActualLength(actualLength);
+            }
             client.close();
             client = null;
             return resp.getPayload();

@@ -49,6 +49,7 @@ public final class BinaryUploadPayload implements Serializable {
     private boolean serverError = false;
     private int division = -1;
     private boolean finished = false;
+    private long actualLength = 0;
 
     /**
      * Constructor for the 'calling user'
@@ -112,5 +113,25 @@ public final class BinaryUploadPayload implements Serializable {
 
     public boolean isFinished() {
         return finished;
+    }
+
+    /**
+     * Get the actual content length
+     *
+     * @return actual content length
+     * @since 3.1
+     */
+    public long getActualLength() {
+        return actualLength;
+    }
+
+    /**
+     * Set the actual content length after the stream has been transfered
+     *
+     * @param actualLength actual length of the content
+     * @since 3.1
+     */
+    public void setActualLength(long actualLength) {
+        this.actualLength = actualLength;
     }
 }
