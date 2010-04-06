@@ -38,14 +38,13 @@ import com.flexive.shared.exceptions.FxRuntimeException;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.workflow.Step;
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.Serializable;
-import java.util.List;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * A referenced content - value class for FxReference
@@ -310,13 +309,17 @@ public class ReferencedContent extends FxPK implements Serializable {
         return super.hashCode() * 31 + caption.hashCode();
     }
 
+    /**
+     * @param obj the other object to compare
+     * @return <code>true</code> if obj is a ReferencedContent and the id and caption are equal
+     */
     @Override
     public boolean equals(Object obj) {
-        //noinspection SimplifiableIfStatement
-        if (!super.equals(obj) || !(obj instanceof ReferencedContent)) {
+        if (obj == null || !(obj instanceof ReferencedContent))
             return false;
-        }
-        return StringUtils.equals(caption, ((ReferencedContent) obj).caption);
+        final ReferencedContent other = (ReferencedContent) obj;
+        return id == other.id;
+//        return StringUtils.equals(caption, other.caption);
     }
 
     /**
