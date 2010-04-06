@@ -52,7 +52,9 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
-import java.util.Collection;
+
+import java.util.*;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.logging.Log;
@@ -61,10 +63,6 @@ import org.apache.commons.logging.LogFactory;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.*;
-import java.util.List;
-import java.util.Stack;
-import java.util.Arrays;
-import java.util.Map;
 
 /**
  * Generic tree storage implementation using a spreaded nested set tree
@@ -321,7 +319,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
                 return -1;
             }
             //System.out.println("### UP we go");
-            return reorganizeSpace(con, seq, sourceMode, destMode, nodeInfo.getParentId(), includeNodeId, overrideSpacing, overrideLeft, insertParent,
+            return _reorganizeSpace(con, seq, sourceMode, destMode, nodeInfo.getParentId(), includeNodeId, overrideSpacing, overrideLeft, insertParent,
                     insertPosition, insertSpace, insertBoundaries, depthDelta, destinationNode, createMode, createKeepIds);
         }
 
@@ -332,7 +330,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
             spacing = overrideSpacing;
         } else {
             if (spacing.compareTo(GO_UP) < 0 && !createMode) {
-                return reorganizeSpace(con, seq, sourceMode, destMode, nodeInfo.getParentId(), includeNodeId, overrideSpacing, overrideLeft, insertParent,
+                return _reorganizeSpace(con, seq, sourceMode, destMode, nodeInfo.getParentId(), includeNodeId, overrideSpacing, overrideLeft, insertParent,
                         insertPosition, insertSpace, insertBoundaries, depthDelta, destinationNode, createMode, createKeepIds);
             }
         }
@@ -353,8 +351,9 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
                             "CHILDCOUNT = 0",
                             "0",
                             "(SELECT COUNT(*) FROM " + getTable(sourceMode) + " WHERE LFT > NODE.LFT AND RGT < NODE.RGT)"
-                    ) + ", " +
-                    "CHILDCOUNT, LFT AS LFTORD,RGT,DEPTH" + createProps +
+                    ) +
+                    // 3           4             5   6
+                    ", CHILDCOUNT, LFT AS LFTORD,RGT,DEPTH" + createProps +
                     " FROM (SELECT ID,CHILDCOUNT,LFT,RGT,DEPTH" + createProps + " FROM " + getTable(sourceMode) + " WHERE " +
                     "LFT>" + includeNode + nodeInfo.getLeft() + " AND LFT<" + includeNode + nodeInfo.getRight() + ") NODE " +
                     "ORDER BY LFTORD ASC";
@@ -445,9 +444,9 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
                 // Update the node
                 if (createMode) {
                     newId = createKeepIds ? id : seq.getId(destMode.getSequencer());
-                    if (firstCreatedNodeId == -1) {
+                    if (firstCreatedNodeId == -1)
                         firstCreatedNodeId = newId;
-                    }
+                    
                     // Create the main entry
                     ps.setLong(1, newId);
                     ps.setLong(2, currentParent.peek());
@@ -1126,6 +1125,19 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
                             + node.depth + ", parent depth=" + nodeMap.get(node.parentId).depth);
                 }
             }
+            //check for duplicate boundaries
+            final String sqlBoundaries = "SELECT t.ID FROM " + getTable(mode) + " t, " + getTable(mode) + " c WHERE (t.RGT=c.RGT OR t.LFT=c.LFT) AND t.ID<>c.ID ";
+            stmt.close();
+            stmt = con.prepareStatement(sqlBoundaries);
+            List<Long> dupIds = null;
+            final ResultSet rsBoundaries = stmt.executeQuery();
+            while (rsBoundaries != null && rsBoundaries.next()) {
+                if (dupIds == null)
+                    dupIds = new ArrayList<Long>(50);
+                dupIds.add(rsBoundaries.getLong(1));
+            }
+            if (dupIds != null)
+                throw new FxTreeException(LOG, "ex.tree.check.failed", mode, "Duplicate boundaries for nodes " + dupIds);
             if (LOG.isDebugEnabled())
                 LOG.debug("Successfully checked [" + childMap.size() + "] tree nodes in mode [" + mode.name() + "]!");
         } catch (SQLException e) {

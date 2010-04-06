@@ -1301,7 +1301,7 @@ public abstract class GenericTreeStorage implements TreeStorage {
                 for (List<Long> part : Iterables.partition(removeNodeIds, SQL_IN_PARTSIZE)) {
                     stmt.addBatch("UPDATE " + getTable(mode) + " SET DEPTH=DEPTH-1,DIRTY=" +
                             StorageManager.getBooleanExpression(mode != FxTreeMode.Live) +
-                            " WHERE id IN (" + StringUtils.join(part, ',') + ")");
+                            " WHERE id IN (" + StringUtils.join(part, ',') + ") AND DEPTH>0");
                 }
                 stmt.addBatch("DELETE FROM " + getTable(mode) + " WHERE ID=" + nodeId);
             }
