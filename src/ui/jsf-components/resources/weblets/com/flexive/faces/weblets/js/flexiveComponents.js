@@ -916,7 +916,8 @@ flexive.input = new function() {
             focus_alert: false,
             strict_loading_mode: true,  /* Fixes Firefox HTML encoding problem with multiple editors */
             relative_urls: false,        /* don't force relative URLs for images and links */
-            convert_urls : false
+            convert_urls : false,
+            forced_root_block : false    /* Don't add surrounding p (FX-836) */
             /*width: "100%"*/
         },
 
@@ -944,7 +945,8 @@ flexive.input = new function() {
             focus_alert: false,
             strict_loading_mode: true,  /* Fixes Firefox HTML encoding problem with multiple editors */
             relative_urls: false,        /* don't force relative URLs for images and links */
-            convert_urls : false
+            convert_urls : false,
+            forced_root_block : false    /* Don't add surrounding p (FX-836) */
             /*width: "100%"*/
         }
     };

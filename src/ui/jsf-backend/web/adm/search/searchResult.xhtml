@@ -124,7 +124,7 @@
                                 />
                     </h:selectOneListbox>
                     <c:if test="#{fxSearchResultBean.folderId != -1}">
-                        <h:selectOneListbox id="subfolder" value="#{fxSearchResultBean.folderId}" onchange="getElementById('frm:refreshButton').onclick()">
+                        <h:selectOneListbox id="subfolder" value="#{fxSearchResultBean.folderId}" onchange="parent.lockScreen();getElementById('frm:refreshButton').onclick()">
                             <f:selectItem itemValue="#{fxSearchResultBean.folderId}" itemLabel="#{fxMessageBean['SearchResult.label.folder.current']}"/>
                             <f:selectItems value="#{fxSearchResultBean.subFolderItems}"/>
                             <c:if test="#{fxSearchResultBean.folderId != 1 and fxSearchResultBean.parentFolderId != -1}">
@@ -239,7 +239,7 @@
                                icon="view_list#{fxSearchResultBean.viewType == 'LIST' ? '_active' : ''}" location="toolbar"  lockscreen="false"/>
             <adm:commandButton id="refreshButton" labelKey="SearchResult.button.view.refresh"
                                bean="#{fxSearchResultBean}" action="refresh"
-                               icon="reload" location="toolbar" lockscreen="false" separator="after"/>
+                               icon="reload" location="toolbar" lockscreen="true" separator="after"/>
             <adm:commandButton id="preferencesButton" labelKey="ResultPreferences.button.open"
                                bean="#{resultPreferencesBean}" action="show"
                                icon="configure" lockscreen="false" location="both" separator="after">

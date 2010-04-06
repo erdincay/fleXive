@@ -434,11 +434,13 @@ function storePk(/* PK */ pk) {
 
 function openContent(/* PK */ pk) {
     storePk(pk);
+    parent.lockScreen();
     document.getElementById("frm:showButton").onclick();
 }
 
 function editContent(/* PK */ pk) {
     storePk(pk);
+    parent.lockScreen();
     document.getElementById("frm:editButton").onclick();
 }
 
