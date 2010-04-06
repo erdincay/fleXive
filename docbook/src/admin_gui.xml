@@ -39,7 +39,7 @@
     <section xml:id="structure_editor_basics">
         <title>The structure editor</title>
         <para>The structure editor allows you to
-            define the structure or blueprints of content instances. In essence, the
+            define the structure or blueprints of content instances. In essence the
             structure of a content instance is defined by three main building blocks:
             <itemizedlist>
                 <listitem>
@@ -72,17 +72,19 @@
 
         <important>Please note that properties and groups on their own do not
             "belong to" types and also types do not "consist of" properties. Instead properties
-            and groups need to be assigned to types. In fact, the same property can be assigned to
-            multiple types using different property assignments. In practice this
+            and groups need to be assigned to types. In fact the same property can be assigned to
+            multiple types using different property assignments. In theory this
             means that creating a property and assigning it to a type is a two step process.
             First you create the property (choose the property name, data type, default value etc.)
-            and secondly the property needs to be assigned to the type via a property assignment.
+            and secondly the property needs to be assigned to the type using a property assignment.
+            In practice this is automatically handled by the structure editor but it is important to
+            understand that a property is not equal to a property assignment.
             The property assignment acts as a "link" between the type and the actual property
-            and there are various property settings which can be overruled and fine tuned by
+            and there are various property settings which can be overridden and fine tuned by
             the property assignment. Similarly, if you remove a property or group from a type, it
             means that you really only remove the assignment so that this specific property or group is
             no longer assigned to the type anymore. Properties and groups that are no longer assigned
-            to any type or another group will be automatically removed from the system.
+            to another type or another group will be automatically removed from the system.
         </important>
 
         <section xml:id="structure_editor_gui">
@@ -442,7 +444,9 @@
                                     <itemizedlist>
                                     <listitem>
                                         <para>assign the selected assignment's property/group to another type or group.
-                                            By using copy &amp; paste a property can be used by arbitrary types.
+                                            I.e. a new property/group assignment for the selected property is created and
+                                            assigned to the specified type or group at the chosen position. By using copy &amp;
+                                            paste a property can be used within arbitrary types.
                                         </para>
                                     </listitem>
                                     </itemizedlist>
@@ -500,7 +504,7 @@
             <section xml:id="structure_editor_view_mode_vs_edit_mode">
                 <title>View mode vs. edit mode</title>
                 <para>
-                    By default, left clicking on a structure element in the structure tree opens
+                    By default, double left clicking on a structure element in the structure tree opens
                     an editor in
                     <glossterm>view mode</glossterm>
                     on the right half of the screen.
@@ -512,33 +516,31 @@
                 <para>
                     The edit mode on the other hand enables you to edit structure elements and to
                     save changes to the data base. You can switch to edit mode by choosing "Edit" from the context menu
-                    or by clicking the "Edit" button in the editor on the right half of the screen.
+                    or by clicking choosing "Edit" in the context menu which is presented by left clicking on the structure
+                    element in the structure tree.
                     Both view and edit mode provide three different sub editors:
                     <itemizedlist>
                         <listitem>
                             <para>
-                                The type editor for creating and editing types and scripts assigned to that type.
+                                The type editor for creating and editing types options and scripts assigned to that type.
                             </para>
                         </listitem>
                         <listitem>
                             <para>
-                                The group editor for editing group assignments, editing and creating groups and their
-                                options.
+                                The group editor for editing group assignments, editing and creating groups, their
+                                options and scripts.
                             </para>
                         </listitem>
                         <listitem>
                             <para>
-                                The property editor for editing property assignments, editing and creating properties
-                                and
-                                their options.
+                                The property editor for editing property assignments, editing and creating properties, their options
+                                and scripts.
                             </para>
                         </listitem>
                     </itemizedlist>
-                    Depending on which item is left-clicked in the structure tree, or which item is selected for
+                    Depending on which item is double clicked in the structure tree, or which item is selected for
                     creation
-                    in the context menu of the structure tree, one of the three sub editors is opened in either view
-                    mode or
-                    edit mode.
+                    in the context menu of the structure tree, the according sub editors is opened.
                 </para>
             </section>
             <section xml:id="structure_editor_type_editor">
@@ -555,13 +557,11 @@
                     <title>Editing types</title>
                     <para>
                         When editing an existing type, you will notice that the type's
-                        <guimenuitem>"Mode"</guimenuitem>
-                        and
                         <guimenuitem>"Language mode"</guimenuitem>
-                        select boxes are disabled and grayed out. This is due to the fact that the setting
-                        of a type's mode and language mode is only allowed when a new type is created. For
+                        select box is disabled. Specifying a type's language mode
+                        is only allowed when the type is created. For
                         types that are already stored in the database, content may also already exist which
-                        would become invalid if those fields change.
+                        would become invalid if the language mode is changed.
                     </para>
                     <para>
                         Types with their mode set to
@@ -575,9 +575,9 @@
                         button in the
                         <guimenuitem>"Actions"</guimenuitem>
                         column. In order to set unlimited
-                        multiplicities simply enable or disable the according checkbox in a table row. For specifying
-                        the multiplicites manually, first disable the checkbox and use the input field below the
-                        source or destination type which appears after disabling the checkbox.
+                        multiplicities simply enable or disable the according checkbox in the relation's table row.
+                        For specifying the multiplicites manually, first disable the checkbox and use the input
+                        field below the source or destination type which appears after disabling the checkbox.
                         Relations can be removed again by clicking on the
                         <guibutton>"Delete"</guibutton>
                         button
@@ -658,178 +658,36 @@
                             </listitem>
                         </itemizedlist>
                     </para>
-                    <caution>
+                    <note>
                         <para>
                             When creating a new group, the
                             <guimenuitem>"Edit Group Assignment"</guimenuitem>
                             tab will
-                            be hidden, as well as the options of the group assignment in the
+                            be hidden (as no group assignment may exist without a group),
+                            as well as the options of the group assignment in the
                             <guimenuitem>"Edit Options"</guimenuitem>
-                            tab. The according assignment will then be
-                            automatically generated after the group has been created and automatically
-                            inserted into the structure tree accordingly.
+                            tab. Upon pressing the "Create" button, the group is created and the
+                            according group assignment is automatically generated.
                         </para>
                         <para>
-                            Notice that assignments may override specific settings of their groups.
+                            Note that assignments may override specific settings of their groups.
                             For group assignments, if the checkbox
-                            <guimenuitem>"Override Multiplicity"</guimenuitem>
-                            in the
-                            <guimenuitem>"Edit Group Assignment"</guimenuitem>
-                            tab, or the checkbox
                             <guimenuitem>"Overridable Multiplicity"</guimenuitem>
-                            is enabled, the multiplicity
-                            defined in the group assignment overrides the multiplicity of its group.
+                            in the
+                            <guimenuitem>"Group Details"</guimenuitem>
+                            tab is checked the group's multiplicity may be overridden by
+                            the group's assignment. I.e. the <guimenuitem>"Override Multiplicity"</guimenuitem>
+                            checkbox becomes available in the <guimenuitem>"Group Assignment Details"</guimenuitem>
+                            tab.
                         </para>
                         <para>
-                            Also notice that the group mode of a group assignment may not be changed if content
+                            Also note that the group mode of a group assignment may not be changed if content
                             instances for the group assignment already exist.
+                            If you want more information on groups and their specific settings please refer to
+                             <xref linkend="core_structures_group_parameters"/>.
                         </para>
-                    </caution>
+                    </note>
                 </section>
-
-                <section xml:id="structure_editor_group_options">
-                    <title>Editing group assignment and group options</title>
-                    <para>
-                        Generally speaking an option is just a pair of a key and a value. The user
-                        can access the options by left clicking the
-                        <guimenuitem>"Edit Options"</guimenuitem>
-                        tab.
-                        <mediaobject>
-                            <imageobject>
-                                <imagedata fileref="images/adm_ui_structure_editor/group_options.png" format="PNG"
-                                           contentwidth="66%"/>
-                            </imageobject>
-                        </mediaobject>
-                        In the image above, the group options table and the group assignment options table
-                        are displayed. The group has three options with the keys "MYOPTION", "MYOPTION2"
-                        and "MYOPTION3". The
-                        <guimenuitem>"Overridable"</guimenuitem>
-                        checkbox indicates
-                        which options may be overwritten by the group assignment (i.e. may have the
-                        same key but a different value).
-                    </para>
-                    <para>In the example above, only the group option with
-                        the key "MYOPTION2" and value "myvalue" is marked as overridable. This option
-                        is successfully overwritten by the group assignment option with the same key
-                        "MYOPTION2" and the different value "another value".
-                    </para>
-                    <para>
-                        Options can be added by filling in the empty fields on the bottom of the
-                        according table and clicking the
-                        <guibutton>"Add"</guibutton>
-                        button which is
-                        located in the
-                        <guimenuitem>"Actions"</guimenuitem>
-                        column of the table. An
-                        option can be deleted again by selecting the according row and pressing the
-                        <guibutton>"Delete"</guibutton>
-                        button which is
-                        also located in the
-                        <guimenuitem>"Actions"</guimenuitem>
-                        column of the table.
-                    </para>
-                    <para>
-                        In order to facilitate the editing of options, visual helpers are provided:
-                        <itemizedlist>
-                            <listitem>
-                                <para>
-                                    Option displayed in green: This is a valid option, for example "MYOPTION"
-                                    in the group options table.
-                                </para>
-                            </listitem>
-                            <listitem>
-                                <para>
-                                    Option displayed with grey background: The assignment tries to
-                                    override a group option which is currently not set to "Overridable", for
-                                    example "MYOPTION3" in the group assignment options table.
-                                </para>
-                            </listitem>
-                            <listitem>
-                                <para>
-                                    Option displayed in red: This is an invalid option. Either the option
-                                    has no key, or the option has no value, the key already exists or
-                                    the assignment tries to override an option with the same value. The key
-                                    "MYOPTION4" exists twice in the group assignment options table, therefore
-                                    making it invalid.
-                                </para>
-                            </listitem>
-                        </itemizedlist>
-                        In order to display the visual helpers, the "Validate" button
-                        <inlinemediaobject>
-                            <imageobject>
-                                <imagedata fileref="images/adm_ui_structure_editor/validate_button.png" format="PNG"
-                                           contentwidth="66%"/>
-                            </imageobject>
-                        </inlinemediaobject>
-                        on the bottom left has to be clicked.
-                    </para>
-                </section>
-
-                <section xml:id="structure_editor_saving_deleting_groups">
-                    <title>Saving and deleting group assignments and groups</title>
-                    <para>
-                        In order to save changes to existing group assignments, groups and options,
-                        the group editor provides the
-                        <guibutton>"Save"</guibutton>
-                        button
-                        <inlinemediaobject>
-                            <imageobject>
-                                <imagedata fileref="images/adm_ui_structure_editor/save_button.png" format="PNG"
-                                           contentwidth="66%"/>
-                            </imageobject>
-                        </inlinemediaobject>
-                        located at the bottom left of the group editor in every tab. A shortcut to the button
-                        can also be found on top of the content frame.
-                        <warning>
-                            When pressing the "Save"
-                            button, all changes within the three tabs are saved, meaning all changes that
-                            have been made to the assignment, to the group and to the options, altough only one
-                            tab is visible. This behaviour is the same for type and property assignment editors
-                            as well.
-                        </warning>
-                    </para>
-                    <para>
-                        In order to create a new group, the "Create Group..." option has to be selected from
-                        the context menu of the of the structure tree. Instead of a
-                        <guibutton>"Save"</guibutton>
-                        button,
-                        the group editor provides the
-                        <guibutton>"Create"</guibutton>
-                        button
-                        <inlinemediaobject>
-                            <imageobject>
-                                <imagedata fileref="images/adm_ui_structure_editor/create_button.png" format="PNG"
-                                           contentwidth="66%"/>
-                            </imageobject>
-                        </inlinemediaobject>
-                        at the bottom left of the group editor view, as well as a shortcut on top of the
-                        content frame. After the group has been successfully created, an according group assignment
-                        is automatically generated as well and automatically inserted into the structure tree.
-                    </para>
-                    <para>
-                        For deleting an existing group assignment, the group editor provides the
-                        <guibutton>"Delete"</guibutton>
-                        button
-                        <inlinemediaobject>
-                            <imageobject>
-                                <imagedata fileref="images/adm_ui_structure_editor/delete_button_assignment.png" format="PNG"
-                                           contentwidth="66%"/>
-                            </imageobject>
-                        </inlinemediaobject>
-                        at the bottom right of the "Edit Group Assignment" tab. A shortcut to the button can also be
-                        found on top of the content frame.
-                        <caution>
-                            <para>
-                                Note that by deleting a group assignment, the group itsself
-                                is not automatically deleted! Only if the group is not assigned to another group or type
-                                anymore
-                                , the group will be removed from the database.
-                            </para>
-                        </caution>
-                    </para>
-                </section>
-                If you want more information on groups and their specific settings please refer to
-                <xref linkend="core_structures_group_parameters"/>.
             </section>
 
             <section xml:id="structure_editor_property_editor">
@@ -846,7 +704,7 @@
                 <section xml:id="structure_editor_editing_properties">
                     <title>Editing property assignments</title>
                     <para>
-                        Similar to the group editor, the property editor provides three tabs:
+                        Similar to the group editor, the property editor provides four tabs:
                         <itemizedlist>
                             <listitem>
                                 <para>
@@ -873,6 +731,15 @@
                                     access to the options of the property assignment and its property as well.
                                 </para>
                             </listitem>
+                             <listitem>
+                                <para>
+                                    Additionally the
+                                    <guimenuitem>"Scripting"</guimenuitem>
+                                    tab, gives you
+                                    access to the scripting editor which is described in
+                                    <xref linkend="structure_editor_script_assignment_editor"/>.
+                                </para>
+                            </listitem>
                         </itemizedlist>
                     </para>
                     <para>
@@ -883,24 +750,23 @@
                                            format="PNG" contentwidth="66%"/>
                             </imageobject>
                         </inlinemediaobject>
-                        , together with their properties may not be edited. This is why all input elements
-                        are deactivated. It is only allowed to edit their options.
+                        , together with their properties may not be edited (except by users with the role Supervisor).
+                        This is why all input elements are deactivated. It is only allowed to edit their options.
                     </para>
-                    <caution>
+                    <note>
                         <para>
                             When creating a new property, the
                             <guimenuitem>"Edit Property Assignment"</guimenuitem>
                             tab will
-                            be hidden, as well as the options of the property assignment in the
+                            be hidden (as no property assignment may exist without a property),
+                            as well as the options of the property assignment in the
                             <guimenuitem>"Edit Options"</guimenuitem>
-                            tab. The according assignment will then be
-                            automatically generated after the property has been created and automatically inserted into
-                            the
-                            structure tree accordingly.
+                            tab. Upon pressing the "Create" button, the property is created and the
+                            according property assignment is automatically generated.
                         </para>
                         <para>
                             Note that property assignments may override specific settings of their property.
-                            If a specific setting may be overwritten is controlled by the "Override property options"
+                            Whether a specific setting may be overwritten is controlled by the "Override property options"
                             section in the
                             <guimenuitem>"Edit Property Assignment"</guimenuitem>
                             tab and by the "Property
@@ -915,59 +781,128 @@
                                 </imageobject>
                             </mediaobject>
                         </para>
-                    </caution>
+                        If you want more information on properties and their specific settings please refer to
+                        <xref linkend="core_structures_property_parameters"/>.
+                    </note>
                 </section>
-                <section xml:id="structure_editor_property_options">
-                    <title>Editing property assignment and property options</title>
-                    <para>
-                        Editing property assignment and property options works exactly the same as
-                        editing group assignment and group options. The only difference is that, when
-                        creating a new property, a set of standard options is automatically added.
-                        If you need more information please refer to
-                        <xref linkend="structure_editor_group_options"/>.
-                    </para>
-                </section>
+            </section>
 
-                <section xml:id="structure_editor_saving_deleting_properties">
-                    <title>Saving and deleting property assignments and properties</title>
-                    <para>
-                        Also concerning saving and deletion operations, properties and property assignments
-                        exactly comply to group and group assignments. The reader is therefore refered to
-                        <xref linkend="structure_editor_saving_deleting_groups"/>.
-                    </para>
-                </section>
-                If you want more information on properties and their specific settings please refer to
-                <xref linkend="core_structures_property_parameters"/>.
+            <section xml:id="structure_editor_options">
+                <title>The options editor</title>
+                <para>
+                    Generally speaking an option is just a pair of a key and a value. There are
+                    special structure options which trigger a special behavior. If you want more
+                    information on built-in options  please refer to
+                    <xref linkend="core_structures_options"/>. The user
+                    may access the options by left clicking the
+                    <guimenuitem>"Edit Options"</guimenuitem>
+                    tab.
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata fileref="images/adm_ui_structure_editor/property_options.png" format="PNG"
+                                       contentwidth="66%"/>
+                        </imageobject>
+                    </mediaobject>
+                    Generally assignment options may override property/group options if the
+                    overridable flag of the property/group option is enabled.
+                    In the image above, the property has four options with the keys "SEARCHABLE",
+                    "HTML.EDITOR", "MULTILINE" and "SHOW.OVERVIEW". The
+                    <guimenuitem>"Overridable"</guimenuitem>
+                    checkbox indicates that all options may be overriden by the assignment except
+                    HTML.EDITOR.
+                </para>
+                <para>
+                    Options can be added by specifying a key, a value and the overrideable flag
+                    and clicking the
+                    <guibutton>"Add"</guibutton>
+                    button which is located in the
+                    <guimenuitem>"Actions"</guimenuitem>
+                    column of the table. An
+                    option can be deleted again by selecting the according row and pressing the
+                    <guibutton>"Delete"</guibutton>
+                    button which is
+                    also located in the
+                    <guimenuitem>"Actions"</guimenuitem>
+                    column of the table.
+                </para>
+                <para>
+                    In order to facilitate the editing of options, visual helpers are provided:
+                    <itemizedlist>
+                        <listitem>
+                            <para>
+                                Option is displayed in green: This is a valid option, for example "SEARCHABLE"
+                                in the property and assignment options table.
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                Option displayed with grey background: The assignment tries to
+                                override an option which is currently not overridable, i.e "HTML.EDITOR"
+                                in the assignment options table.
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                Option displayed in red: This is an invalid option. Either the option
+                                has no key, or the option has no value, the key already exists or
+                                the assignment tries to override an option with the same value. The key
+                                "SHOW.OVERVIEW" exists twice in the assignment options table, therefore
+                                making it invalid.
+                            </para>
+                        </listitem>
+                    </itemizedlist>
+                    In order to update the visual helpers, the "Validate" button
+                    <inlinemediaobject>
+                        <imageobject>
+                            <imagedata fileref="images/adm_ui_structure_editor/validate_button.png" format="PNG"
+                                       contentwidth="66%"/>
+                        </imageobject>
+                    </inlinemediaobject>
+                    on the bottom left may be clicked.
+                </para>
             </section>
 
             <section xml:id="structure_editor_script_assignment_editor">
-                <title>The script assignment Editor</title>
+                <title>The scripting editor</title>
                 <para>
-                    Scripts can be assigned to a type or property assignment by using the script assignment editor,
-                    wich is reachable by clicking on the "Scripting" tab. The number in brackets on
+                    Scripts can be assigned to a type or property assignment using the scripting editor,
+                    which is reachable by clicking on the "Scripting" tab. The number in brackets on
                     the "Scripting" tab refers to the number of scripts that have already been assigned.
                     Note that only users that are in the role of "Script Manager" may edit script assignments.
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata fileref="images/adm_ui_structure_editor/scripting_tab.png" format="PNG"
+                                       contentwidth="66%"/>
+                        </imageobject>
+                    </mediaobject>
                 </para>
                 <para>
                     Via the editor it is possible to add, remove and edit existing script assignments.
                     Clicking on a specific script name provides a shortcut to the
-                    script editor in the "Admin" section, where the script code can be inspected or changed.
-                    A script assignment consists of a specific script and a specific script event, which designates
-                    when a script will be run. Naturally, types and assignments provide different subsets of events
-                    to choose from.
+                    script editor where the script code can be inspected or changed.
+                    In order to create a script assignment a script and a script event (which indicates
+                    when a script will be run) need to be chosen. Naturally, types and assignments provide
+                    different subsets of script events to choose from.
                 </para>
                 <para>
-                    Furthermore it is possible to activate and deactivate script assignments. For deactivated
-                    script assignments, script execution will be prevented. It is also possible to derive script
-                    assignments to child types or property assignments. The inherited script assignments
-                    of a parent type or property assignment can not be directly in the script assignment editor of
-                    the child. Instead
-                    a link is provided for derived script assignments, which opens the script assignment editor
+                    Additionally it is possible to activate and deactivate script assignments. For deactivated
+                    script assignments, script execution will be prevented. It is also possible to make script
+                    assignments available for derived usage in derived child types or property assignments.
+                    Derived script assignments in the derived type or assignment can not be directly
+                    edited in the scripting editor. Instead
+                    a link to the parent is provided, which opens the script assignment editor
                     of the parent type where changes can be made and are in turn propagated to all derived children.
                 </para>
                 <para>
-                    In order for changes to take effect, the script assignment editor -just like the other editors-
-                    provides the
+                    If you want more information on scripts and their specific settings please refer to
+                    <xref linkend="core_scripting"/>.
+                </para>
+            </section>
+
+            <section xml:id="structure_editor_saving_and_deleting">
+                <title>Saving and deleting</title>
+                <para>
+                    In order to save changes the editors provide the
                     <guibutton>"Save"</guibutton>
                     button
                     <inlinemediaobject>
@@ -976,17 +911,166 @@
                                        contentwidth="66%"/>
                         </imageobject>
                     </inlinemediaobject>
-                    at the bottom left of the script assignment editor view. A shortcut to the button can also be
-                    found on top of the content frame.
+                    located at the bottom left of of every tab. (if the editor is in <glossterm>edit mode</glossterm>). A shortcut to the button
+                    <caution>
+                        Pressing the "Save" button persists all changes within the editor's tabs, meaning
+                        all changes that have been made to the assignment, to the property/group to the options,
+                        and to scripting, although only one tab is visible.
+                    </caution>
                 </para>
                 <para>
-                    If you want more information on scripts and their specific settings please refer to
-                    <xref linkend="core_scripting"/>.
+                    For deleting assignments and types, the editors provide the
+                    <guibutton>"Delete"</guibutton>
+                    button
+                    <inlinemediaobject>
+                        <imageobject>
+                            <imagedata fileref="images/adm_ui_structure_editor/delete_button_assignment.png" format="PNG"
+                                       contentwidth="66%"/>
+                        </imageobject>
+                    </inlinemediaobject>
+                    at the bottom right of the tab. A shortcut to the button can also be
+                    found on top of the content frame.
+                    <note>
+                        <para>
+                            By deleting an assignment, the property/group itself
+                            is not automatically deleted. Only if the property/group is not
+                            assigned to another group or type anymore
+                            , the property/group will be removed from the database.
+                        </para>
+                    </note>
                 </para>
             </section>
         </section>
-    </section>
 
+        <section xml:id="structure_export_import">
+            <title>Structure export and import</title>
+            <para>Type definitions (together with their groups and properties)
+                can be exported as groovy script which contains all necessary instructions
+                to rebuild the exported type definition(s) from scratch. This script can later be
+                run import the structures again. An export as XML structure is also supported.
+                The export and import of type definitions between different &flexive;
+                distributions enables the export and import of content instances
+                based on these type definitions.
+            </para>
+             <section xml:id="structure_export">
+                 <title>Structure export GUI</title>
+                 <para>
+                     The structure export GUI can be invoked via the context menu by right clicking
+                     on a type and choosing "Export Type" in the structure tree.
+                     <mediaobject>
+                         <imageobject>
+                             <imagedata fileref="images/adm_ui_structure_editor/structure_export.png" format="PNG"
+                                     contentwidth="66%"/>
+                         </imageobject>
+                     </mediaobject>
+                     Per default the "Export Results" tab is active, showing the
+                     "Summary of exported Structures" and the "Exported structures as a
+                     Groovy script" panels.
+                     <section xml:id="structure_export_results_tab">
+                         <title>Export Results Tab</title>
+                         <para>
+                             The summary panel displays useful information
+                             about the structures to be exported and also contains the "Groups" panel
+                             showing the type's groups, the "Dependencies" panel, showing dependencies
+                             caused by derived assignments and the script assignments panel showing
+                             assigned scripts.
+                         </para>
+                         <para>
+                             The "Exported structures as a Groovy script" panel provides various
+                             export options
+                             that influence the exported Groovy script together with a preview of the
+                             exported script.
+                             The export options include:
+                             <itemizedlist>
+                                 <listitem>
+                                    <para>
+                                        Add code to delete structures/instances: If toggled
+                                        code is added to the beginning of the script
+                                        that deletes the exported structures in the target &flexive;
+                                        distribution if they are already existing. This is useful
+                                        to prevent errors that occur if the
+                                        script contains structures that
+                                        may already exist in the target &flexive; distribution.
+                                    </para>
+                                </listitem>
+                                <listitem>
+                                    <para>
+                                        Export structures using only the default GroovyTypeBuilder options:
+                                        If not toggled structures are exported using all structure information.
+                                        This includes for example assignment and type options, labels, acl settings etc.
+                                        If toggled, the exact structure information is discarded and types, properties
+                                        assignments and groups are rebuilt using only the default options.
+                                    </para>
+                                </listitem>
+                                <listitem>
+                                    <para>
+                                        Add script event assignment code:
+                                        If toggled, assigned scripts (script code and script assignments)
+                                        are exported as well.
+                                    </para>
+                                </listitem>
+                                <listitem>
+                                    <para>
+                                        Add &flexive; SYSTEM types:
+                                        If toggled &flexive; system internal types/system internal properties
+                                        (for example the ROOT type together with system internal property dependencies)
+                                        are exported as well.
+                                    </para>
+                                </listitem>
+                                <listitem>
+                                    <para>
+                                        Add package import statements:
+                                        If toggled needed package import statements are added at the beginning of the
+                                        export script.
+                                    </para>
+                                </listitem>
+                                <listitem>
+                                    <para>
+                                        Overwrite existing scripts:
+                                        If toggled exported scripts override the scripts of the target &flexive;
+                                        distribution if already present.
+                                    </para>
+                               </listitem>
+                            </itemizedlist>
+                         </para>
+                     </section>
+                     <section xml:id="structure_export_tab">
+                         <title>Structure Export Tab</title>
+                         <para>
+                             The "Structure Export Tab" provides the possibility to
+                             export arbitrary type definitions as a batch in XML format
+                             or as Groovy Script.
+                         </para>
+                         <para>
+                             The export options to choose from are similar to those described in
+                             <xref linkend="structure_export_results_tab"/>. If the user
+                             chooses to export the selected type definitions as Groovy script
+                             the "Export Results" tab is opened and initialized
+                             with the specified type definitions. If the user chooses the XML export
+                             an XML is file provided for download.
+                         </para>
+                     </section>
+                 </para>
+             </section>
+             <section xml:id="structure_import">
+                 <title>Structure import GUI</title>
+                 <para>
+                     The structure import GUI can be invoked via the "Structures" drop down menu
+                     in the menu bar of the structure tree.
+                     <mediaobject>
+                         <imageobject>
+                             <imagedata fileref="images/adm_ui_structure_editor/structure_import.png" format="PNG"
+                                     contentwidth="66%"/>
+                         </imageobject>
+                     </mediaobject>
+                     The GUI supports Groovy script import and XML import via a file upload or by pasting
+                     the code into the inline editor. After a file was chosen for the file upload or
+                     the code was pasted into the editor, the import process is triggered by
+                     pressing the "Import" button.
+                 </para>
+             </section>
+        </section>
+    </section>
 
     <section xml:id="adm_instance_editor">
         <title>The instance editor</title>
