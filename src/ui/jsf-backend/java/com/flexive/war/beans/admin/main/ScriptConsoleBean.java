@@ -33,6 +33,7 @@
  ***************************************************************/
 package com.flexive.war.beans.admin.main;
 
+import com.flexive.faces.FxJsfUtils;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSharedUtils;
@@ -57,6 +58,11 @@ import java.util.Formatter;
 public class ScriptConsoleBean implements Serializable {
     private static final long serialVersionUID = -938270211808872146L;
 
+    /**
+     * Session key to store the last inserted code
+     */
+    private static final String SESSION_LASTCODE = "__FXLASTNCODE__";
+
     private String code;
     private long executionTime;
     private boolean web;
@@ -70,12 +76,15 @@ public class ScriptConsoleBean implements Serializable {
     
     public String getCode() {
         if(code == null) {
+            code = (String) FxJsfUtils.getSessionAttribute(SESSION_LASTCODE);
+            if(code == null || code.trim().length() == 0)
             code = ScriptBean.getClassImports(language);
         }
         return code;
     }
 
     public void setCode(String code) {
+        FxJsfUtils.setSessionAttribute(SESSION_LASTCODE, code);
         this.code = code;
     }
 
