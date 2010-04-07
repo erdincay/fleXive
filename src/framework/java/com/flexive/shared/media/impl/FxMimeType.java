@@ -56,6 +56,7 @@ public class FxMimeType implements Serializable {
     public static final String MULTIPART = "multipart";
     public static final String TEXT = "text";
     public static final String VIDEO = "video";
+    public static final String UNKNOWN = "unknown";
     public static final String UNKNOWN_SUBTYPE = "*";
     public static final String PLACEHOLDER = APPLICATION + "/" + UNKNOWN_SUBTYPE;
 

@@ -55,6 +55,7 @@ public class GenericBinarySQLOutputStream extends PipedOutputStream implements R
     PipedInputStream pipe;
     private int divisionId;
     private String handle;
+    private String mimeType;
     private long expectedSize;
     private long ttl;
     private long count;
@@ -65,14 +66,16 @@ public class GenericBinarySQLOutputStream extends PipedOutputStream implements R
      *
      * @param divisionId   division
      * @param handle       binary handle
+     * @param mimeType     mime type
      * @param expectedSize expected size of the binary
      * @param ttl          time to live in the transit space
      * @throws IOException on errors
      * @throws SQLException if no connection could be obtained
      */
-    GenericBinarySQLOutputStream(int divisionId, String handle, long expectedSize, long ttl) throws IOException, SQLException {
+    GenericBinarySQLOutputStream(int divisionId, String handle, String mimeType, long expectedSize, long ttl) throws IOException, SQLException {
         this.divisionId = divisionId;
         this.handle = handle;
+        this.mimeType = mimeType;
         this.expectedSize = expectedSize;
         this.ttl = ttl;
         this.pipe = new PipedInputStream(this);
@@ -127,11 +130,12 @@ public class GenericBinarySQLOutputStream extends PipedOutputStream implements R
         Connection con = null;
         try {
             con = Database.getNonTXDataSource(divisionId).getConnection();
-            ps = con.prepareStatement("INSERT INTO " + DatabaseConst.TBL_BINARY_TRANSIT + " (BKEY,FBLOB,TFER_DONE,EXPIRE) VALUES(?,?,?,?)");
+            ps = con.prepareStatement("INSERT INTO " + DatabaseConst.TBL_BINARY_TRANSIT + " (BKEY,MIMETYPE,FBLOB,TFER_DONE,EXPIRE) VALUES(?,?,?,?,?)");
             ps.setString(1, handle);
-            ps.setBinaryStream(2, pipe, (int) expectedSize);
-            ps.setBoolean(3, false);
-            ps.setLong(4, System.currentTimeMillis() + ttl);
+            ps.setString(2, mimeType);
+            ps.setBinaryStream(3, pipe, (int) expectedSize);
+            ps.setBoolean(4, false);
+            ps.setLong(5, System.currentTimeMillis() + ttl);
             long time = System.currentTimeMillis();
             ps.executeUpdate();
             if (LOG.isDebugEnabled())

@@ -266,13 +266,14 @@ public interface ContentStorage {
      *
      * @param divisionId   division
      * @param handle       binary handle
+     * @param mimeType     the mime type to use if auto-detection fails
      * @param expectedSize the expected size of the binary
      * @param ttl          time to live in the transit space
      * @return an output stream that receives the binary
      * @throws SQLException on errors
      * @throws IOException  on errors
      */
-    OutputStream receiveTransitBinary(int divisionId, String handle, long expectedSize, long ttl) throws SQLException, IOException;
+    OutputStream receiveTransitBinary(int divisionId, String handle, String mimeType, long expectedSize, long ttl) throws SQLException, IOException;
 
     /**
      * Fetch a binary as an InputStream, if the requested binary is not found, return <code>null</code>

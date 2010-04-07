@@ -103,7 +103,8 @@ public class BinaryTest {
     @Test
     public void binaryFromStream() throws Exception {
         final String CONTENT = "test document content";
-        BinaryDescriptor bin = new BinaryDescriptor("test document.txt", new ByteArrayInputStream(CONTENT.getBytes("UTF-8")));
+        final String MIME_TYPE = "plain/text";
+        BinaryDescriptor bin = new BinaryDescriptor("test document.txt", MIME_TYPE, new ByteArrayInputStream(CONTENT.getBytes("UTF-8")));
         FxType docType = CacheAdmin.getEnvironment().getType(DOCUMENT_TYPE);
         FxContent doc = co.initialize(docType.getId());
         doc.setValue("/DOCUMENT", new FxBinary(false, bin));
@@ -112,6 +113,7 @@ public class BinaryTest {
             FxBinary binLoaded = (FxBinary) docLoaded.getValue("/DOCUMENT");
             ByteArrayOutputStream bout = new ByteArrayOutputStream();
             binLoaded.getDefaultTranslation().download(bout);
+            Assert.assertEquals(binLoaded.getDefaultTranslation().getMimeType(), MIME_TYPE);
             Assert.assertEquals(bout.toString(), CONTENT);
         } finally {
             co.remove(docLoaded.getPk());

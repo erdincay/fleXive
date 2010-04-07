@@ -37,6 +37,7 @@ import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxStreamException;
 import com.flexive.shared.media.FxMediaEngine;
 import com.flexive.shared.media.FxMediaSelector;
+import com.flexive.shared.media.impl.FxMimeType;
 import com.flexive.shared.value.BinaryDescriptor;
 import com.flexive.stream.*;
 import org.apache.commons.logging.Log;
@@ -92,7 +93,21 @@ public class FxStreamUtils {
      * @see FxStreamUtils#DEFAULT_TTL
      */
     public static BinaryUploadPayload uploadBinary(long length, InputStream stream) throws FxStreamException {
-        return uploadBinary(length, stream, DEFAULT_TTL);
+        return uploadBinary(length, stream, DEFAULT_TTL, FxMimeType.UNKNOWN);
+    }
+
+    /**
+     * Upload a binary (using an OutputStream) to the StreamServer with a default time to live
+     *
+     * @param length expected length of the stream/binary
+     * @param stream the Stream containing the binary
+     * @param mimeType the mime type to use if auto-detection fails
+     * @return payload containing server side handle of the binary, mimeType and meta data
+     * @throws FxStreamException on errors
+     * @see FxStreamUtils#DEFAULT_TTL
+     */
+    public static BinaryUploadPayload uploadBinary(long length, InputStream stream, String mimeType) throws FxStreamException {
+        return uploadBinary(length, stream, DEFAULT_TTL, mimeType);
     }
 
     /**
@@ -130,6 +145,7 @@ public class FxStreamUtils {
         }
     }
 
+
     /**
      * Upload a binary (using an OutputStream) to the StreamServer with a given time to live.
      * Warning: if using a remote connection, this method will return a few miliseconds before
@@ -141,13 +157,31 @@ public class FxStreamUtils {
      * @param timeToLive time in miliseconds the binary is guaranteed to exist server side (will be removed once expired)
      * @return payload containing server side handle of the binary, mimeType and meta data
      * @throws FxStreamException on errors
+     * @deprecated
      */
     public static BinaryUploadPayload uploadBinary(long length, InputStream stream, long timeToLive) throws FxStreamException {
+        return uploadBinary(length, stream, timeToLive, FxMimeType.UNKNOWN);
+    }
+
+    /**
+     * Upload a binary (using an OutputStream) to the StreamServer with a given time to live.
+     * Warning: if using a remote connection, this method will return a few miliseconds before
+     * all binary data is stored in the DB! Local connected clients will return *after* all
+     * data is stored. This is currently a 'feature' that might be fixed sometime.
+     *
+     * @param length     expected length of the stream/binary
+     * @param stream     the Stream containing the binary
+     * @param timeToLive time in miliseconds the binary is guaranteed to exist server side (will be removed once expired)
+     * @param mimeType   the mime type to use if auto-detection fails
+     * @return payload containing server side handle of the binary, mimeType and meta data
+     * @throws FxStreamException on errors
+     * @since 3.1
+     */
+    public static BinaryUploadPayload uploadBinary(long length, InputStream stream, long timeToLive, String mimeType) throws FxStreamException {
         StreamClient client = null;
         try {
             client = getClient();
-//            client = StreamClientFactory.getRemoteClient(servers.get(0).getAddress(), servers.get(0).getPort());
-            DataPacket<BinaryUploadPayload> req = new DataPacket<BinaryUploadPayload>(new BinaryUploadPayload(length, timeToLive), true);
+            DataPacket<BinaryUploadPayload> req = new DataPacket<BinaryUploadPayload>(new BinaryUploadPayload(length, timeToLive, mimeType), true);
             DataPacket<BinaryUploadPayload> resp = client.connect(req);
             if (resp.getPayload().isServerError())
                 throw new FxStreamException("ex.stream.serverError", resp.getPayload().getErrorMessage());
@@ -245,7 +279,6 @@ public class FxStreamUtils {
         StreamClient client = null;
         try {
             client = getClient(server);
-//            client = StreamClientFactory.getRemoteClient(servers.get(0).getAddress(), servers.get(0).getPort());
             DataPacket<BinaryDownloadPayload> req = new DataPacket<BinaryDownloadPayload>(
                     new BinaryDownloadPayload(binaryId, 1, 1, selector.getSize().getBlobIndex(), selector.isForceImage()),
                     true, true);
@@ -329,7 +362,7 @@ public class FxStreamUtils {
     }
 
     /**
-     * Download a binary with given size (Original, Preview 1..3)
+     * Download a binary with given size (Original, Screenview, Preview 1..3)
      *
      * @param server     (optional) list of remote stream servers
      * @param stream     the output stream to send the binary to

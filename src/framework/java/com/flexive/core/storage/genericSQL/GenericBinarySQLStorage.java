@@ -129,20 +129,21 @@ public class GenericBinarySQLStorage implements BinaryStorage {
     /**
      * {@inheritDoc}
      */
-    public OutputStream receiveTransitBinary(int divisionId, String handle, long expectedSize, long ttl) throws SQLException, IOException {
+    public OutputStream receiveTransitBinary(int divisionId, String handle, String mimeType, long expectedSize, long ttl) throws SQLException, IOException {
         try {
             if (EJBLookup.getConfigurationEngine().get(SystemParameters.BINARY_TRANSIT_DB))
-                return new GenericBinarySQLOutputStream(divisionId, handle, expectedSize, ttl);
+                return new GenericBinarySQLOutputStream(divisionId, handle, mimeType, expectedSize, ttl);
             else {
                 Connection con;
                 PreparedStatement ps = null;
                 con = Database.getDbConnection(divisionId);
                 try {
                     //create a dummy entry
-                    ps = con.prepareStatement("INSERT INTO " + DatabaseConst.TBL_BINARY_TRANSIT + " (BKEY,FBLOB,TFER_DONE,EXPIRE) VALUES(?,NULL,?,?)");
+                    ps = con.prepareStatement("INSERT INTO " + DatabaseConst.TBL_BINARY_TRANSIT + " (BKEY,MIMETYPE,FBLOB,TFER_DONE,EXPIRE) VALUES(?,?,NULL,?,?)");
                     ps.setString(1, handle);
-                    ps.setBoolean(2, true);
-                    ps.setLong(3, System.currentTimeMillis() + ttl);
+                    ps.setString(2, mimeType);
+                    ps.setBoolean(3, true);
+                    ps.setLong(4, System.currentTimeMillis() + ttl);
                     ps.executeUpdate();
                 } finally {
                     Database.closeObjects(GenericBinarySQLStorage.class, con, ps);
@@ -698,28 +699,11 @@ public class GenericBinarySQLStorage implements BinaryStorage {
                     LOG.error("Error running binary processing script: " + e.getMessage());
                 }
             }
-            //check if values for preview are valid
-            /*if (!useDefaultPreview) {
-                if (previewFile1 == null || !previewFile1.exists() ||
-                        previewFile2 == null || !previewFile2.exists() ||
-                        previewFile3 == null || !previewFile3.exists() ||
-                        previewFile4 == null || !previewFile4.exists() ||
-                        dimensionsPreview1 == null || dimensionsPreview1.length != 2 || dimensionsPreview1[0] < 0 || dimensionsPreview1[1] < 0 ||
-                        dimensionsPreview2 == null || dimensionsPreview2.length != 2 || dimensionsPreview2[0] < 0 || dimensionsPreview2[1] < 0 ||
-                        dimensionsPreview3 == null || dimensionsPreview3.length != 2 || dimensionsPreview3[0] < 0 || dimensionsPreview3[1] < 0 ||
-                        dimensionsPreview4 == null || dimensionsPreview4.length != 2 || dimensionsPreview4[0] < 0 || dimensionsPreview4[1] < 0
-                        ) {
-                    LOG.warn("Invalid preview parameters! Setting to default/unknown!");
-                    useDefaultPreview = true;
-                    defaultId = SYS_UNKNOWN;
-                }
-            } else {*/
             //only negative values are allowed for default previews
             if (useDefaultPreview && defaultId >= 0) {
                 defaultId = SYS_UNKNOWN;
                 LOG.warn("Only default preview id's that are negative and defined in BinaryDescriptor as constants are allowed!");
             }
-//            }
 
             if (!useDefaultPreview) {
                 ps = con.prepareStatement(BINARY_TRANSIT_PREVIEWS);

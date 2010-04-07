@@ -3095,8 +3095,8 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     /**
      * {@inheritDoc}
      */
-    public OutputStream receiveTransitBinary(int divisionId, String handle, long expectedSize, long ttl) throws SQLException, IOException {
-        return binaryStorage.receiveTransitBinary(divisionId, handle, expectedSize, ttl);
+    public OutputStream receiveTransitBinary(int divisionId, String handle, String mimeType, long expectedSize, long ttl) throws SQLException, IOException {
+        return binaryStorage.receiveTransitBinary(divisionId, handle, mimeType, expectedSize, ttl);
     }
 
     /**

@@ -59,6 +59,7 @@ public class BinaryUploadProtocol extends StreamProtocol<BinaryUploadPayload> {
 
     private long timeToLive = 0;
     private String handle = null;
+    private String mimeType = null;
     private long count = 0;
     private int division = -1;
     private long expectedLength = 0;
@@ -101,16 +102,17 @@ public class BinaryUploadProtocol extends StreamProtocol<BinaryUploadPayload> {
             this.expectedLength = dataPacket.getPayload().getExpectedLength();
             if (LOG.isDebugEnabled()) LOG.debug("Receive started at " + new Date(System.currentTimeMillis()));
             this.handle = RandomStringUtils.randomAlphanumeric(32);
+            this.mimeType = dataPacket.getPayload().getMimeType();
             this.division = dataPacket.getPayload().getDivision();
             if( this.expectedLength == 0 ) {
                 //create an empty transit entry
                 try {
-                    pout = StorageManager.getContentStorage(TypeStorageMode.Hierarchical).receiveTransitBinary(division, handle, expectedLength, timeToLive);
+                    pout = StorageManager.getContentStorage(TypeStorageMode.Hierarchical).receiveTransitBinary(division, handle, mimeType, expectedLength, timeToLive);
                 } catch (Exception e) {
                     LOG.error(e);
                 }
             }
-            return new DataPacket<BinaryUploadPayload>(new BinaryUploadPayload(handle), false, this.expectedLength > 0 || this.expectedLength == -1L);
+            return new DataPacket<BinaryUploadPayload>(new BinaryUploadPayload(handle, this.mimeType), false, this.expectedLength > 0 || this.expectedLength == -1L);
         } else {
             cleanup();
         }
@@ -131,7 +133,7 @@ public class BinaryUploadProtocol extends StreamProtocol<BinaryUploadPayload> {
             rcvStarted = true;
             if (LOG.isDebugEnabled()) LOG.debug("(internal serverside) receive start");
             try {
-                pout = StorageManager.getContentStorage(TypeStorageMode.Hierarchical).receiveTransitBinary(division, handle, expectedLength, timeToLive);
+                pout = StorageManager.getContentStorage(TypeStorageMode.Hierarchical).receiveTransitBinary(division, handle, mimeType, expectedLength, timeToLive);
             } catch (SQLException e) {
                 LOG.error("SQL Error trying to receive binary stream: " + e.getMessage(), e);
             } catch (FxNotFoundException e) {

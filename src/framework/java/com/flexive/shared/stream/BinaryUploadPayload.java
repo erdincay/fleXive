@@ -32,6 +32,8 @@
 package com.flexive.shared.stream;
 
 import com.flexive.shared.FxContext;
+import com.flexive.shared.media.impl.FxMimeType;
+import org.apache.commons.lang.StringUtils;
 
 import java.io.Serializable;
 
@@ -44,6 +46,7 @@ public final class BinaryUploadPayload implements Serializable {
     private static final long serialVersionUID = -54895840376576935L;
 
     private String handle = null; //handle and optional error message
+    private String mimeType = null; //passed mimeType, will be used if auto-detection fails
     private long timeToLive = 0;
     private long expectedLength = 0;
     private boolean serverError = false;
@@ -61,6 +64,24 @@ public final class BinaryUploadPayload implements Serializable {
         this.expectedLength = expectedLength;
         this.timeToLive = timeToLive;
         this.division = FxContext.get().getDivisionId();
+        this.mimeType = FxMimeType.UNKNOWN;
+    }
+
+    /**
+     * Constructor for the 'calling user'
+     *
+     * @param expectedLength expected length of the stream/binary
+     * @param timeToLive     desired TTL
+     * @param mimeType       mime type
+     */
+    public BinaryUploadPayload(long expectedLength, long timeToLive, String mimeType) {
+        this.expectedLength = expectedLength;
+        this.timeToLive = timeToLive;
+        this.division = FxContext.get().getDivisionId();
+        if(!StringUtils.isBlank(mimeType))
+            this.mimeType = mimeType;
+        else
+            this.mimeType = FxMimeType.UNKNOWN;
     }
 
     /**
@@ -70,6 +91,21 @@ public final class BinaryUploadPayload implements Serializable {
      */
     public BinaryUploadPayload(String handle) {
         this.handle = handle;
+        this.mimeType = FxMimeType.UNKNOWN;
+    }
+
+    /**
+     * Server side constructor with mimeType
+     *
+     * @param handle db handle assigned to the binary
+     * @param mimeType mime type
+     */
+    public BinaryUploadPayload(String handle, String mimeType) {
+        this.handle = handle;
+        if(!StringUtils.isBlank(mimeType))
+            this.mimeType = mimeType;
+        else
+            this.mimeType = FxMimeType.UNKNOWN;
     }
 
     /**
@@ -133,5 +169,15 @@ public final class BinaryUploadPayload implements Serializable {
      */
     public void setActualLength(long actualLength) {
         this.actualLength = actualLength;
+    }
+
+    /**
+     * Get the passed mimeType for this binary (will be used if auto-detection fails)
+     *
+     * @return mimeType
+     * @since 3.1
+     */
+    public String getMimeType() {
+        return mimeType;
     }
 }
