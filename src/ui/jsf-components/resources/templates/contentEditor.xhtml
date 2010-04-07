@@ -110,8 +110,7 @@
                     </script>
                     <div style="display:none;">
                         <a4j:commandButton id="#{editorId}_CallbackIcon" location="content"
-                                         action="#{__ceBean.callBack}" icon="cancel" reRender="#{__ce_reRenderButton}"
-                                         oncomplete="flexive.contentEditor.preSubmit();">
+                                         action="#{__ceBean.callBack}" icon="cancel" reRender="#{__ce_reRenderButton}">
                             <f:setPropertyActionListener value="#{_ceContent.editorId}" target="#{__ceBean.editorId}"/>
                             <f:setPropertyActionListener value="#{__ce_reRender}" target="#{__ceBean.reRender}"/>
                         </a4j:commandButton>
