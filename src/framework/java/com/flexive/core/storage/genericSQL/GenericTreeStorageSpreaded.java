@@ -53,6 +53,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multiset.Entry;
+import java.math.BigDecimal;
 
 import java.util.*;
 
@@ -61,8 +62,7 @@ import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
+import java.math.BigInteger;
 import java.sql.*;
 
 /**
@@ -74,18 +74,18 @@ import java.sql.*;
 public class GenericTreeStorageSpreaded extends GenericTreeStorage {
     private static final Log LOG = LogFactory.getLog(GenericTreeStorageSpreaded.class);
 
-    protected static final BigDecimal TWO = new BigDecimal(2);
-    protected static final BigDecimal THREE = new BigDecimal(3);
-    protected static final BigDecimal GO_UP = new BigDecimal(1024);
-    protected static final BigDecimal MAX_RIGHT = new BigDecimal("18446744073709551615");
+    protected static final BigInteger TWO = BigInteger.valueOf(2);
+    protected static final BigInteger THREE = BigInteger.valueOf(3);
+    protected static final BigInteger GO_UP = BigInteger.valueOf(1024);
+    protected static final BigInteger MAX_RIGHT = new BigInteger("18446744073709551615");
 
     /**
      * The maximum spacing for new nodes. Lower means less space reorgs for flat lists, but more reorgs for
      * deeply nested trees.
      */
-    protected static final BigDecimal DEFAULT_NODE_SPACING = new BigDecimal(10000);
-//    protected static final BigDecimal MAX_RIGHT = new BigDecimal("1000");
-//    protected static final BigDecimal GO_UP = new BigDecimal(10);
+    protected static final BigInteger DEFAULT_NODE_SPACING = BigInteger.valueOf(10000);
+//    protected static final BigInteger MAX_RIGHT = new BigInteger("1000");
+//    protected static final BigInteger GO_UP = new BigInteger(10);
 
     private static final String TREE_LIVE_MAXRIGHT = "SELECT MAX(RGT) FROM " + getTable(FxTreeMode.Live) +
             //            1
@@ -106,7 +106,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
             ResultSet rs = ps.executeQuery();
             if (rs == null || !rs.next())
                 throw new FxNotFoundException("ex.tree.node.notFound", nodeId, mode);
-            BigDecimal maxRight = rs.getBigDecimal(1);
+            BigInteger maxRight = getNodeBounds(rs, 1);
             ps.close();
             ps = con.prepareStatement(prepareSql(mode, mode == FxTreeMode.Live ? TREE_LIVE_NODEINFO : TREE_EDIT_NODEINFO));
             ps.setBoolean(1, mode == FxTreeMode.Live);
@@ -121,8 +121,8 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
             long _mandator = rs.getLong(19);
             final FxPK reference = new FxPK(rs.getLong(9), rs.getInt(16));
             final List<Long> aclIds = fetchNodeACLs(con, reference);
-            return new FxTreeNodeInfoSpreaded(rs.getBigDecimal(1), rs.getBigDecimal(2), rs.getBigDecimal(5),
-                    rs.getBigDecimal(6), maxRight, rs.getInt(4), rs.getInt(8), rs.getInt(7), rs.getLong(3),
+            return new FxTreeNodeInfoSpreaded(getNodeBounds(rs, 1), getNodeBounds(rs, 2), getNodeBounds(rs, 5),
+                    getNodeBounds(rs, 6), maxRight, rs.getInt(4), rs.getInt(8), rs.getInt(7), rs.getLong(3),
                     nodeId, rs.getString(12), reference,
                     aclIds, mode, rs.getInt(13), rs.getString(10), rs.getLong(11),
                     FxPermissionUtils.getPermissionUnion(aclIds, _type, _stepACL, _createdBy, _mandator));
@@ -143,24 +143,24 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
      * @throws com.flexive.shared.exceptions.FxTreeException
      *          if the function fails
      */
-    public BigDecimal[] getBoundaries(Connection con, FxTreeNodeInfoSpreaded node, int position) throws FxApplicationException {
+    public BigInteger[] getBoundaries(Connection con, FxTreeNodeInfoSpreaded node, int position) throws FxApplicationException {
         // Position cleanup
         if (position < 0)
             position = 0;
 
         // any childs at all? If not we just return the node boundaries
         if (!node.hasChildren())
-            return new BigDecimal[]{node.getLeft(), node.getRight()};
+            return new BigInteger[]{node.getLeft(), node.getRight()};
 
         // Max position?
         if (position >= node.getDirectChildCount())
-            return new BigDecimal[]{node.getMaxChildRight(), node.getRight()};
+            return new BigInteger[]{node.getMaxChildRight(), node.getRight()};
 
         Statement stmt = null;
         // Somewhere between the child nodes
         try {
-            BigDecimal leftBoundary;
-            BigDecimal rightBoundary;
+            BigInteger leftBoundary;
+            BigInteger rightBoundary;
 
             stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT * FROM (" +
@@ -171,20 +171,20 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
                 if (position == 0) {
                     /* first position */
                     leftBoundary = node.getLeft();
-                    rightBoundary = rs.getBigDecimal(1);
+                    rightBoundary = getNodeBounds(rs, 1);
                 } else {
                     /* somewhere between 2 children or after last child */
-                    leftBoundary = rs.getBigDecimal(2);
-//                    rightBoundary = rs.getBigDecimal(1);
+                    leftBoundary = getNodeBounds(rs, 2);
+//                    rightBoundary = getNodeBounds(rs, 1);
                     if (rs.next())
-                        rightBoundary = rs.getBigDecimal(1);
+                        rightBoundary = getNodeBounds(rs, 1);
                     else
                         rightBoundary = node.getRight();
                 }
             } else {
                 throw new FxTreeException("ex.tree.boundaries.computeFailed", node.getId(), position, "Invalid position [" + position + "] to calculate boundaries!");
             }
-            return new BigDecimal[]{leftBoundary, rightBoundary};
+            return new BigInteger[]{leftBoundary, rightBoundary};
         } catch (Exception e) {
             throw new FxTreeException(e, "ex.tree.boundaries.computeFailed", node.getId(), position, e.getMessage());
         } finally {
@@ -208,9 +208,9 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
      * @return the used spacing
      * @throws FxApplicationException on errors
      */
-    public BigDecimal makeSpace(Connection con, SequencerEngine seq, FxTreeMode mode, long nodeId, int position, final int additional) throws FxApplicationException {
+    public BigInteger makeSpace(Connection con, SequencerEngine seq, FxTreeMode mode, long nodeId, int position, final int additional) throws FxApplicationException {
         FxTreeNodeInfoSpreaded nodeInfo = (FxTreeNodeInfoSpreaded) getTreeNodeInfo(con, mode, nodeId);
-        BigDecimal boundaries[] = getBoundaries(con, nodeInfo, position);
+        BigInteger boundaries[] = getBoundaries(con, nodeInfo, position);
 
         int totalChildCount = nodeInfo.getTotalChildCount() + additional;
         boolean hasSpace = nodeInfo.hasSpaceFor(totalChildCount, 2);
@@ -228,10 +228,10 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
         }
 
         // Allocate/Reorganize space
-        BigDecimal spacing = nodeInfo.getSpacing(totalChildCount);
+        BigInteger spacing = nodeInfo.getSpacing(totalChildCount);
         int spaceCount = (additional * 2) + 1;
-        BigDecimal insertSpace = spacing.multiply(new BigDecimal(spaceCount));
-        insertSpace = insertSpace.add(new BigDecimal(additional * 2));
+        BigInteger insertSpace = spacing.multiply(BigInteger.valueOf(spaceCount));
+        insertSpace = insertSpace.add(BigInteger.valueOf(additional * 2));
 
         reorganizeSpace(con, seq, mode, mode, nodeInfo.getId(), false, spacing, null, nodeInfo, position,
                 insertSpace, boundaries, 0, null, false, false);
@@ -263,8 +263,8 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
      */
     public long reorganizeSpace(Connection con, SequencerEngine seq,
                                 FxTreeMode sourceMode, FxTreeMode destMode,
-                                long nodeId, boolean includeNodeId, BigDecimal overrideSpacing, BigDecimal overrideLeft,
-                                FxTreeNodeInfo insertParent, int insertPosition, BigDecimal insertSpace, BigDecimal insertBoundaries[],
+                                long nodeId, boolean includeNodeId, BigInteger overrideSpacing, BigInteger overrideLeft,
+                                FxTreeNodeInfo insertParent, int insertPosition, BigInteger insertSpace, BigInteger insertBoundaries[],
                                 int depthDelta, Long destinationNode, boolean createMode, boolean createKeepIds) throws FxTreeException {
         Statement stmt = null;
         try {
@@ -302,8 +302,8 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
 
     protected long _reorganizeSpace(Connection con, SequencerEngine seq,
                                     FxTreeMode sourceMode, FxTreeMode destMode,
-                                    long nodeId, boolean includeNodeId, BigDecimal overrideSpacing, BigDecimal overrideLeft,
-                                    FxTreeNodeInfo insertParent, int insertPosition, BigDecimal insertSpace, BigDecimal insertBoundaries[],
+                                    long nodeId, boolean includeNodeId, BigInteger overrideSpacing, BigInteger overrideLeft,
+                                    FxTreeNodeInfo insertParent, int insertPosition, BigInteger insertSpace, BigInteger insertBoundaries[],
                                     int depthDelta, Long destinationNode, boolean createMode, boolean createKeepIds) throws FxTreeException {
         long firstCreatedNodeId = -1;
         FxTreeNodeInfoSpreaded nodeInfo;
@@ -324,7 +324,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
                     insertPosition, insertSpace, insertBoundaries, depthDelta, destinationNode, createMode, createKeepIds);
         }
 
-        BigDecimal spacing = nodeInfo.getDefaultSpacing();
+        BigInteger spacing = nodeInfo.getDefaultSpacing();
         if (overrideSpacing != null && (overrideSpacing.compareTo(spacing) < 0 || overrideLeft != null)) {
             // override spacing unless it is greater OR overrideLeft is specified (in that case we
             // have to use the spacing for valid tree ranges)  
@@ -343,8 +343,8 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
         Statement stmt = null;
         PreparedStatement ps = null;
         ResultSet rs;
-        BigDecimal left = overrideLeft == null ? nodeInfo.getLeft() : overrideLeft;
-        BigDecimal right = null;
+        BigInteger left = overrideLeft == null ? nodeInfo.getLeft() : overrideLeft;
+        BigInteger right = null;
         String includeNode = includeNodeId ? "=" : "";
         long counter = 0;
         long newId = -1;
@@ -376,11 +376,11 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
             long id;
             int total_childs;
             int direct_childs;
-            BigDecimal nextLeft;
+            BigInteger nextLeft;
             int lastDepth = nodeInfo.getDepth() + (includeNodeId ? 0 : 1);
             int depth;
-            BigDecimal _rgt;
-            BigDecimal _lft;
+            BigInteger _rgt;
+            BigInteger _lft;
             Long ref = null;
             String data = null;
             String name = "";
@@ -398,8 +398,8 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
                 id = rs.getLong(1);
                 total_childs = rs.getInt(2);
                 direct_childs = rs.getInt(3);
-                _lft = rs.getBigDecimal(4);
-                _rgt = rs.getBigDecimal(5);
+                _lft = getNodeBounds(rs, 4);
+                _rgt = getNodeBounds(rs, 5);
                 depth = rs.getInt(6);
                 if (createMode) {
                     // Reading these properties is slow, only do it when needed
@@ -409,12 +409,12 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
                     data = rs.getString(10);
                     if (rs.wasNull()) data = null;
                 }
-                left = left.add(spacing).add(BigDecimal.ONE);
+                left = left.add(spacing).add(BigInteger.ONE);
 
                 // Handle depth differences
                 if (lastDepth - depth > 0) {
-                    BigDecimal depthDifference = spacing.add(BigDecimal.ONE);
-                    left = left.add(depthDifference.multiply(new BigDecimal(lastDepth - depth)));
+                    BigInteger depthDifference = spacing.add(BigInteger.ONE);
+                    left = left.add(depthDifference.multiply(BigInteger.valueOf(lastDepth - depth)));
                 }
                 if (createMode) {
                     if (lastDepth < depth) {
@@ -425,12 +425,12 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
                     }
                 }
 
-                right = left.add(spacing).add(BigDecimal.ONE);
+                right = left.add(spacing).add(BigInteger.ONE);
 
                 // add child space if needed
                 if (total_childs > 0) {
-                    BigDecimal childSpace = spacing.multiply(new BigDecimal(total_childs * 2));
-                    childSpace = childSpace.add(new BigDecimal((total_childs * 2) - 1));
+                    BigInteger childSpace = spacing.multiply(BigInteger.valueOf(total_childs * 2));
+                    childSpace = childSpace.add(BigInteger.valueOf((total_childs * 2) - 1));
                     right = right.add(childSpace);
                     nextLeft = left;
                 } else {
@@ -468,15 +468,15 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
                         ps.setString(6, data);
                     }
 //                    System.out.println("=> id:"+newId+" left:"+left+" right:"+right);
-                    ps.setBigDecimal(7, left);
-                    ps.setBigDecimal(8, right);
+                    setNodeBounds(ps, 7, left);
+                    setNodeBounds(ps, 8, right);
                     ps.setInt(9, direct_childs);
                     ps.setString(10, name);
                     ps.setLong(11, System.currentTimeMillis());
                     ps.addBatch();
                 } else {
-                    ps.setBigDecimal(1, left);
-                    ps.setBigDecimal(2, right);
+                    setNodeBounds(ps, 1, left);
+                    setNodeBounds(ps, 2, right);
                     ps.setInt(3, depth + depthDelta);
                     ps.setLong(4, id);
                     ps.addBatch();
@@ -559,18 +559,18 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
 
 //        makeSpace(con, seq/*irrelevant*/, mode, parentNodeId, position/*irrelevant*/, 1);
         FxTreeNodeInfoSpreaded parentNode = (FxTreeNodeInfoSpreaded) getTreeNodeInfo(con, mode, parentNodeId);
-        BigDecimal boundaries[] = getBoundaries(con, parentNode, position);
-        BigDecimal leftBoundary = boundaries[0]; //== left border
-        BigDecimal rightBoundary = boundaries[1]; //== right border
+        BigInteger boundaries[] = getBoundaries(con, parentNode, position);
+        BigInteger leftBoundary = boundaries[0]; //== left border
+        BigInteger rightBoundary = boundaries[1]; //== right border
 
         // Node has to be inserted between the left and right boundary and needs 2 slots for its left and right border
-        BigDecimal spacing = rightBoundary.subtract(leftBoundary).subtract(TWO);
+        BigInteger spacing = rightBoundary.subtract(leftBoundary).subtract(TWO);
         // Compute spacing for left,inner and right part
-        spacing = spacing.divide(THREE, RoundingMode.FLOOR);
+        spacing = spacing.divide(THREE);
 
         // We need at least 2 open slots (for the left and right boundary of the new node)
         //if the spacing is <= 0 we need more space
-        if (spacing.compareTo(BigDecimal.ZERO) <= 0/*less than*/) {
+        if (spacing.compareTo(BigInteger.ZERO) <= 0/*less than*/) {
             throw new FxTreeException("ex.tree.create.noSpace", parentNodeId);
         }
 
@@ -579,11 +579,11 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
         // Maxspacing indicates the number of nodes (*2) we expect to put in this node before space reorg
         spacing = spacing.compareTo(DEFAULT_NODE_SPACING) > 0 ? DEFAULT_NODE_SPACING : spacing;
 
-//        final BigDecimal left = leftBoundary.add(spacing).add(BigDecimal.ONE);
+//        final BigInteger left = leftBoundary.add(spacing).add(BigInteger.ONE);
         // don't add gap to left boundary (doesn't seem to have any benefits since that space is lost
         // unless the tree is reorganized anyway
-        final BigDecimal left = leftBoundary.add(BigDecimal.ONE);
-        final BigDecimal right = left.add(spacing).add(BigDecimal.ONE);
+        final BigInteger left = leftBoundary.add(BigInteger.ONE);
+        final BigInteger right = left.add(spacing).add(BigInteger.ONE);
 
         NodeCreateInfo nci = getNodeCreateInfo(mode, seq, ce, nodeId, name, label, reference, activateContent);
 
@@ -595,8 +595,8 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
                     "(" + nci.id + "," + parentNodeId + "," + (parentNode.getDepth() + 1) +
                     ",?," + nci.reference.getId() + ",?,?,0,?," + StorageManager.getTimestampFunction() + ",?)");
             ps.setBoolean(1, mode != FxTreeMode.Live);
-            ps.setBigDecimal(2, left);
-            ps.setBigDecimal(3, right);
+            setNodeBounds(ps, 2, left);
+            setNodeBounds(ps, 3, right);
             ps.setString(4, FxFormatUtils.escapeTreePath(nci.name));
             if (StringUtils.isEmpty(data)) {
                 ps.setNull(5, java.sql.Types.VARCHAR);
@@ -684,11 +684,11 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
         }
 
         // Make space for the new nodes
-        BigDecimal spacing = makeSpace(con, seq, mode, newParentId, newPosition, node.getTotalChildCount() + 1);
+        BigInteger spacing = makeSpace(con, seq, mode, newParentId, newPosition, node.getTotalChildCount() + 1);
 
         // Reload the node to obtain the new boundary and spacing informations
         destinationNode = (FxTreeNodeInfoSpreaded) getTreeNodeInfo(con, mode, newParentId);
-        BigDecimal boundaries[] = getBoundaries(con, destinationNode, newPosition);
+        BigInteger boundaries[] = getBoundaries(con, destinationNode, newPosition);
 
         // Move the nodes
         int depthDelta = (destinationNode.getDepth() + 1) - node.getDepth();
@@ -729,7 +729,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
             }
 
         } catch (SQLException e) {
-            throw new FxTreeException("ex.tree.move.parentUpdate.failed", node.getId(), e.getMessage());
+            throw new FxTreeException(e, "ex.tree.move.parentUpdate.failed", node.getId(), e.getMessage());
         } finally {
             try {
                 if (stmt != null) stmt.close();
@@ -749,7 +749,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
         getTreeNodeInfo(con, mode, dstParentNodeId);
 
         // Make space for the new nodes
-        BigDecimal spacing = makeSpace(con, seq, mode, dstParentNodeId, dstPosition, sourceNode.getTotalChildCount() + 1);
+        BigInteger spacing = makeSpace(con, seq, mode, dstParentNodeId, dstPosition, sourceNode.getTotalChildCount() + 1);
 
         // Reload the node to obtain the new boundary and spacing informations
         final FxTreeNodeInfoSpreaded destinationNode = (FxTreeNodeInfoSpreaded) getTreeNodeInfo(con, mode, dstParentNodeId);
@@ -757,7 +757,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
         acquireLocksForUpdate(con, mode, Arrays.asList(srcNodeId, sourceNode.getParentId(), dstParentNodeId));
 
         // Copy the data
-        BigDecimal boundaries[] = getBoundaries(con, destinationNode, dstPosition);
+        BigInteger boundaries[] = getBoundaries(con, destinationNode, dstPosition);
         int depthDelta = (destinationNode.getDepth() + 1) - sourceNode.getDepth();
         long firstCreatedNodeId = reorganizeSpace(con, seq, mode, mode, sourceNode.getId(), true, spacing, boundaries[0], null, -1, null, null,
                 depthDelta, dstParentNodeId, true, false);
@@ -773,8 +773,8 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
             if (deepReferenceCopy) {
                 FxTreeNodeInfoSpreaded nodeInfo = (FxTreeNodeInfoSpreaded)getTreeNodeInfo(con, mode, firstCreatedNodeId);
                 ps = con.prepareStatement("SELECT ID,REF FROM "+getTable(mode)+" WHERE LFT>=? AND RGT<=?");
-                ps.setBigDecimal(1, nodeInfo.getLeft());
-                ps.setBigDecimal(2, nodeInfo.getRight());
+                setNodeBounds(ps, 1, nodeInfo.getLeft());
+                setNodeBounds(ps, 2, nodeInfo.getRight());
                 ResultSet rs = ps.executeQuery();
                 final ContentEngine ce = EJBLookup.getContentEngine();
                 while( rs != null && rs.next() ) {
@@ -949,14 +949,14 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
         int position = 0;
 
         // Make space for the new nodes
-        BigDecimal spacing = makeSpace(con, seq, FxTreeMode.Live, destination, /*sourceNode.getPosition()*/position,
+        BigInteger spacing = makeSpace(con, seq, FxTreeMode.Live, destination, /*sourceNode.getPosition()*/position,
                 sourceNode.getTotalChildCount() + 1);
 
         // Reload the node to obtain the new boundary and spacing informations
         FxTreeNodeInfoSpreaded destinationNode = (FxTreeNodeInfoSpreaded) getTreeNodeInfo(con, FxTreeMode.Live, destination);
 
         // Copy the data
-        BigDecimal boundaries[] = getBoundaries(con, destinationNode, position);
+        BigInteger boundaries[] = getBoundaries(con, destinationNode, position);
         int depthDelta = (destinationNode.getDepth() + 1) - sourceNode.getDepth();
 
         reorganizeSpace(con, seq, mode, FxTreeMode.Live, sourceNode.getId(), true, spacing,
@@ -1007,8 +1007,8 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
                     if (psRemove == null) {
                         psRemove = con.prepareStatement("DELETE FROM " + getTable(FxTreeMode.Live) + " WHERE LFT>=? AND RGT<=?");
                     }
-                    psRemove.setBigDecimal(1, rs.getBigDecimal(3));
-                    psRemove.setBigDecimal(2, rs.getBigDecimal(4));
+                    setNodeBounds(psRemove, 1, getNodeBounds(rs, 3));
+                    setNodeBounds(psRemove, 2, getNodeBounds(rs, 4));
                     psRemove.execute();
                     if (psFixChildCount == null) {
                         psFixChildCount = con.prepareStatement("UPDATE " + getTable(FxTreeMode.Live) + " SET CHILDCOUNT=CHILDCOUNT-1 WHERE ID=?");
@@ -1025,8 +1025,8 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
                             psFlagDirty = con.prepareStatement("UPDATE " + getTable(FxTreeMode.Edit) + " SET DIRTY=" + StorageManager.getBooleanTrueExpression() +
                                     " WHERE LFT>=? AND RGT<=?");
                         }
-                        psFlagDirty.setBigDecimal(1, rsBoundaries.getBigDecimal(1));
-                        psFlagDirty.setBigDecimal(2, rsBoundaries.getBigDecimal(2));
+                        setNodeBounds(psFlagDirty, 1, getNodeBounds(rsBoundaries, 1));
+                        setNodeBounds(psFlagDirty, 2, getNodeBounds(rsBoundaries, 2));
                         psFlagDirty.executeUpdate();
                     }
                 }
@@ -1084,11 +1084,13 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
             // collect nodes, build lookup tables
             final Map<Long, CheckedNodeInfo> nodeMap = Maps.newHashMap();           // node ID -> node info
             final Multimap<Long, CheckedNodeInfo> childMap = HashMultimap.create();    // node ID -> children
-            final Multimap<BigDecimal, CheckedNodeInfo> leftNodeInfos = HashMultimap.create(1000, 1);
-            final Multimap<BigDecimal, CheckedNodeInfo> rightNodeInfos = HashMultimap.create(1000, 1);
+            final Multimap<BigInteger, CheckedNodeInfo> leftNodeInfos = HashMultimap.create(1000, 1);
+            final Multimap<BigInteger, CheckedNodeInfo> rightNodeInfos = HashMultimap.create(1000, 1);
             while (rs.next()) {
-                final CheckedNodeInfo info = new CheckedNodeInfo(rs.getLong(1), rs.getLong(6), rs.getBigDecimal(2),
-                        rs.getBigDecimal(3), rs.getInt(4), rs.getInt(5));
+                final CheckedNodeInfo info = new CheckedNodeInfo(rs.getLong(1), rs.getLong(6), 
+                        getNodeBounds(rs, 2),
+                        getNodeBounds(rs, 3),
+                        rs.getInt(4), rs.getInt(5));
                 nodeMap.put(info.id, info);
                 childMap.put(info.parentId, info);
                 leftNodeInfos.put(info.left, info);
@@ -1104,8 +1106,8 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
                 }
 
                 // check node bounds of children
-                BigDecimal min = MAX_RIGHT;
-                BigDecimal max = new BigDecimal(0);
+                BigInteger min = MAX_RIGHT;
+                BigInteger max = BigInteger.ZERO;
                 final Collection<CheckedNodeInfo> children = childMap.get(node.id);
                 for (CheckedNodeInfo child : children) {
                     if (child.left.compareTo(min) < 0) {
@@ -1148,9 +1150,9 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
         }
     }
 
-    private void checkUniqueBounds( FxTreeMode mode, Multimap<BigDecimal, CheckedNodeInfo> infos, String name) throws FxTreeException {
+    private void checkUniqueBounds( FxTreeMode mode, Multimap<BigInteger, CheckedNodeInfo> infos, String name) throws FxTreeException {
         // check for unique left/right tree bounds
-        for (Entry<BigDecimal> entry : infos.keys().entrySet()) {
+        for (Entry<BigInteger> entry : infos.keys().entrySet()) {
             if (entry.getCount() > 1) {
                 throw new FxTreeException(LOG, "ex.tree.check.failed", mode, "Duplicate boundaries (" + name
                         + ") for nodes " + infos.get(entry.getElement()));
@@ -1161,12 +1163,12 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
     private static class CheckedNodeInfo {
         private final long id;
         private final long parentId;
-        private final BigDecimal left;
-        private final BigDecimal right;
+        private final BigInteger left;
+        private final BigInteger right;
         private final int directChildCount;
         private final int depth;
 
-        public CheckedNodeInfo(long id, long parentId, BigDecimal left, BigDecimal right, int directChildCount, int depth) {
+        public CheckedNodeInfo(long id, long parentId, BigInteger left, BigInteger right, int directChildCount, int depth) {
             this.id = id;
             this.parentId = parentId;
             this.left = left;

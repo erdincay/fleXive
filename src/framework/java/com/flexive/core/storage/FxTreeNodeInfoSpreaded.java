@@ -36,8 +36,7 @@ import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.security.PermissionSet;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
+import java.math.BigInteger;
 import java.util.List;
 
 /**
@@ -51,14 +50,14 @@ public class FxTreeNodeInfoSpreaded extends FxTreeNodeInfo implements Serializab
 
     private static final long serialVersionUID = -2090532401288230681L;
 
-    private final static BigDecimal THREE = new BigDecimal(3);
-    private BigDecimal innerSpace;
-    private BigDecimal defaultSpacing;
-    private BigDecimal left;
-    private BigDecimal right;
-    private BigDecimal parentLeft;
-    private BigDecimal parentRight;
-    private BigDecimal maxChildRight;
+    private final static BigInteger THREE = BigInteger.valueOf(3);
+    private BigInteger innerSpace;
+    private BigInteger defaultSpacing;
+    private BigInteger left;
+    private BigInteger right;
+    private BigInteger parentLeft;
+    private BigInteger parentRight;
+    private BigInteger maxChildRight;
 
     /**
      * Ctor
@@ -82,8 +81,8 @@ public class FxTreeNodeInfoSpreaded extends FxTreeNodeInfo implements Serializab
      * @param modifiedAt       last modified at
      * @param permissions      the node permissions of the calling user
      */
-    public FxTreeNodeInfoSpreaded(BigDecimal left, BigDecimal right,
-                                  BigDecimal parentLeft, BigDecimal parentRight, BigDecimal maxChildRight,
+    public FxTreeNodeInfoSpreaded(BigInteger left, BigInteger right,
+                                  BigInteger parentLeft, BigInteger parentRight, BigInteger maxChildRight,
                                   int totalChildCount, int directChildCount, int depth, long parentId, long id, String name,
                                   FxPK reference, List<Long> aclIds, FxTreeMode mode, int position, String template, long modifiedAt,
                                   PermissionSet permissions) {
@@ -95,7 +94,7 @@ public class FxTreeNodeInfoSpreaded extends FxTreeNodeInfo implements Serializab
         this.parentRight = parentRight;
         this.maxChildRight = maxChildRight;
         // Compute the space between the node left and right border
-        innerSpace = (right.subtract(left)).subtract(BigDecimal.ONE);
+        innerSpace = (right.subtract(left)).subtract(BigInteger.ONE);
         // Compute the default spacing between borders inside this node
         defaultSpacing = getSpacing(totalChildCount);
     }
@@ -105,7 +104,7 @@ public class FxTreeNodeInfoSpreaded extends FxTreeNodeInfo implements Serializab
      *
      * @return inner space
      */
-    public BigDecimal getInnerSpace() {
+    public BigInteger getInnerSpace() {
         return innerSpace;
     }
 
@@ -114,7 +113,7 @@ public class FxTreeNodeInfoSpreaded extends FxTreeNodeInfo implements Serializab
      *
      * @return default spacing
      */
-    public BigDecimal getDefaultSpacing() {
+    public BigInteger getDefaultSpacing() {
         return defaultSpacing;
     }
 
@@ -124,7 +123,7 @@ public class FxTreeNodeInfoSpreaded extends FxTreeNodeInfo implements Serializab
      * @return left position
      */
     @Override
-    public BigDecimal getLeft() {
+    public BigInteger getLeft() {
         return left;
     }
 
@@ -134,7 +133,7 @@ public class FxTreeNodeInfoSpreaded extends FxTreeNodeInfo implements Serializab
      * @return right position
      */
     @Override
-    public BigDecimal getRight() {
+    public BigInteger getRight() {
         return right;
     }
 
@@ -144,7 +143,7 @@ public class FxTreeNodeInfoSpreaded extends FxTreeNodeInfo implements Serializab
      * @return parent left position
      */
     @Override
-    public BigDecimal getParentLeft() {
+    public BigInteger getParentLeft() {
         return parentLeft;
     }
 
@@ -154,7 +153,7 @@ public class FxTreeNodeInfoSpreaded extends FxTreeNodeInfo implements Serializab
      * @return parent right position
      */
     @Override
-    public BigDecimal getParentRight() {
+    public BigInteger getParentRight() {
         return parentRight;
     }
 
@@ -166,7 +165,7 @@ public class FxTreeNodeInfoSpreaded extends FxTreeNodeInfo implements Serializab
      *
      * @return The maximum rgt value of all childs of the node
      */
-    public BigDecimal getMaxChildRight() {
+    public BigInteger getMaxChildRight() {
         if (directChildCount == 0 || maxChildRight == null) {
             return right;
         } else {
@@ -181,13 +180,13 @@ public class FxTreeNodeInfoSpreaded extends FxTreeNodeInfo implements Serializab
      * @param childCount number of children to get the spacing for
      * @return spacing
      */
-    public BigDecimal getSpacing(int childCount) {
+    public BigInteger getSpacing(int childCount) {
         // Every node needs 2 positions for its lft and rgt borders
-        BigDecimal result = innerSpace.subtract(new BigDecimal(childCount * 2));
+        BigInteger result = innerSpace.subtract(BigInteger.valueOf(childCount * 2));
         // Compute the spaces needed in and between the nodes
-        BigDecimal spacesNeeded = new BigDecimal((childCount * 2) + 1);
+        BigInteger spacesNeeded = BigInteger.valueOf((childCount * 2) + 1);
         // Devide the space available and floor it
-        return result.divide(spacesNeeded, RoundingMode.FLOOR);
+        return result.divide(spacesNeeded);
     }
 
     /**
@@ -210,12 +209,12 @@ public class FxTreeNodeInfoSpreaded extends FxTreeNodeInfo implements Serializab
      */
     public boolean hasSpaceFor(int childCount, int spacing) {
         // Every child node needs at least 2 positions (the left and right border)
-        BigDecimal spaceNeeded = new BigDecimal(childCount * 2);
+        BigInteger spaceNeeded = BigInteger.valueOf(childCount * 2);
         // Compute needed spacing
-        BigDecimal totalSpacing = spacing <= 0 ? BigDecimal.ZERO : new BigDecimal(((childCount * 2) + 1) * spacing);
+        BigInteger totalSpacing = spacing <= 0 ? BigInteger.ZERO : BigInteger.valueOf(((childCount * 2) + 1) * (long) spacing);
         // See if we can fit them all in
         spaceNeeded = spaceNeeded.add(totalSpacing);
-        return ((this.getInnerSpace().subtract(spaceNeeded)).compareTo(BigDecimal.ZERO) > 0);
+        return ((this.getInnerSpace().subtract(spaceNeeded)).compareTo(BigInteger.ZERO) > 0);
     }
 
     /**
@@ -225,7 +224,7 @@ public class FxTreeNodeInfoSpreaded extends FxTreeNodeInfo implements Serializab
      * @return if there is enough space to hold <code>childCount</code> child nodes
      */
     public boolean hasSpaceFor(int childCount) {
-        return getSpacing(childCount).compareTo(BigDecimal.ZERO) >= 0;
+        return getSpacing(childCount).compareTo(BigInteger.ZERO) >= 0;
     }
 
 

@@ -62,12 +62,13 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import java.math.BigDecimal;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.sql.*;
 import java.util.*;
 
@@ -1207,16 +1208,6 @@ public abstract class GenericTreeStorage implements TreeStorage {
     }
 
     /**
-     * Convert a Number to BigDecimal
-     *
-     * @param value Number
-     * @return BigDecimal
-     */
-    private BigDecimal toBigDecimal(Number value) {
-        return value instanceof BigDecimal ? (BigDecimal) value : new BigDecimal(value.toString());
-    }
-
-    /**
      * {@inheritDoc}
      */
     public void removeNode(Connection con, FxTreeMode mode, ContentEngine ce, long nodeId, boolean removeChildren) throws FxApplicationException {
@@ -1401,8 +1392,8 @@ public abstract class GenericTreeStorage implements TreeStorage {
             final String rangeIncl = includeRoot ? "=" : "";
             stmt = con.prepareStatement("SELECT id FROM " + getTable(mode) 
                     + " WHERE lft >" + rangeIncl + " ? AND rgt <" + rangeIncl + " ?");
-            stmt.setBigDecimal(1, toBigDecimal(left));
-            stmt.setBigDecimal(2, toBigDecimal(right));
+            setNodeBounds(stmt, 1, new BigInteger(left.toString()));
+            setNodeBounds(stmt, 2, new BigInteger(right.toString()));
             return collectNodeIds(stmt);
         } finally {
             Database.closeObjects(GenericTreeStorage.class, null, stmt);
@@ -1886,5 +1877,15 @@ public abstract class GenericTreeStorage implements TreeStorage {
         return result;
     }
 
+
+    protected BigInteger getNodeBounds(ResultSet rs, int index) throws SQLException {
+        final String value = rs.getString(index);
+        return value == null ? BigInteger.ZERO : new BigInteger(value);
+    }
+
+    protected void setNodeBounds(PreparedStatement stmt, int index, BigInteger value) throws SQLException {
+        // Postgres 8.x does not perform automatic conversion from String (unlike other DBMS)
+        stmt.setBigDecimal(index, new BigDecimal(value.toString()));
+    }
 
 }

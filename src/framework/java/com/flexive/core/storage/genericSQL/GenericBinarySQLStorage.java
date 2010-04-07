@@ -777,7 +777,7 @@ public class GenericBinarySQLStorage implements BinaryStorage {
             ps.setInt(positionBinary + 2, dimensionsPreview[1]);
             ps.setInt(positionSize, (int) previewFile.length());
         } else {
-            ps.setNull(positionBinary, Types.BLOB);
+            ps.setNull(positionBinary, Types.BINARY);
             ps.setInt(positionBinary + 1, 0);
             ps.setInt(positionBinary + 2, 0);
             ps.setInt(positionSize, 0);
