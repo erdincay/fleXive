@@ -92,6 +92,7 @@ public class StructureExportBean {
     private String open_4 = "true"; // Groovy result panel
     private String open_5 = "false";
     private String open_6 = "false";
+    private String open_7 = "false"; // more Groovy options
     private boolean allTypesMarked;
     private String typeIdsXML;
     private List<StructureExporterCallback> dependencyStructures;
@@ -568,6 +569,14 @@ public class StructureExportBean {
         this.open_6 = open_6;
     }
 
+    public String getOpen_7() {
+        return open_7;
+    }
+
+    public void setOpen_7(String open_7) {
+        this.open_7 = open_7;
+    }
+
     public boolean isAllTypesMarked() {
         return allTypesMarked;
     }
@@ -726,6 +735,14 @@ public class StructureExportBean {
 
     public boolean isAddSystemTypes() {
         return gbean.isAddSystemTypes();
+    }
+
+    public void setConvertToUnicode(boolean convertToUnicode) {
+        gbean.setConvertToUnicode(convertToUnicode);
+    }
+
+    public boolean isConvertToUnicode() {
+        return gbean.isConvertToUnicode();
     }
 
     public String getUserLang() {

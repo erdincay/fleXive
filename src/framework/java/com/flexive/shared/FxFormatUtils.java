@@ -750,4 +750,49 @@ public final class FxFormatUtils {
         res.append(ms).append("ms");
         return res.toString();
     }
+
+    /**
+     * Convert international characters to hex-encoded unicode format (\\u....)
+     * internat. chars: e.g. ~ 0x007E - 0x00FF
+     * Takes one or two character ranges as parameters (second range == null --> converted to "first" range)
+     * Ranges are inclusive!
+     *
+     * @param input the input String
+     * @param start1 start of range 1
+     * @param end1 end of range 2
+     * @param start2 start of range 2
+     * @param end2 end of range 2
+     * @return the String containing unicode characters
+     */
+    public static String convertToJavaUnicode(String input, Character start1, Character end1, Character start2, Character end2) {
+        if (start1 == null || end1 == null)
+            return input;
+
+        StringBuilder out = new StringBuilder(input.length());
+        String hex;
+        char ch;
+
+        if (start2 == null || end2 == null) {
+            start2 = start1;
+            end2 = end1;
+        }
+
+        // walk through indiv. chars and convert as needed while appending to "out"
+        for (int i = 0; i < input.length(); i++) {
+            ch = input.charAt(i);
+
+            if ((ch >= start1) && (ch <= end1) || (ch >= start2) && (ch <= end2)) {
+                out.append("\\u");
+                hex = Integer.toHexString(input.charAt(i) & 0xFFFF);
+                // prepend 0s
+                for (int j = 0; j < 4 - hex.length(); j++)
+                    out.append("0");
+
+                out.append(hex.toUpperCase());
+            } else {
+                out.append(ch);
+            }
+        }
+        return out.toString();
+    }
 }

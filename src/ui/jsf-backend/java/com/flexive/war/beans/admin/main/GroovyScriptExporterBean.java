@@ -32,6 +32,7 @@
 
 package com.flexive.war.beans.admin.main;
 
+import com.flexive.shared.FxFormatUtils;
 import com.flexive.shared.structure.export.StructureExporterCallback;
 import com.flexive.shared.scripting.groovy.GroovyScriptExporter;
 
@@ -54,6 +55,7 @@ public class GroovyScriptExporterBean {
     private boolean withoutDependencies = false;
     private boolean addWorkflow = false; // generate code f. workflow names
     private boolean reset;
+    private boolean convertToUnicode = false;
 
     /**
      * Default constructor (use setters)
@@ -85,7 +87,8 @@ public class GroovyScriptExporterBean {
     }
 
     /**
-     * Generate the script code
+     * Generate the script code - uses the GroovyScriptExporter's run method and applies the boolean flags.
+     * Unicode conversion is performed after script generation is completed.
      */
     private void generateCode() {
         if (exporter == null)
@@ -95,8 +98,13 @@ public class GroovyScriptExporterBean {
             exporter.run(generateImportStatements, deleteStructures, generateScriptAssignments, scriptOverride, defaultsOnly,
                     addSystemTypes, withoutDependencies, addWorkflow, reset);
 
-        scriptCode = exporter.getScriptCode();
-        reset = false; // reset reset
+        if(convertToUnicode) {
+            char start = 0x00A1; // character range
+            char end = 0x02B8;
+            scriptCode = FxFormatUtils.convertToJavaUnicode(exporter.getScriptCode(), start, end, null, null);
+        } else
+            scriptCode = exporter.getScriptCode();
+        reset = false; // always reset "reset" after a new run
     }
 
     public boolean isDeleteStructures() {
@@ -166,6 +174,14 @@ public class GroovyScriptExporterBean {
 
     public void setWithoutDependencies(boolean withoutDependencies) {
         this.withoutDependencies = withoutDependencies;
+    }
+
+    public boolean isConvertToUnicode() {
+        return convertToUnicode;
+    }
+
+    public void setConvertToUnicode(boolean convertToUnicode) {
+        this.convertToUnicode = convertToUnicode;
     }
 
     /**

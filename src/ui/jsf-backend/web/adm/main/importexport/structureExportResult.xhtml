@@ -55,39 +55,7 @@
 
         <a4j:form id="frm">
 
-            <t:saveState value="#{exportBean.showAllTypes}"/>
-            <t:saveState value="#{exportBean.showBaseTypes}"/>
-            <t:saveState value="#{exportBean.showDerivedTypes}"/>
-            <t:saveState value="#{exportBean.showRelations}"/>
-            <t:saveState value="#{exportBean.exportedTypesList}"/>
-            <t:saveState value="#{exportBean.exportPerformed}"/>
-            <t:saveState value="#{exportBean.callback}"/>
-            <t:saveState value="#{exportBean.hasDependencies}"/>
-            <t:saveState value="#{exportBean.dependencyStructures}"/>
-            <t:saveState value="#{exportBean.expDepTypeList}"/>
-            <t:saveState value="#{exportBean.exportedGroupsList}"/>
-            <t:saveState value="#{exportBean.assignmentIsGroupMap}"/>
-            <t:saveState value="#{exportBean.open_1}"/>
-            <t:saveState value="#{exportBean.open_2}"/>
-            <t:saveState value="#{exportBean.open_3}"/>
-            <t:saveState value="#{exportBean.open_4}"/>
-            <t:saveState value="#{exportBean.open_5}"/>
-            <t:saveState value="#{exportBean.open_6}"/>
-            <t:saveState value="#{exportBean.exportIds}"/>
-            <t:saveState value="#{exportBean.allTypesMarked}"/>
-            <t:saveState value="#{exportBean.expDepGroupList}"/>
-            <t:saveState value="#{exportBean.dependentOnMapping}"/>
-            <t:saveState value="#{exportBean.showScripts}"/>
-            <t:saveState value="#{exportBean.typesWithScripts}"/>
-            <t:saveState value="#{exportBean.assignsWithScripts}"/>
-            <t:saveState value="#{exportBean.typeScripts}"/>
-            <t:saveState value="#{exportBean.typeScriptEvents}"/>
-            <t:saveState value="#{exportBean.assignScriptEvents}"/>
-            <t:saveState value="#{exportBean.assignScripts}"/>
-            <t:saveState value="#{exportBean.scriptIdNameMap}"/>
-            <t:saveState value="#{exportBean.gbean}"/>
-            <t:saveState value="#{exportBean.userLang}"/>
-            <t:saveState value="#{exportBean.activateEditor}"/>
+            <a4j:keepAlive beanName="exportBean"/>
 
             <adm:tab label="#{fxMessageBean['StructureExport.tabtitle.main']}" active="false" id="tab1"
                      bean="#{exportBean}" action="showMainTab" rendered="true" lockscreen="true" />
@@ -263,69 +231,98 @@
                         <fx:fieldSet legendKey="StructureExport.lbl.groovyOptions">
                             <table id="groovyOptions" class="fxFont">
                                 <tbody>
+                                <tr>
+                                    <td>
+                                        <fx:formRow overrideInputStyle="float:none" id="scriptAssignments"
+                                                    labelKey="StructureExport.lbl.scriptAssignments" newLine="false">
+                                            <h:selectBooleanCheckbox id="scriptAssignments" value="#{exportBean.generateScriptAssignments}">
+                                                <a4j:support reRender="codePanel, overrideSwitch" event="onclick" oncomplete="activateEditArea('frm:groovyCode', true, '#{scriptConsoleBean.userLang}', null, '#{exportBean.toggleEditor}', null, null, false);"/>
+                                            </h:selectBooleanCheckbox>
+                                        </fx:formRow>
+                                    </td>
+                                    <td>
+                                        <fx:formRow overrideInputStyle="float:none" id="importStatements"
+                                                    labelKey="StructureExport.lbl.addImportSatements" newLine="false">
+                                            <h:selectBooleanCheckbox id="importStatements" value="#{exportBean.generateImportStatements}">
+                                                <a4j:support reRender="codePanel" event="onclick" oncomplete="activateEditArea('frm:groovyCode', true, '#{scriptConsoleBean.userLang}', null, '#{exportBean.toggleEditor}', null, null, false);"/>
+                                            </h:selectBooleanCheckbox>
+                                        </fx:formRow>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <a4j:outputPanel id="overrideSwitch" ajaxRendered="true">
+                                            <fx:formRow overrideInputStyle="float:none" id="scriptOverrideSwitch"
+                                                        labelKey="StructureExport.lbl.scriptOverride" newLine="false">
+                                                <h:selectBooleanCheckbox id="scriptOverrideSwitch" value="#{exportBean.scriptOverride}" disabled="#{not exportBean.generateScriptAssignments}">
+                                                    <a4j:support reRender="codePanel" event="onclick" oncomplete="activateEditArea('frm:groovyCode', true, '#{scriptConsoleBean.userLang}', null, '#{exportBean.toggleEditor}', null, null, false);"/>
+                                                </h:selectBooleanCheckbox>
+                                            </fx:formRow>
+                                        </a4j:outputPanel>
+                                    </td>
+                                    <td>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+
+                            <rich:simpleTogglePanel id="moreGrooyOptions" rendered="true"
+                                        opened="#{exportBean.open_7}" switchType="client"
+                                        label="#{fxMessageBean['StructureExport.lbl.moreGroovyOptions']}">
+
+                                <table id="moreScriptOptions" class="fxFont">
+                                    <tbody>
                                     <tr>
                                         <td>
-                                            <fx:formRow overrideInputStyle="float:none" id="deleteStructures" labelKey="StructureExport.lbl.addDeleteStructures" newLine="false">
+                                            <fx:formRow overrideInputStyle="float:none" id="deleteStructures"
+                                                        labelKey="StructureExport.lbl.addDeleteStructures" newLine="false">
                                                 <h:selectBooleanCheckbox id="deleteStructures" value="#{exportBean.deleteStructures}">
                                                     <a4j:support reRender="codePanel" event="onclick" oncomplete="activateEditArea('frm:groovyCode', true, '#{scriptConsoleBean.userLang}', null, '#{exportBean.toggleEditor}', null, null, false);"/>
                                                 </h:selectBooleanCheckbox>
                                             </fx:formRow>
                                         </td>
                                         <td>
-                                            <fx:formRow overrideInputStyle="float:none" id="importStatements" labelKey="StructureExport.lbl.addImportSatements" newLine="false">
-                                                <h:selectBooleanCheckbox id="importStatements" value="#{exportBean.generateImportStatements}">
-                                                    <a4j:support reRender="codePanel" event="onclick" oncomplete="activateEditArea('frm:groovyCode', true, '#{scriptConsoleBean.userLang}', null, '#{exportBean.toggleEditor}', null, null, false);"/>
-                                                </h:selectBooleanCheckbox>
-                                            </fx:formRow>
-                                        </td>
-                                        </tr>
-                                    <tr>
-                                        <td>
-                                            <fx:formRow overrideInputStyle="float:none" id="defaultsOnly" labelKey="StructureExport.lbl.defaultsOnly" newLine="false">
+                                            <fx:formRow overrideInputStyle="float:none" id="defaultsOnly"
+                                                        labelKey="StructureExport.lbl.defaultsOnly" newLine="false">
                                                 <h:selectBooleanCheckbox id="defaultsOnly" value="#{exportBean.defaultsOnly}">
                                                     <a4j:support reRender="codePanel" event="onclick" oncomplete="activateEditArea('frm:groovyCode', true, '#{scriptConsoleBean.userLang}', null, '#{exportBean.toggleEditor}', null, null, false);"/>
                                                 </h:selectBooleanCheckbox>
                                             </fx:formRow>
                                         </td>
-                                        <td>
-                                        </td>
                                     </tr>
                                     <tr>
                                         <td>
-                                            <fx:formRow overrideInputStyle="float:none" id="scriptAssignments" labelKey="StructureExport.lbl.scriptAssignments" newLine="false">
-                                                <h:selectBooleanCheckbox id="scriptAssignments" value="#{exportBean.generateScriptAssignments}">
-                                                    <a4j:support reRender="codePanel, overrideSwitch" event="onclick" oncomplete="activateEditArea('frm:groovyCode', true, '#{scriptConsoleBean.userLang}', null, '#{exportBean.toggleEditor}', null, null, false);"/>
-                                                </h:selectBooleanCheckbox>
-                                            </fx:formRow>
-                                        </td>
-                                        <td>
-                                            <a4j:outputPanel id="overrideSwitch" ajaxRendered="true">
-                                                <fx:formRow overrideInputStyle="float:none" id="scriptOverrideSwitch" labelKey="StructureExport.lbl.scriptOverride" newLine="false">
-                                                    <h:selectBooleanCheckbox id="scriptOverrideSwitch" value="#{exportBean.scriptOverride}" disabled="#{not exportBean.generateScriptAssignments}">
-                                                        <a4j:support reRender="codePanel" event="onclick" oncomplete="activateEditArea('frm:groovyCode', true, '#{scriptConsoleBean.userLang}', null, '#{exportBean.toggleEditor}', null, null, false);"/>
-                                                    </h:selectBooleanCheckbox>
-                                                </fx:formRow>
-                                            </a4j:outputPanel>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <fx:formRow overrideInputStyle="float:none" id="addSystemTypes" labelKey="StructureExport.lbl.addSystemTypes" newLine="false">
+                                            <fx:formRow overrideInputStyle="float:none" id="addSystemTypes"
+                                                        labelKey="StructureExport.lbl.addSystemTypes" newLine="false">
                                                 <h:selectBooleanCheckbox id="addSystemTypes" value="#{exportBean.addSystemTypes}">
                                                     <a4j:support reRender="codePanel" event="onclick" oncomplete="activateEditArea('frm:groovyCode', true, '#{scriptConsoleBean.userLang}', null, '#{exportBean.toggleEditor}', null, null, false);"/>
                                                 </h:selectBooleanCheckbox>
                                             </fx:formRow>
                                         </td>
                                         <td>
-                                            <fx:formRow overrideInputStyle="float:none" id="addWorkflow" labelKey="StructureExport.lbl.addWorkflow" newLine="false">
+                                            <fx:formRow overrideInputStyle="float:none" id="addWorkflow"
+                                                        labelKey="StructureExport.lbl.addWorkflow" newLine="false">
                                                 <h:selectBooleanCheckbox id="addWorkflow" value="#{exportBean.addWorkflow}">
                                                     <a4j:support reRender="codePanel" event="onclick" oncomplete="activateEditArea('frm:groovyCode', true, '#{scriptConsoleBean.userLang}', null, '#{exportBean.toggleEditor}', null, null, false);"/>
                                                 </h:selectBooleanCheckbox>
                                             </fx:formRow>
                                         </td>
                                     </tr>
-                                </tbody>
-                            </table>
+                                    <tr>
+                                        <td>
+                                            <fx:formRow overrideInputStyle="float:none" id="convertToUnicode"
+                                                        labelKey="StructureExport.lbl.convertToUnicode" newLine="false">
+                                                <h:selectBooleanCheckbox id="convertToUnicode" value="#{exportBean.convertToUnicode}">
+                                                    <a4j:support reRender="codePanel" event="onclick" oncomplete="activateEditArea('frm:groovyCode', true, '#{scriptConsoleBean.userLang}', null, '#{exportBean.toggleEditor}', null, null, false);"/>
+                                                </h:selectBooleanCheckbox>
+                                            </fx:formRow>
+                                        </td>
+                                        <td>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </rich:simpleTogglePanel>
                         </fx:fieldSet>
                     </a4j:outputPanel>
 

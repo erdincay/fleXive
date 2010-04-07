@@ -52,7 +52,6 @@ import static org.apache.commons.lang.StringUtils.stripToEmpty;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -1010,7 +1009,8 @@ public final class GroovyScriptExporterTools {
                     // GROUPS
                 } else if (a instanceof FxGroupAssignment) {
                     // retrieve the child assignments for the given group and pass them on
-                    final List<FxAssignment> currentChildren = groupAssignments.get((FxGroupAssignment) a);
+                    @SuppressWarnings({"SuspiciousMethodCalls"})
+                    final List<FxAssignment> currentChildren = groupAssignments.get(a);
                     script.append(createGroup((FxGroupAssignment) a, currentChildren, groupAssignments, isDerived, defaultsOnly, callOnlyGroups, tabCount, withoutDependencies, differingDerivedAssignments));
                 }
             }
@@ -1077,7 +1077,7 @@ public final class GroovyScriptExporterTools {
 
             script.append(defLang)
                     .append(", \"")
-                    .append(convertToUTF8(hintAsString))
+                    .append(hintAsString)
                     .append("\")");
 
             if (langs.length > 1) { // we have more than one language assignment
@@ -1471,18 +1471,6 @@ public final class GroovyScriptExporterTools {
     }
 
     /**
-     * Escape special characters from the script code
-     *
-     * @param inputCode the input code
-     * @return returns the escaped text
-     */
-    private static String processScriptCode(String inputCode) {
-        inputCode = inputCode.replaceAll("\"", "\\\\\"");
-        inputCode = inputCode.replaceAll("\r", "");
-        return inputCode;
-    }
-
-    /**
      * Create script code
      *
      * @param si     FxScriptInfo
@@ -1539,13 +1527,5 @@ public final class GroovyScriptExporterTools {
 
         script.trimToSize();
         return script.toString();
-    }
-
-    private static String convertToUTF8(String in) {
-        try {
-        return new String(in.getBytes("UTF-8"));
-        } catch(UnsupportedEncodingException e) {
-            return in;
-        }
     }
 }
