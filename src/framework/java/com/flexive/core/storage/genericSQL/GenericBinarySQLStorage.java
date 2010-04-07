@@ -47,6 +47,7 @@ import com.flexive.shared.exceptions.FxUpdateException;
 import com.flexive.shared.interfaces.DivisionConfigurationEngine;
 import com.flexive.shared.interfaces.ScriptingEngine;
 import com.flexive.shared.media.FxMediaEngine;
+import com.flexive.shared.media.impl.FxMimeType;
 import com.flexive.shared.scripting.FxScriptBinding;
 import com.flexive.shared.scripting.FxScriptEvent;
 import com.flexive.shared.scripting.FxScriptResult;
@@ -91,7 +92,8 @@ public class GenericBinarySQLStorage implements BinaryStorage {
     protected static final String BINARY_META_LOAD = "SELECT XMLMETA FROM " + TBL_CONTENT_BINARY + " WHERE ID=? AND VER=? AND QUALITY=?";
 
     //    select into xx () select  FBLOB1,FBLOB2,?,?,?
-    protected static final String BINARY_TRANSIT_HEADER = "SELECT FBLOB FROM " + TBL_BINARY_TRANSIT + " WHERE BKEY=?";
+    protected static final String BINARY_TRANSIT_HEADER = "SELECT FBLOB,MIMETYPE FROM " + TBL_BINARY_TRANSIT + " WHERE BKEY=?";
+    protected static final String BINARY_TRANSIT_MIMETYPE = "SELECT MIMETYPE FROM " + TBL_BINARY_TRANSIT + " WHERE BKEY=?";
     //                                                                   1           2         3         4         5
     protected static final String BINARY_TRANSIT_PREVIEW_SIZES = "SELECT PREVIEW_REF,PREV1SIZE,PREV2SIZE,PREV3SIZE,PREV4SIZE FROM " + TBL_BINARY_TRANSIT + " WHERE BKEY=?";
 
@@ -275,17 +277,17 @@ public class GenericBinarySQLStorage implements BinaryStorage {
         PreviewSizes result = requestedSize;
         if (result == PreviewSizes.SCREENVIEW && prev4size == 0) {
             result = PreviewSizes.PREVIEW3;
-            if( width < BinaryDescriptor.SCREENVIEW_WIDTH && height < BinaryDescriptor.SCREENVIEW_HEIGHT)
+            if (width < BinaryDescriptor.SCREENVIEW_WIDTH && height < BinaryDescriptor.SCREENVIEW_HEIGHT)
                 result = PreviewSizes.ORIGINAL;
         }
         if (result == PreviewSizes.PREVIEW3 && prev3size == 0) {
             result = PreviewSizes.PREVIEW2;
-            if( width < result.getSize() || height < result.getSize())
+            if (width < result.getSize() || height < result.getSize())
                 result = PreviewSizes.ORIGINAL;
         }
         if (result == PreviewSizes.PREVIEW2 && prev2size == 0) {
             result = PreviewSizes.PREVIEW1;
-            if( width < result.getSize() || height < result.getSize())
+            if (width < result.getSize() || height < result.getSize())
                 result = PreviewSizes.ORIGINAL;
         }
         if (result == PreviewSizes.PREVIEW1 && prev1size == 0)
@@ -821,6 +823,9 @@ public class GenericBinarySQLStorage implements BinaryStorage {
 
                 binaryTransitFile = File.createTempFile("FXBIN_", "_TEMP");
                 in = rs.getBinaryStream(1);
+                mimeType = rs.getString(2);
+                if (rs.wasNull())
+                    mimeType = FxMimeType.UNKNOWN;
                 fos = new FileOutputStream(binaryTransitFile);
                 byte[] buffer = new byte[4096];
                 int read;
@@ -860,14 +865,27 @@ public class GenericBinarySQLStorage implements BinaryStorage {
         } else {
             binaryTransitFile = FxBinaryUtils.getTransitFile(FxContext.get().getDivisionId(), binary.getHandle());
             if (binaryTransitFile != null) {
+                Connection con = null;
                 try {
+                    con = Database.getNonTXDataSource().getConnection();
+                    ps = con.prepareStatement(BINARY_TRANSIT_MIMETYPE);
+                    ps.setString(1, binary.getHandle());
+                    ResultSet rsMime = ps.executeQuery();
+                    if (rsMime != null && rsMime.next()) {
+                        mimeType = rsMime.getString(1);
+                        if (rsMime.wasNull())
+                            mimeType = FxMimeType.UNKNOWN;
+                    }
                     in = new FileInputStream(binaryTransitFile);
                     header = new byte[48];
                     if (in.read(header, 0, 48) < 48)
                         header = null;
+                } catch (SQLException e) {
+                    throw new FxDbException(e, "ex.db.sqlError", e.getMessage());
                 } catch (IOException e) {
                     throw new FxApplicationException(e, "ex.content.binary.IOError", binary.getHandle());
                 } finally {
+                    Database.closeObjects(GenericBinarySQLStorage.class, con, ps);
                     try {
                         in.close();
                     } catch (IOException e) {
@@ -877,8 +895,11 @@ public class GenericBinarySQLStorage implements BinaryStorage {
             } else
                 throw new FxDbException("ex.content.binary.transitNotFound", binary.getHandle());
         }
-        if (header != null)
-            mimeType = FxMediaEngine.detectMimeType(header, binary.getName());
+        if (header != null) {
+            String detectedMimeType = FxMediaEngine.detectMimeType(header, binary.getName());
+            if (!FxMimeType.UNKNOWN.equalsIgnoreCase(detectedMimeType))
+                mimeType = detectedMimeType;
+        }
 
         if (binaryTransitFile == null || !binaryTransitFile.exists())
             throw new FxApplicationException("ex.content.binary.transitNotFound", binary.getHandle());
