@@ -334,7 +334,7 @@
                     </a4j:outputPanel>
 
                     <a4j:outputPanel id="editorToggleBox" ajaxRendered="true" layout="block">
-                        <fx:formRow overrideInputStyle="float:none" id="activateEditorLabel" labelKey="StructureExport.lbl.activateEditor" newLine="false">
+                        <fx:formRow overrideInputStyle="float:none" id="activateEditor" labelKey="StructureExport.lbl.activateEditor" newLine="false">
                             <h:selectBooleanCheckbox id="activateEditor" value="#{exportBean.activateEditor}">
                                 <a4j:support reRender="codePanel" event="onclick" oncomplete="activateEditArea('frm:groovyCode', true, '#{scriptConsoleBean.userLang}', null, '#{exportBean.toggleEditor}', null, null, false);"/>
                             </h:selectBooleanCheckbox>

@@ -19,9 +19,11 @@
         <script language="javascript" type="text/javascript"
                 src="#{fxSystemBean.contextPath}/adm/js/edit_area/edit_area_full.js">
         </script>
-        <script type="text/javascript">
-            activateEditArea('frm:pasteArea', true, "#{structureImportBean.userLang}");
-        </script>
+        <c:if test="#{structureImportBean.activateEditor}">
+                <script type="text/javascript">
+                    activateEditArea('frm:pasteArea', true, "#{structureImportBean.userLang}", null, '#{structureImportBean.toggleEditor}', null, null, false);
+                </script>
+            </c:if>
     </ui:define>
 
     <ui:define name="body">
@@ -36,7 +38,7 @@
                                 width="600" height="20" overrideInputStyle="width:250px;">
                         <h:selectBooleanCheckbox id="groovyImport" value="#{structureImportBean.groovyImport}">
                             <a4j:support event="onclick" reRender="buttonPanel, resultPanel, togglePanel"
-                                         oncomplete="activateEditArea('frm:pasteArea', true, '#{structureImportBean.userLang}');"/>
+                                         oncomplete="activateEditArea('frm:pasteArea', true, '#{structureImportBean.userLang}', null, '#{structureImportBean.toggleEditor}', null, null, false);"/>
                         </h:selectBooleanCheckbox>
                         <h:outputText style="color:red; padding-left:10px; padding-bottom:5px"
                                       value="#{fxMessageBean['StructureImport.lbl.xmlImport']}"
@@ -52,17 +54,26 @@
 
             <a4j:outputPanel id="pastePanel" ajaxRendered="true" layout="block">
                 <fx:fieldSet id="uploadType" legendKey="StructureImport.field.importPaste">
-                    <h:inputTextarea id="pasteArea" rows="20" cols="100" value="#{structureImportBean.pasteContent}"
-                                     readonly="false"/>
-                    
+                    <a4j:outputPanel id="codePanel" layout="block" style="width: 700px;">
+                        <h:inputTextarea id="pasteArea" rows="20" cols="100" value="#{structureImportBean.pasteContent}"
+                                         readonly="false"/>
+                    </a4j:outputPanel>
                     <br/>
 
-                    <a4j:outputPanel id="verifyPanel" layout="block">
+                    <a4j:outputPanel id="editorToggleBox" ajaxRendered="true" layout="block">
+                        <fx:formRow overrideInputStyle="float:none" id="activateEditor" labelKey="ScriptConsole.label.activateEditor" newLine="false">
+                            <h:selectBooleanCheckbox id="activateEditor" value="#{structureImportBean.activateEditor}">
+                                <a4j:support reRender="codePanel" event="onclick" oncomplete="activateEditArea('frm:pasteArea', true, '#{structureImportBean.userLang}', null, '#{structureImportBean.toggleEditor}', null, null, false);"/>
+                            </h:selectBooleanCheckbox>
+                        </fx:formRow>
+                    </a4j:outputPanel>
+
+                    <a4j:outputPanel id="verifyPanel" layout="block" style="margin-top:2px; margin-left:5px;">
                         <adm:ajaxCommandButton id="verifyButton" labelKey="Script.button.verify"
                                                icon="check" bean="#{structureImportBean}"
                                                buttonDisabled="#{!structureImportBean.groovyImport}"
                                                action="checkScriptSyntax" reRender="resultPanel, uploadPanel"
-                                               oncomplete="activateEditArea('frm:pasteArea', true, '#{structureImportBean.userLang}');"/>
+                                               oncomplete="activateEditArea('frm:pasteArea', true, '#{structureImportBean.userLang}', null, '#{structureImportBean.toggleEditor}', null, null, false);"/>
                     </a4j:outputPanel>
                 </fx:fieldSet>
 

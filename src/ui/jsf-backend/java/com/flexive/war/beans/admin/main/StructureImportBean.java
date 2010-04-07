@@ -66,6 +66,8 @@ public class StructureImportBean implements ActionBean, Serializable {
     private transient Object result;
     private long executionTime;
     private String userLang = "en";
+    private String toggleEditor = "onload";
+    private boolean activateEditor = true;
 
     /**
      * {@inheritDoc}
@@ -244,5 +246,28 @@ public class StructureImportBean implements ActionBean, Serializable {
             ScriptBean.checkScriptSyntax("dummyName.groovy", pasteContent);
 
         result = null; // reset
+    }
+
+
+    public String getToggleEditor() {
+        return toggleEditor;
+    }
+
+    public void setToggleEditor(String toggleEditor) {
+        this.toggleEditor = toggleEditor;
+    }
+
+    public boolean isActivateEditor() {
+        return activateEditor;
+    }
+
+   /**
+     * Activate the editor and also control the "toggleEditor" variable f. editarea
+     *
+     * @param activateEditor flag
+     */
+    public void setActivateEditor(boolean activateEditor) {
+        toggleEditor = activateEditor ? "onload" : "later";
+        this.activateEditor = activateEditor;
     }
 }

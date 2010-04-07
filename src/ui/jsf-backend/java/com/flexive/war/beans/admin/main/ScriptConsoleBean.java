@@ -63,6 +63,8 @@ public class ScriptConsoleBean implements Serializable {
     private String language = "groovy"; // initial setting for script syntax check
     private boolean verifyButtonEnabled = false;
     private String userLang = "en";
+    private String toggleEditor = "onload";
+    private boolean activateEditor = true; // edit area switch
 
     private transient Object result;
     
@@ -200,5 +202,27 @@ public class ScriptConsoleBean implements Serializable {
     public String getUserLang() {
         userLang = FxContext.getUserTicket().getLanguage().getIso2digit();
         return userLang;
+    }
+
+    public String getToggleEditor() {
+        return toggleEditor;
+    }
+
+    public void setToggleEditor(String toggleEditor) {
+        this.toggleEditor = toggleEditor;
+    }
+
+    public boolean isActivateEditor() {
+        return activateEditor;
+    }
+
+   /**
+     * Activate the editor and also control the "toggleEditor" variable f. editarea
+     *
+     * @param activateEditor flag
+     */
+    public void setActivateEditor(boolean activateEditor) {
+        toggleEditor = activateEditor ? "onload" : "later";
+        this.activateEditor = activateEditor;
     }
 }
