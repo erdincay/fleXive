@@ -591,7 +591,7 @@ public class BeContentEditorBean implements ActionBean, Serializable {
             displayTreeLabelMap = FxSharedUtils.getMappedFunction(new FxSharedUtils.ParameterMapper<Long, String>() {
 
                 public String get(Object key) {
-                    final int maxLen = 100;
+                    final int maxLen = 80;
                     final String label = getTreeLabelPath().get((Long) key);
                     if (label != null && label.length() > maxLen) {
                         return label.substring(0, maxLen - 3) + "...";
@@ -606,6 +606,16 @@ public class BeContentEditorBean implements ActionBean, Serializable {
     }
 
     /**
+     * Show the new content creation screen.
+     *
+     * @return  the action outcome
+     */
+    public String showNewContent() {
+        resetViewStateVars();
+        return "contentEditor";
+    }
+
+    /**
      * JSF action to create a new instance for a given type id.
      *
      * @return contentEditor navigation case
@@ -615,6 +625,9 @@ public class BeContentEditorBean implements ActionBean, Serializable {
         this.typeId = newTypeId;
         beBeanInUse = true;
         this.editMode = true;
+        if (treeNodeParent > 0) {
+            addTreeNode();
+        }
         return getEditorPage();
     }
 

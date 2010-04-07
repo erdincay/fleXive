@@ -136,12 +136,8 @@ cmap.each() {key, value ->
             }
             fxvalue = new FxNumber(false, _int); break
         case "DateTime":
-        fxvalue = new FxDateTime(false, new java.util.Date(Long.valueOf(value)))
-//        println "Time is " + content.getValue("/$key").bestTranslation.time + " empty:" + content.getValue("/$key").isEmpty()
-        if (!content.containsValue("/$key")) {
-            content.getValue("/$key").setEmpty()
-        }
-        break
+            fxvalue = new FxDateTime(false, new java.util.Date(Long.valueOf(value)))
+            break
     }
     if (fxvalue != null) {
 //        println "fxValue=" + fxvalue

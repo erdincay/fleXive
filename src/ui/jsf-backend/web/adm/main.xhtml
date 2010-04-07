@@ -40,6 +40,7 @@
                 input.focus();
                 return;
             }
+            lockScreen();
             invokeContentAction("adm/search/searchResult.jsf", "fulltextSearch", {query: query});
         }
 

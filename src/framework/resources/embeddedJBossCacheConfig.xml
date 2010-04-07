@@ -110,7 +110,7 @@
 
            <!-- cache region for contents -->
            <region name="/Division1/FxContent">
-             <attribute name="maxNodes">1000</attribute>
+             <attribute name="maxNodes">100</attribute>
              <attribute name="timeToLiveSeconds">1000</attribute>
            </region>
 

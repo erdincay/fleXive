@@ -38,7 +38,7 @@ function onShowContextMenu() {
         flexive.yui.setMenuItems(["copy", "copy_briefcases"], "disabled", noSelection && noItemUnderCursor);
         flexive.yui.setMenuItem("edit", "disabled", !perms["edit"]);
         flexive.yui.setMenuItem("delete", "disabled", !perms["delete"]);
-        flexive.yui.setMenuItem("download", "disabled", !hasBinary);
+        flexive.yui.setMenuItems(["showScreenview", "download"], "disabled", !hasBinary);
         var useCurrentRowInfo = (selectedIds.length == 0 || (selectedIds.length == 1 && selectedIds[0] == pk.id));
         flexive.yui.setMenuItem("lock", "disabled", flexive.yui.datatable.getRecordValue(resultTable, this.contextEventTarget, "mayLock") != "true" && useCurrentRowInfo);
         flexive.yui.setMenuItem("unlock", "disabled", flexive.yui.datatable.getRecordValue(resultTable, this.contextEventTarget, "mayUnlock") != "true" && useCurrentRowInfo);

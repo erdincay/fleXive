@@ -69,9 +69,24 @@ disableTab... false if the <adm:tab/> component should be rendered, true otherwi
                         <adm:contentInfoPanel srcEditor="#{srcEditor}" wrappedContent="#{myContent}"/>
                     </c:if>
                 </ui:fragment>
+
                 <!-- content settings -->
                 <div class="contentSettings">
-                    <div style="float:left;padding-right:50px">
+                    <!-- Preview Image -->
+                    <ui:fragment rendered="#{myContent.content.previewAvailable}">
+                        <div class="previewImage">
+                            <a rel="lytebox" href="thumbnail/pk#{myContent.content.pk.id}.#{myContent.content.pk.version}/s4/ts#{fxSystemBean.currentTimeMillis}">
+                                <img src="thumbnail/pk#{myContent.content.pk.id}.#{myContent.content.pk.version}/s2/ts#{fxSystemBean.currentTimeMillis}"
+                                     alt="#{fxMessageBean['Content.preview.title']}" title="#{fxMessageBean['Content.preview.title']}"/>
+                            </a>
+                            <div style="padding-top:6px">
+                                <strong>#{fxMessageBean['Content.field.previewImage']}</strong>
+                            </div>
+                        </div>
+                    </ui:fragment>
+
+
+                    <div style="padding-right:50px">
                         <!-- Type name and small type icon -->
                         <fx:formRow labelKey="Content.field.type">
                             <ui:fragment rendered="#{not empty myContent.typeIcon}">
@@ -234,19 +249,6 @@ disableTab... false if the <adm:tab/> component should be rendered, true otherwi
                             </fx:formRow>
                         </c:if>
                     </div>
-
-                    <!-- Preview Image -->
-                    <ui:fragment rendered="#{myContent.content.previewAvailable}">
-                        <div class="previewImage">
-                            <a rel="lytebox" href="thumbnail/pk#{myContent.content.pk.id}.#{myContent.content.pk.version}/s4/ts#{fxSystemBean.currentTimeMillis}">
-                                <img src="thumbnail/pk#{myContent.content.pk.id}.#{myContent.content.pk.version}/s2/ts#{fxSystemBean.currentTimeMillis}"
-                                     alt="#{fxMessageBean['Content.preview.title']}" title="#{fxMessageBean['Content.preview.title']}"/>
-                            </a>
-                            <div style="padding-top:6px">
-                                <strong>#{fxMessageBean['Content.field.previewImage']}</strong>
-                            </div>
-                        </div>
-                    </ui:fragment>
 
                      <!--ie surrounding div height fix-->
                     <div style="clear:both;height:0"><!-- __ --></div>
