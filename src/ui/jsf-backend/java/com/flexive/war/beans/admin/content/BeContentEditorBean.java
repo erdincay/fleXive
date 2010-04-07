@@ -1274,6 +1274,9 @@ public class BeContentEditorBean implements ActionBean, Serializable {
             if (session == null)
                 session = FxJsfUtils.getSession();
             this.sortedPKs = (String) session.getAttribute(SORTED_PK_KEY);
+            if (StringUtils.isBlank(this.sortedPKs)) {
+                return;
+            }
         }
         else {
             this.sortedPKs = sortedPKs;
