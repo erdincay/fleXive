@@ -1237,6 +1237,11 @@ public class FxTreeTest {
             } catch (FxApplicationException e) {
                 fail("Expected pk to exist!", e);
             }
+            final long folderId = tree.save(FxTreeNodeEdit.createNew("TestDataFolder").setMode(mode).setParentNodeId(FxTreeNode.ROOT_NODE));
+            tree.save(FxTreeNodeEdit.createNew("TestData5_Child").setReference(pk).setMode(mode).setParentNodeId(folderId));
+            tree.remove(tree.getNode(mode, folderId), FxTreeRemoveOp.RemoveSingleFiled, true);
+            // content should still exist
+            assertTrue(tree.exist(mode, nodeId2), "Node2 should still exist!");
 
             nodeId = tree.save(FxTreeNodeEdit.createNew("TestData6").setReference(pk).setMode(mode).setParentNodeId(FxTreeNode.ROOT_NODE));
             assertEquals(tree.getTree(mode, FxTreeNode.ROOT_NODE, 10).getDirectChildCount(), 2, "");

@@ -332,6 +332,19 @@
                 doPaste(menuItem, flexive.util.getJsonRpc().ContentTreeEditor.moveBelow, flexive.util.getJsonRpc().ContentTreeEditor.copyBelow);
             }
 
+            // Paste reference(s) of a previously copied or cut tree node into the current node
+            function pasteNodeReferences(menuItem) {
+                doPaste(menuItem, flexive.util.getJsonRpc().ContentTreeEditor.move, flexive.util.getJsonRpc().ContentTreeEditor.copyReferences);
+            }
+
+            function pasteNodeReferencesAbove(menuItem) {
+                doPaste(menuItem, flexive.util.getJsonRpc().ContentTreeEditor.moveAbove, flexive.util.getJsonRpc().ContentTreeEditor.copyReferencesAbove);
+            }
+
+            function pasteNodeReferencesBelow(menuItem) {
+                doPaste(menuItem, flexive.util.getJsonRpc().ContentTreeEditor.moveBelow, flexive.util.getJsonRpc().ContentTreeEditor.copyReferencesBelow);
+            }
+
             // pastes or moves a tree node. moveFun and copyFun are methods with the following signature:
             // long nodeId, long newParentId, int index, boolean live
             function doPaste(menuItem, moveFun, copyFun) {
@@ -393,7 +406,12 @@
                 var clipboardEmpty = parent.getContentClipboard().isEmpty();
                 setActionDisabled(menu.getTreeNode(), "attachContentSelection", clipboardEmpty);
                 setActionDisabled(menu.getTreeNode(), "attachNode", !(getContentFrame().isContentEditor && !getContentFrame().isReadOnly));
+
+                // disable paste actions if a selection is available in the clipboard or no node was copied/cut
                 setActionDisabled(menu.getTreeNode(), "pasteNode", !clipboardEmpty || (cutNodeId == -1 && copyNodeId == -1));
+                
+                // disable paste references unless the user copied a node before
+                setActionDisabled(menu.getTreeNode(), "pasteNodeReferences", !clipboardEmpty || copyNodeId == -1);
                 menu.show_();
             }
 
@@ -460,6 +478,11 @@
                 <adm:treeContextMenuItem treeActions="pasteNode" icon="paste" labelKey="ContentTree.menu.pasteNode" clickHandler="pasteNode"/>
                 <adm:treeContextMenuItem treeActions="pasteNode" icon="paste" labelKey="ContentTree.menu.pasteNodeAbove" clickHandler="pasteNodeAbove"/>
                 <adm:treeContextMenuItem treeActions="pasteNode" icon="paste" labelKey="ContentTree.menu.pasteNodeBelow" clickHandler="pasteNodeBelow"/>
+                <adm:treeContextMenuItem treeActions="pasteNodeReferences" icon="paste" labelKey="ContentTree.menu.pasteReferences">
+                    <adm:treeContextMenuItem treeActions="pasteNode" icon="paste" labelKey="ContentTree.menu.pasteNode" clickHandler="pasteNodeReferences"/>
+                    <adm:treeContextMenuItem treeActions="pasteNode" icon="paste" labelKey="ContentTree.menu.pasteNodeAbove" clickHandler="pasteNodeReferencesAbove"/>
+                    <adm:treeContextMenuItem treeActions="pasteNode" icon="paste" labelKey="ContentTree.menu.pasteNodeBelow" clickHandler="pasteNodeReferencesBelow"/>
+                </adm:treeContextMenuItem>
                 <adm:treeContextMenuItem treeActions="cutNode" icon="cut" labelKey="ContentTree.menu.cutNode" clickHandler="cutNode"/>
                 <adm:treeContextMenuItem treeActions="copyNode" icon="copy" labelKey="ContentTree.menu.copyNode" clickHandler="copyNode"/>
                 <fx:dojoMenuSeparator/>

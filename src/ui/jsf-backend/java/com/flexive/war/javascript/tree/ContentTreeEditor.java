@@ -130,13 +130,7 @@ public class ContentTreeEditor implements Serializable {
      * @throws Exception if an error occured
      */
     public String move(long nodeId, long newParentId, int index, boolean live) throws Exception {
-        try {
-            getTreeEngine().move(live ? Live : Edit, nodeId, newParentId, index);
-        } catch (Exception e) {
-            LOG.error("Failed to move node: " + e, e);
-            throw e;
-        }
-        return "[]";
+        return moveInto(nodeId, newParentId, live, index, new MoveOp());
     }
 
     /**
@@ -289,13 +283,7 @@ public class ContentTreeEditor implements Serializable {
     }
 
     public String copy(long nodeId, long newParentId, int index, boolean live) throws Exception {
-        try {
-            getTreeEngine().copy(live ? Live : Edit, nodeId, newParentId, index, false);
-        } catch (Exception e) {
-            LOG.error("Failed to copy node: " + e.getMessage(), e);
-            throw e;
-        }
-        return "[]";
+        return moveInto(nodeId, newParentId, live, index, new CopyOp());
     }
 
     public String copyAbove(long nodeId, long targetId, int index, boolean live) throws Exception {
@@ -306,20 +294,58 @@ public class ContentTreeEditor implements Serializable {
         return moveNear(nodeId, targetId, live, 1, new CopyOp());
     }
 
+    public String copyReferences(long nodeId, long newParentId, int index, boolean live) throws Exception {
+        return moveInto(nodeId, newParentId, live, index, new CopyReferencesOp());
+    }
+
+    public String copyReferencesAbove(long nodeId, long targetId, int index, boolean live) throws Exception {
+        return moveNear(nodeId, targetId, live, 0, new CopyReferencesOp());
+    }
+
+    public String copyReferencesBelow(long nodeId, long targetId, int index, boolean live) throws Exception {
+        return moveNear(nodeId, targetId, live, 1, new CopyReferencesOp());
+    }
+
     private static interface TreeMoveOp {
         void perform(FxTreeMode treeMode, long nodeId, long targetId, int position) throws FxApplicationException;
     }
 
+    /**
+     * Tree move (cut/paste) operation.
+     */
     private static class MoveOp implements TreeMoveOp {
         public void perform(FxTreeMode treeMode, long nodeId, long targetId, int position) throws FxApplicationException {
             getTreeEngine().move(treeMode, nodeId, targetId, position);
         }
     }
 
+    /**
+     * Tree copy operation.
+     */
     private static class CopyOp implements TreeMoveOp {
+        public void perform(FxTreeMode treeMode, long nodeId, long targetId, int position) throws FxApplicationException {
+            getTreeEngine().copy(treeMode, nodeId, targetId, position, true);
+        }
+    }
+
+    /**
+     * Tree 'copy references' (shallow copy) operation.
+     */
+    private static class CopyReferencesOp implements TreeMoveOp {
         public void perform(FxTreeMode treeMode, long nodeId, long targetId, int position) throws FxApplicationException {
             getTreeEngine().copy(treeMode, nodeId, targetId, position, false);
         }
+    }
+
+    private String moveInto(long nodeId, long targetId, boolean live, int position, TreeMoveOp op) throws Exception {
+        final FxTreeMode treeMode = live ? Live : Edit;
+        try {
+            op.perform(treeMode, nodeId, targetId, position);
+        } catch (Exception e) {
+            LOG.error("failed to copy/move node: " + e, e);
+            throw e;
+        }
+        return "[]";
     }
 
     private String moveNear(long nodeId, long targetId, boolean live, int deltaPos, TreeMoveOp op) throws Exception {

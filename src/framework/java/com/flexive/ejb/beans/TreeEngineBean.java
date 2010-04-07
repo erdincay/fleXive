@@ -496,7 +496,7 @@ public class TreeEngineBean implements TreeEngine, TreeEngineLocal {
                         if (removeOp == FxTreeRemoveOp.RemoveSingleFiled) {
                             //reference count it only relevant if removeOp is RemoveSingleFiled
                             refCount = contentEngine.getReferencedContentCount(currNode.getReference());
-                            if (currNode.getId() == nodeId)
+                            if (currNode.getId() == nodeId || removeChildren)
                                 refCount++; //include the reference from the already removed node
                         }
                         if (removeOp == FxTreeRemoveOp.Remove || (removeOp == FxTreeRemoveOp.RemoveSingleFiled && refCount == 1)) {
