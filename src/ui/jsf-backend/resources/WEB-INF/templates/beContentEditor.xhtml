@@ -208,7 +208,7 @@ disableTab... false if the <adm:tab/> component should be rendered, true otherwi
                                         </div>
                                     </ui:fragment>
                                     <!-- show lock owner -->
-                                    <ui:fragment rendered="#{_ceContent.guiSettings.showLockOwner and not empty _ceContent.guiSettings.lockOwner}">
+                                    <ui:fragment rendered="#{_ceContent.guiSettings.showLockOwner and not empty _ceContent.guiSettings.lockOwner and _ceContent.guiSettings.lockOwner ne fxSystemBean.userTicket.loginName}">
                                         <div style="float:left; padding-top:5px; padding-left:5px; padding-right:5px;">
                                             <h:outputText value="#{fxMessageBean['ContentEditor.field.lockOwner']}: #{_ceContent.guiSettings.lockOwner}" />
                                         </div>
