@@ -50,18 +50,21 @@ import java.util.List;
 public class FlexivePropertyDefinition implements PropertyDefinition {
     private final FxPropertyAssignment assignment;
     private final String name;
+    private final boolean overrideId;   // use custom name as ID (for virtual properties)?
     private final PropertyType overrideType;
 
     public FlexivePropertyDefinition(FxPropertyAssignment assignment) {
         this.assignment = assignment;
         this.name = XPathElement.stripType(assignment.getXPath()).substring(1).toLowerCase();
         this.overrideType = null;
+        this.overrideId = false;
     }
 
     public FlexivePropertyDefinition(FxPropertyAssignment assignment, String overrideName, PropertyType overrideType) {
         this.assignment = assignment;
         this.name = overrideName;
         this.overrideType = overrideType;
+        this.overrideId = true;
     }
 
     public String getName() {
@@ -69,7 +72,7 @@ public class FlexivePropertyDefinition implements PropertyDefinition {
     }
 
     public String getId() {
-        return getName();
+        return overrideId ? name : assignment.getXPath();
     }
 
     public String getDisplayName() {

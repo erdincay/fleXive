@@ -35,6 +35,7 @@ import com.flexive.cmis.spi.FlexiveType;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.tree.FxTreeNode;
+import java.util.Collection;
 import org.apache.chemistry.*;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -42,7 +43,7 @@ import org.junit.Test;
 
 import static com.flexive.cmis.Utils.getRepo;
 import static com.flexive.cmis.Utils.getRepoConnection;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 /**
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
@@ -89,10 +90,12 @@ public class RepositoryTest {
     public void getTypes() {
         final Repository repo = getRepo();
         assertEquals(FlexiveType.ROOT_TYPE_ID, repo.getType("ROOT").getId());
-        assertEquals("All types should be a subtype of Root",
-                CacheAdmin.getEnvironment().getTypes().size(), 
-                repo.getTypeDescendants("Root").size()
-        );
+        final Collection<Type> typeDescendants = repo.getTypeDescendants(FlexiveType.ROOT_TYPE_ID);
+        for (FxType fxType : CacheAdmin.getEnvironment().getTypes()) {
+            if (!typeDescendants.contains(new FlexiveType(fxType))) {
+                fail("All types should be a subtype of Root, could not find type: " + fxType.getName());
+            }
+        }
         assertEquals("Expected two folder types", 2, repo.getTypeDescendants(FxType.FOLDER).size());
         /*boolean[] hasMoreItems = new boolean[5];
         assertEquals("Type count limit not applied", 1, repo.getTypes(FxType.FOLDER, false, 1, 0, hasMoreItems).size());

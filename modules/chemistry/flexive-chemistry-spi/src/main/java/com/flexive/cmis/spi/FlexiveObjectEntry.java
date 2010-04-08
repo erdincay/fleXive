@@ -364,7 +364,7 @@ public abstract class FlexiveObjectEntry extends BaseObject implements ObjectEnt
 
                 // a child (folder or document) with this label already exists
                 throw new IllegalArgumentException(
-                        parent.getPath() + name + " already exists."
+                        parent.getPath() + "/" + name + " already exists."
                 );
 
             }

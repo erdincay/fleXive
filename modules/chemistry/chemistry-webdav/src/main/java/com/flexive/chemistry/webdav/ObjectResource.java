@@ -188,10 +188,13 @@ public abstract class ObjectResource<T extends CMISObject>
                     }
                 }
             }
-            object.setName(name);
-            object.save();      // save name change (TODO: cannot move *and* set name in one operation)
             if (!target.getObject().getId().equals(object.getParent().getId())) {
                 object.move(target.getObject(), object.getParent());
+            }
+            if (!oldName.equals(name)) {
+                // save name change (TODO: cannot move *and* set name in one operation)
+                object.setName(name);
+                object.save();      
             }
             done = true;
         } catch (NameConstraintViolationException e) {
@@ -199,7 +202,8 @@ public abstract class ObjectResource<T extends CMISObject>
         } catch (UpdateConflictException e) {
             throw new ConflictException(this);
         } finally {
-            if (!done) {
+            // now name is changed after moving, so if we go wrong there we don't do anything
+            /*if (!done) {
                 try {
                     object.setName(oldName);    // restore object name in case of errors
                 } catch (NameConstraintViolationException e) {
@@ -208,7 +212,7 @@ public abstract class ObjectResource<T extends CMISObject>
                         LOG.warn("Failed to restore old filename: " + e.getMessage(), e);
                     }
                 }
-            }
+            }*/
         }
     }
 

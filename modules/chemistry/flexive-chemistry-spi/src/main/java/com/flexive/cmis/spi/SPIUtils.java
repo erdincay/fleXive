@@ -51,6 +51,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -73,11 +74,16 @@ public class SPIUtils {
     }
 
     public static boolean isFolderId(String objectId) {
-        return objectId != null && objectId.indexOf('.') == -1;
+        return StringUtils.isNumeric(objectId);
     }
 
     public static boolean isDocumentId(String objectId) {
-        return !isFolderId(objectId);
+        try {
+            Double.parseDouble(objectId);   // <id> or <id>.<ver>
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
     }
 
     public static long getNodeId(String objectId) {

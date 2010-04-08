@@ -93,6 +93,10 @@
                     <groupId>eu.medsea.mimeutil</groupId>
                     <artifactId>mime-util</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
 
@@ -112,19 +116,6 @@
         <dependency>
             <groupId>com.flexive.cmis</groupId>
             <artifactId>flexive-chemistry-spi</artifactId>
-        </dependency>
-
-        <!-- Logger implementation for milton (use commons logging) -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-jcl</artifactId>
-            <version>1.5.6</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>commons-logging</artifactId>
-                    <groupId>commons-logging</groupId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <dependency>

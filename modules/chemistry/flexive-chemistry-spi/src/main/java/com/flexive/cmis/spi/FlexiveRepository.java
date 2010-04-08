@@ -83,12 +83,16 @@ public class FlexiveRepository implements Repository {
     }
 
     public Collection<Type> getTypes() {
-        // TODO: return basetype (cmis:document, ...)
         final List<FxType> fxTypes = getEnvironment().getTypes();
         final List<Type> result = Lists.newArrayListWithCapacity(fxTypes.size());
         for (FxType fxType : fxTypes) {
             result.add(new FlexiveType(fxType));
         }
+        // add base types
+        result.add(new FlexiveType(BaseType.DOCUMENT.getId()));
+        result.add(new FlexiveType(BaseType.FOLDER.getId()));
+        // TODO: relationship and policy types
+        
         return result;
     }
 
@@ -105,24 +109,20 @@ public class FlexiveRepository implements Repository {
     }
 
     public Collection<Type> getTypeDescendants(String typeId, int depth, boolean includePropertyDefinitions) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        // TODO: use depth/includePropertyDefinitions
+        return getTypes(typeId, true);
     }
 
     private Collection<Type> getTypes(String typeId, boolean includeType) {
         final List<Type> result = Lists.newArrayList();
         if (typeId == null) {
-            for (FxType fxType : getEnvironment().getTypes()) {
-                result.add(new FlexiveType(fxType));
-            }
+            return getTypes();
         } else {
             if (FlexiveType.ROOT_TYPE_ID.equalsIgnoreCase(typeId)) {
-                // return all types
-                for (FxType type : getEnvironment().getTypes()) {
-                    result.add(new FlexiveType(type));
-                }
+                return getTypes();
             } else {
                 // return type + descendants
-                for (FxType derived : getEnvironment().getType(typeId).getDerivedTypes(true, includeType)) {
+                for (FxType derived : getEnvironment().getType(SPIUtils.getFxTypeName(typeId)).getDerivedTypes(true, includeType)) {
                     result.add(new FlexiveType(derived));
                 }
             }

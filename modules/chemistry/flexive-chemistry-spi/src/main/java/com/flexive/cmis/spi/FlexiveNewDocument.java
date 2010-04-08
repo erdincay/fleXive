@@ -138,6 +138,11 @@ public class FlexiveNewDocument extends FlexiveDocument {
         }
     }
 
+    @Override
+    protected long getFxTypeId() {
+        return content == null ? super.getFxTypeId() : content.getTypeId();
+    }
+
     private static FxContent newContent(String typeName) {
         try {
             return EJBLookup.getContentEngine().initialize(SPIUtils.getFxTypeName(typeName));

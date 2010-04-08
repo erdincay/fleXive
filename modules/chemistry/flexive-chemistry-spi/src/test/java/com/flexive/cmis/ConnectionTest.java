@@ -116,7 +116,7 @@ public class ConnectionTest {
     private Set<String> collectResultTypes(Collection<CMISObject> result) {
         final Set<String> foundTypes = new HashSet<String>();
         for (CMISObject row : result) {
-            foundTypes.add(row.getTypeId());
+            foundTypes.add(row.getTypeId().toLowerCase());
         }
         return foundTypes;
     }

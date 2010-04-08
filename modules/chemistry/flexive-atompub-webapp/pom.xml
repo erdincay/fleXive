@@ -70,6 +70,12 @@
                     </dependency>
 
                     <dependency>
+                        <groupId>commons-lang</groupId>
+                        <artifactId>commons-lang</artifactId>
+                        <version>2.4</version>
+                    </dependency>
+
+                    <dependency>
                         <groupId>org.jboss</groupId>
                         <artifactId>jboss-common-core</artifactId>
                         <version>2.2.3.GA</version>
@@ -93,6 +99,13 @@
             <scope>provided</scope>
         </dependency>
 
-    </dependencies>
+
+        <!-- Manually include chemistry commons to use our dependency settings (exclusions + version) -->
+        <dependency>
+            <groupId>org.apache.chemistry</groupId>
+            <artifactId>chemistry-commons</artifactId>
+        </dependency>
+        
+</dependencies>
     
 </project>

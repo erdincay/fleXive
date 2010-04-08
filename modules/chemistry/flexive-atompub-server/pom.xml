@@ -98,6 +98,11 @@
             <version>2.5</version>
             <scope>provided</scope>
         </dependency>
+
+        <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+        </dependency>
 <!--
         <dependency>
             <groupId>javax.servlet</groupId>

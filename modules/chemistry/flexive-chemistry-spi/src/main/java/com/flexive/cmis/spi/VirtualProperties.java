@@ -88,21 +88,7 @@ enum VirtualProperties {
     //CONTENT_STREAM_URI(Property.CONTENT_STREAM_URI, PropertyType.URI),
     
     // folder (also has a NAME)
-    PARENT_ID(Property.PARENT_ID, PropertyType.ID) {
-        @Override
-        public Serializable convertValue(Object flexiveValue) {
-            final FxPaths paths = (FxPaths) flexiveValue;
-            if (paths == null || paths.getPaths().isEmpty()) {
-                return null;
-            }
-            // select first returned path - the API needs to override this behaviour when returning multiple
-            // parents
-            final FxPaths.Path path = paths.getPaths().get(0);
-            return String.valueOf(path.getItems().size()  > 1
-                    ? path.getItems().get(path.getItems().size() - 2).getNodeId()
-                    : FxTreeNode.ROOT_NODE
-            );
-        }},
+    PARENT_ID(Property.PARENT_ID, PropertyType.ID),
     // TODO: define multiple property
     ALLOWED_CHILD_OBJECT_IDS(Property.ALLOWED_CHILD_OBJECT_TYPE_IDS);
 

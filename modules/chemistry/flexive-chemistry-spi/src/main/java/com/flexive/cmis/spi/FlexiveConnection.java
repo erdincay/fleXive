@@ -50,6 +50,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
 import org.apache.chemistry.impl.simple.SimpleListPage;
+import org.apache.chemistry.impl.simple.SimpleObjectId;
 
 import static com.flexive.shared.EJBLookup.getCmisSearchEngine;
 import static com.flexive.shared.EJBLookup.getTreeEngine;
@@ -183,12 +184,7 @@ public class FlexiveConnection implements Connection, SPI {
     }
 
     public ObjectId newObjectId(final String id) {
-        // TODO: not sure what to return here
-        if (SPIUtils.isFolderId(id)) {
-            return new FlexiveFolder(context, SPIUtils.getNodeId(id));
-        } else {
-            return new FlexiveDocument(context, SPIUtils.getDocumentId(id));
-        }
+        return new SimpleObjectId(id);
     }
 
     public ObjectEntry newObjectEntry(String typeId) {
@@ -520,9 +516,11 @@ public class FlexiveConnection implements Connection, SPI {
             return (FlexiveFolder) object;
         } else if (SPIUtils.isFolderId(id)) {
             return new FlexiveFolder(context, SPIUtils.getNodeId(id));
-        } else {
+        } else if (SPIUtils.isDocumentId(id)) {
             FxPK pk = SPIUtils.getDocumentId(id);
             return new FlexiveDocument(context, pk);
+        } else {
+            throw new IllegalArgumentException("Invalid object id: " + object.getId());
         }
     }
 

@@ -54,22 +54,25 @@ import java.net.URI;
 public class FlexiveType implements Type {
     public static final String ROOT_TYPE_ID = "Root";
 
+    private final String id;
     private final FxType type;
 
     public FlexiveType(String typeName) {
         this.type = CacheAdmin.getEnvironment().getType(SPIUtils.getFxTypeName(typeName));
+        this.id = typeName;
     }
     
     public FlexiveType(long typeId) {
-        this.type = CacheAdmin.getEnvironment().getType(typeId);
+        this(CacheAdmin.getEnvironment().getType(typeId));
     }
 
     public FlexiveType(FxType type) {
         this.type = type;
+        this.id = type.getName();
     }
 
     public String getId() {
-        return type.getId() == FxType.ROOT_ID ? ROOT_TYPE_ID : type.getName().toLowerCase();
+        return type.getId() == FxType.ROOT_ID ? ROOT_TYPE_ID : id;
     }
 
     public String getQueryName() {
@@ -209,4 +212,27 @@ public class FlexiveType implements Type {
         }
         return false;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final FlexiveType other = (FlexiveType) obj;
+        if ((this.id == null) ? (other.id != null) : !this.id.equals(other.id)) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 47 * hash + (this.id != null ? this.id.hashCode() : 0);
+        return hash;
+    }
+
 }

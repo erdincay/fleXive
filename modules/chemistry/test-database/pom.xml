@@ -20,7 +20,7 @@
     -->
     <profiles>
         <profile>
-            <id>flexive-db-setup-h2</id>
+            <id>db-setup-h2</id>
             <!--
                 Activate the profile automatically when the database files are missing.
 
