@@ -1016,9 +1016,36 @@
                              export options
                              that influence the exported Groovy script together with a preview of the
                              exported script.
+                             <mediaobject>
+                                 <imageobject>
+                                    <imagedata fileref="images/adm_ui_structure_editor/structure_export_options.png" format="PNG"
+                                     contentwidth="66%"/>
+                                 </imageobject>
+                             </mediaobject>
                              The export options include:
                              <itemizedlist>
                                  <listitem>
+                                    <para>
+                                        Add script event assignment code:
+                                        If toggled, assigned scripts (script code and script assignments)
+                                        are exported as well.
+                                   </para>
+                                </listitem>
+                                <listitem>
+                                    <para>
+                                        Add package import statements:
+                                        If toggled needed package import statements are added at the beginning of the
+                                        export script.
+                                    </para>
+                                </listitem>
+                                <listitem>
+                                    <para>
+                                        Overwrite existing scripts:
+                                        If toggled exported scripts override the scripts of the target &flexive;
+                                        distribution if already present.
+                                    </para>
+                                </listitem>
+                                <listitem>
                                     <para>
                                         Add code to delete structures/instances: If toggled
                                         code is added to the beginning of the script
@@ -1040,13 +1067,6 @@
                                 </listitem>
                                 <listitem>
                                     <para>
-                                        Add script event assignment code:
-                                        If toggled, assigned scripts (script code and script assignments)
-                                        are exported as well.
-                                    </para>
-                                </listitem>
-                                <listitem>
-                                    <para>
                                         Add &flexive; SYSTEM types:
                                         If toggled &flexive; system internal types/system internal properties
                                         (for example the ROOT type together with system internal property dependencies)
@@ -1055,18 +1075,19 @@
                                 </listitem>
                                 <listitem>
                                     <para>
-                                        Add package import statements:
-                                        If toggled needed package import statements are added at the beginning of the
-                                        export script.
+                                        Add Workflow name:
+                                        If toggled also exports the assigned workflow name. Note that really only the
+                                        workflow's name is exported, which means that the workflow must exist on the
+                                        target flexive distribution.
                                     </para>
                                 </listitem>
                                 <listitem>
                                     <para>
-                                        Overwrite existing scripts:
-                                        If toggled exported scripts override the scripts of the target &flexive;
-                                        distribution if already present.
+                                        Convert international characters to unicode representation:
+                                        If toggled international characters are converted to their unicode representation.
+                                        This is handy for systems which don't use UTF-8 per default.
                                     </para>
-                               </listitem>
+                                </listitem>
                             </itemizedlist>
                          </para>
                      </section>
@@ -2376,110 +2397,19 @@
         <title>Select list administration</title>
         The &Flexive;
         <link linkend="core_structure_selectlists">select list</link>
-        administration allows you to create and edit select lists.
+        administration allows you to create, edit and delete select lists.
         <section xml:id="adm_selectlists_create">
             <title>Creating a select list</title>
-            <para>The following screen shows the initial step of the select list creation process.</para>
-            <para>You can specify</para>
-            <para>
-                <variablelist>
-                    <varlistentry>
-                        <term>
-                            <code>Name</code>
-                        </term>
-                        <listitem>
-                            <para>The name of the select list</para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>
-                            <code>Label</code>
-                        </term>
-                        <listitem>
-                            <para>The label of the select list</para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>
-                            <code>Description</code>
-                        </term>
-                        <listitem>
-                            <para>A description of the select list's context.</para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>
-                            <code>
-                                Dynamic item creation
-                            </code>
-                        </term>
-                        <listitem>
-                            <para>The option for
-                                <link linkend="core_structure_selectlist_parameters">dynamic item creation</link>
-                            </para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>
-                            <code>Create items ACL</code>
-                        </term>
-                        <listitem>
-                            <para>The permission matrix of the
-                                <code>Default SelectList Create
-                                    <link linkend="adm_ACL">ACL</link>
-                                </code>
-                                provides only permission settings for
-                            </para>
-                            <para>
-                                <itemizedlist>
-                                    <listitem>Create</listitem>
-                                </itemizedlist>
-                            </para>
-                            <para>
-                                <mediaobject>
-                                    <imageobject>
-                                        <imagedata
-                                                fileref="images/adm_ui_selectlists/def_selectlist_create_acl_matrix.png"
-                                                format="PNG" contentwidth="100%"/>
-                                    </imageobject>
-                                </mediaobject>
-                            </para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>
-                            <code>ACL for new items</code>
-                        </term>
-                        <listitem>
-                            <para>The permission matrix of the
-                                <code>Default SelectList item
-                                    <link linkend="adm_ACL">ACL</link>
-                                </code>
-                                provides only permission settings for
-                            </para>
-                            <para>
-                                <itemizedlist>
-                                    <listitem>Read</listitem>
-                                    <listitem>Edit</listitem>
-                                    <listitem>Delete</listitem>
-                                </itemizedlist>
-                            </para>
-                            <para>
-                                <mediaobject>
-                                    <imageobject>
-                                        <imagedata
-                                                fileref="images/adm_ui_selectlists/def_selectlist_item_acl_matrix.png"
-                                                format="PNG" contentwidth="100%"/>
-                                    </imageobject>
-                                </mediaobject>
-                            </para>
-                        </listitem>
-                    </varlistentry>
-                </variablelist>
+            <para>A select list requires a unique name, an ACL that controls the permissions for users
+                regarding creating and deleting select list items (Create items ACL) and
+                an ACL which is assigned to newly created select list items per default
+                (ACL for new items).
             </para>
-            <para>Mind that you cannot change the ACL's and the
-                <code>Dynamic item creation</code>
-                option after creation of the select list.
+            <para>
+                Providing a label, description allowing
+                <link linkend="core_structure_selectlist_parameters">dynamic item creation</link>,
+                specifying the breadcrumb separator and confining select item multi-selection
+                to the same level is optional.
             </para>
             <para>
                 <mediaobject>
@@ -2489,84 +2419,291 @@
                     </imageobject>
                 </mediaobject>
             </para>
+            <para>
+                After the user presses the "Create" button the select list is created and
+                new select items may be added.
+            </para>
         </section>
         <section xml:id="adm_selectlists_edit">
-            <title>Editing a select list</title>
+            <title>Editing a select list and its select items</title>
             <para>A select list consists of
                 <link linkend="core_structure_selectlist_item_parameters">select list items</link>
                 . The select list editor allows you to add and delete
-                select list items. The following screen shows the select list editor.
+                select list items. The user can only add items to select lists after it has
+                been created.
             </para>
-            <para>For a select list item (1) you can specify</para>
             <para>
-                <variablelist>
-                    <varlistentry>
-                        <term>
-                            <code>Label</code>
-                        </term>
-                        <listitem>
-                            <para>A label for the select list item</para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>
-                            <code>Data</code>
-                        </term>
-                        <listitem>
-                            <para>Additional data stored in the select list item (i.e. a currency code, a picture ratio)
-                            </para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>
-                            <code>ACL</code>
-                        </term>
-                        <listitem>
-                            <para>The
-                                <link linkend="adm_ACL">ACL</link>
-                                for the select list item
-                            </para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>
-                            <code>Color</code>
-                        </term>
-                        <listitem>
-                            <para>A hex (i.e.
-                                <code>#0033CC</code>) or CSS color code (i.e.
-                                <code>red</code>) for the
-                                select list item
-                            </para>
-                        </listitem>
-                    </varlistentry>
-                </variablelist>
+                A select list item requires a name, a label and an ACL of category
+                <code>SelectList Item</code>.
+                Additionally <code>String</code> data may be stored within the select item
+                a color may be selected to improve GUI display and already created select items
+                may be assigned as sub-elements of this select item. Select items are created by
+                pressing the "Create new item" button.
             </para>
             <para>
                 <mediaobject>
                     <imageobject>
-                        <imagedata fileref="images/adm_ui_selectlists/edit_selectlist.png"
+                        <imagedata fileref="images/adm_ui_selectlists/create_selectitem.png"
+                                   format="PNG" contentwidth="100%"/>
+                    </imageobject>
+                </mediaobject>
+            </para>
+            <para>
+                Existing select items may be modified (edit icon),
+                repositioned within the select list (up and down arrows) and deleted.
+            </para>
+        </section>
+        <section xml:id="adm_selectlists_overview">
+            <title>Select list overview</title>
+            <para>
+                The select list overview displays all existing select list and
+                enables the user to edit, delete and create new select lists.
+            </para>
+            <para>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="images/adm_ui_selectlists/overview_selectlist.png"
                                    format="PNG" contentwidth="100%"/>
                     </imageobject>
                 </mediaobject>
             </para>
         </section>
     </section>
-     <section xml:id="adm_system">
-        <title>System information and language settings</title>
-        <para>The
-            <filename>System</filename>
-            menu item of the
-            <filename>Administration</filename>
-            tab contains the
-            <link linkend="adm_system_sysinfo">system information</link>
-            display
-            and the
-            <link linkend="adm_system_language">language settings</link>.
+    <section xml:id="adm_export_import">
+        <title>Export and Import of Structures and Division</title>
+        <para>The import and export of structures is already described in
+            <xref linkend="structure_export_import"/>.
+            Additionally the Administration GUI provides the possibility to
+            export and import whole divisions.
         </para>
-        <section xml:id="adm_system_sysinfo">
-            <title>The System Information</title>
-            <para>The system information gives you a brief overview of the system &Flexive; is running on.</para>
+        <para>
+             <mediaobject>
+                <imageobject>
+                    <imagedata fileref="images/adm_ui_import_export/division_import_export.png"
+                               format="PNG" contentwidth="100%"/>
+                </imageobject>
+            </mediaobject>
+        </para>
+        <para>
+            In order to export a division, a file name has to be specified and the "Export" button
+            needs to be pressed. The division export creates a .ZIP file containing all necessary
+            information and copies it to the working directory.
+            After a successful division export the user feedback displays the the exact path of the
+            export file.
+        </para>
+        <para>
+            In order to import a division, the file name of the export .ZIP file has to be specified
+            and the "Examine" button has to be pressed. After pressing the "Examine" button
+            information about the exported division is displayed.
+        </para>
+        <para>
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="images/adm_ui_import_export/division_examine_import.png"
+                               format="PNG" contentwidth="100%"/>
+                </imageobject>
+            </mediaobject>
+        </para>
+        <para>
+            Now the user can import the division by pressing the "Import" button.
+        </para>
+    </section>
+    <section xml:id="adm_system">
+        <title>System administration</title>
+        <para>The System administration contains on the one hand tools that
+            display and allow to modify system settings and configuration
+            and on the other hand tools that simply don't fit in anywhere else.
+        </para>
+         <para>
+             <mediaobject>
+                <imageobject>
+                    <imagedata fileref="images/adm_ui_system/system_administration_overview.png"
+                               format="PNG" contentwidth="100%"/>
+                </imageobject>
+            </mediaobject>
+        </para>
+        <para>
+            The available tools are described in the following sub-sections.
+        </para>
+        <section xml:id="adm_system_search">
+            <title>Search settings</title>
+            <para>
+                The search settings provide three tools:
+                <itemizedlist>
+                    <listitem>
+                        <para>
+                            &fxsql; Query: The &fxsql; GUI provides a text area where the user may
+                            submit <link linkend="core_search">FxSQL</link> queries and
+                            optionally create  <link linkend="adm_query_editor_queries_briefcases">briefcases</link>.
+                            <mediaobject>
+                                <imageobject>
+                                    <imagedata fileref="images/adm_ui_system/fxsql_query.png"
+                                               format="PNG" contentwidth="100%"/>
+                                </imageobject>
+                            </mediaobject>
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            Default query: Allows the definition of a system-wide default query for &flexive;
+                            backend users using the <link linkend="adm_query_editor">query editor</link>.
+                        </para>
+                    </listitem>
+                     <listitem>
+                        <para>
+                            Default result preferences: Allows a fine grained control about what properties
+                            and in which order properties are displayed when searching for a content type.
+                           <mediaobject>
+                                <imageobject>
+                                    <imagedata fileref="images/adm_ui_system/default_result_preferences.png"
+                                               format="PNG" contentwidth="100%"/>
+                                </imageobject>
+                            </mediaobject>
+                            For every existing content type the properties that should be displayed in a result set
+                            can be selected. Via the "Add entry" button properties can be selected, and their position
+                            can be changed using the arrow icons. Properties can be removed from the result set
+                            again using the trash can icon.
+                         </para>
+                         <para>
+                            Different property sets for different view types are supported. I.e. the user may choose
+                            to display certain properties in <code>Thumbnails</code>> mode and different properties
+                            in <code>List</code> mode.
+                        </para>
+                        <para>
+                            Different property sets for different search locations are also supported. The
+                            <link linkend="css_feature_userdefined">search location</link>
+                            is a parameter that can be supplied to a  &fxsql; search query in order to provide contextual
+                            information from which location the search was issued. In practice different search locations
+                            are used to display different property sets which can be customized:
+                            <itemizedlist>
+                                <listitem>
+                                    <para>
+                                        Content results: Search location used by the &flexive; backend when searching for
+                                        contents.
+                                    </para>
+                                </listitem>
+                                <listitem>
+                                    <para>
+                                        Browse references popup: Search location used by the &flexive;
+                                        <link linkend="adm_instance_editor ">content instance
+                                        editor</link> for displaying referenced contents.
+                                    </para>
+                                </listitem>
+                                <listitem>
+                                    <para>
+                                        Default location: Fallback search location which is used when the search
+                                        location parameter is not set.
+                                    </para>
+                                </listitem>
+                            </itemizedlist>
+                        </para>
+                    </listitem>
+                </itemizedlist>
+            </para>
+        </section>
+        <section xml:id="adm_system_cmis_sql_query">
+            <title>CMIS SQL query</title>
+            <para>
+                The CMIS SQL GUI provides a text input area for CMIS compatible SQL queries.
+            </para>
+        </section>
+        <section xml:id="adm_system_configuration">
+            <title>System Configuration</title>
+            <para>
+                The System configuration allows the user to modify &flexive; system settings.
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="images/adm_ui_system/system_configuration.png"
+                                   format="PNG" contentwidth="100%"/>
+                    </imageobject>
+                </mediaobject>
+            </para>
+            The configuration includes:
+            <itemizedlist>
+                <listitem>
+                    <para>
+                        Enable live tree: if this option is disabled, the user cannot switch to the
+                        <link linkend="adm_content_tree">live tree</link> in the
+                        <link linkend="adm_instance_editor">content instance editor</link>
+                        anymore. Note that the backend needs to be reloaded via the browser
+                        in order for changes to take effect!.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        Auto flatten assignments: automatically flatten assignments
+                        that can be stored in the flat storage (max. multiplicity &lt;= 1).
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        Export URL prefix: path used by the export servlet.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                        Store binary transit files in Database: if enabled, binary files are
+                        stored directly in the database during file upload, instead of the file
+                        system.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                       Binary transit path: file system path to store binaries during file upload.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                       Binary threshold: threshold in bytes to
+                        store binary files on the file system (instead of directly in the database)
+                        if exceeded.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                       Binary preview threshold: threshold in bytes to
+                        store preview files on the file system (instead of directly in the database)
+                        if exceeded.
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>
+                       Binary path: path to store binary files on the file system.
+                    </para>
+                </listitem>
+            </itemizedlist>
+        </section>
+        <section xml:id="adm_system_parameters">
+            <title>System parameters</title>
+            <para>
+                The system parameters GUI provides a generic view of all
+                &flexive; system parameters grouped by scope.
+                Some parameters
+                can intentionally not be edited
+                as either specialized GUIs for editing exist in the backend administration
+                or they merely serve information purposes and don't impact system behavior.
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="images/adm_ui_system/system_paramters.png"
+                                   format="PNG" contentwidth="100%"/>
+                    </imageobject>
+                </mediaobject>
+            </para>
+        </section>
+         <section xml:id="adm_lock_administration">
+            <title>Lock administration</title>
+            <para>
+            </para>
+        </section>
+          <section xml:id="adm_history_viewer">
+            <title>History viewer</title>
+            <para>
+            </para>
+        </section>
+        <section xml:id="adm_system_information">
+            <title>System information</title>
+            <para>The system information provides general runtime and hardware information
+                of the system &flexive; is running on.</para>
             <para>
                 <mediaobject>
                     <imageobject>
@@ -2597,6 +2734,9 @@
                     </imageobject>
                 </mediaobject>
             </para>
+        </section>
+        <section xml:id="adm_test_data">
+            <title>Create random test data for content instances</title>
         </section>
     </section>
 </chapter>
