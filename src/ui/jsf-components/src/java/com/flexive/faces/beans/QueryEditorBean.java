@@ -83,6 +83,7 @@ public class QueryEditorBean implements Serializable {
     private long addAssignmentId;
     private int addAssignmentNodeId = -1;
     private boolean addNodeLive = false;
+    private boolean addNodeOnlyDirect = false;
     private int removeNodeId = -1;
     private String nodeSelection = null;
     private boolean reloadSearchPanel = false;
@@ -113,6 +114,7 @@ public class QueryEditorBean implements Serializable {
                 setRootNode(new QueryRootNode(QueryRootNode.Type.CONTENTSEARCH, location));
                 addAssignmentId = FxJsfUtils.getLongParameter("nodeId", FxTreeNode.ROOT_NODE);
                 addNodeLive = FxJsfUtils.getBooleanParameter("liveMode", false);
+                addNodeOnlyDirect = FxJsfUtils.getBooleanParameter("onlyDirect", false);
                 addTreeNode();
             } else if ("typeSearch".equals(action)) {
                 setRootNode(new QueryRootNode(QueryRootNode.Type.CONTENTSEARCH, location));
@@ -295,6 +297,10 @@ public class QueryEditorBean implements Serializable {
                 addNodeLive ? FxTreeMode.Live : FxTreeMode.Edit,
                 treeNode.getLabel() != null && !treeNode.getLabel().isEmpty()
                         ? treeNode.getLabel() : new FxString(false, treeNode.getName()));
+        newNode.setComparator(addNodeOnlyDirect
+                ? TreeValueNode.TreeValueComparator.DIRECTCHILD
+                : TreeValueNode.TreeValueComparator.CHILD
+        );
         addQueryNode(newNode);
     }
 

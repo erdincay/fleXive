@@ -36,11 +36,13 @@ package com.flexive.war.filter;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.security.Role;
 import com.flexive.shared.security.UserTicket;
+import com.flexive.war.FxRequest;
 import org.apache.commons.lang.StringUtils;
 
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Handles security checks for the backend administration - checks if the calling user has the role
@@ -59,14 +61,20 @@ public class BackendAuthorizationFilter implements Filter {
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         // get URI without application context path
         final UserTicket ticket = FxContext.getUserTicket();
-        if (ticket.isGuest()) {
-            // not logged in at all - forward to login page
-            FilterUtils.sendRedirect(servletRequest, servletResponse,
-                    "/pub/login.jsf"
-                    // guess whether we got a session timeout (from within the backend) or a new request
-                    + (StringUtils.indexOf(((HttpServletRequest) servletRequest).getHeader("Referer"), "/adm/") != -1
-                            ? "?sessionExpired=true" : "")
-            );
+        if (ticket.isGuest() && servletRequest instanceof FxRequest) {
+            final FxRequest request = (FxRequest) servletRequest;
+            if (request.isDynamicContent()) {
+                // not logged in at all - forward to login page
+                FilterUtils.sendRedirect(servletRequest, servletResponse,
+                        "/pub/login.jsf"
+                        // guess whether we got a session timeout (from within the backend) or a new request
+                        + (StringUtils.indexOf(((HttpServletRequest) servletRequest).getHeader("Referer"), "/adm/") != -1
+                                ? "?sessionExpired=true" : "")
+                );
+            } else {
+                // static content (e.g. images), forbid access
+                ((HttpServletResponse) servletResponse).sendError(HttpServletResponse.SC_FORBIDDEN);
+            }
         } else if (!ticket.isInRole(Role.BackendAccess)) {
             // logged in, but lacks role for backend access - show error page
             servletRequest.getRequestDispatcher("/pub/backendRestricted.jsf").forward(servletRequest, servletResponse);
