@@ -75,6 +75,7 @@ import org.w3c.tidy.Tidy;
 import java.io.*;
 import java.sql.*;
 import java.util.*;
+import java.util.Date;
 
 /**
  * Generic implementation of hierarchical content handling.
@@ -1700,9 +1701,9 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                             break;
                         case DateTime:
                             if (currValue == null)
-                                currValue = new FxDateTime(multiLang, currLang, rs.getTimestamp(columns[0]));
+                                currValue = new FxDateTime(multiLang, currLang, new Date(rs.getTimestamp(columns[0]).getTime()));
                             else
-                                currValue.setTranslation(currLang, rs.getTimestamp(columns[0]));
+                                currValue.setTranslation(currLang, new Date(rs.getTimestamp(columns[0]).getTime()));
                             break;
                         case DateRange:
                             if (currValue == null)
@@ -1722,14 +1723,14 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                             if (currValue == null)
                                 currValue = new FxDateTimeRange(multiLang, currLang,
                                         new DateRange(
-                                                rs.getTimestamp(columns[0]),
-                                                rs.getTimestamp(getColumns(((FxPropertyAssignment) currAssignment).getProperty())[1]))
+                                                new Date(rs.getTimestamp(columns[0]).getTime()),
+                                                new Date(rs.getTimestamp(getColumns(((FxPropertyAssignment) currAssignment).getProperty())[1]).getTime()))
                                 );
                             else
                                 currValue.setTranslation(currLang,
                                         new DateRange(
-                                                rs.getTimestamp(columns[0]),
-                                                rs.getTimestamp(getColumns(((FxPropertyAssignment) currAssignment).getProperty())[1]))
+                                                new Date(rs.getTimestamp(columns[0]).getTime()),
+                                                new Date(rs.getTimestamp(getColumns(((FxPropertyAssignment) currAssignment).getProperty())[1]).getTime()))
                                 );
                             break;
                         case Binary:
