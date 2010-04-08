@@ -244,7 +244,7 @@ public class FxTypeEdit extends FxType implements Serializable {
 
     /**
      * Automatically remove the mime type configuration (not the key, values only) for any types which are created
-     * as derived types from a DOCUMENTFILE type parent and set a dummy mime type as a placeholder (application/*)
+     * as derived types from a DOCUMENTFILE type parent and set a dummy mime type as a placeholder (unknown/unknown)
      * // TODO: this behaviour is subject to a possible change
      * 
      * @param typeOptions the type options
@@ -253,7 +253,7 @@ public class FxTypeEdit extends FxType implements Serializable {
     private static List<FxStructureOption> removeMimeTypes(List<FxStructureOption> typeOptions) {
         final List<FxStructureOption> out = FxStructureOption.cloneOptions(typeOptions);
         if(FxStructureOption.hasOption(FxStructureOption.OPTION_MIMETYPE, out)) {
-            FxStructureOption.setOption(out, FxStructureOption.OPTION_MIMETYPE, true, true, new FxMimeTypeWrapper(FxMimeType.PLACEHOLDER).toString());
+            FxStructureOption.setOption(out, FxStructureOption.OPTION_MIMETYPE, true, true, new FxMimeTypeWrapper(FxMimeType.DEFAULT).toString());
         }
 
         return out;
@@ -1055,6 +1055,7 @@ public class FxTypeEdit extends FxType implements Serializable {
      *
      * @since 3.1
      */
+    @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     public FxTypeEdit setMimeType(FxMimeTypeWrapper mimeTypeWrapper) {
         if(!mayAssignMimeType())
             throw new FxApplicationException("ex.structure.type.mimetype.err", this).asRuntimeException();

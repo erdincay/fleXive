@@ -46,7 +46,6 @@ public class FxMimeType implements Serializable {
     /**
      * "Main/default" mime types
      */
-    public static final String DEFAULT = "application/octet-stream";
     public static final String APPLICATION = "application";
     public static final String AUDIO = "audio";
     public static final String EXAMPLE = "example";
@@ -57,8 +56,8 @@ public class FxMimeType implements Serializable {
     public static final String TEXT = "text";
     public static final String VIDEO = "video";
     public static final String UNKNOWN = "unknown";
-    public static final String UNKNOWN_SUBTYPE = "*";
-    public static final String PLACEHOLDER = APPLICATION + "/" + UNKNOWN_SUBTYPE;
+    public static final String UNKNOWN_SUBTYPE = "unknown";
+    public static final String DEFAULT = UNKNOWN + "/" + UNKNOWN_SUBTYPE;
 
     private String type;
     private String subType;

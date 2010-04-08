@@ -299,12 +299,25 @@ public final class GroovyScriptExporterTools {
             sopts.put("multiplicity", "new FxMultiplicity(" + prop.getMultiplicity().getMin() + "," + prop.getMultiplicity().getMax() + ")");
             sopts.put("overrideACL", prop.mayOverrideACL() + "");
             sopts.put("overrideMultiplicity", prop.mayOverrideBaseMultiplicity() + "");
-            sopts.put("overrideInOverview", prop.mayOverrideInOverview() + "");
-            sopts.put("overrideMaxLength", prop.mayOverrideMaxLength() + "");
-            sopts.put("overrideMultiline", prop.mayOverrideMultiLine() + "");
-            sopts.put("overrideSearchable", prop.mayOverrideSearchable() + "");
-            sopts.put("overrideUseHtmlEditor", prop.mayOverrideUseHTMLEditor() + "");
-            sopts.put("overrideMultilang", prop.mayOverrideMultiLang() + "");
+
+            if(prop.hasOption(FxStructureOption.OPTION_SHOW_OVERVIEW))
+                sopts.put("overrideInOverview", prop.mayOverrideInOverview() + "");
+            
+            if(prop.hasOption(FxStructureOption.OPTION_MAXLENGTH))
+                sopts.put("overrideMaxLength", prop.mayOverrideMaxLength() + "");
+
+            if(prop.hasOption(FxStructureOption.OPTION_MULTILINE))
+                sopts.put("overrideMultiline", prop.mayOverrideMultiLine() + "");
+
+            if(prop.hasOption(FxStructureOption.OPTION_SEARCHABLE))
+                sopts.put("overrideSearchable", prop.mayOverrideSearchable() + "");
+
+            if(prop.hasOption(FxStructureOption.OPTION_HTML_EDITOR))
+                sopts.put("overrideUseHtmlEditor", prop.mayOverrideUseHTMLEditor() + "");
+
+            if(prop.hasOption(FxStructureOption.OPTION_MULTILANG))
+                sopts.put("overrideMultilang", prop.mayOverrideMultiLang() + "");
+
             if (prop.getMaxLength() != 0) {// means that maxLength is not set
                 sopts.put("maxLength", prop.getMaxLength() + "");
             }
