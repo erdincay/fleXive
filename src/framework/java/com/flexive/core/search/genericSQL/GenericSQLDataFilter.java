@@ -780,7 +780,7 @@ public class GenericSQLDataFilter extends DataFilter {
      * @return sql snippet
      */
     protected String fulltextMatch(String column, String expr) {
-        return "MATCH (" + column + ") AGAINST (" + expr + ")";
+        return "MATCH (" + column + ") AGAINST (" + expr + " IN BOOLEAN MODE)";
     }
 
     /**
