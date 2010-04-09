@@ -53,7 +53,6 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multiset.Entry;
-import java.math.BigDecimal;
 
 import java.util.*;
 
@@ -127,6 +126,19 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
                     aclIds, mode, rs.getInt(13), rs.getString(10), rs.getLong(11),
                     FxPermissionUtils.getPermissionUnion(aclIds, _type, _stepACL, _createdBy, _mandator));
         } catch (SQLException e) {
+            final DBStorage db = StorageManager.getStorageImpl();
+            if (db.isDeadlock(e) || db.isQueryTimeout(e)) {
+                if (LOG.isWarnEnabled()) {
+                    LOG.warn("Deadlock detected while reading node info, waiting 100ms and retrying...");
+                }
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException ex) {
+                    // ignore
+                }
+                // try again
+                return getTreeNodeInfo(con, mode, nodeId);
+            }
             throw new FxTreeException(e, "ex.tree.nodeInfo.sqlError", nodeId, e.getMessage());
         } finally {
             Database.closeObjects(GenericTreeStorageSpreaded.class, null, ps);
@@ -234,7 +246,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
         insertSpace = insertSpace.add(BigInteger.valueOf(additional * 2));
 
         reorganizeSpace(con, seq, mode, mode, nodeInfo.getId(), false, spacing, null, nodeInfo, position,
-                insertSpace, boundaries, 0, null, false, false);
+                insertSpace, boundaries, 0, null, false, false, false);
         return spacing;
     }
 
@@ -258,6 +270,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
      * @param destinationNode  create mode only: the destination node
      * @param createMode       if true the function will insert copy of nodes instead of updating them
      * @param createKeepIds    keep the ids in create mode
+     * @param disableSpaceOptimization  if the space inside the node must not be compacted (for moving node trees)
      * @return first created node id or -1 if no node was created using this method
      * @throws FxTreeException if the function fails
      */
@@ -265,7 +278,8 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
                                 FxTreeMode sourceMode, FxTreeMode destMode,
                                 long nodeId, boolean includeNodeId, BigInteger overrideSpacing, BigInteger overrideLeft,
                                 FxTreeNodeInfo insertParent, int insertPosition, BigInteger insertSpace, BigInteger insertBoundaries[],
-                                int depthDelta, Long destinationNode, boolean createMode, boolean createKeepIds) throws FxTreeException {
+                                int depthDelta, Long destinationNode, boolean createMode, boolean createKeepIds,
+                                boolean disableSpaceOptimization) throws FxTreeException {
         Statement stmt = null;
         try {
             synchronized (LOCK_REORG) {
@@ -276,7 +290,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
                 }
                 return _reorganizeSpace(con, seq, sourceMode, destMode, nodeId, includeNodeId, overrideSpacing,
                         overrideLeft, insertParent, insertPosition, insertSpace, insertBoundaries,
-                        depthDelta, destinationNode, createMode, createKeepIds);
+                        depthDelta, destinationNode, createMode, createKeepIds, disableSpaceOptimization);
             }
         } catch (FxDbException e) {
             throw new FxTreeException(e);
@@ -304,7 +318,8 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
                                     FxTreeMode sourceMode, FxTreeMode destMode,
                                     long nodeId, boolean includeNodeId, BigInteger overrideSpacing, BigInteger overrideLeft,
                                     FxTreeNodeInfo insertParent, int insertPosition, BigInteger insertSpace, BigInteger insertBoundaries[],
-                                    int depthDelta, Long destinationNode, boolean createMode, boolean createKeepIds) throws FxTreeException {
+                                    int depthDelta, Long destinationNode, boolean createMode, boolean createKeepIds,
+                                    boolean disableSpaceOptimization) throws FxTreeException {
         long firstCreatedNodeId = -1;
         FxTreeNodeInfoSpreaded nodeInfo;
         try {
@@ -313,15 +328,15 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
             return -1;
         }
 
-        if (!nodeInfo.isSpaceOptimizable()) {
+        if (!nodeInfo.isSpaceOptimizable() && !disableSpaceOptimization) {
             // The Root node and cant be optimize any more ... so all we can do is fail :-/
             // This should never really happen
             if (nodeId == ROOT_NODE) {
                 return -1;
             }
-            //System.out.println("### UP we go");
+            //System.out.println("### UP we go, depthDelta=" + depthDelta);
             return _reorganizeSpace(con, seq, sourceMode, destMode, nodeInfo.getParentId(), includeNodeId, overrideSpacing, overrideLeft, insertParent,
-                    insertPosition, insertSpace, insertBoundaries, depthDelta, destinationNode, createMode, createKeepIds);
+                    insertPosition, insertSpace, insertBoundaries, depthDelta, destinationNode, createMode, createKeepIds, false);
         }
 
         BigInteger spacing = nodeInfo.getDefaultSpacing();
@@ -330,9 +345,9 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
             // have to use the spacing for valid tree ranges)  
             spacing = overrideSpacing;
         } else {
-            if (spacing.compareTo(GO_UP) < 0 && !createMode) {
+            if (spacing.compareTo(GO_UP) < 0 && !createMode && !disableSpaceOptimization) {
                 return _reorganizeSpace(con, seq, sourceMode, destMode, nodeInfo.getParentId(), includeNodeId, overrideSpacing, overrideLeft, insertParent,
-                        insertPosition, insertSpace, insertBoundaries, depthDelta, destinationNode, createMode, createKeepIds);
+                        insertPosition, insertSpace, insertBoundaries, depthDelta, destinationNode, createMode, createKeepIds, false);
             }
         }
 
@@ -392,7 +407,6 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
             }
 
             //System.out.println("Spacing:"+SPACING);
-            int position = 0;
             while (rs.next()) {
                 //System.out.println("------------------");
                 id = rs.getLong(1);
@@ -437,13 +451,27 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
                     nextLeft = right;
                 }
 
-                if (insertBoundaries != null && position == insertPosition) {
+                if (insertBoundaries != null) {
                     // insert gap at requested position
+                    // If we're past the gap, keep adding the insert space to left/right because the added
+                    // space is never "injected" into the loop, i.e. without adding it the left/right boundaries of
+                    // nodes after the gap would be too far to the left.
                     if (_lft.compareTo(insertBoundaries[0]) > 0) {
                         left = left.add(insertSpace);
-                        right = right.add(insertSpace);
-                        nextLeft = nextLeft.add(insertSpace);
                     }
+                    if (_rgt.compareTo(insertBoundaries[0]) > 0) {
+                        right = right.add(insertSpace);
+                    }
+                }
+
+                // sanity checks
+                if (left.compareTo(right) >= 0) {
+                    throw new FxTreeException(LOG, "ex.tree.reorganize.failed", counter, left, right,
+                            "left greater than right");
+                }
+                if (insertParent != null && right.compareTo((BigInteger) insertParent.getRight()) > 0) {
+                    throw new FxTreeException(LOG, "ex.tree.reorganize.failed", counter, left, right,
+                            "wrote past parent node bounds");
                 }
 
                 // Update the node
@@ -488,9 +516,6 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
                 left = nextLeft;
                 lastDepth = depth;
                 counter++;
-                if (depth == nodeInfo.getDepth() + 1) {
-                    position++; // count position in root folder
-                }
 
                 // Execute batch every 10000 items to avoid out of memory
                 if (counter % 10000 == 0) {
@@ -554,7 +579,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
                              FxString label, int position, FxPK reference, String data, long nodeId, boolean activateContent)
             throws FxApplicationException {
 
-        // acquire exclusive lock for parent node 
+        // acquire exclusive lock for parent node
         acquireLocksForUpdate(con, mode, Arrays.asList(parentNodeId));
 
 //        makeSpace(con, seq/*irrelevant*/, mode, parentNodeId, position/*irrelevant*/, 1);
@@ -631,7 +656,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
             return _createNode(con, seq, ce, mode, parentNodeId, name, label, position, reference, data, nodeId, activateContent);
         } catch (FxTreeException e) {
             if ("ex.tree.create.noSpace".equals(e.getExceptionMessage().getKey())) {
-                reorganizeSpace(con, seq, mode, mode, parentNodeId, false, null, null, null, -1, null, null, 0, null, false, false);
+                reorganizeSpace(con, seq, mode, mode, parentNodeId, false, null, null, null, -1, null, null, 0, null, false, false, false);
                 return _createNode(con, seq, ce, mode, parentNodeId, name, label, position, reference, data, nodeId, activateContent);
             } else
                 throw e;
@@ -693,7 +718,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
         // Move the nodes
         int depthDelta = (destinationNode.getDepth() + 1) - node.getDepth();
         reorganizeSpace(con, seq, mode, mode, node.getId(), true, spacing, boundaries[0], null, -1, null, null,
-                depthDelta, null, false, false);
+                depthDelta, null, false, false, true);
 
 
         Statement stmt = null;
@@ -760,7 +785,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
         BigInteger boundaries[] = getBoundaries(con, destinationNode, dstPosition);
         int depthDelta = (destinationNode.getDepth() + 1) - sourceNode.getDepth();
         long firstCreatedNodeId = reorganizeSpace(con, seq, mode, mode, sourceNode.getId(), true, spacing, boundaries[0], null, -1, null, null,
-                depthDelta, dstParentNodeId, true, false);
+                depthDelta, dstParentNodeId, true, false, true);
 
         Statement stmt = null;
         PreparedStatement ps = null;
@@ -960,7 +985,7 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
         int depthDelta = (destinationNode.getDepth() + 1) - sourceNode.getDepth();
 
         reorganizeSpace(con, seq, mode, FxTreeMode.Live, sourceNode.getId(), true, spacing,
-                boundaries[0], null, 0, null, null, depthDelta, destination, true, true);
+                boundaries[0], null, 0, null, null, depthDelta, destination, true, true, true);
 
 
         try {
@@ -1179,7 +1204,8 @@ public class GenericTreeStorageSpreaded extends GenericTreeStorage {
 
         @Override
         public String toString() {
-            return String.valueOf(id);
+            return String.valueOf(id) + "[depth=" + depth + ", left=" + left + ", right=" + right
+                    + ", directChildCount=" + directChildCount + "]";
         }
     }
 

@@ -65,6 +65,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.sql.Connection;
+import java.util.Collections;
 import java.util.List;
 
 import static com.flexive.shared.CacheAdmin.getEnvironment;
@@ -1285,4 +1286,62 @@ public class FxTreeTest {
             }
         }
     }
+
+    @Test
+    public void testReorgParent() throws FxApplicationException {
+        // trigger a bug that occured when triggering a parent reorg through TreeEngine#move
+        treeFolderStressTest(10, 10);
+    }
+
+    @Test
+    public void testDeepTree() throws FxApplicationException {
+        treeFolderStressTest(500, 5);
+    }
+
+    @Test
+    public void testDeepTree2() throws FxApplicationException {
+        treeFolderStressTest(5, 100);
+    }
+
+    private void treeFolderStressTest(int testInstanceCount, int maxDepth) throws FxApplicationException {
+        long folderId = FxTreeNode.ROOT_NODE;
+        long firstFolderId = -1;
+        long instancesFolderId = -1;
+        try {
+            // create some test nodes that will be moved
+            instancesFolderId = getTreeEngine().save(FxTreeNodeEdit.createNew("testinstances").setParentNodeId(FxTreeNode.ROOT_NODE));
+            final FxContent co = getContentEngine().initialize("CMIS_PERSON");
+            final FxPK pk = getContentEngine().save(co);
+            for (int i = 0; i < testInstanceCount; i++) {
+                getTreeEngine().save(FxTreeNodeEdit.createNew("instance" + i).setReference(pk).setParentNodeId(instancesFolderId));
+            }
+            assertEquals(getTreeEngine().getNode(FxTreeMode.Edit, instancesFolderId).getDirectChildCount(), testInstanceCount);
+            // create nested folders
+            final List<Long> folderIds = Lists.newArrayListWithCapacity(maxDepth);
+            for (int i = 0; i < maxDepth; i++) {
+                folderId = getTreeEngine().save(
+                        FxTreeNodeEdit.createNew("deep_l" + i).setParentNodeId(folderId).setPosition(-1)
+                );
+                if (firstFolderId == -1) {
+                    firstFolderId = folderId;
+                }
+                folderIds.add(folderId);
+                getTreeEngine().move(FxTreeMode.Edit, instancesFolderId, folderId, -1);
+            }
+
+            // bubble test folder back to the root node
+            Collections.reverse(folderIds);
+            for (long id : folderIds) {
+                getTreeEngine().move(FxTreeMode.Edit, instancesFolderId, id, -1);
+            }
+        } finally {
+            if (instancesFolderId != -1) {
+                getTreeEngine().remove(FxTreeMode.Edit, instancesFolderId, FxTreeRemoveOp.Remove, true);
+            }
+            if (firstFolderId != -1) {
+                getTreeEngine().remove(FxTreeMode.Edit, firstFolderId, FxTreeRemoveOp.Remove, true);
+            }
+        }
+    }
+
 }

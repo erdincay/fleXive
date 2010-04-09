@@ -35,7 +35,6 @@ import com.flexive.core.search.cmis.model.*;
 import com.flexive.core.storage.ContentStorage;
 import com.flexive.core.storage.TreeStorage;
 import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.EJBLookup;
 import com.flexive.shared.cmis.CmisVirtualProperty;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxCmisSqlParseException;
@@ -50,8 +49,6 @@ import com.flexive.shared.structure.FxType;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNode;
 import java.sql.Connection;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.antlr.runtime.tree.Tree;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -374,7 +371,7 @@ class StatementBuilder {
 
         // add all CMIS system properties
         for (CmisVirtualProperty property : CmisVirtualProperty.values()) {
-            if (property.getFxPropertyName() != null) {
+            if (property.isSupportsQuery()) {
                 result.add(
                         new ColumnReference(
                             environment, storage,
