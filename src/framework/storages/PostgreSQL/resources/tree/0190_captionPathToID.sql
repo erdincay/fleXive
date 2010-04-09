@@ -18,7 +18,7 @@ Create OR REPLACE function tree_captionPathToID(_startNode BIGINT,path TEXT,_tpr
 returns BIGINT AS $$ -- deterministic reads sql data
 DECLARE
   _result BIGINT DEFAULT _startNode;
-  _current CHAR(255) DEFAULT '';
+  _current CHAR(1024) DEFAULT '';
   done BOOLEAN DEFAULT FALSE;
   notfound BOOLEAN DEFAULT FALSE;
   _path TEXT DEFAULT path;

@@ -3,7 +3,7 @@ CREATE OR REPLACE function tree_pathToID(_startNode BIGINT,path text,_live boole
 RETURNS BIGINT AS $$ -- DETERMINISTIC READS SQL DATA
 DECLARE
   _result BIGINT default _startNode;
-  _current char(255) default '';
+  _current char(1024) default '';
   done BOOLEAN DEFAULT FALSE;
   notfound BOOLEAN DEFAULT FALSE;
   _path text;

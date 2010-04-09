@@ -4,7 +4,7 @@ Create function tree_pathToID(_startNode INTEGER UNSIGNED,_path text,_live boole
 returns INTEGER UNSIGNED DETERMINISTIC READS SQL DATA
 BEGIN
   DECLARE _result INTEGER UNSIGNED default _startNode;
-  DECLARE _current char(255) default '';
+  DECLARE _current varchar(1024) default '';
   DECLARE done BOOLEAN DEFAULT FALSE;
   DECLARE notfound BOOLEAN DEFAULT FALSE;
   DECLARE CONTINUE HANDLER FOR SQLSTATE '02000' SET notfound = TRUE;

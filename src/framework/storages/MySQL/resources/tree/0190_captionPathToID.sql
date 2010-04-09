@@ -19,7 +19,7 @@ Create function tree_captionPathToID(_startNode INTEGER UNSIGNED,_path TEXT,_tpr
 returns INTEGER UNSIGNED deterministic reads sql data
 BEGIN
   DECLARE _result INTEGER UNSIGNED default _startNode;
-  DECLARE _current char(255) default '';
+  DECLARE _current varchar(1024) default '';
   DECLARE done BOOLEAN DEFAULT FALSE;
   DECLARE notfound BOOLEAN DEFAULT FALSE;
   DECLARE CONTINUE HANDLER FOR SQLSTATE '02000' SET notfound = TRUE;

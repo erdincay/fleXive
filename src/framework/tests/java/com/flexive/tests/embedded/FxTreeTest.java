@@ -67,6 +67,7 @@ import org.testng.annotations.Test;
 import java.sql.Connection;
 import java.util.Collections;
 import java.util.List;
+import org.apache.commons.lang.RandomStringUtils;
 
 import static com.flexive.shared.CacheAdmin.getEnvironment;
 import static com.flexive.shared.EJBLookup.getContentEngine;
@@ -76,18 +77,18 @@ import static com.flexive.tests.embedded.FxTestUtils.logout;
 import static org.testng.Assert.*;
 
 /**
- * Tree engine tests.
+ * Tree engine tests. Longer-running tests are not executed with "tests.all", but must be triggered explicitly
+ * (group "tree-stress").
  *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-@Test(groups = {"ejb", "tree"})
 public class FxTreeTest {
     TreeEngine tree;
     ScriptingEngine scripting;
     ContentEngine ce;
     TypeEngine ty;
 
-    @BeforeClass
+    @BeforeClass(groups={"tree","tree-stress"})
     public void beforeClass() throws Exception {
         login(TestUsers.SUPERVISOR);
         tree = getTreeEngine();
@@ -97,7 +98,7 @@ public class FxTreeTest {
         enableTreeChecks();
     }
 
-    @AfterClass
+    @AfterClass(groups = {"tree","tree-stress"})
     public void afterClass() throws FxLogoutFailedException {
         try {
             clearTrees();
@@ -151,7 +152,7 @@ public class FxTreeTest {
      *
      * @throws FxApplicationException on errors
      */
-    @Test
+    @Test(groups = {"ejb", "tree"})
     public void treeTestEdit() throws FxApplicationException {
         treeCRUD(FxTreeMode.Edit);
         createPath(FxTreeMode.Edit);
@@ -332,7 +333,7 @@ public class FxTreeTest {
      *
      * @throws FxApplicationException on errors
      */
-    @Test
+    @Test(groups = {"ejb", "tree"})
     public void activationTest() throws FxApplicationException {
         //clear live and edit tree
         clearTrees();
@@ -404,7 +405,7 @@ public class FxTreeTest {
      *
      * @throws FxApplicationException on errors
      */
-    @Test
+    @Test(groups = {"ejb", "tree"})
     public void contentRemoval() throws FxApplicationException {
         //clear live and edit tree
         clearTrees();
@@ -481,7 +482,7 @@ public class FxTreeTest {
      *
      * @throws FxApplicationException on errors
      */
-    @Test
+    @Test(groups = {"ejb", "tree"})
     public void massCreateTest() throws FxApplicationException {
         clearTrees();
         disableTreeChecks();    // disable to improve performance
@@ -532,7 +533,7 @@ public class FxTreeTest {
      *
      * @throws FxApplicationException on errors
      */
-    @Test
+    @Test(groups = {"ejb", "tree"})
     public void scriptingAddRemoveTest() throws FxApplicationException {
         clearTrees();
         FxTreeMode mode = FxTreeMode.Edit;
@@ -573,7 +574,7 @@ public class FxTreeTest {
      *
      * @throws FxApplicationException on errors
      */
-    @Test
+    @Test(groups = {"ejb", "tree"})
     public void scriptingActivateTest() throws FxApplicationException {
         clearTrees();
         FxTreeMode mode = FxTreeMode.Edit;
@@ -606,7 +607,7 @@ public class FxTreeTest {
      *
      * @throws FxApplicationException on errors
      */
-    @Test
+    @Test(groups = {"ejb", "tree"})
     public void scriptingFolderReplacementTest() throws FxApplicationException {
         clearTrees();
         FxTreeMode mode = FxTreeMode.Edit;
@@ -637,7 +638,7 @@ public class FxTreeTest {
         }
     }
 
-    @Test
+    @Test(groups = {"ejb", "tree"})
     public void treeIteratorTest() throws FxApplicationException {
         clearTrees();
         final String[] names = {"my", "virtual", "directory"};
@@ -665,7 +666,7 @@ public class FxTreeTest {
         }
     }
 
-    @Test
+    @Test(groups = {"ejb", "tree"})
     public void treeCaptionPathToIdTest() throws FxApplicationException {
         clearTrees();
         FxTreeNodeEdit tn = FxTreeNodeEdit.createNew("NodeName");
@@ -685,7 +686,7 @@ public class FxTreeTest {
      *
      * @throws FxApplicationException on errors
      */
-    @Test
+    @Test(groups = {"ejb", "tree"})
     public void findChildrenTest() throws FxApplicationException {
         clearTrees();
         final String node2 = "node_2";
@@ -774,7 +775,7 @@ public class FxTreeTest {
      *
      * @throws FxApplicationException on errors
      */
-    @Test
+    @Test(groups = {"ejb", "tree"})
     public void getPathsTest() throws FxApplicationException {
         clearTrees();
         FxTreeMode mode = FxTreeMode.Edit;
@@ -819,7 +820,7 @@ public class FxTreeTest {
      *
      * @throws FxApplicationException on errors
      */
-    @Test
+    @Test(groups = {"ejb", "tree"})
     public void setAndGetDataTest() throws FxApplicationException {
         clearTrees();
         FxTreeMode mode = FxTreeMode.Edit;
@@ -848,7 +849,7 @@ public class FxTreeTest {
      *
      * @throws FxApplicationException on errors
      */
-    @Test
+    @Test(groups = {"ejb", "tree"})
     public void getIdsTest() throws FxApplicationException {
         clearTrees();
         FxTreeMode mode = FxTreeMode.Edit;
@@ -878,7 +879,7 @@ public class FxTreeTest {
      *
      * @throws FxApplicationException on errors
      */
-    @Test(enabled = false)
+    @Test(groups = "tree-stress")
     public void populateTest() throws FxApplicationException {
         clearTrees();
         disableTreeChecks();
@@ -920,7 +921,7 @@ public class FxTreeTest {
      *
      * @throws FxApplicationException on errors
      */
-    @Test
+    @Test(groups = {"ejb", "tree"})
     public void genericTreeStorageSetDataTest() throws FxApplicationException {
         clearTrees();
         FxTreeMode mode = FxTreeMode.Edit;
@@ -951,7 +952,7 @@ public class FxTreeTest {
      *
      * @throws FxApplicationException on errors
      */
-    @Test
+    @Test(groups = {"ejb", "tree"})
     public void genericTreeStorageGetCopyOfCountTest() throws FxApplicationException {
         clearTrees();
         FxTreeMode mode = FxTreeMode.Edit;
@@ -992,7 +993,7 @@ public class FxTreeTest {
      *
      * @throws FxApplicationException on errors
      */
-    @Test
+    @Test(groups = {"ejb", "tree"})
     public void genericTreeStorageFlagDirtyTest() throws FxApplicationException {
         clearTrees();
         TreeStorage treeStorage = new TreeStorage();
@@ -1014,7 +1015,7 @@ public class FxTreeTest {
         }
     }
 
-    @Test
+    @Test(groups = {"ejb", "tree"})
     public void manyMovesTest() throws FxApplicationException {
         // stress tree engine moves somewhat in reaction to bug FX-724, however, I haven't been able
         // to reproduce it yet.
@@ -1170,7 +1171,7 @@ public class FxTreeTest {
         return contentPK;
     }
 
-    @Test
+    @Test(groups = {"ejb", "tree"})
     public void removeOpTest() throws FxApplicationException {
         long typeId = createTestType();
 
@@ -1263,7 +1264,7 @@ public class FxTreeTest {
         }
     }
 
-    @Test
+    @Test(groups = {"ejb", "tree"})
     public void testEscapedTreePathLookup_FX796() throws FxApplicationException {
         final String[] tests = {
                 "name with spaces",
@@ -1287,20 +1288,57 @@ public class FxTreeTest {
         }
     }
 
-    @Test
+    @Test(groups = {"ejb", "tree"})
+    public void testLongPaths() throws FxApplicationException {
+        // push FQN path limits
+        long firstFolderId = -1;
+        long folderId = FxTreeNode.ROOT_NODE;
+        try {
+            final List<String> paths = Lists.newArrayList();
+            final List<String> captions = Lists.newArrayList();
+
+            for (int i = 0; i < 10; i++) {
+                final String path = RandomStringUtils.randomAlphanumeric(1024);
+                final String caption = RandomStringUtils.randomAlphanumeric(1024);
+                folderId = getTreeEngine().save(
+                        FxTreeNodeEdit.createNew(path)
+                        .setLabel(new FxString(true, caption))
+                        .setParentNodeId(folderId)
+                );
+                if (firstFolderId == -1) {
+                    firstFolderId = folderId;
+                }
+                paths.add(path);
+                captions.add(caption);
+            }
+
+            for (int i = 1; i < 10; i++) {
+                getTreeEngine().getIdByPath(FxTreeMode.Edit,
+                        "/" + StringUtils.join(paths.subList(0, i), '/')
+                );
+                getTreeEngine().getIdByLabelPath(FxTreeMode.Edit, FxTreeNode.ROOT_NODE,
+                        "/" + StringUtils.join(captions.subList(0, i), '/')
+                );
+            }
+        } finally {
+            getTreeEngine().remove(FxTreeMode.Edit, firstFolderId, FxTreeRemoveOp.Remove, true);
+        }
+    }
+
+    @Test(groups = {"ejb", "tree"})
     public void testReorgParent() throws FxApplicationException {
         // trigger a bug that occured when triggering a parent reorg through TreeEngine#move
         treeFolderStressTest(10, 10);
     }
 
-    @Test
+    @Test(groups="tree-stress")
     public void testDeepTree() throws FxApplicationException {
-        treeFolderStressTest(500, 5);
+        treeFolderStressTest(500, 50);
     }
 
-    @Test
+    @Test(groups = "tree-stress")
     public void testDeepTree2() throws FxApplicationException {
-        treeFolderStressTest(5, 100);
+        treeFolderStressTest(5, 500);
     }
 
     private void treeFolderStressTest(int testInstanceCount, int maxDepth) throws FxApplicationException {
