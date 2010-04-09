@@ -142,6 +142,24 @@ WHERE * = 'test']]></programlisting>
                 be enabled for fulltext indexing (See
                 <xref linkend="core_structures_property_parameters"/>).
             </para>
+
+            <para>
+                The exact semantics of the fulltext query depend on the underlying database storage:
+
+                <itemizedlist>
+                    <listitem>
+                        <para>
+                            MySQL supports wildcards and boolean search expressions as described in
+                            <link xlink:href="http://dev.mysql.com/doc/refman/5.1/en/fulltext-boolean.html">the MySQL reference manual</link>.
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            PostgreSQL and H2 currently do not support wildcards.
+                        </para>
+                </listitem>
+            </itemizedlist>
+            </para>
         </section>
 
         <section xml:id="css_feature_assignments">
