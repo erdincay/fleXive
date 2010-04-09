@@ -983,7 +983,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
         if (this.isEmpty() != otherValue.isEmpty()) return false;
         if (this.isMultiLanguage() != otherValue.isMultiLanguage()) return false;
         if (multiLanguage) {
-            return this.translations.equals(otherValue.translations);
+            return this.translations.equals(otherValue.translations) && this.defaultLanguage == otherValue.defaultLanguage;
         } else {
             if (!this.isEmpty())
                 if (!this.singleValue.equals(otherValue.singleValue)) return false;
