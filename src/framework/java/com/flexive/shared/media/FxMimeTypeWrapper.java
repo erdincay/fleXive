@@ -195,6 +195,7 @@ public class FxMimeTypeWrapper implements Serializable {
      */
     @Override
     public String toString() {
-        return mimeTypes == null ? "[]" : mimeTypes.toString();
+        String out = mimeTypes == null ? "[]" : mimeTypes.toString();
+        return out.substring(1, out.length() - 1);
     }
 }

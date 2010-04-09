@@ -56,8 +56,7 @@ public class FxMimeType implements Serializable {
     public static final String TEXT = "text";
     public static final String VIDEO = "video";
     public static final String UNKNOWN = "unknown";
-    public static final String UNKNOWN_SUBTYPE = "unknown";
-    public static final String DEFAULT = UNKNOWN + "/" + UNKNOWN_SUBTYPE;
+    public static final String DEFAULT = UNKNOWN + "/" + UNKNOWN;
 
     private String type;
     private String subType;
@@ -78,7 +77,7 @@ public class FxMimeType implements Serializable {
      */
     public FxMimeType(String type) {
         this.type = type;
-        this.subType = UNKNOWN_SUBTYPE;
+        this.subType = UNKNOWN;
     }
 
     /**
@@ -112,7 +111,7 @@ public class FxMimeType implements Serializable {
     public String toString() {
         if(!StringUtils.isBlank(subType))
             return type + "/" + subType;
-        else return type + "/" + UNKNOWN_SUBTYPE;
+        else return type + "/" + UNKNOWN;
     }
 
     @Override
@@ -145,10 +144,12 @@ public class FxMimeType implements Serializable {
         final String type = StringUtils.trim(s[0].toLowerCase());
         final String subType;
 
-        if(s.length > 1)
+        if(s.length > 1 && !StringUtils.isBlank(type))
           subType = StringUtils.trim(s[1].toLowerCase());
+        else if(StringUtils.isBlank(type))
+            return new FxMimeType(FxMimeType.UNKNOWN, FxMimeType.UNKNOWN);
         else
-            subType = UNKNOWN_SUBTYPE;
+            subType = UNKNOWN;
 
         return new FxMimeType(type, subType);
     }
