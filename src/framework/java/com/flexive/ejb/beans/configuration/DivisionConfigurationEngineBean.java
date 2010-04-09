@@ -525,6 +525,8 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
     public void exportDivision(String localFileName) throws FxApplicationException {
         if (!FxContext.getUserTicket().isGlobalSupervisor())
             throw new FxNoAccessException("ex.export.noAccess");
+        if (StringUtils.isEmpty(localFileName))
+            throw new FxInvalidParameterException("localFileName", "ex.export.noFileProvided");
         File zip = new File(localFileName);
         boolean createError = false;
         try {
@@ -563,7 +565,7 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
         if (!FxContext.getUserTicket().isGlobalSupervisor())
             throw new FxNoAccessException("ex.import.noAccess");
         if(StringUtils.isEmpty(localFileName))
-            throw new FxInvalidParameterException("localFileName", "ex.import.noFile", localFileName);
+            throw new FxInvalidParameterException("localFileName", "ex.import.noFileProvided");
         File data = new File(localFileName);
         if (!data.exists() || !data.isFile())
             throw new FxInvalidParameterException("localFileName", "ex.import.noFile", localFileName);
@@ -583,6 +585,8 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
     public void importDivision(String localFileName) throws FxApplicationException {
         if (!FxContext.getUserTicket().isGlobalSupervisor())
             throw new FxNoAccessException("ex.import.noAccess");
+        if(StringUtils.isEmpty(localFileName))
+            throw new FxInvalidParameterException("localFileName", "ex.import.noFileProvided");
         File data = new File(localFileName);
         if (!data.exists() || !data.isFile())
             throw new FxInvalidParameterException("localFileName", "ex.import.noFile", localFileName);
