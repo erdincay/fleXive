@@ -10,33 +10,186 @@
     <xi:include href="includes/author_azrzavy.xml"/>
     <xi:include href="includes/author_hbacher.xml"/>
 
-    <title>The &flexive; administration GUI</title>
+    <title>The &flexive; backend GUI</title>
 
-    <section xml:id="administration_gui_basics">
-        <title>Running the administration GUI</title>
-        <para>Provided that you have a working flexive installation, you
-            start the administration GUI by starting your chosen webserver. You enter
-            the administration GUI by opening your web browser and entering the address
-            of the administration GUI startpage. By default the address is
-            <code>http://localhost:8080/flexive/adm/main.jsf</code>
-            where
-            <code>localhost</code>
-            can to be replaced by your IP address. The port (
-            <code>8080</code>
-            in the example) depends on your
-            Application Servers setting and is the default for e.g. JBoss. After a few moments, you
-            will reach the login page. If you want to work with the administration
-            GUI as supervisor (a role that is allowed to do
-            <emphasis>everything</emphasis>
-            without any security limitations), the default username to
-            choose is
-            <code>supervisor</code>
-            with its default password
-            <code>supervisor</code>.
-        </para>
+    <section xml:id="adm_gui_basics">
+        <title>&Flexive; backend basics</title>
+        <section xml:id="adm_gui_run">
+        <title>Running the backend administration GUI</title>
+            <para>Provided that you have a working
+                <link linkend="installation">&flexive; installation</link>, you
+                start the &flexive; backend by starting your chosen application server.
+                You can access the administration GUI by opening your web browser
+                and entering the address
+                of the backend GUI startpage. By default the address is
+                <code>http://localhost:8080/flexive/adm/main.jsf</code>
+                where
+                <code>localhost</code>
+                can be replaced by the IP address of the application server.
+                The port (
+                <code>8080</code>
+                in the example) depends on your
+                Application Servers settings (8080 is the default for JBoss).
+                After a few moments, you
+                will reach the <link linkend="adm_gui_login">login page</link>.
+            </para>
+        </section>
+        <section xml:id="adm_gui_login">
+            <title>Logging in</title>
+            <para>
+                If you want to work with the administration
+                GUI as supervisor (a role that is allowed to do
+                <emphasis>everything</emphasis>
+                without any security limitations), the default username to
+                choose is
+                <code>supervisor</code>
+                with its default password
+                <code>supervisor</code>.
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="images/adm_ui_backend/flexive_login.png" format="PNG"
+                                   width="100%"/>
+                    </imageobject>
+                </mediaobject>
+                <caution>
+                    Once you have logged in as supervisor you should
+                    modify the default supervisor password via
+                    <link linkend="adm_ui_user">account administration</link> or
+                    via <link linkend="adm_user_preferences">user preferences</link>.
+                </caution>
+                <note>
+                    When the backend administration GUI is started for the first time
+                    and a user successfully logs in, the execution of
+                    <link linkend="core_scripting_runonce">run-once scripts</link>
+                    is automatically triggered which may take a few seconds.
+                    (Simply wait until script execution has completed and
+                    press the "Continue" button. The run-once scripts are
+                    used to initialize &flexive;).
+                </note>
+            </para>
+        </section>
+        <section xml:id="adm_gui_areas">
+            <title>&Flexive; backend display areas</title>
+            <para>
+                The backend consists of four areas:
+                <itemizedlist>
+                    <listitem>
+                        <para>
+                            (1) The currently selected backend GUI section: The currently
+                            active GUI section is displayed on top, in this case the
+                            <link linkend="adm_content_tree ">Content Tree</link>.
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                           (2) Currently inactive sections: Inactive GUI sections, are
+                            displayed on the bottom. By clicking on an inactive section
+                            the section becomes active.
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            (3) The toolbar:
+                            <para>
+                                The toolbar contains the following icons
+                                <itemizedlist>
+                                    <listitem>
+                                        <para>
+                                            Context sensitive GUI icons: In the left side of
+                                            the toolbar context sensitive
+                                            GUI buttons are displayed. If for example the
+                                            <link linked="adm_ui_user">user administration GUI</link>
+                                            is displayed an icon for creating a user is also available
+                                            in the toolbar.
+                                        </para>
+                                    </listitem>
+                                    <listitem>
+                                        <para>
+                                            Plugin icons: Right next to the context sensitive
+                                            GUI buttons, the icons of the
+                                            <link linkend="plugins_backend_feedback">feedback plugin</link>
+                                            are displayed.
+                                        </para>
+                                    </listitem>
+                                    <listitem>
+                                        <para>
+                                            Fixed icons: In the right side of the toolbar the fulltext
+                                            search bar, the icon for accessing
+                                            <link linkend="adm_user_preferences">user preferences</link>
+                                            and the logout
+                                            icon are displayed
+                                            <inlinemediaobject>
+                                                <imageobject>
+                                                    <imagedata fileref="images/adm_ui_backend/backend_toolbar_fixed_icons.png" format="PNG"
+                                                   width="100%"/>
+                                                </imageobject>
+                                            </inlinemediaobject>.
+                                        </para>
+                                    </listitem>
+                                </itemizedlist>
+                            </para>
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            (4) The content frame: The content frame is the main display
+                            area for the currently opened backend GUI.
+                        </para>
+                    </listitem>
+                </itemizedlist>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="images/adm_ui_backend/backend_general.png" format="PNG"
+                                   width="66%"/>
+                    </imageobject>
+                </mediaobject>
+            </para>
+        </section>
+        <section xml:id="adm_gui_overview">
+            <title>Backend GUI overview</title>
+                <para>
+                    The &flexive; backend provides four main GUIs:
+                <itemizedlist>
+                    <listitem>
+                        <para>
+                            <link linkend="adm_content_tree ">Content Tree:</link>
+                            The content tree is used for browsing,
+                            creating, modifying and deleting content instances.
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            <link linkend="adm_ui_structure_editor">Structures:</link>
+                            The structure editors allow the user
+                            to create, modify and delete the blueprints of content instances.
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            <link linkend="adm_ui_query_editor">Search:</link>
+                            The query editor allows the user
+                            to customize search queries in order to search
+                            within the content tree and within content instances.
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                             <link linkend="adm_administration">Administration:</link>
+                            The administration section provides a collection of GUIs for
+                            the administration of &flexive;.
+                        </para>
+                    </listitem>
+                </itemizedlist>
+            </para>
+        </section>
     </section>
 
-    <section xml:id="structure_editor_basics">
+    <section xml:id="adm_user_preferences">
+        <title>User preferences</title>
+
+    </section>
+
+    <section xml:id="adm_structure_editor_basics">
         <title>The structure editor</title>
         <para>The structure editor allows you to
             define the structure or blueprints of content instances. In essence the
@@ -87,7 +240,7 @@
             to another type or another group will be automatically removed from the system.
         </important>
 
-        <section xml:id="structure_editor_gui">
+        <section xml:id="adm_structure_editor_gui">
             <title>The structure editor GUI</title>
             <para>
                 <mediaobject>
@@ -104,7 +257,7 @@
                 tab (1) in the administration backend. The GUI is separated into two parts: the
                 structure tree (2) on the left half of the screen and the edit view (3) on the right half.
             </para>
-            <section xml:id="structure_tree_items">
+            <section xml:id="adm_structure_tree_items">
                 <title>Structure tree items</title>
                 The Structure tree contains all defined types with their assignments as children.
                 <para>The structure tree consists of the following items:
@@ -180,7 +333,7 @@
                     </itemizedlist>
                 </para>
             </section>
-            <section xml:id="structure_tree_interaction">
+            <section xml:id="adm_structure_tree_interaction">
                 <title>Structure tree interaction</title>
                 <para>
                     <itemizedlist>
@@ -452,7 +605,7 @@
                         </listitem>
                     </itemizedlist>
                 </para>
-                <section xml:id="structure_tree_cut_copy_paste">
+                <section xml:id="adm_structure_tree_cut_copy_paste">
                     <title>Cut, copy and paste operations</title>
                     <para>
                         <itemizedlist>
@@ -537,7 +690,7 @@
                     </para>
                 </section>
             </section>
-            <section xml:id="structure_editor_view_mode_vs_edit_mode">
+            <section xml:id="adm_structure_editor_view_mode_vs_edit_mode">
                 <title>View mode vs. edit mode</title>
                 <para>
                     By default, double left clicking on a structure element in the structure tree opens
@@ -579,7 +732,7 @@
                     in the context menu of the structure tree, the according sub editors is opened.
                 </para>
             </section>
-            <section xml:id="structure_editor_type_editor">
+            <section xml:id="adm_structure_editor_type_editor">
                 <title>The type editor</title>
                 <para>
                     <mediaobject>
@@ -589,7 +742,7 @@
                         </imageobject>
                     </mediaobject>
                 </para>
-                <section xml:id="structure_editor_editing_types">
+                <section xml:id="adm_structure_editor_editing_types">
                     <title>Editing types</title>
                     <para>
                         When editing an existing type, you will notice that the type's
@@ -652,7 +805,7 @@
                 <xref linkend="core_structures_types_parameters"/>.
             </section>
 
-            <section xml:id="structure_editor_group_editor">
+            <section xml:id="adm_structure_editor_group_editor">
                 <title>The group editor</title>
                 <para>
                     <mediaobject>
@@ -663,7 +816,7 @@
                     </mediaobject>
                 </para>
 
-                <section xml:id="structure_editor_editing_groups">
+                <section xml:id="adm_structure_editor_editing_groups">
                     <title>Editing group assignments</title>
                     <para>
                         When editing an existing group assignment, you will notice three tabs:
@@ -726,7 +879,7 @@
                 </section>
             </section>
 
-            <section xml:id="structure_editor_property_editor">
+            <section xml:id="adm_structure_editor_property_editor">
                 <title>The property editor</title>
                 <para>
                     <mediaobject>
@@ -737,7 +890,7 @@
                     </mediaobject>
                 </para>
 
-                <section xml:id="structure_editor_editing_properties">
+                <section xml:id="adm_structure_editor_editing_properties">
                     <title>Editing property assignments</title>
                     <para>
                         Similar to the group editor, the property editor provides four tabs:
@@ -773,7 +926,7 @@
                                     <guimenuitem>"Scripting"</guimenuitem>
                                     tab, gives you
                                     access to the scripting editor which is described in
-                                    <xref linkend="structure_editor_script_assignment_editor"/>.
+                                    <xref linkend="adm_structure_editor_script_assignment_editor"/>.
                                 </para>
                             </listitem>
                         </itemizedlist>
@@ -823,7 +976,7 @@
                 </section>
             </section>
 
-            <section xml:id="structure_editor_options">
+            <section xml:id="adm_structure_editor_options">
                 <title>The options editor</title>
                 <para>
                     Generally speaking an option is just a pair of a key and a value. There are
@@ -898,7 +1051,7 @@
                 </para>
             </section>
 
-            <section xml:id="structure_editor_script_assignment_editor">
+            <section xml:id="adm_structure_editor_script_assignment_editor">
                 <title>The scripting editor</title>
                 <para>
                     Scripts can be assigned to a type or property assignment using the scripting editor,
@@ -935,7 +1088,7 @@
                 </para>
             </section>
 
-            <section xml:id="structure_editor_saving_and_deleting">
+            <section xml:id="adm_structure_editor_saving_and_deleting">
                 <title>Saving and deleting</title>
                 <para>
                     In order to save changes the editors provide the
@@ -978,7 +1131,7 @@
             </section>
         </section>
 
-        <section xml:id="structure_export_import">
+        <section xml:id="adm_structure_export_import">
             <title>Structure export and import</title>
             <para>Type definitions (together with their groups and properties)
                 can be exported as groovy script which contains all necessary instructions
@@ -988,7 +1141,7 @@
                 distributions enables the export and import of content instances
                 based on these type definitions.
             </para>
-             <section xml:id="structure_export">
+             <section xml:id="adm_structure_export">
                  <title>Structure export GUI</title>
                  <para>
                      The structure export GUI can be invoked via the context menu by right clicking
@@ -1002,7 +1155,7 @@
                      Per default the "Export Results" tab is active, showing the
                      "Summary of exported Structures" and the "Exported structures as a
                      Groovy script" panels.
-                     <section xml:id="structure_export_results_tab">
+                     <section xml:id="adm_structure_export_results_tab">
                          <title>Export Results Tab</title>
                          <para>
                              The summary panel displays useful information
@@ -1091,7 +1244,7 @@
                             </itemizedlist>
                          </para>
                      </section>
-                     <section xml:id="structure_export_tab">
+                     <section xml:id="adm_structure_export_tab">
                          <title>Structure Export Tab</title>
                          <para>
                              The "Structure Export Tab" provides the possibility to
@@ -1100,7 +1253,7 @@
                          </para>
                          <para>
                              The export options to choose from are similar to those described in
-                             <xref linkend="structure_export_results_tab"/>. If the user
+                             <xref linkend="adm_structure_export_results_tab"/>. If the user
                              chooses to export the selected type definitions as Groovy script
                              the "Export Results" tab is opened and initialized
                              with the specified type definitions. If the user chooses the XML export
@@ -1109,7 +1262,7 @@
                      </section>
                  </para>
              </section>
-             <section xml:id="structure_import">
+             <section xml:id="adm_structure_import">
                  <title>Structure import GUI</title>
                  <para>
                      The structure import GUI can be invoked via the "Structures" drop down menu
@@ -1141,7 +1294,7 @@
                     <link linkend="adm_content_tree">Content tree</link>
                 </listitem>
                 <listitem>
-                    <link linkend="structure_editor_gui">Structure tree</link>
+                    <link linkend="adm_structure_editor_gui">Structure tree</link>
                 </listitem>
                 <listitem>
                     <link linkend="adm_query_editor">Query editor / query results</link>
@@ -1171,7 +1324,7 @@
                     <listitem>The node of the content tree which the instance is attached to</listitem>
                     <listitem>The version and access information</listitem>
                     <listitem>Single
-                        <link linkend="structure_editor_property_editor">properties</link>
+                        <link linkend="adm_structure_editor_property_editor">properties</link>
                         as input fields
                     </listitem>
                     <listitem>Grouped properties</listitem>
@@ -1449,10 +1602,10 @@
                 tab. Open the query editor and rightclick on nodes of the
                 <link linkend="adm_content_tree">content tree</link>
                 and
-                <link linkend="structure_editor_gui">structure tree</link>
+                <link linkend="adm_structure_editor_gui">structure tree</link>
                 to formulate your query. You can add as many nodes as you want.
                 You can also search on
-                <link linkend="structure_editor_property_editor">structure properties</link>.
+                <link linkend="adm_structure_editor_property_editor">structure properties</link>.
             </para>
             <para>
                 Select the chosen query elements with Shift or Ctrl and rightclick on them to use the context
@@ -1677,1066 +1830,1195 @@
         </para>
     </section>
 
-    <section xml:id="adm_user">
-        <title>User account administration</title>
-        <para>
-            The &Flexive; user account administration UI provides an administration
-            interface to administer your
-            user accounts, assign
-            <link linkend="adm_user_group">createuser groups</link>
-            and roles and make other settings like activation and language settings.
-        </para>
-        <section xml:id="adm_user_create_user">
-            <title>Creating a user</title>
-            <para>The following screen shows the user account editor when creating a new user.</para>
+    <section xml:id="adm_administration">
+        <title>&Flexive; administration</title>
+        <section xml:id="adm_user">
+            <title>User account administration</title>
             <para>
-                Roles are a key feature of the &Flexive;
-                <link linkend="core_security">security concept</link>.
-                There are two ways to assign roles to a user.
+                The &Flexive; user account administration UI provides an administration
+                interface to administer your
+                user accounts, assign
+                <link linkend="adm_user_group">createuser groups</link>
+                and roles and make other settings like activation and language settings.
             </para>
-            <para>
-                <orderedlist>
-                    <listitem>Direct assignment</listitem>
-                    <listitem>Inheritance through user group membership</listitem>
-                </orderedlist>
-            </para>
-            <para>
-                <mediaobject>
-                    <imageobject>
-                        <imagedata fileref="images/adm_ui_user/create_user.png"
-                                   format="PNG" contentwidth="100%"/>
-                    </imageobject>
-                </mediaobject>
-            </para>
-            <para>After creation, you will be redirected to the user account overview where you can edit and delete
-                users.
-            </para>
-        </section>
-        <section xml:id="adm_user_overview">
-            <title>The user account overview</title>
-            <para>The following screen shows the user group overview.</para>
-            <para>
-                You can see the two system defined accounts:
-                <variablelist>
-                    <varlistentry>
-                        <term>Guest</term>
-                        <listitem>
-                            <para>Everyone who is not logged in is treated as guest.</para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>SUPERVISOR</term>
-                        <listitem>
-                            <para>This user is in all roles and may operate on all mandators.</para>
-                        </listitem>
-                    </varlistentry>
-                </variablelist>
-                These two accounts cannot be removed.
-            </para>
-            <para>
-                <mediaobject>
-                    <imageobject>
-                        <imagedata fileref="images/adm_ui_user/user_overview.png"
-                                   format="PNG" contentwidth="100%"/>
-                    </imageobject>
-                </mediaobject>
-                By clicking the edit icon
-                <inlinemediaobject>
-                    <imageobject>
-                        <imagedata fileref="images/adm_ui_user/edit.png"
-                                   format="PNG" contentwidth="100%"/>
-                    </imageobject>
-                </inlinemediaobject>
-                a user account may be edited and by clicking the delete icon
-                <inlinemediaobject>
-                    <imageobject>
-                        <imagedata fileref="images/adm_ui_user/delete.png"
-                                   format="PNG" contentwidth="100%"/>
-                    </imageobject>
-                </inlinemediaobject>
-                a user account may be deleted.
-            </para>
-        </section>
-    </section>
-    <section xml:id="adm_user_group">
-        <title>User group administration</title>
-        <para>The user group editor allows you to create and edit user groups.
-            You can specify a group name, a color and
-            assign roles to the group.
-        </para>
-        <para>
-            <mediaobject>
-                <imageobject>
-                    <imagedata fileref="images/adm_ui_user_groups/usergroup_editor.png"
-                               format="PNG" contentwidth="100%"/>
-                </imageobject>
-            </mediaobject>
-        </para>
-        After saving you will be redirected to the user group overview.
-        <section xml:id="adm_user_group_overview">
-            <title>The user group overview</title>
-            <para>The following screen shows the user account overview.
-                The default system user groups cannot be deleted:
-                <variablelist>
-                    <varlistentry>
-                        <term>Everyone (Default)</term>
-                        <listitem>
-                            <para>For every mandator
-                                <link linkend="adm_mandator">mandator</link>
-                                an according "Everyone" group is created automatically.
-                                In order to be able to distinguish the different "Everyone" groups,
-                                the mandator's name is shown in the brackets. The "Everyone(Default)" group
-                                contains every user of the mandator named
-                                <emphasis>
-                                    Default
-                                </emphasis>
-                                .
-                            </para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>Everyone</term>
-                        <listitem>
-                            <para>System user group containing every user of every mandator.
-                            </para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>Owner</term>
-                        <listitem>
-                            <para>The system user group <filename>Owner</filename> is used to assign ACLs and thereby grant permissions
-                                to content owners (i.e. users that created content).
-                            </para>
-                        </listitem>
-                    </varlistentry>
-                </variablelist>
-            </para>
-            <para>
-                <mediaobject>
-                    <imageobject>
-                        <imagedata fileref="images/adm_ui_user_groups/usergroup_overview.png"
-                                   format="PNG" contentwidth="100%"/>
-                    </imageobject>
-                </mediaobject>
-                By clicking the edit icon
-                <inlinemediaobject>
-                    <imageobject>
-                        <imagedata fileref="images/adm_ui_user_groups/edit.png"
-                                   format="PNG" contentwidth="100%"/>
-                    </imageobject>
-                </inlinemediaobject>
-                a user group may be edited and by clicking the delete icon
-                <inlinemediaobject>
-                    <imageobject>
-                        <imagedata fileref="images/adm_ui_user_groups/delete.png"
-                                   format="PNG" contentwidth="100%"/>
-                    </imageobject>
-                </inlinemediaobject>
-                a user group may be deleted.
-            </para>
-        </section>
-    </section>
-    <section xml:id="adm_mandator">
-        <title>Mandator administration</title>
-        <para>This chapter explains the administration UI for mandators. Please see section
-            <link linkend="core_security_mandators">Mandators</link>
-            in chapter
-            <link linkend="core_security">Security</link>
-            for an explanation of the concept of mandators used in &Flexive;.
-        </para>
-        <section xml:id="adm_mandator_create">
-            <title>Creating a mandator</title>
-            <para>The following screen shows the mandator editor. You can specify a name for the mandator and set the
-                activation flag.
-            </para>
-            <para>
-                <mediaobject>
-                    <imageobject>
-                        <imagedata fileref="images/adm_ui_mandator/mandator_editor.png"
-                                   format="PNG" contentwidth="100%"/>
-                    </imageobject>
-                </mediaobject>
-            </para>
-            After creating a mandator, you will be redirected to the overview for mandators.
-        </section>
-        <section xml:id="adm_mandator_overview">
-            <title>The mandator overview</title>
-            <para>In the mandator overview mandators can be edited and deleted.</para>
-            <para>In the following screen you can see the mandator named
-                <emphasis>Default</emphasis>.
-            </para>
-            <para>
-                <mediaobject>
-                    <imageobject>
-                        <imagedata fileref="images/adm_ui_mandator/mandator_overview.png"
-                                   format="PNG" contentwidth="100%"/>
-                    </imageobject>
-                </mediaobject>
-            </para>
-        </section>
-    </section>
-    <section xml:id="adm_ACL">
-        <title>ACL administration</title>
-        <para>The ACL administration UI provides an ACL editor to edit
-            and create ACLs and to set permissions for
-            <link linkend="adm_user_group">user groups
-            </link>
-            in the permission matrix. ACLs are a key feature of the &Flexive;
-            <link linkend="core_security">security concept</link>.
-        </para>
-        <section xml:id="adm_ACL_create">
-            <title>Creating an ACL</title>
-            <para>The following screen shows the ACL editor in create mode.</para>
-            <para>
-                You must specify
-                <orderedlist>
-                    <listitem>
-                        <para>The
-                            <link linkend="adm_mandator">mandator</link>
-                        </para>
-                    </listitem>
-                    <listitem>
-                        <para>The ACL's name</para>
-                    </listitem>
-                    <listitem>
-                        <para>The ACL's label</para>
-                    </listitem>
-                    <listitem>
-                        <para>A color</para>
-                    </listitem>
-                    <listitem>
-                        <para>A category</para>
-                        <para>Please see chapter
-                            <link linkend="core_security_acl">ACL's - Access Control Lists</link>
-                            for information about ACL categories in &Flexive;.
-                        </para>
-                        <para>The following categories are available:</para>
-                        <para>
-                            <itemizedlist>
-                                <listitem>
-                                    <link linkend="core_contents">Instance</link>
-                                </listitem>
-                                <listitem>
-                                    <link linkend="core_structure">Structure</link>
-                                </listitem>
-                                <listitem>
-                                    <link linkend="core_workflow">Workflow</link>
-                                </listitem>
-                                <listitem>
-                                    <link linkend="adm_query_editor_queries_briefcases">Briefcase</link>
-                                </listitem>
-                                <listitem>
-                                    <link linkend="adm_selectlists">SelectList</link>
-                                </listitem>
-                                <listitem>
-                                    <link linkend="adm_selectlists">SelectList Item</link>
-                                </listitem>
-                            </itemizedlist>
-                        </para>
-                    </listitem>
-                    <listitem>
-                        <para>An optional description</para>
-                    </listitem>
-                </orderedlist>
-            </para>
-            <para>
-                <mediaobject>
-                    <imageobject>
-                        <imagedata fileref="images/adm_ui_acl/acl_editor.png"
-                                   format="PNG" contentwidth="100%"/>
-                    </imageobject>
-                </mediaobject>
-            </para>
-            After pressing the "Create" button the permission matrix becomes available.
-        </section>
-        <section xml:id="adm_acl_permission_matrix">
-            <title>The permission matrix</title>
-            <para>The permission matrix is available in the ACL editor for already created ACLs.
-                Add rows to assign the ACL to user groups
-                and toggle the checkboxes in the matrix to grant permissions.
-                For deleting an assignment to a user group the delete icon needs to be clicked.
-            </para>
-            <para>
-                <mediaobject>
-                    <imageobject>
-                        <imagedata fileref="images/adm_ui_acl/acl_editor_saved.png"
-                                   format="PNG" contentwidth="100%"/>
-                    </imageobject>
-                </mediaobject>
-            </para>
-            <para>
-                In this example the user group
-                <emphasis>Everyone</emphasis>
-                (a user group automatically containing every user)
-                has read permissions on content instances using this ACL.
-                Users that are a member of the user group
-                <emphasis>Account Managers</emphasis>
-                have read and edit permission on content instances using this ACL.
-                (please note that
-                <emphasis>Account Managers</emphasis>
-                would already have read permission anyway
-                due to their membership to user group
-                <emphasis>Everyone</emphasis>
-                but we added read permission here in case someone decides to remove group
-                <emphasis>Everyone</emphasis>
-                from this ACL at a later date and we still want to keep the read permission).
-                Members of the user group
-                <emphasis>Editors</emphasis>
-                may additionally create, delete and export content instances using this ACL.
-            </para>
-        </section>
-        <section xml:id="adm_acl_overview">
-            <title>The ACL overview</title>
-            <para>On the following screen you can see the default ACLs for each
-                <link linkend="adm_ACL_create">category</link>
-                and a user defined ACL (myacl).
-            </para>
-            <para>You can switch between different mandators with the select box on top of the list.</para>
-            <para>
-                <mediaobject>
-                    <imageobject>
-                        <imagedata fileref="images/adm_ui_acl/acl_overview.png"
-                                   format="PNG" contentwidth="100%"/>
-                    </imageobject>
-                </mediaobject>
-            </para>
-            <para>
-            By clicking the edit icon
-                <inlinemediaobject>
-                    <imageobject>
-                        <imagedata fileref="images/adm_ui_acl/edit.png"
-                                   format="PNG" contentwidth="100%"/>
-                    </imageobject>
-                </inlinemediaobject>
-                an ACL be edited and by clicking the delete icon
-                <inlinemediaobject>
-                    <imageobject>
-                        <imagedata fileref="images/adm_ui_acl/delete.png"
-                                   format="PNG" contentwidth="100%"/>
-                    </imageobject>
-                </inlinemediaobject>
-                an ACL may be deleted.
-            </para>
-        </section>
-    </section>
-
-    <section xml:id="adm_workflow">
-        <title>Workflow administration</title>
-        <para>The &Flexive; workflow administration UI allows you to define
-            <link linkend="adm_workfow_step_definition">step definitions</link>
-            and workflows. Step definitions
-            are used as steps in one or more workflows. You can define
-            <link linkend="core_workflow_overview">routes</link>
-            between these steps.
-            See the core component chapter
-            <link linkend="core_workflow">Workflow Engine</link>
-            for additional information about workflows in &Flexive;.
-        </para>
-        <section xml:id="adm_workfow_step_definition">
-            <title>Step definitions</title>
-            <para>In order to create a step the step's name and label are required. You may decide
-                to allow only one content version in the step. See
-                <link linkend="core_workflow_overview">unique target</link> for more details
-                about this concept.
-            </para>
-            <para>
-                <mediaobject>
-                    <imageobject>
-                        <imagedata fileref="images/adm_ui_workflow/create_step_def.png"
-                                   format="PNG" contentwidth="100%"/>
-                    </imageobject>
-                </mediaobject>
-            </para>
-        </section>
-        <section xml:id="adm_workfow_step_definition_overview">
-            <title>Step definition overview</title>
-            <para>Existing workflow steps may be edited and deleted via
-                the step definition overview.</para>
-            <para>
-                <mediaobject>
-                    <imageobject>
-                        <imagedata fileref="images/adm_ui_workflow/step_def_overview.png"
-                                   format="PNG" contentwidth="100%"/>
-                    </imageobject>
-                </mediaobject>
-            </para>
-        </section>
-        <section xml:id="adm_workflow_create">
-            <title>Creating a workflow</title>
-            <para>In order to create a workflow a name is required
-                and an optional description may be added.</para>
-            <para>
-                <mediaobject>
-                    <imageobject>
-                        <imagedata fileref="images/adm_ui_workflow/create_workflow.png"
-                                   format="PNG" contentwidth="100%"/>
-                    </imageobject>
-                </mediaobject>
-            </para>
-            <para>After the creation of a workflow, the workflow editor is
-                opened automatically.
-            </para>
-        </section>
-        <section xml:id="adm_workflow_edit">
-            <title>Editing a workflow</title>
-            <para>The basic elements of a workflow are:</para>
-            <para>
-                <variablelist>
-                    <varlistentry>
-                        <listitem>
-                            <para>
-                                Steps: Previously defined steps definitions
-                                may be used as steps in a workflow. Each step needs
-                                an ACL of category workflow assigned to it. See
-                                <link linkend="adm_ACL_create">workflow ACL</link> for
-                                details about ACL creation.
-                            </para>
-                        </listitem>
-                        <listitem>
-                            <para>Routes:
-                                Routes define the possible transitions from one workflow step
-                                to another. Each route must have a
-                                <link linkend="adm_user_group">user group</link>
-                                assigned representing users who may perform this transition.
-                            </para>
-                        </listitem>
-                    </varlistentry>
-                </variablelist>
-            </para>
-            <para>
-                <mediaobject>
-                    <imageobject>
-                        <imagedata fileref="images/adm_ui_workflow/edit_workflow.png"
-                                   format="PNG" contentwidth="100%"/>
-                    </imageobject>
-                </mediaobject>
-            </para>
-            <para>The following diagram illustrates the routes defined in the example workflow
-                displayed on the screenshot.</para>
-            <para>
-                <mediaobject>
-                    <imageobject>
-                        <imagedata fileref="images/adm_ui_workflow/workflow_routes.png"
-                                   format="PNG" contentwidth="100%"/>
-                    </imageobject>
-                </mediaobject>
-            </para>
-        </section>
-        <section xml:id="adm_workflow_overview">
-            <title>The workflow overview</title>
-            <para>Via the workflow overview existing workflows can be edited or deleted.
-                Mind that you cannot delete workflows which are already in use.
-            </para>
-            <para>
-                <mediaobject>
-                    <imageobject>
-                        <imagedata fileref="images/adm_ui_workflow/workflow_overview.png"
-                                   format="PNG" contentwidth="100%"/>
-                    </imageobject>
-                </mediaobject>
-            </para>
-        </section>
-    </section>
-    <section xml:id="adm_scripts">
-        <title>Script administration</title>
-        The &Flexive; script administration allows you to create and edit scripts via the script editor
-        and to execute
-        scripts directly in the
-        <link linkend="adm_scripts_console">script console</link>. The scripting language of
-        choice is Groovy, but if JavaSE 6 or higher is
-        used any language supported by the Java Scripting API can be used. Please see the section
-        <link linkend="core_scripting">Scripting Engine</link>
-        for more information about scripting in &Flexive;.
-        <section xml:id="adm_scripts_create">
-            <title>Creating a script</title>
-            <para>Before a script can be created a valid name is required. After a valid name has been
-                provided in the "Name" text field, the script editor and the additional buttons become
-                available. A script requires a script event and of course some code.
-            </para>
-            <para>
-                <mediaobject>
-                    <imageobject>
-                        <imagedata fileref="images/adm_ui_scripts/create_script.png"
-                                   format="PNG" contentwidth="100%"/>
-                    </imageobject>
-                </mediaobject>
-            </para>
-            <para>If the default script event is set to
-                <code>Manual</code>, the script can be directly
-                executed via the "Run script" button or via the
-                administration UI in the
-                <link linkend="adm_scripts_overview">script overview</link>.
-            </para>
-            <para>The "Syntax check" button is available for all Groovy scripts (checking for a
-                .gy or .groovy extension. The "Add default imports" adds the most commonly used
-                &flexive; classes to the import statements of the script.
-            </para>
-            <para>
-                <table class="flexive" xml:id="script_event_list">
-                    <caption>FxScriptEvent list</caption>
-                    <thead>
-                        <tr>
-                            <th colspan="3">List of available events</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>
-                                <itemizedlist>
-                                    <listitem>
-                                        <code>Manual</code>
-                                    </listitem>
-                                </itemizedlist>
-                                <itemizedlist>
-                                    <listitem>
-                                        <code>BeforeContentSave</code>
-                                    </listitem>
-                                    <listitem>
-                                        <code>AfterContentSave</code>
-                                    </listitem>
-                                    <listitem>
-                                        <code>BeforeContentCreate</code>
-                                    </listitem>
-                                    <listitem>
-                                        <code>AfterContentCreate</code>
-                                    </listitem>
-                                </itemizedlist>
-                                <itemizedlist>
-                                    <listitem>
-                                        <code>BeforeContentRemove</code>
-                                    </listitem>
-                                    <listitem>
-                                        <code>AfterContentRemove</code>
-                                    </listitem>
-                                    <listitem>
-                                        <code>AfterContentLoad</code>
-                                    </listitem>
-                                    <listitem>
-                                        <code>AfterContentInitialize</code>
-                                    </listitem>
-                                    <listitem>
-                                        <code>PrepareContentCreate</code>
-                                    </listitem>
-                                    <listitem>
-                                        <code>PrepareContentSave</code>
-                                    </listitem>
-                                </itemizedlist>
-                            </td>
-                            <td>
-                                <itemizedlist>
-                                    <listitem>
-                                        <code>BeforeDataChangeUpdate</code>
-                                    </listitem>
-                                    <listitem>
-                                        <code>AfterDataChangeUpdate</code>
-                                    </listitem>
-                                    <listitem>
-                                        <code>BeforeDataChangeDelete</code>
-                                    </listitem>
-                                    <listitem>
-                                        <code>AfterDataChangeDelete</code>
-                                    </listitem>
-                                    <listitem>
-                                        <code>BeforeDataChangeAdd</code>
-                                    </listitem>
-                                    <listitem>
-                                        <code>AfterDataChangeAdd</code>
-                                    </listitem>
-                                </itemizedlist>
-                                <itemizedlist>
-                                    <listitem>
-                                        <code>BeforeAssignmentDataCreate</code>
-                                    </listitem>
-                                    <listitem>
-                                        <code>AfterAssignmentDataCreate</code>
-                                    </listitem>
-                                    <listitem>
-                                        <code>BeforeAssignmentDataSave</code>
-                                    </listitem>
-                                    <listitem>
-                                        <code>AfterAssignmentDataSave</code>
-                                    </listitem>
-                                    <listitem>
-                                        <code>BeforeAssignmentDataDelete</code>
-                                    </listitem>
-                                    <listitem>
-                                        <code>AfterAssignmentDataDelete</code>
-                                    </listitem>
-                                </itemizedlist>
-                            </td>
-                            <td>
-                                <itemizedlist>
-                                    <listitem>
-                                        <code>BinaryPreviewProcess</code>
-                                    </listitem>
-                                    <listitem>
-                                        <code>AfterAccountCreate</code>
-                                    </listitem>
-                                    <listitem>
-                                        <code>AfterTreeNodeAdded</code>
-                                    </listitem>
-                                    <listitem>
-                                        <code>AfterTreeNodeRemoved</code>
-                                    </listitem>
-                                    <listitem>
-                                        <code>BeforeTreeNodeRemoved</code>
-                                    </listitem>
-                                    <listitem>
-                                        <code>AfterTreeNodeActivated</code>
-                                    </listitem>
-                                </itemizedlist>
-                                <itemizedlist>
-                                    <listitem>
-                                        <code>BeforeTreeNodeActivated</code>
-                                    </listitem>
-                                    <listitem>
-                                        <code>AfterTreeNodeFolderReplacement</code>
-                                    </listitem>
-                                </itemizedlist>
-                                <itemizedlist>
-                                    <listitem>
-                                        <code>AccountLogin</code>
-                                    </listitem>
-                                    <listitem>
-                                        <code>AccountLogout</code>
-                                    </listitem>
-                                    <listitem>
-                                        <code>AfterAccountCreate</code>
-                                    </listitem>
-                                </itemizedlist>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </para>
-        </section>
-        <section xml:id="adm_scripts_overview">
-            <title>The script overview</title>
-            <para>The following screen shows the script overview. You can see the script
-                <filename>myscript.groovy</filename> at the bottom of the table
-                , which can be executed manually via the administration UI,
-                and other scripts, bound to different
-                <link linkend="script_event_list">events</link>.
-            </para>
-            <para>
-                <mediaobject>
-                    <imageobject>
-                        <imagedata fileref="images/adm_ui_scripts/script_overview.png"
-                                   format="PNG" contentwidth="100%"/>
-                    </imageobject>
-                </mediaobject>
-            </para>
-            <para>
-                By clicking the edit icon
-                    <inlinemediaobject>
-                        <imageobject>
-                            <imagedata fileref="images/adm_ui_scripts/edit.png"
-                                       format="PNG" contentwidth="100%"/>
-                        </imageobject>
-                    </inlinemediaobject>
-                    a script may be edited and by clicking the delete icon
-                    <inlinemediaobject>
-                        <imageobject>
-                            <imagedata fileref="images/adm_ui_scripts/delete.png"
-                                       format="PNG" contentwidth="100%"/>
-                        </imageobject>
-                    </inlinemediaobject>
-                    a script may be deleted.
-            </para>
-        </section>
-        <section xml:id="adm_scripts_console">
-            <title>The Script Console</title>
-            <para>The following screen shows the &Flexive; Script console. It allows you to execute scripts directly
-                at the EJB layer or at the Web layer.
-            </para>
-            <para>
-                <mediaobject>
-                    <imageobject>
-                        <imagedata fileref="images/adm_ui_scripts/script_console.png"
-                                   format="PNG" contentwidth="100%"/>
-                    </imageobject>
-                </mediaobject>
-            </para>
-            <para>You can choose between the following languages and file extensions:</para>
-                <itemizedlist>
-                    <listitem>
-                        <code>gy: Groovy v1.5.1 (Bundled GroovyShell v1.5.1)</code>
-                    </listitem>
-                    <listitem>
-                        <code>groovy: Groovy v1.5.1 (Bundled GroovyShell v1.5.1)</code>
-                    </listitem>
-                    <listitem>
-                        <code>js: ECMAScript v1.6 (Mozilla Rhino v1.6 release 2)</code>
-                    </listitem>
-                </itemizedlist>
-            <para>If you want to execute the script on the web layer, check the option
-                <code>Execute at Web layer</code>.
-                Mind that this feature is only available for bundled Groovy!
-                Buttons to add the most used &flexive; imports and to check the syntax are
-                available as well.
-            </para>
-            <section>
-                <title>Script example</title>
-                <para>The Groovy code in this example creates a new tree node in the
-                    <link linkend="adm_content_tree_modes">Edit tree</link>
-                    of the
-                    <link linkend="adm_content_tree">Content Tree</link>. The
-                    node's name is
-                    <code>NodeName</code> and its label <code>NodeLabel</code>.
-                </para>
-                <para>You might want to copy paste the example and try it out. Don't forget
-                    to refresh the content tree to view the results!
+            <section xml:id="adm_user_create_user">
+                <title>Creating a user</title>
+                <para>The following screen shows the user account editor when creating a new user.</para>
+                <para>
+                    Roles are a key feature of the &Flexive;
+                    <link linkend="core_security">security concept</link>.
+                    There are two ways to assign roles to a user.
                 </para>
                 <para>
-                    <xi:include href="listings/adm_scripts_console_example.xml"></xi:include>
+                    <orderedlist>
+                        <listitem>Direct assignment</listitem>
+                        <listitem>Inheritance through user group membership</listitem>
+                    </orderedlist>
+                </para>
+                <para>
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata fileref="images/adm_ui_user/create_user.png"
+                                       format="PNG" contentwidth="100%"/>
+                        </imageobject>
+                    </mediaobject>
+                </para>
+                <para>After creation, you will be redirected to the user account overview where you can edit and delete
+                    users.
+                </para>
+            </section>
+            <section xml:id="adm_user_overview">
+                <title>The user account overview</title>
+                <para>The following screen shows the user group overview.</para>
+                <para>
+                    You can see the two system defined accounts:
+                    <variablelist>
+                        <varlistentry>
+                            <term>Guest</term>
+                            <listitem>
+                                <para>Everyone who is not logged in is treated as guest.</para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>SUPERVISOR</term>
+                            <listitem>
+                                <para>This user is in all roles and may operate on all mandators.</para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                    These two accounts cannot be removed.
+                </para>
+                <para>
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata fileref="images/adm_ui_user/user_overview.png"
+                                       format="PNG" contentwidth="100%"/>
+                        </imageobject>
+                    </mediaobject>
+                    By clicking the edit icon
+                    <inlinemediaobject>
+                        <imageobject>
+                            <imagedata fileref="images/adm_ui_user/edit.png"
+                                       format="PNG" contentwidth="100%"/>
+                        </imageobject>
+                    </inlinemediaobject>
+                    a user account may be edited and by clicking the delete icon
+                    <inlinemediaobject>
+                        <imageobject>
+                            <imagedata fileref="images/adm_ui_user/delete.png"
+                                       format="PNG" contentwidth="100%"/>
+                        </imageobject>
+                    </inlinemediaobject>
+                    a user account may be deleted.
                 </para>
             </section>
         </section>
-    </section>
-    <section xml:id="adm_selectlists">
-        <title>Select list administration</title>
-        The &Flexive;
-        <link linkend="core_structure_selectlists">select list</link>
-        administration allows you to create, edit and delete select lists.
-        <section xml:id="adm_selectlists_create">
-            <title>Creating a select list</title>
-            <para>A select list requires a unique name, an ACL that controls the permissions for users
-                regarding creating and deleting select list items (Create items ACL) and
-                an ACL which is assigned to newly created select list items per default
-                (ACL for new items).
-            </para>
-            <para>
-                Providing a label, description allowing
-                <link linkend="core_structure_selectlist_parameters">dynamic item creation</link>,
-                specifying the breadcrumb separator and confining select item multi-selection
-                to the same level is optional.
+        <section xml:id="adm_user_group">
+            <title>User group administration</title>
+            <para>The user group editor allows you to create and edit user groups.
+                You can specify a group name, a color and
+                assign roles to the group.
             </para>
             <para>
                 <mediaobject>
                     <imageobject>
-                        <imagedata fileref="images/adm_ui_selectlists/create_selectlist.png"
+                        <imagedata fileref="images/adm_ui_user_groups/usergroup_editor.png"
+                                   format="PNG" contentwidth="100%"/>
+                    </imageobject>
+                </mediaobject>
+            </para>
+            After saving you will be redirected to the user group overview.
+            <section xml:id="adm_user_group_overview">
+                <title>The user group overview</title>
+                <para>The following screen shows the user account overview.
+                    The default system user groups cannot be deleted:
+                    <variablelist>
+                        <varlistentry>
+                            <term>Everyone (Default)</term>
+                            <listitem>
+                                <para>For every
+                                    <link linkend="adm_mandator">mandator</link>
+                                    an according "Everyone" group is created automatically.
+                                    In order to be able to distinguish the different "Everyone" groups,
+                                    the mandator's name is shown in the brackets. The "Everyone(Default)" group
+                                    contains every user of the mandator named
+                                    <emphasis>
+                                        Default
+                                    </emphasis>
+                                    .
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>Everyone</term>
+                            <listitem>
+                                <para>System user group containing every user of every mandator.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                        <varlistentry>
+                            <term>Owner</term>
+                            <listitem>
+                                <para>The system user group <filename>Owner</filename> is used to assign ACLs and thereby grant permissions
+                                    to content owners (i.e. users that created content).
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                </para>
+                <para>
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata fileref="images/adm_ui_user_groups/usergroup_overview.png"
+                                       format="PNG" contentwidth="100%"/>
+                        </imageobject>
+                    </mediaobject>
+                    By clicking the edit icon
+                    <inlinemediaobject>
+                        <imageobject>
+                            <imagedata fileref="images/adm_ui_user_groups/edit.png"
+                                       format="PNG" contentwidth="100%"/>
+                        </imageobject>
+                    </inlinemediaobject>
+                    a user group may be edited and by clicking the delete icon
+                    <inlinemediaobject>
+                        <imageobject>
+                            <imagedata fileref="images/adm_ui_user_groups/delete.png"
+                                       format="PNG" contentwidth="100%"/>
+                        </imageobject>
+                    </inlinemediaobject>
+                    a user group may be deleted.
+                </para>
+            </section>
+        </section>
+        <section xml:id="adm_mandator">
+            <title>Mandator administration</title>
+            <para>This chapter explains the administration UI for mandators. Please see section
+                <link linkend="core_security_mandators">Mandators</link>
+                in chapter
+                <link linkend="core_security">Security</link>
+                for an explanation of the concept of mandators used in &Flexive;.
+            </para>
+            <section xml:id="adm_mandator_create">
+                <title>Creating a mandator</title>
+                <para>The following screen shows the mandator editor. You can specify a name for the mandator and set the
+                    activation flag.
+                </para>
+                <para>
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata fileref="images/adm_ui_mandator/mandator_editor.png"
+                                       format="PNG" contentwidth="100%"/>
+                        </imageobject>
+                    </mediaobject>
+                </para>
+                After creating a mandator, you will be redirected to the overview for mandators.
+            </section>
+            <section xml:id="adm_mandator_overview">
+                <title>The mandator overview</title>
+                <para>In the mandator overview mandators can be edited and deleted.</para>
+                <para>In the following screen you can see the mandator named
+                    <emphasis>Default</emphasis>.
+                </para>
+                <para>
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata fileref="images/adm_ui_mandator/mandator_overview.png"
+                                       format="PNG" contentwidth="100%"/>
+                        </imageobject>
+                    </mediaobject>
+                </para>
+            </section>
+        </section>
+        <section xml:id="adm_ACL">
+            <title>ACL administration</title>
+            <para>The ACL administration UI provides an ACL editor to edit
+                and create ACLs and to set permissions for
+                <link linkend="adm_user_group">user groups
+                </link>
+                in the permission matrix. ACLs are a key feature of the &Flexive;
+                <link linkend="core_security">security concept</link>.
+            </para>
+            <section xml:id="adm_ACL_create">
+                <title>Creating an ACL</title>
+                <para>The following screen shows the ACL editor in create mode.</para>
+                <para>
+                    You must specify
+                    <orderedlist>
+                        <listitem>
+                            <para>The
+                                <link linkend="adm_mandator">mandator</link>
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>The ACL's name</para>
+                        </listitem>
+                        <listitem>
+                            <para>The ACL's label</para>
+                        </listitem>
+                        <listitem>
+                            <para>A color</para>
+                        </listitem>
+                        <listitem>
+                            <para>A category</para>
+                            <para>Please see chapter
+                                <link linkend="core_security_acl">ACL's - Access Control Lists</link>
+                                for information about ACL categories in &Flexive;.
+                            </para>
+                            <para>The following categories are available:</para>
+                            <para>
+                                <itemizedlist>
+                                    <listitem>
+                                        <link linkend="core_contents">Instance</link>
+                                    </listitem>
+                                    <listitem>
+                                        <link linkend="core_structure">Structure</link>
+                                    </listitem>
+                                    <listitem>
+                                        <link linkend="core_workflow">Workflow</link>
+                                    </listitem>
+                                    <listitem>
+                                        <link linkend="adm_query_editor_queries_briefcases">Briefcase</link>
+                                    </listitem>
+                                    <listitem>
+                                        <link linkend="adm_selectlists">SelectList</link>
+                                    </listitem>
+                                    <listitem>
+                                        <link linkend="adm_selectlists">SelectList Item</link>
+                                    </listitem>
+                                </itemizedlist>
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>An optional description</para>
+                        </listitem>
+                    </orderedlist>
+                </para>
+                <para>
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata fileref="images/adm_ui_acl/acl_editor.png"
+                                       format="PNG" contentwidth="100%"/>
+                        </imageobject>
+                    </mediaobject>
+                </para>
+                After pressing the "Create" button the permission matrix becomes available.
+            </section>
+            <section xml:id="adm_acl_permission_matrix">
+                <title>The permission matrix</title>
+                <para>The permission matrix is available in the ACL editor for already created ACLs.
+                    Add rows to assign the ACL to user groups
+                    and toggle the checkboxes in the matrix to grant permissions.
+                    For deleting an assignment to a user group the delete icon needs to be clicked.
+                </para>
+                <para>
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata fileref="images/adm_ui_acl/acl_editor_saved.png"
+                                       format="PNG" contentwidth="100%"/>
+                        </imageobject>
+                    </mediaobject>
+                </para>
+                <para>
+                    In this example the user group
+                    <emphasis>Everyone</emphasis>
+                    (a user group automatically containing every user)
+                    has read permissions on content instances using this ACL.
+                    Users that are a member of the user group
+                    <emphasis>Account Managers</emphasis>
+                    have read and edit permission on content instances using this ACL.
+                    (please note that
+                    <emphasis>Account Managers</emphasis>
+                    would already have read permission anyway
+                    due to their membership to user group
+                    <emphasis>Everyone</emphasis>
+                    but we added read permission here in case someone decides to remove group
+                    <emphasis>Everyone</emphasis>
+                    from this ACL at a later date and we still want to keep the read permission).
+                    Members of the user group
+                    <emphasis>Editors</emphasis>
+                    may additionally create, delete and export content instances using this ACL.
+                </para>
+            </section>
+            <section xml:id="adm_acl_overview">
+                <title>The ACL overview</title>
+                <para>On the following screen you can see the default ACLs for each
+                    <link linkend="adm_ACL_create">category</link>
+                    and a user defined ACL (myacl).
+                </para>
+                <para>You can switch between different mandators with the select box on top of the list.</para>
+                <para>
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata fileref="images/adm_ui_acl/acl_overview.png"
+                                       format="PNG" contentwidth="100%"/>
+                        </imageobject>
+                    </mediaobject>
+                </para>
+                <para>
+                By clicking the edit icon
+                    <inlinemediaobject>
+                        <imageobject>
+                            <imagedata fileref="images/adm_ui_acl/edit.png"
+                                       format="PNG" contentwidth="100%"/>
+                        </imageobject>
+                    </inlinemediaobject>
+                    an ACL be edited and by clicking the delete icon
+                    <inlinemediaobject>
+                        <imageobject>
+                            <imagedata fileref="images/adm_ui_acl/delete.png"
+                                       format="PNG" contentwidth="100%"/>
+                        </imageobject>
+                    </inlinemediaobject>
+                    an ACL may be deleted.
+                </para>
+            </section>
+        </section>
+
+        <section xml:id="adm_workflow">
+            <title>Workflow administration</title>
+            <para>The &Flexive; workflow administration UI allows you to define
+                <link linkend="adm_workfow_step_definition">step definitions</link>
+                and workflows. Step definitions
+                are used as steps in one or more workflows. You can define
+                <link linkend="core_workflow_overview">routes</link>
+                between these steps.
+                See the core component chapter
+                <link linkend="core_workflow">Workflow Engine</link>
+                for additional information about workflows in &Flexive;.
+            </para>
+            <section xml:id="adm_workfow_step_definition">
+                <title>Step definitions</title>
+                <para>In order to create a step the step's name and label are required. You may decide
+                    to allow only one content version in the step. See
+                    <link linkend="core_workflow_overview">unique target</link> for more details
+                    about this concept.
+                </para>
+                <para>
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata fileref="images/adm_ui_workflow/create_step_def.png"
+                                       format="PNG" contentwidth="100%"/>
+                        </imageobject>
+                    </mediaobject>
+                </para>
+            </section>
+            <section xml:id="adm_workfow_step_definition_overview">
+                <title>Step definition overview</title>
+                <para>Existing workflow steps may be edited and deleted via
+                    the step definition overview.</para>
+                <para>
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata fileref="images/adm_ui_workflow/step_def_overview.png"
+                                       format="PNG" contentwidth="100%"/>
+                        </imageobject>
+                    </mediaobject>
+                </para>
+            </section>
+            <section xml:id="adm_workflow_create">
+                <title>Creating a workflow</title>
+                <para>In order to create a workflow a name is required
+                    and an optional description may be added.</para>
+                <para>
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata fileref="images/adm_ui_workflow/create_workflow.png"
+                                       format="PNG" contentwidth="100%"/>
+                        </imageobject>
+                    </mediaobject>
+                </para>
+                <para>After the creation of a workflow, the workflow editor is
+                    opened automatically.
+                </para>
+            </section>
+            <section xml:id="adm_workflow_edit">
+                <title>Editing a workflow</title>
+                <para>The basic elements of a workflow are:</para>
+                <para>
+                    <variablelist>
+                        <varlistentry>
+                            <listitem>
+                                <para>
+                                    Steps: Previously defined steps definitions
+                                    may be used as steps in a workflow. Each step needs
+                                    an ACL of category workflow assigned to it. See
+                                    <link linkend="adm_ACL_create">workflow ACL</link> for
+                                    details about ACL creation.
+                                </para>
+                            </listitem>
+                            <listitem>
+                                <para>Routes:
+                                    Routes define the possible transitions from one workflow step
+                                    to another. Each route must have a
+                                    <link linkend="adm_user_group">user group</link>
+                                    assigned representing users who may perform this transition.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+                    </variablelist>
+                </para>
+                <para>
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata fileref="images/adm_ui_workflow/edit_workflow.png"
+                                       format="PNG" contentwidth="100%"/>
+                        </imageobject>
+                    </mediaobject>
+                </para>
+                <para>The following diagram illustrates the routes defined in the example workflow
+                    displayed on the screenshot.</para>
+                <para>
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata fileref="images/adm_ui_workflow/workflow_routes.png"
+                                       format="PNG" contentwidth="100%"/>
+                        </imageobject>
+                    </mediaobject>
+                </para>
+            </section>
+            <section xml:id="adm_workflow_overview">
+                <title>The workflow overview</title>
+                <para>Via the workflow overview existing workflows can be edited or deleted.
+                    Mind that you cannot delete workflows which are already in use.
+                </para>
+                <para>
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata fileref="images/adm_ui_workflow/workflow_overview.png"
+                                       format="PNG" contentwidth="100%"/>
+                        </imageobject>
+                    </mediaobject>
+                </para>
+            </section>
+        </section>
+        <section xml:id="adm_scripts">
+            <title>Script administration</title>
+            The &Flexive; script administration allows you to create and edit scripts via the script editor
+            and to execute
+            scripts directly in the
+            <link linkend="adm_scripts_console">script console</link>. The scripting language of
+            choice is Groovy, but if JavaSE 6 or higher is
+            used any language supported by the Java Scripting API can be used. Please see the section
+            <link linkend="core_scripting">Scripting Engine</link>
+            for more information about scripting in &Flexive;.
+            <section xml:id="adm_scripts_create">
+                <title>Creating a script</title>
+                <para>Before a script can be created a valid name is required. After a valid name has been
+                    provided in the "Name" text field, the script editor and the additional buttons become
+                    available. A script requires a script event and of course some code.
+                </para>
+                <para>
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata fileref="images/adm_ui_scripts/create_script.png"
+                                       format="PNG" contentwidth="100%"/>
+                        </imageobject>
+                    </mediaobject>
+                </para>
+                <para>If the default script event is set to
+                    <code>Manual</code>, the script can be directly
+                    executed via the "Run script" button or via the
+                    administration UI in the
+                    <link linkend="adm_scripts_overview">script overview</link>.
+                </para>
+                <para>The "Syntax check" button is available for all Groovy scripts (checking for a
+                    .gy or .groovy extension. The "Add default imports" adds the most commonly used
+                    &flexive; classes to the import statements of the script.
+                </para>
+                <para>
+                    <table class="flexive" xml:id="script_event_list">
+                        <caption>FxScriptEvent list</caption>
+                        <thead>
+                            <tr>
+                                <th colspan="3">List of available events</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <itemizedlist>
+                                        <listitem>
+                                            <code>Manual</code>
+                                        </listitem>
+                                    </itemizedlist>
+                                    <itemizedlist>
+                                        <listitem>
+                                            <code>BeforeContentSave</code>
+                                        </listitem>
+                                        <listitem>
+                                            <code>AfterContentSave</code>
+                                        </listitem>
+                                        <listitem>
+                                            <code>BeforeContentCreate</code>
+                                        </listitem>
+                                        <listitem>
+                                            <code>AfterContentCreate</code>
+                                        </listitem>
+                                    </itemizedlist>
+                                    <itemizedlist>
+                                        <listitem>
+                                            <code>BeforeContentRemove</code>
+                                        </listitem>
+                                        <listitem>
+                                            <code>AfterContentRemove</code>
+                                        </listitem>
+                                        <listitem>
+                                            <code>AfterContentLoad</code>
+                                        </listitem>
+                                        <listitem>
+                                            <code>AfterContentInitialize</code>
+                                        </listitem>
+                                        <listitem>
+                                            <code>PrepareContentCreate</code>
+                                        </listitem>
+                                        <listitem>
+                                            <code>PrepareContentSave</code>
+                                        </listitem>
+                                    </itemizedlist>
+                                </td>
+                                <td>
+                                    <itemizedlist>
+                                        <listitem>
+                                            <code>BeforeDataChangeUpdate</code>
+                                        </listitem>
+                                        <listitem>
+                                            <code>AfterDataChangeUpdate</code>
+                                        </listitem>
+                                        <listitem>
+                                            <code>BeforeDataChangeDelete</code>
+                                        </listitem>
+                                        <listitem>
+                                            <code>AfterDataChangeDelete</code>
+                                        </listitem>
+                                        <listitem>
+                                            <code>BeforeDataChangeAdd</code>
+                                        </listitem>
+                                        <listitem>
+                                            <code>AfterDataChangeAdd</code>
+                                        </listitem>
+                                    </itemizedlist>
+                                    <itemizedlist>
+                                        <listitem>
+                                            <code>BeforeAssignmentDataCreate</code>
+                                        </listitem>
+                                        <listitem>
+                                            <code>AfterAssignmentDataCreate</code>
+                                        </listitem>
+                                        <listitem>
+                                            <code>BeforeAssignmentDataSave</code>
+                                        </listitem>
+                                        <listitem>
+                                            <code>AfterAssignmentDataSave</code>
+                                        </listitem>
+                                        <listitem>
+                                            <code>BeforeAssignmentDataDelete</code>
+                                        </listitem>
+                                        <listitem>
+                                            <code>AfterAssignmentDataDelete</code>
+                                        </listitem>
+                                    </itemizedlist>
+                                </td>
+                                <td>
+                                    <itemizedlist>
+                                        <listitem>
+                                            <code>BinaryPreviewProcess</code>
+                                        </listitem>
+                                        <listitem>
+                                            <code>AfterAccountCreate</code>
+                                        </listitem>
+                                        <listitem>
+                                            <code>AfterTreeNodeAdded</code>
+                                        </listitem>
+                                        <listitem>
+                                            <code>AfterTreeNodeRemoved</code>
+                                        </listitem>
+                                        <listitem>
+                                            <code>BeforeTreeNodeRemoved</code>
+                                        </listitem>
+                                        <listitem>
+                                            <code>AfterTreeNodeActivated</code>
+                                        </listitem>
+                                    </itemizedlist>
+                                    <itemizedlist>
+                                        <listitem>
+                                            <code>BeforeTreeNodeActivated</code>
+                                        </listitem>
+                                        <listitem>
+                                            <code>AfterTreeNodeFolderReplacement</code>
+                                        </listitem>
+                                    </itemizedlist>
+                                    <itemizedlist>
+                                        <listitem>
+                                            <code>AccountLogin</code>
+                                        </listitem>
+                                        <listitem>
+                                            <code>AccountLogout</code>
+                                        </listitem>
+                                        <listitem>
+                                            <code>AfterAccountCreate</code>
+                                        </listitem>
+                                    </itemizedlist>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </para>
+            </section>
+            <section xml:id="adm_scripts_overview">
+                <title>The script overview</title>
+                <para>The following screen shows the script overview. You can see the script
+                    <filename>myscript.groovy</filename> at the bottom of the table
+                    , which can be executed manually via the administration UI,
+                    and other scripts, bound to different
+                    <link linkend="script_event_list">events</link>.
+                </para>
+                <para>
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata fileref="images/adm_ui_scripts/script_overview.png"
+                                       format="PNG" contentwidth="100%"/>
+                        </imageobject>
+                    </mediaobject>
+                </para>
+                <para>
+                    By clicking the edit icon
+                        <inlinemediaobject>
+                            <imageobject>
+                                <imagedata fileref="images/adm_ui_scripts/edit.png"
+                                           format="PNG" contentwidth="100%"/>
+                            </imageobject>
+                        </inlinemediaobject>
+                        a script may be edited and by clicking the delete icon
+                        <inlinemediaobject>
+                            <imageobject>
+                                <imagedata fileref="images/adm_ui_scripts/delete.png"
+                                           format="PNG" contentwidth="100%"/>
+                            </imageobject>
+                        </inlinemediaobject>
+                        a script may be deleted.
+                </para>
+            </section>
+            <section xml:id="adm_scripts_console">
+                <title>The Script Console</title>
+                <para>The following screen shows the &Flexive; Script console. It allows you to execute scripts directly
+                    at the EJB layer or at the Web layer.
+                </para>
+                <para>
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata fileref="images/adm_ui_scripts/script_console.png"
+                                       format="PNG" contentwidth="100%"/>
+                        </imageobject>
+                    </mediaobject>
+                </para>
+                <para>You can choose between the following languages and file extensions:</para>
+                    <itemizedlist>
+                        <listitem>
+                            <code>gy: Groovy v1.5.1 (Bundled GroovyShell v1.5.1)</code>
+                        </listitem>
+                        <listitem>
+                            <code>groovy: Groovy v1.5.1 (Bundled GroovyShell v1.5.1)</code>
+                        </listitem>
+                        <listitem>
+                            <code>js: ECMAScript v1.6 (Mozilla Rhino v1.6 release 2)</code>
+                        </listitem>
+                    </itemizedlist>
+                <para>If you want to execute the script on the web layer, check the option
+                    <code>Execute at Web layer</code>.
+                    Mind that this feature is only available for bundled Groovy!
+                    Buttons to add the most used &flexive; imports and to check the syntax are
+                    available as well.
+                </para>
+                <section>
+                    <title>Script example</title>
+                    <para>The Groovy code in this example creates a new tree node in the
+                        <link linkend="adm_content_tree_modes">Edit tree</link>
+                        of the
+                        <link linkend="adm_content_tree">Content Tree</link>. The
+                        node's name is
+                        <code>NodeName</code> and its label <code>NodeLabel</code>.
+                    </para>
+                    <para>You might want to copy paste the example and try it out. Don't forget
+                        to refresh the content tree to view the results!
+                    </para>
+                    <para>
+                        <xi:include href="listings/adm_scripts_console_example.xml"></xi:include>
+                    </para>
+                </section>
+            </section>
+        </section>
+        <section xml:id="adm_selectlists">
+            <title>Select list administration</title>
+            The &Flexive;
+            <link linkend="core_structure_selectlists">select list</link>
+            administration allows you to create, edit and delete select lists.
+            <section xml:id="adm_selectlists_create">
+                <title>Creating a select list</title>
+                <para>A select list requires a unique name, an ACL that controls the permissions for users
+                    regarding creating and deleting select list items (Create items ACL) and
+                    an ACL which is assigned to newly created select list items per default
+                    (ACL for new items).
+                </para>
+                <para>
+                    Providing a label, description allowing
+                    <link linkend="core_structure_selectlist_parameters">dynamic item creation</link>,
+                    specifying the breadcrumb separator and confining select item multi-selection
+                    to the same level is optional.
+                </para>
+                <para>
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata fileref="images/adm_ui_selectlists/create_selectlist.png"
+                                       format="PNG" contentwidth="100%"/>
+                        </imageobject>
+                    </mediaobject>
+                </para>
+                <para>
+                    After the user presses the "Create" button the select list is created and
+                    new select items may be added.
+                </para>
+            </section>
+            <section xml:id="adm_selectlists_edit">
+                <title>Editing a select list and its select items</title>
+                <para>A select list consists of
+                    <link linkend="core_structure_selectlist_item_parameters">select list items</link>
+                    . The select list editor allows you to add and delete
+                    select list items. The user can only add items to select lists after it has
+                    been created.
+                </para>
+                <para>
+                    A select list item requires a name, a label and an ACL of category
+                    <code>SelectList Item</code>.
+                    Additionally <code>String</code> data may be stored within the select item
+                    a color may be selected to improve GUI display and already created select items
+                    may be assigned as sub-elements of this select item. Select items are created by
+                    pressing the "Create new item" button.
+                </para>
+                <para>
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata fileref="images/adm_ui_selectlists/create_selectitem.png"
+                                       format="PNG" contentwidth="100%"/>
+                        </imageobject>
+                    </mediaobject>
+                </para>
+                <para>
+                    Existing select items may be modified (edit icon),
+                    repositioned within the select list (up and down arrows) and deleted.
+                </para>
+            </section>
+            <section xml:id="adm_selectlists_overview">
+                <title>Select list overview</title>
+                <para>
+                    The select list overview displays all existing select list and
+                    enables the user to edit, delete and create new select lists.
+                </para>
+                <para>
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata fileref="images/adm_ui_selectlists/overview_selectlist.png"
+                                       format="PNG" contentwidth="100%"/>
+                        </imageobject>
+                    </mediaobject>
+                </para>
+            </section>
+        </section>
+        <section xml:id="adm_export_import">
+            <title>Export and Import of Structures and Division</title>
+            <para>The import and export of structures is already described in
+                <xref linkend="adm_structure_export_import"/>.
+                Additionally the Administration GUI provides the possibility to
+                export and import whole divisions.
+            </para>
+            <para>
+                 <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="images/adm_ui_import_export/division_import_export.png"
                                    format="PNG" contentwidth="100%"/>
                     </imageobject>
                 </mediaobject>
             </para>
             <para>
-                After the user presses the "Create" button the select list is created and
-                new select items may be added.
-            </para>
-        </section>
-        <section xml:id="adm_selectlists_edit">
-            <title>Editing a select list and its select items</title>
-            <para>A select list consists of
-                <link linkend="core_structure_selectlist_item_parameters">select list items</link>
-                . The select list editor allows you to add and delete
-                select list items. The user can only add items to select lists after it has
-                been created.
+                In order to export a division, a file name (including full path) has to be provided
+                and the "Export" button needs to be pressed. The division export creates
+                a .ZIP file using the given file name containing all division data.
+                Note: If only a file name (without path) is specified, the file is created in the
+                current working directory.
+                After a successful division export the user feedback displays the the exact path of the
+                export file.
             </para>
             <para>
-                A select list item requires a name, a label and an ACL of category
-                <code>SelectList Item</code>.
-                Additionally <code>String</code> data may be stored within the select item
-                a color may be selected to improve GUI display and already created select items
-                may be assigned as sub-elements of this select item. Select items are created by
-                pressing the "Create new item" button.
+                In order to import a division, the file name of the export .ZIP file has to be specified
+                and the "Examine" button has to be pressed. After pressing the "Examine" button
+                information about the exported division is displayed.
             </para>
             <para>
                 <mediaobject>
                     <imageobject>
-                        <imagedata fileref="images/adm_ui_selectlists/create_selectitem.png"
+                        <imagedata fileref="images/adm_ui_import_export/division_examine_import.png"
                                    format="PNG" contentwidth="100%"/>
                     </imageobject>
                 </mediaobject>
             </para>
             <para>
-                Existing select items may be modified (edit icon),
-                repositioned within the select list (up and down arrows) and deleted.
+                Now the user can import the division by pressing the "Import" button.
             </para>
         </section>
-        <section xml:id="adm_selectlists_overview">
-            <title>Select list overview</title>
-            <para>
-                The select list overview displays all existing select list and
-                enables the user to edit, delete and create new select lists.
+        <section xml:id="adm_system">
+            <title>System administration</title>
+            <para>The System administration contains on the one hand tools that
+                display and allow to modify system settings and configuration
+                and on the other hand tools that simply don't fit in anywhere else.
             </para>
-            <para>
-                <mediaobject>
+             <para>
+                 <mediaobject>
                     <imageobject>
-                        <imagedata fileref="images/adm_ui_selectlists/overview_selectlist.png"
+                        <imagedata fileref="images/adm_ui_system/system_administration_overview.png"
                                    format="PNG" contentwidth="100%"/>
                     </imageobject>
                 </mediaobject>
             </para>
-        </section>
-    </section>
-    <section xml:id="adm_export_import">
-        <title>Export and Import of Structures and Division</title>
-        <para>The import and export of structures is already described in
-            <xref linkend="structure_export_import"/>.
-            Additionally the Administration GUI provides the possibility to
-            export and import whole divisions.
-        </para>
-        <para>
-             <mediaobject>
-                <imageobject>
-                    <imagedata fileref="images/adm_ui_import_export/division_import_export.png"
-                               format="PNG" contentwidth="100%"/>
-                </imageobject>
-            </mediaobject>
-        </para>
-        <para>
-            In order to export a division, a file name has to be specified and the "Export" button
-            needs to be pressed. The division export creates a .ZIP file containing all necessary
-            information and copies it to the working directory.
-            After a successful division export the user feedback displays the the exact path of the
-            export file.
-        </para>
-        <para>
-            In order to import a division, the file name of the export .ZIP file has to be specified
-            and the "Examine" button has to be pressed. After pressing the "Examine" button
-            information about the exported division is displayed.
-        </para>
-        <para>
-            <mediaobject>
-                <imageobject>
-                    <imagedata fileref="images/adm_ui_import_export/division_examine_import.png"
-                               format="PNG" contentwidth="100%"/>
-                </imageobject>
-            </mediaobject>
-        </para>
-        <para>
-            Now the user can import the division by pressing the "Import" button.
-        </para>
-    </section>
-    <section xml:id="adm_system">
-        <title>System administration</title>
-        <para>The System administration contains on the one hand tools that
-            display and allow to modify system settings and configuration
-            and on the other hand tools that simply don't fit in anywhere else.
-        </para>
-         <para>
-             <mediaobject>
-                <imageobject>
-                    <imagedata fileref="images/adm_ui_system/system_administration_overview.png"
-                               format="PNG" contentwidth="100%"/>
-                </imageobject>
-            </mediaobject>
-        </para>
-        <para>
-            The available tools are described in the following sub-sections.
-        </para>
-        <section xml:id="adm_system_search">
-            <title>Search settings</title>
             <para>
-                The search settings provide three tools:
+                The available tools are described in the following sub-sections.
+            </para>
+            <section xml:id="adm_system_search">
+                <title>Search settings</title>
+                <para>
+                    The search settings provide three tools:
+                    <itemizedlist>
+                        <listitem>
+                            <para>
+                                &fxsql; Query: The &fxsql; GUI provides a text area where the user may
+                                submit <link linkend="core_search">FxSQL</link> queries and
+                                optionally create  <link linkend="adm_query_editor_queries_briefcases">briefcases</link>.
+                                <mediaobject>
+                                    <imageobject>
+                                        <imagedata fileref="images/adm_ui_system/fxsql_query.png"
+                                                   format="PNG" contentwidth="100%"/>
+                                    </imageobject>
+                                </mediaobject>
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                Default query: Allows the definition of a system-wide default query for &flexive;
+                                backend users using the <link linkend="adm_query_editor">query editor</link>.
+                            </para>
+                        </listitem>
+                         <listitem>
+                            <para>
+                                Default result preferences: Allows a fine grained control about what properties
+                                and in which order properties are displayed when searching for a content type.
+                               <mediaobject>
+                                    <imageobject>
+                                        <imagedata fileref="images/adm_ui_system/default_result_preferences.png"
+                                                   format="PNG" contentwidth="100%"/>
+                                    </imageobject>
+                                </mediaobject>
+                                For every existing content type the properties that should be displayed in a result set
+                                can be selected. Via the "Add entry" button properties can be selected, and their position
+                                can be changed using the arrow icons. Properties can be removed from the result set
+                                again using the trash can icon.
+                             </para>
+                             <para>
+                                Different property sets for different view types are supported. I.e. the user may choose
+                                to display certain properties in <code>Thumbnails</code>> mode and different properties
+                                in <code>List</code> mode.
+                            </para>
+                            <para>
+                                Different property sets for different search locations are also supported. The
+                                <link linkend="css_feature_userdefined">search location</link>
+                                is a parameter that can be supplied to a  &fxsql; search query in order to provide contextual
+                                information from which location the search was issued. In practice different search locations
+                                are used to display different property sets which can be customized:
+                                <itemizedlist>
+                                    <listitem>
+                                        <para>
+                                            Content results: Search location used by the &flexive; backend when searching for
+                                            contents.
+                                        </para>
+                                    </listitem>
+                                    <listitem>
+                                        <para>
+                                            Browse references popup: Search location used by the &flexive;
+                                            <link linkend="adm_instance_editor ">content instance
+                                            editor</link> for displaying referenced contents.
+                                        </para>
+                                    </listitem>
+                                    <listitem>
+                                        <para>
+                                            Default location: Fallback search location which is used when the search
+                                            location parameter is not set.
+                                        </para>
+                                    </listitem>
+                                </itemizedlist>
+                            </para>
+                        </listitem>
+                    </itemizedlist>
+                </para>
+            </section>
+            <section xml:id="adm_system_cmis_sql_query">
+                <title>CMIS SQL query</title>
+                <para>
+                    The CMIS SQL GUI provides a text input area for CMIS compatible SQL queries.
+                </para>
+            </section>
+            <section xml:id="adm_system_configuration">
+                <title>System Configuration</title>
+                <para>
+                    The System configuration allows the user to modify &flexive; system settings.
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata fileref="images/adm_ui_system/system_configuration.png"
+                                       format="PNG" contentwidth="100%"/>
+                        </imageobject>
+                    </mediaobject>
+                </para>
+                The configuration includes:
                 <itemizedlist>
                     <listitem>
                         <para>
-                            &fxsql; Query: The &fxsql; GUI provides a text area where the user may
-                            submit <link linkend="core_search">FxSQL</link> queries and
-                            optionally create  <link linkend="adm_query_editor_queries_briefcases">briefcases</link>.
-                            <mediaobject>
-                                <imageobject>
-                                    <imagedata fileref="images/adm_ui_system/fxsql_query.png"
-                                               format="PNG" contentwidth="100%"/>
-                                </imageobject>
-                            </mediaobject>
+                            Enable live tree: if this option is disabled, the user cannot switch to the
+                            <link linkend="adm_content_tree">live tree</link> in the
+                            <link linkend="adm_instance_editor">content instance editor</link>
+                            anymore. Note that the backend needs to be reloaded via the browser
+                            in order for changes to take effect!.
                         </para>
                     </listitem>
                     <listitem>
                         <para>
-                            Default query: Allows the definition of a system-wide default query for &flexive;
-                            backend users using the <link linkend="adm_query_editor">query editor</link>.
+                            Auto flatten assignments: automatically flatten assignments
+                            that can be stored in the flat storage (max. multiplicity &lt;= 1).
                         </para>
                     </listitem>
-                     <listitem>
+                    <listitem>
                         <para>
-                            Default result preferences: Allows a fine grained control about what properties
-                            and in which order properties are displayed when searching for a content type.
-                           <mediaobject>
-                                <imageobject>
-                                    <imagedata fileref="images/adm_ui_system/default_result_preferences.png"
-                                               format="PNG" contentwidth="100%"/>
-                                </imageobject>
-                            </mediaobject>
-                            For every existing content type the properties that should be displayed in a result set
-                            can be selected. Via the "Add entry" button properties can be selected, and their position
-                            can be changed using the arrow icons. Properties can be removed from the result set
-                            again using the trash can icon.
-                         </para>
-                         <para>
-                            Different property sets for different view types are supported. I.e. the user may choose
-                            to display certain properties in <code>Thumbnails</code>> mode and different properties
-                            in <code>List</code> mode.
+                            Export URL prefix: path used by the export servlet.
                         </para>
+                    </listitem>
+                    <listitem>
                         <para>
-                            Different property sets for different search locations are also supported. The
-                            <link linkend="css_feature_userdefined">search location</link>
-                            is a parameter that can be supplied to a  &fxsql; search query in order to provide contextual
-                            information from which location the search was issued. In practice different search locations
-                            are used to display different property sets which can be customized:
-                            <itemizedlist>
-                                <listitem>
-                                    <para>
-                                        Content results: Search location used by the &flexive; backend when searching for
-                                        contents.
-                                    </para>
-                                </listitem>
-                                <listitem>
-                                    <para>
-                                        Browse references popup: Search location used by the &flexive;
-                                        <link linkend="adm_instance_editor ">content instance
-                                        editor</link> for displaying referenced contents.
-                                    </para>
-                                </listitem>
-                                <listitem>
-                                    <para>
-                                        Default location: Fallback search location which is used when the search
-                                        location parameter is not set.
-                                    </para>
-                                </listitem>
-                            </itemizedlist>
+                            Store binary transit files in Database: if enabled, binary files are
+                            stored directly in the database during file upload, instead of the file
+                            system.
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                           Binary transit path: file system path to store binaries during file upload.
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                           Binary threshold: threshold in bytes to
+                            store binary files on the file system (instead of directly in the database)
+                            if exceeded.
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                           Binary preview threshold: threshold in bytes to
+                            store preview files on the file system (instead of directly in the database)
+                            if exceeded.
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                           Binary path: path to store binary files on the file system.
                         </para>
                     </listitem>
                 </itemizedlist>
-            </para>
-        </section>
-        <section xml:id="adm_system_cmis_sql_query">
-            <title>CMIS SQL query</title>
-            <para>
-                The CMIS SQL GUI provides a text input area for CMIS compatible SQL queries.
-            </para>
-        </section>
-        <section xml:id="adm_system_configuration">
-            <title>System Configuration</title>
-            <para>
-                The System configuration allows the user to modify &flexive; system settings.
-                <mediaobject>
+            </section>
+            <section xml:id="adm_system_parameters">
+                <title>System parameters</title>
+                <para>
+                    The system parameters GUI provides a generic view of all
+                    &flexive; system parameters grouped by scope.
+                    Some parameters
+                    can intentionally not be edited
+                    as either specialized GUIs for editing exist in the backend administration
+                    or they merely serve information purposes and don't impact system behavior.
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata fileref="images/adm_ui_system/system_paramters.png"
+                                       format="PNG" contentwidth="100%"/>
+                        </imageobject>
+                    </mediaobject>
+                </para>
+            </section>
+             <section xml:id="adm_lock_administration">
+                <title>Lock administration</title>
+                <para>
+                    The lock administration provides the possibility to search the system
+                    for locked instances and to remove or extend the locks.
+                </para>
+                 <para>
+                     The search offers the following refinements:
+                     <itemizedlist>
+                         <listitem>
+                             <para>
+                                Max. number of results:
+                                 Limit to the maximum number of returned search results.
+                             </para>
+                         </listitem>
+                         <listitem>
+                             <para>
+                                Account: The search results only contains locks belonging
+                                 to the specified user account.
+                             </para>
+                         </listitem>
+                         <listitem>
+                             <para>
+                                Type: The search result only contains locks of content instances
+                                 of the specified type
+                             </para>
+                         </listitem>
+                         <listitem>
+                             <para>
+                                Lock Type: The search result only contains locks of
+                                 the selected lock type.
+                             </para>
+                         </listitem>
+                     </itemizedlist>
+                     The locks within the search result can be selected to either remove
+                     (by pressing the "Unlock selected" button) or to extend (by pressing
+                     the "Extend selected" button) all selected locks.
+                 </para>
+            </section>
+              <section xml:id="adm_history_viewer">
+                <title>History viewer</title>
+                <para>
+                    The history viewer provides an interface to search for recorded history entries.
+                    The search can be refined to:
+                    <itemizedlist>
+                        <listitem>
+                            <para>
+                                Max. number of results: Specifies the maximum
+                                number of retrieved search results.
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                Account: Refine the search query to a specific user account.
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                Start date: Refine the search query to history entries
+                                after the start date.
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                End date: Refine the search query to history entries before
+                                the end date.
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                Type: Refine the search query to contents of the given Type.
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                Content Id: Refine the search query to contents with the specified Id.
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                Category: Refine the search query to filter results according to the selected
+                                history entry category.
+                            </para>
+                        </listitem>
+                    </itemizedlist>
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata fileref="images/adm_ui_system/history_viewer.png"
+                                       format="PNG" contentwidth="100%"/>
+                        </imageobject>
+                    </mediaobject>
+                    The query is submitted by pressing the "Search" button. The query result is
+                    displayed below within a result table. <note>The user may click on entries in the
+                    "Message" column within the result table to receive more detailed information
+                    of the history event.</note>
+                </para>
+            </section>
+            <section xml:id="adm_system_information">
+                <title>System information</title>
+                <para>The system information provides general runtime and hardware information
+                    of the system &flexive; is running on.</para>
+                <para>
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata fileref="images/adm_ui_system/system_information.png"
+                                       format="PNG" contentwidth="100%"/>
+                        </imageobject>
+                    </mediaobject>
+                </para>
+            </section>
+            <section xml:id="adm_system_language">
+                <title>Language settings</title>
+                <para>In the language settings editor you can manage available languages. Add a language from the list of
+                    disabled languages (by pressing the "+" icon), remove an available language
+                    (by pressing the "-" icon) or change the list's order.
+                    The language at the first position on
+                    the list becomes the default language.
+                </para>
+                <para>
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata fileref="images/adm_ui_system/language_settings.png"
+                                       format="PNG" contentwidth="100%"/>
+                        </imageobject>
+                    </mediaobject>
+                </para>
+                <para>Check the
+                    <code>Allow removal of languages which are in use</code>
+                    option to be able to delete languages which are already in use by
+                    <link linkend="core_contents">content instances</link>.
+                </para>
+            </section>
+            <section xml:id="adm_test_data">
+                <title>Create random test data for content instances</title>
+                In order to get a notion of how custom content instances might look like,
+                random test data can be created.
+                 <mediaobject>
                     <imageobject>
-                        <imagedata fileref="images/adm_ui_system/system_configuration.png"
+                        <imagedata fileref="images/adm_ui_system/random_test_data.png"
                                    format="PNG" contentwidth="100%"/>
                     </imageobject>
                 </mediaobject>
-            </para>
-            The configuration includes:
-            <itemizedlist>
-                <listitem>
-                    <para>
-                        Enable live tree: if this option is disabled, the user cannot switch to the
-                        <link linkend="adm_content_tree">live tree</link> in the
-                        <link linkend="adm_instance_editor">content instance editor</link>
-                        anymore. Note that the backend needs to be reloaded via the browser
-                        in order for changes to take effect!.
-                    </para>
-                </listitem>
-                <listitem>
-                    <para>
-                        Auto flatten assignments: automatically flatten assignments
-                        that can be stored in the flat storage (max. multiplicity &lt;= 1).
-                    </para>
-                </listitem>
-                <listitem>
-                    <para>
-                        Export URL prefix: path used by the export servlet.
-                    </para>
-                </listitem>
-                <listitem>
-                    <para>
-                        Store binary transit files in Database: if enabled, binary files are
-                        stored directly in the database during file upload, instead of the file
-                        system.
-                    </para>
-                </listitem>
-                <listitem>
-                    <para>
-                       Binary transit path: file system path to store binaries during file upload.
-                    </para>
-                </listitem>
-                <listitem>
-                    <para>
-                       Binary threshold: threshold in bytes to
-                        store binary files on the file system (instead of directly in the database)
-                        if exceeded.
-                    </para>
-                </listitem>
-                <listitem>
-                    <para>
-                       Binary preview threshold: threshold in bytes to
-                        store preview files on the file system (instead of directly in the database)
-                        if exceeded.
-                    </para>
-                </listitem>
-                <listitem>
-                    <para>
-                       Binary path: path to store binary files on the file system.
-                    </para>
-                </listitem>
-            </itemizedlist>
-        </section>
-        <section xml:id="adm_system_parameters">
-            <title>System parameters</title>
-            <para>
-                The system parameters GUI provides a generic view of all
-                &flexive; system parameters grouped by scope.
-                Some parameters
-                can intentionally not be edited
-                as either specialized GUIs for editing exist in the backend administration
-                or they merely serve information purposes and don't impact system behavior.
-                <mediaobject>
-                    <imageobject>
-                        <imagedata fileref="images/adm_ui_system/system_paramters.png"
-                                   format="PNG" contentwidth="100%"/>
-                    </imageobject>
-                </mediaobject>
-            </para>
-        </section>
-         <section xml:id="adm_lock_administration">
-            <title>Lock administration</title>
-            <para>
-            </para>
-        </section>
-          <section xml:id="adm_history_viewer">
-            <title>History viewer</title>
-            <para>
-            </para>
-        </section>
-        <section xml:id="adm_system_information">
-            <title>System information</title>
-            <para>The system information provides general runtime and hardware information
-                of the system &flexive; is running on.</para>
-            <para>
-                <mediaobject>
-                    <imageobject>
-                        <imagedata fileref="images/adm_ui_system/sysinfo.png"
-                                   format="PNG" contentwidth="100%"/>
-                    </imageobject>
-                </mediaobject>
-            </para>
-        </section>
-        <section xml:id="adm_system_language">
-            <title>Language settings</title>
-            <para>In the language settings editor you can manage your system languages. Add a language from the list of
-                disabled languages, delete a language or change the list's order. The language at the first position on
-                the list becomes the default language. The following screen shows the language settings editor.
-            </para>
-            <para>Check the
-                <code>Ignore language usage (1)</code>
-                option to be able to delete languages which are already in use by
-                <link linkend="core_contents">content instances</link>, meaning a
-                <link linkend="structure_editor_property_editor">property</link>
-                has been filled in by a user in this language.
-            </para>
-            <para>
-                <mediaobject>
-                    <imageobject>
-                        <imagedata fileref="images/adm_ui_system/language_settings.png"
-                                   format="PNG" contentwidth="100%"/>
-                    </imageobject>
-                </mediaobject>
-            </para>
-        </section>
-        <section xml:id="adm_test_data">
-            <title>Create random test data for content instances</title>
+                The following options are available:
+                <itemizedlist>
+                    <listitem>
+                        <para>
+                            Type: random test data is created for content instances of the
+                            selected type.
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            Count: number of content instances to be created.
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            Max. multiplicity: Specifies the maximum multiplicity
+                            for properties that are assigned with
+                            a multiplicity > 1.
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            Sore in folder: Created instances will be stored in the
+                            content tree at the specified folder.
+                        </para>
+                    </listitem>
+                </itemizedlist>
+                Upon pressing the "Create Test Data" button content instances with
+                randomized that data are created.
+            </section>
         </section>
     </section>
 </chapter>
