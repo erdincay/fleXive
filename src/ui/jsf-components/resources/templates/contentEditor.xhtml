@@ -106,14 +106,15 @@
 
                 <ui:insert name="insertTop">
                     <ui:fragment rendered="#{not empty _ceContent.guiSettings.lockStatus and not _ceContent.new}">
-                        <h:outputText value="#{fxMessageBean['ContentEditor.field.lockAdmin']}: #{_ceContent.guiSettings.lockStatus}"
-                                      title="#{_ceContent.guiSettings.lockStatusTooltip}"/>
+                        <ui:fragment rendered="#{_ceContent.guiSettings.permLock or (not empty _ceContent.guiSettings.lockOwner and _ceContent.guiSettings.lockOwner ne fxSystemBean.userTicket.loginName)}">
+                            <h:outputText value="#{fxMessageBean['ContentEditor.field.lockAdmin']}: #{_ceContent.guiSettings.lockStatus}"
+                                        title="#{_ceContent.guiSettings.lockStatusTooltip}"/>
+                        </ui:fragment>
                         <ui:fragment rendered="#{_ceContent.guiSettings.contentLocked and _ceContent.guiSettings.showLockOwner and not empty _ceContent.guiSettings.lockOwner and _ceContent.guiSettings.lockOwner ne fxSystemBean.userTicket.loginName}">
                             <br />
                             <h:outputText value="#{fxMessageBean['ContentEditor.field.lockOwner']}: #{_ceContent.guiSettings.lockOwner}" />
                         </ui:fragment>
                         <br/><br/>
-
                     </ui:fragment>
                 </ui:insert>
 
