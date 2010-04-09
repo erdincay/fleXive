@@ -77,7 +77,7 @@
                         <para>
                             (1) The currently selected backend GUI section: The currently
                             active GUI section is displayed on top, in this case the
-                            <link linkend="adm_content_tree ">Content Tree</link>.
+                            <link linkend="adm_content_tree">Content Tree</link>.
                         </para>
                     </listitem>
                     <listitem>
@@ -152,7 +152,7 @@
                 <itemizedlist>
                     <listitem>
                         <para>
-                            <link linkend="adm_content_tree ">Content Tree:</link>
+                            <link linkend="adm_content_tree">Content Tree:</link>
                             The content tree is used for browsing,
                             creating, modifying and deleting content instances.
                         </para>
@@ -166,7 +166,7 @@
                     </listitem>
                     <listitem>
                         <para>
-                            <link linkend="adm_ui_query_editor">Search:</link>
+                            <link linkend="adm_query_editor">Search:</link>
                             The query editor allows the user
                             to customize search queries in order to search
                             within the content tree and within content instances.
@@ -240,7 +240,7 @@
             to another type or another group will be automatically removed from the system.
         </important>
 
-        <section xml:id="adm_structure_editor_gui">
+        <section xml:id="adm_ui_structure_editor">
             <title>The structure editor GUI</title>
             <para>
                 <mediaobject>
@@ -1294,7 +1294,7 @@
                     <link linkend="adm_content_tree">Content tree</link>
                 </listitem>
                 <listitem>
-                    <link linkend="adm_structure_editor_gui">Structure tree</link>
+                    <link linkend="adm_ui_structure_editor">Structure tree</link>
                 </listitem>
                 <listitem>
                     <link linkend="adm_query_editor">Query editor / query results</link>
@@ -1602,7 +1602,7 @@
                 tab. Open the query editor and rightclick on nodes of the
                 <link linkend="adm_content_tree">content tree</link>
                 and
-                <link linkend="adm_structure_editor_gui">structure tree</link>
+                <link linkend="adm_ui_structure_editor">structure tree</link>
                 to formulate your query. You can add as many nodes as you want.
                 You can also search on
                 <link linkend="adm_structure_editor_property_editor">structure properties</link>.
@@ -1832,13 +1832,13 @@
 
     <section xml:id="adm_administration">
         <title>&Flexive; administration</title>
-        <section xml:id="adm_user">
+        <section xml:id="adm_ui_user">
             <title>User account administration</title>
             <para>
                 The &Flexive; user account administration UI provides an administration
                 interface to administer your
                 user accounts, assign
-                <link linkend="adm_user_group">createuser groups</link>
+                <link linkend="adm_ui_user_group">createuser groups</link>
                 and roles and make other settings like activation and language settings.
             </para>
             <section xml:id="adm_user_create_user">
@@ -1867,7 +1867,7 @@
                     users.
                 </para>
             </section>
-            <section xml:id="adm_user_overview">
+            <section xml:id="adm_ui_user_overview">
                 <title>The user account overview</title>
                 <para>The following screen shows the user group overview.</para>
                 <para>
@@ -1913,7 +1913,7 @@
                 </para>
             </section>
         </section>
-        <section xml:id="adm_user_group">
+        <section xml:id="adm_ui_user_group">
             <title>User group administration</title>
             <para>The user group editor allows you to create and edit user groups.
                 You can specify a group name, a color and
@@ -1928,7 +1928,7 @@
                 </mediaobject>
             </para>
             After saving you will be redirected to the user group overview.
-            <section xml:id="adm_user_group_overview">
+            <section xml:id="adm_ui_user_group_overview">
                 <title>The user group overview</title>
                 <para>The following screen shows the user account overview.
                     The default system user groups cannot be deleted:
@@ -2034,7 +2034,7 @@
             <title>ACL administration</title>
             <para>The ACL administration UI provides an ACL editor to edit
                 and create ACLs and to set permissions for
-                <link linkend="adm_user_group">user groups
+                <link linkend="adm_ui_user_group">user groups
                 </link>
                 in the permission matrix. ACLs are a key feature of the &Flexive;
                 <link linkend="core_security">security concept</link>.
@@ -2251,7 +2251,7 @@
                                 <para>Routes:
                                     Routes define the possible transitions from one workflow step
                                     to another. Each route must have a
-                                    <link linkend="adm_user_group">user group</link>
+                                    <link linkend="adm_ui_user_group">user group</link>
                                     assigned representing users who may perform this transition.
                                 </para>
                             </listitem>
