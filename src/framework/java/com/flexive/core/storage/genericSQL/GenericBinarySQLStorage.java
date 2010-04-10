@@ -186,7 +186,17 @@ public class GenericBinarySQLStorage implements BinaryStorage {
                     previewId = rs.getLong(1);
                     if (rs.wasNull())
                         previewId = 0;
-                    size = getAvailablePreviewSize(size, rs.getInt(2), rs.getInt(3), rs.getInt(4), rs.getInt(5), rs.getInt(6), rs.getInt(7));
+                    boolean found = previewId == 0;
+                    if (!found) { //fall back to referenced preview
+                        rs.close();
+                        ps.setLong(1, previewId);
+                        ps.setInt(2, binaryVersion);
+                        ps.setInt(3, binaryQuality);
+                        rs = ps.executeQuery();
+                        found = rs != null && rs.next();
+                    }
+                    if (found)
+                        size = getAvailablePreviewSize(size, rs.getInt(2), rs.getInt(3), rs.getInt(4), rs.getInt(5), rs.getInt(6), rs.getInt(7));
                 }
                 ps.close();
             }
