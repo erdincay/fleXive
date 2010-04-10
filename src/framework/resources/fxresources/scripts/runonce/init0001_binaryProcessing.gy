@@ -32,6 +32,23 @@
 import com.flexive.shared.scripting.FxScriptEvent
 import com.flexive.shared.EJBLookup
 
+//check if a binary storage directory already exists and back it up if needed (see FX-697)
+File binDir = new File(com.flexive.core.storage.binary.FxBinaryUtils.getBinaryDirectory() + File.separatorChar + com.flexive.shared.FxContext.get().divisionId)
+if (binDir.exists()) {
+  println "Binary directory [${binDir.absolutePath}] exists. Moving it to a backup copy ..."
+  String backupDir = ".Backup_" + com.flexive.shared.FxFormatUtils.getUniversalDateTimeFormat().format(new Date(System.currentTimeMillis()))
+  backupDir = backupDir.replace('-','_') //remove potential file name problems
+  backupDir = backupDir.replace(':','_')
+  backupDir = backupDir.replace('+','_')
+  backupDir = binDir.absolutePath + backupDir
+  if (!binDir.renameTo(new File(backupDir))) {
+    println "Failed to rename [${binDir.absolutePath}] to [$backupDir]!"
+  } else
+    EJBLookup.historyTrackerEngine.track("history.binaryStorage.renamed", binDir.absolutePath, backupDir)
+}
+
+
+//setup binary processing scripts
 EJBLookup.getScriptingEngine().createScriptFromLibrary(FxScriptEvent.BinaryPreviewProcess,
     "BinaryProcessor_Images.gy",
     "BinaryProcessor_Images.gy",
