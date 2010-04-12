@@ -13,9 +13,9 @@
 <ui:composition template="/adm/contentTemplate.xhtml">
 
     <ui:define name="head">
-        <t:stylesheet path="/adm/css/contentEditor.css"/>
-        <script type="text/javascript" src="#{fxSystemBean.contextPath}/pub/js/shared.js"> </script>
-        <script type="text/javascript" src="#{fxSystemBean.contextPath}/adm/js/contentEditor.js"> </script>
+        <t:stylesheet path="#{adm:versionedUrl('/adm/css/contentEditor.css')}"/>
+        <script type="text/javascript" src="#{fxSystemBean.contextPath}/pub/js/#{adm:versionedUrl('shared.js')}"> </script>
+        <script type="text/javascript" src="#{fxSystemBean.contextPath}/adm/js/#{adm:versionedUrl('contentEditor.js')}"> </script>
         <fx:includes all="true"/>
     </ui:define>
 

@@ -11,10 +11,10 @@
 
 <ui:composition template="/adm/contentTemplate.xhtml">
     <ui:define name="head">
+        <fx:includes all="true"/>
         <t:stylesheet path="#{adm:versionedUrl('/adm/css/contentEditor.css')}"/>
         <script type="text/javascript" src="#{fxSystemBean.contextPath}/pub/js/#{adm:versionedUrl('shared.js')}"> </script>
         <script type="text/javascript" src="#{fxSystemBean.contextPath}/adm/js/#{adm:versionedUrl('contentEditor.js')}"> </script>
-        <script type="text/javascript" src="#{fxSystemBean.contextPath}/pub/js/tiny_mce/#{adm:versionedUrl('tiny_mce.js')}"> </script>
     </ui:define>
 
     <ui:define name="body">

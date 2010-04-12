@@ -347,7 +347,7 @@ public class SearchResultBean implements ActionBean, Serializable {
                     columns.add("@metadata");
                 }
                 columns.add("@*");
-                final FxResultSet result = getQueryBuilder()
+                FxResultSet result = getQueryBuilder()
                         .select(columns)
                         .startRow(0)
                         .getResult();
@@ -363,6 +363,8 @@ public class SearchResultBean implements ActionBean, Serializable {
                     // reset type ID if it is no longer present (e.g. because a content was removed)
                     if (!found) {
                         setTypeId(-1);
+                        // re-submit query
+                        result = getQueryBuilder().select(columns).startRow(0).getResult();
                     }
                 }
                 if (getTypeId() == -1 && result.getContentTypes().size() == 1) {
