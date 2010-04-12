@@ -83,6 +83,9 @@ function syncWithBriefcasePanel(rootMenuItemId, itemIdPrefix) {
     // count existing briefcases in the second menu item group
     var remainingOld = menu.getItemGroups()[1].length;
 
+    // insert empty placeholder menu item to avoid removing the empty item group if exactly 1 briefcase exists (FX-776)
+    var dummyItem = addBriefcaseMenuItem(menu, itemIdPrefix, -123);
+
     // copy briefcases from briefcase panel, which is supposed to be up-to-date
     var briefcases = parent.getSearchNavFrame().briefcasePanel.items;
     for (var i = 0; i < briefcases.length; i++) {
@@ -104,6 +107,9 @@ function syncWithBriefcasePanel(rootMenuItemId, itemIdPrefix) {
         menu.removeItem(menu.getItemGroups()[1][0], 1);
         remainingOld--;
     }
+    
+    // remove dummy item
+    menu.removeItem(dummyItem, 1);
 }
 
 function getSubMenu(menuItemId) {
