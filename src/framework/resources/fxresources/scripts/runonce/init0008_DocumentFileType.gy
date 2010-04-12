@@ -1,0 +1,115 @@
+/** *************************************************************
+ *  This file is part of the [fleXive](R) framework.
+ *
+ *  Copyright (c) 1999-2010
+ *  UCS - unique computing solutions gmbh (http://www.ucs.at)
+ *  All rights reserved
+ *
+ *  The [fleXive](R) project is free software; you can redistribute
+ *  it and/or modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation.
+ *
+ *  The GNU Lesser General Public License can be found at
+ *  http://www.gnu.org/licenses/lgpl.html.
+ *  A copy is found in the textfile LGPL.txt and important notices to the
+ *  license from the author are found in LICENSE.txt distributed with
+ *  these libraries.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  For further information about UCS - unique computing solutions gmbh,
+ *  please see the company website: http://www.ucs.at
+ *
+ *  For further information about [fleXive](R), please see the
+ *  project website: http://www.flexive.org
+ *
+ *
+ *  This copyright notice MUST APPEAR in all copies of the file!
+ ************************************************************** */
+
+//file: init000_DocumentFileType.gy
+//description: Create the "DocumentFile" FxType needed for all flexive installations
+//expected bindings:
+//  ticket ... UserTicket
+//  scriptname ... name of this script
+//author: Christopher Blasnik, Unique Computing Solutions GmbH
+
+import com.flexive.shared.scripting.groovy.GroovyTypeBuilder
+import com.flexive.shared.value.FxString
+import com.flexive.shared.CacheAdmin
+import com.flexive.shared.security.ACLCategory
+import com.flexive.shared.structure.LanguageMode
+import com.flexive.shared.structure.TypeMode
+import com.flexive.shared.structure.TypeStorageMode
+import com.flexive.shared.structure.UniqueMode
+import com.flexive.shared.structure.FxMultiplicity
+import com.flexive.shared.structure.FxDataType
+import com.flexive.shared.search.ResultPreferences
+import com.flexive.shared.EJBLookup
+import com.flexive.shared.search.ResultColumnInfo
+import com.flexive.shared.structure.FxType
+import com.flexive.shared.search.ResultOrderByInfo
+import com.flexive.shared.search.SortDirection
+import com.flexive.shared.search.ResultViewType
+import com.flexive.shared.search.AdminResultLocations
+
+new GroovyTypeBuilder().documentfile(
+        label: new FxString(true, 1, "Document File Root").setTranslation(2, "Dokument File Root"),
+        acl: CacheAdmin.environment.getACL(ACLCategory.STRUCTURE.getDefaultId()),
+        hint: new FxString(true, 1, "Root type store for all unknown/unknown mime types").setTranslation(2, "Root Typ f\u00FCr unknown/unknown mime types"),
+        languageMode: LanguageMode.Multiple,
+        trackHistory: false,
+        typeMode: TypeMode.Content,
+        maxVersions: -1L,
+        storageMode: TypeStorageMode.Hierarchical,
+        useInstancePermissions: true,
+        usePropertyPermissions: false,
+        useStepPermissions: true,
+        useTypePermissions: true,
+        usePermissions: true,
+        mimeType: "unknown/unknown") {
+
+    caption(assignment: "ROOT/CAPTION")
+    file(
+            label: new FxString(true, 1, "Binary file").setTranslation(2, "Datei"),
+            hint: new FxString(true, 1, ""),
+            defaultMultiplicity: 1,
+            multilang: false,
+            dataType: FxDataType.Binary,
+            acl: CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+            multiplicity: new FxMultiplicity(1, 1),
+            overrideACL: true,
+            overrideMultiplicity: true,
+            overrideSearchable: true,
+            overrideInOverview: true, // not in image type
+            overrideMultiline: true, // not in image type
+            overrideUseHtmlEditor: true, // not in image type
+            searchable: true,
+            fullTextIndexed: true,
+            multiline: false,
+            inOverview: false,
+            useHtmlEditor: false,
+            uniqueMode: UniqueMode.None,
+            enabled: true,
+            "SEARCHABLE": "1",
+            "SHOW.OVERVIEW": "0", // not in image type
+            "MULTILINE": "0", // not in image type
+            "HTML.EDITOR": "0") // not in image type
+}
+
+// create default result columns for the backend application
+EJBLookup.resultPreferencesEngine.saveSystemDefault(
+        new ResultPreferences(
+                [new ResultColumnInfo("@pk"),
+                        new ResultColumnInfo("#" + FxType.DOCUMENTFILE + "/caption"),
+                ],
+                [new ResultOrderByInfo("#" + FxType.DOCUMENTFILE + "/title", SortDirection.ASCENDING)],
+                25, 0
+        ),
+        CacheAdmin.environment.getType(FxType.DOCUMENTFILE).id,
+        ResultViewType.LIST,
+        AdminResultLocations.values()
+)

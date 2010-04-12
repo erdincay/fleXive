@@ -1,4 +1,4 @@
-/***************************************************************
+/** *************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
  *  Copyright (c) 1999-2010
@@ -28,7 +28,7 @@
  *
  *
  *  This copyright notice MUST APPEAR in all copies of the file!
- ***************************************************************/
+ ************************************************************** */
 
 //file: init0010_ImageType.gy
 //description: Create the "Image" FxType needed for all flexive installations
@@ -43,11 +43,10 @@ import com.flexive.shared.interfaces.*
 import com.flexive.shared.scripting.*
 import com.flexive.shared.structure.*
 import com.flexive.shared.security.*
-import com.flexive.shared.FxLanguage
-import com.flexive.shared.configuration.SystemParameters
 import com.flexive.shared.value.FxString
 import com.flexive.shared.scripting.groovy.GroovyTypeBuilder
 import com.flexive.shared.search.*
+
 void createSelectLists() {
     ACL aclList = CacheAdmin.getEnvironment().getDefaultACL(ACLCategory.SELECTLIST);
     ACL aclItem = CacheAdmin.getEnvironment().getDefaultACL(ACLCategory.SELECTLISTITEM);
@@ -76,11 +75,8 @@ void createSelectLists() {
 
 def String IMAGE_TYPE = "Image";
 
-def ContentEngine co = EJBLookup.getContentEngine();
-def ACLEngine acl = EJBLookup.getAclEngine();
-def TypeEngine type = EJBLookup.getTypeEngine();
-def AssignmentEngine ass = EJBLookup.getAssignmentEngine();
 def ScriptingEngine se = EJBLookup.getScriptingEngine();
+def long typeId;
 
 try {
     if (CacheAdmin.getEnvironment().getType(IMAGE_TYPE) != null) {
@@ -94,69 +90,803 @@ try {
 //create needed select lists
 createSelectLists();
 
-def ACL typeACL = CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.defaultId)
-def long typeId = type.save(FxTypeEdit.createNew(IMAGE_TYPE, new FxString(FxLanguage.ENGLISH, "Image").setTranslation(FxLanguage.GERMAN, "Bild"), typeACL, null));
+// create image type
+new GroovyTypeBuilder().image(
+        parentTypeName: FxType.DOCUMENTFILE,
+        label: new FxString(true, 1, "Image").setTranslation(2, "Bild"),
+        acl: CacheAdmin.environment.getACL(ACLCategory.STRUCTURE.getDefaultId()),
+        languageMode: LanguageMode.Multiple,
+        trackHistory: false,
+        typeMode: TypeMode.Content,
+        maxVersions: -1L,
+        storageMode: TypeStorageMode.Hierarchical,
+        useInstancePermissions: true,
+        usePropertyPermissions: false,
+        useStepPermissions: true,
+        useTypePermissions: true,
+        usePermissions: true,
+        mimeType: "image/unknown") {
 
-def builder = new GroovyTypeBuilder(typeId)
-builder {
-    fqn(assignment: CacheAdmin.getEnvironment().getAssignment((Long) EJBLookup.configurationEngine.get(SystemParameters.TREE_FQN_ROOTASSIGNMENT)).getXPath())
-    caption(assignment: CacheAdmin.getEnvironment().getAssignment((Long) EJBLookup.configurationEngine.get(SystemParameters.TREE_CAPTION_ROOTASSIGNMENT)).getXPath())
-    imagebinary(dataType: FxDataType.Binary, multiplicity: FxMultiplicity.MULT_1_1, acl: typeACL)
-    fileName(dataType: FxDataType.String1024, multiplicity: FxMultiplicity.MULT_1_1, multilang: false, defaultMultiplicity: 0)
-    abstractText(name: "Abstract", alias: "Abstract", dataType: FxDataType.String1024, multiplicity: FxMultiplicity.MULT_0_1, multilang: false, defaultMultiplicity: 0)
-    dateCreated(dataType: FxDataType.DateTime, multiplicity: FxMultiplicity.MULT_0_1, multilang: false, defaultMultiplicity: 0)
-    author(dataType: FxDataType.String1024, multiplicity: FxMultiplicity.MULT_0_1, multilang: true, defaultMultiplicity: 0)
-    authorTitle(dataType: FxDataType.String1024, multiplicity: FxMultiplicity.MULT_0_1, multilang: true, defaultMultiplicity: 0)
-    credit(dataType: FxDataType.String1024, multiplicity: FxMultiplicity.MULT_0_1, multilang: true, defaultMultiplicity: 0)
-    contact(dataType: FxDataType.String1024, multiplicity: FxMultiplicity.MULT_0_1, multilang: true, defaultMultiplicity: 0)
-    source(dataType: FxDataType.String1024, multiplicity: FxMultiplicity.MULT_0_1, multilang: true, defaultMultiplicity: 0)
-    copyright(dataType: FxDataType.String1024, multiplicity: FxMultiplicity.MULT_0_1, multilang: true, defaultMultiplicity: 0)
-    compression(FxDataType.SelectOne, multiplicity: FxMultiplicity.MULT_0_1, multilang: false, referencedList: CacheAdmin.getEnvironment().getSelectList("Image Compression"), defaultMultiplicity: 0)
-    pixelXDimension(FxDataType.Number, multiplicity: FxMultiplicity.MULT_0_1, multilang: false, defaultMultiplicity: 0)
-    pixelYDimension(FxDataType.Number, multiplicity: FxMultiplicity.MULT_0_1, multilang: false, defaultMultiplicity: 0)
-    xResolution(FxDataType.Double, multiplicity: FxMultiplicity.MULT_0_1, multilang: false, defaultMultiplicity: 0)
-    yResolution(FxDataType.Double, multiplicity: FxMultiplicity.MULT_0_1, multilang: false, defaultMultiplicity: 0)
-    bitsPerPixel(FxDataType.Number, multiplicity: FxMultiplicity.MULT_0_1, multilang: false, defaultMultiplicity: 0)
-    colorType(dataType: FxDataType.String1024, multiplicity: FxMultiplicity.MULT_0_1, multilang: false, defaultMultiplicity: 0)
-    keywords(dataType: FxDataType.String1024, multiplicity: FxMultiplicity.MULT_0_N, multilang: true, defaultMultiplicity: 0)
-    TakeLocation(defaultMultiplicity: 0) {
-        city(dataType: FxDataType.String1024, multiplicity: FxMultiplicity.MULT_0_1, multilang: true)
-        subLocation(dataType: FxDataType.String1024, multiplicity: FxMultiplicity.MULT_0_1, multilang: false)
-        proviceState(label: new FxString("Province/State"), dataType: FxDataType.String1024, multiplicity: FxMultiplicity.MULT_0_1, multilang: false)
-        country(dataType: FxDataType.String1024, multiplicity: FxMultiplicity.MULT_0_1, multilang: false)
+    fqn(assignment: "ROOT/FQN")
+    file(
+            alias: "IMAGEBINARY",
+            label: new FxString(true, 1, "Imagebinary"))
+    filename(
+            label: new FxString(true, 1, "FileName"),
+            hint: new FxString(true, 1, ""),
+            defaultMultiplicity: 1,
+            multilang: false,
+            dataType: FxDataType.String1024,
+            acl: CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+            multiplicity: new FxMultiplicity(1, 1),
+            overrideACL: true,
+            overrideMultiplicity: true,
+            overrideSearchable: true,
+            searchable: true,
+            fullTextIndexed: true,
+            multiline: false,
+            inOverview: false,
+            useHtmlEditor: false,
+            uniqueMode: UniqueMode.None,
+            enabled: true,
+            "SEARCHABLE": "1")
+    "abstract"(
+            label: new FxString(true, 1, "Abstract"),
+            hint: new FxString(true, 1, ""),
+            defaultMultiplicity: 0,
+            multilang: false,
+            dataType: FxDataType.String1024,
+            acl: CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+            multiplicity: new FxMultiplicity(0, 1),
+            overrideACL: true,
+            overrideMultiplicity: true,
+            overrideSearchable: true,
+            searchable: true,
+            fullTextIndexed: true,
+            multiline: false,
+            inOverview: false,
+            useHtmlEditor: false,
+            uniqueMode: UniqueMode.None,
+            enabled: true,
+            "SEARCHABLE": "1")
+    datecreated(
+            label: new FxString(true, 1, "DateCreated"),
+            hint: new FxString(true, 1, ""),
+            defaultMultiplicity: 0,
+            multilang: false,
+            dataType: FxDataType.DateTime,
+            acl: CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+            multiplicity: new FxMultiplicity(0, 1),
+            overrideACL: true,
+            overrideMultiplicity: true,
+            overrideSearchable: true,
+            searchable: true,
+            fullTextIndexed: false,
+            multiline: false,
+            inOverview: false,
+            useHtmlEditor: false,
+            uniqueMode: UniqueMode.None,
+            enabled: true,
+            "SEARCHABLE": "1")
+    author_1(
+            label: new FxString(true, 1, "Author"),
+            hint: new FxString(true, 1, ""),
+            alias: "AUTHOR",
+            defaultMultiplicity: 0,
+            multilang: true,
+            dataType: FxDataType.String1024,
+            acl: CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+            multiplicity: new FxMultiplicity(0, 1),
+            overrideACL: true,
+            overrideMultiplicity: true,
+            overrideSearchable: true,
+            overrideMultilang: true,
+            searchable: true,
+            fullTextIndexed: true,
+            multiline: false,
+            inOverview: false,
+            useHtmlEditor: false,
+            uniqueMode: UniqueMode.None,
+            enabled: true,
+            "MULTILANG": "1",
+            "SEARCHABLE": "1")
+    authortitle(
+            label: new FxString(true, 1, "AuthorTitle"),
+            hint: new FxString(true, 1, ""),
+            defaultMultiplicity: 0,
+            multilang: true,
+            dataType: FxDataType.String1024,
+            acl: CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+            multiplicity: new FxMultiplicity(0, 1),
+            overrideACL: true,
+            overrideMultiplicity: true,
+            overrideSearchable: true,
+            overrideMultilang: true,
+            searchable: true,
+            fullTextIndexed: true,
+            multiline: false,
+            inOverview: false,
+            useHtmlEditor: false,
+            uniqueMode: UniqueMode.None,
+            enabled: true,
+            "MULTILANG": "1",
+            "SEARCHABLE": "1")
+    credit(
+            label: new FxString(true, 1, "Credit"),
+            hint: new FxString(true, 1, ""),
+            defaultMultiplicity: 0,
+            multilang: true,
+            dataType: FxDataType.String1024,
+            acl: CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+            multiplicity: new FxMultiplicity(0, 1),
+            overrideACL: true,
+            overrideMultiplicity: true,
+            overrideSearchable: true,
+            overrideMultilang: true,
+            searchable: true,
+            fullTextIndexed: true,
+            multiline: false,
+            inOverview: false,
+            useHtmlEditor: false,
+            uniqueMode: UniqueMode.None,
+            enabled: true,
+            "MULTILANG": "1",
+            "SEARCHABLE": "1")
+    contact(
+            label: new FxString(true, 1, "Contact"),
+            hint: new FxString(true, 1, ""),
+            defaultMultiplicity: 0,
+            multilang: true,
+            dataType: FxDataType.String1024,
+            acl: CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+            multiplicity: new FxMultiplicity(0, 1),
+            overrideACL: true,
+            overrideMultiplicity: true,
+            overrideSearchable: true,
+            overrideMultilang: true,
+            searchable: true,
+            fullTextIndexed: true,
+            multiline: false,
+            inOverview: false,
+            useHtmlEditor: false,
+            uniqueMode: UniqueMode.None,
+            enabled: true,
+            "MULTILANG": "1",
+            "SEARCHABLE": "1")
+    source(
+            label: new FxString(true, 1, "Source"),
+            hint: new FxString(true, 1, ""),
+            defaultMultiplicity: 0,
+            multilang: true,
+            dataType: FxDataType.String1024,
+            acl: CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+            multiplicity: new FxMultiplicity(0, 1),
+            overrideACL: true,
+            overrideMultiplicity: true,
+            overrideSearchable: true,
+            overrideMultilang: true,
+            searchable: true,
+            fullTextIndexed: true,
+            multiline: false,
+            inOverview: false,
+            useHtmlEditor: false,
+            uniqueMode: UniqueMode.None,
+            enabled: true,
+            "MULTILANG": "1",
+            "SEARCHABLE": "1")
+    copyright(
+            label: new FxString(true, 1, "Copyright"),
+            hint: new FxString(true, 1, ""),
+            defaultMultiplicity: 0,
+            multilang: true,
+            dataType: FxDataType.String1024,
+            acl: CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+            multiplicity: new FxMultiplicity(0, 1),
+            overrideACL: true,
+            overrideMultiplicity: true,
+            overrideSearchable: true,
+            overrideMultilang: true,
+            searchable: true,
+            fullTextIndexed: true,
+            multiline: false,
+            inOverview: false,
+            useHtmlEditor: false,
+            uniqueMode: UniqueMode.None,
+            enabled: true,
+            "MULTILANG": "1",
+            "SEARCHABLE": "1")
+    compression(
+            label: new FxString(true, 1, "Compression"),
+            hint: new FxString(true, 1, ""),
+            defaultMultiplicity: 0,
+            multilang: false,
+            dataType: FxDataType.SelectOne,
+            acl: CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+            multiplicity: new FxMultiplicity(0, 1),
+            overrideACL: true,
+            overrideMultiplicity: true,
+            overrideSearchable: true,
+            searchable: true,
+            fullTextIndexed: false,
+            multiline: false,
+            inOverview: false,
+            useHtmlEditor: false,
+            uniqueMode: UniqueMode.None,
+            enabled: true,
+            referencedList: CacheAdmin.getEnvironment().getSelectList("Image Compression"),
+            "SEARCHABLE": "1")
+    pixelxdimension(
+            label: new FxString(true, 1, "PixelXDimension"),
+            hint: new FxString(true, 1, ""),
+            defaultMultiplicity: 0,
+            multilang: false,
+            dataType: FxDataType.Number,
+            acl: CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+            multiplicity: new FxMultiplicity(0, 1),
+            overrideACL: true,
+            overrideMultiplicity: true,
+            overrideSearchable: true,
+            searchable: true,
+            fullTextIndexed: false,
+            multiline: false,
+            inOverview: false,
+            useHtmlEditor: false,
+            uniqueMode: UniqueMode.None,
+            enabled: true,
+            "SEARCHABLE": "1")
+    pixelydimension(
+            label: new FxString(true, 1, "PixelYDimension"),
+            hint: new FxString(true, 1, ""),
+            defaultMultiplicity: 0,
+            multilang: false,
+            dataType: FxDataType.Number,
+            acl: CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+            multiplicity: new FxMultiplicity(0, 1),
+            overrideACL: true,
+            overrideMultiplicity: true,
+            overrideSearchable: true,
+            searchable: true,
+            fullTextIndexed: false,
+            multiline: false,
+            inOverview: false,
+            useHtmlEditor: false,
+            uniqueMode: UniqueMode.None,
+            enabled: true,
+            "SEARCHABLE": "1")
+    xresolution(
+            label: new FxString(true, 1, "XResolution"),
+            hint: new FxString(true, 1, ""),
+            defaultMultiplicity: 0,
+            multilang: false,
+            dataType: FxDataType.Double,
+            acl: CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+            multiplicity: new FxMultiplicity(0, 1),
+            overrideACL: true,
+            overrideMultiplicity: true,
+            overrideSearchable: true,
+            searchable: true,
+            fullTextIndexed: false,
+            multiline: false,
+            inOverview: false,
+            useHtmlEditor: false,
+            uniqueMode: UniqueMode.None,
+            enabled: true,
+            "SEARCHABLE": "1")
+    yresolution(
+            label: new FxString(true, 1, "YResolution"),
+            hint: new FxString(true, 1, ""),
+            defaultMultiplicity: 0,
+            multilang: false,
+            dataType: FxDataType.Double,
+            acl: CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+            multiplicity: new FxMultiplicity(0, 1),
+            overrideACL: true,
+            overrideMultiplicity: true,
+            overrideSearchable: true,
+            searchable: true,
+            fullTextIndexed: false,
+            multiline: false,
+            inOverview: false,
+            useHtmlEditor: false,
+            uniqueMode: UniqueMode.None,
+            enabled: true,
+            "SEARCHABLE": "1")
+    bitsperpixel(
+            label: new FxString(true, 1, "BitsPerPixel"),
+            hint: new FxString(true, 1, ""),
+            defaultMultiplicity: 0,
+            multilang: false,
+            dataType: FxDataType.Number,
+            acl: CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+            multiplicity: new FxMultiplicity(0, 1),
+            overrideACL: true,
+            overrideMultiplicity: true,
+            overrideSearchable: true,
+            searchable: true,
+            fullTextIndexed: false,
+            multiline: false,
+            inOverview: false,
+            useHtmlEditor: false,
+            uniqueMode: UniqueMode.None,
+            enabled: true,
+            "SEARCHABLE": "1")
+    colortype(
+            label: new FxString(true, 1, "ColorType"),
+            hint: new FxString(true, 1, ""),
+            defaultMultiplicity: 0,
+            multilang: false,
+            dataType: FxDataType.String1024,
+            acl: CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+            multiplicity: new FxMultiplicity(0, 1),
+            overrideACL: true,
+            overrideMultiplicity: true,
+            overrideSearchable: true,
+            searchable: true,
+            fullTextIndexed: true,
+            multiline: false,
+            inOverview: false,
+            useHtmlEditor: false,
+            uniqueMode: UniqueMode.None,
+            enabled: true,
+            "SEARCHABLE": "1")
+    keywords_1(
+            label: new FxString(true, 1, "Keywords"),
+            hint: new FxString(true, 1, ""),
+            alias: "KEYWORDS",
+            defaultMultiplicity: 0,
+            multilang: true,
+            dataType: FxDataType.String1024,
+            acl: CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+            multiplicity: new FxMultiplicity(0, 2147483647),
+            overrideACL: true,
+            overrideMultiplicity: true,
+            overrideSearchable: true,
+            overrideMultilang: true,
+            searchable: true,
+            fullTextIndexed: true,
+            multiline: false,
+            inOverview: false,
+            useHtmlEditor: false,
+            uniqueMode: UniqueMode.None,
+            enabled: true,
+            "MULTILANG": "1",
+            "SEARCHABLE": "1")
+    TAKELOCATION(
+            label: new FxString(true, 1, "TakeLocation"),
+            hint: new FxString(true, 1, ""),
+            alias: "TAKELOCATION",
+            defaultMultiplicity: 0,
+            overrideMultiplicity: false,
+            multiplicity: new FxMultiplicity(0, 1),
+            groupMode: GroupMode.AnyOf) {
+        city_1(
+                label: new FxString(true, 1, "City"),
+                hint: new FxString(true, 1, ""),
+                alias: "CITY",
+                defaultMultiplicity: 1,
+                multilang: true,
+                dataType: FxDataType.String1024,
+                acl: CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+                multiplicity: new FxMultiplicity(0, 1),
+                overrideACL: true,
+                overrideMultiplicity: true,
+                overrideSearchable: true,
+                overrideMultilang: true,
+                searchable: true,
+                fullTextIndexed: true,
+                multiline: false,
+                inOverview: false,
+                useHtmlEditor: false,
+                uniqueMode: UniqueMode.None,
+                enabled: true,
+                "MULTILANG": "1",
+                "SEARCHABLE": "1")
+        sublocation(
+                label: new FxString(true, 1, "SubLocation"),
+                hint: new FxString(true, 1, ""),
+                defaultMultiplicity: 1,
+                multilang: false,
+                dataType: FxDataType.String1024,
+                acl: CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+                multiplicity: new FxMultiplicity(0, 1),
+                overrideACL: true,
+                overrideMultiplicity: true,
+                overrideSearchable: true,
+                searchable: true,
+                fullTextIndexed: true,
+                multiline: false,
+                inOverview: false,
+                useHtmlEditor: false,
+                uniqueMode: UniqueMode.None,
+                enabled: true,
+                "SEARCHABLE": "1")
+        provicestate(
+                label: new FxString(true, 1, "Province/State"),
+                hint: new FxString(true, 1, ""),
+                defaultMultiplicity: 1,
+                multilang: false,
+                dataType: FxDataType.String1024,
+                acl: CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+                multiplicity: new FxMultiplicity(0, 1),
+                overrideACL: true,
+                overrideMultiplicity: true,
+                overrideSearchable: true,
+                searchable: true,
+                fullTextIndexed: true,
+                multiline: false,
+                inOverview: false,
+                useHtmlEditor: false,
+                uniqueMode: UniqueMode.None,
+                enabled: true,
+                "SEARCHABLE": "1")
+        country_1(
+                label: new FxString(true, 1, "Country"),
+                hint: new FxString(true, 1, ""),
+                alias: "COUNTRY",
+                defaultMultiplicity: 1,
+                multilang: false,
+                dataType: FxDataType.String1024,
+                acl: CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+                multiplicity: new FxMultiplicity(0, 1),
+                overrideACL: true,
+                overrideMultiplicity: true,
+                overrideSearchable: true,
+                searchable: true,
+                fullTextIndexed: true,
+                multiline: false,
+                inOverview: false,
+                useHtmlEditor: false,
+                uniqueMode: UniqueMode.None,
+                enabled: true,
+                "SEARCHABLE": "1")
     }
-    MetaData(defaultMultiplicity: 0) {
-        manufacturer(dataType: FxDataType.String1024, multiplicity: FxMultiplicity.MULT_0_1, multilang: false)
-        model(dataType: FxDataType.String1024, multiplicity: FxMultiplicity.MULT_0_1, multilang: false)
-        orientation(FxDataType.SelectOne, multiplicity: FxMultiplicity.MULT_0_1, multilang: false, referencedList: CacheAdmin.getEnvironment().getSelectList("Image Orientation"), defaultMultiplicity: 0)
-        iso(name:"ISO", FxDataType.Number, multiplicity: FxMultiplicity.MULT_0_1, multilang: false, defaultMultiplicity: 0)
-        focalLength(dataType: FxDataType.String1024, multiplicity: FxMultiplicity.MULT_0_1, multilang: false)
-        maxApertureValue(dataType: FxDataType.String1024, multiplicity: FxMultiplicity.MULT_0_1, multilang: false)
-        apertureValue(dataType: FxDataType.String1024, multiplicity: FxMultiplicity.MULT_0_1, multilang: false)
-        exposureBias(dataType: FxDataType.String1024, multiplicity: FxMultiplicity.MULT_0_1, multilang: false)
-        exposureProgram(dataType: FxDataType.String1024, multiplicity: FxMultiplicity.MULT_0_1, multilang: false)
-        exposureTime(dataType: FxDataType.String1024, multiplicity: FxMultiplicity.MULT_0_1, multilang: false)
-        fNumber(dataType: FxDataType.String1024, multiplicity: FxMultiplicity.MULT_0_1, multilang: false)
-        originatingProgram(dataType: FxDataType.String1024, multiplicity: FxMultiplicity.MULT_0_1, multilang: false)
-        meteringMode(dataType: FxDataType.String1024, multiplicity: FxMultiplicity.MULT_0_1, multilang: false)
-        specialInstructions(dataType: FxDataType.String1024, multiplicity: FxMultiplicity.MULT_0_1, multilang: false)
-        fixtureIdentifier(dataType: FxDataType.String1024, multiplicity: FxMultiplicity.MULT_0_1, multilang: false)
-        flash(dataType: FxDataType.String1024, multiplicity: FxMultiplicity.MULT_0_1, multilang: false)
-        whiteBalance(dataType: FxDataType.String1024, multiplicity: FxMultiplicity.MULT_0_1, multilang: false)
+    METADATA(
+            label: new FxString(true, 1, "MetaData"),
+            hint: new FxString(true, 1, ""),
+            alias: "METADATA",
+            defaultMultiplicity: 0,
+            overrideMultiplicity: false,
+            multiplicity: new FxMultiplicity(0, 1),
+            groupMode: GroupMode.AnyOf) {
+        manufacturer(
+                label: new FxString(true, 1, "Manufacturer"),
+                hint: new FxString(true, 1, ""),
+                defaultMultiplicity: 1,
+                multilang: false,
+                dataType: FxDataType.String1024,
+                acl: CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+                multiplicity: new FxMultiplicity(0, 1),
+                overrideACL: true,
+                overrideMultiplicity: true,
+                overrideSearchable: true,
+                searchable: true,
+                fullTextIndexed: true,
+                multiline: false,
+                inOverview: false,
+                useHtmlEditor: false,
+                uniqueMode: UniqueMode.None,
+                enabled: true,
+                "SEARCHABLE": "1")
+        model(
+                label: new FxString(true, 1, "Model"),
+                hint: new FxString(true, 1, ""),
+                defaultMultiplicity: 1,
+                multilang: false,
+                dataType: FxDataType.String1024,
+                acl: CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+                multiplicity: new FxMultiplicity(0, 1),
+                overrideACL: true,
+                overrideMultiplicity: true,
+                overrideSearchable: true,
+                searchable: true,
+                fullTextIndexed: true,
+                multiline: false,
+                inOverview: false,
+                useHtmlEditor: false,
+                uniqueMode: UniqueMode.None,
+                enabled: true,
+                "SEARCHABLE": "1")
+        orientation(
+                label: new FxString(true, 1, "Orientation"),
+                hint: new FxString(true, 1, ""),
+                defaultMultiplicity: 0,
+                multilang: false,
+                dataType: FxDataType.SelectOne,
+                acl: CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+                multiplicity: new FxMultiplicity(0, 1),
+                overrideACL: true,
+                overrideMultiplicity: true,
+                overrideSearchable: true,
+                searchable: true,
+                fullTextIndexed: false,
+                multiline: false,
+                inOverview: false,
+                useHtmlEditor: false,
+                uniqueMode: UniqueMode.None,
+                enabled: true,
+                referencedList: CacheAdmin.getEnvironment().getSelectList("Image Orientation"),
+                "SEARCHABLE": "1")
+        iso(
+                label: new FxString(true, 1, "ISO"),
+                hint: new FxString(true, 1, ""),
+                defaultMultiplicity: 0,
+                multilang: false,
+                dataType: FxDataType.Number,
+                acl: CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+                multiplicity: new FxMultiplicity(0, 1),
+                overrideACL: true,
+                overrideMultiplicity: true,
+                overrideSearchable: true,
+                searchable: true,
+                fullTextIndexed: false,
+                multiline: false,
+                inOverview: false,
+                useHtmlEditor: false,
+                uniqueMode: UniqueMode.None,
+                enabled: true,
+                "SEARCHABLE": "1")
+        focallength(
+                label: new FxString(true, 1, "FocalLength"),
+                hint: new FxString(true, 1, ""),
+                defaultMultiplicity: 1,
+                multilang: false,
+                dataType: FxDataType.String1024,
+                acl: CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+                multiplicity: new FxMultiplicity(0, 1),
+                overrideACL: true,
+                overrideMultiplicity: true,
+                overrideSearchable: true,
+                searchable: true,
+                fullTextIndexed: true,
+                multiline: false,
+                inOverview: false,
+                useHtmlEditor: false,
+                uniqueMode: UniqueMode.None,
+                enabled: true,
+                "SEARCHABLE": "1")
+        maxaperturevalue(
+                label: new FxString(true, 1, "MaxApertureValue"),
+                hint: new FxString(true, 1, ""),
+                defaultMultiplicity: 1,
+                multilang: false,
+                dataType: FxDataType.String1024,
+                acl: CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+                multiplicity: new FxMultiplicity(0, 1),
+                overrideACL: true,
+                overrideMultiplicity: true,
+                overrideSearchable: true,
+                searchable: true,
+                fullTextIndexed: true,
+                multiline: false,
+                inOverview: false,
+                useHtmlEditor: false,
+                uniqueMode: UniqueMode.None,
+                enabled: true,
+                "SEARCHABLE": "1")
+        aperturevalue(
+                label: new FxString(true, 1, "ApertureValue"),
+                hint: new FxString(true, 1, ""),
+                defaultMultiplicity: 1,
+                multilang: false,
+                dataType: FxDataType.String1024,
+                acl: CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+                multiplicity: new FxMultiplicity(0, 1),
+                overrideACL: true,
+                overrideMultiplicity: true,
+                overrideSearchable: true,
+                searchable: true,
+                fullTextIndexed: true,
+                multiline: false,
+                inOverview: false,
+                useHtmlEditor: false,
+                uniqueMode: UniqueMode.None,
+                enabled: true,
+                "SEARCHABLE": "1")
+        exposurebias(
+                label: new FxString(true, 1, "ExposureBias"),
+                hint: new FxString(true, 1, ""),
+                defaultMultiplicity: 1,
+                multilang: false,
+                dataType: FxDataType.String1024,
+                acl: CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+                multiplicity: new FxMultiplicity(0, 1),
+                overrideACL: true,
+                overrideMultiplicity: true,
+                overrideSearchable: true,
+                searchable: true,
+                fullTextIndexed: true,
+                multiline: false,
+                inOverview: false,
+                useHtmlEditor: false,
+                uniqueMode: UniqueMode.None,
+                enabled: true,
+                "SEARCHABLE": "1")
+        exposureprogram(
+                label: new FxString(true, 1, "ExposureProgram"),
+                hint: new FxString(true, 1, ""),
+                defaultMultiplicity: 1,
+                multilang: false,
+                dataType: FxDataType.String1024,
+                acl: CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+                multiplicity: new FxMultiplicity(0, 1),
+                overrideACL: true,
+                overrideMultiplicity: true,
+                overrideSearchable: true,
+                searchable: true,
+                fullTextIndexed: true,
+                multiline: false,
+                inOverview: false,
+                useHtmlEditor: false,
+                uniqueMode: UniqueMode.None,
+                enabled: true,
+                "SEARCHABLE": "1")
+        exposuretime(
+                label: new FxString(true, 1, "ExposureTime"),
+                hint: new FxString(true, 1, ""),
+                defaultMultiplicity: 1,
+                multilang: false,
+                dataType: FxDataType.String1024,
+                acl: CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+                multiplicity: new FxMultiplicity(0, 1),
+                overrideACL: true,
+                overrideMultiplicity: true,
+                overrideSearchable: true,
+                searchable: true,
+                fullTextIndexed: true,
+                multiline: false,
+                inOverview: false,
+                useHtmlEditor: false,
+                uniqueMode: UniqueMode.None,
+                enabled: true,
+                "SEARCHABLE": "1")
+        fnumber(
+                label: new FxString(true, 1, "FNumber"),
+                hint: new FxString(true, 1, ""),
+                defaultMultiplicity: 1,
+                multilang: false,
+                dataType: FxDataType.String1024,
+                acl: CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+                multiplicity: new FxMultiplicity(0, 1),
+                overrideACL: true,
+                overrideMultiplicity: true,
+                overrideSearchable: true,
+                searchable: true,
+                fullTextIndexed: true,
+                multiline: false,
+                inOverview: false,
+                useHtmlEditor: false,
+                uniqueMode: UniqueMode.None,
+                enabled: true,
+                "SEARCHABLE": "1")
+        originatingprogram(
+                label: new FxString(true, 1, "OriginatingProgram"),
+                hint: new FxString(true, 1, ""),
+                defaultMultiplicity: 1,
+                multilang: false,
+                dataType: FxDataType.String1024,
+                acl: CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+                multiplicity: new FxMultiplicity(0, 1),
+                overrideACL: true,
+                overrideMultiplicity: true,
+                overrideSearchable: true,
+                searchable: true,
+                fullTextIndexed: true,
+                multiline: false,
+                inOverview: false,
+                useHtmlEditor: false,
+                uniqueMode: UniqueMode.None,
+                enabled: true,
+                "SEARCHABLE": "1")
+        meteringmode(
+                label: new FxString(true, 1, "MeteringMode"),
+                hint: new FxString(true, 1, ""),
+                defaultMultiplicity: 1,
+                multilang: false,
+                dataType: FxDataType.String1024,
+                acl: CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+                multiplicity: new FxMultiplicity(0, 1),
+                overrideACL: true,
+                overrideMultiplicity: true,
+                overrideSearchable: true,
+                searchable: true,
+                fullTextIndexed: true,
+                multiline: false,
+                inOverview: false,
+                useHtmlEditor: false,
+                uniqueMode: UniqueMode.None,
+                enabled: true,
+                "SEARCHABLE": "1")
+        specialinstructions(
+                label: new FxString(true, 1, "SpecialInstructions"),
+                hint: new FxString(true, 1, ""),
+                defaultMultiplicity: 1,
+                multilang: false,
+                dataType: FxDataType.String1024,
+                acl: CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+                multiplicity: new FxMultiplicity(0, 1),
+                overrideACL: true,
+                overrideMultiplicity: true,
+                overrideSearchable: true,
+                searchable: true,
+                fullTextIndexed: true,
+                multiline: false,
+                inOverview: false,
+                useHtmlEditor: false,
+                uniqueMode: UniqueMode.None,
+                enabled: true,
+                "SEARCHABLE": "1")
+        fixtureidentifier(
+                label: new FxString(true, 1, "FixtureIdentifier"),
+                hint: new FxString(true, 1, ""),
+                defaultMultiplicity: 1,
+                multilang: false,
+                dataType: FxDataType.String1024,
+                acl: CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+                multiplicity: new FxMultiplicity(0, 1),
+                overrideACL: true,
+                overrideMultiplicity: true,
+                overrideSearchable: true,
+                searchable: true,
+                fullTextIndexed: true,
+                multiline: false,
+                inOverview: false,
+                useHtmlEditor: false,
+                uniqueMode: UniqueMode.None,
+                enabled: true,
+                "SEARCHABLE": "1")
+        flash(
+                label: new FxString(true, 1, "Flash"),
+                hint: new FxString(true, 1, ""),
+                defaultMultiplicity: 1,
+                multilang: false,
+                dataType: FxDataType.String1024,
+                acl: CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+                multiplicity: new FxMultiplicity(0, 1),
+                overrideACL: true,
+                overrideMultiplicity: true,
+                overrideSearchable: true,
+                searchable: true,
+                fullTextIndexed: true,
+                multiline: false,
+                inOverview: false,
+                useHtmlEditor: false,
+                uniqueMode: UniqueMode.None,
+                enabled: true,
+                "SEARCHABLE": "1")
+        whitebalance(
+                label: new FxString(true, 1, "WhiteBalance"),
+                hint: new FxString(true, 1, ""),
+                defaultMultiplicity: 1,
+                multilang: false,
+                dataType: FxDataType.String1024,
+                acl: CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+                multiplicity: new FxMultiplicity(0, 1),
+                overrideACL: true,
+                overrideMultiplicity: true,
+                overrideSearchable: true,
+                searchable: true,
+                fullTextIndexed: true,
+                multiline: false,
+                inOverview: false,
+                useHtmlEditor: false,
+                uniqueMode: UniqueMode.None,
+                enabled: true,
+                "SEARCHABLE": "1")
     }
 }
 
+typeId = CacheAdmin.getEnvironment().getType(IMAGE_TYPE).getId()
 FxScriptInfo si = se.createScriptFromLibrary(FxScriptEvent.BeforeContentCreate, "ImageMetaParser.gy", "ImageMetaParser.gy", "Script filling image properties");
 se.createTypeScriptMapping(si.getId(), typeId, true, true);
 
 EJBLookup.resultPreferencesEngine.saveSystemDefault(
         new ResultPreferences(
                 [new ResultColumnInfo("#image/imageBinary"),
-                 new ResultColumnInfo("@pk"),
-                 new ResultColumnInfo("#image/caption"),
-                 new ResultColumnInfo("#image/dateCreated"),
-                 new ResultColumnInfo("#image/filename"),
-                 new ResultColumnInfo("#image/author")
+                        new ResultColumnInfo("@pk"),
+                        new ResultColumnInfo("#image/caption"),
+                        new ResultColumnInfo("#image/dateCreated"),
+                        new ResultColumnInfo("#image/filename"),
+                        new ResultColumnInfo("#image/author")
                 ],
                 [new ResultOrderByInfo("#image/dateCreated", SortDirection.DESCENDING)],
                 25, 0
@@ -165,10 +895,11 @@ EJBLookup.resultPreferencesEngine.saveSystemDefault(
         ResultViewType.LIST,
         AdminResultLocations.values()
 )
+
 EJBLookup.resultPreferencesEngine.saveSystemDefault(
         new ResultPreferences(
                 [new ResultColumnInfo("#image/caption"),
-                 new ResultColumnInfo("#image/dateCreated")
+                        new ResultColumnInfo("#image/dateCreated")
                 ],
                 [new ResultOrderByInfo("#image/dateCreated", SortDirection.DESCENDING)],
                 25, 0

@@ -71,7 +71,7 @@ public class BinaryTest {
     private static final Log LOG = LogFactory.getLog(BinaryTest.class);
 
     private static String IMAGE_TYPE = "Image";
-    private static String DOCUMENT_TYPE = "DocumentFile";
+    private static String DOCUMENT_TYPE = FxType.DOCUMENT;
 
     private ContentEngine co;
 
@@ -103,7 +103,7 @@ public class BinaryTest {
     @Test
     public void binaryFromStream() throws Exception {
         final String CONTENT = "test document content";
-        final String MIME_TYPE = "plain/text";
+        final String MIME_TYPE = "text/plain";
         BinaryDescriptor bin = new BinaryDescriptor("test document.txt", MIME_TYPE, new ByteArrayInputStream(CONTENT.getBytes("UTF-8")));
         FxType docType = CacheAdmin.getEnvironment().getType(DOCUMENT_TYPE);
         FxContent doc = co.initialize(docType.getId());

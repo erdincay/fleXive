@@ -503,10 +503,10 @@ public class SearchEngineTest {
 
     @Test
     public void selectBinaryTest() throws FxApplicationException {
-        final FxResultSet result = new SqlQueryBuilder().type("image").select("@pk", "imageBinary").getResult();
+        final FxResultSet result = new SqlQueryBuilder().type("image").select("@pk", "image/imageBinary").getResult();
         assertTrue(result.getRowCount() > 0);
         for (FxResultRow row : result.getResultRows()) {
-            final BinaryDescriptor binary = ((FxBinary) row.getFxValue("imageBinary")).getBestTranslation();
+            final BinaryDescriptor binary = ((FxBinary) row.getFxValue("image/imageBinary")).getBestTranslation();
             assertFalse(binary.isNewBinary());
             assertNotNull(binary.getName());
             assertNotNull(binary.getMimeType());

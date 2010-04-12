@@ -84,14 +84,13 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      */
     public static final String FOLDER = "FOLDER";
     /**
-     * Name of the ROOT document type for storing file formats
+     * Name of the ROOT document type for storing (binary) file formats
      */
     public static final String DOCUMENTFILE = "DOCUMENTFILE";
     /**
-     * Name of the document type for storing typical document file formats (PDF, Word, Excel, ...)
+     * Name of the document type for storing typical document file formats (application mime types: PDF, Word, Excel, ...)
      */
-    // public static final String DOCUMENT = "APPLICATION";
-    public static final String DOCUMENT = "DOCUMENTFILE";
+    public static final String DOCUMENT = "DOCUMENT";
 
     protected long id;
     protected ACL ACL;
