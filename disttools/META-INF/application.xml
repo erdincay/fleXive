@@ -2,7 +2,7 @@
 <application xmlns="http://java.sun.com/xml/ns/javaee" version="5"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/application_5.xsd">
-    <display-name>[fleXive](tm) v3</display-name>
+    <display-name>flexive 3</display-name>
 
     <module>
       <ejb>flexive-ejb.jar</ejb>

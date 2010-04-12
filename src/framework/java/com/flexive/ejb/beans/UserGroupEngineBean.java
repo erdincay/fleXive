@@ -50,6 +50,7 @@ import javax.ejb.*;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.lang.StringUtils;
 
 
 /**
@@ -306,8 +307,8 @@ public class UserGroupEngineBean implements UserGroupEngine, UserGroupEngineLoca
             checkName(name);
 
             // Fill in new values
-            if (name != null && color.length() > 0) aGroup.setName(name);
-            if (color != null) aGroup.setColor(color);
+            if (StringUtils.isNotBlank(name)) aGroup.setName(name);
+            if (StringUtils.isNotBlank(color)) aGroup.setColor(color);
 
             // Obtain a database connection
             con = Database.getDbConnection();
