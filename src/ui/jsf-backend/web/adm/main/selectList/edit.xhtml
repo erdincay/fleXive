@@ -43,8 +43,8 @@
                 <fx:fxValueInputLanguageSelect id="updateLanguages"/>
             </div>
 
-            <fx:formRow labelKey="SelectList.label.selectList.name" id="name">
-                <h:inputText id="name" value="#{selectListBean.selectListName}" disabled="#{readonlyList}" styleClass="fxValueTextInput"/>
+            <fx:formRow labelKey="SelectList.label.selectList.name" id="listName">
+                <h:inputText id="listName" value="#{selectListBean.selectListName}" disabled="#{readonlyList}" styleClass="fxValueTextInput"/>
             </fx:formRow>
              <fx:formRow labelKey="SelectList.label.selectList.label" id="label">
                 <fx:fxValueInput id="label" value="#{selectListBean.selectListLabel}" readOnly="#{readonlyList}"/>
@@ -111,14 +111,28 @@
                         <tbody>
                         <ui:repeat var="item" value="#{selectListBean.items}">
                             <tr value="#{selectListBean.idMap[item.id]}">
-                                <td align="left">#{item.name}</td>
+                                <td align="left">
+                                    <ui:fragment rendered="#{item.validName}">
+                                        #{item.name}
+                                    </ui:fragment>
+                                    <ui:fragment rendered="#{!item.validName}">
+                                        <div class="errorMessage">[#{fxMessageBean['ex.selectlist.missingName']}]</div>
+                                    </ui:fragment>
+                                </td>
                                 <td align="left"><!--#{item.color}-->
                                     <div style="display: inline; border:1px solid; background-color:#{item.color}">
                                         <img src="#{fx:webletUrl('com.flexive.faces.weblets', '/images/empty.gif')}"
                                              width="12" height="12"/>
                                     </div>
                                 </td>
-                                <td align="left"><fx:fxValueInput value="#{item.label}" readOnly="true"/></td>
+                                <td align="left">
+                                    <ui:fragment rendered="#{item.validLabel}">
+                                        <fx:fxValueInput value="#{item.label}" readOnly="true"/>
+                                    </ui:fragment>
+                                    <ui:fragment rendered="#{!item.validLabel}">
+                                        <div class="errorMessage">[#{fxMessageBean['ex.selectlist.missingLabel']}]</div>
+                                    </ui:fragment>
+                                </td>
                                 <td align="left">#{item.data}</td>
                                 <td align="left"><fx:fxValueInput value="#{item.acl.label}" readOnly="true"/></td>
                                 <td align="left">#{item.childCount}</td>

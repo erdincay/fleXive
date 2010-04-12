@@ -39,6 +39,7 @@ import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.LifeCycleInfo;
 import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.value.FxString;
+import org.apache.commons.lang.StringUtils;
 
 import java.io.Serializable;
 import java.util.List;
@@ -400,5 +401,21 @@ public class FxSelectListItem implements Serializable, SelectableObjectWithLabel
             curr = curr.getParentItem();
         }
         return sb.toString();
+    }
+
+    /**
+     * checks if the current listItem is valid
+     * @return <code>true</code> if the name is valid
+     */
+    public boolean isValidName() {
+        return (!StringUtils.isEmpty(name) && name.indexOf(',') < 0);
+    }
+
+    /**
+     * checks if the current listItem is valid
+     * @return <code>true</code> if the label is valid
+     */
+    public boolean isValidLabel() {
+        return label != null && !label.getIsEmpty();
     }
 }

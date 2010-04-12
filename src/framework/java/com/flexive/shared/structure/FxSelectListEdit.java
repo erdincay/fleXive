@@ -246,6 +246,9 @@ public class FxSelectListEdit extends FxSelectList implements Serializable {
      */
 
     public void removeItem(Long id) {
+        if (getHasChildItems(id)) {
+            return;
+        }
         this.items.remove(id);
         recalcPositions();
     }

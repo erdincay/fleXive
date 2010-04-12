@@ -34,13 +34,14 @@ package com.flexive.ejb.beans.structure;
 import com.flexive.core.Database;
 import static com.flexive.core.DatabaseConst.*;
 import com.flexive.core.LifeCycleInfoImpl;
-import com.flexive.core.storage.StorageManager;
 import com.flexive.core.flatstorage.FxFlatStorageManager;
+import com.flexive.core.storage.StorageManager;
 import com.flexive.core.structure.StructureLoader;
+import com.flexive.ejb.beans.EJBUtils;
 import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSystemSequencer;
-import com.flexive.shared.EJBLookup;
 import com.flexive.shared.cache.FxCacheException;
 import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.*;
@@ -54,7 +55,6 @@ import com.flexive.shared.structure.FxSelectListEdit;
 import com.flexive.shared.structure.FxSelectListItem;
 import com.flexive.shared.structure.FxSelectListItemEdit;
 import com.flexive.shared.value.FxString;
-import com.flexive.ejb.beans.EJBUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -65,9 +65,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * SelectListEngine implementation
@@ -135,41 +133,97 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
                 idMap = new HashMap<Long, Long>(10);
             idMap.put(e.getId(), seq.getId(FxSystemSequencer.SELECTLIST_ITEM));
         }
-        for (FxSelectListItem item : list.getItems()) {
-            e = (item instanceof FxSelectListItemEdit ? (FxSelectListItemEdit) item : item.asEditable());
-            if (newList) {
-                currentItemId = createItem(e, idMap);
-                //get the new created default item id
-                if (defaultItemId < 0 && e.getId() == defaultItemId)
-                    defaultItemId = currentItemId;
-            } else if (e.isNew()) {
-                createItem(e, idMap);
-                changes = true;
-            } else if (e.changes()) {
-                //check if the user is permitted to edit this specific item
-                if (FxContext.getUserTicket().isInRole(Role.SelectListEditor) || FxContext.getUserTicket().mayCreateACL(e.getAcl().getId(), -1)) {
-                    updateItem(e);
-                    changes = true;
-                } else
-                    throw new FxNoAccessException("ex.role.notInRole", Role.SelectListEditor.getName());
-            }
-        }
-        updatePositions(list.getItems(), idMap);
-        updateDefaultItem(id, defaultItemId);
-        if (!changes) {
-            FxSelectListItem orgDef = CacheAdmin.getEnvironment().getSelectList(id).getDefaultItem();
-            if ((orgDef == null && defaultItemId != 0) || (orgDef != null && defaultItemId <= 0) ||
-                    (orgDef != null && defaultItemId != 0 && orgDef.getId() != defaultItemId))
-                changes = true;
-        }
         try {
-            if (changes)
-                StructureLoader.reload(null);
-        } catch (FxCacheException e1) {
-            EJBUtils.rollback(ctx);
-            throw new FxCreateException(LOG, e1, "ex.cache", e1.getMessage());
+            for (FxSelectListItemEdit item : sortItemsByParent(list.getItems())) {
+                e = item;
+                if (newList) {
+                    currentItemId = createItem(e, idMap);
+                    //get the new created default item id
+                    if (defaultItemId < 0 && e.getId() == defaultItemId)
+                        defaultItemId = currentItemId;
+                } else if (e.isNew()) {
+                    createItem(e, idMap);
+                    changes = true;
+                } else if (e.changes()) {
+                    //check if the user is permitted to edit this specific item
+                    if (FxContext.getUserTicket().isInRole(Role.SelectListEditor) || FxContext.getUserTicket().mayCreateACL(e.getAcl().getId(), -1)) {
+                        updateItem(e);
+                        changes = true;
+                    } else
+                        throw new FxNoAccessException("ex.role.notInRole", Role.SelectListEditor.getName());
+                }
+            }
+            updatePositions(list.getItems(), idMap);
+            updateDefaultItem(id, defaultItemId);
+            if (!changes) {
+                FxSelectListItem orgDef = CacheAdmin.getEnvironment().getSelectList(id).getDefaultItem();
+                if ((orgDef == null && defaultItemId != 0) || (orgDef != null && defaultItemId <= 0) ||
+                        (orgDef != null && defaultItemId != 0 && orgDef.getId() != defaultItemId))
+                    changes = true;
+            }
+            try {
+                if (changes)
+                    StructureLoader.reload(null);
+            } catch (FxCacheException e1) {
+                EJBUtils.rollback(ctx);
+                throw new FxCreateException(LOG, e1, "ex.cache", e1.getMessage());
+            }
+            return id;
+        } catch (FxApplicationException fxApp) {
+            ctx.setRollbackOnly();
+            throw fxApp;
         }
-        return id;
+    }
+
+    /**
+     * Sorts a list of SelectListItems according the parent ids
+     *
+     * Changes only the order to save, not the order of the selectList
+     * @param items a list of the SelectListItems
+     * @return a list sorted by the parent or an empty list if item was <code>null</code> or empty
+     */
+    private List<FxSelectListItemEdit> sortItemsByParent(List<FxSelectListItem> items) {
+        if (items == null || items.size() <= 0) {
+            return new ArrayList<FxSelectListItemEdit>();
+        }
+        List<FxSelectListItemEdit> sortedItems = new ArrayList<FxSelectListItemEdit>(items.size());
+        List<FxSelectListItem> tmpItems = new ArrayList<FxSelectListItem>(items);
+        List<FxSelectListItem> badItems = new ArrayList<FxSelectListItem>(items.size());
+        Set<Long> knownParents = new HashSet<Long>();
+        // Indicates if we have added one (or more) items into the result list
+        boolean changed = true;
+        int remainingLoops = 500;
+
+        while (tmpItems.size() > 0 && changed && remainingLoops-->0) {
+            changed = false;
+            for (FxSelectListItem tmpItem : tmpItems) {
+                // If the item has no parent, we add it to the result list, and mark the id as 'known'
+                if (!tmpItem.hasParentItem()) {
+                    sortedItems.add((tmpItem instanceof FxSelectListItemEdit ? (FxSelectListItemEdit) tmpItem : tmpItem.asEditable()));
+                    knownParents.add(tmpItem.getId());
+                    changed = true;
+                } else {
+                    // If the item has a parent we already know, we add it to the result list, and mark the id as 'known'
+                    if (knownParents.contains(tmpItem.getParentItem().getId())) {
+                        sortedItems.add((tmpItem instanceof FxSelectListItemEdit ? (FxSelectListItemEdit) tmpItem : tmpItem.asEditable()));
+                        knownParents.add(tmpItem.getId());
+                        changed = true;
+                    // If the item has a parent we don't know, we had to add it to the badItems and try again the next time
+                    } else {
+                        badItems.add(tmpItem);
+                    }
+                }
+            }
+            tmpItems.clear();
+            tmpItems.addAll(badItems);
+            badItems.clear();
+        }
+
+        // Just in case some items has unknown parents add them to the list so that we keep consistent
+        for (FxSelectListItem tmpItem : tmpItems) {
+            sortedItems.add((tmpItem instanceof FxSelectListItemEdit ? (FxSelectListItemEdit) tmpItem : tmpItem.asEditable()));
+        }
+        return sortedItems;
     }
 
     /**
@@ -465,7 +519,7 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
         PreparedStatement ps = null;
         try {
             con = Database.getDbConnection();
-            //                                                                 1  2    3   4        5      6    7
+            //                                                                        1  2    3   4        5      6    7
             ps = con.prepareStatement("INSERT INTO " + TBL_STRUCT_SELECTLIST_ITEM + "(ID,NAME,ACL,PARENTID,LISTID,DATA,COLOR," +
                     //8         9          10          11          12      13       14
                     "CREATED_BY,CREATED_AT,MODIFIED_BY,MODIFIED_AT,DBIN_ID,DBIN_VER,DBIN_QUALITY)VALUES" +

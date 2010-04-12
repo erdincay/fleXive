@@ -53,7 +53,6 @@ import com.flexive.shared.value.FxString;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import javax.faces.event.ActionEvent;
 import javax.faces.model.SelectItem;
 import java.io.Serializable;
 import java.util.*;
@@ -572,7 +571,7 @@ public class SelectListBean implements Serializable {
             selectListId = EJBLookup.getSelectListEngine().save(list);
             reset();
             new FxFacesMsgInfo("SelectList.nfo.created").addToContext();
-            return initEditing();
+            return initEditing(true);
         }
         catch (Throwable t) {
             new FxFacesMsgErr(t).addToContext();
@@ -581,7 +580,13 @@ public class SelectListBean implements Serializable {
     }
 
     public String initEditing() {
-        selectList = CacheAdmin.getEnvironment().getSelectList(selectListId).asEditable();
+        return initEditing(true);
+    }
+
+    public String initEditing(boolean reloadSelectlist) {
+        if (reloadSelectlist) {
+            selectList = CacheAdmin.getEnvironment().getSelectList(selectListId).asEditable();
+        }
         setSelectListAllowDynamicCreation(selectList.isAllowDynamicItemCreation());
         setSelectListDescription(selectList.getDescription() == null ? new FxString("") : selectList.getDescription());
         setSelectListLabel(selectList.getLabel() == null ? new FxString("") : selectList.getLabel());
@@ -620,8 +625,12 @@ public class SelectListBean implements Serializable {
                 //check if the item is used in content instances (only check if the item was saved before (id >= 0) )
                 if (listItemId >= 0 && EJBLookup.getSelectListEngine().getSelectListItemInstanceCount(listItemId) != 0)
                     throw new FxEntryInUseException("ex.selectlist.item.itemInUse", selectList.getItem(listItemId).getLabel());
-
-                selectList.removeItem(listItemId);
+                if (!selectList.getHasChildItems(listItemId)){
+                    selectList.removeItem(listItemId);
+                }
+                else {
+                  new FxFacesMsgErr("ex.selectlist.item.hasChildren", selectList.getItem(listItemId).getLabel()).addToContext();  
+                }
             } else
                 throw new FxNoAccessException("ex.selectlist.item.remove.noPerm", selectList.getLabel(), selectList.getCreateItemACL().getLabel());
         }
@@ -693,11 +702,11 @@ public class SelectListBean implements Serializable {
             EJBLookup.getSelectListEngine().save(selectList);
             reset();
             new FxFacesMsgInfo("SelectList.nfo.saved").addToContext();
-            return initEditing();
+            return initEditing(true);
         }
         catch (Throwable t) {
             new FxFacesMsgErr(t).addToContext();
-            return initEditing();
+            return initEditing(false);
         }
     }
 }
