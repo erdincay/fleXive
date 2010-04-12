@@ -21,7 +21,7 @@
         <a4j:region id="lockPanel">
             <h:form id="frm">
                 <t:saveState value="#{lockBean.list}"/>
-                
+
                 <script type="text/javascript">
                     <!--
                     var userAcHandler = new flexive.yui.AutoCompleteHandler(function(query) {
@@ -48,23 +48,11 @@
                         <f:selectItems value="#{lockBean.availableLockTypes}"/>
                     </h:selectOneListbox>
                 </fx:formRow>
-                <br/><br/>
-                <a4j:outputPanel id="lockOptionPanel">
-                    <fx:fieldSet legendKey="Lock.field.lockOptions">
-                        <fx:formRow id="markAllBox" labelKey="Lock.label.markAllBox">
-                            <h:selectBooleanCheckbox id="markAllBox" value="#{lockBean.allMarked}">
-                                <a4j:support event="onclick" reRender="lockResults" action="#{lockBean.markAll}"/>
-                            </h:selectBooleanCheckbox>
-                        </fx:formRow>
-                        <!-- unlock / extend selected buttons -->
-                        <adm:ajaxCommandButton id="unlockSelected" labelKey="Lock.button.unlockSelected"
-                                               bean="#{lockBean}" action="unlockSelected" reRender="lockOptionPanel, lockResults"
-                                               icon="unlock"/>
-                        <adm:ajaxCommandButton id="extendSelected" labelKey="Lock.button.extendSelected"
-                                               bean="#{lockBean}" action="extendSelected" reRender="lockOptionPanel, lockResults"
-                                               icon="timeExtend"/>
-                    </fx:fieldSet>
-                </a4j:outputPanel>
+                <br/>
+
+                <adm:commandButton id="lockQuerySearch" labelKey="Lock.button.query" location="both"
+                                   icon="search" lockscreen="false" bean="#{lockBean}" action="performQuery"/>
+                <br/><br/><br/>
 
                 <a4j:outputPanel id="lockResults">
                     <c:set var="list" value="#{lockBean.list}"/>
@@ -143,9 +131,23 @@
                     </adm:sortableTable>
                     <fx:yuiSetup/>
                 </a4j:outputPanel>
-
-                <adm:commandButton id="lockQuerySearch" labelKey="Lock.button.query" location="both"
-                                   icon="search" lockscreen="false" bean="#{lockBean}" action="performQuery"/>
+                <br/>
+                <a4j:outputPanel id="lockOptionPanel">
+                    <fx:fieldSet legendKey="Lock.field.lockOptions">
+                        <fx:formRow id="markAllBox" labelKey="Lock.label.markAllBox">
+                            <h:selectBooleanCheckbox id="markAllBox" value="#{lockBean.allMarked}">
+                                <a4j:support event="onclick" reRender="lockResults" action="#{lockBean.markAll}"/>
+                            </h:selectBooleanCheckbox>
+                        </fx:formRow>
+                        <!-- unlock / extend selected buttons -->
+                        <adm:ajaxCommandButton id="unlockSelected" labelKey="Lock.button.unlockSelected"
+                                               bean="#{lockBean}" action="unlockSelected" reRender="lockOptionPanel, lockResults"
+                                               icon="unlock"/>
+                        <adm:ajaxCommandButton id="extendSelected" labelKey="Lock.button.extendSelected"
+                                               bean="#{lockBean}" action="extendSelected" reRender="lockOptionPanel, lockResults"
+                                               icon="timeExtend"/>
+                    </fx:fieldSet>
+                </a4j:outputPanel>
 
                 <adm:toolbarPluginButtons/>
 
