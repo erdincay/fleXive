@@ -45,6 +45,7 @@ import com.flexive.shared.structure.FxDataType;
 import com.flexive.shared.structure.FxPropertyAssignment;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNode;
+import com.flexive.shared.tree.FxTreeNodeEdit;
 import com.flexive.shared.value.BinaryDescriptor;
 import com.flexive.shared.value.FxBinary;
 import com.flexive.shared.value.FxString;
@@ -71,12 +72,15 @@ public class FlexiveDocument extends FlexiveObjectEntry implements Document {
     private final FxPK pk;    // only setting PK leads to lazy loading of the content
     private final String treePathName;
     private final long folderParentId;
-    
+
+    private String newTreeName;
+
     private FxContent _cachedContent;
     private FxString _cachedCaption;
     private long _cachedTypeId = -1;
     private FxTreeNode _cachedFolderParent; // the parent if the document was loaded from a folder
     private LifeCycleInfo _cachedLifeCycleInfo;
+    private FxTreeNode _cachedFolderNode;
 
     FlexiveDocument(FlexiveConnection.Context context, FxContent content) {
         super(context);
@@ -125,6 +129,7 @@ public class FlexiveDocument extends FlexiveObjectEntry implements Document {
         this._cachedCaption = node.getLabel();
         this._cachedTypeId = node.getReferenceTypeId();
         this._cachedLifeCycleInfo = node.getReferenceLifeCycleInfo();
+        this._cachedFolderNode = node;
     }
 
     @Override
@@ -410,6 +415,14 @@ public class FlexiveDocument extends FlexiveObjectEntry implements Document {
         try {
             // TODO: sync folders
             getContent().save();
+
+            // sync folder name
+            if (newTreeName != null && getFolderNode() != null) {
+                final FxTreeNodeEdit editNode = getFolderNode().asEditable();
+                editNode.getLabel().setValue(newTreeName);
+                editNode.setName(newTreeName);
+                getTreeEngine().save(editNode);
+            }
         } catch (FxApplicationException e) {
             throw e.asRuntimeException();
         }
@@ -442,6 +455,7 @@ public class FlexiveDocument extends FlexiveObjectEntry implements Document {
         } else {
             throw new IllegalArgumentException("No caption property available for type: " + getTypeId());
         }
+        this.newTreeName = name;
     }
 
     public ContentStream getContentStream(String contentStreamId) throws IOException {
@@ -476,6 +490,20 @@ public class FlexiveDocument extends FlexiveObjectEntry implements Document {
             throw e.asRuntimeException();
         }
         return nodes;
+    }
+
+    /**
+     * @return  the tree node if this content was loaded from a folder, or null otherwise
+     */
+    private FxTreeNode getFolderNode() {
+        if (_cachedFolderNode == null && folderParentId != -1) {
+            try {
+                _cachedFolderNode = getTreeEngine().findChild(FxTreeMode.Edit, folderParentId, getPK());
+            } catch (FxApplicationException e) {
+                throw e.asRuntimeException();
+            }
+        }
+        return _cachedFolderNode;
     }
 
 }

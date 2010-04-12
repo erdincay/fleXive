@@ -44,6 +44,8 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
+ * <strong>Disclaimer: this API is part of the CMIS interface and is not yet considered stable.</strong><br/><br/>
+ *
  * A row in a {@link CmisResultSet}. The column values are boxed in {@link CmisResultValue} objects.
  * <p>
  * You can iterate over the columns of this row using it as an iterator, or access the columns directly:

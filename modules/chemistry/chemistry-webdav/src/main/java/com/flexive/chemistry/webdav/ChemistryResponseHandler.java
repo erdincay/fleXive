@@ -29,43 +29,22 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the file!
  ***************************************************************/
-package com.flexive.shared.interfaces;
+package com.flexive.chemistry.webdav;
 
-import com.flexive.shared.exceptions.*;
-import com.flexive.shared.cmis.search.CmisResultSet;
-
-import javax.ejb.Remote;
+import com.bradmcevoy.http.MsOfficeResponseHandler;
 
 /**
- * <strong>Disclaimer: this API is part of the CMIS interface and is not yet considered stable.</strong><br/><br/>
- *
- * The CMIS search engine EJB interface.
+ * The default response handler. Currently this is Milton's MsOfficeResponseHandler, but it returns
+ * "1,2" as supported levels for better compatibility with Mac.
  *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
- * @since 3.1
  */
-@Remote
-public interface CmisSearchEngine {
+public class ChemistryResponseHandler extends MsOfficeResponseHandler {
 
-    /**
-     * @param query the CMIS-SQL query to be submitted
-     * @return the query result
-     * @throws FxCmisSqlParseException when the query could not be parsed
-     * @throws FxCmisQueryException    when the query could not be executed
-     */
-    CmisResultSet search(String query) throws FxApplicationException;
-
-    /**
-     * @param query                 the CMIS-SQL query to be submitted
-     * @param returnPrimitiveValues if true, the return values will not be boxed in
-     *                              {@link com.flexive.shared.value.FxValue} objects
-     * @param startRow              first row to return
-     * @param maxRows               max. number of rows to return
-     * @return the query result
-     * @throws FxCmisSqlParseException when the query could not be parsed
-     * @throws FxCmisQueryException    when the query could not be executed
-     */
-    CmisResultSet search(String query, boolean returnPrimitiveValues, int startRow, int maxRows) throws FxApplicationException;
+    @Override
+    public String getSupportedLevels() {
+        return "1,2";
+    }
 
 }

@@ -41,11 +41,11 @@ import org.apache.commons.lang.StringUtils;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 import java.util.Date;
 
 /**
+ * <strong>Disclaimer: this API is part of the CMIS interface and is not yet considered stable.</strong><br/><br/>
+ *
  * A boxed column value in a CMIS result set. You can access the boxed value with
  * {@link #getValue()}, the {@link #equals(Object)} and {@link #toString()} functions will be
  * forwarded to the boxed instance (unless it is null).

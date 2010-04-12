@@ -28,7 +28,7 @@
         </init-param>
         <init-param>
             <param-name>response.handler.class</param-name>
-            <param-value>com.bradmcevoy.http.MsOfficeResponseHandler</param-value>
+            <param-value>com.flexive.chemistry.webdav.ChemistryResponseHandler</param-value>
         </init-param>
         <init-param>
             <param-name>not.found.url</param-name>

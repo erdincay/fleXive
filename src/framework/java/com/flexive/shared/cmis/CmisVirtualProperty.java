@@ -34,6 +34,8 @@ package com.flexive.shared.cmis;
 import org.apache.commons.lang.StringUtils;
 
 /**
+ * <strong>Disclaimer: this API is part of the CMIS interface and is not yet considered stable.</strong><br/><br/>
+ *
  * Definitions of CMIS property names (CMIS draft 0.62) and their mapping to [fleXive] properties, if available.
  *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
