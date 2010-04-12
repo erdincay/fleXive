@@ -186,7 +186,38 @@
 
     <section xml:id="adm_user_preferences">
         <title>User preferences</title>
-
+        <para>
+            The user preferences GUI can be accessed via the <link linkend="adm_gui_areas">toolbar
+            </link> by clicking the
+            <inlinemediaobject>
+                 <imageobject>
+                    <imagedata fileref="images/adm_ui_user_preferences/user_preferences_icon.png" format="PNG"
+                               width="66%"/>
+                </imageobject>
+            </inlinemediaobject> icon.
+            The user preferences GUI provides two tabs. The first tab called "User preferences" allows
+            changing the backend language and the default input language, the e-mail address
+            and the password.
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="images/adm_ui_user_preferences/user_preferences.png" format="PNG"
+                                   width="66%"/>
+                </imageobject>
+            </mediaobject>
+        </para>
+        <para>
+            The second tab called "User contact data" allows editing the contact data content instance
+            directly which is used to store additional user specific data but is 
+            actually independent of the actual account data (i.e modifying the e-mail
+            address in the contact data does
+            not forward to the e-mail stored within the account data).
+            <mediaobject>
+                <imageobject>
+                    <imagedata fileref="images/adm_ui_user_preferences/user_contact_data.png" format="PNG"
+                                   width="66%"/>
+                </imageobject>
+            </mediaobject>
+        </para>
     </section>
 
     <section xml:id="adm_structure_editor_basics">
@@ -257,8 +288,8 @@
                 tab (1) in the administration backend. The GUI is separated into two parts: the
                 structure tree (2) on the left half of the screen and the edit view (3) on the right half.
             </para>
-            <section xml:id="adm_structure_tree_items">
-                <title>Structure tree items</title>
+            <section xml:id="adm_structure_tree">
+                <title>Structure tree</title>
                 The Structure tree contains all defined types with their assignments as children.
                 <para>The structure tree consists of the following items:
                     <itemizedlist>
@@ -1284,293 +1315,498 @@
 
     <section xml:id="adm_instance_editor">
         <title>The instance editor</title>
-        <para>The instance editor allows you to create and edit
+        <para>The instance editor allows you view to create and edit
             <link linkend="core_contents">content instances</link>.
+            Similar to the structure editor, the instance editor supports
+            a <glossterm>view mode</glossterm> and an <glossterm>edit mode</glossterm>.
         </para>
-        <para>It can be accessed via the</para>
-        <para>
+        <section xml:id="adm_instance_editor_create">
+            <title>Creating contents</title>
+            <para>
+            The instance editor for creating contents can be accessed via the
             <itemizedlist>
                 <listitem>
-                    <link linkend="adm_content_tree">Content tree</link>
+                    <link linkend="adm_content_tree">Content tree</link> via
+                    the "Create content..." context menu item
+                    when right clicking on a node.
                 </listitem>
                 <listitem>
                     <link linkend="adm_ui_structure_editor">Structure tree</link>
+                    via
+                    the "Create content..." context menu item
+                    when right clicking on a type.
                 </listitem>
                 <listitem>
                     <link linkend="adm_query_editor">Query editor / query results</link>
+                    via the "New Content..." button.
                 </listitem>
             </itemizedlist>
-        </para>
-        <para>As you might expect, the content tree and the query results contain already created instances. From the
-            structure tree it is possible to create new content
-            instances which can be attached to the content tree.
-        </para>
-        <para>By default, the instantiated type's properties are displayed as input fields on the initialization of an
-            instance. Non mandatory properties can be skipped and added again, when needed.
-        </para>
-        <section xml:id="adm_instance_editor_creating_editing">
-            <title>Creating and editing contents</title>
-            <para>These are the UI elements of the instance editor:</para>
-            <para>
-                <orderedlist>
-                    <listitem>The
-                        <link linkend="adm_ACL">ACL</link>
-                        to choose for this instance
+            </para>
+            <section xml:id="adm_instance_editor_create_ui_elements">
+            <title>Content creation UI elements</title>
+                <para>These are the UI elements available for content creation:
+                    <orderedlist>
+                        <listitem>
+                            The content <link linkend="adm_structure_editor_editing_types">type</link>
+                            with optional type icon of this content instance
+                        </listitem>
+                        <listitem>The
+                            <link linkend="adm_ACL">ACLs</link>
+                            to choose for this instance
+                        </listitem>
+                        <listitem>The
+                            <link linkend="adm_workflow">workflow step</link>
+                            to choose for this instance
+                        </listitem>
+                        <listitem>The node of the content tree which the instance is attached to</listitem>
+                        <listitem>The global default input language
+                            of input components displayed on this page</listitem>
+                        <listitem>Control to expand and collapse all displayed groups  via
+                            <inlinemediaobject>
+                                <imageobject>
+                                    <imagedata fileref="images/adm_ui_instance_editor/expand_collapse_group_icons.png" format="PNG"
+                                         contentwidth="66%"/>
+                                </imageobject>
+                            </inlinemediaobject>
+                        </listitem>
+                        <listitem>Single
+                            <link linkend="adm_structure_editor_property_editor">properties</link>
+                            as input fields
+                        </listitem>
+                        <listitem><link linkend="adm_structure_editor_group_editor">Grouped</link>
+                            properties as input fields
+                        </listitem>
+                        <listitem>Buttons representing possible actions</listitem>
+                    </orderedlist>
+                    <para>
+                        The instantiated type's properties and groups
+                        are displayed
+                        as input fields. The position of input fields can be changed
+                        using the
+                        <inlinemediaobject>
+                            <imageobject>
+                                <imagedata fileref="images/adm_ui_instance_editor/up.png" format="PNG"
+                                     contentwidth="66%"/>
+                            </imageobject>
+                        </inlinemediaobject>
+                        <inlinemediaobject>
+                            <imageobject>
+                                <imagedata fileref="images/adm_ui_instance_editor/down.png" format="PNG"
+                                     contentwidth="66%"/>
+                            </imageobject>
+                        </inlinemediaobject>arrows.
+                        Non mandatory properties and groups may be removed and
+                        added again, when allowed by their assigned multiplicity.
+                        Clicking
+                        <inlinemediaobject>
+                            <imageobject>
+                                <imagedata fileref="images/adm_ui_instance_editor/group.png" format="PNG"
+                                     contentwidth="66%"/>
+                            </imageobject>
+                        </inlinemediaobject>
+                        opens a popup which allows the user to insert groups and
+                        <inlinemediaobject>
+                            <imageobject>
+                                <imagedata fileref="images/adm_ui_instance_editor/property.png" format="PNG"
+                                     contentwidth="66%"/>
+                            </imageobject>
+                        </inlinemediaobject>
+                        allows inserting properties respectively.
+                        By clicking
+                        <inlinemediaobject>
+                            <imageobject>
+                                <imagedata fileref="images/adm_ui_instance_editor/add.png" format="PNG"
+                                     contentwidth="66%"/>
+                            </imageobject>
+                        </inlinemediaobject> another instance of the property/group is added which
+                        is removed again by clicking
+                        <inlinemediaobject>
+                            <imageobject>
+                                <imagedata fileref="images/adm_ui_instance_editor/remove.png" format="PNG"
+                                     contentwidth="66%"/>
+                            </imageobject>
+                        </inlinemediaobject>
+                    </para>
+                </para>
+                <para>
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata fileref="images/adm_ui_instance_editor/create_content.png"
+                                       format="PNG" contentwidth="100%"/>
+                        </imageobject>
+                    </mediaobject>
+                </para>
+            </section>
+        </section>
+        <section xml:id="adm_instance_editor_edit">
+            <title>Editing contents</title>
+            <para>For content instances that have already been created
+                additional actions are available:
+                <itemizedlist>
+                    <listitem>
+                        <para>
+                            <link linkend="adm_instance_editor_edit_versioning">
+                                Content versioning
+                            </link>: New versions of a content instance can be
+                                created, existing versions can be compared,
+                                the content instance can be restored
+                                to a previous version and old versions can be deleted.
+                        </para>
                     </listitem>
-                    <listitem>The
-                        <link linkend="adm_workflow">workflow</link>
-                        step to choose for this instance
+                    <listitem>
+                        <para>
+                            <link linkend="adm_instance_editor_edit_import_export">
+                                Content import and export
+                            </link>
+                            : Content data can be exported
+                                as an XML file and imported again.
+
+                        </para>
                     </listitem>
-                    <listitem>The node of the content tree which the instance is attached to</listitem>
-                    <listitem>The version and access information</listitem>
-                    <listitem>Single
-                        <link linkend="adm_structure_editor_property_editor">properties</link>
-                        as input fields
+                    <listitem>
+                        <para>
+                            <link linkend="adm_instance_editor_edit_locking">
+                                Content instance locking:</link>
+                                Content instances
+                                may be locked in order to prevent other users
+                                from modifying the content data while it is being
+                                edited.
+                        </para>
                     </listitem>
-                    <listitem>Grouped properties</listitem>
-                </orderedlist>
+                </itemizedlist>
             </para>
             <para>
                 <mediaobject>
                     <imageobject>
-                        <imagedata fileref="images/adm_ui_instance_editor/content_instance.png"
-                                   format="PNG" contentwidth="100%"/>
+                        <imagedata fileref="images/adm_ui_instance_editor/edit_content.png"
+                                   format="PNG" contentwidth="66%"/>
                     </imageobject>
                 </mediaobject>
             </para>
-            <para>After saving you will get the following screen. You can see that the fields which have not been filled
-                in,
-                disappeared. No matter, you can add them again by clicking on the symbol for the single fields (1) or
-                by clicking on the symbol for the grouped fields (2).
-            </para>
-            <para>
+            <section xml:id="adm_instance_editor_edit_versioning">
+                <title>Content versioning</title>
+                the version which is being edited is displayed after the content's id as part of
+                its PK (in this case #9.4 which means that the content with the id 9 in version 4
+                is edited).
+                The instance editor allows to restore contents to previous
+                versions and to delete old versions.
+                This feature is accessible by clicking the "Info" tab.
                 <mediaobject>
                     <imageobject>
-                        <imagedata fileref="images/adm_ui_instance_editor/content_instance_saved.png"
-                                   format="PNG" contentwidth="100%"/>
+                        <imagedata fileref="images/adm_ui_instance_editor/content_versioning.png"
+                                   format="PNG" contentwidth="66%"/>
                     </imageobject>
                 </mediaobject>
-            </para>
-            <para>It is possible to create a new version of the instance.</para>
-            <para>To learn more about versioning in &Flexive; see the
-                <link linkend="core_contents">Content Engine</link>
-                section.
-            </para>
+                Different content versions may be compared to reproduce changes via the
+                "Compare Versions" tab.
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="images/adm_ui_instance_editor/content_compare_versions.png"
+                                   format="PNG" contentwidth="66%"/>
+                    </imageobject>
+                </mediaobject>
+                The button "New Version" saves the content in a new version and "Delete Version"
+                deletes the currently edited version of the content instance an reverts it to the
+                previous version.
+            </section>
+            <section xml:id="adm_instance_editor_edit_import_export">
+                <title>Content import and export</title>
+                Via the "Import" and "Export" tabs content data can be imported from and
+                exported to XML files. The import requires the contents of the XML file
+                to be pasted into the "Paste content" text area.
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="images/adm_ui_instance_editor/content_import.png"
+                                   format="PNG" contentwidth="66%"/>
+                    </imageobject>
+                </mediaobject>
+            </section>
+            <section xml:id="adm_instance_editor_edit_locking">
+                <title>Content locking</title>
+                <para>
+                    While editing a content instance it is automatically loosely locked. This means
+                    that other users with the same permissions can take over the loose lock and edit
+                    the content instance, but a warning is displayed indicating that the content is
+                    locked and being edited.
+                </para>
+                <para>
+                    By clicking
+                    <itemizedlist>
+                        <listitem>
+                            <para>
+                                <inlinemediaobject>
+                                    <imageobject>
+                                        <imagedata fileref="images/adm_ui_instance_editor/lock.png"
+                                                   format="PNG" contentwidth="66%"/>
+                                    </imageobject>
+                                </inlinemediaobject>
+                                on a loosely locked content instance, the loose lock is
+                                converted to a permanent lock which can be only
+                                taken over by the user or a supervisor.
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                <inlinemediaobject>
+                                    <imageobject>
+                                        <imagedata fileref="images/adm_ui_instance_editor/looseLock.png"
+                                                   format="PNG" contentwidth="66%"/>
+                                    </imageobject>
+                                </inlinemediaobject>
+                                on a permanently locked content instance the permanent lock is
+                                converted to a loose lock.
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                <inlinemediaobject>
+                                    <imageobject>
+                                        <imagedata fileref="images/adm_ui_instance_editor/time.png"
+                                                   format="PNG" contentwidth="66%"/>
+                                    </imageobject>
+                                </inlinemediaobject>
+                                the remaining lock time is displayed.
+                            </para>
+                        </listitem>
+                         <listitem>
+                            <para>
+                                <inlinemediaobject>
+                                    <imageobject>
+                                        <imagedata fileref="images/adm_ui_instance_editor/time.png"
+                                                   format="PNG" contentwidth="66%"/>
+                                    </imageobject>
+                                </inlinemediaobject>
+                                the lock time is extended.
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                <inlinemediaobject>
+                                    <imageobject>
+                                        <imagedata fileref="images/adm_ui_instance_editor/unlock.png"
+                                                   format="PNG" contentwidth="66%"/>
+                                    </imageobject>
+                                </inlinemediaobject>
+                                the content instance is unlocked.
+                            </para>
+                        </listitem>
+                    </itemizedlist>
+                </para>
+            </section>
         </section>
     </section>
 
     <section xml:id="adm_content_tree">
         <title>The content tree</title>
-        <para>The content tree contains content instances of any type. It can be used i.e. in a Content Management
-            System, where the page tree of a website can be administered inside the &Flexive; backend administration.
-            Mind that when we speak of the content tree, in fact we speak of 2 separate trees. The live and the edit
-            tree.
+        <para>The content tree contains references to content
+            instances and presents a file-system-like view
+            on available content instances. The content tree
+            can be used to organize and mange your contents.
+            I.e. the page tree of a website can be
+            modeled using the content tree and administered via the
+            &Flexive; backend administration.
+            Mind that when we speak of the content tree, in fact we speak of
+            two separate trees. The <link linkend="adm_content_tree_modes">
+            live and the edit tree</link>.
             This will be explained in detail in this section.
-            You can find the content tree in the tab
-            <filename>Content Tree</filename>.
+            The content tree is accessible via the "Content Tree" tab.
         </para>
         <section xml:id="adm_content_tree_modes">
-            <title>Modes of the content tree</title>
-            <para>The content tree GUI allows you to administer the 2 separate trees:
+            <title>Live and edit tree</title>
+            <para>The content tree GUI allows you to administer two separate trees:
                 <para>
                     <orderedlist>
-                        <listitem>The Live Tree</listitem>
                         <listitem>The Edit Tree</listitem>
+                        <listitem>The Live Tree</listitem>
                     </orderedlist>
                 </para>
+                 <para>
+                    The edit tree holds content instances that are being edited
+                    and waiting to be activated. By activating a content instance
+                    via the <link linkend="adm_content_tree_context_menu">content tree's
+                    context menu</link> the instance's workflow step is automatically
+                    changed to "Live" and it is copied into the live tree.
+                </para>
                 <para>
-                    The Live tree holds content instances which have been activated in the edit tree. It is not
-                    possible to create content instances directly in the live tree. You can activate tree nodes,
-                    representing content instances, or
-                    subtrees via the
+                    The live tree holds content instances in the
+                    <link linkend="adm_workflow_edit">workflow step</link>
+                    "Live" which have already been explicitly activated.
+                    In other words the live tree contains "published" content.
+                    It is not possible to create content instances directly
+                    in the live tree. Instead content instances need to be activated
+                    in the edit tree via the
                     <link linkend="adm_content_tree_context_menu">content tree's
                         context menu</link>.
                 </para>
-                <para>Furthermore it is possible to change the appearence of the node's textual representation. You
-                    can choose between the caption and the node path of a tree node.
+                <para>
+                    Edit tree example:
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata fileref="images/adm_ui_content_tree/edit_tree.png"
+                                       format="PNG" contentwidth="66%"/>
+                        </imageobject>
+                    </mediaobject>
                 </para>
-            </para>
-            <para>The UI provides the following elements to handle these different views:
-            </para>
-            <para>
-                <orderedlist>
-                    <listitem>Button to switch between caption and node paths</listitem>
-                    <listitem>Button to switch between edit and live tree</listitem>
-                </orderedlist>
-            </para>
-            <para>
-                <mediaobject>
-                    <imageobject>
-                        <imagedata fileref="images/adm_ui_content_tree/tree_live_edit_switch.png"
-                                   format="PNG" contentwidth="100%"/>
-                    </imageobject>
-                </mediaobject>
-            </para>
-            <para>See the core components chapter
-                <link linkend="core_tree_live_edit">edit and live modes</link>
-                for additional information.
+                <para>
+                    Live tree example:
+                    <mediaobject>
+                        <imageobject>
+                            <imagedata fileref="images/adm_ui_content_tree/live_tree.png"
+                                       format="PNG" contentwidth="66%"/>
+                        </imageobject>
+                    </mediaobject>
+                </para>
+                <para>
+                    In essence this means that although content instances
+                    are copied from the edit tree to the live tree, you have
+                    virtually two independent content trees available.
+                    Contents can be edited, messed with and organized in the edit tree
+                    while contents are "published" for the public via the live tree.
+                </para>
+                <para>By clicking the
+                    <inlinemediaobject>
+                        <imageobject>
+                            <imagedata fileref="images/adm_ui_content_tree/tree_edit.png"
+                                       format="PNG" contentwidth="66%"/>
+                        </imageobject>
+                    </inlinemediaobject>
+                    icon, the user can switch between the live tree and the
+                    edit tree. By clicking the
+                    <inlinemediaobject>
+                        <imageobject>
+                            <imagedata fileref="images/adm_ui_content_tree/tree_label_caption.png"
+                                       format="PNG" contentwidth="66%"/>
+                        </imageobject>
+                    </inlinemediaobject>
+                    icon, the user can switch between content instance captions and node paths.
+                </para>
+                <para>See the core components chapter
+                    <link linkend="core_tree_live_edit">edit and live modes</link>
+                    for additional information.
+                </para>
             </para>
         </section>
         <section xml:id="adm_content_tree_context_menu">
             <title>The content tree's context menu</title>
-            <para>To activate the context menu rightclick on a tree node. Not all features shown on the following
-                screenshot are always available. For example, attaching a content instance is only possible, if the
+            <para>To display the context menu right-click on a tree node.
+                Not all features shown on the following
+                screenshot are always available.
+                For example, attaching a content instance is only possible, if the
                 instance has been
                 loaded into the instance editor before.
             </para>
             <para>
                 <mediaobject>
                     <imageobject>
-                        <imagedata fileref="images/adm_ui_content_tree/content_tree_contextmenu.png"
+                        <imagedata fileref="images/adm_ui_content_tree/context_menu.png"
                                    format="PNG" contentwidth="100%"/>
                     </imageobject>
                 </mediaobject>
             </para>
             <para>
                 The context menu provides the following functionality:
-                <variablelist>
-                    <varlistentry>
-                        <term>
-                            <code>Attach content here</code>
-                        </term>
-                        <listitem>
-                            <para>
-                                Attach an, into the instance editor loaded, instance to the content tree.
-                            </para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>
-                            <code>Open</code>
-                        </term>
-                        <listitem>
-                            <para>
-                                Load an instance into the instance editor in view mode.
-                            </para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>
-                            <code>Edit</code>
-                        </term>
-                        <listitem>
-                            <para>
-                                Load an instance into the instance editor in edit mode.
-                            </para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>
-                            <code>Rename</code>
-                        </term>
-                        <listitem>
-                            <para>
-                                Rename the instance directly in the content tree's in-place editor.
-                            </para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>
-                            <code>Create folder</code>
-                        </term>
-                        <listitem>
-                            <para>
-                                Create a folder on the target node.
-                            </para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>
-                            <code>Create content ...</code>
-                        </term>
-                        <listitem>
-                            <para>
-                                Create a content instance on the target node.
-                            </para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>
-                            <code>Activate</code>
-                        </term>
-                        <listitem>
-                            <para>
-                                Activate the node for the live tree.
-                            </para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>
-                            <code>Activate subtree</code>
-                        </term>
-                        <listitem>
-                            <para>
-                                Activate the subtree for the live tree.
-                            </para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>
-                            <code>Paste</code>
-                        </term>
-                        <listitem>
-                            <para>
-                                Paste a formerly copied content into a tree node. The tree node becomes
-                                the parent of the pasted content instance.
-                            </para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>
-                            <code>Cut</code>
-                        </term>
-                        <listitem>
-                            <para>
-                                Cut a content instance from its position.
-                            </para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>
-                            <code>Copy</code>
-                        </term>
-                        <listitem>
-                            <para>
-                                Copy a content instance.
-                            </para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>
-                            <code>Detach content</code>
-                        </term>
-                        <listitem>
-                            <para>
-                                Detach a content instance from the content tree.
-                                If a node to detach has children they will be shifted onto the detached node's level.
-                                See chapter
-                                <link linkend="core_tree">Tree Engine</link>
-                                for further details.
-                                <para>
-                                    <emphasis>Note:</emphasis>
-                                    Content instances of type
-                                    <filename>folder</filename>
-                                    are deleted permanently if detached.
-                                </para>
-                            </para>
-                        </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>
-                            <code>Delete</code>
-                        </term>
-                        <listitem>
-                            <para>
-                                Delete a content instance permanently.
-                            </para>
-                        </listitem>
-                    </varlistentry>
-                </variablelist>
+                <itemizedlist>
+                    <listitem>
+                       <para>Attach content here: Attach the content that is currently visible
+                           in the instance editor to the selected content tree node.
+                       </para>
+                    </listitem>
+                    <listitem>
+                       <para>Open: Open the currently selected content in the instance editor in
+                           <glossterm>view mode</glossterm>.
+                       </para>
+                    </listitem>
+                    <listitem>
+                       <para>Edit: Open the currently selected content in the instance editor in
+                           <glossterm>edit mode</glossterm>.
+                       </para>
+                    </listitem>
+                    <listitem>
+                       <para>Rename: rename the instance directly in the content tree's in-place editor.
+                       </para>
+                    </listitem>
+                    <listitem>
+                       <para>Lock/Unlock (subtree): Lock the currently selected unlocked content instance
+                           (including its children), unlock
+                           the currently selected locked content instance (including its children).
+                       </para>
+                    </listitem>
+                    <listitem>
+                       <para>Create folder: Create a folder as child of the currently selected node.
+                       </para>
+                    </listitem>
+                    <listitem>
+                       <para>Create content...: Create a new content instance as child of the currently
+                           selected node.
+                       </para>
+                    </listitem>
+                    <listitem>
+                       <para>Activate: Activate the currently selected content (node) for the
+                           <link linkend="adm_content_tree_modes">live tree</link>.
+                       </para>
+                    </listitem>
+                    <listitem>
+                       <para>Activate subtree: Activate the currently selected content (node) including
+                           its children for the
+                           <link linkend="adm_content_tree_modes">live tree</link>.
+                       </para>
+                    </listitem>
+                    <listitem>
+                       <para>Paste into/above/below:
+                           <itemizedlist>
+                               <listitem>
+                                   <para>
+                                       Pastes the previously <emphasis>copied</emphasis> content
+                                       into/above/below the selected node as a <emphasis>new instance</emphasis>.
+                                       (A new content instance is generated
+                                       by copying the data of the copied content instance and inserted accordingly).
+                                   </para>
+                               </listitem>
+                               <listitem>
+                                   <para>
+                                       Pastes the previously <emphasis>cut</emphasis> content
+                                       <emphasis>reference</emphasis>
+                                       into/above/below the selected node. (Only the content reference is pasted which
+                                       represents a "move" operation, no
+                                       new content instance is created).
+                                   </para>
+                               </listitem>
+                           </itemizedlist>
+                       </para>
+                    </listitem>
+                    <listitem>
+                       <para>Paste references: Pastes the previously copied content
+                           <emphasis>reference</emphasis> into/above/below the selected node.
+                           Both nodes now reference the <emphasis>same</emphasis> content.
+                       </para>
+                    </listitem>
+                    <listitem>
+                       <para>Cut: Cut the selected a tree node in order to paste it
+                           at a different position within the content tree.
+                       </para>
+                    </listitem>
+                     <listitem>
+                       <para>Cut: Copy the selected tree node in order to either create
+                           a copy of the referenced content instance
+                           at a different position within the content tree (paste)
+                           or to copy the reference itself (paste reference).
+                       </para>
+                    </listitem>
+                    <listitem>
+                       <para>Detach content (with children): Removes the selected content
+                           references (including child nodes) from the content tree.
+                           <emphasis>Note</emphasis>: this operation does only delete
+                           content instances of type "folder" permanently.
+                           Content instances of
+                           other types are only removed from the content tree and
+                           can be reattached.
+                           In order to reattach
+                           removed contents, they can be searched for via a
+                           <link linkend="adm_query_editor">customized query</link> and
+                           reattached to the content tree.
+                       </para>
+                    </listitem>
+                </itemizedlist>
             </para>
         </section>
     </section>
@@ -1581,9 +1817,10 @@
             The query editor allows you to search for already created content instances. You can formulate
             complex queries on structures and their properties, it's like building SQL statements visually.
         </para>
-        <para>The elements of the query result set can be attached to the
+        <para>The elements of the query result set can be edited, attached to the
             <link linkend="adm_content_tree">content tree</link>
-            or saved into a briefcase, which can be shared among users. A query can also be saved.
+            or saved into a <link linkend="adm_query_editor_queries_briefcases">briefcase</link>
+            , which can be shared among users. Queries can also be saved.
         </para>
         <mediaobject>
             <imageobject>
@@ -1593,129 +1830,138 @@
         </mediaobject>
         <section xml:id="adm_query_editor_creating_queries">
             <title>Creating queries with the visual query editor</title>
-            <para>To access the query editor go to the
-                <filename>Search</filename>
-                tab of the &Flexive; backend administration. It is also accessible via the
-                <filename>FxSQL / Search</filename>
-                menu item in the
-                <filename>Administration</filename>
-                tab. Open the query editor and rightclick on nodes of the
-                <link linkend="adm_content_tree">content tree</link>
-                and
-                <link linkend="adm_ui_structure_editor">structure tree</link>
-                to formulate your query. You can add as many nodes as you want.
-                You can also search on
-                <link linkend="adm_structure_editor_property_editor">structure properties</link>.
+            <para>The query editor can be accessed via the
+                "Search"
+                tab of the &Flexive; backend administration.
+                It is also accessible in the instance editor via the "Query" tab
+                and the "Create Query" context menu item in the
+                <link linkend="adm_ui_structure_editor">structure editor</link>.
+           </para>
+           <para>
+               In order to create queries, the query editor needs to be displayed in
+               the content frame in the right half of the screen and either the
+               <link linkend="adm_ui_content_tree">content tree</link>
+               or the <link linkend="adm_structure_tree">structure tree</link>
+               on the left half.
+               <para>
+                   If the content tree is displayed, left clicking on a tree node
+                   adds the currently selected tree node to the query with the
+                   <code>Child of</code> or <code>Direct child of</code> query operator
+                   which is explained in
+                   <xref linkend="adm_query_editor_operators"/>.
+               </para>
+               <para>
+                   If the structure tree is displayed, left clicking on a tree node
+                   adds the currently selected structure element to the query. Depending
+                   on the structure element's data type the operators
+                   <code>=</code>, <code>not equal</code>, <code>is empty</code>,
+                   <code>is not empty</code> and <code>like</code> become available.
+                   <note>
+                       It is also possible to explicitly search
+                       for a property and thereby for all content types using that property
+                       (instead of a property assignment which is limited to one content type
+                       and its derived types).
+                       In order to search for properties the property must be right clicked
+                       in the structure tree to open the context menu and
+                       "Create query (property)" must be selected.
+                   </note>
+               </para>
             </para>
             <para>
-                Select the chosen query elements with Shift or Ctrl and rightclick on them to use the context
-                menu to create subqueries with con/disjunctions.
+                Subqueries with con- and disjunctions can be created in two steps:
+                <orderedlist>
+                    <listitem>
+                        <para>
+                            Select multiple query elements which you want to use in a subquery
+                            by holding the Shift or Ctrl key and left-clicking.
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            After all elements of interest have been selected perform
+                            a right click on one selected element to open a context. From
+                            the context menu you can choose to join to select the elements
+                            with the <code>and</code> operator or the <code>or</code> operator.
+                             <mediaobject>
+                                <imageobject>
+                                    <imagedata fileref="images/adm_ui_query_editor/build_subquery.png"
+                                               format="PNG" contentwidth="100%"/>
+                                </imageobject>
+                            </mediaobject>
+                        </para>
+                    </listitem>
+                </orderedlist>
+                Theoretically you may nest your subqueries infinitely.
             </para>
-            <para>The following screen shows a formulated query in the query editor. You can nest your subqueries
-                infinitely.
-            </para>
-            <para>The following comparison operators are available:</para>
-            <para>
-                <variablelist>
-                    <varlistentry>
-                        <term>
-                            <code>=</code>
-                        </term>
+            <section xml:id="adm_query_editor_operators">
+                <title>Query parameters</title>
+                <para>The following query operators select all content instances</para>
+                <para>
+                    <itemizedlist>
                         <listitem>
                             <para>
-                                Expression is equal
+                                <code>=</code>:
+                                whose value of the selected structure element's data
+                                equals the query expression.
                             </para>
                         </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>
-                            <code>not equal</code>
-                        </term>
                         <listitem>
                             <para>
-                                Expression is not equal
+                                <code>not equal</code>: whose value of the selected structure element's data
+                                does not equal the query expression.
                             </para>
                         </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>
-                            <code>is empty</code>
-                        </term>
                         <listitem>
                             <para>
-                                Expression is empty
+                                <code>is empty</code>: whose selected structure element data is empty.
                             </para>
                         </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>
-                            <code>is not empty</code>
-                        </term>
                         <listitem>
                             <para>
-                                Expression is not empty
+                                <code>like</code>: whose selected structure element contains data like the
+                                search expression. Like performs a fulltext search within the data of the
+                                selected structure element also returning partial matches.
                             </para>
                         </listitem>
-                    </varlistentry>
-                    <varlistentry>
-                        <term>
-                            <code>like</code>
-                        </term>
                         <listitem>
                             <para>
-                                Partial match. Use the
-                                <code>%</code>
-                                character, meaning
-                                <emphasis>any character(s)</emphasis>,
-                                to build your expression.
-                                Mind that the term
-                                <emphasis>any character(s)</emphasis>
-                                implies
-                                <emphasis>no</emphasis>
-                                character. Expression is case insensitive.
-                            </para>
-                            <para>
-                                The following examples illustrate the usage of
-                                <code>like</code>
-                                in sql statements and the &Flexive; query editor. Assuming a user with first name
-                                <code>John</code>
-                                exists in the database, you could search for him (and all other matching names) using
-                                the following patterns.
-                                <variablelist>
-                                    <varlistentry>
-                                        <term>
-                                            <code>%oh%</code>
-                                        </term>
-                                        <listitem>
-                                            <para>Search for
-                                                <code>oh</code>
-                                                preceded and followed by any character(s), meaning all words containing
-                                                <code>oh</code>.
-                                            </para>
-                                        </listitem>
-                                    </varlistentry>
-                                    <varlistentry>
-                                        <term>
-                                            <code>jo%</code>
-                                        </term>
-                                        <listitem>
-                                            <para>Search for
-                                                <code>jo</code>
-                                                followed by any character(s), meaning all words starting with
-                                                <code>jo</code>.
-                                            </para>
-                                        </listitem>
-                                    </varlistentry>
-                                </variablelist>
+                                <code>child of</code>: that are
+                                child of the selected content tree node.
                             </para>
                         </listitem>
-                    </varlistentry>
-                </variablelist>
-            </para>
+                        <listitem>
+                            <para>
+                                <code>direct child of</code>: that are direct children
+                                of the selected content tree node.
+                            </para>
+                        </listitem>
+                    </itemizedlist>
+                    Additional search parameters:
+                    <itemizedlist>
+                        <listitem>
+                            <para>
+                                Max. results: limits the number of returned results.
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                Query timeout: aborts the query after the specified timeout.
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                Create briefcase: creates a
+                                <link linkend="adm_query_editor_queries_briefcases">briefcase</link>
+                                from the query result. For creating briefcases a briefcase name is
+                                required.
+                            </para>
+                        </listitem>
+                    </itemizedlist>
+                </para>
+            </section>
             <section xml:id="adm_query_editor_result">
                 <title>Query results</title>
-                <para>If the query with your provided search criteria was successful, the result set will be
-                    displayed.
+                <para>Upon pressing the "Search" button the query result is displayed.
                 </para>
                 <para>
                     <mediaobject>
@@ -1725,7 +1971,8 @@
                         </imageobject>
                     </mediaobject>
                 </para>
-                <para>Rightclick on an item of the result set to activate the context menu.</para>
+                <para>Right-click on an item of the result set or left-clicking "more..." activates
+                    the query result context menu.</para>
                 <para>
                     <mediaobject>
                         <imageobject>
@@ -1735,44 +1982,70 @@
                     </mediaobject>
                 </para>
                 <para>
-                    <variablelist>
-                        <varlistentry>
-                            <term>Show</term>
-                            <listitem>
-                                <para>View instance.</para>
-                            </listitem>
-                        </varlistentry>
-                        <varlistentry>
-                            <term>Show screenview</term>
-                            <listitem>
-                                <para>Show preview (images).</para>
-                            </listitem>
-                        </varlistentry>
-                        <varlistentry>
-                            <term>Edit</term>
-                            <listitem>
-                                <para>Edit instance.</para>
-                            </listitem>
-                        </varlistentry>
-                        <varlistentry>
-                            <term>Copy</term>
-                            <listitem>
-                                <para>Copy instance and</para>
-                                <para>
-                                    <itemizedlist>
-                                        <listitem>paste it into a briefcase</listitem>
-                                        <listitem>attach it to a content tree's node</listitem>
-                                    </itemizedlist>
-                                </para>
-                            </listitem>
-                        </varlistentry>
-                        <varlistentry>
-                            <term>Delete</term>
-                            <listitem>
-                                <para>Delete instance permanently.</para>
-                            </listitem>
-                        </varlistentry>
-                    </variablelist>
+                    <itemizedlist>
+                        <listitem>
+                            <para>
+                                Open: open the selected content instance
+                                in the <link linked="adm_instance_editor">instance editor</link>
+                                in <glossterm>view-mode</glossterm>.
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                Show screenshot: Show a screenshot of the content instance (available for binary data).
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                Edit: open the selected content instance in the
+                                <link linked="adm_instance_editor">instance editor</link>
+                                in <glossterm>edit-mode</glossterm>.
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                Download: download binary data.
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                Lock: lock selected instance.
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                Unlock: unlock selected instance.
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                Copy: copy content instance in order to perform
+                                an operation in the <link linkend="adm_content_tree">content tree</link>.
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                Copy to briefcase: copies the selected result entry to a
+                                 <link linkend="adm_query_editor_queries_briefcases">briefcase</link>.
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                Delete: deletes the selected content instance.
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                Select all: Selects all content instances of the whole search result. 
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                Select all on this page: Selects only content instances on the currently visible
+                                search result page.
+                            </para>
+                        </listitem>
+                    </itemizedlist>
                 </para>
             </section>
             <section xml:id="adm_query_editor_queries_briefcases">
@@ -1793,41 +2066,6 @@
                 </para>
             </section>
         </section>
-    </section>
-
-    <section xml:id="adm_fxsql">
-        <title>The FxSQL Search</title>
-        <para>In addition to the
-            <link linkend="adm_query_editor">visual query editor</link>
-            the &Flexive; administration UI provides an input mask,
-            shown on the following screen, to
-            execute
-            <link linkend="core_search_sqlintro">FxSQL</link>
-            statements directly. It is also possible to create
-            <link linkend="adm_query_editor_queries_briefcases">briefcases</link>
-            from the result set. The input mask
-            can be found in the
-            <filename>FxSQL / Search</filename>
-            menu item of the
-            <filename>Administration</filename>
-            tab.
-        </para>
-        <para>
-            <link linkend="core_search_sqlintro">FxSQL</link>
-            is a &Flexive; SQL (structured query language) dialect.
-        </para>
-        <para>In the following example on the screen the primary keys of all content instances are selected from
-            the table
-            <code>content</code>.
-        </para>
-        <para>
-            <mediaobject>
-                <imageobject>
-                    <imagedata fileref="images/adm_ui_query_editor/fxsql_search.png"
-                               format="PNG" contentwidth="100%"/>
-                </imageobject>
-            </mediaobject>
-        </para>
     </section>
 
     <section xml:id="adm_administration">
@@ -2689,9 +2927,17 @@
                     <itemizedlist>
                         <listitem>
                             <para>
-                                &fxsql; Query: The &fxsql; GUI provides a text area where the user may
-                                submit <link linkend="core_search">FxSQL</link> queries and
-                                optionally create  <link linkend="adm_query_editor_queries_briefcases">briefcases</link>.
+                                &fxsql; Query GUI:
+                                In contrast to the
+                                <link linkend="adm_query_editor">visual query editor</link>
+                                the &fxsql; GUI contains a text input area where the user may
+                                submit <link linkend="core_search_sqlintro">FxSQL</link> queries directly
+                                and optionally create <link linkend="adm_query_editor_queries_briefcases">
+                                briefcases</link>.
+                                <para>
+                                    <link linkend="core_search_sqlintro">FxSQL</link>
+                                    is a &Flexive; SQL (structured query language) dialect.
+                                </para>
                                 <mediaobject>
                                     <imageobject>
                                         <imagedata fileref="images/adm_ui_system/fxsql_query.png"
@@ -2841,7 +3087,7 @@
                     or they merely serve information purposes and don't impact system behavior.
                     <mediaobject>
                         <imageobject>
-                            <imagedata fileref="images/adm_ui_system/system_paramters.png"
+                            <imagedata fileref="images/adm_ui_system/system_parameters.png"
                                        format="PNG" contentwidth="100%"/>
                         </imageobject>
                     </mediaobject>
@@ -2884,6 +3130,12 @@
                      The locks within the search result can be selected to either remove
                      (by pressing the "Unlock selected" button) or to extend (by pressing
                      the "Extend selected" button) all selected locks.
+                     <mediaobject>
+                        <imageobject>
+                            <imagedata fileref="images/adm_ui_system/lock_administration.png"
+                                       format="PNG" contentwidth="100%"/>
+                        </imageobject>
+                    </mediaobject>
                  </para>
             </section>
               <section xml:id="adm_history_viewer">

@@ -1270,7 +1270,8 @@
                     by providing a language select list next to the input elements.
                 </para>
                 <para>
-                    The default input language of multi-language values can be set in the user preferences
+                    The default input language of multi-language values can be set in the
+                    <link linkend="adm_user_preferences">user preferences</link>
                     of the &backendGui; or programmatically through the user configuration parameter
                     <constant>com.flexive.shared.configuration.SystemParameters.USER_DEFAULTINPUTLANGUAGE</constant>.
                 </para>
