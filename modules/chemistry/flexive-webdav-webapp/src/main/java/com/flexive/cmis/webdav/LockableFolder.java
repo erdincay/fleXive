@@ -35,7 +35,6 @@ import com.flexive.chemistry.webdav.FolderResource;
 import com.flexive.chemistry.webdav.ChemistryResourceFactory;
 import com.bradmcevoy.http.*;
 import com.flexive.shared.structure.FxType;
-import java.io.InputStream;
 import java.util.List;
 import org.apache.chemistry.Folder;
 

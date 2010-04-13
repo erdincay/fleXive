@@ -136,5 +136,16 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- Include logger for Milton - required for Jetty which fails to use the EAR's packaged version -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-jcl</artifactId>
+        </dependency>
+        
     </dependencies>
 </project>
