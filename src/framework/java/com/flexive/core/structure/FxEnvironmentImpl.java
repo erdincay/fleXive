@@ -39,6 +39,8 @@ import com.flexive.shared.XPathElement;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.exceptions.FxRuntimeException;
+import com.flexive.shared.media.FxMimeTypeWrapper;
+import com.flexive.shared.media.impl.FxMimeType;
 import com.flexive.shared.scripting.FxScriptInfo;
 import com.flexive.shared.scripting.FxScriptMapping;
 import com.flexive.shared.scripting.FxScriptMappingEntry;
@@ -51,7 +53,6 @@ import com.flexive.shared.workflow.Route;
 import com.flexive.shared.workflow.Step;
 import com.flexive.shared.workflow.StepDefinition;
 import com.flexive.shared.workflow.Workflow;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 import java.util.*;
@@ -1393,5 +1394,54 @@ public final class FxEnvironmentImpl implements FxEnvironment {
      */
     public List<FxLanguage> getLanguages() {
         return languages;   // already unmodifiable
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public FxType getMimeTypeMatch(String mimeType) {
+        FxMimeType fxMimeType = FxMimeType.getMimeType(mimeType);
+        // no proper match for given mimetype - return DocumentFile (TODO: adjust/check output of mimeutils)
+        if(FxMimeType.UNKNOWN.equals(fxMimeType.getType()))
+            return getType(FxType.DOCUMENTFILE);
+
+        List<FxType> allMimeFxTypes = getType(FxType.DOCUMENTFILE).getDerivedTypes();
+
+        FxType out = containsMimeType(allMimeFxTypes, fxMimeType, null);
+        return out != null ? out : getType(FxType.DOCUMENTFILE);
+    }
+
+
+    /**
+     * Private method to recursively check a list of FxTypes for a given FxMimeType
+     * root == null on first call
+     *
+     * @param typeList the List&lt;FxType&gt;
+     * @param mimeType the instance of FxMimeType
+     * @param root the root node
+     * @return the FxType or null/the input root node if nothing found
+     */
+    private FxType containsMimeType(List<FxType> typeList, FxMimeType mimeType, FxType root) {
+        FxType derivedMatch = null;
+        for(FxType t : typeList) {
+            FxMimeTypeWrapper wrapper = t.getMimeType();
+            if(wrapper.contains(mimeType, true)) {
+                // assign root FxType for given (main) mime type
+                if(root == null)
+                    root = t;
+                // have we got an exact match?
+                if(wrapper.contains(mimeType)) {
+                    return t;
+                }
+                // do we have further derived types for the current one?
+                List<FxType> currentDerivedList = t.getDerivedTypes();
+
+                if(currentDerivedList != null && currentDerivedList.size() > 0) {
+                    derivedMatch = containsMimeType(currentDerivedList, mimeType, root);
+                }
+            }
+        }
+        return derivedMatch != null ? derivedMatch : root;
     }
 }

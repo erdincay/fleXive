@@ -135,11 +135,14 @@ public class FxMimeType implements Serializable {
     /**
      * Construct a MimeType from a given String. If the parameterised mime type cannot be identified,
      * a DEFAULT mime type of "application/octet-stream" will be constructed
+     * A null input will return "unknown/unknown"
      *
      * @param mimeType the mimetype as a String, e.g. "application/pdf"
      * @return returns a MimeType
      */
-    public static FxMimeType getMimeTypeFromString(String mimeType) {
+    public static FxMimeType getMimeType(String mimeType) {
+        if(mimeType == null)
+            mimeType = "";
         final String[] s = mimeType.split("/");
         final String type = StringUtils.trim(s[0].toLowerCase());
         final String subType;

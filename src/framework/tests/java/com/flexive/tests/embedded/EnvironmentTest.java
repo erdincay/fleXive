@@ -32,6 +32,10 @@
 package com.flexive.tests.embedded;
 
 import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.EJBLookup;
+import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.interfaces.TypeEngine;
+import com.flexive.shared.media.FxMimeTypeWrapper;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.security.Mandator;
@@ -215,6 +219,70 @@ public class EnvironmentTest {
             }
         } catch (UnsupportedOperationException e) {
             // continue
+        }
+    }
+
+    /**
+     * Test the getMimeTypeMatch method
+     *
+     * @since 3.1
+     */
+    @Test(groups = {"ejb", "environment"})
+    public void mimeTypeMatchTest() throws FxApplicationException {
+        /*
+        basic setup provided the following mime types
+        unknown/unknown --> DOCUMENTFILE
+        application/unknown --> DOCUMENT
+        image/unknown --> IMAGE
+         */
+        long id1 = -1;
+        long id2 = -1;
+        long id3 = -1;
+        long id4 = -1;
+
+        Assert.assertEquals(getEnvironment().getMimeTypeMatch(null).getName(), FxType.DOCUMENTFILE);
+        Assert.assertEquals(getEnvironment().getMimeTypeMatch("unknown/unknown").getName(), FxType.DOCUMENTFILE);
+        Assert.assertEquals(getEnvironment().getMimeTypeMatch("foo/bar").getName(), FxType.DOCUMENTFILE);
+        Assert.assertEquals(getEnvironment().getMimeTypeMatch("application/unknown").getName(), FxType.DOCUMENT);
+        Assert.assertEquals(getEnvironment().getMimeTypeMatch("application/foobar").getName(), FxType.DOCUMENT);
+        Assert.assertEquals(getEnvironment().getMimeTypeMatch("image/unknown").getName(), "IMAGE");
+        Assert.assertEquals(getEnvironment().getMimeTypeMatch("image/foobar").getName(), "IMAGE");
+
+        // let's create some derived types and check if the respective FxTypes are recognised
+        TypeEngine te = EJBLookup.getTypeEngine();
+        try {
+            id1 = te.save(FxTypeEdit.createNew("PDF_TYPE", FxType.DOCUMENT).setMimeType(new FxMimeTypeWrapper("application/pdf")));
+            id2 = te.save(FxTypeEdit.createNew("JPG_TYPE", "IMAGE").setMimeType(new FxMimeTypeWrapper("image/jpeg")));
+            id3 = te.save(FxTypeEdit.createNew("PNG_TYPE", "IMAGE").setMimeType(new FxMimeTypeWrapper("image/png")));
+            id4 = te.save(FxTypeEdit.createNew("JPG_TYPE_CHILD", "JPG_TYPE").setMimeType(new FxMimeTypeWrapper("image/foobar")));
+
+            Assert.assertEquals(getEnvironment().getMimeTypeMatch("application/pdf").getName(), "PDF_TYPE");
+            Assert.assertEquals(getEnvironment().getMimeTypeMatch("image/jpeg").getName(), "JPG_TYPE");
+            Assert.assertEquals(getEnvironment().getMimeTypeMatch("image/png").getName(), "PNG_TYPE");
+            Assert.assertEquals(getEnvironment().getMimeTypeMatch("image/foobar").getName(), "JPG_TYPE_CHILD");
+
+            // child types override their parents' settings
+            FxType childTest = getEnvironment().getType("JPG_TYPE_CHILD");
+            FxMimeTypeWrapper wrapper = childTest.getMimeType();
+            wrapper.addMimeTypes("image/jpeg");
+            te.save(childTest.asEditable().setMimeType(wrapper));
+
+            // the original JPG_TYPE still has image/jpg
+            Assert.assertEquals(getEnvironment().getType("JPG_TYPE").getMimeType().toString(), "image/jpeg");
+            // asking for the matching type will return the bottom of the hierarchy
+            Assert.assertEquals(getEnvironment().getMimeTypeMatch("image/jpeg").getName(), "JPG_TYPE_CHILD");
+
+        } catch (FxApplicationException ex) {
+            // silent death throes
+        } finally { // clean up test structures
+            if (id1 != -1)
+                te.remove(id1);
+            if (id2 != -1)
+                te.remove(id1);
+            if (id3 != -1)
+                te.remove(id1);
+            if (id4 != -1)
+                te.remove(id1);
         }
     }
 }

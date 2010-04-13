@@ -41,6 +41,7 @@ import com.flexive.shared.content.FxPK;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.*;
+import com.flexive.shared.media.FxMimeTypeWrapper;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.Mandator;
 import com.flexive.shared.security.ACLCategory;
@@ -1596,11 +1597,46 @@ public class StructureTest {
      * Test setting mime types for DOCUMENTFILE and its derived types
      *
      * @throws FxApplicationException on errors
+     *
+     * @since 3.1
      */
     @Test(groups = {"ejb", "structure"})
     public void mimeTypeTest() throws FxApplicationException {
-        // FxTypeEdit document;
-        // TODO
+
+        try {
+            FxType docRoot = getEnvironment().getType(FxType.DOCUMENTFILE);
+            te.save(FxTypeEdit.createNew("MIMETESTER", docRoot.getId()));
+            FxType testType = getEnvironment().getType("MIMETESTER");
+            // we should have unknown/unknown
+            Assert.assertEquals(testType.getMimeType().getMimeTypes().size(), 1);
+            Assert.assertTrue(testType.getMimeType().contains("unknown/unknown"));
+
+            // replace with video/flv
+            te.save(testType.asEditable().setMimeType(new FxMimeTypeWrapper("video/flv")));
+            testType = getEnvironment().getType("MIMETESTER");
+            // we should have video/flv
+            Assert.assertEquals(testType.getMimeType().getMimeTypes().size(), 1);
+            Assert.assertTrue(testType.getMimeType().contains("video/flv"));
+
+            // clean up
+            te.remove(testType.getId());
+
+            // test setting a mime type f. a type not derived from DocumentFile
+            te.save(FxTypeEdit.createNew("MIMETESTER"));
+            testType = getEnvironment().getType("MIMETESTER");
+
+
+            try {
+                testType.asEditable().setMimeType(new FxMimeTypeWrapper("foo/bar"));
+                Assert.fail("Setting a mime type for an FxType which is not derived from \"DOCUMENTFILE\" should have failed");
+            } catch (Exception e) {
+                // do nothing
+            }
+
+        } finally {
+            if (getEnvironment().typeExists("MIMETESTER"))
+                te.remove(getEnvironment().getType("MIMETESTER").getId());
+        }
     }
 
     /**

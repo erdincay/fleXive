@@ -123,7 +123,7 @@ public class FxMimeTypeWrapper implements Serializable {
         String[] mtSplit = mimeTypes.split(",");
         for (String m : mtSplit) {
             m = StringUtils.trim(m);
-            final FxMimeType mt = FxMimeType.getMimeTypeFromString(m);
+            final FxMimeType mt = FxMimeType.getMimeType(m);
             if (!this.mimeTypes.contains(mt))
                 this.mimeTypes.add(mt);
         }
@@ -147,7 +147,7 @@ public class FxMimeTypeWrapper implements Serializable {
      */
     public boolean removeMimeType(String mimeType) {
         boolean removed = false;
-        FxMimeType mt = FxMimeType.getMimeTypeFromString(mimeType.toLowerCase());
+        FxMimeType mt = FxMimeType.getMimeType(mimeType.toLowerCase());
 
         int idx = -1;
         for (int i = 0; i < mimeTypes.size(); i++) {
@@ -174,7 +174,26 @@ public class FxMimeTypeWrapper implements Serializable {
      * @return returns true if found
      */
     public boolean contains(FxMimeType mimeType) {
-        return mimeTypes.contains(mimeType);
+        return contains(mimeType, false);
+    }
+
+    /**
+     * Check if the given mime type exists, optionally for the main type only
+     *
+     * @param mimeType the FxMimeType
+     * @param mainTypeOnly set to true if only the main mime type should be checked
+     * @return true if the mime type exists
+     */
+    public boolean contains(FxMimeType mimeType, boolean mainTypeOnly) {
+        if(mainTypeOnly) {
+            for(FxMimeType mt : mimeTypes) {
+                if(mimeType.getType().equals(mt.getType()))
+                    return true;
+            }
+        } else {
+             return mimeTypes.contains(mimeType);
+        }
+        return false;
     }
     
     /**
@@ -184,9 +203,8 @@ public class FxMimeTypeWrapper implements Serializable {
      * @return returns true if found
      */
     public boolean contains(String mimeType) {
-        return contains(FxMimeType.getMimeTypeFromString(mimeType));
+        return contains(FxMimeType.getMimeType(mimeType));
     }
-
 
     /**
      * Creates a comma separated list of mime types

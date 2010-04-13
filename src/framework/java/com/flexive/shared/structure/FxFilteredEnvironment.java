@@ -653,4 +653,10 @@ public final class FxFilteredEnvironment implements FxEnvironment {
         return environment.getLanguages();
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public FxType getMimeTypeMatch(String mimeType) {
+        return environment.getMimeTypeMatch(mimeType);
+    }
 }

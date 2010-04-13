@@ -692,4 +692,14 @@ public interface FxEnvironment extends Serializable {
      * @since   3.1
      */
     FxLanguage getLanguage(String isoCode);
+
+    /**
+     * Return the closest matching FxType (any derived type of DocumentFile) for a given mime type
+     *
+     * @param mimeType e.g. application/pdf as a String
+     * @return the relevant FxType or the resp. root type f. a given main mime type (i.e. DocumentFile f. unknown/unknown, Image f. image/unknown, Document f. application/unknown
+     *
+     * @since 3.1
+     */
+    FxType getMimeTypeMatch(String mimeType);
 }
