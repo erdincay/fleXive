@@ -899,7 +899,8 @@ public class PropertyEditorBean implements ActionBean, Serializable {
      * @return flattenable
      */
     public boolean isFlattenable() {
-        return !assignment.isFlatStorageEntry() && EJBLookup.getAssignmentEngine().isFlattenable(assignment);
+        return !assignment.isFlatStorageEntry() && !assignment.isSystemInternal()
+                && EJBLookup.getAssignmentEngine().isFlattenable(assignment);
     }
 
     public void flatten() throws FxApplicationException {
