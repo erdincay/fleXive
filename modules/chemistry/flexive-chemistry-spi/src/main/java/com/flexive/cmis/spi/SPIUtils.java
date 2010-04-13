@@ -225,7 +225,7 @@ public class SPIUtils {
     public static String getFxTypeName(String typeId) {
         if (BaseType.DOCUMENT.toString().equalsIgnoreCase(typeId)) {
             // TODO: this should actually the root type, but the root type isn't really usable here
-            return FxType.DOCUMENT;
+            return FxType.DOCUMENTFILE;
         } else if (BaseType.FOLDER.toString().equalsIgnoreCase(typeId)) {
             return FxType.FOLDER;
         } else {

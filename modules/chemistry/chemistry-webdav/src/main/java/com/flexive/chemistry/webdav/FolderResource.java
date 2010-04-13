@@ -279,11 +279,18 @@ public class FolderResource extends ObjectResource<Folder>
     }
 
     protected Resource handleBinaryDocument(InputStream inputStream, Long length, String contentType, String newName) throws IOException {
-        final Document doc = getObject().newDocument(BaseType.DOCUMENT.getId());
+
+        // split detected content types
+        final List<String> mimeTypes = contentType == null
+                ? new ArrayList<String>(0)
+                : Arrays.asList(contentType.split(","));
+
+        final Document doc = getObject().newDocument(getDocumentType(mimeTypes));
         try {
             doc.setName(newName);
             if (inputStream != null) {
-                doc.setContentStream(new UploadContentStream(inputStream, newName, contentType, length));
+                final String mimeType = getMimeType(mimeTypes);
+                doc.setContentStream(new UploadContentStream(inputStream, newName, mimeType, length));
             }
             doc.save();
         } catch (CMISException e) {
@@ -291,6 +298,27 @@ public class FolderResource extends ObjectResource<Folder>
         }
 
         return resourceFactory.createResource(getChildPath(newName), doc);
+    }
+
+    /**
+     * Return the CMIS document type for the given MIME type(s).
+     *
+     * @param mimeTypes     the detected MIME type(s) of the content
+     * @return              the CMIS document type to be used for creating a new instance
+     */
+    protected String getDocumentType(List<String> mimeTypes) {
+        return BaseType.DOCUMENT.getId();
+    }
+
+    /**
+     * Return the primary MIME type to be used if the repository does not support multiple MIME types.
+     *
+     * @param mimeTypes the detected MIME type(s)
+     * @return          the MIME type to be used for the content stream
+     */
+    protected String getMimeType(List<String> mimeTypes) {
+        // if more than one mime type is detected, use the first one
+        return mimeTypes.isEmpty() ? "unknown/unknown" : mimeTypes.get(0);
     }
 
     protected Resource handleTextDocument(InputStream input, byte[] header, int read, String newName) throws IOException {

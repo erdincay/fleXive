@@ -34,10 +34,14 @@ package com.flexive.cmis.webdav;
 import com.flexive.chemistry.webdav.FolderResource;
 import com.flexive.chemistry.webdav.ChemistryResourceFactory;
 import com.bradmcevoy.http.*;
+import com.flexive.shared.structure.FxType;
+import java.io.InputStream;
+import java.util.List;
 import org.apache.chemistry.Folder;
 
 import java.io.IOException;
 import java.io.ByteArrayInputStream;
+import org.apache.chemistry.BaseType;
 
 /**
  * Add lock support for text document resources.
@@ -78,4 +82,22 @@ public class LockableFolder extends FolderResource implements LockableResource, 
             throw new IllegalArgumentException(e);
         }
     }
+
+    @Override
+    protected String getDocumentType(List<String> mimeTypes) {
+        // TODO: the image/document switching should be implemented in the flexive repository
+        if (mimeTypes.isEmpty()) {
+            return BaseType.DOCUMENT.getId();
+        } else if (mimeTypes.get(0).startsWith("image/")) {
+            return "IMAGE";
+        } else if (mimeTypes.get(0).startsWith("application/")) {
+            return FxType.DOCUMENT;
+        } else {
+            // fallback
+            return FxType.DOCUMENTFILE;
+        }
+    }
+
+
+
 }
