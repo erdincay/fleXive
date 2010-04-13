@@ -43,6 +43,7 @@ var flexive = new function() {
         PREVIEW1: {id: 1, size: 42},
         PREVIEW2: {id: 2, size: 85},
         PREVIEW3: {id: 3, size: 232},
+        SCREENVIEW: {id: 4, size: 1024},
         ORIGINAL: {id: 0, size: -1}
     };
 

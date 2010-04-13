@@ -570,6 +570,17 @@ flexiveResultThumbnails > table,
     vertical-align: middle;
 }
 
+.SCREENVIEW .yui-dt-liner {
+    height: 783px; /* 768px thumbnail + 15px footer */
+}
+
+.SCREENVIEW .thumbnailContainer {
+    display: table-cell;
+    height: 768px;
+    width: 1024px;
+    vertical-align: middle;
+}
+
 /* Thumbnail footer */
 .flexiveResultThumbnails .resultThumbnailCaption,
     .flexiveResultThumbnails .resultThumbnailAction {

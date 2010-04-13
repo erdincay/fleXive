@@ -68,7 +68,7 @@ Parameters:
                         template : "#{fxMessageBean['ResultTable.label.rowSelect']}",
                         totalRecords : viewRows.length,
                         rowsPerPage : updateRowsPerPage,
-                        rowsPerPageOptions : isThumbnails ? [2, 5, 10, 25, 50] : [10,25,50,100],
+                        rowsPerPageOptions : isThumbnails ? [1, 2, 3, 5, 10, 25, 50] : [10,25,50,100],
                         alwaysVisible: isThumbnails
                     };
                     if (updateRowsPerPage == null) {
@@ -110,7 +110,7 @@ Parameters:
                         if (containerEl.className.indexOf("flexiveResultThumbnails") == -1) {
                             containerEl.className += " flexiveResultThumbnails " + previewSize;
                         } else {
-                            containerEl.className = containerEl.className.replace(/PREVIEW[0-9]/, previewSize);
+                            containerEl.className = containerEl.className.replace(/(PREVIEW[0-9]|SCREENVIEW)/, previewSize);
                         }
                     } else {
                         // enable row selection
