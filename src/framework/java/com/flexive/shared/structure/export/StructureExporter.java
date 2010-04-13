@@ -242,7 +242,7 @@ public class StructureExporter implements StructureExporterCallback {
                 final List<FxAssignment> filteredWhiteList = new ArrayList<FxAssignment>();
                 for (FxAssignment a : whiteList) {
                     final long baseAssignmentId = StructureExporterTools.getBaseTypeId(a);
-                    if (baseAssignmentId != parentTypeId) {
+                    if (baseAssignmentId != parentTypeId || baseAssignmentId == 0) {
                         filteredWhiteList.add(a);
                     } else {
                         if(AssignmentDifferenceAnalyser.analyse(a, true).size() > 0) {

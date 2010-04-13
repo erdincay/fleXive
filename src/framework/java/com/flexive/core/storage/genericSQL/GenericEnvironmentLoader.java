@@ -465,7 +465,7 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                         alRelations.add(new FxTypeRelation(new FxPreloadType(rsRelations.getLong(1)), new FxPreloadType(rsRelations.getLong(2)),
                                 rsRelations.getInt(3), rsRelations.getInt(4)));
                     long parentId = rs.getLong(3);
-                    FxType parentType = rs.wasNull() ? null : new FxPreloadType(parentId);
+                    FxType parentType = id == 0 ? null : new FxPreloadType(parentId);
                     FxType _type = new FxType(id, environment.getACL(rs.getInt(19)),
                             environment.getWorkflow(rs.getInt(20)), rs.getString(2),
                             getTranslation(labels, id, 0),
@@ -482,7 +482,7 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                 } catch (FxNotFoundException e) {
                     throw new FxLoadException(LOG, e);
                 }
-            }
+            }            
         } catch (SQLException exc) {
             throw new FxLoadException(LOG, "Failed to load all FxTypes: " + exc.getMessage(), exc);
         } finally {

@@ -300,7 +300,8 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 }
             }
             htracker.track(type, "history.assignment.createProperty", property.getName(), type.getId(), type.getName());
-            createInheritedAssignments(CacheAdmin.getEnvironment().getAssignment(newAssignmentId), con, sql, type.getDerivedTypes());
+            if( type.getId() != FxType.ROOT_ID)
+                createInheritedAssignments(CacheAdmin.getEnvironment().getAssignment(newAssignmentId), con, sql, type.getDerivedTypes());
         } catch (FxNotFoundException e) {
             EJBUtils.rollback(ctx);
             throw new FxCreateException(e);
@@ -747,7 +748,8 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     TBL_STRUCT_ASSIGNMENTS, new String[]{"DESCRIPTION", "HINT"}, "ID", newAssignmentId);
             StructureLoader.reload(con);
             htracker.track(type, "history.assignment.createGroup", group.getName(), type.getId(), type.getName());
-            createInheritedAssignments(CacheAdmin.getEnvironment().getAssignment(newAssignmentId), con, sql, type.getDerivedTypes());
+            if( type.getId() != FxType.ROOT_ID)
+                createInheritedAssignments(CacheAdmin.getEnvironment().getAssignment(newAssignmentId), con, sql, type.getDerivedTypes());
         } catch (FxNotFoundException e) {
             EJBUtils.rollback(ctx);
             throw new FxCreateException(e);
@@ -1275,13 +1277,14 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 EJBUtils.rollback(ctx);
                 throw new FxCreateException(e, "ex.cache", e.getMessage());
             }
-            createInheritedAssignments(CacheAdmin.getEnvironment().getAssignment(newAssignmentId), con, sql,
+            if( group.getAssignedType().getId() != FxType.ROOT_ID)
+                createInheritedAssignments(CacheAdmin.getEnvironment().getAssignment(newAssignmentId), con, sql,
                     group.getAssignedType().getDerivedTypes());
         } catch (SQLException e) {
             final boolean uniqueConstraintViolation = StorageManager.isUniqueConstraintViolation(e);
             EJBUtils.rollback(ctx);
             if (uniqueConstraintViolation)
-                throw new FxEntryExistsException("ex.structure.assignment.group.exists", group.getAlias(), group.getXPath());
+                throw new FxEntryExistsException("ex.structure.assignment.group.exists", group.getAlias(), group.getAssignedType().getName() + group.getXPath());
             throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
         } catch (FxNotFoundException e) {
             throw new FxCreateException(e);
@@ -1984,7 +1987,8 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     EJBUtils.rollback(ctx);
                     throw new FxCreateException(e, "ex.cache", e.getMessage());
                 }
-                createInheritedAssignments(CacheAdmin.getEnvironment().getAssignment(newAssignmentId), con, sql,
+                if( pa.getAssignedType().getId() != FxType.ROOT_ID)
+                    createInheritedAssignments(CacheAdmin.getEnvironment().getAssignment(newAssignmentId), con, sql,
                         pa.getAssignedType().getDerivedTypes());
             }
         } catch (SQLException e) {
@@ -1992,7 +1996,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             if (!ctx.getRollbackOnly())
                 EJBUtils.rollback(ctx);
             if (uniqueConstraintViolation)
-                throw new FxEntryExistsException("ex.structure.assignment.property.exists", pa.getAlias(), pa.getXPath());
+                throw new FxEntryExistsException("ex.structure.assignment.property.exists", pa.getAlias(), pa.getAssignedType().getName() + pa.getXPath());
             throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
         } finally {
             Database.closeObjects(AssignmentEngineBean.class, null, ps);

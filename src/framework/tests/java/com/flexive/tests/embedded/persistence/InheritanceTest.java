@@ -54,7 +54,7 @@ import org.testng.Assert;
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-@Test(groups = {"ejb", "structure"})
+@Test(groups = {"ejb", "structure", "inheritance"})
 public class InheritanceTest extends StructureTestBase {
 
     private final static String TYPE_NAME = "INHERITANCETEST_" + RandomStringUtils.random(16, true, true);

@@ -36,6 +36,8 @@ import com.flexive.shared.EJBLookup;
 import com.flexive.shared.XPathElement;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxConversionException;
+import com.flexive.shared.exceptions.FxNotFoundException;
+import com.flexive.shared.exceptions.FxRuntimeException;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.FxString;
@@ -218,6 +220,20 @@ public class FxPropertyAssignmentConverter extends FxAssignmentConverter {
                 }
             }
             reader.moveUp();
+        }
+        //check if disabled
+        try {
+            if (type.hasAssignment(data.getXpath())) {
+                FxPropertyAssignment check = type.getPropertyAssignment(data.getXpath());
+                if (!check.isEnabled()) {
+                    FxPropertyAssignmentEdit checkEnabled = check.asEditable().setEnabled(true);
+                    System.out.println("Enabling: " + data.getXpath());
+                    EJBLookup.getAssignmentEngine().save(checkEnabled, false);
+                    type.resolveReferences(CacheAdmin.getEnvironment());
+                }
+            }
+        } catch (FxApplicationException e) {
+            throw e.asRuntimeException();
         }
         //check if the assignment exists and create if needed
         if (!type.isXPathValid(data.getXpath(), true)) {

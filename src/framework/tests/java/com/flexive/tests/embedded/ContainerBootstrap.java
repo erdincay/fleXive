@@ -50,7 +50,7 @@ import org.testng.annotations.Test;
         "workflow", "streaming", "scripting", "valuetest", "cache", "image", "tree", "relation",
         "search", "tutorial", "benchmark", "environment", "mandator", "importexport", "uniquemode",
         "roles", "reference", "binary", "flatstorage", "briefcase", "cmis", "lock", "sequencer", "resultset",
-        "contentconversion", "stresstest"})
+        "contentconversion", "stresstest", "inheritance"})
 public class ContainerBootstrap {
 
     /**

@@ -152,7 +152,7 @@ public class ImportExportTest {
             Assert.assertEquals(xml, importedXml);
             //try re-importing over existing, should not throw any errors
             String importedXml2 = EJBLookup.getTypeEngine().export(importedType.getId());
-            Assert.assertEquals(importedXml, importedXml2);
+            Assert.assertEquals(importedXml2, importedXml);
         } finally {
             EJBLookup.getTypeEngine().remove(importedType.getId());
         }

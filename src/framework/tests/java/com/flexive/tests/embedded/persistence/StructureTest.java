@@ -349,19 +349,20 @@ public class StructureTest {
         ut.begin();
         FxString desc = new FxString("group description...");
         desc.setTranslation(2, "gruppen beschreibung");
-        FxGroupEdit ge = FxGroupEdit.createNew("grouptest", desc, new FxString("hint..."), true, new FxMultiplicity(0, FxMultiplicity.N));
+        final String GROUPNAME = "GROUPTEST"+RandomStringUtils.randomNumeric(5);
+        FxGroupEdit ge = FxGroupEdit.createNew(GROUPNAME, desc, new FxString("hint..."), true, new FxMultiplicity(0, FxMultiplicity.N));
         ae.createGroup(ge, "/");
         ge.setName("subgroup");
-        ae.createGroup(ge, "/GROUPTEST");
+        ae.createGroup(ge, "/" + GROUPNAME);
         ge.setName("subgroup2");
-        ae.createGroup(ge, "/GROUPTEST/SUBGROUP");
+        ae.createGroup(ge, "/" + GROUPNAME + "/SUBGROUP");
         desc.setTranslation(1, "property description...");
         desc.setTranslation(2, "attribut beschreibung...");
         FxPropertyEdit pe = FxPropertyEdit.createNew("testproperty", desc, new FxString("property hint"), true, new FxMultiplicity(1, 1),
                 true, env().getACL(1), FxDataType.Number, new FxString("123"),
                 true, null, null, null);
-        ae.createProperty(pe, "/GROUPTEST/SUBGROUP");
-        FxGroupAssignment ga = (FxGroupAssignment) env().getAssignment("ROOT/GROUPTEST");
+        ae.createProperty(pe, "/" + GROUPNAME + "/SUBGROUP");
+        FxGroupAssignment ga = (FxGroupAssignment) env().getAssignment("ROOT/" + GROUPNAME);
         FxGroupAssignmentEdit gae = FxGroupAssignmentEdit.createNew(ga, env().getType("ROOT"), "GTEST", "/");
         ae.save(gae, true);
         ut.rollback();

@@ -43,6 +43,7 @@ import com.flexive.shared.cache.FxCacheException;
 import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxConversionException;
+import com.flexive.shared.exceptions.FxEntryExistsException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.interfaces.ScriptingEngine;
 import com.flexive.shared.interfaces.TypeEngine;
@@ -64,7 +65,9 @@ import org.apache.commons.lang.ArrayUtils;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * XStream converter for FxType
@@ -173,7 +176,9 @@ public class FxTypeConverter implements Converter {
         FxType parent = null;
         if (Boolean.valueOf(reader.getAttribute("derived"))) {
             //this value can not be changed for existing types
-            parent = env.getType(reader.getAttribute("parent"));
+            final String parentType = reader.getAttribute("parent");
+            if( !FxType.ROOT.equals(parentType))
+                parent = env.getType(parentType);
         }
         ACL acl = env.getACL(reader.getAttribute("acl"));
         TypeCategory cat = TypeCategory.valueOf(reader.getAttribute("category"));
@@ -197,7 +202,7 @@ public class FxTypeConverter implements Converter {
         FxString label = null;
         List<FxTypeScriptImportMapping> scriptMapping = null;
         if (!existing) {
-            typeEdit = FxTypeEdit.createNew(name, label, acl, workflow, parent, false/*irrelevant*/,
+            typeEdit = FxTypeEdit.createNew(name, label, acl, workflow, parent, false,
                     storageMode, cat, mode, langMode, state, permissions, trackHistory, historyAge, maxVersions,
                     maxRelSource, maxRelDest);
             typeEdit.setLifeCycleInfo(LifeCycleInfoImpl.createNew(FxContext.getUserTicket()));
@@ -299,16 +304,21 @@ public class FxTypeConverter implements Converter {
                 typeEdit = CacheAdmin.getEnvironment().getType(typeEngine.save(typeEdit)).asEditable();
                 final ScriptingEngine scriptingEngine = EJBLookup.getScriptingEngine();
                 //remove all script assignments
-                for (FxScriptEvent ev : typeEdit.getScriptEvents())
+                final Set<FxScriptEvent> scriptEvents = new HashSet<FxScriptEvent>(typeEdit.getScriptEvents());
+                for (FxScriptEvent ev : scriptEvents)
                     for (long scriptId : typeEdit.getScriptMapping(ev)) {
                         scriptingEngine.removeTypeScriptMapping(scriptId, typeEdit.getId());
                     }
                 //and re-add them
 
                 for (FxTypeScriptImportMapping sm : scriptMapping) {
-                    scriptingEngine.createTypeScriptMapping(sm.getEvent(),
-                            env.getScript(sm.getScriptName()).getId(), typeEdit.getId(),
-                            sm.isActive(), sm.isDerivedUsage());
+                    try {
+                        scriptingEngine.createTypeScriptMapping(sm.getEvent(),
+                                env.getScript(sm.getScriptName()).getId(), typeEdit.getId(),
+                                sm.isActive(), sm.isDerivedUsage());
+                    } catch (FxEntryExistsException e) {
+                        //mapping already exists via inheritance
+                    }
                 }
                 try {
                     StructureLoader.reload(null);

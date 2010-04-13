@@ -295,7 +295,13 @@ public final class AssignmentDifferenceAnalyser {
      */
     private static List<String> derivedGroupComparison(FxGroupAssignment ga) {
         final List<String> result = new ArrayList<String>();
-        final FxGroupAssignment base = (FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment(ga.getBaseAssignmentId());
+        final FxGroupAssignment base;
+        try {
+            base = (FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment(ga.getBaseAssignmentId());
+        } catch (Exception e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            throw new RuntimeException(e);
+        }
 
         if (compareTranslations(base.getHint(), base.getHint().getTranslatedLanguages(), ga.getHint(), ga.getHint().getTranslatedLanguages()))
             result.add("hint");

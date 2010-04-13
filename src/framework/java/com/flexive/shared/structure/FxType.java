@@ -31,11 +31,7 @@
  ***************************************************************/
 package com.flexive.shared.structure;
 
-import com.flexive.shared.AbstractSelectableObjectWithLabel;
-import com.flexive.shared.FxContext;
-import com.flexive.shared.SelectableObjectWithLabel;
-import com.flexive.shared.SelectableObjectWithName;
-import com.flexive.shared.XPathElement;
+import com.flexive.shared.*;
 import com.flexive.shared.media.FxMimeTypeWrapper;
 import com.flexive.shared.content.FxGroupData;
 import com.flexive.shared.content.FxPK;
@@ -742,14 +738,15 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
         //we only resolve if the parent is a preload type! => this can and will only happen once
         if (getParent() != null && getParent().getMode() == TypeMode.Preload) {
             //assign correct parents
-            if (getParent().getId() == 0)
-                this.parent = null;
-            else {
+//            if (getParent().getId() == 0)
+//                this.parent = null;
+//            else {
                 this.parent = fxStructure.getType(getParent().getId());
                 if (!this.parent.derivedTypes.contains(this))
                     this.parent.derivedTypes.add(this);
-            }
+//            }
             //resolve derived types
+            derivedTypes.clear();
             for (FxType derived : fxStructure.getTypes(true, true, true, true)) {
                 if (derived.getParent() != null && derived.getParent().getId() == getId())
                     derivedTypes.add(derived);
@@ -928,6 +925,22 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
             throw e.asRuntimeException();
         }
         throw new FxNotFoundException("ex.structure.assignment.notFound.xpath", parentXPath).asRuntimeException();
+    }
+
+    /**
+     * Check if the requested assignment exists for this type
+     *
+     * @param xPath xpath of the assignment
+     * @return assignment exists
+     * @since 3.1
+     */
+    public boolean hasAssignment(String xPath) {
+        try {
+            getAssignment(xPath);
+            return true;
+        } catch (FxRuntimeException e) {
+            return false;
+        }
     }
 
     /**
