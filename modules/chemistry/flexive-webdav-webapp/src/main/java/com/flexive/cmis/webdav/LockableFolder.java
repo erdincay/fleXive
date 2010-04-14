@@ -34,7 +34,7 @@ package com.flexive.cmis.webdav;
 import com.flexive.chemistry.webdav.FolderResource;
 import com.flexive.chemistry.webdav.ChemistryResourceFactory;
 import com.bradmcevoy.http.*;
-import com.flexive.shared.structure.FxType;
+import com.flexive.shared.CacheAdmin;
 import java.util.List;
 import org.apache.chemistry.Folder;
 
@@ -87,13 +87,8 @@ public class LockableFolder extends FolderResource implements LockableResource, 
         // TODO: the image/document switching should be implemented in the flexive repository
         if (mimeTypes.isEmpty()) {
             return BaseType.DOCUMENT.getId();
-        } else if (mimeTypes.get(0).startsWith("image/")) {
-            return "IMAGE";
-        } else if (mimeTypes.get(0).startsWith("application/")) {
-            return FxType.DOCUMENT;
         } else {
-            // fallback
-            return FxType.DOCUMENTFILE;
+            return CacheAdmin.getEnvironment().getMimeTypeMatch(mimeTypes.get(0)).getName();
         }
     }
 
