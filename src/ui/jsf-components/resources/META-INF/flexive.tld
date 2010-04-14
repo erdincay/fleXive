@@ -622,45 +622,11 @@
             <rtexprvalue>true</rtexprvalue>
             <description>An instance of the flexive.yui.AutoCompleteHandler javascript class. This class provides a query method for a  client-side autocomplete widget provided by Yahoo UI, as well as a method  for formatting the response.</description>
         </attribute>
-    </tag>
-    <tag>
-        <name>content</name>
-        <body-content>JSP</body-content>
         <attribute>
-            <name>var</name>
+            <name>valueChangeListener</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
-            <description>The name of the variable that provides the content. The actual FxContent  instance  itself  is provided in "#{var}_content", i.e. if var="project",  then the FxContent is supplied in "project_content".</description>
-        </attribute>
-        <attribute>
-            <name>pk</name>
-            <required>false</required>
-            <rtexprvalue>true</rtexprvalue>
-            <description>A primary key. May be supplied as an FxPK object, a long ID, a String containing a primary key (e.g. "5", "5.1", "5.MAX"), a FxReference, or a FxSelectListItem whose ID will be interpreted as a content ID.</description>
-        </attribute>
-        <attribute>
-            <name>type</name>
-            <required>false</required>
-            <rtexprvalue>true</rtexprvalue>
-            <description>The new content type ID (if no PK was specified)</description>
-        </attribute>
-        <attribute>
-            <name>typeName</name>
-            <required>false</required>
-            <rtexprvalue>true</rtexprvalue>
-            <description>The new content type name (if no PK was specified)</description>
-        </attribute>
-        <attribute>
-            <name>content</name>
-            <required>false</required>
-            <rtexprvalue>true</rtexprvalue>
-            <description>The content instance to be displayed (if no PK was specified).</description>
-        </attribute>
-        <attribute>
-            <name>preserveContent</name>
-            <required>false</required>
-            <rtexprvalue>true</rtexprvalue>
-            <description>If set to true, the content instance will be stored in the JSF viewstate. This  is  memory-expensive, but is necessary for editor pages that modify the content  structure, e.g. pages that allow to add or remove groups or properties. By  default,  this option is set to false.</description>
+            <description>A JSF listener that is invoked when the component value changes.</description>
         </attribute>
     </tag>
     <tag>
@@ -679,10 +645,82 @@
             <description>The value of the "var" attribute of the &lt;fx:content&gt; component whose content should be edited. If nested directly in a  fx:content tag, this attribute can be omitted.</description>
         </attribute>
         <attribute>
+            <name>label</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>An optional label that overrides the assignment label.</description>
+        </attribute>
+        <attribute>
             <name>labelKey</name>
             <required>false</required>
             <rtexprvalue>true</rtexprvalue>
             <description>An optional message key that overrides the assignment label.</description>
+        </attribute>
+        <attribute>
+            <name>tooltip</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>The input label tooltip (optional).</description>
+        </attribute>
+        <attribute>
+            <name>tooltipKey</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>Message key of the tooltip (overrides tooltip, if not specified and labelKey is set,  it defaults to #{labelKey}.tooltip )</description>
+        </attribute>
+        <attribute>
+            <name>readOnly</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>If true, no input field will be rendered.</description>
+        </attribute>
+        <attribute>
+            <name>forceLineInput</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>For multiline and HTML properties, force to render a single-line input field (e.g.  for search query forms).</description>
+        </attribute>
+        <attribute>
+            <name>inputMapper</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>An optional input mapper for rendering the input control. For example, properties  referencing other content may need a custom input mapper that provides a select list  of content instances. For more information take a look at the InputMapper documentation and at .</description>
+        </attribute>
+        <attribute>
+            <name>valueFormatter</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>A FxValueFormatter to be used for rendering the value (in read-only mode only). If not specified,  the JSF renderer will choose the appropriate default formatter for  the actual value class.</description>
+        </attribute>
+        <attribute>
+            <name>filter</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>If set to false, HTML output will not be filtered. If set to true (the default),  HTML entities will be used for sensitive characters (e.g. "&amp;lt;"  instead of "&lt;").</description>
+        </attribute>
+        <attribute>
+            <name>disableMultiLanguage</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>Disables multi language support even if the FxValue object is multilingual.  Only the default translation will be displayed and updated.</description>
+        </attribute>
+        <attribute>
+            <name>disableLytebox</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>Set this property to true if the Lytebox javascript library used for rendering inline previews of images should not be used.</description>
+        </attribute>
+        <attribute>
+            <name>onchange</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>An optional javascript expression to be called when an input element  changed its value.</description>
+        </attribute>
+        <attribute>
+            <name>autocompleteHandler</name>
+            <required>false</required>
+            <rtexprvalue>true</rtexprvalue>
+            <description>An instance of the flexive.yui.AutoCompleteHandler javascript class. This class provides a query method for a  client-side autocomplete widget provided by Yahoo UI, as well as a method  for formatting the response.</description>
         </attribute>
     </tag>
     <tag>

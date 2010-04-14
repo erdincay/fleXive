@@ -1227,6 +1227,15 @@
                             </varlistentry>
 
                             <varlistentry>
+                                <term>label</term>
+                                <listitem>
+                                    <para>
+                                        An optional label that overrides the assignment label.
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+
+                            <varlistentry>
                                 <term>labelKey</term>
                                 <listitem>
                                     <para>
@@ -1234,6 +1243,130 @@
                                     </para>
                                 </listitem>
                             </varlistentry>
+
+                            <varlistentry>
+                                <term>tooltip</term>
+                                <listitem>
+                                    <para>
+                                        The input label tooltip (optional).
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+
+                            <varlistentry>
+                                <term>tooltipKey</term>
+                                <listitem>
+                                    <para>
+                                        Message key of the tooltip (overrides tooltip, if not specified and labelKey is set,
+                                        it defaults to<code language="jsfel">#{labelKey}.tooltip</code>)
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+
+                            <varlistentry>
+                                <term>readOnly</term>
+                                <listitem>
+                                    <para>
+                                        If true, no input field will be rendered.
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+
+                            <varlistentry>
+                                <term>forceLineInput</term>
+                                <listitem>
+                                    <para>
+                                        For multiline and HTML properties, force to render a single-line input field (e.g.
+                                        for search query forms).
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+
+                            <varlistentry>
+                                <term>inputMapper</term>
+                                <listitem>
+                                    <para>
+                                        An optional input mapper for rendering the input control. For example, properties
+                                        referencing other content may need a custom input mapper that provides a select list
+                                        of content instances. For more information take a look at the
+                                        <link xlink:href="&flexiveJavadocBase;shared/com/flexive/shared/value/mapper/InputMapper.html">
+                                            InputMapper
+                                        </link>
+                                        documentation and at
+                                        <xref linkend="jcl_fx_content_ex_inputmappers"/>.
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+
+                            <varlistentry>
+                                <term>valueFormatter</term>
+                                <listitem>
+                                    <para>
+                                        A
+                                        <interfacename>FxValueFormatter</interfacename>
+                                        to be used for rendering the value (in read-only mode only). If not specified,
+                                        the JSF renderer will choose the appropriate default formatter for
+                                        the actual value class.
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+
+                            <varlistentry>
+                                <term>filter</term>
+
+                                <listitem>
+                                    <para>
+                                        If set to false, HTML output will not be filtered. If set to true (the default),
+                                        HTML entities will be used for sensitive characters (e.g. "&amp;lt;"
+                                        instead of "&lt;").
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+
+                            <varlistentry>
+                                <term>disableMultiLanguage</term>
+                                <listitem>
+                                    <para>
+                                        Disables multi language support even if the FxValue object is multilingual.
+                                        Only the default translation will be displayed and updated.
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+
+                            <varlistentry>
+                                <term>disableLytebox</term>
+                                <listitem>
+                                    <para>
+                                        Set this property to true if the
+                                        <link xlink:href="http://www.dolem.com/lytebox/">Lytebox</link>
+                                        javascript library used for rendering inline previews of images should not be used.
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+
+                            <varlistentry>
+                                <term>onchange</term>
+                                <listitem>
+                                    <para>
+                                        An optional javascript expression to be called when an input element
+                                        changed its value.
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+
+                            <varlistentry>
+                                <term>autocompleteHandler</term>
+                                <listitem>
+                                    <para>
+                                        An instance of the
+                                        <classname>flexive.yui.AutoCompleteHandler</classname>
+                                        javascript class. This class provides a query method for a
+                                        client-side autocomplete widget provided by Yahoo UI, as well as a method
+                                        for formatting the response.
+                                    </para>
+                                </listitem>
+                            </varlistentry>
+
                         </variablelist>
                     </para>
                 </section>
@@ -1274,6 +1407,10 @@
                     <link linkend="adm_user_preferences">user preferences</link>
                     of the &backendGui; or programmatically through the user configuration parameter
                     <constant>com.flexive.shared.configuration.SystemParameters.USER_DEFAULTINPUTLANGUAGE</constant>.
+                </para>
+                <para>
+                    Note that this component is a JSF UIInput component, thus it supports many standard JSF
+                    input facilities (like value change listeners or validators).
                 </para>
                 <section xml:id="jcl_fx_value_input_synopsis">
                     <title>Synopsis</title>
@@ -1441,6 +1578,16 @@
                                 </para>
                             </listitem>
                         </varlistentry>
+
+                        <varlistentry>
+                            <term>valueChangeListener</term>
+                            <listitem>
+                                <para>
+                                    A JSF listener that is invoked when the component value changes.
+                                </para>
+                            </listitem>
+                        </varlistentry>
+
                     </variablelist>
                 </section>
 
