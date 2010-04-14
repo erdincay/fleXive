@@ -139,11 +139,13 @@
                     <f:selectItems value="#{fxSelectBean.structureACLs}" />
                 </h:selectOneListbox>
             </fx:formRow>
+            <ui:fragment rendered="#{propertyEditorBean.propertyReference}">
                 <fx:formRow labelKey="PropertyEditor.label.reference.selectone" id="RefSelectOne">
                     <h:selectBooleanCheckbox id="RefSelectOne" value="#{propertyEditorBean.propertyReferenceSelectOne}"
                        disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"
                             />
                 </fx:formRow>
+            </ui:fragment>
             <fx:fieldSet legend="#{fxMessageBean['PropertyEditor.label.propertyOverrideOptions']}">
                 <fx:formRow labelKey="PropertyEditor.label.mayOverrideMultiLang" id="propertyMayOverrideMultiLang" tooltipKey="PropertyEditor.tooltip.mayOverrideMultiLang">
                     <h:selectBooleanCheckbox id="propertyMayOverrideMultiLang" value="#{propertyEditorBean.propertyMayOverrideMultiLang}"
