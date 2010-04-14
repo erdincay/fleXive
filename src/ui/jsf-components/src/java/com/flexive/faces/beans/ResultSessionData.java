@@ -73,7 +73,7 @@ public class ResultSessionData implements Serializable {
 
     private FxResultSet result; // only when ResultLocation#isCacheInSession is true
 
-    private long folderId;
+    private long folderId = -1;
     private FxTreeMode treeMode;
     private boolean onlyDirectChildren;
     private boolean enableFolderActions;
