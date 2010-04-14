@@ -60,6 +60,14 @@
             <fileset dir="resources" includes="custom-*.xsl"/>
         </copy>
 
+        <!-- Create redirect file -->
+        <echo file="${build.doc.dir}/index.html"><![CDATA[<html>
+<meta http-equiv="refresh" content="0; URL=website/"/>
+<body>
+Redirecting to <a href="website/">the [fleXive] reference documentation...</a>
+</body>
+</html>]]></echo>
+
     </target>
 
     <target name="prepare.java" description="Setup for docbook processing via Java" depends="prepare">
