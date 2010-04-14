@@ -1399,7 +1399,6 @@ public final class FxEnvironmentImpl implements FxEnvironment {
     /**
      * {@inheritDoc}
      */
-    @Override
     public FxType getMimeTypeMatch(String mimeType) {
         FxMimeType fxMimeType = FxMimeType.getMimeType(mimeType);
         // no proper match for given mimetype - return DocumentFile (TODO: adjust/check output of mimeutils)
