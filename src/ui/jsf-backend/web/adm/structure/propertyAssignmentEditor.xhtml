@@ -137,7 +137,7 @@
 
             <ui:fragment rendered="#{propertyEditorBean.propertyReference}">
                 <fx:formRow labelKey="PropertyEditor.label.reference.selectone" id="RefSelectOne">
-                    <h:selectBooleanCheckbox id="RefSelectOne" value="#{propertyEditorBean.propertyReferenceSelectOne}"
+                    <h:selectBooleanCheckbox id="RefSelectOne" value="#{propertyEditorBean.assignmentReferenceSelectOne}"
                        disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"
                             />
                 </fx:formRow>
@@ -152,6 +152,13 @@
                             <a4j:support event="onclick" reRender="multiLangBox,defaultLangSelect,defaultValueInput,defaultLanguageInput"/>
                         </h:selectBooleanCheckbox>
                 </fx:formRow>
+                <ui:fragment rendered="#{propertyEditorBean.propertyReference} and false"><!--TODO check it-->
+                    <fx:formRow labelKey="PropertyEditor.label.reference.selectone" id="overrideRefSelectOne">
+                        <h:selectBooleanCheckbox id="overrideRefSelectOne" value="#{propertyEditorBean.propertyMayOverrideReferenceSelectOne}"
+                                 disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal
+                                 and not fxSystemBean.isInRole['GlobalSupervisor'])}"/>
+                    </fx:formRow>
+                </ui:fragment>
 
                 <a4j:outputPanel id="multiLangBox">
                     <ui:fragment rendered="#{propertyEditorBean.overrideMultiLang}">

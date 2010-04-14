@@ -31,14 +31,13 @@
  ***************************************************************/
 package com.flexive.shared.structure;
 
+import com.flexive.shared.exceptions.FxInvalidParameterException;
 import org.apache.commons.lang.StringUtils;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import com.flexive.shared.exceptions.FxInvalidParameterException;
 
 /**
  * Option for structure elements (groups, properties, assignments)
@@ -163,6 +162,15 @@ public class FxStructureOption implements Serializable {
      */
     public boolean isSet() {
         return set;
+    }
+
+    /**
+     * Test if the option need to be saved
+     * @return <code>true</code> if the option is set and the value is not empty
+     * @since 3.1
+     */
+    public boolean isValid() {
+        return set && !StringUtils.isEmpty(value);
     }
 
     /**

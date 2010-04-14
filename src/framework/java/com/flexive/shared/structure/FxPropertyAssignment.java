@@ -36,17 +36,17 @@ import com.flexive.shared.XPathElement;
 import com.flexive.shared.content.FxData;
 import com.flexive.shared.content.FxGroupData;
 import com.flexive.shared.content.FxPropertyData;
+import com.flexive.shared.exceptions.FxContentExceptionCause;
 import com.flexive.shared.exceptions.FxCreateException;
 import com.flexive.shared.exceptions.FxRuntimeException;
-import com.flexive.shared.exceptions.FxContentExceptionCause;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.value.FxValue;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.ArrayList;
 
 /**
  * Assignment of a property to a type or group
@@ -420,5 +420,9 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
         }
 
         return result;
+    }
+
+    public boolean isReferenceSelectOne() {
+        return getOption(FxStructureOption.OPTION_REFERENCE_SELECTONE).isValueTrue();
     }
 }

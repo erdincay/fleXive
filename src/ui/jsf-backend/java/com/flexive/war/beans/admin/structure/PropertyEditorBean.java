@@ -738,6 +738,11 @@ public class PropertyEditorBean implements ActionBean, Serializable {
         return ml.isSet() && ml.isOverrideable();
     }
 
+    public boolean isPropertyMayOverrideReferenceSelectOne() {
+        FxStructureOption ml = property.getOption(FxStructureOption.OPTION_REFERENCE_SELECTONE);
+        return ml.isSet() && ml.isOverrideable();
+    }
+
     public void setPropertyMayOverrideMultiLang(boolean b) {
         FxStructureOption ml = property.getOption(FxStructureOption.OPTION_MULTILANG);
         if (!ml.isSet() && b)
@@ -746,6 +751,16 @@ public class PropertyEditorBean implements ActionBean, Serializable {
             property.setOption(FxStructureOption.OPTION_MULTILANG, b, ml.isValueTrue());
         if (ml.isSet() && !b && assignment != null)
             assignment.clearOption(FxStructureOption.OPTION_MULTILANG);
+    }
+
+    public void setPropertyMayOverrideReferenceSelectOne(boolean b) {
+        FxStructureOption ml = property.getOption(FxStructureOption.OPTION_REFERENCE_SELECTONE);
+        if (!ml.isSet() && b)
+            property.setOption(FxStructureOption.OPTION_REFERENCE_SELECTONE, true, false);
+        if (ml.isSet())
+            property.setOption(FxStructureOption.OPTION_REFERENCE_SELECTONE, b, ml.isValueTrue());
+        if (ml.isSet() && !b && assignment != null)
+            assignment.clearOption(FxStructureOption.OPTION_REFERENCE_SELECTONE);
     }
 
     public boolean isPropertyMultiLanguage() {
@@ -773,6 +788,22 @@ public class PropertyEditorBean implements ActionBean, Serializable {
          if ((!ml.isSet() && b) || ml.isSet()) {
              try {
                  optionWrapper.setOption(true, FxStructureOption.OPTION_REFERENCE_SELECTONE, b);
+             }
+             catch (Exception e) {
+                 new FxFacesMsgErr(e).addToContext();
+             }
+         }
+     }
+
+    public boolean isAssignmentReferenceSelectOne() {
+        return assignment.isReferenceSelectOne();
+    }
+
+    public void setAssignmentReferenceSelectOne(boolean b) throws FxInvalidParameterException {
+         FxStructureOption ml = assignment.getOption(FxStructureOption.OPTION_REFERENCE_SELECTONE);
+         if ((!ml.isSet() && b) || ml.isSet()) {
+             try {
+                 assignment.setOption(FxStructureOption.OPTION_REFERENCE_SELECTONE, b);
              }
              catch (Exception e) {
                  new FxFacesMsgErr(e).addToContext();
@@ -843,6 +874,35 @@ public class PropertyEditorBean implements ActionBean, Serializable {
                     assignment.setOption(FxStructureOption.OPTION_MULTILANG, !isPropertyMultiLanguage());
                 else
                     assignment.clearOption(FxStructureOption.OPTION_MULTILANG);
+            }
+            catch (Throwable t) {
+                new FxFacesMsgErr(t).addToContext();
+            }
+        }
+    }
+
+    public boolean isOverrideReferenceSelectOne() {
+        if (assignment == null)
+            return false;
+        //handle multi lang option seperately
+        FxStructureOption refSelectOne = null;
+        for (FxStructureOption o : assignment.getOptions()) {
+            if (o.getKey().equals(FxStructureOption.OPTION_REFERENCE_SELECTONE)) {
+                refSelectOne = o;
+                break;
+            }
+        }
+        return refSelectOne != null && isPropertyMayOverrideReferenceSelectOne() && refSelectOne.isSet();
+    }
+
+    public void setOverrideReferenceSelectOne(boolean overrideReferenceSelectOne) {
+        //only react to changing values
+        if (isOverrideReferenceSelectOne() != overrideReferenceSelectOne) {
+            try {
+                if (overrideReferenceSelectOne)
+                    assignment.setOption(FxStructureOption.OPTION_REFERENCE_SELECTONE, !isPropertyReferenceSelectOne());
+                else
+                    assignment.clearOption(FxStructureOption.OPTION_REFERENCE_SELECTONE);
             }
             catch (Throwable t) {
                 new FxFacesMsgErr(t).addToContext();
@@ -1092,29 +1152,22 @@ public class PropertyEditorBean implements ActionBean, Serializable {
         int min = FxMultiplicity.getStringToInt(minMultiplicity);
         int max = FxMultiplicity.getStringToInt(maxMultiplicity);
 
-        FxStructureOption multilang = null;
-        //save multilang option
-        for (FxStructureOption o : assignment.getOptions()) {
-            if (o.getKey().equals(FxStructureOption.OPTION_MULTILANG)) {
-                multilang = o;
-                break;
+        List<String> notSetAssignments = new ArrayList<String>();
+
+        for (FxStructureOption currAssignment : assignment.getOptions()) {
+            if (!currAssignment.isValid()) {
+                notSetAssignments.add(currAssignment.getKey());
             }
         }
 
-        //delete current options
-        while (!assignment.getOptions().isEmpty()) {
-            String key = assignment.getOptions().get(0).getKey();
-            assignment.clearOption(key);
+        for (String currKey : notSetAssignments) {
+            assignment.clearOption(currKey);
         }
         //add edited options
         List<FxStructureOption> newAssignmentOptions = optionWrapper.asFxStructureOptionList(optionWrapper.getAssignmentOptions());
         for (FxStructureOption o : newAssignmentOptions) {
             assignment.setOption(o.getKey(), o.getValue());
         }
-
-        //restore multilang option
-        if (multilang != null && multilang.isSet() && property.getOption(FxStructureOption.OPTION_MULTILANG).isOverrideable())
-            assignment.setOption(multilang.getKey(), multilang.getValue());
 
         //in any case restore the system language for systeminternal properties
         if (isSystemInternal() && originalLanguageSystemLanguage) {
@@ -1148,33 +1201,28 @@ public class PropertyEditorBean implements ActionBean, Serializable {
         }
 
         Set<String> missingKey = new HashSet<String>();
+        List<String> notSetProperties = new ArrayList<String>();
 
         int min = FxMultiplicity.getStringToInt(propertyMinMultiplicity);
         int max = FxMultiplicity.getStringToInt(propertyMaxMultiplicity);
 
         FxJsfUtils.checkMultiplicity(min, max);
 
-        //save multilang option
-        FxStructureOption multilang = property.getOption(FxStructureOption.OPTION_MULTILANG);
-
         for (FxStructureOption currentOption : property.getOptions()) {
             missingKey.add(currentOption.getKey());
+            if (!currentOption.isValid()) {
+                notSetProperties.add(currentOption.getKey());
+            }
         }
 
-        //delete current options
-        while (!property.getOptions().isEmpty()) {
-            String key = property.getOptions().get(0).getKey();
-            property.clearOption(key);
+        for (String currKey : notSetProperties) {
+            property.clearOption(currKey);
         }
         //add edited options
         List<FxStructureOption> newGroupOptions = optionWrapper.asFxStructureOptionList(optionWrapper.getStructureOptions());
         for (FxStructureOption o : newGroupOptions) {
             property.setOption(o.getKey(), o.isOverrideable(), o.getValue());
         }
-
-        //restore multilang option
-        if (multilang.isSet())
-            property.setOption(multilang.getKey(), multilang.isOverrideable(), multilang.getValue());
 
         if (!isSystemInternal() || FxJsfUtils.getRequest().getUserTicket().isInRole(Role.GlobalSupervisor)) {
             property.setMultiplicity(new FxMultiplicity(min, max));

@@ -159,6 +159,16 @@ public class FxProperty extends FxStructureElement implements Serializable {
     }
 
     /**
+     * Should this property display references as select list?
+     *
+     * @return property displays references as select list
+     * @since 3.1
+     */
+    public boolean isAssignmentSelectOne() {
+        return getOption(FxStructureOption.OPTION_REFERENCE_SELECTONE).isValueTrue();
+    }
+
+    /**
      * May assignments override this properties searchable flag?
      *
      * @return if assignments may override this properties searchable flag?
