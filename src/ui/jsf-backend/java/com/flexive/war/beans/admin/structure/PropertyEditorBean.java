@@ -38,14 +38,16 @@ import com.flexive.faces.beans.ActionBean;
 import com.flexive.faces.beans.SelectBean;
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.faces.messages.FxFacesMsgInfo;
-import com.flexive.shared.*;
+import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.EJBLookup;
+import com.flexive.shared.FxLanguage;
+import com.flexive.shared.XPathElement;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxRuntimeException;
 import com.flexive.shared.scripting.FxScriptInfo;
 import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.security.Role;
-import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.value.FxValue;
@@ -56,10 +58,7 @@ import org.apache.commons.logging.LogFactory;
 
 import javax.faces.model.SelectItem;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Bean behind propertyAssignmentEditor.xhtml, propertyEditor.xhtml and propertyOptionEditor to
@@ -603,12 +602,11 @@ public class PropertyEditorBean implements ActionBean, Serializable {
      * @return available Types including a dummy value for null.
      */
     public List<SelectItem> getTypes() {
-        List<FxType> typesList = CacheAdmin.getFilteredEnvironment().getTypes(true, true, true, false);
+        List<FxType> typesList = CacheAdmin.getFilteredEnvironment().getTypes(true/*baseTypes*/, true/*derivedTypes*/, true/*types*/, false/*relations*/);
         final List<SelectItem> result = new ArrayList<SelectItem>(typesList.size() + 1);
-        final UserTicket ticket = FxContext.getUserTicket();
         result.add(new SelectItem((long) -1, ""));
-        for (SelectableObjectWithLabel item : typesList) {
-            result.add(new SelectItem(item.getId(), item.getLabel().getBestTranslation(ticket)));
+        for (FxType item : typesList) {
+            result.add(new SelectItem(item.getId(), item.getDisplayName()));
         }
         return result;
     }
@@ -765,6 +763,23 @@ public class PropertyEditorBean implements ActionBean, Serializable {
             }
         }
     }
+
+    public boolean isPropertyReferenceSelectOne() {
+        return property.isReferenceSelectOne();
+    }
+
+    public void setPropertyReferenceSelectOne(boolean b) throws FxInvalidParameterException {
+         FxStructureOption ml = property.getOption(FxStructureOption.OPTION_REFERENCE_SELECTONE);
+         if ((!ml.isSet() && b) || ml.isSet()) {
+             try {
+                 optionWrapper.setOption(true, FxStructureOption.OPTION_REFERENCE_SELECTONE, b);
+             }
+             catch (Exception e) {
+                 new FxFacesMsgErr(e).addToContext();
+             }
+         }
+     }
+
 
     /**
      * Returns if the option FxStructureOption.OPTION_MULTILANG is set.
@@ -1132,6 +1147,8 @@ public class PropertyEditorBean implements ActionBean, Serializable {
             throw new FxApplicationException("ex.structureEditor.noLabel");
         }
 
+        Set<String> missingKey = new HashSet<String>();
+
         int min = FxMultiplicity.getStringToInt(propertyMinMultiplicity);
         int max = FxMultiplicity.getStringToInt(propertyMaxMultiplicity);
 
@@ -1139,6 +1156,10 @@ public class PropertyEditorBean implements ActionBean, Serializable {
 
         //save multilang option
         FxStructureOption multilang = property.getOption(FxStructureOption.OPTION_MULTILANG);
+
+        for (FxStructureOption currentOption : property.getOptions()) {
+            missingKey.add(currentOption.getKey());
+        }
 
         //delete current options
         while (!property.getOptions().isEmpty()) {
@@ -1157,6 +1178,22 @@ public class PropertyEditorBean implements ActionBean, Serializable {
 
         if (!isSystemInternal() || FxJsfUtils.getRequest().getUserTicket().isInRole(Role.GlobalSupervisor)) {
             property.setMultiplicity(new FxMultiplicity(min, max));
+        }
+
+        for (FxStructureOption currentOption : property.getOptions()) {
+            missingKey.remove(currentOption.getKey());
+        }
+
+        if (missingKey.size() > 0) {
+            String firstKey = missingKey.iterator().next();
+            missingKey.remove(firstKey);
+            StringBuilder missingKeys = new StringBuilder(firstKey);
+            String [] keys = new String[missingKey.size()];
+            keys = missingKey.toArray(keys);
+            for (String currentKey : keys) {
+                missingKeys.append(", ").append(currentKey);
+            }
+            new FxFacesMsgInfo("PropertyEditor.err.propertyKeysNotSaved", missingKeys.toString()).addToContext();
         }
     }
 
