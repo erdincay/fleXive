@@ -641,19 +641,19 @@ public class FxContent implements Serializable {
      * @return this FxContent instance to allow chained calls
      */
     public FxContent setValue(String XPath, FxValue value) {
-        getProperyData(XPath).setValue(value);
+        getPropertyDataCreate(XPath).setValue(value);
         return this;
     }
 
     /**
-     * Get the FxPropertyData entry for an XPath.
-     * If the entry does not exist yet, it will be created.
+     * Get the FxPropertyData entry for an XPath and create a new entry if it does not exist yet.
      *
      * @param XPath requested xpath
      * @return FxPropertyData
+     * @since 3.1
      */
     @SuppressWarnings({"ThrowableInstanceNeverThrown"})
-    private FxPropertyData getProperyData(String XPath) {
+    public FxPropertyData getPropertyDataCreate(String XPath) {
         XPath = XPathElement.stripType(XPath);
         createXPath(XPath);
         List<FxData> prop = getData(XPath);
@@ -677,6 +677,7 @@ public class FxContent implements Serializable {
     public FxContent setValue(String XPath, Object value) {
         if (value instanceof FxValue)
             return this.setValue(XPath, (FxValue) value);
+        XPath = XPathElement.stripType(XPath);
         if (!containsValue(XPath))
             createXPath(XPath);
         FxValue val = getPropertyData(XPath).getValue();
@@ -684,7 +685,6 @@ public class FxContent implements Serializable {
             val.setDefaultTranslation(value);
         else
             val.setValue(value);
-
         return this;
     }
 
