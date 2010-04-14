@@ -187,8 +187,8 @@
     <section xml:id="adm_user_preferences">
         <title>User preferences</title>
         <para>
-            The user preferences GUI can be accessed via the <link linkend="adm_gui_areas">toolbar
-            </link> by clicking the
+            The user preferences GUI can be accessed via the
+            <link linkend="adm_gui_areas">toolbar</link> by clicking the
             <inlinemediaobject>
                  <imageobject>
                     <imagedata fileref="images/adm_ui_user_preferences/user_preferences_icon.png" format="PNG"
@@ -206,9 +206,13 @@
             </mediaobject>
         </para>
         <para>
-            The second tab called "User contact data" allows editing the contact data content instance
-            directly which is used to store additional user specific data but is 
-            actually independent of the actual account data (i.e modifying the e-mail
+            The second tab called "User contact data" allows editing the contact
+            data content instance directly. (For details about editing content instances
+            please refer to <xref linkend="adm_instance_editor"/>). 
+            The contact data content instance is used to store
+            <emphasis>additional</emphasis>
+            user specific data but is actually independent of the actual
+            account data (i.e modifying the e-mail
             address in the contact data does
             not forward to the e-mail stored within the account data).
             <mediaobject>
@@ -391,32 +395,45 @@
                                     <listitem>
                                         <para>
                                             Left clicking on "Structures" in the structure tree
-                                            tab opens a drop down menu. The following
+                                            tab opens a drop down menu.
+                                            <mediaobject>
+                                                <imageobject>
+                                                    <imagedata fileref="images/adm_ui_structure_editor/type_dropdown.png" format="PNG"
+                                                               contentwidth="66%"/>
+                                                </imageobject>
+                                            </mediaobject>
+                                            The following
                                             options are available:
                                         </para>
                                         <itemizedlist>
                                             <listitem>
-                                                <para>Create a new content type (opens the type editor GUI).
+                                                <para>Create a new content type (opens the
+                                                    <link linkend="adm_structure_editor_type_editor">type editor</link>).
                                                 </para>
                                             </listitem>
                                             <listitem>
-                                                <para>Create a new relation type (opens the type editor GUI).
+                                                <para>Create a new relation type (opens the
+                                                    <link linkend="adm_structure_editor_type_editor">type editor</link>).
                                                 </para>
                                             </listitem>
                                             <listitem>
-                                                <para>Import a type (opens the structure import GUI).
+                                                <para>Import a type (opens the
+                                                    <link linkend="adm_structure_export_import">structure import GUI</link>).
                                                 </para>
                                             </listitem>
                                             <listitem>
-                                                <para>Export types (opens the structure export GUI).
+                                                <para>Export types (opens the
+                                                    <link linkend="adm_structure_export_import">structure export GUI</link>).
                                                 </para>
                                             </listitem>
                                             <listitem>
-                                                <para>Build a search query (opens the search GUI).
+                                                <para>Build a search query (opens the
+                                                    <link linkend="adm_query_editor">visual query editor</link>).
                                                 </para>
                                             </listitem>
                                             <listitem>
-                                                <para>View search results (opens the search result GUI).
+                                                <para>View search results (opens the
+                                                    <link linkend="adm_query_editor_result">search results</link>).
                                                 </para>
                                             </listitem>
                                             <listitem>
@@ -428,12 +445,6 @@
                                                 </para>
                                             </listitem>
                                         </itemizedlist>
-                                        <inlinemediaobject>
-                                            <imageobject>
-                                                <imagedata fileref="images/adm_ui_structure_editor/type_dropdown.png" format="PNG"
-                                                           contentwidth="66%"/>
-                                            </imageobject>
-                                        </inlinemediaobject>
                                     </listitem>
                                      <listitem>
                                         <para>
@@ -475,56 +486,70 @@
                                     <listitem>
                                         <para>
                                             For types it is possible to:
+                                             <mediaobject>
+                                                <imageobject>
+                                                    <imagedata fileref="images/adm_ui_structure_editor/context_menu_type.png"
+                                                               format="PNG" contentwidth="66%"/>
+                                                </imageobject>
+                                            </mediaobject>
                                             <itemizedlist>
                                                 <listitem>
                                                     <para>Open the type in
-                                                        <glossterm>view mode</glossterm> (this action will open the type editor).
+                                                        <glossterm>view mode</glossterm> (this action will open the
+                                                        <link linkend="adm_structure_editor_type_editor">type editor</link>).
                                                     </para>
                                                 </listitem>
                                                 <listitem>
                                                     <para>Open the type in
-                                                        <glossterm>edit mode</glossterm> (this action will open the type editor).
+                                                        <glossterm>edit mode</glossterm> (this action will open the
+                                                        <link linkend="adm_structure_editor_type_editor">type editor</link>).
                                                     </para>
                                                 </listitem>
                                                  <listitem>
                                                     <para>Export the type with or without.
-                                                        <glossterm>dependencies</glossterm> (this action will open the export GUI).
+                                                        <glossterm>dependencies</glossterm> (this action will open the
+                                                        <link linkend="adm_structure_export_import">export GUI</link>).
                                                     </para>
                                                 </listitem>
                                                 <listitem>
                                                     <para>Create a new property that will be automatically assigned to
-                                                        this type (this action will open the property editor).
+                                                        this type (this action will open the
+                                                        <link linkend="adm_structure_editor_property_editor">property editor</link>).
                                                     </para>
                                                 </listitem>
                                                 <listitem>
                                                     <para>Create a new group that will be automatically assigned to this
-                                                        type (this action will open the group editor).
+                                                        type (this action will open the
+                                                        <link linkend="adm_structure_editor_group_editor">group editor</link>).
                                                     </para>
                                                 </listitem>
                                                 <listitem>
-                                                    <para>Create a derived type of this type (this action will open the type editor).
+                                                    <para>Create a derived type of this type (this action will open the
+                                                        <link linkend="adm_structure_editor_type_editor">type editor</link>).
                                                     </para>
                                                 </listitem>
                                                  <listitem>
                                                     <para>Create a search query containing this type as search parameter
-                                                        (this action will open the search GUI).
+                                                        (this action will open the
+                                                        <link linkend="adm_query_editor">visual query editor</link>).
                                                     </para>
                                                 </listitem>
                                                  <listitem>
-                                                    <para>View the search query results (this action will open the search result GUI).
+                                                    <para>View the search query results (this action will open the
+                                                        <link linkend="adm_query_editor_result">search results</link>).
                                                     </para>
                                                 </listitem>
                                                 <listitem>
                                                     <para>
                                                         Create content for the selected type (this action will open
-                                                        the
-                                                        content editor).
+                                                        <link linkend="adm_instance_editor">instance editor</link>).
                                                     </para>
                                                 </listitem>
                                                 <listitem>
                                                     <para>
                                                         Create content instances with random test data of the selected type
-                                                        (this action will open the test data GUI).
+                                                        (this action will open the
+                                                        <link linkend="adm_test_data">test data generation GUI</link>).
                                                     </para>
                                                 </listitem>
                                                 <listitem>
@@ -533,12 +558,6 @@
                                                     </para>
                                                 </listitem>
                                             </itemizedlist>
-                                            <mediaobject>
-                                                <imageobject>
-                                                    <imagedata fileref="images/adm_ui_structure_editor/context_menu_type.png"
-                                                               format="PNG" contentwidth="66%"/>
-                                                </imageobject>
-                                            </mediaobject>
                                         </para>
                                     </listitem>
                                     <listitem>
@@ -547,12 +566,14 @@
                                             <itemizedlist>
                                                 <listitem>
                                                     <para>Open the group assignment in
-                                                        <glossterm>view mode</glossterm> (this action will open the group editor).
+                                                        <glossterm>view mode</glossterm> (this action will open the
+                                                        <link linkend="adm_structure_editor_group_editor">group editor</link>).
                                                     </para>
                                                 </listitem>
                                                 <listitem>
                                                     <para>Open the group assignment in
-                                                        <glossterm>edit mode</glossterm> (this action will open the group editor).
+                                                        <glossterm>edit mode</glossterm> (this action will open the
+                                                        <link linkend="adm_structure_editor_group_editor">group editor</link>).
                                                     </para>
                                                 </listitem>
                                                 <listitem>
@@ -560,21 +581,21 @@
                                                         Create a new property or group that
                                                         will automatically be assigned to the selected group
                                                         assignment's
-                                                        group (this action will open the property/group editor).
+                                                        group (this action will open the
+                                                        <link linkend="adm_structure_editor_property_editor">property</link>/
+                                                        <link linkend="adm_structure_editor_group_editor">group editor</link>).
                                                     </para>
                                                 </listitem>
                                                 <listitem>
                                                     <para>
                                                         To copy the group assignment, so it can be pasted into another
-                                                        group
-                                                        or type.
+                                                        group or type.
                                                     </para>
                                                 </listitem>
                                                 <listitem>
                                                     <para>
                                                         To cut the group assignment, so it can be pasted into the same
-                                                        group
-                                                        or type at a different position.
+                                                        group or type at a different position.
                                                     </para>
                                                 </listitem>
                                                 <listitem>
@@ -591,22 +612,26 @@
                                             <itemizedlist>
                                                 <listitem>
                                                     <para>Open the property assignment in
-                                                        <glossterm>view mode</glossterm> (this action will open the property editor).
+                                                        <glossterm>view mode</glossterm> (this action will open the
+                                                        <link linkend="adm_structure_editor_property_editor">property editor</link>).
                                                     </para>
                                                 </listitem>
                                                 <listitem>
                                                     <para>Open the assignment in
-                                                        <glossterm>edit mode</glossterm> (this action will open the property editor).
+                                                        <glossterm>edit mode</glossterm> (this action will open the
+                                                        <link linkend="adm_structure_editor_property_editor">property editor</link>).
                                                     </para>
                                                 </listitem>
                                                 <listitem>
                                                     <para>Create a search query containing this property assignment itself as
-                                                        search parameter (this action will open the search GUI).
+                                                        search parameter (this action will open the
+                                                        <link linkend="adm_query_editor">visual query editor</link>).
                                                     </para>
                                                 </listitem>
                                                 <listitem>
                                                     <para>Create a search query containing the property assignment's property
-                                                        as search parameter (this action will open the search GUI).
+                                                        as search parameter (this action will open the
+                                                        <link linkend="adm_query_editor">visual query editor</link>).
                                                     </para>
                                                 </listitem>
                                                 <listitem>
@@ -681,10 +706,10 @@
                                         <listitem>
                                             <para>
                                                 Paste into: This is the default pasting operation for copied
-                                                assignments. A copy of the selected assignment  will be created and
+                                                assignments. A copy of the selected assignment will be created and
                                                 pasted into the chosen group or into the
                                                 chosen type
-                                                at the last position.
+                                                at the first position.
                                             </para>
                                         </listitem>
                                     </itemizedlist>
@@ -742,18 +767,21 @@
                     <itemizedlist>
                         <listitem>
                             <para>
-                                The type editor for creating and editing types options and scripts assigned to that type.
+                                The <link linkend="adm_structure_editor_type_editor">type editor</link>
+                                for creating and editing types options and scripts assigned to that type.
                             </para>
                         </listitem>
                         <listitem>
                             <para>
-                                The group editor for editing group assignments, editing and creating groups, their
+                                The <link linkend="adm_structure_editor_group_editor">group editor</link>
+                                for editing group assignments, editing and creating groups, their
                                 options and scripts.
                             </para>
                         </listitem>
                         <listitem>
                             <para>
-                                The property editor for editing property assignments, editing and creating properties, their options
+                                The <link linkend="adm_structure_editor_property_editor">property editor</link>
+                                for editing property assignments, editing and creating properties, their options
                                 and scripts.
                             </para>
                         </listitem>
@@ -796,7 +824,7 @@
                         <guimenuitem>"Actions"</guimenuitem>
                         column. In order to set unlimited
                         multiplicities simply enable or disable the according checkbox in the relation's table row.
-                        For specifying the multiplicites manually, first disable the checkbox and use the input
+                        For specifying the multiplicities manually, first disable the checkbox and use the input
                         field below the source or destination type which appears after disabling the checkbox.
                         Relations can be removed again by clicking on the
                         <guibutton>"Delete"</guibutton>
@@ -1347,7 +1375,7 @@
                 <para>These are the UI elements available for content creation:
                     <orderedlist>
                         <listitem>
-                            The content <link linkend="adm_structure_editor_editing_types">type</link>
+                            The content <link linkend="core_structure_types">type</link>
                             with optional type icon of this content instance
                         </listitem>
                         <listitem>The
@@ -1361,7 +1389,7 @@
                         <listitem>The node of the content tree which the instance is attached to</listitem>
                         <listitem>The global default input language
                             of input components displayed on this page</listitem>
-                        <listitem>Control to expand and collapse all displayed groups  via
+                        <listitem>Controls to expand and collapse all displayed groups via
                             <inlinemediaobject>
                                 <imageobject>
                                     <imagedata fileref="images/adm_ui_instance_editor/expand_collapse_group_icons.png" format="PNG"
@@ -1404,7 +1432,7 @@
                                      contentwidth="66%"/>
                             </imageobject>
                         </inlinemediaobject>
-                        opens a popup which allows the user to insert groups and
+                        opens a popup which allows the user to insert groups and clicking
                         <inlinemediaobject>
                             <imageobject>
                                 <imagedata fileref="images/adm_ui_instance_editor/property.png" format="PNG"
@@ -1485,7 +1513,7 @@
             </para>
             <section xml:id="adm_instance_editor_edit_versioning">
                 <title>Content versioning</title>
-                the version which is being edited is displayed after the content's id as part of
+                The version which is being edited is displayed after the content's id as part of
                 its PK (in this case #9.4 which means that the content with the id 9 in version 4
                 is edited).
                 The instance editor allows to restore contents to previous
@@ -1853,9 +1881,10 @@
                <para>
                    If the structure tree is displayed, left clicking on a tree node
                    adds the currently selected structure element to the query. Depending
-                   on the structure element's data type the operators
+                   on the structure element's data type the
+                   <link linkend="adm_query_editor_operators">query operators</link>
                    <code>=</code>, <code>not equal</code>, <code>is empty</code>,
-                   <code>is not empty</code> and <code>like</code> become available.
+                   <code>is not empty</code>, ... become available.
                    <note>
                        It is also possible to explicitly search
                        for a property and thereby for all content types using that property
@@ -1909,6 +1938,30 @@
                             <para>
                                 <code>not equal</code>: whose value of the selected structure element's data
                                 does not equal the query expression.
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                <code>less than</code>: whose value of the selected structure element's data
+                                is less than the query expression.
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                <code>greater than</code>: whose value of the selected structure element's data
+                                is greater than the query expression.
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                <code>less or equal</code>: whose value of the selected structure element's data
+                               is less or equal to the query expression.
+                            </para>
+                        </listitem>
+                        <listitem>
+                            <para>
+                                <code>greater or equal</code>: whose value of the selected structure element's data
+                                is greater or equal to the query expression.
                             </para>
                         </listitem>
                         <listitem>
@@ -2075,24 +2128,14 @@
             <para>
                 The &Flexive; user account administration UI provides an administration
                 interface to administer your
-                user accounts, assign
-                <link linkend="adm_ui_user_group">createuser groups</link>
-                and roles and make other settings like activation and language settings.
+                user accounts, assign users to
+                <link linkend="adm_ui_user_group">user groups</link>
+                assign roles and administer additional settings like account 
+                activation and language settings.
             </para>
             <section xml:id="adm_user_create_user">
                 <title>Creating a user</title>
                 <para>The following screen shows the user account editor when creating a new user.</para>
-                <para>
-                    Roles are a key feature of the &Flexive;
-                    <link linkend="core_security">security concept</link>.
-                    There are two ways to assign roles to a user.
-                </para>
-                <para>
-                    <orderedlist>
-                        <listitem>Direct assignment</listitem>
-                        <listitem>Inheritance through user group membership</listitem>
-                    </orderedlist>
-                </para>
                 <para>
                     <mediaobject>
                         <imageobject>
@@ -2100,6 +2143,17 @@
                                        format="PNG" contentwidth="100%"/>
                         </imageobject>
                     </mediaobject>
+                </para>
+                <para>
+                    Roles are a key feature of the &Flexive;
+                    <link linkend="core_security">security concept</link>.
+                    There are two ways to assign roles to a user.
+                </para>
+                <para>
+                    <itemizedlist>
+                        <listitem>(1) Direct assignment</listitem>
+                        <listitem>(2) Inheritance through user group membership</listitem>
+                    </itemizedlist>
                 </para>
                 <para>After creation, you will be redirected to the user account overview where you can edit and delete
                     users.
@@ -2382,7 +2436,7 @@
                 <title>The ACL overview</title>
                 <para>On the following screen you can see the default ACLs for each
                     <link linkend="adm_ACL_create">category</link>
-                    and a user defined ACL (myacl).
+                    and a user defined ACL (named myacl).
                 </para>
                 <para>You can switch between different mandators with the select box on top of the list.</para>
                 <para>
@@ -2735,6 +2789,24 @@
                             </imageobject>
                         </inlinemediaobject>
                         a script may be deleted.
+                </para>
+            </section>
+            <section xml:id="adm_scripts_run_once_script_info">
+                <title>Run-Once Script Information</title>
+                <para>
+                    The Run-Once script information GUI displays valuable information about the
+                    <link linkend="core_scripting_runonce">run-once scripts</link>. The
+                    GUI is a good starting point for debugging run-once scripts as
+                    script execution success, script execution time and
+                    possible error-messages are displayed. A popup containing the full
+                    error message is opened by clicking on an error message in the
+                    tabular overview.
+                     <mediaobject>
+                        <imageobject>
+                            <imagedata fileref="images/adm_ui_scripts/run_once_script_info.png"
+                                       format="PNG" contentwidth="100%"/>
+                        </imageobject>
+                    </mediaobject>
                 </para>
             </section>
             <section xml:id="adm_scripts_console">
