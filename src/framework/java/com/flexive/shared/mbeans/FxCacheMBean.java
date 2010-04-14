@@ -43,10 +43,17 @@ import java.util.Set;
  */
 //@Management
 public interface FxCacheMBean extends FxBackingCache {
+
+    /**
+     * System property to override the streaming server port
+     * @since 3.1
+     */
+    final static String STREAMING_PORT_PROPERTY = "fxstreaming.port";
+
     /**
      * Port of the streaming server
      */
-    int STREAMING_PORT = 6241;
+    int DEFAULT_STREAMING_PORT = 6241;
 
     // Life cycle methods
     /**

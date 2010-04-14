@@ -106,7 +106,17 @@ public class FxCache implements FxCacheMBean, DynamicMBean {
         }
         //start streamserver
         try {
-            server = new StreamServer(FxStreamUtils.probeNetworkInterfaces(), FxCacheMBean.STREAMING_PORT);
+            int port = DEFAULT_STREAMING_PORT;
+            if( System.getProperty(STREAMING_PORT_PROPERTY) != null ) {
+                String _port = System.getProperty(STREAMING_PORT_PROPERTY);
+                try {
+                    port = Integer.parseInt(_port);
+                } catch (NumberFormatException e) {
+                    //ignore port
+                    LOG.error("Invalid streaming server port provided: ["+_port+"], using default port ["+port+"]");
+                }
+            }
+            server = new StreamServer(FxStreamUtils.probeNetworkInterfaces(), port);
             server.addProtocol(new BinaryUploadProtocol());
             server.addProtocol(new BinaryDownloadProtocol());
             server.start();
