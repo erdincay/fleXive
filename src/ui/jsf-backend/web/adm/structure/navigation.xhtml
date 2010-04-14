@@ -437,37 +437,28 @@
                 var destId = getNodeId(menu.getTreeNode());
                 var destNodeType=menu.getTreeNode().nodeType;
                 try {
+                    var isNewAlias = alias != null && alias !="";
                     //check if nodes are at same level
                     var sameLevel = flexive.util.getJsonRpc().StructureTreeEditor.isSameLevel(copyNode.assignmentId, destId);
                     var newAssignmentId = -1;
-                    if (!sameLevel) {
-                        //create derived assignment
+                    if (copyMode || !sameLevel || (sameLevel && isNewAlias)) {
+                        //in copy mode or for different levels or for a new alias create a derived assignment
                         newAssignmentId = flexive.util.getJsonRpc().StructureTreeEditor.pasteAssignmentRelative(getNodeId(copyNode), copyNode.nodeType , destId, destNodeType ,alias, 1);
+                        if (cutMode) {
+                            flexive.util.getJsonRpc().StructureTreeEditor.deleteAssignment(copyNode.assignmentId);
+                            copyNode=null;
+                        }
                         reloadAndKeepExpanded();
                         expandToNodeWithId(newAssignmentId, false);
                     } else {
-                        if (cutMode){   // && sameLevel assured by else
-                            // just perform move operation
-                            flexive.util.getJsonRpc().StructureTreeEditor.moveAssignmentRelative(getNodeId(copyNode), copyNode.nodeType, destId, 1);
-                            reloadAndKeepExpanded();
-                            expandToNodeWithId(getNodeId(copyNode), false);
-                        } else if (copyMode) {   // && sameLevel assured by else
-                            flexive.util.getJsonRpc().StructureTreeEditor.pasteAssignmentRelative(getNodeId(copyNode), copyNode.nodeType, destId, copyNode.nodeType, alias, 1);
-                            reloadAndKeepExpanded();
-                            expandToNodeWithId(getNodeId(copyNode), false);
-                        }
-                    }
-                    if (cutMode && !sameLevel) {
-                        //cut out == delete copyNode
-                        flexive.util.getJsonRpc().StructureTreeEditor.deleteAssignment(copyNode.assignmentId);
-                        copyNode=null;
-                        //select pasted node
+                        // otherwise == (cut mode and same level and no alias) just perform move operation
+                        flexive.util.getJsonRpc().StructureTreeEditor.moveAssignmentRelative(getNodeId(copyNode), copyNode.nodeType, destId, 1);
                         reloadAndKeepExpanded();
-                        expandToNodeWithId(newAssignmentId, false);
+                        expandToNodeWithId(getNodeId(copyNode), false);
                     }
                 }
                 catch (e) {
-                        alertDialog(e.message);
+                    alertDialog(e.message);
                 }
             }
 
@@ -484,38 +475,28 @@
                 var destId = getNodeId(menu.getTreeNode());
                 var destNodeType=menu.getTreeNode().nodeType;
                 try {
+                    var isNewAlias = alias != null && alias !="";
                     //check if nodes are at same level
                     var sameLevel = flexive.util.getJsonRpc().StructureTreeEditor.isSameLevel(copyNode.assignmentId, destId);
                     var newAssignmentId = -1;
-
-                    if (!sameLevel) {
-                        //create derived assignment
-                        newAssignmentId = flexive.util.getJsonRpc().StructureTreeEditor.pasteAssignmentRelative(getNodeId(copyNode), copyNode.nodeType , destId, destNodeType, alias, 0);
+                    if (copyMode || !sameLevel || (sameLevel && isNewAlias)) {
+                        //in copy mode or for different levels or for a new alias create a derived assignment
+                        newAssignmentId = flexive.util.getJsonRpc().StructureTreeEditor.pasteAssignmentRelative(getNodeId(copyNode), copyNode.nodeType , destId, destNodeType ,alias, 0);
+                        if (cutMode) {
+                            flexive.util.getJsonRpc().StructureTreeEditor.deleteAssignment(copyNode.assignmentId);
+                            copyNode=null;
+                        }
                         reloadAndKeepExpanded();
                         expandToNodeWithId(newAssignmentId, false);
                     } else {
-                        if (cutMode){    // && sameLevel assured by else
-                            // just perform move operation
-                            flexive.util.getJsonRpc().StructureTreeEditor.moveAssignmentRelative(getNodeId(copyNode), copyNode.nodeType, destId, 0);
-                            reloadAndKeepExpanded();
-                            expandToNodeWithId(getNodeId(copyNode), false);
-                        } else if (copyMode) {    // && sameLevel assured by else
-                            flexive.util.getJsonRpc().StructureTreeEditor.pasteAssignmentRelative(getNodeId(copyNode), copyNode.nodeType, destId, copyNode.nodeType, alias, 0);
-                            reloadAndKeepExpanded();
-                            expandToNodeWithId(getNodeId(copyNode), false);
-                        }
-                    }
-                    if (cutMode && !sameLevel) {
-                        //cut out == delete copyNode
-                        flexive.util.getJsonRpc().StructureTreeEditor.deleteAssignment(copyNode.assignmentId);
-                        copyNode=null;
-                        //select pasted node
+                        // otherwise == (cut mode and same level and no alias) just perform move operation
+                        flexive.util.getJsonRpc().StructureTreeEditor.moveAssignmentRelative(getNodeId(copyNode), copyNode.nodeType, destId, 0);
                         reloadAndKeepExpanded();
-                        expandToNodeWithId(newAssignmentId, false);
+                        expandToNodeWithId(getNodeId(copyNode), false);
                     }
                 }
                 catch (e) {
-                        alertDialog(e.message);
+                    alertDialog(e.message);
                 }
             }
 
@@ -706,8 +687,8 @@
                 //copy: only allowed if not pasting directly into the own parent -> use paste into as
                 //cut: only allowed if not pasting a group into itsself or one of its children
                 setActionDisabled(menu.getTreeNode(), "pasteInto", lackRole || copyNode==null || (!isType(node.nodeType) && node.nodeType!="Group") ||
-                            flexive.util.getJsonRpc().StructureTreeEditor.isDirectChild(copyNode.assignmentId, getNodeId(node), node.nodeType) ||
-                            (cutMode && getNodeId(copyNode) == getNodeId(node)) || (cutMode && pasteGroupIntoSelf));
+                            flexive.util.getJsonRpc().StructureTreeEditor.isDirectChild(copyNode.assignmentId, getNodeId(node), node.nodeType) 
+                            || (cutMode && getNodeId(copyNode) == getNodeId(node)) || (cutMode && pasteGroupIntoSelf));
 
                 //paste a copied or cut assignment below another assignment prompting for a different alias
                 //cut: only allowed if not pasting a group into itsself or one of its children
@@ -722,9 +703,11 @@
                 //paste a copied or cut assignment into a group assignment or type prompting for a different alias
                 //cut: only allowed if not pasting a group into itsself or one of its children
                 setActionDisabled(menu.getTreeNode(), "pasteIntoAs", lackRole || copyNode==null ||
-                            (!isType(node.nodeType) && node.nodeType!="Group") || (cutMode && pasteGroupIntoSelf));
+                            (!isType(node.nodeType) && node.nodeType!="Group") || (cutMode && getNodeId(copyNode) == getNodeId(node)) || (cutMode && pasteGroupIntoSelf));
 
-                setActionDisabled(menu.getTreeNode(), "pasteSubMenu", lackRole || copyNode==null);
+                //cut: only allowed if not pasting a group into itsself or one of its children
+                setActionDisabled(menu.getTreeNode(), "pasteSubMenu", lackRole || copyNode==null || (cutMode && pasteGroupIntoSelf));
+
                 setActionDisabled(menu.getTreeNode(), "createTestData", lackRole || !isType(node.nodeType));
                 setActionDisabled(menu.getTreeNode(), "exportType", lackRole || !isType(node.nodeType));
                 setActionDisabled(menu.getTreeNode(), "exportTypeNoDeps", lackRole || !isType(node.nodeType));

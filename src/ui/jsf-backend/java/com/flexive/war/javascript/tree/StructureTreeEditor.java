@@ -35,6 +35,7 @@ package com.flexive.war.javascript.tree;
 
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
+import com.flexive.shared.XPathElement;
 import com.flexive.shared.value.FxString;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
@@ -101,6 +102,27 @@ public class StructureTreeEditor implements Serializable {
     }
 
     /**
+     * Creates a new group assignment from a given group assignment
+     * with optionally a new alias which is also used as label if specified.
+     *
+     * @param orgAssignmentId source assignment
+     * @param newAlias new alias (may be null)
+     * @param xPath destination xpath
+     * @param type destination type
+     * @return the created group assignment
+     * @throws FxNotFoundException
+     * @throws FxInvalidParameterException
+     */
+    private FxGroupAssignmentEdit createReusedGroupAssignment(long orgAssignmentId, String newAlias, String xPath, FxType type) throws FxNotFoundException, FxInvalidParameterException {
+        FxGroupAssignment assignment = (FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment(orgAssignmentId);
+        FxGroupAssignmentEdit group;
+        group = FxGroupAssignmentEdit.createNew(assignment, type, StringUtils.isBlank(newAlias) ? assignment.getAlias() : newAlias, xPath);
+        if (!StringUtils.isBlank(newAlias))
+            group.getLabel().setDefaultTranslation(StringUtils.capitalize(newAlias));
+        return group;
+    }
+
+    /**
      * Creates a derived assignment from a given assignment and pastes it into the
      * the target group or type at the first position. A new alias can also be specified.
      *
@@ -137,7 +159,8 @@ public class StructureTreeEditor implements Serializable {
             //EJBLookup.getAssignmentEngine().save(pa, false);
         } else if (StructureTreeWriter.NODE_TYPE_GROUP.equals(parentNodeType)) {
             FxGroupAssignment assignment = (FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment(parentAssId);
-            assignmentId = EJBLookup.getAssignmentEngine().save(FxGroupAssignmentEdit.createNew(assignment, targetType, newName == null ? assignment.getAlias() : newName, targetXPath).setPosition(0), true);
+            assignmentId = EJBLookup.getAssignmentEngine().save(createReusedGroupAssignment(assignment.getId(),newName, targetXPath,targetType).setPosition(0), true);
+            //assignmentId = EJBLookup.getAssignmentEngine().save(FxGroupAssignmentEdit.createNew(assignment, targetType, newName == null ? assignment.getAlias() : newName, targetXPath).setPosition(0), true);
             //move group assignment to first position
             //FxGroupAssignmentEdit ga = ((FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment(assignmentId)).asEditable();
             //ga.setPosition(0);
@@ -162,25 +185,19 @@ public class StructureTreeEditor implements Serializable {
      *          on errors
      */
     public long pasteAssignmentRelative(long srcId, String srcNodeType, long destId, String destNodeType, String newName, int steps) throws FxApplicationException {
-        String destXPath = "/";
         long assignmentId = -1;
         FxAssignment destAssignment = CacheAdmin.getEnvironment().getAssignment(destId);
         FxType destType = destAssignment.getAssignedType();
+        String destXPath = XPathElement.stripLastElement(destAssignment.getXPath());
+        // for types it seems that Xpath must end with a "/" TODO: resolve xpath issue.
+        if (destXPath.equals(destType.getName()))
+                destXPath=destXPath+"/";
 
-        //get destination xpath
-        if (StructureTreeWriter.NODE_TYPE_GROUP.equals(destNodeType)) {
-            destXPath = destAssignment.getXPath();
-        } else if (StructureTreeWriter.NODE_TYPE_ASSIGNMENT.equals(destNodeType)) {
-            if (destAssignment.hasParentGroupAssignment())
-                destXPath = destAssignment.getParentGroupAssignment().getXPath();
-        } else {
-            throw new FxInvalidParameterException("nodeType", "ex.structureTreeEditor.nodeType.invalid", destNodeType);
-        }
-
+        // create new assignment
         if (StructureTreeWriter.NODE_TYPE_GROUP.equals(srcNodeType)) {
             FxGroupAssignment srcAssignment = (FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment(srcId);
             //create assignment
-            FxGroupAssignmentEdit newAssignment = FxGroupAssignmentEdit.createNew(srcAssignment, destType, newName == null ? srcAssignment.getAlias() : newName, destXPath);
+            FxGroupAssignmentEdit newAssignment = createReusedGroupAssignment(srcAssignment.getId(), newName, destXPath, destType);
             //set position
             newAssignment.setPosition(destAssignment.getPosition() + steps);
             //save newly created assignment to db
