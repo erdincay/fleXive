@@ -299,19 +299,24 @@ public class FxValueInput extends UIInput {
                 if (fxValue instanceof FxReference && StringUtils.isNotBlank(fxValue.getXPath())) {
                     // fetch property from assignment
                     final FxProperty property;
+                    final boolean referenceSelectOne;
                     if (!XPathElement.isValidXPath(fxValue.getXPath())) {
                         //if not a valid xpath, we might have a property
-                        if (CacheAdmin.getEnvironment().propertyExists(fxValue.getXPath()))
+                        if (CacheAdmin.getEnvironment().propertyExists(fxValue.getXPath())) {
                             property = CacheAdmin.getEnvironment().getProperty(fxValue.getXPath());
-                        else {
+                            referenceSelectOne = property.getOption(FxStructureOption.OPTION_REFERENCE_SELECTONE).isValueTrue();
+                        } else {
                             inputMapper = new IdentityInputMapper();    // use dummy mapper
                             return inputMapper;
                         }
                     } else {
-                        property = ((FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(fxValue.getXPath())).getProperty();
+                        final FxPropertyAssignment assignment = (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(fxValue.getXPath());
+                        property = assignment.getProperty();
+                        referenceSelectOne = assignment.getOption(FxStructureOption.OPTION_REFERENCE_SELECTONE).isValueTrue();
                     }
 
-                    if (property.getOption(FxStructureOption.OPTION_REFERENCE_SELECTONE).isValueTrue() && !isReadOnly()) {
+
+                    if (referenceSelectOne && !isReadOnly()) {
                         // render a select list with *all* valid choices (i.e. all instances visible to the user)
                         inputMapper = new FxPkSelectOneInputMapper(getValidReferenceList(property));
                     } else {
