@@ -80,7 +80,7 @@ if( meta.summary ) {
     if( meta.summary.title ) {
     	String title = (String)meta.summary.title
     	if("untitled".equals(title))
-    	  title = (String)binValue.name
+    	  title = (String)meta.name
         process(cmap, 'MLString|Caption', title)
     }
     if( meta.summary.lastModifiedAt )
