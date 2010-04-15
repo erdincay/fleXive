@@ -783,17 +783,26 @@ public class PropertyEditorBean implements ActionBean, Serializable {
         return property.isReferenceSelectOne();
     }
 
+    /**
+     * Sets the property for the OptionReferenceSelectOne
+     *
+     * Always set it, even if value is false
+     * If first created, set it to overwritable
+     * @param b the value to set the property
+     * @throws FxInvalidParameterException If something went wrong
+     */
     public void setPropertyReferenceSelectOne(boolean b) throws FxInvalidParameterException {
-         FxStructureOption ml = property.getOption(FxStructureOption.OPTION_REFERENCE_SELECTONE);
-         if ((!ml.isSet() && b) || ml.isSet()) {
-             try {
-                 optionWrapper.setOption(true, FxStructureOption.OPTION_REFERENCE_SELECTONE, b);
-             }
-             catch (Exception e) {
-                 new FxFacesMsgErr(e).addToContext();
-             }
-         }
-     }
+        FxStructureOption ml = property.getOption(FxStructureOption.OPTION_REFERENCE_SELECTONE);
+        try {
+            optionWrapper.setOption(true, FxStructureOption.OPTION_REFERENCE_SELECTONE, b);
+            if (!ml.isSet()) {
+                optionWrapper.getOption(true, FxStructureOption.OPTION_REFERENCE_SELECTONE).setOverridable(true);
+            }
+        }
+        catch (Exception e) {
+            new FxFacesMsgErr(e).addToContext();
+        }
+    }
 
     public boolean isAssignmentReferenceSelectOne() {
         return assignment.isReferenceSelectOne();
