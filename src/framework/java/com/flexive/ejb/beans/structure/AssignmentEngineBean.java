@@ -1379,6 +1379,30 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                         ps.setLong(2, prop.getId());
                         ps.executeUpdate();
                         ps.close();
+                        //FX-858: get all assignments for this property and re-flatten if possible to reflect data type changes
+                        final List<FxPropertyAssignment> refAssignments = env.getReferencingPropertyAssignments(prop.getId());
+                        final FxFlatStorage fs = FxFlatStorageManager.getInstance();
+                        List<FxPropertyAssignment> flattened = new ArrayList<FxPropertyAssignment>(refAssignments.size());
+                        for (FxPropertyAssignment refAssignment : refAssignments) {
+                            if (refAssignment.isFlatStorageEntry()) {
+                                fs.unflatten(refAssignment);
+                                flattened.add(refAssignment);
+                            }
+                        }
+                        if (flattened.size() > 0) {
+                            try {
+                                StructureLoader.reload(con);
+                                final FxEnvironment envNew = CacheAdmin.getEnvironment();
+                                for (FxPropertyAssignment ref : flattened) {
+                                    if (fs.isFlattenable(ref))
+                                        fs.flatten(fs.getDefaultStorage(), (FxPropertyAssignment) envNew.getAssignment(ref.getId()));
+                                }
+                                StructureLoader.reload(con);
+                            } catch (FxCacheException e) {
+                                EJBUtils.rollback(ctx);
+                                throw new FxCreateException(e, "ex.cache", e.getMessage());
+                            }
+                        }
                         if (changes)
                             changesDesc.append(',');
                         changesDesc.append("dataType=").append(prop.getDataType().getName());
