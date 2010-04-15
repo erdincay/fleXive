@@ -37,9 +37,13 @@
                         <br/>
                     </fx:fieldSet>
                 </a4j:outputPanel>
-                <a4j:outputPanel id="examineInfo" rendered="#{divisionImportExportBean.status == 'examine'}"
+                <a4j:outputPanel id="examineInfo" rendered="#{divisionImportExportBean.status == 'examine' or
+                                                    divisionImportExportBean.status == 'exportSuccess'}"
                                  ajaxRendered="true">
-                    <fx:fieldSet id="infoSet" legendKey="DivisionImportExport.legend.exportInfo">
+                    <fx:fieldSet id="infoSet"
+                                 legendKey="#{divisionImportExportBean.status == 'examine' ?
+                                 'DivisionImportExport.legend.exportInfo' : 
+                                 'DivisionImportExport.legend.exportSuccessInfo'}">
                         <table>
                             <tr>
                                 <td>#{fxMessageBean['DivisionImportExport.label.source']}</td>
@@ -113,7 +117,12 @@
                                            rendered="#{divisionImportExportBean.status == 'init'}"
                                            icon="export" action="exportDivision" id="exportButton" reRender="impex"/>
 
-
+                    <div onclick="loadContentPage('adm/main/importexport/divisionImportExport.jsf');">
+                        <adm:ajaxCommandButton labelKey="DivisionImportExport.button.back" location="both"
+                                           bean="#{divisionImportExportBean}" lockscreen="true"
+                                           rendered="#{divisionImportExportBean.status == 'exportSuccess'}"
+                                           icon="previous" id="backButton"/>
+                    </div>
                 </a4j:outputPanel>
 
                 <adm:toolbarPluginButtons/>

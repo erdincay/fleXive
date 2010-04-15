@@ -169,8 +169,14 @@ public class DivisionImportExportBean implements Serializable {
             EJBLookup.getDivisionConfigurationEngine().exportDivision(source);
             setStatus("export");
             new FxFacesMsgInfo("DivisionImportExport.export.success", new File(source).getAbsolutePath()).addToContext();
+            examineExportedDivision();
         } catch (Exception e) {
             new FxFacesMsgErr(e).addToContext();
         }
+    }
+
+    private void examineExportedDivision() {
+        examineExport();
+        setStatus("exportSuccess");
     }
 }
