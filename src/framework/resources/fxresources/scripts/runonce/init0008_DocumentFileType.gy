@@ -59,7 +59,7 @@ import com.flexive.shared.scripting.FxScriptInfo
 import com.flexive.shared.scripting.FxScriptEvent
 
 new GroovyTypeBuilder().documentfile(
-        label: new FxString(true, 1, "Document File Root").setTranslation(2, "Dokument File Root"),
+        label: new FxString(true, 1, "Document File").setTranslation(2, "Dokument File"),
         acl: CacheAdmin.environment.getACL(ACLCategory.STRUCTURE.getDefaultId()),
         hint: new FxString(true, 1, "Root type store for all unknown/unknown mime types").setTranslation(2, "Root Typ f\u00FCr unknown/unknown mime types"),
         languageMode: LanguageMode.Multiple,

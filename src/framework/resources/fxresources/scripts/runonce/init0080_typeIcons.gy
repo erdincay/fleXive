@@ -72,6 +72,7 @@ def addTypeIcon(String typeName, String fileName) {
 }
 
 if (!FxSharedUtils.isMinimalRunOnceScripts()) {
+    addTypeIcon(FxType.DOCUMENTFILE, "type-documentfile.png")
     addTypeIcon("image", "type-image.png")
     addTypeIcon(FxType.CONTACTDATA, "type-contact.png")
     addTypeIcon("article", "type-article.png")
