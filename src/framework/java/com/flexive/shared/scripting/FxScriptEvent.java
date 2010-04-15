@@ -353,7 +353,12 @@ public enum FxScriptEvent {
      * Passed variables:<br/>
      * <i>UserTicket ticket</i>: The UserTicket of the user that is being logged off<br/>
      */
-    AccountLogout(33, FxScriptScope.Accounts, "UserTicket ticket");
+    AccountLogout(33, FxScriptScope.Accounts, "UserTicket ticket"),
+
+    /**
+     * An internal event for script executable by any user.
+     */
+    Internal(34, FxScriptScope.Type);
 
 
     private long id;

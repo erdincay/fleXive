@@ -155,6 +155,6 @@ se.createTypeScriptMapping(si.getId(), typeId, true, false);
 
 // scripts needed f. the DocumentParser callback class (creation & conversion of DocumentFile content instances
 // DocumentTypeMetaDataParser.gy
-se.createScriptFromLibrary(FxScriptEvent.Manual, "DocumentTypeMetaDataParser.gy", "DocumentTypeMetaDataParser.gy", "Parse Meta Data f. the DOCUMENT type");
+se.createScriptFromLibrary(FxScriptEvent.Internal, "DocumentTypeMetaDataParser.gy", "DocumentTypeMetaDataParser.gy", "Parse Meta Data f. the DOCUMENT type");
 // ImageTypeMetaDataParser.gy
-se.createScriptFromLibrary(FxScriptEvent.Manual, "ImageTypeMetaDataParser.gy", "ImageTypeMetaDataParser.gy", "Parse Meta Data f. the IMAGE type");
+se.createScriptFromLibrary(FxScriptEvent.Internal, "ImageTypeMetaDataParser.gy", "ImageTypeMetaDataParser.gy", "Parse Meta Data f. the IMAGE type");
