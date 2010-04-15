@@ -1358,7 +1358,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 }
                 //not supported yet
                 if (!org.getName().equals(prop.getName())) {
-                    throw new FxUpdateException("ex.structure.modification.notSuppoerted", "name");
+                    throw new FxUpdateException("ex.structure.modification.notSupported", "name");
                     /*
                     if (ps != null) ps.close();
                     ps = con.prepareStatement("UPDATE " + TBL_STRUCT_PROPERTIES + " SET NAME=? WHERE ID=?");
@@ -1607,9 +1607,8 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 changes = true;
             }
 
-            if (changes) {
-                //TODO: invoke htracker with changeDesc
-            }
+            if (changes)
+                htracker.track("history.assignment.updateProperty", prop.getName(), prop.getId(), changesDesc.toString());
             success = true;
         } catch (SQLException e) {
             EJBUtils.rollback(ctx);
