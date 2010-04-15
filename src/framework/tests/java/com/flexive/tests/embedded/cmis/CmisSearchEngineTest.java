@@ -337,7 +337,7 @@ public class CmisSearchEngineTest {
     @Test(groups = {"search", "cmis", "ejb"})
     public void selectBinary() throws FxApplicationException {
         final CmisResultSet result = getCmisSearchEngine().search(
-                "SELECT id, imageBinary FROM image"
+                "SELECT id, file FROM image"
         );
         assertTrue(result.getRowCount() > 0);
         for (CmisResultRow row : result) {

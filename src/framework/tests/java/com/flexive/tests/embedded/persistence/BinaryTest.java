@@ -107,10 +107,10 @@ public class BinaryTest {
         BinaryDescriptor bin = new BinaryDescriptor("test document.txt", MIME_TYPE, new ByteArrayInputStream(CONTENT.getBytes("UTF-8")));
         FxType docType = CacheAdmin.getEnvironment().getType(DOCUMENT_TYPE);
         FxContent doc = co.initialize(docType.getId());
-        doc.setValue("/DOCUMENT", new FxBinary(false, bin));
+        doc.setValue("/FILE", new FxBinary(false, bin));
         FxContent docLoaded = co.load(co.save(doc));
         try {
-            FxBinary binLoaded = (FxBinary) docLoaded.getValue("/DOCUMENT");
+            FxBinary binLoaded = (FxBinary) docLoaded.getValue("/FILE");
             ByteArrayOutputStream bout = new ByteArrayOutputStream();
             binLoaded.getDefaultTranslation().download(bout);
             Assert.assertEquals(binLoaded.getDefaultTranslation().getMimeType(), MIME_TYPE);
@@ -188,14 +188,14 @@ public class BinaryTest {
             binary = new BinaryDescriptor(testFile.getName(), fis);
 
         FxContent img = co.initialize(type.getId());
-        img.setValue("/ImageBinary", new FxBinary(false, binary));
+        img.setValue("/File", new FxBinary(false, binary));
         img.setValue("/Filename", new FxString(false, "Exif.JPG"));
         FxPK pk = null;
         try {
             if (transitFS) {
                 //perform an optional prepareSave to be able to retrieve the transit handle
                 img = co.prepareSave(img);
-                final String handle = ((BinaryDescriptor) img.getValue("/ImageBinary").getBestTranslation()).getHandle();
+                final String handle = ((BinaryDescriptor) img.getValue("/File").getBestTranslation()).getHandle();
                 File transStore = new File(FxBinaryUtils.getTransitDirectory() + File.separatorChar + String.valueOf(divisionId));
                 Assert.assertTrue(transStore.exists() && transStore.isDirectory(), "transit directory [" + transStore.getAbsolutePath() + "] does not exist!");
                 File[] found = transStore.listFiles(new FilenameFilter() {
@@ -209,13 +209,13 @@ public class BinaryTest {
             pk = co.save(img);
 
             FxContent loaded = co.load(pk);
-            FxBinary bin = (FxBinary) loaded.getValue("/ImageBinary");
+            FxBinary bin = (FxBinary) loaded.getValue("/File");
             File comp = File.createTempFile("Exif", "JPG");
             FileOutputStream fos = new FileOutputStream(comp);
             bin.getBestTranslation().download(fos);
             fos.close();
             Assert.assertTrue(FxFileUtils.fileCompare(comp, testFile), "Files do not match!");
-            final BinaryDescriptor desc = ((BinaryDescriptor) img.getValue("/ImageBinary").getBestTranslation());
+            final BinaryDescriptor desc = ((BinaryDescriptor) img.getValue("/File").getBestTranslation());
             if (binThreshold > testFile.length()) {
                 //binary is expected to be stored on the filesystem
                 File binFile = FxBinaryUtils.getBinaryFile(divisionId, desc.getId(), desc.getVersion(), desc.getQuality(), PreviewSizes.ORIGINAL.getBlobIndex());

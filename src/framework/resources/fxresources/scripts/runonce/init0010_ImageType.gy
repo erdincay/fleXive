@@ -109,7 +109,6 @@ new GroovyTypeBuilder().image(
 
     fqn(assignment: "ROOT/FQN")
     file(
-            alias: "IMAGEBINARY",
             label: new FxString(true, 1, "Imagebinary"))
     filename(
             label: new FxString(true, 1, "FileName"),
@@ -118,7 +117,7 @@ new GroovyTypeBuilder().image(
             multilang: false,
             dataType: FxDataType.String1024,
             acl: CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
-            multiplicity: new FxMultiplicity(1, 1),
+            multiplicity: new FxMultiplicity(0, 1),
             overrideACL: true,
             overrideMultiplicity: true,
             overrideSearchable: true,
@@ -881,7 +880,8 @@ se.createTypeScriptMapping(si.getId(), typeId, true, true);
 
 EJBLookup.resultPreferencesEngine.saveSystemDefault(
         new ResultPreferences(
-                [new ResultColumnInfo("#image/imageBinary"),
+                // [new ResultColumnInfo("#image/imageBinary"),
+                [new ResultColumnInfo("#image/file"),
                         new ResultColumnInfo("@pk"),
                         new ResultColumnInfo("#image/caption"),
                         new ResultColumnInfo("#image/dateCreated"),

@@ -62,6 +62,7 @@ import java.io.FileOutputStream;
 public class ImageTypeTest {
 
     private static String IMAGE_TYPE = "Image";
+    private static String BINPATH = "/File";
 
     private ContentEngine co;
 
@@ -92,7 +93,7 @@ public class ImageTypeTest {
             FxBinary fxBin = new FxBinary(false, binary);
 
             FxContent img = co.initialize(type.getId());
-            img.setValue("/ImageBinary", fxBin);
+            img.setValue(BINPATH, fxBin);
             img.setValue("/Filename", new FxString(false, "Exif.JPG"));
             img = co.prepareSave(img);
             imgPK = co.save(img);
@@ -127,24 +128,24 @@ public class ImageTypeTest {
 
             //version 1
             FxContent img = co.initialize(type.getId());
-            img.setValue("/ImageBinary", fxBin);
+            img.setValue(BINPATH, fxBin);
             img.setValue("/Filename", new FxString(false, "Exif.JPG"));
             img = co.prepareSave(img);
             imgPK = co.save(img);
             img = co.load(imgPK);
-            fxBin = (FxBinary)img.getValue("/ImageBinary");
+            fxBin = (FxBinary)img.getValue(BINPATH);
             long bin1Id = fxBin.getBestTranslation().getId();
             Assert.assertEquals(img.getBinaryPreviewId(), bin1Id, "Image binary is not the preview binary!");
             //change the image
             fis = new FileInputStream(testFile2);
             binary = new BinaryDescriptor(testFile2.getName(), testFile2.length(), fis);
             fxBin = new FxBinary(false, binary);
-            img.setValue("/ImageBinary", fxBin);
+            img.setValue(BINPATH, fxBin);
             img.setValue("/Filename", new FxString(false, "GIF_Image.GIF"));
             img = co.prepareSave(img);
             imgPK = co.save(img);
             img = co.load(imgPK);
-            fxBin = (FxBinary)img.getValue("/ImageBinary");
+            fxBin = (FxBinary)img.getValue(BINPATH);
             long bin2Id = fxBin.getBestTranslation().getId();
             Assert.assertNotSame(bin1Id, bin2Id);
             Assert.assertEquals(img.getBinaryPreviewId(), bin2Id);
@@ -157,12 +158,12 @@ public class ImageTypeTest {
             fis = new FileInputStream(testFile1);
             binary = new BinaryDescriptor(testFile1.getName(), testFile1.length(), fis);
             fxBin = new FxBinary(false, binary);
-            img.setValue("/ImageBinary", fxBin);
+            img.setValue(BINPATH, fxBin);
             img.setValue("/Filename", new FxString(false, "Exif.JPG"));
             img = co.prepareSave(img);
             imgPK = co.save(img);
             img = co.load(imgPK);
-            fxBin = (FxBinary)img.getValue("/ImageBinary");
+            fxBin = (FxBinary)img.getValue(BINPATH);
             long bin3Id = fxBin.getBestTranslation().getId();
             Assert.assertEquals(img.getBinaryPreviewId(), bin3Id);
         } finally {

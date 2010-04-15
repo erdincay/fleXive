@@ -60,12 +60,12 @@ new GroovyTypeBuilder().document(
         useStepPermissions: true,
         useTypePermissions: true,
         usePermissions: true,
-        mimeType: "application/unknown") {
+        // for now we need to add the text/html mimetype for the automatic document extraction
+        mimeType: "application/unknown, text/html") {
 
-    caption(label: new FxString(true, 1, "Document title").setTranslation(2, "Dokumenttitel"),
-            alias: "TITLE")
+    caption(
+            label: new FxString(true, 1, "Document title").setTranslation(2, "Dokumenttitel"))
     file(
-            alias: "DOCUMENT",
             label: new FxString(true, 1, "The document file").setTranslation(2, "Datei"))
     author(
             label: new FxString(true, 1, "Author").setTranslation(2, "Autor"),
@@ -473,12 +473,12 @@ new GroovyTypeBuilder().document(
 EJBLookup.resultPreferencesEngine.saveSystemDefault(
         new ResultPreferences(
                 [new ResultColumnInfo("@pk"),
-                        new ResultColumnInfo("#" + FxType.DOCUMENT + "/title"),
+                        new ResultColumnInfo("#" + FxType.DOCUMENT + "/caption"),
                         new ResultColumnInfo("#" + FxType.DOCUMENT + "/createDate"),
                         new ResultColumnInfo("#" + FxType.DOCUMENT + "/description"),
                         new ResultColumnInfo("#" + FxType.DOCUMENT + "/author"),
                 ],
-                [new ResultOrderByInfo("#" + FxType.DOCUMENT + "/title", SortDirection.ASCENDING)],
+                [new ResultOrderByInfo("#" + FxType.DOCUMENT + "/caption", SortDirection.ASCENDING)],
                 25, 0
         ),
         CacheAdmin.environment.getType(FxType.DOCUMENT).id,

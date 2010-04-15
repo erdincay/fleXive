@@ -10,12 +10,12 @@
     BinaryDescriptor binary = new BinaryDescriptor(testFile.getName(), testFile.length(), fis); //<co xml:id="cs_bin_1"/>
 
     FxContent img = co.initialize(type.getId());
-    img.setValue("/ImageBinary", new FxBinary(false, binary)); //<co xml:id="cs_bin_2"/>
+    img.setValue("/File", new FxBinary(false, binary)); //<co xml:id="cs_bin_2"/>
     img.setValue("/Filename", new FxString(false, "Exif.JPG"));
     FxPK pk = co.save(img);
 
     FxContent loaded = co.load(pk);
-    FxBinary bin = (FxBinary)loaded.getValue("/ImageBinary");
+    FxBinary bin = (FxBinary)loaded.getValue("/File");
     File comp = File.createTempFile("Exif","JPG");
     FileOutputStream fos = new FileOutputStream(comp);
     bin.getBestTranslation().download(fos); //<co xml:id="cs_bin_3"/>

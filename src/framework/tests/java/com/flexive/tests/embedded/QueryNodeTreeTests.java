@@ -750,7 +750,7 @@ public class QueryNodeTreeTests {
     }
 
     private static FxPropertyAssignment getTestBinaryAssignment() {
-        return (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment("image/imagebinary");
+        return (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment("image/file");
     }
 
 

@@ -58,7 +58,7 @@ FxBinary getImageBinary(name, path) {
 FxPK createTypeIcon(String typeName, String fileName) {
     def builder = new GroovyContentBuilder("image")
     builder {
-        imageBinary(getImageBinary("Type Icon: " + typeName.toUpperCase(), fileName))
+        file(getImageBinary("Type Icon: " + typeName.toUpperCase(), fileName))
     }
     EJBLookup.contentEngine.save(builder.content)
 }

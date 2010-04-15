@@ -40,16 +40,16 @@
 //author: Markus Plesser, Unique Computing Solutions GmbH
 import com.flexive.shared.value.*
 
-if( !content.containsValue("/Document") ) {
+if( !content.containsValue("/File") ) {
     println "No document present to parse!"
     return content
 }
 
-def binValue = content.getPropertyData("/Document").value.defaultTranslation
+def binValue = content.getPropertyData("/File").value.defaultTranslation
 if( binValue.metadata == null || binValue.metadata.length() < 20) {
     println "No metadata present for document to process!"
-    if( !content.containsValue("/TITLE"))
-        content.setValue("/TITLE", new FxString(true, (String)binValue.name))
+    if( !content.containsValue("/CAPTION"))
+        content.setValue("/CAPTION", new FxString(true, (String)binValue.name))
     if( !content.containsValue("/ENCRYPTED"))
         content.setValue("/ENCRYPTED", new FxBoolean(false, false))
     return content
@@ -99,7 +99,7 @@ if( meta.summary ) {
     	String title = (String)meta.summary.title
     	if("untitled".equals(title))
     	  title = (String)binValue.name
-        process(cmap, 'MLString|Title', title)
+        process(cmap, 'MLString|Caption', title)
     }
     if( meta.summary.lastModifiedAt )
         process(cmap, 'DateTime|LastModified', meta.summary.lastModifiedAt)
@@ -149,8 +149,8 @@ cmap.each() {key, value ->
 }
 
 
-if( !content.containsValue("/TITLE") )
-    content.setValue("/TITLE", new FxString(true, (String)binValue.name))
+if( !content.containsValue("/CAPTION") )
+    content.setValue("/CAPTION", new FxString(true, (String)binValue.name))
 if( !content.containsValue("/ENCRYPTED") )
     content.setValue("/ENCRYPTED", new FxBoolean(false, false))
 return content

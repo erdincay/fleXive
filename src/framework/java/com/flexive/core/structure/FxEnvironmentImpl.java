@@ -1401,7 +1401,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
      */
     public FxType getMimeTypeMatch(String mimeType) {
         FxMimeType fxMimeType = FxMimeType.getMimeType(mimeType);
-        // no proper match for given mimetype - return DocumentFile (TODO: adjust/check output of mimeutils)
+        // no proper match for given mimetype - return DocumentFile
         if(FxMimeType.UNKNOWN.equals(fxMimeType.getType()))
             return getType(FxType.DOCUMENTFILE);
 

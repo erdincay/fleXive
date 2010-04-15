@@ -55,6 +55,8 @@ import com.flexive.shared.search.ResultOrderByInfo
 import com.flexive.shared.search.SortDirection
 import com.flexive.shared.search.ResultViewType
 import com.flexive.shared.search.AdminResultLocations
+import com.flexive.shared.scripting.FxScriptInfo
+import com.flexive.shared.scripting.FxScriptEvent
 
 new GroovyTypeBuilder().documentfile(
         label: new FxString(true, 1, "Document File Root").setTranslation(2, "Dokument File Root"),
@@ -84,9 +86,9 @@ new GroovyTypeBuilder().documentfile(
             overrideACL: true,
             overrideMultiplicity: true,
             overrideSearchable: true,
-            overrideInOverview: true, // not in image type
-            overrideMultiline: true, // not in image type
-            overrideUseHtmlEditor: true, // not in image type
+            overrideInOverview: true,
+            overrideMultiline: true,
+            overrideUseHtmlEditor: true,
             searchable: true,
             fullTextIndexed: true,
             multiline: false,
@@ -95,9 +97,34 @@ new GroovyTypeBuilder().documentfile(
             uniqueMode: UniqueMode.None,
             enabled: true,
             "SEARCHABLE": "1",
-            "SHOW.OVERVIEW": "0", // not in image type
-            "MULTILINE": "0", // not in image type
-            "HTML.EDITOR": "0") // not in image type
+            "SHOW.OVERVIEW": "0",
+            "MULTILINE": "0",
+            "HTML.EDITOR": "0")
+    mimetype(
+            label: new FxString(true, 1, "MimeType"),
+            hint: new FxString(true, 1, "Stores the binary's mimetype"),
+            defaultMultiplicity: 1,
+            multilang: false,
+            dataType: FxDataType.String1024,
+            acl: CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+            multiplicity: new FxMultiplicity(0, 1),
+            overrideACL: true,
+            overrideMultiplicity: true,
+            overrideInOverview: true,
+            overrideMultiline: true,
+            overrideSearchable: true,
+            overrideUseHtmlEditor: true,
+            searchable: true,
+            fullTextIndexed: false,
+            multiline: false,
+            inOverview: false,
+            useHtmlEditor: false,
+            uniqueMode: UniqueMode.None,
+            enabled: true,
+            "SHOW.OVERVIEW": "0",
+            "MULTILINE": "0",
+            "SEARCHABLE": "1",
+            "HTML.EDITOR": "0")
 }
 
 // create default result columns for the backend application
@@ -106,10 +133,28 @@ EJBLookup.resultPreferencesEngine.saveSystemDefault(
                 [new ResultColumnInfo("@pk"),
                         new ResultColumnInfo("#" + FxType.DOCUMENTFILE + "/caption"),
                 ],
-                [new ResultOrderByInfo("#" + FxType.DOCUMENTFILE + "/title", SortDirection.ASCENDING)],
+                [new ResultOrderByInfo("#" + FxType.DOCUMENTFILE + "/caption", SortDirection.ASCENDING)],
                 25, 0
         ),
         CacheAdmin.environment.getType(FxType.DOCUMENTFILE).id,
         ResultViewType.LIST,
         AdminResultLocations.values()
 )
+
+// script associations
+typeId = CacheAdmin.getEnvironment().getType(FxType.DOCUMENTFILE).getId()
+def se = EJBLookup.getScriptingEngine()
+FxScriptInfo si = se.createScriptFromLibrary(FxScriptEvent.BeforeContentCreate, "DocumentFileMetaParser.gy", "DocumentFileMetaParser.gy", "Document File Metadata Parser");
+se.createTypeScriptMapping(si.getId(), typeId, true, false);
+// webdav: needs AfterContentSave
+si = se.createScriptFromLibrary(FxScriptEvent.AfterContentSave, "DocumentFileContentConverterACS.gy", "DocumentFileContentConverterACS.gy", "Document File Content Converstion according to Mime Type");
+se.createTypeScriptMapping(si.getId(), typeId, true, false);
+// BE: AfterContentCreate (see AssignmentEngineBean save())
+si = se.createScriptFromLibrary(FxScriptEvent.AfterContentCreate, "DocumentFileContentConverterACC.gy", "DocumentFileContentConverterACC.gy", "Document File Content Converstion according to Mime Type");
+se.createTypeScriptMapping(si.getId(), typeId, true, false);
+
+// scripts needed f. the DocumentParser callback class (creation & conversion of DocumentFile content instances
+// DocumentTypeMetaDataParser.gy
+se.createScriptFromLibrary(FxScriptEvent.Manual, "DocumentTypeMetaDataParser.gy", "DocumentTypeMetaDataParser.gy", "Parse Meta Data f. the DOCUMENT type");
+// ImageTypeMetaDataParser.gy
+se.createScriptFromLibrary(FxScriptEvent.Manual, "ImageTypeMetaDataParser.gy", "ImageTypeMetaDataParser.gy", "Parse Meta Data f. the IMAGE type");

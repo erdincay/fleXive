@@ -42,7 +42,7 @@
 import com.flexive.shared.CacheAdmin
 import com.flexive.shared.value.*
 
-def binValue = content.getPropertyData("/ImageBinary").value.defaultTranslation
+def binValue = content.getPropertyData("/File").value.defaultTranslation
 if (binValue.metadata == null || binValue.metadata.length() < 20) {
     println "No metadata present for image to process!"
     return
