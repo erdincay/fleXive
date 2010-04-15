@@ -42,7 +42,9 @@ import com.flexive.shared.exceptions.FxNotFoundException;
 public enum FxScriptEvent {
 
     /**
-     * Manually execute script, not dependent on any 'trigger point' - will be executed on demand
+     * Manually execute script, not dependent on any 'trigger point' - will be executed on demand.
+     * <p>Execution of a manual script requires the the calling user to be in the role
+     * {@link com.flexive.shared.security.Role#ScriptExecution}.</p>
      */
     Manual(1, FxScriptScope.All),
 

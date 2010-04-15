@@ -92,7 +92,7 @@ public enum Role implements SelectableObjectWithName, SelectableObjectWithLabel,
     ScriptManagement((byte) 8, "Script Management", "#00AA00"),
 
     /**
-     * may execute scripts that can be run "standalone"
+     * may execute scripts of type {@link com.flexive.shared.scripting.FxScriptEvent#Manual}
      */
     ScriptExecution((byte) 9, "Script Execution", "#00AA00"),
 
