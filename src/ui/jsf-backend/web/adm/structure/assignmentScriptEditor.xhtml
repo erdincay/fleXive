@@ -76,7 +76,11 @@
                             </th>
                             <th>#{fxMessageBean['ScriptEditor.label.active']}</th>
                             <th>#{fxMessageBean['ScriptEditor.label.derivedUsage']}</th>
-                            <th>#{fxMessageBean['ScriptEditor.label.actions']}</th>
+                            <th>
+                                <ui:fragment rendered="#{propertyEditorBean.editMode}">
+                                    #{fxMessageBean['ScriptEditor.label.actions']}
+                                </ui:fragment>
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
