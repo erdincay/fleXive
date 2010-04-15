@@ -42,6 +42,7 @@ import java.nio.channels.Channels;
 import java.nio.channels.FileChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -230,14 +231,23 @@ public class FxFileUtils {
     }
 
     /**
-     * Compare if two files match
+     * Compare if two files match. Currently this method loads both files into memory and compares them,
+     * so don't use this on arbitrarily large files.
      *
      * @param file1 first file to compare
      * @param file2 second file to compare
      * @return match
      */
     public static boolean fileCompare(File file1, File file2) {
-        return file2.length() == file1.length();
+        try {
+            return file2.length() == file1.length()
+                    && Arrays.equals(getBytes(file2), getBytes(file1));
+        } catch (IOException e) {
+            if (LOG.isWarnEnabled()) {
+                LOG.warn("Failed to compare files: " + e.getMessage(), e);
+            }
+            return false;
+        }
     }
 
     /**
@@ -286,7 +296,6 @@ public class FxFileUtils {
      *
      * @param root  the root directory
      * @return      the contents of the directory
-     * @since 3.1
      */
     public static List<File> listRecursive(File root) {
         if (root == null || !root.exists()) {
