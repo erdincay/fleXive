@@ -80,7 +80,7 @@ if( meta.summary ) {
     if( meta.summary.title ) {
     	String title = (String)meta.summary.title
     	if("untitled".equals(title))
-    	  title = (String)metaData.name
+    	  title = (String)meta.name
         process(cmap, 'MLString|Caption', title)
     }
     if( meta.summary.lastModifiedAt )
@@ -130,7 +130,7 @@ cmap.each() {key, value ->
 
 
 if( !content.containsValue("/CAPTION") )
-    content.setValue("/CAPTION", new FxString(true, (String)metaData.name))
+    content.setValue("/CAPTION", new FxString(true, (String)meta.name))
 if( !content.containsValue("/ENCRYPTED") )
     content.setValue("/ENCRYPTED", new FxBoolean(false, false))
 return content
