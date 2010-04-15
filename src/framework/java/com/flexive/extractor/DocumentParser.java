@@ -34,6 +34,7 @@ package com.flexive.extractor;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxFileUtils;
+import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.content.FxContent;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
@@ -52,15 +53,17 @@ import org.apache.commons.logging.LogFactory;
 import java.io.*;
 
 /**
- * DocumentParser
- * A class for parsing content instances of DOCUMENTFILE and its derived types
- * Caller: callbacks from ScriptEvents attached to the respective types
- * DOCUMENTFILE: FxScriptEvent.BeforeContentCreate (run())
- * FxScriptEvent.AfterContentSave (convert()
- * DOCUMENT: t.b. implemented, atm orig. scripts are executed, no callback to this class
+ * A class for parsing content instances of DOCUMENTFILE and its derived types.
+ * <p>
+ * Caller: callbacks from ScriptEvents attached to the respective types<br/>
+ * DOCUMENTFILE: FxScriptEvent.BeforeContentCreate (run())<br/>
+ * FxScriptEvent.AfterContentSave (convert()<br/>
+ * DOCUMENT: t.b. implemented, atm orig. scripts are executed, no callback to this class<br/>
  * IMAGE: t.b. implemented, atm orig. scripts are executed, no callback to this class
+ * </p>
  *
  * @author Christopher Blasnik (c.blasnik@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+ * @since 3.1
  */
 public class DocumentParser {
 
@@ -101,8 +104,9 @@ public class DocumentParser {
             try {
                 this.content = EJBLookup.getContentEngine().load(pk);
             } catch (FxApplicationException e) {
-                LOG.error("Could not load content for pk " + pk + " - conversion aborted " + e.getMessage());
-                e.printStackTrace();
+                if (LOG.isDebugEnabled()) {
+                    LOG.error("Could not load content for pk " + pk + " - conversion aborted " + e.getMessage(), e);
+                }
             }
         }
         if(contentType == null || reloadContent) {
@@ -163,7 +167,9 @@ public class DocumentParser {
                 // retrieve a matching FxType and convert the content
                 FxType destinationType = CacheAdmin.getEnvironment().getMimeTypeMatch(mimeType);
                 if (destinationType.getId() == contentType.getId()) {
-                    LOG.debug("No matching type for content pk " + pk + " found, content remains instance of type id " + content.getTypeId());
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug("No matching type for content pk " + pk + " found, content remains instance of type id " + content.getTypeId());
+                    }
                     return pk;
                 }
 
@@ -175,8 +181,9 @@ public class DocumentParser {
                     }
 
                 } catch (FxApplicationException e) {
-                    LOG.error("An error occurred during content type conversion" + e.getMessage());
-                    e.printStackTrace();
+                    if (LOG.isErrorEnabled()) {
+                        LOG.error("An error occurred during content type conversion" + e.getMessage(), e);
+                    }
                 }
             }
         }
@@ -238,16 +245,9 @@ public class DocumentParser {
             }
             
         } catch (Exception e) {
-            LOG.error("Could not download binary file or create InputStream " + e.getMessage());
-            e.printStackTrace();
+            LOG.error("Could not download binary file or create InputStream " + e.getMessage(), e);
         } finally {
-            if(inputStream != null) {
-                try {
-                    inputStream.close();
-                } catch (IOException e) {
-                    // silent death
-                }
-            }
+            FxSharedUtils.close(inputStream);
         }
         return desc;
     }
@@ -275,16 +275,11 @@ public class DocumentParser {
             }
             
         } catch (Exception e) {
-            LOG.error("Could not download binary file or create InputStream " + e.getMessage());
-            e.printStackTrace();
-        } finally {
-            if (inputStream != null) {
-                try {
-                    inputStream.close();
-                } catch (IOException e) {
-                    // ignore
-                }
+            if (LOG.isErrorEnabled()) {
+                LOG.error("Could not download binary file or create InputStream " + e.getMessage(), e);
             }
+        } finally {
+            FxSharedUtils.close(inputStream);
             // delete tmp file
             if(imageFile != null) {
                 imageFile.delete();
@@ -341,8 +336,9 @@ public class DocumentParser {
                 // save content
                 EJBLookup.getContentEngine().save(content);
             } catch (FxApplicationException e) {
-                LOG.error("updateDocumentContentInstance error: " + e.getMessage());
-                e.printStackTrace();
+                if (LOG.isErrorEnabled()) {
+                    LOG.error("updateDocumentContentInstance error: " + e.getMessage(), e);
+                }
             }
         }
     }
