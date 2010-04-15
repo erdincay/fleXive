@@ -808,17 +808,28 @@ public class PropertyEditorBean implements ActionBean, Serializable {
         return assignment.isReferenceSelectOne();
     }
 
+    /**
+     * Sets the assignment property for the OptionReferenceSelectOne
+     *
+     * Always set it, even if value is false
+     * @param b the value to set the property
+     * @throws FxInvalidParameterException If something went wrong
+     */
     public void setAssignmentReferenceSelectOne(boolean b) throws FxInvalidParameterException {
-         FxStructureOption ml = assignment.getOption(FxStructureOption.OPTION_REFERENCE_SELECTONE);
-         if ((!ml.isSet() && b) || ml.isSet()) {
-             try {
-                 assignment.setOption(FxStructureOption.OPTION_REFERENCE_SELECTONE, b);
-             }
-             catch (Exception e) {
-                 new FxFacesMsgErr(e).addToContext();
-             }
-         }
-     }
+        try {
+            assignment.setOption(FxStructureOption.OPTION_REFERENCE_SELECTONE, b);
+            final OptionWrapper.WrappedOption wrappedOption = optionWrapper.getOption(true, FxStructureOption.OPTION_REFERENCE_SELECTONE);
+            // If the current value is the same as the value in the property, delete the unused property from the optionWrapper
+            if (b == wrappedOption.getBooleanValue()) {
+                optionWrapper.deleteOption(optionWrapper.getAssignmentOptions(), wrappedOption);
+            } else {
+                optionWrapper.setOption(false, FxStructureOption.OPTION_REFERENCE_SELECTONE, b);
+            }
+        }
+        catch (Exception e) {
+            new FxFacesMsgErr(e).addToContext();
+        }
+    }
 
 
     /**
@@ -1175,7 +1186,9 @@ public class PropertyEditorBean implements ActionBean, Serializable {
         //add edited options
         List<FxStructureOption> newAssignmentOptions = optionWrapper.asFxStructureOptionList(optionWrapper.getAssignmentOptions());
         for (FxStructureOption o : newAssignmentOptions) {
-            assignment.setOption(o.getKey(), o.getValue());
+            if (!assignment.getOption(o.getKey()).isSet()) {
+                assignment.setOption(o.getKey(), o.getValue());
+            }
         }
 
         //in any case restore the system language for systeminternal properties
