@@ -111,16 +111,20 @@ public class FxMediaEngine {
             }
             mimeType = detectMimeType(header, file.getName());
         }
-        try {
-            if (mimeType.startsWith("image")) {
-                if (FxMediaImageMagickEngine.IM_IDENTIFY_POSSIBLE) {
-
-                }
-                //native
+        if (mimeType.startsWith("image")) {
+            try {
+                //try native first
                 return FxMediaNativeEngine.identify(mimeType, file);
+            } catch (FxApplicationException e) {
+                if (FxMediaImageMagickEngine.IM_IDENTIFY_POSSIBLE) {
+                    try {
+                        return FxMediaImageMagickEngine.identify(mimeType, file);
+                    } catch (FxApplicationException e1) {
+                        LOG.error(e1);
+                    }
+                } else
+                    LOG.error(e);
             }
-        } catch (FxApplicationException e) {
-            LOG.error(e);
         }
         //last resort: unknown
         return new FxUnknownMetadataImpl(mimeType, file.getName());

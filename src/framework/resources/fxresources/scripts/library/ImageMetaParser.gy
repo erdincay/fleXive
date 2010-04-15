@@ -45,6 +45,9 @@ import com.flexive.shared.value.*
 def binValue = content.getPropertyData("/File").value.defaultTranslation
 if (binValue.metadata == null || binValue.metadata.length() < 20) {
     println "No metadata present for image to process!"
+    //ensure that the filename is set, else the file can not be saved
+    if (content.getValue("/FILENAME").isEmpty())
+        content.setValue("/FILENAME", new FxString(false, binValue.name))
     return
 }
 
@@ -62,9 +65,9 @@ void process(cmap, key, rawvalue) {
 }
 
 try {
-    if (binValue.isNewBinary()) {
+//    if (binValue.isNewBinary()) {
 //        println "Processing a new descriptor (got to load meta/mime from transit)..."
-    }
+//    }
 //    println "Meta data (first 20 chars): ${binValue.metadata.substring(0, 20)}...";
 
 //    println "Image name: " + binValue.name

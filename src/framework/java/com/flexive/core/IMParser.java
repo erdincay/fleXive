@@ -147,11 +147,11 @@ public class IMParser {
                 } else
                     level = lastNonValueLevel + 1;
                 if (curr.endsWith(":")) {
-                    writer.writeStartElement(curr.substring(0, curr.lastIndexOf(':')).trim().replaceAll("[ :]", "-"));
+                    writer.writeStartElement(curr.substring(0, curr.lastIndexOf(':')).trim().replaceAll("[ :]", "-").replaceAll("\\[.*\\]",""));
                     lastLevel = level + 1;
                     continue;
                 } else if (pColormap.matcher(curr).matches()) {
-                    writer.writeStartElement(curr.substring(0, curr.lastIndexOf(':')).trim().replaceAll("[ :]", "-"));
+                    writer.writeStartElement(curr.substring(0, curr.lastIndexOf(':')).trim().replaceAll("[ :]", "-").replaceAll("\\[.*\\]",""));
                     writer.writeAttribute("colors", curr.split(": ")[1].trim());
                     lastLevel = level + 1;
                     continue;
@@ -159,12 +159,12 @@ public class IMParser {
                 entry = curr.split(": ");
                 if (entry.length == 2) {
                     if (!valueEntry) {
-                        writer.writeStartElement(entry[0].trim().replaceAll("[ :]", "-"));
+                        writer.writeStartElement(entry[0].trim().replaceAll("[ :]", "-").replaceAll("\\[.*\\]",""));
                         writer.writeCharacters(entry[1]);
                         writer.writeEndElement();
                     } else {
                         writer.writeEmptyElement("value");
-                        writer.writeAttribute("key", entry[0].trim().replaceAll("[ :]", "-"));
+                        writer.writeAttribute("key", entry[0].trim().replaceAll("[ :]", "-").replaceAll("\\[.*\\]",""));
                         writer.writeAttribute("data", entry[1]);
 //                        writer.writeEndElement();
                     }

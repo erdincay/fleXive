@@ -62,6 +62,8 @@ if (!isImage)
 
 //parse metadata
 FxMetadata meta = FxMediaEngine.identify(mimeType, binaryFile)
+if (!meta.isImageMetadata())
+  return //could not identify as image
 metaData = meta.toXML()
 //create previews
 String ext = ".JPG"

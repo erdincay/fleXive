@@ -449,7 +449,7 @@ public class FxMediaNativeEngine {
             if (detected.isEmpty()) {
                 return "application/unknown";
             } else {
-                return ((MimeType) detected.iterator().next()).toString();
+                return detected.iterator().next().toString();
             }
         }
         //byte signature based detection (TODO: also use mime-utils Magic detectors)

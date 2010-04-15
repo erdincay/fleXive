@@ -32,15 +32,14 @@
 package com.flexive.shared.media;
 
 import com.flexive.shared.exceptions.FxApplicationException;
+import org.apache.commons.lang.StringUtils;
 
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
-import java.io.StringWriter;
 import java.io.Serializable;
+import java.io.StringWriter;
 import java.util.List;
-
-import org.apache.commons.lang.StringUtils;
 
 /**
  * Generic media metadata
@@ -56,7 +55,7 @@ public abstract class FxMetadata {
      */
     public static class FxMetadataItem implements Serializable {
         private static final long serialVersionUID = -4856169406370122927L;
-        
+
         private String key;
         private String value;
 
@@ -119,6 +118,16 @@ public abstract class FxMetadata {
     public abstract List<FxMetadataItem> getMetadata();
 
     /**
+     * Check if this metatdata object is an image metadata instance
+     *
+     * @return this object is an image meta data instance
+     * @since 3.1
+     */
+    public boolean isImageMetadata() {
+        return this instanceof FxImageMetadata;
+    }
+
+    /**
      * Get this metadata object as an FxImageMetadata instance
      *
      * @return FxImageMetadata instance
@@ -148,7 +157,7 @@ public abstract class FxMetadata {
             writeXMLTags(writer);
             for (FxMetadataItem mdi : getMetadata()) {
                 final String value = mdi.getValue().replaceAll("[\\x00-\\x1F]", ""); //filter out control characters
-                if( StringUtils.isEmpty(value))
+                if (StringUtils.isEmpty(value))
                     continue;
                 writer.writeStartElement("meta");
                 writer.writeAttribute("key", mdi.getKey());

@@ -31,17 +31,26 @@
  ***************************************************************/
 package com.flexive.shared.media.impl;
 
+import com.flexive.core.IMParser;
 import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.media.FxMetadata;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
+import javax.xml.parsers.DocumentBuilder;
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
+import javax.xml.xpath.XPath;
 import java.io.*;
-import java.util.regex.Pattern;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.StringTokenizer;
+import java.util.regex.Pattern;
 
 /**
  * ImageMagick media engine
@@ -277,4 +286,116 @@ public class FxMediaImageMagickEngine {
         return sw.getBuffer().toString();
     }
 
+    /**
+     * Identify a file, returning metadata
+     *
+     * @param mimeType if not null it will be used to call the correct identify routine
+     * @param file     the file to identify
+     * @return metadata
+     * @throws FxApplicationException on errors
+     * @since 3.1
+     */
+    public static FxMetadata identify(String mimeType, File file) throws FxApplicationException {
+        if (mimeType == null)
+            mimeType = FxMediaNativeEngine.detectMimeType(null, file.getAbsolutePath());
+        try {
+            String metaData = IMParser.getMetaData(file);
+
+            String format = "unknown";
+            String formatDescription = "";
+            String compressionAlgorithm = "";
+            String colorType = "";
+            int width = 0;
+            int height = 0;
+            double xRes = 0.0;
+            double yRes = 0.0;
+            int bpp = 0;
+
+            DocumentBuilder builder = javax.xml.parsers.DocumentBuilderFactory.newInstance().newDocumentBuilder();
+            Document document = builder.parse(new ByteArrayInputStream(metaData.getBytes()));
+            XPath xPath = javax.xml.xpath.XPathFactory.newInstance().newXPath();
+
+            Node nFormat = (Node) xPath.evaluate("/Image/Format", document, javax.xml.xpath.XPathConstants.NODE);
+            if (nFormat != null && nFormat.getTextContent() != null) {
+                format = nFormat.getTextContent();
+                if (format.indexOf(' ') > 0) {
+                    formatDescription = format.substring(format.indexOf(' ') + 1);
+                    if (formatDescription.indexOf('(') >= 0 && formatDescription.indexOf(')') > 0) {
+                        formatDescription = formatDescription.substring(formatDescription.indexOf('(') + 1, formatDescription.indexOf(')'));
+                    }
+                    format = format.substring(0, format.indexOf(' '));
+                }
+            }
+
+            Node nCompression = (org.w3c.dom.Node) xPath.evaluate("/Image/Compression", document, javax.xml.xpath.XPathConstants.NODE);
+            if (nCompression != null && nCompression.getTextContent() != null) {
+                compressionAlgorithm = nCompression.getTextContent();
+            }
+
+            Node nColorType = (Node) xPath.evaluate("/Image/Colorspace", document, javax.xml.xpath.XPathConstants.NODE);
+            if (nColorType != null && nColorType.getTextContent() != null) {
+                colorType = nColorType.getTextContent();
+            }
+
+            Node nGeometry = (Node) xPath.evaluate("/Image/Geometry", document, javax.xml.xpath.XPathConstants.NODE);
+            if (nGeometry != null && nGeometry.getTextContent() != null) {
+                String geo = nGeometry.getTextContent();
+                if (geo.indexOf('+') > 0)
+                    geo = geo.substring(0, geo.indexOf('+'));
+                if (geo.indexOf('x') > 0) {
+                    try {
+                        width = Integer.parseInt(geo.substring(0, geo.indexOf('x')));
+                        height = Integer.parseInt(geo.substring(geo.indexOf('x') + 1));
+                    } catch (NumberFormatException ex) {
+                        //failed, ignore
+                    }
+
+                }
+            }
+
+            Node nResolution = (Node) xPath.evaluate("/Image/Resolution", document, javax.xml.xpath.XPathConstants.NODE);
+            if (nResolution != null && nResolution.getTextContent() != null) {
+                String res = nResolution.getTextContent();
+                if (res.indexOf('+') > 0)
+                    res = res.substring(0, res.indexOf('+'));
+                if (res.indexOf('x') > 0) {
+                    try {
+                        xRes = Double.parseDouble(res.substring(0, res.indexOf('x')));
+                        yRes = Double.parseDouble(res.substring(res.indexOf('x') + 1));
+                    } catch (NumberFormatException ex) {
+                        //failed, ignore
+                    }
+
+                }
+            }
+
+            Node nDepth = (Node) xPath.evaluate("/Image/Depth", document, javax.xml.xpath.XPathConstants.NODE);
+            if (nDepth != null && nDepth.getTextContent() != null) {
+                String dep = nDepth.getTextContent();
+                if (dep.indexOf('-') > 0)
+                    dep = dep.substring(0, dep.indexOf('-'));
+                try {
+                    bpp = Integer.parseInt(dep);
+                } catch (NumberFormatException ex) {
+                    //failed, ignore
+                }
+            }
+
+            List<FxMetadata.FxMetadataItem> items = new ArrayList<FxMetadata.FxMetadataItem>(50);
+            NodeList nodes = (NodeList) xPath.evaluate("/Image/*", document, javax.xml.xpath.XPathConstants.NODESET);
+            Node currNode;
+            for (int i = 0; i < nodes.getLength(); i++) {
+                currNode = nodes.item(i);
+                if (currNode.hasChildNodes() && currNode.getChildNodes().getLength() > 1) {
+                    for (int j = 0; j < currNode.getChildNodes().getLength(); j++)
+                        items.add(new FxMetadata.FxMetadataItem(currNode.getNodeName() + "/" + currNode.getChildNodes().item(j).getNodeName(), currNode.getChildNodes().item(j).getTextContent()));
+                } else
+                    items.add(new FxMetadata.FxMetadataItem(currNode.getNodeName(), currNode.getTextContent()));
+            }
+            return new FxImageMetadataImpl(mimeType, file.getName(), items, width, height, format, formatDescription, compressionAlgorithm, xRes, yRes, colorType, false, bpp, false, false, null);
+        } catch (Exception e) {
+            throw new FxApplicationException(e, "ex.media.identify.error", file.getName(), mimeType, e.getMessage());
+        }
+
+    }
 }
