@@ -1840,14 +1840,14 @@
     </section>
 
     <section xml:id="adm_query_editor">
-        <title>The query editor</title>
+        <title>The visual query editor</title>
         <para>
             The query editor allows you to search for already created content instances. You can formulate
             complex queries on structures and their properties, it's like building SQL statements visually.
         </para>
         <para>The elements of the query result set can be edited, attached to the
             <link linkend="adm_content_tree">content tree</link>
-            or saved into a <link linkend="adm_query_editor_queries_briefcases">briefcase</link>
+            or saved into a <link linkend="adm_query_editor_briefcase">briefcase</link>
             , which can be shared among users. Queries can also be saved.
         </para>
         <mediaobject>
@@ -2004,7 +2004,7 @@
                         <listitem>
                             <para>
                                 Create briefcase: creates a
-                                <link linkend="adm_query_editor_queries_briefcases">briefcase</link>
+                                <link linkend="adm_query_editor_queries_briefcase">briefcase</link>
                                 from the query result. For creating briefcases a briefcase name is
                                 required.
                             </para>
@@ -2012,112 +2012,135 @@
                     </itemizedlist>
                 </para>
             </section>
-            <section xml:id="adm_query_editor_result">
-                <title>Query results</title>
-                <para>Upon pressing the "Search" button the query result is displayed.
-                </para>
-                <para>
-                    <mediaobject>
-                        <imageobject>
-                            <imagedata fileref="images/adm_ui_query_editor/query_result.png"
-                                       format="PNG" contentwidth="100%"/>
-                        </imageobject>
-                    </mediaobject>
-                </para>
-                <para>Right-click on an item of the result set or left-clicking "more..." activates
-                    the query result context menu.</para>
-                <para>
-                    <mediaobject>
-                        <imageobject>
-                            <imagedata fileref="images/adm_ui_query_editor/query_result_context_menu.png"
-                                       format="PNG" contentwidth="100%"/>
-                        </imageobject>
-                    </mediaobject>
-                </para>
-                <para>
-                    <itemizedlist>
-                        <listitem>
-                            <para>
-                                Open: open the selected content instance
-                                in the <link linked="adm_instance_editor">instance editor</link>
-                                in <glossterm>view-mode</glossterm>.
-                            </para>
-                        </listitem>
-                        <listitem>
-                            <para>
-                                Show screenshot: Show a screenshot of the content instance (available for binary data).
-                            </para>
-                        </listitem>
-                        <listitem>
-                            <para>
-                                Edit: open the selected content instance in the
-                                <link linked="adm_instance_editor">instance editor</link>
-                                in <glossterm>edit-mode</glossterm>.
-                            </para>
-                        </listitem>
-                        <listitem>
-                            <para>
-                                Download: download binary data.
-                            </para>
-                        </listitem>
-                        <listitem>
-                            <para>
-                                Lock: lock selected instance.
-                            </para>
-                        </listitem>
-                        <listitem>
-                            <para>
-                                Unlock: unlock selected instance.
-                            </para>
-                        </listitem>
-                        <listitem>
-                            <para>
-                                Copy: copy content instance in order to perform
-                                an operation in the <link linkend="adm_content_tree">content tree</link>.
-                            </para>
-                        </listitem>
-                        <listitem>
-                            <para>
-                                Copy to briefcase: copies the selected result entry to a
-                                 <link linkend="adm_query_editor_queries_briefcases">briefcase</link>.
-                            </para>
-                        </listitem>
-                        <listitem>
-                            <para>
-                                Delete: deletes the selected content instance.
-                            </para>
-                        </listitem>
-                        <listitem>
-                            <para>
-                                Select all: Selects all content instances of the whole search result. 
-                            </para>
-                        </listitem>
-                        <listitem>
-                            <para>
-                                Select all on this page: Selects only content instances on the currently visible
-                                search result page.
-                            </para>
-                        </listitem>
-                    </itemizedlist>
-                </para>
-            </section>
-            <section xml:id="adm_query_editor_queries_briefcases">
-                <title>Saved queries and briefcases</title>
-                <para>You can save your query or save the query result to a briefcase by checking the options in the
-                    query editor before executing the query. A briefcase can be public or private, meaning shared or
-                    not shared among other users. Saved queries and briefcases can be found in the
-                    <filename>Search</filename>
-                    tab of the &Flexive; backend administration.
-                </para>
-                <para>
-                    <mediaobject>
-                        <imageobject>
-                            <imagedata fileref="images/adm_ui_query_editor/search_tab.png"
-                                       format="PNG" contentwidth="100%"/>
-                        </imageobject>
-                    </mediaobject>
-                </para>
-            </section>
+        </section>
+        <section xml:id="adm_query_editor_result">
+            <title>Query results</title>
+            <para>Upon pressing the "Search" button the query result is displayed.
+            </para>
+            <para>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="images/adm_ui_query_editor/query_result.png"
+                                   format="PNG" contentwidth="100%"/>
+                    </imageobject>
+                </mediaobject>
+            </para>
+            <para>Right-click on an item of the result set or left-clicking "more..." activates
+                the query result context menu.</para>
+            <para>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="images/adm_ui_query_editor/query_result_context_menu.png"
+                                   format="PNG" contentwidth="100%"/>
+                    </imageobject>
+                </mediaobject>
+            </para>
+            <para>
+                <itemizedlist>
+                    <listitem>
+                        <para>
+                            Open: open the selected content instance
+                            in the <link linked="adm_instance_editor">instance editor</link>
+                            in <glossterm>view-mode</glossterm>.
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            Show screenshot: Show a screenshot of the content instance (available for binary data).
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            Edit: open the selected content instance in the
+                            <link linked="adm_instance_editor">instance editor</link>
+                            in <glossterm>edit-mode</glossterm>.
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            Download: download binary data.
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            Lock: lock selected instance.
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            Unlock: unlock selected instance.
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            Copy: copy content instance in order to perform
+                            an operation in the <link linkend="adm_content_tree">content tree</link>.
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            Copy to briefcase: copies the selected result entry to a
+                             <link linkend="adm_query_editor_briefcase">briefcase</link>.
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            Delete: deletes the selected content instance.
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            Select all: Selects all content instances of the whole search result.
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            Select all on this page: Selects only content instances on the currently visible
+                            search result page.
+                        </para>
+                    </listitem>
+                </itemizedlist>
+            </para>
+        </section>
+         <section xml:id="adm_query_editor_saved_queries">
+            <title>Saved queries</title>
+            <para>You can save your query (meaning that you save the query parameters)
+                by pressing the "Save query" button before executing
+                your query. Saving queries saves you the trouble of building the
+                same query over and over again, you can simply
+                select your saved query and press the "Search"
+                button. Saved queries can be accessed via the Search GUI.
+            </para>
+            <para>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="images/adm_ui_query_editor/search_tab.png"
+                                   format="PNG" contentwidth="100%"/>
+                    </imageobject>
+                </mediaobject>
+            </para>
+        </section>
+        <section xml:id="adm_query_editor_briefcase">
+            <title>Briefcases</title>
+            <para>Single result entries or whole query results can be saved into briefcases.
+                For example you can search for all existing articles, pick a few which
+                interest you most and put them into a briefcase. Via the briefcase you can now
+                quickly access your articles without having the trouble of searching and picking
+                the ones of interest again. It is also possible to share
+                briefcases with the public, meaning that other users may also
+                access your briefcase. Additionally arbitrary briefcase entries
+                of one briefcase can be copied or moved to other briefcases.
+                New briefcases can be created and existing briefcases
+                can accessed via the Search GUI.
+            </para>
+            <para>
+                <mediaobject>
+                    <imageobject>
+                        <imagedata fileref="images/adm_ui_query_editor/briefcase.png"
+                                   format="PNG" contentwidth="100%"/>
+                    </imageobject>
+                </mediaobject>
+            </para>
         </section>
     </section>
 
@@ -2370,7 +2393,7 @@
                                         <link linkend="core_workflow">Workflow</link>
                                     </listitem>
                                     <listitem>
-                                        <link linkend="adm_query_editor_queries_briefcases">Briefcase</link>
+                                        <link linkend="adm_query_editor_briefcase">Briefcase</link>
                                     </listitem>
                                     <listitem>
                                         <link linkend="adm_selectlists">SelectList</link>
@@ -3004,7 +3027,7 @@
                                 <link linkend="adm_query_editor">visual query editor</link>
                                 the &fxsql; GUI contains a text input area where the user may
                                 submit <link linkend="core_search_sqlintro">FxSQL</link> queries directly
-                                and optionally create <link linkend="adm_query_editor_queries_briefcases">
+                                and optionally create <link linkend="adm_query_editor_queries_briefcase">
                                 briefcases</link>.
                                 <para>
                                     <link linkend="core_search_sqlintro">FxSQL</link>
