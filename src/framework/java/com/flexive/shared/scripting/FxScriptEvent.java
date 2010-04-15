@@ -356,7 +356,7 @@ public enum FxScriptEvent {
     AccountLogout(33, FxScriptScope.Accounts, "UserTicket ticket"),
 
     /**
-     * An internal event for script executable by any user.
+     * An internal event for scripts executable by any user.
      */
     Internal(34, FxScriptScope.Type);
 
