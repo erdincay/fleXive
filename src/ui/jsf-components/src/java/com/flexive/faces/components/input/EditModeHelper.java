@@ -505,15 +505,23 @@ class EditModeHelper extends RenderHelper {
     }
 
     private void renderCheckbox(UIComponent parent, String inputId, FxLanguage language) throws IOException {
+        MessageBean mb = MessageBean.getInstance();
+        String[] toolTips = {mb.getMessage("FxValueInput.selectBox.value.true"),
+            mb.getMessage("FxValueInput.selectBox.value.false"),
+            mb.getMessage("FxValueInput.selectBox.value.empty")};
+
         final HtmlSelectBooleanCheckbox checkbox = (HtmlSelectBooleanCheckbox) FxJsfUtils.addChildComponent(parent, HtmlSelectBooleanCheckbox.COMPONENT_TYPE);
         checkbox.setId(stripForm(inputId));
-        checkbox.setValue(value.getTranslation(language));
+        Boolean b = (Boolean) value.getTranslation(language);
+        checkbox.setValue(b);
+        checkbox.setTitle(value.isTranslationEmpty(language) ? toolTips[2] : b ? toolTips[0] : toolTips[1]);
         addHtmlAttributes(component, checkbox);
         checkbox.setStyleClass(
                 CSS_VALUE_INPUT_FIELD
                 + (value.isTranslationEmpty(language) ? " " + CSS_EMPTY : "")
         );
-        checkbox.setOnclick("flexive.input.onTristateCheckboxChanged('" + inputId + "')");
+
+        checkbox.setOnclick("flexive.input.onTristateCheckboxChanged('" + inputId + "', new Array('"+StringUtils.join(toolTips,"' ,'") +"')" +")");
         // render hidden input to represent "empty"
         final HtmlInputHidden hidden = (HtmlInputHidden) FxJsfUtils.addChildComponent(parent, HtmlInputHidden.COMPONENT_TYPE);
         hidden.setId(stripForm(inputId) + "_empty");

@@ -976,7 +976,7 @@ flexive.input = new function() {
      *
      * @param inputId   the checkbox input ID
      */
-    this.onTristateCheckboxChanged = function(inputId)  {
+    this.onTristateCheckboxChanged = function(inputId, tooltips)  {
         // get checkbox
         var checkbox = document.getElementById(inputId);
         // get hidden input for setting the empty state
@@ -990,10 +990,12 @@ flexive.input = new function() {
             if (checkbox.className.indexOf("fxValueEmpty") == -1) {
                 checkbox.className += " fxValueEmpty";
             }
+            checkbox.title=tooltips[2];
         } else {
             // normal state
             hidden.value = "false";
-            checkbox.className = checkbox.className.replace("fxValueEmpty", ""); 
+            checkbox.className = checkbox.className.replace("fxValueEmpty", "");
+            checkbox.title=checkbox.checked ? tooltips[0] : tooltips[1];
         }
     };
 };
