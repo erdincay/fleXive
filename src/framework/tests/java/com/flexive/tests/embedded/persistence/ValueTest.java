@@ -252,7 +252,8 @@ public class ValueTest {
         GregorianCalendar gc_single_datetime2 = new GregorianCalendar(1974, 3, 17, 14, 30, 15);
         String s_single = "ABC";
         String s_multi = "DEF";
-
+        String s_single_big = RandomStringUtils.randomAlphanumeric(50000);
+        String s_multi_big = RandomStringUtils.randomAlphanumeric(50000);
 
         File testFile = new File("test.file");
         if (!testFile.exists())
@@ -278,8 +279,8 @@ public class ValueTest {
                         new FxString(true, s_multi)),
 
                 new TestData<FxString>(FxDataType.Text,
-                        new FxString(false, s_single),
-                        new FxString(true, s_multi)),
+                        new FxString(false, s_single_big),
+                        new FxString(true, s_multi_big)),
 
                 new TestData<FxNumber>(FxDataType.Number,
                         new FxNumber(false, Integer.MAX_VALUE),

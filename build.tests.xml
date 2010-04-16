@@ -303,14 +303,17 @@
     	<!-- Run a given test group (set via the tests.groups property, e.g. via -Dtests.groups=...) -->
         <echo>Test groups can be specified in the tests.groups property,</echo>
         <echo>e.g. "ant tests.groups -Dtests.groups=shared,configuration"</echo>
-        <echo>Running tests in group(s): ${tests.groups}</echo>
         <groovy>
+            if(properties.'tests.groups' == null) {
+                ant.fail "Please set the tests.groups property!"
+            }
             // build dist target only when executing the dist group
             if (properties.'tests.groups'.indexOf('dist') != -1) {
                 project.executeTarget('dist')
                 properties.'run.dist.settings' = '-Dflexive.test.dist.file="' + properties.'flexive.base.build.dir' + '/flexive-dist.zip"'
             }
         </groovy>
+        <echo>Running tests in group(s): ${tests.groups}</echo>
         <copy file="${tests.resources.dir}/testlog4j.xml" todir="${tests.classes.dir}"/>
 
         <!--<property name="myclasspath" refid="ejb3-embedded.classpath"/>-->
