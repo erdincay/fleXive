@@ -96,7 +96,8 @@
                                                          action="runScript" bean="#{scriptBean}"
                                                          lockscreen="true"
                                                          onclick="storeDataTablePosition('listForm')"
-                                                         id="runButton_#{item.id}">
+                                                         id="runButton_#{item.id}"
+                                                         location="content">
                                             <f:setPropertyActionListener value="#{item.id}" target="#{scriptBean.id}"/>
                                         </adm:commandIcon>
                                     </ui:fragment>
