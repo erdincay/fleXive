@@ -816,6 +816,7 @@ public class PropertyEditorBean implements ActionBean, Serializable {
      * @throws FxInvalidParameterException If something went wrong
      */
     public void setAssignmentReferenceSelectOne(boolean b) throws FxInvalidParameterException {
+        if (!isOverrideReferenceSelectOne()) return;
         try {
             assignment.setOption(FxStructureOption.OPTION_REFERENCE_SELECTONE, b);
             final OptionWrapper.WrappedOption wrappedOption = optionWrapper.getOption(true, FxStructureOption.OPTION_REFERENCE_SELECTONE);
@@ -904,15 +905,12 @@ public class PropertyEditorBean implements ActionBean, Serializable {
     public boolean isOverrideReferenceSelectOne() {
         if (assignment == null)
             return false;
-        //handle multi lang option seperately
-        FxStructureOption refSelectOne = null;
         for (FxStructureOption o : assignment.getOptions()) {
             if (o.getKey().equals(FxStructureOption.OPTION_REFERENCE_SELECTONE)) {
-                refSelectOne = o;
-                break;
+                return o.isSet();
             }
         }
-        return refSelectOne != null && isPropertyMayOverrideReferenceSelectOne() && refSelectOne.isSet();
+        return false;
     }
 
     public void setOverrideReferenceSelectOne(boolean overrideReferenceSelectOne) {
@@ -921,8 +919,9 @@ public class PropertyEditorBean implements ActionBean, Serializable {
             try {
                 if (overrideReferenceSelectOne)
                     assignment.setOption(FxStructureOption.OPTION_REFERENCE_SELECTONE, !isPropertyReferenceSelectOne());
-                else
+                else {
                     assignment.clearOption(FxStructureOption.OPTION_REFERENCE_SELECTONE);
+                }
             }
             catch (Throwable t) {
                 new FxFacesMsgErr(t).addToContext();

@@ -135,14 +135,6 @@
                         disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"/>
             </fx:formRow>
 
-            <ui:fragment rendered="#{propertyEditorBean.propertyReference}">
-                <fx:formRow labelKey="PropertyEditor.label.reference.selectone" id="RefSelectOne">
-                    <h:selectBooleanCheckbox id="RefSelectOne" value="#{propertyEditorBean.assignmentReferenceSelectOne}"
-                       disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"
-                            />
-                </fx:formRow>
-            </ui:fragment>
-
             <fx:fieldSet legend="#{fxMessageBean['PropertyEditor.label.overridePropertyOptions']}">
                 <fx:formRow labelKey="PropertyEditor.label.overrideMultiLang" id="overrideMultiLang">
                         <h:selectBooleanCheckbox id="overrideMultiLang" value="#{propertyEditorBean.overrideMultiLang}"
@@ -152,13 +144,6 @@
                             <a4j:support event="onclick" reRender="multiLangBox,defaultLangSelect,defaultValueInput,defaultLanguageInput"/>
                         </h:selectBooleanCheckbox>
                 </fx:formRow>
-                <ui:fragment rendered="#{propertyEditorBean.propertyReference} and false"><!--TODO check it-->
-                    <fx:formRow labelKey="PropertyEditor.label.reference.selectone" id="overrideRefSelectOne">
-                        <h:selectBooleanCheckbox id="overrideRefSelectOne" value="#{propertyEditorBean.propertyMayOverrideReferenceSelectOne}"
-                                 disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal
-                                 and not fxSystemBean.isInRole['GlobalSupervisor'])}"/>
-                    </fx:formRow>
-                </ui:fragment>
 
                 <a4j:outputPanel id="multiLangBox">
                     <ui:fragment rendered="#{propertyEditorBean.overrideMultiLang}">
@@ -216,6 +201,28 @@
                                         disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}">
                                     <f:selectItems value="#{fxSelectBean.structureACLs}" />
                                 </h:selectOneListbox>
+                            </fx:formRow>
+                        </div>
+                    </ui:fragment>
+                </a4j:outputPanel>
+
+                <ui:fragment rendered="#{propertyEditorBean.propertyReference}">
+                    <fx:formRow labelKey="PropertyEditor.label.reference.selectone" id="overrideRefSelectOne">
+                        <h:selectBooleanCheckbox id="overrideRefSelectOne" value="#{propertyEditorBean.overrideReferenceSelectOne}"
+                                 disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal
+                                 and not fxSystemBean.isInRole['GlobalSupervisor'])}">
+                                 <a4j:support event="onclick" reRender="RefSelectOneP"/>
+                            </h:selectBooleanCheckbox>
+                    </fx:formRow>
+                </ui:fragment>
+
+                <a4j:outputPanel id="RefSelectOneP">
+                    <ui:fragment rendered="#{propertyEditorBean.overrideReferenceSelectOne}">
+                        <div style="padding-left:17px">
+                            <fx:formRow labelKey="PropertyEditor.label.reference.selectone" id="RefSelectOne">
+                                <h:selectBooleanCheckbox id="RefSelectOne" value="#{propertyEditorBean.assignmentReferenceSelectOne}"
+                                   disabled="#{not propertyEditorBean.editMode or (propertyEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"
+                                        />
                             </fx:formRow>
                         </div>
                     </ui:fragment>
