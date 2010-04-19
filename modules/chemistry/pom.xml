@@ -220,6 +220,11 @@
                         <groupId>org.slf4j</groupId>
                         <artifactId>slf4j-api</artifactId>
                     </exclusion>
+                    <!-- Use groovy version from flexive -->
+                    <exclusion>
+                        <groupId>org.codehaus.groovy</groupId>
+                        <artifactId>groovy-all-minimal</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
 
@@ -283,9 +288,13 @@
                                 <name>flexive.quartz.disable</name>
                                 <value>true</value>
                             </property>
-                                <property>
+                            <property>
                                 <name>flexive.runonce.minimal</name>
                                 <value>true</value>
+                            </property>
+                            <property>
+                                <name>fxstreaming.port</name>
+                                <value>18291</value>
                             </property>
                         </systemProperties>
                         <testFailureIgnore>true</testFailureIgnore>
