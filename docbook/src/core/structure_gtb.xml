@@ -2057,4 +2057,95 @@ builder {
     <para>
 
     </para>
+
+    <section xml:id="core_structure_gob">
+        <title>The GroovyOptionBuilder</title>
+        <para>The
+            <classname>GroovyOptionBuilder</classname>
+            (&quot;GOB&quot;)
+            provides a means for creating <classname>List</classname>s of <classname>FxStructureOption</classname>s using Groovy.
+            Just like the GTB, the GOB extends Groovy's builder support class.
+            Let us get straight to the examples to demonstrate how the GOB works:
+        </para>
+        <para>
+            Considerations
+            <itemizedlist>
+                <listitem>
+                    The GroovyOptionBuilder will always return a List of FxStructureOptions
+                </listitem>
+                <listitem>
+                    It is recommended to always quote the names of the options, e.g. &quot;MYOPTION&quot;
+                </listitem>
+                <listitem>
+                    The options &quot;overrideable&quot; and &quot;isInherited&quot; are <classname>true</classname> by default
+                </listitem>
+            </itemizedlist>
+        </para>
+
+        <section xml:id="core_structure_gob_examples_1">
+            <title>GroovyOptionBuilder usage example 1</title>
+            <para>
+                Create an option &quot;FOO&quot; having value &quot;BAR&quot; which cannot be overridden and which is not inherited by derived structures
+                <programlisting><![CDATA[
+new GroovyOptionBuilder()."FOO"(value: "BAR", overrideable: false, isInherited: false)
+             ]]></programlisting>
+            </para>
+        </section>
+
+        <section xml:id="core_structure_gob_examples_2">
+            <title>GroovyOptionBuilder usage example 2</title>
+            <para>
+                Create several options
+                <programlisting><![CDATA[
+new GroovyOptionBuilder()."FOO"(value: "BAR", overrideable: false, isInherited: false) {
+    "opt1"(value: true, overrideable: false, isInherited: true)
+    "opt1.special"(value: true, overrideable: true, isInherited: true)
+    "opt2"(value: "20.5", overrideable: true, isInherited: false)
+    "Addr.Street"(value: "Broadway", overrideable: true, isInherited: true)
+    "Addr.StreetNo"(value: "10", overrideable: true, isInherited: false)
+    "Addr.TelNo"(value: "0043123456789")
+    "Addr.Country"(value: "Austria")
+}
+             ]]></programlisting>
+            </para>
+        </section>
+
+        <section xml:id="core_structure_gob_gtb_integration">
+            <title>Using the GroovyOptionBuilder within the GroovyTypeBuilder</title>
+            <para>
+                Using the GOB in conjunction with the GroovyTypeBuilder requires usage of Groovy's <classname>Eval</classname> class,
+                or the <classname>Eval.me(String expression)</classname> method, respectively.
+                Basically the call to the GOB remains the same as in the previous examples. Using <classname>Eval</classname> however,
+                the code must be quoted using three sucessive double quotes (Groovy's way to escape any special characters within a String).
+                <para>
+                    A list of caveats for using Eval.me in a call to the GOB:
+                    <itemizedlist>
+                        <listitem>
+                           Quote the call using three double quotes, e.g.
+                            <programlisting>
+                            ... structureOptions: Eval.me("""[code goes here...]""")...
+                            </programlisting>
+                        </listitem>
+                        <listitem>
+                            Since using Eval represents an independent call to the compiler, the import statement for the GOB must be included in any call.
+                            (separated from the code by &quot;;&quot; on the same line or by a newline)
+                        </listitem>
+                    </itemizedlist>
+                </para>
+                <para>
+                    Full example:
+                </para>
+                <programlisting><![CDATA[
+new GroovyTypeBuilder().mytype(
+	label: new FxString(true, 1, "My type label"),
+	structureOptions: Eval.me("""import com.flexive.shared.scripting.groovy.*
+		new GroovyOptionBuilder()."MYOPT"(value: "1", overrideable: true, isInherited: true) {
+		"OTHEROPT.SRGN"(value: "0", overrideable: true, isInherited: false)
+		"FOO.BAR"(value: "foobar", overrideable: false, isInherited: false) }"""))
+             ]]></programlisting>
+            </para>
+        </section>
+
+    </section>
+
 </section>
