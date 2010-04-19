@@ -1183,9 +1183,14 @@ public class PropertyEditorBean implements ActionBean, Serializable {
             assignment.clearOption(currKey);
         }
         //add edited options
+        Map<String, Boolean> tmpAssignments = new Hashtable<String, Boolean>();
+        for (FxStructureOption o : assignment.getOptions()) {
+            tmpAssignments.put(o.getKey(), o.isSet());
+        }
         List<FxStructureOption> newAssignmentOptions = optionWrapper.asFxStructureOptionList(optionWrapper.getAssignmentOptions());
         for (FxStructureOption o : newAssignmentOptions) {
-            if (!assignment.getOption(o.getKey()).isSet()) {
+            Boolean exist = tmpAssignments.get(o.getKey());
+            if (exist == null || exist == false) {
                 assignment.setOption(o.getKey(), o.getValue());
             }
         }
