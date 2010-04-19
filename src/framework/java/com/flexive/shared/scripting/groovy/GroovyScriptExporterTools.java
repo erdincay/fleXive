@@ -52,7 +52,6 @@ import static org.apache.commons.lang.StringUtils.stripToEmpty;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -184,11 +183,13 @@ public final class GroovyScriptExporterTools {
                 sopts.put("workflow", "\"" + type.getWorkflow().getName() + "\"");
             }
             if (type.isDerived()) { // take out of !defaultsOnly option?
-                sopts.put("parentTypeName", "\"" + type.getParent().getName() + "\"");
+                // if clause necessary since rev. #2162 (all types derived from ROOT)
+                if(!FxType.ROOT.equals(type.getParent().getName()))
+                    sopts.put("parentTypeName", "\"" + type.getParent().getName() + "\"");
             }
 
-            // retrieve any type options
-            sopts.putAll(getOptions(type));
+            // FxStructureOptions via the GroovyOptionbuilder
+            script.append(getStructureOptions(type, tabCount));
 
             // append options to script
             for (String option : sopts.keySet()) {
@@ -338,8 +339,8 @@ public final class GroovyScriptExporterTools {
                 sopts.put("referencedList", refList + "");
             }
 
-            // FxStructureOptions
-            sopts.putAll(getStructureOptions(prop));
+            // FxStructureOptions via the GroovyOptionbuilder
+            script.append(getStructureOptions(prop, tabCount));
 
             // DEFAULT VALUES
             if (prop.isDefaultValueSet()) {
@@ -604,9 +605,9 @@ public final class GroovyScriptExporterTools {
                     sopts.put("multiline", pa.isMultiLine() + "");
             }
 
-            // structure options
+            // FxStructureOptions via the GroovyOptionbuilder
             if (differences.contains("structureoptions"))
-                sopts.putAll(getStructureOptions(pa));
+                script.append(getStructureOptions(pa, tabCount));
 
             if (differences.contains("searchable")) {
                 if (prop.mayOverrideSearchable())
@@ -854,8 +855,8 @@ public final class GroovyScriptExporterTools {
                     sopts.put("multiplicity", "new FxMultiplicity(" + group.getMultiplicity().getMin() + "," + group.getMultiplicity().getMax() + ")");
                     sopts.put("groupMode", "GroupMode." + ga.getMode().name());
 
-                    // remaining structure options
-                    sopts.putAll(getStructureOptions(group));
+                    // FxStructureOptions via the GroovyOptionbuilder
+                    script.append(getStructureOptions(group, tabCount));
 
                     // append options to script
                     for (String option : sopts.keySet()) {
@@ -964,9 +965,9 @@ public final class GroovyScriptExporterTools {
             if (differences.contains("enabled"))
                 sopts.put("enabled", ga.isEnabled() + "");
 
-            // Structure options
+            // FxStructureOptions via the GroovyOptionbuilder
             if (differences.contains("structureoptions"))
-                sopts.putAll(getStructureOptions(ga));
+                script.append(getStructureOptions(ga, tabCount));
 
             // append options to script
             for (String option : sopts.keySet()) {
@@ -1192,47 +1193,82 @@ public final class GroovyScriptExporterTools {
 
     /**
      * Retrieve all set structure options for an FxType (or FxTypeEdit)
-     * // TODO: add boolean attributes f. options
+     *
      * @param element the FxType
+     * @param tabCount the current tab count as an int
      * @return returns a Map<String, String> containing the FxStructureOption --> Value mappings
      */
-    private static <T extends FxType> Map<String, String> getOptions(T element) {
-        Map<String, String> opts = new HashMap<String, String>();
-        for (FxStructureOption o : element.getOptions()) {
-            if (o.isSet())
-                opts.put("\"" + o.getKey() + "\"", "\"" + o.getValue() + "\"");
-        }
-        return opts;
+    private static <T extends FxType> String getStructureOptions(T element, int tabCount) {
+        return buildOptions(element.getOptions(), tabCount, true);
     }
 
     /**
      * Retrieve all set structure options for an FxStructureElement
-     * // TODO: add boolean attributes f. options
+     *
      * @param element the FxStructureElement (e.g. FxGroup)
+     * @param tabCount the current tab count as an int
      * @return returns a Map<String, String> containing the FxStructureOption --> Value mappings
      */
-    private static <T extends FxStructureElement> Map<String, String> getStructureOptions(T element) {
-        Map<String, String> opts = new HashMap<String, String>();
-        for (FxStructureOption o : element.getOptions()) {
-            if (o.isSet())
-                opts.put("\"" + o.getKey() + "\"", "\"" + o.getValue() + "\"");
-        }
-        return opts;
+    private static <T extends FxStructureElement> String getStructureOptions(T element, int tabCount) {
+        return buildOptions(element.getOptions(), tabCount, false);
     }
 
     /**
      * Retrieve all set structure options for an FxAssignment
      *
-     * @param a the FxAssignment
+     * @param element the FxAssignment
+     * @param tabCount the current tab count as an int
      * @return returns a Map<String, String> containing the FxStructureOption --> Value mappings
      */
-    private static <T extends FxAssignment> Map<String, String> getStructureOptions(T a) {
-        Map<String, String> opts = new HashMap<String, String>();
-        for (FxStructureOption o : a.getOptions()) {
-            if (o.isSet())
-                opts.put("\"" + o.getKey() + "\"", "\"" + o.getValue() + "\"");
+    private static <T extends FxAssignment> String getStructureOptions(T element, int tabCount) {
+        return buildOptions(element.getOptions(), tabCount, false);
+    }
+
+    /**
+     * Generates script code for FxStructureOptions using the com.flexive.shared.scripting.groovy.GroovyOptionBuilder
+     * We have to use Groovy's Eval class (#me(String x) ) for the nested builder
+     *
+     * @param optList the List of FxStructureOptions
+     * @param tabCount code layouting tab count
+     * @param isTypeOption set to true if these are a type's options (getIsInherited --> different ruleset as long as isInherited not properly implemented in the AssignmentEngine)
+     * @return the stuctureOptions GTB option as a String, nothing if the list is empty
+     */
+    private static String buildOptions(List<FxStructureOption> optList, int tabCount, boolean isTypeOption) {
+        if (optList != null && optList.size() > 0) {
+            StringBuilder s = new StringBuilder(500);
+            int size = optList.size();
+
+            s.append(Indent.tabs(tabCount + 1))
+                    .append("new GroovyOptionBuilder().");
+
+            for (int i = 0; i < size; i++) {
+                FxStructureOption current = optList.get(i);
+                if (i == 1)
+                    s.append(" {\n");
+                if(i >= 1)
+                    s.append(Indent.tabs(tabCount + 1));
+
+                s.append("\"")
+                        .append(current.getKey())
+                        .append("\"(value: \"")
+                        .append(current.getValue())
+                        .append("\", overrideable: ")
+                        .append(current.isOverrideable())
+                        .append(", isInherited: ");
+                // for Assignments and SturcutreElements set this to "true" to maintain compatibility for now
+                String isInheritedVal = isTypeOption ? Boolean.toString(current.getIsInherited()) : "true";
+                s.append(isInheritedVal)
+                        .append(")");
+                if(i >= 1 && i != size - 1)
+                    s.append("\n");
+                if (i == size - 1 && size > 1)
+                    s.append(" }");
+            }
+
+            s.trimToSize();
+            return Indent.tabs(tabCount) + "structureOptions: " + "Eval.me(\"\"\"import com.flexive.shared.scripting.groovy.*\n" + s.toString() + "\"\"\"),\n";
         }
-        return opts;
+        return "";
     }
 
     /**

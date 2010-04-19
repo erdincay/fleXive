@@ -119,7 +119,7 @@ public class GroovyOptionBuilder extends BuilderSupport implements Serializable 
             FxStructureOption inOption = (FxStructureOption) o;
             overrideable = (Boolean) getMapValue(map, "overrideable", false, inOption.isOverrideable());
             isInherited = (Boolean) getMapValue(map, "isInherited", false, inOption.getIsInherited());
-            optionList.add(new FxStructureOption(inOption.getKey(), overrideable, true, isInherited, (String)value));;
+            optionList.add(new FxStructureOption(inOption.getKey(), overrideable, true, isInherited, (String)value));
         } else if (o instanceof String) {
             overrideable = (Boolean) getMapValue(map, "overrideable", false, true);
             isInherited = (Boolean) getMapValue(map, "isInherited", false, true);
