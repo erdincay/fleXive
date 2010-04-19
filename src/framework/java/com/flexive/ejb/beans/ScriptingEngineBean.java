@@ -1200,7 +1200,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         }
         if (ret == null)
             ret = new ArrayList<String[]>(2);
-        ret.add(0, new String[]{"groovy", "groovy: Groovy v" + FxSharedUtils.getBundledGroovyVersion() + " (Bundled GroovyShell v" + FxSharedUtils.getBundledGroovyVersion() + ")"});
+        // Add gy extension f. Groovy
         ret.add(0, new String[]{"gy", "gy: Groovy v" + FxSharedUtils.getBundledGroovyVersion() + " (Bundled GroovyShell v" + FxSharedUtils.getBundledGroovyVersion() + ")"});
         return ret;
     }

@@ -42,6 +42,7 @@ import com.flexive.shared.value.FxValue;
 import com.flexive.shared.workflow.Step;
 import com.flexive.shared.workflow.StepDefinition;
 import com.google.common.collect.Lists;
+import groovy.lang.GroovySystem;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -145,7 +146,7 @@ public final class FxSharedUtils {
             fxBuildDate = bundle.getString("flexive.builddate");
             fxBuildUser = bundle.getString("flexive.builduser");
             fxHeader = bundle.getString("flexive.header");
-            bundledGroovyVersion = bundle.getString("flexive.bundledGroovyVersion");
+            bundledGroovyVersion = GroovySystem.getVersion();
             final String languagesValue = bundle.getString("flexive.translatedLocales");
             if (StringUtils.isNotBlank(languagesValue)) {
                 final String[] languages = StringUtils.split(languagesValue, ",");
