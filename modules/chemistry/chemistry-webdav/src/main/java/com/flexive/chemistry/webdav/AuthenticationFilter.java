@@ -37,6 +37,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.commons.logging.Log;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 /**
  * Milton filter that authenticates the user before the resources are resolved and provides the
@@ -65,7 +66,10 @@ public class AuthenticationFilter implements Filter {
             if (factory.requireAuthentication()) {
                 // send unauthorized response status, force user authentication
                 response.setStatus(Response.Status.SC_UNAUTHORIZED);
-                response.setAuthenticateHeader(ObjectResource.SECURITY_REALM);
+                // TODO: authentication configuration
+                response.setAuthenticateHeader(Arrays.asList(
+                        "basic realm=\"" + ObjectResource.SECURITY_REALM + "\""
+                ));
 
                 // send some content, KDE's Dolphin thinks the resource doesn't exist otherwise
                 // TODO: check if this problem persists with Milton's handling of unauthorized responses

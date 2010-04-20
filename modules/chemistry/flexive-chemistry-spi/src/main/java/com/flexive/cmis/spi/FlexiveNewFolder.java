@@ -38,6 +38,7 @@ import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.tree.FxTreeMode;
 import com.flexive.shared.tree.FxTreeNodeEdit;
 import com.flexive.shared.tree.FxTreeNode;
+import org.apache.chemistry.Folder;
 import org.apache.chemistry.Type;
 
 /**
@@ -163,6 +164,16 @@ public class FlexiveNewFolder extends FlexiveFolder {
         } else {
             super.save();
         }
+        if (parent != null) {
+            parent.refreshNode();
+        }
+    }
+
+    @Override
+    public void move(Folder targetFolder, Folder sourceFolder) {
+        super.move(targetFolder, sourceFolder);
+        // apply change on our node
+        node.setParentNodeId(SPIUtils.getNodeId(targetFolder.getId()));
     }
 
     private boolean isNew() {

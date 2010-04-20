@@ -58,8 +58,8 @@ public class FlexiveResourceFactory extends ChemistryResourceFactory {
     public Connection createConnection(Request request, Auth auth) throws LoginException {
         final Map<String, Serializable> params = new HashMap<String, Serializable>();
         if (auth != null) {
-            params.put(FlexiveConnection.PARAM_USERNAME, auth.user);
-            params.put(FlexiveConnection.PARAM_PASSWORD, auth.password);
+            params.put(FlexiveConnection.PARAM_USERNAME, auth.getUser());
+            params.put(FlexiveConnection.PARAM_PASSWORD, auth.getPassword());
         }
         
         // browse into documents that have children, even if their document type

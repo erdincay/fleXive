@@ -135,6 +135,13 @@ public class FlexiveFolder extends FlexiveObjectEntry implements Folder {
         return _cachedNode;
     }
 
+    /**
+     * Indicate that the node should be refreshed for the next operation.
+     */
+    protected void refreshNode() {
+        _cachedNode = null;
+    }
+
     protected FxTreeMode getTreeMode() {
         return treeMode;
     }
@@ -382,6 +389,11 @@ public class FlexiveFolder extends FlexiveObjectEntry implements Folder {
 
             // perform move
             getTreeEngine().move(getTreeMode(), getNodeId(), SPIUtils.getNodeId(targetFolder.getId()), -1);
+
+            // perform update
+            if (_cachedNode != null) {
+                _cachedNode.setParentNodeId(SPIUtils.getNodeId(targetFolder.getId()));
+            }
         } catch (FxApplicationException e) {
             throw e.asRuntimeException();
         }

@@ -94,9 +94,7 @@ public class FolderResource extends ObjectResource<Folder>
                 return resourceFactory.createResource(path + object.getName(), child);
             }
         }
-        throw new IllegalArgumentException(
-                "No child with name '" + childName + "' found in folder '" + getName() + "'"
-        );
+        return null;
     }
 
     /**

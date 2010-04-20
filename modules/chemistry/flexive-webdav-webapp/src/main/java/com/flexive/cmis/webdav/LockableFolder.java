@@ -34,6 +34,7 @@ package com.flexive.cmis.webdav;
 import com.flexive.chemistry.webdav.FolderResource;
 import com.flexive.chemistry.webdav.ChemistryResourceFactory;
 import com.bradmcevoy.http.*;
+import com.bradmcevoy.http.exceptions.NotAuthorizedException;
 import com.flexive.shared.CacheAdmin;
 import java.util.List;
 import org.apache.chemistry.Folder;
@@ -78,6 +79,8 @@ public class LockableFolder extends FolderResource implements LockableResource, 
                 throw new IllegalArgumentException("Cannot lock resource of class " + resource.getClass().getCanonicalName());
             }
         } catch (IOException e) {
+            throw new IllegalArgumentException(e);
+        } catch (NotAuthorizedException e) {
             throw new IllegalArgumentException(e);
         }
     }
