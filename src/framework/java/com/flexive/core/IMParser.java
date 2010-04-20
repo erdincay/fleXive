@@ -33,6 +33,7 @@ package com.flexive.core;
 
 import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.exceptions.FxApplicationException;
+import org.apache.commons.lang.StringUtils;
 
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -112,6 +113,19 @@ public class IMParser {
 
 
     /**
+     * Remove invalid characters from an xml element
+     *
+     * @param element element to clean
+     * @return cleaned element
+     * @since 3.1.1
+     */
+    private static String cleanElement(String element) {
+        if (StringUtils.isBlank(element))
+            return "empty-element";
+        return element.trim().replaceAll("[ :]", "-").replaceAll("\\[.*\\]", "");
+    }
+
+    /**
      * Parse an identify stdOut result (from in) and convert it to an XML content
      *
      * @param in identify response
@@ -131,7 +145,12 @@ public class IMParser {
         String[] entry;
         try {
             while ((curr = br.readLine()) != null) {
+                if( curr.indexOf(':') == -1 || curr.trim().length() == 0) {
+                    System.out.println("skipping: ["+curr+"]");
+                    continue; //ignore lines without ':'
+                }
                 level = getLevel(curr);
+                curr = curr.trim();
                 if (level == 0 && curr.startsWith("Image:")) {
                     writer.writeStartElement("Image");
                     entry = curr.split(": ");
@@ -147,11 +166,11 @@ public class IMParser {
                 } else
                     level = lastNonValueLevel + 1;
                 if (curr.endsWith(":")) {
-                    writer.writeStartElement(curr.substring(0, curr.lastIndexOf(':')).trim().replaceAll("[ :]", "-").replaceAll("\\[.*\\]",""));
+                    writer.writeStartElement(cleanElement(curr.substring(0, curr.lastIndexOf(':'))));
                     lastLevel = level + 1;
                     continue;
                 } else if (pColormap.matcher(curr).matches()) {
-                    writer.writeStartElement(curr.substring(0, curr.lastIndexOf(':')).trim().replaceAll("[ :]", "-").replaceAll("\\[.*\\]",""));
+                    writer.writeStartElement(cleanElement(curr.substring(0, curr.lastIndexOf(':'))));
                     writer.writeAttribute("colors", curr.split(": ")[1].trim());
                     lastLevel = level + 1;
                     continue;
@@ -159,12 +178,12 @@ public class IMParser {
                 entry = curr.split(": ");
                 if (entry.length == 2) {
                     if (!valueEntry) {
-                        writer.writeStartElement(entry[0].trim().replaceAll("[ :]", "-").replaceAll("\\[.*\\]",""));
+                        writer.writeStartElement(cleanElement(entry[0]));
                         writer.writeCharacters(entry[1]);
                         writer.writeEndElement();
                     } else {
                         writer.writeEmptyElement("value");
-                        writer.writeAttribute("key", entry[0].trim().replaceAll("[ :]", "-").replaceAll("\\[.*\\]",""));
+                        writer.writeAttribute("key", cleanElement(entry[0]));
                         writer.writeAttribute("data", entry[1]);
 //                        writer.writeEndElement();
                     }

@@ -380,6 +380,18 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         return true;
     }
 
+    /**
+     * Set a big(long) string value, implementations may differ by used database
+     *
+     * @param ps   the prepared statement to operate on
+     * @param pos  argument position
+     * @param data the big string to set
+     * @throws SQLException on errors
+     */
+    protected void setBigString(PreparedStatement ps, int pos, String data) throws SQLException {
+        //default implementation using PreparedStatement#setString
+        ps.setString(pos, data);
+    }
 
     /**
      * {@inheritDoc}
@@ -1161,13 +1173,13 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                                 extractorInput,
                                 true
                         );
-                        ps.setString(pos[2], result.getText());
-                        ps.setString(pos[0], (String) translatedValue);
+                        setBigString(ps, pos[2], result.getText());
+                        setBigString(ps, pos[0], (String) translatedValue);
                         break;
                     case String1024:
                     case Text:
                         checkDataType(FxString.class, value, data.getXPathFull());
-                        ps.setString(pos[0], (String) translatedValue);
+                        setBigString(ps, pos[0], (String) translatedValue);
                         break;
                     case Boolean:
                         checkDataType(FxBoolean.class, value, data.getXPathFull());
@@ -1348,7 +1360,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      * @return tidied string
      * @throws FxUpdateException if tidy failed
      */
-    private static String doTidy(String XPath, String content) throws FxUpdateException {
+    protected static String doTidy(String XPath, String content) throws FxUpdateException {
         Tidy tidy = new Tidy();
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         tidy.setDropEmptyParas(true);

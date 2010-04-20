@@ -32,6 +32,7 @@
 package com.flexive.ejb.beans.configuration;
 
 import com.flexive.core.Database;
+import com.flexive.core.storage.StorageManager;
 import com.flexive.shared.configuration.Parameter;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxLoadException;
@@ -152,7 +153,7 @@ public abstract class CustomDomainConfigurationImpl<T extends Serializable> exte
         }
         final String sql = "UPDATE " + tableName + " SET cvalue=?, className=? WHERE " + idColumn + "=? AND cpath=? AND ckey=?";
         final PreparedStatement stmt = conn.prepareStatement(sql);
-        stmt.setString(1, value);
+        StorageManager.setBigString(stmt, 1, value);
         stmt.setString(2, className);
         setDomain(stmt, 3);
         stmt.setString(4, path);
@@ -170,7 +171,7 @@ public abstract class CustomDomainConfigurationImpl<T extends Serializable> exte
         setDomain(stmt, 1);
         stmt.setString(2, path);
         stmt.setString(3, key);
-        stmt.setString(4, value);
+        StorageManager.setBigString(stmt, 4, value);
         stmt.setString(5, className);
         return stmt;
     }

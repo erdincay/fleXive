@@ -215,7 +215,7 @@ public class GlobalConfigurationEngineBean extends GenericConfigurationImpl impl
         // TODO: support className/getAll() in global configuration?
         String sql = "UPDATE " + getConfigurationTable(conn) + " SET cvalue=? WHERE cpath=? AND ckey=?";
         PreparedStatement stmt = conn.prepareStatement(sql);
-        stmt.setString(1, value);
+        StorageManager.setBigString(stmt, 1, value);
         stmt.setString(2, path);
         stmt.setString(3, key);
         return stmt;
@@ -235,7 +235,7 @@ public class GlobalConfigurationEngineBean extends GenericConfigurationImpl impl
         PreparedStatement stmt = conn.prepareStatement(sql);
         stmt.setString(1, path);
         stmt.setString(2, key);
-        stmt.setString(3, value);
+        StorageManager.setBigString(stmt, 3, value);
         return stmt;
     }
 

@@ -127,6 +127,19 @@ public class GenericBinarySQLStorage implements BinaryStorage {
         return true;
     }
 
+    /**
+     * Set a big(long) string value, implementations may differ by used database
+     *
+     * @param ps   the prepared statement to operate on
+     * @param pos  argument position
+     * @param data the big string to set
+     * @throws SQLException on errors
+     */
+    protected void setBigString(PreparedStatement ps, int pos, String data) throws SQLException {
+        //default implementation using PreparedStatement#setString
+        ps.setString(pos, data);
+    }
+
 
     /**
      * {@inheritDoc}
@@ -527,7 +540,7 @@ public class GenericBinarySQLStorage implements BinaryStorage {
             int cnt = copyBlob ? 4 : 5;
             ps.setString(cnt++, created.getName());
             ps.setLong(cnt++, created.getSize());
-            ps.setString(cnt++, created.getMetadata());
+            setBigString(ps, cnt++, created.getMetadata());
             ps.setString(cnt++, created.getMimeType());
             ps.setBoolean(cnt++, created.isImage());
             ps.setDouble(cnt++, created.getResolution());

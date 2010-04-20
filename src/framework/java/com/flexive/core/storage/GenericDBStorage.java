@@ -44,6 +44,8 @@ import org.apache.commons.logging.LogFactory;
 
 import java.io.OutputStream;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
@@ -156,6 +158,14 @@ public abstract class GenericDBStorage implements DBStorage {
                 (live ? "\nUNION\n(SELECT MAX(modified_at) FROM " + DatabaseConst.TBL_TREE + "_LIVE)\n" : "") +
                 "\nUNION\n(SELECT MAX(modified_at) FROM " + DatabaseConst.TBL_TREE + ")\n" +
                 ") changes";
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public void setBigString(PreparedStatement ps, int pos, String data) throws SQLException {
+        //default implementation using PreparedStatement#setString
+        ps.setString(pos, data);
     }
 
     /**

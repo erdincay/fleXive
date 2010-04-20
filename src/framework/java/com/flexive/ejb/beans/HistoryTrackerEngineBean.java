@@ -119,7 +119,7 @@ public class HistoryTrackerEngineBean implements HistoryTrackerEngine, HistoryTr
 
             ps.setLong(3, System.currentTimeMillis());
             ps.setString(4, key);
-            ps.setString(5, StringUtils.join(args, '|'));
+            StorageManager.setBigString(ps, 5, StringUtils.join(args, '|'));
             try {
                 ps.setString(6, FxSharedUtils.getLocalizedMessage("History", FxLanguage.ENGLISH, "en", key, args));
             } catch (Exception e) {
@@ -144,7 +144,7 @@ public class HistoryTrackerEngineBean implements HistoryTrackerEngine, HistoryTr
                 ps.setNull(13, java.sql.Types.NUMERIC);
             }
             if (data != null)
-                ps.setString(14, data);
+                StorageManager.setBigString(ps, 14, data);
             else
                 ps.setNull(14, java.sql.Types.VARCHAR);
             ps.executeUpdate();

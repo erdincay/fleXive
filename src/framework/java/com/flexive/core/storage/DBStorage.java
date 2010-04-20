@@ -47,6 +47,7 @@ import com.flexive.shared.structure.TypeStorageMode;
 import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.zip.ZipFile;
@@ -283,6 +284,18 @@ public interface DBStorage {
      * @return statement to get the last content change timestamp
      */
     String getLastContentChangeStatement(boolean live);
+
+    /**
+     * Set a big(long) string value, implementations may differ by used database.
+     * Default implementation used PreparedStatement#setString
+     *
+     * @param ps   the prepared statement to operate on
+     * @param pos  argument position
+     * @param data the big string to set
+     * @throws SQLException on errors
+     * @since 3.1.1
+     */
+    void setBigString(PreparedStatement ps, int pos, String data) throws SQLException;
 
     /**
      * Format a date to be used in a query condition (properly escaped)

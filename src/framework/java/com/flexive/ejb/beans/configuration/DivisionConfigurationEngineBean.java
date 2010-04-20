@@ -112,7 +112,7 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
         PreparedStatement stmt = conn.prepareStatement(sql);
         stmt.setString(1, path);
         stmt.setString(2, key);
-        stmt.setString(3, value);
+        StorageManager.setBigString(stmt, 3, value);
         stmt.setString(4, className);
         return stmt;
     }
@@ -160,7 +160,7 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
         }
         final String sql = "UPDATE " + TBL_CONFIG_DIVISION + " SET cvalue=?, className=? WHERE cpath=? AND ckey=?";
         PreparedStatement stmt = conn.prepareStatement(sql);
-        stmt.setString(1, value);
+        StorageManager.setBigString(stmt, 1, value);
         stmt.setString(2, className);
         stmt.setString(3, path);
         stmt.setString(4, key);

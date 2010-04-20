@@ -153,6 +153,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
          * @return last script evaluation result
          * @throws FxApplicationException on errors
          */
+        @SuppressWarnings({"ThrowableInstanceNeverThrown"})
         static FxScriptResult internal_runScript(String name, FxScriptBinding binding, String code) throws FxApplicationException {
             if (name == null)
                 name = "unknown";
@@ -297,7 +298,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
             ps = con.prepareStatement(sql);
             ps.setString(1, name);
             ps.setString(2, description);
-            ps.setString(3, code);
+            StorageManager.setBigString(ps, 3, code);
             ps.setLong(4, event.getId());
             ps.setBoolean(5, active);
             ps.setLong(6, scriptId);
@@ -317,6 +318,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
     /**
      * {@inheritDoc}
      */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void updateScriptInfo(FxScriptInfoEdit script) throws FxApplicationException {
         updateScriptInfo(script.getId(), script.getEvent(), script.getName(), script.getDescription(), script.getCode(), script.isActive());
     }
@@ -413,7 +415,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
             ps.setLong(1, si.getId());
             ps.setString(2, si.getName());
             ps.setString(3, si.getDescription());
-            ps.setString(4, code);
+            StorageManager.setBigString(ps, 4, code);
             ps.setLong(5, si.getEvent().getId());
             ps.setBoolean(6, si.isActive());
             ps.executeUpdate();

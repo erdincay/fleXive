@@ -49,6 +49,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
@@ -239,6 +240,20 @@ public class StorageManager {
      */
     public static String getBooleanFalseExpression() {
         return getStorageImpl().getBooleanFalseExpression();
+    }
+
+    /**
+     * Set a big(long) string value, implementations may differ by used database.
+     * Default implementation used PreparedStatement#setString
+     *
+     * @param ps   the prepared statement to operate on
+     * @param pos  argument position
+     * @param data the big string to set
+     * @throws SQLException on errors
+     * @since 3.1.1
+     */
+    public static void setBigString(PreparedStatement ps, int pos, String data) throws SQLException {
+        getStorageImpl().setBigString(ps, pos, data);
     }
 
     /**
