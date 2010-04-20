@@ -113,7 +113,7 @@
                         <th class="tblHeader" field="overridable" dataType="html" align="left">
                             #{fxMessageBean['TypeEditor.table.overridable']}
                         </th>
-                        <th class="tblHeader" field="overridable" dataType="html" align="left">
+                        <th class="tblHeader" field="isInherited" dataType="html" align="left">
                             #{fxMessageBean['TypeEditor.table.isInherited']}
                         </th>
                         <ui:fragment rendered="#{typeEditorBean.editMode}">
@@ -134,40 +134,32 @@
                                     <h:inputText value="#{option.value}" style="color:green" disabled="#{not typeEditorBean.editMode}"/>
                                 </td>
                                 <td align="left">
-                                    <h:selectBooleanCheckbox value="#{option.overridable}" onchange="submit();" style="color:green"
-                                                             disabled="#{not typeEditorBean.editMode or (typeEditorBean.editMode and option.isInherited)}"/>
+                                    <h:selectBooleanCheckbox value="#{option.overridable}" style="color:green" disabled="#{not typeEditorBean.editMode}"/>
                                 </td>
                                 <td align="left">
-                                    <h:selectBooleanCheckbox value="#{option.isInherited}" onchange="submit();" style="color:green"
-                                                             disabled="#{not typeEditorBean.editMode}"/>
+                                    <h:selectBooleanCheckbox value="#{option.isInherited}" style="color:green" disabled="#{not typeEditorBean.editMode}"/>
                                 </td>
                             </h:panelGroup>
                             <h:panelGroup rendered="#{not typeEditorBean.optionWrapper.isTypeOptionValidMap[option.key]}">
                                 <td align="left">
-                                    <h:inputText value="#{option.key}" style="color:red"
-                                                              disabled="#{not typeEditorBean.editMode}"/>
+                                    <h:inputText value="#{option.key}" style="color:red" disabled="#{not typeEditorBean.editMode}"/>
                                 </td>
                                 <td align="left">
                                     <h:inputText value="#{option.value}" style="color:red" disabled="#{not typeEditorBean.editMode}"/>
                                 </td>
                                 <td align="left">
-                                    <h:selectBooleanCheckbox value="#{option.overridable}" onchange="submit();" style="color:red"
-                                                             disabled="#{not typeEditorBean.editMode or (typeEditorBean.editMode and option.isInherited)}"/>
+                                    <h:selectBooleanCheckbox value="#{option.overridable}" style="color:red" disabled="#{not typeEditorBean.editMode}"/>
                                 </td>
                                 <td align="left">
-                                    <h:selectBooleanCheckbox value="#{option.isInherited}" onchange="submit();" style="color:red"
-                                                             disabled="#{not typeEditorBean.editMode}"/>
+                                    <h:selectBooleanCheckbox value="#{option.isInherited}" style="color:red" disabled="#{not typeEditorBean.editMode}"/>
                                 </td>
                             </h:panelGroup>
                             <ui:fragment rendered="#{typeEditorBean.editMode}">
                                 <td align="left">
                                     <adm:commandButton labelKey="TypeEditor.table.button.delete" location="content"
-                                                       icon="delete" action="deleteTypeOption"
-                                                       bean="#{typeEditorBean}"
-                                                       id="deleteOptionButton_#{option.id}"
-                                                       confirmKey="TypeEditor.message.deleteOption">
-                                        <f:setPropertyActionListener target="#{typeEditorBean.optionFiler}"
-                                                                     value="#{option}"/>
+                                                       icon="delete" action="deleteTypeOption" bean="#{typeEditorBean}"
+                                                       id="deleteOptionButton_#{option.id}" confirmKey="TypeEditor.message.deleteOption">
+                                        <f:setPropertyActionListener target="#{typeEditorBean.optionFiler}" value="#{option}"/>
                                     </adm:commandButton>
                                 </td>
                             </ui:fragment>
