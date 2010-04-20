@@ -348,12 +348,18 @@ public class ScriptingTest {
         List<String[]> scriptingEngines = se.getAvailableScriptEngines();
         assertTrue(scriptingEngines.size() >= 1);
         // check Groovy is present (with a max count of 2)
+        // outcome dependent on java version running
         int count = 0;
         for (String[] s : scriptingEngines) {
             if (s[0].equals("groovy") || s[0].equals("gy"))
                 count++;
         }
-        assertEquals(count, 2);
+        String currentJavaVersion = System.getProperty("java.version");
+        // temp. fix: with 1.6 the groovy scripting engine is part of the JDK
+        if(currentJavaVersion.startsWith("1.6"))
+            assertEquals(count, 2);
+        else if(currentJavaVersion.startsWith("1.5"))
+            assertEquals(count, 1);
 
         // runonce scripts
         List<FxScriptRunInfo> runOnce = se.getRunOnceInformation();
