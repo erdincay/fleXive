@@ -1199,7 +1199,7 @@ public final class GroovyScriptExporterTools {
      * @return returns a Map<String, String> containing the FxStructureOption --> Value mappings
      */
     private static <T extends FxType> String getStructureOptions(T element, int tabCount) {
-        return buildOptions(element.getOptions(), tabCount, true);
+        return buildOptions(element.getOptions(), tabCount, false);
     }
 
     /**
@@ -1210,7 +1210,8 @@ public final class GroovyScriptExporterTools {
      * @return returns a Map<String, String> containing the FxStructureOption --> Value mappings
      */
     private static <T extends FxStructureElement> String getStructureOptions(T element, int tabCount) {
-        return buildOptions(element.getOptions(), tabCount, false);
+        // Properties and and groups (base) will always have isInherited = true for any of their options
+        return buildOptions(element.getOptions(), tabCount, true);
     }
 
     /**
@@ -1230,10 +1231,10 @@ public final class GroovyScriptExporterTools {
      *
      * @param optList the List of FxStructureOptions
      * @param tabCount code layouting tab count
-     * @param isTypeOption set to true if these are a type's options (getIsInherited --> different ruleset as long as isInherited not properly implemented in the AssignmentEngine)
+     * @param inheritedAlwaysTrue set to true if these are a type's options (getIsInherited --> different ruleset as long as isInherited not properly implemented in the AssignmentEngine)
      * @return the stuctureOptions GTB option as a String, nothing if the list is empty
      */
-    private static String buildOptions(List<FxStructureOption> optList, int tabCount, boolean isTypeOption) {
+    private static String buildOptions(List<FxStructureOption> optList, int tabCount, boolean inheritedAlwaysTrue) {
         if (optList != null && optList.size() > 0) {
             StringBuilder s = new StringBuilder(500);
             int size = optList.size();
@@ -1255,8 +1256,10 @@ public final class GroovyScriptExporterTools {
                         .append("\", overrideable: ")
                         .append(current.isOverrideable())
                         .append(", isInherited: ");
-                // for Assignments and SturcutreElements set this to "true" to maintain compatibility for now
-                String isInheritedVal = isTypeOption ? Boolean.toString(current.getIsInherited()) : "true";
+                
+                // option isInherited option
+                String isInheritedVal = inheritedAlwaysTrue ?  "true" : Boolean.toString(current.getIsInherited());
+
                 s.append(isInheritedVal)
                         .append(")");
                 if(i >= 1 && i != size - 1)
