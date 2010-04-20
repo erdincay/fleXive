@@ -70,6 +70,40 @@ public class FxScriptInfoEdit extends FxScriptInfo {
     }
 
     /**
+     * Implementation detail: cached groovy scripts cannot be run concurrently, but
+     * are only compiled once. Groovy scripts that are not cached are compiled every
+     * time before execution (cached = false is suitable for long running groovy scripts
+     * that are likely to be executed concurrently).
+     *
+     * @param cached if a script should be cached
+     * @since 3.1.1
+     *
+     */
+    public void setCached(boolean cached) {
+        this.cached = cached;
+    }
+
+    /**
+     * Constructor
+     *
+     * @param id          script id
+     * @param event       script type
+     * @param name        (unique) name of the script
+     * @param description description
+     * @param code        the script code
+     * @param active      if the script is active
+     * @param cached      if the script is cached
+     *
+     * @throws FxInvalidParameterException on errors
+     * @see FxScriptEvent
+     * @since 3.1.1
+     */
+    public FxScriptInfoEdit(long id, FxScriptEvent event, String name, String description, String code, boolean active, boolean cached) throws FxInvalidParameterException {
+        super(id, event, name, description, active, cached);
+        this.code = code;
+    }
+
+     /**
      * Constructor
      *
      * @param id          script id
@@ -80,7 +114,9 @@ public class FxScriptInfoEdit extends FxScriptInfo {
      * @param active      if the script is active
      * @throws FxInvalidParameterException on errors
      * @see FxScriptEvent
+     * @deprecated use {@link #FxScriptInfoEdit(long, FxScriptEvent, String, String, String, boolean, boolean)} instead
      */
+    @Deprecated
     public FxScriptInfoEdit(long id, FxScriptEvent event, String name, String description, String code, boolean active) throws FxInvalidParameterException {
         super(id, event, name, description, active);
         this.code = code;
@@ -99,5 +135,6 @@ public class FxScriptInfoEdit extends FxScriptInfo {
         this.description = si.description;
         this.code = si.getId() != 0 ? EJBLookup.getScriptingEngine().loadScriptCode(si.getId()) : "";
         this.active = si.active;
+        this.cached = si.cached;
     }
 }

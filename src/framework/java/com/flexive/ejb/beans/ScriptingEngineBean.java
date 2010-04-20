@@ -132,7 +132,8 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
                 } catch (Throwable t) {
                     throw new FxInvalidParameterException(si.getName(), "ex.general.scripting.exception", si.getName(), t.getMessage());
                 }
-                LocalScriptingCache.groovyScriptCache.putIfAbsent(scriptId, script);
+                if (si.isCached())
+                    LocalScriptingCache.groovyScriptCache.putIfAbsent(scriptId, script);
             }
             return null;
         }
@@ -258,14 +259,14 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         try {
             // Obtain a database connection
             con = Database.getDbConnection();
-            //            1     2     3     4    5
-            sql = "SELECT ID, SNAME,SDESC,STYPE,ACTIVE FROM " + TBL_SCRIPTS + " ORDER BY ID";
+            //            1     2     3     4    5         6
+            sql = "SELECT ID, SNAME,SDESC,STYPE,ACTIVE, IS_CACHED FROM " + TBL_SCRIPTS + " ORDER BY ID";
             ps = con.prepareStatement(sql);
             ResultSet rs = ps.executeQuery();
 
             while (rs != null && rs.next()) {
                 slist.add(new FxScriptInfo(rs.getInt(1), FxScriptEvent.getById(rs.getLong(4)), rs.getString(2),
-                        rs.getString(3), rs.getBoolean(5)));
+                        rs.getString(3), rs.getBoolean(5), rs.getBoolean(6)));
             }
 
         } catch (SQLException exc) {
@@ -277,35 +278,49 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         return slist;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    @Deprecated
+    public void updateScriptInfo(long scriptId, FxScriptEvent event, String name, String description, String code, boolean active) throws FxApplicationException {
+        FxScriptInfo si = CacheAdmin.getEnvironment().getScript(scriptId);
+        updateScriptInfo(new FxScriptInfoEdit(scriptId, event, name, description, code, active, si.isCached()));
+    }
 
     /**
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void updateScriptInfo(long scriptId, FxScriptEvent event, String name, String description, String code, boolean active) throws FxApplicationException {
+    public void updateScriptInfo(FxScriptInfoEdit script) throws FxApplicationException {
         FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.ScriptManagement);
         Connection con = null;
         PreparedStatement ps = null;
         String sql;
         boolean success = false;
         try {
-            if (code == null)
-                code = "";
+            String code ="";
+            if (script.getCode() != null)
+                code = script.getCode();
             // Obtain a database connection
             con = Database.getDbConnection();
-            //                                          1       2       3       4    5            6
-            sql = "UPDATE " + TBL_SCRIPTS + " SET SNAME=?,SDESC=?,SDATA=?,STYPE=?,ACTIVE=? WHERE ID=?";
+            //                                          1       2       3       4    5         6              7
+            sql = "UPDATE " + TBL_SCRIPTS + " SET SNAME=?,SDESC=?,SDATA=?,STYPE=?,ACTIVE=?,IS_CACHED=? WHERE ID=?";
             ps = con.prepareStatement(sql);
-            ps.setString(1, name);
-            ps.setString(2, description);
+            ps.setString(1, script.getName());
+            ps.setString(2, script.getDescription());
             StorageManager.setBigString(ps, 3, code);
-            ps.setLong(4, event.getId());
-            ps.setBoolean(5, active);
-            ps.setLong(6, scriptId);
+            ps.setLong(4, script.getEvent().getId());
+            ps.setBoolean(5, script.isActive());
+            ps.setBoolean(6, script.isCached());
+            ps.setLong(7, script.getId());
             ps.executeUpdate();
+            // remove script from cache if necessary
+            if (FxSharedUtils.isGroovyScript(script.getName()) && !script.isCached())
+                LocalScriptingCache.groovyScriptCache.remove(script.getId());
             success = true;
         } catch (SQLException exc) {
-            throw new FxUpdateException(LOG, exc, "ex.scripting.update.failed", name, exc.getMessage());
+            throw new FxUpdateException(LOG, exc, "ex.scripting.update.failed", script.getName(), exc.getMessage());
         } finally {
             Database.closeObjects(ScriptingEngineBean.class, con, ps);
             if (!success)
@@ -315,14 +330,6 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public void updateScriptInfo(FxScriptInfoEdit script) throws FxApplicationException {
-        updateScriptInfo(script.getId(), script.getEvent(), script.getName(), script.getDescription(), script.getCode(), script.isActive());
-    }
-
 
     /**
      * {@inheritDoc}
@@ -330,7 +337,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
     public void updateScriptCode(long scriptId, String code) throws FxApplicationException {
         FxScriptInfo si = CacheAdmin.getEnvironment().getScript(scriptId);
-        updateScriptInfo(si.getId(), si.getEvent(), si.getName(), si.getDescription(), code, si.isActive());
+        updateScriptInfo(new FxScriptInfoEdit(si.getId(), si.getEvent(), si.getName(), si.getDescription(), code, si.isActive(), si.isCached()));
     }
 
     /**
@@ -392,11 +399,11 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         }
     }
 
-    /**
+     /**
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public FxScriptInfo createScript(FxScriptEvent event, String name, String description, String code) throws FxApplicationException {
+    public FxScriptInfo createScript(FxScriptInfoEdit scriptInfo) throws FxApplicationException {
         FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.ScriptManagement);
         FxScriptInfo si;
         Connection con = null;
@@ -404,13 +411,15 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         String sql;
         boolean success = false;
         try {
-            si = new FxScriptInfo(seq.getId(FxSystemSequencer.SCRIPTS), event, name, description, true);
-            if (code == null)
-                code = "";
+            // for groovy scripts set cached flag to true
+            si = new FxScriptInfo(seq.getId(FxSystemSequencer.SCRIPTS), scriptInfo.getEvent(), scriptInfo.getName(),
+                    scriptInfo.getDescription(), scriptInfo.isActive(), scriptInfo.isCached());
+            String code = scriptInfo.getCode() == null ? "" : scriptInfo.getCode();
+
             // Obtain a database connection
             con = Database.getDbConnection();
-            //                                      1  2     3     4     5       6
-            sql = "INSERT INTO " + TBL_SCRIPTS + " (ID,SNAME,SDESC,SDATA,STYPE,ACTIVE) VALUES (?,?,?,?,?,?)";
+            //                                      1  2     3     4     5       6        7
+            sql = "INSERT INTO " + TBL_SCRIPTS + " (ID,SNAME,SDESC,SDATA,STYPE,ACTIVE,IS_CACHED) VALUES (?,?,?,?,?,?,?)";
             ps = con.prepareStatement(sql);
             ps.setLong(1, si.getId());
             ps.setString(2, si.getName());
@@ -418,12 +427,13 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
             StorageManager.setBigString(ps, 4, code);
             ps.setLong(5, si.getEvent().getId());
             ps.setBoolean(6, si.isActive());
+            ps.setBoolean(7, si.isCached());
             ps.executeUpdate();
             success = true;
         } catch (SQLException exc) {
             if (StorageManager.isUniqueConstraintViolation(exc))
-                throw new FxEntryExistsException("ex.scripting.name.notUnique", name);
-            throw new FxCreateException(LOG, exc, "ex.scripting.create.failed", name, exc.getMessage());
+                throw new FxEntryExistsException("ex.scripting.name.notUnique", scriptInfo.getName());
+            throw new FxCreateException(LOG, exc, "ex.scripting.create.failed", scriptInfo.getName(), exc.getMessage());
         } finally {
             Database.closeObjects(ScriptingEngineBean.class, con, ps);
             if (!success)
@@ -438,19 +448,41 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public FxScriptInfo createScriptFromLibrary(FxScriptEvent event, String libraryname, String name, String description) throws FxApplicationException {
-        FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.ScriptManagement);
-        String code = FxSharedUtils.loadFromInputStream(FxSharedUtils.getResourceStream("fxresources/scripts/library/" + libraryname), -1);
-        if (code == null || code.length() == 0)
-            throw new FxNotFoundException("ex.scripting.load.library.failed", libraryname);
-        return createScript(event, name, description, code);
+    @Deprecated
+    public FxScriptInfo createScript(FxScriptEvent event, String name, String description, String code) throws FxApplicationException {
+        return createScript(new FxScriptInfoEdit(-1, event, name, description, code, true,
+                StringUtils.isNotBlank(name) && FxSharedUtils.isGroovyScript(name)));
     }
 
     /**
      * {@inheritDoc}
      */
     @TransactionAttribute(TransactionAttributeType.REQUIRED)
-    public FxScriptInfo createScriptFromDropLibrary(String dropName, FxScriptEvent event, String libraryname, String name, String description) throws FxApplicationException {
+    @Deprecated
+    public FxScriptInfo createScriptFromLibrary(FxScriptEvent event, String libraryname, String name, String description) throws FxApplicationException {
+        return createScriptFromLibrary(libraryname, new FxScriptInfo(-1,event,name,description,true,
+                StringUtils.isNotBlank(name) && FxSharedUtils.isGroovyScript(name)));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public FxScriptInfo createScriptFromLibrary(String libraryname, FxScriptInfo scriptInfo) throws FxApplicationException {
+        FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.ScriptManagement);
+        String code = FxSharedUtils.loadFromInputStream(FxSharedUtils.getResourceStream("fxresources/scripts/library/" + libraryname), -1);
+        if (code == null || code.length() == 0)
+            throw new FxNotFoundException("ex.scripting.load.library.failed", libraryname);
+        return createScript(new FxScriptInfoEdit(-1, scriptInfo.getEvent(), scriptInfo.getName(),
+                scriptInfo.getDescription(), code, scriptInfo.isActive(), scriptInfo.isCached()));
+    }
+
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public FxScriptInfo createScriptFromDropLibrary(String dropName, String libraryname, FxScriptInfo scriptInfo) throws FxApplicationException {
         FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.ScriptManagement);
         String code = FxSharedUtils.loadFromInputStream(FxSharedUtils.getResourceStream(dropName + "Resources/scripts/library/" + libraryname), -1);
         if (code == null || code.length() == 0) { // this might be a jar file
@@ -474,7 +506,19 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         if (code == null || code.length() == 0) {
             throw new FxNotFoundException("ex.scripting.load.library.failed", libraryname);
         }
-        return createScript(event, name, description, code);
+        return createScript(new FxScriptInfoEdit(-1, scriptInfo.getEvent(),
+                scriptInfo.getName(), scriptInfo.getDescription(), code,
+                scriptInfo.isActive(), scriptInfo.isCached()));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Deprecated
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public FxScriptInfo createScriptFromDropLibrary(String dropName, FxScriptEvent event, String libraryname, String name, String description) throws FxApplicationException {
+        return createScriptFromDropLibrary(dropName, libraryname, new FxScriptInfo(-1,event,name,description,true,
+                StringUtils.isNotBlank(name) && FxSharedUtils.isGroovyScript(name)));
     }
 
     /**
@@ -558,7 +602,8 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
             } catch (Throwable t) {
                 throw new FxInvalidParameterException(si.getName(), "ex.general.scripting.exception", si.getName(), t.getMessage());
             }
-            LocalScriptingCache.groovyScriptCache.putIfAbsent(scriptId, script);
+            if (si.isCached())
+                LocalScriptingCache.groovyScriptCache.putIfAbsent(scriptId, script);
         }
 
         if (binding == null)

@@ -144,17 +144,27 @@ EJBLookup.resultPreferencesEngine.saveSystemDefault(
 // script associations
 typeId = CacheAdmin.getEnvironment().getType(FxType.DOCUMENTFILE).getId()
 def se = EJBLookup.getScriptingEngine()
-FxScriptInfo si = se.createScriptFromLibrary(FxScriptEvent.BeforeContentCreate, "DocumentFileMetaParser.gy", "DocumentFileMetaParser.gy", "Document File Metadata Parser");
+FxScriptInfo si = se.createScriptFromLibrary("DocumentFileMetaParser.gy",
+        new FxScriptInfo(-1,FxScriptEvent.BeforeContentCreate, "DocumentFileMetaParser.gy",
+                "Document File Metadata Parser",true,false));
 se.createTypeScriptMapping(si.getId(), typeId, true, false);
 // webdav: needs AfterContentSave
-si = se.createScriptFromLibrary(FxScriptEvent.AfterContentSave, "DocumentFileContentConverterACS.gy", "DocumentFileContentConverterACS.gy", "Document File Content Converstion according to Mime Type");
+si = se.createScriptFromLibrary("DocumentFileContentConverterACS.gy",
+        new FxScriptInfo(-1, FxScriptEvent.AfterContentSave, "DocumentFileContentConverterACS.gy",
+                "Document File Content Converstion according to Mime Type",true,false));
 se.createTypeScriptMapping(si.getId(), typeId, true, false);
 // BE: AfterContentCreate (see AssignmentEngineBean save())
-si = se.createScriptFromLibrary(FxScriptEvent.AfterContentCreate, "DocumentFileContentConverterACC.gy", "DocumentFileContentConverterACC.gy", "Document File Content Converstion according to Mime Type");
+si = se.createScriptFromLibrary("DocumentFileContentConverterACC.gy",
+        new FxScriptInfo(-1, FxScriptEvent.AfterContentCreate, "DocumentFileContentConverterACC.gy",
+                "Document File Content Converstion according to Mime Type",true,false));
 se.createTypeScriptMapping(si.getId(), typeId, true, false);
 
 // scripts needed f. the DocumentParser callback class (creation & conversion of DocumentFile content instances
 // DocumentTypeMetaDataParser.gy
-se.createScriptFromLibrary(FxScriptEvent.Internal, "DocumentTypeMetaDataParser.gy", "DocumentTypeMetaDataParser.gy", "Parse Meta Data f. the DOCUMENT type");
+se.createScriptFromLibrary("DocumentTypeMetaDataParser.gy",
+        new FxScriptInfo(-1, FxScriptEvent.Internal, "DocumentTypeMetaDataParser.gy",
+                "Parse Meta Data f. the DOCUMENT type",true,false));
 // ImageTypeMetaDataParser.gy
-se.createScriptFromLibrary(FxScriptEvent.Internal, "ImageTypeMetaDataParser.gy", "ImageTypeMetaDataParser.gy", "Parse Meta Data f. the IMAGE type");
+se.createScriptFromLibrary("ImageTypeMetaDataParser.gy",
+        new FxScriptInfo(-1,FxScriptEvent.Internal, "ImageTypeMetaDataParser.gy",
+                "Parse Meta Data f. the IMAGE type",true,false));

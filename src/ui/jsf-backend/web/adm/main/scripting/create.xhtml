@@ -68,6 +68,12 @@
                                      disabled="#{!scriptBean.inputFieldEnabled}"/>
                     </fx:formRow>
 
+                    <div style="#{scriptBean.renderCachedSelect ? '': 'display:none;'}">
+                        <fx:formRow labelKey="Script.field.cached" id="cached">
+                            <h:selectBooleanCheckbox id="cached" value="#{scriptBean.sinfo.cached}"/>
+                        </fx:formRow>
+                    </div>
+
                     <fx:formRow labelKey="Script.field.code" id="code">
                         <h:inputTextarea id="code" value="#{scriptBean.sinfo.code}" cols="100" rows="25"
                                          disabled="#{!scriptBean.inputFieldEnabled}"/>

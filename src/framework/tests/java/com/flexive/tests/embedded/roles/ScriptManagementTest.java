@@ -38,6 +38,8 @@ import com.flexive.shared.exceptions.FxNoAccessException;
 import com.flexive.shared.scripting.FxScriptEvent;
 import static com.flexive.shared.security.Role.ScriptExecution;
 import static com.flexive.shared.security.Role.ScriptManagement;
+
+import com.flexive.shared.scripting.FxScriptInfoEdit;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
@@ -103,7 +105,8 @@ public class ScriptManagementTest extends AbstractRoleTest {
             FxContext.get().runAsSystem();
         }
         try {
-            scriptId = getScriptingEngine().createScript(FxScriptEvent.Manual, "script management test.gy", "", "1+1").getId();
+            scriptId = getScriptingEngine().createScript(
+                    new FxScriptInfoEdit(-1,FxScriptEvent.Manual, "script management test.gy", "", "1+1",true,true)).getId();
             forced = force;
             if (!force) {
                 assertSuccess(ScriptManagement, -1);

@@ -33,6 +33,7 @@ package com.flexive.tests.embedded.benchmark;
 
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
+import com.flexive.shared.scripting.FxScriptInfoEdit;
 import com.flexive.shared.search.query.SqlQueryBuilder;
 import com.flexive.shared.search.query.PropertyValueComparator;
 import com.flexive.shared.search.FxResultSet;
@@ -85,10 +86,12 @@ public class ContentBenchmark {
     @Test(groups = "benchmark")
     public void createContactDataBenchmark() throws FxApplicationException {
         // register some scripts
-        final FxScriptInfo script1 = EJBLookup.getScriptingEngine().createScript(FxScriptEvent.AfterContentCreate, SCRIPT1, "",
-                "com.flexive.tests.embedded.benchmark.ContentBenchmark.scriptCtr1++");
-        final FxScriptInfo script2 = EJBLookup.getScriptingEngine().createScript(FxScriptEvent.AfterContentCreate, SCRIPT2, "",
-                "com.flexive.tests.embedded.benchmark.ContentBenchmark.scriptCtr2++");
+        final FxScriptInfo script1 = EJBLookup.getScriptingEngine().createScript(
+                new FxScriptInfoEdit(-1,FxScriptEvent.AfterContentCreate, SCRIPT1, "",
+                "com.flexive.tests.embedded.benchmark.ContentBenchmark.scriptCtr1++",true,true));
+        final FxScriptInfo script2 = EJBLookup.getScriptingEngine().createScript(
+                new FxScriptInfoEdit(-1,FxScriptEvent.AfterContentCreate, SCRIPT2, "",
+                "com.flexive.tests.embedded.benchmark.ContentBenchmark.scriptCtr2++",true,true));
         final long contactDataId = CacheAdmin.getEnvironment().getType(FxType.CONTACTDATA).getId();
         EJBLookup.getScriptingEngine().createTypeScriptMapping(script1.getId(), contactDataId, true, true);
         EJBLookup.getScriptingEngine().createTypeScriptMapping(script2.getId(), contactDataId, true, true);

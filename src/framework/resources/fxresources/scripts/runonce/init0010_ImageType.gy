@@ -875,7 +875,9 @@ new GroovyTypeBuilder().image(
 }
 
 typeId = CacheAdmin.getEnvironment().getType(IMAGE_TYPE).getId()
-FxScriptInfo si = se.createScriptFromLibrary(FxScriptEvent.BeforeContentCreate, "ImageMetaParser.gy", "ImageMetaParser.gy", "Script filling image properties");
+FxScriptInfo si = se.createScriptFromLibrary("ImageMetaParser.gy",
+        new FxScriptInfo(-1,FxScriptEvent.BeforeContentCreate, "ImageMetaParser.gy",
+                "Script filling image properties",true,false));
 se.createTypeScriptMapping(si.getId(), typeId, true, true);
 
 EJBLookup.resultPreferencesEngine.saveSystemDefault(

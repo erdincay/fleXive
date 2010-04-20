@@ -138,8 +138,9 @@ EJBLookup.resultPreferencesEngine.saveSystemDefault(
 // create web page folder and automatically store new products there
 final long manuFolderId = EJBLookup.treeEngine.createNodes(FxTreeMode.Edit, FxTreeNode.ROOT_NODE, -1, "Products/Manufacturers")[-1]
 final FxScriptInfo productsTreeScriptId =
-    EJBLookup.scriptingEngine.createScriptFromDropLibrary("products", FxScriptEvent.AfterContentCreate,
-            "productsTree.groovy", "ProductsTree.groovy", "Stores new products in the manufacturer folder")
+    EJBLookup.scriptingEngine.createScriptFromDropLibrary("products", "productsTree.groovy",
+            new FxScriptInfo(-1,FxScriptEvent.AfterContentCreate,
+              "ProductsTree.groovy", "Stores new products in the manufacturer folder",true,false))
 EJBLookup.scriptingEngine.createTypeScriptMapping(
         productsTreeScriptId.id,
         CacheAdmin.environment.getType("product").id,

@@ -77,7 +77,9 @@ public interface ScriptingEngine {
      * @param active      if the script is active
      * @throws FxApplicationException on errors
      * @see com.flexive.shared.scripting.FxScriptEvent
+     * @deprecated use {@link #updateScriptInfo(FxScriptInfoEdit)} instead
      */
+    @Deprecated
     void updateScriptInfo(long scriptId, FxScriptEvent event, String name, String description, String code, boolean active) throws FxApplicationException;
 
     /**
@@ -108,8 +110,9 @@ public interface ScriptingEngine {
     List<Long> getByScriptEvent(FxScriptEvent scriptEvent);
 
     /**
-     * Create a new script
-     * (newly created scripts are set to active per default).
+     * Create a new script:<br/>
+     * -newly created scripts are set to active per default<br/>
+     * -groovy scripts are cached by default, other script types not
      *
      * @param event       script event
      * @param name        (unique) name
@@ -118,26 +121,74 @@ public interface ScriptingEngine {
      * @return FxScriptInfo for the new created script
      * @throws FxApplicationException on errors
      * @see com.flexive.shared.scripting.FxScriptEvent
+     * @deprecated use {@link #createScript(FxScriptInfoEdit)} instead
      */
+    @Deprecated
     FxScriptInfo createScript(FxScriptEvent event, String name, String description, String code) throws FxApplicationException;
 
     /**
-     * Create a new script based on a script from the library
-     * (newly created scripts are set to active per default).
+     * Constructs a new script with the data provided by FxScriptInfoEdit,
+     * (the id is discarded)
+     *
+     * @param scriptInfo script information
+     * @since 3.1.1
+     * @return FxScriptInfo for the newly created script
+     * @throws com.flexive.shared.exceptions.FxApplicationException on errors
+     */
+    FxScriptInfo createScript(FxScriptInfoEdit scriptInfo) throws FxApplicationException;
+
+    /**
+     * Create a new script based on a script from the library:<br/>
+     * -newly created scripts are set to active per default<br/>
+     * -groovy scripts are cached by default, other script types not
      *
      * @param event       script event
      * @param libraryname name of the script in the script library
      * @param name        (unique) name
      * @param description description
-     * @return FxScriptInfo for the new created script
+     * @return FxScriptInfo for the newly created script
      * @throws FxApplicationException on errors
      * @see com.flexive.shared.scripting.FxScriptEvent
+     * @deprecated use {@link #createScriptFromLibrary(String, FxScriptInfo)} instead
      */
+    @Deprecated
     FxScriptInfo createScriptFromLibrary(FxScriptEvent event, String libraryname, String name, String description) throws FxApplicationException;
 
     /**
-     * Create a new script based on a script from the library
-     * (newly created scripts are set to active per default).
+     * Create a new script based on a script from the library:<br/>
+     * The script's code is loaded from the library, other
+     * data needed for creating the script is provided
+     * by the scriptInfo parameter (id is discarded).
+     *
+     * @param libraryname name of the script in the script library
+     * @param scriptInfo script information
+     * @return FxScriptInfo for the newly created script
+     * @throws FxApplicationException on errors
+     * @see com.flexive.shared.scripting.FxScriptEvent
+     * @since 3.1.1
+     */
+    FxScriptInfo createScriptFromLibrary(String libraryname, FxScriptInfo scriptInfo) throws FxApplicationException;
+
+    /**
+     * Create a new script based on a script from a drop's library:<br/>
+     * The script's code is loaded from the library, other
+     * data needed for creating the script is provided
+     * by the scriptInfo parameter (id is discarded).
+     *
+     * @param dropName name of the drop to use as repository
+     * @param libraryname name of the script in drop
+     * @param scriptInfo script information
+     * @return FxScriptInfo for the newly created script
+     * @throws FxApplicationException on errors
+     * @see com.flexive.shared.scripting.FxScriptEvent
+     * @since 3.1.1
+     */
+    FxScriptInfo createScriptFromDropLibrary(String dropName, String libraryname, FxScriptInfo scriptInfo) throws FxApplicationException;
+
+    /**
+     * Create a new script based on a script from the library:<br/>
+     * -newly created scripts are set to active per default<br/>
+     * -groovy scripts are cached by default, other script types not
      *
      * @param dropName    name of the drop to use as repository
      * @param event       script event
@@ -147,7 +198,9 @@ public interface ScriptingEngine {
      * @return FxScriptInfo for the new created script
      * @throws FxApplicationException on errors
      * @see com.flexive.shared.scripting.FxScriptEvent
+     * @deprecated use {@link #createScriptFromDropLibrary(String, String, FxScriptInfo)} instead
      */
+    @Deprecated
     FxScriptInfo createScriptFromDropLibrary(String dropName, FxScriptEvent event, String libraryname, String name, String description) throws FxApplicationException;
 
     /**

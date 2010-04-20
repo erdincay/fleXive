@@ -31,6 +31,7 @@
  ***************************************************************/
 import com.flexive.shared.scripting.FxScriptEvent
 import com.flexive.shared.EJBLookup
+import com.flexive.shared.scripting.FxScriptInfo
 
 //check if a binary storage directory already exists and back it up if needed (see FX-697)
 File binDir = new File(com.flexive.core.storage.binary.FxBinaryUtils.getBinaryDirectory() + File.separatorChar + com.flexive.shared.FxContext.get().divisionId)
@@ -49,7 +50,8 @@ if (binDir.exists()) {
 
 
 //setup binary processing scripts
-EJBLookup.getScriptingEngine().createScriptFromLibrary(FxScriptEvent.BinaryPreviewProcess,
-    "BinaryProcessor_Images.gy",
-    "BinaryProcessor_Images.gy",
-    "Binary processing for images")
+EJBLookup.getScriptingEngine().createScriptFromLibrary(
+        "BinaryProcessor_Images.gy", new FxScriptInfo(-1,
+        FxScriptEvent.BinaryPreviewProcess,
+        "BinaryProcessor_Images.gy",
+        "Binary processing for images",true,false))

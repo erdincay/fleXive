@@ -77,8 +77,10 @@ public class ScriptingTest {
         try {
             String codeLoad = "println \"[Groovy script]=== Loading Content \"+content.pk+\"(\"+environment.getType(content.getTypeId()).getName()+\") ===\"";
             String codeRemove = "println \"[Groovy script]=== Before removal of content \"+pk+\"(\"+environment.getType(securityInfo.getTypeId()).getName()+\") ===\"";
-            loadScript = EJBLookup.getScriptingEngine().createScript(FxScriptEvent.AfterContentLoad, "afterLoadTest.gy", "Test script", codeLoad);
-            removeScript = EJBLookup.getScriptingEngine().createScript(FxScriptEvent.BeforeContentRemove, "beforeRemoveTest.gy", "Test script", codeRemove);
+            loadScript = EJBLookup.getScriptingEngine().createScript(
+                    new FxScriptInfoEdit(-1,FxScriptEvent.AfterContentLoad, "afterLoadTest.gy", "Test script", codeLoad,true,true));
+            removeScript = EJBLookup.getScriptingEngine().createScript(
+                    new FxScriptInfoEdit(-1,FxScriptEvent.BeforeContentRemove, "beforeRemoveTest.gy", "Test script", codeRemove,true,true));
         } finally {
             logout();
         }
@@ -121,7 +123,8 @@ public class ScriptingTest {
         String wrongCode = "retur \"hello, my syntax is wrong\"";
         Object result = "hello world";
 
-        FxScriptInfo si = se.createScript(FxScriptEvent.Manual, name, desc, code);
+        FxScriptInfo si = se.createScript(
+                new FxScriptInfoEdit(-1,FxScriptEvent.Manual, name, desc, code,true,true));
         Assert.assertTrue(si != null, "No FxScriptInfo returned!");
         Assert.assertTrue(si.getId() > 0, "Invalid script id");
         Assert.assertTrue(si.getName().equals(name), "Invalid name");
@@ -163,7 +166,7 @@ public class ScriptingTest {
      */
     @Test
     public void scriptActivation() throws Exception {
-        FxScriptInfo si = se.createScript(FxScriptEvent.Manual, "manualTestScript.gy", "manualTestScript", "return \"done\";");
+        FxScriptInfo si = se.createScript(new FxScriptInfoEdit(-1,FxScriptEvent.Manual, "manualTestScript.gy", "manualTestScript", "return \"done\";",true,true));
         try {
             se.runScript(si.getId());
             FxScriptInfoEdit inactive = si.asEditable();
@@ -221,7 +224,8 @@ public class ScriptingTest {
         List<FxScriptInfo> scripts = new ArrayList<FxScriptInfo>(10);
         try {
             FxScriptEvent event = FxScriptEvent.AfterDataChangeDelete;
-            FxScriptInfo testAssignmentScript = se.createScript(event, "Test2" + event.getName() + ".gy", "", "");
+            FxScriptInfo testAssignmentScript = se.createScript(
+                    new FxScriptInfoEdit(-1,event, "Test2" + event.getName() + ".gy", "", "",true,true));
             final long assId = type.getAssignment("/C").getId();
             final long assIdDer = type.getAssignment("/NEW_C").getId();
 
@@ -238,7 +242,8 @@ public class ScriptingTest {
 
             // reassign, test reassignment and remove all assignments for "/B"
             se.remove(testAssignmentScript.getId());
-            testAssignmentScript = se.createScript(event, "TestNoTwo" + event.getName() + ".gy", "", "");
+            testAssignmentScript = se.createScript(
+                    new FxScriptInfoEdit(-1,event, "TestNoTwo" + event.getName() + ".gy", "", "",true,true));
             se.createAssignmentScriptMapping(testAssignmentScript.getId(), assId, true, true);
             sm = se.loadScriptMapping(testAssignmentScript.getId());
             sme = sm.getMappedAssignments();
@@ -250,7 +255,8 @@ public class ScriptingTest {
 
             // check assignment consistency
             se.remove(testAssignmentScript.getId());
-            testAssignmentScript = se.createScript(event, "TestNoTwo" + event.getName() + ".gy", "", "");
+            testAssignmentScript = se.createScript(
+                    new FxScriptInfoEdit(-1,event, "TestNoTwo" + event.getName() + ".gy", "", "",true,true));
             try {
                 se.createAssignmentScriptMapping(testAssignmentScript.getId(), assIdDer, true, true);
                 se.createAssignmentScriptMapping(testAssignmentScript.getId(), assIdDer, true, true);
@@ -262,7 +268,7 @@ public class ScriptingTest {
 
             // test the assignment update
             se.remove(testAssignmentScript.getId());
-            testAssignmentScript = se.createScript(event, "Test2" + event.getName() + ".gy", "", "");
+            testAssignmentScript = se.createScript(new FxScriptInfoEdit(-1,event, "Test2" + event.getName() + ".gy", "", "",true,true));
             se.createAssignmentScriptMapping(testAssignmentScript.getId(), assId, true, true);
             se.updateAssignmentScriptMappingForEvent(testAssignmentScript.getId(), assId, event, false, false);
             sm = se.loadScriptMapping(testAssignmentScript.getId());
@@ -331,9 +337,9 @@ public class ScriptingTest {
             data = "change";
         else if (event.name().startsWith("AfterDataChange"))
             data = "change";
-        FxScriptInfo si = se.createScript(event, "Test" + event.name() + ".gy",
+        FxScriptInfo si = se.createScript(new FxScriptInfoEdit(-1,event, "Test" + event.name() + ".gy",
                 "",
-                "println \"This is [" + event.name() + "] registered for Assignment [" + assignment.getXPath() + "] - I am called for ${" + data + "}\"");
+                "println \"This is [" + event.name() + "] registered for Assignment [" + assignment.getXPath() + "] - I am called for ${" + data + "}\"",true,true));
         se.createAssignmentScriptMapping(si.getId(), assignment.getId(), true, true);
         return si;
     }
@@ -500,8 +506,8 @@ public class ScriptingTest {
      * @throws FxApplicationException on errors
      */
     private FxScriptInfo createScriptForType(FxScriptEvent event, FxType type) throws FxApplicationException {
-        FxScriptInfo si = se.createScript(event, "TestTypeMap" + event.getName() + ".gy", "", "println \"TYPE script mapping tests: fired for type "
-                + type.getName() + "(id:" + type.getId() + ") for this event: " + event.getName() + "\"");
+        FxScriptInfo si = se.createScript(new FxScriptInfoEdit(-1,event, "TestTypeMap" + event.getName() + ".gy", "", "println \"TYPE script mapping tests: fired for type "
+                + type.getName() + "(id:" + type.getId() + ") for this event: " + event.getName() + "\"",true,true));
         se.createTypeScriptMapping(event, si.getId(), type.getId(), true, true);
         return si;
     }
@@ -543,7 +549,10 @@ public class ScriptingTest {
         }
 
         try {
-            si = se.createScriptFromDropLibrary("flexiveDropTest", FxScriptEvent.Manual, "TestDropLibScript.gy", "UniqueScriptName1010.gy", "description");
+            si = se.createScriptFromDropLibrary(
+                    "flexiveDropTest", "TestDropLibScript.gy" ,
+                    new FxScriptInfo(-1,FxScriptEvent.Manual, "UniqueScriptName1010.gy",
+                            "description",true,true));
             assertEquals(se.loadScriptCode(si.getId()), libCode);
             se.remove(si.getId()); // clean up
         } catch (FxNotFoundException e) {

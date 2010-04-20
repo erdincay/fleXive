@@ -43,6 +43,7 @@ import com.flexive.shared.structure.*
 import com.flexive.shared.value.FxString
 import com.flexive.shared.scripting.FxScriptEvent
 import com.flexive.shared.search.*
+import com.flexive.shared.scripting.FxScriptInfoEdit
 
 def label(labelEn, labelDe) {
     return new FxString(true, FxLanguage.ENGLISH, (String)labelEn).setTranslation(FxLanguage.GERMAN, labelDe);
@@ -69,7 +70,8 @@ builder {
 }
 
 //create a before-save script to verify e-mail and build display name and caption
-FxScriptInfo si = EJBLookup.getScriptingEngine().createScript(FxScriptEvent.BeforeContentSave, "ContactDataVerify.gy", "Verification for contact data",
+FxScriptInfo si = EJBLookup.getScriptingEngine().createScript(
+        new FxScriptInfoEdit(-1,FxScriptEvent.BeforeContentSave, "ContactDataVerify.gy", "Verification for contact data",
         '''
 import com.flexive.shared.value.*
 //println "in contactdata create/save script ..."
@@ -88,13 +90,14 @@ if( !("".equals(display) ) ) {
     content.setValue("/DISPLAYNAME", new FxString(true, display))
 }
 return content
-''')
+''',true,true))
 EJBLookup.getScriptingEngine().createTypeScriptMapping(si.id, typeId, true, true)
 EJBLookup.getScriptingEngine().createTypeScriptMapping(FxScriptEvent.BeforeContentCreate, si.id, typeId, true, true)
 
 
 //remove-script that prevents removal if assigned to an account
-FxScriptInfo siRm = EJBLookup.getScriptingEngine().createScript(FxScriptEvent.BeforeContentRemove, "ContactDataRemove.gy", "Remove check for contact data",
+FxScriptInfo siRm = EJBLookup.getScriptingEngine().createScript(
+        new FxScriptInfoEdit(-1,FxScriptEvent.BeforeContentRemove, "ContactDataRemove.gy", "Remove check for contact data",
         '''
 import com.flexive.shared.*
 import com.flexive.shared.value.*
@@ -112,7 +115,7 @@ try {
     //ok to remove
     //println "ok to remove. exception: "+e.message
 }
-''')
+''',true,true))
 EJBLookup.getScriptingEngine().createTypeScriptMapping(siRm.id, typeId, true, true)
 
 

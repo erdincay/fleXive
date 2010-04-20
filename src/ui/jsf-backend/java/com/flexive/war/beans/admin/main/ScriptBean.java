@@ -371,13 +371,15 @@ public class ScriptBean implements Serializable {
             return "scriptOverview";
         }
 
-        if (sinfo.getName().length() < 1 || sinfo.getEvent() == null) {
+        if (StringUtils.isBlank(sinfo.getName()) || sinfo.getEvent() == null) {
             new FxFacesMsgErr("Script.err.createMiss").addToContext();
             return "scriptCreate";
         }
 
         try {
-            setId(getScriptingEngine().createScript(sinfo.getEvent(), sinfo.getName(), sinfo.getDescription(), sinfo.getCode()).getId());
+            if (!isRenderCachedSelect())
+                sinfo.setCached(false);    
+            setId(getScriptingEngine().createScript(sinfo).getId());
             setSinfo(CacheAdmin.getEnvironment().getScript(id).asEditable());
             // display updated script list
             //updateScriptList();
@@ -405,7 +407,9 @@ public class ScriptBean implements Serializable {
         ensureScriptIdSet();
 
         try {
-            getScriptingEngine().updateScriptInfo(id, sinfo.getEvent(), sinfo.getName(), sinfo.getDescription(), sinfo.getCode(), sinfo.isActive());
+            getScriptingEngine().updateScriptInfo(new FxScriptInfoEdit(id, sinfo.getEvent(), sinfo.getName(),
+                    sinfo.getDescription(), sinfo.getCode(), sinfo.isActive(),
+                    isRenderCachedSelect() && sinfo.isCached()));
             //updateScriptList(); needed (see mandators) ???
             new FxFacesMsgInfo("Script.nfo.updated").addToContext();
             return null;
@@ -707,5 +711,9 @@ public class ScriptBean implements Serializable {
     public String getUserLang() {
         userLang = FxContext.getUserTicket().getLanguage().getIso2digit();
         return userLang;
+    }
+
+    public boolean isRenderCachedSelect() {
+        return sinfo != null && StringUtils.isNotBlank(sinfo.getName()) && FxSharedUtils.isGroovyScript(sinfo.getName());
     }
 }

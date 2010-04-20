@@ -46,6 +46,7 @@ import com.flexive.shared.interfaces.TreeEngine;
 import com.flexive.shared.interfaces.TypeEngine;
 import com.flexive.shared.scripting.FxScriptEvent;
 import com.flexive.shared.scripting.FxScriptInfo;
+import com.flexive.shared.scripting.FxScriptInfoEdit;
 import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.structure.FxPropertyAssignmentEdit;
 import com.flexive.shared.structure.FxType;
@@ -541,16 +542,19 @@ public class FxTreeTest {
         scriptCounter = 0;
         String code = "println \"[Groovy script]=== After adding node ${node.id}: ${node.path} ===\"\n" +
                 "com.flexive.tests.embedded.FxTreeTest.scriptCounter++";
-        FxScriptInfo siAdd = EJBLookup.getScriptingEngine().createScript(FxScriptEvent.AfterTreeNodeAdded,
-                "afterNodeAdded.gy", "Test script", code);
+        FxScriptInfo siAdd = EJBLookup.getScriptingEngine().createScript(
+                new FxScriptInfoEdit(-1,FxScriptEvent.AfterTreeNodeAdded,
+                "afterNodeAdded.gy", "Test script", code,true,true));
         code = "println \"[Groovy script]=== Before removing node ${node.id}: ${node.path} ===\"\n" +
                 "com.flexive.tests.embedded.FxTreeTest.scriptCounter -= 2";
-        FxScriptInfo siBeforeRemove = EJBLookup.getScriptingEngine().createScript(FxScriptEvent.BeforeTreeNodeRemoved,
-                "beforeNodeRemoved.gy", "Test script", code);
+        FxScriptInfo siBeforeRemove = EJBLookup.getScriptingEngine().createScript(
+                new FxScriptInfoEdit(-1,FxScriptEvent.BeforeTreeNodeRemoved,
+                "beforeNodeRemoved.gy", "Test script", code,true,true));
         code = "println \"[Groovy script]=== After removing node ${node.id}: ${node.path} ===\"\n" +
                 "com.flexive.tests.embedded.FxTreeTest.scriptCounter++";
-        FxScriptInfo siAfterRemove = EJBLookup.getScriptingEngine().createScript(FxScriptEvent.AfterTreeNodeRemoved,
-                "afterNodeRemoved.gy", "Test script", code);
+        FxScriptInfo siAfterRemove = EJBLookup.getScriptingEngine().createScript(
+                new FxScriptInfoEdit(-1,FxScriptEvent.AfterTreeNodeRemoved,
+                "afterNodeRemoved.gy", "Test script", code,true,true));
         try {
             assertEquals(scriptCounter, 0);
             long nodeId = tree.save(FxTreeNodeEdit.createNew("Test1").setMode(mode).setParentNodeId(FxTreeNode.ROOT_NODE));
@@ -582,12 +586,14 @@ public class FxTreeTest {
         scriptCounter = 0;
         String code = "println \"[Groovy script]=== Before activating node ${node.id}: ${node.path} ===\"\n" +
                 "com.flexive.tests.embedded.FxTreeTest.scriptCounter+=2";
-        FxScriptInfo siBeforeActivate = EJBLookup.getScriptingEngine().createScript(FxScriptEvent.BeforeTreeNodeActivated,
-                "beforeNodeActivate.gy", "Test script", code);
+        FxScriptInfo siBeforeActivate = EJBLookup.getScriptingEngine().createScript(
+                new FxScriptInfoEdit(-1,FxScriptEvent.BeforeTreeNodeActivated,
+                "beforeNodeActivate.gy", "Test script", code,true,true));
         code = "println \"[Groovy script]=== After activating node ${node.id}: ${node.path} ===\"\n" +
                 "com.flexive.tests.embedded.FxTreeTest.scriptCounter--";
-        FxScriptInfo siAfterActivate = EJBLookup.getScriptingEngine().createScript(FxScriptEvent.AfterTreeNodeActivated,
-                "afterNodeActivate.gy", "Test script", code);
+        FxScriptInfo siAfterActivate = EJBLookup.getScriptingEngine().createScript(
+                new FxScriptInfoEdit(-1,FxScriptEvent.AfterTreeNodeActivated,
+                "afterNodeActivate.gy", "Test script", code,true,true));
         try {
             assertEquals(scriptCounter, 0);
             long nodeId = tree.save(FxTreeNodeEdit.createNew("Test1").setMode(mode).setParentNodeId(FxTreeNode.ROOT_NODE));
@@ -618,8 +624,9 @@ public class FxTreeTest {
         String code = "println \"[Groovy script]=== AfterTreeNodeFolderReplacement node ${node.id}: ${node.path}. co-pk: ${content}, folder-pk: ${node.reference} ===\"\n" +
                 "com.flexive.tests.embedded.FxTreeTest.scriptCounter=42\n" +
                 "if(content.id == node.reference.id) com.flexive.tests.embedded.FxTreeTest.scriptCounter=-1";
-        FxScriptInfo siAfterTreeNodeFolderReplacement = EJBLookup.getScriptingEngine().createScript(FxScriptEvent.AfterTreeNodeFolderReplacement,
-                "treeNodeFolderReplacement.gy", "Test script", code);
+        FxScriptInfo siAfterTreeNodeFolderReplacement = EJBLookup.getScriptingEngine().createScript(
+                new FxScriptInfoEdit(-1,FxScriptEvent.AfterTreeNodeFolderReplacement,
+                "treeNodeFolderReplacement.gy", "Test script", code,true,true));
         try {
             assertEquals(scriptCounter, 0);
             tree.save(FxTreeNodeEdit.createNew("Test1").

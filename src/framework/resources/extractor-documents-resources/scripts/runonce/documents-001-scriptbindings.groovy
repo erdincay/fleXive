@@ -44,12 +44,13 @@ se.scriptInfos.each { FxScriptInfo info ->
 }
 
 // assign preview generation
-se.createScriptFromDropLibrary("flexive-extractor-documents", FxScriptEvent.BinaryPreviewProcess,
-    "BinaryProcessor_Documents.gy",
-    "BinaryProcessor_Documents.gy",
-    "Binary processing for documents")
+se.createScriptFromDropLibrary("flexive-extractor-documents", "BinaryProcessor_Documents.gy",
+        new FxScriptInfo(-1,FxScriptEvent.BinaryPreviewProcess, "BinaryProcessor_Documents.gy",
+    "Binary processing for documents", true,false))
 
 // attach document extractor to document type    
-long scriptId = se.createScriptFromDropLibrary("flexive-extractor-documents", FxScriptEvent.BeforeContentCreate,
-    "DocumentMetaParser.gy", "DocumentMetaParser.gy", "Script filling document properties").id;
+long scriptId = se.createScriptFromDropLibrary(
+        "flexive-extractor-documents", "DocumentMetaParser.gy",
+        new FxScriptInfo(-1, FxScriptEvent.BeforeContentCreate, "DocumentMetaParser.gy",
+                "Script filling document properties",true,false)).id;
 se.createTypeScriptMapping(scriptId, CacheAdmin.environment.getType(FxType.DOCUMENT).id, true, true)

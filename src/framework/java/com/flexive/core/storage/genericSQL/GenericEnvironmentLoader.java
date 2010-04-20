@@ -721,13 +721,13 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
         String sql;
         List<FxScriptInfo> scripts = new ArrayList<FxScriptInfo>(10);
         try {
-            //            1  2     3     4     5
-            sql = "SELECT ID,SNAME,SDESC,STYPE,ACTIVE FROM " + TBL_SCRIPTS + " ORDER BY ID";
+            //            1  2     3     4     5           6
+            sql = "SELECT ID,SNAME,SDESC,STYPE,ACTIVE,IS_CACHED FROM " + TBL_SCRIPTS + " ORDER BY ID";
             ps = con.prepareStatement(sql);
             ResultSet rs = ps.executeQuery();
             while (rs != null && rs.next())
                 scripts.add(new FxScriptInfo(rs.getLong(1), FxScriptEvent.getById(rs.getLong(4)), rs.getString(2),
-                        rs.getString(3), rs.getBoolean(5)));
+                        rs.getString(3), rs.getBoolean(5),rs.getBoolean(6)));
         } catch (SQLException exc) {
             throw new FxLoadException(LOG, exc, "ex.scripting.load.failed", -1, exc.getMessage());
         } finally {

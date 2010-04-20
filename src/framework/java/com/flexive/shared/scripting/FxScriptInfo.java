@@ -32,6 +32,7 @@
 package com.flexive.shared.scripting;
 
 import com.flexive.shared.AbstractSelectableObjectWithName;
+import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import org.apache.commons.lang.StringUtils;
@@ -50,6 +51,7 @@ public class FxScriptInfo extends AbstractSelectableObjectWithName implements Se
     protected String name;
     protected String description;
     protected boolean active =false;
+    protected boolean cached = false;
 
     public FxScriptInfo() {
         /* empty constructor */
@@ -63,18 +65,38 @@ public class FxScriptInfo extends AbstractSelectableObjectWithName implements Se
      * @param name        (unique) name of the script
      * @param description description
      * @param active      if the script is active
+     * @param cached      if the script is cached
      * @throws FxInvalidParameterException on errors
      * @see FxScriptEvent
+     * @since 3.1.1
      */
-    public FxScriptInfo(long id, FxScriptEvent event, String name, String description, boolean active) throws FxInvalidParameterException {
+    public FxScriptInfo(long id, FxScriptEvent event, String name, String description, boolean active, boolean cached) throws FxInvalidParameterException {
         this.id = id;
         this.event = event;
         this.name = name;
         this.description = (description == null ? "" : description);
         this.active=active;
-        if (StringUtils.isEmpty(this.name) || this.name.length() > 255) {
+        this.cached=cached;
+        if (StringUtils.isBlank(this.name) || this.name.length() > 255) {
             throw new FxInvalidParameterException("NAME", "ex.scripting.name.invalid", name);
         }
+    }
+
+    /**
+     * Constructor
+     *
+     * @param id          script id
+     * @param event       script type
+     * @param name        (unique) name of the script
+     * @param description description
+     * @param active      if the script is active
+     * @throws FxInvalidParameterException on errors
+     * @see FxScriptEvent
+     * @deprecated use {@link #FxScriptInfo(long, FxScriptEvent, String, String, boolean, boolean)} instead
+     */
+    @Deprecated
+    public FxScriptInfo(long id, FxScriptEvent event, String name, String description, boolean active) throws FxInvalidParameterException {
+        this(id, event,name,description,active,StringUtils.isNotBlank(name) ? FxSharedUtils.isGroovyScript(name) : false);
     }
 
     /**
@@ -137,5 +159,13 @@ public class FxScriptInfo extends AbstractSelectableObjectWithName implements Se
         return active;
     }
 
-
+    /**
+     * Returns if the script is cached.
+     *
+     * @return cached
+     * @since 3.1.1
+     */
+    public boolean isCached() {
+        return cached;
+    }
 }
