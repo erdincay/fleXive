@@ -1136,8 +1136,7 @@ public class PropertyEditorBean implements ActionBean, Serializable {
         }
 
         if (assignment.getProperty().getReferencedType() != null && assignment.getAssignedType().getId() == assignment.getProperty().getReferencedType().getId() && // selfreference
-            !minMultiplicity.equalsIgnoreCase("0") )
-        {
+            !minMultiplicity.equalsIgnoreCase("0") ) {
             new FxFacesMsgErr("PropertyEditor.err.selfReference").addToContext();
             return;
         }
@@ -1150,12 +1149,23 @@ public class PropertyEditorBean implements ActionBean, Serializable {
                 StructureTreeControllerBean s = (StructureTreeControllerBean) FxJsfUtils.getManagedBean("structureTreeControllerBean");
                 s.addAction(StructureTreeControllerBean.ACTION_RENAME_ASSIGNMENT, assignment.getId(), assignment.getDisplayName());
                 new FxFacesMsgInfo("PropertyEditor.message.info.savedChanges", assignment.getLabel()).addToContext();
+                reInit();
             }
             catch (Throwable t) {
                 new FxFacesMsgErr(t).addToContext();
             }
         } else
             new FxFacesMsgInfo("StructureEditor.info.notInRole.structureManagement").addToContext();
+    }
+
+    /**
+     * Re-initialise variables after saving
+     */
+    private void reInit() {
+        property = CacheAdmin.getEnvironment().getProperty(property.getId()).asEditable();
+        assignment = ((FxPropertyAssignment)CacheAdmin.getEnvironment().getAssignment(assignment.getId())).asEditable();
+        // reload the optionWrapper
+        optionWrapper = new OptionWrapper(property.getOptions(), assignment.getOptions(), true);
     }
 
     /**
@@ -1168,31 +1178,49 @@ public class PropertyEditorBean implements ActionBean, Serializable {
         if (assignment.getLabel().getIsEmpty()) {
             throw new FxApplicationException("ex.structureEditor.noLabel");
         }
+
+        final List<FxStructureOption> removeOptions = new ArrayList<FxStructureOption>(1);
+        final List<FxStructureOption> invalidOptions = new ArrayList<FxStructureOption>(1);
+
         int min = FxMultiplicity.getStringToInt(minMultiplicity);
         int max = FxMultiplicity.getStringToInt(maxMultiplicity);
 
-        List<String> notSetAssignments = new ArrayList<String>();
-
-        for (FxStructureOption currAssignment : assignment.getOptions()) {
-            if (!currAssignment.isValid()) {
-                notSetAssignments.add(currAssignment.getKey());
-            }
+        // retrieve edited options
+        List<FxStructureOption> newOptions = optionWrapper.asFxStructureOptionList(optionWrapper.getAssignmentOptions());
+        // populate list of removed options
+        for(FxStructureOption oldOpt : assignment.getOptions()) {
+            if(!FxStructureOption.hasOption(oldOpt.getKey(), newOptions) || !oldOpt.isValid())
+                removeOptions.add(oldOpt);
+            // invalid options
+            if(!oldOpt.isValid())
+                invalidOptions.add(oldOpt);
         }
 
-        for (String currKey : notSetAssignments) {
-            assignment.clearOption(currKey);
-        }
-        //add edited options
-        Map<String, Boolean> tmpAssignments = new Hashtable<String, Boolean>();
-        for (FxStructureOption o : assignment.getOptions()) {
-            tmpAssignments.put(o.getKey(), o.isSet());
-        }
-        List<FxStructureOption> newAssignmentOptions = optionWrapper.asFxStructureOptionList(optionWrapper.getAssignmentOptions());
-        for (FxStructureOption o : newAssignmentOptions) {
-            Boolean exist = tmpAssignments.get(o.getKey());
-            if (exist == null || exist == false) {
+        // add edited options (checks if they are set)
+        for (FxStructureOption o : newOptions) {
+            if(o.isValid())
                 assignment.setOption(o.getKey(), o.getValue());
+            else { // remove invalid options from the optionwrapper
+                removeOptions.add(o);
+                invalidOptions.add(o);
             }
+        }
+        // remove operation
+        if (removeOptions.size() > 0) {
+            for (FxStructureOption o : removeOptions) {
+                assignment.clearOption(o.getKey());
+            }
+        }
+
+        // check out diff missing options / removed options and build a message f. removed options
+        if(invalidOptions.size() > 0) {
+            final StringBuilder invalidOptMessage = new StringBuilder(200);
+            for(FxStructureOption invalidOpt : invalidOptions) {
+                invalidOptMessage.append(invalidOpt.toString());
+            }
+            invalidOptMessage.trimToSize();
+            if(invalidOptMessage.length() > 0)
+                new FxFacesMsgInfo("PropertyEditor.err.propertyAssKeysNotSaved", invalidOptMessage.toString()).addToContext();
         }
 
         //in any case restore the system language for systeminternal properties
@@ -1226,48 +1254,53 @@ public class PropertyEditorBean implements ActionBean, Serializable {
             throw new FxApplicationException("ex.structureEditor.noLabel");
         }
 
-        Set<String> missingKey = new HashSet<String>();
-        List<String> notSetProperties = new ArrayList<String>();
+        final List<FxStructureOption> removeOptions = new ArrayList<FxStructureOption>(1);
+        final List<FxStructureOption> invalidOptions = new ArrayList<FxStructureOption>(1);
 
         int min = FxMultiplicity.getStringToInt(propertyMinMultiplicity);
         int max = FxMultiplicity.getStringToInt(propertyMaxMultiplicity);
 
         FxJsfUtils.checkMultiplicity(min, max);
 
-        for (FxStructureOption currentOption : property.getOptions()) {
-            missingKey.add(currentOption.getKey());
-            if (!currentOption.isValid()) {
-                notSetProperties.add(currentOption.getKey());
+        // retrieve edited options
+        List<FxStructureOption> newOptions = optionWrapper.asFxStructureOptionList(optionWrapper.getStructureOptions());
+        // populate list of removed options
+        for(FxStructureOption oldOpt : property.getOptions()) {
+            if(!FxStructureOption.hasOption(oldOpt.getKey(), newOptions) || !oldOpt.isValid())
+                removeOptions.add(oldOpt);
+            // invalid options
+            if(!oldOpt.isValid())
+                invalidOptions.add(oldOpt);
+        }
+        //add edited options (checks if they are set)
+        for (FxStructureOption o : newOptions) {
+            if(o.isValid())
+                property.setOption(o.getKey(), o.isOverrideable(), o.getValue());
+            else { // remove invalid options from the optionwrapper
+                removeOptions.add(o);
+                invalidOptions.add(o);
+            }
+        }
+        // remove operation
+        if (removeOptions.size() > 0) {
+            for (FxStructureOption o : removeOptions) {
+                property.clearOption(o.getKey());
             }
         }
 
-        for (String currKey : notSetProperties) {
-            property.clearOption(currKey);
-        }
-        //add edited options
-        List<FxStructureOption> newGroupOptions = optionWrapper.asFxStructureOptionList(optionWrapper.getStructureOptions());
-        for (FxStructureOption o : newGroupOptions) {
-            property.setOption(o.getKey(), o.isOverrideable(), o.getValue());
+        // check out diff missing options / removed options and build a message f. removed options
+        if(invalidOptions.size() > 0) {
+            final StringBuilder invalidOptMessage = new StringBuilder(200);
+            for(FxStructureOption invalidOpt : invalidOptions) {
+                invalidOptMessage.append(invalidOpt.toString());
+            }
+            invalidOptMessage.trimToSize();
+            if(invalidOptMessage.length() > 0)
+                new FxFacesMsgInfo("PropertyEditor.err.propertyKeysNotSaved", invalidOptMessage.toString()).addToContext();
         }
 
         if (!isSystemInternal() || FxJsfUtils.getRequest().getUserTicket().isInRole(Role.GlobalSupervisor)) {
             property.setMultiplicity(new FxMultiplicity(min, max));
-        }
-
-        for (FxStructureOption currentOption : property.getOptions()) {
-            missingKey.remove(currentOption.getKey());
-        }
-
-        if (missingKey.size() > 0) {
-            String firstKey = missingKey.iterator().next();
-            missingKey.remove(firstKey);
-            StringBuilder missingKeys = new StringBuilder(firstKey);
-            String [] keys = new String[missingKey.size()];
-            keys = missingKey.toArray(keys);
-            for (String currentKey : keys) {
-                missingKeys.append(", ").append(currentKey);
-            }
-            new FxFacesMsgInfo("PropertyEditor.err.propertyKeysNotSaved", missingKeys.toString()).addToContext();
         }
     }
 

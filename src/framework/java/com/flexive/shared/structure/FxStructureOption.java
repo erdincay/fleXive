@@ -166,6 +166,7 @@ public class FxStructureOption implements Serializable {
 
     /**
      * Test if the option need to be saved
+     * 
      * @return <code>true</code> if the option is set and the value is not empty
      * @since 3.1
      */
@@ -427,5 +428,13 @@ public class FxStructureOption implements Serializable {
         result = 31 * result + (set ? 1 : 0);
         result = 31 * result + (isInherited ? 1 : 0);
         return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        return "[key:" + key + "|value:" + value + "]";
     }
 }
