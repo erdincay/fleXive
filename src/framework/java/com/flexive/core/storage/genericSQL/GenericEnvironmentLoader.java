@@ -402,7 +402,7 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
         Map<Long, List<FxStructureOption>> result = new HashMap<Long, List<FxStructureOption>>(500);
         try {
             stmt = con.createStatement();
-            final ResultSet rs = stmt.executeQuery("SELECT " + idColumn + ",OPTKEY,MAYOVERRIDE,OPTVALUE FROM "
+            final ResultSet rs = stmt.executeQuery("SELECT " + idColumn + ",OPTKEY,MAYOVERRIDE,ISINHERITED,OPTVALUE FROM "
                     + table + " WHERE " + whereClause);
             while (rs.next()) {
                 final long id = rs.getLong(1);
@@ -410,7 +410,7 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                     result.put(id, new ArrayList<FxStructureOption>());
                 }
 
-                final String dbValue = rs.getString(4);
+                final String dbValue = rs.getString(5);
                 final String value;
                 if (FxStructureOption.VALUE_FALSE.equals(dbValue)) {
                     // check string constants to avoid creating "0" and "1" strings all over the place
@@ -420,7 +420,7 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                 } else {
                     value = dbValue;
                 }
-                FxStructureOption.setOption(result.get(id), rs.getString(2), rs.getBoolean(3), value);
+                FxStructureOption.setOption(result.get(id), rs.getString(2), rs.getBoolean(3), rs.getBoolean(4), value);
             }
             return result;
         } finally {

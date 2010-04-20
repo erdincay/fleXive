@@ -267,7 +267,6 @@ public class FxGroupAssignmentEdit extends FxGroupAssignment {
         return new FxGroupAssignmentEdit(ga, type, alias, parentXPath, null);
     }
 
-
     /**
      * Sets the parent group assignment.
      *
@@ -286,7 +285,7 @@ public class FxGroupAssignmentEdit extends FxGroupAssignment {
     }
 
     /**
-     * Set an option
+     * Set an option with defaults of overrideable & isInherited == true
      *
      * @param key   option key
      * @param value value of the option
@@ -294,17 +293,11 @@ public class FxGroupAssignmentEdit extends FxGroupAssignment {
      * @throws FxInvalidParameterException if the property does not allow overriding
      */
     public FxGroupAssignmentEdit setOption(String key, String value) throws FxInvalidParameterException {
-
-        FxStructureOption gOpt = getGroup().getOption(key);
-        if (gOpt.isSet() && !gOpt.isOverrideable())
-            throw new FxInvalidParameterException(key, "ex.structure.override.group.forbidden", key, getGroup().getName());
-
-        FxStructureOption.setOption(options, key, true, value);
-        return this;
+        return setOption(key, true, true, value);
     }
 
     /**
-     * Set a boolean option
+     * Set a boolean option with defaults of overrideable & isInherited == true
      *
      * @param key   option key
      * @param value value of the option
@@ -312,12 +305,48 @@ public class FxGroupAssignmentEdit extends FxGroupAssignment {
      * @throws FxInvalidParameterException if the property does not allow overriding
      */
     public FxGroupAssignmentEdit setOption(String key, boolean value) throws FxInvalidParameterException {
+            return setOption(key, true, true, value);
+    }
 
+    /**
+     * Set an option
+     *
+     * @param key option key
+     * @param overrideable flag to indicate that derived assignments may override this option
+     * @param isInherited flag to indicate that derived assignments inherit this option
+     * @param value value of the option
+     * @return the assignment itself, useful for chained calls
+     * @throws FxInvalidParameterException on errors
+     *
+     * @since 3.1.1
+     */
+    public FxGroupAssignmentEdit setOption(String key, boolean overrideable, boolean isInherited, String value) throws FxInvalidParameterException {
+         FxStructureOption gOpt = getGroup().getOption(key);
+        if (gOpt.isSet() && !gOpt.isOverrideable())
+            throw new FxInvalidParameterException(key, "ex.structure.override.group.forbidden", key, getGroup().getName());
+
+        FxStructureOption.setOption(options, key, overrideable, isInherited, value);
+        return this;
+    }
+
+    /**
+     * Set a boolean option
+     *
+     * @param key option key
+     * @param overrideable flag to indicate that derived assignments may override this option
+     * @param isInherited flag to indicate that derived assignments inherit this option
+     * @param value value of the option
+     * @return the assignment itself, useful for chained calls
+     * @throws FxInvalidParameterException on errors
+     *
+     * @since 3.1.1
+     */
+    public FxGroupAssignmentEdit setOption(String key, boolean overrideable, boolean isInherited, boolean value) throws FxInvalidParameterException {
         FxStructureOption gOpt = getGroup().getOption(key);
         if (gOpt.isSet() && !gOpt.isOverrideable())
             throw new FxInvalidParameterException(key, "ex.structure.override.group.forbidden", key, getGroup().getName());
 
-        FxStructureOption.setOption(options, key, true, value);
+        FxStructureOption.setOption(options, key, overrideable, isInherited, value);
         return this;
     }
 
@@ -344,6 +373,7 @@ public class FxGroupAssignmentEdit extends FxGroupAssignment {
      *
      * @return the editable group object.
      */
+    @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     public FxGroupEdit getGroupEdit() {
         if (!(group instanceof FxGroupEdit))
             throw new FxApplicationException("ex.structure.noEditableGroup").asRuntimeException();

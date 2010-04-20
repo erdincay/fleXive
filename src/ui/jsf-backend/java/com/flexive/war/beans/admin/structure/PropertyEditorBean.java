@@ -66,8 +66,6 @@ import java.util.*;
  *
  * @author Gerhard Glos (gerhard.glos@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-
-
 public class PropertyEditorBean implements ActionBean, Serializable {
     private static final long serialVersionUID = 7853783961770884278L;
     private static final Log LOG = LogFactory.getLog(PropertyEditorBean.class);
@@ -76,6 +74,8 @@ public class PropertyEditorBean implements ActionBean, Serializable {
     //private FxLanguage defaultLanguage = null;
     private String assignmentOptionValue = null;
     private String assignmentOptionKey = null;
+    private boolean assignmentOverridable = true;
+    private boolean assignmentIsInherited = true;
     private String propertyOptionValue = null;
     private String propertyOptionKey = null;
     private boolean propertyOptionOverridable = true;
@@ -106,13 +106,11 @@ public class PropertyEditorBean implements ActionBean, Serializable {
     private boolean selectedActive = true;
     private int defaultMultiplicity = -1;
 
-    private boolean canDefault = false;
-
     public long getAssignmentId() {
         return assignment != null ? assignment.getId() : -1;
     }
 
-    //necessarry only to prevent JSF errors because of value binding
+    //necessary only to prevent JSF errors because of value binding
     public void setAssignmentId(long assignmentId) {
     }
 
@@ -317,7 +315,6 @@ public class PropertyEditorBean implements ActionBean, Serializable {
         if (isPropertySelectList()) {
             returnValue = property.getReferencedList() == null;
         }
-//        System.out.println("-- isCanDefault --" + returnValue);
         return returnValue;
     }
 
@@ -651,12 +648,33 @@ public class PropertyEditorBean implements ActionBean, Serializable {
         this.propertyOptionOverridable = propertyOptionOverridable;
     }
 
+    public boolean isAssignmentOverridable() {
+        return assignmentOverridable;
+    }
+
+    public void setAssignmentOverridable(boolean assignmentOverridable) {
+        this.assignmentOverridable = assignmentOverridable;
+    }
+
+    public boolean isAssignmentIsInherited() {
+        return assignmentIsInherited;
+    }
+
+    public void setAssignmentIsInherited(boolean assignmentIsInherited) {
+        this.assignmentIsInherited = assignmentIsInherited;
+    }
+
     public void addAssignmentOption() {
         try {
             optionWrapper.addOption(optionWrapper.getAssignmentOptions(),
-                    assignmentOptionKey, assignmentOptionValue, false);
+                    assignmentOptionKey, assignmentOptionValue, assignmentOverridable,
+                    assignmentIsInherited);
             assignmentOptionKey = null;
             assignmentOptionValue = null;
+            // set the "default" values f. overrideable and isInherited
+            assignmentOverridable = true;
+            assignmentIsInherited = true;
+
         }
         catch (Throwable t) {
             new FxFacesMsgErr(t).addToContext();
@@ -682,7 +700,9 @@ public class PropertyEditorBean implements ActionBean, Serializable {
     public void addPropertyOption() {
         try {
             optionWrapper.addOption(optionWrapper.getStructureOptions(),
-                    propertyOptionKey, propertyOptionValue, propertyOptionOverridable);
+                    propertyOptionKey, propertyOptionValue, propertyOptionOverridable,
+                    true); // base option inheritance - always "true"
+            // reset after add
             propertyOptionKey = null;
             propertyOptionValue = null;
             propertyOptionOverridable = true;
@@ -1102,6 +1122,7 @@ public class PropertyEditorBean implements ActionBean, Serializable {
     /**
      * Stores a newly created property in DB
      */
+    @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     public void createProperty() {
         if (FxJsfUtils.getRequest().getUserTicket().isInRole(Role.StructureManagement)) {
             try {
@@ -1199,7 +1220,7 @@ public class PropertyEditorBean implements ActionBean, Serializable {
         // add edited options (checks if they are set)
         for (FxStructureOption o : newOptions) {
             if(o.isValid())
-                assignment.setOption(o.getKey(), o.getValue());
+                assignment.setOption(o.getKey(), o.isOverrideable(), o.getIsInherited(), o.getValue());
             else { // remove invalid options from the optionwrapper
                 removeOptions.add(o);
                 invalidOptions.add(o);
@@ -1336,6 +1357,11 @@ public class PropertyEditorBean implements ActionBean, Serializable {
      * ************** script editor tab begin ***********************
      */
 
+    /**
+     * Show the AssignmentScriptEditor
+     *
+     * @return the next page
+     */
     public String showAssignmentScriptEditor() {
         return "assignmentScriptEditor";
     }
@@ -1440,6 +1466,8 @@ public class PropertyEditorBean implements ActionBean, Serializable {
 
     public Map<Long, String> getAssignmentNameForId() {
         return new HashMap<Long, String>() {
+            private static final long serialVersionUID = -1106753357173316138L;
+
             public String get(Object key) {
                 return CacheAdmin.getFilteredEnvironment().getAssignment((Long) key).getXPath();
             }
@@ -1474,5 +1502,4 @@ public class PropertyEditorBean implements ActionBean, Serializable {
     }
 
     /****script editor tab end*********/
-
 }

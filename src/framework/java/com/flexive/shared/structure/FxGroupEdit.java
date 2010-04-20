@@ -197,6 +197,7 @@ public class FxGroupEdit extends FxGroup {
 
     /**
      * Set an option
+     * Implicityly set isInherited to "true"
      *
      * @param key          option key
      * @param overrideable is the option overrideable from assignments?
@@ -204,12 +205,13 @@ public class FxGroupEdit extends FxGroup {
      * @return the group itself, useful for chained calls
      */
     public FxGroupEdit setOption(String key, boolean overrideable, String value) {
-        FxStructureOption.setOption(options, key, overrideable, value);
+        FxStructureOption.setOption(options, key, overrideable, true, value);
         return this;
     }
 
     /**
      * Set a boolean option
+     * Implicityly set isInherited to "true"
      *
      * @param key          option key
      * @param overrideable is the option overrideable from assignments?
@@ -217,7 +219,7 @@ public class FxGroupEdit extends FxGroup {
      * @return the group itself, useful for chained calls
      */
     public FxGroupEdit setOption(String key, boolean overrideable, boolean value) {
-        FxStructureOption.setOption(options, key, overrideable, value);
+        FxStructureOption.setOption(options, key, overrideable, true, value);
         return this;
     }
 

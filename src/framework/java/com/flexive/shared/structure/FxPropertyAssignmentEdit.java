@@ -163,7 +163,7 @@ public class FxPropertyAssignmentEdit extends FxPropertyAssignment {
     }
 
     /**
-     * Set an option
+     * Set an option with defaults of overrideable & isInherited == true
      *
      * @param key   option key
      * @param value value of the option
@@ -171,17 +171,11 @@ public class FxPropertyAssignmentEdit extends FxPropertyAssignment {
      * @throws FxInvalidParameterException if the property does not allow overriding
      */
     public FxPropertyAssignmentEdit setOption(String key, String value) throws FxInvalidParameterException {
-
-        FxStructureOption pOpt = getProperty().getOption(key);
-        if (pOpt.isSet() && !pOpt.isOverrideable())
-            throw new FxInvalidParameterException(key, "ex.structure.override.property.forbidden", key, getProperty().getName());
-
-        FxStructureOption.setOption(options, key, true, value);
-        return this;
+        return setOption(key, true, true, value);
     }
 
     /**
-     * Set a boolean option
+     * Set a boolean option with defaults of overrideable & isInherited == true
      *
      * @param key   option key
      * @param value value of the option
@@ -189,12 +183,50 @@ public class FxPropertyAssignmentEdit extends FxPropertyAssignment {
      * @throws FxInvalidParameterException if the property does not allow overriding
      */
     public FxPropertyAssignmentEdit setOption(String key, boolean value) throws FxInvalidParameterException {
+        return setOption(key, true, true, value);
+    }
 
+    /**
+     * Set an option
+     *
+     * @param key the option key
+     * @param overrideable the overrideable status
+     * @param isInherited the isInherited status (inherited by derived assignments)
+     * @param value the option value
+     * @return the assignment itself, useful f. chained calls
+     * @throws FxInvalidParameterException on errors
+     *
+     * @since 3.1.1
+     */
+    public FxPropertyAssignmentEdit setOption(String key, boolean overrideable, boolean isInherited, String value) throws FxInvalidParameterException {
+        // already set in the property?
         FxStructureOption pOpt = getProperty().getOption(key);
         if (pOpt.isSet() && !pOpt.isOverrideable())
             throw new FxInvalidParameterException(key, "ex.structure.override.property.forbidden", key, getProperty().getName());
 
-        FxStructureOption.setOption(options, key, true, value);
+        FxStructureOption.setOption(options, key, overrideable, isInherited, value);
+        return this;
+    }
+
+    /**
+     * Set a boolean option
+     *
+     * @param key the option key
+     * @param overrideable overrideable status
+     * @param isInherited the isInherited status (inherited by derived assignments)
+     * @param value the option value
+     * @return the assignment itself, useful f. chained calls
+     * @throws FxInvalidParameterException on errors
+     *
+     * @since 3.1.1
+     */
+    public FxPropertyAssignmentEdit setOption(String key, boolean overrideable, boolean isInherited, boolean value) throws FxInvalidParameterException {
+        // already set in the property?
+        FxStructureOption pOpt = getProperty().getOption(key);
+        if (pOpt.isSet() && !pOpt.isOverrideable())
+            throw new FxInvalidParameterException(key, "ex.structure.override.property.forbidden", key, getProperty().getName());
+
+        FxStructureOption.setOption(options, key, overrideable, isInherited, value);
         return this;
     }
 
@@ -552,6 +584,8 @@ public class FxPropertyAssignmentEdit extends FxPropertyAssignment {
      * Save this assignment and return the saved instance.
      *
      * @return  the saved assignment
+     * @throws FxApplicationException on errors
+     *
      * @since 3.1
      */
     public FxPropertyAssignmentEdit save() throws FxApplicationException {

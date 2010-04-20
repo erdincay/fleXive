@@ -463,7 +463,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             if (options == null || options.size() == 0)
                 return;
             ps.close();
-            ps = con.prepareStatement("INSERT INTO " + table + " (" + primaryColumn + ",ASSID,OPTKEY,MAYOVERRIDE,OPTVALUE)VALUES(?,?,?,?,?)");
+            ps = con.prepareStatement("INSERT INTO " + table + " (" + primaryColumn + ",ASSID,OPTKEY,MAYOVERRIDE,ISINHERITED,OPTVALUE)VALUES(?,?,?,?,?,?)");
             for (FxStructureOption option : options) {
                 ps.setLong(1, primaryId);
                 if (assignmentId != null)
@@ -474,7 +474,8 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     throw new FxInvalidParameterException("key", "ex.structure.option.key.empty", option.getValue());
                 ps.setString(3, option.getKey());
                 ps.setBoolean(4, option.isOverrideable());
-                ps.setString(5, option.getValue());
+                ps.setBoolean(5, option.getIsInherited());
+                ps.setString(6, option.getValue());
                 ps.addBatch();
             }
             ps.executeBatch();

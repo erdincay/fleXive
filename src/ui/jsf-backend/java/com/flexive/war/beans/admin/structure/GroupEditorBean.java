@@ -74,6 +74,8 @@ public class GroupEditorBean implements Serializable {
     private boolean groupOptionOverridable = true;
     private String assignmentOptionValue = null;
     private String assignmentOptionKey = null;
+    private boolean assignmentOverridable = true;
+    private boolean assignmentIsInherited = true;
     private OptionWrapper optionWrapper = null;
     private WrappedOption optionFiler = null;
     private FxType parentType = null;
@@ -369,6 +371,7 @@ public class GroupEditorBean implements Serializable {
     /**
      * Apply changes to the group and the assignment and forward them to DB
      */
+    @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     public void saveChanges() {
         if (FxJsfUtils.getRequest().getUserTicket().isInRole(Role.StructureManagement)) {
             try {
@@ -378,6 +381,7 @@ public class GroupEditorBean implements Serializable {
                 StructureTreeControllerBean s = (StructureTreeControllerBean) FxJsfUtils.getManagedBean("structureTreeControllerBean");
                 s.addAction(StructureTreeControllerBean.ACTION_RENAME_ASSIGNMENT, assignment.getId(), assignment.getDisplayName());
                 new FxFacesMsgInfo("GroupEditor.message.info.savedChanges", assignment.getLabel()).addToContext();
+                reInit();
             }
             catch (Throwable t) {
                 new FxFacesMsgErr(t).addToContext();
@@ -388,8 +392,18 @@ public class GroupEditorBean implements Serializable {
     }
 
     /**
+     * Re-initialise property/assignment/optionwrapper variables after a save
+     */
+    private void reInit() {
+        group = CacheAdmin.getEnvironment().getGroup(group.getId()).asEditable();
+        assignment = ((FxGroupAssignment)CacheAdmin.getEnvironment().getAssignment(assignment.getId())).asEditable();
+        optionWrapper = new OptionWrapper(group.getOptions(), assignment.getOptions(), false);
+    }
+
+    /**
      * Save a newly created group to DB
      */
+    @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     public void createGroup() {
         if (FxJsfUtils.getRequest().getUserTicket().isInRole(Role.StructureManagement)) {
             try {
@@ -417,14 +431,45 @@ public class GroupEditorBean implements Serializable {
      * @throws FxApplicationException   if the label is invalid
      */
     private void saveAssignmentChanges() throws FxApplicationException {
-        //delete current options
-        while (!assignment.getOptions().isEmpty()) {
-            String key = assignment.getOptions().get(0).getKey();
-            assignment.clearOption(key);
+        final List<FxStructureOption> removeOptions = new ArrayList<FxStructureOption>(1);
+        final List<FxStructureOption> invalidOptions = new ArrayList<FxStructureOption>(1);
+
+        // retrieve edited options
+        List<FxStructureOption> newOptions = optionWrapper.asFxStructureOptionList(optionWrapper.getAssignmentOptions());
+        // populate list of removed options
+        for(FxStructureOption oldOpt : assignment.getOptions()) {
+            if(!FxStructureOption.hasOption(oldOpt.getKey(), newOptions) || !oldOpt.isValid())
+                removeOptions.add(oldOpt);
+            // invalid options
+            if(!oldOpt.isValid())
+                invalidOptions.add(oldOpt);
         }
-        List<FxStructureOption> newAssignmentOptions = optionWrapper.asFxStructureOptionList(optionWrapper.getAssignmentOptions());
-        for (FxStructureOption o : newAssignmentOptions) {
-            assignment.setOption(o.getKey(), o.getValue());
+
+        // add edited options (checks if they are set)
+        for (FxStructureOption o : newOptions) {
+            if(o.isValid())
+                assignment.setOption(o.getKey(), o.isOverrideable(), o.getIsInherited(), o.getValue());
+            else { // remove invalid options from the optionwrapper
+                removeOptions.add(o);
+                invalidOptions.add(o);
+            }
+        }
+        // remove operation
+        if (removeOptions.size() > 0) {
+            for (FxStructureOption o : removeOptions) {
+                assignment.clearOption(o.getKey());
+            }
+        }
+
+        // check out diff missing options / removed options and build a message f. removed options
+        if(invalidOptions.size() > 0) {
+            final StringBuilder invalidOptMessage = new StringBuilder(200);
+            for(FxStructureOption invalidOpt : invalidOptions) {
+                invalidOptMessage.append(invalidOpt.toString());
+            }
+            invalidOptMessage.trimToSize();
+            if(invalidOptMessage.length() > 0)
+                new FxFacesMsgInfo("PropertyEditor.err.propertyAssKeysNotSaved", invalidOptMessage.toString()).addToContext();
         }
 
         if (assignment.getLabel().getIsEmpty()) {
@@ -459,14 +504,44 @@ public class GroupEditorBean implements Serializable {
 
         FxJsfUtils.checkMultiplicity(grpMul.getMin(),grpMul.getMax());
 
-        while (!group.getOptions().isEmpty()) {
-            String key = group.getOptions().get(0).getKey();
-            group.clearOption(key);
+        final List<FxStructureOption> removeOptions = new ArrayList<FxStructureOption>(1);
+        final List<FxStructureOption> invalidOptions = new ArrayList<FxStructureOption>(1);
+
+        // retrieve edited options
+        List<FxStructureOption> newOptions = optionWrapper.asFxStructureOptionList(optionWrapper.getStructureOptions());
+        // populate list of removed options
+        for(FxStructureOption oldOpt : group.getOptions()) {
+            if(!FxStructureOption.hasOption(oldOpt.getKey(), newOptions) || !oldOpt.isValid())
+                removeOptions.add(oldOpt);
+            // invalid options
+            if(!oldOpt.isValid())
+                invalidOptions.add(oldOpt);
+        }
+        //add edited options (checks if they are set)
+        for (FxStructureOption o : newOptions) {
+            if(o.isValid())
+                group.setOption(o.getKey(), o.isOverrideable(), o.getValue());
+            else { // remove invalid options from the optionwrapper
+                removeOptions.add(o);
+                invalidOptions.add(o);
+            }
+        }
+        // remove operation
+        if (removeOptions.size() > 0) {
+            for (FxStructureOption o : removeOptions) {
+                group.clearOption(o.getKey());
+            }
         }
 
-        List<FxStructureOption> newGroupOptions = optionWrapper.asFxStructureOptionList(optionWrapper.getStructureOptions());
-        for (FxStructureOption o : newGroupOptions) {
-            group.setOption(o.getKey(), o.isOverrideable(), o.getValue());
+        // check out diff missing options / removed options and build a message f. removed options
+        if(invalidOptions.size() > 0) {
+            final StringBuilder invalidOptMessage = new StringBuilder(200);
+            for(FxStructureOption invalidOpt : invalidOptions) {
+                invalidOptMessage.append(invalidOpt.toString());
+            }
+            invalidOptMessage.trimToSize();
+            if(invalidOptMessage.length() > 0)
+                new FxFacesMsgInfo("GroupEditor.err.propertyKeysNotSaved", invalidOptMessage.toString()).addToContext();
         }
 
         if (!isSystemInternal() || FxJsfUtils.getRequest().getUserTicket().isInRole(Role.GlobalSupervisor))
@@ -537,12 +612,30 @@ public class GroupEditorBean implements Serializable {
         this.assignmentOptionKey = assignmentOptionKey;
     }
 
+    public boolean isAssignmentOverridable() {
+        return assignmentOverridable;
+    }
+
+    public void setAssignmentOverridable(boolean assignmentOverridable) {
+        this.assignmentOverridable = assignmentOverridable;
+    }
+
+    public boolean isAssignmentIsInherited() {
+        return assignmentIsInherited;
+    }
+
+    public void setAssignmentIsInherited(boolean assignmentIsInherited) {
+        this.assignmentIsInherited = assignmentIsInherited;
+    }
+
     public void addAssignmentOption() {
         try {
-            optionWrapper.addOption(optionWrapper.getAssignmentOptions(),
-                assignmentOptionKey, assignmentOptionValue, false);
+            optionWrapper.addOption(optionWrapper.getAssignmentOptions(), assignmentOptionKey, assignmentOptionValue, assignmentOverridable, assignmentIsInherited);
+            // reset vars
             assignmentOptionKey = null;
             assignmentOptionValue = null;
+            assignmentOverridable = true;
+            assignmentIsInherited = true;
         }
         catch (Throwable t) {
              new FxFacesMsgErr(t).addToContext();

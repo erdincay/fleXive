@@ -219,6 +219,7 @@ public class FxPropertyEdit extends FxProperty {
      * @throws com.flexive.shared.exceptions.FxRuntimeException
      *          if the name is empty (uniqueness will be checked during save operation)
      */
+    @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     public FxPropertyEdit setName(String name) {
         if (StringUtils.isEmpty(name))
             throw new FxInvalidParameterException("NAME", "ex.general.parameter.empty", "name").asRuntimeException();
@@ -330,7 +331,7 @@ public class FxPropertyEdit extends FxProperty {
      * @return the property itself, useful for chained calls
      */
     public FxPropertyEdit setMultiLang(boolean multiLang) {
-        FxStructureOption.setOption(options, FxStructureOption.OPTION_MULTILANG, mayOverrideMultiLang(), multiLang);
+        FxStructureOption.setOption(options, FxStructureOption.OPTION_MULTILANG, mayOverrideMultiLang(), true, multiLang);
         return this;
     }
 
@@ -341,7 +342,7 @@ public class FxPropertyEdit extends FxProperty {
      * @return the property itself, useful for chained calls
      */
     public FxPropertyEdit setOverrideMultiLang(boolean overrideMultiLang) {
-        FxStructureOption.setOption(options, FxStructureOption.OPTION_MULTILANG, overrideMultiLang, isMultiLang());
+        FxStructureOption.setOption(options, FxStructureOption.OPTION_MULTILANG, overrideMultiLang, true, isMultiLang());
         return this;
     }
 
@@ -352,7 +353,7 @@ public class FxPropertyEdit extends FxProperty {
      * @return the property itself, useful for chained calls
      */
     public FxPropertyEdit setMultiLine(boolean multiLine) {
-        FxStructureOption.setOption(options, FxStructureOption.OPTION_MULTILINE, mayOverrideMultiLine(), multiLine);
+        FxStructureOption.setOption(options, FxStructureOption.OPTION_MULTILINE, mayOverrideMultiLine(), true, multiLine);
         return this;
     }
 
@@ -363,7 +364,7 @@ public class FxPropertyEdit extends FxProperty {
      * @return the property itself, useful for chained calls
      */
     public FxPropertyEdit setOverrideMultiLine(boolean overrideMultiLine) {
-        FxStructureOption.setOption(options, FxStructureOption.OPTION_MULTILINE, overrideMultiLine, isMultiLine());
+        FxStructureOption.setOption(options, FxStructureOption.OPTION_MULTILINE, overrideMultiLine, true, isMultiLine());
         return this;
     }
 
@@ -375,7 +376,7 @@ public class FxPropertyEdit extends FxProperty {
      * @throws FxInvalidParameterException on errors
      */
     public FxPropertyEdit setMaxLength(int maxLength) throws FxInvalidParameterException {
-        FxStructureOption.setOption(options, FxStructureOption.OPTION_MAXLENGTH, mayOverrideMaxLength(), String.valueOf(maxLength));
+        FxStructureOption.setOption(options, FxStructureOption.OPTION_MAXLENGTH, mayOverrideMaxLength(), true, String.valueOf(maxLength));
         return this;
     }
 
@@ -385,6 +386,7 @@ public class FxPropertyEdit extends FxProperty {
      * @param overrideMaxLEngth are assignments allowed to override this properties maxLength setting?
      * @return the property itself, useful for chained calls
      */
+    @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     public FxPropertyEdit setOverrideMaxLength(boolean overrideMaxLEngth) {
         if (!getOption(FxStructureOption.OPTION_MAXLENGTH).isSet()) {
             try {
@@ -393,7 +395,7 @@ public class FxPropertyEdit extends FxProperty {
                 throw new FxInvalidParameterException("MAXLENGTH", "ex.general.parameter.format", "-1").asRuntimeException();
             }
         }
-        FxStructureOption.setOption(options, FxStructureOption.OPTION_MAXLENGTH, overrideMaxLEngth, String.valueOf(getMaxLength()));
+        FxStructureOption.setOption(options, FxStructureOption.OPTION_MAXLENGTH, overrideMaxLEngth, true, String.valueOf(getMaxLength()));
         return this;
     }
 
@@ -404,7 +406,7 @@ public class FxPropertyEdit extends FxProperty {
      * @return the property itself, useful for chained calls
      */
     public FxPropertyEdit setSearchable(boolean searchable) {
-        FxStructureOption.setOption(options, FxStructureOption.OPTION_SEARCHABLE, mayOverrideSearchable(), searchable);
+        FxStructureOption.setOption(options, FxStructureOption.OPTION_SEARCHABLE, mayOverrideSearchable(), true, searchable);
         return this;
     }
 
@@ -415,7 +417,7 @@ public class FxPropertyEdit extends FxProperty {
      * @return the property itself, useful for chained calls
      */
     public FxPropertyEdit setOverrideSearchable(boolean overrideSearchable) {
-        FxStructureOption.setOption(options, FxStructureOption.OPTION_SEARCHABLE, overrideSearchable, isSearchable());
+        FxStructureOption.setOption(options, FxStructureOption.OPTION_SEARCHABLE, overrideSearchable, true, isSearchable());
         return this;
     }
 
@@ -426,7 +428,7 @@ public class FxPropertyEdit extends FxProperty {
      * @return the property itself, useful for chained calls
      */
     public FxPropertyEdit setInOverview(boolean inOverview) {
-        FxStructureOption.setOption(options, FxStructureOption.OPTION_SHOW_OVERVIEW, mayOverrideInOverview(), inOverview);
+        FxStructureOption.setOption(options, FxStructureOption.OPTION_SHOW_OVERVIEW, mayOverrideInOverview(), true, inOverview);
         return this;
     }
 
@@ -437,7 +439,7 @@ public class FxPropertyEdit extends FxProperty {
      * @return the property itself, useful for chained calls
      */
     public FxPropertyEdit setOverrideOverview(boolean overrideOverview) {
-        FxStructureOption.setOption(options, FxStructureOption.OPTION_SHOW_OVERVIEW, overrideOverview, isInOverview());
+        FxStructureOption.setOption(options, FxStructureOption.OPTION_SHOW_OVERVIEW, overrideOverview, true, isInOverview());
         return this;
     }
 
@@ -448,7 +450,7 @@ public class FxPropertyEdit extends FxProperty {
      * @return the property itself, useful for chained calls
      */
     public FxPropertyEdit setUseHTMLEditor(boolean useHTMLEditor) {
-        FxStructureOption.setOption(options, FxStructureOption.OPTION_HTML_EDITOR, mayOverrideInOverview(), useHTMLEditor);
+        FxStructureOption.setOption(options, FxStructureOption.OPTION_HTML_EDITOR, mayOverrideInOverview(), true, useHTMLEditor);
         return this;
     }
 
@@ -459,12 +461,13 @@ public class FxPropertyEdit extends FxProperty {
      * @return the property itself, useful for chained calls
      */
     public FxPropertyEdit setOverrideHTMLEditor(boolean overrideHTMLEditor) {
-        FxStructureOption.setOption(options, FxStructureOption.OPTION_HTML_EDITOR, overrideHTMLEditor, isUseHTMLEditor());
+        FxStructureOption.setOption(options, FxStructureOption.OPTION_HTML_EDITOR, overrideHTMLEditor, true, isUseHTMLEditor());
         return this;
     }
 
     /**
      * Set an option
+     * Implicitly all property options have their isInherited status set to true
      *
      * @param key          option key
      * @param overrideable is the option overrideable from assignments?
@@ -472,12 +475,13 @@ public class FxPropertyEdit extends FxProperty {
      * @return the property itself, useful for chained calls
      */
     public FxPropertyEdit setOption(String key, boolean overrideable, String value) {
-        FxStructureOption.setOption(options, key, overrideable, value);
+        FxStructureOption.setOption(options, key, overrideable, true, value);
         return this;
     }
 
     /**
      * Set a boolean option
+     * Implicitly all property options have their isInherited status set to true
      *
      * @param key          option key
      * @param overrideable is the option overrideable from assignments?
@@ -485,7 +489,7 @@ public class FxPropertyEdit extends FxProperty {
      * @return the property itself, useful for chained calls
      */
     public FxPropertyEdit setOption(String key, boolean overrideable, boolean value) {
-        FxStructureOption.setOption(options, key, overrideable, value);
+        FxStructureOption.setOption(options, key, overrideable, true, value);
         return this;
     }
 
@@ -563,6 +567,7 @@ public class FxPropertyEdit extends FxProperty {
      * @param value default value
      * @return the property itself, useful for chained calls
      */
+    @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     public FxPropertyEdit setDefaultValue(FxValue value) {
         if (value != null && value.isMultiLanguage() != this.isMultiLang()) {
             if (value.isMultiLanguage())
@@ -577,6 +582,7 @@ public class FxPropertyEdit extends FxProperty {
     /**
      * Perform some consistency checks, called internally!
      */
+    @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     public void checkConsistency() {
         switch (this.getDataType()) {
             case Reference:
