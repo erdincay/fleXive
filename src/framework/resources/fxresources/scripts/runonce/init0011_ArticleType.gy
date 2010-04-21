@@ -63,26 +63,6 @@ try {
 } catch (FxRuntimeException nf) {
     //ok, ignore
 }
-//try {
-//    CacheAdmin.getEnvironment().getACL(TYPE_ACL);
-//} catch (FxRuntimeException e) {
-//    long typeACL = acl.create(TYPE_ACL, new FxString("ACL for the Article Type"), Mandator.MANDATOR_FLEXIVE, "#00CCDD", "", ACLCategory.STRUCTURE);
-//    acl.assign(typeACL, UserGroup.GROUP_EVERYONE, true, true, true, true, true, true)
-//}
-//try {
-//    CacheAdmin.getEnvironment().getACL(CONTENT_ACL);
-//} catch (FxRuntimeException e) {
-//    long coACL = acl.create(CONTENT_ACL, new FxString("ACL for contents of the Article Type"), Mandator.MANDATOR_FLEXIVE, "#00CCDD", "", ACLCategory.INSTANCE);
-//    acl.assign(coACL, UserGroup.GROUP_EVERYONE, true, true, true, true, true, true)
-//}
-//try {
-//    CacheAdmin.getEnvironment().getACL(WF_ACL);
-//} catch (FxRuntimeException e) {
-//    long wfACL = acl.create(WF_ACL, new FxString("ACL for the workflow of the Article Type"), Mandator.MANDATOR_FLEXIVE, "#00CCDD", "", ACLCategory.WORKFLOW);
-//    acl.assign(wfACL, UserGroup.GROUP_EVERYONE, true, true, true, true, true, true)
-//}
-
-//def ACL typeACL = CacheAdmin.getEnvironment().getACL(TYPE_ACL);
 
 new GroovyTypeBuilder().Article(
         label: new FxString(FxLanguage.ENGLISH, "Article").setTranslation(FxLanguage.GERMAN, "Artikel")) {
