@@ -700,6 +700,7 @@ public class FxContext implements Serializable {
                         language = last.getLanguage();
                     }
                     si.ticket.setLanguage(language);
+                    setLastUserTicket(session, si.ticket);  // refresh ticket with new language
                 } catch (Exception e) {
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("Failed to use request locale from browser - unknown language: " + request.getLocale().getLanguage());

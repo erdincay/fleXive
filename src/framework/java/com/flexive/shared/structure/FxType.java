@@ -389,7 +389,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      * Use permissions at all?
      *
      * @return if permissions are used at all
-     * @deprecated will be removed in 3.1
+     * @deprecated will be removed in 3.2
      */
     public boolean usePermissions() {
         return isUsePermissions();
@@ -399,7 +399,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      * Use content instance permissions?
      *
      * @return if content instance permissions are used
-     * @deprecated will be removed in 3.1
+     * @deprecated will be removed in 3.2
      */
     public boolean useInstancePermissions() {
         return isUseInstancePermissions();
@@ -409,7 +409,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      * Use property permissions?
      *
      * @return if property permissions are used
-     * @deprecated will be removed in 3.1
+     * @deprecated will be removed in 3.2
      */
     public boolean usePropertyPermissions() {
         return isUsePropertyPermissions();
@@ -419,7 +419,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      * Use step permissions?
      *
      * @return if step permissions are used
-     * @deprecated will be removed in 3.1
+     * @deprecated will be removed in 3.2
      */
     public boolean useStepPermissions() {
         return isUseStepPermissions();
@@ -429,7 +429,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      * Use type permissions?
      *
      * @return if type permissions are used
-     * @deprecated will be removed in 3.1
+     * @deprecated will be removed in 3.2
      */
     public boolean useTypePermissions() {
         return isUseTypePermissions();
