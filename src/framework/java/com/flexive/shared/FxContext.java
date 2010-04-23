@@ -453,7 +453,9 @@ public class FxContext implements Serializable {
             try {
                 result = URLDecoder.decode(result, "UTF-8");
             } catch (Throwable t) {
-                System.out.print("Failed to decode the URI using UTF-8, using fallback decoding. msg=" + t.getMessage());
+                if (LOG.isWarnEnabled()) {
+                    LOG.warn("Failed to decode the URI using UTF-8, using fallback decoding. msg=" + t.getMessage());
+                }
                 result = URLDecoder.decode(result);
             }
         }
@@ -703,7 +705,9 @@ public class FxContext implements Serializable {
                     setLastUserTicket(session, si.ticket);  // refresh ticket with new language
                 } catch (Exception e) {
                     if (LOG.isDebugEnabled()) {
-                        LOG.debug("Failed to use request locale from browser - unknown language: " + request.getLocale().getLanguage());
+                        LOG.debug("Failed to use request locale from browser - unknown language: " 
+                                + request.getLocale().getLanguage()
+                                + " - " + e.getMessage(), e);
                     }
                 }
             }

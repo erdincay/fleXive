@@ -94,7 +94,7 @@ public final class FxDBAuthentication {
                     "FROM " + TBL_ACCOUNTS + " a " +
                     "LEFT JOIN " +
                     " (SELECT ID,ISLOGGEDIN,LAST_LOGIN,LAST_LOGIN_FROM,FAILED_ATTEMPTS,AUTHSRC FROM " + TBL_ACCOUNT_DETAILS +
-                    " WHERE APPLICATION=?) d ON a.ID=d.ID WHERE UPPER(a.LOGIN_NAME)=UPPER(?)";
+                    " WHERE APPLICATION=? ORDER BY LAST_LOGIN DESC) d ON a.ID=d.ID WHERE UPPER(a.LOGIN_NAME)=UPPER(?)";
             ps = con.prepareStatement(curSql);
             ps.setString(1, inf.getApplicationId());
             ps.setString(2, username);
@@ -172,6 +172,8 @@ public final class FxDBAuthentication {
             ps.executeUpdate();
 
             // Mark user as active in the database
+            // This can lead to duplicate rows for a user/application for concurrent logins (e.g. WebDAV clients),
+            // but we prefer this to actually locking the complete table before updates. (FX-868)
             curSql = "INSERT INTO " + TBL_ACCOUNT_DETAILS + " (ID,APPLICATION,ISLOGGEDIN,LAST_LOGIN,LAST_LOGIN_FROM,FAILED_ATTEMPTS,AUTHSRC) " +
                     "VALUES (?,?,?,?,?,?,?)";
             ps.close();
