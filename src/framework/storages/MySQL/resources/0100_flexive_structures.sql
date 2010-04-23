@@ -340,6 +340,7 @@ CREATE TABLE FXS_TYPEDEF (
   ID INTEGER UNSIGNED NOT NULL,
   ACL INTEGER UNSIGNED NOT NULL COMMENT 'ACL for the type, only checked if enabled in permissions',
   WORKFLOW INTEGER UNSIGNED NOT NULL,
+  DEFACL INTEGER UNSIGNED COMMENT 'Optional default ACL for instances',
   NAME VARCHAR(255) CHARACTER SET UTF8 NOT NULL COMMENT 'name of the type',
   PARENT INTEGER UNSIGNED DEFAULT NULL COMMENT 'parent for derived types, null if this is the parent, cyclic checks have to be performed by the application',
   STORAGE_MODE tinyint(4) unsigned NOT NULL COMMENT 'how are data tables organized \n0=inbound\n1=outbound\n2=external table (no versioning, permissions, etc)\n3=memory (nothing persisted, for small amounts of data only, no query engine available!)',
@@ -365,6 +366,8 @@ CREATE TABLE FXS_TYPEDEF (
   FOREIGN KEY FK_TYPEDEF_PARENT(PARENT) REFERENCES FXS_TYPEDEF(ID)
   	ON DELETE RESTRICT ON UPDATE RESTRICT,
   FOREIGN KEY FK_TYPEDEF_ACL(ACL) REFERENCES FXS_ACL(ID)
+  	ON DELETE RESTRICT ON UPDATE RESTRICT,
+  FOREIGN KEY FK_TYPEDEF_DEFACL(DEFACL) REFERENCES FXS_ACL(ID)
   	ON DELETE RESTRICT ON UPDATE RESTRICT,
   FOREIGN KEY FK_TYPEDEF_WORKFLOW(WORKFLOW) REFERENCES FXS_WORKFLOWS(ID)
   	ON DELETE RESTRICT ON UPDATE RESTRICT

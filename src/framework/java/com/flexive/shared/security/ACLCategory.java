@@ -81,6 +81,7 @@ public enum ACLCategory implements ObjectWithLabel {
      * @param id the id
      * @return TypeMode the type
      */
+    @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     public static ACLCategory getById(int id) {
         for (ACLCategory cat : ACLCategory.values())
             if (cat.id == id)

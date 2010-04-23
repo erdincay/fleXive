@@ -32,15 +32,19 @@
 package com.flexive.shared.structure;
 
 import com.flexive.shared.*;
-import com.flexive.shared.media.FxMimeTypeWrapper;
 import com.flexive.shared.content.FxGroupData;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.content.FxPermissionUtils;
-import com.flexive.shared.exceptions.*;
+import com.flexive.shared.exceptions.FxCreateException;
+import com.flexive.shared.exceptions.FxInvalidParameterException;
+import com.flexive.shared.exceptions.FxNotFoundException;
+import com.flexive.shared.exceptions.FxRuntimeException;
+import com.flexive.shared.media.FxMimeTypeWrapper;
 import com.flexive.shared.scripting.FxScriptEvent;
 import com.flexive.shared.scripting.FxScriptMapping;
 import com.flexive.shared.scripting.FxScriptMappingEntry;
 import com.flexive.shared.security.ACL;
+import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.security.LifeCycleInfo;
 import com.flexive.shared.security.UserTicket;
 import com.flexive.shared.value.FxReference;
@@ -90,6 +94,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
 
     protected long id;
     protected ACL ACL;
+    protected ACL defaultInstanceACL;
     protected Workflow workflow;
     protected String name;
     protected FxString label;
@@ -119,13 +124,43 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
     protected FxReference icon;
     protected List<FxStructureOption> options;
 
-    public FxType(long id, ACL acl, Workflow workflow, String name, FxString label, FxType parent, TypeStorageMode storageMode,
+
+    /**
+     * [fleXive] internal constructor for FxTypes, do not used this outside the flexive core!
+     *
+     * @param id                         type id
+     * @param acl                        type ACL
+     * @param defaultInstanceACL         optional default ACL to assign for new instances
+     * @param workflow                   the types workflow
+     * @param name                       name
+     * @param label                      label
+     * @param parent                     parent type
+     * @param storageMode                storage mode
+     * @param category                   type category
+     * @param mode                       type mode
+     * @param language                   language mode
+     * @param state                      type state
+     * @param permissions                permissions to use (bit coded)
+     * @param multipleContentACLs        does this type support multiple acls for instances?
+     * @param includedInSupertypeQueries include this type in super type queries?
+     * @param trackHistory               track history?
+     * @param historyAge                 max. age of history to keep
+     * @param maxVersions                max. number of versions to keep for instances of this type
+     * @param maxRelSource               max. number of relation sources
+     * @param maxRelDestination          max. number of relation destination
+     * @param lifeCycleInfo              life cycle info for the type
+     * @param derivedTypes               list of types derived from this type
+     * @param relations                  list of relations this type is affiliated with
+     * @param options                    type options
+     */
+    public FxType(long id, ACL acl, ACL defaultInstanceACL, Workflow workflow, String name, FxString label, FxType parent, TypeStorageMode storageMode,
                   TypeCategory category, TypeMode mode, LanguageMode language, TypeState state, byte permissions,
                   boolean multipleContentACLs, boolean includedInSupertypeQueries, boolean trackHistory,
                   long historyAge, long maxVersions, int maxRelSource, int maxRelDestination, LifeCycleInfo lifeCycleInfo,
                   List<FxType> derivedTypes, List<FxTypeRelation> relations, List<FxStructureOption> options) {
         this.id = id;
         this.ACL = acl;
+        this.defaultInstanceACL = defaultInstanceACL;
         this.workflow = workflow;
         this.name = name.toUpperCase();
         this.label = label;
@@ -155,6 +190,44 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
     }
 
     /**
+     * [fleXive] internal constructor for FxTypes, do not used this outside the flexive core!
+     *
+     * @param id                         type id
+     * @param acl                        type ACL
+     * @param workflow                   the types workflow
+     * @param name                       name
+     * @param label                      label
+     * @param parent                     parent type
+     * @param storageMode                storage mode
+     * @param category                   type category
+     * @param mode                       type mode
+     * @param language                   language mode
+     * @param state                      type state
+     * @param permissions                permissions to use (bit coded)
+     * @param multipleContentACLs        does this type support multiple acls for instances?
+     * @param includedInSupertypeQueries include this type in super type queries?
+     * @param trackHistory               track history?
+     * @param historyAge                 max. age of history to keep
+     * @param maxVersions                max. number of versions to keep for instances of this type
+     * @param maxRelSource               max. number of relation sources
+     * @param maxRelDestination          max. number of relation destination
+     * @param lifeCycleInfo              life cycle info for the type
+     * @param derivedTypes               list of types derived from this type
+     * @param relations                  list of relations this type is affiliated with
+     * @param options                    type options
+     * @deprecated since 3.1.1
+     */
+    public FxType(long id, ACL acl, Workflow workflow, String name, FxString label, FxType parent, TypeStorageMode storageMode,
+                  TypeCategory category, TypeMode mode, LanguageMode language, TypeState state, byte permissions,
+                  boolean multipleContentACLs, boolean includedInSupertypeQueries, boolean trackHistory,
+                  long historyAge, long maxVersions, int maxRelSource, int maxRelDestination, LifeCycleInfo lifeCycleInfo,
+                  List<FxType> derivedTypes, List<FxTypeRelation> relations, List<FxStructureOption> options) {
+        this(id, acl, null, workflow, name, label, parent, storageMode, category, mode, language, state, permissions,
+                multipleContentACLs, includedInSupertypeQueries, trackHistory, historyAge, maxVersions, maxRelSource,
+                maxRelDestination, lifeCycleInfo, derivedTypes, relations, options);
+    }
+
+    /**
      * Get the category of this FxType (System, User, ...)
      *
      * @return the category.
@@ -179,6 +252,29 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      */
     public ACL getACL() {
         return ACL;
+    }
+
+    /**
+     * Is a default instance ACL defined for this type?
+     *
+     * @return if a default instance ACL is defined for this type
+     * @since 3.1.1
+     */
+    public boolean hasDefaultInstanceACL() {
+        return this.defaultInstanceACL != null;
+    }
+
+    /**
+     * Get the default instance ACL for this type.
+     * If no default instance ACL is assigned, return the global default instance ACL
+     *
+     * @return default instance ACL for this type
+     * @since 3.1.1
+     */
+    public ACL getDefaultInstanceACL() {
+        if (this.defaultInstanceACL == null)
+            return CacheAdmin.getEnvironment().getACL(ACLCategory.INSTANCE.getDefaultId());
+        return defaultInstanceACL;
     }
 
     /**
@@ -237,11 +333,12 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
 
     /**
      * Get the description (=label) of this FxType
-     * @deprecated replaced by {@link #getLabel()}
      *
      * @return description (=label)
+     * @deprecated replaced by {@link #getLabel()}
      */
-    @Deprecated public FxString getDescription() {
+    @Deprecated
+    public FxString getDescription() {
         return getLabel();
     }
 
@@ -287,10 +384,10 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
     /**
      * Is this FxType derived from the given type?
      *
-     * @param typeId    the parent type
-     * @return          true if this type is derived (direct or transitive) from {@code typeId}
-     *                  or when this type's ID is {@code typeId}
-     * @since           3.1
+     * @param typeId the parent type
+     * @return true if this type is derived (direct or transitive) from {@code typeId}
+     *         or when this type's ID is {@code typeId}
+     * @since 3.1
      */
     public boolean isDerivedFrom(long typeId) {
         if (id == typeId || id == FxType.ROOT_ID) {
@@ -307,10 +404,10 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
     /**
      * Is this FxType derived from the given type?
      *
-     * @param typeName  the type name
-     * @return          true if this type is derived (direct or transitive) from {@code typeName}
-     *                  or when the typeName refers to this type
-     * @since           3.1
+     * @param typeName the type name
+     * @return true if this type is derived (direct or transitive) from {@code typeName}
+     *         or when the typeName refers to this type
+     * @since 3.1
      */
     public boolean isDerivedFrom(String typeName) {
         if (name.equalsIgnoreCase(typeName) || "Root".equalsIgnoreCase(typeName)) {
@@ -345,9 +442,9 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
     /**
      * Get all FxTypes that are derived from this type.
      *
-     * @param transitive        if transitive dependencies (derived types of derived types) should be resolved
-     * @param includeOwnType    if the own type should be included (as first element)
-     * @return                  all FxTypes that are derived from this type.
+     * @param transitive     if transitive dependencies (derived types of derived types) should be resolved
+     * @param includeOwnType if the own type should be included (as first element)
+     * @return all FxTypes that are derived from this type.
      * @since 3.1
      */
     public List<FxType> getDerivedTypes(boolean transitive, boolean includeOwnType) {
@@ -366,7 +463,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
     /**
      * Add the derived types (direct and through transitive dependency) of this type to the result list.
      *
-     * @param result    the result list to be populated
+     * @param result the result list to be populated
      * @since 3.1
      */
     protected void addDerivedTypes(Collection<FxType> result) {
@@ -488,8 +585,8 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
     /**
      * Allow multiple ACLs for a content of this type?
      *
-     * @return  true if multiple content ACLs are allowed
-     * @since   3.1
+     * @return true if multiple content ACLs are allowed
+     * @since 3.1
      */
     public boolean isMultipleContentACLs() {
         return multipleContentACLs;
@@ -581,7 +678,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      * Get all property assignments that are attached to the type's root or to a group
      * attached to the type.
      *
-     * @return  all property assignments for the type
+     * @return all property assignments for the type
      * @since 3.1
      */
     public List<FxPropertyAssignment> getAllProperties() {
@@ -741,16 +838,16 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
 //            if (getParent().getId() == 0)
 //                this.parent = null;
 //            else {
-                this.parent = fxStructure.getType(getParent().getId());
-                if (!this.parent.derivedTypes.contains(this))
-                    this.parent.derivedTypes.add(this);
+            this.parent = fxStructure.getType(getParent().getId());
+            if (!this.parent.derivedTypes.contains(this))
+                this.parent.derivedTypes.add(this);
 //            }
             //resolve derived types
             derivedTypes.clear();
             for (FxType derived : fxStructure.getTypes(true, true, true, true)) {
                 if (derived.getParent() != null && derived.getParent().getId() == getId())
                     derivedTypes.add(derived);
-                }
+            }
             if (relations.size() > 0) {
                 for (FxTypeRelation relation : relations)
                     relation.resolveReferences(fxStructure);
@@ -773,7 +870,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
                 continue;
             if (fxpa.hasScriptMappings() && !scriptedAssignments.contains(fxpa))
                 scriptedAssignments.add(fxpa);
-            if(!containsFlatStorageAssignments && fxpa.isFlatStorageEntry())
+            if (!containsFlatStorageAssignments && fxpa.isFlatStorageEntry())
                 containsFlatStorageAssignments = true;
             if (!fxpa.hasParentGroupAssignment())
                 assignedProperties.add(fxpa);
@@ -872,6 +969,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      * @param maxMultiplicity the maximum multiplicity for groups
      * @return random data
      */
+    @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     public FxGroupData createRandomData(FxPK pk, FxEnvironment env, Random rnd, int maxMultiplicity) {
         FxGroupData base;
         try {
@@ -907,7 +1005,8 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      * @param parentXPath desired XPath
      * @return FxAssignment
      */
-    public FxAssignment getAssignment(String parentXPath)  {
+    @SuppressWarnings({"ThrowableInstanceNeverThrown"})
+    public FxAssignment getAssignment(String parentXPath) {
         if (StringUtils.isEmpty(parentXPath) || "/".equals(parentXPath))
             return null; //connected to the root
         parentXPath = XPathElement.stripType(parentXPath);
@@ -951,7 +1050,8 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      * @param parentXPath desired XPath
      * @return FxAssignment
      */
-    public FxPropertyAssignment getPropertyAssignment(String parentXPath)  {
+    @SuppressWarnings({"ThrowableInstanceNeverThrown"})
+    public FxPropertyAssignment getPropertyAssignment(String parentXPath) {
         FxAssignment pa = getAssignment(parentXPath);
         if (pa instanceof FxPropertyAssignment)
             return (FxPropertyAssignment) pa;
@@ -964,8 +1064,8 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      * the first binary assignment.
      * <p>However, parent group multiplicities are not yet taken into account.</p>
      *
-     * @return  the property assignment that should be treated as the main binary content for this type,
-     * or null if no such assignment exists
+     * @return the property assignment that should be treated as the main binary content for this type,
+     *         or null if no such assignment exists
      * @since 3.1
      */
     public FxPropertyAssignment getMainBinaryAssignment() {
@@ -985,13 +1085,14 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
     /**
      * Returns the mandatory assignments of the given type.
      *
-     * @return  the mandatory assignments of the given type.
+     * @param datatype data type to check for
+     * @return the mandatory assignments of the given type.
      * @since 3.1
      */
-    public List<FxPropertyAssignment> getMandatoryAssignments(FxDataType type) {
+    public List<FxPropertyAssignment> getMandatoryAssignments(FxDataType datatype) {
         final List<FxPropertyAssignment> result = new ArrayList<FxPropertyAssignment>();
         for (FxPropertyAssignment assignment : getAllProperties()) {
-            if (assignment.getProperty().getDataType() == type && assignment.getMultiplicity().getMin() > 0) {
+            if (assignment.getProperty().getDataType() == datatype && assignment.getMultiplicity().getMin() > 0) {
                 boolean allRequired = true;
                 FxAssignment parent = assignment;
                 // check if all parents are also required
@@ -1018,6 +1119,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      * @param parentXPath desired XPath
      * @return FxAssignment
      */
+    @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     public FxGroupAssignment getGroupAssignment(String parentXPath) {
         FxAssignment pa = getAssignment(parentXPath);
         if (pa instanceof FxGroupAssignment)
@@ -1070,6 +1172,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      * @param parentXPath desired XPath
      * @return ArrayList of FxAssignment
      */
+    @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     public List<FxAssignment> getConnectedAssignments(String parentXPath) {
         List<FxAssignment> assignments = new ArrayList<FxAssignment>(10);
         if (StringUtils.isEmpty(parentXPath) || "/".equals(parentXPath)) {
@@ -1206,7 +1309,6 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      *
      * @param key option key
      * @return if an option is set for the requested key
-     *
      * @since 3.1
      */
     public boolean hasOption(String key) {
@@ -1220,7 +1322,6 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      *
      * @param key option key
      * @return the found option or an object that indicates that the option is not set
-     *
      * @since 3.1
      */
     public FxStructureOption getOption(String key) {
@@ -1231,7 +1332,6 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      * Get a (unmodifiable) list of all options set for this group
      *
      * @return (unmodifiable) list of all options set for this group
-     *
      * @since 3.1
      */
     public List<FxStructureOption> getOptions() {
@@ -1242,13 +1342,12 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      * Retrieve the List of options which are inherited by derived types
      *
      * @return (modifiable) list of all options inherited by derived types
-     *
      * @since 3.1
      */
     public List<FxStructureOption> getInheritedOptions() {
         final List<FxStructureOption> out = new ArrayList<FxStructureOption>(options.size());
-        for(FxStructureOption o : options) {
-            if(o.getIsInherited()) {
+        for (FxStructureOption o : options) {
+            if (o.getIsInherited()) {
                 out.add(o);
             }
         }
@@ -1259,11 +1358,10 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      * Retrieve the mime types for a given FxType
      *
      * @return return the mime types for a given FxType as a FxMimeType obj., or null if none are set
-     *
      * @since 3.1
      */
     public FxMimeTypeWrapper getMimeType() {
-        if(isMimeTypeSet()) {
+        if (isMimeTypeSet()) {
             return new FxMimeTypeWrapper(getOption(FxStructureOption.OPTION_MIMETYPE).getValue());
         }
         return null;
@@ -1273,7 +1371,6 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      * Convenience method to check if ANY mime type was set for this FxType
      *
      * @return true if a mime type was set
-     *
      * @since 3.1
      */
     public boolean isMimeTypeSet() {

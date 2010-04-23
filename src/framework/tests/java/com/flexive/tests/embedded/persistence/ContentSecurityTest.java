@@ -42,6 +42,7 @@ import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.ACLEngine;
 import com.flexive.shared.interfaces.ContentEngine;
+import com.flexive.shared.interfaces.TypeEngine;
 import com.flexive.shared.interfaces.UserGroupEngine;
 import com.flexive.shared.search.FxResultSet;
 import com.flexive.shared.search.query.PropertyValueComparator;
@@ -55,12 +56,13 @@ import com.flexive.shared.value.FxString;
 import com.flexive.shared.workflow.*;
 import static com.flexive.tests.embedded.FxTestUtils.login;
 import static com.flexive.tests.embedded.FxTestUtils.logout;
+import static org.testng.Assert.*;
+
 import com.flexive.tests.embedded.TestUser;
 import com.flexive.tests.embedded.TestUsers;
 import org.apache.commons.lang.RandomStringUtils;
 import org.testng.Assert;
-import static org.testng.Assert.fail;
-import static org.testng.Assert.assertEquals;
+
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -935,5 +937,35 @@ public class ContentSecurityTest {
     private void assertSearchReturnsPK(FxPK pk, int expectedRows) throws FxApplicationException {
         assertEquals(EJBLookup.getSearchEngine().search("SELECT @pk WHERE id=" + pk.getId()).getRowCount(), expectedRows,
                 "Expected " + expectedRows + " result rows.");
+    }
+
+    @Test
+    public void defaultInstanceACLTest() throws FxApplicationException {
+        FxContext.get().runAsSystem();
+        try {
+            TypeEngine te = EJBLookup.getTypeEngine();
+            FxType ct = CacheAdmin.getEnvironment().getType(FxType.CONTACTDATA);
+            //check default settings
+            assertTrue(ct.hasDefaultInstanceACL());
+            assertEquals(ct.getDefaultInstanceACL().getId(), ACL.ACL_CONTACTDATA);
+            //remove default acl
+            te.save(ct.asEditable().setDefaultInstanceACL(null));
+            ct = CacheAdmin.getEnvironment().getType(FxType.CONTACTDATA);
+            assertFalse(ct.hasDefaultInstanceACL());
+            //set to default instance ACL
+            te.save(ct.asEditable().setDefaultInstanceACL(CacheAdmin.getEnvironment().getDefaultACL(ACLCategory.INSTANCE)));
+            ct = CacheAdmin.getEnvironment().getType(FxType.CONTACTDATA);
+            assertTrue(ct.hasDefaultInstanceACL());
+            assertEquals(ct.getDefaultInstanceACL().getId(), ACLCategory.INSTANCE.getDefaultId());
+            assertEquals((long)getContentEngine().initialize(FxType.CONTACTDATA).getAclIds().get(0), ACLCategory.INSTANCE.getDefaultId());
+            //set back to default settings
+            te.save(ct.asEditable().setDefaultInstanceACL(CacheAdmin.getEnvironment().getACL(ACL.ACL_CONTACTDATA)));
+            ct = CacheAdmin.getEnvironment().getType(FxType.CONTACTDATA);
+            assertTrue(ct.hasDefaultInstanceACL());
+            assertEquals(ct.getDefaultInstanceACL().getId(), ACL.ACL_CONTACTDATA);
+            assertEquals((long)getContentEngine().initialize(FxType.CONTACTDATA).getAclIds().get(0), ACL.ACL_CONTACTDATA);
+        } finally {
+            FxContext.get().stopRunAsSystem();
+        }
     }
 }

@@ -101,8 +101,13 @@ public class CmisSearchEngineTest {
 
     @AfterClass(groups = {"search", "cmis", "ejb"})
     public void cleanup() throws FxApplicationException, FxLogoutFailedException {
-        for (FxPK pk : testInstances) {
-            getContentEngine().remove(pk);
+        try {
+            FxContext.get().runAsSystem();
+            for (FxPK pk : testInstances) {
+                getContentEngine().remove(pk);
+            }
+        } finally {
+            FxContext.get().stopRunAsSystem();
         }
         FxTestUtils.logout();
     }
@@ -1100,12 +1105,17 @@ public class CmisSearchEngineTest {
     }
 
     private FxPK createContactData(String surname, String name) throws FxApplicationException {
-        final FxPK pk = getContentEngine().initialize(FxType.CONTACTDATA)
-                .setValue("/surname", surname)
-                .setValue("/name", name)
-                .save().getPk();
-        testInstances.add(pk);
-        return pk;
+        try {
+            FxContext.get().runAsSystem(); //have to be supervisor to create contact data for "others"
+            final FxPK pk = getContentEngine().initialize(FxType.CONTACTDATA)
+                    .setValue("/surname", surname)
+                    .setValue("/name", name)
+                    .save().getPk();
+            testInstances.add(pk);
+            return pk;
+        } finally {
+            FxContext.get().stopRunAsSystem();
+        }
     }
 
     private FxPK createArticle(String title, String text) throws FxApplicationException {

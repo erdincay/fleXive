@@ -104,7 +104,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
         try {
             environment.getACL(acl);
         } catch (Exception e) {
-            acl = ACLCategory.INSTANCE.getDefaultId();
+            acl = type.hasDefaultInstanceACL() ? type.getDefaultInstanceACL().getId() : ACLCategory.INSTANCE.getDefaultId();
             if (!ticket.isGlobalSupervisor() && type.isUseInstancePermissions() &&
                     !(ticket.mayCreateACL(acl, ticket.getUserId()) &&
                             ticket.mayReadACL(acl, ticket.getUserId()) &&
@@ -170,7 +170,7 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
         FxType type = CacheAdmin.getEnvironment().getType(typeId);
         UserTicket ticket = FxContext.getUserTicket();
         return initialize(type.getId(), ticket.getMandatorId(),
-                -1 /*invalid ACL will cause a lookup for best-fit ACL*/,
+                type.hasDefaultInstanceACL() ? type.getDefaultInstanceACL().getId() : -1 /*invalid ACL will cause a lookup for best-fit ACL*/,
                 -1 /*invalid Step will cause a lookup for best-fit Step*/, ticket.getLanguage().getId());
     }
 

@@ -321,6 +321,7 @@ COMMENT ON TABLE FXS_WF_ROUTES IS 'Routes';
 CREATE TABLE FXS_TYPEDEF (
   ID BIGINT NOT NULL,
   ACL BIGINT NOT NULL,
+  DEFACL BIGINT,
   WORKFLOW BIGINT NOT NULL,
   NAME VARCHAR(255) NOT NULL,
   PARENT BIGINT DEFAULT NULL,
@@ -353,6 +354,7 @@ CREATE TABLE FXS_TYPEDEF (
 );
 COMMENT ON TABLE FXS_TYPEDEF IS 'Type definitions';
 COMMENT ON COLUMN FXS_TYPEDEF.ACL IS 'ACL for the type, only checked if enabled in permissions';
+COMMENT ON COLUMN FXS_TYPEDEF.DEFACL IS 'Optional default ACL for instances';
 COMMENT ON COLUMN FXS_TYPEDEF.NAME IS 'name of the type';
 COMMENT ON COLUMN FXS_TYPEDEF.PARENT IS 'parent for derived types, null if this is the parent, cyclic checks have to be performed by the application';
 COMMENT ON COLUMN FXS_TYPEDEF.STORAGE_MODE IS E'how are data tables organized \n0=inbound\n1=outbound\n2=external table (no versioning, permissions, etc)\n3=memory (nothing persisted, for small amounts of data only, no query engine available!)';

@@ -50,7 +50,7 @@ def label(labelEn, labelDe) {
 }
 
 def long typeId = EJBLookup.getTypeEngine().save(FxTypeEdit.createNew(FxType.CONTACTDATA, new FxString(FxLanguage.ENGLISH, "Contact Data").setTranslation(FxLanguage.GERMAN, "Kontaktdaten"),
-        CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.defaultId), null))
+        CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.defaultId), null).setDefaultInstanceACL(CacheAdmin.getEnvironment().getACL(ACL.ACL_CONTACTDATA)))
 def builder = new GroovyTypeBuilder(typeId)
 builder {
     fqn(assignment: CacheAdmin.getEnvironment().getAssignment((Long) EJBLookup.configurationEngine.get(SystemParameters.TREE_FQN_ROOTASSIGNMENT)).getXPath())

@@ -80,6 +80,7 @@ public class FxTypeConverter implements Converter {
     /**
      * {@inheritDoc}
      */
+    @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     public void marshal(Object o, HierarchicalStreamWriter writer, MarshallingContext ctx) {
         FxType type = ((FxType) o);
         FxEnvironment env = CacheAdmin.getEnvironment();
@@ -90,6 +91,9 @@ public class FxTypeConverter implements Converter {
                 writer.addAttribute("parent", type.getParent().getName());
 
             writer.addAttribute("acl", type.getACL().getName());
+            writer.addAttribute("hasdefacl", String.valueOf(type.hasDefaultInstanceACL()));
+            if (type.hasDefaultInstanceACL())
+                writer.addAttribute("defacl", type.getDefaultInstanceACL().getName());
             writer.addAttribute("category", type.getCategory().name());
             writer.addAttribute("languageMode", type.getLanguage().name());
             writer.addAttribute("maxVersions", String.valueOf(type.getMaxVersions()));
@@ -166,6 +170,7 @@ public class FxTypeConverter implements Converter {
     /**
      * {@inheritDoc}
      */
+    @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     public Object unmarshal(HierarchicalStreamReader reader, UnmarshallingContext ctx) {
         final FxEnvironment env = CacheAdmin.getEnvironment();
         String name = reader.getAttribute("name");
@@ -181,6 +186,10 @@ public class FxTypeConverter implements Converter {
                 parent = env.getType(parentType);
         }
         ACL acl = env.getACL(reader.getAttribute("acl"));
+        boolean hasDefaultACL = Boolean.valueOf(reader.getAttribute("hasdefacl"));
+        ACL defACL = null;
+        if( hasDefaultACL )
+            defACL = env.getACL(reader.getAttribute("defacl"));
         TypeCategory cat = TypeCategory.valueOf(reader.getAttribute("category"));
         LanguageMode langMode = LanguageMode.valueOf(reader.getAttribute("languageMode"));
         long maxVersions = Long.valueOf(reader.getAttribute("maxVersions"));
@@ -202,13 +211,14 @@ public class FxTypeConverter implements Converter {
         FxString label = null;
         List<FxTypeScriptImportMapping> scriptMapping = null;
         if (!existing) {
-            typeEdit = FxTypeEdit.createNew(name, label, acl, workflow, parent, false,
+            typeEdit = FxTypeEdit.createNew(name, label, acl, defACL, workflow, parent, false,
                     storageMode, cat, mode, langMode, state, permissions, trackHistory, historyAge, maxVersions,
                     maxRelSource, maxRelDest);
             typeEdit.setLifeCycleInfo(LifeCycleInfoImpl.createNew(FxContext.getUserTicket()));
         }
         if (existing) {
             typeEdit.setACL(acl);
+            typeEdit.setDefaultInstanceACL(defACL);
             typeEdit.setCategory(cat);
             typeEdit.setLanguage(langMode);
             typeEdit.setMaxVersions(maxVersions);

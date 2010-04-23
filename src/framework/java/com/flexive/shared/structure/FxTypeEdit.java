@@ -32,12 +32,12 @@
 package com.flexive.shared.structure;
 
 import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxLanguage;
 import com.flexive.shared.FxSharedUtils;
-import com.flexive.shared.EJBLookup;
 import com.flexive.shared.content.FxPermissionUtils;
-import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.media.FxMimeTypeWrapper;
 import com.flexive.shared.media.impl.FxMimeType;
 import com.flexive.shared.security.ACL;
@@ -74,6 +74,7 @@ public class FxTypeEdit extends FxType implements Serializable {
      * @param name                       name of the type
      * @param label                      label
      * @param acl                        type ACL
+     * @param defaultInstanceACL         optional default ACL to assign for new instances
      * @param workflow                   workflow to use
      * @param parent                     parent type or <code>null</code> if not derived
      * @param enableParentAssignments    if parent is not <code>null</code> enable all derived assignments from the parent?
@@ -92,14 +93,14 @@ public class FxTypeEdit extends FxType implements Serializable {
      * @param maxRelDestination          max. number of instances related as destination
      * @param options                    List of FxStructureOptions
      */
-    private FxTypeEdit(String name, FxString label, ACL acl, Workflow workflow, FxType parent,
+    private FxTypeEdit(String name, FxString label, ACL acl, ACL defaultInstanceACL, Workflow workflow, FxType parent,
                        boolean enableParentAssignments,
                        TypeStorageMode storageMode, TypeCategory category, TypeMode mode,
                        LanguageMode language, TypeState state, byte permissions, boolean multipleContentACLs,
                        boolean includedInSupertypeQueries,
                        boolean trackHistory, long historyAge, long maxVersions, int maxRelSource,
                        int maxRelDestination, List<FxStructureOption> options) {
-        super(-1, acl, workflow, name, label, parent, storageMode, category, mode, language, state, permissions,
+        super(-1, acl, defaultInstanceACL, workflow, name, label, parent, storageMode, category, mode, language, state, permissions,
                 multipleContentACLs, includedInSupertypeQueries, trackHistory, historyAge,
                 maxVersions, maxRelSource, maxRelDestination, null, null, new ArrayList<FxTypeRelation>(5), options);
         FxSharedUtils.checkParameterMultilang(label, "label");
@@ -117,7 +118,7 @@ public class FxTypeEdit extends FxType implements Serializable {
      * @param type the FxType to edit
      */
     public FxTypeEdit(FxType type) {
-        super(type.getId(), type.getACL(), type.getWorkflow(),
+        super(type.getId(), type.getACL(), type.hasDefaultInstanceACL() ? type.getDefaultInstanceACL() : null, type.getWorkflow(),
                 type.getName(), type.getLabel(), type.getParent(), type.getStorageMode(), type.getCategory(),
                 type.getMode(), type.getLanguage(), type.getState(), type.permissions, type.isMultipleContentACLs(),
                 type.isIncludedInSupertypeQueries(), type.isTrackHistory(), type.getHistoryAge(), type.getMaxVersions(), type.getMaxRelSource(),
@@ -201,7 +202,7 @@ public class FxTypeEdit extends FxType implements Serializable {
     }
 
     /**
-     * Create a new FxTypeEdit instance derived from an existing FxType
+     * Create a new FxTypeEdit instance derived from an existing FxType using the parents default instance ACL if it is set
      *
      * @param name   name of the type
      * @param label  label
@@ -211,18 +212,18 @@ public class FxTypeEdit extends FxType implements Serializable {
      */
     public static FxTypeEdit createNew(String name, FxString label, ACL acl, FxType parent) {
         List<FxStructureOption> options = parent == null ? FxStructureOption.getEmptyOptionList(2) : parent.getInheritedOptions();
-        if(parent != null && parent.isMimeTypeSet()) {
+        if (parent != null && parent.isMimeTypeSet()) {
             options = removeMimeTypes(options);
         }
 
         if (parent == null) {
-            return createNew(name, label, acl,
+            return createNew(name, label, acl, null,
                     CacheAdmin.getEnvironment().getWorkflows().get(0),
                     null, false, TypeStorageMode.Hierarchical,
                     TypeCategory.User, TypeMode.Content, LanguageMode.Multiple, TypeState.Available,
                     getDefaultTypePermissions(), false, 0, -1, 0, 0, options);
         } else {
-            return createNew(name, label, acl,
+            return createNew(name, label, acl, parent.hasDefaultInstanceACL() ? parent.getDefaultInstanceACL() : null,
                     parent.getWorkflow(),
                     parent, true, parent.getStorageMode(),
                     TypeCategory.User, parent.getMode(),
@@ -246,13 +247,13 @@ public class FxTypeEdit extends FxType implements Serializable {
      * Automatically remove the mime type configuration (not the key, values only) for any types which are created
      * as derived types from a DOCUMENTFILE type parent and set a dummy mime type as a placeholder (unknown/unknown)
      * // TODO: this behaviour is subject to a possible change
-     * 
+     *
      * @param typeOptions the type options
      * @return type options w/o MIMETYPE values
      */
     private static List<FxStructureOption> removeMimeTypes(List<FxStructureOption> typeOptions) {
         final List<FxStructureOption> out = FxStructureOption.cloneOptions(typeOptions);
-        if(FxStructureOption.hasOption(FxStructureOption.OPTION_MIMETYPE, out)) {
+        if (FxStructureOption.hasOption(FxStructureOption.OPTION_MIMETYPE, out)) {
             FxStructureOption.setOption(out, FxStructureOption.OPTION_MIMETYPE, true, true, new FxMimeTypeWrapper(FxMimeType.DEFAULT).toString());
         }
 
@@ -280,6 +281,7 @@ public class FxTypeEdit extends FxType implements Serializable {
      * @param maxRelSource            max. number of instance related as source
      * @param maxRelDestination       max. number of instance related as destination
      * @return FxTypeEdit instance for creating a new FxType
+     * @deprecated since 3.1.1 (defaultInstanceACL added to method)
      */
     public static FxTypeEdit createNew(String name, FxString label, ACL acl, Workflow workflow,
                                        FxType parent, boolean enableParentAssignments,
@@ -287,7 +289,43 @@ public class FxTypeEdit extends FxType implements Serializable {
                                        LanguageMode language, TypeState state, byte permissions,
                                        boolean trackHistory, long historyAge, long maxVersions, int maxRelSource,
                                        int maxRelDestination) {
-        return new FxTypeEdit(name, label, acl, workflow, parent, enableParentAssignments,
+        return new FxTypeEdit(name, label, acl, null, workflow, parent, enableParentAssignments,
+                storageMode, category, mode, language, state, permissions, parent == null || parent.isMultipleContentACLs(),
+                parent == null || parent.isIncludedInSupertypeQueries(), trackHistory, historyAge,
+                maxVersions, maxRelSource, maxRelDestination, null);
+    }
+
+    /**
+     * Create a new FxTypeEdit instance for creating a new FxType (no structure options)
+     *
+     * @param name                    name of the type
+     * @param label                   label
+     * @param acl                     type ACL
+     * @param defaultInstanceACL      optional default ACL to assign for new instances
+     * @param workflow                workflow to use
+     * @param parent                  parent type or <code>null</code> if not derived
+     * @param enableParentAssignments if parent is not <code>null</code> enable all derived assignments from the parent?
+     * @param storageMode             the storage mode
+     * @param category                category mode (system, user)
+     * @param mode                    type mode (content, relation)
+     * @param language                language mode
+     * @param state                   type state (active, locked, etc)
+     * @param permissions             permissions bit coded
+     * @param trackHistory            track history
+     * @param historyAge              max. age of the history to track
+     * @param maxVersions             max. number of versions to keep, if &lt; 0 unlimited
+     * @param maxRelSource            max. number of instance related as source
+     * @param maxRelDestination       max. number of instance related as destination
+     * @return FxTypeEdit instance for creating a new FxType
+     * @since 3.1.1
+     */
+    public static FxTypeEdit createNew(String name, FxString label, ACL acl, ACL defaultInstanceACL, Workflow workflow,
+                                       FxType parent, boolean enableParentAssignments,
+                                       TypeStorageMode storageMode, TypeCategory category, TypeMode mode,
+                                       LanguageMode language, TypeState state, byte permissions,
+                                       boolean trackHistory, long historyAge, long maxVersions, int maxRelSource,
+                                       int maxRelDestination) {
+        return new FxTypeEdit(name, label, acl, defaultInstanceACL, workflow, parent, enableParentAssignments,
                 storageMode, category, mode, language, state, permissions, parent == null || parent.isMultipleContentACLs(),
                 parent == null || parent.isIncludedInSupertypeQueries(), trackHistory, historyAge,
                 maxVersions, maxRelSource, maxRelDestination, null);
@@ -315,6 +353,7 @@ public class FxTypeEdit extends FxType implements Serializable {
      * @param maxRelDestination       max. number of instance related as destination
      * @param options                 list of structure options
      * @return FxTypeEdit instance for creating a new FxType
+     * @deprecated since 3.1.1 (defaultInstanceACL added to method)
      */
     public static FxTypeEdit createNew(String name, FxString label, ACL acl, Workflow workflow,
                                        FxType parent, boolean enableParentAssignments,
@@ -322,7 +361,44 @@ public class FxTypeEdit extends FxType implements Serializable {
                                        LanguageMode language, TypeState state, byte permissions,
                                        boolean trackHistory, long historyAge, long maxVersions, int maxRelSource,
                                        int maxRelDestination, List<FxStructureOption> options) {
-        return new FxTypeEdit(name, label, acl, workflow, parent, enableParentAssignments,
+        return new FxTypeEdit(name, label, acl, null, workflow, parent, enableParentAssignments,
+                storageMode, category, mode, language, state, permissions, parent == null || parent.isMultipleContentACLs(),
+                parent == null || parent.isIncludedInSupertypeQueries(), trackHistory, historyAge,
+                maxVersions, maxRelSource, maxRelDestination, options);
+    }
+
+    /**
+     * Create a new FxTypeEdit instance for creating a new FxType
+     *
+     * @param name                    name of the type
+     * @param label                   label
+     * @param acl                     type ACL
+     * @param defaultInstanceACL      optional default ACL to assign for new instances
+     * @param workflow                workflow to use
+     * @param parent                  parent type or <code>null</code> if not derived
+     * @param enableParentAssignments if parent is not <code>null</code> enable all derived assignments from the parent?
+     * @param storageMode             the storage mode
+     * @param category                category mode (system, user)
+     * @param mode                    type mode (content, relation)
+     * @param language                language mode
+     * @param state                   type state (active, locked, etc)
+     * @param permissions             permissions bit coded
+     * @param trackHistory            track history
+     * @param historyAge              max. age of the history to track
+     * @param maxVersions             max. number of versions to keep, if &lt; 0 unlimited
+     * @param maxRelSource            max. number of instance related as source
+     * @param maxRelDestination       max. number of instance related as destination
+     * @param options                 list of structure options
+     * @return FxTypeEdit instance for creating a new FxType
+     * @since 3.1.1
+     */
+    public static FxTypeEdit createNew(String name, FxString label, ACL acl, ACL defaultInstanceACL, Workflow workflow,
+                                       FxType parent, boolean enableParentAssignments,
+                                       TypeStorageMode storageMode, TypeCategory category, TypeMode mode,
+                                       LanguageMode language, TypeState state, byte permissions,
+                                       boolean trackHistory, long historyAge, long maxVersions, int maxRelSource,
+                                       int maxRelDestination, List<FxStructureOption> options) {
+        return new FxTypeEdit(name, label, acl, defaultInstanceACL, workflow, parent, enableParentAssignments,
                 storageMode, category, mode, language, state, permissions, parent == null || parent.isMultipleContentACLs(),
                 parent == null || parent.isIncludedInSupertypeQueries(), trackHistory, historyAge,
                 maxVersions, maxRelSource, maxRelDestination, options);
@@ -393,11 +469,24 @@ public class FxTypeEdit extends FxType implements Serializable {
     /**
      * Assign a new ACL
      *
-     * @param ACL ACL to assign for this type
+     * @param acl ACL to assign for this type
      * @return the type itself, useful for chained calls
      */
-    public FxTypeEdit setACL(ACL ACL) {
-        this.ACL = ACL;
+    public FxTypeEdit setACL(ACL acl) {
+        this.ACL = acl;
+        this.changed = true;
+        return this;
+    }
+
+    /**
+     * Assign a new default instance ACL
+     *
+     * @param defaultInstanceACL default instance ACL to assign for this type
+     * @return the type itself, useful for chained calls
+     * @since 3.1.1
+     */
+    public FxTypeEdit setDefaultInstanceACL(ACL defaultInstanceACL) {
+        this.defaultInstanceACL = defaultInstanceACL;
         this.changed = true;
         return this;
     }
@@ -927,7 +1016,6 @@ public class FxTypeEdit extends FxType implements Serializable {
      *
      * @param options a List of FxTypeStructureOptions
      * @return itself
-     *
      * @since 3.1
      */
     public FxTypeEdit setOptions(List<FxStructureOption> options) {
@@ -942,7 +1030,6 @@ public class FxTypeEdit extends FxType implements Serializable {
      * @param value value of the option
      * @return the assignment itself, useful for chained calls
      * @throws FxInvalidParameterException if the property does not allow overriding
-     *
      * @since 3.1
      */
     public FxTypeEdit setOption(String key, String value) throws FxInvalidParameterException {
@@ -958,19 +1045,18 @@ public class FxTypeEdit extends FxType implements Serializable {
 
     /**
      * Set an option
-     * 
-     * @param key   option key
-     * @param value value of the option
+     *
+     * @param key         option key
+     * @param value       value of the option
      * @param overridable may derived types override the option?
      * @param isInherited will the option be inherited by derived types?
      * @return the assignment itself, useful for chained calls
      * @throws FxInvalidParameterException if the property does not allow overriding
-     *
      * @since 3.1
      */
     public FxTypeEdit setOption(String key, String value, boolean overridable, boolean isInherited) throws FxInvalidParameterException {
-        if(FxStructureOption.OPTION_MIMETYPE.equals(key)) {
-            if(!mayAssignMimeType())
+        if (FxStructureOption.OPTION_MIMETYPE.equals(key)) {
+            if (!mayAssignMimeType())
                 throw new FxInvalidParameterException(key, "ex.structure.type.mimetype.err");
         }
         final FxStructureOption pOpt = getOption(key);
@@ -978,7 +1064,7 @@ public class FxTypeEdit extends FxType implements Serializable {
             if (pOpt.isSet() && !pOpt.isOverrideable() && pOpt.getIsInherited()) {
                 // check if it was inherited from the supertype
                 final FxStructureOption parentOption = parent.getOption(pOpt.getKey());
-                if(parentOption.isSet() && parentOption.getIsInherited() && (!parentOption.equals(pOpt) || !pOpt.getValue().equals(value)))
+                if (parentOption.isSet() && parentOption.getIsInherited() && (!parentOption.equals(pOpt) || !pOpt.getValue().equals(value)))
                     throw new FxInvalidParameterException(key, "ex.structure.type.override.forbidden", key, parent.getName());
             }
         }
@@ -994,7 +1080,6 @@ public class FxTypeEdit extends FxType implements Serializable {
      * @param value value of the option
      * @return the assignemnt itself, useful for chained calls
      * @throws FxInvalidParameterException if the property does not allow overriding
-     *
      * @since 3.1
      */
     public FxTypeEdit setOption(String key, boolean value) throws FxInvalidParameterException {
@@ -1010,14 +1095,13 @@ public class FxTypeEdit extends FxType implements Serializable {
 
     /**
      * Set a boolean option
-     * 
-     * @param key   option key
-     * @param value value of the option
+     *
+     * @param key         option key
+     * @param value       value of the option
      * @param overridable may derived types override the option?
      * @param isInherited is the option inherited by derived types?
      * @return the assignemnt itself, useful for chained calls
      * @throws FxInvalidParameterException if the property does not allow overriding
-     *
      * @since 3.1
      */
     public FxTypeEdit setOption(String key, boolean value, boolean overridable, boolean isInherited) throws FxInvalidParameterException {
@@ -1027,7 +1111,7 @@ public class FxTypeEdit extends FxType implements Serializable {
             if (pOpt.isSet() && !pOpt.isOverrideable() && pOpt.getIsInherited()) {
                 // check if it was inherited from the supertype
                 final FxStructureOption parentOption = parent.getOption(pOpt.getKey());
-                if(parentOption.isSet() && parentOption.getIsInherited() && (!parentOption.equals(pOpt) || !pOpt.isValueTrue() == value))
+                if (parentOption.isSet() && parentOption.getIsInherited() && (!parentOption.equals(pOpt) || !pOpt.isValueTrue() == value))
                     throw new FxInvalidParameterException(key, "ex.structure.type.override.forbidden", key, parent.getName());
             }
         }
@@ -1040,7 +1124,6 @@ public class FxTypeEdit extends FxType implements Serializable {
      * Clear an option entry
      *
      * @param key option name
-     *
      * @since 3.1
      */
     public void clearOption(String key) {
@@ -1049,15 +1132,14 @@ public class FxTypeEdit extends FxType implements Serializable {
 
     /**
      * Set 1* MimeTypes for a given FxType. The mimetype can only be set for descendents of "DOCUMENTFILE"
-     * 
+     *
      * @param mimeTypeWrapper the MimeType to set
      * @return this
-     *
      * @since 3.1
      */
     @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     public FxTypeEdit setMimeType(FxMimeTypeWrapper mimeTypeWrapper) {
-        if(!mayAssignMimeType())
+        if (!mayAssignMimeType())
             throw new FxApplicationException("ex.structure.type.mimetype.err", this).asRuntimeException();
 
         FxStructureOption.setOption(options, FxStructureOption.OPTION_MIMETYPE, true, true, mimeTypeWrapper.toString());
@@ -1068,9 +1150,8 @@ public class FxTypeEdit extends FxType implements Serializable {
     /**
      * Checks whether a mime type may be assigned to the given FxType. Mime types can only be assigned to "DOCUMENTFILE"
      * or any of its derived types
-     * 
-     * @return returns true if a mime type may be assigned to this FxType
      *
+     * @return returns true if a mime type may be assigned to this FxType
      * @since 3.1
      */
     public boolean mayAssignMimeType() {
@@ -1090,8 +1171,8 @@ public class FxTypeEdit extends FxType implements Serializable {
      * Save the type and return the saved instance.
      *
      * @return the saved instance.
-     * @since 3.1
      * @throws FxApplicationException on errors
+     * @since 3.1
      */
     public FxTypeEdit save() throws FxApplicationException {
         final long id = EJBLookup.getTypeEngine().save(this);

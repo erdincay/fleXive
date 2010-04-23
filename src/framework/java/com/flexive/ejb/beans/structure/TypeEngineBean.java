@@ -48,6 +48,7 @@ import com.flexive.shared.content.FxPK;
 import com.flexive.shared.content.FxPermissionUtils;
 import com.flexive.shared.exceptions.*;
 import com.flexive.shared.interfaces.*;
+import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.security.Role;
 import com.flexive.shared.security.UserTicket;
@@ -103,10 +104,10 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
                     "LANG_MODE,  TYPE_STATE, SECURITY_MODE, TRACKHISTORY, HISTORY_AGE, MAX_VERSIONS, " +
                     //13               14                15          16          17           18           19   20        21
                     "REL_TOTAL_MAXSRC, REL_TOTAL_MAXDST, CREATED_BY, CREATED_AT, MODIFIED_BY, MODIFIED_AT, ACL, WORKFLOW, ICON_REF," +
-                    // 22                   23
-                    "MULTIPLE_CONTENT_ACLS, INSUPERTYPEQUERY)" +
+                    // 22                   23                24
+                    "MULTIPLE_CONTENT_ACLS, INSUPERTYPEQUERY, DEFACL)" +
                     " VALUES " +
-                    "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+                    "(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
     /**
      * {@inheritDoc}
@@ -136,7 +137,8 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
             throw new FxInvalidParameterException("STORAGEMODE", "ex.structure.typeStorageMode.notSupported", type.getStorageMode().getLabel().getBestTranslation(ticket));
         if (type.getACL().getCategory() != ACLCategory.STRUCTURE)
             throw new FxInvalidParameterException("aclId", "ex.acl.category.invalid", type.getACL().getCategory().name(), ACLCategory.STRUCTURE.name());
-
+        if (type.hasDefaultInstanceACL() && type.getDefaultInstanceACL().getCategory() != ACLCategory.INSTANCE)
+            throw new FxInvalidParameterException("DEFACL", "ex.acl.category.invalid", type.getDefaultInstanceACL().getCategory(), ACLCategory.INSTANCE);
         Connection con = null;
         PreparedStatement ps = null;
         long newId = seq.getId(FxSystemSequencer.TYPEDEF);
@@ -173,6 +175,10 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
                 ps.setLong(21, type.getIcon().getDefaultTranslation().getId());
             ps.setBoolean(22, type.isUseInstancePermissions() && type.isMultipleContentACLs());
             ps.setBoolean(23, type.isIncludedInSupertypeQueries());
+            if (type.hasDefaultInstanceACL())
+                ps.setLong(24, type.getDefaultInstanceACL().getId());
+            else
+                ps.setNull(24, java.sql.Types.INTEGER);
             ps.executeUpdate();
             Database.storeFxString(type.getLabel(), con, TBL_STRUCT_TYPES, "DESCRIPTION", "ID", newId);
 
@@ -619,6 +625,25 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
                 htracker.track(type, "history.type.update.acl", orgType.getACL(), type.getACL());
             }
             //end ACL changes
+
+            //start default instance ACL changes
+            if (type.hasDefaultInstanceACL() != orgType.hasDefaultInstanceACL() ||   !type.getDefaultInstanceACL().equals(orgType.getDefaultInstanceACL())) {
+                if (type.hasDefaultInstanceACL() && type.getDefaultInstanceACL().getCategory() != ACLCategory.INSTANCE)
+                    throw new FxInvalidParameterException("DEFACL", "ex.acl.category.invalid", type.getDefaultInstanceACL().getCategory(), ACLCategory.INSTANCE);
+                sql.setLength(0);
+                sql.append("UPDATE ").append(TBL_STRUCT_TYPES).append(" SET DEFACL=? WHERE ID=?");
+                if (ps != null) ps.close();
+                ps = con.prepareStatement(sql.toString());
+                if (type.hasDefaultInstanceACL())
+                    ps.setLong(1, type.getDefaultInstanceACL().getId());
+                else
+                    ps.setNull(1, java.sql.Types.INTEGER);
+                ps.setLong(2, type.getId());
+                ps.executeUpdate();
+                htracker.track(type, "history.type.update.defacl", orgType.hasDefaultInstanceACL() ? orgType.getACL() : "-",
+                        type.hasDefaultInstanceACL() ? type.getDefaultInstanceACL() : "-");
+            }
+            //end default instance ACL changes
 
             //start Workflow changes
             if (!type.getWorkflow().equals(orgType.getWorkflow())) {
@@ -1070,8 +1095,8 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
                     "LANG_MODE, TYPE_STATE, SECURITY_MODE, TRACKHISTORY, HISTORY_AGE, MAX_VERSIONS," +
                     //13               14                15          16          17           18           19   20
                     "REL_TOTAL_MAXSRC, REL_TOTAL_MAXDST, CREATED_BY, CREATED_AT, MODIFIED_BY, MODIFIED_AT, ACL, WORKFLOW, " +
-                    // 21                   22
-                    "MULTIPLE_CONTENT_ACLS, INSUPERTYPEQUERY" +
+                    // 21                   22                23
+                    "MULTIPLE_CONTENT_ACLS, INSUPERTYPEQUERY, DEFACL" +
                     " FROM " + TBL_STRUCT_TYPES + " WHERE ID=" + id;
 
             stmt = con.createStatement();
@@ -1087,7 +1112,13 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
                         alRelations.add(new FxTypeRelation(new FxPreloadType(rsRelations.getLong(1)), new FxPreloadType(rsRelations.getLong(2)),
                                 rsRelations.getInt(3), rsRelations.getInt(4)));
 
-                    return new FxType(rs.getLong(1), environment.getACL(rs.getInt(19)),
+                    final long defaultInstanceACLId = rs.getInt(23);
+                    final ACL defaultInstanceACL;
+                    if (!rs.wasNull())
+                        defaultInstanceACL = environment.getACL(defaultInstanceACLId);
+                    else
+                        defaultInstanceACL = null;
+                    return new FxType(rs.getLong(1), environment.getACL(rs.getInt(19)), defaultInstanceACL,
                             environment.getWorkflow(rs.getInt(20)), rs.getString(2),
                             Database.loadFxString(con, TBL_STRUCT_TYPES, "description", "id=" + rs.getLong(1)),
                             new FxPreloadType(rs.getLong(3)), TypeStorageMode.getById(rs.getInt(4)),

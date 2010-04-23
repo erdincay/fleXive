@@ -619,6 +619,24 @@ public class TypeEditorBean implements Serializable {
         return this.type.isTrackHistory();
     }
 
+    public boolean isUseDefaultInstanceACL() {
+        return this.type.hasDefaultInstanceACL();
+    }
+
+    public void setUseDefaultInstanceACL(boolean use) {
+        this.type.setDefaultInstanceACL(use ? CacheAdmin.getEnvironment().getDefaultACL(ACLCategory.INSTANCE) : null);
+    }
+
+    public long getDefaultInstanceACL() {
+        return this.type.getDefaultInstanceACL().getId();
+    }
+
+    public void setDefaultInstanceACL(long acl) {
+        this.type.setDefaultInstanceACL(CacheAdmin.getEnvironment().getACL(acl));
+    }
+
+
+
     public void setUseInstancePermissions(boolean perm) {
         this.type.setUseInstancePermissions(perm);
     }

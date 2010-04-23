@@ -73,7 +73,7 @@ public class SelectBean implements Serializable {
     private List<SelectItem> userGroups = null;
     private List<SelectItem> userGroupsNonSystem = null;
     private List<SelectItem> briefcaseACLs = null;
-    private List<SelectItem> contentACLs = null;
+    private List<SelectItem> instanceACLs = null;
     private List<SelectItem> globalUserGroups = null;
     private List<SelectItem> globalUserGroupsNonSystem = null;
     private List<SelectItem> languages = null;
@@ -383,12 +383,23 @@ public class SelectBean implements Serializable {
      * Return all available content ACLs.
      *
      * @return all available content ACLs.
+     * @deprecated since 3.1.1 use getInstanceACLs instead
      */
     public List<SelectItem> getContentACLs() {
-        if (contentACLs == null) {
-            contentACLs = FxJsfUtils.asSelectListWithLabel(environment.getACLs(ACLCategory.INSTANCE));
+        return getInstanceACLs();
+    }
+
+    /**
+     * Return all available content ACLs.
+     *
+     * @return all available content ACLs.
+     * @since 3.1.1
+     */
+    public List<SelectItem> getInstanceACLs() {
+        if (instanceACLs == null) {
+            instanceACLs = FxJsfUtils.asSelectListWithLabel(environment.getACLs(ACLCategory.INSTANCE));
         }
-        return contentACLs;
+        return instanceACLs;
     }
 
     /**

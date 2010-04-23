@@ -269,6 +269,20 @@
                 </h:selectOneListbox>
             </fx:formRow>
 
+            <fx:formRow labelKey="TypeEditor.label.useDefaultInstanceACL" id="useDefaultInstanceACL">
+                <h:selectBooleanCheckbox id="useDefaultInstanceACL" value="#{typeEditorBean.useDefaultInstanceACL}"
+                                         disabled="#{not typeEditorBean.editMode}" onchange="submit();"/>
+            </fx:formRow>
+
+            <ui:fragment rendered="#{typeEditorBean.useDefaultInstanceACL}">
+                <fx:formRow labelKey="TypeEditor.label.defaultInstanceACL" id="defaultInstanceACL">
+                    <h:selectOneListbox size="1" id="defaultInstanceACL" value="#{typeEditorBean.defaultInstanceACL}"
+                                        disabled="#{not typeEditorBean.editMode}">
+                        <f:selectItems value="#{fxSelectBean.instanceACLs}"/>
+                    </h:selectOneListbox>
+                </fx:formRow>
+            </ui:fragment>
+
             <fx:formRow labelKey="TypeEditor.label.icon" id="icon">
                 <fx:fxValueInput value="#{typeEditorBean.icon}" id="icon" readOnly="#{not typeEditorBean.editMode}"/>
             </fx:formRow>

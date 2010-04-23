@@ -447,8 +447,8 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                     "LANG_MODE, TYPE_STATE, SECURITY_MODE, TRACKHISTORY, HISTORY_AGE, MAX_VERSIONS," +
                     //13               14                15          16          17           18           19   20        21
                     "REL_TOTAL_MAXSRC, REL_TOTAL_MAXDST, CREATED_BY, CREATED_AT, MODIFIED_BY, MODIFIED_AT, ACL, WORKFLOW, ICON_REF, " +
-                    // 22                   23
-                    "MULTIPLE_CONTENT_ACLS, INSUPERTYPEQUERY" +
+                    // 22                   23                24
+                    "MULTIPLE_CONTENT_ACLS, INSUPERTYPEQUERY, DEFACL" +
                     " FROM " + TBL_STRUCT_TYPES + " ORDER BY NAME";
 
             stmt = con.createStatement();
@@ -466,7 +466,13 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
                                 rsRelations.getInt(3), rsRelations.getInt(4)));
                     long parentId = rs.getLong(3);
                     FxType parentType = id == 0 ? null : new FxPreloadType(parentId);
-                    FxType _type = new FxType(id, environment.getACL(rs.getInt(19)),
+                    final long defaultInstanceACLId = rs.getInt(24);
+                    final ACL defaultInstanceACL;
+                    if (!rs.wasNull())
+                        defaultInstanceACL = environment.getACL(defaultInstanceACLId);
+                    else
+                        defaultInstanceACL = null;
+                    FxType _type = new FxType(id, environment.getACL(rs.getInt(19)), defaultInstanceACL,
                             environment.getWorkflow(rs.getInt(20)), rs.getString(2),
                             getTranslation(labels, id, 0),
                             parentType, TypeStorageMode.getById(rs.getInt(4)),
