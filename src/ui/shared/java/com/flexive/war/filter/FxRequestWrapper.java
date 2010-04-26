@@ -45,7 +45,7 @@ import javax.servlet.http.HttpSession;
 import java.util.Map;
 
 /**
- * HttpRequest wrapper to privide flexive specific informations
+ * HttpRequest wrapper to provide flexive specific informations
  */
 public class FxRequestWrapper extends HttpServletRequestWrapper implements FxRequest {
     private static final Log LOG = LogFactory.getLog(FxRequestWrapper.class);
@@ -206,7 +206,7 @@ public class FxRequestWrapper extends HttpServletRequestWrapper implements FxReq
         // list only resources that are known to be static, otherwise we'll run into troubles
         // when flexive is integrated in other applications/frameworks (e.g. Seam)
         return !("jpg".equals(pageType) || "css".equals(pageType) || "gif".equals(pageType) || "png".equals(pageType)
-            || "js".equals(pageType));
+            || "js".equals(pageType) || "ico".equals(pageType));
     }
 
     /**

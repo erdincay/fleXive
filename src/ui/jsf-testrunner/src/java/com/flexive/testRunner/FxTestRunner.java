@@ -67,6 +67,7 @@ public class FxTestRunner {
             "/browser/",   //requires selenium
             "/benchmark/", //no benchmarks in ear tests, only executed in embedded container!
             "/disttools/", //no distribution tests (not available in ear)
+            "/jsf/", //depends on Sun RI
     };
 
     /**
