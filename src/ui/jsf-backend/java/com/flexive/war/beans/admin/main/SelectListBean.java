@@ -91,6 +91,8 @@ public class SelectListBean implements Serializable {
     private int currentPage = 1;
     private int overviewRows = 10;
     private int overviewCurrentPage = 1;
+    private String sortColumn;
+    private String sortOrder;
     private long editListItemId = UNSELECTED_ID;
     private long moveListItemId = UNSELECTED_ID;
     private boolean editNew = false;
@@ -109,6 +111,22 @@ public class SelectListBean implements Serializable {
 
     public void setRowsPerPage(int rowsPerPage) {
         this.rowsPerPage = rowsPerPage;
+    }
+
+    public String getSortColumn() {
+        return sortColumn;
+    }
+
+    public void setSortColumn(String sortColumn) {
+        this.sortColumn = sortColumn;
+    }
+
+    public String getSortOrder() {
+        return sortOrder;
+    }
+
+    public void setSortOrder(String sortOrder) {
+        this.sortOrder = sortOrder;
     }
 
     public int getCurrentPage() {

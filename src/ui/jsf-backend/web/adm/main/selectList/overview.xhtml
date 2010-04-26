@@ -18,13 +18,16 @@
             <t:saveState value="#{selectListBean.selectListId}"/>
             <h:inputHidden id="currentPage" value="#{selectListBean.overviewCurrentPage}"/>
             <h:inputHidden id="rowsPerPage" value="#{selectListBean.overviewRows}"/>
+            <h:inputHidden id="sortColumn" value="#{selectListBean.sortColumn}"/>
+            <h:inputHidden id="sortOrder" value="#{selectListBean.sortOrder}"/>
 
            <adm:tab label="#{fxMessageBean['SelectList.tab.overview']}" active="true" id="tab1"/>
 
             <a4j:outputPanel id="selectListPanel">
                 <adm:sortableTable id="table" onPageChange="DTpageChange"
                                    startPage="#{selectListBean.overviewCurrentPage}"
-                                   rowsPerPage="#{selectListBean.overviewRows}">
+                                   rowsPerPage="#{selectListBean.overviewRows}"
+                                   onSortChange="SortChange" sortColumn="#{selectListBean.sortColumn}" sortOrder="#{selectListBean.sortOrder}">
                     <table id="table">
 
                         <thead>

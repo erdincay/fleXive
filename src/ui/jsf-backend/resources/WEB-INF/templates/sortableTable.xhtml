@@ -44,6 +44,16 @@ Parameters:
         <c:set var="initRowsPerPage" value="dataTable.configs.paginator.setRowsPerPage(#{rowsPerPage});"/>
     </c:if>
 
+    <c:set var="sortColumnEvent" value=""/>
+    <c:if test="#{!empty onSortChange}">
+        <c:set var="sortColumnEvent" value="dataTable.subscribe('beforeSortedByChange', #{onSortChange})"/>
+    </c:if>
+
+    <c:set var="sortByColumnAction" value=""/>
+    <c:if test="#{!empty sortColumn and !empty sortOrder}">
+        <c:set var="sortByColumnAction" value="dataTable.sortColumn(dataTable.getColumn('#{sortColumn}'), '#{sortOrder}')"/>
+    </c:if>
+
     <script type="text/javascript">
     <!--
         flexive.yui.require("datatable");
@@ -72,15 +82,18 @@ Parameters:
                     rowsPerPage : 10,
                     rowsPerPageOptions : [10, 25, 50, 100]
                   })
+                //,sortedBy: {key:"#{sortColumnKey}", dir:YAHOO.widget.DataTable.CLASS_ASC}
             });
             #{pageChangeEvent}
+            #{sortByColumnAction}
             #{initRowsPerPage}
             #{initPage}
             dataTable.subscribe("rowMouseoverEvent", dataTable.onEventHighlightRow);
             dataTable.subscribe("rowMouseoutEvent", dataTable.onEventUnhighlightRow);
+            #{sortColumnEvent}
             document.getElementById("#{id}_loading").style.display = "none";
             document.getElementById("#{id}_container").style.display = "block";
-        })
+        });
     //-->
     </script>
 

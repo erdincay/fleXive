@@ -19,6 +19,8 @@
         <h:form id="listForm">
             <h:inputHidden id="currentPage" value="#{accountBean.overviewPageNumber}"/>
             <h:inputHidden id="rowsPerPage" value="#{accountBean.overviewRows}"/>
+            <h:inputHidden id="sortColumn" value="#{accountBean.sortColumn}"/>
+            <h:inputHidden id="sortOrder" value="#{accountBean.sortOrder}"/>
 
             <adm:tab label="#{fxMessageBean['Account.label.overview']}" active="true" id="tab1"/>
 
@@ -45,7 +47,8 @@
 
             <br/><br/>
 
-            <adm:sortableTable id="table" onPageChange="DTpageChange" startPage="#{accountBean.overviewPageNumber}" rowsPerPage="#{accountBean.overviewRows}">
+            <adm:sortableTable id="table" onPageChange="DTpageChange" startPage="#{accountBean.overviewPageNumber}" rowsPerPage="#{accountBean.overviewRows}"
+                               onSortChange="SortChange" sortColumn="#{accountBean.sortColumn}" sortOrder="#{accountBean.sortOrder}">
                 <table id="table" class="dojoTable">
                     <thead>
                         <tr>
@@ -111,7 +114,7 @@
                                     </ui:fragment>
                                 </td>
                             </tr>
-                        </ui:repeat>
+                        </ui:repeat>                                                     
                     </tbody>
                 </table>
             </adm:sortableTable>

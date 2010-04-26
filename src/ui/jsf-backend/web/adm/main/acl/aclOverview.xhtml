@@ -38,8 +38,12 @@
     <h:form id="listForm">
         <h:inputHidden id="currentPage" value="#{aclBean.overviewPageNumber}"/>
         <h:inputHidden id="rowsPerPage" value="#{aclBean.overviewRows}"/>
+        <h:inputHidden id="sortColumn" value="#{aclBean.sortColumn}"/>
+            <h:inputHidden id="sortOrder" value="#{aclBean.sortOrder}"/>
 
-        <adm:sortableTable id="table" onPageChange="DTpageChange" startPage="#{aclBean.overviewPageNumber}" rowsPerPage="#{aclBean.overviewRows}">
+
+        <adm:sortableTable id="table" onPageChange="DTpageChange" startPage="#{aclBean.overviewPageNumber}" rowsPerPage="#{aclBean.overviewRows}"
+                onSortChange="SortChange" sortColumn="#{aclBean.sortColumn}" sortOrder="#{aclBean.sortOrder}">
             <table id="table" class="dojoTable">
                 <thead>
                     <tr>

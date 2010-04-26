@@ -99,6 +99,8 @@ public class AccountBean implements Serializable {
 
     private int overviewPageNumber;
     private int overviewRows;
+    private String sortColumn;
+    private String sortOrder;
 
     // user preferences fields
     private FxLanguage defaultInputLanguage;
@@ -438,6 +440,22 @@ public class AccountBean implements Serializable {
 
     public void setOverviewRows(int overviewRows) {
         this.overviewRows = overviewRows;
+    }
+
+    public String getSortColumn() {
+        return sortColumn;
+    }
+
+    public void setSortColumn(String sortColumn) {
+        this.sortColumn = sortColumn;
+    }
+
+    public String getSortOrder() {
+        return sortOrder;
+    }
+
+    public void setSortOrder(String sortOrder) {
+        this.sortOrder = sortOrder;
     }
 
     /**

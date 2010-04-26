@@ -77,8 +77,9 @@ public class ScriptConsoleBean implements Serializable {
     public String getCode() {
         if(code == null) {
             code = (String) FxJsfUtils.getSessionAttribute(SESSION_LASTCODE);
-            if(code == null || code.trim().length() == 0)
-            code = ScriptBean.getClassImports(language);
+            if(code == null || code.trim().length() == 0){
+                code = ScriptBean.getClassImports(language);
+            }
         }
         return code;
     }

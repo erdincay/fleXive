@@ -627,6 +627,24 @@
             <rtexprvalue>false</rtexprvalue>
             <description>number of rows that should be rendered initially</description>
         </attribute>
+        <attribute>
+            <name>onSortChange</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>javascript function to be called if the sort order changed</description>
+        </attribute>
+        <attribute>
+            <name>sortColumn</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>the column which should be sorted</description>
+        </attribute>
+        <attribute>
+            <name>sortOrder</name>
+            <required>false</required>
+            <rtexprvalue>false</rtexprvalue>
+            <description>the column which should be sorted</description>
+        </attribute>
     </tag>
     <tag>
         <name>shortcut</name>

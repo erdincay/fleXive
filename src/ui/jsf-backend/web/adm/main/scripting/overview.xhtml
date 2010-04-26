@@ -18,6 +18,8 @@
         <h:form id="listForm">
             <h:inputHidden id="currentPage" value="#{scriptBean.overviewPageNumber}"/>
             <h:inputHidden id="rowsPerPage" value="#{scriptBean.overviewRowNumber}"/>
+            <h:inputHidden id="sortColumn" value="#{scriptBean.sortColumn}"/>
+            <h:inputHidden id="sortOrder" value="#{scriptBean.sortOrder}"/>
 
 
             <adm:tab label="#{fxMessageBean['Script.tabtitle.overview']}" active="true" id="tab1"/>
@@ -38,7 +40,7 @@
             <br/>
             <a4j:outputPanel id="scriptOverviewPanel">
                 <adm:sortableTable id="table" onPageChange="DTpageChange" startPage="#{scriptBean.overviewPageNumber}"
-                                   rowsPerPage="#{scriptBean.overviewRowNumber}">
+                                   rowsPerPage="#{scriptBean.overviewRowNumber}" onSortChange="SortChange" sortColumn="#{scriptBean.sortColumn}" sortOrder="#{scriptBean.sortOrder}">
                     <table id="table">
                         <thead>
                         <tr>

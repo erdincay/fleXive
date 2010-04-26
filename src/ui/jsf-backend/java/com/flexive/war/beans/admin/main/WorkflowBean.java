@@ -84,6 +84,8 @@ public class WorkflowBean implements Serializable {
 
     private int overviewPageNumber;
     private int overviewRows;
+    private String sortColumn;
+    private String sortOrder;
 
     /**
      * Default constructor
@@ -472,6 +474,22 @@ public class WorkflowBean implements Serializable {
 
     public void setStepACL(long stepACL) {
         this.stepACL = stepACL;
+    }
+
+    public String getSortColumn() {
+        return sortColumn;
+    }
+
+    public void setSortColumn(String sortColumn) {
+        this.sortColumn = sortColumn;
+    }
+
+    public String getSortOrder() {
+        return sortOrder;
+    }
+
+    public void setSortOrder(String sortOrder) {
+        this.sortOrder = sortOrder;
     }
 
     /**

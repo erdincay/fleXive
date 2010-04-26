@@ -18,6 +18,9 @@
         <a4j:keepAlive beanName="workflowBean"/>
 
         <a4j:form id="frm">
+
+        <t:saveState id="sortColumn" value="#{workflowBean.sortColumn}"/>
+        <t:saveState id="sortOrder" value="#{workflowBean.sortOrder}"/>
             
             <h:inputHidden value="#{workflowBean.workflow.id}"/>
         	

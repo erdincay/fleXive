@@ -17,9 +17,12 @@
 
             <h:inputHidden id="currentPage" value="#{workflowBean.overviewPageNumber}"/>
             <h:inputHidden id="rowsPerPage" value="#{workflowBean.overviewRows}"/>
+            <h:inputHidden id="sortColumn" value="#{workflowBean.sortColumn}"/>
+            <h:inputHidden id="sortOrder" value="#{workflowBean.sortOrder}"/>
             
 
-            <adm:sortableTable id="table" onPageChange="DTpageChange" startPage="#{workflowBean.overviewPageNumber}" rowsPerPage="#{workflowBean.overviewRows}">
+            <adm:sortableTable id="table" onPageChange="DTpageChange" startPage="#{workflowBean.overviewPageNumber}" rowsPerPage="#{workflowBean.overviewRows}"
+                    onSortChange="SortChange" sortColumn="#{workflowBean.sortColumn}" sortOrder="#{workflowBean.sortOrder}">
                 <table id="table">
 
                     <thead>

@@ -68,6 +68,8 @@ public class AclBean implements Serializable {
 
     private int overviewPageNumber;
     private int overviewRows;
+    private String sortColumn;
+    private String sortOrder;
 
 
     public String getSelectedIds() {
@@ -90,6 +92,22 @@ public class AclBean implements Serializable {
             }
             return result;
         }
+    }
+
+    public String getSortColumn() {
+        return sortColumn;
+    }
+
+    public void setSortColumn(String sortColumn) {
+        this.sortColumn = sortColumn;
+    }
+
+    public String getSortOrder() {
+        return sortOrder;
+    }
+
+    public void setSortOrder(String sortOrder) {
+        this.sortOrder = sortOrder;
     }
 
     public long getAssignmentId() {

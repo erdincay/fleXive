@@ -72,6 +72,8 @@ public class UserGroupBean implements Serializable {
 
     private int overviewPageNumber;
     private int overviewRows;
+    private String sortColumn;
+    private String sortOrder;
 
 
     public Long[] getRoles() {
@@ -80,6 +82,22 @@ public class UserGroupBean implements Serializable {
 
     public void setRoles(Long[] roles) {
         this.roles = roles;
+    }
+
+    public String getSortColumn() {
+        return sortColumn;
+    }
+
+    public void setSortColumn(String sortColumn) {
+        this.sortColumn = sortColumn;
+    }
+
+    public String getSortOrder() {
+        return sortOrder;
+    }
+
+    public void setSortOrder(String sortOrder) {
+        this.sortOrder = sortOrder;
     }
 
     public String getName() {

@@ -89,6 +89,8 @@ public class ScriptBean implements Serializable {
     private String language = "groovy";
     private int overviewPageNumber = 1;
     private int overviewRowNumber = 10;
+    private String sortColumn;
+    private String sortOrder;
 
     private transient Object result;
     
@@ -125,6 +127,22 @@ public class ScriptBean implements Serializable {
             this.selectedScriptEventId = -1;
 
         return eventsForScope;
+    }
+
+    public String getSortColumn() {
+        return sortColumn;
+    }
+
+    public void setSortColumn(String sortColumn) {
+        this.sortColumn = sortColumn;
+    }
+
+    public String getSortOrder() {
+        return sortOrder;
+    }
+
+    public void setSortOrder(String sortOrder) {
+        this.sortOrder = sortOrder;
     }
 
     public void setSelectedScope(FxScriptScope selectedScope) {

@@ -35,6 +35,8 @@
                 <t:saveState id="ssCode" value="#{scriptBean.sinfo.code}"/>
                 <t:saveState value="#{scriptBean.overviewPageNumber}"/>
                 <t:saveState value="#{scriptBean.overviewRowNumber}"/>
+                <t:saveState id="sortColumn" value="#{scriptBean.sortColumn}"/>
+                <t:saveState id="sortOrder" value="#{scriptBean.sortOrder}"/>
 
                 <adm:tab label="#{fxMessageBean['Script.tabtitle.edit,#{scriptBean.sinfo.name}']}" active="true"
                          id="tab1"/>

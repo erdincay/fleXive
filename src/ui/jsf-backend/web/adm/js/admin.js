@@ -787,10 +787,17 @@ function getOnClick(id, onClickAction, lockscreen) {
 // adm:sortableTable page change / row change utilities - YUI ***********************
 var currentDTPage = 1;
 var rowsPerDTPage = 10;
+var sortColumn = "";
+var sortOrder = "";
 
 function DTpageChange (event) {
     rowsPerDTPage = event.newState.rowsPerPage;
     currentDTPage = event.newValue;
+}
+
+function SortChange(event){
+    sortColumn = event.newValue.column.key;
+    sortOrder = event.newValue.dir;
 }
 
 /**
@@ -806,6 +813,12 @@ function storeDataTablePosition(formPrefix) {
     }
     if (elem = document.getElementById(formPrefix + ":rowsPerPage")) {
         elem.value = rowsPerDTPage;
+    }
+   if(elem = document.getElementById(formPrefix + ":sortColumn")){
+        elem.value = sortColumn;
+    }
+    if(elem = document.getElementById(formPrefix + ":sortOrder")){
+        elem.value = sortOrder;
     }
 }
 // **********************************************************************************
