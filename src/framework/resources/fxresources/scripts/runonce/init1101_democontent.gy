@@ -49,6 +49,11 @@ import com.flexive.shared.search.query.PropertyValueComparator
 import com.flexive.shared.search.query.PropertyValueNode
 import com.flexive.shared.value.FxLargeNumber
 import com.flexive.shared.search.AdminResultLocations
+import com.flexive.shared.scripting.FxScriptEvent
+import com.flexive.shared.scripting.FxScriptInfo
+import com.flexive.shared.scripting.FxScriptBinding
+import com.flexive.shared.scripting.groovy.GroovyTypeBuilder
+import com.flexive.shared.scripting.groovy.GroovyContentBuilder
 
 if (FxSharedUtils.isMinimalRunOnceScripts()) {
     return;
@@ -81,3 +86,9 @@ node2.setValue(new FxString(false, "Welcome*"))
 root.addChild(node2)
 
 EJBLookup.searchEngine.save(root)
+
+// create with serach test type, to allow usage of SearchTest type outside of embedded testcases
+EJBLookup.scriptingEngine.createScriptFromLibrary("SearchTestType.gy",
+        new FxScriptInfo(-1,FxScriptEvent.Manual, "SearchTestType.gy",
+                "Creates the SearchTest type if not already present",true,true))
+

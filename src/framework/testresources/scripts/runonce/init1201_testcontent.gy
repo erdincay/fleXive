@@ -46,6 +46,7 @@ import com.flexive.shared.workflow.Step
 import com.flexive.shared.workflow.StepDefinition
 import com.flexive.shared.scripting.FxScriptEvent
 import com.flexive.shared.scripting.FxScriptInfo
+import com.flexive.shared.scripting.FxScriptBinding
 import com.flexive.shared.scripting.groovy.GroovyTypeBuilder
 import com.flexive.shared.scripting.groovy.GroovyContentBuilder
 
@@ -57,11 +58,6 @@ import com.flexive.shared.scripting.groovy.GroovyContentBuilder
  * @author Markus Plesser, UCS
  * @version $Rev$
  */
-
-// always create script, to allow usage of SearchTest type outside of embedded testcases
-final FxScriptInfo scriptInfo = EJBLookup.scriptingEngine.createScriptFromLibrary("SearchTestType.gy",
-        new FxScriptInfo(-1,FxScriptEvent.Manual, "SearchTestType.gy",
-                "Creates the SearchTest type if not already present",true,true))
 
 if (!FxContext.get().testDivision) {
     println "Not creating test fixture..."
@@ -86,7 +82,7 @@ println "Creating test fixture - content..."
 }
 
 // create test type
-EJBLookup.scriptingEngine.runScript(scriptInfo.id)
+EJBLookup.scriptingEngine.runScript("SearchTestType.gy", new FxScriptBinding())
 
 long dummyACLId = EJBLookup.aclEngine.create("Dummy ACL", new FxString("Dummy ACL"), Mandator.MANDATOR_FLEXIVE, "#000000", "", ACLCategory.INSTANCE)
 
