@@ -292,6 +292,14 @@
         </groovy>
     </target>
     
+	<target name="tests.stress" depends="tests.stress.run, emma.report"/>
+	<target name="tests.stress.run" depends="tests.stress.init, tests.groups.run"/>
+	<target name="tests.stress.init" depends="tests.prepare,tests.compile.ejb">
+        <groovy>
+            properties.'tests.groups' = "tree-stress"
+        </groovy>
+    </target>
+
     <target name="tests.groups" depends="tests.groups.run,emma.report"/>
 
     <target name="tests.groups.prepare">
