@@ -3,14 +3,12 @@
         <!ENTITY % global_entities SYSTEM "../global.ent">
         %global_entities;
         ]>
-<programlisting language="java" xml:id="core_structure_newtype"  xmlns="http://docbook.org/ns/docbook"><co xml:id="cst_newtype_1"/>        TypeEngine typeEngine = EJBLookup.getTypeEngine();
+<programlisting language="java" xml:id="core_structure_newtype"  xmlns="http://docbook.org/ns/docbook">FxTypeEdit.createNew("Customer")        // <co xml:id="cst_newtype_1"/>
+    .setLabel(                          // <co xml:id="cst_newtype_2"/>
+        new FxString(FxLanguage.ENGLISH, "A generic customer")
+        .setTranslation(FxLanguage.GERMAN, "Ein generischer Kunde"))
+    .setACL(CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()))   // <co xml:id="cst_newtype_3"/>
+    .save();    // <co xml:id="cst_newtype_4"/>
 
-<co xml:id="cst_newtype_2"/>        FxString typeLabel = new FxString("A generic customer");
-<co xml:id="cst_newtype_3"/>        typeLabel.setTranslation(FxLanguage.GERMAN, "Ein generischer Kunde");
-<co xml:id="cst_newtype_4"/>        ACL customerACL = CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId());
-
-<co xml:id="cst_newtype_5"/>        FxTypeEdit type = FxTypeEdit.createNew("Customer", typeLabel, customerACL);
-
-<co xml:id="cst_newtype_6"/>        typeEngine.save(type);
-<co xml:id="cst_newtype_7"/>        FxType typeByName = CacheAdmin.getEnvironment().getType("Customer");
+FxType typeByName = CacheAdmin.getEnvironment().getType("Customer");    // <co xml:id="cst_newtype_5"/>
 </programlisting>

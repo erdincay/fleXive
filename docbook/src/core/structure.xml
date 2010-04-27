@@ -567,51 +567,34 @@
 
                     <calloutlist>
                         <callout arearefs="cst_newtype_1">
-                            <para>We use the utility class
-                                <classname>EJBLookup</classname>
-                                to retrieve a reference to the type engine enterprise bean.
+                            <para>Create a new editable FxType instance with the type name "Customer".
+                            The type name is unique for the entire division and can be used to lookup
+                            the type afterwards.
                             </para>
                         </callout>
                         <callout arearefs="cst_newtype_2">
-                            <para>The multilingual
-                                <classname>FxString</classname>
-                                <varname>typeLabel</varname>
-                                is initialized with support for multilingual values (first parameter set to
-                                <code>true</code>
-                                ) and is assigned the default translation. The default translation is by convention
-                                english.
-                                It would have been the same effect if we wrote
-                                <code>FxString typeLabel = new FxString(true, FxLanguage.ENGLISH, "A generic customer");
-                                </code>
+                            <para>
+                                The multilingual type label is initialized with an English and German
+                                type label.
                             </para>
                         </callout>
                         <callout arearefs="cst_newtype_3">
-                            <para>The german translation is assigned.
+                            <para>
+                                Assign an ACL that is used for all instances of that type.
+                                Note that you can skip this step if you want to use the default structure ACL
+                                (like in this example).
                             </para>
                         </callout>
                         <callout arearefs="cst_newtype_4">
-                            <para>We don't want to create a new ACL and use the default ACL for structures
-                                (<code>Category.STRUCTURE.getDefaultId()</code>)
+                            <para>The type is created in the database.
+                            You can add properties to the type as shown in
+                            <xref linkend="core_content_ex_personType_java"/>.
                             </para>
                         </callout>
                         <callout arearefs="cst_newtype_5">
-                            <para>A new type instance is created with most settings using default values, only setting
-                                the
-                                name, label and ACL.
-                            </para>
-                        </callout>
-                        <callout arearefs="cst_newtype_6">
-                            <para>The
-                                <interfacename>TypeEngine</interfacename>
-                                takes care of persisting our new type. Using the<methodname>save(FxTypeEdit
-                                type)</methodname>-method we can create new or save existing types.
-                            </para>
-                        </callout>
-                        <callout arearefs="cst_newtype_7">
                             <para>This line just serves as an example how to retrieve the a reference to the new type.
                                 Saving the instance automatically forced a reload of the cached environment, that why we
-                                can
-                                retrieve it from the cache here.
+                                can retrieve it from the cache here.
                             </para>
                         </callout>
                     </calloutlist>
