@@ -29,12 +29,10 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../../lib/groovy/groovy.jar!/" />
+          <root url="jar://$MODULE_DIR$/../../../lib/groovy/groovy-all-1.7.2.jar!/" />
         </CLASSES>
         <JAVADOC />
-        <SOURCES>
-          <root url="jar://$MODULE_DIR$/../../../../../misc/sources/groovy-src-1.5.0.zip!/groovy-1.5.0/src/main" />
-        </SOURCES>
+        <SOURCES />
       </library>
     </orderEntry>
     <orderEntry type="module-library">
