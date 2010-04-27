@@ -36,6 +36,7 @@ package com.flexive.war.beans.admin.main;
 
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.beans.SelectBean;
+import com.flexive.faces.beans.UserConfigurationBean;
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.faces.messages.FxFacesMsgInfo;
 import com.flexive.faces.model.FxJSFSelectItem;
@@ -643,6 +644,7 @@ public class AccountBean implements Serializable {
                 }
                 getAccountEngine().updateUser(userTicket.getUserId(), password, null, null, null /*email*/, null/*language*/);
                 new FxFacesMsgInfo("User.nfo.passwordSaved").addToContext();
+                UserConfigurationBean.changedPassword();
             }
 
         } catch (FxApplicationException e) {
@@ -651,6 +653,10 @@ public class AccountBean implements Serializable {
         } finally {
             FxContext.get()._reloadUserTicket();
         }
+    }
+
+    public void cancelPasswordChangeReminder() {
+        UserConfigurationBean.changedPassword();
     }
 
     public void cancelPasswordChange() {

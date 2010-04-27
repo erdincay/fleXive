@@ -54,6 +54,10 @@
             }
             parent.invokeContentAction("adm/search/searchResult.jsf", "fulltextSearch", {query: query});
         }
+
+        function getBase() {
+            return "#{fxSystemBean.documentBase}";
+        }
         -->
     </script>
 </head>
@@ -69,6 +73,27 @@
             <adm:tab id="tab1" active="true" label="#{fxMessageBean['Welcome.welcome']}"/>
         </h:form>
 
+
+    <a4j:outputPanel id="passwordReminder">
+        <ui:fragment rendered="#{not userConfig.hasChangedPassword}">
+            <h:form id="pswReminder">
+                <div class="infoBox">
+                    <div class="warnMessage">
+                        #{fxMessageBean['Welcome.label.needChangePassword']}
+                        <br clear="all"/>
+                        <br clear="all"/>
+                        <adm:commandButton id="ChangePasswordButton" location="content" action="userEdit" icon="ok"
+                                           labelKey="Welcome.link.changePasswordNow"/>
+                        <adm:ajaxCommandButton id="NotChangePasswordButton" labelKey="Welcome.button.dontChange"
+                                               icon="cancel" bean="#{accountBean}" action="cancelPasswordChangeReminder"
+                                               reRender="passwordReminder" confirmKey="Welcome.confirm.dontChange"/>
+                        <br clear="all"/>
+                    </div>
+                </div>
+            </h:form>
+        </ui:fragment>
+    </a4j:outputPanel>
+    <br/>
 
     <!--
         Access the environment to keep the loading message until the environment has been initialized
@@ -335,5 +360,6 @@
             }
         -->
         </script>
+    <fx:yuiSetup/>
 </body>
 </html>

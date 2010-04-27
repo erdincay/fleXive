@@ -114,6 +114,14 @@
     </managed-bean>
 
     <managed-bean>
+        <managed-bean-name>userConfig</managed-bean-name>
+        <managed-bean-class>
+            com.flexive.faces.beans.UserConfigurationBean
+        </managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean>
+
+    <managed-bean>
         <managed-bean-name>accountBean</managed-bean-name>
         <managed-bean-class>
             com.flexive.war.beans.admin.main.AccountBean

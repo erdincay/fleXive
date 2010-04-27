@@ -43,7 +43,6 @@ import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.interfaces.ConfigurationEngine;
 import com.flexive.shared.scripting.FxScriptRunInfo;
 
-import javax.faces.event.ActionEvent;
 import javax.faces.model.SelectItem;
 import javax.faces.model.SelectItemGroup;
 import java.io.Serializable;
@@ -89,7 +88,7 @@ public class ConfigurationManagerBean {
 
     private int curPanel = 0;
 
-    private final static Hashtable<String, Integer> TYPE_LUT = new Hashtable<String, Integer>();
+    private final static Hashtable<String, Integer> TYPE_CACHE = new Hashtable<String, Integer>();
     private final Hashtable<String, Integer> PARAMETER_TYPES = new Hashtable<String, Integer>();
     private final Hashtable<String, TableRow> allRows = new Hashtable<String, TableRow>();
     private final ArrayList<String> tableHeader = new ArrayList<String>();
@@ -117,6 +116,7 @@ public class ConfigurationManagerBean {
     private ArrayList<ParameterScope> allScopes = null;
     private String currentPathStr = "";
 
+
     static {
         SelectItem[] curSelects = new SelectItem[]{
 //                new SelectItem(0, mb.getMessage("SysParamConfig.selectType"), "", true),   // if removed, watch out for the index
@@ -127,14 +127,13 @@ public class ConfigurationManagerBean {
         };
         typeSelectList.setSelectItems(curSelects);
 
-        TYPE_LUT.put(BOOLEAN_KEY, BOOLEAN_VALUE);
-        TYPE_LUT.put(LONG_KEY, LONG_VALUE);
-        TYPE_LUT.put(STRING_KEY, STRING_VALUE);
-        TYPE_LUT.put(INTEGER_KEY, INTEGER_VALUE);
-        TYPE_LUT.put(ARRAY_LIST_KEY, ARRAY_LIST_VALUE);
-    }
+        TYPE_CACHE.put(BOOLEAN_KEY, BOOLEAN_VALUE);
+        TYPE_CACHE.put(LONG_KEY, LONG_VALUE);
+        TYPE_CACHE.put(STRING_KEY, STRING_VALUE);
+        TYPE_CACHE.put(INTEGER_KEY, INTEGER_VALUE);
+        TYPE_CACHE.put(ARRAY_LIST_KEY, ARRAY_LIST_VALUE);
 
-    ConfigurationEngine ce = EJBLookup.getConfigurationEngine();
+    }
 
     public ConfigurationManagerBean() {
         initHeader();
@@ -162,6 +161,7 @@ public class ConfigurationManagerBean {
      * @param changeIDs indicates if this method should change the selected IDs or not
      */
     private void init(boolean changeIDs) {
+        ConfigurationEngine ce = EJBLookup.getConfigurationEngine();
         initHeader();
         allTables.clear();
         Hashtable<String, List<TableRow>> tableBody = new Hashtable<String, List<TableRow>>();
@@ -175,7 +175,7 @@ public class ConfigurationManagerBean {
         boolean editable;
         Serializable value;
 
-        Map<String, ParameterScope> scopeLUT = new Hashtable<String, ParameterScope>();
+        Map<String, ParameterScope> scopeCache = new Hashtable<String, ParameterScope>();
         List<String> tmpScopes = new ArrayList<String>();
 
         curPanel = NO_PANEL;
@@ -190,7 +190,7 @@ public class ConfigurationManagerBean {
                     tmpScopes.add(tmpF.getName());
                 }
                 try {
-                    scopeLUT.put(tmpF.getName(), (ParameterScope) tmpF.get(null));
+                    scopeCache.put(tmpF.getName(), (ParameterScope) tmpF.get(null));
                 } catch (IllegalAccessException e) {
                     new FxFacesMsgErr(e).addToContext();
                 } catch (Throwable t) {
@@ -204,7 +204,7 @@ public class ConfigurationManagerBean {
             for (String s : sortedScopes) {
                 tmpTable = new ArrayList<TableRow>();
                 tableBody.put(s, tmpTable);
-                allScopes.add(scopeLUT.get(s));
+                allScopes.add(scopeCache.get(s));
             }
 
             /** In the first loop we check all the Values, their types, save the types in the TypeLUT and build the
@@ -230,7 +230,7 @@ public class ConfigurationManagerBean {
                 tmpAL.add(tmpType);
                 curValue.clear();
                 editable = false;
-                Integer tmpI = TYPE_LUT.get(tmpType);
+                Integer tmpI = TYPE_CACHE.get(tmpType);
                 if (tmpI != null) {
                     PARAMETER_TYPES.put(key.getKey(), tmpI);
                     if (tmpI == ARRAY_LIST_VALUE) {
@@ -337,6 +337,7 @@ public class ConfigurationManagerBean {
      * creates a new value and validiates the input
      */
     public void createNew() {
+        ConfigurationEngine ce = EJBLookup.getConfigurationEngine();
         Class<? extends Serializable> curClass = null;
         Serializable value = null;
         ParameterPath curPath = null;
@@ -527,6 +528,7 @@ public class ConfigurationManagerBean {
      * is called when the edit commandIcon is pressed
      */
     public void editCurItem() {
+        ConfigurationEngine ce = EJBLookup.getConfigurationEngine();
         Integer tmpI = PARAMETER_TYPES.get(curEditName);
         if (tmpI == null) {
             init(false);
@@ -564,6 +566,7 @@ public class ConfigurationManagerBean {
      * saves the changes of an edit
      */
     public void save() {
+        ConfigurationEngine ce = EJBLookup.getConfigurationEngine();
         curPanel = NO_PANEL;
         Integer tmpI = PARAMETER_TYPES.get(curEditName);
         if (tmpI == null) return;
@@ -736,6 +739,7 @@ public class ConfigurationManagerBean {
     }
 
     public void deleteKey() {
+        ConfigurationEngine ce = EJBLookup.getConfigurationEngine();
         Parameter<Serializable> curP = allParams.get(curEditName);
         try {
             ce.remove(curP);

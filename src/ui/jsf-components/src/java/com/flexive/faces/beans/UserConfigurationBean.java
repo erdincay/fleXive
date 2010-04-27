@@ -32,12 +32,16 @@
 package com.flexive.faces.beans;
 
 import com.flexive.faces.FxJsfUtils;
-import com.flexive.shared.configuration.ParameterMap;
-import com.flexive.shared.configuration.SystemParameters;
-import com.flexive.shared.configuration.Parameter;
+import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
+import com.flexive.shared.configuration.Parameter;
+import com.flexive.shared.configuration.ParameterMap;
+import com.flexive.shared.configuration.SystemParameterPaths;
+import com.flexive.shared.configuration.SystemParameters;
+import com.flexive.shared.configuration.parameters.ParameterFactory;
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.interfaces.ConfigurationEngine;
 
 import java.io.Serializable;
 
@@ -52,7 +56,12 @@ public class UserConfigurationBean implements Serializable {
     private static final String REQ_USER_INPUTLANGUAGE = "UCB_inputLanguageId";
 
     protected final ParameterMap cachedParameters = new ParameterMap();
+    private final static Parameter<Boolean> PARAM_HAS_CHANGED_PASSWORD;
     private long inputLanguageId = -1;
+
+    static {
+        PARAM_HAS_CHANGED_PASSWORD = ParameterFactory.newInstance(Boolean.class, SystemParameterPaths.USER_CONFIG_ONLY,"changedPassword",Boolean.FALSE);
+    }
 
     public long getDefaultInputLanguageId() {
         return getParameter(SystemParameters.USER_DEFAULTINPUTLANGUAGE);
@@ -115,4 +124,24 @@ public class UserConfigurationBean implements Serializable {
         }
         return value;
     }
+
+    public boolean isHasChangedPassword() {
+        ConfigurationEngine ce = EJBLookup.getConfigurationEngine();
+        try {
+            return ce.get(PARAM_HAS_CHANGED_PASSWORD);
+        } catch (FxApplicationException e) {
+            new FxFacesMsgErr(e).addToContext();
+        }
+        return false;
+    }
+
+    public static void changedPassword()  {
+        ConfigurationEngine ce = EJBLookup.getConfigurationEngine();
+        try {
+            ce.put(PARAM_HAS_CHANGED_PASSWORD, true);
+        } catch (FxApplicationException e) {
+            new FxFacesMsgErr(e).addToContext();
+        }
+    }
+
 }
