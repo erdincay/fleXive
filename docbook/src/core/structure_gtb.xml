@@ -327,8 +327,28 @@ builder {
                             </code>
                         </td>
                         <td>
-                            Sets a general ACL which is valid for all (newly) created property assignments within the type.
+                            Sets a general (ACLCategory.STRUCTURE) ACL which is valid for all (newly) created property assignments within the type.
                             A given &quot;acl&quot; will override the &quot;generalACL&quot;
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            defaultInstanceACL
+                        </td>
+                        <td>
+                            <classname>String</classname>
+                            or
+                            <classname>ACL</classname>
+                        </td>
+                        <td>
+                            Providing an instance ACL named &quot;Foobar Instance ACL&quot; exists:
+                            <code>new GroovyTypeBuilder().testtype(defaultInstanceACL: "Foobar Instance ACL") {
+                                        ...
+                                  }
+                            </code>
+                        </td>
+                        <td>
+                            Sets a default content instance ACL for the given typ
                         </td>
                     </tr>
                     <tr>

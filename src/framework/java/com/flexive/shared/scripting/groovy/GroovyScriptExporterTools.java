@@ -40,6 +40,7 @@ import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.scripting.FxScriptInfo;
 import com.flexive.shared.scripting.FxScriptMapping;
 import com.flexive.shared.scripting.FxScriptMappingEntry;
+import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.structure.export.AssignmentDifferenceAnalyser;
 import com.flexive.shared.structure.export.StructureExporterTools;
@@ -164,8 +165,19 @@ public final class GroovyScriptExporterTools {
 
             // sopts - a map for "simple" GroovyTypeBuilder options
             Map<String, String> sopts = new LinkedHashMap<String, String>();
-            final String aclCategory = type.getACL().getCategory().getLabel().getTranslation(1).toUpperCase();
-            sopts.put("acl", "CacheAdmin.environment.getACL(ACLCategory." + aclCategory + ".getDefaultId())");
+            // type acl
+            String acl = type.getACL().getName();
+            // only set if different from the default structure ACL
+            if (!CacheAdmin.getEnvironment().getACL(acl).equals(CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()))) {
+                sopts.put("acl", "\"" + acl + "\"");
+            }
+
+            // type defaultInstanceACL
+            String defInstACL = type.getDefaultInstanceACL().getName();
+            // only set if different from the default instance acl for content instances
+            if(!CacheAdmin.getEnvironment().getACL(defInstACL).equals(CacheAdmin.getEnvironment().getACL(ACLCategory.INSTANCE.getDefaultId()))) {
+                sopts.put("defaultInstanceACL", "\"" + defInstACL + "\"");
+            }
             sopts.put("languageMode", type.getLanguage() == LanguageMode.Multiple ? "LanguageMode.Multiple" : "LanguageMode.Single");
             sopts.put("trackHistory", type.isTrackHistory() + "");
             if (type.isTrackHistory())

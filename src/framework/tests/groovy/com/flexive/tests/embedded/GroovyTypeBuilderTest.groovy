@@ -1635,6 +1635,33 @@ class GroovyTypeBuilderTest {
     }
 
     /**
+     * Tests the GTB "defaultInstanceACL" option or setting a default instance ACL, respectively
+     */
+    @Test(groups = ["ejb", "scripting", "structure"])
+    void defaultInstanceACLTest() {
+        def aclEngine = EJBLookup.getAclEngine()
+        def aclId = aclEngine.create("Foobar Instance ACL", new FxString(true, "Foo"), TestUsers.getTestMandator(), "#000000", "Foobar ACL Description", ACLCategory.INSTANCE);
+        def acl = environment().getACL(aclId);
+
+        try {
+            // test setting as a String
+            new GroovyTypeBuilder().builderTest(defaultInstanceACL: "Foobar Instance ACL")
+            def t = environment().getType("BUILDERTEST")
+            Assert.assertEquals(t.getDefaultInstanceACL(), environment().getACL("Foobar Instance ACL"))
+            removeTestType()
+
+            // set as ACL obj
+            new GroovyTypeBuilder().builderTest(defaultInstanceACL: acl)
+            t = environment().getType("BUILDERTEST")
+            Assert.assertEquals(t.getDefaultInstanceACL(), environment().getACL("Foobar Instance ACL"))
+            
+        } finally {
+            removeTestType()
+            aclEngine.remove(aclId);
+        }
+    }
+
+    /**
      * Tests the GTB "flatten" option
      */
     @Test(groups = ["ejb", "scripting", "structure"])

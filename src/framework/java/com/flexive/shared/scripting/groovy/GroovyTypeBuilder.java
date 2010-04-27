@@ -130,7 +130,7 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
             "ACL", "GENERALACL", "LABEL", "PARENTTYPENAME", "LANGUAGEMODE", "TYPEMODE", "TRACKHISTORY", "HISTORYAGE",
             "MAXVERSIONS", "USEINSTANCEPERMISSIONS", "USEPROPERTYPERMISSIONS", "USESTEPPERMISSIONS", "WORKFLOW",
             "USETYPEPERMISSIONS", "USEPERMISSIONS", "ICON", "MIMETYPE", "STORAGEMODE", "NAME", "HINT", "DESCRIPTION",
-            "STRUCTUREOPTIONS"
+            "STRUCTUREOPTIONS", "DEFAULTINSTANCEACL"
     };
 
     /**
@@ -903,6 +903,7 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
         FxString label, hint;
         UniqueMode uniqueMode;
         ACL acl;
+        ACL defaultInstanceACL;
         int defaultMultiplicity;
         FxValue defaultValue;
         Boolean useInstancePermissions, useStepPermissions, useTypePermissions, usePropertyPermissions,
@@ -953,6 +954,15 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
                 acl = CacheAdmin.getEnvironment().getACL(aclString);
             } else if (!attributes.containsKey("acl") && generalACL == null) { // default
                 acl = CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId());
+            }
+
+            if (attributes.containsKey("defaultInstanceACL")) {
+                if (attributes.get("defaultInstanceACL") instanceof String) {
+                    final String defInstAclString = (String) FxSharedUtils.get(attributes, "defaultInstanceACL", "Default Instance ACL");
+                    defaultInstanceACL = CacheAdmin.getEnvironment().getACL(defInstAclString);
+                } else if (attributes.get("defaultInstanceACL") instanceof ACL) {
+                    defaultInstanceACL = (ACL) FxSharedUtils.get(attributes, "defaultInstanceACL", CacheAdmin.getEnvironment().getACL(ACLCategory.INSTANCE.getDefaultId()));
+                }
             }
 
             if (attributes.containsKey("description")) {
@@ -1035,6 +1045,9 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
             }
             if(attributes.containsKey("structureOptions")) {
                 type.setOptions(structureOptions);
+            }
+            if(attributes.containsKey("defaultInstanceACL")) {
+                type.setDefaultInstanceACL(defaultInstanceACL);
             }
 
             // set non-generic type options
