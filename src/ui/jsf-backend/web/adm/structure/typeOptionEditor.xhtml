@@ -48,7 +48,7 @@
 
         <!-- show parent type options -->
         <ui:fragment rendered="#{not empty typeEditorBean.type.parent}">
-            <fx:fieldSet legend="#{fxMessageBean['TypeEditor.label.parentTypeOptions']}">
+            <fx:fieldSet legend="#{fxMessageBean['TypeEditor.label.parentTypeOptions']}" relativeWidth="80">
 
                 <fx:formRow labelKey="TypeEditor.label.derivedFrom">
                      <h:commandLink onclick="var treeframe=parent.getStructureNavFrame(); treeframe.openNode(#{typeEditorBean.type.parent.id}, true);">

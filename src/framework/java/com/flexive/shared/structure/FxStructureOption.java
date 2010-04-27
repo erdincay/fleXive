@@ -372,18 +372,34 @@ public class FxStructureOption implements Serializable {
     }
 
     /**
-     * Get a copy of the a list of options
+     * Get a copy of a list of options
      *
      * @param options list to clone
      * @return cloned list of options
      */
     public static List<FxStructureOption> cloneOptions(List<FxStructureOption> options) {
-        if (options == null)
+        return cloneOptions(options, false);
+    }
+
+    /**
+     * Get a copy of a list of options - optionally only those which have their isInherited flag set to true
+     *
+     * @param options list to clone
+     * @param isInheritedOnly return only options whose isInherited flag is true
+     * @return cloned list of options
+     * @since 3.1.1
+     */
+    public static List<FxStructureOption> cloneOptions(List<FxStructureOption> options, boolean isInheritedOnly) {
+         if (options == null)
             return null;
         else {
             ArrayList<FxStructureOption> clone = new ArrayList<FxStructureOption>(options.size());
             for (FxStructureOption o : options) {
-                clone.add(new FxStructureOption(o));
+                if(isInheritedOnly) {
+                    if(o.getIsInherited())
+                        clone.add(new FxStructureOption(o));
+                } else
+                    clone.add(new FxStructureOption(o));
             }
             return clone;
         }

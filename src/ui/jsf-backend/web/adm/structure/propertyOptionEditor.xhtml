@@ -6,6 +6,7 @@
       xmlns:t="http://myfaces.apache.org/tomahawk"
       xmlns:c="http://java.sun.com/jstl/core"
       xmlns:a4j="https://ajax4jsf.dev.java.net/ajax"
+      xmlns:rich="http://richfaces.org/rich"
       xmlns:adm="http://www.flexive.com/jsf/admin"
       xmlns:fx="http://www.flexive.com/jsf/core">
 <body>
@@ -114,6 +115,63 @@
             </fx:fieldSet>
 
             <ui:fragment rendered="#{not propertyEditorBean.property.new}">
+                <!-- show parent assignment options -->
+                <rich:simpleTogglePanel id="parentAssignmentOptions" rendered="#{propertyEditorBean.assignment.derivedAssignment and propertyEditorBean.showParentAssignmentOptions}"
+                                        opened="#{propertyEditorBean.openParentOptions}" style="margin-left:2px; margin-bottom:20px;"
+                                        label="#{fxMessageBean['PropertyEditor.label.parentAssignmentOptionsPanel']}" switchType="client">
+
+                    <fx:fieldSet legend="#{fxMessageBean['PropertyEditor.label.parentAssignmentOptions']}" relativeWidth="90">
+
+                        <fx:formRow labelKey="PropertyEditor.label.xPathBase" id="xPathBase">
+                            <h:commandLink id="gotoPropertyAssignmentButton_#{propertyEditorBean.assignment.baseAssignmentId}"
+                                           onclick="var treeframe=parent.getStructureNavFrame(); treeframe.openNode(#{propertyEditorBean.assignment.baseAssignmentId}, false);">
+                                <h:outputText id="xPathBase" value="#{propertyEditorBean.baseAssignmentXPath}"/>
+                            </h:commandLink>
+                        </fx:formRow>
+
+                        <adm:sortableTable id="optionsTableParent">
+                            <table id="optionsTableParent">
+                                <thead>
+                                    <tr>
+                                        <th class="tblHeader" field="key" dataType="String" align="left">
+                                            #{fxMessageBean['PropertyEditor.table.key']}
+                                        </th>
+                                        <th class="tblHeader" field="value" dataType="String" align="left">
+                                            #{fxMessageBean['PropertyEditor.table.value']}
+                                        </th>
+                                        <th class="tblHeader" field="overridable" dataType="html" align="left">
+                                            #{fxMessageBean['PropertyEditor.table.overridable']}
+                                        </th>
+                                        <th class="tblHeader" field="isInherited" dataType="html" align="left">
+                                            #{fxMessageBean['PropertyEditor.table.isInherited']}
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                <ui:repeat value="#{propertyEditorBean.optionWrapperParent.assignmentOptions}" var="option">
+                                    <tr>
+                                        <h:panelGroup>
+                                            <td align="left">
+                                                <h:inputText value="#{option.key}" style="color:gray" disabled="true"/>
+                                            </td>
+                                            <td align="left">
+                                                <h:inputText value="#{option.value}" style="color:gray" disabled="true"/>
+                                            </td>
+                                            <td align="left">
+                                                <h:selectBooleanCheckbox value="#{option.overridable}" style="color:gray" disabled="true"/>
+                                            </td>
+                                            <td align="left">
+                                                <h:selectBooleanCheckbox value="#{option.isInherited}" style="color:gray" disabled="true"/>
+                                            </td>
+                                        </h:panelGroup>
+                                    </tr>
+                                </ui:repeat>
+                                </tbody>
+                            </table>
+                        </adm:sortableTable>
+                    </fx:fieldSet>
+                </rich:simpleTogglePanel>
+
                 <fx:fieldSet legend="#{fxMessageBean['PropertyEditor.label.propertyAssignmentOptions']}" relativeWidth="90">
                     <adm:sortableTable id="optionsTable2">
                         <table id="optionsTable2">
@@ -143,46 +201,66 @@
                                     <tr>
                                         <h:panelGroup rendered="#{propertyEditorBean.optionWrapper.isAssignmentOptionValidMap[option.key]
                                                 and propertyEditorBean.optionWrapper.isAssignmentOptionOverridableMap[option.key]}">
-                                            <td align="left"><h:inputText value="#{option.key}" style="color:green" disabled="#{not propertyEditorBean.editMode}"/></td>
-                                            <td align="left"><h:inputText value="#{option.value}" style="color:green" disabled="#{not propertyEditorBean.editMode}"/></td>
-                                            <td align="left">
-                                                <h:selectBooleanCheckbox value="#{option.overridable}" style="color:green" disabled="#{not propertyEditorBean.editMode}"/>
+                                            <td align="left"><h:inputText value="#{option.key}" style="color:green"
+                                                                          disabled="#{not propertyEditorBean.editMode or propertyEditorBean.showParentAssignmentOptions and !option.overridable}"/>
+                                            </td>
+                                            <td align="left"><h:inputText value="#{option.value}" style="color:green"
+                                                                          disabled="#{not propertyEditorBean.editMode or propertyEditorBean.showParentAssignmentOptions and !option.overridable}"/>
                                             </td>
                                             <td align="left">
-                                                <h:selectBooleanCheckbox value="#{option.isInherited}" style="color:green" disabled="#{not propertyEditorBean.editMode}"/>
+                                                <h:selectBooleanCheckbox value="#{option.overridable}" style="color:green"
+                                                                         disabled="#{not propertyEditorBean.editMode or propertyEditorBean.showParentAssignmentOptions and !option.overridable}"/>
+                                            </td>
+                                            <td align="left">
+                                                <h:selectBooleanCheckbox value="#{option.isInherited}" style="color:green"
+                                                                         disabled="#{not propertyEditorBean.editMode or propertyEditorBean.showParentAssignmentOptions and !option.overridable}"/>
                                             </td>
                                         </h:panelGroup>
                                         <h:panelGroup rendered="#{not propertyEditorBean.optionWrapper.isAssignmentOptionValidMap[option.key]
                                                 and propertyEditorBean.optionWrapper.isAssignmentOptionOverridableMap[option.key]}">
-                                            <td align="left"><h:inputText value="#{option.key}" style="color:red" disabled="#{not propertyEditorBean.editMode}"/></td>
-                                            <td align="left"><h:inputText value="#{option.value}" style="color:red" disabled="#{not propertyEditorBean.editMode}"/></td>
-                                            <td align="left">
-                                                <h:selectBooleanCheckbox value="#{option.overridable}" style="color:red" disabled="#{not propertyEditorBean.editMode}"/>
+                                            <td align="left"><h:inputText value="#{option.key}" style="color:red"
+                                                                          disabled="#{not propertyEditorBean.editMode or propertyEditorBean.showParentAssignmentOptions and !option.overridable}"/>
+                                            </td>
+                                            <td align="left"><h:inputText value="#{option.value}" style="color:red"
+                                                                          disabled="#{not propertyEditorBean.editMode or propertyEditorBean.showParentAssignmentOptions and !option.overridable}"/>
                                             </td>
                                             <td align="left">
-                                                <h:selectBooleanCheckbox value="#{option.isInherited}" style="color:red" disabled="#{not propertyEditorBean.editMode}"/>
+                                                <h:selectBooleanCheckbox value="#{option.overridable}" style="color:red"
+                                                                         disabled="#{not propertyEditorBean.editMode or propertyEditorBean.showParentAssignmentOptions and !option.overridable}"/>
+                                            </td>
+                                            <td align="left">
+                                                <h:selectBooleanCheckbox value="#{option.isInherited}" style="color:red"
+                                                                         disabled="#{not propertyEditorBean.editMode or propertyEditorBean.showParentAssignmentOptions and !option.overridable}"/>
                                             </td>
                                         </h:panelGroup>
                                         <h:panelGroup rendered="#{propertyEditorBean.optionWrapper.isAssignmentOptionValidMap[option.key]
                                                 and not propertyEditorBean.optionWrapper.isAssignmentOptionOverridableMap[option.key]}">
-                                            <td align="left"><h:inputText value="#{option.key}" style="color:green; background-color:lightgray" disabled="#{not propertyEditorBean.editMode}"/></td>
-                                            <td align="left"><h:inputText value="#{option.value}" style="color:green; background-color:lightgray" disabled="#{not propertyEditorBean.editMode}"/></td>
-                                            <td align="left">
-                                                <h:selectBooleanCheckbox value="#{option.overridable}" style="color:green; background-color:lightgray" disabled="#{not propertyEditorBean.editMode}"/>
+                                            <td align="left"><h:inputText value="#{option.key}" style="color:gray; background-color:lightgray" disabled="true"/>
+                                            </td>
+                                            <td align="left"><h:inputText value="#{option.value}" style="color:gray; background-color:lightgray" disabled="true"/>
                                             </td>
                                             <td align="left">
-                                                <h:selectBooleanCheckbox value="#{option.isInherited}" style="color:green; background-color:lightgray" disabled="#{not propertyEditorBean.editMode}"/>
+                                                <h:selectBooleanCheckbox value="#{option.overridable}" style="color:gray; background-color:lightgray" disabled="true"/>
+                                            </td>
+                                            <td align="left">
+                                                <h:selectBooleanCheckbox value="#{option.isInherited}" style="color:gray; background-color:lightgray" disabled="true"/>
                                             </td>
                                         </h:panelGroup>
                                         <h:panelGroup rendered="#{not propertyEditorBean.optionWrapper.isAssignmentOptionValidMap[option.key]
                                                 and not propertyEditorBean.optionWrapper.isAssignmentOptionOverridableMap[option.key]}">
-                                            <td align="left"><h:inputText value="#{option.key}" style="color:red; background-color:lightgray" disabled="#{not propertyEditorBean.editMode}"/></td>
-                                            <td align="left"><h:inputText value="#{option.value}" style="color:red; background-color:lightgray" disabled="#{not propertyEditorBean.editMode}"/></td>
-                                            <td align="left">
-                                                <h:selectBooleanCheckbox value="#{option.overridable}" style="color:red; background-color:lightgray" disabled="#{not propertyEditorBean.editMode}"/>
+                                            <td align="left"><h:inputText value="#{option.key}" style="color:red; background-color:lightgray"
+                                                                          disabled="#{not propertyEditorBean.editMode or propertyEditorBean.showParentAssignmentOptions and !option.overridable}"/>
+                                            </td>
+                                            <td align="left"><h:inputText value="#{option.value}" style="color:red; background-color:lightgray"
+                                                                          disabled="#{not propertyEditorBean.editMode or propertyEditorBean.showParentAssignmentOptions and !option.overridable}"/>
                                             </td>
                                             <td align="left">
-                                                <h:selectBooleanCheckbox value="#{option.isInherited}" style="color:red; background-color:lightgray" disabled="#{not propertyEditorBean.editMode}"/>
+                                                <h:selectBooleanCheckbox value="#{option.overridable}" style="color:red; background-color:lightgray"
+                                                                         disabled="#{not propertyEditorBean.editMode or propertyEditorBean.showParentAssignmentOptions and !option.overridable}"/>
+                                            </td>
+                                            <td align="left">
+                                                <h:selectBooleanCheckbox value="#{option.isInherited}" style="color:red; background-color:lightgray"
+                                                                         disabled="#{not propertyEditorBean.editMode or propertyEditorBean.showParentAssignmentOptions and !option.overridable}"/>
                                             </td>
                                         </h:panelGroup>
                                          <ui:fragment rendered="#{propertyEditorBean.editMode}">

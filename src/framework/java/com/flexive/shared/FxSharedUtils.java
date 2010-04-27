@@ -1891,6 +1891,7 @@ public final class FxSharedUtils {
      * Add a resource reference for the given resource base name.
      *
      * @param baseName the resource name (e.g. "ApplicationResources")
+     * @return a List of BundleReferences
      * @throws IOException if an I/O error occured while looking for resources
      */
     public static List<BundleReference> addMessageResources(String baseName) throws IOException {
@@ -1997,5 +1998,38 @@ public final class FxSharedUtils {
             result = 31 * result + key.hashCode();
             return result;
         }
+    }
+
+    /**
+     * This method checks if the current assignment is a derived assignment subject to the following conditions:
+     * 1.) must be assigned to a derived type
+     * 2.) must be inherited from the derived type's parent
+     * 3.) XPaths must match
+     *
+     * @param assignment an FxAssignment
+     * @param <T>        extends FxAssignment
+     * @return true if conditions are met
+     * @since 3.1.1
+     */
+    public static <T extends FxAssignment> boolean checkAssignmentInherited(T assignment) {
+        if (assignment == null)
+            return false;
+        // "REAL" inheritance only works for derived types
+        if (assignment.getAssignedType().isDerived()) {
+            final FxAssignment baseAssignment;
+            // temp. assignments might not be found (id = -1)  
+            try {
+                baseAssignment = CacheAdmin.getEnvironment().getAssignment(assignment.getBaseAssignmentId());
+                long baseTypeId = baseAssignment.getAssignedType().getId();
+                // type must be derived and the assignment must be part of the inheritance chain
+                return assignment.getAssignedType().isDerivedFrom(baseTypeId) &&
+                        XPathElement.stripType(baseAssignment.getXPath()).equals(XPathElement.stripType(assignment.getXPath()));
+            } catch (Exception e) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Assignment inheritance could not be determined (probably due to a temp. assignment id of -1");
+                }
+            }
+        }
+        return false;
     }
 }

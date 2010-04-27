@@ -375,10 +375,51 @@ public class FxGroupAssignment extends FxAssignment implements Serializable {
      * Save this assignment and return the saved instance.
      *
      * @return  the saved assignment
+     * @throws FxApplicationException on errors
      * @since 3.1
      */
     public FxGroupAssignmentEdit save() throws FxApplicationException {
         final long id = EJBLookup.getAssignmentEngine().save(this, true);
         return ((FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment(id)).asEditable();
+    }
+
+    /**
+     * Return a list of all assignments that were derived from this one (i.e. all assignments of
+     * subtypes with the same base assignment ID). An assignment can be inherited at most once in a
+     * type, since changing the (unique) alias breaks the inheritance chain.<br />
+     * Implementation analogous to method found in FxPropertyAssignment.
+     *
+     * @param environment   the environment
+     * @return              a list of all derived assignments
+     * @since 3.1.1
+     */
+    public List<FxGroupAssignment> getDerivedAssignments(FxEnvironment environment) {
+        final List<FxGroupAssignment> result = new ArrayList<FxGroupAssignment>();
+
+        // get the base assignment ID, i.e. the assignment ID that will be used for derived types
+        final long baseAssignmentId =
+                baseAssignment != ROOT_BASE
+                        ? baseAssignment
+                        : getId();
+
+        // check for reusage of our assignment
+        final List<FxType> types = getAssignedType().getId() == FxType.ROOT_ID
+                // FX-825 - ROOT does not return subtypes, just get all types from the environment
+                ? environment.getTypes()
+                // normal type, just get all subtypes
+                : getAssignedType().getDerivedTypes(true, false);
+
+        for (FxType derivedType : types) {
+            try {
+                final FxAssignment derivedAssignment = derivedType.getAssignment(getXPath());
+                if (derivedAssignment.isDerivedFrom(environment, baseAssignmentId)) {
+                    result.add((FxGroupAssignment) derivedAssignment);
+                }
+            } catch (FxRuntimeException e) {
+                // assignment not derived
+            }
+        }
+
+        return result;
     }
 }

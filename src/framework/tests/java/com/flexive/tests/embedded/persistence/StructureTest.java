@@ -65,6 +65,7 @@ import org.testng.annotations.Test;
 
 import javax.naming.Context;
 import javax.transaction.UserTransaction;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Collections;
 
@@ -1625,7 +1626,6 @@ public class StructureTest {
             te.save(FxTypeEdit.createNew("MIMETESTER"));
             testType = getEnvironment().getType("MIMETESTER");
 
-
             try {
                 testType.asEditable().setMimeType(new FxMimeTypeWrapper("foo/bar"));
                 Assert.fail("Setting a mime type for an FxType which is not derived from \"DOCUMENTFILE\" should have failed");
@@ -1636,6 +1636,205 @@ public class StructureTest {
         } finally {
             if (getEnvironment().typeExists("MIMETESTER"))
                 te.remove(getEnvironment().getType("MIMETESTER").getId());
+        }
+    }
+
+    /**
+     * Tests inheritance / overridable options of FxStructureOptions f. assignments
+     * --> Tests propagation to derived assignments of base assignments
+     *
+     * @throws FxApplicationException on errors
+     * @since 3.1.1
+     */
+    @Test(groups = {"ejb", "structure", "optinherit"})
+    public void assignmentOptionInheritanceTest() throws FxApplicationException {
+        long baseTypeId = -1, derTypeId = -1, sepTypeId = -1;
+        long propID1 = -1, propID2 = -1, propID3 = -1, propID4 = -1, groupID1 = -1, groupID2 = -1;
+
+        final String TEST1 = "OPTINHERITANCE";
+        final String TEST1DER = "DEROPTINHERITANCE";
+
+        try {
+            // create a test type & a prop(assignment)
+            baseTypeId = createTestTypeAndProp(TEST1, "proptest1", true);
+            // retrieve assignment and create a few structure options
+            // PROPERTY assignment options
+            // opt1 - overrideable, inherited
+            // opt2 - overrideable, inherited (to test several)
+            // opt3 - overrideable, not inherited
+            // opt4 - not overrideable, inherited
+            // opt5 - not overrideable, not inherited
+            // GROUP assignment options
+            // groupopt1 - overridable, inherited
+            // groupopt2 - not overridable, inherited
+            // groupopt3 - overridable, not inherited
+            FxPropertyAssignmentEdit propTest1 = ((FxPropertyAssignment) env().getAssignment(TEST1 + "/PROPTEST1")).asEditable();
+            List<FxStructureOption> options = new ArrayList<FxStructureOption>(5);
+            options.add(new FxStructureOption("opt1", true, true, true, "VAL1"));
+            options.add(new FxStructureOption("opt2", true, true, true, "VAL2"));
+            options.add(new FxStructureOption("opt3", true, true, false, "VAL3"));
+            options.add(new FxStructureOption("opt4", false, true, true, "VAL4"));
+            options.add(new FxStructureOption("opt5", false, true, false, "VAL5"));
+            propTest1.setOptions(options);
+            ae.save(propTest1, false);
+
+            // create a group and options
+            FxGroupEdit group = FxGroupEdit.createNew("TESTGROUP1", new FxString(true, "TESTGROUP1"), new FxString(true, ""), true, FxMultiplicity.MULT_0_1);
+            ae.createGroup(baseTypeId, group, "/");
+
+            FxGroupAssignmentEdit groupTest1 = ((FxGroupAssignment) env().getAssignment(TEST1 + "/TESTGROUP1")).asEditable();
+
+            options = new ArrayList<FxStructureOption>(3);
+            options.add(new FxStructureOption("groupopt1", true, true, true, "G1"));
+            options.add(new FxStructureOption("groupopt2", false, true, true, "G2"));
+            options.add(new FxStructureOption("groupopt3", true, true, false, "G3"));
+
+            groupTest1.setOptions(options);
+            ae.save(groupTest1, false);
+
+
+            // reload orig assignments
+            propTest1 = ((FxPropertyAssignment) env().getAssignment(TEST1 + "/PROPTEST1")).asEditable();
+            groupTest1 = ((FxGroupAssignment) env().getAssignment(TEST1 + "/TESTGROUP1")).asEditable();
+            Assert.assertEquals(propTest1.getOptions().size(), 5);
+            Assert.assertEquals(groupTest1.getOptions().size(), 3);
+
+            // create a derived type - only option assignments having isInherited=true should be passed on
+            derTypeId = te.save(FxTypeEdit.createNew(TEST1DER, TEST1));
+            FxPropertyAssignmentEdit propTest1Der = ((FxPropertyAssignment) env().getAssignment(TEST1DER + "/PROPTEST1")).asEditable();
+            propID1 = propTest1Der.getId();
+            FxGroupAssignmentEdit groupTest1Der = ((FxGroupAssignment) env().getAssignment(TEST1DER + "/TESTGROUP1")).asEditable();
+            groupID1 = groupTest1Der.getId();
+
+            // assertions for inherited options
+            final List<FxStructureOption> derPropOptions = propTest1Der.getOptions();
+            final List<FxStructureOption> derGroupOptions = groupTest1Der.getOptions();
+            Assert.assertEquals(derPropOptions.size(), 3);
+            Assert.assertEquals(derGroupOptions.size(), 2);
+
+            // prop
+            Assert.assertTrue(propTest1Der.hasOption("OPT1"));
+            Assert.assertTrue(propTest1Der.hasOption("OPT2"));
+            Assert.assertTrue(propTest1Der.hasOption("OPT4")); // not overridable
+
+            // group
+            Assert.assertTrue(groupTest1Der.hasOption("GROUPOPT1"));
+            Assert.assertTrue(groupTest1Der.hasOption("GROUPOPT2"));
+
+            // test setting prop options
+            propTest1Der.setOption("OPT1", "VAL1NEW");
+            propTest1Der.setOption("OPT2", "VAL2NEW");
+            try {
+                propTest1Der.setOption("OPT4", "VAL4NEW");
+                Assert.fail("Setting an inherited property assignment option which cannot be overridden should have failed");
+            } catch (FxInvalidParameterException e) {
+                // ignore
+            }
+            ae.save(propTest1Der, false);
+            propTest1Der = ((FxPropertyAssignment) env().getAssignment(TEST1DER + "/PROPTEST1")).asEditable();
+            Assert.assertEquals(propTest1Der.getOption("OPT1").getValue(), "VAL1NEW");
+            Assert.assertEquals(propTest1Der.getOption("OPT2").getValue(), "VAL2NEW");
+
+            // test setting group options
+            groupTest1Der.setOption("GROUPOPT1", "G1NEWVAL");
+            try {
+                groupTest1Der.setOption("GROUPOPT2", "G2NEWVAL");
+                Assert.fail("Setting an inherited group assignment option which cannot be overridden should have failed");
+            } catch (FxInvalidParameterException e) {
+                // ignore
+            }
+            ae.save(groupTest1Der, false);
+            groupTest1Der = ((FxGroupAssignment) env().getAssignment(TEST1DER + "/TESTGROUP1")).asEditable();
+            Assert.assertEquals(groupTest1Der.getOption("GROUPOPT1").getValue(), "G1NEWVAL");
+
+            // test option inheritance propagation for property assignments:
+            // add 2 more inherited options to propTest1Der --> should be propagated to propTest1 in the derived type
+            propTest1.setOption("INHERITOPT1", true, true, true);
+            propTest1.setOption("INHERITOPT2", false, true, "1234");
+            ae.save(propTest1, false);
+
+            // reload proptest1der
+            propTest1Der = ((FxPropertyAssignment) env().getAssignment(TEST1DER + "/PROPTEST1")).asEditable();
+
+            Assert.assertEquals(propTest1Der.getOptions().size(), 5);
+            Assert.assertTrue(propTest1Der.hasOption("INHERITOPT1"));
+            Assert.assertTrue(propTest1Der.hasOption("INHERITOPT2"));
+            // and we should still have the "original" options
+            Assert.assertTrue(propTest1Der.hasOption("OPT1"));
+            Assert.assertTrue(propTest1Der.hasOption("OPT2"));
+            Assert.assertTrue(propTest1Der.hasOption("OPT4"));
+
+            // test option inheritance propagation for group assignments:
+            // add 2 more inherited options to groupTest1Der --> should be propagated to groupTest1 in the derived type
+            groupTest1.setOption("GROUPINHERITOPT1", true, true, true);
+            groupTest1.setOption("GROUPINHERITOPT2", false, true, "5678");
+            ae.save(groupTest1, false);
+
+            // reload groupTest2
+            groupTest1Der = ((FxGroupAssignment) env().getAssignment(TEST1DER + "/TESTGROUP1")).asEditable();
+
+            Assert.assertEquals(groupTest1Der.getOptions().size(), 4);
+            Assert.assertTrue(groupTest1Der.hasOption("GROUPINHERITOPT1"));
+            Assert.assertTrue(groupTest1Der.hasOption("GROUPINHERITOPT2"));
+            // and we should still have the "original" options
+            Assert.assertTrue(groupTest1Der.hasOption("GROUPOPT1"));
+            Assert.assertTrue(groupTest1Der.hasOption("GROUPOPT2"));
+
+            // ALIASED assignments --> copies all options (functionality = fx <=3.1)
+
+            // 1. aliased assignment in a derived type
+            // Notice: aliasing a property to a derived type's group will have the same outcome)
+            propTest1 = ((FxPropertyAssignment) env().getAssignment(TEST1 + "/PROPTEST1")).asEditable(); // reload
+            propID3 = ae.save(FxPropertyAssignmentEdit.createNew(propTest1, env().getType(TEST1DER), "TEST1ALIAS", "/"), false);
+            FxPropertyAssignment aliasTest = (FxPropertyAssignment) env().getAssignment(TEST1DER + "/TEST1ALIAS");
+
+            options = aliasTest.getOptions();
+            Assert.assertEquals(propTest1.getOptions().size(), 7); // assert orig. no. of options
+            Assert.assertEquals(options.size(), 7); // all options, including those w/ inherited == false
+            Assert.assertTrue(FxStructureOption.hasOption("OPT1", options));
+            Assert.assertTrue(FxStructureOption.hasOption("OPT2", options));
+            Assert.assertTrue(FxStructureOption.hasOption("OPT3", options));
+            Assert.assertTrue(FxStructureOption.hasOption("OPT4", options));
+            Assert.assertTrue(FxStructureOption.hasOption("OPT5", options));
+            Assert.assertTrue(FxStructureOption.hasOption("INHERITOPT1", options));
+            Assert.assertTrue(FxStructureOption.hasOption("INHERITOPT2", options));
+
+            // 2. aliased assignment in a separate type
+            sepTypeId = createTestTypeAndProp("SEPARATE", null, false);
+            propID4 = ae.save(FxPropertyAssignmentEdit.createNew(propTest1, env().getType("SEPARATE"), "TEST1ALIAS2", "/"), false);
+            FxPropertyAssignment aliasTest2 = (FxPropertyAssignment) env().getAssignment("SEPARATE/TEST1ALIAS2");
+
+            options = aliasTest2.getOptions();
+            Assert.assertEquals(options.size(), 7); // all options, including those w/ inherited == false
+            Assert.assertTrue(FxStructureOption.hasOption("OPT1", options));
+            Assert.assertTrue(FxStructureOption.hasOption("OPT2", options));
+            Assert.assertTrue(FxStructureOption.hasOption("OPT3", options));
+            Assert.assertTrue(FxStructureOption.hasOption("OPT4", options));
+            Assert.assertTrue(FxStructureOption.hasOption("OPT5", options));
+            Assert.assertTrue(FxStructureOption.hasOption("INHERITOPT1", options));
+            Assert.assertTrue(FxStructureOption.hasOption("INHERITOPT2", options));
+
+        } finally {
+            // rem. derived assignments first
+            if (propID4 != -1)
+                ae.removeAssignment(propID4);
+            if (propID3 != -1)
+                ae.removeAssignment(propID3);
+            if (propID2 != -1)
+                ae.removeAssignment(propID2);
+            if (groupID2 != -1)
+                ae.removeAssignment(groupID2);
+            if (propID1 != -1)
+                ae.removeAssignment(propID1);
+            if (groupID1 != -1)
+                ae.removeAssignment(groupID1);
+            // remove types
+            if (sepTypeId != -1)
+                te.remove(sepTypeId);
+            if (derTypeId != -1)
+                te.remove(derTypeId);
+            if (baseTypeId != -1)
+                te.remove(baseTypeId);
         }
     }
 

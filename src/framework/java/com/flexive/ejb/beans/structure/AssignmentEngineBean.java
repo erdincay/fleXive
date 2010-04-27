@@ -403,8 +403,20 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 }
             }
         }
-        if (changed)
+        if (changed) {
             storeOptions(con, TBL_STRUCT_GROUP_OPTIONS, "ID", group.getGroup().getId(), group.getId(), group.getOptions());
+            // propagate inherited options to derived assignments (only for derived types!)
+            List<FxGroupAssignment> derivedAssignments = org.getDerivedAssignments(CacheAdmin.getEnvironment());
+            if (derivedAssignments.size() > 0) {
+                // retrieve list of inherited options from the current modified assignment
+                for (FxGroupAssignment derived : derivedAssignments) {
+                    final List<FxStructureOption> inheritedOpts = FxStructureOption.cloneOptions(group.getOptions(), true);
+                    if (inheritedOpts.size() > 0) {
+                        updateDerivedAssignmentOptions(con, TBL_STRUCT_GROUP_OPTIONS, derived, inheritedOpts);
+                    }
+                }
+            }
+        }
         return changed;
     }
 
@@ -432,8 +444,20 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 }
             }
         }
-        if (changed)
+        if (changed) {
             storeOptions(con, TBL_STRUCT_PROPERTY_OPTIONS, "ID", original.getProperty().getId(), original.getId(), prop.getOptions());
+            // propagate inherited options to derived assignments (only f. derived types!)
+            List<FxPropertyAssignment> derivedAssignments = original.getDerivedAssignments(CacheAdmin.getEnvironment());
+            if (derivedAssignments.size() > 0) {
+                // retrieve list of inherited options from the current modified assignment
+                for (FxPropertyAssignment derived : derivedAssignments) {
+                    final List<FxStructureOption> inheritedOpts = FxStructureOption.cloneOptions(modified.getOptions(), true);
+                    if (inheritedOpts.size() > 0) {
+                        updateDerivedAssignmentOptions(con, TBL_STRUCT_PROPERTY_OPTIONS, derived, inheritedOpts);
+                    }
+                }
+            }
+        }
         return changed;
     }
 
@@ -483,6 +507,50 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             if (ps != null)
                 ps.close();
         }
+    }
+
+    /**
+     * Update the options of any derived assignments if their base versions acquire new options which are inherited
+     * ONLY do this iff the respective options are not already set
+     *
+     * @param con an open and valid connection
+     * @param table the table name
+     * @param derived the derived assignment t.b. updated
+     * @param inheritedOpts the options of the source type t.b. inherited by the derived type
+     * @return true if any changes had to be made
+     * @throws SQLException on errors
+     * @throws FxInvalidParameterException on errors
+     * @since 3.1.1
+     */
+    private boolean updateDerivedAssignmentOptions(Connection con, String table, FxAssignment derived, List<FxStructureOption> inheritedOpts)
+        throws SQLException, FxInvalidParameterException {
+        boolean changed = false;
+        final List<FxStructureOption> current = FxStructureOption.cloneOptions(derived.getOptions());
+        final List<FxStructureOption> newOpts = new ArrayList<FxStructureOption>(inheritedOpts.size());
+
+        for (FxStructureOption o : inheritedOpts) {
+            if (!FxStructureOption.hasOption(o.getKey(), current))
+                newOpts.add(o);
+            // update non overridable inherited option values if they differ
+            else if (!o.isOverrideable() && !FxStructureOption.getOption(o.getKey(), current).getValue().equals(o.getValue())) {
+                newOpts.add(new FxStructureOption(o.getKey(), o.isOverrideable(), true, o.getIsInherited(), o.getValue()));
+                // remove the option from the current ones
+                FxStructureOption.clearOption(current, o.getKey());
+            }
+        }
+        // add all remaining current options
+        newOpts.addAll(current);
+
+        if(newOpts.size() > 0) {
+            if(derived instanceof FxPropertyAssignment)
+                storeOptions(con, table, "ID", ((FxPropertyAssignment)derived).getProperty().getId(), derived.getId(), newOpts);
+            else if(derived instanceof FxGroupAssignment)
+                storeOptions(con, table, "ID", ((FxGroupAssignment)derived).getGroup().getId(), derived.getId(), newOpts);
+
+            changed = true;
+        }
+
+        return changed;
     }
 
     /**
@@ -1062,7 +1130,8 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 List<FxStructureOption> options = group.getOptions();
                 for (FxStructureOption option : options) {
                     changesDesc.append(option.getKey()).append("=").append(option.getValue()).append(" overridable=").
-                            append(option.isOverrideable()).append(" isSet=").append(option.isSet());
+                            append(option.isOverrideable()).append(" isSet=").append(option.isSet()).append(" isInherited=").
+                            append(option.getIsInherited());
                 }
                 changes = true;
             }
@@ -1258,7 +1327,20 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             }
             htracker.track(group.getAssignedType(), "history.assignment.createGroupAssignment", XPath, group.getAssignedType().getId(), group.getAssignedType().getName(),
                     group.getGroup().getId(), group.getGroup().getName());
-            storeOptions(con, TBL_STRUCT_GROUP_OPTIONS, "ID", group.getGroup().getId(), newAssignmentId, group.getOptions());
+
+
+            // FxStructureOption inheritance
+            boolean isInheritedAssignment = FxSharedUtils.checkAssignmentInherited(group);
+            if (isInheritedAssignment) {
+                // FxStructureOptions - retrieve only those with an activated "isInherited" flag
+                final List<FxStructureOption> inheritedOpts = FxStructureOption.cloneOptions(group.getOptions(), true);
+                if (inheritedOpts.size() > 0) {
+                    storeOptions(con, TBL_STRUCT_GROUP_OPTIONS, "ID", group.getGroup().getId(), newAssignmentId, inheritedOpts);
+                }
+            } else {
+                storeOptions(con, TBL_STRUCT_GROUP_OPTIONS, "ID", group.getGroup().getId(), newAssignmentId, group.getOptions());
+            }
+            
             if (group.getBaseAssignmentId() > 0 && createSubAssignments) {
                 FxGroupAssignment baseGroup = (FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment(group.getBaseAssignmentId());
                 for (FxGroupAssignment ga : baseGroup.getAssignedGroups()) {
@@ -1892,7 +1974,8 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 List<FxStructureOption> options = modified.getOptions();
                 for (FxStructureOption option : options) {
                     changesDesc.append(option.getKey()).append("=").append(option.getValue()).append(" overridable=").
-                            append(option.isOverrideable()).append(" isSet=").append(option.isSet());
+                            append(option.isOverrideable()).append(" isSet=").append(option.isSet()).append( "isInherited").
+                            append(option.getIsInherited());
                 }
                 changes = true;
             }
@@ -1986,7 +2069,19 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     TBL_STRUCT_ASSIGNMENTS, new String[]{"DESCRIPTION", "HINT"}, "ID", newAssignmentId);
             htracker.track(pa.getAssignedType(), "history.assignment.createPropertyAssignment", XPath, pa.getAssignedType().getId(), pa.getAssignedType().getName(),
                     pa.getProperty().getId(), pa.getProperty().getName());
-            storeOptions(con, TBL_STRUCT_PROPERTY_OPTIONS, "ID", pa.getProperty().getId(), newAssignmentId, pa.getOptions());
+
+            // FxStructureOption inheritance
+            boolean isInheritedAssignment = FxSharedUtils.checkAssignmentInherited(pa);
+            if (isInheritedAssignment) {
+                // FxStructureOptions - retrieve only those with an activated "isInherited" flag
+                final List<FxStructureOption> inheritedOpts = FxStructureOption.cloneOptions(pa.getOptions(), true);
+                if (inheritedOpts.size() > 0) {
+                    storeOptions(con, TBL_STRUCT_PROPERTY_OPTIONS, "ID", pa.getProperty().getId(), newAssignmentId, inheritedOpts);
+                }
+            } else {
+                storeOptions(con, TBL_STRUCT_PROPERTY_OPTIONS, "ID", pa.getProperty().getId(), newAssignmentId, pa.getOptions());
+            }
+            
             setAssignmentPosition(con, newAssignmentId, pa.getPosition());
 
             if (!pa.isSystemInternal()) {

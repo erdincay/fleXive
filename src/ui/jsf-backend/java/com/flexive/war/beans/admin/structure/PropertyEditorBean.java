@@ -38,10 +38,7 @@ import com.flexive.faces.beans.ActionBean;
 import com.flexive.faces.beans.SelectBean;
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.faces.messages.FxFacesMsgInfo;
-import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.EJBLookup;
-import com.flexive.shared.FxLanguage;
-import com.flexive.shared.XPathElement;
+import com.flexive.shared.*;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxRuntimeException;
@@ -105,6 +102,10 @@ public class PropertyEditorBean implements ActionBean, Serializable {
     private boolean selectedDerivedUsage = true;
     private boolean selectedActive = true;
     private int defaultMultiplicity = -1;
+    // show parent assignment options (CMIS / inheritance compliant derived assignments only)
+    private boolean showParentAssignmentOptions = false;
+    private OptionWrapper optionWrapperParent = null;
+    private String openParentOptions = "false"; // toggle panel f. parent assignment options
 
     public long getAssignmentId() {
         return assignment != null ? assignment.getId() : -1;
@@ -1058,7 +1059,10 @@ public class PropertyEditorBean implements ActionBean, Serializable {
         setPropertyMinMultiplicity(FxMultiplicity.getIntToString(property.getMultiplicity().getMin()));
         setPropertyMaxMultiplicity(FxMultiplicity.getIntToString(property.getMultiplicity().getMax()));
 
-        optionWrapper = new OptionWrapper(property.getOptions(), assignment.getOptions(), true);
+        optionWrapper = new OptionWrapper(property.getOptions(), assignment.getOptions(), true, isShowParentAssignmentOptions());
+        if(isShowParentAssignmentOptions()) {
+            optionWrapperParent = new OptionWrapper(null, CacheAdmin.getEnvironment().getAssignment(assignment.getBaseAssignmentId()).getOptions(), false);
+        }
 
         try {
             //workaround for the system language, which is not loadable:
@@ -1186,7 +1190,7 @@ public class PropertyEditorBean implements ActionBean, Serializable {
         property = CacheAdmin.getEnvironment().getProperty(property.getId()).asEditable();
         assignment = ((FxPropertyAssignment)CacheAdmin.getEnvironment().getAssignment(assignment.getId())).asEditable();
         // reload the optionWrapper
-        optionWrapper = new OptionWrapper(property.getOptions(), assignment.getOptions(), true);
+        optionWrapper = new OptionWrapper(property.getOptions(), assignment.getOptions(), true, isShowParentAssignmentOptions());
     }
 
     /**
@@ -1451,6 +1455,36 @@ public class PropertyEditorBean implements ActionBean, Serializable {
 
     public void setSelectedActive(boolean selectedActive) {
         this.selectedActive = selectedActive;
+    }
+
+    public OptionWrapper getOptionWrapperParent() {
+        return optionWrapperParent;
+    }
+
+    public void setOptionWrapperParent(OptionWrapper optionWrapperParent) {
+        this.optionWrapperParent = optionWrapperParent;
+    }
+
+    public String getOpenParentOptions() {
+        return openParentOptions;
+    }
+
+    public void setOpenParentOptions(String openParentOptions) {
+        this.openParentOptions = openParentOptions;
+    }
+
+    /**
+     * Toggle for showing the base assignment options
+     *
+     * @return true if inheritance conditions are met
+     */
+    public boolean isShowParentAssignmentOptions() {
+        showParentAssignmentOptions = FxSharedUtils.checkAssignmentInherited(assignment);
+        return showParentAssignmentOptions;
+    }
+
+    public void setShowParentAssignmentOptions(boolean showParentAssignmentOptions) {
+        this.showParentAssignmentOptions = showParentAssignmentOptions;
     }
 
     public void addScript() {

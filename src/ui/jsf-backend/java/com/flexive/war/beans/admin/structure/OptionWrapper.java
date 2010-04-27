@@ -74,11 +74,14 @@ public class OptionWrapper implements Serializable {
 
     private List<WrappedOption> structureOptions = null;
     private List<WrappedOption> assignmentOptions = null;
+    private List<WrappedOption> unoverridableAssignmentOptions = null;
     private List<WrappedOption> typeOptions = null;
     private Map<String, Boolean> assignmentOptionValidMap = null;
     private Map<String, Boolean> assignmentOptionOverridableMap = null;
+    // private Map<String, Boolean> derivedAssignmentOptionOverridableMap = null;
     private Map<String, Boolean> structureOptionValidMap = null;
     private Map<String, Boolean> typeOptionValidMap = null;
+    private boolean isDerivedAssignment = false;
 
     /**
      * Creates the OptionWrapper (For FxTypes)
@@ -119,8 +122,22 @@ public class OptionWrapper implements Serializable {
      *                           structureOptions, if not alaready present
      */
     public OptionWrapper(List<FxStructureOption> structureOptions, List<FxStructureOption> assignmentOptions, boolean addStandardOptions) {
+        this(structureOptions, assignmentOptions, addStandardOptions, false);
+    }
+
+    /**
+     * Creates the OptionWrapper
+     *
+     * @param structureOptions   optionlist of the structure element (e.g. group or property)
+     * @param assignmentOptions  optionlist of the according assignment (e.g. groupassignment or propertyassignment)
+     * @param addStandardOptions if the standard options (FxStructureOption.OPTION_...) should be added to the
+     *                           structureOptions, if not alaready present
+     * @param isDerivedAssignment set this flag to indicate that all inherited, non-overridable options should NOT be added to the assignmentOptionOverridableMap
+     */
+    public OptionWrapper(List<FxStructureOption> structureOptions, List<FxStructureOption> assignmentOptions, boolean addStandardOptions, boolean isDerivedAssignment) {
         this.structureOptions = new ArrayList<WrappedOption>();
         this.assignmentOptions = new ArrayList<WrappedOption>();
+        this.isDerivedAssignment = isDerivedAssignment;
 
         List<String> blacklisted = Arrays.asList(blacklistedOptionKeys);
 
@@ -156,7 +173,7 @@ public class OptionWrapper implements Serializable {
      *                              if not alaready present
      */
     public OptionWrapper(List<FxStructureOption> structureOptions, List<FxStructureOption> assignmentOptions, List<String> standardOptionKeyList) {
-        this(structureOptions, assignmentOptions, false);
+        this(structureOptions, assignmentOptions, false, false);
         List<WrappedOption> standardOptions = new ArrayList<WrappedOption>();
         for (String key : standardOptionKeyList) {
             standardOptions.add(new WrappedOption(key, FxStructureOption.VALUE_FALSE, false, true, true));
@@ -346,9 +363,28 @@ public class OptionWrapper implements Serializable {
         return converted;
     }
 
-    private boolean mayOverrideOption(String key) {
+    private boolean mayOverrideOption(String key, boolean isDerivedAssignment) {
+        boolean mayOverride = true;
         for (WrappedOption o : structureOptions) {
-            if (o.key.equals(key) && !o.isOverridable())
+            if (o.key.equals(key) && !o.isOverridable()) {
+                mayOverride = false;
+                break;
+            }
+        }
+        if (isDerivedAssignment) {
+            for (WrappedOption o : assignmentOptions) {
+                if (o.key.equals(key) && !o.isOverridable() && o.getIsInherited()) {
+                    mayOverride = false;
+                    break;
+                }
+            }
+        }
+        return mayOverride;
+    }
+
+    private boolean mayOverrideAssignmentOption(String key) { // TODO obsolete?
+        for (WrappedOption o : assignmentOptions) {
+            if (o.key.equals(key) && !o.isOverridable() && o.getIsInherited())
                 return false;
         }
         return true;
@@ -413,20 +449,39 @@ public class OptionWrapper implements Serializable {
     }
 
     /**
-     * A Map to indicate if an assignment option for a given key may be overrwritten.
+     * A Map to indicate if an assignment option for a given key may be overridden.
      *
-     * @return a Map for JSF pages which indicates if an assignment option for a given key may be overwritten.
+     * @return a Map for JSF pages which indicates if an assignment option for a given key may be overridden.
      */
     public Map<String, Boolean> getIsAssignmentOptionOverridableMap() {
         if (assignmentOptionOverridableMap == null) {
             assignmentOptionOverridableMap = new HashMap<String, Boolean>() {
                 public Boolean get(Object key) {
-                    return mayOverrideOption((String) key);
+                    return mayOverrideOption((String) key, isDerivedAssignment);
                 }
             };
         }
         return assignmentOptionOverridableMap;
     }
+
+    /**
+     * A Map to indicate if a derived assignment's option for a given key may be overridden.
+     * // TODO
+     * @return a Map for JSF pages which indicates if a derived assignment option for a given key may be overridden.
+     */
+//    public Map<String, Boolean> getIsDerivedAssignmentOptionOverridableMap() {
+//        if(derivedAssignmentOptionOverridableMap == null) {
+//            derivedAssignmentOptionOverridableMap = new HashMap<String, Boolean>() {
+//                private static final long serialVersionUID = -5743838788953000568L;
+//
+//                @Override
+//                public Boolean get(Object key) {
+//                    return mayOverrideAssignmentOption((String)key);
+//                }
+//            };
+//        }
+//        return derivedAssignmentOptionOverridableMap;
+//    }
 
     /**
      * A Map to indicate if a structure option for a given key is valid.
@@ -495,6 +550,20 @@ public class OptionWrapper implements Serializable {
             this.set = option.isSet();
             this.isInherited = option.getIsInherited();
         }
+
+//        /**
+//         * Ctor w/ an additional flag for derived assignments and their respective inherited options
+//         * Creates a sep. list of unoverridable derived options
+//         *
+//         * @param option the FxStructureOption
+//         * @param checkDerivedAssignmentOptions set to true if // TODO: bla
+//         */
+//        public WrappedOption(FxStructureOption option, boolean checkDerivedAssignmentOptions) {
+//            if(checkDerivedAssignmentOptions) {
+//                
+//            } else
+//               new WrappedOption(option);
+//        }
 
         private String asStringValue(boolean value) {
             if (value)

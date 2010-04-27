@@ -38,6 +38,8 @@ import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.faces.messages.FxFacesMsgInfo;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
+import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.XPathElement;
 import com.flexive.shared.security.Role;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.structure.*;
@@ -86,6 +88,9 @@ public class GroupEditorBean implements Serializable {
     private boolean editMode = false;
     //checker if current user may edit the property
     private boolean structureManagement = false;
+    private boolean showParentAssignmentOptions = false;
+    private OptionWrapper optionWrapperParent = null;
+    private String openParentOptions = "false"; // toggle panel f. parent assignment options
 
     public String getParseRequestParameters() {
         try {
@@ -161,7 +166,7 @@ public class GroupEditorBean implements Serializable {
         return assignment != null && assignment.isSystemInternal();
     }
 
-     /**
+    /**
      * initializes variables and does workarounds so editing
      * of an existing group and group assignment is possible via the webinterface
      */
@@ -172,7 +177,10 @@ public class GroupEditorBean implements Serializable {
         assignmentMaxMul = FxMultiplicity.getIntToString(assignment.getMultiplicity().getMax());
         groupMinMul = FxMultiplicity.getIntToString(group.getMultiplicity().getMin());
         groupMaxMul = FxMultiplicity.getIntToString(group.getMultiplicity().getMax());
-        optionWrapper = new OptionWrapper(group.getOptions(), assignment.getOptions(), false);
+        optionWrapper = new OptionWrapper(group.getOptions(), assignment.getOptions(), false, isShowParentAssignmentOptions());
+        if (isShowParentAssignmentOptions()) {
+            optionWrapperParent = new OptionWrapper(null, CacheAdmin.getEnvironment().getAssignment(assignment.getBaseAssignmentId()).getOptions(), false);
+        }
     }
 
     /**
@@ -368,6 +376,14 @@ public class GroupEditorBean implements Serializable {
         group.setOverrideMultiplicity(b);
     }
 
+    public String getOpenParentOptions() {
+        return openParentOptions;
+    }
+
+    public void setOpenParentOptions(String openParentOptions) {
+        this.openParentOptions = openParentOptions;
+    }
+
     /**
      * Apply changes to the group and the assignment and forward them to DB
      */
@@ -397,7 +413,7 @@ public class GroupEditorBean implements Serializable {
     private void reInit() {
         group = CacheAdmin.getEnvironment().getGroup(group.getId()).asEditable();
         assignment = ((FxGroupAssignment)CacheAdmin.getEnvironment().getAssignment(assignment.getId())).asEditable();
-        optionWrapper = new OptionWrapper(group.getOptions(), assignment.getOptions(), false);
+        optionWrapper = new OptionWrapper(group.getOptions(), assignment.getOptions(), false, isShowParentAssignmentOptions());
     }
 
     /**
@@ -628,6 +644,20 @@ public class GroupEditorBean implements Serializable {
         this.assignmentIsInherited = assignmentIsInherited;
     }
 
+    /**
+     * Toggle for showing the base assignment options
+     *
+     * @return true if inheritance conditions are met
+     */
+    public boolean isShowParentAssignmentOptions() {
+        showParentAssignmentOptions = FxSharedUtils.checkAssignmentInherited(assignment);
+        return showParentAssignmentOptions;
+    }
+
+    public void setShowParentAssignmentOptions(boolean showParentAssignmentOptions) {
+        this.showParentAssignmentOptions = showParentAssignmentOptions;
+    }
+
     public void addAssignmentOption() {
         try {
             optionWrapper.addOption(optionWrapper.getAssignmentOptions(), assignmentOptionKey, assignmentOptionValue, assignmentOverridable, assignmentIsInherited);
@@ -663,7 +693,15 @@ public class GroupEditorBean implements Serializable {
         optionWrapper.deleteOption(optionWrapper.getStructureOptions(), optionFiler);
     }
 
-     /**
+    public OptionWrapper getOptionWrapperParent() {
+        return optionWrapperParent;
+    }
+
+    public void setOptionWrapperParent(OptionWrapper optionWrapperParent) {
+        this.optionWrapperParent = optionWrapperParent;
+    }
+
+    /**
      * Hack in order to use command buttons to submit the form values
      * and update the view of GUI elements
      */

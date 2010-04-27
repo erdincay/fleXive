@@ -31,6 +31,8 @@
  ***************************************************************/
 package com.flexive.shared.structure;
 
+import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.XPathElement;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
@@ -311,19 +313,28 @@ public class FxGroupAssignmentEdit extends FxGroupAssignment {
     /**
      * Set an option
      *
-     * @param key option key
+     * @param key          option key
      * @param overrideable flag to indicate that derived assignments may override this option
-     * @param isInherited flag to indicate that derived assignments inherit this option
-     * @param value value of the option
+     * @param isInherited  flag to indicate that derived assignments inherit this option
+     * @param value        value of the option
      * @return the assignment itself, useful for chained calls
      * @throws FxInvalidParameterException on errors
-     *
      * @since 3.1.1
      */
     public FxGroupAssignmentEdit setOption(String key, boolean overrideable, boolean isInherited, String value) throws FxInvalidParameterException {
-         FxStructureOption gOpt = getGroup().getOption(key);
+        FxStructureOption gOpt = getGroup().getOption(key);
         if (gOpt.isSet() && !gOpt.isOverrideable())
             throw new FxInvalidParameterException(key, "ex.structure.override.group.forbidden", key, getGroup().getName());
+
+        if (this.isDerivedAssignment()) {
+            if (FxSharedUtils.checkAssignmentInherited(this)) {
+                FxGroupAssignment base = (FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment(getBaseAssignmentId());
+                if (base.getOption(key).getIsInherited() && !base.getOption(key).isOverrideable()) {
+                    if (!value.equals(base.getOption(key).getValue()))
+                        throw new FxInvalidParameterException(key, "ex.structure.override.groupAssignment.forbidden", key, base.getXPath());
+                }
+            }
+        }
 
         FxStructureOption.setOption(options, key, overrideable, isInherited, value);
         return this;
@@ -332,19 +343,30 @@ public class FxGroupAssignmentEdit extends FxGroupAssignment {
     /**
      * Set a boolean option
      *
-     * @param key option key
+     * @param key          option key
      * @param overrideable flag to indicate that derived assignments may override this option
-     * @param isInherited flag to indicate that derived assignments inherit this option
-     * @param value value of the option
+     * @param isInherited  flag to indicate that derived assignments inherit this option
+     * @param value        value of the option
      * @return the assignment itself, useful for chained calls
      * @throws FxInvalidParameterException on errors
-     *
      * @since 3.1.1
      */
     public FxGroupAssignmentEdit setOption(String key, boolean overrideable, boolean isInherited, boolean value) throws FxInvalidParameterException {
         FxStructureOption gOpt = getGroup().getOption(key);
         if (gOpt.isSet() && !gOpt.isOverrideable())
             throw new FxInvalidParameterException(key, "ex.structure.override.group.forbidden", key, getGroup().getName());
+
+        if (this.isDerivedAssignment()) {
+            if (FxSharedUtils.checkAssignmentInherited(this)) {
+                FxGroupAssignment base = (FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment(getBaseAssignmentId());
+                if (base.getOption(key).getIsInherited() && !base.getOption(key).isOverrideable()) {
+                    // only complain if the value gets overridden
+                    final String inValue = value ? FxStructureOption.VALUE_TRUE : FxStructureOption.VALUE_FALSE;
+                    if (!inValue.equals(base.getOption(key).getValue()))
+                        throw new FxInvalidParameterException(key, "ex.structure.override.groupAssignment.forbidden", key, base.getXPath());
+                }
+            }
+        }
 
         FxStructureOption.setOption(options, key, overrideable, isInherited, value);
         return this;
