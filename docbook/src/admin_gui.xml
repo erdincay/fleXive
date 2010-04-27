@@ -860,6 +860,77 @@
                         </mediaobject>
                     </para>
                 </section>
+                <section xml:id="adm_structure_editor_type_permissions">
+                    <title>Type permissions</title>
+                    <para>
+                        Types are protected by their structure <link linkend="core_security_acl">ACL</link>
+                        and may additionally be assigned multiple <link linkend="core_security_acl">instance ACLs</link>.
+                        If the type uses instance permissions it is possible to specify a default instance ACL, which
+                        will be used by default whenever a new content instance of this type is created.
+                         <mediaobject>
+                            <imageobject>
+                                <imagedata fileref="images/adm_ui_structure_editor/type_editor_acl.png" format="PNG"
+                                           contentwidth="66%"/>
+                            </imageobject>
+                        </mediaobject>
+                    </para>
+                    <para>
+                        By editing the type's permissions you may adapt the permission checks to an arbitrary
+                        level of security:
+                        <mediaobject>
+                            <imageobject>
+                                <imagedata fileref="images/adm_ui_structure_editor/type_editor_permissions.png" format="PNG"
+                                           contentwidth="66%"/>
+                            </imageobject>
+                        </mediaobject>
+                        <itemizedlist>
+                            <listitem>
+                                <para>
+                                    Use type permissions: If enabled, the mandatory structure
+                                    <link linkend="core_security_acl">ACL</link> assigned to
+                                    the type is included in permission checks.
+                                </para>
+                            </listitem>
+                            <listitem>
+                                <para>
+                                    Use instance permissions: If enabled, the type also includes its
+                                    assigned instance <link linkend="core_security_acl">ACL(s)</link>
+                                    when performing permission checks, in addition
+                                    to its (mandatory) structure <link linkend="core_security_acl">ACL</link>.
+                                </para>
+                            </listitem>
+                            <listitem>
+                                <para>
+                                    Use property permissions: If enabled, the <link linkend="core_security_acl">ACL</link>
+                                    assigned to the type's
+                                    properties is also taken into account when a content instance
+                                    is accessed or modified. Using property permissions it is possible
+                                    to restrict the access to single properties to arbitrary user
+                                    groups. (For example imagine a type article with the properties text and comment
+                                    where only the user group "editors" may change the article text but every
+                                    user may add a comment).
+                                </para>
+                            </listitem>
+                            <listitem>
+                                <para>
+                                    Use step permissions: If enabled, the
+                                    <link linkend="core_security_acl">ACL</link> assigned to the
+                                    current workflow step of the content instance is included in
+                                    permission checks.
+                                </para>
+                            </listitem>
+                            <listitem>
+                                <para>
+                                    Multiple <link linkend="core_security_acl">ACLs</link> per instance: if enabled, multiple instance ACLs can be assigned
+                                    to an instance of this type.
+                                </para>
+                            </listitem>
+                        </itemizedlist>
+                    </para>
+                    <para>
+
+                    </para>
+                </section>
                 If you want more information on types and their specific settings please refer to
                 <xref linkend="core_structures_types_parameters"/>.
             </section>

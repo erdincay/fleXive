@@ -225,6 +225,17 @@
                             </td>
                         </tr>
                         <tr>
+                            <td>Default instance ACL</td>
+                            <td>
+                                <methodname>setDefaultInstanceACL(ACL defaultInstanceACL)</methodname>
+                            </td>
+                            <td>&list_yes;</td>
+                            <td>&list_yes;</td>
+                            <td>Sets the default instance ACL which is assigned to newly created content
+                                instances of that type per default.
+                            </td>
+                        </tr>
+                        <tr>
                             <td>Category</td>
                             <td>
                                 <methodname>setCategory(TypeCategory category)</methodname>
@@ -516,6 +527,17 @@
                                 be checked. Disabling this check, will allow everyone to create or remove instances of
                                 this type (if instance permission checks are enabled, they will of course still be
                                 checked in the case of a removal).
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Allow multiple instance ACLs</td>
+                            <td>
+                                <methodname>setMultipleContentACLs(boolean value)</methodname>
+                            </td>
+                            <td>&list_yes;</td>
+                            <td>&list_yes;</td>
+                            <td>If true, multiple content instance ACLs are allowed for content
+                                instances of this type.
                             </td>
                         </tr>
                         <tr>
