@@ -1324,6 +1324,15 @@ public class BeContentEditorBean implements ActionBean, Serializable {
     }
 
     /**
+     * @see com.flexive.faces.beans.FxContentEditorBean#sortProperties()
+     * @since 3.1.1
+     */
+    public void sortProperties() {
+        FxContentEditorBean ceBean = (FxContentEditorBean) FxJsfUtils.getManagedBean("fxContentEditorBean");
+        ceBean.sortProperties();
+    }
+
+    /**
      * @return the confirmKey if in editMode or <code>null</code> if not in editMode
      */
     public String getConfirm() {

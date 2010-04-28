@@ -33,13 +33,13 @@ package com.flexive.shared.content;
 
 import com.flexive.shared.FxContext;
 import com.flexive.shared.XPathElement;
+import com.flexive.shared.exceptions.FxContentExceptionCause;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxNoAccessException;
-import com.flexive.shared.exceptions.FxContentExceptionCause;
 import com.flexive.shared.structure.FxMultiplicity;
 import com.flexive.shared.structure.FxPropertyAssignment;
-import com.flexive.shared.structure.GroupMode;
 import com.flexive.shared.structure.FxStructureOption;
+import com.flexive.shared.structure.GroupMode;
 import com.flexive.shared.value.*;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.logging.Log;
@@ -221,9 +221,12 @@ public class FxPropertyData extends FxData {
         for (FxData curr : getParent().getChildren())
             if (curr.getAssignmentId() == this.getAssignmentId() && !curr.isEmpty())
                 valid++;
-        if (valid < this.getAssignmentMultiplicity().getMin())
-            throw new FxInvalidParameterException(this.getAlias(), "ex.content.required.missing", this.getXPath(), valid,
-                    this.getAssignmentMultiplicity().toString()).setAffectedXPath(this.getXPathFull(), FxContentExceptionCause.RequiredViolated);
+        if (valid < this.getAssignmentMultiplicity().getMin()) {
+            // print the label of the property in the error msg if the label is present
+            throw new FxInvalidParameterException(this.getAlias(), "ex.content.required.missing",
+                    this.getAssignment().getDisplayName(true), valid, this.getAssignmentMultiplicity().toString())
+                    .setAffectedXPath(this.getXPathFull(), FxContentExceptionCause.RequiredViolated);
+        }
     }
 
     public void checkMaxLength() throws FxInvalidParameterException {
@@ -238,7 +241,7 @@ public class FxPropertyData extends FxData {
         for (long lang :value.getTranslatedLanguages()) {
             if (value.getTranslation(lang).toString().length() >maxLength.getIntValue())
                 throw new FxInvalidParameterException(this.getAlias(), "ex.content.value.invalid.maxLength",
-                        this.getXPath(), getMaxLength().getIntValue(), value.toString(), value.toString().length()).setAffectedXPath(this.getXPathFull(), FxContentExceptionCause.MaxlengthViolated);
+                        this.getAssignment().getDisplayName(true), getMaxLength().getIntValue(), value.toString(), value.toString().length()).setAffectedXPath(this.getXPathFull(), FxContentExceptionCause.MaxlengthViolated);
         }
     }
 

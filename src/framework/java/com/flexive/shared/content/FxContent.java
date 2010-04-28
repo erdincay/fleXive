@@ -929,6 +929,15 @@ public class FxContent implements Serializable {
     }
 
     /**
+     * Sorts the current data (=root data) according to the order of the type
+     *
+     * @since 3.1.1
+     */
+    public void sortData() {
+        FxPropertySorter.getSorterForType(typeId).applyOrder(data);
+    }
+
+    /**
      * Remove the property or group denoted by XPath
      *
      * @param XPath the XPath to remove

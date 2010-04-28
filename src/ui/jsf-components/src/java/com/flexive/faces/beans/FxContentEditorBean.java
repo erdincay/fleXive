@@ -51,11 +51,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.Serializable;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 
 /**
  * Backing bean for the content editor component.
@@ -958,8 +958,12 @@ public class FxContentEditorBean implements Serializable {
      * JSF-Action to perform a pending A4J-action that was manually set by javascript.
      */
     public void resolveA4jAction() {
-        if (StringUtils.isEmpty(storageKey) || StringUtils.isEmpty(nextA4jAction) || StringUtils.isEmpty(actionXpath))
+        if (StringUtils.isEmpty(storageKey) || StringUtils.isEmpty(nextA4jAction) || StringUtils.isEmpty(actionXpath)) {
+            if (nextA4jAction.equalsIgnoreCase("preCancel")) {
+                preCancel();
+            }
             return;
+        }
         try {
             setEditorId(storageKey);
             final List<FxData> data = contentStorage.get(storageKey).getContent().getData(actionXpath);
@@ -1083,7 +1087,8 @@ public class FxContentEditorBean implements Serializable {
      * @return true if the user changed something
      */
     public boolean wasChanged() {
-        return contentStorage.get(editorId).wasChanged();
+     FxWrappedContent c = contentStorage.get(editorId);
+        return c == null || c.wasChanged();
     }
 
     public void setAllOpened(String allOpened) {
@@ -1107,6 +1112,27 @@ public class FxContentEditorBean implements Serializable {
         changed = wasChanged();
         if (!changed) {
             cancel();
+        }
+    }
+
+    /**
+     * Sorts the current properties according to the Typedefinition
+     *
+     * @since 3.1.1
+     */
+    public void sortProperties() {
+        FxContent c = contentStorage.get(editorId).getContent();
+        if (c == null)
+            return;
+
+        String formPrefix = "";
+        try {
+            c.sortData();
+            formPrefix = contentStorage.get(editorId).getGuiSettings().getFormPrefix();
+        } catch (Throwable t) {
+            addErrorMessage(t, formPrefix);
+        } finally {
+            resetForm(formPrefix);
         }
     }
 

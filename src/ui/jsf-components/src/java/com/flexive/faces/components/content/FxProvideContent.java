@@ -228,6 +228,7 @@ public class FxProvideContent extends TagHandler {
                 if (typeId != null || type != null) {
                     wc = new FxWrappedContent(EJBLookup.getContentEngine().initialize(type != null ? type.getId() : typeId),
                             id, guiSettings, false);
+                    guiSettings.setUserMayUnlock(true);
                 } else {
                     // edit given content instance
                     FxContent storedCo = content;
@@ -263,11 +264,13 @@ public class FxProvideContent extends TagHandler {
                 // given type doesn't match content type -> reinitialize content for new type
                 else if (type != null && wc.getContent().getTypeId() != type.getId()) {
                     wc = new FxWrappedContent(EJBLookup.getContentEngine().initialize(type.getId()), id, guiSettings, false);
+                    guiSettings.setUserMayUnlock(true);
                     externalChanges = true;
                 }
                 // given type doesn't match content type -> reinitialize content for new type
                 else if (typeId != null && wc.getContent().getTypeId() != typeId) {
                     wc = new FxWrappedContent(EJBLookup.getContentEngine().initialize(typeId), id, guiSettings, false);
+                    guiSettings.setUserMayUnlock(true);
                     externalChanges = true;
                 }
                 if (externalChanges) {
