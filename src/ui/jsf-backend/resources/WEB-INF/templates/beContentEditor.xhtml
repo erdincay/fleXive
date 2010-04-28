@@ -504,7 +504,7 @@ disableTab... false if the <adm:tab/> component should be rendered, true otherwi
                 and empty myContent.guiSettings.openedReferenceId}">
                 <adm:commandButton id="#{editorId}_exportButton" labelKey="Content.button.export"
                                 lockscreen="false" location="#{empty myContent.guiSettings.openedReferenceId
-                                         and not myContent.referenced ? 'both' : 'content'}"
+                                         and not myContent.referenced ? 'toolbar' : 'content'}"
                                icon="export" separator="#{not myContent.referenced ? 'before' : ''}"
                                onclick="exportContent('#{myContent.content.pk}');return false;"
                                ajax="true">
