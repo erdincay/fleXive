@@ -44,7 +44,6 @@ import com.flexive.shared.workflow.Workflow;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Collection;
 
 
 /**
@@ -653,12 +652,12 @@ public interface FxEnvironment extends Serializable {
     String getDeactivatedTypesList();
 
     /**
-     * Get FxFlatStorage Mappings for the requested storage, type and leveĺ
+     * Get FxFlatStorage Mappings for the requested storage, type and level
      *
      * @param storage flat storage
      * @param typeId  type id
      * @param level   level
-     * @return Mappings for the requested storage, type and leveĺ
+     * @return Mappings for the requested storage, type and level
      */
     List<FxFlatStorageMapping> getFlatStorageMappings(String storage, long typeId, int level);
 
