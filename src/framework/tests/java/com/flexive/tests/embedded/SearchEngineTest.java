@@ -1289,33 +1289,35 @@ public class SearchEngineTest {
             final SimpleDateFormat dateTimeFormat = FxFormatUtils.getDateTimeFormat();
 
             final FxContent content = getContentEngine().initialize(TEST_TYPE);
+            final String compareDate = "2008-03-18";
+            final String compareDateTime = "2008-03-18 15:43:25.000"; //mp: replaced millisecond part with .000 since MySQL does not support milliseconds in DATETIME. See also http://bugs.mysql.com/bug.php?id=8523
             content.setValue("/" + dateProperty, new FxDate(false,
-                    dateFormat.parse("2008-03-18")));
+                    dateFormat.parse(compareDate)));
             content.setValue("/" + dateTimeProperty, new FxDateTime(false,
-                    dateTimeFormat.parse("2008-03-18 15:43:25.123")));
+                    dateTimeFormat.parse(compareDateTime)));
             pk = getContentEngine().save(content);
 
             // date query
-            assertExactPkMatch(pk, new SqlQueryBuilder().select("@pk").condition(dateProperty, EQ, "2008-03-18").condition("id", EQ, pk.getId()).getResult().<FxPK>collectColumn(1));
-            assertExactPkMatch(pk, new SqlQueryBuilder().select("@pk").condition(dateProperty, PropertyValueComparator.LE, "2008-03-18").condition("id", EQ, pk.getId()).getResult().<FxPK>collectColumn(1));
-            assertExactPkMatch(pk, new SqlQueryBuilder().select("@pk").condition(dateProperty, PropertyValueComparator.GE, "2008-03-18").condition("id", EQ, pk.getId()).getResult().<FxPK>collectColumn(1));
+            assertExactPkMatch(pk, new SqlQueryBuilder().select("@pk").condition(dateProperty, EQ, compareDate).condition("id", EQ, pk.getId()).getResult().<FxPK>collectColumn(1));
+            assertExactPkMatch(pk, new SqlQueryBuilder().select("@pk").condition(dateProperty, PropertyValueComparator.LE, compareDate).condition("id", EQ, pk.getId()).getResult().<FxPK>collectColumn(1));
+            assertExactPkMatch(pk, new SqlQueryBuilder().select("@pk").condition(dateProperty, PropertyValueComparator.GE, compareDate).condition("id", EQ, pk.getId()).getResult().<FxPK>collectColumn(1));
 
-            Assert.assertEquals(new SqlQueryBuilder().select("@pk").condition(dateProperty, PropertyValueComparator.LT, "2008-03-18").condition("id", EQ, pk.getId()).getResult().getRowCount(), 0,
+            Assert.assertEquals(new SqlQueryBuilder().select("@pk").condition(dateProperty, PropertyValueComparator.LT, compareDate).condition("id", EQ, pk.getId()).getResult().getRowCount(), 0,
                     "No rows should be returned because date condition doesn't match.");
-            Assert.assertEquals(new SqlQueryBuilder().select("@pk").condition(dateProperty, PropertyValueComparator.GT, "2008-03-18").condition("id", EQ, pk.getId()).getResult().getRowCount(), 0,
+            Assert.assertEquals(new SqlQueryBuilder().select("@pk").condition(dateProperty, PropertyValueComparator.GT, compareDate).condition("id", EQ, pk.getId()).getResult().getRowCount(), 0,
                     "No rows should be returned because date condition doesn't match.");
-            Assert.assertEquals(new SqlQueryBuilder().select("@pk").condition(dateProperty, PropertyValueComparator.NE, "2008-03-18").condition("id", EQ, pk.getId()).getResult().getRowCount(), 0,
+            Assert.assertEquals(new SqlQueryBuilder().select("@pk").condition(dateProperty, PropertyValueComparator.NE, compareDate).condition("id", EQ, pk.getId()).getResult().getRowCount(), 0,
                     "No rows should be returned because date condition doesn't match.");
 
             // datetime query
-            assertExactPkMatch(pk, new SqlQueryBuilder().select("@pk").condition(dateTimeProperty, EQ, "2008-03-18 15:43:25.123").condition("id", EQ, pk.getId()).getResult().<FxPK>collectColumn(1));
-            assertExactPkMatch(pk, new SqlQueryBuilder().select("@pk").condition(dateTimeProperty, PropertyValueComparator.LE, "2008-03-18 15:43:25.123").condition("id", EQ, pk.getId()).getResult().<FxPK>collectColumn(1));
-            assertExactPkMatch(pk, new SqlQueryBuilder().select("@pk").condition(dateTimeProperty, PropertyValueComparator.GE, "2008-03-18 15:43:25.123").condition("id", EQ, pk.getId()).getResult().<FxPK>collectColumn(1));
-            Assert.assertEquals(new SqlQueryBuilder().select("@pk").condition(dateTimeProperty, PropertyValueComparator.LT, "2008-03-18 15:43:25.123").condition("id", EQ, pk.getId()).getResult().getRowCount(), 0,
+            assertExactPkMatch(pk, new SqlQueryBuilder().select("@pk").condition(dateTimeProperty, EQ, compareDateTime).condition("id", EQ, pk.getId()).getResult().<FxPK>collectColumn(1));
+            assertExactPkMatch(pk, new SqlQueryBuilder().select("@pk").condition(dateTimeProperty, PropertyValueComparator.LE, compareDateTime).condition("id", EQ, pk.getId()).getResult().<FxPK>collectColumn(1));
+            assertExactPkMatch(pk, new SqlQueryBuilder().select("@pk").condition(dateTimeProperty, PropertyValueComparator.GE, compareDateTime).condition("id", EQ, pk.getId()).getResult().<FxPK>collectColumn(1));
+            Assert.assertEquals(new SqlQueryBuilder().select("@pk").condition(dateTimeProperty, PropertyValueComparator.LT, compareDateTime).condition("id", EQ, pk.getId()).getResult().getRowCount(), 0,
                     "No rows should be returned because date condition doesn't match.");
-            Assert.assertEquals(new SqlQueryBuilder().select("@pk").condition(dateTimeProperty, PropertyValueComparator.GT, "2008-03-18 15:43:25.123").condition("id", EQ, pk.getId()).getResult().getRowCount(), 0,
+            Assert.assertEquals(new SqlQueryBuilder().select("@pk").condition(dateTimeProperty, PropertyValueComparator.GT, compareDateTime).condition("id", EQ, pk.getId()).getResult().getRowCount(), 0,
                     "No rows should be returned because date condition doesn't match.");
-            Assert.assertEquals(new SqlQueryBuilder().select("@pk").condition(dateTimeProperty, PropertyValueComparator.NE, "2008-03-18 15:43:25.123").condition("id", EQ, pk.getId()).getResult().getRowCount(), 0,
+            Assert.assertEquals(new SqlQueryBuilder().select("@pk").condition(dateTimeProperty, PropertyValueComparator.NE, compareDateTime).condition("id", EQ, pk.getId()).getResult().getRowCount(), 0,
                     "No rows should be returned because date condition doesn't match.");
         } finally {
             removePk(pk);
