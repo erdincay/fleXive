@@ -169,6 +169,10 @@ try {
 //        println "set ok"
     }
 
+    // set mime type if not present
+    if (!content.containsValue("/MIMETYPE"))
+        content.setValue("/MIMETYPE", new FxString(false, (String) binValue.mimeType))
+
     return content
 } catch (Exception e) {
     System.err.println("Failed to process metadata (ignored): " + e.getMessage())
