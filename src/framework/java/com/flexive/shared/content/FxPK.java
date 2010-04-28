@@ -192,12 +192,12 @@ public class FxPK implements Serializable, Comparable<FxPK> {
         }
         String[] pk = value.split("\\.");
         if (pk == null || pk.length != 2)
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("Invalid PK value: " + value);
         long _id, _ver;
         try {
             _id = Long.parseLong(pk[0]);
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException(e);
         }
         try {
             _ver = Integer.parseInt(pk[1]);
@@ -207,7 +207,7 @@ public class FxPK implements Serializable, Comparable<FxPK> {
             else if ("LIVE".equals(pk[1]))
                 _ver = LIVE;
             else
-                throw new IllegalArgumentException();
+                throw new IllegalArgumentException("Illegal version: " + pk[1]);
         }
         return new FxPK(_id, (int) _ver);
     }
