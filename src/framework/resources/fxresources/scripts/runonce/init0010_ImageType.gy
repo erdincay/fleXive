@@ -73,14 +73,12 @@ void createSelectLists() {
     EJBLookup.getSelectListEngine().save(orientationList);
 }
 
-def String IMAGE_TYPE = "Image";
-
 def ScriptingEngine se = EJBLookup.getScriptingEngine();
 def long typeId;
 
 try {
-    if (CacheAdmin.getEnvironment().getType(IMAGE_TYPE) != null) {
-        println "Image type '${IMAGE_TYPE}' already exists! Skipping create attempt!";
+    if (CacheAdmin.getEnvironment().getType(FxType.IMAGE) != null) {
+        println "Image type '${FxType.IMAGE}' already exists! Skipping create attempt!";
         return;
     }
 } catch (FxRuntimeException nf) {
@@ -874,7 +872,7 @@ new GroovyTypeBuilder().image(
     }
 }
 
-typeId = CacheAdmin.getEnvironment().getType(IMAGE_TYPE).getId()
+typeId = CacheAdmin.getEnvironment().getType(FxType.IMAGE).getId()
 FxScriptInfo si = se.createScriptFromLibrary("ImageMetaParser.gy",
         new FxScriptInfo(-1,FxScriptEvent.BeforeContentCreate, "ImageMetaParser.gy",
                 "Script filling image properties",true,false));
@@ -893,7 +891,7 @@ EJBLookup.resultPreferencesEngine.saveSystemDefault(
                 [new ResultOrderByInfo("#image/dateCreated", SortDirection.DESCENDING)],
                 25, 0
         ),
-        CacheAdmin.environment.getType(IMAGE_TYPE).id,
+        CacheAdmin.environment.getType(FxType.IMAGE).id,
         ResultViewType.LIST,
         AdminResultLocations.values()
 )
@@ -906,7 +904,7 @@ EJBLookup.resultPreferencesEngine.saveSystemDefault(
                 [new ResultOrderByInfo("#image/dateCreated", SortDirection.DESCENDING)],
                 25, 0
         ),
-        CacheAdmin.environment.getType(IMAGE_TYPE).id,
+        CacheAdmin.environment.getType(FxType.IMAGE).id,
         ResultViewType.THUMBNAILS,
         AdminResultLocations.values()
 )

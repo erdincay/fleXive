@@ -157,13 +157,3 @@ si = se.createScriptFromLibrary("DocumentFileContentConverter.gy",
 se.createTypeScriptMapping(si.getId(), typeId, true, false)
 // BE: AfterContentCreate (see AssignmentEngineBean save())
 se.createTypeScriptMapping(FxScriptEvent.AfterContentCreate, si.id, typeId, true, false)
-
-// scripts needed f. the DocumentParser callback class (creation & conversion of DocumentFile content instances
-// DocumentTypeMetaDataParser.gy
-se.createScriptFromLibrary("DocumentTypeMetaDataParser.gy",
-        new FxScriptInfo(-1, FxScriptEvent.Internal, "DocumentTypeMetaDataParser.gy",
-                "Parse Meta Data f. the DOCUMENT type",true,false));
-// ImageTypeMetaDataParser.gy
-se.createScriptFromLibrary("ImageTypeMetaDataParser.gy",
-        new FxScriptInfo(-1,FxScriptEvent.Internal, "ImageTypeMetaDataParser.gy",
-                "Parse Meta Data f. the IMAGE type",true,false));

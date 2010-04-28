@@ -1,4 +1,4 @@
-/***************************************************************
+/** *************************************************************
  *  This file is part of the [fleXive](R) framework.
  *
  *  Copyright (c) 1999-2010
@@ -28,7 +28,7 @@
  *
  *
  *  This copyright notice MUST APPEAR in all copies of the file!
- ***************************************************************/
+ ************************************************************** */
 
 //file: ImageMetaParser.gy
 //description:
@@ -36,18 +36,24 @@
 // To be called for Image type create and update dynamic scripting
 //expected bindings:
 //  ticket ... UserTicket
+// [optional] binaryDescriptor ... the BinaryDescriptor (taken from the content if null)
 //  content ... the FxContent being processed
 //author: Markus Plesser, Unique Computing Solutions GmbH
 
 import com.flexive.shared.CacheAdmin
 import com.flexive.shared.value.*
 
-def binValue = content.getPropertyData("/File").value.defaultTranslation
+def binValue
+if (binding.variables.containsKey("binaryDescriptor"))
+    binValue = binaryDescriptor != null ? binaryDescriptor : content.getPropertyData("/File").value.defaultTranslation
+else
+    binValue = content.getPropertyData("/File").value.defaultTranslation
+
 if (binValue.metadata == null || binValue.metadata.length() < 20) {
     println "No metadata present for image to process!"
     //ensure that the filename is set, else the file can not be saved
-    if (content.getValue("/FILENAME").isEmpty())
-        content.setValue("/FILENAME", new FxString(false, binValue.name))
+    if (!content.containsValue("/FILENAME"))
+        content.setValue("/FILENAME", new FxString(false, (String) binValue.name))
     return
 }
 
@@ -65,77 +71,59 @@ void process(cmap, key, rawvalue) {
 }
 
 try {
-//    if (binValue.isNewBinary()) {
-//        println "Processing a new descriptor (got to load meta/mime from transit)..."
-//    }
-//    println "Meta data (first 20 chars): ${binValue.metadata.substring(0, 20)}...";
+    if (!content.containsValue("/FILENAME"))
+        content.setValue("/FILENAME", new FxString(false, (String) binValue.name))
 
-//    println "Image name: " + binValue.name
-    if (content.getValue("/FILENAME").isEmpty())
-        content.setValue("/FILENAME", new FxString(false, binValue.name))
-
-
+    // println "Meta data (first 20 chars): ${binValue.metadata.substring(0, 20)}...";
     def meta = new XmlSlurper().parseText(binValue.metadata);
     def cmap = [:]
-//    def geometry = ((String) meta.Geometry).split('x')
-//    def res = ((String) meta.Resolution).split('x')
     def java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
 
     def compList = CacheAdmin.environment.getSelectList("Image Compression")
     def orientList = CacheAdmin.environment.getSelectList("Image Orientation")
 
     process(cmap, 'String|Caption', binValue.name)
-    process(cmap, 'DateTime|DateCreated', meta.meta.find{ it.@key == 'DateTimeOriginal'})
-    if( !cmap.containsKey('DateTime|DateCreated') )
-        process(cmap, 'DateTime|DateCreated', meta.meta.find{ it.@key == 'DateTime'})
+    process(cmap, 'DateTime|DateCreated', meta.meta.find { it.@key == 'DateTimeOriginal'})
+    if (!cmap.containsKey('DateTime|DateCreated'))
+    process(cmap, 'DateTime|DateCreated', meta.meta.find { it.@key == 'DateTime'})
 
-    def width = meta.meta.find{ it.@key == 'PixelXDimension'}
-    if( width == "" )
-        width = meta.imageData.width
-    def height = meta.meta.find{ it.@key == 'PixelYDimension'}
-    if( height == "")
-        height = meta.imageData.height
+    def width = meta.meta.find { it.@key == 'PixelXDimension'}
+    if (width == "")
+    width = meta.imageData.width
+    def height = meta.meta.find { it.@key == 'PixelYDimension'}
+    if (height == "")
+    height = meta.imageData.height
     process(cmap, 'Number|PixelXDimension', width)
     process(cmap, 'Number|PixelYDimension', height)
-    
-    process(cmap, 'Double|xResolution', meta.meta.find{ it.@key == 'xResolution'})
-    process(cmap, 'Double|yResolution', meta.meta.find{ it.@key == 'xResolution'})
+
+    process(cmap, 'Double|xResolution', meta.meta.find { it.@key == 'xResolution'})
+    process(cmap, 'Double|yResolution', meta.meta.find { it.@key == 'xResolution'})
     process(cmap, 'Number|BitsPerPixel', meta.imageData.bpp)
     process(cmap, 'String|ColorType', meta.imageData.colorType)
     process(cmap, 'SelectList|Compression', meta.imageData.compressionAlgorithm);
-    process(cmap, 'String|MetaData/Manufacturer', meta.meta.find{ it.@key == 'Make'})
-    process(cmap, 'String|MetaData/Model', meta.meta.find{ it.@key == 'Model'})
-    process(cmap, 'Number|MetaData/ISO', meta.meta.find{ it.@key == 'ISOSpeedRatings'})
-    process(cmap, 'SelectList|MetaData/Orientation', meta.meta.find{ it.@key == 'Orientation'});
-    process(cmap, 'String|MetaData/FocalLength', meta.meta.find{ it.@key == 'FocalLength'})
-    process(cmap, 'String|MetaData/MaxApertureValue', meta.meta.find{ it.@key == 'MaxApertureValue'})
-    process(cmap, 'String|MetaData/ApertureValue', meta.meta.find{ it.@key == 'ApertureValue'})
-    process(cmap, 'String|MetaData/ExposureBias', meta.meta.find{ it.@key == 'ExposureBiasValue'})
-    process(cmap, 'String|MetaData/ExposureProgram', meta.meta.find{ it.@key == 'ExposureMode'})
-    process(cmap, 'String|MetaData/ExposureTime', meta.meta.find{ it.@key == 'ExposureTime'})
-    process(cmap, 'String|MetaData/FNumber', meta.meta.find{ it.@key == 'FNumber'})
-    process(cmap, 'String|MetaData/Flash', meta.meta.find{ it.@key == 'Flash'})
-    process(cmap, 'String|MetaData/MeteringMode', meta.meta.find{ it.@key == 'MeteringMode'})
-    process(cmap, 'String|MetaData/WhiteBalance', meta.meta.find{ it.@key == 'WhiteBalance'})
-    process(cmap, 'String|MetaData/OriginatingProgram', meta.meta.find{ it.@key == 'Software'})
-
-
-//    if (cmap['DateCreated'] == null)
-//        process(cmap, 'DateTime|DateCreated', meta['Exif-DateTime'])
-//    if (cmap['DateCreated'] == null)
-//        process(cmap, 'DateTime|DateCreated', sdf.format(new java.util.Date(System.currentTimeMillis())))
-//
-//    process(cmap, 'SelectList|Compression', binValue.mimeType);
-
-
+    process(cmap, 'String|MetaData/Manufacturer', meta.meta.find { it.@key == 'Make'})
+    process(cmap, 'String|MetaData/Model', meta.meta.find { it.@key == 'Model'})
+    process(cmap, 'Number|MetaData/ISO', meta.meta.find { it.@key == 'ISOSpeedRatings'})
+    process(cmap, 'SelectList|MetaData/Orientation', meta.meta.find { it.@key == 'Orientation'});
+    process(cmap, 'String|MetaData/FocalLength', meta.meta.find { it.@key == 'FocalLength'})
+    process(cmap, 'String|MetaData/MaxApertureValue', meta.meta.find { it.@key == 'MaxApertureValue'})
+    process(cmap, 'String|MetaData/ApertureValue', meta.meta.find { it.@key == 'ApertureValue'})
+    process(cmap, 'String|MetaData/ExposureBias', meta.meta.find { it.@key == 'ExposureBiasValue'})
+    process(cmap, 'String|MetaData/ExposureProgram', meta.meta.find { it.@key == 'ExposureMode'})
+    process(cmap, 'String|MetaData/ExposureTime', meta.meta.find { it.@key == 'ExposureTime'})
+    process(cmap, 'String|MetaData/FNumber', meta.meta.find { it.@key == 'FNumber'})
+    process(cmap, 'String|MetaData/Flash', meta.meta.find { it.@key == 'Flash'})
+    process(cmap, 'String|MetaData/MeteringMode', meta.meta.find { it.@key == 'MeteringMode'})
+    process(cmap, 'String|MetaData/WhiteBalance', meta.meta.find { it.@key == 'WhiteBalance'})
+    process(cmap, 'String|MetaData/OriginatingProgram', meta.meta.find { it.@key == 'Software'})
 
     cmap.each() {key, value ->
         def _type = key.split('\\|')[0]
         def fxvalue
         key = key.split("\\|")[1]
-//        println "${key} -> ${value} (${_type})"
+
         switch (_type) {
-            case "String": fxvalue = new FxString(key=="Caption", value); break
+            case "String": fxvalue = new FxString(key == "Caption", value); break
             case "Number":
                 fxvalue = new FxNumber(false, Integer.parseInt(value)); break
             case "Double": fxvalue = new FxDouble(false, Double.parseDouble(value)); break
@@ -143,8 +131,8 @@ try {
             case "SelectList":
                 if (key == "Compression") {
                     try {
-                        if( value.startsWith("PNG"))
-                            value = "PNG"
+                        if (value.startsWith("PNG"))
+                        value = "PNG"
                         fxvalue = new FxSelectOne(false, compList.getItemByData(value.toUpperCase()))
                     } catch (Throwable t) {
                         println "Error setting select list item: " + t.message
@@ -160,13 +148,12 @@ try {
                     }
                 }
         }
-//        println "fxValue[$key]=$fxvalue"
+
         try {
             content.setValue("/" + key, fxvalue);
         } catch (Exception e) {
             System.err.println("Failed to process metadata for /$key (ignored): " + e.getMessage())
         }
-//        println "set ok"
     }
 
     // set mime type if not present
@@ -177,18 +164,3 @@ try {
 } catch (Exception e) {
     System.err.println("Failed to process metadata (ignored): " + e.getMessage())
 }
-
-/*
-println meta.@source
-
-//cmap['MetaData/Manufacturer'] = meta['Profile-exif'].Make
-println meta['Profile-exif'].Model
-println meta.Colorspace
-println cmap
-*/
-
-//println "XML:  "+((FxBinary)((FxPropertyData)content.getPropertyData("/ImageBinary")).getValue())
-//.getBestTranslation().getMetadata()
-
-//println sdf.parse(cmap['DateCreated'])
-//println "finished!"

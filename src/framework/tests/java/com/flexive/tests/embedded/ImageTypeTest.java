@@ -41,17 +41,16 @@ import com.flexive.shared.structure.FxType;
 import com.flexive.shared.value.BinaryDescriptor;
 import com.flexive.shared.value.FxBinary;
 import com.flexive.shared.value.FxString;
-import static com.flexive.tests.embedded.FxTestUtils.login;
-import static com.flexive.tests.embedded.FxTestUtils.logout;
-import com.flexive.tests.embedded.TestUsers;
+import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import org.testng.Assert;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
+
+import static com.flexive.tests.embedded.FxTestUtils.login;
+import static com.flexive.tests.embedded.FxTestUtils.logout;
 
 /**
  * Test and setup for the image type
@@ -61,7 +60,6 @@ import java.io.FileOutputStream;
 @Test(groups = {"ejb", "image"})
 public class ImageTypeTest {
 
-    private static String IMAGE_TYPE = "Image";
     private static String BINPATH = "/File";
 
     private ContentEngine co;
@@ -86,7 +84,7 @@ public class ImageTypeTest {
             if (!testFile.exists())
                 return;
 
-            FxType type = CacheAdmin.getEnvironment().getType(IMAGE_TYPE);
+            FxType type = CacheAdmin.getEnvironment().getType(FxType.IMAGE);
 
             FileInputStream fis = new FileInputStream(testFile);
             BinaryDescriptor binary = new BinaryDescriptor(testFile.getName(), testFile.length(), fis);
@@ -120,7 +118,7 @@ public class ImageTypeTest {
             if (!testFile2.exists())
                 return;
 
-            FxType type = CacheAdmin.getEnvironment().getType(IMAGE_TYPE);
+            FxType type = CacheAdmin.getEnvironment().getType(FxType.IMAGE);
 
             FileInputStream fis = new FileInputStream(testFile1);
             BinaryDescriptor binary = new BinaryDescriptor(testFile1.getName(), testFile1.length(), fis);

@@ -100,7 +100,7 @@ new GroovyTypeBuilder().Article(
             multiplicity: FxMultiplicity.MULT_0_N,
             dataType: FxDataType.Reference,
             defaultMultiplicity: 0,
-            referencedType: "IMAGE")
+            referencedType: FxType.IMAGE)
     // xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
     // xx ARTICLE TEASER GROUP
     // xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -123,7 +123,7 @@ new GroovyTypeBuilder().Article(
 
         teaser_image(label: new FxString("Linked Image"),
                 dataType: FxDataType.Reference,
-                referencedType: CacheAdmin.environment.getType("IMAGE"),
+                referencedType: CacheAdmin.environment.getType(FxType.IMAGE),
                 fullTextIndexed: false,
                 defaultMultiplicity: 0)
     }
@@ -149,7 +149,7 @@ new GroovyTypeBuilder().Article(
 
         box_image(label: new FxString("Linked Image"),
                 dataType: FxDataType.Reference,
-                referencedType: CacheAdmin.environment.getType("IMAGE"),
+                referencedType: CacheAdmin.environment.getType(FxType.IMAGE),
                 fullTextIndexed: false,
                 defaultMultiplicity: 0)
     }

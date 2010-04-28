@@ -70,7 +70,7 @@ import static com.flexive.tests.embedded.FxTestUtils.logout;
 public class BinaryTest {
     private static final Log LOG = LogFactory.getLog(BinaryTest.class);
 
-    private static String IMAGE_TYPE = "Image";
+    private static String IMAGE_TYPE = FxType.IMAGE;
     private static String DOCUMENT_TYPE = FxType.DOCUMENT;
 
     private ContentEngine co;

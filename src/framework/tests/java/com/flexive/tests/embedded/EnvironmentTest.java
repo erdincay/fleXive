@@ -252,8 +252,8 @@ public class EnvironmentTest {
         TypeEngine te = EJBLookup.getTypeEngine();
         try {
             id1 = te.save(FxTypeEdit.createNew("PDF_TYPE", FxType.DOCUMENT).setMimeType(new FxMimeTypeWrapper("application/pdf")));
-            id2 = te.save(FxTypeEdit.createNew("JPG_TYPE", "IMAGE").setMimeType(new FxMimeTypeWrapper("image/jpeg")));
-            id3 = te.save(FxTypeEdit.createNew("PNG_TYPE", "IMAGE").setMimeType(new FxMimeTypeWrapper("image/png")));
+            id2 = te.save(FxTypeEdit.createNew("JPG_TYPE", FxType.IMAGE).setMimeType(new FxMimeTypeWrapper("image/jpeg")));
+            id3 = te.save(FxTypeEdit.createNew("PNG_TYPE", FxType.IMAGE).setMimeType(new FxMimeTypeWrapper("image/png")));
             id4 = te.save(FxTypeEdit.createNew("JPG_TYPE_CHILD", "JPG_TYPE").setMimeType(new FxMimeTypeWrapper("image/foobar")));
 
             Assert.assertEquals(getEnvironment().getMimeTypeMatch("application/pdf").getName(), "PDF_TYPE");

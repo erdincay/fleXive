@@ -91,6 +91,11 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      * Name of the document type for storing typical document file formats (application mime types: PDF, Word, Excel, ...)
      */
     public static final String DOCUMENT = "DOCUMENT";
+    /**
+     * Name of the image type for storing image file formats (mimetypes image/*)
+     * @since 3.1.1
+     */
+    public static final String IMAGE = "IMAGE";
 
     protected long id;
     protected ACL ACL;
@@ -930,6 +935,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
      * @param xpPrefix XPath prefix like "FxType name[@pk=..]"
      * @return empty FxData hierarchy
      */
+    @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     public FxGroupData createEmptyData(String xpPrefix) {
         FxGroupData base;
         try {

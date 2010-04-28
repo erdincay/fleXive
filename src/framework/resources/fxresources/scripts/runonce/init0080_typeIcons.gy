@@ -56,7 +56,7 @@ FxBinary getImageBinary(name, path) {
 }
 
 FxPK createTypeIcon(String typeName, String fileName) {
-    def builder = new GroovyContentBuilder("image")
+    def builder = new GroovyContentBuilder(FxType.IMAGE)
     builder {
         file(getImageBinary("Type Icon: " + typeName.toUpperCase(), fileName))
     }
@@ -73,7 +73,7 @@ def addTypeIcon(String typeName, String fileName) {
 
 if (!FxSharedUtils.isMinimalRunOnceScripts()) {
     addTypeIcon(FxType.DOCUMENTFILE, "type-documentfile.png")
-    addTypeIcon("image", "type-image.png")
+    addTypeIcon(FxType.IMAGE, "type-image.png")
     addTypeIcon(FxType.CONTACTDATA, "type-contact.png")
     addTypeIcon("article", "type-article.png")
     addTypeIcon(FxType.DOCUMENT, "type-document.png")

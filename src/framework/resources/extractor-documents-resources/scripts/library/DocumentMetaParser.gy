@@ -36,6 +36,7 @@
 // To be called for Document type create and update dynamic scripting
 //expected bindings:
 //  ticket ... UserTicket
+// [optional] binaryDescriptor ... BinaryDescriptor (retrieved from content instance if null)
 //  content ... the FxContent being processed
 //author: Markus Plesser, Unique Computing Solutions GmbH
 import com.flexive.shared.value.*
@@ -45,7 +46,14 @@ if( !content.containsValue("/File") ) {
     return content
 }
 
-def binValue = content.getPropertyData("/File").value.defaultTranslation
+
+def binValue
+if(binding.variables.containsKey("binaryDescriptor"))
+    binValue = binaryDescriptor != null ? binaryDescriptor : content.getPropertyData("/File").value.defaultTranslation
+else
+    binValue = content.getPropertyData("/File").value.defaultTranslation
+
+// def binValue = content.getPropertyData("/File").value.defaultTranslation
 if( binValue.metadata == null || binValue.metadata.length() < 20) {
     println "No metadata present for document to process!"
     if( !content.containsValue("/CAPTION"))
@@ -70,11 +78,7 @@ void process(cmap,key,rawvalue)  {
     cmap[key] += ' '+value
 }
 
-//println "Document name: "+binValue.name
 def java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy:MM:dd HH:mm:ss")
-//println "Text: $meta.text"
-//println "Meta: $meta"
-//println "Summary: $meta.summary"
 
 if( meta.summary ) {
     if( meta.summary.author )
@@ -121,7 +125,7 @@ cmap.each() {key, value ->
     def _type = key.split('\\|')[0]
     def fxvalue
     key = key.split("\\|")[1]
-//      println "${key} -> ${value} (${_type})"
+
     switch (_type) {
         case "String": fxvalue = new FxString(false, (String)value); break
         case "MLString": fxvalue = new FxString(true, (String)value); break
@@ -140,14 +144,11 @@ cmap.each() {key, value ->
             break
     }
     if (fxvalue != null) {
-//        println "fxValue=" + fxvalue
         if (!content.containsValue("/" + key)) {
             content.setValue("/" + key, fxvalue);
-//            println "/$key -> $fxvalue"
         }
     }
 }
-
 
 if (!content.containsValue("/CAPTION"))
     content.setValue("/CAPTION", new FxString(true, (String) binValue.name))
