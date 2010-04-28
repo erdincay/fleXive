@@ -68,7 +68,7 @@ public class FxQuartz {
 
     /**
      * Get the Scheduler for the current division
-     *                                                                               cd .
+     *
      * @return Scheduler for the current division
      */
     public static Scheduler getScheduler() {

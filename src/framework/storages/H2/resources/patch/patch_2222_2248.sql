@@ -1,18 +1,6 @@
-/*
-# This script is identical to "tables_h2.sql" from the
-# Quartz 1.8 distribution:
-
--- Thanks to Amir Kibbar and Peter Rietzler for contributing the schema for H2 database,
--- and verifying that it works with Quartz's StdJDBCDelegate
---
--- Note, Quartz depends on row-level locking which means you must use the MVCC=TRUE
--- setting on your H2 database, or you will experience dead-locks
---
---
--- In your Quartz properties file, you'll need to set
--- org.quartz.jobStore.driverDelegateClass = org.quartz.impl.jdbcjobstore.StdJDBCDelegate
-*/
-
+-- Patch from v2222 -> v2248
+-- Change: FX-873: Update Quartz to 1.8
+-- Author: Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
 DROP TABLE QRTZ_LOCKS IF EXISTS;
 DROP TABLE QRTZ_SCHEDULER_STATE IF EXISTS;
 DROP TABLE QRTZ_FIRED_TRIGGERS IF EXISTS;
