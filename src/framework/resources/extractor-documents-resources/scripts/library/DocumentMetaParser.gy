@@ -149,8 +149,11 @@ cmap.each() {key, value ->
 }
 
 
-if( !content.containsValue("/CAPTION") )
-    content.setValue("/CAPTION", new FxString(true, (String)binValue.name))
-if( !content.containsValue("/ENCRYPTED") )
+if (!content.containsValue("/CAPTION"))
+    content.setValue("/CAPTION", new FxString(true, (String) binValue.name))
+if (!content.containsValue("/ENCRYPTED"))
     content.setValue("/ENCRYPTED", new FxBoolean(false, false))
+// check if the mimetype was set
+if (!content.containsValue("/MIMETYPE"))
+    content.setValue("/MIMETYPE", new FxString(false, (String) binValue.mimeType))
 return content

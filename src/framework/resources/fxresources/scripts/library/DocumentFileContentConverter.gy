@@ -31,7 +31,7 @@ package library
  *  This copyright notice MUST APPEAR in all copies of the file!
  ***************************************************************/
 
-//file: DocumentFileContentConverterACC.gy (ACC - AfterContentCreate)
+//file: DocumentFileContentConverter.gy (AfterContentCreate and AfterContentSave events)
 //description: Run a callback to DocumentParser for content type conversion
 //author: Christopher Blasnik, Unique Computing Solutions GmbH
 
