@@ -173,9 +173,8 @@ public final class GroovyScriptExporterTools {
             }
 
             // type defaultInstanceACL
-            String defInstACL = type.getDefaultInstanceACL().getName();
-            // only set if different from the default instance acl for content instances
-            if(!CacheAdmin.getEnvironment().getACL(defInstACL).equals(CacheAdmin.getEnvironment().getACL(ACLCategory.INSTANCE.getDefaultId()))) {
+            if(type.hasDefaultInstanceACL()) {
+                String defInstACL = type.getDefaultInstanceACL().getName();
                 sopts.put("defaultInstanceACL", "\"" + defInstACL + "\"");
             }
             sopts.put("languageMode", type.getLanguage() == LanguageMode.Multiple ? "LanguageMode.Multiple" : "LanguageMode.Single");
