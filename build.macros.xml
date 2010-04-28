@@ -18,6 +18,7 @@
                     excludes="@{excludes}"
                     source="${compiler.source}"
                     target="${compiler.target}"
+                    includeantruntime="false"
                     fork="${compiler.fork}">
 				<args/>
 			</javac>
