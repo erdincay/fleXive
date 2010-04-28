@@ -160,7 +160,7 @@ public class FxPropertyAssignmentEdit extends FxPropertyAssignment {
     }
 
     /**
-     * Set an option with defaults of overrideable & isInherited == true
+     * Set an option with defaults of overridable & isInherited == true
      *
      * @param key   option key
      * @param value value of the option
@@ -172,7 +172,7 @@ public class FxPropertyAssignmentEdit extends FxPropertyAssignment {
     }
 
     /**
-     * Set a boolean option with defaults of overrideable & isInherited == true
+     * Set a boolean option with defaults of overridable & isInherited == true
      *
      * @param key   option key
      * @param value value of the option
@@ -187,23 +187,23 @@ public class FxPropertyAssignmentEdit extends FxPropertyAssignment {
      * Set an option
      *
      * @param key          the option key
-     * @param overrideable the overrideable status
+     * @param overridable the overridable status
      * @param isInherited  the isInherited status (inherited by derived assignments)
      * @param value        the option value
      * @return the assignment itself, useful f. chained calls
      * @throws FxInvalidParameterException on errors
      * @since 3.1.1
      */
-    public FxPropertyAssignmentEdit setOption(String key, boolean overrideable, boolean isInherited, String value) throws FxInvalidParameterException {
+    public FxPropertyAssignmentEdit setOption(String key, boolean overridable, boolean isInherited, String value) throws FxInvalidParameterException {
         // already set in the property?
         FxStructureOption pOpt = getProperty().getOption(key);
-        if (pOpt.isSet() && !pOpt.isOverrideable())
+        if (pOpt.isSet() && !pOpt.isOverridable())
             throw new FxInvalidParameterException(key, "ex.structure.override.property.forbidden", key, getProperty().getName());
 
         if (this.isDerivedAssignment()) {
             if (FxSharedUtils.checkAssignmentInherited(this)) {
                 FxPropertyAssignment base = (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(getBaseAssignmentId());
-                if (base.getOption(key).getIsInherited() && !base.getOption(key).isOverrideable()) {
+                if (base.getOption(key).getIsInherited() && !base.getOption(key).isOverridable()) {
                     // only complain if the value gets overridden
                     if (!value.equals(base.getOption(key).getValue()))
                         throw new FxInvalidParameterException(key, "ex.structure.override.propertyAssignment.forbidden", key, base.getXPath());
@@ -211,7 +211,7 @@ public class FxPropertyAssignmentEdit extends FxPropertyAssignment {
             }
         }
 
-        FxStructureOption.setOption(options, key, overrideable, isInherited, value);
+        FxStructureOption.setOption(options, key, overridable, isInherited, value);
         return this;
     }
 
@@ -219,23 +219,23 @@ public class FxPropertyAssignmentEdit extends FxPropertyAssignment {
      * Set a boolean option
      *
      * @param key          the option key
-     * @param overrideable overrideable status
+     * @param overridable overridable status
      * @param isInherited  the isInherited status (inherited by derived assignments)
      * @param value        the option value
      * @return the assignment itself, useful f. chained calls
      * @throws FxInvalidParameterException on errors
      * @since 3.1.1
      */
-    public FxPropertyAssignmentEdit setOption(String key, boolean overrideable, boolean isInherited, boolean value) throws FxInvalidParameterException {
+    public FxPropertyAssignmentEdit setOption(String key, boolean overridable, boolean isInherited, boolean value) throws FxInvalidParameterException {
         // already set in the property?
         FxStructureOption pOpt = getProperty().getOption(key);
-        if (pOpt.isSet() && !pOpt.isOverrideable())
+        if (pOpt.isSet() && !pOpt.isOverridable())
             throw new FxInvalidParameterException(key, "ex.structure.override.property.forbidden", key, getProperty().getName());
 
         if (this.isDerivedAssignment()) {
             if (FxSharedUtils.checkAssignmentInherited(this)) {
                 FxPropertyAssignment base = (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(getBaseAssignmentId());
-                if (base.getOption(key).getIsInherited() && !base.getOption(key).isOverrideable()) {
+                if (base.getOption(key).getIsInherited() && !base.getOption(key).isOverridable()) {
                     // only complain if the value gets overridden
                     final String inValue = value ? FxStructureOption.VALUE_TRUE : FxStructureOption.VALUE_FALSE;
                     if (!inValue.equals(base.getOption(key).getValue()))
@@ -244,7 +244,7 @@ public class FxPropertyAssignmentEdit extends FxPropertyAssignment {
             }
         }
 
-        FxStructureOption.setOption(options, key, overrideable, isInherited, value);
+        FxStructureOption.setOption(options, key, overridable, isInherited, value);
         return this;
     }
 

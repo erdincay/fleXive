@@ -1323,7 +1323,7 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
 
     /**
      * Get an option entry for the given key, if the key is invalid or not found a <code>FxTypeStructureOption</code> object
-     * will be returned with <code>set</code> set to <code>false</code>, overrideable set to <code>false</code> and value
+     * will be returned with <code>set</code> set to <code>false</code>, overridable set to <code>false</code> and value
      * set to an empty String.
      *
      * @param key option key

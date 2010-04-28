@@ -1131,7 +1131,7 @@
                     HTML.EDITOR.
                 </para>
                 <para>
-                    Options can be added by specifying a key, a value and the overrideable flag
+                    Options can be added by specifying a key, a value and the overridable flag
                     and clicking the
                     <guibutton>"Add"</guibutton>
                     button which is located in the

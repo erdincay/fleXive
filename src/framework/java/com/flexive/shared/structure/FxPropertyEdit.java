@@ -120,7 +120,7 @@ public class FxPropertyEdit extends FxProperty {
                 fulltextIndexed, referencedType, referencedList, UniqueMode.None, options);
         setName(name);
         setSearchable(true); //default is searchable
-        setOptionOverrideable(FxStructureOption.OPTION_SEARCHABLE, true);
+        setOptionOverridable(FxStructureOption.OPTION_SEARCHABLE, true);
         //if the use html editor option is not set and the datatype is html, set it
         boolean hasHTMLOption = false;
         if (options == null)
@@ -131,7 +131,7 @@ public class FxPropertyEdit extends FxProperty {
         }
         if (dataType == FxDataType.HTML && !hasHTMLOption) {
             setUseHTMLEditor(true);
-            setOptionOverrideable(FxStructureOption.OPTION_HTML_EDITOR, true);
+            setOptionOverridable(FxStructureOption.OPTION_HTML_EDITOR, true);
         }
         this.isNew = true;
     }
@@ -470,12 +470,12 @@ public class FxPropertyEdit extends FxProperty {
      * Implicitly all property options have their isInherited status set to true
      *
      * @param key          option key
-     * @param overrideable is the option overrideable from assignments?
+     * @param overridable is the option overridable from assignments?
      * @param value        value of the option
      * @return the property itself, useful for chained calls
      */
-    public FxPropertyEdit setOption(String key, boolean overrideable, String value) {
-        FxStructureOption.setOption(options, key, overrideable, true, value);
+    public FxPropertyEdit setOption(String key, boolean overridable, String value) {
+        FxStructureOption.setOption(options, key, overridable, true, value);
         return this;
     }
 
@@ -484,26 +484,26 @@ public class FxPropertyEdit extends FxProperty {
      * Implicitly all property options have their isInherited status set to true
      *
      * @param key          option key
-     * @param overrideable is the option overrideable from assignments?
+     * @param overridable is the option overridable from assignments?
      * @param value        value of the option
      * @return the property itself, useful for chained calls
      */
-    public FxPropertyEdit setOption(String key, boolean overrideable, boolean value) {
-        FxStructureOption.setOption(options, key, overrideable, true, value);
+    public FxPropertyEdit setOption(String key, boolean overridable, boolean value) {
+        FxStructureOption.setOption(options, key, overridable, true, value);
         return this;
     }
 
     /**
-     * Change the overrideable status of an option, will only have effect if the option exists!
+     * Change the overridable status of an option, will only have effect if the option exists!
      *
      * @param key          option key
-     * @param overrideable overrideable status
+     * @param overridable overridable status
      * @return the property itself, useful for chained calls
      */
-    public FxPropertyEdit setOptionOverrideable(String key, boolean overrideable) {
+    public FxPropertyEdit setOptionOverridable(String key, boolean overridable) {
         FxStructureOption opt = getOption(key);
         if (opt.isSet())
-            opt.overrideable = overrideable;
+            opt.overridable = overridable;
         return this;
     }
 

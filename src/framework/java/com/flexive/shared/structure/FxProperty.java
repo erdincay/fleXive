@@ -136,7 +136,7 @@ public class FxProperty extends FxStructureElement implements Serializable {
      * @return if assignments may override this properties multilanguage setting?
      */
     public boolean mayOverrideMultiLang() {
-        return getOption(FxStructureOption.OPTION_MULTILANG).isOverrideable();
+        return getOption(FxStructureOption.OPTION_MULTILANG).isOverridable();
     }
 
     /**
@@ -174,7 +174,7 @@ public class FxProperty extends FxStructureElement implements Serializable {
      * @return if assignments may override this properties searchable flag?
      */
     public boolean mayOverrideSearchable() {
-        return getOption(FxStructureOption.OPTION_SEARCHABLE).isOverrideable();
+        return getOption(FxStructureOption.OPTION_SEARCHABLE).isOverridable();
     }
 
     /**
@@ -201,7 +201,7 @@ public class FxProperty extends FxStructureElement implements Serializable {
      * @return if assignments may override this properties appearance in overviews?
      */
     public boolean mayOverrideInOverview() {
-        return getOption(FxStructureOption.OPTION_SHOW_OVERVIEW).isOverrideable();
+        return getOption(FxStructureOption.OPTION_SHOW_OVERVIEW).isOverridable();
     }
 
     /**
@@ -219,7 +219,7 @@ public class FxProperty extends FxStructureElement implements Serializable {
      * @return if assignments may override this properties setting wether to use a HTML editor?
      */
     public boolean mayOverrideUseHTMLEditor() {
-        return getOption(FxStructureOption.OPTION_HTML_EDITOR).isOverrideable();
+        return getOption(FxStructureOption.OPTION_HTML_EDITOR).isOverridable();
     }
 
     /**
@@ -237,7 +237,7 @@ public class FxProperty extends FxStructureElement implements Serializable {
      * @return if assignments may override this properties multiline setting?
      */
     public boolean mayOverrideMultiLine() {
-        return getOption(FxStructureOption.OPTION_MULTILINE).isOverrideable();
+        return getOption(FxStructureOption.OPTION_MULTILINE).isOverridable();
     }
 
     /**
@@ -298,7 +298,7 @@ public class FxProperty extends FxStructureElement implements Serializable {
      * @return if assignments may override this properties maxLength setting?
      */
     public boolean mayOverrideMaxLength() {
-        return getOption(FxStructureOption.OPTION_MAXLENGTH).isOverrideable();
+        return getOption(FxStructureOption.OPTION_MAXLENGTH).isOverridable();
     }
 
     /**

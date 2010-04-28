@@ -712,8 +712,8 @@ builder {
                             <para>
                                 <code>
                                     def myPropOptions = new GroovyOptionBuilder().foo(value: "bar") {
-                                        foobar(value: "barfoo", overrideable: false)
-                                        barfoo(value: "foobar", overrideable: false, isInherited: false)
+                                        foobar(value: "barfoo", overridable: false)
+                                        barfoo(value: "foobar", overridable: false, isInherited: false)
                                     }
                                 </code>
                             </para>
@@ -1264,8 +1264,8 @@ builder {
                             <para>
                                 <code>
                                     def myPropOptions = new GroovyOptionBuilder().foo(value: "bar") {
-                                        foobar(value: "barfoo", overrideable: false)
-                                        barfoo(value: "foobar", overrideable: false, isInherited: false)
+                                        foobar(value: "barfoo", overridable: false)
+                                        barfoo(value: "foobar", overridable: false, isInherited: false)
                                     }
                                 </code>
                             </para>
@@ -2097,7 +2097,7 @@ builder {
                     It is recommended to always quote the names of the options, e.g. &quot;MYOPTION&quot;
                 </listitem>
                 <listitem>
-                    The options &quot;overrideable&quot; and &quot;isInherited&quot; are <classname>true</classname> by default
+                    The options &quot;overridable&quot; and &quot;isInherited&quot; are <classname>true</classname> by default
                 </listitem>
             </itemizedlist>
         </para>
@@ -2107,7 +2107,7 @@ builder {
             <para>
                 Create an option &quot;FOO&quot; having value &quot;BAR&quot; which cannot be overridden and which is not inherited by derived structures
                 <programlisting><![CDATA[
-new GroovyOptionBuilder()."FOO"(value: "BAR", overrideable: false, isInherited: false)
+new GroovyOptionBuilder()."FOO"(value: "BAR", overridable: false, isInherited: false)
              ]]></programlisting>
             </para>
         </section>
@@ -2117,12 +2117,12 @@ new GroovyOptionBuilder()."FOO"(value: "BAR", overrideable: false, isInherited: 
             <para>
                 Create several options
                 <programlisting><![CDATA[
-new GroovyOptionBuilder()."FOO"(value: "BAR", overrideable: false, isInherited: false) {
-    "opt1"(value: true, overrideable: false, isInherited: true)
-    "opt1.special"(value: true, overrideable: true, isInherited: true)
-    "opt2"(value: "20.5", overrideable: true, isInherited: false)
-    "Addr.Street"(value: "Broadway", overrideable: true, isInherited: true)
-    "Addr.StreetNo"(value: "10", overrideable: true, isInherited: false)
+new GroovyOptionBuilder()."FOO"(value: "BAR", overridable: false, isInherited: false) {
+    "opt1"(value: true, overridable: false, isInherited: true)
+    "opt1.special"(value: true, overridable: true, isInherited: true)
+    "opt2"(value: "20.5", overridable: true, isInherited: false)
+    "Addr.Street"(value: "Broadway", overridable: true, isInherited: true)
+    "Addr.StreetNo"(value: "10", overridable: true, isInherited: false)
     "Addr.TelNo"(value: "0043123456789")
     "Addr.Country"(value: "Austria")
 }
@@ -2159,9 +2159,9 @@ new GroovyOptionBuilder()."FOO"(value: "BAR", overrideable: false, isInherited: 
 new GroovyTypeBuilder().mytype(
 	label: new FxString(true, 1, "My type label"),
 	structureOptions: Eval.me("""import com.flexive.shared.scripting.groovy.*
-		new GroovyOptionBuilder()."MYOPT"(value: "1", overrideable: true, isInherited: true) {
-		"OTHEROPT.SRGN"(value: "0", overrideable: true, isInherited: false)
-		"FOO.BAR"(value: "foobar", overrideable: false, isInherited: false) }"""))
+		new GroovyOptionBuilder()."MYOPT"(value: "1", overridable: true, isInherited: true) {
+		"OTHEROPT.SRGN"(value: "0", overridable: true, isInherited: false)
+		"FOO.BAR"(value: "foobar", overridable: false, isInherited: false) }"""))
              ]]></programlisting>
             </para>
         </section>

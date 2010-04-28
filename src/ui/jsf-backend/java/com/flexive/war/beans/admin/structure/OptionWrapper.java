@@ -546,7 +546,7 @@ public class OptionWrapper implements Serializable {
         public WrappedOption(FxStructureOption option) {
             this.key = option.getKey().toUpperCase();
             this.value = option.getValue();
-            this.overridable = option.isOverrideable();
+            this.overridable = option.isOverridable();
             this.set = option.isSet();
             this.isInherited = option.getIsInherited();
         }

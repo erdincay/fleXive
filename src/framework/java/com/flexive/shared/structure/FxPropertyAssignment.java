@@ -194,7 +194,7 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
         FxStructureOption pOpt = property.getOption(key);
         if (!pOpt.isSet())
             return super.getOption(key);
-        if (!pOpt.isOverrideable())
+        if (!pOpt.isOverridable())
             return pOpt;
         if (super.hasOption(key))
             return super.getOption(key);

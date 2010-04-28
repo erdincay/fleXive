@@ -672,7 +672,7 @@ public class PropertyEditorBean implements ActionBean, Serializable {
                     assignmentIsInherited);
             assignmentOptionKey = null;
             assignmentOptionValue = null;
-            // set the "default" values f. overrideable and isInherited
+            // set the "default" values f. overridable and isInherited
             assignmentOverridable = true;
             assignmentIsInherited = true;
 
@@ -756,12 +756,12 @@ public class PropertyEditorBean implements ActionBean, Serializable {
 
     public boolean isPropertyMayOverrideMultiLang() {
         FxStructureOption ml = property.getOption(FxStructureOption.OPTION_MULTILANG);
-        return ml.isSet() && ml.isOverrideable();
+        return ml.isSet() && ml.isOverridable();
     }
 
     public boolean isPropertyMayOverrideReferenceSelectOne() {
         FxStructureOption ml = property.getOption(FxStructureOption.OPTION_REFERENCE_SELECTONE);
-        return ml.isSet() && ml.isOverrideable();
+        return ml.isSet() && ml.isOverridable();
     }
 
     public void setPropertyMayOverrideMultiLang(boolean b) {
@@ -792,7 +792,7 @@ public class PropertyEditorBean implements ActionBean, Serializable {
         FxStructureOption ml = property.getOption(FxStructureOption.OPTION_MULTILANG);
         if ((!ml.isSet() && b) || ml.isSet()) {
             try {
-                property.setOption(FxStructureOption.OPTION_MULTILANG, ml.isOverrideable(), b);
+                property.setOption(FxStructureOption.OPTION_MULTILANG, ml.isOverridable(), b);
             }
             catch (Throwable t) {
                 new FxFacesMsgErr(t).addToContext();
@@ -1224,7 +1224,7 @@ public class PropertyEditorBean implements ActionBean, Serializable {
         // add edited options (checks if they are set)
         for (FxStructureOption o : newOptions) {
             if(o.isValid())
-                assignment.setOption(o.getKey(), o.isOverrideable(), o.getIsInherited(), o.getValue());
+                assignment.setOption(o.getKey(), o.isOverridable(), o.getIsInherited(), o.getValue());
             else { // remove invalid options from the optionwrapper
                 removeOptions.add(o);
                 invalidOptions.add(o);
@@ -1300,7 +1300,7 @@ public class PropertyEditorBean implements ActionBean, Serializable {
         //add edited options (checks if they are set)
         for (FxStructureOption o : newOptions) {
             if(o.isValid())
-                property.setOption(o.getKey(), o.isOverrideable(), o.getValue());
+                property.setOption(o.getKey(), o.isOverridable(), o.getValue());
             else { // remove invalid options from the optionwrapper
                 removeOptions.add(o);
                 invalidOptions.add(o);

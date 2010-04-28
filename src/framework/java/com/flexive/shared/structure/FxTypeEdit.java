@@ -1035,7 +1035,7 @@ public class FxTypeEdit extends FxType implements Serializable {
     public FxTypeEdit setOption(String key, String value) throws FxInvalidParameterException {
         if (FxStructureOption.hasOption(key, options)) {
             FxStructureOption o = this.getOption(key);
-            setOption(key, value, o.isOverrideable(), o.getIsInherited());
+            setOption(key, value, o.isOverridable(), o.getIsInherited());
         } else {
             setOption(key, value, true, false);
             this.changed = true;
@@ -1061,7 +1061,7 @@ public class FxTypeEdit extends FxType implements Serializable {
         }
         final FxStructureOption pOpt = getOption(key);
         if (parent != null) {
-            if (pOpt.isSet() && !pOpt.isOverrideable() && pOpt.getIsInherited()) {
+            if (pOpt.isSet() && !pOpt.isOverridable() && pOpt.getIsInherited()) {
                 // check if it was inherited from the supertype
                 final FxStructureOption parentOption = parent.getOption(pOpt.getKey());
                 if (parentOption.isSet() && parentOption.getIsInherited() && (!parentOption.equals(pOpt) || !pOpt.getValue().equals(value)))
@@ -1085,7 +1085,7 @@ public class FxTypeEdit extends FxType implements Serializable {
     public FxTypeEdit setOption(String key, boolean value) throws FxInvalidParameterException {
         if (FxStructureOption.hasOption(key, options)) {
             FxStructureOption o = this.getOption(key);
-            setOption(key, value, o.isOverrideable(), o.getIsInherited());
+            setOption(key, value, o.isOverridable(), o.getIsInherited());
         } else {
             setOption(key, value, true, false);
             this.changed = true;
@@ -1108,7 +1108,7 @@ public class FxTypeEdit extends FxType implements Serializable {
 
         final FxStructureOption pOpt = getOption(key);
         if (parent != null) {
-            if (pOpt.isSet() && !pOpt.isOverrideable() && pOpt.getIsInherited()) {
+            if (pOpt.isSet() && !pOpt.isOverridable() && pOpt.getIsInherited()) {
                 // check if it was inherited from the supertype
                 final FxStructureOption parentOption = parent.getOption(pOpt.getKey());
                 if (parentOption.isSet() && parentOption.getIsInherited() && (!parentOption.equals(pOpt) || !pOpt.isValueTrue() == value))

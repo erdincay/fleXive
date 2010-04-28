@@ -254,7 +254,7 @@
                         <td>Options</td>
                         <td>
                             <methodname>setOption(..)</methodname>
-                            <methodname>setOptionOverrideable(..)</methodname>
+                            <methodname>setOptionOverridable(..)</methodname>
                             <methodname>clearOption(..)</methodname>
                         </td>
                         <td>&list_yes;</td>
@@ -292,7 +292,7 @@
                         </td>
                     </tr>
                     <tr>
-                        <td>Overrideable multiplicity</td>
+                        <td>Overridable multiplicity</td>
                         <td>
                             <methodname>setOverrideMultiplicity(boolean overrideMultiplicity)</methodname>
                         </td>

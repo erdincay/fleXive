@@ -1264,8 +1264,8 @@ public final class GroovyScriptExporterTools {
                         .append(current.getKey())
                         .append("\"(value: \"")
                         .append(current.getValue())
-                        .append("\", overrideable: ")
-                        .append(current.isOverrideable())
+                        .append("\", overridable: ")
+                        .append(current.isOverridable())
                         .append(", isInherited: ");
                 
                 // option isInherited option

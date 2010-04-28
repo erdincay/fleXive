@@ -47,8 +47,8 @@ public class GroovyOptionBuilderTest {
     void simpleOptionBuilder() {
         def optionList = new GroovyOptionBuilder().option1(value: "FOO") {
             option2(value: false)
-            option3(value: "BAR", overrideable: false, isInherited: false)
-            option4(value: true, overrideable: true, isInherited: true)
+            option3(value: "BAR", overridable: false, isInherited: false)
+            option4(value: true, overridable: true, isInherited: true)
         }
 
         Assert.assertEquals(optionList.size(), 4);
@@ -56,22 +56,22 @@ public class GroovyOptionBuilderTest {
         Assert.assertEquals(option.getKey(), "OPTION1")
         Assert.assertEquals(option.getValue(), "FOO")
         // test defaults
-        Assert.assertTrue(option.isOverrideable())
+        Assert.assertTrue(option.isOverridable())
         Assert.assertTrue(option.getIsInherited())
 
         option = optionList.get(1);
         Assert.assertFalse(option.isValueTrue());
         // test defaults
-        Assert.assertTrue(option.isOverrideable())
+        Assert.assertTrue(option.isOverridable())
         Assert.assertTrue(option.getIsInherited())
 
         option = optionList.get(2);
-        Assert.assertFalse(option.isOverrideable())
+        Assert.assertFalse(option.isOverridable())
         Assert.assertFalse(option.getIsInherited())
 
         option = optionList.get(3);
         Assert.assertTrue(option.isValueTrue())
-        Assert.assertTrue(option.isOverrideable())
+        Assert.assertTrue(option.isOverridable())
         Assert.assertTrue(option.getIsInherited())
     }
 }

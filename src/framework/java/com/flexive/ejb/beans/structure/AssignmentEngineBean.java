@@ -497,7 +497,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 if (StringUtils.isEmpty(option.getKey()))
                     throw new FxInvalidParameterException("key", "ex.structure.option.key.empty", option.getValue());
                 ps.setString(3, option.getKey());
-                ps.setBoolean(4, option.isOverrideable());
+                ps.setBoolean(4, option.isOverridable());
                 ps.setBoolean(5, option.getIsInherited());
                 ps.setString(6, option.getValue());
                 ps.addBatch();
@@ -532,8 +532,8 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             if (!FxStructureOption.hasOption(o.getKey(), current))
                 newOpts.add(o);
             // update non overridable inherited option values if they differ
-            else if (!o.isOverrideable() && !FxStructureOption.getOption(o.getKey(), current).getValue().equals(o.getValue())) {
-                newOpts.add(new FxStructureOption(o.getKey(), o.isOverrideable(), true, o.getIsInherited(), o.getValue()));
+            else if (!o.isOverridable() && !FxStructureOption.getOption(o.getKey(), current).getValue().equals(o.getValue())) {
+                newOpts.add(new FxStructureOption(o.getKey(), o.isOverridable(), true, o.getIsInherited(), o.getValue()));
                 // remove the option from the current ones
                 FxStructureOption.clearOption(current, o.getKey());
             }
@@ -693,7 +693,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 List<FxStructureOption> options = group.getOptions();
                 for (FxStructureOption option : options) {
                     changesDesc.append(option.getKey()).append("=").append(option.getValue()).append(" overridable=").
-                            append(option.isOverrideable()).append(" isSet=").append(option.isSet());
+                            append(option.isOverridable()).append(" isSet=").append(option.isSet());
                 }
                 changes = true;
             }
@@ -1130,7 +1130,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 List<FxStructureOption> options = group.getOptions();
                 for (FxStructureOption option : options) {
                     changesDesc.append(option.getKey()).append("=").append(option.getValue()).append(" overridable=").
-                            append(option.isOverrideable()).append(" isSet=").append(option.isSet()).append(" isInherited=").
+                            append(option.isOverridable()).append(" isSet=").append(option.isSet()).append(" isInherited=").
                             append(option.getIsInherited());
                 }
                 changes = true;
@@ -1685,7 +1685,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 List<FxStructureOption> options = prop.getOptions();
                 for (FxStructureOption option : options) {
                     changesDesc.append(option.getKey()).append("=").append(option.getValue()).append(" overridable=").
-                            append(option.isOverrideable()).append(" isSet=").append(option.isSet());
+                            append(option.isOverridable()).append(" isSet=").append(option.isSet());
                 }
                 changes = true;
             }
@@ -1974,7 +1974,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 List<FxStructureOption> options = modified.getOptions();
                 for (FxStructureOption option : options) {
                     changesDesc.append(option.getKey()).append("=").append(option.getValue()).append(" overridable=").
-                            append(option.isOverrideable()).append(" isSet=").append(option.isSet()).append( "isInherited").
+                            append(option.isOverridable()).append(" isSet=").append(option.isSet()).append( "isInherited").
                             append(option.getIsInherited());
                 }
                 changes = true;

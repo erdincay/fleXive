@@ -318,7 +318,7 @@ public class TypeEditorBean implements Serializable {
                 //add options (check if they may be set)
                 List<FxStructureOption> opts = optionWrapper.asFxStructureOptionList(optionWrapper.getTypeOptions());
                 for (FxStructureOption o : opts) {
-                    type.setOption(o.getKey(), o.getValue(), o.isOverrideable(), o.getIsInherited());
+                    type.setOption(o.getKey(), o.getValue(), o.isOverridable(), o.getIsInherited());
                 }
 
                 //delete current options
@@ -329,7 +329,7 @@ public class TypeEditorBean implements Serializable {
 
                 //add options
                 for (FxStructureOption o : opts) {
-                    type.setOption(o.getKey(), o.getValue(), o.isOverrideable(), o.getIsInherited());
+                    type.setOption(o.getKey(), o.getValue(), o.isOverridable(), o.getIsInherited());
                 }
 
                 type.setHistoryAge(historyAgeToMilis());

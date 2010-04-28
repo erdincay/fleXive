@@ -46,17 +46,17 @@ import java.util.Map;
  * General usage:<br /><br />
  * A list w/ one option:<br />
  * <pre>
- * new GroovyOptionBuilder().[OPTNAME](value: STRING/BOOLEAN, overrideable:BOOLEAN, isInherited:BOOLEAN)<br />
+ * new GroovyOptionBuilder().[OPTNAME](value: STRING/BOOLEAN, overridable:BOOLEAN, isInherited:BOOLEAN)<br />
  * </pre>
  * A list w/ several options:<br />
  * <pre>
- * new GroovyOptionBuilder().[OPTNAME](value: STRING/BOOLEAN, overrideable:BOOLEAN, isInherited:BOOLEAN) {<br />
+ * new GroovyOptionBuilder().[OPTNAME](value: STRING/BOOLEAN, overridable:BOOLEAN, isInherited:BOOLEAN) {<br />
  *      [OPTNAME]([attributes]
  *      [OPTNAME]([attributes]
  *      ...
  * }
  * </pre><br /><br />
- * The attributes &quot;overrideable&quot; and &quot;isInherited&quot; will default to &quot;true&quot; if not called explicitly
+ * The attributes &quot;overridable&quot; and &quot;isInherited&quot; will default to &quot;true&quot; if not called explicitly
  * <br /><br />
  * Example:<br />
  * <pre>
@@ -109,7 +109,7 @@ public class GroovyOptionBuilder extends BuilderSupport implements Serializable 
      */
     @Override
     protected Object createNode(Object o, Map map) {
-        boolean overrideable, isInherited;
+        boolean overridable, isInherited;
         Object value = getMapValue(map, "value", true, "");
         if(value instanceof Boolean) {
             value = (Boolean)value ? FxStructureOption.VALUE_TRUE : FxStructureOption.VALUE_FALSE;
@@ -117,13 +117,13 @@ public class GroovyOptionBuilder extends BuilderSupport implements Serializable 
 
         if (o instanceof FxStructureOption) {
             FxStructureOption inOption = (FxStructureOption) o;
-            overrideable = (Boolean) getMapValue(map, "overrideable", false, inOption.isOverrideable());
+            overridable = (Boolean) getMapValue(map, "overridable", false, inOption.isOverridable());
             isInherited = (Boolean) getMapValue(map, "isInherited", false, inOption.getIsInherited());
-            optionList.add(new FxStructureOption(inOption.getKey(), overrideable, true, isInherited, (String)value));
+            optionList.add(new FxStructureOption(inOption.getKey(), overridable, true, isInherited, (String)value));
         } else if (o instanceof String) {
-            overrideable = (Boolean) getMapValue(map, "overrideable", false, true);
+            overridable = (Boolean) getMapValue(map, "overridable", false, true);
             isInherited = (Boolean) getMapValue(map, "isInherited", false, true);
-            optionList.add(new FxStructureOption(o.toString().toUpperCase(), overrideable, true, isInherited, (String)value));
+            optionList.add(new FxStructureOption(o.toString().toUpperCase(), overridable, true, isInherited, (String)value));
         }
         return optionList;
     }

@@ -504,10 +504,10 @@ public class StructureTest {
                 env().getType(FxType.CONTACTDATA), "test", "/");
         assertTrue(property.isMultiLang(), "Caption property should be multi-language by default");
         if (property.getProperty().mayOverrideMultiLang())
-            assertTrue(false, "Expected Caption property to be not overrideable for this test case!");
+            assertTrue(false, "Expected Caption property to be not overridable for this test case!");
         try {
             property.setMultiLang(false);
-            assertTrue(false, "Non-overrideable option must not be overridden!");
+            assertTrue(false, "Non-overridable option must not be overridden!");
         } catch (FxInvalidParameterException ipe) {
             //expected
         }
@@ -1424,13 +1424,13 @@ public class StructureTest {
 
             assertEquals(p.getOption("OPT.1P").getValue(), "OPT 1 value");
             assertEquals(p.getOption("OPT.2P").getIntValue(), 0);
-            assertFalse(p.getOption("OPT.1P").isOverrideable());
-            assertTrue(p.getOption("OPT.2P").isOverrideable());
+            assertFalse(p.getOption("OPT.1P").isOverridable());
+            assertTrue(p.getOption("OPT.2P").isOverridable());
 
             assertEquals(g.getOption("OPT.1G").getValue(), "OPT 1 value");
             assertEquals(g.getOption("OPT.2G").getIntValue(), 0);
-            assertFalse(g.getOption("OPT.1G").isOverrideable());
-            assertTrue(g.getOption("OPT.2G").isOverrideable());
+            assertFalse(g.getOption("OPT.1G").isOverridable());
+            assertTrue(g.getOption("OPT.2G").isOverridable());
 
             // create an assignment and check whether the group options are "passed along"
             FxGroupAssignmentEdit ga = FxGroupAssignmentEdit.createNew((FxGroupAssignment) getEnvironment().getAssignment("OPTTEST/GROUP1OPTTEST"),
@@ -1442,8 +1442,8 @@ public class StructureTest {
 
             assertEquals(gass.getOption("OPT.1G").getValue(), "OPT 1 value");
             assertEquals(gass.getOption("OPT.2G").getIntValue(), 0);
-            assertFalse(gass.getOption("OPT.1G").isOverrideable());
-            assertTrue(gass.getOption("OPT.2G").isOverrideable());
+            assertFalse(gass.getOption("OPT.1G").isOverridable());
+            assertTrue(gass.getOption("OPT.2G").isOverridable());
 
             ae.removeAssignment(aId);
         } finally {
@@ -1537,11 +1537,11 @@ public class StructureTest {
         FxType t1der = null;
         try {
             type = FxTypeEdit.createNew("STRUCTOPTTEST");
-            type.setOption("OPTION_A", "a value"); // overrideable, not inherited
-            type.setOption("OPTION_B", "another value", false, true); // non-overrideable, inherited
-            type.setOption("OPTION_BOOL_A", true); // overrideable, not inherited
-            type.setOption("OPTION_BOOL_B", false, false, true); // non-overrideable, inherited
-            type.setOption("OPTION_C", "C", true, true); // overrideable, inherited
+            type.setOption("OPTION_A", "a value"); // overridable, not inherited
+            type.setOption("OPTION_B", "another value", false, true); // non-overridable, inherited
+            type.setOption("OPTION_BOOL_A", true); // overridable, not inherited
+            type.setOption("OPTION_BOOL_B", false, false, true); // non-overridable, inherited
+            type.setOption("OPTION_C", "C", true, true); // overridable, inherited
             type = type.save();
 
             // create a derived type
@@ -1552,32 +1552,32 @@ public class StructureTest {
             t1der = getEnvironment().getType("STRUCTOPTTESTDERIVED");
 
             Assert.assertEquals(t1.getOption("OPTION_A").getValue(), "a value");
-            Assert.assertTrue(t1.getOption("OPTION_A").isOverrideable());
+            Assert.assertTrue(t1.getOption("OPTION_A").isOverridable());
             Assert.assertFalse(t1.getOption("OPTION_A").getIsInherited());
             Assert.assertEquals(t1.getOption("OPTION_B").getValue(), "another value");
-            Assert.assertFalse(t1.getOption("OPTION_B").isOverrideable());
+            Assert.assertFalse(t1.getOption("OPTION_B").isOverridable());
             Assert.assertTrue(t1.getOption("OPTION_B").getIsInherited());
             Assert.assertEquals(t1.getOption("OPTION_BOOL_A").isValueTrue(), true);
-            Assert.assertTrue(t1.getOption("OPTION_BOOL_A").isOverrideable());
+            Assert.assertTrue(t1.getOption("OPTION_BOOL_A").isOverridable());
             Assert.assertFalse(t1.getOption("OPTION_BOOL_A").getIsInherited());
             Assert.assertEquals(t1.getOption("OPTION_BOOL_B").isValueTrue(), false);
-            Assert.assertFalse(t1.getOption("OPTION_BOOL_B").isOverrideable());
+            Assert.assertFalse(t1.getOption("OPTION_BOOL_B").isOverridable());
             Assert.assertTrue(t1.getOption("OPTION_BOOL_B").getIsInherited());
             Assert.assertEquals(t1.getOption("OPTION_C").getValue(), "C");
-            Assert.assertTrue(t1.getOption("OPTION_C").isOverrideable());
+            Assert.assertTrue(t1.getOption("OPTION_C").isOverridable());
             Assert.assertTrue(t1.getOption("OPTION_C").getIsInherited());
 
             Assert.assertEquals(t1der.getOption("OPTION_B").getValue(), "another value");
             Assert.assertFalse(t1der.getOption("OPTION_BOOL_B").isValueTrue());
             Assert.assertEquals(t1der.getOption("OPTION_C").getValue(), "C");
 
-            // try to set the overrideable and the non-overrideable options
+            // try to set the overridable and the non-overridable options
             typeDer = getEnvironment().getType("STRUCTOPTTESTDERIVED").asEditable();
             typeDer.setOption("OPTION_C", "C NEW");
 
             try {
                 typeDer.setOption("OPTION_B", "new value");
-                Assert.fail("It should not be possible to set values for un-overrideable, inherited options");
+                Assert.fail("It should not be possible to set values for un-overridable, inherited options");
             } catch (FxApplicationException e) {
                 // expected
             }
@@ -1659,11 +1659,11 @@ public class StructureTest {
             baseTypeId = createTestTypeAndProp(TEST1, "proptest1", true);
             // retrieve assignment and create a few structure options
             // PROPERTY assignment options
-            // opt1 - overrideable, inherited
-            // opt2 - overrideable, inherited (to test several)
-            // opt3 - overrideable, not inherited
-            // opt4 - not overrideable, inherited
-            // opt5 - not overrideable, not inherited
+            // opt1 - overridable, inherited
+            // opt2 - overridable, inherited (to test several)
+            // opt3 - overridable, not inherited
+            // opt4 - not overridable, inherited
+            // opt5 - not overridable, not inherited
             // GROUP assignment options
             // groupopt1 - overridable, inherited
             // groupopt2 - not overridable, inherited

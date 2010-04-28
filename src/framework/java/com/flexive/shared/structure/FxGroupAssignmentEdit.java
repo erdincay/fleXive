@@ -287,7 +287,7 @@ public class FxGroupAssignmentEdit extends FxGroupAssignment {
     }
 
     /**
-     * Set an option with defaults of overrideable & isInherited == true
+     * Set an option with defaults of overridable & isInherited == true
      *
      * @param key   option key
      * @param value value of the option
@@ -299,7 +299,7 @@ public class FxGroupAssignmentEdit extends FxGroupAssignment {
     }
 
     /**
-     * Set a boolean option with defaults of overrideable & isInherited == true
+     * Set a boolean option with defaults of overridable & isInherited == true
      *
      * @param key   option key
      * @param value value of the option
@@ -314,29 +314,29 @@ public class FxGroupAssignmentEdit extends FxGroupAssignment {
      * Set an option
      *
      * @param key          option key
-     * @param overrideable flag to indicate that derived assignments may override this option
+     * @param overridable flag to indicate that derived assignments may override this option
      * @param isInherited  flag to indicate that derived assignments inherit this option
      * @param value        value of the option
      * @return the assignment itself, useful for chained calls
      * @throws FxInvalidParameterException on errors
      * @since 3.1.1
      */
-    public FxGroupAssignmentEdit setOption(String key, boolean overrideable, boolean isInherited, String value) throws FxInvalidParameterException {
+    public FxGroupAssignmentEdit setOption(String key, boolean overridable, boolean isInherited, String value) throws FxInvalidParameterException {
         FxStructureOption gOpt = getGroup().getOption(key);
-        if (gOpt.isSet() && !gOpt.isOverrideable())
+        if (gOpt.isSet() && !gOpt.isOverridable())
             throw new FxInvalidParameterException(key, "ex.structure.override.group.forbidden", key, getGroup().getName());
 
         if (this.isDerivedAssignment()) {
             if (FxSharedUtils.checkAssignmentInherited(this)) {
                 FxGroupAssignment base = (FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment(getBaseAssignmentId());
-                if (base.getOption(key).getIsInherited() && !base.getOption(key).isOverrideable()) {
+                if (base.getOption(key).getIsInherited() && !base.getOption(key).isOverridable()) {
                     if (!value.equals(base.getOption(key).getValue()))
                         throw new FxInvalidParameterException(key, "ex.structure.override.groupAssignment.forbidden", key, base.getXPath());
                 }
             }
         }
 
-        FxStructureOption.setOption(options, key, overrideable, isInherited, value);
+        FxStructureOption.setOption(options, key, overridable, isInherited, value);
         return this;
     }
 
@@ -344,22 +344,22 @@ public class FxGroupAssignmentEdit extends FxGroupAssignment {
      * Set a boolean option
      *
      * @param key          option key
-     * @param overrideable flag to indicate that derived assignments may override this option
+     * @param overridable flag to indicate that derived assignments may override this option
      * @param isInherited  flag to indicate that derived assignments inherit this option
      * @param value        value of the option
      * @return the assignment itself, useful for chained calls
      * @throws FxInvalidParameterException on errors
      * @since 3.1.1
      */
-    public FxGroupAssignmentEdit setOption(String key, boolean overrideable, boolean isInherited, boolean value) throws FxInvalidParameterException {
+    public FxGroupAssignmentEdit setOption(String key, boolean overridable, boolean isInherited, boolean value) throws FxInvalidParameterException {
         FxStructureOption gOpt = getGroup().getOption(key);
-        if (gOpt.isSet() && !gOpt.isOverrideable())
+        if (gOpt.isSet() && !gOpt.isOverridable())
             throw new FxInvalidParameterException(key, "ex.structure.override.group.forbidden", key, getGroup().getName());
 
         if (this.isDerivedAssignment()) {
             if (FxSharedUtils.checkAssignmentInherited(this)) {
                 FxGroupAssignment base = (FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment(getBaseAssignmentId());
-                if (base.getOption(key).getIsInherited() && !base.getOption(key).isOverrideable()) {
+                if (base.getOption(key).getIsInherited() && !base.getOption(key).isOverridable()) {
                     // only complain if the value gets overridden
                     final String inValue = value ? FxStructureOption.VALUE_TRUE : FxStructureOption.VALUE_FALSE;
                     if (!inValue.equals(base.getOption(key).getValue()))
@@ -368,7 +368,7 @@ public class FxGroupAssignmentEdit extends FxGroupAssignment {
             }
         }
 
-        FxStructureOption.setOption(options, key, overrideable, isInherited, value);
+        FxStructureOption.setOption(options, key, overridable, isInherited, value);
         return this;
     }
 

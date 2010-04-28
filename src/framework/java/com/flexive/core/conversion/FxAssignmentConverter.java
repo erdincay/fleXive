@@ -193,7 +193,7 @@ public abstract class FxAssignmentConverter implements Converter {
             writer.startNode("option");
             writer.addAttribute("key", opt.getKey());
             writer.addAttribute("value", opt.getValue());
-            writer.addAttribute("overrideable", String.valueOf(opt.isOverrideable()));
+            writer.addAttribute("overridable", String.valueOf(opt.isOverridable()));
             writer.addAttribute("set", String.valueOf(opt.isSet()));
             writer.endNode();
         }
@@ -220,7 +220,7 @@ public abstract class FxAssignmentConverter implements Converter {
             reader.moveDown();
             if (!"option".equals(reader.getNodeName()))
                 throw new FxConversionException("ex.conversion.wrongNode", "option", reader.getNodeName()).asRuntimeException();
-            options.add(new FxStructureOption(reader.getAttribute("key"), Boolean.valueOf(reader.getAttribute("overrideable")),
+            options.add(new FxStructureOption(reader.getAttribute("key"), Boolean.valueOf(reader.getAttribute("overridable")),
                     Boolean.valueOf(reader.getAttribute("set")), reader.getAttribute("value")));
             reader.moveUp();
         }

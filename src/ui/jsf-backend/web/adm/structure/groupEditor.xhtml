@@ -66,7 +66,7 @@
                                      readOnly="#{not groupEditorBean.editMode or (groupEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"/>
             </fx:formRow>
 
-            <fx:formRow labelKey="GroupEditor.label.overrideableBaseMultiplicity" id="overrideBaseMultiplicity">
+            <fx:formRow labelKey="GroupEditor.label.overridableBaseMultiplicity" id="overrideBaseMultiplicity">
                 <h:selectBooleanCheckbox id="overrideBaseMultiplicity" value="#{groupEditorBean.groupOverrideBaseMultiplicity}"
                          disabled="#{not groupEditorBean.editMode or (groupEditorBean.systemInternal and not fxSystemBean.isInRole['GlobalSupervisor'])}"/>
             </fx:formRow>

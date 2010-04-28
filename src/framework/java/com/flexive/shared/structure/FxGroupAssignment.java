@@ -287,7 +287,7 @@ public class FxGroupAssignment extends FxAssignment implements Serializable {
         FxStructureOption gOpt = group.getOption(key);
         if (!gOpt.isSet())
             return super.getOption(key);
-        if (!gOpt.isOverrideable())
+        if (!gOpt.isOverridable())
             return gOpt;
         if (super.hasOption(key))
             return super.getOption(key);

@@ -39,7 +39,6 @@ import com.flexive.faces.messages.FxFacesMsgInfo;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxSharedUtils;
-import com.flexive.shared.XPathElement;
 import com.flexive.shared.security.Role;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.structure.*;
@@ -464,7 +463,7 @@ public class GroupEditorBean implements Serializable {
         // add edited options (checks if they are set)
         for (FxStructureOption o : newOptions) {
             if(o.isValid())
-                assignment.setOption(o.getKey(), o.isOverrideable(), o.getIsInherited(), o.getValue());
+                assignment.setOption(o.getKey(), o.isOverridable(), o.getIsInherited(), o.getValue());
             else { // remove invalid options from the optionwrapper
                 removeOptions.add(o);
                 invalidOptions.add(o);
@@ -536,7 +535,7 @@ public class GroupEditorBean implements Serializable {
         //add edited options (checks if they are set)
         for (FxStructureOption o : newOptions) {
             if(o.isValid())
-                group.setOption(o.getKey(), o.isOverrideable(), o.getValue());
+                group.setOption(o.getKey(), o.isOverridable(), o.getValue());
             else { // remove invalid options from the optionwrapper
                 removeOptions.add(o);
                 invalidOptions.add(o);

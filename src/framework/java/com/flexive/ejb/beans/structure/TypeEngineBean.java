@@ -1210,7 +1210,7 @@ public class TypeEngineBean implements TypeEngine, TypeEngineLocal {
                 if (StringUtils.isEmpty(option.getKey()))
                     throw new FxInvalidParameterException("key", "ex.structure.option.key.empty", option.getValue());
                 ps.setString(2, option.getKey());
-                ps.setBoolean(3, option.isOverrideable());
+                ps.setBoolean(3, option.isOverridable());
                 ps.setBoolean(4, option.getIsInherited());
                 ps.setString(5, option.getValue());
                 ps.addBatch();

@@ -385,17 +385,17 @@ class GroovyTypeBuilderTest {
 
             // structure options
             opt = p.getOption("SHOW.OVERVIEW");
-            Assert.assertTrue(opt.isOverrideable())
+            Assert.assertTrue(opt.isOverridable())
             opt = p.getOption("MAXLENGTH")
-            Assert.assertTrue(opt.isOverrideable())
+            Assert.assertTrue(opt.isOverridable())
             opt = p.getOption("MULTILINE")
-            Assert.assertTrue(opt.isOverrideable())
+            Assert.assertTrue(opt.isOverridable())
             opt = p.getOption("SEARCHABLE")
-            Assert.assertTrue(opt.isOverrideable())
+            Assert.assertTrue(opt.isOverridable())
             opt = p.getOption("HTML.EDITOR")
-            Assert.assertTrue(opt.isOverrideable())
+            Assert.assertTrue(opt.isOverridable())
             opt = p.getOption("MULTILANG")
-            Assert.assertTrue(opt.isOverrideable())
+            Assert.assertTrue(opt.isOverridable())
 
             // derived assignment
             Assert.assertEquals(pa_der.getProperty(), p)
@@ -1710,9 +1710,9 @@ class GroovyTypeBuilderTest {
             Assert.assertTrue(t.getOption("OPT_A").isValueTrue())
             Assert.assertEquals(t.getOption("OPT_B").getValue(), "ASDF")
             // default settings
-            Assert.assertTrue(t.getOption("OPT_A").isOverrideable())
+            Assert.assertTrue(t.getOption("OPT_A").isOverridable())
             Assert.assertFalse(t.getOption("OPT_A").getIsInherited())
-            Assert.assertTrue(t.getOption("OPT_B").isOverrideable())
+            Assert.assertTrue(t.getOption("OPT_B").isOverridable())
             Assert.assertFalse(t.getOption("OPT_B").getIsInherited())
         } finally {
             removeTestType()
@@ -1728,15 +1728,15 @@ class GroovyTypeBuilderTest {
         def propAssId = -1;
         try {
             // define various option lists
-            def typeOptions = new GroovyOptionBuilder().option1(value: "FOO", overrideable: false, isInherited: true) {
-                option2(value: "BAR", overrideable: false, isInherited: false)
+            def typeOptions = new GroovyOptionBuilder().option1(value: "FOO", overridable: false, isInherited: true) {
+                option2(value: "BAR", overridable: false, isInherited: false)
             }
-            def propOptions = new GroovyOptionBuilder().pOpt1(value: "value 1", overrideable: false) {
+            def propOptions = new GroovyOptionBuilder().pOpt1(value: "value 1", overridable: false) {
                 pOpt2(value: false)
             }
             def propAssOptions = new GroovyOptionBuilder().pOpt2(value: true) // overrides property setting
             def groupOptions = new GroovyOptionBuilder().gOpt1(value: "group value") {
-                gOpt2(value: false, overrideable: false)
+                gOpt2(value: false, overridable: false)
             }
             def groupAssOptions = new GroovyOptionBuilder().gOpt1(value: "overridden group value")
             // create test type
@@ -1755,12 +1755,12 @@ class GroovyTypeBuilderTest {
             o = optionsList.get(0);
             Assert.assertEquals(o.getKey(), "OPTION1")
             Assert.assertEquals(o.getValue(), "FOO")
-            Assert.assertFalse(o.isOverrideable())
+            Assert.assertFalse(o.isOverridable())
             Assert.assertTrue(o.getIsInherited())
             o = optionsList.get(1);
             Assert.assertEquals(o.getKey(), "OPTION2")
             Assert.assertEquals(o.getValue(), "BAR")
-            Assert.assertFalse(o.isOverrideable())
+            Assert.assertFalse(o.isOverridable())
             Assert.assertFalse(o.getIsInherited())
 
             // property and property assignment options
@@ -1773,7 +1773,7 @@ class GroovyTypeBuilderTest {
             o = optionsList.get(0);
             Assert.assertEquals(o.getKey(), "POPT1")
             Assert.assertEquals(o.getValue(), "value 1")
-            Assert.assertFalse(o.isOverrideable())
+            Assert.assertFalse(o.isOverridable())
             o = optionsList.get(1);
             Assert.assertEquals(o.getKey(), "POPT2")
             Assert.assertFalse(o.isValueTrue())
@@ -1797,7 +1797,7 @@ class GroovyTypeBuilderTest {
             o = optionsList.get(1)
             Assert.assertEquals(o.getKey(), "GOPT2")
             Assert.assertFalse(o.isValueTrue())
-            Assert.assertFalse(o.isOverrideable())
+            Assert.assertFalse(o.isOverridable())
 
             optionsList = groupAss.getOptions();
             Assert.assertEquals(optionsList.size(), 1)
