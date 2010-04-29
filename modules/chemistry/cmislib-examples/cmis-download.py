@@ -11,16 +11,9 @@ import sys, os
 # download all items in folder
 def download_folder(folder):
     children = folder.getChildren() 
+
     for child in cmis_filter_by_base_type(children, 'cmis:document'):
-        try:
-            stream = child.getContentStream()
-            print "Downloading: " + child.name
-            f = open(child.name, 'wb')
-            f.write(stream.read())
-            stream.close()
-            f.close()
-        except:
-            pass    # ignore, happens if content has no content stream
+        cmis_download_document(child)
 
     for child in cmis_filter_by_base_type(children, 'cmis:folder'):
         os.mkdir(child.name)
