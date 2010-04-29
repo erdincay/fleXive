@@ -1,0 +1,25 @@
+Index: server/src/main/java/org/apache/abdera/protocol/server/context/MediaResponseContext.java
+===================================================================
+--- server/src/main/java/org/apache/abdera/protocol/server/context/MediaResponseContext.java	(revision 939218)
++++ server/src/main/java/org/apache/abdera/protocol/server/context/MediaResponseContext.java	(working copy)
+@@ -112,11 +112,15 @@
+       throws IOException {
+     if (hasEntity()) {
+       if (in != null) {
+-        byte[] buf = new byte[500];
+-        int r = -1;
+-        while ((r = in.read(buf)) != -1) {
+-          out.write(buf,0,r);
+-          buf = new byte[100];
++        try {
++          byte[] buf = new byte[500];
++          int r = -1;
++          while ((r = in.read(buf)) != -1) {
++            out.write(buf,0,r);
++            buf = new byte[100];
++          }
++        } finally {
++          in.close();
+         }
+       }
+     }
