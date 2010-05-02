@@ -40,5 +40,6 @@ package com.flexive.shared.media;
 public enum FxMediaType {
     Image,
     Document,
+    Audio,
     Unknown
 }

@@ -93,9 +93,22 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
     public static final String DOCUMENT = "DOCUMENT";
     /**
      * Name of the image type for storing image file formats (mimetypes image/*)
+     *
      * @since 3.1.1
      */
     public static final String IMAGE = "IMAGE";
+    /**
+     * Name of the audio type for storing audio file formats (mimetypes audio/*)
+     *
+     * @since 3.1.2
+     */
+    public static final String AUDIO = "AUDIO";
+    /**
+     * Name of the video type for storing video file formats (mimetypes video/*)
+     *
+     * @since 3.1.2
+     */
+    public static final String VIDEO = "VIDEO";
 
     protected long id;
     protected ACL ACL;

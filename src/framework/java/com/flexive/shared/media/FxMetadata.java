@@ -118,13 +118,36 @@ public abstract class FxMetadata {
     public abstract List<FxMetadataItem> getMetadata();
 
     /**
-     * Check if this metatdata object is an image metadata instance
+     * Check if this metadata object is an image metadata instance
      *
      * @return this object is an image meta data instance
      * @since 3.1
      */
     public boolean isImageMetadata() {
         return this instanceof FxImageMetadata;
+    }
+
+    /**
+     * Check if this metadata object is an audio metadata instance
+     *
+     * @return true if this object is an audio metadata instance
+     * @since 3.1.2
+     */
+    public boolean isAudioMetadata() {
+        return this instanceof FxAudioMetadata;
+    }
+
+    /**
+     * Get this metadata object as an FxImageMetadata instance
+     *
+     * @return FxAudioMetadata instance
+     * @throws FxApplicationException on errors
+     * @since 3.1.2
+     */
+    public FxAudioMetadata asAudioMetadata() throws FxApplicationException {
+        if(this instanceof FxAudioMetadata)
+            return (FxAudioMetadata)this;
+        throw new FxApplicationException("ex.general.wrongClass", this.getClass().getCanonicalName(), FxAudioMetadata.class.getCanonicalName());
     }
 
     /**

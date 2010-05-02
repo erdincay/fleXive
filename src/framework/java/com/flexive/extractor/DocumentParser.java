@@ -119,7 +119,8 @@ public class DocumentParser {
     }
 
     /**
-     * Main metaparser method f. the DOCUMENTFILE type (and its derived types [future change])
+     * Main metaparser method f. the DOCUMENTFILE type
+     * (Set the MIMETYPE (and CAPTION) property in for a content instance of DOCUMENTFILE)
      * Run the parser and return the FxContent instance
      *
      * @return the FxContent instance
@@ -127,26 +128,18 @@ public class DocumentParser {
     public FxContent run() {
         if (init(false)) {
             // DOCUMENTFILE content instance
-            if (FxType.DOCUMENTFILE.equals(contentType.getName()))
-                return runDocumentFileParser();
-        }
-        return content;
-    }
-
-    /**
-     * Set the MIMETYPE (and CAPTION) property in for a content instance of DOCUMENTFILE
-     *
-     * @return the FxContent instance
-     */
-    private FxContent runDocumentFileParser() {
-        Object binValue = content.getPropertyData(FILEPROP).getValue().getDefaultTranslation();
-        if (binValue != null && binValue instanceof BinaryDescriptor) {
-            BinaryDescriptor desc = (BinaryDescriptor) binValue;
-            if (desc.getMimeType() != null) {
-                if (!content.containsValue(MIMEPROP))
-                    content.setValue(MIMEPROP, new FxString(false, desc.getMimeType()));
-                if (!content.containsValue("/CAPTION"))
-                    content.setValue("/CAPTION", new FxString(true, desc.getName()));
+            if (FxType.DOCUMENTFILE.equals(contentType.getName())) {
+                // retrieve the BinaryDescriptor
+                Object binValue = content.getPropertyData(FILEPROP).getValue().getDefaultTranslation();
+                if (binValue != null && binValue instanceof BinaryDescriptor) {
+                    BinaryDescriptor desc = (BinaryDescriptor) binValue;
+                    if (desc.getMimeType() != null) {
+                        if (!content.containsValue(MIMEPROP))
+                            content.setValue(MIMEPROP, new FxString(false, desc.getMimeType()));
+                        if (!content.containsValue("/CAPTION"))
+                            content.setValue("/CAPTION", new FxString(true, desc.getName()));
+                    }
+                }
             }
         }
         return content;
@@ -168,6 +161,7 @@ public class DocumentParser {
                 String mimeType = content.getValue("/MIMETYPE").toString();
                 // retrieve a matching FxType and convert the content
                 FxType destinationType = CacheAdmin.getEnvironment().getMimeTypeMatch(mimeType);
+                BinaryDescriptor desc;
                 if (destinationType.getId() == contentType.getId()) {
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("No matching type for content pk " + pk + " found, content remains instance of type id " + content.getTypeId());
@@ -177,9 +171,17 @@ public class DocumentParser {
 
                 try {
                     EJBLookup.getContentEngine().convertContentType(pk, destinationType.getId(), true, true);
-                    // only call DOCUMENT / IMAGE extractors if the destination type is derived from or DOCUMENT/IMAGE itself
-                    if (checkTypeOrigin(destinationType)) {
-                        extractBinaryMetaData();
+
+                    // only perform the extraction for types derived from DOCUMENTFILE
+                    if (destinationType.getParent() != null && destinationType.isDerivedFrom(FxType.DOCUMENTFILE)) {
+                        desc = extractBinaryMetaData();
+
+                        // update the content with the parsed metadata
+                        if (desc != null && desc.getMetadata() != null) {
+                            updateContentWithMetadata(desc);
+                            // save the converted and updated content instance
+                            EJBLookup.getContentEngine().save(content);
+                        }
                     }
 
                 } catch (FxApplicationException e) {
@@ -193,45 +195,34 @@ public class DocumentParser {
     }
 
     /**
-     * Check if the given FxType is a child of IMAGE or DOCUMENT (or the resp. type itself)
-     * // this method will only exist for as long there are merely extractors for these given types
+     * Extract the metadata from the file loaded via the BinaryDescriptor
+     * Incl. decision path for document and image data extraction
      *
-     * @param type the Fxtype
-     * @return true if the
+     * @return the BinaryDescriptor instance incl. parsed metadata
      */
-    private boolean checkTypeOrigin(FxType type) {
-        return FxType.DOCUMENT.equals(type.getName()) ||
-                FxType.IMAGE.equals(type.getName()) ||
-                type.getParent() != null && (type.isDerivedFrom(FxType.DOCUMENT) || type.isDerivedFrom(FxType.IMAGE));
+    private BinaryDescriptor extractBinaryMetaData() {
+        BinaryDescriptor desc = null;
+        // reload content & retrieve BinaryDescriptor
+        if (init(true)) {
+            desc = (BinaryDescriptor) content.getValue(FILEPROP).getBestTranslation();
+            // based on the descriptor let's relaunch extraction of the metadata and reassign the descriptor
+            if (checkType(FxType.DOCUMENT)) {
+                desc = extractDocumentMetaData(desc);
+            } else {
+                desc = extractFileMetaData(desc);
+            }
+        }
+        return desc;
     }
 
     /**
-     * Extract the metadata from the file loaded via the BinaryDescriptor
-     * Incl. decision path for document and image data extraction
+     * Convenience method to check whether the current content type's metadata extraction needs to be called
+     *
+     * @param typeName the type's name
+     * @return true if the check is passed
      */
-    private void extractBinaryMetaData() {
-        // reload content & retrieve BinaryDescriptor
-        if (init(true)) {
-            BinaryDescriptor desc = (BinaryDescriptor) content.getValue(FILEPROP).getBestTranslation();
-            // based on the descriptor let's relaunch extraction of the metadata and reassign the descriptor
-            if (FxType.DOCUMENT.equals(contentType.getName()) || contentType.getParent() != null && contentType.isDerivedFrom(FxType.DOCUMENT)) {
-                desc = extractDocumentMetaData(desc);
-                // update content and save
-                parseMetaData(desc);
-
-            } else if (FxType.IMAGE.equals(contentType.getName()) || contentType.getParent() != null && contentType.isDerivedFrom(FxType.IMAGE)) {
-                desc = extractImageMetaData(desc);
-                // update content and save
-                parseMetaData(desc);
-            }
-            try {
-                EJBLookup.getContentEngine().save(content);
-            } catch (FxApplicationException e) {
-                if (LOG.isErrorEnabled()) {
-                    LOG.error("An error ocurred while saving content instance " + content.getPk() + " " + e.getMessage(), e);
-                }
-            }
-        }
+    private boolean checkType(String typeName) {
+        return typeName.equals(contentType.getName()) || contentType.getParent() != null && contentType.isDerivedFrom(typeName);
     }
 
     /**
@@ -254,7 +245,7 @@ public class DocumentParser {
             }
 
         } catch (Exception e) {
-            if(LOG.isErrorEnabled()) {
+            if (LOG.isErrorEnabled()) {
                 LOG.error("Could not download binary file or create InputStream " + e.getMessage(), e);
             }
         } finally {
@@ -264,21 +255,23 @@ public class DocumentParser {
     }
 
     /**
-     * Extract metadata from the image file (image will be loaded from the binary storage)
+     * Extract metadata from the image/audio file (image will be loaded from the binary storage)
+     * This method can be used for image and audio types, i.e. any type which uses metadata extraction
+     * via the FxMediaEngine.identify(String mimeType, File file) method
      *
      * @param desc an instance of the BinaryDescriptor for the file t.b. examined
      * @return the (updated) BinaryDescriptor
      */
-    private BinaryDescriptor extractImageMetaData(BinaryDescriptor desc) {
+    private BinaryDescriptor extractFileMetaData(BinaryDescriptor desc) {
         InputStream inputStream = null;
-        File imageFile = null;
+        File file = null;
         try {
-            imageFile = File.createTempFile("flexive-upload-", desc.getName());
+            file = File.createTempFile("flexive-upload-", desc.getName());
             // create a File from the inputstream
             inputStream = FxStreamUtils.getBinaryStream(desc, BinaryDescriptor.PreviewSizes.ORIGINAL);
-            FxFileUtils.copyStream2File(desc.getSize(), inputStream, imageFile);
+            FxFileUtils.copyStream2File(desc.getSize(), inputStream, file);
             // extract the metaData
-            final FxMetadata metaData = FxMediaEngine.identify(desc.getMimeType(), imageFile);
+            final FxMetadata metaData = FxMediaEngine.identify(desc.getMimeType(), file);
 
             if (metaData != null) {
                 return new BinaryDescriptor(desc.getHandle(), desc.getName(), desc.getSize(),
@@ -292,8 +285,8 @@ public class DocumentParser {
         } finally {
             FxSharedUtils.close(inputStream);
             // delete tmp file
-            if (imageFile != null) {
-                imageFile.delete();
+            if (file != null) {
+                file.delete();
             }
         }
         return desc;
@@ -306,7 +299,7 @@ public class DocumentParser {
      * @param desc the BinaryDescriptor
      * @return the FxContent instance
      */
-    public FxContent parseMetaData(BinaryDescriptor desc) {
+    public FxContent updateContentWithMetadata(BinaryDescriptor desc) {
         ScriptingEngine scripting = EJBLookup.getScriptingEngine();
         FxScriptBinding binding = new FxScriptBinding();
 

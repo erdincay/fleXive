@@ -32,6 +32,7 @@
 package com.flexive.shared.media;
 
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.media.impl.FxAudioExtractionEngine;
 import com.flexive.shared.media.impl.FxMediaImageMagickEngine;
 import com.flexive.shared.media.impl.FxMediaNativeEngine;
 import com.flexive.shared.media.impl.FxUnknownMetadataImpl;
@@ -111,6 +112,7 @@ public class FxMediaEngine {
             }
             mimeType = detectMimeType(header, file.getName());
         }
+        // image file identification
         if (mimeType.startsWith("image")) {
             try {
                 //try native first
@@ -124,6 +126,15 @@ public class FxMediaEngine {
                     }
                 } else
                     LOG.error(e);
+            }
+        // audio file identification
+        } else if(mimeType.startsWith("audio")) {
+            try {
+                return FxAudioExtractionEngine.identify(mimeType, file);
+            } catch (FxApplicationException e) {
+                if(LOG.isErrorEnabled()) {
+                    LOG.error(e);
+                }
             }
         }
         //last resort: unknown

@@ -50,8 +50,17 @@ if (binDir.exists()) {
 
 
 //setup binary processing scripts
-EJBLookup.getScriptingEngine().createScriptFromLibrary(
+// binary processing f. images
+def se = EJBLookup.getScriptingEngine()
+se.createScriptFromLibrary(
         "BinaryProcessor_Images.gy", new FxScriptInfo(-1,
         FxScriptEvent.BinaryPreviewProcess,
         "BinaryProcessor_Images.gy",
         "Binary processing for images",true,false))
+
+// binary processing f. audio files
+se.createScriptFromLibrary(
+        "BinaryProcessor_AudioFiles.gy", new FxScriptInfo(-1,
+        FxScriptEvent.BinaryPreviewProcess,
+        "BinaryProcessor_AudioFiles.gy",
+        "Binary processing for audio files",true,false))
