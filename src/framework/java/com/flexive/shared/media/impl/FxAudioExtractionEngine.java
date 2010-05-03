@@ -95,9 +95,9 @@ public class FxAudioExtractionEngine {
         public void extractAudioData() {
             final String subType = mimeType.getSubType();
             // ogg and mp3
-            if (subType.contains("ogg")) {
+            if (subType.contains("ogg") || subType.contains("vorbis")) {
                 extractOggAudioData();
-            } else if (subType.contains("mp3")) {
+            } else if (subType.contains("mp3") || subType.contains("mpeg")) {
                 extractMp3AudioData();
             } else { // the (current) rest
                 extractNativeAudioData();
@@ -142,6 +142,7 @@ public class FxAudioExtractionEngine {
          * TODO: Extract mp3 audio data
          */
         private void extractMp3AudioData() {
+            
             metaItems = new ArrayList<FxMetadata.FxMetadataItem>(1);
         }
 

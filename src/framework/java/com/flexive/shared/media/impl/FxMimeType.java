@@ -31,18 +31,31 @@
  ***************************************************************/
 package com.flexive.shared.media.impl;
 
+import eu.medsea.mimeutil.MimeType;
+import eu.medsea.mimeutil.MimeUtil;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.io.Serializable;
+import java.util.Collection;
 
 /**
  * A general mime type / subtype implementation
  *
  * @author Christopher Blasnik (c.blasnik@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
- *
  * @since 3.1
  */
 public class FxMimeType implements Serializable {
+
+    // MimeUtils mimedetector registration
+
+    static {
+        // MIME-type detection setup
+        MimeUtil.registerMimeDetector("eu.medsea.mimeutil.detector.ExtensionMimeDetector");
+        MimeUtil.registerMimeDetector("eu.medsea.mimeutil.detector.MagicMimeMimeDetector");
+    }
+
     /**
      * "Main/default" mime types
      */
@@ -61,6 +74,7 @@ public class FxMimeType implements Serializable {
     private String type;
     private String subType;
     private static final long serialVersionUID = -5416305800516366421L;
+    private static Log LOG = LogFactory.getLog(FxMimeType.class);
 
     /**
      * Default constructor, sets a default of "application/octet-stream"
@@ -83,7 +97,7 @@ public class FxMimeType implements Serializable {
     /**
      * Construct a mimeType from a given main- and sub type
      *
-     * @param type the type (e.g. "application")
+     * @param type    the type (e.g. "application")
      * @param subType the sub type (e.g. "msword")
      */
     public FxMimeType(String type, String subType) {
@@ -109,7 +123,7 @@ public class FxMimeType implements Serializable {
 
     @Override
     public String toString() {
-        if(!StringUtils.isBlank(subType))
+        if (!StringUtils.isBlank(subType))
             return type + "/" + subType;
         else return type + "/" + UNKNOWN;
     }
@@ -124,11 +138,11 @@ public class FxMimeType implements Serializable {
 
     @Override
     public boolean equals(Object o) {
-        if(o == null || !(o instanceof FxMimeType))
+        if (o == null || !(o instanceof FxMimeType))
             return false;
-        if(o == this)
+        if (o == this)
             return true;
-        final FxMimeType comp = (FxMimeType)o;
+        final FxMimeType comp = (FxMimeType) o;
         return !(!this.type.equals(comp.type) || !this.subType.equals(comp.subType));
     }
 
@@ -141,19 +155,51 @@ public class FxMimeType implements Serializable {
      * @return returns a MimeType
      */
     public static FxMimeType getMimeType(String mimeType) {
-        if(mimeType == null)
+        if (mimeType == null)
             mimeType = "";
         final String[] s = mimeType.split("/");
         final String type = StringUtils.trim(s[0].toLowerCase());
         final String subType;
 
-        if(s.length > 1 && !StringUtils.isBlank(type))
-          subType = StringUtils.trim(s[1].toLowerCase());
-        else if(StringUtils.isBlank(type))
+        if (s.length > 1 && !StringUtils.isBlank(type))
+            subType = StringUtils.trim(s[1].toLowerCase());
+        else if (StringUtils.isBlank(type))
             return new FxMimeType(FxMimeType.UNKNOWN, FxMimeType.UNKNOWN);
         else
             subType = UNKNOWN;
 
         return new FxMimeType(type, subType);
+    }
+
+    /**
+     * This is a helper method for mime type detection based on medsea's mimeutils
+     * Mime type detection based on header bytes and filenames, the latter is used as a
+     * fallback if header detection fails
+     *
+     * @param header the file header as a byte array
+     * @param fileName the file name as a String
+     * @return the FxMimeType constructed from the input
+     * @since 3.1.2
+     */
+    @SuppressWarnings({"unchecked"})
+    public static FxMimeType detectMimeType(byte[] header, String fileName) {
+        MimeType mt;
+        // try and find the mimetype from the given file header
+        Collection<MimeType> detected = MimeUtil.getMimeTypes(header);
+        if (!detected.isEmpty()) {
+            mt = detected.iterator().next();
+            return new FxMimeType(mt.getMediaType(), mt.getSubType());
+
+        } else { // extension based detection
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Failed to detect file's mime type from header, trying a file extension match");
+            }
+            detected = MimeUtil.getMimeTypes(fileName);
+            if(detected.isEmpty()) {
+                return new FxMimeType(UNKNOWN);
+            }
+            mt = detected.iterator().next();
+            return new FxMimeType(mt.getMediaType(), mt.getSubType());
+        }
     }
 }
