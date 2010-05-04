@@ -34,6 +34,8 @@ package com.flexive.shared.media.impl;
 import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.media.FxMetadata;
+import javazoom.spi.vorbis.sampled.file.VorbisAudioFileFormat;
+import javazoom.spi.vorbis.sampled.file.VorbisAudioFormat;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.tritonus.share.sampled.TAudioFormat;
@@ -87,6 +89,12 @@ public class FxAudioExtractionEngine {
         private File file;
         private List<FxMetadata.FxMetadataItem> metaItems;
 
+        /**
+         * Ctor
+         *
+         * @param mimeType the mime type as a String
+         * @param file the audio file
+         */
         AudioExtractor(String mimeType, File file) {
             this.mimeType = FxMimeType.getMimeType(mimeType);
             this.file = file;
@@ -99,13 +107,14 @@ public class FxAudioExtractionEngine {
         public void extractAudioData() {
             final String subType = mimeType.getSubType();
             // ogg and mp3
-            if (subType.contains("ogg") || subType.contains("vorbis")) {
+            if (subType.contains("ogg") || subType.contains("vorbis"))
                 extractOggAudioData();
-            } else if (subType.contains("mp3") || subType.contains("mpeg")) {
+            else if (subType.contains("mp3") || subType.contains("mpeg"))
                 extractMp3AudioData();
-            } else { // the (current) rest
+            else if (subType.contains("flac"))
+                extractFlacAudioData();
+            else // the (current) rest
                 extractNativeAudioData();
-            }
         }
 
         /**
@@ -118,7 +127,6 @@ public class FxAudioExtractionEngine {
             try {
                 audioInStream = AudioSystem.getAudioInputStream(file);
                 clip = AudioSystem.getClip();
-                clip.open(audioInStream);
                 // length in microseconds
                 length = clip.getMicrosecondLength();
                 // audio format info
@@ -136,14 +144,14 @@ public class FxAudioExtractionEngine {
                 }
             } finally {
                 if (clip != null) {
-                    clip.close();
+                    clip.flush();
                 }
                 FxSharedUtils.close(audioInStream);
             }
         }
 
         /**
-         * Extract audio (meta)data from an MP3-encoded audio file using JLayer
+         * Extract audio (meta)data from an MP3-encoded audio file using JLayer / mp3spi
          * <p/>
          * mp3 parameters from http://www.javazoom.net/mp3spi/documents.html
          * <p/>
@@ -186,7 +194,7 @@ public class FxAudioExtractionEngine {
          * mp3.shoutcast.metadata.icy-url=http://www.di.fm
          */
         private void extractMp3AudioData() {
-            metaItems = new ArrayList<FxMetadata.FxMetadataItem>(5);
+            metaItems = new ArrayList<FxMetadata.FxMetadataItem>(12);
             Map<String, Object> properties;
             try {
                 final AudioFileFormat baseFileFormat = AudioSystem.getAudioFileFormat(file);
@@ -270,9 +278,70 @@ public class FxAudioExtractionEngine {
         }
 
         /**
-         * TODO: Extract ogg vorbis audio data
+         * Extract ogg vorbis audio metadata useing JLayer / vorbisspi
          */
         private void extractOggAudioData() {
+            metaItems = new ArrayList<FxMetadata.FxMetadataItem>(6);
+            Map<String, Object> properties;
+            AudioInputStream audioInStream = null;
+            Clip clip = null;
+            try {
+                audioInStream = AudioSystem.getAudioInputStream(file);
+                clip = AudioSystem.getClip();
+                final AudioFileFormat baseFileFormat = AudioSystem.getAudioFileFormat(file);  // VorbisAudioFileFormat
+                final AudioFormat baseFormat = baseFileFormat.getFormat(); // VorbisAudioFormat
+
+                if (baseFileFormat instanceof VorbisAudioFileFormat) {
+                    properties = baseFileFormat.properties();
+                    final AudioFormat audioFormat = clip.getFormat();
+
+                    // ENCODONG
+                    metaItems.add(new FxMetadata.FxMetadataItem("encoding", audioFormat.getEncoding().toString()));
+
+                    // SAMPLERATE
+                    Integer bitrate = properties.get("ogg.frequency.hz") != null ? (Integer) properties.get("ogg.frequency.hz") : 0;
+                    if (bitrate != 0)
+                        metaItems.add(new FxMetadata.FxMetadataItem("samplerate", String.valueOf(bitrate)));
+
+                    // CHANNELS
+                    Integer channels = properties.get("ogg.channels") != null ? (Integer) properties.get("ogg.channels") : null;
+                    if (channels != null)
+                        metaItems.add(new FxMetadata.FxMetadataItem("channels", String.valueOf(channels)));
+
+                    // LENGTH / DURATION
+                    length = properties.get("duration") != null ? (Long) properties.get("duration") : 0L;
+
+                    // ENCODING
+                    String encoding = properties.get("mp3.version.encoding") != null ? (String) properties.get("mp3.version.encoding") : null;
+                    if (encoding != null)
+                        metaItems.add(new FxMetadata.FxMetadataItem("encoding", encoding));
+                }
+
+                if (baseFormat instanceof VorbisAudioFormat) {
+                    properties = baseFormat.properties();
+
+                    // variable bit rate flag
+                    Boolean vbr = properties.get("vbr") != null ? (Boolean) properties.get("vbr") : null;
+                    if (vbr != null)
+                        metaItems.add(new FxMetadata.FxMetadataItem("vbr", String.valueOf(vbr)));
+                }
+
+            } catch (Exception e) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("An error ocurred while parsing ogg vorbis metadata from an audio file", e);
+                }
+            } finally {
+                if (clip != null) {
+                    clip.flush();
+                }
+                FxSharedUtils.close(audioInStream);
+            }
+        }
+
+        /**
+         * Extract flac audio data using JFlac
+         */
+        private void extractFlacAudioData() {
             metaItems = new ArrayList<FxMetadata.FxMetadataItem>(1);
         }
 
