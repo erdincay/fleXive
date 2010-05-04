@@ -295,7 +295,7 @@ public class FxAudioExtractionEngine {
                     properties = baseFileFormat.properties();
                     final AudioFormat audioFormat = clip.getFormat();
 
-                    // ENCODONG
+                    // ENCODING
                     metaItems.add(new FxMetadata.FxMetadataItem("encoding", audioFormat.getEncoding().toString()));
 
                     // SAMPLERATE
@@ -310,11 +310,6 @@ public class FxAudioExtractionEngine {
 
                     // LENGTH / DURATION
                     length = properties.get("duration") != null ? (Long) properties.get("duration") : 0L;
-
-                    // ENCODING
-                    String encoding = properties.get("mp3.version.encoding") != null ? (String) properties.get("mp3.version.encoding") : null;
-                    if (encoding != null)
-                        metaItems.add(new FxMetadata.FxMetadataItem("encoding", encoding));
                 }
 
                 if (baseFormat instanceof VorbisAudioFormat) {
