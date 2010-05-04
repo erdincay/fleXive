@@ -36,11 +36,14 @@ import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.media.FxMetadata;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.tritonus.share.sampled.TAudioFormat;
+import org.tritonus.share.sampled.file.TAudioFileFormat;
 
 import javax.sound.sampled.*;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A Class to extract audio meta data information for various supported audio formats.
@@ -54,6 +57,7 @@ import java.util.List;
  * mp3spi
  *
  * @author Christopher Blasnik, cblasnik@flexive.com, unique computing solutions gmbh
+ * @since 3.1.2
  */
 public class FxAudioExtractionEngine {
 
@@ -139,11 +143,130 @@ public class FxAudioExtractionEngine {
         }
 
         /**
-         * TODO: Extract mp3 audio data
+         * Extract audio (meta)data from an MP3-encoded audio file using JLayer
+         * <p/>
+         * mp3 parameters from http://www.javazoom.net/mp3spi/documents.html
+         * <p/>
+         * Standard parameters :
+         * - duration : [Long], duration in microseconds.
+         * - title : [String], Title of the stream.
+         * - author : [String], Name of the artist of the stream.
+         * - album : [String], Name of the album of the stream.
+         * - date : [String], The date (year) of the recording or release of the stream.
+         * - copyright : [String], Copyright message of the stream.
+         * - comment : [String], Comment of the stream.
+         * Extended MP3 parameters :
+         * - mp3.version.mpeg : [String], mpeg version : 1,2 or 2.5
+         * - mp3.version.layer : [String], layer version 1, 2 or 3
+         * - mp3.version.encoding : [String], mpeg encoding : MPEG1, MPEG2-LSF, MPEG2.5-LSF
+         * - mp3.channels : [Integer], number of channels 1 : mono, 2 : stereo.
+         * - mp3.frequency.hz : [Integer], sampling rate in hz.
+         * - mp3.bitrate.nominal.bps : [Integer], nominal bitrate in bps.
+         * - mp3.length.bytes : [Integer], length in bytes.
+         * - mp3.length.frames : [Integer], length in frames.
+         * - mp3.framesize.bytes : [Integer], framesize of the first frame.
+         * framesize is not constant for VBR streams.
+         * - mp3.framerate.fps : [Float], framerate in frames per seconds.
+         * - mp3.header.pos : [Integer], position of first audio header (or ID3v2 size).
+         * - mp3.vbr : [Boolean], vbr flag.
+         * - mp3.vbr.scale : [Integer], vbr scale.
+         * - mp3.crc : [Boolean], crc flag.
+         * - mp3.original : [Boolean], original flag.
+         * - mp3.copyright : [Boolean], copyright flag.
+         * - mp3.padding : [Boolean], padding flag.
+         * - mp3.mode : [Integer], mode 0:STEREO 1:JOINT_STEREO 2:DUAL_CHANNEL 3:SINGLE_CHANNEL
+         * - mp3.id3tag.genre : [String], ID3 tag (v1 or v2) genre.
+         * - mp3.id3tag.track : [String], ID3 tag (v1 or v2) track info.
+         * - mp3.id3tag.v2 : [InputStream], ID3v2 frames.
+         * - mp3.shoutcast.metadata.key : [String], Shoutcast meta key with matching value.
+         * For instance :
+         * mp3.shoutcast.metadata.icy-irc=#shoutcast
+         * mp3.shoutcast.metadata.icy-metaint=8192
+         * mp3.shoutcast.metadata.icy-genre=Trance Techno Dance
+         * mp3.shoutcast.metadata.icy-url=http://www.di.fm
          */
         private void extractMp3AudioData() {
-            
-            metaItems = new ArrayList<FxMetadata.FxMetadataItem>(1);
+            metaItems = new ArrayList<FxMetadata.FxMetadataItem>(5);
+            Map<String, Object> properties;
+            try {
+                final AudioFileFormat baseFileFormat = AudioSystem.getAudioFileFormat(file);
+                final AudioFormat baseFormat = baseFileFormat.getFormat();
+
+                // TAudioFileFormat properties
+                if (baseFileFormat instanceof TAudioFileFormat) {
+                    properties = baseFileFormat.properties();
+                    // SAMPLERATE
+                    Integer bitrate = properties.get("mp3.frequency.hz") != null ? (Integer) properties.get("mp3.frequency.hz") : 0;
+                    if (bitrate != 0)
+                        metaItems.add(new FxMetadata.FxMetadataItem("samplerate", String.valueOf(bitrate)));
+
+                    // TITLE
+                    String title = properties.get("title") != null ? (String) properties.get("title") : null;
+                    if (title != null)
+                        metaItems.add(new FxMetadata.FxMetadataItem("songtitle", title));
+
+                    // ARTIST
+                    String artist = properties.get("author") != null ? (String) properties.get("author") : null;
+                    if (artist != null)
+                        metaItems.add(new FxMetadata.FxMetadataItem("artist", artist));
+
+                    // ALBUM
+                    String album = properties.get("album") != null ? (String) properties.get("album") : null;
+                    if (album != null)
+                        metaItems.add(new FxMetadata.FxMetadataItem("album", album));
+
+                    // CHANNELS
+                    Integer channels = properties.get("mp3.channels") != null ? (Integer) properties.get("mp3.channels") : null;
+                    if (channels != null)
+                        metaItems.add(new FxMetadata.FxMetadataItem("channels", String.valueOf(channels)));
+
+                    // LENGTH / DURATION
+                    length = properties.get("duration") != null ? (Long) properties.get("duration") : 0L;
+
+                    // ENCODING
+                    String encoding = properties.get("mp3.version.encoding") != null ? (String) properties.get("mp3.version.encoding") : null;
+                    if (encoding != null)
+                        metaItems.add(new FxMetadata.FxMetadataItem("encoding", encoding));
+
+                    // YEAR
+                    String year = properties.get("date") != null ? (String) properties.get("date") : null;
+                    if (year != null)
+                        metaItems.add(new FxMetadata.FxMetadataItem("year", year));
+
+                    // GENRE
+                    String genre = properties.get("mp3.id3tag.genre") != null ? (String) properties.get("mp3.id3tag.genre") : null;
+                    if (genre != null)
+                        metaItems.add(new FxMetadata.FxMetadataItem("genre", genre));
+
+                    // COMMENT
+                    String comment = properties.get("comment") != null ? (String) properties.get("comment") : null;
+                    if (comment != null)
+                        metaItems.add(new FxMetadata.FxMetadataItem("audiofilecomment", new String(FxSharedUtils.getBytes(comment))));
+
+                    // COPYRIGHT
+                    String copyright = properties.get("copyright") != null ? (String) properties.get("copyright") : null;
+                    if (copyright != null)
+                        metaItems.add(new FxMetadata.FxMetadataItem("copyright", new String(FxSharedUtils.getBytes(copyright))));
+                }
+                // TAudioFormat properties
+                if (baseFormat instanceof TAudioFormat) {
+                    properties = baseFormat.properties();
+                    // bitrate
+                    Integer bitrate = properties.get("bitrate") != null ? (Integer) properties.get("bitrate") : null;
+                    if (bitrate != null)
+                        metaItems.add(new FxMetadata.FxMetadataItem("bps", String.valueOf(bitrate)));
+
+                    // variable bit rate flag
+                    Boolean vbr = properties.get("vbr") != null ? (Boolean) properties.get("vbr") : null;
+                    if (vbr != null)
+                        metaItems.add(new FxMetadata.FxMetadataItem("vbr", String.valueOf(vbr)));
+                }
+
+            } catch (Exception e) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("An error occurred while reading the mp3 properties", e);
+                }
+            }
         }
 
         /**

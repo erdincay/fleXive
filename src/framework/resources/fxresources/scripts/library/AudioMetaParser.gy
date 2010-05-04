@@ -44,90 +44,80 @@ import com.flexive.shared.value.*
 
 def binValue
 if (binding.variables.containsKey("binaryDescriptor"))
-  binValue = binaryDescriptor != null ? binaryDescriptor : content.getPropertyData("/File").value.defaultTranslation
+    binValue = binaryDescriptor != null ? binaryDescriptor : content.getPropertyData("/File").value.defaultTranslation
 else
-  binValue = content.getPropertyData("/File").value.defaultTranslation
+    binValue = content.getPropertyData("/File").value.defaultTranslation
 
 if (binValue.metadata == null || binValue.metadata.length() < 20) {
-  println "No metadata present for audio file to process!"
-  //ensure that the filename is set, else the file can not be saved
-  if (!content.containsValue("/MIMETYPE"))
-    content.setValue("/MIMETYPE", new FxString(false, (String) binValue.mimeType))
-  return
+    println "No metadata present for audio file to process!"
+    //ensure that the filename is set, else the file can not be saved
+    if (!content.containsValue("/MIMETYPE"))
+        content.setValue("/MIMETYPE", new FxString(false, (String) binValue.mimeType))
+    return
 }
 
 
 void process(cmap, key, rawvalue) {
-  if (rawvalue == null || rawvalue.toString().trim().length() == 0)
-    return
-  def value = rawvalue.toString()
-  if (value.endsWith('.'))
-    value = value.substring(0, value.length() - 1);
-  if (!cmap.containsKey(key))
-    cmap[key] = value
-  else
-    cmap[key] += ' ' + value
+    if (rawvalue == null || rawvalue.toString().trim().length() == 0)
+        return
+    def value = rawvalue.toString()
+    if (value.endsWith('.'))
+        value = value.substring(0, value.length() - 1);
+    if (!cmap.containsKey(key))
+        cmap[key] = value
+    else
+        cmap[key] += ' ' + value
 }
 
 try {
-  // println "Meta data (first 20 chars): ${binValue.metadata.substring(0, 20)}...";
-  def meta = new XmlSlurper().parseText(binValue.metadata);
-  def cmap = [:]
-  def java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+    // println "Meta data (first 20 chars): ${binValue.metadata.substring(0, 20)}...";
+    def meta = new XmlSlurper().parseText(binValue.metadata);
+    def cmap = [:]
+    def java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy")
 
-  process(cmap, 'String|Caption', binValue.name)
-  process(cmap, 'String|Length', meta.audioData.length)
-  process(cmap, 'LargeNumber|Durationmicros', meta.audioData.durationmicros)
-  process(cmap, 'Double|Samplerate', meta.meta.find { it.@key == 'samplerate'})
-  process(cmap, 'String|Encoding', meta.meta.find { it.@key == 'encoding'})
-  process(cmap, 'Number|Channels', meta.meta.find { it.@key == 'channels'})
-  // TODO: id3 tag / ogg comment extraction
+    process(cmap, 'String|Caption', binValue.name)
+    process(cmap, 'String|Length', meta.audioData.length)
+    process(cmap, 'LargeNumber|Durationmicros', meta.audioData.durationmicros)
+    process(cmap, 'Double|Samplerate', meta.meta.find { it.@key == 'samplerate'})
+    process(cmap, 'String|Encoding', meta.meta.find { it.@key == 'encoding'})
+    process(cmap, 'Number|Channels', meta.meta.find { it.@key == 'channels'})
+    // id3 tag / ogg comment metadata extraction
+    process(cmap, 'String|MetaData/SongTitle', meta.meta.find {it.@key == 'songtitle'})
+    process(cmap, 'String|MetaData/Artist', meta.meta.find {it.@key == 'artist'})
+    process(cmap, 'String|MetaData/Album', meta.meta.find {it.@key == 'album'})
+    process(cmap, 'String|MetaData/Genre', meta.meta.find {it.@key == 'genre'})
+    process(cmap, 'Number|MetaData/Year', meta.meta.find {it.@key == 'year'})
+    process(cmap, 'String|MetaData/AudioFileComment', meta.meta.find {it.@key == 'audiofilecomment'})
+    process(cmap, 'Number|MetaData/Bps', meta.meta.find {it.@key == 'bps'})
+    process(cmap, 'Boolean|MetaData/Vbr', meta.meta.find {it.@key == 'vbr'})
 
-  // traverse metadata 
-  cmap.each() {key, value ->
-    def _type = key.split('\\|')[0]
-    def fxvalue
-    key = key.split("\\|")[1]
+    // traverse metadata
+    cmap.each() {key, value ->
+        def _type = key.split('\\|')[0]
+        def fxvalue
+        key = key.split("\\|")[1]
 
-    switch (_type) {
-      case "String": fxvalue = new FxString(key == "Caption", value); break
-      case "Number": fxvalue = new FxNumber(false, Integer.parseInt(value)); break
-      case "LargeNumber": fxvalue = new FxLargeNumber(false, Long.parseLong(value)); break
-      case "Double": fxvalue = new FxDouble(false, Double.parseDouble(value)); break
-      case "DateTime": fxvalue = new FxDateTime(false, sdf.parse(value)); break
-      case "SelectList":
-        if (key == "Compression") {
-          try {
-            if (value.startsWith("PNG"))
-              value = "PNG"
-            fxvalue = new FxSelectOne(false, compList.getItemByData(value.toUpperCase()))
-          } catch (Throwable t) {
-            println "Error setting select list item: " + t.message
-            fxvalue = null
-          }
+        switch (_type) {
+            case "String": fxvalue = new FxString(key == "Caption", (String)value); break
+            case "Number": fxvalue = new FxNumber(false, Integer.parseInt((String)value)); break
+            case "LargeNumber": fxvalue = new FxLargeNumber(false, Long.parseLong((String)value)); break
+            case "Double": fxvalue = new FxDouble(false, Double.parseDouble((String)value)); break
+            case "Date": fxvalue = new FxDate(false, sdf.parse((String)value)); break;
+            case "Boolean": fxvalue = new FxBoolean(false, Boolean.parseBoolean((String)value)); break
         }
-        if (key == "MetaData/Orientation") {
-          try {
-            fxvalue = new FxSelectOne(false, orientList.getItemByData(value.toUpperCase()))
-          } catch (Throwable t) {
-            println "Error setting select list item: " + t.message
-            fxvalue = null
-          }
+
+        try {
+            content.setValue("/" + key, fxvalue);
+        } catch (Exception e) {
+            System.err.println("Failed to process metadata for /$key (ignored): " + e.getMessage())
         }
     }
 
-    try {
-      content.setValue("/" + key, fxvalue);
-    } catch (Exception e) {
-      System.err.println("Failed to process metadata for /$key (ignored): " + e.getMessage())
-    }
-  }
+    if (!content.containsValue("/MIMETYPE"))
+        content.setValue("/MIMETYPE", new FxString(false, (String) binValue.mimeType))
 
-  if (!content.containsValue("/MIMETYPE"))
-    content.setValue("/MIMETYPE", new FxString(false, (String) binValue.mimeType))
-
-  return content
+    return content
 
 } catch (Exception e) {
-  System.err.println("Failed to process metadata (ignored): " + e.getMessage())
+    System.err.println("Failed to process metadata (ignored): " + e.getMessage())
 }
