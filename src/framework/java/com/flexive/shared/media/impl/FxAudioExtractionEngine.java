@@ -38,11 +38,18 @@ import javazoom.spi.vorbis.sampled.file.VorbisAudioFileFormat;
 import javazoom.spi.vorbis.sampled.file.VorbisAudioFormat;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.kc7bfi.jflac.FLACDecoder;
+import org.kc7bfi.jflac.FrameListener;
+import org.kc7bfi.jflac.frame.Frame;
+import org.kc7bfi.jflac.metadata.Metadata;
+import org.kc7bfi.jflac.metadata.StreamInfo;
 import org.tritonus.share.sampled.TAudioFormat;
 import org.tritonus.share.sampled.file.TAudioFileFormat;
 
 import javax.sound.sampled.*;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -93,7 +100,7 @@ public class FxAudioExtractionEngine {
          * Ctor
          *
          * @param mimeType the mime type as a String
-         * @param file the audio file
+         * @param file     the audio file
          */
         AudioExtractor(String mimeType, File file) {
             this.mimeType = FxMimeType.getMimeType(mimeType);
@@ -334,10 +341,74 @@ public class FxAudioExtractionEngine {
         }
 
         /**
-         * Extract flac audio data using JFlac
+         * Extract flac audio data using the JFlac library
+         *
+         * - still need to check out how to get remaining data (duration, etc.)
          */
         private void extractFlacAudioData() {
-            metaItems = new ArrayList<FxMetadata.FxMetadataItem>(1);
+            metaItems = new ArrayList<FxMetadata.FxMetadataItem>(5);
+            // Map<String, Object> properties;
+            InputStream audioInStream = null;
+            final AudioFormat audioFormat;
+            try {
+                audioInStream = new FileInputStream(file);
+                final FlacAudioExtractor audioExtr = new FlacAudioExtractor();
+                audioExtr.analyse(audioInStream);
+
+                final StreamInfo streamInfo = audioExtr.getStreamInfo();
+                audioFormat = streamInfo.getAudioFormat();
+
+                int samplerate = streamInfo.getSampleRate();
+                metaItems.add(new FxMetadata.FxMetadataItem("samplerate", String.valueOf(samplerate)));
+                int channels = streamInfo.getChannels();
+                metaItems.add(new FxMetadata.FxMetadataItem("channels", String.valueOf(channels)));
+
+                // ENCODING
+                metaItems.add(new FxMetadata.FxMetadataItem("encoding", audioFormat.getEncoding().toString()));
+
+            } catch (Exception e) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("An error occurred decoding the FLAC audio file", e);
+                }
+            } finally {
+                FxSharedUtils.close(audioInStream);
+            }
+        }
+
+        /**
+         * The Flac file audio extractor
+         */
+        class FlacAudioExtractor implements FrameListener {
+
+            private StreamInfo streamInfo;
+
+            FlacAudioExtractor() {
+            }
+
+            void analyse(InputStream audioInStream) throws Exception {
+                FLACDecoder decoder = new FLACDecoder(audioInStream);
+                decoder.addFrameListener(this);
+                decoder.decode();
+            }
+
+            @Override
+            public void processMetadata(Metadata metadata) {
+                if (metadata instanceof StreamInfo) {
+                    streamInfo = (StreamInfo) metadata;
+                }
+            }
+
+            @Override
+            public void processFrame(Frame frame) {
+            }
+
+            @Override
+            public void processError(String s) {
+            }
+
+            public StreamInfo getStreamInfo() {
+                return streamInfo;
+            }
         }
 
         public long getLength() {
