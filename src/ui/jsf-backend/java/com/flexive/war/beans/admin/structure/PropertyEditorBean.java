@@ -1212,6 +1212,7 @@ public class PropertyEditorBean implements ActionBean, Serializable {
 
         // retrieve edited options
         List<FxStructureOption> newOptions = optionWrapper.asFxStructureOptionList(optionWrapper.getAssignmentOptions());
+        newOptions.addAll(assignment.getOptions());
         // populate list of removed options
         for(FxStructureOption oldOpt : assignment.getOptions()) {
             if(!FxStructureOption.hasOption(oldOpt.getKey(), newOptions) || !oldOpt.isValid())
@@ -1289,12 +1290,15 @@ public class PropertyEditorBean implements ActionBean, Serializable {
 
         // retrieve edited options
         List<FxStructureOption> newOptions = optionWrapper.asFxStructureOptionList(optionWrapper.getStructureOptions());
+        newOptions.addAll(property.getOptions());
         // populate list of removed options
         for(FxStructureOption oldOpt : property.getOptions()) {
-            if(!FxStructureOption.hasOption(oldOpt.getKey(), newOptions) || !oldOpt.isValid())
-                removeOptions.add(oldOpt);
+            if(!FxStructureOption.hasOption(oldOpt.getKey(), newOptions) || !oldOpt.isValid()) {
+                if(!removeOptions.contains(oldOpt))
+                    removeOptions.add(oldOpt);
+            }
             // invalid options
-            if(!oldOpt.isValid())
+            if(!oldOpt.isValid() && !invalidOptions.contains(oldOpt))
                 invalidOptions.add(oldOpt);
         }
         //add edited options (checks if they are set)
@@ -1302,8 +1306,10 @@ public class PropertyEditorBean implements ActionBean, Serializable {
             if(o.isValid())
                 property.setOption(o.getKey(), o.isOverridable(), o.getValue());
             else { // remove invalid options from the optionwrapper
-                removeOptions.add(o);
-                invalidOptions.add(o);
+                if(!removeOptions.contains(o))
+                    removeOptions.add(o);
+                if(!invalidOptions.contains(o))
+                    invalidOptions.add(o);
             }
         }
         // remove operation
