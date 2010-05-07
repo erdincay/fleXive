@@ -82,7 +82,7 @@ public class FxAudioExtractionEngine {
      * @throws FxApplicationException on errors
      */
     public static FxMetadata identify(String mimeType, File file) throws FxApplicationException {
-        final AudioExtractor extractor = new AudioExtractor(mimeType, file);
+        final AudioExtractorImpl extractor = new AudioExtractorImpl(mimeType, file);
         extractor.extractAudioData();
 
         return new FxAudioMetaDataImpl(mimeType, file.getName(), extractor.getMetaItems(), extractor.getLength());
@@ -91,7 +91,7 @@ public class FxAudioExtractionEngine {
     /**
      * Inner class to deal with the actual audio data extraction
      */
-    static class AudioExtractor {
+    private static class AudioExtractorImpl {
         private long length = 0L;
         private FxMimeType mimeType;
         private File file;
@@ -103,7 +103,7 @@ public class FxAudioExtractionEngine {
          * @param mimeType the mime type as a String
          * @param file     the audio file
          */
-        AudioExtractor(String mimeType, File file) {
+        AudioExtractorImpl(String mimeType, File file) {
             this.mimeType = FxMimeType.getMimeType(mimeType);
             this.file = file;
         }
