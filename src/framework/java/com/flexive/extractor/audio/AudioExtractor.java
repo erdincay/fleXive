@@ -69,9 +69,9 @@ import java.util.Map;
  * @author Christopher Blasnik, cblasnik@flexive.com, unique computing solutions gmbh
  * @since 3.1.2
  */
-public class FxAudioExtractionEngine {
+public class AudioExtractor {
 
-    private static final Log LOG = LogFactory.getLog(FxAudioExtractionEngine.class);
+    private static final Log LOG = LogFactory.getLog(AudioExtractor.class);
 
     /**
      * Identify a file, returning metadata

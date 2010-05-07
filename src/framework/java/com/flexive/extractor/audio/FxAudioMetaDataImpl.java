@@ -31,7 +31,6 @@
  ***************************************************************/
 package com.flexive.extractor.audio;
 
-import com.flexive.extractor.audio.FxAudioMetadata;
 import com.flexive.shared.media.FxMediaType;
 
 import javax.xml.stream.XMLStreamException;
@@ -46,7 +45,7 @@ import static com.flexive.shared.FxXMLUtils.writeSimpleTag;
  *
  * @author Christopher Blasnik, cblasnik@flexive.com, unique computing solutions gmbh
  */
-public class FxAudioMetaDataImpl extends FxAudioMetadata {
+class FxAudioMetaDataImpl extends FxAudioMetadata {
 
     private String mimeType;
     private String fileName;

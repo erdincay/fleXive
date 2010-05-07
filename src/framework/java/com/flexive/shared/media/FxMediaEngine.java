@@ -54,7 +54,7 @@ import java.io.OutputStream;
 public class FxMediaEngine {
     private static final Log LOG = LogFactory.getLog(FxMediaEngine.class);
 
-    private static final String CLS_AUDIO_EXTRACTOR = "com.flexive.extractor.audio.FxAudioExtractionEngine";
+    private static final String CLS_AUDIO_EXTRACTOR = "com.flexive.extractor.audio.AudioExtractor";
 
 
     /**
