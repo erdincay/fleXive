@@ -76,6 +76,11 @@ class FxAudioMetaDataImpl extends FxAudioMetadata {
         return FxMediaType.Audio;
     }
 
+    @Override
+    public boolean isAudioMetadata() {
+        return true;
+    }
+
     /**
      * {@inheritDoc}
      */

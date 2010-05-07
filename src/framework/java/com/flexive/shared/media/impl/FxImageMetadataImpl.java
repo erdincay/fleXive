@@ -118,6 +118,14 @@ public class FxImageMetadataImpl extends FxImageMetadata {
     /**
      * {@inheritDoc}
      */
+    @Override
+    public boolean isImageMetadata() {
+        return true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     public String getMimeType() {
         return mimeType;
     }

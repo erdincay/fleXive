@@ -31,7 +31,6 @@
  ***************************************************************/
 package com.flexive.shared.media;
 
-import com.flexive.extractor.audio.FxAudioMetadata;
 import com.flexive.shared.exceptions.FxApplicationException;
 import org.apache.commons.lang.StringUtils;
 
@@ -125,7 +124,7 @@ public abstract class FxMetadata {
      * @since 3.1
      */
     public boolean isImageMetadata() {
-        return this instanceof FxImageMetadata;
+        return false;
     }
 
     /**
@@ -135,20 +134,7 @@ public abstract class FxMetadata {
      * @since 3.1.2
      */
     public boolean isAudioMetadata() {
-        return this instanceof FxAudioMetadata;
-    }
-
-    /**
-     * Get this metadata object as an FxImageMetadata instance
-     *
-     * @return FxAudioMetadata instance
-     * @throws FxApplicationException on errors
-     * @since 3.1.2
-     */
-    public FxAudioMetadata asAudioMetadata() throws FxApplicationException {
-        if(this instanceof FxAudioMetadata)
-            return (FxAudioMetadata)this;
-        throw new FxApplicationException("ex.general.wrongClass", this.getClass().getCanonicalName(), FxAudioMetadata.class.getCanonicalName());
+        return false;
     }
 
     /**
