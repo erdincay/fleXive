@@ -29,9 +29,9 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the file!
  ***************************************************************/
-package com.flexive.shared.media.impl;
+package com.flexive.extractor.audio;
 
-import com.flexive.shared.media.FxAudioMetadata;
+import com.flexive.extractor.audio.FxAudioMetadata;
 import com.flexive.shared.media.FxMediaType;
 
 import javax.xml.stream.XMLStreamException;

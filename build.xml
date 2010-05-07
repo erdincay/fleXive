@@ -36,6 +36,7 @@
 
 	<property name="sqlparser.jar" value="flexive-sqlParser.jar"/>
 	<property name="extractor.jar" value="flexive-extractor.jar"/>
+    <property name="extractor-audio.jar" value="flexive-extractor-audio.jar"/>
 	<property name="extractor-documents.jar" value="flexive-extractor-documents.jar"/>
     <property name="flatstorage.jar" value="flexive-flatstorage.jar"/>
 
@@ -295,6 +296,7 @@
 		<safeDelete file="${flexive.lib.dir}/${sqlparser.jar}"/>
 		<safeDelete file="${flexive.lib.dir}/${extractor.jar}"/>
 		<safeDelete file="${flexive.lib.dir}/${extractor-documents.jar}"/>
+        <safeDelete file="${flexive.lib.dir}/${extractor-audio.jar}"/>
 	</target>
 
 	<target name="gen.parsers" depends="clean.parsers, prepare" description="Generate SQL and HTML parsers">
@@ -324,11 +326,18 @@
 				<attribute name="Main-Class" value="com.flexive.extractor.htmlExtractor.consoleTest"/>
 			</manifest>
             <fileset dir="${build.framework.classes.dir}">
-				<include name="com/flexive/extractor/**"/>
+				<include name="com/flexive/extractor/*"/>
+                <include name="com/flexive/extractor/html/*"/>
 			</fileset>
         </jar>
         <jar jarfile="${flexive.lib.dir}/${extractor-documents.jar}">
             <fileset  dir="${flexive.resources.framework.dir}/extractor-documents-resources" includes="**/*"/>
+        </jar>
+        <jar jarfile="${flexive.lib.dir}/${extractor-audio.jar}">
+            <fileset  dir="${flexive.resources.framework.dir}/extractor-audio-resources" includes="**/*"/>
+            <fileset dir="${build.framework.classes.dir}">
+				<include name="com/flexive/extractor/audio/**"/>
+            </fileset>
         </jar>
 	</target>
 
@@ -633,7 +642,7 @@
             <fileset dir="${flexive.drop.dir}" includes="*.jar" excludes="*-ejb.jar,*.war,*.par"/>
 
             <!-- Shared libraries -->
-            <fileset dir="${flexive.lib.dir}" includes="${sqlparser.jar},${extractor.jar},${extractor-documents.jar},${flatstorage.jar},cglib*.jar,fxStream.jar,commons-io-1.1.jar,sanselan.jar,quartz*.jar,PDFRenderer.jar,commons-*.jar,jbosscache-core.jar,jgroups.jar,jboss-common-core-42-compat.jar,urlrewrite-*.jar,google-collect*.jar,jsr173_1.0_api.jar,jtidy.jar,mime-util*,slf4j*,icepdf-core.jar"/>
+            <fileset dir="${flexive.lib.dir}" includes="${sqlparser.jar},${extractor.jar},${extractor-documents.jar},${extractor-audio.jar},${flatstorage.jar},cglib*.jar,fxStream.jar,commons-io-1.1.jar,sanselan.jar,quartz*.jar,PDFRenderer.jar,commons-*.jar,jbosscache-core.jar,jgroups.jar,jboss-common-core-42-compat.jar,urlrewrite-*.jar,google-collect*.jar,jsr173_1.0_api.jar,jtidy.jar,mime-util*,slf4j*,icepdf-core.jar"/>
             <fileset dir="${flexive.lib.dir}/groovy" includes="*.jar"/>
             <fileset dir="${flexive.lib.dir}/audio" includes="*.jar"/>
             <fileset dir="${build.ui.jar.dir}" includes="*.jar" excludes="flexive-plugin-jsf-testrunner.jar"/>
@@ -837,6 +846,7 @@
 		<copy file="${flexive.lib.dir}/${extractor.jar}" tofile="${flexive.dist.lib.dir}/${extractor.jar}"/>
         <copy file="${flexive.lib.dir}/${flatstorage.jar}" tofile="${flexive.dist.lib.dir}/${flatstorage.jar}"/>
 		<copy file="${flexive.lib.dir}/${extractor-documents.jar}" tofile="${flexive.dist.lib.dir}/${extractor-documents.jar}"/>
+        <copy file="${flexive.lib.dir}/${extractor-audio.jar}" tofile="${flexive.dist.lib.dir}/${extractor-audio.jar}"/>
 		<copy file="${flexive.build.framework.jar.dir}/flexive-ant.jar" tofile="${flexive.dist.lib.dir}/flexive-ant.jar"/>
         <copy file="${flexive.build.framework.jar.dir}/flexive-shared.jar" tofile="${flexive.dist.lib.dir}/flexive-shared.jar"/>
         <copy todir="${flexive.dist.lib.dir}">

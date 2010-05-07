@@ -29,7 +29,9 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the file!
  ***************************************************************/
-package com.flexive.shared.media;
+package com.flexive.extractor.audio;
+
+import com.flexive.shared.media.FxMetadata;
 
 /**
  * FxMetaData for audio files

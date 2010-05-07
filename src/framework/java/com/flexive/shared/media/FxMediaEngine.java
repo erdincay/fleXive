@@ -32,11 +32,11 @@
 package com.flexive.shared.media;
 
 import com.flexive.shared.exceptions.FxApplicationException;
-import com.flexive.shared.media.impl.FxAudioExtractionEngine;
 import com.flexive.shared.media.impl.FxMediaImageMagickEngine;
 import com.flexive.shared.media.impl.FxMediaNativeEngine;
 import com.flexive.shared.media.impl.FxUnknownMetadataImpl;
 import com.flexive.shared.stream.BinaryDownloadCallback;
+import java.lang.reflect.Method;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -53,6 +53,8 @@ import java.io.OutputStream;
  */
 public class FxMediaEngine {
     private static final Log LOG = LogFactory.getLog(FxMediaEngine.class);
+
+    private static final String CLS_AUDIO_EXTRACTOR = "com.flexive.extractor.audio.FxAudioExtractionEngine";
 
 
     /**
@@ -127,18 +129,51 @@ public class FxMediaEngine {
                 } else
                     LOG.error(e);
             }
-        // audio file identification
         } else if(mimeType.startsWith("audio")) {
-            try {
-                return FxAudioExtractionEngine.identify(mimeType, file);
-            } catch (FxApplicationException e) {
-                if(LOG.isErrorEnabled()) {
-                    LOG.error(e);
-                }
+            // audio file identification (optional) - TODO: do the same for documents
+            // or make this really extensible
+            final FxMetadata meta = invokeIdentify(mimeType, file, CLS_AUDIO_EXTRACTOR);
+            if (meta != null) {
+                return meta;
             }
         }
         //last resort: unknown
         return new FxUnknownMetadataImpl(mimeType, file.getName());
+    }
+
+    /**
+     * Invoke the "identify" method on the given extractor class dynamically.
+     *
+     * @param mimeType      the binary mime type
+     * @param file          the binary file
+     * @param extractorClassName    the fully qualified extractor class name
+     * @return              the extracted meta data, or null if the extractor is not available
+     *                      or the invokation threw an exception
+     */
+    private static FxMetadata invokeIdentify(String mimeType, File file, String extractorClassName) {
+        try {
+            final Class<?> cls = Class.forName(extractorClassName);
+            final Method idMethod = cls.getMethod("identify", String.class, File.class);
+            try {
+                return (FxMetadata) idMethod.invoke(null, mimeType, file);
+            } catch (Exception e) {
+                if (LOG.isErrorEnabled()) {
+                    LOG.error(e.getMessage(), e);
+                }
+                // error in extractor, fall through to unknown metadata
+                return null;
+            }
+        } catch (ClassNotFoundException e) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug(extractorClassName + " not available");
+            }
+            return null;
+        } catch (NoSuchMethodException e) {
+            if (LOG.isErrorEnabled()) {
+                LOG.error(e.getMessage(), e);
+            }
+            throw new IllegalArgumentException(e);
+        }
     }
 
     /**

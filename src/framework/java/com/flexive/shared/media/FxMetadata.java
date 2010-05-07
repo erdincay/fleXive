@@ -31,6 +31,7 @@
  ***************************************************************/
 package com.flexive.shared.media;
 
+import com.flexive.extractor.audio.FxAudioMetadata;
 import com.flexive.shared.exceptions.FxApplicationException;
 import org.apache.commons.lang.StringUtils;
 

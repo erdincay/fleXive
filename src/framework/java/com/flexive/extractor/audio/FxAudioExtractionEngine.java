@@ -29,11 +29,12 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the file!
  ***************************************************************/
-package com.flexive.shared.media.impl;
+package com.flexive.extractor.audio;
 
 import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.media.FxMetadata;
+import com.flexive.shared.media.impl.FxMimeType;
 import javazoom.spi.vorbis.sampled.file.VorbisAudioFileFormat;
 import javazoom.spi.vorbis.sampled.file.VorbisAudioFormat;
 import org.apache.commons.logging.Log;
