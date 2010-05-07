@@ -91,12 +91,14 @@ public class GenericColumnReference implements ResultColumnMapper<ResultColumnRe
         final String[] readColumns = entry.getReadColumns();
         final List<String> columns = new ArrayList<String>(readColumns.length);
         int ctr = 0;
+        final boolean emulateMultiValued;
         if (column.getSelectedObject().isMultivalued() && !isDirectSelectForMultivalued(sqlMapperFactory, column, dataType)) {
             // multivalued select, but database does not support direct select - select only ID and version
             final TableReference table = column.getSelectedObject().getTableReference();
             columns.add(FILTER_ALIAS + "." + table.getIdFilterColumn());
             columns.add(FILTER_ALIAS + "." + table.getVersionFilterColumn());
             index.increment(2);
+            emulateMultiValued = true;
         } else {
             // select all read columns
             for (String readColumn : readColumns) {
@@ -128,6 +130,7 @@ public class GenericColumnReference implements ResultColumnMapper<ResultColumnRe
                 );
                 index.increment();
             }
+            emulateMultiValued = false;
         }
         // select XPath
         // currently does not return a xpath prefix, because one row may match more than one content instance
@@ -142,7 +145,8 @@ public class GenericColumnReference implements ResultColumnMapper<ResultColumnRe
         // use base assignment for datatype checks
         final FxPropertyAssignment assignment = column.getSelectedObject().getBaseAssignment();
 
-        if (!xpath && assignment != null && assignment.getProperty().getDataType() == FxDataType.Binary) {
+        if (!xpath && assignment != null && assignment.getProperty().getDataType() == FxDataType.Binary
+                && !emulateMultiValued) {
             // select string-coded form of the BLOB properties
             select = DataSelector.selectBinary(columns.get(0))
                     + (includeResultAlias ? " AS " + column.getResultSetAlias() : "");

@@ -31,6 +31,7 @@
  ***************************************************************/
 package com.flexive.tests.embedded.persistence;
 
+import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxLanguage;
 
@@ -1485,12 +1486,18 @@ public class StructureTest {
         final FxTypeEdit type = FxTypeEdit.createNew("typeFastCreateTest").save();
         FxPK pk = null;
         try {
+            final FxEnvironment env = CacheAdmin.getEnvironment();
             type.addProperty("string", FxDataType.String1024).setMultiplicity(FxMultiplicity.MULT_1_1).save();
             type.addGroup("group1").setLabel(new FxString(true, "group label")).save();
             type.addProperty("group1/groupstring", FxDataType.String1024);
             type.addGroup("group1/group2");
             type.addProperty("group1/group2/group2string", FxDataType.String1024);
             type.addProperty("number", FxDataType.Number);
+            type.addSelectListProperty("country",
+                    env.getSelectList(FxSelectList.COUNTRIES),
+                    false
+            );
+            type.addReferenceProperty("documentref", env.getType(FxType.DOCUMENTFILE));
             FxPropertyAssignmentEdit fxpae = type.addProperty("test", FxDataType.HTML);
             fxpae.setMultiplicity(FxMultiplicity.MULT_0_1).save();
 

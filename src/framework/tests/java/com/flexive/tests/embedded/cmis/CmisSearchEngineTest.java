@@ -47,7 +47,13 @@ import com.flexive.shared.exceptions.FxAccountInUseException;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxLoginFailedException;
 import com.flexive.shared.exceptions.FxLogoutFailedException;
+import com.flexive.shared.exceptions.FxStreamException;
+import com.flexive.shared.interfaces.ContentEngine;
 import com.flexive.shared.search.FxPaths;
+import com.flexive.shared.structure.FxDataType;
+import com.flexive.shared.structure.FxMultiplicity;
+import com.flexive.shared.structure.FxPropertyAssignmentEdit;
+import com.flexive.shared.structure.FxSelectList;
 import com.flexive.shared.structure.FxSelectListItem;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.structure.FxTypeEdit;
@@ -56,14 +62,18 @@ import com.flexive.shared.tree.FxTreeNode;
 import com.flexive.shared.tree.FxTreeNodeEdit;
 import com.flexive.shared.tree.FxTreeRemoveOp;
 import com.flexive.shared.value.BinaryDescriptor;
+import com.flexive.shared.value.FxBinary;
 import com.flexive.shared.value.FxNoAccess;
 import com.flexive.shared.value.FxNumber;
+import com.flexive.shared.value.FxSelectOne;
+import com.flexive.shared.value.FxValue;
 import com.flexive.shared.value.SelectMany;
 import com.flexive.tests.embedded.FxTestUtils;
 import com.flexive.tests.embedded.TestUsers;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import java.io.ByteArrayInputStream;
 import org.apache.commons.lang.StringUtils;
 import static org.testng.Assert.*;
 import org.testng.annotations.AfterClass;
@@ -1067,6 +1077,51 @@ public class CmisSearchEngineTest {
                 getTreeEngine().remove(FxTreeMode.Edit, id, FxTreeRemoveOp.Remove, true);
             }
         }
+    }
+
+    @Test(groups = {"search", "cmis", "ejb"})
+    public void selectPropertyTest() throws FxApplicationException {
+        final CmisResultSet result = getCmisSearchEngine().search(
+                "SELECT cmis:objectId, selectOneSearchProp FROM SearchTest");
+        assertTrue(result.getRowCount() > 0, "No rows returned");
+        for (CmisResultRow row : result) {
+            final Object value = row.getColumn(2).getValue();
+            assertTrue(value != null, "Value was null");
+            assertTrue(value instanceof FxSelectListItem,
+                    "Unexpected return type: " + value.getClass());
+        }
+    }
+
+    @Test(groups = {"search", "cmis", "ejb"})
+    public void selectMultiBinaryTest() throws FxApplicationException {
+        // attempts to select a binary with max multiplicity > 1
+        try {
+            FxContext.startRunningAsSystem();
+            final FxTypeEdit type = FxTypeEdit.createNew("selectMultiBinaryTest").save();
+            final ContentEngine ce = EJBLookup.getContentEngine();
+            try {
+                type.addProperty("binaries", FxDataType.Binary).setMultiplicity(FxMultiplicity.MULT_0_N).save();
+
+                final FxContent co = ce.initialize(type.getId());
+                setBinaryProperty(co, "/binaries[1]", "abc".getBytes());
+                setBinaryProperty(co, "/binaries[2]", "def".getBytes());
+                ce.save(co);
+
+                final CmisResultSet result = getCmisSearchEngine().search(
+                        "SELECT * FROM " + type.getName()
+                );
+                assertTrue(result.getRowCount() > 0, "No rows returned");
+            } finally {
+                ce.removeForType(type.getId());
+                EJBLookup.getTypeEngine().remove(type.getId());
+            }
+        } finally {
+            FxContext.stopRunningAsSystem();
+        }
+    }
+
+    private void setBinaryProperty(final FxContent co, String parameter, byte[] bytes) throws FxStreamException {
+        co.setValue(parameter, new FxBinary(false, new BinaryDescriptor("test1", new ByteArrayInputStream(bytes))));
     }
 
     private List<Long> createTestFolderContents(String folderName) throws FxApplicationException {

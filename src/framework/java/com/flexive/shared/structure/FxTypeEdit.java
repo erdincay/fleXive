@@ -918,23 +918,60 @@ public class FxTypeEdit extends FxType implements Serializable {
      * @since 3.1
      */
     public FxPropertyAssignmentEdit addProperty(String name, FxDataType dataType) throws FxApplicationException {
+        final FxPropertyEdit prop = createDefaultProperty(name, dataType);
+        return addProperty(name, prop);
+    }
+
+    /**
+     * Add a new select list assignment to this type.
+     * The assignment is saved instantly and is returned to the caller.
+     *
+     * @param name     the assignment name
+     * @param referencedList the referenced select list
+     * @param selectMany true to enable multiple selection
+     * @return the created assignment
+     * @throws FxApplicationException on errors
+     * @since 3.1.2
+     */
+    public FxPropertyAssignmentEdit addSelectListProperty(String name, FxSelectList referencedList, boolean selectMany)
+            throws FxApplicationException {
+        final FxPropertyEdit prop = createDefaultProperty(
+                name,
+                selectMany ? FxDataType.SelectMany : FxDataType.SelectOne
+        );
+        prop.setReferencedList(referencedList);
+        return addProperty(name, prop);
+        
+    }
+
+    /**
+     * Add a reference assignment to this type.
+     * The assignment is saved instantly and is returned to the caller.
+     *
+     * @param name     the assignment name
+     * @param referencedType the referenced type
+     * @return the created assignment
+     * @throws FxApplicationException on errors
+     * @since 3.1.2
+     */
+    public FxPropertyAssignmentEdit addReferenceProperty(String name, FxType referencedType)
+            throws FxApplicationException {
+        final FxPropertyEdit prop = createDefaultProperty(name, FxDataType.Reference);
+        prop.setReferencedType(referencedType);
+        return addProperty(name, prop);
+    }
+
+    private FxPropertyEdit createDefaultProperty(String name, FxDataType dataType) {
         final String alias = getAssignmentAlias(name);
         // create property
-        final FxPropertyEdit prop = FxPropertyEdit.createNew(
-                alias,
-                new FxString(true, alias),
-                new FxString(true, ""),
-                FxMultiplicity.MULT_0_1,
-                CacheAdmin.getEnvironment().getDefaultACL(ACLCategory.STRUCTURE),
-                dataType
-        );
+        final FxPropertyEdit prop = FxPropertyEdit.createNew(alias, new FxString(true, alias), new FxString(true, ""), FxMultiplicity.MULT_0_1, CacheAdmin.getEnvironment().getDefaultACL(ACLCategory.STRUCTURE), dataType);
         prop.setAutoUniquePropertyName(true);
         prop.setOptions(defaultOptions);
-        final long propId = EJBLookup.getAssignmentEngine().createProperty(
-                getId(),
-                prop,
-                getAssignmentParent(name)
-        );
+        return prop;
+    }
+
+    private FxPropertyAssignmentEdit addProperty( String name, final FxPropertyEdit prop) throws FxApplicationException {
+        final long propId = EJBLookup.getAssignmentEngine().createProperty(getId(), prop, getAssignmentParent(name));
         return CacheAdmin.getEnvironment().getPropertyAssignment(propId).asEditable();
     }
 
