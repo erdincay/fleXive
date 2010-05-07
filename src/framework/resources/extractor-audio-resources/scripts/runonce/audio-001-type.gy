@@ -509,5 +509,4 @@ se.createScriptFromDropLibrary("flexive-extractor-audio",
 
 if (!FxSharedUtils.isMinimalRunOnceScripts()) {
     addTypeIcon(FxType.AUDIO, "type-audio.png")
-    EJBLookup.divisionConfigurationEngine.installBinary(BinaryDescriptor.SYS_AUDIO, "binaries/mime-audio.png");
 }

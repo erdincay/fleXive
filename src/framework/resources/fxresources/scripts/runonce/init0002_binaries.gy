@@ -43,6 +43,7 @@ void installThumbnails() {
         return;
     }
     dc.installBinary(BinaryDescriptor.SYS_NOACCESS, "thumbs/noaccess.png");
+    dc.installBinary(BinaryDescriptor.SYS_AUDIO, "thumbs/mime-audio.png");
     dc.installBinary(BinaryDescriptor.SYS_DOC, "thumbs/mime-doc.png");
     dc.installBinary(BinaryDescriptor.SYS_ICAL, "thumbs/mime-ical.png");
     dc.installBinary(BinaryDescriptor.SYS_INFO, "thumbs/mime-info.png");
