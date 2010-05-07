@@ -392,18 +392,15 @@ public class AudioExtractor {
                 decoder.decode();
             }
 
-            @Override
             public void processMetadata(Metadata metadata) {
                 if (metadata instanceof StreamInfo) {
                     streamInfo = (StreamInfo) metadata;
                 }
             }
 
-            @Override
             public void processFrame(Frame frame) {
             }
 
-            @Override
             public void processError(String s) {
             }
 

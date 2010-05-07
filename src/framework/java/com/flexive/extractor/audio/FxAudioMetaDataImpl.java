@@ -36,7 +36,7 @@ import com.flexive.shared.media.FxMediaType;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import org.apache.commons.lang.time.DurationFormatUtils;
 
 import static com.flexive.shared.FxXMLUtils.writeSimpleTag;
 
@@ -105,17 +105,7 @@ class FxAudioMetaDataImpl extends FxAudioMetadata {
      */
     @Override
     public String getLengthAsTimeString() {
-        final long hrs = TimeUnit.MICROSECONDS.toHours(length);
-        final long mins = TimeUnit.MICROSECONDS.toMinutes(length);
-        final long secs = TimeUnit.MICROSECONDS.toSeconds(length);
-        final long millis = TimeUnit.MICROSECONDS.toMillis(length);
-
-        return String.format("%02d:%02d:%02d.%04d",
-                hrs,
-                mins - TimeUnit.HOURS.toMinutes(hrs),
-                secs - TimeUnit.MINUTES.toSeconds(mins),
-                millis - TimeUnit.SECONDS.toMillis(secs)
-        );
+        return DurationFormatUtils.formatDurationHMS(length / 1000L);
     }
 
     /**
