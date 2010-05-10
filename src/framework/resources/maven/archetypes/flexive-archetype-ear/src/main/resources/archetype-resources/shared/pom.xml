@@ -18,12 +18,19 @@
             <artifactId>flexive-extractor-documents</artifactId>
         </dependency>
 
+        <!-- Disable this dependency if you don't need to process audio documents (MP3, OGG, Flac, ...) -->
+        <dependency>
+            <groupId>com.flexive</groupId>
+            <artifactId>flexive-extractor-audio</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>javax.ejb</groupId>
             <artifactId>ejb-api</artifactId>
             <version>3.0</version>
             <scope>provided</scope>
         </dependency>
+        
         <dependency>
             <groupId>com.flexive</groupId>
             <artifactId>flexive-shared</artifactId>

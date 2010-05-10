@@ -52,8 +52,8 @@ public class FxMimeType implements Serializable {
 
     static {
         // MIME-type detection setup
-        MimeUtil.registerMimeDetector("eu.medsea.mimeutil.detector.ExtensionMimeDetector");
         MimeUtil.registerMimeDetector("eu.medsea.mimeutil.detector.MagicMimeMimeDetector");
+        MimeUtil.registerMimeDetector("eu.medsea.mimeutil.detector.ExtensionMimeDetector");
     }
 
     /**

@@ -84,6 +84,11 @@
             </dependency>
             <dependency>
                 <groupId>com.flexive</groupId>
+                <artifactId>flexive-extractor-audio</artifactId>
+                <version>${flexive.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.flexive</groupId>
                 <artifactId>flexive-h2</artifactId>
                 <version>${flexive.version}</version>
             </dependency>

@@ -36,6 +36,7 @@ import com.flexive.chemistry.webdav.ChemistryResourceFactory;
 import com.bradmcevoy.http.*;
 import com.bradmcevoy.http.exceptions.NotAuthorizedException;
 import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.media.impl.FxMimeType;
 import java.util.List;
 import org.apache.chemistry.Folder;
 
@@ -86,12 +87,13 @@ public class LockableFolder extends FolderResource implements LockableResource, 
     }
 
     @Override
-    protected String getDocumentType(List<String> mimeTypes) {
-        // TODO: the image/document switching should be implemented in the flexive repository
+    protected String getDocumentType(String name, byte[] header, List<String> mimeTypes) {
         if (mimeTypes.isEmpty()) {
             return BaseType.DOCUMENT.getId();
         } else {
-            return CacheAdmin.getEnvironment().getMimeTypeMatch(mimeTypes.get(0)).getName();
+            return CacheAdmin.getEnvironment().getMimeTypeMatch(
+                    FxMimeType.detectMimeType(header, name).toString()
+            ).getName();
         }
     }
 

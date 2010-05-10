@@ -271,19 +271,19 @@ public class FolderResource extends ObjectResource<Folder>
             result = handleTextDocument(peekStream, header, read, newName);
         }
         if (result == null) {
-            result = handleBinaryDocument(peekStream, length, contentType, newName);
+            result = handleBinaryDocument(peekStream, length, header, contentType, newName);
         }
         return result;
     }
 
-    protected Resource handleBinaryDocument(InputStream inputStream, Long length, String contentType, String newName) throws IOException {
+    protected Resource handleBinaryDocument(InputStream inputStream, Long length, byte[] header, String contentType, String newName) throws IOException {
 
         // split detected content types
         final List<String> mimeTypes = contentType == null
                 ? new ArrayList<String>(0)
                 : Arrays.asList(contentType.split(","));
 
-        final Document doc = getObject().newDocument(getDocumentType(mimeTypes));
+        final Document doc = getObject().newDocument(getDocumentType(newName, header, mimeTypes));
         try {
             doc.setName(newName);
             if (inputStream != null) {
@@ -301,10 +301,12 @@ public class FolderResource extends ObjectResource<Folder>
     /**
      * Return the CMIS document type for the given MIME type(s).
      *
+     * @parma name          the filename
+     * @param header        the first 256 bytes of the file
      * @param mimeTypes     the detected MIME type(s) of the content
      * @return              the CMIS document type to be used for creating a new instance
      */
-    protected String getDocumentType(List<String> mimeTypes) {
+    protected String getDocumentType(String name, byte[] header, List<String> mimeTypes) {
         return BaseType.DOCUMENT.getId();
     }
 
