@@ -72,7 +72,7 @@ new GroovyTypeBuilder().documentfile(
         useStepPermissions: true,
         useTypePermissions: true,
         usePermissions: true,
-        mimeType: "unknown/unknown") {
+        mimeType: "unknown/unknown,application/octet-stream,application/unknown") {
 
     caption(assignment: "ROOT/CAPTION")
     file(

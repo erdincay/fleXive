@@ -474,9 +474,9 @@ EJBLookup.resultPreferencesEngine.saveSystemDefault(
         new ResultPreferences(
                 [new ResultColumnInfo("@pk"),
                         new ResultColumnInfo("#" + FxType.DOCUMENT + "/caption"),
-                        new ResultColumnInfo("#" + FxType.DOCUMENT + "/createDate"),
-                        new ResultColumnInfo("#" + FxType.DOCUMENT + "/description"),
                         new ResultColumnInfo("#" + FxType.DOCUMENT + "/author"),
+                        new ResultColumnInfo("#" + FxType.DOCUMENT + "/pages"),
+                        new ResultColumnInfo("#" + FxType.DOCUMENT + "/createDate"),
                 ],
                 [new ResultOrderByInfo("#" + FxType.DOCUMENT + "/caption", SortDirection.ASCENDING)],
                 25, 0

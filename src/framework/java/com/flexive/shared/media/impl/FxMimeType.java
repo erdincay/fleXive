@@ -33,6 +33,10 @@ package com.flexive.shared.media.impl;
 
 import eu.medsea.mimeutil.MimeType;
 import eu.medsea.mimeutil.MimeUtil;
+import eu.medsea.mimeutil.detector.ExtensionMimeDetector;
+import eu.medsea.mimeutil.detector.MagicMimeMimeDetector;
+import eu.medsea.mimeutil.detector.OpendesktopMimeDetector;
+import eu.medsea.mimeutil.detector.WindowsRegistryMimeDetector;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -52,8 +56,13 @@ public class FxMimeType implements Serializable {
 
     static {
         // MIME-type detection setup
-        MimeUtil.registerMimeDetector("eu.medsea.mimeutil.detector.MagicMimeMimeDetector");
-        MimeUtil.registerMimeDetector("eu.medsea.mimeutil.detector.ExtensionMimeDetector");
+        MimeUtil.registerMimeDetector(MagicMimeMimeDetector.class.getCanonicalName());
+        // For Linux/OpenDesktop machines
+        MimeUtil.registerMimeDetector(OpendesktopMimeDetector.class.getCanonicalName());
+        // For Windows machines
+        MimeUtil.registerMimeDetector(WindowsRegistryMimeDetector.class.getCanonicalName());
+        // Last resort - use file extension
+        MimeUtil.registerMimeDetector(ExtensionMimeDetector.class.getCanonicalName());
     }
 
     /**
@@ -184,22 +193,26 @@ public class FxMimeType implements Serializable {
     @SuppressWarnings({"unchecked"})
     public static FxMimeType detectMimeType(byte[] header, String fileName) {
         MimeType mt;
+        
         // try and find the mimetype from the given file header
         Collection<MimeType> detected = MimeUtil.getMimeTypes(header);
         if (!detected.isEmpty()) {
-            mt = detected.iterator().next();
-            return new FxMimeType(mt.getMediaType(), mt.getSubType());
+            mt = MimeUtil.getMostSpecificMimeType(detected);
+            if (!"application/octet-stream".equals(mt.toString())) {
+                return new FxMimeType(mt.getMediaType(), mt.getSubType());
+            }
 
-        } else { // extension based detection
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Failed to detect file's mime type from header, trying a file extension match");
-            }
-            detected = MimeUtil.getMimeTypes(fileName);
-            if(detected.isEmpty()) {
-                return new FxMimeType(UNKNOWN);
-            }
-            mt = detected.iterator().next();
-            return new FxMimeType(mt.getMediaType(), mt.getSubType());
+        } 
+        
+        // extension based detection
+        if (LOG.isDebugEnabled()) {
+            LOG.debug("Failed to detect file's mime type from header, trying a file extension match");
         }
+        detected = MimeUtil.getMimeTypes(fileName);
+        if(detected.isEmpty()) {
+            return new FxMimeType(UNKNOWN);
+        }
+        mt = MimeUtil.getMostSpecificMimeType(detected);
+        return new FxMimeType(mt.getMediaType(), mt.getSubType());
     }
 }
