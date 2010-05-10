@@ -1028,8 +1028,13 @@ database.vendor=MySQL
             <maven-build-sources artifactId="flexive-plugin-jsf-feedbackPlugin" label="[fleXive] backend feedback plugin" srcdir="${flexive.base.ui.dir}/jsf-feedbackPlugin/src/java"/>
             <maven-build-sources artifactId="flexive-backend" label="[fleXive] backend application" srcdir="${flexive.src.ui.jsf.dir}"/>
 
-            <maven-build-sources artifactId="flexive-extractor" label="[fleXive] document extraction library" srcdir="${flexive.src.framework.dir}"
+            <maven-build-sources artifactId="flexive-extractor" label="[fleXive] extractors base module" srcdir="${flexive.src.framework.dir}"
+                                 prefix="com/flexive/extractor/" packagenames="com.flexive.extractor"/>
+            <maven-build-sources artifactId="flexive-extractor-documents" label="[fleXive] document extractors module" srcdir="${flexive.src.framework.dir}"
                                  prefix="com/flexive/extractor/" packagenames="com.flexive.extractor.*"/>
+            <maven-build-sources artifactId="flexive-extractor-audio" label="[fleXive] audio extractors module" srcdir="${flexive.src.framework.dir}"
+                                 prefix="com/flexive/extractor/audio/" packagenames="com.flexive.extractor.audio.*"/>
+
             <maven-build-sources artifactId="flexive-sqlParser" label="[fleXive] FxSQL parser" srcdir="${flexive.src.framework.dir}"
                                  prefix="com/flexive/sqlParser/" packagenames="com.flexive.sqlParser.*"/>
             <maven-build-sources artifactId="flexive-h2" label="[fleXive] H2 database support" srcdir="${flexive.base.framework.dir}/storages/H2/java"/>
@@ -1083,7 +1088,8 @@ database.vendor=MySQL
         <maven-deploy-with-sources path="${build.ui.jar.dir}" name="flexive-backend"/>
 
         <maven-deploy-with-sources path="${flexive.lib.dir}" name="flexive-extractor"/>
-        <maven-deploy file="${flexive.lib.dir}/${extractor-documents.jar}" pom="flexive-extractor-documents.pom"/>
+        <maven-deploy-with-sources path="${flexive.lib.dir}" name="flexive-extractor-documents"/>
+        <maven-deploy-with-sources path="${flexive.lib.dir}" name="flexive-extractor-audio"/>
         <maven-deploy-with-sources path="${flexive.lib.dir}" name="flexive-sqlParser"/>
         <maven-deploy file="${flexive.lib.dir}/fxStream.jar" pom="fxStream.pom"/>
         <maven-deploy file="${flexive.lib.dir}/flexive-flatstorage.jar" pom="flexive-flatstorage.pom"/>
@@ -1106,6 +1112,7 @@ database.vendor=MySQL
         </maven-deploy>
         <maven-deploy file="${flexive.lib.dir}/jboss-common-core-42-compat.jar" pom="jboss-common-core-42-compat.pom"/>
         <maven-deploy file="${flexive.lib.dir}/PDFRenderer.jar" pom="pdf-renderer.pom"/>
+        <maven-deploy file="${flexive.lib.dir}/audio/jflac-1.3.jar" pom="jflac.pom"/>
 
         <!-- ZIP SQL Schemas - TODO: legacy package, remove after next release (schemas are also contained in flexive-h2 and flexive-mysql) -->
         <jar file="${flexive.base.build.dir}/flexive-sql-schemas.jar">

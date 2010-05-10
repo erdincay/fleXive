@@ -44,5 +44,16 @@
             <optional>true</optional>
         </dependency>
 
+        <!--
+            Include flexive-extractor-audio for MP3, FLAC, OGG, etc. handling.
+            This module adds about 1 MB of dependencies.
+        -->
+        <dependency>
+            <groupId>com.flexive</groupId>
+            <artifactId>flexive-extractor-audio</artifactId>
+            <version>@FLEXIVE_VERSION@</version>
+            <optional>true</optional>
+        </dependency>
+
     </dependencies>
 </project>

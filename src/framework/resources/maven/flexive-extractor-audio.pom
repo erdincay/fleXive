@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.flexive</groupId>
+    <artifactId>flexive-extractor-audio</artifactId>
+    <version>@FLEXIVE_VERSION@</version>
+    <description>Flexive Audio Extractors</description>
+
+    <licenses>
+        <license>
+            <name>GNU Lesser General Public License (LGPL)</name>
+            <url>http://www.fsf.org/licensing/licenses/lgpl.txt</url>
+        </license>
+    </licenses>
+    <url>http://www.flexive.org/</url>
+    <issueManagement>
+        <system>Atlassian JIRA</system>
+        <url>http://issuetracker.flexive.org/jira/browse/FX</url>
+    </issueManagement>
+    <organization>
+        <name>unique computing solutions GmbH (UCS)</name>
+        <url>http://www.ucs.at/</url>
+    </organization>
+    <scm>
+        <connection>scm:svn:http://svn.flexive.org/repository/flexive/@FLEXIVE_BRANCH@</connection>
+        <url>http://source.flexive.org/browse/fleXive/@FLEXIVE_BRANCH@/src/framework/java/com/flexive/extractor/audio</url>
+    </scm>
+
+    <dependencies>
+
+        <!-- Maven central -->
+        <dependency>
+            <groupId>de.huxhorn.sulky</groupId>
+            <artifactId>de.huxhorn.sulky.3rdparty.jlayer</artifactId>
+            <version>1.0</version>
+        </dependency>
+
+
+        <!-- JBoss repo -->
+        <dependency>
+            <groupId>org.mobicents.external.fmj</groupId>
+            <artifactId>mp3spi</artifactId>
+            <version>1.9.4</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mobicents.external.tritonus</groupId>
+            <artifactId>tritonus_share</artifactId>
+            <version>0.3.6</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mobicents.external.fmj</groupId>
+            <artifactId>vorbisspi</artifactId>
+            <version>1.0.2</version>
+        </dependency>
+
+        <!-- java.net repo -->
+        <dependency>
+            <groupId>com.projectdarkstar.ext.jorbis</groupId>
+            <artifactId>jorbis</artifactId>
+            <version>0.0.17</version>
+        </dependency>
+
+        <!-- flexive.org repo -->
+        <dependency>
+            <groupId>com.flexive</groupId>
+            <artifactId>jflac</artifactId>
+            <version>1.3</version>
+        </dependency>
+
+    </dependencies>
+
+</project>

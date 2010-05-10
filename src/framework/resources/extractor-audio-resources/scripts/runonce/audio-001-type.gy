@@ -122,7 +122,7 @@ new GroovyTypeBuilder().audio(
             useHtmlEditor: false,
             uniqueMode: UniqueMode.None,
             enabled: true)
-    durationmicros(
+    durationmic(
             label: new FxString(true, 1, "DurationMicros"),
             hint: new FxString(true, 1, "Duration in microseconds (additional info)").setTranslation(2, "Dauer in Mikrosekunden (zusätzliche Information)"),
             structureOptions: Eval.me("""import com.flexive.shared.scripting.groovy.*

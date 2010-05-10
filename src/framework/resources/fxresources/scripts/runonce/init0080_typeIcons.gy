@@ -76,6 +76,5 @@ if (!FxSharedUtils.isMinimalRunOnceScripts()) {
     addTypeIcon(FxType.IMAGE, "type-image.png")
     addTypeIcon(FxType.CONTACTDATA, "type-contact.png")
     addTypeIcon("article", "type-article.png")
-    addTypeIcon(FxType.DOCUMENT, "type-document.png")
     addTypeIcon(FxType.FOLDER, "type-folder.png")
 }

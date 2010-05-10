@@ -46,7 +46,6 @@ import org.apache.commons.logging.LogFactory;
  * @since 3.1.2
  */
 class DocumentExtractor {
-
     private static final Log LOG = LogFactory.getLog(DocumentExtractor.class);
 
     /**
@@ -55,7 +54,7 @@ class DocumentExtractor {
      * @param desc an instance of the BinaryDescriptor for the file t.b. examined
      * @return the (updated) BinaryDescriptor
      */
-    BinaryDescriptor extractDocumentMetaData(BinaryDescriptor desc) {
+    public static BinaryDescriptor extractDocumentMetaData(BinaryDescriptor desc) {
         // retrieve the binary
         InputStream inputStream = null;
         try {
@@ -85,7 +84,7 @@ class DocumentExtractor {
      * @param mimeType the mime type as a String
      * @return the Extractor.DocumentType or null if not match is found
      */
-    private Extractor.DocumentType getDocumentType(String mimeType) {
+    private static Extractor.DocumentType getDocumentType(String mimeType) {
         if ("application/msword".equals(mimeType)) {
             return Extractor.DocumentType.Word;
         } else if ("application/mspowerpoint".equals(mimeType)) {
