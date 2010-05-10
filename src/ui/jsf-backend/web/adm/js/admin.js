@@ -800,6 +800,11 @@ function SortChange(event){
     sortOrder = event.newValue.dir;
 }
 
+function storeSortVals(sortCol, sortOrd){
+    sortColumn = sortCol;
+    sortOrder = sortOrd;
+}
+
 /**
  * Stores the current datatable settings in hidden form variables with the following IDs:
  * currentPage, rowsPerPage
