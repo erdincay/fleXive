@@ -322,16 +322,16 @@
 			</manifest>
 		</jar>
 		<jar jarfile="${flexive.lib.dir}/${extractor.jar}">
-			<manifest>
-				<attribute name="Main-Class" value="com.flexive.extractor.htmlExtractor.consoleTest"/>
-			</manifest>
             <fileset dir="${build.framework.classes.dir}">
-				<include name="com/flexive/extractor/*"/>
-                <include name="com/flexive/extractor/html/*"/>
+				<include name="com/flexive/extractor/shared/**"/>
 			</fileset>
         </jar>
         <jar jarfile="${flexive.lib.dir}/${extractor-documents.jar}">
             <fileset  dir="${flexive.resources.framework.dir}/extractor-documents-resources" includes="**/*"/>
+            <fileset dir="${build.framework.classes.dir}">
+				<include name="com/flexive/extractor/**"/>
+                <exclude name="com/flexive/extractor/audio/**"/>
+			</fileset>
         </jar>
         <jar jarfile="${flexive.lib.dir}/${extractor-audio.jar}">
             <fileset  dir="${flexive.resources.framework.dir}/extractor-audio-resources" includes="**/*"/>
