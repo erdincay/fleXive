@@ -48,6 +48,7 @@ import com.flexive.shared.stream.FxStreamUtils;
 import com.flexive.shared.structure.FxType;
 import com.flexive.shared.value.BinaryDescriptor;
 import com.flexive.shared.value.FxString;
+import java.lang.reflect.Method;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -64,19 +65,28 @@ import java.io.InputStream;
  * DOCUMENT: t.b. implemented, atm orig. scripts are executed, no callback to this class<br/>
  * IMAGE: t.b. implemented, atm orig. scripts are executed, no callback to this class
  * </p>
+ * <p>
  *
  * @author Christopher Blasnik (c.blasnik@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @since 3.1
  */
 public class DocumentParser {
+    // Implementation note:
+    // This is the only class of this package that is always available (i.e. packaged in flexive-extractor.jar).
+    // Do not add compile-time dependencies on other classes of com.flexive.extractor!
+    // Ideally this should be moved to com.flexive.shared, we could do this when improving the modularization
+    // of the document extractors.
+
+    private static final Log LOG = LogFactory.getLog(DocumentParser.class);
+    private static final String CLS_DOCUMENT_EXTRACTOR = "com.flexive.extractor.DocumentExtractor";
+
+    // store the most commonly used assignment Xpaths
+    private static final String MIMEPROP = "/MIMETYPE";
+    private static final String FILEPROP = "/FILE";
 
     private FxContent content;
     private FxType contentType;
     private FxPK pk;
-    private static final Log LOG = LogFactory.getLog(DocumentParser.class);
-    // store the most commonly used assignment Xpaths
-    private static String MIMEPROP = "/MIMETYPE";
-    private static String FILEPROP = "/FILE";
 
     /**
      * Constructor f. after content save events
@@ -207,7 +217,23 @@ public class DocumentParser {
             desc = (BinaryDescriptor) content.getValue(FILEPROP).getBestTranslation();
             // based on the descriptor let's relaunch extraction of the metadata and reassign the descriptor
             if (checkType(FxType.DOCUMENT)) {
-                desc = extractDocumentMetaData(desc);
+                // TODO: make this really extensible. Hack to get it working for now
+                // without requiring flexive-extractor-documents (FX-879).
+                try {
+                    final Class<?> cls = Class.forName(CLS_DOCUMENT_EXTRACTOR);
+                    final Method method = cls.getMethod("extractDocumentMetaData", BinaryDescriptor.class);
+                    desc = (BinaryDescriptor) method.invoke(null, desc);
+                } catch (ClassNotFoundException ex) {
+                    // ignore, flexive-extractor-documents not installed
+                    if (LOG.isDebugEnabled()) {
+                        LOG.debug(CLS_DOCUMENT_EXTRACTOR + " not found, assuming flexive-extractor-documents is not installed");
+                    }
+                } catch (Exception e) {
+                    // real error during method invocation or lookup
+                    if (LOG.isWarnEnabled()) {
+                        LOG.warn("Failed to extract document data: " + e.getMessage(), e);
+                    }
+                }
             } else {
                 desc = extractFileMetaData(desc);
             }
@@ -225,34 +251,6 @@ public class DocumentParser {
         return typeName.equals(contentType.getName()) || contentType.getParent() != null && contentType.isDerivedFrom(typeName);
     }
 
-    /**
-     * Extract metadata from the document (doc will be loaded from the binary storage)
-     *
-     * @param desc an instance of the BinaryDescriptor for the file t.b. examined
-     * @return the (updated) BinaryDescriptor
-     */
-    private BinaryDescriptor extractDocumentMetaData(BinaryDescriptor desc) {
-        // retrieve the binary
-        InputStream inputStream = null;
-        try {
-            inputStream = FxStreamUtils.getBinaryStream(desc, BinaryDescriptor.PreviewSizes.ORIGINAL);
-            final Extractor.DocumentType documentType = getDocumentType(desc.getMimeType());
-            final ExtractedData extractedData = Extractor.extractData(inputStream, documentType);
-
-            if (extractedData != null) {
-                return new BinaryDescriptor(desc.getHandle(), desc.getName(), desc.getSize(),
-                        desc.getMimeType(), extractedData.toXML());
-            }
-
-        } catch (Exception e) {
-            if (LOG.isErrorEnabled()) {
-                LOG.error("Could not download binary file or create InputStream " + e.getMessage(), e);
-            }
-        } finally {
-            FxSharedUtils.close(inputStream);
-        }
-        return desc;
-    }
 
     /**
      * Extract metadata from the image/audio file (image will be loaded from the binary storage)
@@ -309,9 +307,12 @@ public class DocumentParser {
         binding.setVariable("binaryDescriptor", desc);
 
         try {
-            for (long scriptId : contentType.getScriptMapping(FxScriptEvent.BeforeContentCreate)) {
-                FxScriptResult result = scripting.runScript(scriptId, binding);
-                content = (FxContent) result.getBinding().getVariable("content");
+            final long[] mapping = contentType.getScriptMapping(FxScriptEvent.BeforeContentCreate);
+            if (mapping != null) {
+                for (long scriptId : mapping) {
+                    FxScriptResult result = scripting.runScript(scriptId, binding);
+                    content = (FxContent) result.getBinding().getVariable("content");
+                }
             }
         } catch (FxApplicationException e) {
             if (LOG.isErrorEnabled()) {
@@ -321,26 +322,4 @@ public class DocumentParser {
         return content;
     }
 
-    /**
-     * Conversion to DOCUMENT type: retrieve the actual Extractor.DocumentType
-     * (see also relevant BinaryPreviewProcess script)
-     *
-     * @param mimeType the mime type as a String
-     * @return the Extractor.DocumentType or null if not match is found
-     */
-    private Extractor.DocumentType getDocumentType(String mimeType) {
-        if ("application/msword".equals(mimeType))
-            return Extractor.DocumentType.Word;
-        else if ("application/mspowerpoint".equals(mimeType))
-            return Extractor.DocumentType.Powerpoint;
-        else if ("application/msexcel".equals(mimeType))
-            return Extractor.DocumentType.Excel;
-        else if ("application/pdf".equals(mimeType))
-            return Extractor.DocumentType.PDF;
-            // possible future change: on-the-fly creation of relevant text type?
-        else if ("text/html".equals(mimeType))
-            return Extractor.DocumentType.HTML;
-        else
-            return null;
-    }
 }

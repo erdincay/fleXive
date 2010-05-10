@@ -323,7 +323,7 @@
 		</jar>
 		<jar jarfile="${flexive.lib.dir}/${extractor.jar}">
             <fileset dir="${build.framework.classes.dir}">
-				<include name="com/flexive/extractor/shared/**"/>
+				<include name="com/flexive/extractor/DocumentParser*"/>
 			</fileset>
         </jar>
         <jar jarfile="${flexive.lib.dir}/${extractor-documents.jar}">
