@@ -103,7 +103,13 @@ public abstract class NumberQueryInputMapper<T, BaseType extends FxValue<T, ?>> 
                 // not properly formatted, return a temporary reference that uses the entire query in the caption
                 return new ReferencedContent(new FxPK(-1), query, null, Lists.<ACL>newArrayList());
             }
-            final FxPK pk = FxPK.fromString(query.substring(0, sepIndex));
+            final FxPK pk;
+            try {
+                pk = FxPK.fromString(query.substring(0, sepIndex));
+            } catch (NumberFormatException e) {
+                // not properly formatted, return a temporary reference that uses the entire query in the caption
+                return new ReferencedContent(new FxPK(-1), query, null, Lists.<ACL>newArrayList());
+            }
             return new ReferencedContent(pk, query.substring(sepIndex + SEP_PK_CAPTION.length()), null, Lists.<ACL>newArrayList());
         }
 

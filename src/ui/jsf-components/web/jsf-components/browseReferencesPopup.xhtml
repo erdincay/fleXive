@@ -31,7 +31,10 @@
                             //"<img border=\"0\" src=\"" + getThumbnailURI(pk) + "\">";
                     } else {
                         // autocomplete text input field - store everything in text input field
-                        parentForm[inputId].value = pk + " - " + caption;
+                        if(pk != "")
+                            parentForm[inputId].value = pk + " - " + caption;
+                        else
+                            parentForm[inputId].value = "";
                     }
                     window.close();
                 } catch (e) {
