@@ -100,6 +100,11 @@ public class GenericBinarySQLStorage implements BinaryStorage {
     protected static final String BINARY_TRANSIT = "INSERT INTO " + TBL_CONTENT_BINARY + "(ID,VER,QUALITY,FBLOB,NAME,BLOBSIZE,XMLMETA,CREATED_AT,MIMETYPE,PREVIEW_REF,ISIMAGE,RESOLUTION,WIDTH,HEIGHT,PREV1_WIDTH,PREV1_HEIGHT,PREV2_WIDTH,PREV2_HEIGHT,PREV3_WIDTH,PREV3_HEIGHT,PREV4_WIDTH,PREV4_HEIGHT,PREV1SIZE,PREV2SIZE,PREV3SIZE,PREV4SIZE,MD5SUM,PREV1,PREV2,PREV3,PREV4) " +
             //      1 2 3       4 5 6     7                                         8             9 0 1 2
             "SELECT ?,?,?,FBLOB,?,?,?," + StorageManager.getTimestampFunction() + ",?,PREVIEW_REF,?,?,?,?,PREV1_WIDTH,PREV1_HEIGHT,PREV2_WIDTH,PREV2_HEIGHT,PREV3_WIDTH,PREV3_HEIGHT,PREV4_WIDTH,PREV4_HEIGHT,PREV1SIZE,PREV2SIZE,PREV3SIZE,PREV4SIZE,?";
+    protected static final String BINARY_TRANSIT_REPLACE = "UPDATE " + TBL_CONTENT_BINARY + " SET FBLOB=";
+    protected static final String BINARY_TRANSIT_REPLACE_FBLOB_COPY = "(SELECT DISTINCT FBLOB FROM " + TBL_BINARY_TRANSIT + " WHERE BKEY=?)";
+    protected static final String BINARY_TRANSIT_REPLACE_FBLOB_PARAM = "?";
+    //                                                                   2          3         4          5             6         7            8       9        10       11         12        13            14            15
+    protected static final String BINARY_TRANSIT_REPLACE_PARAMS = ",NAME=?,BLOBSIZE=?,XMLMETA=?,MIMETYPE=?,PREVIEW_REF=?,ISIMAGE=?,RESOLUTION=?,WIDTH=?,HEIGHT=?,MD5SUM=? WHERE ID=? AND VER=? AND QUALITY=?";
     protected static final String BINARY_TRANSIT_FILESYSTEM = "INSERT INTO " + TBL_CONTENT_BINARY + "(ID,VER,QUALITY,FBLOB,NAME,BLOBSIZE,XMLMETA,CREATED_AT,MIMETYPE,PREVIEW_REF,ISIMAGE,RESOLUTION,WIDTH,HEIGHT,PREV1_WIDTH,PREV1_HEIGHT,PREV2_WIDTH,PREV2_HEIGHT,PREV3_WIDTH,PREV3_HEIGHT,PREV4_WIDTH,PREV4_HEIGHT,PREV1SIZE,PREV2SIZE,PREV3SIZE,PREV4SIZE,MD5SUM,PREV1,PREV2,PREV3,PREV4) " +
             //      1 2 3 4 5 6 7     8                                         9             0 1 2 3                                                                                                                                                  
             "SELECT ?,?,?,?,?,?,?," + StorageManager.getTimestampFunction() + ",?,PREVIEW_REF,?,?,?,?,PREV1_WIDTH,PREV1_HEIGHT,PREV2_WIDTH,PREV2_HEIGHT,PREV3_WIDTH,PREV3_HEIGHT,PREV4_WIDTH,PREV4_HEIGHT,PREV1SIZE,PREV2SIZE,PREV3SIZE,PREV4SIZE,?";
@@ -485,10 +490,24 @@ public class GenericBinarySQLStorage implements BinaryStorage {
             if (ps != null)
                 ps.close();
             String previewSelect = (storePrev1FS ? ",NULL" : ",PREV1") + (storePrev2FS ? ",NULL" : ",PREV2") + (storePrev3FS ? ",NULL" : ",PREV3") + (storePrev4FS ? ",NULL" : ",PREV4");
-            ps = con.prepareStatement((copyBlob ? BINARY_TRANSIT : BINARY_TRANSIT_FILESYSTEM) + previewSelect + BINARY_TRANSIT_PREVIEW_WHERE);
+            //check if the binary is to be replaced
+            ps = con.prepareStatement("SELECT COUNT(*) FROM " + TBL_CONTENT_BINARY + " WHERE ID=? AND VER=? AND QUALITY=?");
             ps.setLong(1, created.getId());
             ps.setInt(2, created.getVersion()); //version
             ps.setInt(3, created.getQuality()); //quality
+            ResultSet rsExist = ps.executeQuery();
+            final boolean replaceBinary = rsExist != null && rsExist.next() && rsExist.getLong(1) > 0;
+            ps.close();
+            int paramIndex = 1;
+            if( replaceBinary ) {
+                ps = con.prepareStatement(BINARY_TRANSIT_REPLACE + (copyBlob ? BINARY_TRANSIT_REPLACE_FBLOB_COPY : BINARY_TRANSIT_REPLACE_FBLOB_PARAM) + BINARY_TRANSIT_REPLACE_PARAMS);
+                FxBinaryUtils.removeBinary(divisionId, created.getId());
+            } else {
+                ps = con.prepareStatement((copyBlob ? BINARY_TRANSIT : BINARY_TRANSIT_FILESYSTEM) + previewSelect + BINARY_TRANSIT_PREVIEW_WHERE);
+                ps.setLong(paramIndex++, created.getId());
+                ps.setInt(paramIndex++, created.getVersion()); //version
+                ps.setInt(paramIndex++, created.getQuality()); //quality
+            }
             File binaryTransit = null;
             boolean removeTransitFile = false;
             if (dbTransit) {
@@ -512,15 +531,17 @@ public class GenericBinarySQLStorage implements BinaryStorage {
             }
 
             boolean needExplicitBlobInsert = false;
+            if( copyBlob && replaceBinary )
+                ps.setString(paramIndex++, binary.getHandle());
             if (!copyBlob) {
                 //we do not perform a simple blob copy operation in the database
                 if (dbStorage) {
-                    //binary is stored in database -> copy it from the transit file (might be a temp. file)
+                    //binary is stored in the database -> copy it from the transit file (might be a temp. file)
                     if (blobInsertSelectAllowed()) {
                         fis = new FileInputStream(binaryTransit);
-                        ps.setBinaryStream(4, fis, (int) binaryTransit.length());
+                        ps.setBinaryStream(paramIndex++, fis, (int) binaryTransit.length());
                     } else {
-                        ps.setNull(4, Types.BINARY);
+                        ps.setNull(paramIndex++, Types.BINARY);
                         needExplicitBlobInsert = true;
                     }
                 } else {
@@ -533,21 +554,28 @@ public class GenericBinarySQLStorage implements BinaryStorage {
                     } catch (IOException e) {
                         throw new FxDbException(LOG, "ex.content.binary.fsCopyFailedError", created.getId(), e.getMessage());
                     }
-                    ps.setNull(4, Types.BINARY);
+                    ps.setNull(paramIndex++, Types.BINARY);
                 }
             }
 
-            int cnt = copyBlob ? 4 : 5;
-            ps.setString(cnt++, created.getName());
-            ps.setLong(cnt++, created.getSize());
-            setBigString(ps, cnt++, created.getMetadata());
-            ps.setString(cnt++, created.getMimeType());
-            ps.setBoolean(cnt++, created.isImage());
-            ps.setDouble(cnt++, created.getResolution());
-            ps.setInt(cnt++, created.getWidth());
-            ps.setInt(cnt++, created.getHeight());
-            ps.setString(cnt++, created.getMd5sum());
-            ps.setString(cnt, binary.getHandle());
+//            int cnt = paramIndex; //copyBlob ? 4 : 5;
+            ps.setString(paramIndex++, created.getName());
+            ps.setLong(paramIndex++, created.getSize());
+            setBigString(ps, paramIndex++, created.getMetadata());
+            ps.setString(paramIndex++, created.getMimeType());
+            if (replaceBinary)
+                ps.setNull(paramIndex++, java.sql.Types.NUMERIC); //set preview ref to null
+            ps.setBoolean(paramIndex++, created.isImage());
+            ps.setDouble(paramIndex++, created.getResolution());
+            ps.setInt(paramIndex++, created.getWidth());
+            ps.setInt(paramIndex++, created.getHeight());
+            ps.setString(paramIndex++, created.getMd5sum());
+            if( replaceBinary ) {
+                ps.setLong(paramIndex++, created.getId());
+                ps.setInt(paramIndex++, created.getVersion()); //version
+                ps.setInt(paramIndex, created.getQuality()); //quality
+            } else
+                ps.setString(paramIndex, binary.getHandle());
             ps.executeUpdate();
             if (needExplicitBlobInsert) {
                 ps.close();
@@ -562,6 +590,33 @@ public class GenericBinarySQLStorage implements BinaryStorage {
             if (removeTransitFile && binaryTransit != null) {
                 //transit file was a temp. file -> got to clean up
                 FxFileUtils.removeFile(binaryTransit);
+            }
+
+            if (replaceBinary) {
+                ps.close();
+                //set all preview entries to the values provided by the transit table
+                ps = con.prepareStatement("UPDATE " + TBL_CONTENT_BINARY + " SET PREV1=NULL,PREV2=NULL,PREV3=NULL,PREV4=NULL WHERE ID=? AND VER=? AND QUALITY=?");
+                ps.setLong(1, created.getId());
+                ps.setInt(2, created.getVersion()); //version
+                ps.setInt(3, created.getQuality()); //quality
+                ps.executeUpdate();
+                ps.close();
+                ps = con.prepareStatement("SELECT PREV1_WIDTH,PREV1_HEIGHT,PREV1SIZE,PREV2_WIDTH,PREV2_HEIGHT,PREV2SIZE,PREV3_WIDTH,PREV3_HEIGHT,PREV3SIZE,PREV4_WIDTH,PREV4_HEIGHT,PREV4SIZE FROM " + TBL_BINARY_TRANSIT + " WHERE BKEY=?");
+                ps.setString(1, binary.getHandle());
+                ResultSet rsPrev = ps.executeQuery();
+                if (rsPrev != null && rsPrev.next()) {
+                    long[] data = new long[12];
+                    for (int d = 0; d < 12; d++)
+                        data[d] = rsPrev.getLong(d + 1);
+                    ps.close();
+                    ps = con.prepareStatement("UPDATE " + TBL_CONTENT_BINARY + " SET PREV1_WIDTH=?,PREV1_HEIGHT=?,PREV1SIZE=?,PREV2_WIDTH=?,PREV2_HEIGHT=?,PREV2SIZE=?,PREV3_WIDTH=?,PREV3_HEIGHT=?,PREV3SIZE=?,PREV4_WIDTH=?,PREV4_HEIGHT=?,PREV4SIZE=? WHERE ID=? AND VER=? AND QUALITY=?");
+                    for (int d = 0; d < 12; d++)
+                        ps.setLong(d + 1, data[d]);
+                    ps.setLong(13, created.getId());
+                    ps.setInt(14, created.getVersion()); //version
+                    ps.setInt(15, created.getQuality()); //quality
+                    ps.executeUpdate();
+                }
             }
 
             //finally fetch the preview blobs from transit and store them on the filesystem if required
