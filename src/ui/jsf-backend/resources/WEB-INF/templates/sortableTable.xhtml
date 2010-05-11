@@ -54,11 +54,6 @@ Parameters:
         <c:set var="sortByColumnAction" value="dataTable.sortColumn(dataTable.getColumn('#{sortColumn}'), '#{sortOrder}')"/>
     </c:if>
 
-    <c:set var="setSortVals" value=""/>
-    <c:if test="#{!empty sortColumn and !empty sortOrder}">
-        <c:set var="setSortVals" value="manSortChange('#{sortColumn}'), '#{sortOrder}');"/>
-    </c:if>
-
     <script type="text/javascript">
     <!-- 
         flexive.yui.require("datatable");

@@ -78,6 +78,9 @@ public class ResultSessionData implements Serializable {
     private boolean onlyDirectChildren;
     private boolean enableFolderActions;
 
+    // remember if at least one search was executed during session time
+    private boolean searchExecuted;
+
     // Keep a reference on the current session if not retrieved from a JSF context
     private transient HttpSession session = null;
 
@@ -314,4 +317,13 @@ public class ResultSessionData implements Serializable {
         this.onlyDirectChildren = onlyDirectChildren;
         saveInSession();
     }
+
+    public boolean isSearchExecuted() {
+        return searchExecuted;
+    }
+
+    public void setSearchExecuted(boolean searchExecuted) {
+        this.searchExecuted = searchExecuted;
+    }
+
 }

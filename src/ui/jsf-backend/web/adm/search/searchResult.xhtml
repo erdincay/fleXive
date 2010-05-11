@@ -81,8 +81,13 @@
             <h:inputHidden value="#{fxSearchResultBean.viewType}"/>
 
             <adm:resultTabs activeTab="results"/>
-
-            <c:if test="#{fxSearchResultBean.queryBuilder != null}">
+           <!-- -->
+            <c:if test="#{not fxSearchResultBean.sessionData.searchExecuted}">
+                #{fxMessageBean['SearchResult.info.noSearchExecuted']}
+                <br/>
+            </c:if>
+                                                                   <!--and fxSearchResultBean.sessionData.searchExecuted-->
+            <c:if test="#{fxSearchResultBean.queryBuilder != null and fxSearchResultBean.sessionData.searchExecuted}">
                 <!-- Eager fetching of result: #{fxSearchResultBean.result} -->
                 <h:inputHidden id="fetchRows" value="#{fxSearchResultBean.fetchRows}"/>
                 <h:inputHidden id="versionFilter" value="#{fxSearchResultBean.versionFilter}"/>

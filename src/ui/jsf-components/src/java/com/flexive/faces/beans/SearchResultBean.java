@@ -227,6 +227,10 @@ public class SearchResultBean implements ActionBean, Serializable {
      * @return the next page
      */
     public String show() {
+        // if no search was executed, do not get the default result set (i.e. do not show results)
+        if(!getSessionData().isSearchExecuted()){
+            return "contentResult";
+        }
         // backend briefcase creation - name check
         if (Boolean.TRUE.equals(createBriefcase) && StringUtils.isBlank(briefcaseName)) {
             new FxFacesMsgErr("Briefcase.err.name").addToContext();
@@ -410,6 +414,8 @@ public class SearchResultBean implements ActionBean, Serializable {
     public void setQueryBuilder(SqlQueryBuilder queryBuilder) {
         getSessionData().setQueryBuilder(queryBuilder);
         setTabTitle(null);
+        // mark that a search was executed
+        getSessionData().setSearchExecuted(true);
     }
 
     public void setStartRow(int rowStart) {
