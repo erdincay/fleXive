@@ -157,6 +157,7 @@
             <url>http://download.java.net/maven/2/</url>
             <layout>default</layout>
             <snapshots>
+                <enabled>false</enabled>
                 <updatePolicy>never</updatePolicy>
             </snapshots>
         </repository>
@@ -167,6 +168,7 @@
             <url>http://repository.jboss.org/maven2</url>
             <layout>default</layout>
             <snapshots>
+                <enabled>false</enabled>
                 <updatePolicy>never</updatePolicy>
             </snapshots>
         </repository>
@@ -184,6 +186,7 @@
             <url>http://download.java.net/maven/1/</url>
             <layout>legacy</layout>
             <snapshots>
+                <enabled>false</enabled>
                 <updatePolicy>never</updatePolicy>
             </snapshots>
         </repository>
