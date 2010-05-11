@@ -50,7 +50,7 @@ public class FxScriptInfo extends AbstractSelectableObjectWithName implements Se
     protected FxScriptEvent event;
     protected String name;
     protected String description;
-    protected boolean active =false;
+    protected boolean active = true;
     protected boolean cached = false;
 
     public FxScriptInfo() {

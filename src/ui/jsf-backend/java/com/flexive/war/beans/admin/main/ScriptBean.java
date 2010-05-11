@@ -396,7 +396,7 @@ public class ScriptBean implements Serializable {
 
         try {
             if (!isRenderCachedSelect())
-                sinfo.setCached(false);    
+                sinfo.setCached(false);
             setId(getScriptingEngine().createScript(sinfo).getId());
             setSinfo(CacheAdmin.getEnvironment().getScript(id).asEditable());
             // display updated script list

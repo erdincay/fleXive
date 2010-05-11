@@ -83,8 +83,11 @@
                                 <td>
                                     <h:commandLink id="editScript_#{listEntry.id}" action="#{scriptBean.editScript}"
                                            value="#{listEntry.scriptInfo.name}" actionListener="#{scriptBean.structureListen}">
-                                    <f:param name="oid" value="#{listEntry.scriptInfo.id}"/>
+                                        <f:param name="oid" value="#{listEntry.scriptInfo.id}"/>
                                     </h:commandLink>
+                                    <ui:fragment rendered="#{!listEntry.scriptInfo.active}">
+                                        <br/><span class="warnMessage">#{fxMessageBean['ScriptEditor.warning.script.inactive']}</span>
+                                    </ui:fragment>
                                 </td>
                                 <td style="padding-left:15px">
                                     <h:outputText value="#{listEntry.scriptEvent.name}"/>
