@@ -717,7 +717,9 @@ public final class FxFormatUtils {
 
     /**
      * Format a timespan given in ms as human readable output
+     * (using hours as the maximum time unit)
      *
+     * @since 3.1.2
      * @param time time in ms
      * @return human readable time
      */
@@ -749,6 +751,58 @@ public final class FxFormatUtils {
         }
         res.append(ms).append("ms");
         return res.toString();
+    }
+
+    /**
+     * Format a timespan given in ms as human readable output
+     * (using weeks as the maximum time unit and
+     * seconds as the smallest)
+     *
+     * @param time time in ms
+     * @return human readable time
+     */
+    public static String formatTimeSpanForScheduler(long time) {
+        if (time <0)
+            return "-";
+
+        StringBuilder res = new StringBuilder(10);
+        long s = time / 1000;
+        long min = 0;
+        long hr = 0;
+        long d = 0;
+        long w = 0;
+        if (s >= 60) {
+            min = s / 60;
+            s = s - (min * 60);
+        }
+        if (min >= 60) {
+            hr = min / 60;
+            min = min - (hr * 60);
+        }
+        if (hr >= 24) {
+            d = hr / 24;
+            hr = hr - (d * 24);
+        }
+        if (d >= 7) {
+            w = d / 7;
+            d = d - (w * 7);
+        }
+        if (w >0)
+            res.append(w).append("w:");
+        if (d>0)
+            res.append(d).append("d:");
+        if (hr>0)
+            res.append(hr).append("hr:");
+        if (min > 0) {
+            res.append(min).append("min:");
+        }
+        if (s > 0) {
+            res.append(s).append("s:");
+        }
+        if (res.length() ==0)
+            return "0s";
+        //cut off last ":"
+        return res.substring(0,res.length()-1);
     }
 
     /**

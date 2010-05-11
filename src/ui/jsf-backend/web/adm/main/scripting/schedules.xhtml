@@ -1,0 +1,289 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:t="http://myfaces.apache.org/tomahawk"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:adm="http://www.flexive.com/jsf/admin"
+      xmlns:fx="http://www.flexive.com/jsf/core"
+      xmlns:rich="http://richfaces.org/rich"
+      xmlns:a4j="https://ajax4jsf.dev.java.net/ajax">
+<body>
+
+<ui:composition template="/adm/contentTemplate.xhtml">
+
+<ui:define name="head">
+    <!-- empty -->
+</ui:define>
+
+<ui:define name="body">
+
+    <h:form id="frm">
+
+        <adm:tab label="#{fxMessageBean['ScriptSchedule.tab.overview']}" active="true" id="tab1"/>
+
+        <h:inputHidden id="currentPage" value="#{scriptScheduleBean.overviewPageNumber}"/>
+        <h:inputHidden id="rowsPerPage" value="#{scriptScheduleBean.overviewRows}"/>
+        <h:inputHidden id="sortColumn" value="#{scriptScheduleBean.sortColumn}"/>
+        <h:inputHidden id="sortOrder" value="#{scriptScheduleBean.sortOrder}"/>
+        <t:saveState value="#{scriptScheduleBean.schedule}"/>
+        <a4j:outputPanel id="scheduleTable">
+            <adm:sortableTable id="table" onPageChange="DTpageChange" startPage="#{scriptScheduleBean.overviewPageNumber}"
+                               rowsPerPage="#{scriptScheduleBean.overviewRows}"
+                    onSortChange="SortChange" sortColumn="#{scriptScheduleBean.sortColumn}" sortOrder="#{scriptScheduleBean.sortOrder}">
+                <table id="table" class="dojoTable">
+                    <thead>
+                        <tr>
+                            <th class="tblHeader" field="scriptName" dataType="String" align="left">
+                                #{fxMessageBean['ScriptSchedule.label.scriptName']}
+                            </th>
+                            <th class="tblHeader" field="scheduleId" dataType="Number" align="left">
+                                #{fxMessageBean['ScriptSchedule.label.scheduleId']}
+                            </th>
+                            <th class="tblHeader" field="name" dataType="String" align="left">
+                                #{fxMessageBean['ScriptSchedule.label.name']}
+                            </th>
+                            <th class="tblHeader" field="active" dataType="html" align="left">
+                                #{fxMessageBean['ScriptSchedule.label.active']}
+                            </th>
+                            <th class="tblHeader" field="startTime" dataType="String" align="left">
+                                #{fxMessageBean['ScriptSchedule.label.startTime']}
+                            </th>
+                            <th class="tblHeader" field="endTime" dataType="String" align="left">
+                                #{fxMessageBean['ScriptSchedule.label.endTime']}
+                            </th>
+                            <th class="tblHeader" field="interval" dataType="String" align="left">
+                                #{fxMessageBean['ScriptSchedule.label.interval']}
+                            </th>
+                            <th class="tblHeader" dataType="html" align="left" noSort="true">
+                                #{fxMessageBean['ScriptSchedule.label.actions']}
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <ui:repeat value="#{scriptScheduleBean.scriptSchedules}" var="schedule">
+                            <tr value="#{schedule.id}">
+                                <td>
+                                    <h:commandLink id="editScript_#{schedule.scriptId}" action="#{scriptBean.editScript}"
+                                           value="#{adm:scriptNameForId(schedule.scriptId)}" actionListener="#{scriptBean.structureListen}">
+                                    <f:param name="oid" value="#{schedule.scriptId}"/>
+                                    </h:commandLink>
+                                </td>
+                                <td>
+                                    <h:outputText value="#{schedule.id}" />
+                                </td>
+                                <td>
+                                    <h:outputText value="#{schedule.name}" />
+                                </td>
+                                <td><h:selectBooleanCheckbox value="#{schedule.active}" disabled="true"/></td>
+                                <td>
+                                    <rich:calendar popup="true"
+                                       disabled="true"
+                                       manualInput="true"
+                                       datePattern="#{scriptScheduleBean.dateTimePattern}"
+                                       value="#{schedule.startTime}"/>
+                                </td>
+                                <td>
+                                    <rich:calendar popup="true"
+                                       manualInput="true"
+                                       datePattern="#{scriptScheduleBean.dateTimePattern}"
+                                       value="#{schedule.endTime}"
+                                       rendered="#{not empty schedule.endTime}"
+                                            disabled="true"/>
+
+                                    <ui:fragment rendered="#{empty schedule.endTime and not schedule.unbounded}">
+                                         #{fxMessageBean['ScriptSchedule.label.repeat']} #{schedule.repeatTimes} #{fxMessageBean['ScriptSchedule.label.times']}
+                                    </ui:fragment>
+
+                                    <ui:fragment rendered="#{empty schedule.endTime and schedule.unbounded}">
+                                            ∞
+                                    </ui:fragment>
+                                </td>
+                                <td>
+                                    <h:outputText value="#{schedule.cronString}"
+                                            rendered="#{not empty schedule.cronString}"/>
+                                    <h:outputText value="#{adm:formatTimeSpanForScheduler(schedule.repeatInterval)}"
+                                            rendered="#{empty schedule.cronString}"/>
+                                </td>
+                                <td>
+                                    <ui:fragment rendered="#{fxSystemBean.isInRole['ScriptManagement']}">
+                                        <!-- edit -->
+                                        <adm:ajaxCommandIcon titleKey="ScriptSchedule.button.edit"
+                                                   icon="edit" action="edit" bean="#{scriptScheduleBean}"
+                                                   id="editButton_#{schedule.id}"
+                                                   onclick="storeDataTablePosition('frm'); #{rich:component('editPanel')}.show();"
+                                                   reRender="createItemArea, panelHeader" lockscreen="true">
+                                            <f:setPropertyActionListener target="#{scriptScheduleBean.id}" value="#{schedule.id}"/>
+                                        </adm:ajaxCommandIcon>
+                                        <!-- delete -->
+                                        <adm:commandIcon labelKey="ScriptSchedule.button.delete" location="content"
+                                                             icon="delete" action="delete" bean="#{scriptScheduleBean}"
+                                                             id="deleteButton_#{schedule.id}"
+                                                             onclick="storeDataTablePosition('frm')"
+                                                             lockscreen="true"
+                                                             confirmKey="ScriptSchedule.confirm.delete">
+                                            <f:setPropertyActionListener target="#{scriptScheduleBean.id}" value="#{schedule.id}"/>
+                                        </adm:commandIcon>
+                                    </ui:fragment>
+                                </td>
+                            </tr>
+                        </ui:repeat>
+                    </tbody>
+                </table>
+            </adm:sortableTable>
+            <fx:yuiSetup/>
+        </a4j:outputPanel>
+        <br/>
+        <adm:ajaxCommandButton labelKey="ScriptSchedule.button.create"
+                           bean="#{scriptScheduleBean}"
+                           icon="new" id="createScriptScheduleButton"
+                           action="create" lockscreen="true"
+                onclick="#{rich:component('editPanel')}.show();"
+                reRender="createItemArea, panelHeader"/>
+
+        <adm:toolbarPluginButtons/>
+    </h:form>
+
+    <rich:modalPanel id="editPanel" width="550" height="320" autosized="true">
+        <f:facet name="header">
+            <a4j:outputPanel id="panelHeader">
+                <h:panelGroup rendered="#{scriptScheduleBean.schedule.id eq -1}">
+                    #{fxMessageBean['ScriptSchedule.tab.create']}
+                </h:panelGroup>
+                <h:panelGroup rendered="#{scriptScheduleBean.schedule.id ne -1}">
+                    #{fxMessageBean['ScriptSchedule.tab.edit']}
+                </h:panelGroup>
+            </a4j:outputPanel>
+        </f:facet>
+        <f:facet name="controls">
+            <h:panelGroup>
+                <h:form>
+                    <adm:ajaxCommandIcon titleKey="ScriptSchedule.button.cancel"
+                                               icon="cancel" bean="#{scriptScheduleBean}" action="cancel"
+                                               id="cancelItemChanges"
+                                               onclick="#{rich:component('editPanel')}.hide();"
+                                               reRender="createItemArea"/>
+                </h:form>
+            </h:panelGroup>
+        </f:facet>
+
+        <a4j:outputPanel id="createItemArea">
+            <h:form id="panelForm">
+                <h:messages id="panelMessages"/>
+                
+                <fx:formRow labelKey="ScriptSchedule.label.script" id="script">
+                    <h:selectOneListbox value="#{scriptScheduleBean.schedule.scriptId}" size="1" id="script">
+                        <f:selectItems value="#{scriptScheduleBean.manualScripts}"/>
+                    </h:selectOneListbox>
+                </fx:formRow>
+
+                <a4j:outputPanel rendered="#{not empty scriptScheduleBean.manualScripts}">
+                    <fx:formRow labelKey="ScriptSchedule.label.scheduleType" id="scheduleType">
+                        <h:selectOneListbox value="#{scriptScheduleBean.scheduleType}" size="1" id="scheduleType">
+                            <f:selectItem itemValue="0" itemLabel="#{fxMessageBean['ScriptSchedule.label.runOnce']}"/>
+                            <f:selectItem itemValue="1" itemLabel="#{fxMessageBean['ScriptSchedule.label.recurring']}"/>
+                            <f:selectItem itemValue="2" itemLabel="#{fxMessageBean['ScriptSchedule.label.cronScript']}"/>
+                            <a4j:support event="onchange" reRender="scheduleData" evetsQueue="updateSchedule"/>
+                        </h:selectOneListbox>
+                    </fx:formRow>
+
+                    <a4j:outputPanel id="scheduleData">
+                        <fx:formRow labelKey="ScriptSchedule.label.name" id="name">
+                            <h:inputText id="name" value="#{scriptScheduleBean.schedule.name}"/>
+                        </fx:formRow>
+                        <fx:formRow labelKey="ScriptSchedule.label.startTime" id="startTime">
+                            <rich:calendar id="startTime" popup="true"
+                                       manualInput="true"
+                                       datePattern="#{scriptScheduleBean.dateTimePattern}"
+                                       value="#{scriptScheduleBean.schedule.startTime}"/>
+                        </fx:formRow>
+
+                         <!-- set interval for recurring schedule -->
+                        <div style="#{(scriptScheduleBean.scheduleType eq 1) ? '':'display:none'}">
+                            <fx:formRow labelKey="ScriptSchedule.label.interval" id="interval">
+                                 <h:inputText value="#{scriptScheduleBean.repeatInterval}" id="interval"/>
+                                 <h:selectOneListbox value="#{scriptScheduleBean.repeatIntervalUnit}" style="margin-left:5px;">
+                                     <f:selectItem itemLabel="#{fxMessageBean['ScriptSchedule.label.second']}" itemValue="0"/>
+                                     <f:selectItem itemLabel="#{fxMessageBean['ScriptSchedule.label.minute']}" itemValue="1"/>
+                                     <f:selectItem itemLabel="#{fxMessageBean['ScriptSchedule.label.hour']}" itemValue="2"/>
+                                     <f:selectItem itemLabel="#{fxMessageBean['ScriptSchedule.label.day']}" itemValue="3"/>
+                                     <f:selectItem itemLabel="#{fxMessageBean['ScriptSchedule.label.week']}" itemValue="4"/>
+                                 </h:selectOneListbox>
+                             </fx:formRow>
+                        </div>
+
+                        <!-- set cron string for cron schedule -->
+                        <div style="#{(scriptScheduleBean.scheduleType eq 2) ? '':'display:none'}">
+                            <fx:formRow>
+                                #{fxMessageBean['ScriptSchedule.info.cronString']}
+                            </fx:formRow>
+                            <fx:formRow labelKey="ScriptSchedule.label.cronString" id="cronString">
+                                 <h:inputText value="#{scriptScheduleBean.schedule.cronString}" id="cronString"/>
+                             </fx:formRow>
+                        </div>
+
+                        <div style="#{(scriptScheduleBean.scheduleType ne 0) ? '':'display:none'}">
+                            <fx:formRow labelKey="ScriptSchedule.label.endTime" id="recurringEndTime">
+                                <h:selectOneListbox value="#{scriptScheduleBean.endTimeType}" size="1" id="recurringEndTime"
+                                        style="margin-right:5px;float:left;">
+                                    <f:selectItem itemValue="0" itemLabel="∞"/>
+                                    <f:selectItem itemValue="1" itemLabel="#{fxMessageBean['ScriptSchedule.label.dateTime']}"/>
+                                    <c:if test="#{scriptScheduleBean.scheduleType eq 1}">
+                                        <f:selectItem itemValue="2" itemLabel="#{fxMessageBean['ScriptSchedule.label.repeatTimes']}"/>
+                                    </c:if>
+                                    <a4j:support event="onchange" reRender="endTimeSelect" evetsQueue="updateSchedule"/>
+                                </h:selectOneListbox>
+
+                                <a4j:outputPanel id="endTimeSelect">
+                                    <div style="#{(scriptScheduleBean.endTimeType eq 1) ? '':'display:none'}">
+                                        <rich:calendar popup="true"
+                                           manualInput="true"
+                                           datePattern="#{scriptScheduleBean.dateTimePattern}"
+                                           value="#{scriptScheduleBean.schedule.endTime}"/>
+                                    </div>
+                                    <div style="#{(scriptScheduleBean.endTimeType eq 2 and scriptScheduleBean.scheduleType eq 1) ? '':'display:none'}">
+                                        <h:inputText value="#{scriptScheduleBean.schedule.repeatTimes}">
+                                        </h:inputText>
+                                        <h:outputText value="#{fxMessageBean['ScriptSchedule.label.times']}"
+                                                style="margin-left:5px;"/>
+                                    </div>
+                                </a4j:outputPanel>
+                            </fx:formRow>
+                        </div>
+                        <fx:formRow labelKey="ScriptSchedule.label.active" id="active">
+                            <h:selectBooleanCheckbox id="active" value="#{scriptScheduleBean.schedule.active}"/>
+                        </fx:formRow>
+                    </a4j:outputPanel>
+                </a4j:outputPanel>
+
+                <br/>
+                <adm:ajaxCommandButton id="saveButton" labelKey="#{scriptScheduleBean.schedule.id ne -1 ? 
+                                    'ScriptSchedule.button.save' : 'ScriptSchedule.button.create'}"
+                                           icon="save" bean="#{scriptScheduleBean}"
+                                           action="createSchedule"
+                                    reRender="scheduleTable, createItemArea"
+                                    lockscreen="true"/>
+
+                <adm:ajaxCommandButton id="cancelButton"
+                                       labelKey="ScriptSchedule.button.cancel"
+                                       icon="cancel" bean="#{scriptScheduleBean}" action="cancel"
+                                       onclick="#{rich:component('editPanel')}.hide();"
+                                       reRender="createItemArea"
+                                       lockscreen="true"/>
+
+                <script type="text/javascript">
+                    if (#{empty scriptScheduleBean.schedule})
+                        #{rich:component('editPanel')}.hide();    
+                </script>
+                <fx:yuiSetup/>
+            </h:form>
+        </a4j:outputPanel>
+    </rich:modalPanel>
+
+</ui:define>
+
+</ui:composition>
+
+</body>
+</html>

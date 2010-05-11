@@ -46,10 +46,7 @@ import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxLoadException;
 import com.flexive.shared.exceptions.FxNotFoundException;
-import com.flexive.shared.scripting.FxScriptEvent;
-import com.flexive.shared.scripting.FxScriptInfo;
-import com.flexive.shared.scripting.FxScriptMapping;
-import com.flexive.shared.scripting.FxScriptMappingEntry;
+import com.flexive.shared.scripting.*;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.security.Mandator;
@@ -67,10 +64,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * generic sql environment loader implementation
@@ -813,6 +807,49 @@ public class GenericEnvironmentLoader implements EnvironmentLoader {
             Database.closeObjects(GenericEnvironmentLoader.class, null, ps_a);
         }
         return mapping;
+    }
+
+    /**
+     * {@inheritDoc}
+     * @since 3.1.2
+     */
+    public List<FxScriptSchedule> loadScriptSchedules(Connection con, FxEnvironmentImpl environment) throws FxLoadException {
+       PreparedStatement ps = null;
+        String sql;
+        List<FxScriptSchedule> schedules = new ArrayList<FxScriptSchedule>(10);
+        try {
+            //             1   2     3      4       5         6         7             8            9
+            sql = "SELECT ID,SCRIPT,SNAME,ACTIVE,STARTTIME,ENDTIME,REPEATINTERVAL,REPEATTIMES,CRONSTRING FROM " + TBL_SCRIPT_SCHEDULES + " ORDER BY SCRIPT";
+            ps = con.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+            while (rs != null && rs.next()) {
+                long id = rs.getLong(1);
+                long scriptId = rs.getLong(2);
+                String name = rs.getString(3);
+                if (rs.wasNull())
+                    name="";
+                boolean active = rs.getBoolean(4);
+                java.util.Date startTime = new java.util.Date(rs.getTimestamp(5).getTime());
+                Timestamp endts = rs.getTimestamp(6);
+                final java.util.Date endTime;
+                if (rs.wasNull())
+                    endTime = null;
+                else
+                    endTime = new java.util.Date(endts.getTime());
+                long repeatInterval = rs.getLong(7);
+                int repeatTimes = rs.getInt(8);
+                String cronString = rs.getString(9);
+                if (rs.wasNull())
+                    cronString="";
+                schedules.add(new FxScriptSchedule(id, scriptId, name, active, startTime, endTime,
+                        repeatInterval, repeatTimes,cronString));
+            }
+        } catch (SQLException exc) {
+            throw new FxLoadException(LOG, exc, "ex.scripting.schedule.load.failed", -1, exc.getMessage());
+        } finally {
+            Database.closeObjects(GenericEnvironmentLoader.class, null, ps);
+        }
+        return schedules;
     }
 
     /**

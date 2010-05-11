@@ -68,11 +68,10 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.security.Principal;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
+import java.text.ParseException;
 import java.util.*;
+import java.util.Date;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -531,6 +530,7 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
         PreparedStatement ps = null;
         String sql;
         boolean success = false;
+        final List<FxScriptSchedule> schedules = CacheAdmin.getEnvironment().getScriptSchedulesForScript(scriptId);
         try {
             // Obtain a database connection
             con = Database.getDbConnection();
@@ -544,11 +544,31 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
             ps.setLong(1, scriptId);
             ps.executeUpdate();
             ps.close();
-            //                                                    1
+            sql = "DELETE FROM " + TBL_SCRIPT_SCHEDULES + " WHERE SCRIPT=?";
+            ps = con.prepareStatement(sql);
+            ps.setLong(1, scriptId);
+            ps.executeUpdate();
+            ps.close();
+            //                                           1
             sql = "DELETE FROM " + TBL_SCRIPTS + " WHERE ID=?";
             ps = con.prepareStatement(sql);
             ps.setLong(1, scriptId);
             ps.executeUpdate();
+             // remove script schedules from scheduler
+            if (EJBLookup.getTimerService().isInstalled()) {
+                for (FxScriptSchedule ss : schedules) {
+                    try {
+                        boolean deleteSuccess = EJBLookup.getTimerService().deleteScriptSchedule(ss);
+                        if (deleteSuccess)
+                            LOG.debug("Script schedule with id "+ss.getId()+" successfully deleted from scheduler");
+                        else
+                            LOG.warn("Failed to delete script schedule with id "+ss.getId()+" from scheduler");
+                    }
+                    catch (Exception e) {
+                        LOG.error("Error removing script schedule from scheduler",e);
+                    }
+                }
+            }
             success = true;
         } catch (SQLException exc) {
             throw new FxRemoveException(LOG, exc, "ex.scripting.remove.failed", scriptId, exc.getMessage());
@@ -1408,4 +1428,199 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
             }
         }
     }
+
+     /**
+     * {@inheritDoc}
+     * @since 3.1.2
+     */
+    public FxScriptSchedule createScriptSchedule(FxScriptScheduleEdit scriptSchedule) throws FxApplicationException {
+        FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.ScriptManagement);
+        FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.ScriptExecution);
+        FxScriptSchedule ss;
+        Connection con = null;
+        PreparedStatement ps = null;
+        String sql;
+        boolean success = false;
+        //check script existence
+        FxScriptInfo si = CacheAdmin.getEnvironment().getScript(scriptSchedule.getScriptId());
+        //check for valid script event
+        if (si.getEvent() != FxScriptEvent.Manual)
+            throw new FxConstraintViolationException("ex.scripting.schedule.wrongScriptEvent");
+        //check consistency
+        checkScriptScheduleConsistency(scriptSchedule);
+        try {
+            // for groovy scripts set cached flag to true
+            ss = new FxScriptSchedule(seq.getId(FxSystemSequencer.SCRIPTS), scriptSchedule.getScriptId(),
+                    scriptSchedule.getName(), scriptSchedule.isActive(), scriptSchedule.getStartTime(),
+                    scriptSchedule.getEndTime(), scriptSchedule.getRepeatInterval(),
+                    scriptSchedule.getRepeatTimes(), scriptSchedule.getCronString());
+
+            // Obtain a database connection
+            con = Database.getDbConnection();
+            //                                                1   2      3     4       5         6        7               8          9
+            sql = "INSERT INTO " + TBL_SCRIPT_SCHEDULES + " (ID,SCRIPT,SNAME,ACTIVE,STARTTIME,ENDTIME,REPEATINTERVAL,REPEATTIMES,CRONSTRING) VALUES (?,?,?,?,?,?,?,?,?)";
+            ps = con.prepareStatement(sql);
+            ps.setLong(1, ss.getId());
+            ps.setLong(2, ss.getScriptId());
+            ps.setString(3, ss.getName());
+            ps.setBoolean(4,ss.isActive());
+            ps.setTimestamp(5, new Timestamp(ss.getStartTime().getTime()));
+            ps.setTimestamp(6, ss.getEndTime() == null ? null : new Timestamp(ss.getEndTime().getTime()));
+            ps.setLong(7, ss.getRepeatInterval());
+            ps.setInt(8, ss.getRepeatTimes());
+            ps.setString(9, ss.getCronString());
+            ps.executeUpdate();
+            if (EJBLookup.getTimerService().isInstalled()) {
+                EJBLookup.getTimerService().scheduleScript(ss);
+            }
+            success = true;
+        } catch (SQLException exc) {
+            throw new FxCreateException(LOG, exc, "ex.scripting.schedule.create.failed", scriptSchedule.getName(), exc.getMessage());
+        } finally {
+            Database.closeObjects(ScriptingEngineBean.class, con, ps);
+            if (!success)
+                EJBUtils.rollback(ctx);
+            else
+                StructureLoader.reloadScripting(FxContext.get().getDivisionId());
+        }
+        return ss;
+    }
+
+     /**
+     * {@inheritDoc}
+     * @since 3.1.2
+     */
+    public FxScriptSchedule updateScriptSchedule(FxScriptScheduleEdit scriptSchedule) throws FxApplicationException {
+       FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.ScriptManagement);
+       FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.ScriptExecution);
+       FxScriptSchedule ss;
+       Connection con = null;
+       PreparedStatement ps = null;
+       String sql;
+       boolean success = false;
+       //check script schedule existence
+       CacheAdmin.getEnvironment().getScriptSchedule(scriptSchedule.getId());
+       //check script existence
+       FxScriptInfo si = CacheAdmin.getEnvironment().getScript(scriptSchedule.getScriptId());
+       //check for valid script event
+       if (si.getEvent() != FxScriptEvent.Manual)
+            throw new FxConstraintViolationException("ex.scripting.schedule.wrongScriptEvent");
+       //check consistency
+       checkScriptScheduleConsistency(scriptSchedule);
+        try {
+            ss = new FxScriptSchedule(scriptSchedule.getId(), scriptSchedule.getScriptId(),
+                    scriptSchedule.getName(), scriptSchedule.isActive(), scriptSchedule.getStartTime(),
+                    scriptSchedule.getEndTime(), scriptSchedule.getRepeatInterval(),
+                    scriptSchedule.getRepeatTimes(), scriptSchedule.getCronString());
+            // Obtain a database connection
+            con = Database.getDbConnection();       //        1        2          3            4            5                 6            7               8         9
+            sql = "UPDATE " + TBL_SCRIPT_SCHEDULES + " SET SNAME=?, ACTIVE=?, STARTTIME=?, ENDTIME=?, REPEATINTERVAL=?, REPEATTIMES=?, CRONSTRING=? WHERE ID=? AND SCRIPT=?";
+            ps = con.prepareStatement(sql);
+            ps.setString(1, ss.getName());
+            ps.setBoolean(2,ss.isActive());
+            ps.setTimestamp(3, new Timestamp(ss.getStartTime().getTime()));
+            ps.setTimestamp(4, ss.getEndTime() == null ? null :new Timestamp(ss.getEndTime().getTime()));
+            ps.setLong(5, ss.getRepeatInterval());
+            ps.setInt(6, ss.getRepeatTimes());
+            ps.setString(7, ss.getCronString());
+            ps.setLong(8, ss.getId());
+            ps.setLong(9, ss.getScriptId());
+            ps.executeUpdate();
+            if (EJBLookup.getTimerService().isInstalled()) {
+                EJBLookup.getTimerService().updateScriptSchedule(ss);
+            }
+            success = true;
+        } catch (SQLException exc) {
+            throw new FxUpdateException(LOG, exc, "ex.scripting.schedule.update.failed", scriptSchedule.getName(), exc.getMessage());
+        } finally {
+            Database.closeObjects(ScriptingEngineBean.class, con, ps);
+            if (!success)
+                EJBUtils.rollback(ctx);
+            else
+                StructureLoader.reloadScripting(FxContext.get().getDivisionId());
+        }
+        return ss;
+    }
+
+     /**
+     * {@inheritDoc}
+     * @since 3.1.2
+     */
+    public void removeScriptSchedule(long scheduleId) throws FxApplicationException {
+        FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.ScriptManagement);
+        FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.ScriptExecution);
+        Connection con = null;
+        PreparedStatement ps = null;
+        String sql;
+        boolean success = false;
+        FxScriptSchedule ss = CacheAdmin.getEnvironment().getScriptSchedule(scheduleId);
+         try {
+            // Obtain a database connection
+             con = Database.getDbConnection();
+             sql = "DELETE FROM " + TBL_SCRIPT_SCHEDULES + " WHERE ID=?";
+             ps = con.prepareStatement(sql);
+             ps.setLong(1, scheduleId);
+             ps.executeUpdate();
+             ps.close();
+             if (EJBLookup.getTimerService().isInstalled()) {
+                 try {
+                     boolean deleteSuccess = EJBLookup.getTimerService().deleteScriptSchedule(ss);
+                     if (deleteSuccess)
+                         LOG.debug("Script schedule with id " + ss.getId() + " successfully deleted from scheduler");
+                     else
+                         LOG.warn("Failed to delete script schedule with id " + ss.getId() + " from scheduler");
+                 }
+                 catch (Exception e) {
+                     LOG.error("Error removing script schedule from scheduler", e);
+                 }
+             }
+             success = true;
+        } catch (SQLException exc) {
+            throw new FxRemoveException(LOG, exc, "ex.scripting.schedule.remove.failed", scheduleId, exc.getMessage());
+        } finally {
+            Database.closeObjects(ScriptingEngineBean.class, con, ps);
+            if (!success)
+                EJBUtils.rollback(ctx);
+            else
+                StructureLoader.reloadScripting(FxContext.get().getDivisionId());
+        }
+    }
+
+    private void checkScriptScheduleConsistency(FxScriptScheduleEdit scriptSchedule) throws FxInvalidParameterException {
+        // repeat times must be either unbounded or >0
+        if (scriptSchedule.getRepeatTimes() <0
+                && scriptSchedule.getRepeatTimes() !=FxScriptSchedule.REPEAT_TIMES_UNBOUNDED)
+            throw new FxInvalidParameterException("repeatTimes",
+                "ex.scripting.schedule.parameter.repeatTimes.invalid");
+
+        // if and end time is specified, repeat times must be unbounded
+        if (scriptSchedule.getEndTime() != null &&
+                scriptSchedule.getRepeatTimes() != FxScriptSchedule.REPEAT_TIMES_UNBOUNDED)
+            throw new FxInvalidParameterException("repeatTimes",
+                "ex.scripting.schedule.parameter.endTimeAndRepeatNotUnbounded");
+
+        // if a cron string is specified, repeat times must be unbounded
+        if (StringUtils.isNotBlank(scriptSchedule.getCronString()) &&
+                scriptSchedule.getRepeatTimes() != FxScriptSchedule.REPEAT_TIMES_UNBOUNDED)
+            throw new FxInvalidParameterException("repeatTimes",
+                "ex.scripting.schedule.parameter.cronStringAndRepeatNotUnbounded");
+
+        // if a cron string is specified, repeat interval must be < 0
+        if (StringUtils.isNotBlank(scriptSchedule.getCronString()) &&
+                !(scriptSchedule.getRepeatInterval() < 0))
+            throw new FxInvalidParameterException("repeatTimes",
+                "ex.scripting.schedule.parameter.cronStringAndRepeatInterval");
+
+        // invalid cron String
+        if (StringUtils.isNotBlank(scriptSchedule.getCronString())) {
+           EJBLookup.getTimerService().parseCronString(scriptSchedule.getCronString());
+        }
+
+        //if start and end time are specified, end time must be after start time
+        if (scriptSchedule.getStartTime() != null && scriptSchedule.getEndTime() !=null
+                && !scriptSchedule.getEndTime().after(scriptSchedule.getStartTime()))
+            throw new FxInvalidParameterException("endTime",
+                "ex.scripting.schedule.parameter.endTimeAfterStartTime");
+    }
+
 }

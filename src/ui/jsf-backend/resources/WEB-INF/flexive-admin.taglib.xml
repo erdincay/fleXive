@@ -165,4 +165,17 @@
         <function-class>com.flexive.war.beans.admin.AdminConfigurationBean</function-class>
         <function-signature>java.lang.String getVersionedUrl(java.lang.String)</function-signature>
     </function>
+
+    <function>
+        <function-name>scriptNameForId</function-name>
+        <function-class>com.flexive.war.beans.admin.main.ScriptScheduleBean</function-class>
+        <function-signature>java.lang.String getScriptNameForId(long)</function-signature>
+    </function>
+
+    <function>
+        <function-name>formatTimeSpanForScheduler</function-name>
+        <function-class>com.flexive.shared.FxFormatUtils</function-class>
+        <function-signature>java.lang.String formatTimeSpanForScheduler(long)</function-signature>
+    </function>
+
 </facelet-taglib>

@@ -31,6 +31,10 @@
  ***************************************************************/
 package com.flexive.shared.interfaces;
 
+import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.exceptions.FxInvalidParameterException;
+import com.flexive.shared.scripting.FxScriptSchedule;
+
 import javax.ejb.Remote;
 
 /**
@@ -65,4 +69,42 @@ public interface FxTimerService {
      * perform maintenance
      */
     void maintenance();
+
+    /**
+     * Schedule a script
+     *
+     * @param scriptSchedule            script schedule
+     * @throws FxApplicationException   on errors
+     * @since 3.1.2
+     */
+    void scheduleScript(FxScriptSchedule scriptSchedule) throws FxApplicationException;
+
+    /**
+     * Update a scheduled script
+     *
+     * @param scriptSchedule            script schedule
+     * @throws FxApplicationException   on errors
+     * @since 3.1.2
+     */
+    void updateScriptSchedule(FxScriptSchedule scriptSchedule) throws FxApplicationException;
+
+    /**
+     * Delete a script schedule
+     *
+     * @param scriptSchedule            script schedule
+     * @throws FxApplicationException   on errors
+     * @since 3.1.2
+     * @return  true if script schedule was found and could be deleted
+     */
+    boolean deleteScriptSchedule(FxScriptSchedule scriptSchedule) throws FxApplicationException;
+
+    /**
+     * Parses a Cron String and throws an exception
+     * if it cannot be parsed
+     *
+     * @param cronString  Cron String
+     * @since 3.1.2
+     * @throws com.flexive.shared.exceptions.FxInvalidParameterException on errors
+     */
+    void parseCronString(String cronString) throws FxInvalidParameterException;
 }

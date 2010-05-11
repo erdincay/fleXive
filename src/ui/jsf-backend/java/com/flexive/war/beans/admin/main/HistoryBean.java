@@ -84,6 +84,7 @@ public class HistoryBean implements Serializable {
             availableGroups.add(new SelectItem("history.type.", "Type"));
             availableGroups.add(new SelectItem("history.group.", "Type group"));
             availableGroups.add(new SelectItem("history.assignment.", "Assignments"));
+            availableGroups.add(new SelectItem("history.scriptSchedule.", "Script Schedule"));
         }
         return availableGroups;
     }

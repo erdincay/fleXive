@@ -37,6 +37,7 @@ import com.flexive.shared.exceptions.FxNoAccessException;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.scripting.FxScriptInfo;
 import com.flexive.shared.scripting.FxScriptMapping;
+import com.flexive.shared.scripting.FxScriptSchedule;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.security.Mandator;
@@ -546,6 +547,30 @@ public final class FxFilteredEnvironment implements FxEnvironment {
      */
     public FxScriptMapping getScriptMapping(long scriptId) {
         return environment.getScriptMapping(scriptId);
+    }
+
+    /**
+     * {@inheritDoc}
+     * @since 3.1.2
+     */
+    public List<FxScriptSchedule> getScriptSchedules() {
+        return environment.getScriptSchedules();
+    }
+    
+    /**
+     * {@inheritDoc}
+     * @since 3.1.2
+     */
+    public FxScriptSchedule getScriptSchedule(long scriptScheduleId) {
+        return environment.getScriptSchedule(scriptScheduleId);
+    }
+
+    /**
+     * {@inheritDoc}
+     * @since 3.1.2
+     */
+    public List<FxScriptSchedule> getScriptSchedulesForScript(long scriptId) {
+        return environment.getScriptSchedulesForScript(scriptId);
     }
 
     /**

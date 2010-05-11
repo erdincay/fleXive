@@ -37,6 +37,7 @@ import com.flexive.shared.exceptions.FxLoadException;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.scripting.FxScriptInfo;
 import com.flexive.shared.scripting.FxScriptMapping;
+import com.flexive.shared.scripting.FxScriptSchedule;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.Mandator;
 import com.flexive.shared.structure.*;
@@ -183,6 +184,17 @@ public interface EnvironmentLoader {
      * @throws FxLoadException on errors
      */
     List<FxScriptMapping> loadScriptMapping(Connection con, FxEnvironmentImpl environment) throws FxLoadException;
+
+     /**
+     * Load all script schedules
+     *
+     * @param con         open and valid db connection
+     * @param environment environment
+     * @return all script schedules
+     * @since 3.1.2
+     * @throws FxLoadException on errors
+     */
+    List<FxScriptSchedule> loadScriptSchedules(Connection con, FxEnvironmentImpl environment) throws FxLoadException;
 
     /**
      * Load all select lists

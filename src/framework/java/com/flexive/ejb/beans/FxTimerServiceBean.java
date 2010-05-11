@@ -35,11 +35,16 @@ import com.flexive.core.timer.FxQuartz;
 import com.flexive.core.Database;
 import com.flexive.core.flatstorage.FxFlatStorageManager;
 import com.flexive.core.storage.StorageManager;
+import com.flexive.shared.FxContext;
+import com.flexive.shared.content.FxPermissionUtils;
+import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.interfaces.FxTimerService;
 import com.flexive.shared.interfaces.FxTimerServiceLocal;
 import com.flexive.shared.configuration.DivisionData;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.scripting.FxScriptSchedule;
+import com.flexive.shared.security.Role;
 import com.flexive.shared.structure.TypeStorageMode;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -236,6 +241,47 @@ public class FxTimerServiceBean implements FxTimerService, FxTimerServiceLocal {
         } catch (FxApplicationException e) {
             LOG.error("Maintenance error: " + e.getMessage(), e);
         }
+    }
 
+     /**
+     * {@inheritDoc}
+     * @since 3.1.2
+     */
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public void scheduleScript(FxScriptSchedule scriptSchedule) throws FxApplicationException {
+         FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.ScriptManagement);
+         FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.ScriptExecution);
+         FxQuartz.scheduleScript(scriptSchedule);
+    }
+
+    /**
+     * {@inheritDoc}
+     * @since 3.1.2
+     */
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public void updateScriptSchedule(FxScriptSchedule scriptSchedule) throws FxApplicationException {
+        FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.ScriptManagement);
+        FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.ScriptExecution);
+        FxQuartz.updateScriptSchedule(scriptSchedule);
+    }
+
+    /**
+     * {@inheritDoc}
+     * @since 3.1.2
+     */
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public boolean deleteScriptSchedule(FxScriptSchedule scriptSchedule) throws FxApplicationException {
+        FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.ScriptManagement);
+        FxPermissionUtils.checkRole(FxContext.getUserTicket(), Role.ScriptExecution);
+        return FxQuartz.deleteScriptSchedule(scriptSchedule);
+    }
+
+     /**
+     * {@inheritDoc}
+     * @since 3.1.2
+     */
+    @TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)
+    public void parseCronString(String cronString) throws FxInvalidParameterException {
+        FxQuartz.parseCronString(cronString);
     }
 }

@@ -44,6 +44,7 @@ import com.flexive.shared.media.impl.FxMimeType;
 import com.flexive.shared.scripting.FxScriptInfo;
 import com.flexive.shared.scripting.FxScriptMapping;
 import com.flexive.shared.scripting.FxScriptMappingEntry;
+import com.flexive.shared.scripting.FxScriptSchedule;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.security.Mandator;
@@ -88,6 +89,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
     private List<Step> steps;
     private List<FxScriptInfo> scripts;
     private List<FxScriptMapping> scriptMappings;
+    private List<FxScriptSchedule> scriptSchedules;
     private List<FxLanguage> languages;
     private FxLanguage systemInternalLanguage;
     private long timeStamp = 0;
@@ -125,6 +127,7 @@ public final class FxEnvironmentImpl implements FxEnvironment {
         if (e.scripts != null) {
             this.scripts = new ArrayList<FxScriptInfo>(e.scripts);
             this.scriptMappings = new ArrayList<FxScriptMapping>(e.scriptMappings);
+            this.scriptSchedules = new ArrayList<FxScriptSchedule>(e.scriptSchedules);
         }
         this.selectLists = new ArrayList<FxSelectList>(e.selectLists);
         this.languages = new ArrayList<FxLanguage>(e.languages);
@@ -391,6 +394,15 @@ public final class FxEnvironmentImpl implements FxEnvironment {
      */
     public void setScriptMappings(List<FxScriptMapping> scriptMappings) {
         this.scriptMappings = scriptMappings;
+    }
+
+    /**
+     * Set script schedules
+     *
+     * @param scriptSchedules all script schedules
+     */
+    public void setScriptSchedules(List<FxScriptSchedule> scriptSchedules) {
+        this.scriptSchedules = scriptSchedules;
     }
 
     /**
@@ -1075,6 +1087,37 @@ public final class FxEnvironmentImpl implements FxEnvironment {
     }
 
     /**
+     * {@inheritDoc}
+     * @since 3.1.2
+     */
+    public List<FxScriptSchedule> getScriptSchedules() {
+        return Collections.unmodifiableList(this.scriptSchedules);
+    }
+
+    /**
+     * {@inheritDoc}
+     * @since 3.1.2
+     */
+    public FxScriptSchedule getScriptSchedule(long scriptScheduleId) {
+        for (FxScriptSchedule ss : this.scriptSchedules)
+            if (ss.getId() == scriptScheduleId)
+                return ss;
+        throw new FxNotFoundException("ex.scripting.schedule.notFound.id", scriptScheduleId).asRuntimeException();
+    }
+
+   /**
+     * {@inheritDoc}
+     * @since 3.1.2
+     */
+    public List<FxScriptSchedule> getScriptSchedulesForScript(long scriptId) {
+        List<FxScriptSchedule> result = new ArrayList<FxScriptSchedule>(10);
+        for (FxScriptSchedule ss : this.scriptSchedules)
+            if (ss.getScriptId() == scriptId)
+                result.add(ss);
+         return Collections.unmodifiableList(result);
+    }
+
+    /**
      * Resolve all missing dependencies
      *
      * @throws FxNotFoundException if a dependency could not be resolved
@@ -1228,11 +1271,13 @@ public final class FxEnvironmentImpl implements FxEnvironment {
      *
      * @param scripts       all scripts
      * @param scriptMapping all mappings
+     * @param scriptSchedules scriptSchedules
      * @throws FxNotFoundException if dependencies can not be resolved
      */
-    public void updateScripting(List<FxScriptInfo> scripts, List<FxScriptMapping> scriptMapping) throws FxNotFoundException {
+    public void updateScripting(List<FxScriptInfo> scripts, List<FxScriptMapping> scriptMapping, List<FxScriptSchedule> scriptSchedules) throws FxNotFoundException {
         this.scripts = scripts;
         this.scriptMappings = scriptMapping;
+        this.scriptSchedules = scriptSchedules;
         resolveDependencies();
     }
 

@@ -124,6 +124,7 @@ public final class StructureLoader {
             environment.setAssignments(loader.loadAssignments(con, environment));
             environment.setScripts(loader.loadScripts(con));
             environment.setScriptMappings(loader.loadScriptMapping(con, environment));
+            environment.setScriptSchedules(loader.loadScriptSchedules(con, environment));
             environment.setLanguages(EJBLookup.getLanguageEngine().loadAvailable(true));
             environment.resolveDependencies();
             environment.updateTimeStamp();
@@ -236,7 +237,7 @@ public final class StructureLoader {
             FxEnvironmentImpl environment = ((FxEnvironmentImpl) CacheAdmin.getEnvironment()).deepClone();
             EnvironmentLoader loader;
             loader = StorageManager.getEnvironmentLoader(EJBLookup.getGlobalConfigurationEngine().getDivisionData(divisionId));
-            environment.updateScripting(loader.loadScripts(con), loader.loadScriptMapping(con, environment));
+            environment.updateScripting(loader.loadScripts(con), loader.loadScriptMapping(con, environment), loader.loadScriptSchedules(con, environment));
             environment.updateTimeStamp();
             FxEnvironmentUtils.cachePut(divisionId, CacheAdmin.ENVIRONMENT_BASE, CacheAdmin.ENVIRONMENT_RUNTIME, environment);
             CacheAdmin.getEnvironment();

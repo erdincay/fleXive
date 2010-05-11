@@ -138,6 +138,14 @@
     </managed-bean>
 
     <managed-bean>
+        <managed-bean-name>scriptScheduleBean</managed-bean-name>
+        <managed-bean-class>
+            com.flexive.war.beans.admin.main.ScriptScheduleBean
+        </managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean>
+
+    <managed-bean>
         <managed-bean-name>briefcaseBean</managed-bean-name>
         <managed-bean-class>
             com.flexive.war.beans.admin.briefcase.BriefcaseBean
@@ -637,6 +645,11 @@
         <navigation-case>
             <from-outcome>structureExportResult</from-outcome>
             <to-view-id>/adm/main/importexport/structureExportResult.xhtml</to-view-id>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>scriptScheduleOverview</from-outcome>
+            <to-view-id>/adm/main/scripting/schedules.xhtml</to-view-id>
         </navigation-case>
 
     </navigation-rule>

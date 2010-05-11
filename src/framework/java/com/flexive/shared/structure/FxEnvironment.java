@@ -34,6 +34,7 @@ package com.flexive.shared.structure;
 import com.flexive.shared.FxLanguage;
 import com.flexive.shared.scripting.FxScriptInfo;
 import com.flexive.shared.scripting.FxScriptMapping;
+import com.flexive.shared.scripting.FxScriptSchedule;
 import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.security.Mandator;
@@ -613,6 +614,33 @@ public interface FxEnvironment extends Serializable {
      * @return the script info object
      */
     FxScriptInfo getScript(String name);
+
+
+    /**
+     * Get all script schedules
+     *
+     * @return all script schedules
+     * @since 3.1.2
+     */
+    List<FxScriptSchedule> getScriptSchedules();
+
+     /**
+     * Get a script schedule by its id
+     *
+     * @param scriptScheduleId requested script schedule id
+     * @return the script schedule
+     * @since 3.1.2
+     */
+    FxScriptSchedule getScriptSchedule(long scriptScheduleId);
+
+    /**
+     * Get all script schedules for a script
+     *
+     * @param scriptId requested script id
+     * @return all script schedules for a script
+     * @since 3.1.2
+     */
+    List<FxScriptSchedule> getScriptSchedulesForScript(long scriptId);
 
     /**
      * Check if a script with the given name exists

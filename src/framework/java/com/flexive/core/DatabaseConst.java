@@ -229,6 +229,11 @@ public final class DatabaseConst {
      */
     public static final String TBL_SCRIPTS = "FXS_SCRIPTS";
     /**
+     * Script schedule table
+     * @since 3.1.2
+     */
+    public static final String TBL_SCRIPT_SCHEDULES = "FXS_SCRIPT_SCHEDULES";
+    /**
      * Script mapping table for assignments
      */
     public static final String TBL_SCRIPT_MAPPING_ASSIGN = "FXS_SCRIPT_ASS_MAPPING";

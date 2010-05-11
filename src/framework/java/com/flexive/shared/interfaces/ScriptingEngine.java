@@ -437,4 +437,33 @@ public interface ScriptingEngine {
      * @throws FxApplicationException on errors
      */
     List<FxScriptRunInfo> getRunOnceInformation() throws FxApplicationException;
+
+    /**
+     * Create a script schedule
+     *
+     * @param scriptSchedule script schedule edit
+     * @return the created script schedule
+     * @since 3.1.2
+     * @throws FxApplicationException   on errors
+     */
+    FxScriptSchedule createScriptSchedule(FxScriptScheduleEdit scriptSchedule) throws FxApplicationException;
+
+    /**
+     * Removes an existing script schedule
+     *
+     * @param scheduleId script schedule id
+     * @since 3.1.2
+     * @throws FxApplicationException   on errors
+     */
+    void removeScriptSchedule(long scheduleId) throws FxApplicationException;
+
+    /**
+     * Update an existing script schedule
+     *
+     * @param scriptSchedule  script schedule
+     * @return  the updated script schedule
+     * @since 3.1.2
+     * @throws FxApplicationException   on errors
+     */
+    FxScriptSchedule updateScriptSchedule(FxScriptScheduleEdit scriptSchedule) throws FxApplicationException;
 }

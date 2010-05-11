@@ -33,14 +33,14 @@ package com.flexive.core.timer;
 
 import com.flexive.core.security.UserTicketImpl;
 import com.flexive.core.timer.jobs.MaintenanceJob;
-import com.flexive.core.Database;
+import com.flexive.core.timer.jobs.ScriptExecutionJob;
 import com.flexive.shared.FxContext;
+import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.exceptions.FxInvalidParameterException;
+import com.flexive.shared.scripting.FxScriptSchedule;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.quartz.JobDetail;
-import org.quartz.Scheduler;
-import org.quartz.SchedulerException;
-import org.quartz.SimpleTrigger;
+import org.quartz.*;
 import org.quartz.impl.SchedulerRepository;
 import org.quartz.impl.StdSchedulerFactory;
 import org.quartz.impl.jdbcjobstore.JobStoreCMT;
@@ -48,8 +48,8 @@ import org.quartz.impl.jdbcjobstore.StdJDBCDelegate;
 import org.quartz.impl.jdbcjobstore.PostgreSQLDelegate;
 import org.quartz.simpl.SimpleThreadPool;
 
+import java.text.ParseException;
 import java.util.Properties;
-import java.sql.SQLException;
 
 /**
  * Quartz scheduler [fleXive] integration
@@ -62,6 +62,8 @@ public class FxQuartz {
     private static final Log LOG = LogFactory.getLog(FxQuartz.class);
 
     public final static String GROUP_INTERNAL = "FxInternal";
+    public final static String TRIGGER_GROUP_FX_SCRIPT_SCHEDULE="FxScriptSchedule";
+    public final static String JOB_GROUP_SCRIPT_EXECUTION = "FxScriptExecutionJob";
     public final static String JOB_MAINTENANCE = "FxMaintenanceJob";
     /** A system property to disable the Quartz-based timer service (e.g. for tests) */
     public static final String PROP_DISABLE = "flexive.quartz.disable";
@@ -175,6 +177,125 @@ public class FxQuartz {
         tr.setVolatility(false);
         scheduler.scheduleJob(job, tr);
         LOG.info("Quartz started and maintenance job is scheduled.");
+    }
+
+    /**
+     * Schedule a script
+     *
+     * @param scriptSchedule            script schedule
+     * @throws FxApplicationException   on errors
+     * @since 3.1.2
+     */
+    public static void scheduleScript(FxScriptSchedule scriptSchedule) throws FxApplicationException {
+        if (!isInstalled())
+            throw new FxApplicationException("ex.timer.not.installed");
+        try {
+            getScheduler().scheduleJob(createScriptExecutionJob(scriptSchedule),
+                    getScriptScheduleTrigger(scriptSchedule));
+            if (!scriptSchedule.isActive())
+                getScheduler().pauseTrigger(String.valueOf(scriptSchedule.getId()),TRIGGER_GROUP_FX_SCRIPT_SCHEDULE);
+        }
+        catch (Exception e) {
+            throw new FxApplicationException(LOG,e);
+        }
+    }
+
+    /**
+     * Update a scheduled script
+     *
+     * @param scriptSchedule            script schedule
+     * @throws FxApplicationException   on errors
+     * @since 3.1.2
+     */
+    public static void updateScriptSchedule(FxScriptSchedule scriptSchedule) throws FxApplicationException {
+        if (!isInstalled())
+            throw new FxApplicationException("ex.timer.not.installed");
+        deleteScriptSchedule(scriptSchedule);
+        scheduleScript(scriptSchedule);
+    }
+
+    /**
+     * Delete a script schedule
+     *
+     * @param scriptSchedule            script schedule
+     * @throws FxApplicationException   on errors
+     * @since 3.1.2
+     * @return true if script schedule was found and could be deleted
+     */
+    public static boolean deleteScriptSchedule(FxScriptSchedule scriptSchedule) throws FxApplicationException {
+        if (!isInstalled())
+            throw new FxApplicationException("ex.timer.not.installed");
+        try {
+            return getScheduler().deleteJob(String.valueOf(scriptSchedule.getId()),JOB_GROUP_SCRIPT_EXECUTION);
+        }
+        catch (Exception e) {
+            throw new FxApplicationException(LOG,e);
+        }
+    }
+
+    /**
+     * Parses a Cron String and throws an exception
+     * if it cannot be parsed
+     *
+     * @param cronString  Cron String
+     * @since 3.1.2
+     * @throws com.flexive.shared.exceptions.FxInvalidParameterException on errors
+     */
+    public static void parseCronString(String cronString) throws FxInvalidParameterException {
+        try {
+                new CronExpression(cronString);
+            }
+            catch (ParseException e) {
+                throw new FxInvalidParameterException(
+                       "cronString","ex.scripting.schedule.parameter.cronString",
+                        cronString,e.getMessage());
+            }
+    }
+
+     /**
+     * Creates a trigger for a given script schedule.
+     *
+     * @param scriptSchedule script schedule
+     * @return trigger
+     * @throws java.text.ParseException        if the cron String cannot be parsed
+     * @throws org.quartz.SchedulerException   if the trigger data is invalid
+     */
+    private static Trigger getScriptScheduleTrigger(FxScriptSchedule scriptSchedule) throws ParseException, SchedulerException {
+         final Trigger t;
+         final String triggerName = String.valueOf(scriptSchedule.getId());
+         if (scriptSchedule.getCronString() != null) {
+            t = new CronTrigger(triggerName, TRIGGER_GROUP_FX_SCRIPT_SCHEDULE,
+                        scriptSchedule.getCronString());
+         }
+         else {
+             t = new SimpleTrigger(triggerName, TRIGGER_GROUP_FX_SCRIPT_SCHEDULE,
+                     scriptSchedule.getStartTime());
+             if (scriptSchedule.isUnbounded())
+                 ((SimpleTrigger)t).setRepeatCount(SimpleTrigger.REPEAT_INDEFINITELY);
+             if (scriptSchedule.getRepeatInterval() > 0)
+                ((SimpleTrigger)t).setRepeatInterval(scriptSchedule.getRepeatInterval());    
+         }
+         // set end time
+         if (t.getEndTime() != null)
+             t.setEndTime(scriptSchedule.getEndTime());
+         // set volatility
+         t.setVolatility(false);
+         return t;
+    }
+
+    /**
+     * Creates a script execution job detail for a given script schedule.
+     *
+     * @param scriptSchedule script schedule
+     * @return script execution job detail
+     */
+    private static JobDetail createScriptExecutionJob(FxScriptSchedule scriptSchedule) {
+        JobDetail scriptExecutionJob = new JobDetail(String.valueOf(scriptSchedule.getId()), JOB_GROUP_SCRIPT_EXECUTION, ScriptExecutionJob.class);
+        scriptExecutionJob.getJobDataMap().put(ScriptExecutionJob.KEY_SCRIPT_ID,scriptSchedule.getScriptId());
+        scriptExecutionJob.getJobDataMap().put(ScriptExecutionJob.KEY_SCHEDULE_NAME,scriptSchedule.getName());
+        scriptExecutionJob.getJobDataMap().put(ScriptExecutionJob.KEY_SCHEDULE_ID,scriptSchedule.getId());
+        scriptExecutionJob.setVolatility(false);
+        return scriptExecutionJob;
     }
 
     /**
