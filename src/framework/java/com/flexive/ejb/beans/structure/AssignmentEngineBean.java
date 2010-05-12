@@ -998,6 +998,14 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 }
                 changes = true;
             }
+            // set the assignment's position
+            if (org.getPosition() != group.getPosition()) {
+                int finalPos = setAssignmentPosition(con, group.getId(), group.getPosition());
+                if (changes)
+                    changesDesc.append(',');
+                changesDesc.append("position=").append(finalPos);
+                changes = true;
+            }
             // change the assignment's default multiplicity (will be auto-adjusted to a valid value in FxGroupAssignmentEdit)
             if (org.getDefaultMultiplicity() != group.getDefaultMultiplicity()) {
                 ps = con.prepareStatement("UPDATE " + TBL_STRUCT_ASSIGNMENTS + " SET DEFMULT=? WHERE ID=?");

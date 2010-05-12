@@ -243,23 +243,18 @@ public class StructureTreeWriter implements Serializable {
         writer.startNode(new Node(String.valueOf(group.getId()), isShowLabels ? group.getDisplayName() : (String)nodeProperties.get("alias"), DOC_TYPE_GROUP, nodeProperties));
         writer.startChildren();
 
-        // sort and write nested groups
-        List<FxGroupAssignment> nested = new ArrayList<FxGroupAssignment>();
-        nested.addAll(group.getAssignedGroups());
-        Collections.sort(nested, new FxSharedUtils.AssignmentPositionSorter());
-        for (FxGroupAssignment nestedGroup : nested) {
-            writeGroupAssignment(writer, nodeProperties, nestedGroup, isShowLabels);
+        List<FxAssignment> children = new ArrayList<FxAssignment>(group.getAssignedGroups().size()+group.getAssignedProperties().size());
+        children.addAll(group.getAssignedGroups());
+        children.addAll(group.getAssignedProperties());
+        Collections.sort(children, new FxSharedUtils.AssignmentPositionSorter());
+
+        for(FxAssignment child: children) {
+            if( child instanceof FxGroupAssignment)
+                writeGroupAssignment(writer, nodeProperties, (FxGroupAssignment)child, isShowLabels);
+            else
+                writePropertyAssignment(writer, nodeProperties, (FxPropertyAssignment)child, isShowLabels);
         }
 
-        // sort and write properties
-        List<FxPropertyAssignment> props = new ArrayList<FxPropertyAssignment>();
-        props.addAll(group.getAssignedProperties());
-        Collections.sort(props, new FxSharedUtils.AssignmentPositionSorter());
-        for (FxPropertyAssignment property : props) {
-            if (!property.isSystemInternal()) {
-                writePropertyAssignment(writer, nodeProperties, property, isShowLabels);
-            }
-        }
 		// add assigned properties
 		writer.closeChildren();
 		writer.closeNode();
