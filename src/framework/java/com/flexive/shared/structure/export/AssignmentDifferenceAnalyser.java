@@ -125,18 +125,22 @@ public final class AssignmentDifferenceAnalyser {
         List<FxStructureOption> propOptions = prop.getOptions();
         List<FxStructureOption> aOptions = pa.getOptions();
 
-        Outer:
-        for (FxStructureOption propOpt : propOptions) {
-            for (FxStructureOption aOpt : aOptions) {
-                if (propOpt.getKey().equals(aOpt.getKey())) {
-                    if (aOpt.getIntValue() != propOpt.getIntValue()) {
-                        result.add("structureoptions");
-                        break Outer;
-                    }
-                } else {
-                    if (!propOptions.contains(aOpt)) {
-                        result.add("structureoptions");
-                        break Outer;
+        if (aOptions.size() != propOptions.size()) {
+            result.add("structureoptions");
+        } else {
+            Outer:
+            for (FxStructureOption propOpt : propOptions) {
+                for (FxStructureOption aOpt : aOptions) {
+                    if (propOpt.getKey().equals(aOpt.getKey())) {
+                        if (aOpt.getIntValue() != propOpt.getIntValue()) {
+                            result.add("structureoptions");
+                            break Outer;
+                        }
+                    } else {
+                        if (!propOptions.contains(aOpt)) {
+                            result.add("structureoptions");
+                            break Outer;
+                        }
                     }
                 }
             }
@@ -221,18 +225,22 @@ public final class AssignmentDifferenceAnalyser {
         List<FxStructureOption> propOptions = base.getOptions();
         List<FxStructureOption> aOptions = pa.getOptions();
 
-        Outer:
-        for (FxStructureOption propOpt : propOptions) {
-            for (FxStructureOption aOpt : aOptions) {
-                if (propOpt.getKey().equals(aOpt.getKey())) {
-                    if (aOpt.getIntValue() != propOpt.getIntValue()) {
-                        result.add("structureoptions");
-                        break Outer;
-                    }
-                } else {
-                    if (!propOptions.contains(aOpt)) {
-                        result.add("structureoptions");
-                        break Outer;
+        if (aOptions.size() != propOptions.size()) {
+            result.add("structureoptions");
+        } else {
+            Outer:
+            for (FxStructureOption propOpt : propOptions) {
+                for (FxStructureOption aOpt : aOptions) {
+                    if (propOpt.getKey().equals(aOpt.getKey())) {
+                        if (aOpt.getIntValue() != propOpt.getIntValue()) {
+                            result.add("structureoptions");
+                            break Outer;
+                        }
+                    } else {
+                        if (!propOptions.contains(aOpt)) {
+                            result.add("structureoptions");
+                            break Outer;
+                        }
                     }
                 }
             }
@@ -267,18 +275,22 @@ public final class AssignmentDifferenceAnalyser {
         List<FxStructureOption> groupOptions = group.getOptions();
         List<FxStructureOption> aOptions = ga.getOptions();
 
-        Outer:
-        for (FxStructureOption groupOpt : groupOptions) {
-            for (FxStructureOption aOpt : aOptions) {
-                if (groupOpt.getKey().equals(aOpt.getKey())) {
-                    if (aOpt.getIntValue() != groupOpt.getIntValue()) {
-                        result.add("structureoptions");
-                        break Outer;
-                    }
-                } else {
-                    if (!groupOptions.contains(aOpt)) {
-                        result.add("structureoptions");
-                        break Outer;
+        if (aOptions.size() != groupOptions.size()) {
+            result.add("structureoptions");
+        } else {
+            Outer:
+            for (FxStructureOption groupOpt : groupOptions) {
+                for (FxStructureOption aOpt : aOptions) {
+                    if (groupOpt.getKey().equals(aOpt.getKey())) {
+                        if (aOpt.getIntValue() != groupOpt.getIntValue()) {
+                            result.add("structureoptions");
+                            break Outer;
+                        }
+                    } else {
+                        if (!groupOptions.contains(aOpt)) {
+                            result.add("structureoptions");
+                            break Outer;
+                        }
                     }
                 }
             }
@@ -330,18 +342,22 @@ public final class AssignmentDifferenceAnalyser {
         List<FxStructureOption> groupOptions = base.getOptions();
         List<FxStructureOption> aOptions = ga.getOptions();
 
-        Outer:
-        for (FxStructureOption groupOpt : groupOptions) {
-            for (FxStructureOption aOpt : aOptions) {
-                if (groupOpt.getKey().equals(aOpt.getKey())) {
-                    if (aOpt.getIntValue() != groupOpt.getIntValue()) {
-                        result.add("structureoptions");
-                        break Outer;
-                    }
-                } else {
-                    if (!groupOptions.contains(aOpt)) {
-                        result.add("structureoptions");
-                        break Outer;
+        if (aOptions.size() != groupOptions.size()) {
+            result.add("structureoptions");
+        } else {
+            Outer:
+            for (FxStructureOption groupOpt : groupOptions) {
+                for (FxStructureOption aOpt : aOptions) {
+                    if (groupOpt.getKey().equals(aOpt.getKey())) {
+                        if (aOpt.getIntValue() != groupOpt.getIntValue()) {
+                            result.add("structureoptions");
+                            break Outer;
+                        }
+                    } else {
+                        if (!groupOptions.contains(aOpt)) {
+                            result.add("structureoptions");
+                            break Outer;
+                        }
                     }
                 }
             }
@@ -353,7 +369,9 @@ public final class AssignmentDifferenceAnalyser {
     /**
      * Compares the language arrays
      *
+     * @param s1 FxString obj 1
      * @param languages1 long[] array of lang ids
+     * @param s2 FxString obj 2
      * @param languages2 long[] array of lang ids
      * @return true if the language arrays differ
      */
