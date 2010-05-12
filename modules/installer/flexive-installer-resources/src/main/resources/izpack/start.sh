@@ -5,5 +5,5 @@
 
 DIR=$(cd $(dirname $0); pwd -P)
 cd $DIR/jetty
-java -Dopenejb.configuration=openejb.conf.xml -Xmx200m -jar start.jar etc/jetty.xml etc/jetty-ssl.xml
+java -Xmx200m -Dopenejb.configuration=openejb.conf.xml -Dopenejb.logger.external=true -jar start.jar etc/jetty.xml etc/jetty-ssl.xml
  

@@ -273,8 +273,11 @@
                                        lockscreen="true"/>
 
                 <script type="text/javascript">
-                    if (#{empty scriptScheduleBean.schedule})
-                        #{rich:component('editPanel')}.hide();    
+                <!--
+                    if (#{empty scriptScheduleBean.schedule} && #{rich:component('editPanel')}) {
+                        #{rich:component('editPanel')}.hide();
+                    }
+                //-->
                 </script>
                 <fx:yuiSetup/>
             </h:form>

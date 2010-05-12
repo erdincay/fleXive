@@ -211,8 +211,9 @@
                                 <unzip src="${basedir}/src/${jetty.zipFile}" dest="${staging.dir}"/>
                                 <move file="${staging.dir}/jetty-${jetty.version}" tofile="${staging.dir}/jetty"/>
                                                                                                                                            
-                                <!-- Install our own webdefault.xml -->
+                                <!-- Install our customized Jetty configs -->
                                 <copy file="${staging.dir}/izpack/jetty-webdefault.xml" tofile="${jetty.staging.dir}/etc/webdefault.xml"/>
+                                <copy file="${staging.dir}/izpack/log4j.properties" tofile="${jetty.staging.dir}/resources/log4j.properties"/>
                                 
                                 <!-- Clean up default installation -->
                                 <delete>
