@@ -1687,6 +1687,10 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     } else
                         throw new FxUpdateException("ex.structure.modification.systemInternal.notGlobalSupervisor", prop.getName());
                 }
+                if(org.isMultiLang() != prop.isMultiLang()) {
+                    if(getPropertyInstanceCount(org.getId()) > 0 ) 
+                        throw new FxUpdateException("ex.structure.modification.contentExists", "multiLang");
+                }
             }
             if (updatePropertyOptions(con, prop)) {
                 changesDesc.append(",options:");
@@ -1874,6 +1878,10 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                     if (!original.getProperty().mayOverrideMultiLang())
                         //noinspection ThrowableInstanceNeverThrown
                         throw new FxUpdateException("ex.structure.assignment.overrideNotAllowed.multiLang", original.getXPath(),
+                                original.getProperty().getName()).setAffectedXPath(original.getXPath(), FxContentExceptionCause.MultiLangOverride);
+                    if (modified.isFlatStorageEntry() && getAssignmentInstanceCount(modified.getId()) > 0)
+                        //noinspection ThrowableInstanceNeverThrown
+                        throw new FxUpdateException("ex.structure.assignment.overrideNotSupported.multiLang", original.getXPath(),
                                 original.getProperty().getName()).setAffectedXPath(original.getXPath(), FxContentExceptionCause.MultiLangOverride);
                     StorageManager.getContentStorage(TypeStorageMode.Hierarchical).
                             updateMultilanguageSettings(con, original.getId(), original.isMultiLang(), modified.isMultiLang(), modified.getDefaultLanguage());
