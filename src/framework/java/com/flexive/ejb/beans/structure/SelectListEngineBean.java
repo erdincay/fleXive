@@ -613,9 +613,9 @@ public class SelectListEngineBean implements SelectListEngine, SelectListEngineL
         if (list.getName() == null || list.getName().equals(""))
             throw new FxInvalidParameterException("Name", "ex.selectlist.name.empty");
         if (list.getName().indexOf('.') > 0)
-            throw new FxInvalidParameterException("Name", "ex.selectlist.name.containsDot");
+            throw new FxInvalidParameterException("Name", "ex.selectlist.name.containsDot", list.getName());
         if (list.getName().indexOf(',') > 0)
-            throw new FxInvalidParameterException("Name", "ex.selectlist.name.containsComma");
+            throw new FxInvalidParameterException("Name", "ex.selectlist.name.containsComma", list.getName());
     }
 
     private void checkValidItemParameters(FxSelectListItemEdit item) throws FxInvalidParameterException {
