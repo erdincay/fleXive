@@ -64,6 +64,14 @@ public enum FxDataType implements Serializable, SelectableObjectWithName {
     SelectOne(16, false, true, false, FxSelectOne.class),
     SelectMany(17, false, true, false, FxSelectMany.class);
 
+    /**
+     * List of implemented data types that should be shown in UI's to select from
+     */
+    private static final FxDataType[] IMPLEMENTED_VALUES = {
+            HTML, String1024, Text, Number, LargeNumber, Float, Double, Date, DateTime, DateRange, DateTimeRange,
+            Boolean, Binary, Reference, SelectOne, SelectMany
+    };
+
     private boolean initialized;
     private final long id;
     private String name;
@@ -93,6 +101,15 @@ public enum FxDataType implements Serializable, SelectableObjectWithName {
         this.valueClass = valueClass;
     }
 
+
+    /**
+     * Get a list of implemented data types that should be shown in UI's to select from
+     *
+     * @return List of implemented data types that should be shown in UI's to select from
+     */
+    public static FxDataType[] getImplementedValues() {
+        return IMPLEMENTED_VALUES;
+    }
 
     /**
      * Get the internal id
@@ -208,7 +225,9 @@ public enum FxDataType implements Serializable, SelectableObjectWithName {
             case Text:
                 return value instanceof FxString;
             case SelectOne:
+                return value instanceof FxSelectOne;
             case SelectMany:
+                return value instanceof FxSelectMany;
             case InlineReference:
             default:
                 // TODO: implement missing data types
@@ -301,6 +320,7 @@ public enum FxDataType implements Serializable, SelectableObjectWithName {
                 return new FxSelectMany(assignment.isMultiLang(), many);
             case InlineReference:
             default:
+                //noinspection ThrowableInstanceNeverThrown
                 throw new FxNotFoundException("ex.structure.datatype.notImplemented", this.name()).asRuntimeException();
         }
     }
@@ -352,6 +372,7 @@ public enum FxDataType implements Serializable, SelectableObjectWithName {
             case SelectMany:
             case InlineReference:
             default:
+                //noinspection ThrowableInstanceNeverThrown
                 throw new FxNotFoundException("ex.structure.datatype.notImplemented", this.name()).asRuntimeException();
         }
     }

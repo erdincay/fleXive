@@ -681,7 +681,7 @@ public class SelectBean implements Serializable {
 
     public List<SelectItem> getDataTypes() {
         if (dataTypes == null) {
-            dataTypes = FxJsfUtils.enumsAsSelectList(FxDataType.values());
+            dataTypes = FxJsfUtils.enumsAsSelectList(FxDataType.getImplementedValues());
             Collections.sort(this.dataTypes, new FxJsfUtils.SelectItemSorter());
         }
         return dataTypes;
