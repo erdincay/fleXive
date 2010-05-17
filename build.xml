@@ -324,12 +324,16 @@
 		<jar jarfile="${flexive.lib.dir}/${extractor.jar}">
             <fileset dir="${build.framework.classes.dir}">
 				<include name="com/flexive/extractor/DocumentParser*"/>
+                <include name="com/flexive/extractor/HtmlExtractor*"/>
+                <include name="com/flexive/extractor/htmlExtractor/**"/>
 			</fileset>
         </jar>
         <jar jarfile="${flexive.lib.dir}/${extractor-documents.jar}">
             <fileset  dir="${flexive.resources.framework.dir}/extractor-documents-resources" includes="**/*"/>
             <fileset dir="${build.framework.classes.dir}">
 				<include name="com/flexive/extractor/**"/>
+                <exclude name="com/flexive/extractor/HtmlExtractor*"/>
+                <exclude name="com/flexive/extractor/htmlExtractor/***"/>
                 <exclude name="com/flexive/extractor/audio/**"/>
 			</fileset>
         </jar>
