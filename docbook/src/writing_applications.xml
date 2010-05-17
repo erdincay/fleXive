@@ -1274,6 +1274,41 @@ BUILD SUCCESSFUL]]></screen>
 ]]></programlisting>
                         </listitem>
                     </varlistentry>
+                    <varlistentry>
+                        <term>flexive-extractor-documents</term>
+                        <listitem>
+                            <para>
+                                Document extractors (e.g. for PDF files). Includes libraries to extract the
+                                text from a binary document format for full-text search and
+                                renderers for preview generation. Matching documents are stored as instances
+                                of the "Document" type.
+                            </para>
+                            <programlisting language="xml"><![CDATA[<dependency>
+    <groupId>com.flexive</groupId>
+    <artifactId>flexive-extractor-documents</artifactId>
+    <version>]]>&mavenVersion;<![CDATA[</version>
+    <type>jar</type>
+</dependency>
+]]></programlisting>
+                        </listitem>
+                    </varlistentry>
+                    <varlistentry>
+                        <term>flexive-extractor-audio (since 3.1.2)</term>
+                        <listitem>
+                            <para>
+                                Audio extractors (e.g. for MP3 files). Extracts meta information like bitrate
+                                or album title from common audio file formats and stores it in the
+                                "Audio" document type.
+                            </para>
+                            <programlisting language="xml"><![CDATA[<dependency>
+    <groupId>com.flexive</groupId>
+    <artifactId>flexive-extractor-audio</artifactId>
+    <version>]]>&mavenVersion;<![CDATA[</version>
+    <type>jar</type>
+</dependency>
+]]></programlisting>
+                        </listitem>
+                    </varlistentry>
                 </variablelist>
             </para>
         </section>
