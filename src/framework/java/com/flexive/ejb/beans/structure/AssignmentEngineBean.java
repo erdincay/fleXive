@@ -1484,11 +1484,16 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                             try {
                                 StructureLoader.reload(con);
                                 final FxEnvironment envNew = CacheAdmin.getEnvironment();
+                                boolean needReload = false;
                                 for (FxPropertyAssignment ref : flattened) {
-                                    if (fs.isFlattenable(ref))
-                                        fs.flatten(fs.getDefaultStorage(), (FxPropertyAssignment) envNew.getAssignment(ref.getId()));
+                                    final FxPropertyAssignment paNew = (FxPropertyAssignment) envNew.getAssignment(ref.getId());
+                                    if (fs.isFlattenable(paNew)) {
+                                        fs.flatten(fs.getDefaultStorage(), paNew);
+                                        needReload = true;
+                                    }
                                 }
-                                StructureLoader.reload(con);
+                                if (needReload)
+                                    StructureLoader.reload(con);
                             } catch (FxCacheException e) {
                                 EJBUtils.rollback(ctx);
                                 throw new FxCreateException(e, "ex.cache", e.getMessage());
