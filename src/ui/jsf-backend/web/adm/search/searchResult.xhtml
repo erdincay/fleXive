@@ -83,7 +83,9 @@
             <adm:resultTabs activeTab="results"/>
            <!-- -->
             <c:if test="#{not fxSearchResultBean.sessionData.searchExecuted}">
-                #{fxMessageBean['SearchResult.info.noSearchExecuted']}
+                <div class="infoMessage">
+                    #{fxMessageBean['SearchResult.info.noSearchExecuted']}
+                </div>
                 <br/>
             </c:if>
                                                                    <!--and fxSearchResultBean.sessionData.searchExecuted-->
