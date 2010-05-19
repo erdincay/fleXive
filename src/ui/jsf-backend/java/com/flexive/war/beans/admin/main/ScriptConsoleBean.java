@@ -34,12 +34,12 @@
 package com.flexive.war.beans.admin.main;
 
 import com.flexive.faces.FxJsfUtils;
+import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.security.Role;
-import com.flexive.faces.messages.FxFacesMsgErr;
 import groovy.lang.GroovyShell;
 import groovy.lang.Script;
 import org.apache.commons.lang.StringUtils;
@@ -62,6 +62,10 @@ public class ScriptConsoleBean implements Serializable {
      * Session key to store the last inserted code
      */
     private static final String SESSION_LASTCODE = "__FXLASTNCODE__";
+    /**
+     * Session key to store if the editor should is active
+     */
+    private static final String SESSION_LASTEDITOR_ACTIVE = "__FXLASTEDITORACTIVE__";
 
     private String code;
     private long executionTime;
@@ -223,10 +227,13 @@ public class ScriptConsoleBean implements Serializable {
     }
 
     public boolean isActivateEditor() {
+        Object sessionActive = FxJsfUtils.getSessionAttribute(SESSION_LASTEDITOR_ACTIVE);
+        if (sessionActive instanceof Boolean)
+            this.activateEditor = (Boolean) sessionActive;
         return activateEditor;
     }
 
-   /**
+    /**
      * Activate the editor and also control the "toggleEditor" variable f. editarea
      *
      * @param activateEditor flag
@@ -234,5 +241,6 @@ public class ScriptConsoleBean implements Serializable {
     public void setActivateEditor(boolean activateEditor) {
         toggleEditor = activateEditor ? "onload" : "later";
         this.activateEditor = activateEditor;
+        FxJsfUtils.setSessionAttribute(SESSION_LASTEDITOR_ACTIVE, activateEditor);
     }
 }

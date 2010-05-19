@@ -7,15 +7,23 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/../../../lib/jsf2/jsf-api.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
     <orderEntry type="module" module-name="framework" />
-    <orderEntry type="module" module-name="web-jsf-components" />
-    <orderEntry type="module" module-name="web-shared" />
+    <orderEntry type="module" module-name="web-jsf-shared" />
   </component>
   <component name="com.intellij.jsf.UserDefinedFacesConfigs">
     <option name="USER_DEFINED_CONFIGS">
       <value>
         <list size="1">
-          <item index="0" class="java.lang.String" itemvalue="src/ui/jsf-globalconfig/resources/META-INF/faces-config.xml" />
+          <item index="0" class="java.lang.String" itemvalue="src/ui/jsf-components/resources/META-INF/faces-config.xml" />
         </list>
       </value>
     </option>

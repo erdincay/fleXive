@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project relativePaths="true" version="4">
+<project version="4">
   <component name="AntConfiguration">
     <defaultAnt bundledAnt="true" />
     <buildFile url="file://$PROJECT_DIR$/build.xml">
@@ -26,13 +26,8 @@
     <option name="PROJECT_PROFILE" />
     <option name="USE_PROJECT_LEVEL_SETTINGS" value="false" />
   </component>
-  <component name="CodeStyleSettingsManager">
-    <option name="PER_PROJECT_SETTINGS" />
-    <option name="USE_PER_PROJECT_SETTINGS" value="false" />
-  </component>
   <component name="CompilerConfiguration">
     <option name="DEFAULT_COMPILER" value="Javac" />
-    <option name="DEPLOY_AFTER_MAKE" value="0" />
     <resourceExtensions>
       <entry name=".+\.(properties|xml|html|dtd|tld)" />
       <entry name=".+\.(gif|png|jpeg|jpg)" />
@@ -48,6 +43,10 @@
       <entry name="?*.dtd" />
       <entry name="?*.tld" />
     </wildcardResourcePatterns>
+    <annotationProcessing enabled="false" useClasspath="true" />
+  </component>
+  <component name="CopyrightManager" default="">
+    <module2copyright />
   </component>
   <component name="DependenciesAnalyzeManager">
     <option name="myForwardDirection" value="false" />
@@ -55,12 +54,23 @@
   <component name="DependencyValidationManager">
     <option name="SKIP_IMPORT_STATEMENTS" value="false" />
   </component>
+  <component name="DynamicElementsStorage">
+    <option name="containingClasses">
+      <map>
+        <entry key="java.lang.Object">
+          <value>
+            <DClassElement>
+              <option name="name" value="java.lang.Object" />
+              <option name="myName" value="java.lang.Object" />
+            </DClassElement>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
   <component name="EclipseCompilerSettings">
-    <option name="DEBUGGING_INFO" value="true" />
     <option name="GENERATE_NO_WARNINGS" value="true" />
     <option name="DEPRECATION" value="false" />
-    <option name="ADDITIONAL_OPTIONS_STRING" value="" />
-    <option name="MAXIMUM_HEAP_SIZE" value="128" />
   </component>
   <component name="EclipseEmbeddedCompilerSettings">
     <option name="DEBUGGING_INFO" value="true" />
@@ -73,39 +83,251 @@
   <component name="EntryPointsManager">
     <entry_points version="2.0" />
   </component>
-  <component name="FacetAutodetectingManager">
-    <autodetection-disabled/>
-  </component>
+  <component name="IdProvider" IDEtalkID="B70027680A23C675EB55EF7726AB2B4B" />
   <component name="InspectionProjectProfileManager">
+    <profiles>
+      <profile version="1.0" is_locked="false">
+        <option name="myName" value="Project Default" />
+        <option name="myLocal" value="false" />
+        <inspection_tool class="groupsTestNG" enabled="true" level="WARNING" enabled_by_default="true">
+          <option name="groups">
+            <value>
+              <list size="33">
+                <item index="0" class="java.lang.String" itemvalue="ejb" />
+                <item index="1" class="java.lang.String" itemvalue="structure" />
+                <item index="2" class="java.lang.String" itemvalue="content" />
+                <item index="3" class="java.lang.String" itemvalue="uniquemode" />
+                <item index="4" class="java.lang.String" itemvalue="cmis" />
+                <item index="5" class="java.lang.String" itemvalue="search" />
+                <item index="6" class="java.lang.String" itemvalue="shared" />
+                <item index="7" class="java.lang.String" itemvalue="jsf" />
+                <item index="8" class="java.lang.String" itemvalue="resultset" />
+                <item index="9" class="java.lang.String" itemvalue="benchmark" />
+                <item index="10" class="java.lang.String" itemvalue="sequencer" />
+                <item index="11" class="java.lang.String" itemvalue="divisionimportexport" />
+                <item index="12" class="java.lang.String" itemvalue="binary" />
+                <item index="13" class="java.lang.String" itemvalue="bootstrap" />
+                <item index="14" class="java.lang.String" itemvalue="briefcase" />
+                <item index="15" class="java.lang.String" itemvalue="cache" />
+                <item index="16" class="java.lang.String" itemvalue="configuration" />
+                <item index="17" class="java.lang.String" itemvalue="environment" />
+                <item index="18" class="java.lang.String" itemvalue="flatstorage" />
+                <item index="19" class="java.lang.String" itemvalue="image" />
+                <item index="20" class="java.lang.String" itemvalue="importexport" />
+                <item index="21" class="java.lang.String" itemvalue="lock" />
+                <item index="22" class="java.lang.String" itemvalue="mandator" />
+                <item index="23" class="java.lang.String" itemvalue="reference" />
+                <item index="24" class="java.lang.String" itemvalue="relation" />
+                <item index="25" class="java.lang.String" itemvalue="roles" />
+                <item index="26" class="java.lang.String" itemvalue="scripting" />
+                <item index="27" class="java.lang.String" itemvalue="security" />
+                <item index="28" class="java.lang.String" itemvalue="streaming" />
+                <item index="29" class="java.lang.String" itemvalue="tree" />
+                <item index="30" class="java.lang.String" itemvalue="tutorial" />
+                <item index="31" class="java.lang.String" itemvalue="valuetest" />
+                <item index="32" class="java.lang.String" itemvalue="workflow" />
+              </list>
+            </value>
+          </option>
+        </inspection_tool>
+      </profile>
+    </profiles>
     <option name="PROJECT_PROFILE" value="Project Default" />
-    <option name="USE_PROJECT_LEVEL_SETTINGS" value="false" />
-    <scopes />
-    <profiles/>
-    <list size="0" />
+    <option name="USE_PROJECT_PROFILE" value="true" />
+    <version value="1.0" />
+    <list size="5">
+      <item index="0" class="java.lang.String" itemvalue="SERVER PROBLEM" />
+      <item index="1" class="java.lang.String" itemvalue="INFO" />
+      <item index="2" class="java.lang.String" itemvalue="TYPO" />
+      <item index="3" class="java.lang.String" itemvalue="WARNING" />
+      <item index="4" class="java.lang.String" itemvalue="ERROR" />
+    </list>
+  </component>
+  <component name="JavadocGenerationManager">
+    <option name="OUTPUT_DIRECTORY" />
+    <option name="OPTION_SCOPE" value="protected" />
+    <option name="OPTION_HIERARCHY" value="true" />
+    <option name="OPTION_NAVIGATOR" value="true" />
+    <option name="OPTION_INDEX" value="true" />
+    <option name="OPTION_SEPARATE_INDEX" value="true" />
+    <option name="OPTION_DOCUMENT_TAG_USE" value="false" />
+    <option name="OPTION_DOCUMENT_TAG_AUTHOR" value="false" />
+    <option name="OPTION_DOCUMENT_TAG_VERSION" value="false" />
+    <option name="OPTION_DOCUMENT_TAG_DEPRECATED" value="true" />
+    <option name="OPTION_DEPRECATED_LIST" value="true" />
+    <option name="OTHER_OPTIONS" value="" />
+    <option name="HEAP_SIZE" />
+    <option name="LOCALE" />
+    <option name="OPEN_IN_BROWSER" value="true" />
+  </component>
+  <component name="JsfProjectComponent">
+    <option name="faceletsSupport" value="ENABLED" />
+  </component>
+  <component name="Palette2">
+    <group name="Swing">
+      <item class="com.intellij.uiDesigner.HSpacer" tooltip-text="Horizontal Spacer" icon="/com/intellij/uiDesigner/icons/hspacer.png" removable="false" auto-create-binding="false" can-attach-label="false">
+        <default-constraints vsize-policy="1" hsize-policy="6" anchor="0" fill="1" />
+      </item>
+      <item class="com.intellij.uiDesigner.VSpacer" tooltip-text="Vertical Spacer" icon="/com/intellij/uiDesigner/icons/vspacer.png" removable="false" auto-create-binding="false" can-attach-label="false">
+        <default-constraints vsize-policy="6" hsize-policy="1" anchor="0" fill="2" />
+      </item>
+      <item class="javax.swing.JPanel" icon="/com/intellij/uiDesigner/icons/panel.png" removable="false" auto-create-binding="false" can-attach-label="false">
+        <default-constraints vsize-policy="3" hsize-policy="3" anchor="0" fill="3" />
+      </item>
+      <item class="javax.swing.JScrollPane" icon="/com/intellij/uiDesigner/icons/scrollPane.png" removable="false" auto-create-binding="false" can-attach-label="true">
+        <default-constraints vsize-policy="7" hsize-policy="7" anchor="0" fill="3" />
+      </item>
+      <item class="javax.swing.JButton" icon="/com/intellij/uiDesigner/icons/button.png" removable="false" auto-create-binding="true" can-attach-label="false">
+        <default-constraints vsize-policy="0" hsize-policy="3" anchor="0" fill="1" />
+        <initial-values>
+          <property name="text" value="Button" />
+        </initial-values>
+      </item>
+      <item class="javax.swing.JRadioButton" icon="/com/intellij/uiDesigner/icons/radioButton.png" removable="false" auto-create-binding="true" can-attach-label="false">
+        <default-constraints vsize-policy="0" hsize-policy="3" anchor="8" fill="0" />
+        <initial-values>
+          <property name="text" value="RadioButton" />
+        </initial-values>
+      </item>
+      <item class="javax.swing.JCheckBox" icon="/com/intellij/uiDesigner/icons/checkBox.png" removable="false" auto-create-binding="true" can-attach-label="false">
+        <default-constraints vsize-policy="0" hsize-policy="3" anchor="8" fill="0" />
+        <initial-values>
+          <property name="text" value="CheckBox" />
+        </initial-values>
+      </item>
+      <item class="javax.swing.JLabel" icon="/com/intellij/uiDesigner/icons/label.png" removable="false" auto-create-binding="false" can-attach-label="false">
+        <default-constraints vsize-policy="0" hsize-policy="0" anchor="8" fill="0" />
+        <initial-values>
+          <property name="text" value="Label" />
+        </initial-values>
+      </item>
+      <item class="javax.swing.JTextField" icon="/com/intellij/uiDesigner/icons/textField.png" removable="false" auto-create-binding="true" can-attach-label="true">
+        <default-constraints vsize-policy="0" hsize-policy="6" anchor="8" fill="1">
+          <preferred-size width="150" height="-1" />
+        </default-constraints>
+      </item>
+      <item class="javax.swing.JPasswordField" icon="/com/intellij/uiDesigner/icons/passwordField.png" removable="false" auto-create-binding="true" can-attach-label="true">
+        <default-constraints vsize-policy="0" hsize-policy="6" anchor="8" fill="1">
+          <preferred-size width="150" height="-1" />
+        </default-constraints>
+      </item>
+      <item class="javax.swing.JFormattedTextField" icon="/com/intellij/uiDesigner/icons/formattedTextField.png" removable="false" auto-create-binding="true" can-attach-label="true">
+        <default-constraints vsize-policy="0" hsize-policy="6" anchor="8" fill="1">
+          <preferred-size width="150" height="-1" />
+        </default-constraints>
+      </item>
+      <item class="javax.swing.JTextArea" icon="/com/intellij/uiDesigner/icons/textArea.png" removable="false" auto-create-binding="true" can-attach-label="true">
+        <default-constraints vsize-policy="6" hsize-policy="6" anchor="0" fill="3">
+          <preferred-size width="150" height="50" />
+        </default-constraints>
+      </item>
+      <item class="javax.swing.JTextPane" icon="/com/intellij/uiDesigner/icons/textPane.png" removable="false" auto-create-binding="true" can-attach-label="true">
+        <default-constraints vsize-policy="6" hsize-policy="6" anchor="0" fill="3">
+          <preferred-size width="150" height="50" />
+        </default-constraints>
+      </item>
+      <item class="javax.swing.JEditorPane" icon="/com/intellij/uiDesigner/icons/editorPane.png" removable="false" auto-create-binding="true" can-attach-label="true">
+        <default-constraints vsize-policy="6" hsize-policy="6" anchor="0" fill="3">
+          <preferred-size width="150" height="50" />
+        </default-constraints>
+      </item>
+      <item class="javax.swing.JComboBox" icon="/com/intellij/uiDesigner/icons/comboBox.png" removable="false" auto-create-binding="true" can-attach-label="true">
+        <default-constraints vsize-policy="0" hsize-policy="2" anchor="8" fill="1" />
+      </item>
+      <item class="javax.swing.JTable" icon="/com/intellij/uiDesigner/icons/table.png" removable="false" auto-create-binding="true" can-attach-label="false">
+        <default-constraints vsize-policy="6" hsize-policy="6" anchor="0" fill="3">
+          <preferred-size width="150" height="50" />
+        </default-constraints>
+      </item>
+      <item class="javax.swing.JList" icon="/com/intellij/uiDesigner/icons/list.png" removable="false" auto-create-binding="true" can-attach-label="false">
+        <default-constraints vsize-policy="6" hsize-policy="2" anchor="0" fill="3">
+          <preferred-size width="150" height="50" />
+        </default-constraints>
+      </item>
+      <item class="javax.swing.JTree" icon="/com/intellij/uiDesigner/icons/tree.png" removable="false" auto-create-binding="true" can-attach-label="false">
+        <default-constraints vsize-policy="6" hsize-policy="6" anchor="0" fill="3">
+          <preferred-size width="150" height="50" />
+        </default-constraints>
+      </item>
+      <item class="javax.swing.JTabbedPane" icon="/com/intellij/uiDesigner/icons/tabbedPane.png" removable="false" auto-create-binding="true" can-attach-label="false">
+        <default-constraints vsize-policy="3" hsize-policy="3" anchor="0" fill="3">
+          <preferred-size width="200" height="200" />
+        </default-constraints>
+      </item>
+      <item class="javax.swing.JSplitPane" icon="/com/intellij/uiDesigner/icons/splitPane.png" removable="false" auto-create-binding="false" can-attach-label="false">
+        <default-constraints vsize-policy="3" hsize-policy="3" anchor="0" fill="3">
+          <preferred-size width="200" height="200" />
+        </default-constraints>
+      </item>
+      <item class="javax.swing.JSpinner" icon="/com/intellij/uiDesigner/icons/spinner.png" removable="false" auto-create-binding="true" can-attach-label="true">
+        <default-constraints vsize-policy="0" hsize-policy="6" anchor="8" fill="1" />
+      </item>
+      <item class="javax.swing.JSlider" icon="/com/intellij/uiDesigner/icons/slider.png" removable="false" auto-create-binding="true" can-attach-label="false">
+        <default-constraints vsize-policy="0" hsize-policy="6" anchor="8" fill="1" />
+      </item>
+      <item class="javax.swing.JSeparator" icon="/com/intellij/uiDesigner/icons/separator.png" removable="false" auto-create-binding="false" can-attach-label="false">
+        <default-constraints vsize-policy="6" hsize-policy="6" anchor="0" fill="3" />
+      </item>
+      <item class="javax.swing.JProgressBar" icon="/com/intellij/uiDesigner/icons/progressbar.png" removable="false" auto-create-binding="true" can-attach-label="false">
+        <default-constraints vsize-policy="0" hsize-policy="6" anchor="0" fill="1" />
+      </item>
+      <item class="javax.swing.JToolBar" icon="/com/intellij/uiDesigner/icons/toolbar.png" removable="false" auto-create-binding="false" can-attach-label="false">
+        <default-constraints vsize-policy="0" hsize-policy="6" anchor="0" fill="1">
+          <preferred-size width="-1" height="20" />
+        </default-constraints>
+      </item>
+      <item class="javax.swing.JToolBar$Separator" icon="/com/intellij/uiDesigner/icons/toolbarSeparator.png" removable="false" auto-create-binding="false" can-attach-label="false">
+        <default-constraints vsize-policy="0" hsize-policy="0" anchor="0" fill="1" />
+      </item>
+      <item class="javax.swing.JScrollBar" icon="/com/intellij/uiDesigner/icons/scrollbar.png" removable="false" auto-create-binding="true" can-attach-label="false">
+        <default-constraints vsize-policy="6" hsize-policy="0" anchor="0" fill="2" />
+      </item>
+    </group>
   </component>
   <component name="ProjectDetails">
     <option name="projectName" value="flexive" />
   </component>
-  <component name="ProjectFileVersion" converted="true" />
+  <component name="ProjectDictionaryState">
+    <dictionary name="mplesser">
+      <words>
+        <w>flexive</w>
+        <w>indices</w>
+        <w>uniquemode</w>
+      </words>
+    </dictionary>
+  </component>
+  <component name="ProjectKey">
+    <option name="state" value="project://efcd7043-aaf4-468c-9a68-bed5ed3f3cae" />
+  </component>
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/docbook/docbook.iml" filepath="$PROJECT_DIR$/docbook/docbook.iml" />
-      <module fileurl="file://$PROJECT_DIR$/src/framework/resources/framework.iml" filepath="$PROJECT_DIR$/src/framework/resources/framework.iml" />
       <module fileurl="file://$PROJECT_DIR$/src/framework/storages/H2/flexive-storage-H2.iml" filepath="$PROJECT_DIR$/src/framework/storages/H2/flexive-storage-H2.iml" />
       <module fileurl="file://$PROJECT_DIR$/src/framework/storages/MySQL/flexive-storage-MySQL.iml" filepath="$PROJECT_DIR$/src/framework/storages/MySQL/flexive-storage-MySQL.iml" />
       <module fileurl="file://$PROJECT_DIR$/src/framework/storages/PostgreSQL/flexive-storage-PostgreSQL.iml" filepath="$PROJECT_DIR$/src/framework/storages/PostgreSQL/flexive-storage-PostgreSQL.iml" />
+      <module fileurl="file://$PROJECT_DIR$/src/framework/resources/framework.iml" filepath="$PROJECT_DIR$/src/framework/resources/framework.iml" />
       <module fileurl="file://$PROJECT_DIR$/src/ui/jsf-feedbackPlugin/jsf-feedbackPlugin.iml" filepath="$PROJECT_DIR$/src/ui/jsf-feedbackPlugin/jsf-feedbackPlugin.iml" />
+      <module fileurl="file://$PROJECT_DIR$/src/ui/jsf-newsletter/jsf-newsletter.iml" filepath="$PROJECT_DIR$/src/ui/jsf-newsletter/jsf-newsletter.iml" />
       <module fileurl="file://$PROJECT_DIR$/src/examples/products/products.iml" filepath="$PROJECT_DIR$/src/examples/products/products.iml" />
       <module fileurl="file://$PROJECT_DIR$/root.iml" filepath="$PROJECT_DIR$/root.iml" />
       <module fileurl="file://$PROJECT_DIR$/src/template-project/template-project.iml" filepath="$PROJECT_DIR$/src/template-project/template-project.iml" />
       <module fileurl="file://$PROJECT_DIR$/src/ui/jsf-backend/resources/web-jsf-backend.iml" filepath="$PROJECT_DIR$/src/ui/jsf-backend/resources/web-jsf-backend.iml" />
       <module fileurl="file://$PROJECT_DIR$/src/ui/jsf-components/web-jsf-components.iml" filepath="$PROJECT_DIR$/src/ui/jsf-components/web-jsf-components.iml" />
       <module fileurl="file://$PROJECT_DIR$/src/ui/jsf-globalconfig/web-jsf-globalconfig.iml" filepath="$PROJECT_DIR$/src/ui/jsf-globalconfig/web-jsf-globalconfig.iml" />
+      <module fileurl="file://$PROJECT_DIR$/src/ui/jsf-shared/web-jsf-shared.iml" filepath="$PROJECT_DIR$/src/ui/jsf-shared/web-jsf-shared.iml" />
       <module fileurl="file://$PROJECT_DIR$/src/ui/jsf-testrunner/web-jsf-testrunner.iml" filepath="$PROJECT_DIR$/src/ui/jsf-testrunner/web-jsf-testrunner.iml" />
+      <module fileurl="file://$PROJECT_DIR$/src/ui/jsf2-components/web-jsf2-compoments.iml" filepath="$PROJECT_DIR$/src/ui/jsf2-components/web-jsf2-compoments.iml" />
       <module fileurl="file://$PROJECT_DIR$/src/ui/shared/resources/web-shared.iml" filepath="$PROJECT_DIR$/src/ui/shared/resources/web-shared.iml" />
     </modules>
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_5" assert-keyword="true" jdk-15="true" project-jdk-name="1.6" project-jdk-type="JavaSDK" />  
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_6" assert-keyword="true" jdk-15="true" project-jdk-name="1.6" project-jdk-type="JavaSDK" />
+  <component name="ResourceManagerContainer">
+    <option name="myResourceBundles">
+      <value>
+        <list size="0" />
+      </value>
+    </option>
+  </component>
   <component name="SqlDialectMappings">
     <file url="file://$PROJECT_DIR$/src" dialect="MySQL" />
   </component>
@@ -115,6 +337,20 @@
         <entry key="$PROJECT_DIR$">
           <value>
             <SvnBranchConfiguration>
+              <option name="branchMap">
+                <map>
+                  <entry key="http://svn.flexive.org/repository/flexive/branches">
+                    <value>
+                      <list />
+                    </value>
+                  </entry>
+                  <entry key="http://svn.flexive.org/repository/flexive/tags">
+                    <value>
+                      <list />
+                    </value>
+                  </entry>
+                </map>
+              </option>
               <option name="branchUrls">
                 <list>
                   <option value="http://svn.flexive.org/repository/flexive/branches" />
@@ -128,6 +364,20 @@
         <entry key="$PROJECT_DIR$/src/framework">
           <value>
             <SvnBranchConfiguration>
+              <option name="branchMap">
+                <map>
+                  <entry key="http://svn.flexive.org/repository/flexive/branches">
+                    <value>
+                      <list />
+                    </value>
+                  </entry>
+                  <entry key="http://svn.flexive.org/repository/flexive/tags">
+                    <value>
+                      <list />
+                    </value>
+                  </entry>
+                </map>
+              </option>
               <option name="branchUrls">
                 <list>
                   <option value="http://svn.flexive.org/repository/flexive/branches" />
@@ -146,5 +396,6 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="svn" />
   </component>
+  <component name="WebServicesPlugin" addRequiredLibraries="true" />
 </project>
 

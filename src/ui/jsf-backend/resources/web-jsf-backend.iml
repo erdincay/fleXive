@@ -26,17 +26,6 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../../../lib/groovy/groovy.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="jar://$MODULE_DIR$/../../../../lib/groovy/groovy-src.zip!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
           <root url="jar://$MODULE_DIR$/../../../../lib/jsf/el-api.jar!/" />
         </CLASSES>
         <JAVADOC />
@@ -79,17 +68,7 @@
       </library>
     </orderEntry>
     <orderEntry type="module" module-name="web-jsf-components" />
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$MODULE_DIR$/../../../../lib/jsf/tomahawk-1.1.6.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES>
-          <root url="jar://$MODULE_DIR$/../../../../../../misc/sources/tomahawk-1.1.6-src.zip!/tomahawk-1.1.6/src" />
-        </SOURCES>
-      </library>
-    </orderEntry>
+    <orderEntry type="module" module-name="web-jsf-shared" exported="" />
   </component>
 </module>
 

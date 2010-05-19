@@ -12,15 +12,6 @@
     <orderEntry type="module" module-name="framework" />
     <orderEntry type="module" module-name="web-jsf-components" />
     <orderEntry type="module" module-name="web-shared" />
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://$APPLICATION_HOME_DIR$/lib/javaee.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
   </component>
 </module>
 
