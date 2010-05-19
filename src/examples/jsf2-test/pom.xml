@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.flexive.example</groupId>
+    <artifactId>jsf2-test</artifactId>
+    <packaging>pom</packaging>
+    <version>1.0-SNAPSHOT</version>
+
+    <properties>
+        <flexive.version>3.1-SNAPSHOT</flexive.version>
+        <openejb.version>3.1</openejb.version>
+        <jetty.version>6.1.22</jetty.version>
+
+        <jsf.api.version>2.0</jsf.api.version>
+        <jsf.version>2.0.2</jsf.version>
+        <slf4j.version>1.5.6</slf4j.version>
+
+        <mysql.connector.version>5.1.10</mysql.connector.version>
+        
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <!-- Set module versions -->
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>${pom.groupId}</groupId>
+                <artifactId>shared</artifactId>
+                <version>${pom.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${pom.groupId}</groupId>
+                <artifactId>ejb-jar</artifactId>
+                <version>${pom.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${pom.groupId}</groupId>
+                <artifactId>ear</artifactId>
+                <version>${pom.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${pom.groupId}</groupId>
+                <artifactId>war</artifactId>
+                <version>${pom.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${pom.groupId}</groupId>
+                <artifactId>consoleapp</artifactId>
+                <version>${pom.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${pom.groupId}</groupId>
+                <artifactId>database</artifactId>
+                <version>${pom.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.flexive</groupId>
+                <artifactId>flexive-backend-war</artifactId>
+                <version>${flexive.version}</version>
+                <type>war</type>
+            </dependency>
+            <dependency>
+                <groupId>com.flexive</groupId>
+                <artifactId>flexive-backend</artifactId>
+                <version>${flexive.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.flexive</groupId>
+                <artifactId>flexive-ejb</artifactId>
+                <type>ejb</type>
+                <version>${flexive.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.flexive</groupId>
+                <artifactId>flexive-extractor</artifactId>
+                <version>${flexive.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.flexive</groupId>
+                <artifactId>flexive-extractor-documents</artifactId>
+                <version>${flexive.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.flexive</groupId>
+                <artifactId>flexive-h2</artifactId>
+                <version>${flexive.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.flexive</groupId>
+                <artifactId>flexive-plugin-globalconfig</artifactId>
+                <version>${flexive.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.flexive</groupId>
+                <artifactId>flexive-plugin-jsf2-core</artifactId>
+                <version>${flexive.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.flexive</groupId>
+                <artifactId>flexive-plugin-jsf-feedback</artifactId>
+                <version>${flexive.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.flexive</groupId>
+                <artifactId>flexive-shared</artifactId>
+                <version>${flexive.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.flexive</groupId>
+                <artifactId>flexive-sql-schemas</artifactId>
+                <version>${flexive.version}</version>
+            </dependency>
+
+            <!-- Configure common dependencies -->
+            <dependency>
+                <groupId>org.apache.openejb</groupId>
+                <artifactId>openejb-ejbd</artifactId>
+                <version>${openejb.version}</version>
+                <exclusions>
+                    <!-- Exclude activeio compile dependency, because it currently
+                         fails to resolve on public repos -->
+                    <exclusion>
+                        <groupId>org.apache.activemq</groupId>
+                        <artifactId>activeio-core</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.5</source>
+                    <target>1.5</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+
+    <repositories>
+        <repository>
+            <id>maven2-repository.dev.java.net</id>
+            <name>Java.net Repository for Maven</name>
+            <url>http://download.java.net/maven/2/</url>
+            <layout>default</layout>
+            <snapshots>
+                <updatePolicy>never</updatePolicy>
+            </snapshots>
+        </repository>
+
+        <repository>
+            <id>maven2-jboss</id>
+            <name>JBoss Maven Repository</name>
+            <url>http://repository.jboss.org/maven2</url>
+            <layout>default</layout>
+            <snapshots>
+                <updatePolicy>never</updatePolicy>
+            </snapshots>
+        </repository>
+
+        <repository>
+            <id>maven.flexive.org</id>
+            <name>Flexive repo</name>
+            <url>http://repo.flexive.org/maven2</url>
+            <layout>default</layout>
+        </repository>
+
+        <repository>
+            <id>download.java.net</id>
+            <name>Java.net Dev Repository for Maven</name>
+            <url>http://download.java.net/maven/1/</url>
+            <layout>legacy</layout>
+            <snapshots>
+                <updatePolicy>never</updatePolicy>
+            </snapshots>
+        </repository>
+
+    </repositories>
+    
+  <modules>
+    <module>database</module>
+    <module>ear</module>
+    <module>war</module>
+    <module>shared</module>
+  </modules>
+    <name>JSF2 Example Application</name>
+</project>
+

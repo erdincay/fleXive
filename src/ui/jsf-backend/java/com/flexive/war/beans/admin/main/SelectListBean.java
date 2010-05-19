@@ -33,6 +33,7 @@
  ***************************************************************/
 package com.flexive.war.beans.admin.main;
 
+import com.flexive.faces.FxJsf1Utils;
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.faces.messages.FxFacesMsgInfo;
@@ -675,7 +676,7 @@ public class SelectListBean implements Serializable {
                 itemACL = selectList.getNewItemACL();
                 itemData = null;
                 itemColor = FxFormatUtils.DEFAULT_COLOR;
-                FxJsfUtils.resetFaceletsComponent("frm");
+                FxJsf1Utils.resetFaceletsComponent("frm");
             }
             //else provoke exception
             else

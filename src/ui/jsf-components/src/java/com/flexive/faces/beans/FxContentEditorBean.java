@@ -34,6 +34,7 @@
 
 package com.flexive.faces.beans;
 
+import com.flexive.faces.FxJsf1Utils;
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.components.content.FxWrappedContent;
 import com.flexive.faces.messages.FxFacesMsgErr;
@@ -998,7 +999,7 @@ public class FxContentEditorBean implements Serializable {
      * @param formPrefix form prefix
      */
     private void resetForm(String formPrefix) {
-        FxJsfUtils.resetFaceletsComponent(formPrefix + ":" + reRender);
+        FxJsf1Utils.resetFaceletsComponent(formPrefix + ":" + reRender);
     }
 
     /**

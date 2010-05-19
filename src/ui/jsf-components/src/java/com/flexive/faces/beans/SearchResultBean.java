@@ -31,6 +31,7 @@
  ***************************************************************/
 package com.flexive.faces.beans;
 
+import com.flexive.faces.FxJsf1Utils;
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.javascript.yui.YahooResultProvider;
 import com.flexive.faces.messages.FxFacesMsgErr;
@@ -102,7 +103,7 @@ public class SearchResultBean implements ActionBean, Serializable {
                 return null;
             }
             // hack!
-            FxJsfUtils.resetFaceletsComponent("frm");
+            FxJsf1Utils.resetFaceletsComponent("frm");
             if ("fulltextSearch".equals(action)) {
                 String query = FxJsfUtils.getParameter("query");
                 if (StringUtils.isBlank(query)) {

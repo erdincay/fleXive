@@ -212,7 +212,7 @@
 
     <function>
         <function-name>webletUrl</function-name>
-        <function-class>com.flexive.faces.beans.SystemBean</function-class>
+        <function-class>com.flexive.faces.FxJsf1Utils</function-class>
         <function-signature>java.lang.String getWebletUrl(java.lang.String,java.lang.String)</function-signature>
     </function>
 </facelet-taglib>

@@ -34,6 +34,7 @@
 package com.flexive.war.beans.admin.main;
 
 
+import com.flexive.faces.FxJsf1Utils;
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.beans.SelectBean;
 import com.flexive.faces.beans.UserConfigurationBean;
@@ -505,7 +506,7 @@ public class AccountBean implements Serializable {
                 return null;
             }
             // hack!
-            FxJsfUtils.resetFaceletsComponent("listForm");
+            FxJsf1Utils.resetFaceletsComponent("listForm");
 
             if ("editUserPref".equals(action)) {
                 editUserPref();

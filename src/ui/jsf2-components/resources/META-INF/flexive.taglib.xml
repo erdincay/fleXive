@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<facelet-taglib xmlns="http://java.sun.com/xml/ns/javaee"
+                xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+                http://java.sun.com/xml/ns/javaee/web-facelettaglibrary_2_0.xsd"
+                version="2.0">
+
+    <namespace>http://www.flexive.com/jsf2/core</namespace>
+
+    <tag>
+        <tag-name>test</tag-name>
+        <component>
+            <component-type>jsf2TestComponent</component-type>
+        </component>
+    </tag>
+
+    <tag>
+        <tag-name>content</tag-name>
+        <component>
+            <component-type>flexive.FxContentView</component-type>
+        </component>
+    </tag>
+
+    <tag>
+        <tag-name>contentList</tag-name>
+        <component>
+            <component-type>flexive.FxContentList</component-type>
+        </component>
+    </tag>
+
+    <tag>
+        <tag-name>thumbnail</tag-name>
+        <component>
+            <component-type>flexive.Thumbnail</component-type>
+        </component>
+    </tag>
+
+    <tag>
+        <tag-name>navigation</tag-name>
+        <component>
+            <component-type>flexive.TreeNavigation</component-type>
+        </component>
+    </tag>
+
+    <tag>
+        <tag-name>fxValueInput</tag-name>
+        <component>
+            <component-type>flexive.FxValueInput</component-type>
+            <renderer-type>flexive.FxValueInput</renderer-type>
+        </component>
+    </tag>
+
+    <tag>
+        <tag-name>includes</tag-name>
+        <source>templates/includes.xhtml</source>
+    </tag>
+
+    <function>
+        <function-name>url</function-name>
+        <function-class>com.flexive.faces.beans.PageBean</function-class>
+        <function-signature>java.lang.String absoluteUrl(java.lang.String)</function-signature>
+    </function>
+
+    <function>
+        <function-name>urlWithLocale</function-name>
+        <function-class>com.flexive.faces.beans.PageBean</function-class>
+        <function-signature>java.lang.String absoluteUrl(java.lang.String, java.lang.String)</function-signature>
+    </function>
+
+    <function>
+        <function-name>encodeEnum</function-name>
+        <function-class>com.flexive.faces.converter.EnumConverter</function-class>
+        <function-signature>java.lang.String encodeEnum(java.lang.Enum)</function-signature>
+    </function>
+
+</facelet-taglib>

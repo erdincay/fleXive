@@ -33,7 +33,7 @@ package com.flexive.faces.components;
 
 import com.flexive.faces.FxJsfComponentUtils;
 import com.flexive.faces.FxJsfUtils;
-import com.flexive.faces.components.input.FxValueInput;
+import com.flexive.faces.components.input.AbstractFxValueInput;
 import com.flexive.shared.ContentLinkFormatter;
 import com.flexive.shared.value.FxValue;
 
@@ -107,12 +107,12 @@ public class ResultValue extends UIOutput {
         final Object value = getValue();
         if (value instanceof FxValue) {
             // use FxValueInput component to support inline-editing
-            final FxValueInput input;
-            if (getChildren().size() == 1 && getChildren().get(0) instanceof FxValueInput) {
+            final AbstractFxValueInput input;
+            if (getChildren().size() == 1 && getChildren().get(0) instanceof AbstractFxValueInput) {
                 // reuse components in a data table
-                input = (FxValueInput) getChildren().get(0);
+                input = (AbstractFxValueInput) getChildren().get(0);
             } else {
-                input = (FxValueInput) FxJsfUtils.addChildComponent(this, FxValueInput.COMPONENT_TYPE);
+                input = (AbstractFxValueInput) FxJsfUtils.addChildComponent(this, null, AbstractFxValueInput.COMPONENT_TYPE);
             }
             input.setValueExpression("value", getValueExpression("value"));
             input.setReadOnly(true);

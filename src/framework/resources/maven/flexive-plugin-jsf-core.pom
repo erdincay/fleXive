@@ -37,6 +37,13 @@
             <optional>false</optional>
         </dependency>
 
+        <dependency>
+            <groupId>com.flexive</groupId>
+            <artifactId>flexive-plugin-jsf-shared</artifactId>
+            <version>@FLEXIVE_VERSION@</version>
+            <optional>false</optional>
+        </dependency>
+
         <!-- Non-optional dependencies -->
 
         <dependency>
@@ -89,12 +96,6 @@
                     <artifactId>xml-apis</artifactId>
                 </exclusion>
             </exclusions>
-        </dependency>
-
-        <dependency>
-            <groupId>org.tuckey</groupId>
-            <artifactId>urlrewritefilter</artifactId>
-            <version>3.1.0</version>
         </dependency>
 
         <!-- Provided dependencies -->

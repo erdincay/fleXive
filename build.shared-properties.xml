@@ -7,6 +7,8 @@
     <property name="flexive.base.ui.shared.dir" value="${flexive.base.ui.dir}/shared"/>
     <property name="flexive.base.ui.jsf.dir" value="${flexive.base.ui.dir}/jsf-backend"/>
     <property name="flexive.base.ui.components.dir" value="${flexive.base.ui.dir}/jsf-components"/>
+    <property name="flexive.base.ui.jsf-shared.dir" value="${flexive.base.ui.dir}/jsf-shared"/>
+    <property name="flexive.base.ui.jsf2-components.dir" value="${flexive.base.ui.dir}/jsf2-components"/>
 
     <property name="flexive.base.build.dir" value="${flexive.basedir}/build"/>
     <property name="flexive.build.framework.dir" value="${flexive.base.build.dir}/framework"/>
@@ -34,6 +36,8 @@
     <property name="flexive.src.ui.tags.dir" value="${flexive.src.ui.shared.dir}/com/flexive/war/tags"/>
     <property name="flexive.src.ui.jsf.dir" value="${flexive.base.ui.jsf.dir}/java"/>
     <property name="flexive.src.ui.components.dir" value="${flexive.base.ui.components.dir}/src/java"/>
+    <property name="flexive.src.ui.jsf-shared.dir" value="${flexive.base.ui.jsf-shared.dir}/src/java"/>
+    <property name="flexive.src.ui.jsf2-components.dir" value="${flexive.base.ui.jsf2-components.dir}/src/java"/>
     <property name="flexive.web.ui.jsf.dir" value="${flexive.base.ui.jsf.dir}/web"/>
 
     <property name="flexive.ant.jar" value="${flexive.build.framework.jar.dir}/flexive-ant.jar"/>

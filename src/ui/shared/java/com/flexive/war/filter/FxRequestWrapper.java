@@ -206,7 +206,9 @@ public class FxRequestWrapper extends HttpServletRequestWrapper implements FxReq
         // list only resources that are known to be static, otherwise we'll run into troubles
         // when flexive is integrated in other applications/frameworks (e.g. Seam)
         return !("jpg".equals(pageType) || "css".equals(pageType) || "gif".equals(pageType) || "png".equals(pageType)
-            || "js".equals(pageType) || "ico".equals(pageType));
+            || "js".equals(pageType) || "ico".equals(pageType)
+            // don't match JSF2 resource requests, even if they have a .html or .xhtml suffix
+            || request.getRequestURI().indexOf("javax.faces.resource") != -1);
     }
 
     /**

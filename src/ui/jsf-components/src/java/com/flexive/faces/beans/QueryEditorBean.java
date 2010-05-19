@@ -31,6 +31,7 @@
  ***************************************************************/
 package com.flexive.faces.beans;
 
+import com.flexive.faces.FxJsf1Utils;
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.faces.messages.FxFacesMsgInfo;
@@ -145,7 +146,7 @@ public class QueryEditorBean implements Serializable {
                 setRootNode(EJBLookup.getSearchEngine().loadSystemDefault(AdminResultLocations.ADMIN));
             }
             updateQueryStore();
-            FxJsfUtils.resetFaceletsComponent(RESET_COMPONENT_ID);
+            FxJsf1Utils.resetFaceletsComponent(RESET_COMPONENT_ID);
         } catch (Exception e) {
             LOG.error("Failed to parse request parameters: " + e.getMessage(), e);
         }
@@ -334,7 +335,7 @@ public class QueryEditorBean implements Serializable {
         }
         //}
         addAssignmentNodeId = newNode.getId();
-        FxJsfUtils.resetFaceletsComponent(RESET_COMPONENT_ID);
+        FxJsf1Utils.resetFaceletsComponent(RESET_COMPONENT_ID);
         updateQueryStore();
     }
 
@@ -345,7 +346,7 @@ public class QueryEditorBean implements Serializable {
         QueryNode removeNode = getRootNode().findChild(removeNodeId);
         if (removeNode != null && removeNode.getParent() != null) {
             removeNode.getParent().removeChild(removeNode);
-            FxJsfUtils.resetFaceletsComponent(RESET_COMPONENT_ID);
+            FxJsf1Utils.resetFaceletsComponent(RESET_COMPONENT_ID);
             updateQueryStore();
         }
     }
@@ -373,7 +374,7 @@ public class QueryEditorBean implements Serializable {
         if (nodeIds.size() > 1) {
             getRootNode().joinNodes(nodeIds, operator);
         }
-        FxJsfUtils.resetFaceletsComponent(RESET_COMPONENT_ID);
+        FxJsf1Utils.resetFaceletsComponent(RESET_COMPONENT_ID);
         updateQueryStore();
     }
 

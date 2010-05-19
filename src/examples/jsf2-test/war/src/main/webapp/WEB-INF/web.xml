@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://java.sun.com/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+         http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
+         version="2.5">
+
+    <!-- A sample web.xml for a standalone flexive web application -->
+
+    <!-- Set the standard (filesystem) extension of your templates -->
+    <context-param>
+        <param-name>javax.faces.DEFAULT_SUFFIX</param-name>
+        <param-value>.xhtml</param-value>
+    </context-param>
+
+    <!--context-param>
+        <param-name>javax.faces.PROJECT_STAGE</param-name>
+        <param-value>Development</param-value>
+    </context-param-->
+
+
+    <!-- Facelets libraries that are not loaded through the classloader -->
+    <!--
+    <context-param>
+        <param-name>facelets.LIBRARIES</param-name>
+        <param-value>/WEB-INF/template.taglib.xml.sample</param-value>
+    </context-param>
+    -->
+
+    <!-- Use a classpath resource resolver for plugins -->
+
+    <!-- Configure FxFilter -->
+    <filter>
+        <filter-name>FxFilter</filter-name>
+        <filter-class>com.flexive.war.filter.FxFilter</filter-class>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>FxFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+        <!--dispatcher>FORWARD</dispatcher>
+        <dispatcher>INCLUDE</dispatcher-->
+    </filter-mapping>
+
+    <!-- Configure URL Rewrite filter -->
+<!--
+    <filter>
+       <filter-name>UrlRewriteFilter</filter-name>
+       <filter-class>org.tuckey.web.filters.urlrewrite.UrlRewriteFilter</filter-class>
+    </filter>
+    <filter-mapping>
+       <filter-name>UrlRewriteFilter</filter-name>
+       <url-pattern>/*</url-pattern>
+    </filter-mapping>
+-->
+
+    <!-- Configure Faces servlet -->
+    <servlet>
+        <servlet-name>Faces Servlet</servlet-name>
+        <servlet-class>javax.faces.webapp.FacesServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>Faces Servlet</servlet-name>
+        <url-pattern>*.xhtml</url-pattern>
+    </servlet-mapping>
+    <!-- JSF2 resources -->
+    <!--servlet-mapping>
+        <servlet-name>Faces Servlet</servlet-name>
+        <url-pattern>/javax.faces.resource/*</url-pattern>
+    </servlet-mapping-->
+    <!--
+        /faces/* (or another suffix pattern) should always be the last url-pattern for the FacesServlet,
+        otherwise the flexive Weblets includes won't work
+    -->
+    <servlet-mapping>
+        <servlet-name>Faces Servlet</servlet-name>
+        <url-pattern>/faces/*</url-pattern>
+    </servlet-mapping>
+
+    <!-- Configure thumbnail and download servlet -->
+    <servlet>
+        <servlet-name>Thumbnail</servlet-name>
+        <servlet-class>com.flexive.war.servlet.ThumbnailServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet>
+        <servlet-name>Download</servlet-name>
+        <servlet-class>com.flexive.war.servlet.DownloadServlet</servlet-class>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>Thumbnail</servlet-name>
+        <url-pattern>/thumbnail/*</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>Download</servlet-name>
+        <url-pattern>/download/*</url-pattern>
+    </servlet-mapping>
+
+    <welcome-file-list>
+        <welcome-file>index.xhtml</welcome-file>
+    </welcome-file-list>
+
+    <!--listener>
+        <listener-class>com.flexive.war.listener.SessionTimeoutListener</listener-class>
+    </listener-->
+</web-app>
+

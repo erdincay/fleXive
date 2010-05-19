@@ -9,7 +9,7 @@
         <init-param>
             <param-name>package</param-name>
             <param-value>
-                com.flexive.faces.weblets
+                META-INF.resources.flexive-faces
             </param-value>
         </init-param>
     </weblet>

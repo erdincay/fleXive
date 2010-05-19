@@ -17,7 +17,7 @@
 
     <component>
         <component-type>flexive.FxValueInput</component-type>
-        <component-class>com.flexive.faces.components.input.FxValueInput</component-class>
+        <component-class>com.flexive.faces.components.input.Jsf1FxValueInput</component-class>
     </component>
 
     <component>
@@ -111,21 +111,21 @@
             <component-family>javax.faces.Input</component-family>
             <renderer-type>flexive.FxValueInput</renderer-type>
             <renderer-class>
-                com.flexive.faces.components.input.FxValueInputRenderer
+                com.flexive.faces.components.input.Jsf1FxValueInputRenderer
             </renderer-class>
         </renderer>
         <renderer>
             <component-family>javax.faces.SelectOne</component-family>
             <renderer-type>javax.faces.Listbox</renderer-type>
             <renderer-class>
-                com.flexive.faces.components.input.FxSelectRenderer
+                com.flexive.faces.renderer.FxSelectRenderer
             </renderer-class>
         </renderer>
         <renderer>
             <component-family>javax.faces.SelectMany</component-family>
             <renderer-type>javax.faces.Listbox</renderer-type>
             <renderer-class>
-                com.flexive.faces.components.input.FxSelectRenderer
+                com.flexive.faces.renderer.FxSelectRenderer
             </renderer-class>
         </renderer>
     </render-kit>

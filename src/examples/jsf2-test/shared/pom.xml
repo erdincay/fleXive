@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<parent>
+		<artifactId>jsf2-test</artifactId>
+		<groupId>com.flexive.example</groupId>
+		<version>1.0-SNAPSHOT</version>
+	</parent>
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>shared</artifactId>
+	<name>shared</name>
+	<packaging>jar</packaging>
+    <dependencies>
+
+        <!-- Disable this dependency if you don't need to process binary documents (Word, PDF, Excel, ...)
+             and want to save about 7 MB of libraries -->
+        <dependency>
+            <groupId>com.flexive</groupId>
+            <artifactId>flexive-extractor-documents</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>javax.ejb</groupId>
+            <artifactId>ejb-api</artifactId>
+            <version>3.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.flexive</groupId>
+            <artifactId>flexive-shared</artifactId>
+            <type>jar</type>
+    	    <scope>provided</scope>
+        </dependency>
+    </dependencies>
+</project>

@@ -60,7 +60,7 @@
         <sequential>
             <makeMessages srcdir="@{srcdir}/resources/messages" dest="@{builddir}/PluginMessages"/>
             <copy todir="@{builddir}/component-config/@{name}">
-                <fileset dir="@{srcdir}/resources" includes="META-INF/**/*,templates/**/*,flexive-application.properties"/>
+                <fileset dir="@{srcdir}/resources" includes="META-INF/**,templates/**/*,flexive-application.properties" excludes="META-INF/resources/**"/>
                 <fileset dir="@{builddir}" includes="*.properties"/>
                 <filterset >
                     <filter token="FLEXIVE_VERSION" value="${flexive.version}"/>
@@ -68,12 +68,13 @@
             </copy>
             <mkdir dir="@{srcdir}/resources/scripts"/>  <!-- ensure script exists for zipfileset -->
             <jar jarfile="@{jarfile}">
-                <fileset dir="@{builddir}/component-config/@{name}" includes="**/*"/>
-                <fileset dir="@{builddir}/classes"/>
-                <fileset dir="@{srcdir}/resources/weblets" includes="**/*"/>
-                <fileset dir="@{srcdir}/web" includes="**/*"/>
+                <fileset dir="@{builddir}/component-config/@{name}" includes="**/*" erroronmissingdir="false"/>
+                <fileset dir="@{builddir}/classes" erroronmissingdir="false"/>
+                <fileset dir="@{srcdir}/resources/weblets" includes="**/*" erroronmissingdir="false"/>
+                <fileset dir="@{srcdir}/web" includes="**/*" erroronmissingdir="false"/>
+                <zipfileset dir="@{srcdir}/resources/META-INF/resources" prefix="META-INF/resources" includes="**/*" erroronmissingdir="false"/>
 
-                <zipfileset dir="@{srcdir}/resources/scripts" prefix="scripts" includes="**/*"/>
+                <zipfileset dir="@{srcdir}/resources/scripts" prefix="scripts" includes="**/*" erroronmissingdir="false"/>
                 <jar-elements/>
             </jar>
         </sequential>

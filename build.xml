@@ -56,7 +56,7 @@
 
 	<!-- classpath needed to compile the core framework -->
 	<path id="classpath.build.framework">
-        <fileset dir="${flexive.lib.dir}/jsf" includes="*.jar"/>
+        <fileset dir="${flexive.lib.dir}/jsf" includes="jsonrpc-1.0.jar"/>
 		<fileset dir="${flexive.lib.dir}" includes="*.jar" excludes="qdox.jar"/>
 		<fileset dir="${flexive.lib.dir}/text_extraction" includes="*.jar"/>
         <fileset dir="${flexive.lib.dir}/richfaces" includes="*.jar"/>
@@ -68,10 +68,31 @@
         <fileset dir="${flexive.lib.dir}/audio" includes="*.jar"/>
     </path>
 
+    <path id="classpath.build.jsf">
+        <fileset dir="${flexive.lib.dir}/jsf" includes="*.jar"/>
+    </path>
+
+    <path id="classpath.build.jsf2">
+        <fileset dir="${flexive.lib.dir}/jsf2" includes="*.jar"/>
+    </path>
+
     <path id="classpath.build.plugin">
         <path path="${build.framework.classes.dir}"/>
         <path path="${build.ui.shared.classes.dir}"/>
+        <path path="${build.ui.components.dir}/jsf-shared/classes"/>
         <path path="${build.ui.components.dir}/jsf-core/classes"/>
+        <path refid="classpath.build.framework"/>
+        <path refid="classpath.build.jsf"/>
+        <!-- Include TestNG for test runner plugin -->
+        <fileset dir="${flexive.lib.dir}/testNG" includes="*.jar"/>
+    </path>
+
+    <path id="classpath.build.plugin.jsf2">
+        <path path="${build.framework.classes.dir}"/>
+        <path path="${build.ui.shared.classes.dir}"/>
+        <path path="${build.ui.components.dir}/jsf-shared/classes"/>
+        <path path="${build.ui.components.dir}/jsf2-components/classes"/>
+        <path refid="classpath.build.jsf2"/>
         <path refid="classpath.build.framework"/>
         <!-- Include TestNG for test runner plugin -->
         <fileset dir="${flexive.lib.dir}/testNG" includes="*.jar"/>
@@ -466,6 +487,7 @@
                 <fileset dir="${build.ui.jar.dir}" includes="*.jar"/>
             </classpath>
             <classpath refid="classpath.build.framework"/>
+            <classpath refid="classpath.build.jsf"/>
         </javac-call>
     </target>
 
@@ -1028,6 +1050,8 @@ database.vendor=MySQL
 
             <maven-build-sources artifactId="flexive-web-shared" label="[fleXive] shared web classes" srcdir="${flexive.src.ui.shared.dir}"/>
             <maven-build-sources artifactId="flexive-plugin-jsf-core" label="[fleXive] JSF components" srcdir="${flexive.src.ui.components.dir}"/>
+            <maven-build-sources artifactId="flexive-plugin-jsf2-core" label="[fleXive] JSF 2 components" srcdir="${flexive.src.ui.jsf2-components.dir}"/>
+            <maven-build-sources artifactId="flexive-plugin-jsf-shared" label="[fleXive] shared JSF classes for JSF 1 and 2" srcdir="${flexive.src.ui.jsf-shared.dir}"/>
             <maven-build-sources artifactId="flexive-plugin-globalconfig" label="[fleXive] global (division) configuration plugin" srcdir="${flexive.base.ui.dir}/jsf-globalconfig/src/java"/>
             <maven-build-sources artifactId="flexive-plugin-jsf-feedbackPlugin" label="[fleXive] backend feedback plugin" srcdir="${flexive.base.ui.dir}/jsf-feedbackPlugin/src/java"/>
             <maven-build-sources artifactId="flexive-backend" label="[fleXive] backend application" srcdir="${flexive.src.ui.jsf.dir}"/>
@@ -1079,7 +1103,7 @@ database.vendor=MySQL
         </sequential>
     </macrodef>
 
-    <target name="maven.deploy" description="Publish to Maven repository set in maven.dist.repo" depends="jar.all,jar.maven.sources">
+    <target name="maven.deploy" description="Publish to Maven repository set in maven.dist.repo" depends="jar.all,jar.jsf2.components,jar.maven.sources">
         <maven-deploy-with-sources path="${flexive.build.framework.jar.dir}" name="flexive-ejb"/>
         <maven-deploy-with-sources path="${flexive.build.framework.jar.dir}" name="flexive-core"/>
 
@@ -1087,6 +1111,8 @@ database.vendor=MySQL
 
         <maven-deploy-with-sources path="${build.ui.jar.dir}" name="flexive-web-shared"/>
         <maven-deploy-with-sources path="${build.ui.jar.dir}" name="flexive-plugin-jsf-core"/>
+        <maven-deploy-with-sources path="${build.ui.jar.dir}" name="flexive-plugin-jsf2-core"/>
+        <maven-deploy-with-sources path="${build.ui.jar.dir}" name="flexive-plugin-jsf-shared"/>
         <maven-deploy-with-sources path="${build.ui.jar.dir}" name="flexive-plugin-globalconfig"/>
         <maven-deploy-with-sources path="${build.ui.jar.dir}" name="flexive-plugin-jsf-feedbackPlugin"/>
         <maven-deploy-with-sources path="${build.ui.jar.dir}" name="flexive-backend"/>
@@ -1228,24 +1254,46 @@ database.vendor=MySQL
 
     <!-- ============================= Plugin targets ================================ -->
 
-    <target name="jar.jsf.components" depends="compile.ui.shared">
-        <buildPlugin name="jsf-core" srcdir="${flexive.base.ui.components.dir}">
+    <target name="jar.jsf.shared" depends="compile.ui.shared">
+        <buildPlugin name="jsf-shared" srcdir="${flexive.base.ui.jsf-shared.dir}">
             <plugin-jar-elements>
-                <!-- explode YUI and TinyMCE editor files in into jsf core plugins JAR under com/flexive/faces/weblets/js -->
+                <!-- explode YUI and TinyMCE editor files in into jsf core plugins JAR under flexive-faces -->
 
-                <zipfileset src="${flexive.base.ui.shared.dir}/resources/lib/tiny_mce.zip" prefix="com/flexive/faces/weblets/js" includes="**/*">
+                <zipfileset src="${flexive.base.ui.shared.dir}/resources/lib/tiny_mce.zip" prefix="META-INF/resources/flexive-faces/js" includes="**/*">
                     <!-- Exclude source javascript files -->
                     <exclude name="**/*_src.js"/>
                 </zipfileset>
 
                 <!-- Include the rest of YUI (skins, images, ...) -->
-                <zipfileset src="${flexive.base.ui.shared.dir}/resources/lib/yui-${web.ui.yui.version}.zip" prefix="com/flexive/faces/weblets/js/yui">
+                <zipfileset src="${flexive.base.ui.shared.dir}/resources/lib/yui-${web.ui.yui.version}.zip" prefix="META-INF/resources/flexive-faces/js/yui">
                     <include name="**/*"/>
                     <!-- Exclude debug JS files -->
                     <exclude name="**/*-debug.js"/>
                 </zipfileset>
             </plugin-jar-elements>
         </buildPlugin>
+    </target>
+
+    <target name="jar.jsf.shared.test" depends="compile.ui.shared" description="Tests if the JSF shared classes can be compiled with both JSF 1.2 and JSF 2">
+        <delete dir="${build.ui.components.dir}/jsf-shared" failonerror="false"/>
+        <echo>Compiling jsf-shared against JSF 1.2...</echo>
+        <buildPlugin name="jsf-shared" srcdir="${flexive.base.ui.jsf-shared.dir}"/>
+
+        <delete dir="${build.ui.components.dir}/jsf-shared"/>
+        <echo>Compiling jsf-shared against JSF 2...</echo>
+        <buildPlugin name="jsf-shared" srcdir="${flexive.base.ui.jsf-shared.dir}"
+                     classpathref="classpath.build.plugin.jsf2"/>
+        <delete dir="${build.ui.components.dir}/jsf-shared"/>
+    </target>
+
+
+    <target name="jar.jsf2.components" depends="jar.jsf.shared">
+        <buildPlugin name="jsf2-core" srcdir="${flexive.base.ui.jsf2-components.dir}"
+                    classpathref="classpath.build.plugin.jsf2"/>
+    </target>
+
+    <target name="jar.jsf.components" depends="compile.ui.shared, jar.jsf.shared">
+        <buildPlugin name="jsf-core" srcdir="${flexive.base.ui.components.dir}"/>
         
         <buildPlugin name="jsf-testrunner" srcdir="${flexive.base.ui.dir}/jsf-testrunner"/>
         <buildPlugin name="globalconfig" srcdir="${flexive.base.ui.dir}/jsf-globalconfig"/>
@@ -1264,10 +1312,11 @@ database.vendor=MySQL
     <macrodef name="buildPlugin">
         <attribute name="name"/>
         <attribute name="srcdir"/>
+        <attribute name="classpathref" default="classpath.build.plugin"/>
         <element name="plugin-jar-elements" optional="true"/>
         <sequential>
             <compilePlugin srcdir="@{srcdir}" builddir="${build.ui.components.dir}/@{name}"
-                           classpathref="classpath.build.plugin"/>
+                           classpathref="@{classpathref}"/>
             <buildPluginJar name="@{name}" srcdir="@{srcdir}" builddir="${build.ui.components.dir}/@{name}"
                             jarfile="${build.ui.jar.dir}/flexive-plugin-@{name}.jar">
                 <jar-elements>

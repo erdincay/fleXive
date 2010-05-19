@@ -1,0 +1,138 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
+      xmlns:fx="http://www.flexive.com/jsf2/core">
+
+    <h:head>
+        <title>JSF Demo</title>
+    </h:head>
+
+    <h:body styleClass="yui-skin-sam">
+        <h:outputScript name="jsf.js" library="javax.faces" target="body">
+        </h:outputScript>
+
+        <fx:includes all="true"/>
+
+        <!--script type="text/javascript" language="javascript">
+            alert("Base URL: " + flexive.baseUrl + " Resource URL: " + flexive.componentsWebletUrl);
+        </script-->
+
+
+        <h1>#{exampleManagedBean.message}</h1>
+        <h:form>
+
+            <h:inputText id="name" value="#{exampleManagedBean.name}">
+                <f:ajax render="reverseName"/>
+            </h:inputText>
+
+            <h:commandButton value="Say reverse">
+                <f:ajax execute="name" render="reverseName"/>
+            </h:commandButton>
+
+            <br/>
+            <h:outputText id="reverseName" value="#{exampleManagedBean.reverseName}"/>
+
+        </h:form>
+
+        <h3>Flexive JSF2 components</h3>
+
+        <h4>fx:jsf2TestComponent</h4>
+        <fx:test/>
+
+        <h4>fx:content</h4>
+
+        <fx:content var="cd" pk="#{exampleManagedBean.userContactData}">
+            User contact data:
+            #{cd.displayName} / 
+            #{cd.email}
+        </fx:content>
+
+        <h4>fx:contentList</h4>
+
+        (disabled because it causes an NPE on Ajax postbacks in Mojarra 2.0.2)
+        <ui:fragment rendered="#{false}">
+            <ul>
+            <fx:contentList id="contentList" var="content">
+                <li>
+                    #{content.id}.#{content.version}
+                </li>
+            </fx:contentList>
+            </ul>
+        </ui:fragment>
+
+        <h4>fx:navigation</h4>
+
+        <fx:navigation var="item" mode="edit">
+            <f:facet name="item">
+                #{item.label}
+            </f:facet>
+        </fx:navigation>
+
+        <h4>fxMessageBean</h4>
+
+        #{fxMessageBean['Example.message.hello']}
+
+        <h4>fxSystemBean</h4>
+
+        Browser: #{fxSystemBean.browser}
+
+        <h4>fx:fxValueInput</h4>
+
+        <fx:content var="cd" pk="#{exampleManagedBean.userContactData}">
+            User contact data:
+            <fx:fxValueInput value="#{cd.displayName}"/> /
+            <fx:fxValueInput value="#{cd.email}"/>
+
+            <br/><br/>
+            Read only mode:
+            <fx:fxValueInput value="#{cd.displayName}" readOnly="true"/> /
+            <fx:fxValueInput value="#{cd.email}" readOnly="true"/>
+        </fx:content>
+
+        <h4>HTML editing</h4>
+
+        <fx:fxValueInput value="#{exampleManagedBean.htmlValue}"/>
+
+        <h4>YUI</h4>
+
+        <div id="yuiButtonContainer"> </div>
+
+        <script type="text/javascript" language="javascript">
+        <!--
+            flexive.yui.require("button");
+            flexive.yui.onYahooLoaded(function() {
+               new YAHOO.widget.Button({
+                   id: "mybuttonid",
+                   type: "button",
+                   label: "My YUI Button",
+                   container: "yuiButtonContainer"
+               });
+            });
+
+            flexive.yui.load();
+        //-->
+        </script>
+
+        <div style="color:gray">
+            <h4>Flexive content instances</h4>
+
+            <table>
+                <ui:repeat var="row" value="#{exampleManagedBean.resultRows}">
+                    <tr>
+                        <ui:repeat var="col" value="#{row.columns}">
+                            <td>
+                                <small>#{col.value}</small>
+                            </td>
+                        </ui:repeat>
+                    </tr>
+                </ui:repeat>
+            </table>
+        </div>
+        
+    </h:body>
+</html>

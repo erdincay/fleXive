@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<faces-config xmlns="http://java.sun.com/xml/ns/javaee"
+              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-facesconfig_1_2.xsd"
+              version="2.0">
+
+    <render-kit>
+        <renderer>
+            <component-family>javax.faces.Input</component-family>
+            <renderer-type>flexive.FxValueInput</renderer-type>
+            <renderer-class>
+                com.flexive.faces.components.input.Jsf2FxValueInputRenderer
+            </renderer-class>
+        </renderer>
+        <renderer>
+            <component-family>javax.faces.SelectOne</component-family>
+            <renderer-type>javax.faces.Listbox</renderer-type>
+            <renderer-class>
+                com.flexive.faces.renderer.FxSelectRenderer
+            </renderer-class>
+        </renderer>
+        <renderer>
+            <component-family>javax.faces.SelectMany</component-family>
+            <renderer-type>javax.faces.Listbox</renderer-type>
+            <renderer-class>
+                com.flexive.faces.renderer.FxSelectRenderer
+            </renderer-class>
+        </renderer>
+    </render-kit>
+
+    <component>
+        <component-type>flexive.FxValueInput</component-type>
+        <component-class>com.flexive.faces.components.input.Jsf2FxValueInput</component-class>
+    </component>
+
+    <component>
+        <component-type>flexive.FxContentList</component-type>
+        <component-class>com.flexive.faces.components.content.FxContentList</component-class>
+    </component>
+
+    <component>
+        <component-type>flexive.FxContentView</component-type>
+        <component-class>com.flexive.faces.components.content.FxContentView</component-class>
+    </component>
+
+    <component>
+        <component-type>flexive.TreeNavigation</component-type>
+        <component-class>com.flexive.faces.components.tree.TreeNavigation</component-class>
+    </component>
+
+    <component>
+        <component-type>flexive.Thumbnail</component-type>
+        <component-class>com.flexive.faces.components.Thumbnail</component-class>
+    </component>
+
+
+    <validator>
+        <validator-id>flexive.regularExpressionValidator</validator-id>
+        <validator-class>com.flexive.faces.validators.RegularExpressionValidator</validator-class>
+    </validator>
+
+    <converter>
+        <converter-id>FxLanguageConverter</converter-id>
+        <converter-class>com.flexive.faces.converter.FxLanguageConverter</converter-class>
+    </converter>
+
+    <converter>
+        <converter-id>SelectableConverter</converter-id>
+        <converter-class>com.flexive.faces.converter.SelectableObjectConverter</converter-class>
+    </converter>
+
+    <converter>
+        <converter-id>QueryOperatorConverter</converter-id>
+        <converter-class>com.flexive.faces.converter.QueryOperatorConverter</converter-class>
+    </converter>
+
+    <converter>
+        <converter-for-class>java.lang.Enum</converter-for-class>
+        <converter-class>com.flexive.faces.converter.EnumConverter</converter-class>
+    </converter>
+
+    <converter>
+        <converter-id>EnumConverter</converter-id>
+        <converter-class>com.flexive.faces.converter.EnumConverter</converter-class>
+    </converter>
+
+    <converter>
+        <converter-for-class>com.flexive.shared.content.FxPK</converter-for-class>
+        <converter-class>com.flexive.faces.converter.FxPkConverter</converter-class>
+    </converter>
+
+    <managed-bean>
+        <managed-bean-name>fxAuthenticationBean</managed-bean-name>
+        <managed-bean-class>
+            com.flexive.faces.beans.AuthenticationBean
+        </managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean>
+
+    <managed-bean>
+        <managed-bean-name>fxSelectBean</managed-bean-name>
+        <managed-bean-class>
+            com.flexive.faces.beans.SelectBean
+        </managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean>
+
+    <managed-bean>
+        <managed-bean-name>fxMapBean</managed-bean-name>
+        <managed-bean-class>
+            com.flexive.faces.beans.MapBean
+        </managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean>
+
+
+    <managed-bean>
+        <managed-bean-name>fxContentViewBean</managed-bean-name>
+        <managed-bean-class>
+            com.flexive.faces.beans.FxContentViewBean
+        </managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean>
+
+    <managed-bean>
+        <managed-bean-name>fxMessageBean</managed-bean-name>
+        <managed-bean-class>
+            com.flexive.faces.beans.MessageBean
+        </managed-bean-class>
+        <managed-bean-scope>application</managed-bean-scope>
+    </managed-bean>
+
+    <managed-bean>
+        <managed-bean-name>fxBrowseReferencesBean</managed-bean-name>
+        <managed-bean-class>com.flexive.faces.beans.BrowseReferencesBean</managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean>
+
+    <managed-bean>
+        <managed-bean-name>fxPluginRegistryBean</managed-bean-name>
+        <managed-bean-class>
+            com.flexive.faces.beans.PluginRegistryBean
+        </managed-bean-class>
+        <managed-bean-scope>application</managed-bean-scope>
+    </managed-bean>
+
+    <managed-bean>
+        <managed-bean-name>fxSystemBean</managed-bean-name>
+        <managed-bean-class>
+            com.flexive.faces.beans.SystemBean
+        </managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean>
+
+    <managed-bean>
+        <managed-bean-name>fxUserConfigurationBean</managed-bean-name>
+        <managed-bean-class>
+            com.flexive.faces.beans.UserConfigurationBean
+        </managed-bean-class>
+        <managed-bean-scope>request</managed-bean-scope>
+    </managed-bean>
+
+
+</faces-config>

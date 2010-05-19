@@ -33,6 +33,7 @@
  ***************************************************************/
 package com.flexive.war.beans.admin.content;
 
+import com.flexive.faces.FxJsf1Utils;
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.beans.ActionBean;
 import com.flexive.faces.beans.FxContentEditorBean;
@@ -201,7 +202,7 @@ public class BeContentEditorBean implements ActionBean, Serializable {
         this.fromResultSet = false;
         this.beBeanInUse = false;
         // hack!
-        FxJsfUtils.resetFaceletsComponent(FORM_ID + ":" + EDITOR_ID);
+        FxJsf1Utils.resetFaceletsComponent(FORM_ID + ":" + EDITOR_ID);
     }
 
     /**
@@ -505,7 +506,7 @@ public class BeContentEditorBean implements ActionBean, Serializable {
      * Ajax call to detach content from tree node set via treeNode variable.
      */
     public void removeTreeNode() {
-        //FxJsfUtils.resetFaceletsComponent(FORM_ID+":"+EDITOR_ID);
+        //FxJsf1Utils.resetFaceletsComponent(FORM_ID+":"+EDITOR_ID);
         for (FxTreeNode node : getTreeNodes()) {
             if (node.getId() == treeNode.getId())
                 node.setMarkForDelete(true);
@@ -649,7 +650,7 @@ public class BeContentEditorBean implements ActionBean, Serializable {
         this.reset = true;
         this.treeNodes = null;
         this.infoPanelState = null;
-        FxJsfUtils.resetFaceletsComponent(FORM_ID + ":" + EDITOR_ID);
+        FxJsf1Utils.resetFaceletsComponent(FORM_ID + ":" + EDITOR_ID);
         return null;
     }
 
@@ -871,7 +872,7 @@ public class BeContentEditorBean implements ActionBean, Serializable {
         } catch (Exception e) {
             new FxFacesMsgErr(e).addToContext();
         } finally {
-            FxJsfUtils.resetFaceletsComponent(FORM_ID + ":" + EDITOR_ID);
+            FxJsf1Utils.resetFaceletsComponent(FORM_ID + ":" + EDITOR_ID);
         }
         return null;
     }
@@ -897,7 +898,7 @@ public class BeContentEditorBean implements ActionBean, Serializable {
         } catch (Exception t) {
             new FxFacesMsgErr(t).addToContext();
         } finally {
-            FxJsfUtils.resetFaceletsComponent(FORM_ID + ":" + EDITOR_ID);
+            FxJsf1Utils.resetFaceletsComponent(FORM_ID + ":" + EDITOR_ID);
         }
         return null;
     }
@@ -919,7 +920,7 @@ public class BeContentEditorBean implements ActionBean, Serializable {
         } catch (Exception t) {
             new FxFacesMsgErr(t).addToContext();
         } finally {
-            FxJsfUtils.resetFaceletsComponent(FORM_ID + ":" + EDITOR_ID);
+            FxJsf1Utils.resetFaceletsComponent(FORM_ID + ":" + EDITOR_ID);
         }
         return null;
     }
@@ -929,7 +930,7 @@ public class BeContentEditorBean implements ActionBean, Serializable {
      */
     public void saveInNewVersion() {
         _save(true);
-        FxJsfUtils.resetFaceletsComponent(FORM_ID + ":" + EDITOR_ID);
+        FxJsf1Utils.resetFaceletsComponent(FORM_ID + ":" + EDITOR_ID);
     }
 
     /**
@@ -950,7 +951,7 @@ public class BeContentEditorBean implements ActionBean, Serializable {
         } else {
             _save(false);
         }
-        FxJsfUtils.resetFaceletsComponent(FORM_ID + ":" + EDITOR_ID);
+        FxJsf1Utils.resetFaceletsComponent(FORM_ID + ":" + EDITOR_ID);
     }
 
     /**

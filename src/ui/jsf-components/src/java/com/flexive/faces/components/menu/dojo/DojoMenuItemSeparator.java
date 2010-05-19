@@ -31,6 +31,9 @@
  ***************************************************************/
 package com.flexive.faces.components.menu.dojo;
 
+import com.flexive.faces.javascript.menu.DojoMenuItemData;
+import com.flexive.faces.javascript.menu.DojoMenuItemSeparatorData;
+import com.flexive.faces.javascript.menu.MenuItemContainer;
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.javascript.menu.*;
 
