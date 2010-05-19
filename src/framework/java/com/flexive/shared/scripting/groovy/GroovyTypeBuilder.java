@@ -1307,7 +1307,7 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
             for (Object oEntry : attributes.entrySet()) {
                 final Map.Entry entry = (Map.Entry) oEntry;
                 final Object key = entry.getKey();
-                if (isNonPropertyOptionKey((String) key))
+                if (isNonAssignmentOptionKey((String) key))
                     continue;
                 final Object optionValue = entry.getValue();
                 final String optionKey = ((String) key).toUpperCase();
