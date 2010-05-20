@@ -31,10 +31,10 @@
  ***************************************************************/
 package com.flexive.shared.structure;
 
+import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.XPathElement;
-import com.flexive.shared.EJBLookup;
-import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.content.FxData;
 import com.flexive.shared.content.FxGroupData;
 import com.flexive.shared.exceptions.*;
@@ -154,7 +154,7 @@ public class FxGroupAssignment extends FxAssignment implements Serializable {
     /**
      * Return all property assignments that are assigned to this group or any subgroup.
      *
-     * @return  all property assignments that are assigned to this group or any subgroup.
+     * @return all property assignments that are assigned to this group or any subgroup.
      */
     public List<FxPropertyAssignment> getAllProperties() {
         if (groupAssignments.isEmpty()) {
@@ -310,11 +310,11 @@ public class FxGroupAssignment extends FxAssignment implements Serializable {
             int count;
             for (FxAssignment as : assignments) {
                 if (!as.isEnabled()
-                    || as.isSystemInternal()
-                    || (as instanceof FxPropertyAssignment && as.getAssignedType().isUsePropertyPermissions() &&
-                            !ticket.mayCreateACL(((FxPropertyAssignment) as).getACL().getId(), ticket.getUserId()))    
-                    || (as instanceof FxPropertyAssignment && ((FxPropertyAssignment) as).getProperty().getDataType() == FxDataType.Binary)
-                    || (as instanceof FxPropertyAssignment && ((FxPropertyAssignment) as).getProperty().getDataType() == FxDataType.Reference)    )
+                        || as.isSystemInternal()
+                        || (as instanceof FxPropertyAssignment && as.getAssignedType().isUsePropertyPermissions() &&
+                        !ticket.mayCreateACL(((FxPropertyAssignment) as).getACL().getId(), ticket.getUserId()))
+                        || (as instanceof FxPropertyAssignment && ((FxPropertyAssignment) as).getProperty().getDataType() == FxDataType.Binary)
+                        || (as instanceof FxPropertyAssignment && ((FxPropertyAssignment) as).getProperty().getDataType() == FxDataType.Reference))
                     continue;
                 count = as.getMultiplicity().getRandomRange(rnd, maxMultiplicity);
                 for (int i = 0; i < count; i++)
@@ -374,7 +374,7 @@ public class FxGroupAssignment extends FxAssignment implements Serializable {
     /**
      * Save this assignment and return the saved instance.
      *
-     * @return  the saved assignment
+     * @return the saved assignment
      * @throws FxApplicationException on errors
      * @since 3.1
      */
@@ -389,8 +389,8 @@ public class FxGroupAssignment extends FxAssignment implements Serializable {
      * type, since changing the (unique) alias breaks the inheritance chain.<br />
      * Implementation analogous to method found in FxPropertyAssignment.
      *
-     * @param environment   the environment
-     * @return              a list of all derived assignments
+     * @param environment the environment
+     * @return a list of all derived assignments
      * @since 3.1.1
      */
     public List<FxGroupAssignment> getDerivedAssignments(FxEnvironment environment) {
@@ -421,5 +421,21 @@ public class FxGroupAssignment extends FxAssignment implements Serializable {
         }
 
         return result;
+    }
+
+    /**
+     * Check if any (direct) sub assignments of this group are mandatory
+     *
+     * @return if any (direct) sub assignments of this group are mandatory
+     * @since 3.1.3
+     */
+    public boolean hasMandatorySubAssignments() {
+        for (FxPropertyAssignment pa : this.getAssignedProperties())
+            if (pa.getMultiplicity().getMin() > 0)
+                return true;
+        for (FxGroupAssignment ga : this.getAssignedGroups())
+            if (ga.getMultiplicity().getMin() > 0)
+                return true;
+        return false;
     }
 }
