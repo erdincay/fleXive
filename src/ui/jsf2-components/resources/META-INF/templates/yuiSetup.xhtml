@@ -1,0 +1,26 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:cc="http://java.sun.com/jsf/composite">
+
+Description:
+
+Initializes the Yahoo UI component library shipped with flexive.
+Include this near the end of all pages where you may want to use Yahoo UI.
+The Yahoo Loader is only executed when at least one flexive component on the page uses
+a Yahoo widget, so the performance impact is minimal if no widget is used.
+
+    <cc:interface/>
+
+    <cc:implementation>
+
+        <script type="text/javascript" language="javascript">
+        <!--
+            flexive.yui.load();
+        //-->
+        </script>
+        
+    </cc:implementation>
+
+</html>
+

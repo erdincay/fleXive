@@ -31,6 +31,7 @@
  ***************************************************************/
 package com.flexive.example;
 
+import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.cmis.search.CmisResultRow;
@@ -56,6 +57,12 @@ public class ExampleManagedBean {
     private List<CmisResultRow> resultRows;
     private FxHTML htmlValue;
     private FxDate dateValue;
+
+    public ExampleManagedBean() {
+        // ensure that flexive is initialized
+        CacheAdmin.getEnvironment();
+    }
+
 
     public String getMessage() {
         return "Hello JSF2 world!";
