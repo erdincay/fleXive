@@ -240,7 +240,7 @@ public class FxMultiplicity implements Serializable {
      * @return valid
      */
     public boolean isValid(int index) {
-        return index >= getMin() && index <= getMax();
+        return index <= getMax();
     }
 
      /**
