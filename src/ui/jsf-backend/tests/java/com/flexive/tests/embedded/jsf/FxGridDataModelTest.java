@@ -35,7 +35,6 @@ package com.flexive.tests.embedded.jsf;
 
 import com.flexive.faces.model.FxGridDataModel;
 import com.flexive.faces.model.FxResultSetDataModel;
-import com.flexive.shared.EJBLookup;
 import com.flexive.shared.exceptions.FxAccountInUseException;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxLoginFailedException;
@@ -56,8 +55,6 @@ import javax.faces.model.DataModel;
  */
 @Test(groups = "jsf")
 public class FxGridDataModelTest extends AbstractSqlQueryTest {
-    private static final int TOTALROWS = 25;
-
     @Override
     @BeforeClass
     public void beforeClass() throws FxLoginFailedException, FxAccountInUseException, FxApplicationException {

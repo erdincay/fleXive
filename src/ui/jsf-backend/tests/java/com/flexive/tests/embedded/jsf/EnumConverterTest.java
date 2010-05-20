@@ -33,7 +33,7 @@
  ***************************************************************/
 package com.flexive.tests.embedded.jsf;
 
-import com.flexive.faces.components.input.FxValueInput;
+import com.flexive.faces.components.input.Jsf1FxValueInput;
 import com.flexive.faces.converter.EnumConverter;
 import com.flexive.shared.search.query.PropertyValueComparator;
 import org.testng.annotations.Test;
@@ -61,7 +61,7 @@ public class EnumConverterTest {
     }
 
     private void testEnumConversion(PropertyValueComparator comparator) {
-        final String value = new EnumConverter().getAsString(FacesContext.getCurrentInstance(), new FxValueInput(), comparator);
-        Assert.assertTrue(new EnumConverter().getAsObject(FacesContext.getCurrentInstance(), new FxValueInput(), value).equals(comparator));
+        final String value = new EnumConverter().getAsString(FacesContext.getCurrentInstance(), new Jsf1FxValueInput(), comparator);
+        Assert.assertTrue(new EnumConverter().getAsObject(FacesContext.getCurrentInstance(), new Jsf1FxValueInput(), value).equals(comparator));
     }
 }
