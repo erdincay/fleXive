@@ -36,7 +36,9 @@ import com.flexive.shared.FxContext;
 import com.flexive.shared.cmis.search.CmisResultRow;
 import com.flexive.shared.content.FxPK;
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.value.FxDate;
 import com.flexive.shared.value.FxHTML;
+import java.util.Date;
 import java.util.List;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.RequestScoped;
@@ -53,6 +55,7 @@ public class ExampleManagedBean {
     private String name;
     private List<CmisResultRow> resultRows;
     private FxHTML htmlValue;
+    private FxDate dateValue;
 
     public String getMessage() {
         return "Hello JSF2 world!";
@@ -90,6 +93,17 @@ public class ExampleManagedBean {
 
     public void setHtmlValue(FxHTML htmlValue) {
         this.htmlValue = htmlValue;
+    }
+
+    public FxDate getDateValue() {
+        if (dateValue == null) {
+            dateValue = new FxDate(false, new Date());
+        }
+        return dateValue;
+    }
+
+    public void setDateValue(FxDate dateValue) {
+        this.dateValue = dateValue;
     }
 
 

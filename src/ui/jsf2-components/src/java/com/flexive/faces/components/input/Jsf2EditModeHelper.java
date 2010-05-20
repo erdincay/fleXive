@@ -48,7 +48,7 @@ public class Jsf2EditModeHelper extends AbstractEditModeHelper {
 
     @Override
     protected void renderUploadComponent(UIComponent parent, String inputId) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        throw new UnsupportedOperationException("File upload in JSF2 not supported yet.");
     }
 
 }

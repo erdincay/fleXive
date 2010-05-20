@@ -32,6 +32,7 @@
 package com.flexive.faces.components.input;
 
 import com.flexive.faces.FxJsf2Const;
+import com.flexive.faces.FxJsf2Utils;
 import com.flexive.shared.value.FxValue;
 import javax.faces.application.ResourceDependencies;
 import javax.faces.application.ResourceDependency;
@@ -62,10 +63,9 @@ public class Jsf2FxValueInput extends AbstractFxValueInput {
 
     @Override
     protected void setPackagedImageUrl(HtmlGraphicImage imageComponent, String imagePath) {
-        if (LOG.isWarnEnabled()) {
-            LOG.warn("Jsf2FxValueInput#setPackagedImageUrl not implemented");
-        }
-        // TODO
+        imageComponent.setUrl(
+                FxJsf2Utils.getResourceRequestPath(imagePath, FxJsf2Const.RESOURCE_LIBRARY)
+        );
     }
 
 }

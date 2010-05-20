@@ -34,6 +34,7 @@ package com.flexive.faces;
 import java.util.Map;
 import javax.faces.FacesException;
 import javax.faces.application.Application;
+import javax.faces.application.Resource;
 import javax.faces.application.ResourceHandler;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
@@ -47,15 +48,18 @@ import org.apache.commons.lang.StringUtils;
  */
 public class FxJsf2Utils {
 
+    private FxJsf2Utils() {
+    }
+
     /**
      * Add the given resource programmatically to the current view (like @ResourceDependency).
      *
-     * @param library           the resource library
      * @param resourceName      the resource name (path)
+     * @param library           the resource library
      * @param target            the target (head, body, or null)
      * @throws FacesException   on errors
      */
-    public static void addResource(String library, String resourceName, String target) throws FacesException {
+    public static void addResource(String resourceName, String library, String target) throws FacesException {
         final FacesContext context = FacesContext.getCurrentInstance();
         final Application app = context.getApplication();
         final ResourceHandler rh = app.getResourceHandler();
@@ -82,5 +86,18 @@ public class FxJsf2Utils {
         }
     }
 
+    /**
+     * Return the URL for loading the given resource (from the client).
+     * 
+     * @param resourceName  the resource path
+     * @param library       the library name
+     * @return              the URL for loading the given resource (from the client).
+     * @see FxJsf2Const#RESOURCE_LIBRARY
+     */
+    public static String getResourceRequestPath(String resourceName, String library) {
+        final ResourceHandler rh = FacesContext.getCurrentInstance().getApplication().getResourceHandler();
+        final Resource resource = rh.createResource(resourceName, library);
+        return resource.getRequestPath();
+    }
 
 }

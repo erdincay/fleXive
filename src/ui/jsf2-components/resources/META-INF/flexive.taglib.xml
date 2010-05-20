@@ -8,13 +8,6 @@
     <namespace>http://www.flexive.com/jsf2/core</namespace>
 
     <tag>
-        <tag-name>test</tag-name>
-        <component>
-            <component-type>jsf2TestComponent</component-type>
-        </component>
-    </tag>
-
-    <tag>
         <tag-name>content</tag-name>
         <component>
             <component-type>flexive.FxContentView</component-type>
@@ -47,6 +40,13 @@
         <component>
             <component-type>flexive.FxValueInput</component-type>
             <renderer-type>flexive.FxValueInput</renderer-type>
+        </component>
+    </tag>
+
+    <tag>
+        <tag-name>resultValue</tag-name>
+        <component>
+            <component-type>flexive.ResultValue</component-type>
         </component>
     </tag>
 

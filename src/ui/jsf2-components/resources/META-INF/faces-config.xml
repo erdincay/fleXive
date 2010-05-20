@@ -53,6 +53,10 @@
         <component-class>com.flexive.faces.components.Thumbnail</component-class>
     </component>
 
+    <component>
+        <component-type>flexive.ResultValue</component-type>
+        <component-class>com.flexive.faces.components.ResultValue</component-class>
+    </component>
 
     <validator>
         <validator-id>flexive.regularExpressionValidator</validator-id>

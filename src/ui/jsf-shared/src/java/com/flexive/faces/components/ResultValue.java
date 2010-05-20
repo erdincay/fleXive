@@ -32,6 +32,8 @@
 package com.flexive.faces.components;
 
 import com.flexive.faces.FxJsfComponentUtils;
+import com.flexive.faces.FxJsfComponentUtils;
+import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.components.input.AbstractFxValueInput;
 import com.flexive.shared.ContentLinkFormatter;
@@ -112,13 +114,14 @@ public class ResultValue extends UIOutput {
                 // reuse components in a data table
                 input = (AbstractFxValueInput) getChildren().get(0);
             } else {
-                input = (AbstractFxValueInput) FxJsfUtils.addChildComponent(this, null, AbstractFxValueInput.COMPONENT_TYPE);
+                input = (AbstractFxValueInput) FxJsfUtils.addChildComponent(
+                        this,
+                        StringUtils.isNotBlank(getId()) ? getId() + "_input" : null,
+                        AbstractFxValueInput.COMPONENT_TYPE
+                );
             }
             input.setValueExpression("value", getValueExpression("value"));
             input.setReadOnly(true);
-            if (StringUtils.isNotBlank(getId())) {
-                input.setId(getId() + "_input");
-            }
         } else {
             // TODO: specify result property name?
             context.getResponseWriter().write(FxJsfUtils.formatResultValue(null, value, getLinkFormatter(),

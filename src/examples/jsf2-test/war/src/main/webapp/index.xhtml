@@ -41,9 +41,6 @@
 
         <h3>Flexive JSF2 components</h3>
 
-        <h4>fx:jsf2TestComponent</h4>
-        <fx:test/>
-
         <h4>fx:content</h4>
 
         <fx:content var="cd" pk="#{exampleManagedBean.userContactData}">
@@ -98,6 +95,10 @@
 
         <fx:fxValueInput value="#{exampleManagedBean.htmlValue}"/>
 
+        <h4>Date input</h4>
+
+        <fx:fxValueInput value="#{exampleManagedBean.dateValue}"/>
+
         <h4>YUI</h4>
 
         <div id="yuiButtonContainer"> </div>
@@ -118,6 +119,10 @@
         //-->
         </script>
 
+        <h4>fx:resultValue</h4>
+
+        <fx:resultValue value="#{exampleManagedBean.dateValue}"/>
+        
         <div style="color:gray">
             <h4>Flexive content instances</h4>
 
