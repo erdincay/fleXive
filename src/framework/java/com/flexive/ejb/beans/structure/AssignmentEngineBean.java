@@ -1462,9 +1462,8 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                         org.getMultiplicity().getMax() != prop.getMultiplicity().getMax()) {
                     if (!prop.mayOverrideBaseMultiplicity()) {
                         if (org.getMultiplicity().getMin() < prop.getMultiplicity().getMin()) {
-                            final long minMult = getPropertyInstanceMultiplicity(con, org.getId(), true);
-                            if (minMult > 0 && minMult < prop.getMultiplicity().getMin())
-                                throw new FxUpdateException("ex.structure.modification.contentExists", "minimumMultiplicity");
+                            for(FxPropertyAssignment pa: CacheAdmin.getEnvironment().getPropertyAssignments(prop.getId(), true))
+                                checkChangePropertyAssignmentMinMultiplicity(con, pa, prop.getMultiplicity());
                         }
                         if (org.getMultiplicity().getMax() > prop.getMultiplicity().getMax()) {
                             if (getPropertyInstanceMultiplicity(con, org.getId(), false) > prop.getMultiplicity().getMax())
@@ -1845,7 +1844,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                         //only check if instances exist
                         if (EJBLookup.getTypeEngine().getInstanceCount(original.getAssignedType().getId()) > 0) {
                             if (needMin)
-                                checkChangePropertyAssignmentMinMultiplicity(con, original, modified);
+                                checkChangePropertyAssignmentMinMultiplicity(con, original, modified.getMultiplicity());
                             if (needMax && getPropertyInstanceMultiplicity(con, original.getProperty().getId(), false) > modified.getMultiplicity().getMax())
                                 throw new FxUpdateException("ex.structure.modification.contentExists", "maximumMultiplicity");
                         }
@@ -2060,20 +2059,20 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
     /**
      * Check if a property assignments minum multiplicity may be changed and throw an exception if not
      *
-     * @param con      an open and valid connection
-     * @param original original assignment
-     * @param modified modified assignment
+     * @param con          an open and valid connection
+     * @param original     original assignment
+     * @param modifiedMult modified multiplicity
      * @throws SQLException      db error
      * @throws FxUpdateException change is not allowed
      */
-    private void checkChangePropertyAssignmentMinMultiplicity(Connection con, FxPropertyAssignment original, FxPropertyAssignmentEdit modified) throws SQLException, FxUpdateException {
+    private void checkChangePropertyAssignmentMinMultiplicity(Connection con, FxPropertyAssignment original, FxMultiplicity modifiedMult) throws SQLException, FxUpdateException {
         final long minMult = getPropertyInstanceMultiplicity(con, original.getProperty().getId(), true);
         boolean changeOk = false;
         //check if the assignment has a parentgroup with a min. multiplicity of 0 and
         if (minMult == 0 && original.hasParentGroupAssignment() && original.getParentGroupAssignment().getMultiplicity().getMin() == 0) {
             changeOk = getGroupInstanceMultiplicity(con, original.getParentGroupAssignment().getGroup().getId(), true) == 0;
         }
-        if (!changeOk && minMult < modified.getMultiplicity().getMin())
+        if (!changeOk && minMult < modifiedMult.getMin())
             throw new FxUpdateException("ex.structure.modification.contentExists", "minimumMultiplicity");
     }
 
