@@ -1901,7 +1901,7 @@ public final class FxSharedUtils {
         while (resources.hasMoreElements()) {
             final URL resourceURL = resources.nextElement();
             try {
-                if ("vfszip".equals(resourceURL.getProtocol())) {
+                if ("vfszip".equals(resourceURL.getProtocol()) || "vfs".equals(resourceURL.getProtocol())) {
                     refs.add(new BundleReference(baseName, resourceURL));
                     continue;
                 }

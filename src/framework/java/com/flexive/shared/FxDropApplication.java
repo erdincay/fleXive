@@ -124,7 +124,7 @@ public class FxDropApplication implements Serializable {
                 path = StringUtils.chop(path);
             }
             this.resourceURL = path;
-            this.isJarProtocol = "vfszip".equals(resourceURL.getProtocol()) || "jar".equals(resourceURL.getProtocol())
+            this.isJarProtocol = "vfszip".equals(resourceURL.getProtocol()) || "vfs".equals(resourceURL.getProtocol()) || "jar".equals(resourceURL.getProtocol())
                     || resourceURL.getPath().indexOf('!') != -1;
         }
     }
@@ -218,7 +218,12 @@ public class FxDropApplication implements Serializable {
             try {
                 return new JarInputStream(new URL("vfszip:" + resourceURL).openStream());
             } catch (MalformedURLException e2) {
-                throw new IllegalArgumentException("Cannot create JAR stream for URL " + resourceURL);
+                //try again using JBoss v6 M3+ vfs ...
+                try {
+                    return new JarInputStream(new URL("vfs:" + resourceURL).openStream());
+                } catch (MalformedURLException e3) {
+                    throw new IllegalArgumentException("Cannot create JAR stream for URL " + resourceURL);
+                }
             }
         }
     }
