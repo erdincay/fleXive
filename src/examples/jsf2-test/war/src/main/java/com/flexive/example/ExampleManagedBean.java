@@ -57,6 +57,7 @@ public class ExampleManagedBean {
     private List<CmisResultRow> resultRows;
     private FxHTML htmlValue;
     private FxDate dateValue;
+    private String htmlText;
 
     public ExampleManagedBean() {
         // ensure that flexive is initialized
@@ -111,6 +112,14 @@ public class ExampleManagedBean {
 
     public void setDateValue(FxDate dateValue) {
         this.dateValue = dateValue;
+    }
+
+    public String getHtmlText() {
+        return htmlText;
+    }
+
+    public void setHtmlText(String htmlText) {
+        this.htmlText = htmlText;
     }
 
 
