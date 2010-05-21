@@ -34,7 +34,7 @@ import net.java.dev.weblets.FacesWebletUtils;
 import javax.faces.context.FacesContext;
 
 /**
- * Plugin for sumbmitting feedback.
+ * Plugin for submitting feedback.
  *
  * @author Gerhard Glos (gerhard.glos@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
