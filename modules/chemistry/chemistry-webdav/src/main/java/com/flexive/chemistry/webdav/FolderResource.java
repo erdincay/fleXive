@@ -52,7 +52,7 @@ import static com.flexive.chemistry.webdav.AuthenticationFilter.getConnection;
  * @version $Rev$
  */
 public class FolderResource extends ObjectResource<Folder>
-        implements CollectionResource, MakeCollectionableResource, PutableResource {
+        implements CollectionResource, MakeCollectionableResource, PutableResource, QuotaResource {
     private static final Pattern PAT_OBJECTID = Pattern.compile("objectId=\"([^\"]+)\"");
     private static final String NS_XHTML = "http://www.w3.org/1999/xhtml";
 
@@ -380,4 +380,14 @@ public class FolderResource extends ObjectResource<Folder>
             throw CMISExceptionWrapper.wrap(e);
         }
     }
+
+    public Long getQuotaAvailable() {
+        // return unlimited quota to avoid confusing clients that check quotas (MIL-67)
+        return Long.valueOf(Long.MAX_VALUE);
+    }
+
+    public Long getQuotaUsed() {
+        return Long.valueOf(0);
+    }
+
 }
