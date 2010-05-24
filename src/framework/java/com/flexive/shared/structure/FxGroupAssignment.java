@@ -46,6 +46,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Assignment of a (structure) group to a type or another assignment of a (structure) group
@@ -234,7 +235,7 @@ public class FxGroupAssignment extends FxAssignment implements Serializable {
      * {@inheritDoc}
      */
     public FxData createEmptyData(FxGroupData parent, int index) {
-        ArrayList<FxData> children = new ArrayList<FxData>(5);
+        List<FxData> children = new CopyOnWriteArrayList<FxData>();
         FxGroupData thisGroup;
         try {
             final UserTicket ticket = FxContext.getUserTicket();
@@ -300,7 +301,7 @@ public class FxGroupAssignment extends FxAssignment implements Serializable {
      */
     @Override
     public FxData createRandomData(Random rnd, FxEnvironment env, FxGroupData parent, int index, int maxMultiplicity) {
-        ArrayList<FxData> children = new ArrayList<FxData>(5);
+        List<FxData> children = new CopyOnWriteArrayList<FxData>();
         FxGroupData thisGroup;
         try {
             final UserTicket ticket = FxContext.getUserTicket();
