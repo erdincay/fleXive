@@ -184,6 +184,7 @@ div.queryRowElement {
     float: left;
     white-space: nowrap;
     padding-right: 3px;
+    overflow-x: hidden;
 }
 
 div.queryWideRowElement {

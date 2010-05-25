@@ -32,6 +32,7 @@
 package com.flexive.shared.search.query;
 
 import com.flexive.shared.EJBLookup;
+import com.flexive.shared.FxFormatUtils;
 import com.flexive.shared.FxLanguage;
 import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.exceptions.FxInvalidQueryNodeException;
@@ -122,8 +123,13 @@ public class TreeValueNode extends QueryValueNode<FxValue, TreeValueNode.TreeVal
                     return "";
                 }
                 // append tree mode to label
-                return value.toString() + " " + FxSharedUtils.getMessage(FxSharedUtils.SHARED_BUNDLE,
-                        "shared.QueryNode.label.tree." + (FxTreeMode.Live.equals(treeMode) ? "live" : "edit"));
+                return "<span title=\"" + FxFormatUtils.escapeForAttribute(value.toString()) + "\">"
+                        + value.toString() + " " 
+                        + FxSharedUtils.getMessage(
+                            FxSharedUtils.SHARED_BUNDLE,
+                            "shared.QueryNode.label.tree." + (FxTreeMode.Live.equals(treeMode) ? "live" : "edit")
+                        )
+                        + "</span>";
             }
         };
     }

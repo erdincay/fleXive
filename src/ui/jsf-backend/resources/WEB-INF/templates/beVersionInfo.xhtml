@@ -27,9 +27,7 @@ for more info
 
 <ui:composition>
     <c:set var="versionInfo" value="#{wrappedContent.versionInfo}"/>
-    <c:set var="typeLabel" value="#{not empty fxMapBean.types[myContent.content.typeId].label ?
-                                            fxMapBean.types[myContent.content.typeId].label :
-                                            fxMapBean.types[myContent.content.typeId].name}"/>
+    <c:set var="typeLabel" value="#{fxMapBean.types[myContent.content.typeId].displayName}"/>
     <c:if test="#{wrappedContent.new}">
         <c:set var="lbl1" value="#{typeLabel} #{fxMessageBean['Content.flag.new']}"/>
     </c:if>

@@ -519,6 +519,20 @@ public final class FxFormatUtils {
     }
 
     /**
+     * Escape the given (string) value for rendering in a HTML or XML attribute (enclosed by double quotes).
+     *
+     * @param value the value to be escaped
+     * @return      the escaped value
+     * @since       3.1.3
+     */
+    public static String escapeForAttribute(Object value) {
+        if (value == null) {
+            return "";
+        }
+        return StringUtils.replace(value.toString(), "\"", "\\\"");
+    }
+
+    /**
      * Escape the given value for CSV.
      *
      * @param value the value to be formatted
