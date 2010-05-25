@@ -210,33 +210,33 @@
                                 <th colspan="3">#{fxMessageBean['Welcome.label.explore']}</th>
                             </tr>
                         </thead>
-                        <c:set var="proto" value="#{request.secure ? 'https' : 'http'}://"/>
+                        <c:set var="imgBase" value="#{request.secure ? 'images/start' : 'http://www.flexive.org/fileadmin/user_upload'}"/>
                         <tr>
                             <td align="center">
                                 <a      href="http://www.flexive.org/explore-javaee-framework-flexive/what-is-flexive.html?source=backend"
                                         target="_new"
-                                        onmouseout="img_01.src='#{proto}www.flexive.org/fileadmin/user_upload/button_flexive_website_explore_0.jpg?source=backend';"
-                                        onmouseover="img_01.src='#{proto}www.flexive.org/fileadmin/user_upload/button_flexive_website_explore_1.jpg?source=backend';"><img
+                                        onmouseout="img_01.src='#{imgBase}/button_flexive_website_explore_0.jpg?source=backend';"
+                                        onmouseover="img_01.src='#{imgBase}/button_flexive_website_explore_1.jpg?source=backend';"><img
                                         name="img_01"
-                                        src="#{proto}www.flexive.org/fileadmin/user_upload/button_flexive_website_explore_0.jpg?source=backend"
+                                        src="#{imgBase}/button_flexive_website_explore_0.jpg?source=backend"
                                         style="width: 110px; height: 71px;" alt="Explore" border="0"/></a>
                             </td>
                             <td align="center">
                                 <a      href="http://www.flexive.org/explore-javaee-framework-flexive/screencasts.html?source=backend"
                                         target="_new"
-                                        onmouseout="img_03.src='#{proto}www.flexive.org/fileadmin/user_upload/button_flexive_website_see_0.jpg?source=backend';"
-                                        onmouseover="img_03.src='#{proto}www.flexive.org/fileadmin/user_upload/button_flexive_website_see_1.jpg?source=backend';"><img
+                                        onmouseout="img_03.src='#{imgBase}/button_flexive_website_see_0.jpg?source=backend';"
+                                        onmouseover="img_03.src='#{imgBase}/button_flexive_website_see_1.jpg?source=backend';"><img
                                         name="img_03"
-                                        src="#{proto}www.flexive.org/fileadmin/user_upload/button_flexive_website_see_0.jpg?source=backend"
+                                        src="#{imgBase}/button_flexive_website_see_0.jpg?source=backend"
                                         style="width: 110px; height: 71px;" alt="Screencasts" border="0"/></a>
                             </td>
                             <td align="center">
                                 <a      href="http://www.flexive.org/community.html?source=backend"
                                         target="_new"
-                                        onmouseout="img_04.src='#{proto}www.flexive.org/fileadmin/user_upload/button_flexive_website_communicate_0.jpg?source=backend';"
-                                        onmouseover="img_04.src='#{proto}www.flexive.org/fileadmin/user_upload/button_flexive_website_communicate_1.jpg?source=backend';"><img
+                                        onmouseout="img_04.src='#{imgBase}/button_flexive_website_communicate_0.jpg?source=backend';"
+                                        onmouseover="img_04.src='#{imgBase}/button_flexive_website_communicate_1.jpg?source=backend';"><img
                                         name="img_04"
-                                        src="#{proto}www.flexive.org/fileadmin/user_upload/button_flexive_website_communicate_0.jpg?source=backend"
+                                        src="#{imgBase}/button_flexive_website_communicate_0.jpg?source=backend"
                                         style="width: 110px; height: 71px;" alt="Communicate" border="0"/></a>
                             </td>
                         </tr>
