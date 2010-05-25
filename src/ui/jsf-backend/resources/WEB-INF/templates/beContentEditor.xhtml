@@ -92,9 +92,7 @@ disableTab... false if the <adm:tab/> component should be rendered, true otherwi
                             <ui:fragment rendered="#{not empty myContent.typeIcon}">
                                 <fx:thumbnail pk="#{myContent.typeIcon}" previewSize="original" width="16" height="16"/>
                             </ui:fragment>
-                            #{not empty fxMapBean.types[myContent.content.typeId].label ?
-                                fxMapBean.types[myContent.content.typeId].label :
-                                fxMapBean.types[myContent.content.typeId].name}
+                            #{fxMapBean.types[myContent.content.typeId].displayName}
                         </fx:formRow>
 
                         <!-- ACL -->

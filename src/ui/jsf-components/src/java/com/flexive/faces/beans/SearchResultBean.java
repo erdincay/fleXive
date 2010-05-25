@@ -141,7 +141,7 @@ public class SearchResultBean implements ActionBean, Serializable {
                 setQueryBuilder(createSqlQueryBuilder().type(id).maxRows(Integer.MAX_VALUE));
                 setTabTitle(MessageBean.getInstance().getMessage(
                         "SearchResult.tabtitle.type",
-                        CacheAdmin.getEnvironment().getType(id).getLabel()
+                        CacheAdmin.getEnvironment().getType(id).getDisplayName()
                 ));
                 show();
             } else if ("openBriefcase".equals(action) || "openBriefcaseDetails".equals(action)) {

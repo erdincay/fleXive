@@ -1426,8 +1426,8 @@ public class FxContent implements Serializable {
             throw new FxInvalidParameterException("con", "ex.content.import.empty").asRuntimeException();
         if (con.getTypeId() != this.getTypeId()) {
             throw new FxInvalidParameterException("con", "ex.content.import.wrongType",
-                    CacheAdmin.getEnvironment().getType(con.getTypeId()).getLabel(),
-                    CacheAdmin.getEnvironment().getType(this.getTypeId()).getLabel()).asRuntimeException();
+                    CacheAdmin.getEnvironment().getType(con.getTypeId()).getDisplayName(),
+                    CacheAdmin.getEnvironment().getType(this.getTypeId()).getDisplayName()).asRuntimeException();
         }
         removeData();
         for (FxData d : con.data.getChildren()) {

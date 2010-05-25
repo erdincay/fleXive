@@ -414,7 +414,7 @@ public class ResultPreferencesBean implements Serializable {
             properties.add(virtualGroup);
             // add type properties
             properties.addAll(
-                    filteredPropertiesGroup(contentProperties, messageBean.getMessage("ResultPreferences.label.group.type", type.getLabel().getBestTranslation()), false)
+                    filteredPropertiesGroup(contentProperties, messageBean.getMessage("ResultPreferences.label.group.type", type.getDisplayName()), false)
             );
             // add derived properties
             properties.addAll(

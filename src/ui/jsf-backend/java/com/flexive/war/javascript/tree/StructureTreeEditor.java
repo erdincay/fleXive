@@ -403,7 +403,7 @@ public class StructureTreeEditor implements Serializable {
                 || StructureTreeWriter.NODE_TYPE_GROUP.equals(nodeType)) {   
             return CacheAdmin.getEnvironment().getAssignment(id).getDisplayName();
         }
-        else return CacheAdmin.getEnvironment().getType(id).getLabel().getBestTranslation();
+        else return CacheAdmin.getEnvironment().getType(id).getDisplayName();
     }
 
 }

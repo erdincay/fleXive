@@ -71,6 +71,32 @@ public class FxJSFSelectItem extends SelectItem implements java.io.Serializable 
     }
 
     /**
+     * Ctor for SelectableObject. Checks dynamically if the given item supports {@link SelectableObjectWithLabel}
+     * or {@link SelectableObjectWithName}.
+     * 
+     * @param item  the item to be wrapped
+     */
+    public FxJSFSelectItem(SelectableObject item) {
+        super(item.getId(), getDisplayName(item));
+    }
+
+    private static String getDisplayName(SelectableObject item) {
+        if (item instanceof SelectableObjectWithLabel) {
+            final SelectableObjectWithLabel itemWithLabel = (SelectableObjectWithLabel) item;
+            if (itemWithLabel.getLabel() != null && !itemWithLabel.getLabel().isEmpty()) {
+                return itemWithLabel.getLabel().toString();
+            }
+        }
+        if (item instanceof SelectableObjectWithName) {
+            final SelectableObjectWithName itemWithName = (SelectableObjectWithName) item;
+            if (StringUtils.isNotBlank(itemWithName.getName())) {
+                return itemWithName.getName();
+            }
+        }
+        return String.valueOf(item.getId());
+    }
+
+    /**
      * Ctor for SelectableObjectWithName
      *
      * @param item SelectableObjectWithName

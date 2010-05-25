@@ -60,6 +60,7 @@ import com.flexive.shared.value.FxReference;
 import com.flexive.shared.value.FxValue;
 import com.flexive.shared.value.ReferencedContent;
 import com.flexive.shared.value.renderer.FxValueFormatter;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -769,7 +770,7 @@ public class BeContentEditorBean implements ActionBean, Serializable {
         List<FxType> types = CacheAdmin.getFilteredEnvironment().getTypes(true, true, true, false);
         ArrayList<FxType> result = new ArrayList<FxType>(types.size());
         for (FxType t : types) {
-            if (!t.getName().equalsIgnoreCase("ROOT")) {
+            if (t.getId() != FxType.ROOT_ID) {
                 result.add(t);
             }
         }

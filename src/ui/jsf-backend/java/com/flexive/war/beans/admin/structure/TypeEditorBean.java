@@ -341,7 +341,7 @@ public class TypeEditorBean implements Serializable {
                     s.addAction(StructureTreeControllerBean.ACTION_RENAME_TYPE, id, type.getDisplayName());
 
                 new FxFacesMsgInfo("TypeEditor.message.info." + (type.isNew() ? "createdType" : "savedChanges"),
-                        type.getLabel()).addToContext();
+                        type.getDisplayName()).addToContext();
                 reloadContentTree = true;
             }
             catch (Throwable t) {

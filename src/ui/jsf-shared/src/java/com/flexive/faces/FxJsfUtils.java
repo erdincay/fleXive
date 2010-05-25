@@ -792,7 +792,8 @@ public class FxJsfUtils {
         if (addEmptyElement)
             result.add(new FxJSFSelectItem());
         for (SelectableObjectWithLabel item : items) {
-            result.add(new FxJSFSelectItem(item));
+            // use the SelectableObject constructor to allow a fallback if the label is not set
+            result.add(new FxJSFSelectItem((SelectableObject) item));
         }
         return result;
     }

@@ -380,7 +380,7 @@ public abstract class AbstractFxValueInput extends UIInput {
                     final String name = row.getColumn(2).getString();
                     if (StringUtils.isBlank(name)) {
                         // caption not defined or not set - use dummy label
-                        label = env.getType(row.getColumn(3).getLong()).getLabel()
+                        label = env.getType(row.getColumn(3).getLong()).getDisplayName()
                                 + "[id=" + row.getColumn(1).getLong() + "]";
                     } else {
                         label = name;
