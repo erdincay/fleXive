@@ -45,7 +45,7 @@
 
     <component>
         <component-type>flexive.TreeNavigation</component-type>
-        <component-class>com.flexive.faces.components.tree.TreeNavigation</component-class>
+        <component-class>com.flexive.faces.components.tree.Jsf2TreeNavigation</component-class>
     </component>
 
     <component>

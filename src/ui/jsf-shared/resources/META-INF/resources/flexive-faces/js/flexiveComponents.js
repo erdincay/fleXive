@@ -979,10 +979,14 @@ flexive.input = new function() {
     
     // initialize the TinyMCE HTML editor
     this.initHtmlEditor = function(autoPopulate, configName) {
+        if (this.initHtmlEditorCalled) {
+            return;
+        }
         try {
             tinymce.baseURL = flexive.componentsWebletUrl + "js/tiny_mce";
             tinymce.query = "";
             tinyMCE.init(this.htmlEditorConfigs[configName == null ? "default-basic" : configName]);
+            this.initHtmlEditorCalled = true;
         } catch (e) {
             alert("initHtml exception: " + e);
             // HTML editor component not configured

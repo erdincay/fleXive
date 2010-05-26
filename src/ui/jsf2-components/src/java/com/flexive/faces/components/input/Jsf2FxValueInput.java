@@ -48,8 +48,11 @@ import org.apache.commons.logging.LogFactory;
  * @version $Rev$
  */
 @ResourceDependencies({
-    @ResourceDependency(library=FxJsf2Const.RESOURCE_LIBRARY, name=FxJsf2Const.RESOURCE_COMPONENTS_CSS, target="head"),
-    @ResourceDependency(library=FxJsf2Const.RESOURCE_LIBRARY, name=FxJsf2Const.RESOURCE_COMPONENTS_JS, target="head")
+    @ResourceDependency(library=FxJsf2Const.RESOURCE_LIBRARY, name=FxJsf2Const.RESOURCE_CSS_COMPONENTS, target="head"),
+    @ResourceDependency(library=FxJsf2Const.RESOURCE_LIBRARY, name=FxJsf2Const.RESOURCE_JS_COMPONENTS, target="head"),
+    @ResourceDependency(library=FxJsf2Const.RESOURCE_LIBRARY, name=FxJsf2Const.RESOURCE_JS_HTMLEDITOR, target="head"),
+    @ResourceDependency(library=FxJsf2Const.RESOURCE_LIBRARY, name=FxJsf2Const.RESOURCE_JS_YUILOADER, target="head"),
+    @ResourceDependency(library=FxJsf2Const.RESOURCE_LIBRARY, name=FxJsf2Const.RESOURCE_JS_INIT, target="body")
 })
 public class Jsf2FxValueInput extends AbstractFxValueInput {
     private static final Log LOG = LogFactory.getLog(Jsf2FxValueInput.class);

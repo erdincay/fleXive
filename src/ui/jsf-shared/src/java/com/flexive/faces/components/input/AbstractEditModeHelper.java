@@ -903,6 +903,7 @@ public abstract class AbstractEditModeHelper implements RenderHelper {
                 writer.endElement("textarea");
                 writer.endElement("div");
                 beginJavascript(writer);
+                writer.write("flexive.input.initHtmlEditor(false);\n");
                 writer.write("tinyMCE.execCommand('mceAddControl', false, '" + inputClientId + "');\n");
                 endJavascript(writer);
             } else {

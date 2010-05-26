@@ -7,17 +7,24 @@
       xmlns:c="http://java.sun.com/jsp/jstl/core"
       xmlns:cc="http://java.sun.com/jsf/composite">
 
-    <cc:interface>
+    <cc:interface
+        name="includes"
+        displayName="Initialize Javascript components"
+        shortDescription="Initialize the fleXive Javascript components. Include this in your page header or at the start of the body content.
+The libraries are included automatically by components that need them, but you may need to load
+them explicitly if the components are not available when the page is first rendered.">
+
         <cc:attribute name="all" default="false" displayName="Include all components"/>
         <cc:attribute name="yui" default="false" displayName="Include Yahoo UI user interface library"/>
         <cc:attribute name="jsonRpc" default="false" displayName="Include JSON/RPC client library"/>
         <cc:attribute name="htmlEditor" default="#{false}" displayName="Include TinyMCE HTML editor"/>
+
     </cc:interface>
 
     <cc:implementation>
 
         <h:outputScript library="flexive-faces" name="js/flexiveComponents.js" target="head"/>
-        <h:outputStylesheet library="flexive-faces" name="css/components.css" target="head"/>
+        <h:outputStylesheet library="flexive-faces" name="css/components.css"/>
 
         <script type="text/javascript" language="javascript">
         <!--
@@ -45,6 +52,10 @@
 
         <c:if test="#{all or jsonRpc}">
             <h:outputScript library="flexive-faces" name="js/jsonrpc.js" target="head"/>
+        </c:if>
+
+        <c:if test="#{all or yui or htmlEditor}">
+            <h:outputScript library="flexive-faces" name="js/init.js" target="body"/>
         </c:if>
         
     </cc:implementation>

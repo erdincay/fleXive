@@ -29,46 +29,23 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the file!
  ***************************************************************/
-package com.flexive.faces;
+package com.flexive.faces.components.tree;
+
+import com.flexive.faces.FxJsf2Const;
+import javax.faces.application.ResourceDependencies;
+import javax.faces.application.ResourceDependency;
 
 /**
- * JSF2-related constant definitions.
- * 
+ * JSF wrapper for the fx:navigation component.
+ *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-public class FxJsf2Const {
-
-    /**
-     * Name of the resource library for serving component-related resources (e.g. flexiveComponents.js).
-     */
-    public static final String RESOURCE_LIBRARY = "flexive-faces";
-
-    /**
-     * Base JS for flexive components.
-     */
-    public static final String RESOURCE_JS_COMPONENTS = "js/flexiveComponents.js";
-
-    /**
-     * Initialize the flexive javascript components (target: body).
-     */
-    public static final String RESOURCE_JS_INIT = "js/init.js";
-
-    /**
-     * HTML editor javascript resource
-     */
-    public static final String RESOURCE_JS_HTMLEDITOR = "js/tiny_mce/tiny_mce.js";
-
-    /**
-     * YUI (Yahoo User Interface library) 2.x javascript resource
-     */
-    public static final String RESOURCE_JS_YUILOADER = "js/yui/yuiloader/yuiloader-min.js";
-
-    /**
-     * Base CSS file for flexive components.
-     */
-    public static final String RESOURCE_CSS_COMPONENTS = "css/components.css";
-
-    private FxJsf2Const() {
-    }
+@ResourceDependencies({
+    @ResourceDependency(library=FxJsf2Const.RESOURCE_LIBRARY, name=FxJsf2Const.RESOURCE_CSS_COMPONENTS, target="head"),
+    @ResourceDependency(library=FxJsf2Const.RESOURCE_LIBRARY, name=FxJsf2Const.RESOURCE_JS_COMPONENTS, target="head"),
+    @ResourceDependency(library=FxJsf2Const.RESOURCE_LIBRARY, name=FxJsf2Const.RESOURCE_JS_YUILOADER, target="head"),
+    @ResourceDependency(library=FxJsf2Const.RESOURCE_LIBRARY, name=FxJsf2Const.RESOURCE_JS_INIT, target="body")
+})
+public class Jsf2TreeNavigation extends TreeNavigation {
 }

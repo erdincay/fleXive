@@ -55,11 +55,6 @@
         <source>templates/includes.xhtml</source>
     </tag>
 
-    <tag>
-        <tag-name>yuiSetup</tag-name>
-        <source>templates/yuiSetup.xhtml</source>
-    </tag>
-
     <function>
         <function-name>url</function-name>
         <function-class>com.flexive.faces.beans.PageBean</function-class>
