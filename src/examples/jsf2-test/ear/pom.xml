@@ -1,37 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-	<parent>
-		<artifactId>jsf2-test</artifactId>
-		<groupId>com.flexive.example</groupId>
-		<version>1.0-SNAPSHOT</version>
-	</parent>
-	<modelVersion>4.0.0</modelVersion>
-	<artifactId>ear</artifactId>
-	<packaging>ear</packaging>
-	<name>ear</name>
+    <parent>
+        <artifactId>jsf2-test</artifactId>
+        <groupId>com.flexive.example</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>ear</artifactId>
+    <packaging>ear</packaging>
+    <name>ear</name>
 
     <properties>
         <ear.name>jsf2-test.ear</ear.name>
+        <ear.work.dir>${project.build.directory}/exploded</ear.work.dir>
     </properties>
 
-	<dependencies>
-		<dependency>
-			<groupId>com.flexive.example</groupId>
-			<artifactId>war</artifactId>
-			<type>war</type>
-			<version>1.0-SNAPSHOT</version>
-		</dependency>
+    <dependencies>
+        <dependency>
+            <groupId>com.flexive.example</groupId>
+            <artifactId>war</artifactId>
+            <type>war</type>
+        </dependency>
+        <dependency>
+            <groupId>com.flexive.example</groupId>
+            <artifactId>shared</artifactId>
+        </dependency>
 
-		<dependency>
-		    <groupId>com.flexive</groupId>
-		    <artifactId>flexive-shared</artifactId>
-		</dependency>
+        <dependency>
+            <groupId>com.flexive</groupId>
+            <artifactId>flexive-shared</artifactId>
+        </dependency>
 
-		<dependency>
-		    <groupId>com.flexive</groupId>
-		    <artifactId>flexive-ejb</artifactId>
+        <dependency>
+            <groupId>com.flexive</groupId>
+            <artifactId>flexive-ejb</artifactId>
             <type>ejb</type>
-		</dependency>
+        </dependency>
 
         <dependency>
             <groupId>com.flexive</groupId>
@@ -45,37 +49,64 @@
         </dependency>
 -->
 
-        <!-- Don't include backend until mixed packaging with JSF1 works -->
-		<!--dependency>
-		    <groupId>com.flexive</groupId>
-		    <artifactId>flexive-backend</artifactId>
-		</dependency-->
+        <!-- Use "fat" backend that bundles all JSF1 dependencies -->
+        <dependency>
+            <groupId>com.flexive.example</groupId>
+            <artifactId>backend-all</artifactId>
+            <type>war</type>
+        </dependency>
 
-	</dependencies>
-	<build>
+    </dependencies>
+    <build>
         <finalName>jsf2-test</finalName>
-		<plugins>
-			<plugin>
-				<artifactId>maven-ear-plugin</artifactId>
-				<configuration>
-    				<defaultLibBundleDir>lib</defaultLibBundleDir>
-					<modules>
-						<webModule>
-							<groupId>com.flexive.example</groupId>
-							<artifactId>war</artifactId>
-						</webModule>
-                        <!--webModule>
-                            <groupId>com.flexive</groupId>
-                            <artifactId>flexive-backend-war</artifactId>
+        <plugins>
+
+            <!-- Unfortunately, we have to copy the shared flexive-backend.jar file manually to the EAR lib folder -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${ear.work.dir}/lib</outputDirectory>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>com.flexive</groupId>
+                                    <artifactId>flexive-backend</artifactId>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-ear-plugin</artifactId>
+                <configuration>
+                    <defaultLibBundleDir>lib</defaultLibBundleDir>
+                    <workDirectory>${ear.work.dir}</workDirectory>
+                    <modules>
+                        <webModule>
+                            <groupId>com.flexive.example</groupId>
+                            <artifactId>war</artifactId>
+                        </webModule>
+                        <webModule>
+                            <groupId>com.flexive.example</groupId>
+                            <artifactId>backend-all</artifactId>
                             <contextRoot>/flexive</contextRoot>
-                        </webModule-->
-					</modules>
-					<jboss>
-             			<version>4</version>
-             			<loader-repository>com.flexive.example:archive=${ear.name}</loader-repository>
-           			</jboss>					
-				</configuration>
-			</plugin>
-		</plugins>
-	</build>
+                        </webModule>
+                    </modules>
+                    <jboss>
+                        <version>4</version>
+                        <loader-repository>com.flexive.example:archive=${ear.name}</loader-repository>
+                    </jboss>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

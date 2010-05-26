@@ -30,11 +30,6 @@
             </dependency>
             <dependency>
                 <groupId>${pom.groupId}</groupId>
-                <artifactId>ejb-jar</artifactId>
-                <version>${pom.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${pom.groupId}</groupId>
                 <artifactId>ear</artifactId>
                 <version>${pom.version}</version>
             </dependency>
@@ -42,16 +37,18 @@
                 <groupId>${pom.groupId}</groupId>
                 <artifactId>war</artifactId>
                 <version>${pom.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${pom.groupId}</groupId>
-                <artifactId>consoleapp</artifactId>
-                <version>${pom.version}</version>
+                <type>war</type>
             </dependency>
             <dependency>
                 <groupId>${pom.groupId}</groupId>
                 <artifactId>database</artifactId>
                 <version>${pom.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${pom.groupId}</groupId>
+                <artifactId>backend-all</artifactId>
+                <version>${pom.version}</version>
+                <type>war</type>
             </dependency>
 
             <dependency>
@@ -194,7 +191,7 @@
     <module>ear</module>
     <module>war</module>
     <module>shared</module>
+    <module>backend-all</module>
   </modules>
     <name>JSF2 Example Application</name>
 </project>
-

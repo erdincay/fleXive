@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>jsf2-test</artifactId>
+        <groupId>com.flexive.example</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <groupId>com.flexive.example</groupId>
+    <artifactId>backend-all</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <name>backend-all</name>
+    <packaging>war</packaging>
+    <description>Creates a "fat" WAR package for the backend that includes all JSF dependencies</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.flexive</groupId>
+            <artifactId>flexive-backend</artifactId>
+            <exclusions>
+                <!-- Exclude shared classes provided by the backend -->
+                <exclusion>
+                    <groupId>com.flexive</groupId>
+                    <artifactId>flexive-shared</artifactId>
+                </exclusion>
+                
+                <exclusion>
+                    <groupId>com.flexive</groupId>
+                    <artifactId>flexive-plugin-jsf-shared</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>backend-all</finalName>
+
+        <plugins>
+            <plugin>
+                <artifactId>maven-war-plugin</artifactId>
+                <!--configuration>
+                    <packagingExcludes>WEB-INF/lib/flexive-backend*.jar</packagingExcludes>
+                </configuration-->
+            </plugin>
+        </plugins>
+    </build>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+</project>
