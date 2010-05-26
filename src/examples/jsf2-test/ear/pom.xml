@@ -35,6 +35,14 @@
             <groupId>com.flexive</groupId>
             <artifactId>flexive-ejb</artifactId>
             <type>ejb</type>
+
+            <exclusions>
+                <!-- Exclude embedded H2 database driver -->
+                <exclusion>
+                    <groupId>com.h2database</groupId>
+                    <artifactId>h2</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>

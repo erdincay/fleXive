@@ -42,7 +42,7 @@
 
     <!--  Whether each interceptor should have an mbean
         registered to capture and display its statistics.  -->
-    <attribute name="UseInterceptorMbeans">true</attribute>
+    <attribute name="ExposeManagementStatistics">true</attribute>
 
     <!-- Name of cluster. Needs to be the same for all clusters, in order
              to find each other -->

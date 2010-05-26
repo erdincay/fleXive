@@ -13,10 +13,10 @@
 
         <!-- Disable this dependency if you don't need to process binary documents (Word, PDF, Excel, ...)
              and want to save about 7 MB of libraries -->
-        <dependency>
+        <!--dependency>
             <groupId>com.flexive</groupId>
             <artifactId>flexive-extractor-documents</artifactId>
-        </dependency>
+        </dependency-->
 
         <dependency>
             <groupId>javax.ejb</groupId>
