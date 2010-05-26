@@ -22,9 +22,7 @@
     </cc:interface>
 
     <cc:implementation>
-        <h:outputScript library="flexive-faces" name="js/flexiveComponents.js" target="head"/>
-        <h:outputStylesheet library="flexive-faces" name="css/components.css" target="head"/>
-
+        <h:outputStylesheet library="flexive-faces" name="css/components.css"/>
 
         <c:if test="${!empty height}">
             <c:set var="overrideStyle" value="#{overrideStyle};height:#{height}px"/>

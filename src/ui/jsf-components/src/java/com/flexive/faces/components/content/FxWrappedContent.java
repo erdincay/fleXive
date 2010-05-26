@@ -1108,37 +1108,30 @@ public class FxWrappedContent implements Serializable {
     }
 
     /**
-     * HashMap returning if this FxData's assignment remesmbles the possibly reused caption property.
+     * HashMap returning if this FxData's assignment resembles the possibly reused caption property.
      */
     private static class IsCaptionProperty extends HashMap<FxPropertyData, Boolean> {
-         private final static long captionId;
         private static final long serialVersionUID = -478666562614561688L;
-
-        static {
-             long cId=-1;
-             try {
-                cId = EJBLookup.getConfigurationEngine().get(TREE_CAPTION_PROPERTY);
-             }
-             catch (Throwable t) {
-                 LOG.error("failed to look up caption assignment",t);
-             }
-             captionId=cId;
-         }
+        private static final String REQ_TREE_CAPTION_PROP = IsCaptionProperty.class.getName() + "_PROPERTYID";
 
         /**
-         * HashMap returning if this FxData's assignment remesmbles the possibly reused caption property.
+         * HashMap returning if this FxData's assignment resembles the possibly reused caption property.
          *
          * @param object FxData
-         * @return true if this FxData's assignment remesmbles the possibly reused caption property.
+         * @return true if this FxData's assignment resembles the possibly reused caption property.
          */
         public Boolean get(Object object) {
             try {
-                if (object instanceof FxPropertyData) {
-                    if(((FxPropertyAssignment)((FxPropertyData)object).getAssignment()).getProperty().getId() ==
-                           captionId)
-                        return true;
+                final FxContext ctx = FxContext.get();
+                if (ctx.getAttribute(REQ_TREE_CAPTION_PROP) == null) {
+                    // cache in request
+                    ctx.setAttribute(
+                            REQ_TREE_CAPTION_PROP,
+                            EJBLookup.getConfigurationEngine().get(TREE_CAPTION_PROPERTY)
+                    );
                 }
-                return false;
+                return object instanceof FxPropertyData
+                        && ((FxPropertyData) object).getPropertyId() == (Long) ctx.getAttribute(REQ_TREE_CAPTION_PROP);
             } catch (Throwable t) {
                 new FxFacesMsgErr(t).addToContext();
                 return false;
