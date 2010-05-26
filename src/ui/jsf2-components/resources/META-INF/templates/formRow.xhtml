@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
+      xmlns:cc="http://java.sun.com/jsf/composite">
+
+    <cc:interface>
+        <cc:attribute name="id" default="" displayName="Id" required="false"/>
+        <cc:attribute name="label" default="" displayName="Label" required="false"/>
+        <cc:attribute name="labelKey" default="" displayName="Message key" required="false"/>
+        <cc:attribute name="tooltip" default="" displayName="Tooltip" required="false"/>
+        <cc:attribute name="tooltipKey" default="" displayName="Message key of the tooltip" required="false"/>
+        <cc:attribute name="newLine" default="" displayName="new line is rendered after input row" required="false"/>
+        <cc:attribute name="width" default="" displayName="Width" required="false"/>
+        <cc:attribute name="relativeWidth" default="" displayName="Relative Width" required="false"/>
+        <cc:attribute name="height" default="" displayName="Height" required="false"/>
+        <cc:attribute name="overrideStyle" default="" displayName="Style to override" required="false"/>
+        <cc:attribute name="overrideInputStyle" default="" displayName="Inputstyle to override" required="false"/>
+    </cc:interface>
+
+    <cc:implementation>
+        <h:outputScript library="flexive-faces" name="js/flexiveComponents.js" target="head"/>
+        <h:outputStylesheet library="flexive-faces" name="css/components.css" target="head"/>
+
+
+        <c:if test="${!empty height}">
+            <c:set var="overrideStyle" value="#{overrideStyle};height:#{height}px"/>
+        </c:if> 
+        <c:if test="${!empty width}">
+            <c:set var="overrideStyle" value="#{overrideStyle};width:#{width}px"/>
+            <c:set var="overrideInputStyle" value="#{overrideInputStyle};width:#{width-140}px"/>
+        </c:if>
+        
+        <c:if test="#{!empty relativeWidth}">
+            <c:if test="#{relativeWidth gt 100}">
+
+                <c:set var="overrideStyle" value="width:100%; #{overrideStyle}"/>
+                <c:set var="overrideInputStyle" value="width:20%; #{overrideInputStyle}"/>
+            </c:if>
+            <c:if test="#{relativeWidth le 100}">
+                <c:set var="overrideStyle" value="width:#{relativeWidth}%; #{overrideStyle};"/>
+                <c:set var="overrideInputStyle" value=" width:#{relativeWidth * 0.80}%; #{overrideInputStyle}"/>
+            </c:if>
+        </c:if>
+        <c:if test="#{!empty labelKey}">
+            <c:set var="label" value="#{fxMessageBean[labelKey]}"/>
+        </c:if>
+        <c:if test="#{empty tooltipKey and not empty labelKey and empty tooltip}">
+            <c:set var="tooltipKey" value="#{labelKey}.tooltip"/>
+        </c:if>
+        <c:if test="#{!empty tooltipKey and fxSystemBean.messageExists[tooltipKey]}">
+            <c:set var="tooltip" value="#{fxMessageBean[tooltipKey]}"/>
+        </c:if>
+
+        <div class="formRow" style="#{overrideStyle}">
+
+            <div class="formLabelContainer">
+                <div class="#{empty tooltip ? '' : 'tooltip'}">
+                    <div class="formLabel" title="#{empty tooltip ? label : ''}">
+                        <c:if test="#{!empty id}">
+                            <h:outputLabel id="#{id}Label" for="#{id}" value="#{label}"/>
+                        </c:if>
+                        <c:if test="#{empty id}">
+                            #{label}
+                        </c:if>
+                    </div>
+                    <div class="tooltipContent">
+                        <c:if test="#{!empty tooltip}">
+                            <c:if test="#{!empty id}">
+                                <h:outputText id="#{id}Tooltip" value="#{tooltip}" escape="false"/>
+                            </c:if>
+                            <c:if test="#{empty id}">
+                                <h:outputText id="#{fxSystemBean.uniqueId}" value="#{tooltip}" escape="false"/>
+                            </c:if>
+                        </c:if>
+                    </div>
+                </div>
+            </div>
+
+            <div class="formInputElement" style="#{overrideInputStyle}">
+                <ui:insert/>
+            </div>
+
+        </div>
+
+        <c:if test="${newLine != 'false'}">
+            <br clear="left"/>
+        </c:if>
+    </cc:implementation>
+
+
+
+</html>

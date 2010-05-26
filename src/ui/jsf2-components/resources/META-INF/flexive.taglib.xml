@@ -55,6 +55,11 @@
         <source>templates/includes.xhtml</source>
     </tag>
 
+    <tag>
+        <tag-name>formRow</tag-name>
+        <source>templates/formRow.xhtml</source>
+    </tag>
+
     <function>
         <function-name>url</function-name>
         <function-class>com.flexive.faces.beans.PageBean</function-class>
