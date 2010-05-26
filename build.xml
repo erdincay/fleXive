@@ -59,7 +59,6 @@
         <fileset dir="${flexive.lib.dir}/jsf" includes="jsonrpc-1.0.jar"/>
 		<fileset dir="${flexive.lib.dir}" includes="*.jar" excludes="qdox.jar"/>
 		<fileset dir="${flexive.lib.dir}/text_extraction" includes="*.jar"/>
-        <fileset dir="${flexive.lib.dir}/richfaces" includes="*.jar"/>
         <fileset dir="${flexive.lib.dir}/xstream" includes="*.jar"/>
         <fileset dir="${flexive.lib.dir}/groovy" includes="*.jar"/>
         <fileset dir="${flexive.lib.dir}/mail" includes="*.jar"/>
@@ -70,6 +69,7 @@
 
     <path id="classpath.build.jsf">
         <fileset dir="${flexive.lib.dir}/jsf" includes="*.jar"/>
+        <fileset refid="flexive.lib.ui.ajax4jsf"/>
     </path>
 
     <path id="classpath.build.jsf2">
@@ -176,6 +176,45 @@
 		<delete dir="${base.reports.dir}"/>
 	</target>
 
+    <target name="jsf.no.shared" description="Disables the sharing of JSF libraries in the EAR lib folder (useful for mixing JSF1 and JSF2 applications).">
+        <echo>Disabled sharing of JSF libs</echo>
+        <property name="jsf.noshared" value="1"/>
+    </target>
+
+    <target name="preinit.filesets">
+        <path id="__jsflibs">
+            <fileset dir="${flexive.lib.dir}/jsf" includes="*.jar" excludes="jsf-api.jar, jsf-impl.jar,el-*.jar,*-src.jar,jstl*, portlet.jar, jsonrpc*"/>
+            <fileset refid="flexive.lib.ui.ajax4jsf"/>
+            <fileset dir="${build.ui.jar.dir}" includes="flexive-plugin-jsf-*,flexive-backend.jar" excludes="flexive-plugin-jsf2-core.jar,flexive-plugin-jsf-shared.jar,flexive-plugin-jsf-testrunner.jar"/>
+        </path>
+        <path id="__jsflibs.shared">
+            <fileset dir="${build.ui.jar.dir}" includes="flexive-plugin-jsf-shared.jar"/>
+        </path>
+    </target>
+
+    <target name="init.filesets.jsfshared" depends="preinit.filesets" unless="jsf.noshared">
+        <!-- Include JSF1 dependencies in EAR lib folder -->
+        <path id="jar.ear.jsflibs">
+            <path refid="__jsflibs"/>
+            <path refid="__jsflibs.shared"/>
+        </path>
+        <!-- Don't include JSF1 dependencies in WAR lib folder -->
+        <path id="jar.war.jsflibs"/>
+    </target>
+
+    <target name="init.filesets.jsfstandalone" if="jsf.noshared">
+        <!-- Don't include JSF1 libraries in EAR lib folder -->
+        <path id="jar.ear.jsflibs">
+            <path refid="__jsflibs.shared"/>
+        </path>
+
+        <!-- Include JSF1 dependencies in WAR lib folder -->
+        <path id="jar.war.jsflibs" refid="__jsflibs"/>
+    </target>
+
+    <target name="init.filesets.jsf" depends="init.filesets.jsfshared, init.filesets.jsfstandalone"/>
+
+
     <target name="redeploy.web.jboss" depends="init" description="Redeploy web files to JBoss">
         <groovy>
              File jbossDir = null
@@ -229,7 +268,7 @@
         </groovy>
     </target>
 
-    <target name="prepare" description="Prepare build directory structures" depends="init">
+    <target name="prepare" description="Prepare build directory structures" depends="init,init.filesets.jsf">
         <groovy>
             def file = properties.basedir+File.separatorChar+"build.properties"
             if( !new File(file).exists() ) {
@@ -523,6 +562,13 @@
 				<filter value="+com.flexive.war.*" />
 			</instr>
 		</emma-->
+        <property name="__jar.ui.libs.dir" value="${flexive.base.build.dir}/ui/libs"/>
+        <delete dir="${__jar.ui.libs.dir}" failonerror="false"/>
+        <mkdir dir="${__jar.ui.libs.dir}"/>
+        <copy todir="${__jar.ui.libs.dir}">
+            <path refid="jar.war.jsflibs"/>
+        </copy>
+
 		<war warfile="${flexive.base.build.dir}/ui/flexive.war" webxml="${resources.ui.jsf.dir}/web.xml" keepcompression="yes">
 			<!-- jsp,html,.. files -->
 			<fileset dir="${flexive.web.ui.shared.dir}">
@@ -554,6 +600,8 @@
             <zipfileset src="${resources.ui.jsf.dir}/lib/edit_area.zip" prefix="adm/js/"
                         includes="**/*">
             </zipfileset>
+
+            <lib dir="${__jar.ui.libs.dir}" includes="**/*"/>
         </war>
 	</target>
 
@@ -664,14 +712,14 @@
         <property name="build.ear.libs.dir" value="${flexive.base.build.dir}/lib"/>
         <delete dir="${build.ear.libs.dir}"/>
         <copy todir="${build.ear.libs.dir}">
-            <fileset dir="${flexive.build.framework.jar.dir}" includes="*.jar" excludes="${sqlparser.jar},${htmlparser.jar},*-ejb.jar"/>
+            <fileset dir="${flexive.build.framework.jar.dir}" includes="*.jar" excludes="${sqlparser.jar},${htmlparser.jar},*-ejb.jar,richfaces*.jar"/>
             <fileset dir="${flexive.drop.dir}" includes="*.jar" excludes="*-ejb.jar,*.war,*.par"/>
 
             <!-- Shared libraries -->
             <fileset dir="${flexive.lib.dir}" includes="${sqlparser.jar},${extractor.jar},${extractor-documents.jar},${extractor-audio.jar},${flatstorage.jar},cglib*.jar,fxStream.jar,commons-io-1.1.jar,sanselan.jar,quartz*.jar,PDFRenderer.jar,commons-*.jar,jbosscache-core.jar,jgroups.jar,jboss-common-core-42-compat.jar,urlrewrite-*.jar,google-collect*.jar,jsr173_1.0_api.jar,jtidy.jar,mime-util*,slf4j*,icepdf-core.jar"/>
             <fileset dir="${flexive.lib.dir}/groovy" includes="*.jar"/>
             <fileset dir="${flexive.lib.dir}/audio" includes="*.jar"/>
-            <fileset dir="${build.ui.jar.dir}" includes="*.jar" excludes="flexive-plugin-jsf-testrunner.jar"/>
+            <fileset dir="${build.ui.jar.dir}" includes="*.jar" excludes="flexive-plugin-jsf-testrunner.jar,flexive-plugin-jsf-*,flexive-plugin-jsf2-*,flexive-backend.jar"/>
             <fileset dir="${flexive.lib.dir}/antlr" includes="antlr-runtime-*.jar"/>
 
             <fileset dir="${build.ui.jar.dir}">
@@ -686,8 +734,8 @@
                 <include name="testng*jar" if="package.testNG"/>
             </fileset>
 
-            <fileset dir="${flexive.lib.dir}/jsf" includes="*.jar" excludes="jsf-api.jar, jsf-impl.jar,el-*.jar"/>
-            <fileset refid="flexive.lib.ui.ajax4jsf"/>
+            <fileset dir="${flexive.lib.dir}/jsf" includes="jsonrpc-1.0.jar"/>
+            <path refid="jar.ear.jsflibs"/>
         </copy>
         <!-- Create manifest classpath -->
         <manifestclasspath property="ear.classpath" jarfile="${flexive.base.build.dir}/flexive.ear">

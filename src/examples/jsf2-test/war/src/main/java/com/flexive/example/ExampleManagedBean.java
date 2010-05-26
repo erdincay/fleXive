@@ -83,7 +83,7 @@ public class ExampleManagedBean {
 
     public List<CmisResultRow> getResultRows() throws FxApplicationException {
         if (resultRows == null) {
-            resultRows = EJBLookup.getCmisSearchEngine().search("SELECT * from cmis:document").getRows();
+            resultRows = EJBLookup.getCmisSearchEngine().search("SELECT * from cmis:document", true, 0, 10).getRows();
         }
         return resultRows;
     }

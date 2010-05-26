@@ -67,7 +67,7 @@ import java.util.*;
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-abstract class AbstractEditModeHelper implements RenderHelper {
+public abstract class AbstractEditModeHelper implements RenderHelper {
     private static final String JS_OBJECT = "fxValue";
 
     protected final AbstractFxValueInput component;

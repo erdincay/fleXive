@@ -93,6 +93,11 @@
             </dependency>
             <dependency>
                 <groupId>com.flexive</groupId>
+                <artifactId>flexive-plugin-jsf-shared</artifactId>
+                <version>${flexive.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.flexive</groupId>
                 <artifactId>flexive-plugin-jsf2-core</artifactId>
                 <version>${flexive.version}</version>
             </dependency>

@@ -32,13 +32,6 @@
     <dependencies>
         <dependency>
             <groupId>com.flexive</groupId>
-            <artifactId>flexive-web-shared</artifactId>
-            <version>@FLEXIVE_VERSION@</version>
-            <optional>false</optional>
-        </dependency>
-
-        <dependency>
-            <groupId>com.flexive</groupId>
             <artifactId>flexive-plugin-jsf-shared</artifactId>
             <version>@FLEXIVE_VERSION@</version>
             <optional>false</optional>

@@ -43,6 +43,7 @@
             <groupId>javax.ejb</groupId>
             <artifactId>ejb-api</artifactId>
             <version>3.0</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
@@ -54,7 +55,13 @@
         <dependency>
             <groupId>com.flexive</groupId>
             <artifactId>flexive-plugin-jsf2-core</artifactId>
-            <scope>provided</scope>
+            <!-- Exclude dependencies bundled at the EAR level -->
+            <exclusions>
+                <exclusion>
+                    <groupId>com.flexive</groupId>
+                    <artifactId>flexive-plugin-jsf-shared</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.flexive</groupId>

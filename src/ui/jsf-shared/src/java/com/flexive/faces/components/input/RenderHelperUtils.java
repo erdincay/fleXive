@@ -52,7 +52,7 @@ import javax.faces.context.ResponseWriter;
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-class RenderHelperUtils {
+public class RenderHelperUtils {
 
     private RenderHelperUtils() {
     }
@@ -66,7 +66,7 @@ class RenderHelperUtils {
      * @param value         the value to be rendered
      * @throws IOException  on I/O errors
      */
-    static void render(RenderHelper renderHelper, AbstractFxValueInput component, String clientId, FxValue value) throws IOException {
+    public static void render(RenderHelper renderHelper, AbstractFxValueInput component, String clientId, FxValue value) throws IOException {
         if (value.isMultiLanguage() && !component.isDisableMultiLanguage()) {
             renderHelper.encodeMultiLanguageField();
         } else {
@@ -74,18 +74,18 @@ class RenderHelperUtils {
         }
     }
 
-    static FxValue getInputValue(AbstractFxValueInput input) {
+    public static FxValue getInputValue(AbstractFxValueInput input) {
         if (input != null) {
             return input.getSubmittedValue() != null ? (FxValue) input.getSubmittedValue() : (FxValue) input.getValue();
         }
         throw new IllegalStateException("No enclosing fx:fxValueInput component found");
     }
 
-    static String stripForm(String inputId) {
+    public static String stripForm(String inputId) {
         return inputId.substring(inputId.lastIndexOf(':') + 1);
     }
 
-    static String getForm(String inputId) {
+    public static String getForm(String inputId) {
         return inputId.substring(0, inputId.indexOf(':'));
     }
 
@@ -270,7 +270,7 @@ class RenderHelperUtils {
         }
     }
 
-    static UIComponent addImageDescriptionComponent(AbstractFxValueInput component, UIComponent parent, FxLanguage language, String inputId) {
+    public static UIComponent addImageDescriptionComponent(AbstractFxValueInput component, UIComponent parent, FxLanguage language, String inputId) {
         ImageDescription desc = new ImageDescription();
         desc.setId(RenderHelperUtils.stripForm(inputId));
         desc.setLanguage(language);
