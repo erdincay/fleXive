@@ -41,5 +41,6 @@ public enum FxMediaType {
     Image,
     Document,
     Audio,
+    Video,
     Unknown
 }

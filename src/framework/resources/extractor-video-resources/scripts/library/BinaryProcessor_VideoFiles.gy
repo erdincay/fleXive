@@ -1,0 +1,101 @@
+/** *************************************************************
+ *  This file is part of the [fleXive](R) framework.
+ *
+ *  Copyright (c) 1999-2010
+ *  UCS - unique computing solutions gmbh (http://www.ucs.at)
+ *  All rights reserved
+ *
+ *  The [fleXive](R) project is free software; you can redistribute
+ *  it and/or modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation.
+ *
+ *  The GNU Lesser General Public License can be found at
+ *  http://www.gnu.org/licenses/lgpl.html.
+ *  A copy is found in the textfile LGPL.txt and important notices to the
+ *  license from the author are found in LICENSE.txt distributed with
+ *  these libraries.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  For further information about UCS - unique computing solutions gmbh,
+ *  please see the company website: http://www.ucs.at
+ *
+ *  For further information about [fleXive](R), please see the
+ *  project website: http://www.flexive.org
+ *
+ *
+ *  This copyright notice MUST APPEAR in all copies of the file!
+ ************************************************************** */
+
+import com.flexive.shared.media.FxMediaEngine
+import com.flexive.shared.media.FxMetadata
+import com.flexive.shared.value.BinaryDescriptor
+
+/*
+Parameters (valid for all binarypreviewprocess scripts):
+===========
+"boolean processed",
+"boolean useDefaultPreview",
+"int defaultId",
+"String mimeType",
+"String metaData",
+"File binaryFile",
+"File previewFile1",
+"File previewFile2",
+"File previewFile3",
+"File previewFile4",
+"int[] dimensionPreview1",
+"int[] dimensionPreview2",
+"int[] dimensionPreview3",
+"int[] dimensionPreview4"
+*/
+
+if (processed)
+  return
+
+println "Entered [BinaryProcessor_Video]"
+boolean isVideoFile = mimeType.startsWith("video/")
+if (!isVideoFile) {
+  println "returning [BinaryProcessor_Video]"
+  return
+}
+
+//parse metadata
+println "Processing a video file ..."
+FxMetadata meta = FxMediaEngine.identify(mimeType, binaryFile)
+if (!meta.isVideoMetadata())
+  return //could not identify as video file
+
+metaData = meta.toXML()
+
+processed = true
+
+useDefaultPreview = true
+
+try {
+  File imgFile = new File((meta.metadata.find { it.@key == 'previewFile'}).getValue());
+  if (imgFile.length() > 30) {
+    def ext = imgFile.getName();
+    ext = ext.substring(ext.lastIndexOf("."));
+    println imgFile.getAbsolutePath();
+    previewFile1 = File.createTempFile("PREV1", ext)
+    previewFile2 = File.createTempFile("PREV2", ext)
+    previewFile3 = File.createTempFile("PREV3", ext)
+    previewFile4 = File.createTempFile("PREV4", ext)
+    dimensionsPreview1 = FxMediaEngine.scale(imgFile, previewFile1, ext, BinaryDescriptor.PREVIEW1_BOX, BinaryDescriptor.PREVIEW1_BOX)
+    dimensionsPreview2 = FxMediaEngine.scale(imgFile, previewFile2, ext, BinaryDescriptor.PREVIEW2_BOX, BinaryDescriptor.PREVIEW2_BOX)
+    dimensionsPreview3 = FxMediaEngine.scale(imgFile, previewFile3, ext, BinaryDescriptor.PREVIEW3_BOX, BinaryDescriptor.PREVIEW3_BOX)
+    dimensionsPreview4 = FxMediaEngine.scale(imgFile, previewFile4, ext, BinaryDescriptor.SCREENVIEW_WIDTH, BinaryDescriptor.SCREENVIEW_HEIGHT)
+    useDefaultPreview = false
+  }
+  if (!imgFile.delete())
+    imgFile.deleteOnExit()
+
+} catch (NullPointerException npe) {
+  // ocurs when there is no preview file
+}
+
+println "Processed a video file."

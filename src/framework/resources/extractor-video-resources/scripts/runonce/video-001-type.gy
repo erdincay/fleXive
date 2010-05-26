@@ -1,0 +1,515 @@
+/** *************************************************************
+ *  This file is part of the [fleXive](R) framework.
+ *
+ *  Copyright (c) 1999-2010
+ *  UCS - unique computing solutions gmbh (http://www.ucs.at)
+ *  All rights reserved
+ *
+ *  The [fleXive](R) project is free software; you can redistribute
+ *  it and/or modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation.
+ *
+ *  The GNU Lesser General Public License can be found at
+ *  http://www.gnu.org/licenses/lgpl.html.
+ *  A copy is found in the textfile LGPL.txt and important notices to the
+ *  license from the author are found in LICENSE.txt distributed with
+ *  these libraries.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  For further information about UCS - unique computing solutions gmbh,
+ *  please see the company website: http://www.ucs.at
+ *
+ *  For further information about [fleXive](R), please see the
+ *  project website: http://www.flexive.org
+ *
+ *
+ *  This copyright notice MUST APPEAR in all copies of the file!
+ ************************************************************** */
+//file: video-001-type.gy
+//description: Create the "Video" FxType needed to store instances of audio mime type files
+//expected bindings:
+//  ticket ... UserTicket
+//  scriptname ... name of this script
+//+author: Laszlo Hernadi, Unique Computing Solutions Gmbh
+
+import com.flexive.shared.CacheAdmin
+import com.flexive.shared.EJBLookup
+import com.flexive.shared.scripting.FxScriptEvent
+import com.flexive.shared.scripting.FxScriptInfo
+import com.flexive.shared.scripting.groovy.GroovyTypeBuilder
+import com.flexive.shared.security.ACLCategory
+import com.flexive.shared.value.FxString
+import com.flexive.shared.search.*
+import com.flexive.shared.structure.*
+import com.flexive.shared.value.FxBinary
+import com.flexive.shared.value.BinaryDescriptor
+import com.flexive.shared.content.FxPK
+import com.flexive.shared.scripting.groovy.GroovyContentBuilder
+import com.flexive.shared.FxSharedUtils
+import com.flexive.shared.value.FxReference
+import com.flexive.shared.value.ReferencedContent
+
+InputStream getImageResource(path) {
+  return Thread.currentThread().getContextClassLoader().getResourceAsStream("binaries/" + path)
+}
+
+FxBinary getImageBinary(name, path) {
+  final InputStream stream = getImageResource(path)
+  return stream != null ? new FxBinary(false, new BinaryDescriptor(name, stream)) : new FxBinary(false, null).setEmpty();
+}
+
+FxPK createTypeIcon(String typeName, String fileName) {
+  def builder = new GroovyContentBuilder(FxType.IMAGE)
+  builder {
+    file(getImageBinary("Type Icon: " + typeName.toUpperCase(), fileName))
+  }
+  EJBLookup.contentEngine.save(builder.content)
+}
+
+def addTypeIcon(String typeName, String fileName) {
+  EJBLookup.typeEngine.save(
+          CacheAdmin.environment.getType(typeName).asEditable().setIcon(new FxReference(new ReferencedContent(createTypeIcon(typeName, fileName))))
+  )
+}
+
+// *******************************
+// Structure Creation
+// *******************************
+
+new GroovyTypeBuilder().video(
+        label: new FxString(true, 1, "Video").setTranslation(2, "Video"),
+        structureOptions: Eval.me("""import com.flexive.shared.scripting.groovy.*
+                new GroovyOptionBuilder()."MIMETYPE"(value: "video/unknown", overridable: true, isInherited: true)"""),
+        languageMode: LanguageMode.Multiple,
+        trackHistory: false,
+        typeMode: TypeMode.Content,
+        maxVersions: -1L,
+        storageMode: TypeStorageMode.Hierarchical,
+        useInstancePermissions: true,
+        usePropertyPermissions: false,
+        useStepPermissions: true,
+        useTypePermissions: true,
+        usePermissions: true,
+        parentTypeName: "DOCUMENTFILE")
+
+        {
+          METADATA(
+                  label: new FxString(true, 1, "Metadata"),
+                  hint: new FxString(true, 1, ""),
+                  alias: "METADATA",
+                  defaultMultiplicity: 0,
+                  overrideMultiplicity: true,
+                  multiplicity: new FxMultiplicity(0, 1),
+                  groupMode: GroupMode.AnyOf) {
+            length_1(
+                    label: new FxString(true, 1, "Length").setTranslation(2, "L\u00E4nge"),
+                    hint: new FxString(true, 1, "Length in HH:mm:ss.ssss").setTranslation(2, "L\u00E4nge in HH:mm:ss.ssss"),
+                    structureOptions: Eval.me("""import com.flexive.shared.scripting.groovy.*
+                           new GroovyOptionBuilder()."SEARCHABLE"(value: "1", overridable: true, isInherited: true) {
+                           "HTML.EDITOR"(value: "0", overridable: false, isInherited: true)
+                           "MULTILINE"(value: "0", overridable: true, isInherited: true)
+                           "SHOW.OVERVIEW"(value: "0", overridable: true, isInherited: true) }"""),
+                    alias: "LENGTH",
+                    defaultMultiplicity: 1,
+                    multilang: false,
+                    dataType: FxDataType.String1024,
+                    acl: CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+                    multiplicity: new FxMultiplicity(0, 1),
+                    overrideACL: true,
+                    overrideMultiplicity: true,
+                    overrideInOverview: true,
+                    overrideMultiline: true,
+                    overrideSearchable: true,
+                    overrideUseHtmlEditor: false,
+                    searchable: true,
+                    fullTextIndexed: true,
+                    multiline: false,
+                    inOverview: false,
+                    useHtmlEditor: false,
+                    uniqueMode: UniqueMode.None,
+                    enabled: true)
+            length(
+            )
+            creationdate(
+                    label: new FxString(true, 1, "Creationdate").setTranslation(2, "Erstellungsdatum"),
+                    hint: new FxString(true, 1, "Creationdate of the video").setTranslation(2, "Erstellungsdatum des Videos"),
+                    structureOptions: Eval.me("""import com.flexive.shared.scripting.groovy.*
+                           new GroovyOptionBuilder()."SEARCHABLE"(value: "1", overridable: true, isInherited: true) {
+                           "HTML.EDITOR"(value: "0", overridable: true, isInherited: true)
+                           "MULTILINE"(value: "0", overridable: true, isInherited: true)
+                           "SHOW.OVERVIEW"(value: "0", overridable: true, isInherited: true) }"""),
+                    defaultMultiplicity: 1,
+                    multilang: false,
+                    dataType: FxDataType.DateTime,
+                    acl: CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+                    multiplicity: new FxMultiplicity(0, 1),
+                    overrideACL: true,
+                    overrideMultiplicity: true,
+                    overrideInOverview: true,
+                    overrideMultiline: true,
+                    overrideSearchable: true,
+                    overrideUseHtmlEditor: true,
+                    searchable: true,
+                    fullTextIndexed: false,
+                    multiline: false,
+                    inOverview: false,
+                    useHtmlEditor: false,
+                    uniqueMode: UniqueMode.None,
+                    enabled: true)
+            creationdate(
+            )
+            VIDEOSTREAM(
+                    label: new FxString(true, 1, "Video stream"),
+                    hint: new FxString(true, 1, ""),
+                    alias: "VIDEOSTREAM",
+                    defaultMultiplicity: 1,
+                    overrideMultiplicity: true,
+                    multiplicity: new FxMultiplicity(0, 2147483647),
+                    groupMode: GroupMode.AnyOf) {
+              type(
+                      label: new FxString(true, 1, "Type"),
+                      hint: new FxString(true, 1, "Type of the video stream").setTranslation(2, "Type vom Video Stream"),
+                      structureOptions: Eval.me("""import com.flexive.shared.scripting.groovy.*
+                             new GroovyOptionBuilder()."SEARCHABLE"(value: "1", overridable: true, isInherited: true) {
+                             "HTML.EDITOR"(value: "0", overridable: true, isInherited: true)
+                             "MULTILINE"(value: "0", overridable: true, isInherited: true)
+                             "SHOW.OVERVIEW"(value: "0", overridable: true, isInherited: true) }"""),
+                      defaultMultiplicity: 1,
+                      multilang: false,
+                      dataType: FxDataType.String1024,
+                      acl: CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+                      multiplicity: new FxMultiplicity(0, 1),
+                      overrideACL: true,
+                      overrideMultiplicity: true,
+                      overrideInOverview: true,
+                      overrideMultiline: true,
+                      overrideSearchable: true,
+                      overrideUseHtmlEditor: true,
+                      searchable: true,
+                      fullTextIndexed: true,
+                      multiline: false,
+                      inOverview: false,
+                      useHtmlEditor: false,
+                      uniqueMode: UniqueMode.None,
+                      enabled: true)
+              type(
+              )
+              format(
+                      label: new FxString(true, 1, "Format"),
+                      hint: new FxString(true, 1, "Format of the video stream").setTranslation(2, "Format des Videostreames"),
+                      structureOptions: Eval.me("""import com.flexive.shared.scripting.groovy.*
+                             new GroovyOptionBuilder()."SEARCHABLE"(value: "1", overridable: true, isInherited: true) {
+                             "HTML.EDITOR"(value: "0", overridable: true, isInherited: true)
+                             "MULTILINE"(value: "0", overridable: true, isInherited: true)
+                             "SHOW.OVERVIEW"(value: "0", overridable: true, isInherited: true) }"""),
+                      defaultMultiplicity: 1,
+                      multilang: false,
+                      dataType: FxDataType.String1024,
+                      acl: CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+                      multiplicity: new FxMultiplicity(0, 1),
+                      overrideACL: true,
+                      overrideMultiplicity: true,
+                      overrideInOverview: true,
+                      overrideMultiline: true,
+                      overrideSearchable: true,
+                      overrideUseHtmlEditor: true,
+                      searchable: true,
+                      fullTextIndexed: true,
+                      multiline: false,
+                      inOverview: false,
+                      useHtmlEditor: false,
+                      uniqueMode: UniqueMode.None,
+                      enabled: true)
+              format(
+              )
+              width(
+                      label: new FxString(true, 1, "Width").setTranslation(2, "Breite"),
+                      hint: new FxString(true, 1, "Width of the video in pixel").setTranslation(2, "Breite des Videos in Pixel"),
+                      structureOptions: Eval.me("""import com.flexive.shared.scripting.groovy.*
+                                   new GroovyOptionBuilder()."SEARCHABLE"(value: "1", overridable: true, isInherited: true) {
+                                   "HTML.EDITOR"(value: "0", overridable: true, isInherited: true)
+                                   "MULTILINE"(value: "0", overridable: true, isInherited: true)
+                                   "SHOW.OVERVIEW"(value: "0", overridable: true, isInherited: true) }"""),
+                      defaultMultiplicity: 1,
+                      multilang: false,
+                      dataType: FxDataType.Number,
+                      acl: CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+                      multiplicity: new FxMultiplicity(0, 1),
+                      overrideACL: true,
+                      overrideMultiplicity: true,
+                      overrideInOverview: true,
+                      overrideMultiline: true,
+                      overrideSearchable: true,
+                      overrideUseHtmlEditor: true,
+                      searchable: true,
+                      fullTextIndexed: false,
+                      multiline: false,
+                      inOverview: false,
+                      useHtmlEditor: false,
+                      uniqueMode: UniqueMode.None,
+                      enabled: true)
+              width(
+              )
+              height(
+                      label: new FxString(true, 1, "Height").setTranslation(2, "H\u00F6he"),
+                      hint: new FxString(true, 1, "Height of the video in pixel").setTranslation(2, "H\u00F6he des Videos in pixel"),
+                      structureOptions: Eval.me("""import com.flexive.shared.scripting.groovy.*
+                                   new GroovyOptionBuilder()."SEARCHABLE"(value: "1", overridable: true, isInherited: true) {
+                                   "HTML.EDITOR"(value: "0", overridable: true, isInherited: true)
+                                   "MULTILINE"(value: "0", overridable: true, isInherited: true)
+                                   "SHOW.OVERVIEW"(value: "0", overridable: true, isInherited: true) }"""),
+                      defaultMultiplicity: 1,
+                      multilang: false,
+                      dataType: FxDataType.Number,
+                      acl: CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+                      multiplicity: new FxMultiplicity(0, 1),
+                      overrideACL: true,
+                      overrideMultiplicity: true,
+                      overrideInOverview: true,
+                      overrideMultiline: true,
+                      overrideSearchable: true,
+                      overrideUseHtmlEditor: true,
+                      searchable: true,
+                      fullTextIndexed: false,
+                      multiline: false,
+                      inOverview: false,
+                      useHtmlEditor: false,
+                      uniqueMode: UniqueMode.None,
+                      enabled: true)
+              height(
+              )
+              framerate(
+                      label: new FxString(true, 1, "Framerate").setTranslation(2, "Bilder pro Sekunde"),
+                      hint: new FxString(true, 1, "Framerate of the video").setTranslation(2, "Bilder pro Sekunde des Videos"),
+                      structureOptions: Eval.me("""import com.flexive.shared.scripting.groovy.*
+                                   new GroovyOptionBuilder()."SEARCHABLE"(value: "1", overridable: true, isInherited: true) {
+                                   "HTML.EDITOR"(value: "0", overridable: true, isInherited: true)
+                                   "MULTILINE"(value: "0", overridable: true, isInherited: true)
+                                   "SHOW.OVERVIEW"(value: "0", overridable: true, isInherited: true) }"""),
+                      defaultMultiplicity: 1,
+                      multilang: false,
+                      dataType: FxDataType.Double,
+                      acl: CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+                      multiplicity: new FxMultiplicity(0, 1),
+                      overrideACL: true,
+                      overrideMultiplicity: true,
+                      overrideInOverview: true,
+                      overrideMultiline: true,
+                      overrideSearchable: true,
+                      overrideUseHtmlEditor: true,
+                      searchable: true,
+                      fullTextIndexed: false,
+                      multiline: false,
+                      inOverview: false,
+                      useHtmlEditor: false,
+                      uniqueMode: UniqueMode.None,
+                      enabled: true)
+              framerate(
+              )
+              videodatarate(
+                      label: new FxString(true, 1, "Videodatarate").setTranslation(2, "Videodatenrate"),
+                      hint: new FxString(true, 1, "Datarate of the video stream in kbit/s").setTranslation(2, "Datarate of the audio stream in kbit/s"),
+                      structureOptions: Eval.me("""import com.flexive.shared.scripting.groovy.*
+                                   new GroovyOptionBuilder()."SEARCHABLE"(value: "1", overridable: true, isInherited: true) {
+                                   "HTML.EDITOR"(value: "0", overridable: true, isInherited: true)
+                                   "MULTILINE"(value: "0", overridable: true, isInherited: true)
+                                   "SHOW.OVERVIEW"(value: "0", overridable: true, isInherited: true) }"""),
+                      alias: "BITRATE",
+                      defaultMultiplicity: 1,
+                      multilang: false,
+                      dataType: FxDataType.Double,
+                      acl: CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+                      multiplicity: new FxMultiplicity(0, 1),
+                      overrideACL: true,
+                      overrideMultiplicity: true,
+                      overrideInOverview: true,
+                      overrideMultiline: true,
+                      overrideSearchable: true,
+                      overrideUseHtmlEditor: true,
+                      searchable: true,
+                      fullTextIndexed: false,
+                      multiline: false,
+                      inOverview: false,
+                      useHtmlEditor: false,
+                      uniqueMode: UniqueMode.None,
+                      enabled: true)
+              bitrate(
+                      label: new FxString(true, 1, "Bitrate").setTranslation(2, "Videodatenrate"))
+            }
+            AUDIOSTREAM(
+                    label: new FxString(true, 1, "Audio stream"),
+                    hint: new FxString(true, 1, ""),
+                    alias: "AUDIOSTREAM",
+                    defaultMultiplicity: 1,
+                    overrideMultiplicity: true,
+                    multiplicity: new FxMultiplicity(0, 2147483647),
+                    groupMode: GroupMode.AnyOf) {
+              type(
+                      label: new FxString(true, 1, "Type"),
+                      hint: new FxString(true, 1, "Type of the audio stream").setTranslation(2, "Type vom Audiostream"),
+                      structureOptions: Eval.me("""import com.flexive.shared.scripting.groovy.*
+                             new GroovyOptionBuilder()."SEARCHABLE"(value: "1", overridable: true, isInherited: true) {
+                             "HTML.EDITOR"(value: "0", overridable: true, isInherited: true)
+                             "MULTILINE"(value: "0", overridable: true, isInherited: true)
+                             "SHOW.OVERVIEW"(value: "0", overridable: true, isInherited: true) }"""),
+                      defaultMultiplicity: 1,
+                      multilang: false,
+                      dataType: FxDataType.String1024,
+                      acl: CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+                      multiplicity: new FxMultiplicity(0, 1),
+                      overrideACL: true,
+                      overrideMultiplicity: true,
+                      overrideInOverview: true,
+                      overrideMultiline: true,
+                      overrideSearchable: true,
+                      overrideUseHtmlEditor: true,
+                      searchable: true,
+                      fullTextIndexed: true,
+                      multiline: false,
+                      inOverview: false,
+                      useHtmlEditor: false,
+                      uniqueMode: UniqueMode.None,
+                      enabled: true)
+              type(
+              )
+              audiodatarate(
+                      label: new FxString(true, 1, "Audiodatarate").setTranslation(2, "Audiodatenrate"),
+                      hint: new FxString(true, 1, "Datarate of the audio stream in kbit/s").setTranslation(2, "Datenrate des Audiostreams in kbit/s"),
+                      structureOptions: Eval.me("""import com.flexive.shared.scripting.groovy.*
+                                   new GroovyOptionBuilder()."SEARCHABLE"(value: "1", overridable: true, isInherited: true) {
+                                   "HTML.EDITOR"(value: "0", overridable: true, isInherited: true)
+                                   "MULTILINE"(value: "0", overridable: true, isInherited: true)
+                                   "SHOW.OVERVIEW"(value: "0", overridable: true, isInherited: true) }"""),
+                      alias: "BITRATE",
+                      defaultMultiplicity: 1,
+                      multilang: false,
+                      dataType: FxDataType.Double,
+                      acl: CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+                      multiplicity: new FxMultiplicity(0, 1),
+                      overrideACL: true,
+                      overrideMultiplicity: true,
+                      overrideInOverview: true,
+                      overrideMultiline: true,
+                      overrideSearchable: true,
+                      overrideUseHtmlEditor: true,
+                      searchable: true,
+                      fullTextIndexed: false,
+                      multiline: false,
+                      inOverview: false,
+                      useHtmlEditor: false,
+                      uniqueMode: UniqueMode.None,
+                      enabled: true)
+              bitrate(
+                      label: new FxString(true, 1, "Bitrate").setTranslation(2, "Audiodatenrate"))
+              format(
+                      label: new FxString(true, 1, "Format"),
+                      hint: new FxString(true, 1, "Format of the Audiostream").setTranslation(2, "Format des Audiostreames"),
+                      structureOptions: Eval.me("""import com.flexive.shared.scripting.groovy.*
+                                   new GroovyOptionBuilder()."SEARCHABLE"(value: "1", overridable: true, isInherited: true) {
+                                   "HTML.EDITOR"(value: "0", overridable: true, isInherited: true)
+                                   "MULTILINE"(value: "0", overridable: true, isInherited: true)
+                                   "SHOW.OVERVIEW"(value: "0", overridable: true, isInherited: true) }"""),
+                      defaultMultiplicity: 1,
+                      multilang: false,
+                      dataType: FxDataType.String1024,
+                      acl: CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+                      multiplicity: new FxMultiplicity(0, 1),
+                      overrideACL: true,
+                      overrideMultiplicity: true,
+                      overrideInOverview: true,
+                      overrideMultiline: true,
+                      overrideSearchable: true,
+                      overrideUseHtmlEditor: true,
+                      searchable: true,
+                      fullTextIndexed: true,
+                      multiline: false,
+                      inOverview: false,
+                      useHtmlEditor: false,
+                      uniqueMode: UniqueMode.None,
+                      enabled: true)
+              format(
+              )
+              frequency(
+                      label: new FxString(true, 1, "Frequency").setTranslation(2, "Frequenz"),
+                      hint: new FxString(true, 1, "Frequency in Hz").setTranslation(2, "Frequenz in Herz"),
+                      structureOptions: Eval.me("""import com.flexive.shared.scripting.groovy.*
+                             new GroovyOptionBuilder()."SEARCHABLE"(value: "1", overridable: true, isInherited: true) {
+                             "HTML.EDITOR"(value: "0", overridable: true, isInherited: true)
+                             "MULTILINE"(value: "0", overridable: true, isInherited: true)
+                             "SHOW.OVERVIEW"(value: "0", overridable: true, isInherited: true) }"""),
+                      defaultMultiplicity: 1,
+                      multilang: false,
+                      dataType: FxDataType.Number,
+                      acl: CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
+                      multiplicity: new FxMultiplicity(0, 1),
+                      overrideACL: true,
+                      overrideMultiplicity: true,
+                      overrideInOverview: true,
+                      overrideMultiline: true,
+                      overrideSearchable: true,
+                      overrideUseHtmlEditor: true,
+                      searchable: true,
+                      fullTextIndexed: false,
+                      multiline: false,
+                      inOverview: false,
+                      useHtmlEditor: false,
+                      uniqueMode: UniqueMode.None,
+                      enabled: true)
+              frequency(
+              )
+            }
+          }
+        }
+
+def scriptCode
+
+// SCRIPT OVERRIDE ********
+boolean scriptOverride = true
+// ************************
+
+// SCRIPTS ATTACHED TO TYPE EVENTS
+
+def FxType currentType
+def FxScriptInfo siType
+
+// ***** SCRIPT START *****
+currentType = CacheAdmin.getEnvironment().getType("VIDEO")
+
+// script association for meta data parsing
+def se = EJBLookup.getScriptingEngine()
+typeId = CacheAdmin.getEnvironment().getType(FxType.VIDEO).getId()
+FxScriptInfo si = se.createScriptFromDropLibrary("flexive-extractor-video", "VideoMetaParser.gy",
+        new FxScriptInfo(-1, FxScriptEvent.BeforeContentCreate, "VideoMetaParser.gy",
+                "Script filling video properties", true, false));
+se.createTypeScriptMapping(si.getId(), typeId, true, true);
+
+// create default result columns for the backend application
+EJBLookup.resultPreferencesEngine.saveSystemDefault(
+        new ResultPreferences(
+                [new ResultColumnInfo("@pk"),
+                        new ResultColumnInfo("#" + FxType.VIDEO + "/caption"),
+                        // perhaps we should add some more cols f. metadata searches ...
+                ],
+                [new ResultOrderByInfo("#" + FxType.DOCUMENT + "/caption", SortDirection.ASCENDING)],
+                25, 0
+        ),
+        CacheAdmin.environment.getType(FxType.VIDEO).id,
+        ResultViewType.LIST,
+        AdminResultLocations.values()
+)
+
+// binary processing f. video files
+se.createScriptFromDropLibrary("flexive-extractor-video",
+        "BinaryProcessor_VideoFiles.gy", new FxScriptInfo(-1,
+                FxScriptEvent.BinaryPreviewProcess,
+                "BinaryProcessor_VideoFiles.gy",
+                "Binary processing for video files", true, false))
+
+
+if (!FxSharedUtils.isMinimalRunOnceScripts()) {
+  addTypeIcon(FxType.VIDEO, "type-video.png")
+}

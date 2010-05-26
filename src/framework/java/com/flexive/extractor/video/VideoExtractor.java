@@ -1,0 +1,352 @@
+package com.flexive.extractor.video;
+
+import com.flexive.shared.FxSharedUtils;
+import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.media.FxMetadata;
+import com.flexive.shared.media.impl.FxMimeType;
+import com.sonydadc.dw.jflv.io.IOHelper;
+import com.sonydadc.dw.jflv.metadata.FlvHeader;
+import com.sonydadc.dw.jflv.parse.ParseMeta;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+/**
+ * The video extractor class
+ * <p/>
+ * It uses ffmpeg from the path, if not present it uses a jar to extract info from flv videos
+ *
+ * @author Laszlo Hernadi lhernadi@ucs.at
+ * @since 3.1.3
+ */
+public class VideoExtractor {
+
+    private static final Log LOG = LogFactory.getLog(VideoExtractor.class);
+
+    /**
+     * Identify a file, returning metadata
+     *
+     * @param mimeType if not null it will be used to call the correct identify routine
+     * @param file     the file to identify
+     * @return metadata
+     * @throws com.flexive.shared.exceptions.FxApplicationException
+     *          on errors
+     */
+    public static FxMetadata identify(String mimeType, File file) throws FxApplicationException {
+        final VideoExtractorImpl extractor = new VideoExtractorImpl(mimeType, file);
+        extractor.extractVideoData();
+
+        return new FxVideoMetaDataImpl(file.getName(), mimeType, extractor.getMetaItems(), extractor.getLength());
+    }
+
+    /**
+     * Inner class to deal with the actual audio data extraction
+     */
+    static class VideoExtractorImpl {
+        private long length = 0L;
+        private FxMimeType mimeType;
+        private File file;
+        private List<FxMetadata.FxMetadataItem> metaItems;
+        private static final String FFMPEG_BINARY = "ffmpeg";
+
+        /**
+         * Constructor
+         *
+         * @param mimeType the mime type as a String
+         * @param file     the video file
+         */
+        VideoExtractorImpl(String mimeType, File file) {
+            this.mimeType = FxMimeType.getMimeType(mimeType);
+            this.file = file;
+        }
+
+        public List<FxMetadata.FxMetadataItem> getMetaItems() {
+            return metaItems;
+        }
+
+        /**
+         * Main extraction method
+         * Extraction is based on the given mime type
+         */
+        public void extractVideoData() {
+            extractGeneral();
+        }
+
+        /**
+         * Extracts the metaData using ffmpeg
+         */
+        private void extractGeneral() {
+            final String subType = mimeType.getSubType();
+            File tmpPrev = null;
+            FxSharedUtils.ProcessResult res;
+            try {
+                tmpPrev = File.createTempFile("VideoPreview", ".jpg");
+                res = FxSharedUtils.executeCommand(FFMPEG_BINARY, "-vstats", "-i", file.getAbsolutePath(), tmpPrev.getAbsolutePath());
+            } catch (IOException e) {
+                e.printStackTrace();
+                res = FxSharedUtils.executeCommand(FFMPEG_BINARY, "-vstats", "-i", file.getAbsolutePath());
+            }
+            FFMpegParser curParser = new FFMpegParser(String.valueOf(res.getStdOut()) + String.valueOf(res.getStdErr()));
+            metaItems = new ArrayList<FxMetadata.FxMetadataItem>(8);
+            if (tmpPrev != null && tmpPrev.length() > 10)
+                metaItems.add(new FxMetadata.FxMetadataItem("previewFile", tmpPrev.getAbsolutePath()));
+            if (!curParser.buildMetaItems(metaItems)) {
+                LOG.error("You need to have the dictionary containing ffmpeg executable in the path");
+                if (subType.contains("flv")) {
+                    extractFLV();
+                }
+            }
+        }
+
+        /**
+         * Extract metaInfo using the jflv lib
+         */
+        private void extractFLV() {
+            metaItems = new ArrayList<FxMetadata.FxMetadataItem>(8);
+
+            try {
+                IOHelper ioh = new IOHelper(file);
+                new FlvHeader(ioh);
+                ParseMeta parm = new ParseMeta(ioh);
+                parm.findMetaTag();
+                Map<String, Object> metaData = parm.getMetaData();
+                metaItems.add(new FxMetadata.FxMetadataItem("videoStreams", "1"));
+                metaItems.add(new FxMetadata.FxMetadataItem("audioStreams", "1"));
+                metaItems.add(new FxMetadata.FxMetadataItem("height1", prepareNumber(metaData.get("height"))));
+                metaItems.add(new FxMetadata.FxMetadataItem("width1", prepareNumber(metaData.get("width"))));
+                metaItems.add(new FxMetadata.FxMetadataItem("duration1", String.valueOf(metaData.get("duration")).trim()));
+                metaItems.add(new FxMetadata.FxMetadataItem("audiodatarate1", String.valueOf(metaData.get("audiodatarate")).trim()));
+                metaItems.add(new FxMetadata.FxMetadataItem("videodatarate1", String.valueOf(metaData.get("videodatarate")).trim()));
+                try {
+                    String tmp = String.valueOf(metaData.get("creationdate")).trim();
+                    tmp = tmp.substring(4);
+                    Date d = (new SimpleDateFormat("MMM dd HH:mm:ss yyyy").parse(tmp));
+                    metaItems.add(new FxMetadata.FxMetadataItem("creationdate1", "STR" + d.getTime()));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                metaItems.add(new FxMetadata.FxMetadataItem("framerate", String.valueOf(metaData.get("framerate")).trim()));
+            } catch (Exception e) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Failed to get audio stream from file or could not recognise video file format", e);
+                }
+            }
+        }
+
+        public long getLength() {
+            return length;
+        }
+
+        private String prepareNumber(Object value) {
+            String sValue = String.valueOf(value).trim();
+            sValue = "" + (int) (Double.parseDouble(sValue));
+            return sValue;
+        }
+
+    }
+
+    /**
+     * A class to parse the ffmpeg output creating the video and audio Stream(s)
+     */
+    private static class FFMpegParser {
+        String duration;
+        String bitrate;
+        List<VideoStreamHolder> videoStream = new ArrayList<VideoStreamHolder>(2);
+        List<AudioStreamHolder> audioStream = new ArrayList<AudioStreamHolder>(2);
+
+        FFMpegParser(String output) {
+            long start = System.nanoTime();
+            int begin0 = output.indexOf("Input #0,");
+            if (begin0 <= 0) return;
+            begin0 = output.indexOf("Duration: ", begin0);
+            if (begin0 <= 0) return;
+            output = output.substring(begin0);
+            int end0 = Math.max(output.indexOf("[ffmpeg_output"), output.indexOf("At least one output file must be specified"));
+            if (end0 > 0) output = output.substring(0, end0);
+            System.out.println("Parsing :\n" + output);
+            duration = output.substring(10, 21);
+            int begin = output.indexOf("bitrate: ");
+            int end;
+            if (begin > 0) {
+                begin += 9;
+                end = output.indexOf(" ", begin);
+                if (end > 0)
+                    bitrate = output.substring(begin, end);
+            }
+            String[] streams = output.split("Stream #");
+            for (String tmp : streams) {
+                String[] subs = tmp.split(":", 3);
+                if (subs.length == 3) {
+                    String key = subs[1].trim();
+                    if (key.equals("Video")) {
+                        videoStream.add(new VideoStreamHolder(subs[2], bitrate));
+                    } else if (key.equals("Audio")) {
+                        audioStream.add(new AudioStreamHolder(subs[2]));
+                    }
+                }
+            }
+            System.out.println(String.format("Parsing took : %7.3fms", ((System.nanoTime() - start) * 1E-6)));
+        }
+
+        /**
+         * Build the meta items of the current video
+         * It recognize the video and audio Stream(s)
+         *
+         * @param metaItems the List to write the metaItems to
+         * @return <code>true</code> if any value is written
+         */
+        public boolean buildMetaItems(List<FxMetadata.FxMetadataItem> metaItems) {
+            boolean returnValue = false;
+            if (duration != null) {
+                metaItems.add(new FxMetadata.FxMetadataItem("duration", duration.trim()));
+                returnValue = true;
+            }
+            metaItems.add(new FxMetadata.FxMetadataItem("videoStreams", "" + videoStream.size()));
+            if (videoStream.size() > 0) {
+                returnValue = true;
+                int i = 1;
+                for (VideoStreamHolder curVs : videoStream) {
+                    metaItems.add(new FxMetadata.FxMetadataItem("height" + i, (curVs.height != null ? curVs.height : "")));
+                    metaItems.add(new FxMetadata.FxMetadataItem("width" + i, (curVs.width != null ? curVs.width : "")));
+                    metaItems.add(new FxMetadata.FxMetadataItem("videodatarate" + i, (curVs.bitRate != null ? curVs.bitRate : "")));
+                    metaItems.add(new FxMetadata.FxMetadataItem("framerate" + i, (curVs.fps != null ? curVs.fps : "")));
+                    metaItems.add(new FxMetadata.FxMetadataItem("videoType" + i, (curVs.type != null ? curVs.type : "")));
+                    metaItems.add(new FxMetadata.FxMetadataItem("videoEncoding" + i, (curVs.encoding != null ? curVs.encoding : "")));
+                    i++;
+                }
+            }
+            metaItems.add(new FxMetadata.FxMetadataItem("audioStreams", "" + audioStream.size()));
+            if (audioStream.size() > 0) {
+                returnValue = true;
+                int i = 1;
+                for (AudioStreamHolder curAudioStream : audioStream) {
+                    metaItems.add(new FxMetadata.FxMetadataItem("audiodatarate" + i, curAudioStream.bitRate));
+                    metaItems.add(new FxMetadata.FxMetadataItem("audioType" + i, (curAudioStream.type != null ? curAudioStream.type : "")));
+                    metaItems.add(new FxMetadata.FxMetadataItem("audioEncoding" + i, (curAudioStream.encoding != null ? curAudioStream.encoding : "")));
+                    metaItems.add(new FxMetadata.FxMetadataItem("frequency" + i, (curAudioStream.herz != null ? curAudioStream.herz : "")));
+                    i++;
+                }
+            }
+            return returnValue;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public String toString() {
+            return duration + "\t" + bitrate + " kb/s Video : [" + String.valueOf(videoStream) + "] Audio : " + String.valueOf(audioStream) + "]";
+        }
+    }
+
+    /**
+     * Holder class for a video stream
+     */
+    private static class VideoStreamHolder {
+        /**
+         * don't parse to int / double we need it as string and let groovy parse
+         */
+        String type;
+        String encoding;
+        String width = "";
+        String height = "";
+        String bitRate = "";
+        String tbr;
+        String tbn;
+        String tbc;
+        String fps = "";
+
+        private final static Pattern res = Pattern.compile("([0-9]+)x([0-9]+)");
+        private final static Pattern bitR = Pattern.compile("([0-9]+) kb/s");
+
+        /**
+         * Creates a VideoStreamHolder from a Video-stream info
+         *
+         * @param info           the videostream info as String
+         * @param overallBitRate the bitrate of the whole file
+         */
+        VideoStreamHolder(String info, String overallBitRate) {
+            String[] all = info.split(", ");
+            type = all[0];
+            encoding = all[1];
+            bitRate = overallBitRate;
+            Matcher m = res.matcher(all[2]);
+            if (m.find()) {
+                width = m.group(1);
+                height = m.group(2);
+            }
+            m = bitR.matcher(all[3]);
+            if (m.find()) {
+                bitRate = m.group(1);
+            }
+            Hashtable<String, String> tmpValues = new Hashtable<String, String>();
+            for (int i = 4; i < all.length; i++) {
+                String[] tmp = all[i].split(" ");
+                if (tmp.length == 2) {
+                    tmpValues.put(tmp[1], tmp[0]);
+                }
+            }
+            String tmp = tmpValues.get("fps");
+            if (tmp != null) fps = tmp;
+            tbr = tmpValues.get("tbr");
+            tbn = tmpValues.get("tbn");
+            tbc = tmpValues.get("tbc");
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public String toString() {
+            return type + ", " + encoding + " [" + width + "x" + height + " @" + bitRate + " kb/s" + " " + fps + " fps";
+        }
+    }
+
+    /**
+     * A holder class for an audio stream
+     */
+    private static class AudioStreamHolder {
+        String type = null;
+        String encoding = null;
+        String herz = null;
+        String bitRate = "";
+
+        //    Format :     Stream #0.1: Audio: wmav2, 32000 Hz, 2 channels, s16, 64 kb/s
+        private final static Pattern Hz = Pattern.compile("([0-9]+) Hz");
+        private final static Pattern bitR = Pattern.compile("([0-9]+) kb/s");
+
+        /**
+         * Creates a AudioStreamHolder from a Audio-stream info
+         *
+         * @param info the videostream info as String
+         */
+        AudioStreamHolder(String info) {
+            String[] all = info.split(", ");
+            encoding = all[0];
+            type = all[2];
+            Matcher m = Hz.matcher(all[1]);
+            if (m.find()) {
+                herz = m.group(1);
+            }
+            m = bitR.matcher(all[4]);
+            if (m.find()) {
+                bitRate = m.group(1);
+            }
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public String toString() {
+            return type + ", " + encoding + " @" + bitRate + " kb/s" + " " + herz + " Hz";
+        }
+    }
+
+}

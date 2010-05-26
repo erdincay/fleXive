@@ -36,7 +36,6 @@ import com.flexive.shared.media.impl.FxMediaImageMagickEngine;
 import com.flexive.shared.media.impl.FxMediaNativeEngine;
 import com.flexive.shared.media.impl.FxUnknownMetadataImpl;
 import com.flexive.shared.stream.BinaryDownloadCallback;
-import java.lang.reflect.Method;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -44,6 +43,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.reflect.Method;
 
 /**
  * Media engine
@@ -55,6 +55,7 @@ public class FxMediaEngine {
     private static final Log LOG = LogFactory.getLog(FxMediaEngine.class);
 
     private static final String CLS_AUDIO_EXTRACTOR = "com.flexive.extractor.audio.AudioExtractor";
+    private static final String CLS_VIDEO_EXTRACTOR = "com.flexive.extractor.video.VideoExtractor";
 
 
     /**
@@ -129,10 +130,18 @@ public class FxMediaEngine {
                 } else
                     LOG.error(e);
             }
-        } else if(mimeType.startsWith("audio")) {
+        } else if (mimeType.startsWith("audio")) {
             // audio file identification (optional) - TODO: do the same for documents
             // or make this really extensible
             final FxMetadata meta = invokeIdentify(mimeType, file, CLS_AUDIO_EXTRACTOR);
+            if (meta != null) {
+                return meta;
+            }
+            // video file identification
+        } else if (mimeType.startsWith("video")) {
+            // video file identification (optional) - TODO: do the same for documents
+            // or make this really extensible
+            final FxMetadata meta = invokeIdentify(mimeType, file, CLS_VIDEO_EXTRACTOR);
             if (meta != null) {
                 return meta;
             }
@@ -144,11 +153,11 @@ public class FxMediaEngine {
     /**
      * Invoke the "identify" method on the given extractor class dynamically.
      *
-     * @param mimeType      the binary mime type
-     * @param file          the binary file
-     * @param extractorClassName    the fully qualified extractor class name
-     * @return              the extracted meta data, or null if the extractor is not available
-     *                      or the invokation threw an exception
+     * @param mimeType           the binary mime type
+     * @param file               the binary file
+     * @param extractorClassName the fully qualified extractor class name
+     * @return the extracted meta data, or null if the extractor is not available
+     *         or the invokation threw an exception
      */
     private static FxMetadata invokeIdentify(String mimeType, File file, String extractorClassName) {
         try {

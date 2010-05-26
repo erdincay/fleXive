@@ -1,0 +1,153 @@
+/** *************************************************************
+ *  This file is part of the [fleXive](R) framework.
+ *
+ *  Copyright (c) 1999-2010
+ *  UCS - unique computing solutions gmbh (http://www.ucs.at)
+ *  All rights reserved
+ *
+ *  The [fleXive](R) project is free software; you can redistribute
+ *  it and/or modify it under the terms of the GNU Lesser General Public
+ *  License as published by the Free Software Foundation.
+ *
+ *  The GNU Lesser General Public License can be found at
+ *  http://www.gnu.org/licenses/lgpl.html.
+ *  A copy is found in the textfile LGPL.txt and important notices to the
+ *  license from the author are found in LICENSE.txt distributed with
+ *  these libraries.
+ *
+ *  This library is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  For further information about UCS - unique computing solutions gmbh,
+ *  please see the company website: http://www.ucs.at
+ *
+ *  For further information about [fleXive](R), please see the
+ *  project website: http://www.flexive.org
+ *
+ *
+ *  This copyright notice MUST APPEAR in all copies of the file!
+ ************************************************************** */
+
+//file: VideoMetaParser.gy
+//description:
+// Parser for Video meta information. Sets Video type fields.
+// To be called for Video type instance creation
+//expected bindings:
+//  ticket ... UserTicket
+// [optional] binaryDescriptor ... the BinaryDescriptor (taken from the content if null)
+//  content ... the FxContent being processed
+//author: Laszlo Hernadi, Unique Computing Solutions GmbH
+
+import com.flexive.shared.value.*
+
+def binValue
+if (binding.variables.containsKey("binaryDescriptor")) {
+  println "true"
+  binValue = binaryDescriptor != null ? binaryDescriptor : content.getPropertyData("/File").value.defaultTranslation
+} else {
+  println "false"
+  binValue = content.getPropertyData("/File").value.defaultTranslation
+  println "[" + binValue + "] - " + binValue.getClass()
+  println "[" + content.getClass() + "]"
+}
+
+if (binValue.metadata == null || binValue.metadata.length() < 20) {
+  println "No metadata present for video file to process!"
+  println "\"" + binValue.metadata + "\"";
+  //ensure that the filename is set, else the file can not be saved
+  if (!content.containsValue("/MIMETYPE"))
+    content.setValue("/MIMETYPE", new FxString(false, (String) binValue.mimeType))
+  return
+}
+
+
+void process(cmap, key, rawvalue) {
+  if (rawvalue == null || rawvalue.toString().trim().length() == 0)
+    return
+  def value = rawvalue.toString()
+  if (value.endsWith('.'))
+    value = value.substring(0, value.length() - 1);
+  if (!cmap.containsKey(key))
+    cmap[key] = value
+  else
+    cmap[key] += ' ' + value
+}
+
+try {
+  println "Meta data (first 20 chars): ${binValue.metadata.substring(0, 20)}...";
+//  println "Meta data : ${binValue.metadata}";
+  def meta = new XmlSlurper().parseText(binValue.metadata);
+  def cmap = [:]
+
+  println "start processing..."
+
+  process(cmap, 'String|Caption', binValue.name)
+  process(cmap, 'String|Metadata/Length', meta.meta.find { it.@key == 'duration'})
+  process(cmap, 'DateTime|Metadata/Creationdate', meta.meta.find { it.@key == 'creationdate'})
+
+  def videoStreams = 1;
+  try {
+    videoStreams = Integer.parseInt(String.valueOf(meta.meta.find {it.@key == 'videoStreams'}));
+  } catch (Exception e) {
+    println "no videoStreams key fond ... (" + e.getMessage() + ")";
+  }
+// parsing video Metadata
+  for (curVS = 1; curVS <= videoStreams; curVS++) {
+    process(cmap, 'Number|Metadata/VideoStream[' + curVS + ']/Height', meta.meta.find { it.@key == ('height' + curVS)})
+    process(cmap, 'Number|Metadata/VideoStream[' + curVS + ']/Width', meta.meta.find { it.@key == ('width' + curVS)})
+    process(cmap, 'String|Metadata/VideoStream[' + curVS + ']/type', meta.meta.find { it.@key == ('videoType' + curVS)})
+    process(cmap, 'Double|Metadata/VideoStream[' + curVS + ']/Bitrate', meta.meta.find { it.@key == ('videodatarate' + curVS)})
+    process(cmap, 'Double|Metadata/VideoStream[' + curVS + ']/Framerate', meta.meta.find { it.@key == ('framerate' + curVS)})
+    process(cmap, 'String|Metadata/VideoStream[' + curVS + ']/format', meta.meta.find { it.@key == ('videoEncoding' + curVS)})
+  }
+
+  def audioStreams = 1;
+  try {
+    audioStreams = Integer.parseInt(String.valueOf(meta.meta.find {it.@key == 'audioStreams'}));
+  } catch (Exception e) {
+    println "no audioStreams key fond ... (" + e.getMessage() + ")";
+  }
+  // parsing audio Metadata
+  for (curAS = 1; curAS <= audioStreams; curAS++) {
+    process(cmap, 'String|Metadata/AudioStream[' + curAS + ']/type', meta.meta.find { it.@key == ('audioType' + curAS)})
+    process(cmap, 'Double|Metadata/AudioStream[' + curAS + ']/Bitrate', meta.meta.find { it.@key == ('audiodatarate' + curAS)})
+    process(cmap, 'Number|Metadata/AudioStream[' + curAS + ']/frequency', meta.meta.find { it.@key == ('frequency' + curAS)})
+    process(cmap, 'String|Metadata/AudioStream[' + curAS + ']/format', meta.meta.find { it.@key == ('audioEncoding' + curAS)})
+  }
+  // traverse metadata
+
+  cmap.each() {key, value ->
+    def _type = key.split('\\|')[0]
+    def fxvalue
+    key = key.split("\\|")[1]
+
+//    println "NEW TYPE : [" + _type + "]";
+
+    try {
+      switch (_type) {
+        case "String": fxvalue = new FxString(key == "Caption", (String) value); break;
+        case "Number": fxvalue = new FxNumber(false, Integer.parseInt((String) value)); break;
+        case "LargeNumber": fxvalue = new FxLargeNumber(false, Long.parseLong((String) value)); break;
+        case "Double": fxvalue = new FxDouble(false, Double.parseDouble((String) value)); break;
+        case "Boolean": fxvalue = new FxBoolean(false, Boolean.parseBoolean((String) value)); break;
+        case "DateTime":
+          fxvalue = new FxDateTime(false, new Date(Long.parseLong(((String) value).substring(3))));
+          break;
+      }
+
+      content.setValue("/" + key, fxvalue);
+    } catch (Exception e) {
+      System.err.println("Failed to process metadata for /$key (ignored): " + e.getMessage())
+      e.printStackTrace();
+    }
+  }
+  if (!content.containsValue("/MIMETYPE"))
+    content.setValue("/MIMETYPE", new FxString(false, (String) binValue.mimeType))
+
+  return content
+
+} catch (Exception e) {
+  System.err.println("Failed to process metadata (ignored): " + e.getMessage())
+}

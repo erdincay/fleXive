@@ -138,6 +138,16 @@ public abstract class FxMetadata {
     }
 
     /**
+     * Check if this metadata object is a video metadata instance
+     *
+     * @return true if this object is an audio metadata instance
+     * @since 3.1.3
+     */
+    public boolean isVideoMetadata() {
+        return false;
+    }
+
+    /**
      * Get this metadata object as an FxImageMetadata instance
      *
      * @return FxImageMetadata instance
