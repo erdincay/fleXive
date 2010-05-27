@@ -37,6 +37,7 @@ import com.flexive.faces.plugin.Plugin;
 import com.flexive.faces.plugin.PluginExecutor;
 import com.flexive.faces.plugin.PluginFactory;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
+import com.google.common.collect.Sets;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -78,8 +79,14 @@ public class PluginRegistryBean implements Serializable {
         try {
             // find all config files in our application's classpath
             final Enumeration<URL> configFiles = Thread.currentThread().getContextClassLoader().getResources(CONFIG_FILENAME);
+            final Set<String> processedUrls = Sets.newHashSet();
             while (configFiles.hasMoreElements()) {
                 final URL configFile = configFiles.nextElement();
+                if (!processedUrls.add(configFile.toString())) {
+                    // avoid adding the same plugin several times
+                    continue;
+                }
+
                 if (LOG.isDebugEnabled()) {
                     LOG.debug("Processing plugin config: " + configFile.getPath());
                 }

@@ -719,19 +719,17 @@ public abstract class AbstractEditModeHelper implements RenderHelper {
                         .closeMap();
             }
             jsonWriter.closeMap().finishResponse();
+            FxJavascriptUtils.beginJavascript(writer);
             writer.write(MessageFormat.format(
-                    "<script language=\"javascript\">\n"
-                            + "<!--\n"
-                            + "  document.getElementById(''{0}'')." + JS_OBJECT
+                            "  document.getElementById(''{0}'')." + JS_OBJECT
                             + " = new flexive.input.FxMultiLanguageValueInput(''{0}'', ''{1}'', {2}, ''{3}'', ''{4}'');\n"
-                            + "  document.getElementById(''{3}'').onchange();\n"
-                            + "//-->\n"
-                            + "</script>",
+                            + "  document.getElementById(''{3}'').onchange();\n",
                     inputClientId, inputClientId + AbstractFxValueInputRenderer.LANG_CONTAINER,
                     jsonWriter.toString(),
                     languageSelectId,
                     defaultLanguageId
             ));
+            FxJavascriptUtils.endJavascript(writer);
         }
 
         @Override

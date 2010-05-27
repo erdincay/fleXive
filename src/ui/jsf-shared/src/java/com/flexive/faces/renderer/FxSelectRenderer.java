@@ -32,6 +32,7 @@
 package com.flexive.faces.renderer;
 
 import com.flexive.faces.FxJsfComponentUtils;
+import com.flexive.faces.javascript.FxJavascriptUtils;
 import com.flexive.faces.model.FxJSFSelectItem;
 import com.flexive.shared.*;
 import com.flexive.shared.scripting.FxScriptInfo;
@@ -54,6 +55,7 @@ import javax.faces.model.SelectItem;
 import javax.faces.model.SelectItemGroup;
 import javax.faces.render.Renderer;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
@@ -525,7 +527,6 @@ full js code:
     }
 */            
           StringBuilder sb = new StringBuilder(750);
-          sb.append("<script type=\"text/javascript\" language=\"JavaScript\">");
           sb.append("var msGrpData_").append(component.getId()).append("=[");
           if( items.size() > 0 ) {
             for(SelectItem check: items) {
@@ -545,8 +546,10 @@ full js code:
             //execute the original onchange event
             sb.append(String.valueOf(attrMap.get("onchange"))).append(";");
           }  
-          sb.append("}</script>\n");
+          sb.append("}\n");
+          FxJavascriptUtils.beginJavascript(writer);
           writer.write(sb.toString());
+          FxJavascriptUtils.endJavascript(writer);
         }
 
         writer.startElement("select", component);

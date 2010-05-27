@@ -58,7 +58,7 @@ public class FxJavascriptUtils {
      * @throws IOException if the code could not be written
      */
     public static void beginJavascript(Writer out) throws IOException {
-        out.write("<script type=\"text/javascript\">\n<!--\n");
+        out.write("<script type=\"text/javascript\" language=\"javascript\">\n//<![CDATA[\n<!--\n");
     }
 
     /**
@@ -68,7 +68,7 @@ public class FxJavascriptUtils {
      * @throws IOException if the code could not be written
      */
     public static void endJavascript(Writer out) throws IOException {
-        out.write("\n//-->\n</script>");
+        out.write("\n//-->\n//]]>\n</script>");
     }
 
     /**
