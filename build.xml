@@ -1121,6 +1121,8 @@ database.vendor=MySQL
                                  prefix="com/flexive/extractor/" packagenames="com.flexive.extractor.*"/>
             <maven-build-sources artifactId="flexive-extractor-audio" label="[fleXive] audio extractors module" srcdir="${flexive.src.framework.dir}"
                                  prefix="com/flexive/extractor/audio/" packagenames="com.flexive.extractor.audio.*"/>
+            <maven-build-sources artifactId="flexive-extractor-video" label="[fleXive] video extractors module" srcdir="${flexive.src.framework.dir}"
+                                 prefix="com/flexive/extractor/video/" packagenames="com.flexive.extractor.video.*"/>
 
             <maven-build-sources artifactId="flexive-sqlParser" label="[fleXive] FxSQL parser" srcdir="${flexive.src.framework.dir}"
                                  prefix="com/flexive/sqlParser/" packagenames="com.flexive.sqlParser.*"/>
@@ -1179,6 +1181,7 @@ database.vendor=MySQL
         <maven-deploy-with-sources path="${flexive.lib.dir}" name="flexive-extractor"/>
         <maven-deploy-with-sources path="${flexive.lib.dir}" name="flexive-extractor-documents"/>
         <maven-deploy-with-sources path="${flexive.lib.dir}" name="flexive-extractor-audio"/>
+        <maven-deploy-with-sources path="${flexive.lib.dir}" name="flexive-extractor-video"/>
         <maven-deploy-with-sources path="${flexive.lib.dir}" name="flexive-sqlParser"/>
         <maven-deploy file="${flexive.lib.dir}/fxStream.jar" pom="fxStream.pom"/>
         <maven-deploy file="${flexive.lib.dir}/flexive-flatstorage.jar" pom="flexive-flatstorage.pom"/>
