@@ -473,4 +473,13 @@
         </repository>
     </repositories>
 
+    <distributionManagement>
+        <repository>
+            <id>local</id>
+            <name>Local repository</name>
+            <url>file://${local-repo}</url>
+            <uniqueVersion>false</uniqueVersion>
+        </repository>
+    </distributionManagement>
+
 </project>

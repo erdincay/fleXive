@@ -24,11 +24,12 @@
     </build>
     
     <distributionManagement>
-        <snapshotRepository>
-            <id>repo</id>
-            <name>Repository Name</name>
-            <url>file:///home/daniel/repos/flexive-snapshot-local</url>
-        </snapshotRepository>
+        <repository>
+            <id>local</id>
+            <name>Local repository</name>
+            <url>file://${local-repo}</url>
+            <uniqueVersion>false</uniqueVersion>
+        </repository>
     </distributionManagement>
 
 </project>
