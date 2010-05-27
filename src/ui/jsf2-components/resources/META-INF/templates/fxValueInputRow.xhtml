@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
+      xmlns:cc="http://java.sun.com/jsf/composite"
+      xmlns:fx="http://www.flexive.com/jsf2/core">
+
+    <cc:interface>
+        <cc:attribute name="id" default="" shortDescription="element input ID" displayName="Id" required="false"/>
+        <cc:attribute name="labelKey" default="" 
+                      shortDescription="Label key (possibly including parameters; set eighter 'labelKey' or 'label'."
+                      displayName="Legend Key" required="false"/>
+
+        <cc:attribute name="label" default="" shortDescription="Label text to be displayed; set eighter 'labelkey' or 'label'." displayName="Label" required="false"/>
+        <cc:attribute name="value" default="" shortDescription="the FxValue object to be displayed (mandatory, must not be null)" displayName="Value" required="false"/>
+
+        <cc:attribute name="inputMapper" default="" shortDescription="an (optional) InputMapper" displayName="Input-Mapper" required="false"/>
+        <cc:attribute name="onchange" default="" shortDescription="a javascript onchange handler" displayName="Onchange" required="false"/>
+        <cc:attribute name="readOnly" default="" shortDescription="true to enable read-only mode" displayName="Read Only" required="false"/>
+
+        <cc:attribute name="decorate" default="false"
+                      shortDescription="f false, no label/input div will be rendered, only the output of the fxValueInput component"
+                      displayName="Decorate" required="false"/>
+
+
+        <cc:attribute name="filter" default="" shortDescription="filter HTML output?" displayName="Filter" required="false"/>
+        <cc:attribute name="forceLineInput" default="" shortDescription="force a single line of output (e.g. for query forms)" displayName="Force Line-Input" required="false"/>
+        <cc:attribute name="valueFormatter" default="" 
+                      shortDescription="A FxValueFormatter to be used for rendering the value (in read-only mode only). If not specified, the JSF renderer will choose the appropriate default formatter for the actual value class."
+                      displayName="Value-Formatter" required="false"/>
+
+        <cc:attribute name="containerDivClass" default="" 
+                      shortDescription="If this CSS class property is set, the component will be embedded in a div-container using this CSS class as style."
+                      displayName="Container div-Class" required="false"/>
+
+        <cc:attribute name="autocompleteHandler" default="" 
+                      shortDescription="An instance of the flexive.yui.AutoCompleteHandler javascript class. This class provides a query method for a client-side autocomplete widget provided by Yahoo UI, as well as a method for formatting the response."
+                      displayName="Autocomplete-Handler" required="false"/>
+
+        <cc:attribute name="disableMultiLanguage" default=""
+                      shortDescription="Disables multi language support even if the FxValue object is multilingual. Only the default translation will be displayed and updated."
+                      displayName="Disable Multi-Language" required="false"/>
+
+        <cc:attribute name="disableLytebox" default="" 
+                      shortDescription="Set this property to true if the Lytebox  javascript library used for rendering inline previews of images should not be used."
+                      displayName="Disable Lyte-Box" required="false"/>
+
+
+    </cc:interface>
+
+    <cc:implementation>
+
+        <c:if test="#{!empty labelKey}">
+            <c:set var="label" value="#{fxMessageBean[labelKey]}"/>
+        </c:if>
+        <c:if test="#{empty readOnly}">
+            <c:set var="readOnly" value="false"/>
+        </c:if>
+        <c:if test="#{empty decorate}">
+            <c:set var="decorate" value="true"/>
+        </c:if>
+        <c:if test="#{empty filter}">
+            <c:set var="filter" value="true"/>
+        </c:if>
+        <c:set var="inputId" value="#{id}"/>
+      
+        <c:if test="#{decorate}">
+            <fx:formRow id="#{id}_input_" label="#{label}">
+                <fx:fxValueInput id="#{inputId}" value="#{value}" inputMapper="#{inputMapper}" onchange="#{onchange}" readOnly="#{readOnly}" filter="#{filter}"
+                    forceLineInput="#{forceLineInput}" valueFormatter="#{valueFormatter}" containerDivClass="#{containerDivClass}"
+                    autocompleteHandler="#{autocompleteHandler}" disableMultiLanguage="#{disableMultiLanguage}" disableLytebox="#{disableLytebox}"/>
+            </fx:formRow>
+        </c:if>
+        <c:if test="#{!decorate}"><fx:fxValueInput id="#{id}" value="#{value}" inputMapper="#{inputMapper}" onchange="#{onchange}" readOnly="#{readOnly}" filter="#{filter}"/></c:if>
+
+    </cc:implementation>
+
+</html>

@@ -41,7 +41,12 @@
 
             <h3>Flexive JSF2 components</h3>
 
-            <h4>fx:content</h4>
+        <h4>fx:fxValueInputLanguageSelect</h4>
+
+        <fx:fxValueInputLanguageSelect id="langId" />
+
+
+        <h4>fx:content</h4>
 
             <fx:content var="cd" pk="#{exampleManagedBean.userContactData}">
                 User contact data:
@@ -126,7 +131,20 @@
 
             <fx:resultValue value="#{exampleManagedBean.dateValue}"/>
 
-            <h4>PrimeFaces</h4>
+        <h4>FieldSet Test</h4>
+        <fx:fieldSet legend="Demo fieldset">
+            <fx:formRow label="Group Name" id="groupname">
+                <h:inputText id="groupname" value="#{exampleManagedBean.inputText1}" required="true"/>
+            </fx:formRow>
+            <fx:formRow label="Color" id="color">
+                <h:inputText id="color" value="#{exampleManagedBean.inputText2}"/>
+            </fx:formRow>
+        </fx:fieldSet>
+
+
+        <!--<fx:fxValueInputRow id="str" value="1" label="My fxValueInputRow" decorate="false" />-->
+
+        <h4>PrimeFaces</h4>
 
             <p:editor value="#{exampleManagedBean.htmlText}" />
 
@@ -189,6 +207,7 @@
                 </ui:repeat>
             </table>
         </div>
+
 
     </h:body>
 </html>

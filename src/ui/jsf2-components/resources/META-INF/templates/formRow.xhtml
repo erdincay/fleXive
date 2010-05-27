@@ -8,19 +8,35 @@
       xmlns:cc="http://java.sun.com/jsf/composite">
 
     <cc:interface>
-        <cc:attribute name="id" default="" displayName="Id" required="false"/>
-        <cc:attribute name="label" default="" displayName="Label" required="false"/>
-        <cc:attribute name="labelKey" default="" displayName="Message key" required="false"/>
-        <cc:attribute name="tooltip" default="" displayName="Tooltip" required="false"/>
-        <cc:attribute name="tooltipKey" default="" displayName="Message key of the tooltip" required="false"/>
-        <cc:attribute name="newLine" default="" displayName="new line is rendered after input row" required="false"/>
-        <cc:attribute name="width" default="" displayName="Width" required="false"/>
-        <cc:attribute name="relativeWidth" default="" displayName="Relative Width" required="false"/>
-        <cc:attribute name="height" default="" displayName="Height" required="false"/>
-        <cc:attribute name="overrideStyle" default="" displayName="Style to override" required="false"/>
-        <cc:attribute name="overrideInputStyle" default="" displayName="Inputstyle to override" required="false"/>
+        <cc:attribute name="id" default="" shortDescription="main input element ID (for assigning the label)" displayName="Id" required="false"/>
+        <cc:attribute name="label" default="" shortDescription="Message key (overrides label)Label" displayName="Label" required="false"/>
+        <cc:attribute name="labelKey" default="" shortDescription="Message key (overrides label)" displayName="Message key" required="false"/>
+        <cc:attribute name="tooltip" default="" shortDescription="Tooltip" displayName="Tooltip" required="false"/>
+        <cc:attribute name="tooltipKey" default=""
+                      shortDescription="Message key of the tooltip (if not specified and labelKey is set, it defaults to #{labelKey}.tooltip)"
+                      displayName="Message key of the tooltip" required="false"/>
+        <cc:attribute name="newLine" default=""
+                      shortDescription="if a newline should be rendered after the input row (default: true)"
+                      displayName="new line is rendered after input row" required="false"/>
+        <cc:attribute name="width" default=""
+                      shortDescription="overrides the default width (value in pixel, eg width='100')"
+                      displayName="Width" required="false"/>
+        <cc:attribute name="relativeWidth" default=""
+                      shortDescription="overrides the default width (value in %, eg relativeWidth='100'), overwrites the width if given"
+                      displayName="Relative Width" required="false"/>
+        <cc:attribute name="height" default=""
+                      shortDescription="overrides the default height (value in pixel, eg height='80')"
+                      displayName="Height" required="false"/>
+        <cc:attribute name="overrideStyle" default=""
+                      shortDescription="override the style settings of the outer formRow container div"
+                      displayName="Style to override" required="false"/>
+        <cc:attribute name="overrideInputStyle" default=""
+                      shortDescription="override the style settings of the inner div containing the (form) input element"
+                      displayName="Inputstyle to override" required="false"/>
     </cc:interface>
 
+
+    
     <cc:implementation>
         <h:outputStylesheet library="flexive-faces" name="css/components.css"/>
 

@@ -58,6 +58,8 @@ public class ExampleManagedBean {
     private FxHTML htmlValue;
     private FxDate dateValue;
     private String htmlText;
+    private String inputText1;
+    private String inputText2;
 
     public ExampleManagedBean() {
         // ensure that flexive is initialized
@@ -122,5 +124,20 @@ public class ExampleManagedBean {
         this.htmlText = htmlText;
     }
 
+    public String getInputText1() {
+        return inputText1;
+    }
+
+    public void setInputText1(String inputText1) {
+        this.inputText1 = inputText1;
+    }
+
+    public String getInputText2() {
+        return inputText2;
+    }
+
+    public void setInputText2(String inputText2) {
+        this.inputText2 = inputText2;
+    }
 
 }

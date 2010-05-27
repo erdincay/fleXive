@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
+      xmlns:cc="http://java.sun.com/jsf/composite">
+
+    <cc:interface>
+        <cc:attribute name="startIndex" default="" shortDescription="the first tab-index to be used" displayName="Legend" required="false"/>
+        <cc:attribute name="rootNode" default="" shortDescription="an optional root DOM node ID where the search for fx:fxValueInput elements should start" displayName="Legend Key" required="false"/>
+    </cc:interface>
+
+    <cc:implementation>
+
+        <c:if test="#{empty startIndex}">
+            <c:set var="startIndex" value="1"/>
+        </c:if>
+        <script type="text/javascript">
+        <!--
+            flexive.yui.require("selector");
+            flexive.yui.onYahooLoaded(function() {
+                var tabIndex = #{startIndex};
+                var rootNode = '#{empty rootNode ? 'null' : rootNode}';
+                var nodes = YAHOO.util.Selector.query(".fxValueInput .fxValueField", rootNode != "null" ? rootNode : null);
+                for (var i = 0; i < nodes.length; i++) {
+                    nodes[i].tabIndex = tabIndex++;
+                }
+            });
+        //-->
+        </script>
+    </cc:implementation>
+
+</html>

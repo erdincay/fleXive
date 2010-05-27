@@ -60,6 +60,26 @@
         <source>templates/formRow.xhtml</source>
     </tag>
 
+    <tag>
+        <tag-name>fieldSet</tag-name>
+        <source>templates/fieldSet.xhtml</source>
+    </tag>
+
+    <tag>
+        <tag-name>linearizeFxValueInputs</tag-name>
+        <source>templates/linearizeFxValueInputs.xhtml</source>
+    </tag>
+
+    <tag>
+        <tag-name>fxValueInputLanguageSelect</tag-name>
+        <source>templates/fxValueInputLanguageSelect.xhtml</source>
+    </tag>
+
+    <tag>
+        <tag-name>fxValueInputRow</tag-name>
+        <source>templates/fxValueInputRow.xhtml</source>
+    </tag>
+    
     <function>
         <function-name>url</function-name>
         <function-class>com.flexive.faces.beans.PageBean</function-class>

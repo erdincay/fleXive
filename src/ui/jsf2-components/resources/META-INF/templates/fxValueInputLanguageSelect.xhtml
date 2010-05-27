@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:c="http://java.sun.com/jsp/jstl/core"
+      xmlns:cc="http://java.sun.com/jsf/composite">
+
+    <cc:interface>
+        <cc:attribute name="id" default="" shortDescription="the input ID (required)" displayName="Id" required="true"/>
+    </cc:interface>
+
+    <cc:implementation>
+
+        <h:selectOneListbox id="#{id}" size="1" onchange="flexive.input.setLanguageOnAllInputs(this.value)"
+            value="#{fxUserConfigurationBean.inputLanguageId}"
+            title="#{fxMessageBean['FxValueInput.languageSelect.title']}">
+            <f:selectItem id="#{id}_all" itemValue="-2" itemLabel="#{fxMessageBean['FxValueInput.language.all']}"/>
+            <c:forEach var="item" items="#{fxSelectBean.languages}">
+                <f:selectItem id="#{id}_#{item.value.id}" itemValue="#{item.value.id}" itemLabel="#{item.value.iso2digit} (#{item.value.label})"/>
+            </c:forEach>
+        </h:selectOneListbox>
+        
+    </cc:implementation>
+
+</html>
