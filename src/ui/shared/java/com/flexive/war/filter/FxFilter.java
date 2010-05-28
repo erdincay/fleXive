@@ -64,8 +64,8 @@ public class FxFilter implements Filter {
 
     private static final String CATALINA_CLIENT_ABORT = "org.apache.catalina.connector.ClientAbortException";
     private static final String X_POWERED_BY_VALUE = "[fleXive]";
-    private static final String SESSION_JSON_BRIDGE = "JSONRPCBridge";
-    private static final String SESSION_JSON_JSF = "FxFilter_JSON_JSF";
+    private static final String JSON_RPC_MARKER = "fxFilterMarker";
+    private static final Object JSON_RPC_LOCK = new Object();
 
     private static final ConcurrentMap<Integer, Boolean> DIVISION_SERVICES = new ConcurrentHashMap<Integer, Boolean>();
 
@@ -221,13 +221,24 @@ public class FxFilter implements Filter {
     }
 
     private void initializeJsonRpc(HttpSession session) {
-        synchronized(session) {
-            if (session.getAttribute(SESSION_JSON_JSF) == null) {
-                // try to initialize the JSF JSON/RPC beans
-                session.setAttribute(SESSION_JSON_JSF, true);
-                final JSONRPCBridge bridge = getJsonRpcBridge(session, true);
+        final JSONRPCBridge bridge = getJsonRpcBridge(session, true);
+        try {
+            if (bridge.lookupObject(JSON_RPC_MARKER) != null) {
+                return;
+            }
+            // JSON/RPC mapping not yet initialized
+            synchronized(JSON_RPC_LOCK) {
+                if (bridge.lookupObject(JSON_RPC_MARKER) != null) {
+                    // initialized while waiting for the lock
+                    return;
+                }
                 registerJsonRpcObjects(bridge);
                 setJsonRpcBridge(session, bridge);
+                bridge.registerObject(JSON_RPC_MARKER, new Object());
+            }
+        } catch (Exception e) {
+            if (LOG.isErrorEnabled()) {
+                LOG.error("Failed to initialize JSON/RPC bridge: " + e.getMessage(), e);
             }
         }
     }

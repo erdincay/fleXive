@@ -49,6 +49,8 @@ import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * A servlet filter that provides the JSON-RPC-Java objects for the backend administration.
@@ -58,7 +60,11 @@ import java.io.IOException;
  * @version $Rev$
  */
 public class JsonRpcFilter implements Filter {
+
+    private static final Log LOG = LogFactory.getLog(JsonRpcFilter.class);
     private static final String SESSION_INITIALIZED = "JsonRpcFilter_init";
+    private static final String JSON_RPC_MARKER = "backendJsonRpc";
+    private static final Object JSON_RPC_LOCK = new Object();
 
     /**
      * {@inheritDoc}
@@ -88,22 +94,33 @@ public class JsonRpcFilter implements Filter {
      * @return the JSON/RPC bridge with all registered objects
      */
     public static JSONRPCBridge getJsonBridge(HttpSession session) {
-        synchronized(session) {
-            if (getJsonRpcBridge(session, false) != null && session.getAttribute(SESSION_INITIALIZED) != null) {
-                return getJsonRpcBridge(session, false);
+        final JSONRPCBridge bridge = getJsonRpcBridge(session, true);
+        try {
+            if (bridge.lookupObject(JSON_RPC_MARKER) != null) {
+                return bridge;
             }
-            session.setAttribute(SESSION_INITIALIZED, true);
-            final JSONRPCBridge bridge = getJsonRpcBridge(session, true);
-            bridge.registerObject("StructureTreeWriter", new StructureTreeWriter());
-            bridge.registerObject("StructureTreeEditor", new StructureTreeEditor());
-            bridge.registerObject("ContentTreeWriter", new ContentTreeWriter());
-            bridge.registerObject("ContentTreeEditor", new ContentTreeEditor());
-            bridge.registerObject("ContentEditor", new ContentEditor());
-            bridge.registerObject("BriefcaseEditor", new BriefcaseEditor());
-            bridge.registerObject("SearchQueryEditor", new SearchQueryEditor());
-            bridge.registerObject("SystemInformation", new SystemInformation());
-
-            setJsonRpcBridge(session, bridge);
+            // register our backend JSON/RPC beans
+            synchronized (JSON_RPC_LOCK) {
+                if (bridge.lookupObject(JSON_RPC_MARKER) != null) {
+                    // initialized while waiting for the lock
+                    return bridge;
+                }
+                bridge.registerObject("StructureTreeWriter", new StructureTreeWriter());
+                bridge.registerObject("StructureTreeEditor", new StructureTreeEditor());
+                bridge.registerObject("ContentTreeWriter", new ContentTreeWriter());
+                bridge.registerObject("ContentTreeEditor", new ContentTreeEditor());
+                bridge.registerObject("ContentEditor", new ContentEditor());
+                bridge.registerObject("BriefcaseEditor", new BriefcaseEditor());
+                bridge.registerObject("SearchQueryEditor", new SearchQueryEditor());
+                bridge.registerObject("SystemInformation", new SystemInformation());
+                bridge.registerObject(JSON_RPC_MARKER, new Object());
+                setJsonRpcBridge(session, bridge);
+                return bridge;
+            }
+        } catch (Exception e) {
+            if (LOG.isErrorEnabled()) {
+                LOG.error("Failed to register backend JSON/RPC calls: " + e.getMessage(), e);
+            }
             return bridge;
         }
     }
