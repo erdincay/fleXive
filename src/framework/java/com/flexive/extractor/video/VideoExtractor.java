@@ -35,14 +35,15 @@ import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.media.FxMetadata;
 import com.flexive.shared.media.impl.FxMimeType;
+import com.google.common.collect.Maps;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -117,7 +118,9 @@ public class VideoExtractor {
                 tmpPrev = File.createTempFile("VideoPreview", ".jpg");
                 res = FxSharedUtils.executeCommand(FFMPEG_BINARY, "-vstats", "-i", file.getAbsolutePath(), tmpPrev.getAbsolutePath());
             } catch (IOException e) {
-                e.printStackTrace();
+                if (LOG.isWarnEnabled()) {
+                    LOG.warn("Video extractor call for previews failed: " + e.getMessage(), e);
+                }
                 res = FxSharedUtils.executeCommand(FFMPEG_BINARY, "-vstats", "-i", file.getAbsolutePath());
             }
             FFMpegParser curParser = new FFMpegParser(String.valueOf(res.getStdOut()) + String.valueOf(res.getStdErr()));
@@ -125,7 +128,9 @@ public class VideoExtractor {
             if (tmpPrev != null && tmpPrev.length() > 10)
                 metaItems.add(new FxMetadata.FxMetadataItem("previewFile", tmpPrev.getAbsolutePath()));
             if (!curParser.buildMetaItems(metaItems)) {
-                LOG.error("You need to have the dictionary containing ffmpeg executable in the path");
+                if (LOG.isInfoEnabled()) {
+                    LOG.info("ffmpeg not found in path, skipping video file processing");
+                }
             }
         }
 
@@ -268,7 +273,7 @@ public class VideoExtractor {
             if (m.find()) {
                 bitRate = m.group(1);
             }
-            Hashtable<String, String> tmpValues = new Hashtable<String, String>();
+            Map<String, String> tmpValues = Maps.newHashMap();
             for (int i = 4; i < all.length; i++) {
                 String[] tmp = all[i].split(" ");
                 if (tmp.length == 2) {
@@ -301,8 +306,8 @@ public class VideoExtractor {
         String bitRate = "";
 
         //    Format :     Stream #0.1: Audio: wmav2, 32000 Hz, 2 channels, s16, 64 kb/s
-        private final static Pattern Hz = Pattern.compile("([0-9]+) Hz");
-        private final static Pattern bitR = Pattern.compile("([0-9]+) kb/s");
+        private static final Pattern HZ = Pattern.compile("([0-9]+) Hz");
+        private static final Pattern BITRATE = Pattern.compile("([0-9]+) kb/s");
 
         /**
          * Creates a AudioStreamHolder from a Audio-stream info
@@ -313,11 +318,11 @@ public class VideoExtractor {
             String[] all = info.split(", ");
             encoding = all[0];
             type = all[2];
-            Matcher m = Hz.matcher(all[1]);
+            Matcher m = HZ.matcher(all[1]);
             if (m.find()) {
                 herz = m.group(1);
             }
-            m = bitR.matcher(all[4]);
+            m = BITRATE.matcher(all[4]);
             if (m.find()) {
                 bitRate = m.group(1);
             }

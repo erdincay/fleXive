@@ -36,7 +36,7 @@ import com.flexive.shared.media.FxMetadata;
 /**
  * FxMetaData for vido files
  *
- * @author Laszlo Herandi, lherandi@flexive.com, unique computing solutions gmbh
+ * @author Laszlo Hernadi, lhernadi@flexive.com, unique computing solutions gmbh
  * @since 3.1.3
  */
 public abstract class FxVideoMetadata extends FxMetadata {
