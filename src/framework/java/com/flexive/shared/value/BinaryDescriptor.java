@@ -627,7 +627,7 @@ public class BinaryDescriptor implements Serializable {
 //        if( this.isNewBinary() && b.isNewBinary() )
 //            return true;
         return !(b.getMetadata() != null && !b.getMetadata().equals(this.getMetadata())) &&
-                !(this.getMetadata() != null && !this.getMetadata().equals(b.getMetadata())) &&
+//                !(this.getMetadata() != null && !this.getMetadata().equals(b.getMetadata())) &&
                 !(this.getMetadata() == null && b.getMetadata() != null) &&
                 !(b.getMetadata() == null && this.getMetadata() != null) &&
                 !(b.getMimeType() != null && !b.getMimeType().equals(this.getMimeType())) &&
