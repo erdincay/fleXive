@@ -40,7 +40,6 @@ import com.flexive.shared.*;
 import com.flexive.shared.configuration.DivisionData;
 import com.flexive.shared.impex.FxImportExportConstants;
 import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
@@ -176,7 +175,7 @@ con.close()
      * @throws IOException  on errors
      */
     private void dumpTable(String tableName, Statement stmt, OutputStream out, StringBuilder sb, String xmlTag, String idColumn) throws SQLException, IOException {
-        dumpTable(tableName, stmt, out, sb, xmlTag, idColumn, true);
+        dumpTable(tableName, stmt, out, sb, xmlTag, idColumn, false);
     }
 
     /**
@@ -188,11 +187,11 @@ con.close()
      * @param sb            an available and valid StringBuilder
      * @param xmlTag        name of the xml tag to write per row
      * @param idColumn      (optional) id column to sort results
-     * @param writeToStream write StringBuilder content to the stream
+     * @param onlyBinaries  process binary fields (else these will be ignored)
      * @throws SQLException on errors
      * @throws IOException  on errors
      */
-    private void dumpTable(String tableName, Statement stmt, OutputStream out, StringBuilder sb, String xmlTag, String idColumn, boolean writeToStream) throws SQLException, IOException {
+    private void dumpTable(String tableName, Statement stmt, OutputStream out, StringBuilder sb, String xmlTag, String idColumn, boolean onlyBinaries) throws SQLException, IOException {
         ResultSet rs = stmt.executeQuery("SELECT * FROM " + tableName +
                 (StringUtils.isEmpty(idColumn) ? "" : " ORDER BY " + idColumn + " ASC"));
         final ResultSetMetaData md = rs.getMetaData();
@@ -200,9 +199,10 @@ con.close()
         boolean hasSubTags;
         while (rs.next()) {
             hasSubTags = false;
-            if (writeToStream)
+            if (!onlyBinaries) {
                 sb.setLength(0);
-            sb.append("  <").append(xmlTag);
+                sb.append("  <").append(xmlTag);
+            }
             for (int i = 1; i <= md.getColumnCount(); i++) {
                 value = null;
                 att = md.getColumnName(i).toLowerCase();
@@ -210,37 +210,47 @@ con.close()
                     case java.sql.Types.DECIMAL:
                     case java.sql.Types.NUMERIC:
                     case java.sql.Types.BIGINT:
-                        value = String.valueOf(rs.getBigDecimal(i));
-                        if (rs.wasNull())
-                            value = null;
+                        if (!onlyBinaries) {
+                            value = String.valueOf(rs.getBigDecimal(i));
+                            if (rs.wasNull())
+                                value = null;
+                        }
                         break;
                     case java.sql.Types.INTEGER:
                     case java.sql.Types.SMALLINT:
                     case java.sql.Types.TINYINT:
-                        value = String.valueOf(rs.getLong(i));
-                        if (rs.wasNull())
-                            value = null;
+                        if (!onlyBinaries) {
+                            value = String.valueOf(rs.getLong(i));
+                            if (rs.wasNull())
+                                value = null;
+                        }
                         break;
                     case java.sql.Types.DOUBLE:
                     case java.sql.Types.FLOAT:
-                        value = String.valueOf(rs.getDouble(i));
-                        if (rs.wasNull())
-                            value = null;
+                        if (!onlyBinaries) {
+                            value = String.valueOf(rs.getDouble(i));
+                            if (rs.wasNull())
+                                value = null;
+                        }
                         break;
                     case java.sql.Types.TIMESTAMP:
                     case java.sql.Types.DATE:
-                        final Timestamp ts = rs.getTimestamp(i);
-                        if (rs.wasNull())
-                            value = null;
-                        else
-                            value = FxFormatUtils.getDateTimeFormat().format(ts);
+                        if (!onlyBinaries) {
+                            final Timestamp ts = rs.getTimestamp(i);
+                            if (rs.wasNull())
+                                value = null;
+                            else
+                                value = FxFormatUtils.getDateTimeFormat().format(ts);
+                        }
                         break;
                     case java.sql.Types.BIT:
                     case java.sql.Types.CHAR:
                     case java.sql.Types.BOOLEAN:
-                        value = rs.getBoolean(i) ? "1" : "0";
-                        if (rs.wasNull())
-                            value = null;
+                        if (!onlyBinaries) {
+                            value = rs.getBoolean(i) ? "1" : "0";
+                            if (rs.wasNull())
+                                value = null;
+                        }
                         break;
                     case java.sql.Types.CLOB:
                     case java.sql.Types.BLOB:
@@ -259,40 +269,47 @@ con.close()
                     default:
                         LOG.warn("Unhandled type [" + md.getColumnType(i) + "] for [" + tableName + "." + att + "]");
                 }
-                if (value != null)
+                if (value != null && !onlyBinaries)
                     sb.append(' ').append(att).append("=\"").append(value).append("\"");
             }
             if (hasSubTags) {
-                sb.append(">\n");
+                if (!onlyBinaries)
+                    sb.append(">\n");
                 for (int i = 1; i <= md.getColumnCount(); i++) {
                     switch (md.getColumnType(i)) {
                         case java.sql.Types.VARBINARY:
                         case java.sql.Types.LONGVARBINARY:
                         case java.sql.Types.BLOB:
-                        case java.sql.Types.BINARY:    
-                            if (!(out instanceof ZipOutputStream))
-                                throw new IllegalArgumentException("out has to be a ZipOutputStream to store binaries!");
-                            ZipOutputStream zip = (ZipOutputStream) out;
-                            InputStream in = rs.getBinaryStream(i);
-                            if (rs.wasNull())
-                                break;
-
+                        case java.sql.Types.BINARY:
+                            if (idColumn == null)
+                                throw new IllegalArgumentException("Id column required to process binaries!");
+                            String binFile = FOLDER_BINARY + "/BIN_" + String.valueOf(rs.getLong(idColumn)) + "_" + i + ".blob";
                             att = md.getColumnName(i).toLowerCase();
-                            String binFile = FOLDER_BINARY + "/BIN_" +
-                                    (idColumn == null ? RandomStringUtils.randomAlphanumeric(8) : String.valueOf(rs.getLong(idColumn))) +
-                                    "_" + RandomStringUtils.randomAlphanumeric(8) + ".blob";
+                            if (onlyBinaries) {
+                                if (!(out instanceof ZipOutputStream))
+                                    throw new IllegalArgumentException("out has to be a ZipOutputStream to store binaries!");
+                                ZipOutputStream zip = (ZipOutputStream) out;
+                                InputStream in = rs.getBinaryStream(i);
+                                if (rs.wasNull())
+                                    break;
 
-                            ZipEntry ze = new ZipEntry(binFile);
-                            zip.putNextEntry(ze);
+                                ZipEntry ze = new ZipEntry(binFile);
+                                zip.putNextEntry(ze);
 
-                            byte[] buffer = new byte[4096];
-                            int read;
-                            while ((read = in.read(buffer)) != -1)
-                                zip.write(buffer, 0, read);
-                            in.close();
-                            zip.closeEntry();
-                            zip.flush();
-                            sb.append("    <").append(att).append(">").append(binFile).append("</").append(att).append(">\n");
+                                byte[] buffer = new byte[4096];
+                                int read;
+                                while ((read = in.read(buffer)) != -1)
+                                    zip.write(buffer, 0, read);
+                                in.close();
+                                zip.closeEntry();
+                                zip.flush();
+                            } else {
+                                InputStream in = rs.getBinaryStream(i); //need to fetch to see if it is empty
+                                if (rs.wasNull())
+                                    break;
+                                in.close();
+                                sb.append("    <").append(att).append(">").append(binFile).append("</").append(att).append(">\n");
+                            }
                             break;
                         case java.sql.Types.CLOB:
                         case SQL_LONGNVARCHAR:
@@ -301,21 +318,25 @@ con.close()
                         case SQL_NVARCHAR:
                         case java.sql.Types.LONGVARCHAR:
                         case java.sql.Types.VARCHAR:
-                            value = rs.getString(i);
-                            if (rs.wasNull())
-                                break;
-                            att = md.getColumnName(i).toLowerCase();
-                            sb.append("    <").append(att).append('>');
-                            escape(sb, value);
-                            sb.append("</").append(att).append(">\n");
+                            if (!onlyBinaries) {
+                                value = rs.getString(i);
+                                if (rs.wasNull())
+                                    break;
+                                att = md.getColumnName(i).toLowerCase();
+                                sb.append("    <").append(att).append('>');
+                                escape(sb, value);
+                                sb.append("</").append(att).append(">\n");
+                            }
                             break;
                     }
                 }
-                sb.append("  </").append(xmlTag).append(">\n");
+                if (!onlyBinaries)
+                    sb.append("  </").append(xmlTag).append(">\n");
             } else {
-                sb.append("/>\n");
+                if (!onlyBinaries)
+                    sb.append("/>\n");
             }
-            if (writeToStream)
+            if (!onlyBinaries)
                 write(out, sb);
         }
     }
@@ -751,16 +772,17 @@ con.close()
         try {
             stmt = con.createStatement();
             //binary table, transit is ignored on purpose!
+            startEntry(zip, FILE_BINARIES);
             sb.setLength(0);
             sb.append("<binaries>\n");
-            dumpTable(DatabaseConst.TBL_CONTENT_BINARY, stmt, zip, sb, "binary", "id", false);
-            ZipEntry ze = new ZipEntry(FILE_BINARIES);
-            zip.putNextEntry(ze);
-            sb.append("</binaries>\n");
-            writeHeader(zip);
             write(zip, sb);
-            zip.closeEntry();
-            zip.flush();
+            //dump meta data
+            dumpTable(DatabaseConst.TBL_CONTENT_BINARY, stmt, zip, sb, "binary", "id", false);
+            sb.append("</binaries>\n");
+            write(zip, sb);
+            endEntry(zip);
+            //dump the binaries
+            dumpTable(DatabaseConst.TBL_CONTENT_BINARY, stmt, zip, sb, "binary", "id", true);
             //filesystem binaries
             final String baseDir = FxBinaryUtils.getBinaryDirectory() + File.separatorChar + String.valueOf(FxContext.get().getDivisionId());
             dumpFilesystem(zip, baseDir);
