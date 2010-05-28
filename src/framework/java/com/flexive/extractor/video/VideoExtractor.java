@@ -35,16 +35,14 @@ import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.media.FxMetadata;
 import com.flexive.shared.media.impl.FxMimeType;
-import com.sonydadc.dw.jflv.io.IOHelper;
-import com.sonydadc.dw.jflv.metadata.FlvHeader;
-import com.sonydadc.dw.jflv.parse.ParseMeta;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -113,7 +111,6 @@ public class VideoExtractor {
          * Extracts the metaData using ffmpeg
          */
         private void extractGeneral() {
-            final String subType = mimeType.getSubType();
             File tmpPrev = null;
             FxSharedUtils.ProcessResult res;
             try {
@@ -129,57 +126,12 @@ public class VideoExtractor {
                 metaItems.add(new FxMetadata.FxMetadataItem("previewFile", tmpPrev.getAbsolutePath()));
             if (!curParser.buildMetaItems(metaItems)) {
                 LOG.error("You need to have the dictionary containing ffmpeg executable in the path");
-                if (subType.contains("flv")) {
-                    extractFLV();
-                }
-            }
-        }
-
-        /**
-         * Extract metaInfo using the jflv lib
-         */
-        private void extractFLV() {
-            metaItems = new ArrayList<FxMetadata.FxMetadataItem>(8);
-
-            try {
-                IOHelper ioh = new IOHelper(file);
-                new FlvHeader(ioh);
-                ParseMeta parm = new ParseMeta(ioh);
-                parm.findMetaTag();
-                Map<String, Object> metaData = parm.getMetaData();
-                metaItems.add(new FxMetadata.FxMetadataItem("videoStreams", "1"));
-                metaItems.add(new FxMetadata.FxMetadataItem("audioStreams", "1"));
-                metaItems.add(new FxMetadata.FxMetadataItem("height1", prepareNumber(metaData.get("height"))));
-                metaItems.add(new FxMetadata.FxMetadataItem("width1", prepareNumber(metaData.get("width"))));
-                metaItems.add(new FxMetadata.FxMetadataItem("duration1", String.valueOf(metaData.get("duration")).trim()));
-                metaItems.add(new FxMetadata.FxMetadataItem("audiodatarate1", String.valueOf(metaData.get("audiodatarate")).trim()));
-                metaItems.add(new FxMetadata.FxMetadataItem("videodatarate1", String.valueOf(metaData.get("videodatarate")).trim()));
-                try {
-                    String tmp = String.valueOf(metaData.get("creationdate")).trim();
-                    tmp = tmp.substring(4);
-                    Date d = (new SimpleDateFormat("MMM dd HH:mm:ss yyyy").parse(tmp));
-                    metaItems.add(new FxMetadata.FxMetadataItem("creationdate1", "STR" + d.getTime()));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                metaItems.add(new FxMetadata.FxMetadataItem("framerate", String.valueOf(metaData.get("framerate")).trim()));
-            } catch (Exception e) {
-                if (LOG.isDebugEnabled()) {
-                    LOG.debug("Failed to get audio stream from file or could not recognise video file format", e);
-                }
             }
         }
 
         public long getLength() {
             return length;
         }
-
-        private String prepareNumber(Object value) {
-            String sValue = String.valueOf(value).trim();
-            sValue = "" + (int) (Double.parseDouble(sValue));
-            return sValue;
-        }
-
     }
 
     /**
