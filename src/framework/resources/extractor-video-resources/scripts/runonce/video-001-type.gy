@@ -491,8 +491,17 @@ se.createTypeScriptMapping(si.getId(), typeId, true, true);
 EJBLookup.resultPreferencesEngine.saveSystemDefault(
         new ResultPreferences(
                 [new ResultColumnInfo("@pk"),
-                        new ResultColumnInfo("#" + FxType.VIDEO + "/caption"),
-                        // perhaps we should add some more cols f. metadata searches ...
+                 new ResultColumnInfo("#" + FxType.VIDEO + "/caption"),
+                 new ResultColumnInfo("#" + FxType.VIDEO + "/metadata/length"),
+                 new ResultColumnInfo("#" + FxType.VIDEO + "/metadata/videostream/type"),
+                 new ResultColumnInfo("#" + FxType.VIDEO + "/metadata/videostream/format"),
+                 new ResultColumnInfo("#" + FxType.VIDEO + "/metadata/videostream/framerate"),
+                 new ResultColumnInfo("#" + FxType.VIDEO + "/metadata/videostream/width"),
+                 new ResultColumnInfo("#" + FxType.VIDEO + "/metadata/videostream/height"),
+                 new ResultColumnInfo("#" + FxType.VIDEO + "/metadata/videostream/bitrate"),
+                 new ResultColumnInfo("#" + FxType.VIDEO + "/metadata/audiostream/type"),
+                 new ResultColumnInfo("#" + FxType.VIDEO + "/metadata/audiostream/format"),
+                 new ResultColumnInfo("#" + FxType.VIDEO + "/metadata/audiostream/bitrate")
                 ],
                 [new ResultOrderByInfo("#" + FxType.DOCUMENT + "/caption", SortDirection.ASCENDING)],
                 25, 0

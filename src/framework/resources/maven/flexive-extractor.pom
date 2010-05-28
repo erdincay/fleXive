@@ -55,5 +55,16 @@
             <optional>true</optional>
         </dependency>
 
+        <!--
+            Include flexive-extractor-video for AVI, MKV, etc. handling.
+            The module itself is 20k, but requires ffmpeg in the path for processing video files.
+        -->
+        <dependency>
+            <groupId>com.flexive</groupId>
+            <artifactId>flexive-extractor-video</artifactId>
+            <version>@FLEXIVE_VERSION@</version>
+            <optional>true</optional>
+        </dependency>
+
     </dependencies>
 </project>

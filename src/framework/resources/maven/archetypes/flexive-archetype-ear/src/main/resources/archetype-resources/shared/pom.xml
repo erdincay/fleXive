@@ -24,6 +24,12 @@
             <artifactId>flexive-extractor-audio</artifactId>
         </dependency>
 
+        <!-- Disable this dependency if you don't need to process video documents (AVI, MKV, ...) -->
+        <dependency>
+            <groupId>com.flexive</groupId>
+            <artifactId>flexive-extractor-video</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>javax.ejb</groupId>
             <artifactId>ejb-api</artifactId>
