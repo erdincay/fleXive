@@ -148,6 +148,7 @@
 
             <p:editor value="#{exampleManagedBean.htmlText}" />
 
+            <p>#{exampleManagedBean.htmlText}</p>
 
             <p:breadCrumb preview="true" expandEffectDuration="200" previewWidth="12">
                 <p:menuitem label="Categories" url="#" />
@@ -208,6 +209,20 @@
             </table>
         </div>
 
+
+        <h:form>
+             <!-- Display all JSF messages -->
+            <h:messages/>
+
+            <p><h:outputLink value="index.xhtml">Back to blog</h:outputLink></p>
+
+            <h4>Fx:value Test</h4>
+             <!-- The fx:content tag references our type "Blog Entry" -->
+            <fx:content var="cd" pk="#{exampleManagedBean.userContactData}">
+                <fx:value property="email" />
+                <fx:value property="displayName" />
+            </fx:content>
+    </h:form>
 
     </h:body>
 </html>

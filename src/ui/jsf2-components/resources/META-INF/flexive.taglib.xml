@@ -79,7 +79,12 @@
         <tag-name>fxValueInputRow</tag-name>
         <source>templates/fxValueInputRow.xhtml</source>
     </tag>
-    
+
+    <tag>
+        <tag-name>value</tag-name>
+        <handler-class>com.flexive.faces.components.content.Jsf2FxValueHandler</handler-class>
+    </tag>
+
     <function>
         <function-name>url</function-name>
         <function-class>com.flexive.faces.beans.PageBean</function-class>
