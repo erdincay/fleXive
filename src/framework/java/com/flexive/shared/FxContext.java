@@ -39,7 +39,9 @@ import com.flexive.shared.exceptions.FxLoginFailedException;
 import com.flexive.shared.exceptions.FxLogoutFailedException;
 import com.flexive.shared.interfaces.AccountEngine;
 import com.flexive.shared.security.UserTicket;
+import com.flexive.shared.structure.FxEnvironment;
 import com.flexive.shared.tree.FxTreeMode;
+import java.util.Iterator;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -80,8 +82,7 @@ public class FxContext implements Serializable {
     public static final String SESSION_DIVISIONID = "$flexive_division_id$";
 
     private static final Log LOG = LogFactory.getLog(FxContext.class);
-    private static ThreadLocal<FxContext> info = new ThreadLocal<FxContext>() {
-    };
+    private static ThreadLocal<FxContext> info = new ThreadLocal<FxContext>();
     private static boolean MANUAL_INIT_CALLED = false;
 
     private final String requestURI;
@@ -619,6 +620,24 @@ public class FxContext implements Serializable {
     }
 
     /**
+     * Remove attributes that are known to be cached (before storing the context for later use).
+     * This is basically a workaround since the context does not know which attributes must be
+     * preserved, and there's one very large blob that may be looming around (the cached FxEnvironment).
+     * 
+     * @since 3.1.3
+     */
+    public void clearCachedAttributes() {
+        final Iterator<Object> it = attributes.values().iterator();
+        while (it.hasNext()) {
+            final Object value = it.next();
+            if (value instanceof FxEnvironment) {
+                // environment can always be re-fetched
+                it.remove();
+            }
+        }
+    }
+    
+    /**
      * Store a value under the given key in the current request's FxContext.
      * <p>
      * A value stored in the context exists for the entire time of the fleXive request, for a
@@ -735,6 +754,7 @@ public class FxContext implements Serializable {
      */
     public static void cleanup() {
         if (info.get() != null) {
+            info.get().clearCachedAttributes();
             info.remove();
         }
     }

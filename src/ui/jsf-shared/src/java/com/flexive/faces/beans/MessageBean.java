@@ -103,10 +103,14 @@ public class MessageBean extends HashMap {
     public static final String BUNDLE_EXCEPTIONS = "FxExceptionMessages";
 
     private static final Log LOG = LogFactory.getLog(MessageBean.class);
-    private static final List<FxSharedUtils.BundleReference> resourceBundles = new CopyOnWriteArrayList<FxSharedUtils.BundleReference>();
-    private static final ConcurrentMap<String, ResourceBundle> cachedBundles = new ConcurrentHashMap<String, ResourceBundle>();
-    private static final ConcurrentMap<FxSharedUtils.MessageKey, String> cachedMessages = new ConcurrentHashMap<FxSharedUtils.MessageKey, String>();
-    private static volatile boolean initialized = false;
+    private final List<FxSharedUtils.BundleReference> resourceBundles = new CopyOnWriteArrayList<FxSharedUtils.BundleReference>();
+    private final ConcurrentMap<String, ResourceBundle> cachedBundles = new ConcurrentHashMap<String, ResourceBundle>();
+    private final ConcurrentMap<FxSharedUtils.MessageKey, String> cachedMessages = new ConcurrentHashMap<FxSharedUtils.MessageKey, String>();
+    private volatile boolean initialized = false;
+
+    public MessageBean() {
+        initialize();
+    }
 
     /**
      * Return the managed instance of the message beans.
@@ -253,7 +257,7 @@ public class MessageBean extends HashMap {
      * and then adds resource references that use {@link URLClassLoader URLClassLoaders} for loading
      * the associated resource bundles.
      */
-    private static synchronized void initialize() {
+    private void initialize() {
         if (initialized) {
             return;
         }

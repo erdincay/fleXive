@@ -31,18 +31,12 @@
  ***************************************************************/
 package com.flexive.core.timer.jobs;
 
-import com.flexive.core.Database;
-import com.flexive.core.storage.StorageManager;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
-import com.flexive.shared.configuration.DivisionData;
-import com.flexive.shared.exceptions.FxApplicationException;
-import com.flexive.shared.structure.TypeStorageMode;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.quartz.*;
 
-import java.sql.Connection;
 
 /**
  * [fleXive] maintenance
@@ -61,12 +55,17 @@ public class MaintenanceJob implements Job {
 //        System.out.println("===\nExecuting " + this.getClass().getCanonicalName() + " - " + this);
 //        System.out.println("Last: " + context.getPreviousFireTime() + " Next: " + context.getNextFireTime() + " Refire count: " + context.getRefireCount());
 //        System.out.println("My Thread: " + Thread.currentThread() + " I am: " + FxContext.get());
+        FxContext ctx = null;
         try {
-            ((FxContext) context.getScheduler().getContext().get("com.flexive.ctx")).replace();
+            ctx = ((FxContext) context.getScheduler().getContext().get("com.flexive.ctx")).copy();
+            ctx.replace();
+
+            EJBLookup.getTimerService().maintenance();
         } catch (SchedulerException e) {
             LOG.error("Failed to replace FxContext: " + e.getMessage(), e);
+        } finally {
+            FxContext.cleanup();
         }
 
-        EJBLookup.getTimerService().maintenance();
     }
 }

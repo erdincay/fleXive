@@ -93,6 +93,8 @@ public class SessionTimeoutListener implements HttpSessionListener {
             }
         } catch (FxLogoutFailedException e) {
             LOG.error("Failed to logout user after session timeout: " + e.getMessage(), e);
+        } finally {
+            FxContext.cleanup();
         }
     }
 }

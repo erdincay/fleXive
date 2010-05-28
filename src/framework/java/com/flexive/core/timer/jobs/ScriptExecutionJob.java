@@ -80,8 +80,10 @@ public class ScriptExecutionJob implements Job {
                         scriptId, scriptName,e);
         }
         finally {
-            if (ctx != null)
+            if (ctx != null) {
                 ctx.stopRunAsSystem();
+            }
+            FxContext.cleanup();
         }
     }
 }

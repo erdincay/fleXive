@@ -150,6 +150,7 @@ public class FxQuartz {
         Scheduler scheduler = new StdSchedulerFactory(props).getScheduler();
         FxContext ctx = FxContext._getEJBContext(currCtx);
         ctx.overrideTicket(UserTicketImpl.getGuestTicket().cloneAsGlobalSupervisor());
+        ctx.clearCachedAttributes();
         scheduler.getContext().put("com.flexive.ctx", ctx);
         // and start it off
         scheduler.start();
