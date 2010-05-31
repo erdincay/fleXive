@@ -217,10 +217,10 @@ public class FxMimeType implements Serializable {
         
         // extension based detection
         if (LOG.isDebugEnabled()) {
-            LOG.debug("Failed to detect file's mime type from header, trying a file extension match");
+            LOG.debug("Failed to detect file's mime type from header, trying a file extension match: " + fileName);
         }
         // check manual extension replacement table
-        if (fileName.indexOf('.') != -1) {
+        if (fileName != null && fileName.indexOf('.') != -1) {
             final String extension = fileName.substring(fileName.lastIndexOf('.') + 1);
             if (EXT_REPLACEMENTS.containsKey(extension.toLowerCase())) {
                 return new FxMimeType(EXT_REPLACEMENTS.get(extension));
