@@ -231,7 +231,8 @@ public class FxMimeType implements Serializable {
         if(detected.isEmpty()) {
             return new FxMimeType(UNKNOWN);
         }
-        mt = MimeUtil.getMostSpecificMimeType(detected);
+        // the first mime-type from mime-util's mapping table is usually fine
+        mt = detected.iterator().next();
         return new FxMimeType(mt.getMediaType(), mt.getSubType());
     }
 }
