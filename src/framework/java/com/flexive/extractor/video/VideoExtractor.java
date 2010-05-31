@@ -116,10 +116,13 @@ public class VideoExtractor {
             FxSharedUtils.ProcessResult res;
             try {
                 tmpPrev = File.createTempFile("VideoPreview", ".jpg");
-                res = FxSharedUtils.executeCommand(FFMPEG_BINARY, "-vstats", "-i", file.getAbsolutePath(), tmpPrev.getAbsolutePath());
+                // add time offset to skip fade-in. If called on a shorter video, no preview will be generated
+                final String offset = "00:00:02.0";
+                // generate preview
+                res = FxSharedUtils.executeCommand(FFMPEG_BINARY, "-vstats", "-ss", offset, "-i", file.getAbsolutePath(), tmpPrev.getAbsolutePath());
             } catch (IOException e) {
                 if (LOG.isWarnEnabled()) {
-                    LOG.warn("Video extractor call for previews failed: " + e.getMessage(), e);
+                    LOG.warn("Failed to create video preview file: " + e.getMessage(), e);
                 }
                 res = FxSharedUtils.executeCommand(FFMPEG_BINARY, "-vstats", "-i", file.getAbsolutePath());
             }
@@ -143,13 +146,18 @@ public class VideoExtractor {
      * A class to parse the ffmpeg output creating the video and audio Stream(s)
      */
     private static class FFMpegParser {
+        private static final Pattern DURATION = Pattern.compile("Duration: ([0-9:.]+)");
+        private static final Pattern BITRATE = Pattern.compile("bitrate: ([0-9]+)");
+
         String duration;
         String bitrate;
         List<VideoStreamHolder> videoStream = new ArrayList<VideoStreamHolder>(2);
         List<AudioStreamHolder> audioStream = new ArrayList<AudioStreamHolder>(2);
 
+
         FFMpegParser(String output) {
             long start = System.nanoTime();
+
             int begin0 = output.indexOf("Input #0,");
             if (begin0 <= 0) return;
             begin0 = output.indexOf("Duration: ", begin0);
@@ -157,15 +165,17 @@ public class VideoExtractor {
             output = output.substring(begin0);
             int end0 = Math.max(output.indexOf("[ffmpeg_output"), output.indexOf("At least one output file must be specified"));
             if (end0 > 0) output = output.substring(0, end0);
-            System.out.println("Parsing :\n" + output);
-            duration = output.substring(10, 21);
-            int begin = output.indexOf("bitrate: ");
-            int end;
-            if (begin > 0) {
-                begin += 9;
-                end = output.indexOf(" ", begin);
-                if (end > 0)
-                    bitrate = output.substring(begin, end);
+
+            if (LOG.isInfoEnabled()) {
+                LOG.info("Parsing :\n" + output);
+            }
+            final Matcher m_dur = DURATION.matcher(output);
+            if (m_dur.find()) {
+                duration = m_dur.group(1);
+            }
+            final Matcher m_bitrate = BITRATE.matcher(output);
+            if (m_bitrate.find()) {
+                bitrate = m_bitrate.group(1);
             }
             String[] streams = output.split("Stream #");
             for (String tmp : streams) {
@@ -179,7 +189,9 @@ public class VideoExtractor {
                     }
                 }
             }
-            System.out.println(String.format("Parsing took : %7.3fms", ((System.nanoTime() - start) * 1E-6)));
+            if (LOG.isTraceEnabled()) {
+                LOG.trace(String.format("Parsing took : %7.3fms", ((System.nanoTime() - start) * 1E-6)));
+            }
         }
 
         /**
@@ -305,7 +317,7 @@ public class VideoExtractor {
         String herz = null;
         String bitRate = "";
 
-        //    Format :     Stream #0.1: Audio: wmav2, 32000 Hz, 2 channels, s16, 64 kb/s
+        //    Format :     Stream #0.1: Audio: wmav2, 32000 Hz, 2 channels, (s16,)? 64 kb/s
         private static final Pattern HZ = Pattern.compile("([0-9]+) Hz");
         private static final Pattern BITRATE = Pattern.compile("([0-9]+) kb/s");
 
@@ -316,13 +328,20 @@ public class VideoExtractor {
          */
         AudioStreamHolder(String info) {
             String[] all = info.split(", ");
+            if (all.length < 3) {
+                if (LOG.isWarnEnabled()) {
+                    LOG.warn("Unknown audio format line: " + info);
+                    type = encoding = "unknown";
+                    return;
+                }
+            }
             encoding = all[0];
             type = all[2];
             Matcher m = HZ.matcher(all[1]);
             if (m.find()) {
                 herz = m.group(1);
             }
-            m = BITRATE.matcher(all[4]);
+            m = BITRATE.matcher(info);
             if (m.find()) {
                 bitRate = m.group(1);
             }

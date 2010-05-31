@@ -84,8 +84,8 @@ try {
   println "start processing..."
 
   process(cmap, 'String|Caption', binValue.name)
-  process(cmap, 'String|Metadata/Length', meta.meta.find { it.@key == 'duration'})
-  process(cmap, 'DateTime|Metadata/Creationdate', meta.meta.find { it.@key == 'creationdate'})
+  process(cmap, 'String|Length', meta.meta.find { it.@key == 'duration'})
+  process(cmap, 'DateTime|Creationdate', meta.meta.find { it.@key == 'creationdate'})
 
   def videoStreams = 1;
   try {
@@ -95,12 +95,12 @@ try {
   }
 // parsing video Metadata
   for (curVS = 1; curVS <= videoStreams; curVS++) {
-    process(cmap, 'Number|Metadata/VideoStream[' + curVS + ']/Height', meta.meta.find { it.@key == ('height' + curVS)})
-    process(cmap, 'Number|Metadata/VideoStream[' + curVS + ']/Width', meta.meta.find { it.@key == ('width' + curVS)})
-    process(cmap, 'String|Metadata/VideoStream[' + curVS + ']/type', meta.meta.find { it.@key == ('videoType' + curVS)})
-    process(cmap, 'Double|Metadata/VideoStream[' + curVS + ']/Bitrate', meta.meta.find { it.@key == ('videodatarate' + curVS)})
-    process(cmap, 'Double|Metadata/VideoStream[' + curVS + ']/Framerate', meta.meta.find { it.@key == ('framerate' + curVS)})
-    process(cmap, 'String|Metadata/VideoStream[' + curVS + ']/format', meta.meta.find { it.@key == ('videoEncoding' + curVS)})
+    process(cmap, 'Number|VideoStream[' + curVS + ']/Height', meta.meta.find { it.@key == ('height' + curVS)})
+    process(cmap, 'Number|VideoStream[' + curVS + ']/Width', meta.meta.find { it.@key == ('width' + curVS)})
+    process(cmap, 'String|VideoStream[' + curVS + ']/type', meta.meta.find { it.@key == ('videoType' + curVS)})
+    process(cmap, 'Double|VideoStream[' + curVS + ']/Bitrate', meta.meta.find { it.@key == ('videodatarate' + curVS)})
+    process(cmap, 'Double|VideoStream[' + curVS + ']/Framerate', meta.meta.find { it.@key == ('framerate' + curVS)})
+    process(cmap, 'String|VideoStream[' + curVS + ']/format', meta.meta.find { it.@key == ('videoEncoding' + curVS)})
   }
 
   def audioStreams = 1;
@@ -111,10 +111,10 @@ try {
   }
   // parsing audio Metadata
   for (curAS = 1; curAS <= audioStreams; curAS++) {
-    process(cmap, 'String|Metadata/AudioStream[' + curAS + ']/type', meta.meta.find { it.@key == ('audioType' + curAS)})
-    process(cmap, 'Double|Metadata/AudioStream[' + curAS + ']/Bitrate', meta.meta.find { it.@key == ('audiodatarate' + curAS)})
-    process(cmap, 'Number|Metadata/AudioStream[' + curAS + ']/frequency', meta.meta.find { it.@key == ('frequency' + curAS)})
-    process(cmap, 'String|Metadata/AudioStream[' + curAS + ']/format', meta.meta.find { it.@key == ('audioEncoding' + curAS)})
+    process(cmap, 'String|AudioStream[' + curAS + ']/type', meta.meta.find { it.@key == ('audioType' + curAS)})
+    process(cmap, 'Double|AudioStream[' + curAS + ']/Bitrate', meta.meta.find { it.@key == ('audiodatarate' + curAS)})
+    process(cmap, 'Number|AudioStream[' + curAS + ']/frequency', meta.meta.find { it.@key == ('frequency' + curAS)})
+    process(cmap, 'String|AudioStream[' + curAS + ']/format', meta.meta.find { it.@key == ('audioEncoding' + curAS)})
   }
   // traverse metadata
 

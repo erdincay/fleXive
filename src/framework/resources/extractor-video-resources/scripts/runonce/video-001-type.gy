@@ -97,14 +97,6 @@ new GroovyTypeBuilder().video(
         parentTypeName: "DOCUMENTFILE")
 
         {
-          METADATA(
-                  label: new FxString(true, 1, "Metadata"),
-                  hint: new FxString(true, 1, ""),
-                  alias: "METADATA",
-                  defaultMultiplicity: 0,
-                  overrideMultiplicity: true,
-                  multiplicity: new FxMultiplicity(0, 1),
-                  groupMode: GroupMode.AnyOf) {
             length_1(
                     label: new FxString(true, 1, "Length").setTranslation(2, "L\u00E4nge"),
                     hint: new FxString(true, 1, "Length in HH:mm:ss.ssss").setTranslation(2, "L\u00E4nge in HH:mm:ss.ssss"),
@@ -462,7 +454,6 @@ new GroovyTypeBuilder().video(
               frequency(
               )
             }
-          }
         }
 
 def scriptCode
@@ -492,16 +483,16 @@ EJBLookup.resultPreferencesEngine.saveSystemDefault(
         new ResultPreferences(
                 [new ResultColumnInfo("@pk"),
                  new ResultColumnInfo("#" + FxType.VIDEO + "/caption"),
-                 new ResultColumnInfo("#" + FxType.VIDEO + "/metadata/length"),
-                 new ResultColumnInfo("#" + FxType.VIDEO + "/metadata/videostream/type"),
-                 new ResultColumnInfo("#" + FxType.VIDEO + "/metadata/videostream/format"),
-                 new ResultColumnInfo("#" + FxType.VIDEO + "/metadata/videostream/framerate"),
-                 new ResultColumnInfo("#" + FxType.VIDEO + "/metadata/videostream/width"),
-                 new ResultColumnInfo("#" + FxType.VIDEO + "/metadata/videostream/height"),
-                 new ResultColumnInfo("#" + FxType.VIDEO + "/metadata/videostream/bitrate"),
-                 new ResultColumnInfo("#" + FxType.VIDEO + "/metadata/audiostream/type"),
-                 new ResultColumnInfo("#" + FxType.VIDEO + "/metadata/audiostream/format"),
-                 new ResultColumnInfo("#" + FxType.VIDEO + "/metadata/audiostream/bitrate")
+                 new ResultColumnInfo("#" + FxType.VIDEO + "/length"),
+                 new ResultColumnInfo("#" + FxType.VIDEO + "/videostream/type"),
+                 new ResultColumnInfo("#" + FxType.VIDEO + "/videostream/format"),
+                 new ResultColumnInfo("#" + FxType.VIDEO + "/videostream/framerate"),
+                 new ResultColumnInfo("#" + FxType.VIDEO + "/videostream/width"),
+                 new ResultColumnInfo("#" + FxType.VIDEO + "/videostream/height"),
+                 new ResultColumnInfo("#" + FxType.VIDEO + "/videostream/bitrate"),
+                 new ResultColumnInfo("#" + FxType.VIDEO + "/audiostream/type"),
+                 new ResultColumnInfo("#" + FxType.VIDEO + "/audiostream/format"),
+                 new ResultColumnInfo("#" + FxType.VIDEO + "/audiostream/bitrate")
                 ],
                 [new ResultOrderByInfo("#" + FxType.DOCUMENT + "/caption", SortDirection.ASCENDING)],
                 25, 0

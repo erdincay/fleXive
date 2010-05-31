@@ -148,13 +148,13 @@ public class FxStreamUtils {
 
     /**
      * Upload a binary (using an OutputStream) to the StreamServer with a given time to live.
-     * Warning: if using a remote connection, this method will return a few miliseconds before
+     * Warning: if using a remote connection, this method will return a few milliseconds before
      * all binary data is stored in the DB! Local connected clients will return *after* all
      * data is stored. This is currently a 'feature' that might be fixed sometime.
      *
      * @param length     expected length of the stream/binary
      * @param stream     the Stream containing the binary
-     * @param timeToLive time in miliseconds the binary is guaranteed to exist server side (will be removed once expired)
+     * @param timeToLive time in milliseconds the binary is guaranteed to exist server side (will be removed once expired)
      * @return payload containing server side handle of the binary, mimeType and meta data
      * @throws FxStreamException on errors
      * @deprecated
@@ -197,7 +197,7 @@ public class FxStreamUtils {
             client = null;
             return resp.getPayload();
         } catch (StreamException e) {
-            throw new FxStreamException(e);
+            throw wrapStreamException(e);
         } finally {
             try {
                 if (client != null)
@@ -307,7 +307,7 @@ public class FxStreamUtils {
             }
             client = null;
         } catch (StreamException e) {
-            throw new FxStreamException(e);
+            throw wrapStreamException(e);
         } finally {
             try {
                 if (client != null)
@@ -344,7 +344,7 @@ public class FxStreamUtils {
         try {
             return requestBinary(server, descriptor, size).getInputStream();
         } catch (StreamException e) {
-            throw new FxStreamException(e);
+            throw wrapStreamException(e);
         }
     }
 
@@ -382,7 +382,7 @@ public class FxStreamUtils {
             client.close();
             client = null;
         } catch (StreamException e) {
-            throw new FxStreamException(e);
+            throw wrapStreamException(e);
         } finally {
             try {
                 if (client != null)
@@ -391,6 +391,10 @@ public class FxStreamUtils {
                 //ignore
             }
         }
+    }
+
+    protected static FxStreamException wrapStreamException(StreamException e) {
+        return new FxStreamException(e.getMessage(), e);
     }
 
     private static StreamClient requestBinary(List<ServerLocation> server, BinaryDescriptor descriptor, BinaryDescriptor.PreviewSizes size) throws FxStreamException, StreamException {

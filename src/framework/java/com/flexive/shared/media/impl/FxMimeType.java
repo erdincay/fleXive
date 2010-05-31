@@ -31,6 +31,7 @@
  ***************************************************************/
 package com.flexive.shared.media.impl;
 
+import com.google.common.collect.Maps;
 import eu.medsea.mimeutil.MimeType;
 import eu.medsea.mimeutil.MimeUtil;
 import eu.medsea.mimeutil.detector.ExtensionMimeDetector;
@@ -43,6 +44,8 @@ import org.apache.commons.logging.LogFactory;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
 
 /**
  * A general mime type / subtype implementation
@@ -52,7 +55,10 @@ import java.util.Collection;
  */
 public class FxMimeType implements Serializable {
 
-    // MimeUtils mimedetector registration
+    /**
+     * Replacement table with overrides for common extensions with mime-utils.
+     */
+    private static final Map<String, String> EXT_REPLACEMENTS;
 
     static {
         // MIME-type detection setup
@@ -63,6 +69,11 @@ public class FxMimeType implements Serializable {
         MimeUtil.registerMimeDetector(WindowsRegistryMimeDetector.class.getCanonicalName());
         // Last resort - use file extension
         MimeUtil.registerMimeDetector(ExtensionMimeDetector.class.getCanonicalName());
+
+        // populate EXT_REPLACEMENTS
+        final Map <String, String> replacements = Maps.newHashMap();
+        replacements.put("wmv", "video/x-ms/wmv");
+        EXT_REPLACEMENTS = Collections.unmodifiableMap(replacements);
     }
 
     /**
@@ -156,7 +167,7 @@ public class FxMimeType implements Serializable {
     }
 
     /**
-     * Construct a MimeType from a given String. If the parameterised mime type cannot be identified,
+     * Construct a MimeType from a given String. If the parameterized mime type cannot be identified,
      * a DEFAULT mime type of "application/octet-stream" will be constructed
      * A null input will return "unknown/unknown"
      *
@@ -208,6 +219,14 @@ public class FxMimeType implements Serializable {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Failed to detect file's mime type from header, trying a file extension match");
         }
+        // check manual extension replacement table
+        if (fileName.indexOf('.') != -1) {
+            final String extension = fileName.substring(fileName.lastIndexOf('.') + 1);
+            if (EXT_REPLACEMENTS.containsKey(extension.toLowerCase())) {
+                return new FxMimeType(EXT_REPLACEMENTS.get(extension));
+            }
+        }
+        // use extension detector from mime-utils
         detected = MimeUtil.getMimeTypes(fileName);
         if(detected.isEmpty()) {
             return new FxMimeType(UNKNOWN);
