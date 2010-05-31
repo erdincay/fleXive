@@ -796,6 +796,13 @@ public class ContentEngineTest {
             assertTrue(d.getRemoves().size() == 0, "Expected no deletes, but got " + d.getRemoves().size());
             assertTrue(d.getUpdates().size() == 0, "Expected no updates, but got " + d.getUpdates().size());
 
+            test.getValue("/TestProperty3[2]").setValueData(9999);
+            d = FxDelta.processDelta(org, test);
+            System.out.println(d.dump());
+            assertTrue(d.getAdds().size() == 0, "Expected no adds, but got " + d.getAdds().size());
+            assertTrue(d.getRemoves().size() == 0, "Expected no deletes, but got " + d.getRemoves().size());
+            assertTrue(d.getUpdates().size() == 1, "Expected one update (value data), but got " + d.getUpdates().size());
+
             test.remove("/TestProperty3[2]");
             d = FxDelta.processDelta(org, test);
             System.out.println(d.dump());

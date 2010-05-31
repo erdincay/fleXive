@@ -1157,24 +1157,24 @@ try {
                 //1  2   3   4    5     6             7     8                                              9         10                 11
                 "(ID,VER,POS,LANG,TPROP,ASSIGN,XDEPTH,XPATH,XPATHMULT,XMULT,XINDEX,PARENTXMULT,PARENTXPATH,ISMAX_VER,ISLIVE_VER,ISGROUP,ISMLDEF,";
         final String insert2 = "(?,?,?,?,?,?,1,?,?,1,1,1,'/',?,?," + StorageManager.getBooleanFalseExpression() + ",?,";
-        final PreparedStatement psString = con.prepareStatement(insert1 + "FTEXT1024,UFTEXT1024,FSELECT)VALUES" +
-                insert2 + "?,?,0)");
-        final PreparedStatement psText = con.prepareStatement(insert1 + "FCLOB,UFCLOB,FSELECT)VALUES" +
-                insert2 + "?,?,0)");
-        final PreparedStatement psDouble = con.prepareStatement(insert1 + "FDOUBLE,FSELECT)VALUES" +
-                insert2 + "?,0)");
-        final PreparedStatement psNumber = con.prepareStatement(insert1 + "FINT,FSELECT)VALUES" +
-                insert2 + "?,0)");
-        final PreparedStatement psLargeNumber = con.prepareStatement(insert1 + "FBIGINT,FSELECT)VALUES" +
-                insert2 + "?,0)");
-        final PreparedStatement psFloat = con.prepareStatement(insert1 + "FFLOAT,FSELECT)VALUES" +
-                insert2 + "?,0)");
-        final PreparedStatement psBoolean = con.prepareStatement(insert1 + "FBOOL,FSELECT)VALUES" +
-                insert2 + "?,0)");
-        final PreparedStatement psReference = con.prepareStatement(insert1 + "FREF,FSELECT)VALUES" +
-                insert2 + "?,0)");
-        final PreparedStatement psSelectOne = con.prepareStatement(insert1 + "FSELECT)VALUES" +
-                insert2 + "?)");
+        final PreparedStatement psString = con.prepareStatement(insert1 + "FTEXT1024,UFTEXT1024,FSELECT,FINT)VALUES" +
+                insert2 + "?,?,0,?)");
+        final PreparedStatement psText = con.prepareStatement(insert1 + "FCLOB,UFCLOB,FSELECT,FINT)VALUES" +
+                insert2 + "?,?,0,?)");
+        final PreparedStatement psDouble = con.prepareStatement(insert1 + "FDOUBLE,FSELECT,FINT)VALUES" +
+                insert2 + "?,0,?)");
+        final PreparedStatement psNumber = con.prepareStatement(insert1 + "FINT,FSELECT,FBIGINT)VALUES" +
+                insert2 + "?,0,?)");
+        final PreparedStatement psLargeNumber = con.prepareStatement(insert1 + "FBIGINT,FSELECT,FINT)VALUES" +
+                insert2 + "?,0,?)");
+        final PreparedStatement psFloat = con.prepareStatement(insert1 + "FFLOAT,FSELECT,FINT)VALUES" +
+                insert2 + "?,0,?)");
+        final PreparedStatement psBoolean = con.prepareStatement(insert1 + "FBOOL,FSELECT,FINT)VALUES" +
+                insert2 + "?,0,?)");
+        final PreparedStatement psReference = con.prepareStatement(insert1 + "FREF,FSELECT,FINT)VALUES" +
+                insert2 + "?,0,?)");
+        final PreparedStatement psSelectOne = con.prepareStatement(insert1 + "FSELECT,FINT)VALUES" +
+                insert2 + "?,?)");
         try {
             final SAXParser parser = SAXParserFactory.newInstance().newSAXParser();
             final DefaultHandler handler = new DefaultHandler() {
@@ -1334,6 +1334,8 @@ try {
                     final int level = Integer.parseInt(data.get("lvl"));
                     long assignment = flatAssignmentMapping.get(currentStorage).get(level).get(column.toUpperCase());
                     int pos = FxArrayUtils.getIntElementAt(data.get("positions"), ',', assignmentPositions.get(assignment));
+                    String _valueData = data.get("valuedata");
+                    Integer valueData = _valueData == null ? null : FxArrayUtils.getHexIntElementAt(data.get("valuedata"), ',', assignmentPositions.get(assignment));
                     Object[] propXP = getPropertyXPathDataType(assignment);
                     long prop = (Long) propXP[0];
                     String xpath = (String) propXP[1];
@@ -1350,45 +1352,55 @@ try {
                     boolean isLiveVer = "1".equals(data.get("islive_ver"));
                     boolean mlDef = "1".equals(data.get(column + "_mld"));
                     PreparedStatement ps;
+                    int vdPos;
                     switch (dataType) {
                         case String1024:
                             ps = psString;
                             ps.setString(12, data.get(column));
                             ps.setString(13, data.get(column).toUpperCase());
+                            vdPos = 14;
                             break;
                         case Text:
                         case HTML:
                             ps = psText;
                             ps.setString(12, data.get(column));
                             ps.setString(13, data.get(column).toUpperCase());
+                            vdPos = 14;
                             break;
                         case Number:
                             ps = psNumber;
                             ps.setLong(12, Long.valueOf(data.get(column)));
+                            vdPos = 13;
                             break;
                         case LargeNumber:
                             ps = psLargeNumber;
                             ps.setLong(12, Long.valueOf(data.get(column)));
+                            vdPos = 13;
                             break;
                         case Reference:
                             ps = psReference;
                             ps.setLong(12, Long.valueOf(data.get(column)));
+                            vdPos = 13;
                             break;
                         case Float:
                             ps = psFloat;
                             ps.setFloat(12, Float.valueOf(data.get(column)));
+                            vdPos = 13;
                             break;
                         case Double:
                             ps = psDouble;
                             ps.setDouble(12, Double.valueOf(data.get(column)));
+                            vdPos = 13;
                             break;
                         case Boolean:
                             ps = psBoolean;
                             ps.setBoolean(12, "1".equals(data.get(column)));
+                            vdPos = 13;
                             break;
                         case SelectOne:
                             ps = psSelectOne;
                             ps.setLong(12, Long.valueOf(data.get(column)));
+                            vdPos = 13;
                             break;
                         default:
                             //noinspection ThrowableInstanceNeverThrown
@@ -1405,6 +1417,10 @@ try {
                     ps.setBoolean(9, isMaxVer);
                     ps.setBoolean(10, isLiveVer);
                     ps.setBoolean(11, mlDef);
+                    if (valueData == null)
+                        ps.setNull(vdPos, java.sql.Types.NUMERIC);
+                    else
+                        ps.setInt(vdPos, valueData);
                     ps.executeUpdate();
                     insertCount++;
                 }

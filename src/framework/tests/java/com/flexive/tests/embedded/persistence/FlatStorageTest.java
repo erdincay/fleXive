@@ -1,6 +1,5 @@
 package com.flexive.tests.embedded.persistence;
 
-import static com.flexive.core.flatstorage.FxFlatStorage.FxFlatColumnType;
 import com.flexive.core.flatstorage.FxFlatStorageInfo;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
@@ -18,8 +17,7 @@ import com.flexive.shared.interfaces.TypeEngine;
 import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.structure.*;
 import com.flexive.shared.value.FxString;
-import static com.flexive.tests.embedded.FxTestUtils.login;
-import static com.flexive.tests.embedded.FxTestUtils.logout;
+import com.flexive.shared.value.FxValue;
 import com.flexive.tests.embedded.TestUsers;
 import org.apache.commons.lang.RandomStringUtils;
 import org.testng.Assert;
@@ -29,6 +27,10 @@ import org.testng.annotations.Test;
 
 import java.util.List;
 import java.util.Map;
+
+import static com.flexive.core.flatstorage.FxFlatStorage.FxFlatColumnType;
+import static com.flexive.tests.embedded.FxTestUtils.login;
+import static com.flexive.tests.embedded.FxTestUtils.logout;
 
 /**
  * Tests for the Flat Storage
@@ -46,6 +48,7 @@ public class FlatStorageTest {
 
     final static String TEST_STORAGE = "FX_CONTENT_FLAT_TEST";
     final static String TEST_STORAGE_DESCRIPTION = "Test storage";
+    final static int VALUEDATA_TEST = 815;
 
     public static final String TEST_TYPE = "TEST_TYPE_" + RandomStringUtils.random(16, true, true);
 
@@ -111,7 +114,8 @@ public class FlatStorageTest {
             //ignore and create
         }
         long typeId = type.save(FxTypeEdit.createNew(TEST_TYPE, new FxString("Test data"), CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()), null));
-        FxType testType = CacheAdmin.getEnvironment().getType(TEST_TYPE);
+        //check if loadable
+        CacheAdmin.getEnvironment().getType(TEST_TYPE);
         FxString hint = new FxString(true, "hint");
         ass.createProperty(typeId, FxPropertyEdit.createNew("TestProperty1", new FxString(true, "TestProperty1"), hint,
                 FxMultiplicity.MULT_0_1, CacheAdmin.getEnvironment().getACL(ACLCategory.STRUCTURE.getDefaultId()),
@@ -225,16 +229,20 @@ public class FlatStorageTest {
         //create a test instance which will be migrated by the flat storage
         final FxContent test = co.initialize(TEST_TYPE);
         test.randomize();
+        test.getValue("/TestProperty7").setValueData(VALUEDATA_TEST);
+        checkValueData(test);
         FxPK pk = co.save(test);
         FxContent loaded = co.load(pk);
+        checkValueData(loaded);
         FxDelta delta = FxDelta.processDelta(test, loaded);
-        System.out.println("delta: "+delta.dump());
+        System.out.println("delta: " + delta.dump());
         Assert.assertTrue(delta.isOnlyInternalPropertyChanges(), "Only system internal properties are expected to be changed!");
 
         loaded.remove("/TestProperty1");
         loaded.setValue("/TestProperty2", new FxString(false, "TEST123"));
         co.save(loaded);
         FxContent loaded2 = co.load(pk);
+        checkValueData(loaded2);
         Assert.assertFalse(loaded2.containsValue("/TestProperty1"), "/TestProperty1 should have been removed!");
         Assert.assertEquals(loaded2.getValue("/TestProperty2").getDefaultTranslation(), "TEST123", "/TestProperty should have been updated!");
 
@@ -255,10 +263,23 @@ public class FlatStorageTest {
         }*/
 
         FxContent loaded3 = co.load(pk);
+        checkValueData(loaded3);
         delta = FxDelta.processDelta(loaded2, loaded3);
-        System.out.println("unflatten-delta: "+delta.dump());
+        System.out.println("unflatten-delta: " + delta.dump());
         Assert.assertFalse(delta.changes(), "No changes expected after unflatten!");
         co.remove(pk);
+    }
+
+    /**
+     * Check if value data is still the same
+     *
+     * @param test content to test
+     */
+    private void checkValueData(FxContent test) {
+        final FxValue value = test.getValue("/TestProperty7");
+        Assert.assertNotNull(value);
+        Assert.assertTrue(value.hasValueData());
+        Assert.assertEquals((int) value.getValueData(), VALUEDATA_TEST);
     }
 
 }

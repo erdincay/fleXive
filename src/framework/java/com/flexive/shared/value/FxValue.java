@@ -61,11 +61,13 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
     private static final long serialVersionUID = -5005063788615664383L;
 
     public static final boolean DEFAULT_MULTILANGUAGE = true;
+    public static final Integer VALUE_NODATA = null;
     protected boolean multiLanguage;
     protected long defaultLanguage = FxLanguage.SYSTEM_ID;
     private long selectedLanguage;
     private int maxInputLength;
     private String XPath = "";
+    private Integer valueData = VALUE_NODATA;
 
     private final static long[] SYSTEM_LANG_ARRAY = new long[]{FxLanguage.SYSTEM_ID};
 
@@ -272,6 +274,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
         this(clone.isMultiLanguage(), clone.getDefaultLanguage(), new HashMap<Long, T>((clone.translations != null ? clone.translations.size() : 1)));
         this.XPath = clone.XPath;
         this.maxInputLength = clone.maxInputLength;
+        this.valueData = clone.valueData;
         if (clone.isImmutableValueType()) {
             if (multiLanguage) {
                 // clone only hashmap
@@ -752,6 +755,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      * @param value    translation
      * @return this
      */
+    @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     public final TDerived setTranslation(long language, T value) {
         if (value instanceof String) {
             try {
@@ -948,6 +952,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
      *
      * @return the formatted value
      */
+    @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     public String getSqlValue() {
         if (isEmpty()) {
             throw new FxInvalidStateException("ex.content.value.sql.empty").asRuntimeException();
@@ -981,6 +986,9 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
         if (this.getClass() != other.getClass()) return false;
         FxValue<?, ?> otherValue = (FxValue<?, ?>) other;
         if (this.isEmpty() != otherValue.isEmpty()) return false;
+        if (this.hasValueData() != otherValue.hasValueData() ||
+                (this.hasValueData() && otherValue.hasValueData() && this.getValueDataRaw().intValue() != otherValue.getValueDataRaw().intValue()))
+            return false;
         if (this.isMultiLanguage() != otherValue.isMultiLanguage()) return false;
         if (multiLanguage) {
             return this.translations.equals(otherValue.translations) && this.defaultLanguage == otherValue.defaultLanguage;
@@ -1000,7 +1008,7 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
         if (translations != null) {
             hash = 31 * hash + translations.hashCode();
         }
-        hash = 31 * hash + (int) defaultLanguage;
+        hash = 31 * hash + (int) defaultLanguage + (hasValueData() ? getValueDataRaw() : 0);
         return hash;
     }
 
@@ -1035,6 +1043,60 @@ public abstract class FxValue<T, TDerived extends FxValue<T, TDerived>> implemen
         } else {
             return FxSharedUtils.getCollator().compare(value, oValue);
         }
+    }
+
+    /**
+     * Get attached value data (optional, if not set will return <code>VALUE_NODATA</code>).
+     * As value data might contain some bit-coded flags in the future, it is not certain if the full Integer range
+     * will be available as some bits might be masked out.
+     *
+     * @return attached value data, if not set will return <code>VALUE_NODATA</code>
+     * @since 3.1.4
+     */
+    public Integer getValueData() {
+        return valueData;
+    }
+
+    /**
+     * Get attached value data (optional, if not set will return <code>VALUE_NODATA</code>) including any bit-coded flags.
+     * Internal use only!
+     *
+     * @return raw attached value data, if not set will return <code>VALUE_NODATA</code>
+     * @since 3.1.4
+     */
+    public Integer getValueDataRaw() {
+        return valueData;
+    }
+
+    /**
+     * Attach additional data to this value instance
+     *
+     * @param valueData value data to attach
+     * @return this
+     * @since 3.1.4
+     */
+    @SuppressWarnings({"unchecked"})
+    public TDerived setValueData(int valueData) {
+        this.valueData = valueData;
+        return (TDerived) this;
+    }
+
+    /**
+     * Unset value data
+     * @since 3.1.4
+     */
+    public void clearValueData() {
+        this.valueData = VALUE_NODATA;
+    }
+
+    /**
+     * Are additional value data set for this value instance?
+     *
+     * @return value data set
+     * @since 3.1.4
+     */
+    public boolean hasValueData() {
+        return this.valueData != null;
     }
 }
 

@@ -174,6 +174,7 @@ public class ValueTest {
         Object de_value;
 
 
+        @SuppressWarnings({"unchecked"})
         public TestData(FxDataType dataType, T _single, T _multi) {
             Assert.assertTrue(!_single.isMultiLanguage(), "1st value argument has to be single language!");
             Assert.assertTrue(_multi.isMultiLanguage(), "2nd value argument has to be multi language!");
@@ -186,8 +187,11 @@ public class ValueTest {
             this._multi.setTranslation(FxLanguage.ENGLISH, en_value);
             this._multi.setTranslation(FxLanguage.GERMAN, de_value);
             this._multi.setDefaultLanguage(FxLanguage.ENGLISH);
+            this._single.setValueData(42);
+            this._multi.setValueData(43);
         }
 
+        @SuppressWarnings({"unchecked"})
         public void testConsistency() throws Exception {
             Assert.assertTrue(!_single.equals(_multi));
             Assert.assertTrue(_single.getDefaultTranslation().equals(_multi.getDefaultTranslation()));
@@ -202,7 +206,19 @@ public class ValueTest {
             Assert.assertTrue(!_single.hasDefaultLanguage());
             Assert.assertTrue(_single.getTranslation(FxLanguage.ENGLISH).equals(de_value));
             Assert.assertTrue(_multi.hasDefaultLanguage());
-            //TODO: more asserts for standard behaviour ...
+            checkValueDataClearing(_single, 42);
+            checkValueDataClearing(_multi, 43);
+        }
+
+        private void checkValueDataClearing(T value, int data) {
+            Assert.assertEquals((int) value.getValueData(), data);
+            value.setValueData(data + 13);
+            Assert.assertEquals((int) value.getValueData(), data + 13);
+            Assert.assertTrue(value.hasValueData());
+            value.clearValueData();
+            Assert.assertFalse(value.hasValueData());
+            value.setValueData(data);
+            Assert.assertTrue(value.hasValueData());
         }
 
         public void testSingleValue(FxValue compare) throws Exception {
@@ -337,15 +353,23 @@ public class ValueTest {
                 FxContent content = co.initialize(testType.getId());
                 content.setValue("/VTS" + test.dataType.name() + "[1]", test._single.copy());
 //                content.getPropertyData("/VT" + test.dataType.name() + "[1]").createNew(FxPropertyData.POSITION_BOTTOM);
-                content.setValue("/VTM" + test.dataType.name() + "[1]", test._multi.copy());
+                content.setValue("/VTM" + test.dataType.name() + "[1]", test._multi.copy().setValueData(43));
                 FxPK pk = co.save(content);
                 FxContent loaded = co.load(pk);
-                test.testSingleValue(loaded.getPropertyData("/VTS" + test.dataType.name() + "[1]").getValue());
-                test.testMultiValue(loaded.getPropertyData("/VTM" + test.dataType.name() + "[1]").getValue());
+                FxValue loadedSingle = loaded.getPropertyData("/VTS" + test.dataType.name() + "[1]").getValue();
+                FxValue loadedMulti = loaded.getPropertyData("/VTM" + test.dataType.name() + "[1]").getValue();
+                test.testSingleValue(loadedSingle);
+                test.testMultiValue(loadedMulti);
+                Assert.assertEquals((int) loadedSingle.getValueData(), 42);
+                Assert.assertEquals((int) loadedMulti.getValueData(), 43);
                 pk = co.save(loaded);
                 loaded = co.load(pk);
-                test.testSingleValue(loaded.getPropertyData("/VTS" + test.dataType.name() + "[1]").getValue());
-                test.testMultiValue(loaded.getPropertyData("/VTM" + test.dataType.name() + "[1]").getValue());
+                loadedSingle = loaded.getPropertyData("/VTS" + test.dataType.name() + "[1]").getValue();
+                loadedMulti = loaded.getPropertyData("/VTM" + test.dataType.name() + "[1]").getValue();
+                test.testSingleValue(loadedSingle);
+                test.testMultiValue(loadedMulti);
+                Assert.assertEquals((int) loadedSingle.getValueData(), 42);
+                Assert.assertEquals((int) loadedMulti.getValueData(), 43);
                 co.remove(pk);
                 if (test.dataType == FxDataType.Reference) {
                     //additional tests

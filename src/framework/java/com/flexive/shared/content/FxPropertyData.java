@@ -121,9 +121,8 @@ public class FxPropertyData extends FxData {
      * Set a new value for this property data
      *
      * @param value the value to set
-     * @throws FxInvalidParameterException if the passed value is of an invalid datatype or otherwise invalid
-     * @throws FxNoAccessException         if the current value is readonly or not accessible
      */
+    @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     public void setValue(FxValue value) {
         if (value == null)
             return;
@@ -214,6 +213,7 @@ public class FxPropertyData extends FxData {
      *
      * @throws FxInvalidParameterException if required properties are empty
      */
+    @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     public void checkRequired() throws FxInvalidParameterException {
         if (this.getAssignmentMultiplicity().isOptional())
             return;
@@ -229,17 +229,23 @@ public class FxPropertyData extends FxData {
         }
     }
 
+    /**
+     * Check if the maximum length is valid (if applicable)
+     *
+     * @throws FxInvalidParameterException on errors
+     */
+    @SuppressWarnings({"ThrowableInstanceNeverThrown"})
     public void checkMaxLength() throws FxInvalidParameterException {
-        if (!this.getMaxLength().isSet() || value ==null || value.isEmpty() || this.getMaxLength().getIntValue() == -1)
+        if (!this.getMaxLength().isSet() || value == null || value.isEmpty() || this.getMaxLength().getIntValue() == -1)
             return;
         //check for max-length compatible data types
-        if (this.getValue() instanceof FxHTML || !(this.getValue() instanceof FxString || this.getValue() instanceof FxNumber ||this.getValue() instanceof FxLargeNumber)) {
-            LOG.warn("Values of type "+this.getValue().getClass().getSimpleName()+" are not compatible with FxStructureOption.OPTION_MAXLENGTH, check omitted!");
+        if (this.getValue() instanceof FxHTML || !(this.getValue() instanceof FxString || this.getValue() instanceof FxNumber || this.getValue() instanceof FxLargeNumber)) {
+            LOG.warn("Values of type " + this.getValue().getClass().getSimpleName() + " are not compatible with FxStructureOption.OPTION_MAXLENGTH, check omitted!");
             return;
         }
 
-        for (long lang :value.getTranslatedLanguages()) {
-            if (value.getTranslation(lang).toString().length() >maxLength.getIntValue())
+        for (long lang : value.getTranslatedLanguages()) {
+            if (value.getTranslation(lang).toString().length() > maxLength.getIntValue())
                 throw new FxInvalidParameterException(this.getAlias(), "ex.content.value.invalid.maxLength",
                         this.getAssignment().getDisplayName(true), getMaxLength().getIntValue(), value.toString(), value.toString().length()).setAffectedXPath(this.getXPathFull(), FxContentExceptionCause.MaxlengthViolated);
         }
@@ -319,6 +325,9 @@ public class FxPropertyData extends FxData {
         return this.value.equals(comp.value) && this.propertyId == comp.propertyId;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int hashCode() {
         int result;

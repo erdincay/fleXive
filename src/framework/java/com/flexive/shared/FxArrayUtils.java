@@ -409,5 +409,49 @@ public class FxArrayUtils {
         }
         throw new ArrayIndexOutOfBoundsException("Index " + index + " is out of bounds for [" + array + "]");
     }
+
+    /**
+     * Get an integer element from a string array containing hexadecimal values
+     *
+     * @param array     the string array containing hexadecimal values
+     * @param separator seperator character
+     * @param index     index to get the element at
+     * @return element  or <code>null</code> if not set
+     */
+    public static Integer getHexIntElementAt(String array, char separator, int index) {
+        try {
+            if (index == 0)
+                return evalIntValue(array.substring(0, array.indexOf(separator)), 16);
+            int curr = 0;
+            int start = 0;
+            for (char c : array.toCharArray()) {
+                if (c == separator)
+                    curr++;
+                if (curr == index) {
+                    int end = array.substring(start + 1).indexOf(',');
+                    if (end == -1)
+                        return evalIntValue(array.substring(start + 1), 16);
+                    return evalIntValue(array.substring(start + 1, start + end + 1), 16);
+                }
+                start++;
+            }
+        } catch (NumberFormatException e) {
+            return null;
+        }
+        throw new ArrayIndexOutOfBoundsException("Index " + index + " is out of bounds for [" + array + "]");
+    }
+
+    /**
+     * Evaluate an integer value, returning <code>null</code> if not set
+     *
+     * @param value the integer value to set
+     * @param radix radix to use
+     * @return integer value or <code>null</code> if not set
+     */
+    private static Integer evalIntValue(String value, int radix) {
+        if (StringUtils.isBlank(value))
+            return null;
+        return Integer.parseInt(value, radix);
+    }
 }
 

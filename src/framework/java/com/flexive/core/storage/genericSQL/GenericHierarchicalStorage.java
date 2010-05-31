@@ -430,6 +430,45 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
     }
 
     /**
+     * Get the value data column position for a given data type for loading
+     *
+     * @param dataType requested data type
+     * @return value column position
+     * @since 3.1.4
+     */
+    protected int getValueDataLoadPos(FxDataType dataType) {
+        if (dataType == FxDataType.Number || dataType == FxDataType.SelectMany)
+            return 14; //FBIGINT
+        return 13; //FINT
+    }
+
+    /**
+     * Get the value data column position for a given data type for inserting
+     *
+     * @param dataType requested data type
+     * @return value column position
+     * @since 3.1.4
+     */
+    protected int getValueDataInsertPos(FxDataType dataType) {
+        if (dataType == FxDataType.Number || dataType == FxDataType.SelectMany)
+            return 26; //FBIGINT
+        return 25; //FINT
+    }
+
+    /**
+     * Get the value data column position for a given data type for updating
+     *
+     * @param dataType requested data type
+     * @return value column position
+     * @since 3.1.4
+     */
+    protected int getValueDataUpdatePos(FxDataType dataType) {
+        if (dataType == FxDataType.Number || dataType == FxDataType.SelectMany)
+            return 11; //FBIGINT
+        return 10; //FINT
+    }
+
+    /**
      * {@inheritDoc}
      */
     public String getQueryUppercaseColumn(FxProperty property) {
@@ -846,6 +885,17 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         return pk;
     }
 
+    /**
+     * Update all (multiple) ACL entries for a content instance
+     *
+     * @param con      an open and valid connection
+     * @param content  the content containing the ACL'S
+     * @param pk       primary key of the content
+     * @param newEntry is this a new entry?
+     * @throws SQLException      on errors
+     * @throws FxCreateException on errors
+     * @throws FxUpdateException on errors
+     */
     protected void updateACLEntries(Connection con, FxContent content, FxPK pk, boolean newEntry) throws SQLException, FxCreateException, FxUpdateException {
         PreparedStatement ps = null;
         try {
@@ -867,7 +917,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             if (aclIds.size() <= 1) {
                 return; // ACL saved in main table
             }
-            
+
             //insert ACLs
             ps = con.prepareStatement(CONTENT_ACL_INSERT);
             for (long aclId : aclIds) {
@@ -1283,6 +1333,11 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                     default:
                         throw new FxDbException(LOG, "ex.db.notImplemented.store", prop.getDataType().getName());
                 }
+                int valueDataPos = insert ? getValueDataInsertPos(prop.getDataType()) : getValueDataUpdatePos(prop.getDataType());
+                if (value.hasValueData()) {
+                    ps.setInt(valueDataPos, value.getValueDataRaw());
+                } else
+                    ps.setNull(valueDataPos, java.sql.Types.NUMERIC);
                 if (batchContentDataChanges())
                     ps.addBatch();
                 else {
@@ -1779,6 +1834,13 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                             break;
                         default:
                             throw new FxDbException(LOG, "ex.db.notImplemented.load", dataType.getName());
+                    }
+                    if (currValue != null) {
+                        int valueData = rs.getInt(getValueDataLoadPos(dataType));
+                        if (rs.wasNull())
+                            currValue.clearValueData();
+                        else
+                            currValue.setValueData(valueData);
                     }
                     if (isMLDef)
                         defLang = currLang;
