@@ -420,6 +420,8 @@ public class FxArrayUtils {
      */
     public static Integer getHexIntElementAt(String array, char separator, int index) {
         try {
+            if (StringUtils.isBlank(array))
+                return null;
             if (index == 0)
                 return evalIntValue(array.substring(0, array.indexOf(separator)), 16);
             int curr = 0;
