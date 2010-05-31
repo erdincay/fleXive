@@ -481,7 +481,8 @@ se.createTypeScriptMapping(si.getId(), typeId, true, true);
 // create default result columns for the backend application
 EJBLookup.resultPreferencesEngine.saveSystemDefault(
         new ResultPreferences(
-                [new ResultColumnInfo("@pk"),
+                [new ResultColumnInfo("#" + FxType.VIDEO + "/file"),
+                 new ResultColumnInfo("@pk"),
                  new ResultColumnInfo("#" + FxType.VIDEO + "/caption"),
                  new ResultColumnInfo("#" + FxType.VIDEO + "/length"),
                  new ResultColumnInfo("#" + FxType.VIDEO + "/videostream/type"),

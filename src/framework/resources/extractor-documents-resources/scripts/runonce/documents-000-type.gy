@@ -472,7 +472,8 @@ new GroovyTypeBuilder().document(
 // create default result columns for the backend application
 EJBLookup.resultPreferencesEngine.saveSystemDefault(
         new ResultPreferences(
-                [new ResultColumnInfo("@pk"),
+                [       new ResultColumnInfo("#" + FxType.DOCUMENT + "/file"),
+                        new ResultColumnInfo("@pk"),
                         new ResultColumnInfo("#" + FxType.DOCUMENT + "/caption"),
                         new ResultColumnInfo("#" + FxType.DOCUMENT + "/author"),
                         new ResultColumnInfo("#" + FxType.DOCUMENT + "/pages"),

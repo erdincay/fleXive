@@ -46,6 +46,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * The video extractor class
@@ -286,7 +287,7 @@ public class VideoExtractor {
                 bitRate = m.group(1);
             }
             Map<String, String> tmpValues = Maps.newHashMap();
-            for (int i = 4; i < all.length; i++) {
+            for (int i = 0; i < all.length; i++) {
                 String[] tmp = all[i].split(" ");
                 if (tmp.length == 2) {
                     tmpValues.put(tmp[1], tmp[0]);
@@ -295,6 +296,9 @@ public class VideoExtractor {
             String tmp = tmpValues.get("fps");
             if (tmp != null) fps = tmp;
             tbr = tmpValues.get("tbr");
+            if (StringUtils.isBlank(fps) && tbr != null && StringUtils.isNumericSpace(tbr.replace('.', ' '))) {
+                fps = tbr;
+            }
             tbn = tmpValues.get("tbn");
             tbc = tmpValues.get("tbc");
         }

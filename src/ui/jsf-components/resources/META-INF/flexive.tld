@@ -12,6 +12,7 @@
     <!-- Template-based TLD start -->
     <tag>
         <name>formRow</name>
+        <tag-class>formRow</tag-class>
         <body-content>JSP</body-content>
         <description>Basic [fleXive3] form row.  </description>
         <attribute>
@@ -83,6 +84,7 @@
     </tag>
     <tag>
         <name>fxValueInputRow</name>
+        <tag-class>fxValueInputRow</tag-class>
         <body-content>JSP</body-content>
         <description>A flexive form input row with a single fxValueInput field.  </description>
         <attribute>
@@ -178,6 +180,7 @@
     </tag>
     <tag>
         <name>queryEditor</name>
+        <tag-class>queryEditor</tag-class>
         <body-content>JSP</body-content>
         <description>[fleXive3] search query editor.  </description>
         <attribute>
@@ -219,6 +222,7 @@
     </tag>
     <tag>
         <name>queryEditorChild</name>
+        <tag-class>queryEditorChild</tag-class>
         <body-content>JSP</body-content>
         <description>Search query editor table. Used by queryEditor.xhtml for rendering the actual query editor.  </description>
         <attribute>
@@ -248,6 +252,7 @@
     </tag>
     <tag>
         <name>popupDialog</name>
+        <tag-class>popupDialog</tag-class>
         <body-content>JSP</body-content>
         <description>A simple javascript popup panel.  </description>
         <attribute>
@@ -259,6 +264,7 @@
     </tag>
     <tag>
         <name>fieldSet</name>
+        <tag-class>fieldSet</tag-class>
         <body-content>JSP</body-content>
         <description>Basic [fleXive3] form group (fieldset).  </description>
         <attribute>
@@ -288,6 +294,7 @@
     </tag>
     <tag>
         <name>downloadLink</name>
+        <tag-class>downloadLink</tag-class>
         <body-content>JSP</body-content>
         <description>Renders a download link for the given object/xpath. The passed body content is rendered inside the link.  </description>
         <attribute>
@@ -311,6 +318,7 @@
     </tag>
     <tag>
         <name>fxValueInputLanguageSelect</name>
+        <tag-class>fxValueInputLanguageSelect</tag-class>
         <body-content>JSP</body-content>
         <description>A select list that toggles all fx:fxValueInput elements on the current page (client-side).  </description>
         <attribute>
@@ -322,6 +330,7 @@
     </tag>
     <tag>
         <name>children</name>
+        <tag-class>children</tag-class>
         <body-content>JSP</body-content>
         <description>Iterator tag for properties and groups of a content instance.  </description>
         <attribute>
@@ -351,6 +360,7 @@
     </tag>
     <tag>
         <name>resultTable</name>
+        <tag-class>resultTable</tag-class>
         <body-content>JSP</body-content>
         <description>A client-side result table implemented using the Yahoo datatable widget.  </description>
         <attribute>
@@ -410,6 +420,7 @@
     </tag>
     <tag>
         <name>resultTableUpdater</name>
+        <tag-class>resultTableUpdater</tag-class>
         <body-content>JSP</body-content>
         <description>Updates the given result table on the current page. Useful for updates during partial page rendering.  Ajax4JSF: place this component in the page region that will be re-rendered (e.g. an a4j:outputPanel component).  </description>
         <attribute>
@@ -439,11 +450,13 @@
     </tag>
     <tag>
         <name>yuiSetup</name>
+        <tag-class>yuiSetup</tag-class>
         <body-content>JSP</body-content>
         <description> Initializes the Yahoo UI component library shipped with flexive. Include this near the end of all pages where you may want to use Yahoo UI.  The Yahoo Loader is only executed when at least one flexive component on the page uses a Yahoo widget, so the performance impact is minimal if no widget is used.  </description>
     </tag>
     <tag>
         <name>linearizeFxValueInputs</name>
+        <tag-class>linearizeFxValueInputs</tag-class>
         <body-content>JSP</body-content>
         <description>Helper tag to linearize the navigation between all fx:fxValueInput instances on a page. After activating the first input on the page, the user can navigate to all following using the "tab" key (i.e. the tabindex will be strictly increasing for all succeeding inputs, skipping other navigation elements and the language selects).  This tag requires YUI. Add this component near the end of the page, but before the call to fx:yuiSetup.  </description>
         <attribute>
@@ -461,6 +474,7 @@
     </tag>
     <tag>
         <name>resizable</name>
+        <tag-class>resizable</tag-class>
         <body-content>JSP</body-content>
         <description>Adds a YUI Resize control for the body contents. The child element should specify 100% for both width and height to adapt to the resize box size.   </description>
     </tag>
@@ -469,6 +483,7 @@
 
     <tag>
         <name>colorPicker</name>
+        <tag-class>colorPicker</tag-class>
         <body-content>JSP</body-content>
         <description>
             A color picker based on Yahoo UI, shown in a popup dialog. The color value will be written to the given form
@@ -486,6 +501,7 @@
     </tag>
     <tag>
         <name>includes</name>
+        <tag-class>includes</tag-class>
         <body-content>JSP</body-content>
         <description>Includes external resources (CSS and JavaScripts) used by [fleXive] components. Place this in the
             &lt;head> section of your HTML page.
@@ -537,6 +553,7 @@
     </tag>
     <tag>
         <name>fxValueInput</name>
+        <tag-class>fxValueInput</tag-class>
         <body-content>JSP</body-content>
         <attribute>
             <name>value</name>
@@ -631,6 +648,7 @@
     </tag>
     <tag>
         <name>value</name>
+        <tag-class>value</tag-class>
         <body-content>JSP</body-content>
         <attribute>
             <name>property</name>
@@ -725,6 +743,7 @@
     </tag>
     <tag>
         <name>contentList</name>
+        <tag-class>contentList</tag-class>
         <body-content>JSP</body-content>
         <attribute>
             <name>var</name>
@@ -753,30 +772,37 @@
     </tag>
     <tag>
         <name>dojoMenu</name>
+        <tag-class>dojoMenu</tag-class>
         <body-content>JSP</body-content>
     </tag>
     <tag>
         <name>dojoMenuItem</name>
+        <tag-class>dojoMenuItem</tag-class>
         <body-content>JSP</body-content>
     </tag>
     <tag>
         <name>dojoMenuSeparator</name>
+        <tag-class>dojoMenuSeparator</tag-class>
         <body-content>JSP</body-content>
     </tag>
     <tag>
         <name>menu</name>
+        <tag-class>menu</tag-class>
         <body-content>JSP</body-content>
     </tag>
     <tag>
         <name>menuItem</name>
+        <tag-class>menuItem</tag-class>
         <body-content>JSP</body-content>
     </tag>
     <tag>
         <name>menuItemGroup</name>
+        <tag-class>menuItemGroup</tag-class>
         <body-content>JSP</body-content>
     </tag>
     <tag>
         <name>resultValue</name>
+        <tag-class>resultValue</tag-class>
         <body-content>JSP</body-content>
         <attribute>
             <name>value</name>
@@ -804,44 +830,14 @@
         </attribute>
     </tag>
     <tag>
-        <attribute>
-            <name>pk</name>
-            <required>false</required>
-            <rtexprvalue>true</rtexprvalue>
-            <description>The primary key of the content instance. If the PK is specified,  the default thumbnail of the content is rendered.</description>
-        </attribute>
-        <attribute>
-            <name>binary</name>
-            <required>false</required>
-            <rtexprvalue>true</rtexprvalue>
-            <description>A specific binary entry of type FxBinary to be rendered. This is useful for for content types with more than one binary  property. For an example, see .</description>
-        </attribute>
-        <attribute>
-            <name>urlOnly</name>
-            <required>false</required>
-            <rtexprvalue>true</rtexprvalue>
-            <description>If true, only the thumbnail URL will be rendered (relative to the context root,  e.g. thumbnail/pk5.1/s0 ).</description>
-        </attribute>
-        <attribute>
-            <name>previewSize</name>
-            <required>false</required>
-            <rtexprvalue>true</rtexprvalue>
-            <description>The desired size of the thumbnail. Valid values are taken from BinaryDescriptor.PreviewSizes : PREVIEW1 , PREVIEW2 (default), PREVIEW3 , SCREENVIEW , ORIGINAL.</description>
-        </attribute>
-        <attribute>
-            <name>forceVersion</name>
-            <required>false</required>
-            <rtexprvalue>true</rtexprvalue>
-            <description>If set to max or live ,  it overrides the version information in the PK or binary descriptor.</description>
-        </attribute>
-    </tag>
-    <tag>
         <name>regularExpressionValidator</name>
+        <tag-class>regularExpressionValidator</tag-class>
         <body-content>JSP</body-content>
     </tag>
 
     <tag>
         <name>navigation</name>
+        <tag-class>navigation</tag-class>
         <body-content>JSP</body-content>
         <attribute>
             <name>var</name>
@@ -900,6 +896,7 @@
     </tag>
     <tag>
         <name>contentEditor</name>
+        <tag-class>contentEditor</tag-class>
         <body-content>JSP</body-content>
         <description>Allows editing of contents by providing an
             AJAX-dependent user interface and preserving edited content
@@ -1074,6 +1071,7 @@
 
     <tag>
         <name>thumbnail</name>
+        <tag-class>thumbnail</tag-class>
         <body-content>JSP</body-content>
         <description>Render a thumbnail for a [fleXive] binary property.</description>
 
@@ -1111,16 +1109,19 @@
 
     <tag>
         <name>fxCeRenderFields</name>
+        <tag-class>fxCeRenderFields</tag-class>
         <body-content>JSP</body-content>
     </tag>
     
     <tag>
         <name>fxCeRenderFieldsMenu</name>
+        <tag-class>fxCeRenderFieldsMenu</tag-class>
         <body-content>JSP</body-content>
     </tag>
 
     <tag>
         <name>wrappedContentProvider</name>
+        <tag-class>wrappedContentProvider</tag-class>
         <body-content>JSP</body-content>
     </tag>
 
