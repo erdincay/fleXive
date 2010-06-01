@@ -574,13 +574,11 @@ public class FxDiff {
      */
     protected static Integer[] toArray(TreeMap<Integer, Integer> map) {
         int size = map.size() == 0 ? 0 : 1 + map.lastKey();
-        Integer[] ary = new Integer[size];
+        Integer[] result = new Integer[size];
 
-        for (Integer o : map.keySet()) {
-            Integer val = map.get(o);
-            ary[o] = val;
-        }
-        return ary;
+        for (Map.Entry<Integer, Integer> entry : map.entrySet())
+            result[entry.getKey()] = entry.getValue();
+        return result;
     }
 
     /**

@@ -1241,9 +1241,9 @@ public class ContentEngineBean implements ContentEngine, ContentEngineLocal {
                         } else { // add to list of xPaths / assignments t.b. removed
                             // sourcePathsMap.
                             final String removePath = sourcePaths.get(d.getDeletedStart());
-                            for(Long removeId : sourcePathsMap.keySet()) {
-                                if(sourcePathsMap.get(removeId).equals(removePath))
-                                    sourceRemoveMap.put(removeId, removePath);
+                            for (Map.Entry<Long, String> pathEntry : sourcePathsMap.entrySet()) {
+                                if(pathEntry.getValue().equals(removePath))
+                                    sourceRemoveMap.put(pathEntry.getKey(), removePath);
                             }
                         }
                     } // else: del start != del end (del end is neg.) and add start & end the same, then dest has an add. prop
