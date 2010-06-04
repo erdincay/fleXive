@@ -249,13 +249,17 @@ public enum FxScriptEvent {
      * <i>int defaultId</i>: set from the script: the default id to use for previews if using thed default preview id<br/>
      * <i>String mimeType</i>: set from the script: mime type<br/>
      * <i>String metaData</i>: set from the script: xml based meta data<br/>
-     * <i>File binaryFile</i>: the original binary file<br/>
-     * <i>File previewFile1</i>: set from script: file containing preview 1<br/>
-     * <i>File previewFile2</i>: set from script: file containing preview 2<br/>
-     * <i>File previewFile3</i>: set from script: file containing preview 3<br/>
+     * <i>String binaryFile</i>: the original binary file (absolute path)<br/>
+     * <i>String previewFile1</i>: set from script: file containing preview 1 (absolute path)<br/>
+     * <i>String previewFile2</i>: set from script: file containing preview 2 (absolute path)<br/>
+     * <i>String previewFile3</i>: set from script: file containing preview 3 (absolute path)<br/>
+     * <i>String previewFile4</i>: set from script: file containing preview 4 (absolute path)<br/>
      * <i>int[] dimensionPreview1</i>: set from script: dimension of preview 1<br/>
      * <i>int[] dimensionPreview2</i>: set from script: dimension of preview 2<br/>
      * <i>int[] dimensionPreview3</i>: set from script: dimension of preview 3<br/>
+     * <i>int[] dimensionPreview4</i>: set from script: dimension of preview 4<br/>
+     * Since Version 3.1.4 the absolute path of files is passed instead of a java.io.File handle as this can and will lead to
+     * serialization issues!
      */
     BinaryPreviewProcess(24, FxScriptScope.BinaryProcessing,
             "boolean processed",
@@ -263,13 +267,15 @@ public enum FxScriptEvent {
             "int defaultId",
             "String mimeType",
             "String metaData",
-            "File binaryFile",
-            "File previewFile1",
-            "File previewFile2",
-            "File previewFile3",
-            "int[] dimensionPreview1",
-            "int[] dimensionPreview2",
-            "int[] dimensionPreview3"
+            "String binaryFile",
+            "String previewFile1",
+            "String previewFile2",
+            "String previewFile3",
+            "String previewFile4",
+            "int[] dimensionsPreview1",
+            "int[] dimensionsPreview2",
+            "int[] dimensionsPreview3",
+            "int[] dimensionsPreview4"
     ),
 
     /**

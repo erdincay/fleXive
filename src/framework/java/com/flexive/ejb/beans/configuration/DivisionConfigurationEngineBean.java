@@ -219,7 +219,8 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
                     break;
                 }
             }
-            //TODO: check if length is still 0 or exception
+            if (length == 0)
+                throw new FxApplicationException("ex.scripting.load.resource.failed", resourceName);
             storage.storeBinary(con, binaryId, 1, 1, binaryName, length, cl.getResourceAsStream("fxresources/binaries/" + resourceName));
         } catch (SQLException e) {
             throw new FxDbException(LOG, e, "ex.db.sqlError", e.getMessage());

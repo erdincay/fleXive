@@ -748,35 +748,37 @@ public class GenericBinarySQLStorage implements BinaryStorage {
                 binding.setVariable("defaultId", defaultId);
                 binding.setVariable("mimeType", binaryTransitFileInfo.getMimeType());
                 binding.setVariable("metaData", metaData);
-                binding.setVariable("binaryFile", binaryTransitFileInfo.getBinaryTransitFile());
-                binding.setVariable("previewFile1", previewFile1);
-                binding.setVariable("previewFile2", previewFile2);
-                binding.setVariable("previewFile3", previewFile3);
-                binding.setVariable("previewFile4", previewFile4);
+                binding.setVariable("binaryFile", binaryTransitFileInfo.getBinaryTransitFile().getAbsolutePath());
+                binding.setVariable("previewFile1", null);
+                binding.setVariable("previewFile2", null);
+                binding.setVariable("previewFile3", null);
+                binding.setVariable("previewFile4", null);
                 binding.setVariable("dimensionsPreview1", dimensionsPreview1);
                 binding.setVariable("dimensionsPreview2", dimensionsPreview2);
                 binding.setVariable("dimensionsPreview3", dimensionsPreview3);
                 binding.setVariable("dimensionsPreview4", dimensionsPreview4);
+                FxScriptResult result;
                 try {
-                    FxScriptResult result = scripting.runScript(script, binding);
+                    result = scripting.runScript(script, binding);
                     binding = result.getBinding();
                     processed = (Boolean) binding.getVariable("processed");
                     if (processed) {
                         useDefaultPreview = (Boolean) binding.getVariable("useDefaultPreview");
                         defaultId = (Integer) binding.getVariable("defaultId");
-                        previewFile1 = (File) binding.getVariable("previewFile1");
-                        previewFile2 = (File) binding.getVariable("previewFile2");
-                        previewFile3 = (File) binding.getVariable("previewFile3");
-                        previewFile4 = (File) binding.getVariable("previewFile4");
-                        dimensionsPreview1 = (int[]) binding.getVariable("dimensionsPreview1");
-                        dimensionsPreview2 = (int[]) binding.getVariable("dimensionsPreview2");
-                        dimensionsPreview3 = (int[]) binding.getVariable("dimensionsPreview3");
-                        dimensionsPreview4 = (int[]) binding.getVariable("dimensionsPreview4");
+                        previewFile1 = getFileHandleFromBinding("previewFile1", binding);
+                        previewFile2 = getFileHandleFromBinding("previewFile2", binding);
+                        previewFile3 = getFileHandleFromBinding("previewFile3", binding);
+                        previewFile4 = getFileHandleFromBinding("previewFile4", binding);
+                        dimensionsPreview1 = (int[]) binding.getVariableOrNull("dimensionsPreview1");
+                        dimensionsPreview2 = (int[]) binding.getVariableOrNull("dimensionsPreview2");
+                        dimensionsPreview3 = (int[]) binding.getVariableOrNull("dimensionsPreview3");
+                        dimensionsPreview4 = (int[]) binding.getVariableOrNull("dimensionsPreview4");
                         metaData = (String) binding.getVariable("metaData");
                         break;
                     }
                 } catch (Throwable e) {
                     LOG.error("Error running binary processing script: " + e.getMessage());
+                    processed = false;
                 }
             }
             //only negative values are allowed for default previews
@@ -833,6 +835,24 @@ public class GenericBinarySQLStorage implements BinaryStorage {
         }
         return new BinaryDescriptor(binary.getHandle(), binary.getName(), binary.getSize(),
                 binaryTransitFileInfo.getMimeType(), metaData, md5sum);
+    }
+
+    /**
+     * Get a variable from a binding as File
+     *
+     * @param variable name of the variable
+     * @param binding  binding
+     * @return File handle
+     */
+    private File getFileHandleFromBinding(String variable, FxScriptBinding binding) {
+        Object o = binding.getVariableOrNull(variable);
+        if (o == null)
+            return null;
+        else if (o instanceof File)
+            return (File) o;
+        else if (o instanceof String)
+            return new File((String) o);
+        return null;
     }
 
     /**

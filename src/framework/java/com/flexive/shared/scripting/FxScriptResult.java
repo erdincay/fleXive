@@ -55,4 +55,12 @@ public class FxScriptResult implements Serializable {
     public Object getResult() {
         return result;
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        return "{" + this.getClass().getSimpleName() + ": result=[" + result + "], binding=[" + binding + "]}";
+    }
 }

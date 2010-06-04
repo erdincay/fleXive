@@ -67,6 +67,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.reflect.UndeclaredThrowableException;
 import java.security.Principal;
 import java.sql.*;
 import java.text.ParseException;
@@ -634,21 +635,19 @@ public class ScriptingEngineBean implements ScriptingEngine, ScriptingEngineLoca
             binding.setVariable("environment", CacheAdmin.getEnvironment());
         binding.setVariable("scriptname", si.getName());
 
-        try {
-            Object result;
-            synchronized (script) {
+        synchronized (script) {
+            try {
+                Object result;
                 script.setBinding(new Binding(binding.getProperties()));
                 result = script.run();
-            }
-            return new FxScriptResult(binding, result);
-        } catch (Throwable e) {
-            if (e instanceof FxApplicationException)
-                throw (FxApplicationException) e;
-            LOG.error("Scripting error: " + e.getMessage(), e);
-            throw new FxInvalidParameterException(si.getName(), "ex.general.scripting.exception", si.getName(), e.getMessage());
-        } finally {
-            // don't leave binding in script cache
-            synchronized (script) {
+                return new FxScriptResult(new FxScriptBinding(binding.getProperties()), result);
+            } catch (Throwable e) {
+                if (e instanceof FxApplicationException)
+                    throw (FxApplicationException) e;
+                LOG.error("Scripting error: " + e.getMessage(), e);
+                throw new FxInvalidParameterException(si.getName(), "ex.general.scripting.exception", si.getName(), e.getMessage());
+            } finally {
+                // don't leave binding in script cache
                 script.setBinding(null);
             }
         }

@@ -47,13 +47,24 @@ import java.util.Map;
 public class FxScriptBinding implements Serializable {
 
     private static final long serialVersionUID = -425075995030227444L;
-    private Map<String, Serializable> properties;
+    private Map<String, Object> properties;
 
     /**
      * Constructor
      */
     public FxScriptBinding() {
-        this.properties = new HashMap<String, Serializable>(5);
+        this.properties = new HashMap<String, Object>(5);
+    }
+
+    /**
+     * Constructor
+     *
+     * @param properties the properties to set
+     * @since 3.1.4
+     */
+    public FxScriptBinding(Map<String, Object> properties) {
+        this.properties = new HashMap<String, Object>(properties.size());
+        this.properties.putAll(properties);
     }
 
     /**
@@ -61,11 +72,13 @@ public class FxScriptBinding implements Serializable {
      *
      * @return properties map
      */
-    public Map<String, Serializable> getProperties() {
+    public Map<String, Object> getProperties() {
         return properties;
     }
 
     /**
+     * Get a Variable, will throw an FxNotFoundException if the variable is not set
+     *
      * @param name the name of the variable to lookup
      * @return the variable value
      * @throws FxNotFoundException if no variable with that name exists
@@ -80,13 +93,31 @@ public class FxScriptBinding implements Serializable {
     }
 
     /**
+     * Get the variable or <code>null</code> if the variable is not set
+     *
+     * @param name the name of the variable to lookup
+     * @return variable value or <code>null</code>
+     * @since 3.1.4
+     */
+    public Object getVariableOrNull(String name) {
+        return properties.get(name);
+    }
+
+    /**
      * Sets the value of the given variable
      *
      * @param name  the name of the variable to set
      * @param value the new value for the given variable
      */
-    public void setVariable(String name, Serializable value) {
+    public void setVariable(String name, Object value) {
         properties.put(name, value);
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        return "{" + this.getClass().getSimpleName() + ": properties=[" + this.properties + "]}";
+    }
 }
