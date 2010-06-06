@@ -1,5 +1,6 @@
 package com.flexive.core.timer.jobs;
 
+import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.interfaces.ScriptingEngine;
@@ -23,7 +24,14 @@ public class ScriptExecutionJob implements Job {
 
     private static final Log LOG = LogFactory.getLog(ScriptExecutionJob.class);
 
+    /**
+     * {@inheritDoc}
+     */
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
+        if (CacheAdmin.isNewInstallation()) {
+            LOG.info("Skipping script execution job until [fleXive] is fully initialized ...");
+            return;
+        }
         FxContext ctx = null;
         FxScriptResult result;
         long scheduleId=-1;
