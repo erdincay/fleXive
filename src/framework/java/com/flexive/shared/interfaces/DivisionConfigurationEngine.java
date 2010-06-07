@@ -34,6 +34,7 @@ package com.flexive.shared.interfaces;
 import com.flexive.core.flatstorage.FxFlatStorageInfo;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.impex.FxDivisionExportInfo;
+import com.flexive.shared.value.FxString;
 
 import javax.ejb.Remote;
 import java.util.List;
@@ -144,4 +145,26 @@ public interface DivisionConfigurationEngine extends GenericConfigurationEngine 
      * @throws FxApplicationException on errors
      */
     public void importDivision(String localFileName) throws FxApplicationException;
+
+    /**
+     * Set a resource value. If the passed value is empty or <code>null</code> the entry will be removed
+     *
+     * @param key   unique key
+     * @param value FxString value
+     * @throws FxApplicationException on errors
+     * @since 3.1.4
+     */
+    public void setResourceValue(String key, FxString value) throws FxApplicationException;
+
+    /**
+     * Get a resource FxString value or <code>null</code> if not set
+     *
+     * @param key             unique key
+     * @param defaultLanguage default language to set in the returned FxString, if not available the first found
+     *                        translation is the default language
+     * @return FxString value or <code>null</code> if not set
+     * @throws FxApplicationException on errors
+     * @since 3.1.4
+     */
+    public FxString getResourceValue(String key, long defaultLanguage) throws FxApplicationException;
 }

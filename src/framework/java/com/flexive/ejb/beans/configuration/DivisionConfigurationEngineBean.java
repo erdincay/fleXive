@@ -38,6 +38,7 @@ import com.flexive.core.storage.ContentStorage;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.ejb.beans.EJBUtils;
 import com.flexive.shared.FxContext;
+import com.flexive.shared.FxLanguage;
 import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.configuration.DivisionData;
 import com.flexive.shared.configuration.ParameterScope;
@@ -50,6 +51,7 @@ import com.flexive.shared.impex.FxDivisionExportInfo;
 import com.flexive.shared.interfaces.DivisionConfigurationEngine;
 import com.flexive.shared.interfaces.DivisionConfigurationEngineLocal;
 import com.flexive.shared.structure.TypeStorageMode;
+import com.flexive.shared.value.FxString;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -57,15 +59,15 @@ import org.apache.commons.logging.LogFactory;
 import javax.annotation.Resource;
 import javax.ejb.*;
 import java.io.*;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.zip.ZipFile;
 
 import static com.flexive.core.DatabaseConst.TBL_CONFIG_DIVISION;
+import static com.flexive.core.DatabaseConst.TBL_RESOURCES;
 
 /**
  * Division configuration implementation.
@@ -565,7 +567,7 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
     public FxDivisionExportInfo getDivisionExportInfo(String localFileName) throws FxApplicationException {
         if (!FxContext.getUserTicket().isGlobalSupervisor())
             throw new FxNoAccessException("ex.import.noAccess");
-        if(StringUtils.isEmpty(localFileName))
+        if (StringUtils.isEmpty(localFileName))
             throw new FxInvalidParameterException("localFileName", "ex.import.noFileProvided");
         File data = new File(localFileName);
         if (!data.exists() || !data.isFile())
@@ -586,7 +588,7 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
     public void importDivision(String localFileName) throws FxApplicationException {
         if (!FxContext.getUserTicket().isGlobalSupervisor())
             throw new FxNoAccessException("ex.import.noAccess");
-        if(StringUtils.isEmpty(localFileName))
+        if (StringUtils.isEmpty(localFileName))
             throw new FxInvalidParameterException("localFileName", "ex.import.noFileProvided");
         File data = new File(localFileName);
         if (!data.exists() || !data.isFile())
@@ -605,6 +607,84 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
             throw new FxApplicationException(e, "ex.import.failed", localFileName, e.getMessage());
         } finally {
             Database.closeObjects(DivisionConfigurationEngine.class, con, null);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void setResourceValue(String key, FxString value) throws FxApplicationException {
+        if (StringUtils.isBlank(key))
+            return;
+        key = key.trim().toLowerCase();
+        if (key.length() > 50)
+            throw new FxApplicationException("ex.configuration.resource.key.tooLong", key);
+        if (!StringUtils.isAsciiPrintable(key))
+            throw new FxApplicationException("ex.configuration.resource.key.nonAscii", key);
+        Connection con = null;
+        PreparedStatement ps = null;
+        try {
+            con = Database.getDbConnection();
+            ps = con.prepareStatement("DELETE FROM " + TBL_RESOURCES + " WHERE RKEY=?");
+            ps.setString(1, key);
+            ps.executeUpdate();
+            if (value != null && !value.isEmpty()) {
+                ps.close();
+                ps = con.prepareStatement("INSERT INTO " + TBL_RESOURCES + " (RKEY,LANG,RVAL)VALUES(?,?,?)");
+                ps.setString(1, key);
+                for (long lang : value.getTranslatedLanguages()) {
+                    ps.setLong(2, lang);
+                    ps.setString(3, value.getTranslation(lang));
+                    ps.addBatch();
+                }
+                ps.executeBatch();
+            }
+        } catch (SQLException e) {
+            throw new FxApplicationException(e, "ex.db.sqlError", e.getMessage());
+        } finally {
+            Database.closeObjects(DivisionConfigurationEngine.class, con, ps);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.SUPPORTS)
+    public FxString getResourceValue(String key, long defaultLanguage) throws FxApplicationException {
+        if (StringUtils.isBlank(key)) {
+            return null;
+        }
+        FxString value;
+        key = key.trim().toLowerCase();
+        Connection con = null;
+        PreparedStatement ps = null;
+        try {
+            con = Database.getDbConnection();
+            ps = con.prepareStatement("SELECT LANG,RVAL FROM " + TBL_RESOURCES + "  WHERE RKEY=?");
+            ps.setString(1, key);
+            ResultSet rs = ps.executeQuery();
+            long firstLang = -1;
+            Map<Long, String> trans = new HashMap<Long, String>(10);
+            while (rs != null && rs.next()) {
+                if (firstLang == -1)
+                    firstLang = rs.getLong(1);
+                trans.put(rs.getLong(1), rs.getString(2));
+            }
+            if (trans.size() == 0)
+                return null;
+            if (trans.size() == 1 && firstLang == FxLanguage.SYSTEM_ID)
+                return new FxString(false, trans.get(firstLang));
+            value = new FxString(trans);
+            if (value.translationExists(defaultLanguage))
+                value.setDefaultLanguage(defaultLanguage);
+            else
+                value.setDefaultLanguage(firstLang);
+            return value;
+        } catch (SQLException e) {
+            throw new FxApplicationException(e, "ex.db.sqlError", e.getMessage());
+        } finally {
+            Database.closeObjects(DivisionConfigurationEngine.class, con, ps);
         }
     }
 }

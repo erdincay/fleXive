@@ -245,6 +245,10 @@ public final class DatabaseConst {
      * Tree Base table
      */
     public static final String TBL_TREE = "FXS_TREE";
+    /**
+     * Resource table
+     */
+    public static final String TBL_RESOURCES = "FX_RES";
 
     /**
      * General table name extension for translation tables
