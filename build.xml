@@ -787,6 +787,13 @@
         <echo message="Skipping database update!"/>
     </target>
 
+    <target name="db.defaults" depends="init" description="Use default schema/database values for db.update and db.update.config">
+        <property name="db.config" value="${database.database.config}"/>
+        <property name="schema.config" value="${database.schema.config}"/>
+        <property name="db.division" value="${database.database.division}"/>
+        <property name="schema.division" value="${database.schema.division}"/>
+    </target>
+
     <target name="db.update.config" description="Update config database" depends="init, jar.dbsetup, jar.storages" unless="db.noupdate">
         <echo taskname="flexive">Setting up configuration database for vendor ${database.vendor} ... (this can be changed in build.properties)</echo>
         <input taskname="flexive" addproperty="db.config" defaultvalue="${database.database.config}"
