@@ -38,6 +38,8 @@ void installThumbnails() {
     DivisionConfigurationEngine dc = com.flexive.shared.EJBLookup.getDivisionConfigurationEngine()
     println("Installing thumbnails ...")
     dc.installBinary(BinaryDescriptor.SYS_UNKNOWN, "thumbs/unknown.png");
+    //SYS_SELECTLIST_DEFAULT is required for selectlists and must not be skipped if isMinimalRunOnceScripts is enabled!
+    dc.installBinary(BinaryDescriptor.SYS_SELECTLIST_DEFAULT, "thumbs/selectlist-default.png");
     if (FxSharedUtils.isMinimalRunOnceScripts()) {
         return;
     }
@@ -50,7 +52,6 @@ void installThumbnails() {
     dc.installBinary(BinaryDescriptor.SYS_TXT, "thumbs/mime-txt.png");
     dc.installBinary(BinaryDescriptor.SYS_VIDEO, "thumbs/mime-video.png");
     dc.installBinary(BinaryDescriptor.SYS_XLS, "thumbs/mime-xls.png");
-    dc.installBinary(BinaryDescriptor.SYS_SELECTLIST_DEFAULT, "thumbs/selectlist-default.png");
 }
 
 
