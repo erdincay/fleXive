@@ -49,7 +49,8 @@ import java.sql.SQLException;
 final public class FxEnvironmentUtils {
 //    private static final Log LOG = LogFactory.getLog(FxEnvironmentUtils.class);
 
-    private final static String ATTR_ENV_REQUEST_ONLY = "$flexive.env.req$";
+    private static final String ATTR_ENV_REQUEST_ONLY = "$flexive.env.req$";
+    private static final String ATTR_ENV_NO_FLATTEN = "$flexive.env.noflatten$";
 
     /**
      * Includes the division id into the path.
@@ -156,6 +157,28 @@ final public class FxEnvironmentUtils {
     public static boolean isCacheEnvironmentRequestOnly() {
         Object o = FxContext.get().getAttribute(ATTR_ENV_REQUEST_ONLY);
         return o != null && (o instanceof Boolean) && ((Boolean) o);
+    }
+
+    /**
+     * Is immediate automatic flattening enabled for the current request? Used by GroovyTypeBuilder to improve
+     * performance.
+     *
+     * @return  true if new properties should not be flattened immediately
+     * @since   3.1.4
+     */
+    public static boolean isNoImmediateFlattening() {
+        return Boolean.TRUE.equals(FxContext.get().getAttribute(ATTR_ENV_NO_FLATTEN));
+    }
+
+    /**
+     * Enable or disable immediate flattening of new properties by the assignment engine. Used by the
+     * GroovyTypeBuilder to improve performance.
+     *
+     * @param disableImmediateFlattening    true to disable immediate flattening
+     * @since   3.1.4
+     */
+    public static void setNoImmediateFlattening(boolean disableImmediateFlattening) {
+        FxContext.get().setAttribute(ATTR_ENV_NO_FLATTEN, disableImmediateFlattening ? Boolean.TRUE : null);
     }
 
     /**

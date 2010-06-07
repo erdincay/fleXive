@@ -31,6 +31,7 @@
  ***************************************************************/
 package com.flexive.ejb.beans.structure;
 
+import com.flexive.core.structure.FxEnvironmentUtils;
 import com.flexive.core.Database;
 import com.flexive.core.conversion.ConversionEngine;
 import com.flexive.core.flatstorage.FxFlatStorage;
@@ -286,18 +287,13 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             ps.executeUpdate();
             Database.storeFxString(new FxString[]{property.getLabel(), property.getHint()}, con,
                     TBL_STRUCT_ASSIGNMENTS, new String[]{"DESCRIPTION", "HINT"}, "ID", newAssignmentId);
-            StructureLoader.reload(con);
-            if (divisionConfig.isFlatStorageEnabled() && divisionConfig.get(SystemParameters.FLATSTORAGE_AUTO)) {
+            StructureLoader.reloadAssignments(FxContext.get().getDivisionId());
+            if (divisionConfig.isFlatStorageEnabled() && divisionConfig.get(SystemParameters.FLATSTORAGE_AUTO) && !FxEnvironmentUtils.isNoImmediateFlattening()) {
                 final FxFlatStorage fs = FxFlatStorageManager.getInstance();
                 FxPropertyAssignment pa = (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(newAssignmentId);
                 if (fs.isFlattenable(pa)) {
                     fs.flatten(con, fs.getDefaultStorage(), pa);
-                    try {
-                        StructureLoader.reload(con);
-                    } catch (FxCacheException e) {
-                        EJBUtils.rollback(ctx);
-                        throw new FxCreateException(e, "ex.cache", e.getMessage());
-                    }
+                    StructureLoader.reloadAssignments(FxContext.get().getDivisionId());
                 }
             }
             htracker.track(type, "history.assignment.createProperty", property.getName(), type.getId(), type.getName());
@@ -315,9 +311,6 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             if (uniqueConstraintViolation)
                 throw new FxEntryExistsException("ex.structure.property.exists", property.getName(), (parentXPath.length() == 0 ? "/" : parentXPath));
             throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
-        } catch (FxCacheException e) {
-            EJBUtils.rollback(ctx);
-            throw new FxCreateException(e, "ex.cache", e.getMessage());
         } finally {
             Database.closeObjects(AssignmentEngineBean.class, con, ps);
         }
@@ -821,7 +814,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             ps.executeUpdate();
             Database.storeFxString(new FxString[]{group.getLabel(), group.getHint()}, con,
                     TBL_STRUCT_ASSIGNMENTS, new String[]{"DESCRIPTION", "HINT"}, "ID", newAssignmentId);
-            StructureLoader.reload(con);
+            StructureLoader.reloadAssignments(FxContext.get().getDivisionId());
             htracker.track(type, "history.assignment.createGroup", group.getName(), type.getId(), type.getName());
             if (type.getId() != FxType.ROOT_ID)
                 createInheritedAssignments(CacheAdmin.getEnvironment().getAssignment(newAssignmentId), con, sql, type.getDerivedTypes());
@@ -837,9 +830,6 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             if (uniqueConstraintViolation)
                 throw new FxEntryExistsException("ex.structure.group.exists", group.getName(), (parentXPath.length() == 0 ? "/" : parentXPath));
             throw new FxCreateException(LOG, e, "ex.db.sqlError", e.getMessage());
-        } catch (FxCacheException e) {
-            EJBUtils.rollback(ctx);
-            throw new FxCreateException(e, "ex.cache", e.getMessage());
         } finally {
             Database.closeObjects(AssignmentEngineBean.class, con, ps);
         }
@@ -1396,8 +1386,8 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 }
             }
             try {
-                StructureLoader.reload(con);
-            } catch (FxCacheException e) {
+                StructureLoader.reloadAssignments(FxContext.get().getDivisionId());
+            } catch (FxApplicationException e) {
                 EJBUtils.rollback(ctx);
                 throw new FxCreateException(e, "ex.cache", e.getMessage());
             }
@@ -2160,7 +2150,8 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             setAssignmentPosition(con, newAssignmentId, pa.getPosition());
 
             if (!pa.isSystemInternal()) {
-                if (divisionConfig.isFlatStorageEnabled() && divisionConfig.get(SystemParameters.FLATSTORAGE_AUTO)) {
+                if (divisionConfig.isFlatStorageEnabled() && divisionConfig.get(SystemParameters.FLATSTORAGE_AUTO)
+                        && !FxEnvironmentUtils.isNoImmediateFlattening()) {
                     final FxFlatStorage fs = FxFlatStorageManager.getInstance();
                     if (fs.isFlattenable(pa)) {
                         try {
@@ -2176,8 +2167,8 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
                 //only need a reload and inheritance handling if the property is not system internal
                 //since system internal properties are only created from the type engine we don't have to care
                 try {
-                    StructureLoader.reload(con);
-                } catch (FxCacheException e) {
+                    StructureLoader.reloadAssignments(FxContext.get().getDivisionId());
+                } catch (FxApplicationException e) {
                     EJBUtils.rollback(ctx);
                     throw new FxCreateException(e, "ex.cache", e.getMessage());
                 }

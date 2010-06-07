@@ -41,7 +41,6 @@ import com.flexive.shared.FxContext;
 import com.flexive.shared.cache.FxCacheException;
 import com.flexive.shared.configuration.DivisionData;
 import com.flexive.shared.exceptions.FxApplicationException;
-import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxLoadException;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.security.ACL;
@@ -250,6 +249,46 @@ public final class StructureLoader {
         }
         if (LOG.isDebugEnabled())
             LOG.debug("Reloaded Scripting in " + (System.currentTimeMillis() - time) + "[ms]");
+    }
+
+    /**
+     * Reload all assignment-related informations including types and properties for the given division.
+     *
+     * @param divisionId    the division to reload
+     * @since 3.1.4
+     */
+    public static void reloadAssignments(int divisionId) throws FxApplicationException {
+        Connection con = null;
+        try {
+            try {
+                con = FxEnvironmentUtils.getDbConnection(divisionId);
+            } catch (SQLException e) {
+                LOG.error(e);
+                return;
+            }
+            final FxEnvironmentImpl existingEnv = (FxEnvironmentImpl) CacheAdmin.getEnvironment();
+            if (existingEnv == null) {
+                load(divisionId, true, con);
+                return;
+            }
+            FxEnvironmentImpl environment = (existingEnv).deepClone();
+            EnvironmentLoader loader;
+            loader = StorageManager.getEnvironmentLoader(EJBLookup.getGlobalConfigurationEngine().getDivisionData(divisionId));
+
+            environment.setGroups(loader.loadGroups(con));
+            environment.setProperties(loader.loadProperties(con, environment));
+            environment.setAssignments(loader.loadAssignments(con, environment));
+            environment.resolveDependencies();
+
+            environment.updateTimeStamp();
+            FxEnvironmentUtils.cachePut(divisionId, CacheAdmin.ENVIRONMENT_BASE, CacheAdmin.ENVIRONMENT_RUNTIME, environment);
+        } catch (FxCacheException e) {
+            LOG.error(e, e);
+        } catch (FxNotFoundException e) {
+            throw new FxLoadException(e);
+        } finally {
+            Database.closeObjects(StructureLoader.class, con, null);
+        }
     }
 
     /**
