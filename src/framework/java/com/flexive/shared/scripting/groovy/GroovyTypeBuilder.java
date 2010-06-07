@@ -36,9 +36,6 @@ import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.FxLanguage;
-import com.flexive.shared.configuration.SystemParameters;
-import com.flexive.shared.exceptions.FxRuntimeException;
-import com.flexive.shared.interfaces.DivisionConfigurationEngine;
 import com.flexive.shared.media.FxMimeTypeWrapper;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
@@ -246,34 +243,6 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
             }
         }
         return false;
-    }
-
-    /**
-     * Enable the default flattening mode of the structure engine.
-     *
-     * @param type  the type builder's type
-     * @return      true if the type was flattened as a result of the call
-     */
-    private static boolean enableDefaultFlattenMode(FxType type) {
-        if (!FxEnvironmentUtils.isNoImmediateFlattening()) {
-            return false; // already disabled
-        }
-        FxEnvironmentUtils.setNoImmediateFlattening(false);
-        final DivisionConfigurationEngine dc = EJBLookup.getDivisionConfigurationEngine();
-        try {
-            if (type != null && dc.isFlatStorageEnabled() && dc.get(SystemParameters.FLATSTORAGE_AUTO)) {
-                EJBLookup.getTypeEngine().flatten(type.getId());
-                return true;
-            }
-            return false;
-        } catch (FxApplicationException ex) {
-            throw ex.asRuntimeException();
-        }
-    }
-
-    private void init() {
-        FxEnvironmentUtils.setCacheEnvironmentRequestOnly(true);
-        FxEnvironmentUtils.setNoImmediateFlattening(true);
     }
 
     private FxType type;
@@ -496,33 +465,31 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
     }
 
     public GroovyTypeBuilder() {
-        init();
+        FxEnvironmentUtils.setCacheEnvironmentRequestOnly(true);
     }
 
     public GroovyTypeBuilder(FxType type) {
         this.type = type;
         this.acl = null;
-        init();
+        FxEnvironmentUtils.setCacheEnvironmentRequestOnly(true);
     }
 
     public GroovyTypeBuilder(String typeName) {
         this.type = CacheAdmin.getEnvironment().getType(typeName);
         this.acl = null;
-        init();
+        FxEnvironmentUtils.setCacheEnvironmentRequestOnly(true);
     }
 
     public GroovyTypeBuilder(long typeId) {
         this.type = CacheAdmin.getEnvironment().getType(typeId);
         this.acl = null;
-        init();
+        FxEnvironmentUtils.setCacheEnvironmentRequestOnly(true);
     }
 
     @Override
     protected Object postNodeCompletion(Object parent, Object node) {
-        if (parent == null) {
+        if (parent == null)
             FxEnvironmentUtils.setCacheEnvironmentRequestOnly(false);
-            enableDefaultFlattenMode(type);
-        }
         return super.postNodeCompletion(parent, node);
     }
 
@@ -617,7 +584,7 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
             if (am.assignment != null) { // create a new property assignment
                 final FxAssignment fxAssignment = CacheAdmin.getEnvironment().getAssignment(am.assignment.startsWith("/") ? type.getName() + am.assignment : am.assignment);
                 try {
-                    return createNewPropertyAssignmentNode(type, fxAssignment, am);
+                    return createNewPropertyAssignmentNode(fxAssignment, am);
                 } catch (FxApplicationException e) {
                     throw e.asRuntimeException();
                 }
@@ -656,7 +623,7 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
                         if (!attributes.containsKey("alias")) {
                             am.alias = fxAssignment.getAlias();
                         }
-                        return createNewPropertyAssignmentNode(type, fxAssignment, am);
+                        return createNewPropertyAssignmentNode(fxAssignment, am);
                     }
                     // create a new property
                     return createNewPropertyNode(am);
@@ -771,14 +738,13 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
     /**
      * Refactoring of common call to "new PropertyAssignmentNode"
      *
-     * @param type         the parent type
      * @param fxAssignment the FxAssignment for which the call will be made
      * @param am           an instance of the AttributeMapper
      * @return returns a GroupAssignmentNode object
      * @throws FxApplicationException on errors
      */
     @SuppressWarnings({"ThrowableInstanceNeverThrown"})
-    private Object createNewPropertyAssignmentNode(FxType type, FxAssignment fxAssignment, AttributeMapper am) throws FxApplicationException {
+    private Object createNewPropertyAssignmentNode(FxAssignment fxAssignment, AttributeMapper am) throws FxApplicationException {
         if (!(fxAssignment instanceof FxPropertyAssignment)) {
             throw new FxInvalidParameterException("assignment", "ex.scripting.builder.assignment.property",
                     am.elementName, am.assignment).asRuntimeException();
@@ -786,12 +752,12 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
         final FxPropertyAssignmentEdit pa;
         if (!am.isNew) {
             pa = ((FxPropertyAssignment) fxAssignment).asEditable();
-            am.setPropertyAssignmentAttributes(type, pa);
+            am.setPropertyAssignmentAttributes(pa);
             return new PropertyAssignmentNode(pa, am);
         }
 
         pa = FxPropertyAssignmentEdit.createNew((FxPropertyAssignment) fxAssignment, type, am.alias, "/");
-        am.setPropertyAssignmentAttributes(type, pa); //set property-assignment attributes
+        am.setPropertyAssignmentAttributes(pa); //set property-assignment attributes
 
         return new PropertyAssignmentNode(pa, am);
 
@@ -1233,7 +1199,7 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
          * @param pa the FxPropertyAssignment t.b. changed
          * @throws FxApplicationException on errors
          */
-        void setPropertyAssignmentAttributes(FxType type, FxPropertyAssignmentEdit pa) throws FxApplicationException {
+        void setPropertyAssignmentAttributes(FxPropertyAssignmentEdit pa) throws FxApplicationException {
             if (attributes.containsKey("label") || attributes.containsKey("description"))
                 pa.setLabel(label);
 
@@ -1294,16 +1260,10 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
             }
 
             if(attributes.containsKey("flatten")) {
-                final boolean flattened = enableDefaultFlattenMode(type);
-                if(!pa.isFlatStorageEntry() && flatten && !flattened) {
+                if(!pa.isFlatStorageEntry() && flatten) {
                     EJBLookup.getAssignmentEngine().flattenAssignment(pa);
-                } else if ((pa.isFlatStorageEntry() || flattened) && !flatten) {
-                    EJBLookup.getAssignmentEngine().unflattenAssignment(
-                            pa.isNew()
-                                ? pa
-                                // reload property assignment to reflect possible flattening in enableDefaultFlattenMode above
-                                : CacheAdmin.getEnvironment().getPropertyAssignment(pa.getId())
-                    );
+                } else if(pa.isFlatStorageEntry() && !flatten) {
+                    EJBLookup.getAssignmentEngine().unflattenAssignment(pa);
                 }
             }
 

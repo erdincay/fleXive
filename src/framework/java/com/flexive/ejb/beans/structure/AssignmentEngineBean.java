@@ -288,7 +288,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             Database.storeFxString(new FxString[]{property.getLabel(), property.getHint()}, con,
                     TBL_STRUCT_ASSIGNMENTS, new String[]{"DESCRIPTION", "HINT"}, "ID", newAssignmentId);
             StructureLoader.reloadAssignments(FxContext.get().getDivisionId());
-            if (divisionConfig.isFlatStorageEnabled() && divisionConfig.get(SystemParameters.FLATSTORAGE_AUTO) && !FxEnvironmentUtils.isNoImmediateFlattening()) {
+            if (divisionConfig.isFlatStorageEnabled() && divisionConfig.get(SystemParameters.FLATSTORAGE_AUTO)) {
                 final FxFlatStorage fs = FxFlatStorageManager.getInstance();
                 FxPropertyAssignment pa = (FxPropertyAssignment) CacheAdmin.getEnvironment().getAssignment(newAssignmentId);
                 if (fs.isFlattenable(pa)) {
@@ -2150,8 +2150,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             setAssignmentPosition(con, newAssignmentId, pa.getPosition());
 
             if (!pa.isSystemInternal()) {
-                if (divisionConfig.isFlatStorageEnabled() && divisionConfig.get(SystemParameters.FLATSTORAGE_AUTO)
-                        && !FxEnvironmentUtils.isNoImmediateFlattening()) {
+                if (divisionConfig.isFlatStorageEnabled() && divisionConfig.get(SystemParameters.FLATSTORAGE_AUTO)) {
                     final FxFlatStorage fs = FxFlatStorageManager.getInstance();
                     if (fs.isFlattenable(pa)) {
                         try {
