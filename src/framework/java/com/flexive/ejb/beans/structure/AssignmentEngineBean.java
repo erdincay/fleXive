@@ -2662,7 +2662,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
         long mult = 0;
         try {
             if (minimum)
-                ps = con.prepareStatement("SELECT MIN(s.MAXIDX) FROM (SELECT MAX(d.XINDEX) AS \"MAXIDX\",d.ID,d.VER FROM " + TBL_CONTENT_DATA + " d WHERE d.TPROP=? GROUP BY d.ID, d.VER) s");
+                ps = con.prepareStatement("SELECT MIN(s.MAXIDX) FROM (SELECT MAX(d.XINDEX) AS MAXIDX,d.ID,d.VER FROM " + TBL_CONTENT_DATA + " d WHERE d.TPROP=? GROUP BY d.ID, d.VER) s");
             else
                 ps = con.prepareStatement("SELECT MAX(XINDEX) FROM " + TBL_CONTENT_DATA + " WHERE TPROP=?");
             ps.setLong(1, propertyId);
@@ -2700,7 +2700,7 @@ public class AssignmentEngineBean implements AssignmentEngine, AssignmentEngineL
             if (assignmentIds.size() > 0) {
                 StringBuilder query;
                 if (minimum) {
-                    query = new StringBuilder("SELECT MIN(s.MAXIDX) FROM (SELECT MAX(d.XINDEX) AS \"MAXIDX\",d.ID,d.VER FROM " + TBL_CONTENT_DATA + " d WHERE d.ASSIGN=");
+                    query = new StringBuilder("SELECT MIN(s.MAXIDX) FROM (SELECT MAX(d.XINDEX) AS MAXIDX,d.ID,d.VER FROM " + TBL_CONTENT_DATA + " d WHERE d.ASSIGN=");
                 } else
                     query = new StringBuilder("SELECT MAX(d.XINDEX) FROM " + TBL_CONTENT_DATA + " d WHERE d.ASSIGN=");
                 for (int i = 0; i < assignmentIds.size(); i++) { // build the complete query
