@@ -28,10 +28,6 @@ public class ScriptExecutionJob implements Job {
      * {@inheritDoc}
      */
     public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
-        if (CacheAdmin.isNewInstallation()) {
-            LOG.info("Skipping script execution job until [fleXive] is fully initialized ...");
-            return;
-        }
         FxContext ctx = null;
         FxScriptResult result;
         long scheduleId=-1;
@@ -47,6 +43,10 @@ public class ScriptExecutionJob implements Job {
                 //reset context so that ctx.stopRunAsSystem(); is not executed
                 ctx=null;
                 throw e;
+            }
+            if (CacheAdmin.isNewInstallation()) {
+                LOG.info("Skipping script execution job until [fleXive] is fully initialized ...");
+                return;
             }
             ctx.runAsSystem();
             scheduleId = (Long) jobExecutionContext.getJobDetail().getJobDataMap().get(KEY_SCHEDULE_ID);

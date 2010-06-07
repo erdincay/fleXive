@@ -31,6 +31,7 @@
  ***************************************************************/
 package com.flexive.shared.scripting.groovy;
 
+import com.flexive.core.structure.FxEnvironmentUtils;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxSharedUtils;
@@ -464,21 +465,32 @@ public class GroovyTypeBuilder extends BuilderSupport implements Serializable {
     }
 
     public GroovyTypeBuilder() {
+        FxEnvironmentUtils.setCacheEnvironmentRequestOnly(true);
     }
 
     public GroovyTypeBuilder(FxType type) {
         this.type = type;
         this.acl = null;
+        FxEnvironmentUtils.setCacheEnvironmentRequestOnly(true);
     }
 
     public GroovyTypeBuilder(String typeName) {
         this.type = CacheAdmin.getEnvironment().getType(typeName);
         this.acl = null;
+        FxEnvironmentUtils.setCacheEnvironmentRequestOnly(true);
     }
 
     public GroovyTypeBuilder(long typeId) {
         this.type = CacheAdmin.getEnvironment().getType(typeId);
         this.acl = null;
+        FxEnvironmentUtils.setCacheEnvironmentRequestOnly(true);
+    }
+
+    @Override
+    protected Object postNodeCompletion(Object parent, Object node) {
+        if (parent == null)
+            FxEnvironmentUtils.setCacheEnvironmentRequestOnly(false);
+        return super.postNodeCompletion(parent, node);
     }
 
     @Override

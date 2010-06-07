@@ -56,14 +56,15 @@ public class MaintenanceJob implements Job {
 //        System.out.println("===\nExecuting " + this.getClass().getCanonicalName() + " - " + this);
 //        System.out.println("Last: " + context.getPreviousFireTime() + " Next: " + context.getNextFireTime() + " Refire count: " + context.getRefireCount());
 //        System.out.println("My Thread: " + Thread.currentThread() + " I am: " + FxContext.get());
-        if (CacheAdmin.isNewInstallation()) {
-            LOG.info("Skipping maintenance job until [fleXive] is fully initialized ...");
-            return;
-        }
         FxContext ctx = null;
         try {
             ctx = ((FxContext) context.getScheduler().getContext().get("com.flexive.ctx")).copy();
             ctx.replace();
+
+            if (CacheAdmin.isNewInstallation()) {
+                LOG.info("Skipping maintenance job until [fleXive] is fully initialized ...");
+                return;
+            }
 
             EJBLookup.getTimerService().maintenance();
         } catch (SchedulerException e) {

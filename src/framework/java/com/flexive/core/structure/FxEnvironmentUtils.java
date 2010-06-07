@@ -33,8 +33,10 @@ package com.flexive.core.structure;
 
 import com.flexive.core.Database;
 import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.FxContext;
 import com.flexive.shared.cache.FxCacheException;
 import com.flexive.shared.configuration.DivisionData;
+import com.flexive.shared.exceptions.FxApplicationException;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -44,8 +46,10 @@ import java.sql.SQLException;
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
-final class FxEnvironmentUtils {
+final public class FxEnvironmentUtils {
 //    private static final Log LOG = LogFactory.getLog(FxEnvironmentUtils.class);
+
+    private final static String ATTR_ENV_REQUEST_ONLY = "$flexive.env.req$";
 
     /**
      * Includes the division id into the path.
@@ -86,7 +90,11 @@ final class FxEnvironmentUtils {
      * @throws FxCacheException on errors
      */
     protected static void cachePut(int divisionId, String path, Object key, Object value) throws FxCacheException {
-        if (CacheAdmin.ENVIRONMENT_RUNTIME.equals(key)) {
+        if (CacheAdmin.ENVIRONMENT_RUNTIME.equals(key) && CacheAdmin.ENVIRONMENT_BASE.equals(path)) {
+            if (isCacheEnvironmentRequestOnly()) {
+                FxContext.get().setAttribute(CacheAdmin.ATTR_ENVIRONMENT, value);
+                return;
+            }
             CacheAdmin.environmentChanged();
         }
         CacheAdmin.getInstance().put(divisionEncodePath(divisionId, path), key, value);
@@ -113,6 +121,41 @@ final class FxEnvironmentUtils {
      */
     protected static void cacheRemove(int divisionId, String path, String key) throws FxCacheException {
         CacheAdmin.getInstance().remove(divisionEncodePath(divisionId, path), key);
+    }
+
+    /**
+     * Cache the environment for the current request only?
+     *
+     * @param requestOnly cache the environment for the current request only?
+     * @since 3.1.4
+     */
+    public static void setCacheEnvironmentRequestOnly(boolean requestOnly) {
+        if( requestOnly )
+            FxContext.get().setAttribute(ATTR_ENV_REQUEST_ONLY, Boolean.TRUE);
+        else {
+            boolean isSet = isCacheEnvironmentRequestOnly();
+            FxContext.get().setAttribute(ATTR_ENV_REQUEST_ONLY, Boolean.FALSE);
+            try {
+                final Object env = FxContext.get().getAttribute(CacheAdmin.ATTR_ENVIRONMENT);
+                if (isSet && env != null) {
+                    cachePut(FxContext.get().getDivisionId(), CacheAdmin.ENVIRONMENT_BASE, CacheAdmin.ENVIRONMENT_RUNTIME, env);
+                }
+            } catch (FxCacheException e) {
+                //noinspection ThrowableInstanceNeverThrown
+                throw new FxApplicationException(e).asRuntimeException();
+            }
+        }
+    }
+
+    /**
+     * Is the environment cached for the current request only?
+     *
+     * @return environment cached for the current request only?
+     * @since 3.1.4
+     */
+    public static boolean isCacheEnvironmentRequestOnly() {
+        Object o = FxContext.get().getAttribute(ATTR_ENV_REQUEST_ONLY);
+        return o != null && (o instanceof Boolean) && ((Boolean) o);
     }
 
     /**

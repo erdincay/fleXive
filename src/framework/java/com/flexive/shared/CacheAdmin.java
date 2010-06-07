@@ -81,7 +81,7 @@ public class CacheAdmin {
             "/cacheAdmin/dropInRunOnce", ParameterScope.DIVISION_ONLY, false);
 
     // request-scoped cache for FxEnvironment
-    private static final String ATTR_ENVIRONMENT = "$flexive_environment$";
+    public static final String ATTR_ENVIRONMENT = "$flexive_environment$";
 
 
     // "cached" cache beans
