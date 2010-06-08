@@ -45,6 +45,13 @@
         </dependency>
 
         <dependency>
+            <groupId>com.flexive</groupId>
+            <artifactId>flexive-ejb-interfaces-all</artifactId>
+            <version>@FLEXIVE_VERSION@</version>
+            <optional>false</optional>
+        </dependency>
+
+        <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
             <version>1.3</version>

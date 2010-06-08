@@ -10,7 +10,7 @@
 
     <!-- Define common versions of dependencies -->
     <properties>
-        <flexive.version>3.1-beta-2</flexive.version>
+        <flexive.version>3.1-SNAPSHOT</flexive.version>
     </properties>
 
     <dependencies>
@@ -25,6 +25,18 @@
             <groupId>com.flexive</groupId>
             <artifactId>flexive-ejb</artifactId>
             <type>ejb</type>
+            <version>${flexive.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.flexive</groupId>
+                    <artifactId>flexive-ejb-interfaces-all</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>com.flexive</groupId>
+            <artifactId>flexive-ejb-interfaces-local</artifactId>
             <version>${flexive.version}</version>
         </dependency>
 

@@ -24,6 +24,8 @@
     <property name="build.ui.jar.libs.dir" value="${flexive.base.build.dir}/ui/libs"/>
     <property name="build.ear.libs.dir" value="${flexive.base.build.dir}/lib"/>
     <property name="build.storages.dir" value="${flexive.base.build.dir}/storages"/>
+    <property name="build.onlylocal.src.dir" value="${flexive.build.framework.dir}/onlylocal-src"/>
+    <property name="build.onlylocal.classes.dir" value="${flexive.build.framework.dir}/onlylocal-classes"/>
     <property name="shared.meta.dir" value="${flexive.build.framework.jar.dir}/shared.meta"/>
     <property name="database.src.dir" value="${flexive.build.framework.sqlResources.dir}"/>
     <property name="database.classpathref" value="classpath.build.framework"/>
@@ -42,6 +44,9 @@
 	<property name="extractor-documents.jar" value="flexive-extractor-documents.jar"/>
     <property name="extractor-video.jar" value="flexive-extractor-video.jar"/>
     <property name="flatstorage.jar" value="flexive-flatstorage.jar"/>
+    <property name="ejb-interfaces-onlylocal.jar" value="flexive-ejb-interfaces-local.jar"/>
+    <property name="ejb-interfaces-all.jar" value="flexive-ejb-interfaces-all.jar"/>
+
 
     <!-- check if sqlParser has been run -->
 	<available file="${flexive.lib.dir}/${sqlparser.jar}" property="missing.parsers"/>
@@ -503,8 +508,15 @@
 		<jar jarfile="${flexive.build.framework.jar.dir}/flexive-shared.jar" keepcompression="true">
 			<fileset dir="${build.framework.classes.dir}">
 				<include name="com/flexive/shared/**"/>
+                <exclude name="com/flexive/shared/interfaces/**"/>
 			</fileset>
 			<zipfileset dir="${shared.meta.dir}" includes="FxExceptionMessages*.properties, FxSharedMessages*.properties, Enum*.properties, History*.properties, flexive.properties"/>
+        </jar>
+        <!-- Create default interfaces file -->
+        <jar jarfile="${flexive.build.framework.jar.dir}/${ejb-interfaces-all.jar}" keepcompression="true">
+			<fileset dir="${build.framework.classes.dir}">
+                <include name="com/flexive/shared/interfaces/**"/>
+			</fileset>
         </jar>
 	</target>
 
@@ -668,6 +680,27 @@
 			</instr>
 		</emma>
 	</target>
+
+    <target name="jar.interfaces.onlylocal" depends="jar.ejb.prepare, jar.framework">
+        <!-- Create dummy interfaces that disable the remote ones for EJB Lite deployment -->
+        <copy todir="${build.onlylocal.src.dir}">
+            <fileset dir="${flexive.src.framework.dir}" includes="com/flexive/shared/interfaces/**"/>
+        </copy>
+
+        <replace dir="${build.onlylocal.src.dir}" token="@Remote" value=""/>
+
+        <javac-call srcdir="${build.onlylocal.src.dir}" destdir="${build.onlylocal.classes.dir}">
+            <classpath refid="classpath.build.framework"/>
+            <classpath>
+                <fileset dir="${flexive.build.framework.jar.dir}" includes="*.jar"/>
+            </classpath>
+        </javac-call>
+
+        <jar file="${flexive.build.framework.jar.dir}/${ejb-interfaces-onlylocal.jar}">
+            <fileset dir="${build.onlylocal.classes.dir}" includes="**"/>
+        </jar>
+        
+    </target>
 
     <target  name="jar.dbsetup" depends="jar.framework.shared">
         <javac-call srcdir="${flexive.src.framework.dir}"
@@ -937,6 +970,7 @@
         <copy file="${flexive.lib.dir}/${extractor-video.jar}" tofile="${flexive.dist.lib.dir}/${extractor-video.jar}"/>
 		<copy file="${flexive.build.framework.jar.dir}/flexive-ant.jar" tofile="${flexive.dist.lib.dir}/flexive-ant.jar"/>
         <copy file="${flexive.build.framework.jar.dir}/flexive-shared.jar" tofile="${flexive.dist.lib.dir}/flexive-shared.jar"/>
+        <copy file="${flexive.build.framework.jar.dir}/${ejb-interfaces-all.jar}" tofile="${flexive.dist.lib.dir}/${ejb-interfaces-all.jar}"/>
         <copy todir="${flexive.dist.lib.dir}">
             <fileset dir="${build.ui.jar.dir}" includes="*.jar" excludes="flexive-backend.jar,flexive-plugin-*.jar"/>
         </copy>
@@ -1110,6 +1144,16 @@ database.vendor=MySQL
                                  srcdir="${flexive.src.framework.dir}"
                                  prefix="com/flexive/shared/" packagenames="com.flexive.shared.*"/>
 
+            <maven-build-sources artifactId="flexive-ejb-interfaces-all"
+                                 label="[fleXive] EJB interfaces"
+                                 srcdir="${flexive.src.framework.dir}"
+                                 prefix="com/flexive/shared/interfaces" packagenames="com.flexive.shared.interfaces.*"/>
+
+            <maven-build-sources artifactId="flexive-ejb-interfaces-local"
+                                 label="[fleXive] local EJB interfaces"
+                                 srcdir="${flexive.src.framework.dir}"
+                                 prefix="com/flexive/shared/interfaces" packagenames="com.flexive.shared.interfaces.*"/>
+
             <maven-build-sources artifactId="flexive-web-shared" label="[fleXive] shared web classes" srcdir="${flexive.src.ui.shared.dir}"/>
             <maven-build-sources artifactId="flexive-plugin-jsf-core" label="[fleXive] JSF components" srcdir="${flexive.src.ui.components.dir}"/>
             <maven-build-sources artifactId="flexive-plugin-jsf2-core" label="[fleXive] JSF 2 components" srcdir="${flexive.src.ui.jsf2-components.dir}"/>
@@ -1167,11 +1211,13 @@ database.vendor=MySQL
         </sequential>
     </macrodef>
 
-    <target name="maven.deploy" description="Publish to Maven repository set in maven.dist.repo" depends="jar.all,jar.jsf2.components,jar.maven.sources">
+    <target name="maven.deploy" description="Publish to Maven repository set in maven.dist.repo" depends="jar.all,jar.jsf2.components,jar.interfaces.onlylocal,jar.maven.sources">
         <maven-deploy-with-sources path="${flexive.build.framework.jar.dir}" name="flexive-ejb"/>
         <maven-deploy-with-sources path="${flexive.build.framework.jar.dir}" name="flexive-core"/>
 
         <maven-deploy-with-sources path="${flexive.build.framework.jar.dir}" name="flexive-shared"/>
+        <maven-deploy-with-sources path="${flexive.build.framework.jar.dir}" name="flexive-ejb-interfaces-all"/>
+        <maven-deploy-with-sources path="${flexive.build.framework.jar.dir}" name="flexive-ejb-interfaces-local"/>
 
         <maven-deploy-with-sources path="${build.ui.jar.dir}" name="flexive-web-shared"/>
         <maven-deploy-with-sources path="${build.ui.jar.dir}" name="flexive-plugin-jsf-core"/>
