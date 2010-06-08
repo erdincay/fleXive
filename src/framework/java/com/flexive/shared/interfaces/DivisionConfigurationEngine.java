@@ -38,6 +38,7 @@ import com.flexive.shared.value.FxString;
 
 import javax.ejb.Remote;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -157,6 +158,15 @@ public interface DivisionConfigurationEngine extends GenericConfigurationEngine 
     public void setResourceValue(String key, FxString value) throws FxApplicationException;
 
     /**
+     * Remove all resources whose key starts with keyPrefix
+     *
+     * @param keyPrefix       requested key prefix
+     * @throws FxApplicationException on errors
+     * @since 3.1.4
+     */
+    public void removeResourceValues(String keyPrefix) throws FxApplicationException;
+
+    /**
      * Get a resource FxString value or <code>null</code> if not set
      *
      * @param key             unique key
@@ -167,4 +177,17 @@ public interface DivisionConfigurationEngine extends GenericConfigurationEngine 
      * @since 3.1.4
      */
     public FxString getResourceValue(String key, long defaultLanguage) throws FxApplicationException;
+
+    /**
+     * Get all resource FxString values that match a given key prefix.
+     * e.g. if keys "test.1", "test.2" and "test.3" exist, a key prefix "test." will return these 3 entries
+     *
+     * @param keyPrefix       requested key prefix
+     * @param defaultLanguage default language to set in the returned FxString, if not available the first found
+     *                        translation is the default language
+     * @return an ordered (in regards to keys) map containing all found keys and FxString values
+     * @throws FxApplicationException on errors
+     * @since 3.1.4
+     */
+    public Map<String, FxString> getResourceValues(String keyPrefix, long defaultLanguage) throws FxApplicationException;
 }

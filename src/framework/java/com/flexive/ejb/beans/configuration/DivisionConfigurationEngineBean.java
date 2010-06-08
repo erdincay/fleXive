@@ -60,10 +60,7 @@ import javax.annotation.Resource;
 import javax.ejb.*;
 import java.io.*;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.zip.ZipFile;
 
 import static com.flexive.core.DatabaseConst.TBL_CONFIG_DIVISION;
@@ -650,6 +647,53 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
     /**
      * {@inheritDoc}
      */
+    @TransactionAttribute(TransactionAttributeType.REQUIRED)
+    public void removeResourceValues(String keyPrefix) throws FxApplicationException {
+        if (StringUtils.isBlank(keyPrefix))
+            return;
+        keyPrefix = keyPrefix.trim().toLowerCase();
+        if (keyPrefix.length() > 50)
+            throw new FxApplicationException("ex.configuration.resource.key.tooLong", keyPrefix);
+        if (!StringUtils.isAsciiPrintable(keyPrefix))
+            throw new FxApplicationException("ex.configuration.resource.key.nonAscii", keyPrefix);
+        Connection con = null;
+        PreparedStatement ps = null;
+        try {
+            con = Database.getDbConnection();
+            ps = con.prepareStatement("DELETE FROM " + TBL_RESOURCES + " WHERE RKEY LIKE ?");
+            ps.setString(1, keyPrefix + "%");
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new FxApplicationException(e, "ex.db.sqlError", e.getMessage());
+        } finally {
+            Database.closeObjects(DivisionConfigurationEngine.class, con, ps);
+        }
+    }
+
+    /**
+     * Build an FxString from translations
+     *
+     * @param firstLang       the first returned language
+     * @param defaultLanguage default language to set, if applicable
+     * @param trans           translations
+     * @return FxString
+     */
+    private FxString buildFxString(long firstLang, long defaultLanguage, Map<Long, String> trans) {
+        if (trans.size() == 0)
+            return null;
+        if (trans.size() == 1 && firstLang == FxLanguage.SYSTEM_ID)
+            return new FxString(false, trans.get(firstLang));
+        FxString value = new FxString(trans);
+        if (value.translationExists(defaultLanguage))
+            value.setDefaultLanguage(defaultLanguage);
+        else
+            value.setDefaultLanguage(firstLang);
+        return value;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     @TransactionAttribute(TransactionAttributeType.SUPPORTS)
     public FxString getResourceValue(String key, long defaultLanguage) throws FxApplicationException {
         if (StringUtils.isBlank(key)) {
@@ -671,16 +715,59 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
                     firstLang = rs.getLong(1);
                 trans.put(rs.getLong(1), rs.getString(2));
             }
-            if (trans.size() == 0)
-                return null;
-            if (trans.size() == 1 && firstLang == FxLanguage.SYSTEM_ID)
-                return new FxString(false, trans.get(firstLang));
-            value = new FxString(trans);
-            if (value.translationExists(defaultLanguage))
-                value.setDefaultLanguage(defaultLanguage);
-            else
-                value.setDefaultLanguage(firstLang);
-            return value;
+            return buildFxString(firstLang, defaultLanguage, trans);
+        } catch (SQLException e) {
+            throw new FxApplicationException(e, "ex.db.sqlError", e.getMessage());
+        } finally {
+            Database.closeObjects(DivisionConfigurationEngine.class, con, ps);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @TransactionAttribute(TransactionAttributeType.SUPPORTS)
+    public Map<String, FxString> getResourceValues(String keyPrefix, long defaultLanguage) throws FxApplicationException {
+        Map<String, FxString> ret = new LinkedHashMap<String, FxString>(10);
+        if (StringUtils.isBlank(keyPrefix)) {
+            return ret;
+        }
+
+        keyPrefix = keyPrefix.trim().toLowerCase();
+        Connection con = null;
+        PreparedStatement ps = null;
+        try {
+            con = Database.getDbConnection();
+            ps = con.prepareStatement("SELECT RKEY,LANG,RVAL FROM " + TBL_RESOURCES + "  WHERE RKEY LIKE ? ORDER BY RKEY ASC");
+
+            ps.setString(1, keyPrefix + "%");
+            ResultSet rs = ps.executeQuery();
+
+            String currKey = null;
+            String key;
+            Map<Long, String> trans = new HashMap<Long, String>(10);
+            long firstLang = -1;
+
+            while (rs != null && rs.next()) {
+                key = rs.getString(1);
+                if (!key.equals(currKey)) {
+                    final FxString data = buildFxString(firstLang, defaultLanguage, trans);
+                    if (data != null)
+                        ret.put(currKey, data);
+                    currKey = key;
+                    trans.clear();
+                    firstLang = -1;
+                }
+                if (firstLang == -1)
+                    firstLang = rs.getLong(2);
+                trans.put(rs.getLong(2), rs.getString(3));
+            }
+            if (trans.size() > 0) {
+                final FxString data = buildFxString(firstLang, defaultLanguage, trans);
+                if (data != null)
+                    ret.put(currKey, data);
+            }
+            return ret;
         } catch (SQLException e) {
             throw new FxApplicationException(e, "ex.db.sqlError", e.getMessage());
         } finally {
