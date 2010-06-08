@@ -57,6 +57,8 @@ public class EJBLookup {
 
     private enum STRATEGY {
         APP_SIMPLENAME_LOCAL,
+        EJB31_APP_MODULE,
+        EJB31_MODULE,
         JAVA_COMP_ENV,
         APP_SIMPLENAME_REMOTE,
         COMPLEXNAME,
@@ -508,7 +510,6 @@ public class EJBLookup {
                     }
                 }
             }
-
         } catch (Exception e) {
             LOG.warn(e);
         }
@@ -602,6 +603,12 @@ public class EJBLookup {
                 return "/" + type.getSimpleName() + "Remote";
             case MAPPED_NAME_REMOTE:
                 return type.getSimpleName() + "#" + type.getCanonicalName();
+            case EJB31_MODULE:
+                // EJB 3.1: EJB packaged in module
+                return "java:module/" + type.getSimpleName() + "!" + type.getCanonicalName() + "Local";
+            case EJB31_APP_MODULE:
+                // EJB 3.1: flexive-ejb module in EAR
+                return "java:app/flexive-ejb/" + type.getSimpleName() + "!" + type.getCanonicalName() + "Local";
             default:
                 throw new FxLookupException("Unsupported/unknown lookup strategy " + used_strategy + "!").asRuntimeException();
         }
