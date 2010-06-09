@@ -32,12 +32,17 @@
 package com.flexive.shared.mbeans;
 
 import com.flexive.shared.CacheAdmin;
+import com.flexive.shared.FxContext;
 import com.flexive.shared.cache.FxBackingCache;
 import com.flexive.shared.cache.FxCacheException;
+import java.io.Serializable;
 import org.jboss.cache.Cache;
 
 import javax.management.*;
 import java.util.Set;
+import org.apache.commons.lang.SerializationUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * Proxy for the FxCache MBean (only for internal use!)
@@ -45,12 +50,16 @@ import java.util.Set;
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public class FxCacheProxy implements FxCacheMBean {
+    private static final Log LOG = LogFactory.getLog(FxCacheProxy.class);
+
     private MBeanServer server;
     private ObjectName name;
 
 
+
     public FxCacheProxy(MBeanServer server) throws MalformedObjectNameException {
         this.server = server;
+        //this.name = new ObjectName(CacheAdmin.CACHE_SERVICE_NAME + "_" + System.currentTimeMillis());
         this.name = new ObjectName(CacheAdmin.CACHE_SERVICE_NAME);
     }
 
@@ -100,8 +109,8 @@ public class FxCacheProxy implements FxCacheMBean {
      */
     public Object get(String path, Object key) throws FxCacheException {
         try {
-            return server.invoke(name, "get", new Object[]{path, key},
-                    new String[]{"java.lang.String", "java.lang.Object"});
+            return unmarshal(server.invoke(name, "get", new Object[]{divisionEncodePath(path), key},
+                    new String[]{"java.lang.String", "java.lang.Object"}));
         } catch (InstanceNotFoundException e) {
             throw new FxCacheException("No FxCache instance found!");
         } catch (MBeanException e) {
@@ -117,7 +126,7 @@ public class FxCacheProxy implements FxCacheMBean {
      */
     public void put(String path, Object key, Object value) throws FxCacheException {
         try {
-            server.invoke(name, "put", new Object[]{path, key, value},
+            server.invoke(name, "put", new Object[]{divisionEncodePath(path), key, marshal(value)},
                     new String[]{"java.lang.String", "java.lang.Object", "java.lang.Object"});
         } catch (InstanceNotFoundException e) {
             throw new FxCacheException("No FxCache instance found!");
@@ -134,7 +143,7 @@ public class FxCacheProxy implements FxCacheMBean {
      */
     public void remove(String path) throws FxCacheException {
         try {
-            server.invoke(name, "remove", new Object[]{path},
+            server.invoke(name, "remove", new Object[]{divisionEncodePath(path)},
                     new String[]{"java.lang.String"});
         } catch (InstanceNotFoundException e) {
             throw new FxCacheException("No FxCache instance found!");
@@ -151,7 +160,7 @@ public class FxCacheProxy implements FxCacheMBean {
      */
     public void remove(String path, Object key) throws FxCacheException {
         try {
-            server.invoke(name, "remove", new Object[]{path, key},
+            server.invoke(name, "remove", new Object[]{divisionEncodePath(path), key},
                     new String[]{"java.lang.String", "java.lang.Object"});
         } catch (InstanceNotFoundException e) {
             throw new FxCacheException("No FxCache instance found!");
@@ -168,7 +177,7 @@ public class FxCacheProxy implements FxCacheMBean {
      */
     public Set getKeys(String path) throws FxCacheException {
         try {
-            return (Set) server.invoke(name, "getKeys", new Object[]{path},
+            return (Set) server.invoke(name, "getKeys", new Object[]{divisionEncodePath(path)},
                     new String[]{"java.lang.String"});
         } catch (InstanceNotFoundException e) {
             throw new FxCacheException("No FxCache instance found!");
@@ -185,7 +194,7 @@ public class FxCacheProxy implements FxCacheMBean {
      */
     public Set globalGetKeys(String path) throws FxCacheException {
         try {
-            return (Set) server.invoke(name, "globalGetKeys", new Object[]{path},
+            return (Set) server.invoke(name, "globalGetKeys", new Object[]{globalDivisionEncodePath(path)},
                     new String[]{"java.lang.String"});
         } catch (InstanceNotFoundException e) {
             throw new FxCacheException("No FxCache instance found!");
@@ -202,8 +211,8 @@ public class FxCacheProxy implements FxCacheMBean {
      */
     public Object globalGet(String path, Object key) throws FxCacheException {
         try {
-            return server.invoke(name, "globalGet", new Object[]{path, key},
-                    new String[]{"java.lang.String", "java.lang.Object"});
+            return unmarshal(server.invoke(name, "globalGet", new Object[]{globalDivisionEncodePath(path), key},
+                    new String[]{"java.lang.String", "java.lang.Object"}));
         } catch (InstanceNotFoundException e) {
             throw new FxCacheException("No FxCache instance found!");
         } catch (MBeanException e) {
@@ -219,7 +228,7 @@ public class FxCacheProxy implements FxCacheMBean {
      */
     public boolean globalExists(String path, Object key) throws FxCacheException {
         try {
-            return (Boolean) server.invoke(name, "globalExists", new Object[]{path, key},
+            return (Boolean) server.invoke(name, "globalExists", new Object[]{globalDivisionEncodePath(path), key},
                     new String[]{"java.lang.String", "java.lang.Object"});
         } catch (InstanceNotFoundException e) {
             throw new FxCacheException("No FxCache instance found!");
@@ -236,7 +245,7 @@ public class FxCacheProxy implements FxCacheMBean {
      */
     public boolean exists(String path, Object key) throws FxCacheException {
         try {
-            return (Boolean) server.invoke(name, "exists", new Object[]{path, key},
+            return (Boolean) server.invoke(name, "exists", new Object[]{divisionEncodePath(path), key},
                     new String[]{"java.lang.String", "java.lang.Object"});
         } catch (InstanceNotFoundException e) {
             throw new FxCacheException("No FxCache instance found!");
@@ -253,7 +262,7 @@ public class FxCacheProxy implements FxCacheMBean {
      */
     public void globalPut(String path, Object key, Object value) throws FxCacheException {
         try {
-            server.invoke(name, "globalPut", new Object[]{path, key, value},
+            server.invoke(name, "globalPut", new Object[]{globalDivisionEncodePath(path), key, marshal(value)},
                     new String[]{"java.lang.String", "java.lang.Object", "java.lang.Object"});
         } catch (InstanceNotFoundException e) {
             throw new FxCacheException("No FxCache instance found!");
@@ -270,7 +279,7 @@ public class FxCacheProxy implements FxCacheMBean {
      */
     public void globalRemove(String path) throws FxCacheException {
         try {
-            server.invoke(name, "globalRemove", new Object[]{path},
+            server.invoke(name, "globalRemove", new Object[]{globalDivisionEncodePath(path)},
                     new String[]{"java.lang.String"});
         } catch (InstanceNotFoundException e) {
             throw new FxCacheException("No FxCache instance found!");
@@ -287,7 +296,7 @@ public class FxCacheProxy implements FxCacheMBean {
      */
     public void globalRemove(String path, Object key) throws FxCacheException {
         try {
-            server.invoke(name, "globalRemove", new Object[]{path, key},
+            server.invoke(name, "globalRemove", new Object[]{globalDivisionEncodePath(path), key},
                     new String[]{"java.lang.String", "java.lang.Object"});
         } catch (InstanceNotFoundException e) {
             throw new FxCacheException("No FxCache instance found!");
@@ -304,7 +313,7 @@ public class FxCacheProxy implements FxCacheMBean {
      */
     public Set getChildrenNames(String path) throws FxCacheException {
         try {
-            return (Set) server.invoke(name, "getChildrenNames", new Object[]{path},
+            return (Set) server.invoke(name, "getChildrenNames", new Object[]{divisionEncodePath(path)},
                     new String[]{"java.lang.String"});
         } catch (InstanceNotFoundException e) {
             throw new FxCacheException("No FxCache instance found!");
@@ -434,4 +443,80 @@ public class FxCacheProxy implements FxCacheMBean {
             throw new FxCacheException("Could not invoke operation on FxCache (reflection error): " + e.getMessage());
         }
     }
+
+    /**
+     * Marshal a value before writing it to the cache, if necessary.
+     *
+     * <p>If the cache is shared between several deployments (class loaders) in a VM, we need
+     * to serialize all values before writing them to the cache to avoid ClassCastExceptions.
+     * This obviously has a grave performance penalty, but really seems to be the only solution in this scenario.
+     * For optimal cache performance, deploy your applications in a single EAR
+     * or disabled the shared cache if you deploy only a single WAR file.</p>
+
+     * @param value   the value to be written
+     * @return        the marshaled value
+     * @since         3.1.4
+     * @see           CacheAdmin#isSharedCache() 
+     */
+    public static Object marshal(Object value) {
+
+        // marshal only if the cache is shared between deployments, otherwise let JBoss Cache handle this
+        return CacheAdmin.isSharedCache() ? SerializationUtils.serialize((Serializable) value) : value;
+    }
+
+    /**
+     * Un-marshal a value processed by {@link #marshal(Object)} before.
+     *
+     * @param value the value to be de-marshaled
+     * @return      the original value
+     * @since       3.1.4
+     */
+    public static Object unmarshal(Object value) {
+        return value != null ? (CacheAdmin.isSharedCache() ? SerializationUtils.deserialize((byte[]) value) : value) : null;
+    }
+
+
+    /**
+     * Includes the division id into the path.
+     *
+     * @param path the path to encode
+     * @return the encoded path
+     * @throws FxCacheException if the division id could not be resolved
+     */
+    private String divisionEncodePath(String path) throws FxCacheException {
+        try {
+            int divId;
+            //#<id>  - purposely undocumented hack to force a division ;) - used during environment loading
+            if (path.charAt(0) == '#') {
+                try {
+                    divId = Integer.parseInt(path.substring(1, path.indexOf('/')));
+                    path = path.substring(path.indexOf('/'));
+                } catch (Exception e) {
+                    throw new FxCacheException("Invalid Division Id in path [" + path + "]!");
+                }
+            } else {
+                FxContext ri = FxContext.get();
+                if (ri.getDivisionId() == -1) {
+                    throw new FxCacheException("Division ID missing in request information [" + ri.getRequestURI() + "]");
+                }
+                divId = ri.getDivisionId();
+            }
+            return "/Division" + divId + (path.startsWith("/") ? "" : "/") + path;
+        } catch (Throwable t) {
+            LOG.error("Unable to encode division ID in cache path: " + t.getMessage(), t);
+            throw new FxCacheException("Unable to encode path: " + t.getMessage());
+        }
+    }
+
+    /**
+     * Includes the global division id into the path.
+     *
+     * @param path the path to encode
+     * @return the encoded path
+     */
+    public static String globalDivisionEncodePath(final String path) {
+        return "/GlobalConfiguration" + (path.startsWith("/") ? "" : "/") + path;
+    }
+
+
 }

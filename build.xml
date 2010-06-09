@@ -696,6 +696,10 @@
             </classpath>
         </javac-call>
 
+        <!-- Create marker file to indicate that only local interfaces are packaged -->
+        <echo file="${build.onlylocal.classes.dir}/flexive-ejb-interfaces-onlylocal.properties">
+        </echo>
+
         <jar file="${flexive.build.framework.jar.dir}/${ejb-interfaces-onlylocal.jar}">
             <fileset dir="${build.onlylocal.classes.dir}" includes="**"/>
         </jar>

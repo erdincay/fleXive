@@ -89,6 +89,37 @@ public class CacheAdmin {
     //    private static ThreadLocal<FxEnvironment> requestEnvironment = new ThreadLocal<FxEnvironment>();
     // environment loader lock
     private static final Object ENV_LOCK = new Object();
+    
+    /** 
+     * {@see #isSharedCache()}
+     */
+    private static final boolean SHARED_CACHE;
+
+    // system property to override SHARED_CACHE setting
+    private static final String CONFIG_SHARED_CACHE = "flexive.cache.shared";
+
+    /**
+     * {@see #isWebProfileDeployment}
+     */
+    private static final boolean WEB_PROFILE_DEPLOYMENT;
+
+    static {
+        // initialize web profile and shared cache configuration.
+        
+        WEB_PROFILE_DEPLOYMENT = Thread.currentThread().getContextClassLoader().getResourceAsStream("flexive-ejb-interfaces-onlylocal.properties") != null;
+
+        final String sharedCacheEnabled = (String) System.getProperties().get(CONFIG_SHARED_CACHE);
+        SHARED_CACHE =
+                // shared cache manually activated
+                Boolean.parseBoolean(sharedCacheEnabled)
+                // web profile deployment (and not disabled explicitly)
+                || (WEB_PROFILE_DEPLOYMENT && !"false".equals(sharedCacheEnabled));
+
+        if (LOG.isInfoEnabled()) {
+            LOG.info("EJB web profile deployment: " + (WEB_PROFILE_DEPLOYMENT ? "yes" : "no"));
+            LOG.info("Shared cache: " + (SHARED_CACHE ? "yes" : "no") + ". This can be set manually with -D" + CONFIG_SHARED_CACHE + "=true or false");
+        }
+    }
 
 
     /**
@@ -112,26 +143,21 @@ public class CacheAdmin {
                 if (LOG.isDebugEnabled())
                     LOG.debug("Registered: " + server.isRegistered(((FxCacheProxy) cache).getName()));
                 cache.create();
-            } else {
-                //check if MBean Server is from current deployment
+            } else if (!isSharedCache()) {
+                // check if MBean Server is from current deployment. Currently this is disabled
+                // if the cache is shared between different deployments in the same VM, so undeploying
+                // the instance that provides the cache leads to undefined behavour.
+                
                 String deployedId = cache.getDeploymentId();
                 if (MBeanHelper.DEPLOYMENT_ID.equals(deployedId))
                     return cache;
                 LOG.info("Redeployment! Have to undeploy " + deployedId + " (vs " + MBeanHelper.DEPLOYMENT_ID + ")");
                 cache.destroy();
-//                    System.out.println("Unregistering ...");
                 server.unregisterMBean(((FxCacheProxy) cache).getName());
-//                    System.out.println("Registering new ...");
                 EJBLookup.getGlobalConfigurationEngine().registerCacheMBean(((FxCacheProxy) cache).getName());
-//                    server.registerMBean(new FxCache(), ((FxCacheProxy)cache).getName());
                 LOG.debug("Registered: " + server.isRegistered(((FxCacheProxy) cache).getName()));
                 cache.create();
             }
-            /* MBeanServer server = MBeanServerLocator.locate();
-    cache = (FxCacheMBean) MBeanProxyExt.create(
-            FxCacheMBean.class,
-            CACHE_SERVICE_NAME,
-            server);*/
             return cache;
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
@@ -432,5 +458,33 @@ public class CacheAdmin {
             LOG.error("Failed to get tree modified timestamp", e);
             return 0;
         }
+    }
+
+    /**
+     * Is the cache shared between different deployments in the same VM ({@code -Dflexive.cache.shared=(true|false)})?
+     *
+     *
+     * <p>This parameter is set automatically when the only local interfaces are deployed
+     * (as in a EJB 3.1 Web profile deployment), since you typically want to deploy more than one
+     * flexive application.</p>
+     *
+     * <p>In EAR deployments, this is set to false by default. This improves performance since no
+     * serialization is involved when writing objects to the cache. In WAR deployments, you can disable
+     * the shared cache if you deploy only one flexive application in your container.</p>
+     *
+     * @since 3.1.4
+     */
+    public static boolean isSharedCache() {
+        return SHARED_CACHE;
+    }
+
+    /**
+     * Is this a JavaEE 6 Web Profile deployment? Automatically set when flexive-ejb-interfaces-local
+     * is packaged.
+     *
+     * @since 3.1.4
+     */
+    public static boolean isWebProfileDeployment() {
+        return WEB_PROFILE_DEPLOYMENT;
     }
 }

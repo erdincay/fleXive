@@ -76,48 +76,6 @@
                 </configuration>
             </plugin>
 
-            <!--
-                Unpack the flexive-ejb artifact and add it to WEB-INF/classes
-                (Glassfish v3 Prelude does not support EJB-JAR deployment yet)
-            -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <!-- Copy the EJBs to target/flexive -->
-                    <execution>
-                        <id>copy-ejb</id>
-                        <phase>generate-resources</phase>
-                        <goals>
-                            <goal>unpack</goal>
-                        </goals>
-                        <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>com.flexive</groupId>
-                                    <artifactId>flexive-ejb</artifactId>
-                                    <version>${flexive.version}</version>
-                                    <overWrite>true</overWrite>
-                                    <outputDirectory>target/flexive/WEB-INF/classes</outputDirectory>
-                                </artifactItem>
-                            </artifactItems>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-war-plugin</artifactId>
-                <configuration>
-                    <webResources>
-                        <resource>
-                            <directory>target/flexive</directory>
-                        </resource>
-                    </webResources>
-                </configuration>
-            </plugin>
-
         </plugins>
     </build>
 

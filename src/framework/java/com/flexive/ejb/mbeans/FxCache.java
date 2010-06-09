@@ -35,16 +35,17 @@ import com.flexive.core.stream.BinaryDownloadProtocol;
 import com.flexive.core.stream.BinaryUploadProtocol;
 import com.flexive.core.structure.StructureLoader;
 import com.flexive.shared.CacheAdmin;
-import com.flexive.shared.FxContext;
 import com.flexive.shared.cache.FxBackingCache;
 import com.flexive.shared.cache.FxBackingCacheProvider;
 import com.flexive.shared.cache.FxBackingCacheProviderFactory;
 import com.flexive.shared.cache.FxCacheException;
 import com.flexive.shared.mbeans.FxCacheMBean;
+import com.flexive.shared.mbeans.FxCacheProxy;
 import com.flexive.shared.mbeans.MBeanHelper;
 import com.flexive.shared.stream.FxStreamUtils;
 import com.flexive.stream.ServerLocation;
 import com.flexive.stream.StreamServer;
+import java.io.Serializable;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.jboss.cache.Cache;
@@ -53,6 +54,7 @@ import javax.management.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import org.apache.commons.lang.SerializationUtils;
 
 /**
  * FxCache MBean
@@ -120,9 +122,15 @@ public class FxCache implements FxCacheMBean, DynamicMBean {
             server.addProtocol(new BinaryUploadProtocol());
             server.addProtocol(new BinaryDownloadProtocol());
             server.start();
+
+            // update streaming server list in shared cache.
+            // NOTE! Since we are operating directly on the backing cache, we have to do the actions
+            // provided by FxCacheProxy (mapping paths, serializing values) manually
+            
             List<ServerLocation> servers = null;
-            if (globalExists(CacheAdmin.STREAMSERVER_BASE, CacheAdmin.STREAMSERVER_EJB_KEY))
-                servers = (List<ServerLocation>) globalGet(CacheAdmin.STREAMSERVER_BASE, CacheAdmin.STREAMSERVER_EJB_KEY);
+            final String configPath = FxCacheProxy.globalDivisionEncodePath(CacheAdmin.STREAMSERVER_BASE);
+            if (globalExists(configPath, CacheAdmin.STREAMSERVER_EJB_KEY))
+                servers = (List<ServerLocation>) FxCacheProxy.unmarshal(globalGet(configPath,CacheAdmin.STREAMSERVER_EJB_KEY));
             if (servers == null)
                 servers = new ArrayList<ServerLocation>(5);
             ServerLocation thisServer = new ServerLocation(server.getAddress().getAddress(), server.getPort());
@@ -130,7 +138,8 @@ public class FxCache implements FxCacheMBean, DynamicMBean {
                 FxStreamUtils.addLocalServer(thisServer);
             else if (!servers.contains(thisServer)) //only add if not contained already and not bound to a local address
                 servers.add(thisServer);
-            globalPut(CacheAdmin.STREAMSERVER_BASE, CacheAdmin.STREAMSERVER_EJB_KEY, servers);
+            globalPut(configPath,CacheAdmin.STREAMSERVER_EJB_KEY, FxCacheProxy.marshal((Serializable) servers));
+            
             LOG.info("Added " + thisServer + " to available StreamServers (" + servers.size() + " total) for cache " + getBackingCache().toString());
         } catch (Exception e) {
             LOG.error("Failed to start StreamServer. Error: " + e.getMessage(), e);
@@ -200,48 +209,6 @@ public class FxCache implements FxCacheMBean, DynamicMBean {
     }
 
     /**
-     * Includes the division id into the path.
-     *
-     * @param path the path to encode
-     * @return the encoded path
-     * @throws FxCacheException if the division id could not be resolved
-     */
-    private String divisionEncodePath(String path) throws FxCacheException {
-        try {
-            int divId;
-            //#<id>  - purposely undocumented hack to force a division ;) - used during environment loading
-            if (path.charAt(0) == '#') {
-                try {
-                    divId = Integer.parseInt(path.substring(1, path.indexOf('/')));
-                    path = path.substring(path.indexOf('/'));
-                } catch (Exception e) {
-                    throw new FxCacheException("Invalid Division Id in path [" + path + "]!");
-                }
-            } else {
-                FxContext ri = FxContext.get();
-                if (ri.getDivisionId() == -1) {
-                    throw new FxCacheException("Division ID missing in request information [" + ri.getRequestURI() + "]");
-                }
-                divId = ri.getDivisionId();
-            }
-            return "/Division" + divId + (path.startsWith("/") ? "" : "/") + path;
-        } catch (Throwable t) {
-            LOG.error("Unable to encode division ID in cache path: " + t.getMessage(), t);
-            throw new FxCacheException("Unable to encode path: " + t.getMessage());
-        }
-    }
-
-    /**
-     * Includes the global division id into the path.
-     *
-     * @param path the path to encode
-     * @return the encoded path
-     */
-    private String globalDivisionEncodePath(final String path) {
-        return "/GlobalConfiguration" + (path.startsWith("/") ? "" : "/") + path;
-    }
-
-    /**
      * {@inheritDoc}
      */
     public Cache<Object, Object> getCache() throws FxCacheException {
@@ -252,35 +219,35 @@ public class FxCache implements FxCacheMBean, DynamicMBean {
      * {@inheritDoc}
      */
     public Object get(String path, Object key) throws FxCacheException {
-        return getBackingCache().get(divisionEncodePath(path), key);
+        return getBackingCache().get(path, key);
     }
 
     /**
      * {@inheritDoc}
      */
     public Object globalGet(String path, Object key) throws FxCacheException {
-        return getBackingCache().get(globalDivisionEncodePath(path), key);
+        return getBackingCache().get(path, key);
     }
 
     /**
      * {@inheritDoc}
      */
     public boolean globalExists(String path, Object key) throws FxCacheException {
-        return getBackingCache().exists(globalDivisionEncodePath(path), key);
+        return getBackingCache().exists(path, key);
     }
 
     /**
      * {@inheritDoc}
      */
     public void put(String path, Object key, Object value) throws FxCacheException {
-        getBackingCache().put(divisionEncodePath(path), key, value);
+        getBackingCache().put(path, key, value);
     }
 
     /**
      * {@inheritDoc}
      */
     public boolean exists(String path, Object key) throws FxCacheException {
-        return getBackingCache().exists(divisionEncodePath(path), key);
+        return getBackingCache().exists(path, key);
     }
 
 
@@ -288,35 +255,35 @@ public class FxCache implements FxCacheMBean, DynamicMBean {
      * {@inheritDoc}
      */
     public void globalPut(String path, Object key, Object value) throws FxCacheException {
-        getBackingCache().put(globalDivisionEncodePath(path), key, value);
+        getBackingCache().put(path, key, value);
     }
 
     /**
      * {@inheritDoc}
      */
     public void remove(String path) throws FxCacheException {
-        getBackingCache().remove(divisionEncodePath(path));
+        getBackingCache().remove(path);
     }
 
     /**
      * {@inheritDoc}
      */
     public void globalRemove(String path) throws FxCacheException {
-        getBackingCache().remove(globalDivisionEncodePath(path));
+        getBackingCache().remove(path);
     }
 
     /**
      * {@inheritDoc}
      */
     public Set getKeys(String path) throws FxCacheException {
-        return getBackingCache().getKeys(divisionEncodePath(path));
+        return getBackingCache().getKeys(path);
     }
 
     /**
      * {@inheritDoc}
      */
     public Set globalGetKeys(String path) throws FxCacheException {
-        return getBackingCache().getKeys(globalDivisionEncodePath(path));
+        return getBackingCache().getKeys(path);
     }
 
 
@@ -324,21 +291,21 @@ public class FxCache implements FxCacheMBean, DynamicMBean {
      * {@inheritDoc}
      */
     public Set getChildrenNames(String path) throws FxCacheException {
-        return getBackingCache().getChildrenNames(divisionEncodePath(path));
+        return getBackingCache().getChildrenNames(path);
     }
 
     /**
      * {@inheritDoc}
      */
     public void remove(String path, Object key) throws FxCacheException {
-        getBackingCache().remove(divisionEncodePath(path), key);
+        getBackingCache().remove(path, key);
     }
 
     /**
      * {@inheritDoc}
      */
     public void globalRemove(String path, Object key) throws FxCacheException {
-        getBackingCache().remove(globalDivisionEncodePath(path), key);
+        getBackingCache().remove(path, key);
     }
 
     /**
