@@ -318,17 +318,15 @@ public class UserTicketStore {
             }
         }
         if (LOG.isDebugEnabled()) LOG.debug("Done flagging dirty.");
-        if (FxContext.get() != null) {
-            // update current user's ticket directly from the DB
-            try {
-                final UserTicket ticket = getUserTicket(FxContext.getUserTicket().getLoginName());
-                // remember current language (FX-329)
-                ticket.setLanguage(FxContext.getUserTicket().getLanguage());
-                // update request ticket
-                FxContext.get().setTicket(ticket);
-            } catch (FxApplicationException e) {
-                throw e.asRuntimeException();
-            }
+        // update current user's ticket directly from the DB
+        try {
+            final UserTicket ticket = getUserTicket(FxContext.getUserTicket().getLoginName());
+            // remember current language (FX-329)
+            ticket.setLanguage(FxContext.getUserTicket().getLanguage());
+            // update request ticket
+            FxContext.get().setTicket(ticket);
+        } catch (FxApplicationException e) {
+            throw e.asRuntimeException();
         }
         // need to flag environment as dirty to force guest ticket updates (FX-349)
         StructureLoader.updateEnvironmentTimestamp();

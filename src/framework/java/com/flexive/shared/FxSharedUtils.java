@@ -87,7 +87,7 @@ public final class FxSharedUtils {
     private static String fxBuildUser = "unknown";
     private static String fxHeader = "[fleXive]";
     private static boolean fxSnapshotVersion = false;
-    private static String bundledGroovyVersion = "unknown";
+    private static String bundledGroovyVersion;
     private static List<String> translatedLocales = Collections.unmodifiableList(Arrays.asList("en"));
     private static String hostname = null;
     private static String appserver = null;
@@ -146,7 +146,6 @@ public final class FxSharedUtils {
             fxBuildDate = bundle.getString("flexive.builddate");
             fxBuildUser = bundle.getString("flexive.builduser");
             fxHeader = bundle.getString("flexive.header");
-            bundledGroovyVersion = GroovySystem.getVersion();
             final String languagesValue = bundle.getString("flexive.translatedLocales");
             if (StringUtils.isNotBlank(languagesValue)) {
                 final String[] languages = StringUtils.split(languagesValue, ",");
@@ -1086,7 +1085,11 @@ public final class FxSharedUtils {
      *
      * @return version of the bundled groovy runtime
      */
-    public static String getBundledGroovyVersion() {
+    public static synchronized String getBundledGroovyVersion() {
+        if (bundledGroovyVersion == null) {
+            // lazy loading to avoid Groovy initialization at deployment
+            bundledGroovyVersion = GroovySystem.getVersion();
+        }
         return bundledGroovyVersion;
     }
 

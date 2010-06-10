@@ -95,8 +95,12 @@ public class UserTicketImpl implements UserTicket, Serializable {
         if (CacheAdmin.isEnvironmentLoaded()) {
             final FxEnvironment environment = CacheAdmin.getEnvironment();
             if (environment.getTimeStamp() != STRUCTURE_TIMESTAMP) {
-                STRUCTURE_TIMESTAMP = environment.getTimeStamp();
-                reloadGuestTicketAssignments(false);
+                synchronized (UserTicketImpl.class) {
+                    if (environment.getTimeStamp() != STRUCTURE_TIMESTAMP) {
+                        STRUCTURE_TIMESTAMP = environment.getTimeStamp();
+                        reloadGuestTicketAssignments(false);
+                    }
+                }
             }
         }
         synchronized(UserTicketImpl.class) {
