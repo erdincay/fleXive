@@ -44,13 +44,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Helper class for filesystem related binary handling
+ * Helper class for filesystem related binary handling.
+ *
+ * <p><small>IMPLEMENTATION NOTE: any EJB lookups in this class must be added to EJBLookup#resolveInterfacesForStreamServer
+ * </small></p>
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @since 3.1
  */
 public class FxBinaryUtils {
-
+    
     private static final Log LOG = LogFactory.getLog(FxBinaryUtils.class);
 
     static final String TRANSIT_EXT = ".fxt";

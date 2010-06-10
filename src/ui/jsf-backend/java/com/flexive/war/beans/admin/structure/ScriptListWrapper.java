@@ -151,8 +151,6 @@ public class ScriptListWrapper implements Serializable {
 
     private List<ScriptListEntry> scriptList = null;
     private int ctr = 0;
-    private Comparator<ScriptListEntry> scriptComparator = new ScriptInfoSorter();
-    private Comparator<ScriptListEntry> eventComparator = new ScriptEventSorter();
     private boolean isType;
 
     /**
@@ -299,8 +297,8 @@ public class ScriptListWrapper implements Serializable {
         scriptList.remove(entry);
     }
 
-    public void sortByScripts() {
-        Collections.sort(scriptList, scriptComparator);
+    public final void sortByScripts() {
+        Collections.sort(scriptList, new ScriptInfoSorter());
         if (sortStatusScriptInfo == SORT_STATUS_UNSORTED)
             sortStatusScriptInfo = SORT_STATUS_ASCENDING;
         else if (sortStatusScriptInfo == SORT_STATUS_ASCENDING)
@@ -311,8 +309,8 @@ public class ScriptListWrapper implements Serializable {
         sortStatusEvent = SORT_STATUS_UNSORTED;
     }
 
-    public void sortByEvents() {
-        Collections.sort(scriptList, eventComparator);
+    public final void sortByEvents() {
+        Collections.sort(scriptList, new ScriptEventSorter());
         if (sortStatusEvent == SORT_STATUS_UNSORTED)
             sortStatusEvent = SORT_STATUS_ASCENDING;
         else if (sortStatusEvent == SORT_STATUS_ASCENDING)

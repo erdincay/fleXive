@@ -35,6 +35,7 @@ import com.flexive.core.Database;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.core.storage.binary.BinaryInputStream;
 import com.flexive.core.storage.genericSQL.GenericBinarySQLInputStream;
+import com.flexive.shared.FxContext;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.media.FxMediaEngine;
 import com.flexive.shared.stream.BinaryDownloadPayload;
@@ -136,6 +137,8 @@ public class BinaryDownloadProtocol extends StreamProtocol<BinaryDownloadPayload
     private BinaryInputStream loadBinaryDescriptor(DataPacket<BinaryDownloadPayload> dataPacket, BinaryDescriptor.PreviewSizes previewSize) throws FxNotFoundException {
         try {
             final Connection con = Database.getDbConnection(dataPacket.getPayload().getDivision());
+            // set division information in context for the storage engine
+            FxContext.get().setDivisionId(dataPacket.getPayload().getDivision());
             BinaryInputStream o = StorageManager.getContentStorage(TypeStorageMode.Hierarchical).fetchBinary(
                     con,
                     dataPacket.getPayload().getDivision(),
@@ -149,7 +152,7 @@ public class BinaryDownloadProtocol extends StreamProtocol<BinaryDownloadPayload
         } catch (SQLException e) {
             LOG.error(e);
             return new GenericBinarySQLInputStream(false);
-        }
+        } 
     }
 
     /**

@@ -31,7 +31,9 @@
  ***************************************************************/
 package com.flexive.core.stream;
 
+import com.flexive.core.storage.ContentStorage;
 import com.flexive.core.storage.StorageManager;
+import com.flexive.shared.FxContext;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.stream.BinaryUploadPayload;
 import com.flexive.shared.structure.TypeStorageMode;
@@ -107,7 +109,7 @@ public class BinaryUploadProtocol extends StreamProtocol<BinaryUploadPayload> {
             if( this.expectedLength == 0 ) {
                 //create an empty transit entry
                 try {
-                    pout = StorageManager.getContentStorage(TypeStorageMode.Hierarchical).receiveTransitBinary(division, handle, mimeType, expectedLength, timeToLive);
+                    pout = getContentStorage().receiveTransitBinary(division, handle, mimeType, expectedLength, timeToLive);
                 } catch (Exception e) {
                     LOG.error(e);
                 }
@@ -117,6 +119,11 @@ public class BinaryUploadProtocol extends StreamProtocol<BinaryUploadPayload> {
             cleanup();
         }
         return null;
+    }
+
+    protected ContentStorage getContentStorage() throws FxNotFoundException {
+        FxContext.get().setDivisionId(division);
+        return StorageManager.getContentStorage(TypeStorageMode.Hierarchical);
     }
 
     /**
@@ -133,12 +140,12 @@ public class BinaryUploadProtocol extends StreamProtocol<BinaryUploadPayload> {
             rcvStarted = true;
             if (LOG.isDebugEnabled()) LOG.debug("(internal serverside) receive start");
             try {
-                pout = StorageManager.getContentStorage(TypeStorageMode.Hierarchical).receiveTransitBinary(division, handle, mimeType, expectedLength, timeToLive);
+                pout = getContentStorage().receiveTransitBinary(division, handle, mimeType, expectedLength, timeToLive);
             } catch (SQLException e) {
                 LOG.error("SQL Error trying to receive binary stream: " + e.getMessage(), e);
             } catch (FxNotFoundException e) {
                 LOG.error("Failed to lookup content storage for division #" + division + ": " + e.getLocalizedMessage());
-            }
+            }  
         }
         if (LOG.isDebugEnabled() && count + buffer.remaining() > expectedLength) {
             LOG.debug("poss. overflow: pos=" + buffer.position() + " lim=" + buffer.limit() + " cap=" + buffer.capacity());

@@ -472,6 +472,13 @@ public class EJBLookup {
                 prepareEnvironment(strat, env);
                 ctx = new InitialContext(env);
                 ctx.lookup(buildName(appName, type));
+
+                if (used_strategy == STRATEGY.EJB31_MODULE) {
+                    // we need to resolve all interfaces required by the streaming server now, since it
+                    // runs outside the module context
+
+                    resolveInterfacesForStreamServer();
+                }
                 return appName;
             } catch (Exception e) {
                 if (LOG.isDebugEnabled()) {
@@ -635,5 +642,9 @@ public class EJBLookup {
      */
     public static <T> T getEngine(Class<T> type) {
         return getInterface(type, APPNAME, null);
+    }
+
+    private static void resolveInterfacesForStreamServer() {
+        getNodeConfigurationEngine();
     }
 }
