@@ -47,6 +47,7 @@
         <dependency>
             <groupId>${groupId}</groupId>
             <artifactId>ejb-jar</artifactId>
+            <type>ejb</type>
         </dependency>
 
         <!-- Include flexive runtime -->

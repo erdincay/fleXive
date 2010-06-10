@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.flexive</groupId>
+        <artifactId>flexive-modules-parent</artifactId>
+        <version>3.1-SNAPSHOT</version>
+    </parent>
+
+    <groupId>com.flexive.standalone</groupId>
+    <artifactId>flexive-backend-standalone</artifactId>
+    <packaging>war</packaging>
+    <name>[fleXive] Backend GUI application (Standalone WAR)</name>
+    <description>
+        Standalone WAR package of the backend GUI application for deployment
+        in containers supporting the JavaEE 6 Web Profile.
+    </description>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.flexive</groupId>
+            <artifactId>flexive-ejb</artifactId>
+            <type>ejb</type>
+            <version>${flexive.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.flexive</groupId>
+                    <artifactId>flexive-ejb-interfaces-all</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>com.flexive</groupId>
+            <artifactId>flexive-backend</artifactId>
+            <version>${flexive.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.flexive</groupId>
+            <artifactId>flexive-ejb-interfaces-local</artifactId>
+            <version>${flexive.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.flexive</groupId>
+            <artifactId>flexive-plugin-jsf-core</artifactId>
+            <version>${flexive.version}</version>
+        </dependency>
+
+    </dependencies>
+
+
+    <build>
+        <finalName>flexive</finalName>
+    </build>
+
+</project>

@@ -8,7 +8,7 @@
     <version>${version}</version>
 
     <properties>
-        <flexive.version>3.1.2</flexive.version>
+        <flexive.version>3.1.3</flexive.version>
         <openejb.version>3.1</openejb.version>
         <jetty.version>6.1.22</jetty.version>
 
@@ -32,6 +32,7 @@
             <dependency>
                 <groupId>${pom.groupId}</groupId>
                 <artifactId>ejb-jar</artifactId>
+                <type>ejb</type>
                 <version>${pom.version}</version>
             </dependency>
             <dependency>
@@ -42,6 +43,7 @@
             <dependency>
                 <groupId>${pom.groupId}</groupId>
                 <artifactId>war</artifactId>
+                <type>war</type>
                 <version>${pom.version}</version>
             </dependency>
             <dependency>

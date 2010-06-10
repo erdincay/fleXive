@@ -19,13 +19,12 @@
 			<groupId>${groupId}</groupId>
 			<artifactId>ejb-jar</artifactId>
 			<type>ejb</type>
-			<version>${version}</version>
 		</dependency>
+
 		<dependency>
 			<groupId>${groupId}</groupId>
 			<artifactId>war</artifactId>
 			<type>war</type>
-			<version>${version}</version>
 		</dependency>
 
 		<dependency>

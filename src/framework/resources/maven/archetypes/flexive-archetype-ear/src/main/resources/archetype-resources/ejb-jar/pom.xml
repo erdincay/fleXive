@@ -13,7 +13,6 @@
         <dependency>
             <groupId>${groupId}</groupId>
             <artifactId>shared</artifactId>
-            <version>${version}</version>
             <type>jar</type>
         </dependency>
 		<dependency>
