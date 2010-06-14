@@ -35,6 +35,7 @@ import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.structure.FxEnvironment;
 import static com.flexive.tests.embedded.benchmark.FxBenchmarkUtils.getResultLogger;
+import org.apache.commons.lang.SerializationUtils;
 import org.testng.annotations.Test;
 
 /**
@@ -64,6 +65,30 @@ public class StructureBenchmark {
         } finally {
             FxContext.get().stopRunAsSystem();
         }
+    }
+
+    public void benchStructureSerialization() {
+        // benchmark environment serialization for shared/distributed caches
+
+        final FxEnvironment env = CacheAdmin.getEnvironment();
+        for (int i = 0; i < 10; i++) {
+            SerializationUtils.deserialize(SerializationUtils.serialize(env));
+        }
+
+        long start = System.currentTimeMillis();
+        final int times = 100;
+        for (int i = 0; i < times; i++) {
+            SerializationUtils.serialize(env);
+        }
+        getResultLogger().logTime("serializeEnvironment", start, times, "instance");
+
+        final byte[] serialized = SerializationUtils.serialize(env);
+        start = System.currentTimeMillis();
+        for (int i = 0; i < times; i++) {
+            SerializationUtils.deserialize(serialized);
+        }
+        getResultLogger().logTime("deserializeEnvironment", start, times, "instance");
+        System.out.println("Serialized environment size: " + (serialized.length / 1024) + "kb");
     }
 
     public void benchGetAssignmentByXPath() {

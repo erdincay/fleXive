@@ -67,6 +67,7 @@ public class FxQuartz {
     public final static String JOB_MAINTENANCE = "FxMaintenanceJob";
     /** A system property to disable the Quartz-based timer service (e.g. for tests) */
     public static final String PROP_DISABLE = "flexive.quartz.disable";
+    private static final String SCHEDULER_PREFIX = "FxQuartzScheduler_Division_";
 
     /**
      * Get the Scheduler for the current division
@@ -74,7 +75,7 @@ public class FxQuartz {
      * @return Scheduler for the current division
      */
     public static Scheduler getScheduler() {
-        return SchedulerRepository.getInstance().lookup("FxQuartzScheduler_Division_" + FxContext.get().getDivisionId());
+        return SchedulerRepository.getInstance().lookup(SCHEDULER_PREFIX + FxContext.get().getDivisionId());
     }
 
     /**
@@ -98,6 +99,7 @@ public class FxQuartz {
         // Grab the Scheduler instance from the Factory
         // see http://wiki.opensymphony.com/display/QRTZ1/ConfigJobStoreCMT for more options
         Properties props = new Properties();
+        props.put("org.quartz.scheduler.skipUpdateCheck", "true");
         props.put(StdSchedulerFactory.PROP_DATASOURCE_PREFIX, "fxQuartzDS");
         props.put("org.quartz.jobStore.dataSource", "fxQuartzDS");
         props.put("org.quartz.dataSource.fxQuartzDS." + StdSchedulerFactory.PROP_CONNECTION_PROVIDER_CLASS,
@@ -276,8 +278,7 @@ public class FxQuartz {
              if (scriptSchedule.getRepeatInterval() > 0)
                 ((SimpleTrigger)t).setRepeatInterval(scriptSchedule.getRepeatInterval());    
          }
-         // set end time
-         if (t.getEndTime() != null)
+         // set end time         if (t.getEndTime() != null)
              t.setEndTime(scriptSchedule.getEndTime());
          // set volatility
          t.setVolatility(false);
@@ -300,13 +301,21 @@ public class FxQuartz {
     }
 
     /**
-     * Shutdown the scheduler
+     * Shutdown the scheduler for all divisions.
      *
      * @throws SchedulerException on errors
      */
     public static void shutdown() throws SchedulerException {
-        if (isInstalled())
-            getScheduler().shutdown();
+        for (Object oScheduler : SchedulerRepository.getInstance().lookupAll()) {
+            final Scheduler scheduler = (Scheduler) oScheduler;
+            if (scheduler.getSchedulerName().startsWith(SCHEDULER_PREFIX)) {
+                if (LOG.isInfoEnabled()) {
+                    LOG.info("Shutting down scheduler for division "
+                            + scheduler.getSchedulerName().substring(SCHEDULER_PREFIX.length()));
+                }
+                scheduler.shutdown();
+            }
+        }
     }
 
     /**

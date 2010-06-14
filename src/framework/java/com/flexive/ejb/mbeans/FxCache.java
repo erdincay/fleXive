@@ -45,6 +45,7 @@ import com.flexive.shared.mbeans.MBeanHelper;
 import com.flexive.shared.stream.FxStreamUtils;
 import com.flexive.stream.ServerLocation;
 import com.flexive.stream.StreamServer;
+import com.google.common.collect.Lists;
 import java.io.Serializable;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -54,7 +55,6 @@ import javax.management.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import org.apache.commons.lang.SerializationUtils;
 
 /**
  * FxCache MBean
@@ -67,7 +67,8 @@ public class FxCache implements FxCacheMBean, DynamicMBean {
     private static final Log LOG = LogFactory.getLog(FxCache.class);
 
 
-    private StreamServer server = null;
+    private StreamServer server;
+    private ServerLocation serverLocation;
     private long nodeStartupTime = -1;
 
     private FxBackingCacheProvider cacheProvider = null;
@@ -97,7 +98,7 @@ public class FxCache implements FxCacheMBean, DynamicMBean {
      * {@inheritDoc}
      */
     @SuppressWarnings("unchecked")
-    public void create() throws Exception {
+    public synchronized void create() throws Exception {
         if (server != null) return;
 
         //switch to UTF-8 encoding
@@ -127,42 +128,47 @@ public class FxCache implements FxCacheMBean, DynamicMBean {
             // NOTE! Since we are operating directly on the backing cache, we have to do the actions
             // provided by FxCacheProxy (mapping paths, serializing values) manually
             
-            List<ServerLocation> servers = null;
-            final String configPath = FxCacheProxy.globalDivisionEncodePath(CacheAdmin.STREAMSERVER_BASE);
-            if (globalExists(configPath, CacheAdmin.STREAMSERVER_EJB_KEY))
-                servers = (List<ServerLocation>) FxCacheProxy.unmarshal(globalGet(configPath,CacheAdmin.STREAMSERVER_EJB_KEY));
-            if (servers == null)
-                servers = new ArrayList<ServerLocation>(5);
-            ServerLocation thisServer = new ServerLocation(server.getAddress().getAddress(), server.getPort());
-            if ((thisServer.getAddress().isLinkLocalAddress() || thisServer.getAddress().isAnyLocalAddress() || thisServer.getAddress().isLoopbackAddress()))
-                FxStreamUtils.addLocalServer(thisServer);
-            else if (!servers.contains(thisServer)) //only add if not contained already and not bound to a local address
-                servers.add(thisServer);
-            globalPut(configPath,CacheAdmin.STREAMSERVER_EJB_KEY, FxCacheProxy.marshal((Serializable) servers));
+            final List<ServerLocation> servers = getCachedServerList();
+            serverLocation = new ServerLocation(server.getAddress().getAddress(), server.getPort());
+            if ((serverLocation.getAddress().isLinkLocalAddress() || serverLocation.getAddress().isAnyLocalAddress() || serverLocation.getAddress().isLoopbackAddress()))
+                FxStreamUtils.addLocalServer(serverLocation);
+            else if (!servers.contains(serverLocation)) //only add if not contained already and not bound to a local address
+                servers.add(serverLocation);
+            updateCachedServerList(servers);
             
-            LOG.info("Added " + thisServer + " to available StreamServers (" + servers.size() + " total) for cache " + getBackingCache().toString());
+            LOG.info("Added " + serverLocation + " to available StreamServers (" + servers.size() + " total) for cache " + getBackingCache().toString());
         } catch (Exception e) {
             LOG.error("Failed to start StreamServer. Error: " + e.getMessage(), e);
         }
     }
 
 
+    private List<ServerLocation> getCachedServerList() throws FxCacheException {
+        final String configPath = FxCacheProxy.globalDivisionEncodePath(CacheAdmin.STREAMSERVER_BASE);
+        if (globalExists(configPath, CacheAdmin.STREAMSERVER_EJB_KEY)) {
+            return Lists.newArrayList(
+                    (List<ServerLocation>) FxCacheProxy.unmarshal(globalGet(configPath,
+                    CacheAdmin.STREAMSERVER_EJB_KEY))
+            );
+        }
+        return new ArrayList<ServerLocation>(5);
+    }
+
+    private void updateCachedServerList(List<ServerLocation> servers) throws FxCacheException {
+        globalPut(FxCacheProxy.globalDivisionEncodePath(CacheAdmin.STREAMSERVER_BASE),
+                CacheAdmin.STREAMSERVER_EJB_KEY, 
+                FxCacheProxy.marshal((Serializable) servers)
+        );
+    }
+
     /**
      * {@inheritDoc}
      */
-    public void destroy() throws Exception {
+    public synchronized void destroy() throws Exception {
         //System.out.println("about to uninstall timer");
         //EJBLookup.getTimerServiceInterface().uninstall();
         //System.out.println("timers uninstalled");
-        if (server != null) {
-            LOG.info("Shutting down StreamServer {" + server.getDescription() + "}");
-            try {
-                server.stop();
-            } catch (Exception e) {
-                LOG.error(e, e);
-            }
-            server = null;
-        }
+        stopLocalStreamServers();
         try {
             if (cacheProvider != null) {
                 cacheProvider.shutdown();
@@ -173,6 +179,29 @@ public class FxCache implements FxCacheMBean, DynamicMBean {
         }
     }
 
+    private void stopLocalStreamServers() {
+        if (server != null) {
+            try {
+                LOG.info("Shutting down StreamServer {" + server.getDescription() + "}");
+                try {
+                    server.stop();
+                } catch (Exception e) {
+                    LOG.error(e, e);
+                }
+                server = null;
+                if (serverLocation != null) {
+                    final List<ServerLocation> servers = getCachedServerList();
+                    servers.remove(serverLocation);
+                    updateCachedServerList(servers);
+                    serverLocation = null;
+                }
+            } catch (FxCacheException ex) {
+                if (LOG.isErrorEnabled()) {
+                    LOG.error("Failed to stop local stream server: " + ex.getMessage(), ex);
+                }
+            }
+        }
+    }
 
     //TODO: finish me!
     private static MBeanInfo info = new MBeanInfo(

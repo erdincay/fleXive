@@ -474,10 +474,10 @@ public class EJBLookup {
                 ctx.lookup(buildName(appName, type));
 
                 if (used_strategy == STRATEGY.EJB31_MODULE) {
-                    // we need to resolve all interfaces required by the streaming server now, since it
-                    // runs outside the module context
+                    // we need to resolve all interfaces required by non-web components (stream server, scheduler),
+                    // since they run outside the module context
 
-                    resolveInterfacesForStreamServer();
+                    resolveKnownInterfaces();
                 }
                 return appName;
             } catch (Exception e) {
@@ -644,7 +644,39 @@ public class EJBLookup {
         return getInterface(type, APPNAME, null);
     }
 
-    private static void resolveInterfacesForStreamServer() {
+    private static void resolveKnownInterfaces() throws NamingException {
+        // FIXME: this is a hack since it does not seem to be possible to browse the java:module path
+        // to enumerate all registered local interfaces. Of course this breaks for user-defined EJBs
+        // or if a new EJB is not registered here.
+        
+        getAccountEngine();
+        getAclEngine();
+        getApplicationConfigurationEngine();
+        getAssignmentEngine();
+        getBriefcaseEngine();
+        getCmisSearchEngine();
+        getConfigurationEngine();
+        getContentEngine();
+        getDivisionConfigurationEngine();
+        getGlobalConfigurationEngine();
+        getHistoryTrackerEngine();
+        getLanguageEngine();
+        getMandatorEngine();
         getNodeConfigurationEngine();
+        getResultPreferencesEngine();
+        getScriptingEngine();
+        getSearchEngine();
+        getSelectListEngine();
+        getSequencerEngine();
+        getTimerService();
+        getTransactionManager();
+        getTreeEngine();
+        getTypeEngine();
+        getUserConfigurationEngine();
+        getUserGroupEngine();
+        getWorkflowEngine();
+        getWorkflowRouteEngine();
+        getWorkflowStepDefinitionEngine();
+        getWorkflowStepEngine();
     }
 }

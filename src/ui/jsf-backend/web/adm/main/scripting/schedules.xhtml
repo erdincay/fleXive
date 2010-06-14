@@ -78,19 +78,14 @@
                                 </td>
                                 <td><h:selectBooleanCheckbox value="#{schedule.active}" disabled="true"/></td>
                                 <td>
-                                    <rich:calendar popup="true"
-                                       disabled="true"
-                                       manualInput="true"
-                                       datePattern="#{scriptScheduleBean.dateTimePattern}"
-                                       value="#{schedule.startTime}"/>
+                                    <h:outputText value="#{schedule.startTime}">
+                                        <f:convertDateTime pattern="#{scriptScheduleBean.dateTimePattern}"/>
+                                    </h:outputText>
                                 </td>
                                 <td>
-                                    <rich:calendar popup="true"
-                                       manualInput="true"
-                                       datePattern="#{scriptScheduleBean.dateTimePattern}"
-                                       value="#{schedule.endTime}"
-                                       rendered="#{not empty schedule.endTime}"
-                                            disabled="true"/>
+                                    <h:outputText value="#{schedule.endTime}">
+                                        <f:convertDateTime pattern="#{scriptScheduleBean.dateTimePattern}"/>
+                                    </h:outputText>
 
                                     <ui:fragment rendered="#{empty schedule.endTime and not schedule.unbounded}">
                                          #{fxMessageBean['ScriptSchedule.label.repeat']} #{schedule.repeatTimes} #{fxMessageBean['ScriptSchedule.label.times']}

@@ -82,7 +82,7 @@ public class FxContext implements Serializable {
     public static final String SESSION_DIVISIONID = "$flexive_division_id$";
 
     private static final Log LOG = LogFactory.getLog(FxContext.class);
-    private static ThreadLocal<FxContext> info = new ThreadLocal<FxContext>();
+    private static final ThreadLocal<FxContext> info = new ThreadLocal<FxContext>();
     private static boolean MANUAL_INIT_CALLED = false;
 
     private final String requestURI;

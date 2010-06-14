@@ -32,11 +32,14 @@
 package com.flexive.war.filter;
 
 import com.flexive.core.flatstorage.FxFlatStorageManager;
+import com.flexive.core.timer.FxQuartz;
+import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.configuration.DivisionData;
 import com.flexive.shared.exceptions.FxApplicationException;
+import com.flexive.shared.mbeans.MBeanHelper;
 import com.metaparadigm.jsonrpc.JSONRPCBridge;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -48,6 +51,7 @@ import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import org.quartz.SchedulerException;
 
 /**
  * The main [fleXive] servlet filter. Its main responsibility is to provide the
@@ -89,6 +93,35 @@ public class FxFilter implements Filter {
     }
 
     public void destroy() {
+        try {
+            // shutdown timer service if it is installed - cannot use EJB call here since we're shutting down
+            FxQuartz.shutdown();
+
+            // check if cache is still there
+            try {
+                CacheAdmin.getInstance().getDeploymentId();
+            } catch (Exception e) {
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug("Cache already uninstalled");
+                }
+                return;
+            }
+
+            if (MBeanHelper.DEPLOYMENT_ID.equals(CacheAdmin.getInstance().getDeploymentId())) {
+                // Destroy local cache instance.
+                // This also stops local streaming servers, since they cannot use EJB calls from a shutdown context.
+
+                CacheAdmin.uninstallLocalInstance();
+            } 
+        } catch (SchedulerException ex) {
+            if (LOG.isWarnEnabled()) {
+                LOG.warn("Failed to shutdown Quartz scheduler: " + ex.getMessage(), ex);
+            }
+        } catch (Exception ex) {
+            if (LOG.isWarnEnabled()) {
+                LOG.warn(ex.getMessage(), ex);
+            }
+        }
     }
 
 

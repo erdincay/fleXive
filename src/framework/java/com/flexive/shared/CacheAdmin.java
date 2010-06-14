@@ -146,22 +146,38 @@ public class CacheAdmin {
             } else if (!isSharedCache()) {
                 // check if MBean Server is from current deployment. Currently this is disabled
                 // if the cache is shared between different deployments in the same VM, so undeploying
-                // the instance that provides the cache leads to undefined behavour.
+                // the instance that provides will remove the cache for the other applications until
+                // a new flexive application is deployed.
                 
                 String deployedId = cache.getDeploymentId();
                 if (MBeanHelper.DEPLOYMENT_ID.equals(deployedId))
                     return cache;
                 LOG.info("Redeployment! Have to undeploy " + deployedId + " (vs " + MBeanHelper.DEPLOYMENT_ID + ")");
-                cache.destroy();
-                server.unregisterMBean(((FxCacheProxy) cache).getName());
+                uninstallLocalInstance();
                 EJBLookup.getGlobalConfigurationEngine().registerCacheMBean(((FxCacheProxy) cache).getName());
                 LOG.debug("Registered: " + server.isRegistered(((FxCacheProxy) cache).getName()));
                 cache.create();
-            }
+            } 
             return cache;
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);
             return null;
+        }
+    }
+
+    /**
+     * Uninstall the local cache instance. This also stops local streaming servers.
+     *
+     * @throws Exception    on errors
+     * @since 3.1.4
+     */
+    public static synchronized void uninstallLocalInstance() throws Exception {
+        if (isCacheMBeanInstalled() && MBeanHelper.DEPLOYMENT_ID.equals(getInstance().getDeploymentId())) {
+            if (LOG.isInfoEnabled()) {
+                LOG.info("Uninstalling local cache instance and streaming server.");
+            }
+            getInstance().destroy();
+            MBeanHelper.locateServer().unregisterMBean(((FxCacheProxy) cache).getName());
         }
     }
 
@@ -182,16 +198,14 @@ public class CacheAdmin {
 
     /**
      * Is this a new and uninitialized flexive installation?
-     * Useful to display splashscreens etc.
+     * Useful to display splash screens etc.
      *
      * @return if this is a new flexive installation
      */
     public static boolean isNewInstallation() {
         try {
-            return getInstance().get(ENVIRONMENT_BASE, ENVIRONMENT_RUNTIME) == null &&
-                    !EJBLookup.getDivisionConfigurationEngine().get(SystemParameters.DIVISION_RUNONCE);
-        } catch (FxCacheException e) {
-            throw new RuntimeException(e.getMessage(), e);
+            return !isEnvironmentLoaded()
+                    && !EJBLookup.getDivisionConfigurationEngine().get(SystemParameters.DIVISION_RUNONCE);
         } catch (FxApplicationException e) {
             throw e.asRuntimeException();
         }
@@ -204,7 +218,7 @@ public class CacheAdmin {
      */
     public static boolean isEnvironmentLoaded() {
         try {
-            return getInstance().get(ENVIRONMENT_BASE, ENVIRONMENT_RUNTIME) != null;
+            return getInstance().exists(ENVIRONMENT_BASE, ENVIRONMENT_RUNTIME);
         } catch (FxCacheException e) {
             return false;
         }

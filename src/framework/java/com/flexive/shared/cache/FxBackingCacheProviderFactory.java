@@ -90,7 +90,7 @@ public class FxBackingCacheProviderFactory {
                 instance = new FxJBossEmbeddedCacheProvider();
                 instance.init();
             } catch (FxCacheException e) {
-                final String message = "Failed to instantiate embedded cahce: " + e.getMessage();
+                final String message = "Failed to instantiate embedded cache: " + e.getMessage();
                 LOG.error(message, e);
                 throw new IllegalStateException(message, e);
             }

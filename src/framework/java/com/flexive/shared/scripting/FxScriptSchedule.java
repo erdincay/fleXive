@@ -43,6 +43,8 @@ import java.util.Date;
  * @since 3.1.2
  */
 public class FxScriptSchedule implements Serializable, SelectableObjectWithName {
+    private static final long serialVersionUID = -7568151422862806766L;
+    
     /**
      * Constant designating unbounded repeat times<br/>
      * (useful for script schedules that should run up to the specified end time,

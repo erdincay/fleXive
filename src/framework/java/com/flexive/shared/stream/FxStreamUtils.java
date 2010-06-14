@@ -53,9 +53,10 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * Utitlity class to access the StreamServer
+ * Utility class to access the StreamServer
  *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
@@ -71,16 +72,16 @@ public class FxStreamUtils {
     /**
      * List of local servers
      */
-    private volatile static List<ServerLocation> localServers = new ArrayList<ServerLocation>(5);
+    private static final List<ServerLocation> localServerLocations = new CopyOnWriteArrayList<ServerLocation>();
 
     /**
      * Add a local server
      *
      * @param serverLocation local server location
      */
-    public static void addLocalServer(ServerLocation serverLocation) {
-        if (!localServers.contains(serverLocation))
-            localServers.add(serverLocation);
+    public static synchronized void addLocalServer(ServerLocation serverLocation) {
+        if (!localServerLocations.contains(serverLocation))
+            localServerLocations.add(serverLocation);
     }
 
     /**
@@ -133,10 +134,10 @@ public class FxStreamUtils {
             servers = CacheAdmin.getStreamServers();
         try {
             StreamClient client;
-            List<ServerLocation> allServers = new ArrayList<ServerLocation>(servers.size() + localServers.size());
-            allServers.addAll(localServers);
+            List<ServerLocation> allServers = new ArrayList<ServerLocation>(servers.size() + localServerLocations.size());
+            allServers.addAll(localServerLocations);
             allServers.addAll(servers);
-            if (allServers.size() == 0)
+            if (allServers.isEmpty())
                 throw new FxStreamException("ex.stream.download.param.server");
             client = StreamClientFactory.getClient(allServers);
             return client;

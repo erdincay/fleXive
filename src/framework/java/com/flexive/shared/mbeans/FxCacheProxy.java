@@ -59,7 +59,6 @@ public class FxCacheProxy implements FxCacheMBean {
 
     public FxCacheProxy(MBeanServer server) throws MalformedObjectNameException {
         this.server = server;
-        //this.name = new ObjectName(CacheAdmin.CACHE_SERVICE_NAME + "_" + System.currentTimeMillis());
         this.name = new ObjectName(CacheAdmin.CACHE_SERVICE_NAME);
     }
 

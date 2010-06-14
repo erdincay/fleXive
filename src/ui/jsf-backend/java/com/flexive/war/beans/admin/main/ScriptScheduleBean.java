@@ -164,7 +164,7 @@ public class ScriptScheduleBean implements Serializable {
             new FxFacesMsgErr(e).addToContext();
             return null;
         }
-        return "scriptScheduleEdit";
+        return null;
     }
 
     private void setBeanDefaultValues() {
