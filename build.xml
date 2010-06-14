@@ -23,6 +23,7 @@
     <property name="build.ui.components.meta.dir" value="${flexive.base.build.dir}/ui/jar/components/WEB-INF"/>
     <property name="build.ui.jar.libs.dir" value="${flexive.base.build.dir}/ui/libs"/>
     <property name="build.ear.libs.dir" value="${flexive.base.build.dir}/lib"/>
+    <property name="build.war.standalone.libs.dir" value="${flexive.base.build.dir}/ui/backend-standalone/lib"/>
     <property name="build.storages.dir" value="${flexive.base.build.dir}/storages"/>
     <property name="build.onlylocal.src.dir" value="${flexive.build.framework.dir}/onlylocal-src"/>
     <property name="build.onlylocal.classes.dir" value="${flexive.build.framework.dir}/onlylocal-classes"/>
@@ -123,6 +124,23 @@
     <fileset id="jar.core.resources" dir="${flexive.resources.framework.dir}">
         <exclude name="**/*"/>  <!-- no inclusions right now -->
     </fileset>
+
+    <path id="jar.ear.libs">
+        <fileset dir="${flexive.lib.dir}" includes="${sqlparser.jar},${extractor.jar},${extractor-documents.jar},${extractor-audio.jar},${extractor-video.jar},${flatstorage.jar},cglib*.jar,fxStream.jar,commons-io-1.1.jar,sanselan.jar,quartz*.jar,PDFRenderer.jar,commons-*.jar,jbosscache-core.jar,jgroups.jar,jboss-common-core-42-compat.jar,urlrewrite-*.jar,google-collect*.jar,jsr173_1.0_api.jar,jtidy.jar,mime-util*,slf4j*,icepdf-core.jar"/>
+        <fileset dir="${flexive.lib.dir}/groovy" includes="*.jar"/>
+        <fileset dir="${flexive.lib.dir}/audio" includes="*.jar"/>
+        <fileset dir="${build.ui.jar.dir}" includes="*.jar" excludes="flexive-plugin-jsf-testrunner.jar,flexive-plugin-jsf-*,flexive-plugin-jsf2-*,flexive-backend.jar"/>
+        <fileset dir="${flexive.lib.dir}/antlr" includes="antlr-runtime-*.jar"/>
+
+        <fileset dir="${build.ui.jar.dir}">
+            <!-- only include the testrunner plugin if target test.package.ear was invoked -->
+            <include name="flexive-plugin-jsf-testrunner.jar" if="package.testNG"/>
+        </fileset>
+        <fileset dir="${flexive.lib.dir}/xstream" includes="*.jar"/>
+        <fileset dir="${flexive.lib.dir}/mail" includes="*.jar"/>
+        <fileset dir="${flexive.lib.dir}/text_extraction"  includes="*.jar"/>
+        <fileset dir="${flexive.lib.dir}/jsf" includes="jsonrpc-1.0.jar"/>
+    </path>
 
 	<!-- ========================== tasks / macros ====================== -->
     <taskdef name="groovyc" classname="org.codehaus.groovy.ant.Groovyc" classpathref="classpath.build.framework"/>
@@ -625,6 +643,24 @@
         </war>
 	</target>
 
+    <target name="jar.ui.standalone" depends="jar.interfaces.onlylocal,jar.ui"
+            description="Packages the backend for standalone deployment in a JavaEE Web Profile Container">
+
+        <mkdir dir="${build.war.standalone.libs.dir}"/>
+        <copy todir="${build.war.standalone.libs.dir}">
+            <path refid="jar.ear.libs"/>
+            <path refid="jar.ear.jsflibs"/>
+        </copy>
+
+        <copy file="${flexive.base.build.dir}/ui/flexive.war" tofile="${flexive.base.build.dir}/ui/flexive-standalone.war"/>
+        
+        <jar jarfile="${flexive.base.build.dir}/ui/flexive-standalone.war" update="true">
+            <zipfileset prefix="WEB-INF/lib" dir="${flexive.build.framework.jar.dir}" includes="*.jar" 
+                excludes="${sqlparser.jar},${htmlparser.jar},richfaces*.jar,${ejb-interfaces-all.jar}"/>
+            <zipfileset prefix="WEB-INF/lib" dir="${build.war.standalone.libs.dir}" includes="*.jar"/>
+        </jar>
+    </target>
+
     <target name="jar.core.prepare">
         <uptodate targetfile="${flexive.build.framework.jar.dir}/flexive-core.jar" property="jar.core.skip">
             <srcfiles refid="jar.core.classes"/>
@@ -758,27 +794,16 @@
             <fileset dir="${flexive.build.framework.jar.dir}" includes="*.jar" excludes="${sqlparser.jar},${htmlparser.jar},*-ejb.jar,richfaces*.jar"/>
             <fileset dir="${flexive.drop.dir}" includes="*.jar" excludes="*-ejb.jar,*.war,*.par"/>
 
+            <path refid="jar.ear.libs"/>
+            
             <!-- Shared libraries -->
-            <fileset dir="${flexive.lib.dir}" includes="${sqlparser.jar},${extractor.jar},${extractor-documents.jar},${extractor-audio.jar},${extractor-video.jar},${flatstorage.jar},cglib*.jar,fxStream.jar,commons-io-1.1.jar,sanselan.jar,quartz*.jar,PDFRenderer.jar,commons-*.jar,jbosscache-core.jar,jgroups.jar,jboss-common-core-42-compat.jar,urlrewrite-*.jar,google-collect*.jar,jsr173_1.0_api.jar,jtidy.jar,mime-util*,slf4j*,icepdf-core.jar"/>
-            <fileset dir="${flexive.lib.dir}/groovy" includes="*.jar"/>
-            <fileset dir="${flexive.lib.dir}/audio" includes="*.jar"/>
-            <fileset dir="${build.ui.jar.dir}" includes="*.jar" excludes="flexive-plugin-jsf-testrunner.jar,flexive-plugin-jsf-*,flexive-plugin-jsf2-*,flexive-backend.jar"/>
-            <fileset dir="${flexive.lib.dir}/antlr" includes="antlr-runtime-*.jar"/>
+            <path refid="jar.ear.jsflibs"/>
 
-            <fileset dir="${build.ui.jar.dir}">
-                <!-- only include the testrunner plugin if target test.package.ear was invoked -->
-                <include name="flexive-plugin-jsf-testrunner.jar" if="package.testNG"/>
-            </fileset>
-            <fileset dir="${flexive.lib.dir}/xstream" includes="*.jar"/>
-            <fileset dir="${flexive.lib.dir}/mail" includes="*.jar"/>
-            <fileset dir="${flexive.lib.dir}/text_extraction"  includes="*.jar"/>
             <fileset dir="${flexive.lib.dir}/testNG">
                 <!-- include testNG only if target test.package.ear was invoked -->
                 <include name="testng*jar" if="package.testNG"/>
             </fileset>
 
-            <fileset dir="${flexive.lib.dir}/jsf" includes="jsonrpc-1.0.jar"/>
-            <path refid="jar.ear.jsflibs"/>
         </copy>
         <!-- Create manifest classpath -->
         <manifestclasspath property="ear.classpath" jarfile="${flexive.base.build.dir}/flexive.ear">
@@ -803,7 +828,7 @@
                 <include name="geronimo-application.xml"/>
                 <include name="weblogic-application.xml"/>
             </metainf>
-            <fileset dir="${flexive.build.framework.jar.dir}" includes="*-ejb.jar,*.par"/>
+            <fileset dir="${flexive.build.framework.jar.dir}" includes="*-ejb.jar"/>
             <fileset dir="${flexive.base.build.dir}/ui" includes="*.war"/>
             <fileset dir="${flexive.drop.dir}" includes="*.war,*-ejb.jar,*.par"/>
 
@@ -975,6 +1000,7 @@
 		<copy file="${flexive.build.framework.jar.dir}/flexive-ant.jar" tofile="${flexive.dist.lib.dir}/flexive-ant.jar"/>
         <copy file="${flexive.build.framework.jar.dir}/flexive-shared.jar" tofile="${flexive.dist.lib.dir}/flexive-shared.jar"/>
         <copy file="${flexive.build.framework.jar.dir}/${ejb-interfaces-all.jar}" tofile="${flexive.dist.lib.dir}/${ejb-interfaces-all.jar}"/>
+        <copy file="${flexive.build.framework.jar.dir}/${ejb-interfaces-onlylocal.jar}" tofile="${flexive.dist.lib.dir}/${ejb-interfaces-onlylocal.jar}"/>
         <copy todir="${flexive.dist.lib.dir}">
             <fileset dir="${build.ui.jar.dir}" includes="*.jar" excludes="flexive-backend.jar,flexive-plugin-*.jar"/>
         </copy>

@@ -18,6 +18,7 @@
 
     <property name="package.ear" value="${fxProject}.ear"/>
     <property name="package.war" value="${fxProject}.war"/>
+    <property name="package.war.standalone" value="${fxProject}-standalone.war"/>
     <property name="package.shared" value="${fxProject}-shared.jar"/>
     <property name="package.ejb" value="${fxProject}-ejb.jar"/>
 
@@ -153,7 +154,7 @@ db.config.create
             <fileset file="${build.dir}/apps/drops.archives"/>
         </jar>
         <ear earfile="${build.dist.dir}/${package.ear}" appxml="${build.dir}/application.xml" duplicate="fail">
-            <zipfileset prefix="lib" dir="${dist.lib.dir}" includes="**/*" excludes="flexive-ejb.jar, flexive-tests.jar"/>
+            <zipfileset prefix="lib" dir="${dist.lib.dir}" includes="**/*" excludes="flexive-ejb.jar, flexive-tests.jar, flexive-ejb-interfaces-local.jar"/>
             <zipfileset prefix="lib" dir="${dist.extlib.dir}" includes="**/*" excludes="${extlib.excludes}"/>
             <zipfileset prefix="lib" dir="${basedir}/lib" includes="**/*.jar"/>
             <zipfileset prefix="lib" dir="${build.dir}" includes="flexive-drop-resources.jar"/>
@@ -170,8 +171,30 @@ db.config.create
         <delete file="${build.dist.dir}/drops.archives"/>
     </target>
 
-    <target name="package" depends="project.precompile,compile,project.postcompile,package.shared,package.ejb,package.war,package.ear,project.postpackage"/>
+    <target name="war.standalone" depends="war" description="Package the application as a WAR file for standalone deployment in a JavaEE Web Profile Container.">
+        <copy file="${build.dist.dir}/${package.war}" tofile="${build.dist.dir}/${package.war.standalone}"/>
+
+        <jar jarfile="${build.dist.dir}/${package.war.standalone}" update="true">
+            <!-- Include application JARs and EJBs -->
+            <zipfileset prefix="WEB-INF/lib" file="${build.dist.dir}/${package.ejb}"/>
+            <zipfileset prefix="WEB-INF/lib" file="${build.dist.dir}/${package.shared}"/>
+
+            <!-- Include shared EAR dependencies -->
+            <zipfileset prefix="WEB-INF/lib" dir="${dist.lib.dir}" includes="**/*" excludes="flexive-tests.jar, flexive-ejb-interfaces-all.jar"/>
+            <zipfileset prefix="WEB-INF/lib" dir="${dist.extlib.dir}" includes="**/*" excludes="${extlib.excludes}"/>
+            <zipfileset prefix="WEB-INF/lib" dir="${basedir}/lib" includes="**/*.jar"/>
+            <zipfileset prefix="WEB-INF/lib" dir="${build.dir}" includes="flexive-drop-resources.jar"/>
+
+            <!-- Include flexive JSF libs -->
+            <zipfileset prefix="WEB-INF/lib" dir="${applications.dir}" includes="flexive-plugin-jsf-shared.jar,flexive-plugin-jsf-core.jar"/>
+        </jar>
+    </target>
+
+    <target name="war" depends="project.precompile,compile,project.postcompile,package.shared,package.ejb,package.war"
+            description="Package the application as a WAR file to be included in a flexive EAR."/>
+
+    <target name="package" depends="war,package.ear,project.postpackage"/>
     
-    <!-- ear is and alias for "package" (to be consistent with the distribution's targets -->
-    <target name="ear" depends="package"/>
+    <!-- ear is an alias for "package" (to be consistent with the distribution's targets -->
+    <target name="ear" depends="package" description="Package the application as an EAR, including all applications in flexive-dist/applications."/>
 </project>
