@@ -342,6 +342,7 @@
             <jvmarg value="-Demma.coverage.out.merge=true"/>
             <jvmarg value="-Dflexive.benchmark.resultlogger=com.flexive.tests.embedded.benchmark.logger.HudsonPlotLogger"/>
             <!--<jvmarg value="-Dflexive.benchmark.resultlogger=com.flexive.tests.embedded.benchmark.logger.XmlLogger"/>-->
+            <jvmarg value="-Dflexive.cache.shared=false"/>
             <jvmarg value="-Dfxstreaming.port=18290"/>
             <jvmarg line="${run.debug.settings}"/>
             <jvmarg line="${run.profile.settings}"/>
