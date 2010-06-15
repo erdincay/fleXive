@@ -41,11 +41,11 @@ Parameters (valid for all binarypreviewprocess scripts):
 "int defaultId",
 "String mimeType",
 "String metaData",
-"File binaryFile",
-"File previewFile1",
-"File previewFile2",
-"File previewFile3",
-"File previewFile4",
+"String binaryFile",
+"String previewFile1",
+"String previewFile2",
+"String previewFile3",
+"String previewFile4",
 "int[] dimensionPreview1",
 "int[] dimensionPreview2",
 "int[] dimensionPreview3",
@@ -59,9 +59,15 @@ boolean isAudioFile = mimeType.startsWith("audio/")
 if (!isAudioFile)
   return
 
+File f_binaryFile = binaryFile != null ? new File((String)binaryFile) : null
+if( f_binaryFile == null || !f_binaryFile.exists() || !f_binaryFile.isFile() ) {
+  System.err.println("Binary file ["+binaryFile+"] does not exist or is not a file!")
+  return
+}
+
 //parse metadata
 println "Processing an audio file ..."
-FxMetadata meta = FxMediaEngine.identify(mimeType, binaryFile)
+FxMetadata meta = FxMediaEngine.identify(mimeType, f_binaryFile)
 if (!meta.isAudioMetadata())
   return //could not identify as audio file
 

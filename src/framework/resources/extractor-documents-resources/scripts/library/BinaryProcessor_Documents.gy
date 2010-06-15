@@ -41,6 +41,25 @@ import java.awt.image.BufferedImage
 import java.awt.*
 import javax.imageio.ImageIO
 
+/*
+Parameters (valid for all binarypreviewprocess scripts):
+===========
+"boolean processed",
+"boolean useDefaultPreview",
+"int defaultId",
+"String mimeType",
+"String metaData",
+"String binaryFile",
+"String previewFile1",
+"String previewFile2",
+"String previewFile3",
+"String previewFile4",
+"int[] dimensionPreview1",
+"int[] dimensionPreview2",
+"int[] dimensionPreview3",
+"int[] dimensionPreview4"
+*/
+
 if (processed) {
   println "already processed in documents ..."
   return
@@ -54,7 +73,7 @@ boolean useICEpdf = true
 
 boolean isDocument = true
 int doc_previewId = BinaryDescriptor.SYS_UNKNOWN
-//Extractor.DOC_TYPE docType = Extractor.DOC_TYPE.WORD
+Extractor.DocumentType docType = null
 switch (mimeType) {
   case "application/msword":
     doc_previewId = BinaryDescriptor.SYS_DOC
@@ -81,12 +100,17 @@ switch (mimeType) {
 }
 
 if (!isDocument) {
-  println "no document!"
   return
 }
-println "processing a document!"
+
+File f_binaryFile = binaryFile != null ? new File((String)binaryFile) : null
+if( f_binaryFile == null || !f_binaryFile.exists() || !f_binaryFile.isFile() ) {
+  System.err.println("Binary file ["+binaryFile+"] does not exist or is not a file!")
+  return
+}
+
 try {
-  metaData = Extractor.extractData(binaryFile, docType).toXML()
+  metaData = Extractor.extractData(f_binaryFile, docType).toXML()
 } catch (Throwable t) {
   println "Failed to extract data, returning empty set: " + t.message
   metaData = ExtractedData.toEmptyXML()
@@ -110,7 +134,7 @@ if (docType == Extractor.DocumentType.PDF) {
     if (usePDFRenderer) {
       println "Using PDFRenderer for rendering"
       // set up the PDF reading
-      RandomAccessFile raf = new RandomAccessFile((File) binaryFile, "r");
+      RandomAccessFile raf = new RandomAccessFile((File) f_binaryFile, "r");
       FileChannel channel = raf.getChannel();
       ByteBuffer buf = channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size());
       PDFFile pdffile = new PDFFile(buf);
@@ -135,7 +159,7 @@ if (docType == Extractor.DocumentType.PDF) {
       println "Using ICEpdf for rendering"
       //try ICEPdf
       org.icepdf.core.pobjects.Document doc = new org.icepdf.core.pobjects.Document()
-      doc.setFile(((File) binaryFile).getAbsolutePath())
+      doc.setFile(((File) f_binaryFile).getAbsolutePath())
       if (doc.getNumberOfPages() > 0) {
         img = (BufferedImage) doc.getPageImage(0, org.icepdf.core.util.GraphicsRenderingHints.PRINT, org.icepdf.core.pobjects.Page.BOUNDARY_CROPBOX, 0f, 1.0f)
         success = true
@@ -145,14 +169,20 @@ if (docType == Extractor.DocumentType.PDF) {
     if (success && img != null) {
       ImageIO.write(img, ext.substring(1), imgFile)
 
-      previewFile1 = File.createTempFile("PREV1", ext)
-      previewFile2 = File.createTempFile("PREV2", ext)
-      previewFile3 = File.createTempFile("PREV3", ext)
-      previewFile4 = File.createTempFile("PREV4", ext)
-      dimensionsPreview1 = FxMediaEngine.scale(imgFile, previewFile1, ext, BinaryDescriptor.PREVIEW1_BOX, BinaryDescriptor.PREVIEW1_BOX)
-      dimensionsPreview2 = FxMediaEngine.scale(imgFile, previewFile2, ext, BinaryDescriptor.PREVIEW2_BOX, BinaryDescriptor.PREVIEW2_BOX)
-      dimensionsPreview3 = FxMediaEngine.scale(imgFile, previewFile3, ext, BinaryDescriptor.PREVIEW3_BOX, BinaryDescriptor.PREVIEW3_BOX)
-      dimensionsPreview4 = FxMediaEngine.scale(imgFile, previewFile4, ext, BinaryDescriptor.SCREENVIEW_WIDTH, BinaryDescriptor.SCREENVIEW_HEIGHT)
+      File f_previewFile1 = File.createTempFile("PREV1", ext)
+      File f_previewFile2 = File.createTempFile("PREV2", ext)
+      File f_previewFile3 = File.createTempFile("PREV3", ext)
+      File f_previewFile4 = File.createTempFile("PREV4", ext)
+
+      dimensionsPreview1 = FxMediaEngine.scale(imgFile, f_previewFile1, ext, BinaryDescriptor.PREVIEW1_BOX, BinaryDescriptor.PREVIEW1_BOX)
+      dimensionsPreview2 = FxMediaEngine.scale(imgFile, f_previewFile2, ext, BinaryDescriptor.PREVIEW2_BOX, BinaryDescriptor.PREVIEW2_BOX)
+      dimensionsPreview3 = FxMediaEngine.scale(imgFile, f_previewFile3, ext, BinaryDescriptor.PREVIEW3_BOX, BinaryDescriptor.PREVIEW3_BOX)
+      dimensionsPreview4 = FxMediaEngine.scale(imgFile, f_previewFile4, ext, BinaryDescriptor.SCREENVIEW_WIDTH, BinaryDescriptor.SCREENVIEW_HEIGHT)
+
+      previewFile1 = f_previewFile1.absolutePath
+      previewFile2 = f_previewFile2.absolutePath
+      previewFile3 = f_previewFile3.absolutePath
+      previewFile4 = f_previewFile4.absolutePath
       useDefaultPreview = false
     }
     if (!imgFile.delete())

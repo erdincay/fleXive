@@ -42,11 +42,11 @@ Parameters (valid for all binarypreviewprocess scripts):
 "int defaultId",
 "String mimeType",
 "String metaData",
-"File binaryFile",
-"File previewFile1",
-"File previewFile2",
-"File previewFile3",
-"File previewFile4",
+"String binaryFile",
+"String previewFile1",
+"String previewFile2",
+"String previewFile3",
+"String previewFile4",
 "int[] dimensionPreview1",
 "int[] dimensionPreview2",
 "int[] dimensionPreview3",
@@ -63,9 +63,15 @@ if (!isVideoFile) {
   return
 }
 
+File f_binaryFile = binaryFile != null ? new File((String)binaryFile) : null
+if( f_binaryFile == null || !f_binaryFile.exists() || !f_binaryFile.isFile() ) {
+  System.err.println("Binary file ["+binaryFile+"] does not exist or is not a file!")
+  return
+}
+
 //parse metadata
 println "Processing a video file ..."
-FxMetadata meta = FxMediaEngine.identify(mimeType, binaryFile)
+FxMetadata meta = FxMediaEngine.identify(mimeType, f_binaryFile)
 if (!meta.isVideoMetadata())
   return //could not identify as video file
 
@@ -74,6 +80,10 @@ metaData = meta.toXML()
 processed = true
 
 useDefaultPreview = true
+File f_previewFile1 = null
+File f_previewFile2 = null
+File f_previewFile3 = null
+File f_previewFile4 = null
 
 try {
   File imgFile = new File((meta.metadata.find { it.@key == 'previewFile'}).getValue());
@@ -81,14 +91,14 @@ try {
     def ext = imgFile.getName();
     ext = ext.substring(ext.lastIndexOf("."));
     println imgFile.getAbsolutePath();
-    previewFile1 = File.createTempFile("PREV1", ext)
-    previewFile2 = File.createTempFile("PREV2", ext)
-    previewFile3 = File.createTempFile("PREV3", ext)
-    previewFile4 = File.createTempFile("PREV4", ext)
-    dimensionsPreview1 = FxMediaEngine.scale(imgFile, previewFile1, ext, BinaryDescriptor.PREVIEW1_BOX, BinaryDescriptor.PREVIEW1_BOX)
-    dimensionsPreview2 = FxMediaEngine.scale(imgFile, previewFile2, ext, BinaryDescriptor.PREVIEW2_BOX, BinaryDescriptor.PREVIEW2_BOX)
-    dimensionsPreview3 = FxMediaEngine.scale(imgFile, previewFile3, ext, BinaryDescriptor.PREVIEW3_BOX, BinaryDescriptor.PREVIEW3_BOX)
-    dimensionsPreview4 = FxMediaEngine.scale(imgFile, previewFile4, ext, BinaryDescriptor.SCREENVIEW_WIDTH, BinaryDescriptor.SCREENVIEW_HEIGHT)
+    f_previewFile1 = File.createTempFile("PREV1", ext)
+    f_previewFile2 = File.createTempFile("PREV2", ext)
+    f_previewFile3 = File.createTempFile("PREV3", ext)
+    f_previewFile4 = File.createTempFile("PREV4", ext)
+    dimensionsPreview1 = FxMediaEngine.scale(imgFile, f_previewFile1, ext, BinaryDescriptor.PREVIEW1_BOX, BinaryDescriptor.PREVIEW1_BOX)
+    dimensionsPreview2 = FxMediaEngine.scale(imgFile, f_previewFile2, ext, BinaryDescriptor.PREVIEW2_BOX, BinaryDescriptor.PREVIEW2_BOX)
+    dimensionsPreview3 = FxMediaEngine.scale(imgFile, f_previewFile3, ext, BinaryDescriptor.PREVIEW3_BOX, BinaryDescriptor.PREVIEW3_BOX)
+    dimensionsPreview4 = FxMediaEngine.scale(imgFile, f_previewFile4, ext, BinaryDescriptor.SCREENVIEW_WIDTH, BinaryDescriptor.SCREENVIEW_HEIGHT)
     useDefaultPreview = false
   }
   if (!imgFile.delete())
@@ -97,5 +107,10 @@ try {
 } catch (NullPointerException npe) {
   // ocurs when there is no preview file
 }
+
+if( f_previewFile1 != null ) previewFile1 = f_previewFile1.absolutePath
+if( f_previewFile2 != null ) previewFile2 = f_previewFile2.absolutePath
+if( f_previewFile3 != null ) previewFile3 = f_previewFile3.absolutePath
+if( f_previewFile4 != null ) previewFile4 = f_previewFile4.absolutePath
 
 println "Processed a video file."
