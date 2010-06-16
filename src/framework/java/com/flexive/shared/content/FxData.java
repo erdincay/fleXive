@@ -367,6 +367,7 @@ public abstract class FxData implements Serializable {
                 curr.setPos(curr.getPos() + 1);
         }
         FxAssignment fxa = type.getAssignment(this.getXPath());
+        // we need to check min and max multiplicity
         FxData newData = fxa.createEmptyData(parent, newIndex);
         newData.setPos(insertPosition);
         newData.applyIndices();

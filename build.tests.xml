@@ -261,7 +261,7 @@
     </target>
 
     <!-- run all tests -->
-	<target name="tests.all" depends="tests.all.init, tests.groups.run, emma.report"/>
+	<target name="tests.all" depends="tests.all.init, tests.groups.run, emma.report" description="run all the tests"/>
 	<target name="tests.all.init">
         <groovy>
             properties.'tests.groups' = "shared,ejb,jsf,tree,dist"

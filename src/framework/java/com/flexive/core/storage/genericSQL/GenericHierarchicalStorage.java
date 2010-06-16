@@ -1453,7 +1453,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      */
     protected void insertGroupData(Connection con, StringBuilder sql, FxPK pk, FxGroupData groupData,
                                    boolean isMaxVer, boolean isLiveVer) throws SQLException {
-        if (groupData == null || groupData.isEmpty())
+        if (groupData == null || (groupData.isEmpty() && groupData.isRemoveable()))
             return;
         PreparedStatement ps = null;
         if (sql == null)

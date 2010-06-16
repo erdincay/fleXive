@@ -1207,8 +1207,8 @@ public class PropertyEditorBean implements ActionBean, Serializable {
         final List<FxStructureOption> removeOptions = new ArrayList<FxStructureOption>(1);
         final List<FxStructureOption> invalidOptions = new ArrayList<FxStructureOption>(1);
 
-        int min = FxMultiplicity.getStringToInt(minMultiplicity);
-        int max = FxMultiplicity.getStringToInt(maxMultiplicity);
+        int min = FxMultiplicity.getStringToInt(minMultiplicity, false);
+        int max = FxMultiplicity.getStringToInt(maxMultiplicity, true);
 
         // retrieve edited options
         List<FxStructureOption> newOptions = optionWrapper.asFxStructureOptionList(optionWrapper.getAssignmentOptions());
@@ -1283,8 +1283,8 @@ public class PropertyEditorBean implements ActionBean, Serializable {
         final List<FxStructureOption> removeOptions = new ArrayList<FxStructureOption>(1);
         final List<FxStructureOption> invalidOptions = new ArrayList<FxStructureOption>(1);
 
-        int min = FxMultiplicity.getStringToInt(propertyMinMultiplicity);
-        int max = FxMultiplicity.getStringToInt(propertyMaxMultiplicity);
+        int min = FxMultiplicity.getStringToInt(propertyMinMultiplicity, false);
+        int max = FxMultiplicity.getStringToInt(propertyMaxMultiplicity, true);
 
         FxJsfUtils.checkMultiplicity(min, max);
 

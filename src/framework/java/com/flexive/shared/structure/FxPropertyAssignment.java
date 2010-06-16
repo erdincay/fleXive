@@ -312,19 +312,32 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
     }
 
     /**
+     * @see com.flexive.shared.structure.FxPropertyAssignment#createEmptyData(com.flexive.shared.content.FxGroupData, int, int)
      * {@inheritDoc}
      */
     @Override
     public FxData createEmptyData(FxGroupData parent, int index) {
+        return createEmptyData(parent,  index, this.getPosition());
+    }
+
+    /**
+     * @see com.flexive.shared.structure.FxPropertyAssignment#createEmptyData(com.flexive.shared.content.FxGroupData, int)
+     * {@inheritDoc}
+     * @since 3.1.4
+     */
+    @Override
+    public FxData createEmptyData(FxGroupData parent, int index, int position) {
         String XPathFull = (this.hasParentGroupAssignment() && parent != null ? parent.getXPathFull() : "") + "/" + this.getAlias();
         String XPath = (this.hasParentGroupAssignment() && parent != null ? parent.getXPath() : "") + "/" + this.getAlias();
-        if (!this.getMultiplicity().isValid(index))
+        final FxMultiplicity fxMultiplicity = this.getMultiplicity();
+        // if we need to check minMulti then it has to be valid otherwise it has only valid maxMulti
+        if (!fxMultiplicity.isValidMax(index))
             //noinspection ThrowableInstanceNeverThrown
             throw new FxCreateException("ex.content.xpath.index.invalid", index, this.getMultiplicity(), this.getXPath()).
                     setAffectedXPath(parent != null ? parent.getXPathFull() : this.getXPath(), FxContentExceptionCause.InvalidIndex).asRuntimeException();
         final FxPropertyData data = new FxPropertyData(parent == null ? "" : parent.getXPathPrefix(), this.getAlias(), index, XPath, XPathElement.toXPathMult(XPathFull),
                 XPathElement.getIndices(XPathFull), this.getId(), this.getProperty().getId(), this.getMultiplicity(),
-                this.getPosition(), parent, this.getEmptyValue(), this.isSystemInternal(), this.getOption(FxStructureOption.OPTION_MAXLENGTH));
+                position, parent, this.getEmptyValue(), this.isSystemInternal(), this.getOption(FxStructureOption.OPTION_MAXLENGTH));
         //Flag if the value is set from the assignments default value
         data.setContainsDefaultValue(!data.getValue().isEmpty());
         return data;
@@ -337,7 +350,7 @@ public class FxPropertyAssignment extends FxAssignment implements Serializable {
     public FxData createRandomData(Random rnd, FxEnvironment env, FxGroupData parent, int index, int maxMultiplicity) {
         String XPathFull = (this.hasParentGroupAssignment() && parent != null ? parent.getXPathFull() : "") + "/" + this.getAlias();
         String XPath = (this.hasParentGroupAssignment() && parent != null ? parent.getXPath() : "") + "/" + this.getAlias();
-        if (!this.getMultiplicity().isValid(index))
+        if (!this.getMultiplicity().isValidMax(index))
             //noinspection ThrowableInstanceNeverThrown
             throw new FxCreateException("ex.content.xpath.index.invalid", index, this.getMultiplicity(), this.getXPath()).
                     setAffectedXPath(parent != null ? parent.getXPathFull() : this.getXPath(), FxContentExceptionCause.InvalidIndex).asRuntimeException();

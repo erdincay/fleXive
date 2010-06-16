@@ -43,11 +43,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import org.apache.commons.lang.ArrayUtils;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -141,7 +137,8 @@ public class FxGroupData extends FxData {
                 return true;
             }
         }
-        return false;
+        return this.getAssignmentMultiplicity().isRequired();
+//        return false;
     }
 
     /**
@@ -268,6 +265,8 @@ public class FxGroupData extends FxData {
                         data.get(j).setPos(lastPos + 1);
                     lastPos = data.get(j).getPos();
                 }
+                data.add(i, child);
+                return child;
             }
         }
         data.add(child); //add at bottom
@@ -310,7 +309,7 @@ public class FxGroupData extends FxData {
                         }
                     }
                     int index = XPathElement.lastElement(xPath).getIndex();
-                    if (as.getMultiplicity().isValid(index))
+                    if (as.getMultiplicity().isValidMax(index))
                         return this.addChild(as.createEmptyData(this, index).setPos(pos));
                     else
                         throw new FxInvalidParameterException("pos", "ex.content.xpath.index.invalid", index, as.getMultiplicity(), this.getXPath()).setAffectedXPath(xPath, FxContentExceptionCause.InvalidIndex).asRuntimeException();
@@ -344,6 +343,7 @@ public class FxGroupData extends FxData {
     /**
      * 'Fix' the indices of children after they have been added to reflect the parent groups index in
      * their XPath
+     * Don't work in the root of a type
      */
     public void fixChildIndices() {
         try {
@@ -367,7 +367,8 @@ public class FxGroupData extends FxData {
     private void _changeIndex(List<FxData> children, int pos, int index) throws FxInvalidParameterException {
         List<XPathElement> elements;
         for (FxData curr : children) {
-            elements = XPathElement.split(curr.getXPath());
+            // we need to get the XPathFull to have the indices
+            elements = XPathElement.split(curr.getXPathFull());
             elements.get(pos).setIndex(index);
             curr.XPathFull = XPathElement.toXPath(elements);
             curr.indices = XPathElement.getIndices(curr.XPathFull);
@@ -391,6 +392,107 @@ public class FxGroupData extends FxData {
      * @param includeRequired include entries that are required (but empty)?
      */
     public void removeEmptyEntries(boolean includeRequired) {
+        // a list to store all entries to remove
+        List<FxData> toRemove = new ArrayList<FxData>(50);
+        // a map to store all ids and count not removed
+        // key : id ; value : amount
+        Map<Long, Integer> notRemoved = new HashMap<Long, Integer>();
+        // a map to store all removed items to compact them, key = assignmentID ; value = the data with the ID
+        Map<Long, FxData> toCompact = new HashMap<Long, FxData>();
+        // a linked list with the groups to check, the first element is always removed, and groups in groups are added to the end
+        // linked list because it has O(1) at adding to the end and removing from the beginning, while an Arraylist must copy all following elements if the first is removed
+        List<FxGroupData> currentGroups = new LinkedList<FxGroupData>();
+        currentGroups.add(this);
+        // indicates if we need to remove all elements 
+        boolean removeAll;
+        // while there is any unchecked group
+        while (currentGroups.size() > 0) {
+            FxGroupData currentGroup= currentGroups.remove(0);
+            toRemove.clear();
+            removeAll = true;
+            // First we need to check if we could remove an element (then add to the toRemove set) else add all other groups to the currentGroups List
+            List<FxData> currentData = currentGroup.data;
+            for (FxData curr : currentData) {
+                boolean propCheck = false; 
+                if (curr.isProperty()) {
+                    FxPropertyData prop = (FxPropertyData) curr;
+                    propCheck |= prop.isContainsDefaultValue();
+                }
+                // if we got something to remove, just put it in to the list otherwise set removeAll to false
+                if ((curr.isEmpty() || propCheck)
+                        // for groups, don't remove them when they contain required properties
+                        && ((curr.isGroup() && !curr.isRequiredPropertiesPresent())
+                        || includeRequired || curr.isRemoveable())
+                        && !curr.isSystemInternal()) {
+                    toRemove.add(curr);
+                } else {
+                    removeAll = false;
+                    if (curr instanceof FxGroupData) {
+                        currentGroups.add((FxGroupData) curr);
+                    }
+                    if (!curr.getAssignmentMultiplicity().isOptional() && !curr.isSystemInternal()) {
+                        long id = curr.getAssignmentId();
+                        Integer amount = notRemoved.get(id);
+                        if (amount == null) {
+                            amount = 0;
+                        }
+                        amount++;
+                        notRemoved.put(id, amount);
+                    }
+                }
+                if (!curr.getAssignmentMultiplicity().isOptional()) {
+                    removeAll = false;
+                }
+            }
+            /*if we need to remove all elements of a group and the current group is optional,
+              then we don't even need to remove all elements and compact,
+              just remove the current group (and clear it) from the parrent and let GC do its job*/
+            if (removeAll) {
+                currentData.clear();
+                if (currentGroup.getAssignmentMultiplicity().isOptional()) {
+                    FxGroupData currentParent = currentGroup.getParent();
+                    if (currentParent != null) {
+                        currentParent.data.remove(currentGroup);
+                    }
+                }
+                continue;
+            }
+            toCompact.clear();
+            // if we don't need to remove all data, just remove what we need to remove and compact
+            for (FxData curr : toRemove) {
+                // only check non optional fields that are removed
+                if (!curr.getAssignmentMultiplicity().isOptional()) {
+                    long id = curr.getAssignmentId();
+                    Integer amount = notRemoved.get(id);
+                    if (amount == null) {
+                        amount = 0;
+                    }
+                    // only remove something if we got at least as many elements as we need
+                    if (amount < curr.getAssignmentMultiplicity().getMin()) {
+                        amount++;
+                        notRemoved.put(id, amount);
+
+                        continue;
+                    }
+                }
+                currentData.remove(curr);
+                // just store any removed item with its ID as key in a map, and only do this if we don't removed all the elements
+                toCompact.put(curr.getAssignmentId(), curr);
+//                curr.compact();
+            }
+            // compact after all elements have been removed, and compact multiple data with same ID only once            
+            for (FxData curr : toCompact.values()) {
+                curr.compact();
+            }
+        }
+    }
+
+    /*
+     * Remove all empty entries of this group
+     *
+     * @param includeRequired include entries that are required (but empty)?
+     *
+    public void removeEmptyEntriesOLD(boolean includeRequired) {
         for (FxData curr : data) {
             if ((curr.isEmpty() || (curr.isProperty() && ((FxPropertyData) curr).isContainsDefaultValue()))
                     // for groups, don't remove them when they contain required properties
@@ -403,12 +505,36 @@ public class FxGroupData extends FxData {
                         break;
                     }
                 }
-                removeEmptyEntries(includeRequired);
+                removeEmptyEntriesOLD(includeRequired);
                 return;
             } else if (curr instanceof FxGroupData) {
-                ((FxGroupData) curr).removeEmptyEntries(includeRequired);
+                ((FxGroupData) curr).removeEmptyEntriesOLD(includeRequired);
                 if (((FxGroupData) curr).data.size() == 0)
                     data.remove(curr);
+            }
+        }
+    }*/
+
+    /**
+     * Synchronize positions closing gaps optionally including sub groups
+     *
+     * @param includeSubGroups close gaps for subgroups as well?
+     */
+    public void compactPositions(boolean includeSubGroups) {
+        List<FxGroupData> todos = new LinkedList<FxGroupData>();
+        int pos = 0;
+        for (FxData curr : data) {
+            curr.setPos(pos++);
+            if (includeSubGroups && curr instanceof FxGroupData)
+                todos.add((FxGroupData) curr);
+        }
+
+        while (todos.size() > 0) {
+            pos = 0;
+            for (FxData curr : todos.remove(0).data) {
+                curr.setPos(pos++);
+                if (curr instanceof FxGroupData)
+                    todos.add((FxGroupData) curr);
             }
         }
     }
@@ -417,15 +543,15 @@ public class FxGroupData extends FxData {
      * Synchronize positions closing gaps optionally including sub groups
      *
      * @param includeSubGroups close gaps for subgroups as well?
-     */
-    public void compactPositions(boolean includeSubGroups) {
+     *
+    public void compactPositionsOLD(boolean includeSubGroups) {
         int pos = 0;
         for (FxData curr : data) {
             curr.setPos(pos++);
             if (includeSubGroups && curr instanceof FxGroupData)
                 ((FxGroupData) curr).compactPositions(true);
         }
-    }
+    }*/
 
     /**
      * Get the root group for this group

@@ -233,17 +233,30 @@ public class FxGroupAssignment extends FxAssignment implements Serializable {
 
     /**
      * {@inheritDoc}
+     * @see com.flexive.shared.structure.FxGroupAssignment#createEmptyData(com.flexive.shared.content.FxGroupData, int, int)
      */
+    @Override
     public FxData createEmptyData(FxGroupData parent, int index) {
+        return createEmptyData(parent,  index, this.getPosition());
+    }
+
+    /**
+     * {@inheritDoc}
+     * @since 3.1.4
+     */
+    @Override
+    public FxData createEmptyData(FxGroupData parent, int index, int position) {
         List<FxData> children = new CopyOnWriteArrayList<FxData>();
         FxGroupData thisGroup;
         try {
             final UserTicket ticket = FxContext.getUserTicket();
-            if (!this.getMultiplicity().isValid(index))
+            final FxMultiplicity fxMultiplicity = this.getMultiplicity();
+            // if we need to check minMulti then it has to be valid otherwise it has only valid maxMulti
+            if (!fxMultiplicity.isValidMax(index))
                 throw new FxCreateException("ex.content.xpath.index.invalid", index, this.getMultiplicity(), this.getXPath()).setAffectedXPath(parent.getXPathFull(), FxContentExceptionCause.InvalidIndex).asRuntimeException();
             thisGroup = new FxGroupData(parent == null ? "" : parent.getXPathPrefix(), this.getAlias(), index, this.getXPath(),
                     XPathElement.stripType(XPathElement.toXPathMult(this.getXPath())), XPathElement.getIndices(getXPath()),
-                    this.getId(), this.getMultiplicity(), this.getPosition(), parent, children, this.isSystemInternal());
+                    this.getId(), this.getMultiplicity(), position, parent, children, this.isSystemInternal());
             if (this.getMode() == GroupMode.OneOf) {
                 //if One-Of more find the first non-optional child and create it (should not happen if correctly setup
                 //but still possible, multiple non-optional childs will result in errors that are thrown in an exception
@@ -254,6 +267,7 @@ public class FxGroupAssignment extends FxAssignment implements Serializable {
                         continue;
                     if (as.getMultiplicity().isRequired()) {
                         if (hasRequired)
+                            //noinspection ThrowableInstanceNeverThrown
                             throw new FxCreateException("ex.content.data.create.oneof.multiple",
                                     thisGroup.getXPathFull()).setAffectedXPath(thisGroup.getXPathFull(), FxContentExceptionCause.InvalidGroupMode).asRuntimeException();
                         hasRequired = true;
@@ -269,7 +283,7 @@ public class FxGroupAssignment extends FxAssignment implements Serializable {
                     if (as.getMultiplicity().isOptional())
                         thisGroup.getChildren().add(as.createEmptyData(thisGroup, 1));
                     else for (int c = 0; c < as.getMultiplicity().getMin(); c++)
-                        thisGroup.getChildren().add(as.createEmptyData(thisGroup, c + 1));
+                               thisGroup.getChildren().add(as.createEmptyData(thisGroup, c + 1));
                 }
             }
             thisGroup.fixChildIndices();

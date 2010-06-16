@@ -490,8 +490,9 @@ public class GroupEditorBean implements Serializable {
         if (assignment.getLabel().getIsEmpty()) {
             throw new FxApplicationException("ex.structureEditor.noLabel");
         }
-        int min = FxMultiplicity.getStringToInt(assignmentMinMul);
-        int max = FxMultiplicity.getStringToInt(assignmentMaxMul);
+        // min can be N as it could be before the patch so it is changeable to not-N
+        int min = FxMultiplicity.getStringToInt(assignmentMinMul, true);
+        int max = FxMultiplicity.getStringToInt(assignmentMaxMul, true);
 
         if (!isSystemInternal()
                 || FxJsfUtils.getRequest().getUserTicket().isInRole(Role.GlobalSupervisor)) {
@@ -514,8 +515,8 @@ public class GroupEditorBean implements Serializable {
         if (group.getLabel().getIsEmpty()) {
             throw new FxApplicationException("ex.structureEditor.noLabel");
         }
-        FxMultiplicity grpMul = new FxMultiplicity(FxMultiplicity.getStringToInt(groupMinMul),
-                FxMultiplicity.getStringToInt(groupMaxMul));
+        FxMultiplicity grpMul = new FxMultiplicity(FxMultiplicity.getStringToInt(groupMinMul, false),
+                FxMultiplicity.getStringToInt(groupMaxMul, true));
 
         FxJsfUtils.checkMultiplicity(grpMul.getMin(),grpMul.getMax());
 

@@ -957,14 +957,61 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
             throw new FxCreateException(e).asRuntimeException();
         }
         final UserTicket ticket = FxContext.getUserTicket();
+        int c;
+
+        // Store the actually beginposition of each position including the multiplicities of previous elemnts
+        // key : position ; value : "real" position
+        Map<Integer, Integer> posDeltas = new HashMap<Integer, Integer>();
+
+        // key : position; value : the amount of elements of the current position
+        Map<Integer, Integer> posMultis = new HashMap<Integer, Integer>();
+        int curBeginPos;
+
+        // First : collect the information about all the multiplicities in the root group (of properties + groups)
         for (FxPropertyAssignment fxpa : assignedProperties) {
-            if (!fxpa.isEnabled() || (isUsePropertyPermissions() && !ticket.mayCreateACL(fxpa.getACL().getId(), ticket.getUserId())))
+            if (!fxpa.isEnabled() || (isUsePropertyPermissions() && !ticket.mayCreateACL(fxpa.getACL().getId(), ticket.getUserId()))) {
                 continue;
+            }
+            posMultis.put(fxpa.getPosition(), fxpa.getDefaultMultiplicity());
+        }
+        for (FxGroupAssignment fxga : assignedGroups) {
+            if (!fxga.isEnabled())
+                continue;
+            posMultis.put(fxga.getPosition(), fxga.getDefaultMultiplicity());
+        }
+        // after this get a sorted list containing the positions (collected)
+        List<Integer> tmpList = new ArrayList<Integer>();
+        tmpList.addAll(posMultis.keySet());
+        Integer [] sortedKeys = new Integer[tmpList.size()];
+        tmpList.toArray(sortedKeys);
+        Arrays.sort(sortedKeys);
+        int nextFreePos = 0;
+/*
+         now calculate the "real" positions of each element according to the multiplicity
+         if the position of an element (in the type) is bigger then the calculated position, the original (bigger) is taken
+         so if there is a type defining P1 on pos 20 with min./default Multi of 30 and P2 (the next) on pos 70, p2 will start on pos 70 
+*/
+        for (int key : sortedKeys) {
+            int multi = posMultis.get(key);
+            nextFreePos = Math.max(key, nextFreePos);
+            posDeltas.put(key, nextFreePos);
+            nextFreePos += multi;
+        }
+
+        // no we could add all the properties and groups because we already "know" on which position will which element start
+        // IMPORTANT : if changing the inner loop from defaultMulti to "more" don't forget to change it at the
+        // beginning of this method (at collecting)
+        for (FxPropertyAssignment fxpa : assignedProperties) {
+            if (!fxpa.isEnabled() || (isUsePropertyPermissions() && !ticket.mayCreateACL(fxpa.getACL().getId(), ticket.getUserId()))) {
+                continue;
+            }
             /*if (fxpa.getMultiplicity().isOptional())
                 base.addChild(fxpa.createEmptyData(base, 1));
             else*/
-            for (int c = 0; c < fxpa.getDefaultMultiplicity(); c++)
-                base.addChild(fxpa.createEmptyData(base, c + 1));
+            // set the beginPos to the first pos (calculated) for the given assignment
+            curBeginPos = posDeltas.get(fxpa.getPosition());
+            for (c = 0; c < fxpa.getDefaultMultiplicity(); c++)
+                base.addChild(fxpa.createEmptyData(base, c + 1, curBeginPos + c));
         }
 
         for (FxGroupAssignment fxga : assignedGroups) {
@@ -973,9 +1020,12 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
             /*if (fxga.getMultiplicity().isOptional())
                 base.addChild(fxga.createEmptyData(base, 1));
             else*/
-            for (int c = 0; c < fxga.getDefaultMultiplicity(); c++)
-                base.addChild(fxga.createEmptyData(base, c + 1));
+            // set the beginPos to the first pos (calculated) for the given group
+            curBeginPos = posDeltas.get(fxga.getPosition());
+            for (c = 0; c < fxga.getDefaultMultiplicity(); c++)
+                base.addChild(fxga.createEmptyData(base, c + 1, curBeginPos + c));
         }
+        // for elements of "inner groups" we don't have to calculate the real position it is done by the fixChildIndices
         return base;
     }
 
@@ -1242,7 +1292,8 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
                     for (FxPropertyAssignment pa : getAssignedProperties()) {
                         if (pa.getAlias().equals(xpe.getAlias())) {
                             last = pa;
-                            valid = pa.isEnabled() && pa.getMultiplicity().isValid(xpe.getIndex());
+                            // only check the max. multiplicity
+                            valid = pa.isEnabled() && pa.getMultiplicity().isValidMax(xpe.getIndex());
                             found = true;
                             break;
                         }
@@ -1252,7 +1303,8 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
                     for (FxGroupAssignment ga : getAssignedGroups()) {
                         if (ga.getAlias().equals(xpe.getAlias())) {
                             last = ga;
-                            valid = ga.isEnabled() && ga.getMultiplicity().isValid(xpe.getIndex());
+                            // only check the max. multiplicity
+                            valid = ga.isEnabled() && ga.getMultiplicity().isValidMax(xpe.getIndex());
                             break;
                         }
                     }
@@ -1267,7 +1319,8 @@ public class FxType extends AbstractSelectableObjectWithLabel implements Seriali
                             last = null; //reset to null for check
                         if (as.getAlias().equals(xpe.getAlias())) {
                             last = as;
-                            valid = as.isEnabled() && as.getMultiplicity().isValid(xpe.getIndex());
+                            // only check the max. multiplicity
+                            valid = as.isEnabled() && as.getMultiplicity().isValidMax(xpe.getIndex());
                             break;
                         }
                     }

@@ -94,6 +94,12 @@ public class ContentEngineTest {
     private static final String TYPE_ARTICLE = "__ArticleTest";
     private final static FxString DEFAULT_STRING = new FxString(true, "ABC");
 
+
+    public static final String MULTI_TYPE = "MULTI_TYPE_" + RandomStringUtils.random(16, true, true);
+    public static final String MULTI_GROUP = "MULTI_GROUP_" + RandomStringUtils.random(16, true, true);
+    private final static int MIN_MULTIPLICITY = 4;
+    private final static int MAX_MULTIPLICITY = 8;
+
     /**
      * setup...
      *
@@ -152,6 +158,11 @@ public class ContentEngineTest {
      * * TestNumberSL (FxNumber) [0..2] (Single language only)
      * * TestFloat (FxFloat) [0..2]
      *
+     *
+     * new type MULTI_GROUP looks like this:
+     * * TestProperty101 (String 1024) [4..8]
+     * * TestProperty102 (String 1024) [1..1]
+     * * TestProperty103 (String 1024) [0..5] 
      * @throws Exception on errors
      */
     @BeforeClass(groups = {"ejb", "content", "contentconversion"}, dependsOnMethods = {"setupACL"})
@@ -249,6 +260,27 @@ public class ContentEngineTest {
             pe.setDataType(FxDataType.Float);
             pe.setMultiplicity(new FxMultiplicity(0, 2));
             ass.createProperty(pe, "/" + TEST_GROUP);
+
+            ge = FxGroupEdit.createNew(MULTI_GROUP, desc, hint, true, new FxMultiplicity(0, 1));
+            ass.createGroup(ge, "/");
+            pe = FxPropertyEdit.createNew("TestProperty101", desc, hint, true, new FxMultiplicity(MIN_MULTIPLICITY, MAX_MULTIPLICITY),
+                    true, structACL, FxDataType.String1024, null,
+                    true, null, null, null).setMultiLang(true).setOverrideMultiLang(true);
+            pe.setAutoUniquePropertyName(true);
+            ass.createProperty(pe, "/" + MULTI_GROUP);
+            pe.setName("TestProperty102");
+            pe.setDataType(FxDataType.String1024);
+            pe.setMultiplicity(new FxMultiplicity(1, 1));
+            ass.createProperty(pe, "/" + MULTI_GROUP);
+            pe.setName("TestProperty103");
+            pe.setDataType(FxDataType.String1024);
+            pe.setMultiplicity(new FxMultiplicity(0, 5));
+            ass.createProperty(pe, "/" + MULTI_GROUP);
+
+            te.save(FxTypeEdit.createNew(MULTI_TYPE, new FxString("Test data multi"), CacheAdmin.getEnvironment().getACLs(ACLCategory.STRUCTURE).get(0), null));
+            FxGroupAssignment ga = (FxGroupAssignment) CacheAdmin.getEnvironment().getAssignment("ROOT/" + MULTI_GROUP);
+            FxGroupAssignmentEdit gae = FxGroupAssignmentEdit.createNew(ga, CacheAdmin.getEnvironment().getType(MULTI_TYPE), null, "/");
+            ass.save(gae, true);
         }
         //create article te
         FxPropertyEdit pe = FxPropertyEdit.createNew("MyTitle", new FxString("Description"), new FxString("Hint"),
@@ -429,7 +461,8 @@ public class ContentEngineTest {
             fail("checkValidity() succeeded when it should not!");
         } catch (FxInvalidParameterException e) {
             //ok
-            assertTrue("ex.content.required.missing".equals(e.getExceptionMessage().getKey()));
+            String exMsgKey = e.getExceptionMessage().getKey();
+            assertTrue("ex.content.required.missing".equals(exMsgKey) || "ex.content.required.missing.none".equals(exMsgKey));
         }
         //fill all required properties
         FxString testValue = new FxString(FxLanguage.ENGLISH, TEST_EN);
@@ -450,7 +483,8 @@ public class ContentEngineTest {
             fail("checkValidity() succeeded but /TestGroup1/TestProperty1_3 is missing!");
         } catch (FxInvalidParameterException e) {
             //ok
-            assertTrue("ex.content.required.missing".equals(e.getExceptionMessage().getKey()));
+            String exMsgKey = e.getExceptionMessage().getKey();
+            assertTrue("ex.content.required.missing".equals(exMsgKey) || "ex.content.required.missing.none".equals(exMsgKey));
         }
         test.setValue("/TestGroup1[1]/TestProperty1_3", testValue);
         try {
@@ -482,11 +516,21 @@ public class ContentEngineTest {
         test.setValue("/TestGroup1[2]/TestProperty1_3", testValue);
         pk = ce.save(test);
         FxContent testLoad = ce.load(pk);
+        try {
+            testLoad.checkValidity();
+        } catch (FxInvalidParameterException e) {
+            fail("save / load don't work! (saving needed groups with only empty properties)", e);
+        }
         final String transIt = ((FxString) testLoad.getPropertyData("/TestGroup1[2]/TestProperty1_3").getValue()).getTranslation(FxLanguage.ITALIAN);
         assertTrue(TEST_IT.equals(transIt), "Expected italian translation '" + TEST_IT + "', got: '" + transIt + "' for pk " + pk);
         ce.remove(pk);
         pk = ce.save(test);
         FxContent testLoad2 = ce.load(pk);
+        try {
+            testLoad2.checkValidity();
+        } catch (FxInvalidParameterException e) {
+            fail("save / load don't work! (saving needed groups with only empty properties)", e);
+        }
         FxNumber number = new FxNumber(true, FxLanguage.GERMAN, 42);
         number.setTranslation(FxLanguage.ENGLISH, 43);
         testLoad2.setValue("/TestNumber", number);
@@ -820,7 +864,7 @@ public class ContentEngineTest {
             d = FxDelta.processDelta(org, test);
             System.out.println(d.dump());
             assertTrue(d.changes(), "Expected some changes");
-            assertTrue(d.getAdds().size() == 3, "Expected 3 (group + 2 properties) adds but got " + d.getAdds().size());
+            assertTrue(d.getAdds().size() == 5, "Expected 5 (3 groups + 2 properties) adds but got " + d.getAdds().size());
             assertTrue(d.getRemoves().size() == 0, "Expected 0 deletes but got " + d.getRemoves().size());
             assertTrue(d.getUpdates().size() == 0, "Expected 0 updates but got " + d.getUpdates().size());
         } finally {
@@ -850,6 +894,126 @@ public class ContentEngineTest {
         assertFalse(org.containsValue("/TestProperty4[2]"));
         assertEquals(org.getValue("/TestGroup1/TestProperty1_3[1]"), testValue3);
         assertFalse(org.containsValue("/TestGroup1/TestProperty1_3[4]"));
+    }
+
+    /**
+      * Test adding lots of empty entries and let them remove and validiate the result
+      *
+      * @throws Exception on errors
+      */
+     @Test(groups = {"ejb", "content"})
+    public void largeTest() throws Exception {
+        FxContent org = ce.initialize(TEST_TYPE);
+        FxString testValue1 = new FxString("Hello world1");
+        FxString testValue2 = new FxString("Hello world2");
+        boolean doOld = false;
+        long t1,t2,t3;
+        org.setValue("/TestProperty4[1]", testValue2);
+        org.setValue("/TestProperty2[1]", testValue2);
+        org.setValue("/TestGroup1/TestProperty1_2[1]", testValue2);
+        org.setValue("/TestGroup1/TestProperty1_3[1]", testValue2);
+        for (int max : new int[] {600,800,1000}) {
+            String xpathPrefix = "/TestProperty4";
+            t1 = System.nanoTime();
+            // first insert test data into root group
+            for (int i = 2; i <= max+1; i++) {
+                String curXPath = String.format(xpathPrefix + "[%d]", i);
+                org.setValue(curXPath, testValue1);
+                org.getValue(curXPath).setEmpty();
+            }
+            t2 = System.nanoTime();
+            org.getRootGroup().removeEmptyEntries();
+            t3 = System.nanoTime();
+            double removeTime = (t3 - t2) * 1E-6;
+            System.out.println(String.format("inserting %s %4d empty elements into root group took %7.2f ms and remove took %7.2f ms [%6.5f ms / remove]", doOld?"OLD":"", max, (t2-t1)*1E-6, removeTime, removeTime/max));
+            // test if removed the empty elements from root
+            assertEquals(org.getRootGroup().getChildren().size(), 23);
+            // it must not only remove the empty elements it also must be valid
+            org.checkValidity();
+            xpathPrefix = "/TestGroup1/TestProperty1_3";
+
+            t1 = System.nanoTime();
+            for (int i = 2; i <= max+1; i++) {
+                String curXPath = String.format(xpathPrefix + "[%d]", i);
+                org.setValue(curXPath, testValue1);
+                org.getValue(curXPath).setEmpty();
+            }
+            t2 = System.nanoTime();
+            org.getRootGroup().removeEmptyEntries();
+            t3 = System.nanoTime();
+            removeTime = (t3 - t2) * 1E-6;
+            System.out.println(String.format("inserting %s %4d empty elements into a group took    %7.2f ms and remove took %7.2f ms [%6.5f ms / remove]", doOld?"OLD":"", max, (t2-t1)*1E-6, removeTime, removeTime/max));
+            assertEquals(org.getRootGroup().getChildren().size(), 23);
+            org.checkValidity();
+        }
+    }
+
+    /**
+      * Test the minimum multiplicity
+      *
+      * @throws Exception on errors
+      */
+     @Test(groups = {"ejb", "content"})
+    public void minMultiplicityTest() throws Exception {
+        FxContent tmp = ce.initialize(MULTI_TYPE);
+        FxString testValue1 = new FxString("Hello world1");
+        try {
+            tmp.checkValidity();
+            fail("Type has 2 required fields!");
+        } catch (FxInvalidParameterException e) {
+            // OK
+        }
+        tmp.setValue("/TestProperty102",testValue1);
+        try {
+            tmp.checkValidity();
+            fail("Type has required fields left!");
+        } catch (FxInvalidParameterException e) {
+            // OK
+        }
+        // testing multiplicity 4..8 
+        String xpathPrefix = "/TestProperty101";
+        for (int i = 1; i < MAX_MULTIPLICITY; i++) {
+            String curXPath = String.format(xpathPrefix + "[%d]", i);
+            tmp.setValue(curXPath, testValue1);
+            try {
+                tmp.checkValidity();
+                if (i < MIN_MULTIPLICITY)
+                    fail("Type has required fields left!");
+            } catch (FxInvalidParameterException e) {
+                if (i >= MIN_MULTIPLICITY)
+                    fail("should have passed!");
+            }
+        }
+    }
+
+    /**
+     * Check if inserting same xpaths to the same pos is done correctly
+     *
+     * @throws Exception on errors
+     */
+    @Test(groups = {"ejb", "content"})
+    public void addChildOrderTest() throws Exception {
+        FxContent tmp = ce.initialize(MULTI_TYPE);
+        FxGroupData data = tmp.getRootGroup();
+
+        int num1 = data.getChildren().size();
+
+        data.addEmptyChild("/TESTPROPERTY101[5]", 30);
+        data.addEmptyChild("/TESTPROPERTY101[6]", 30);
+        data.addEmptyChild("/TESTPROPERTY101[7]", 33);
+        data.addEmptyChild("/TESTPROPERTY101[8]", 33);
+
+        int num2 = data.getChildren().size();
+
+        System.out.println((num2 - num1) + " created...");
+        assertEquals(num2-num1, 4, "It should be 4 elements created, but there was "  + (num2- num1) + " created.");
+        int lastPos = -1;
+        for (FxData tmpData : data.getChildren()) {
+            if (lastPos > tmpData.getPos())
+                fail("The children must be added orderd position even if position is the same");
+            else
+                lastPos = tmpData.getPos();
+        }
     }
 
     /**
@@ -940,7 +1104,8 @@ public class ContentEngineTest {
      */
     @Test(groups = {"ejb", "content"})
     public void maxLengthTest() throws FxApplicationException {
-
+        //  if already failing (we could not save) don't remove!
+        boolean failing = false;
         long typeId = te.save(FxTypeEdit.createNew("MAXLENGTHTEST"));
         FxPropertyEdit ped = FxPropertyEdit.createNew("LENGTHPROP1", new FxString(true, "LENGTHPROP1"), new FxString(true, ""), FxMultiplicity.MULT_0_1,
                 CacheAdmin.getEnvironment().getACL("Default Structure ACL"), FxDataType.String1024);
@@ -958,6 +1123,7 @@ public class ContentEngineTest {
             c.setValue("/LENGTHPROP1", new FxString(false, "1234"));
             try {
                 ce.save(c);
+                failing = true;
                 fail("Setting a content String with length = 4 for a property w/ maxLength = 3 should have failed");
             } catch (FxApplicationException e) {
                 // expected
@@ -974,6 +1140,7 @@ public class ContentEngineTest {
             assertEquals(c.getValue("/LENGTHPROP2").toString(), "1234");
 
         } finally {
+            if (!failing)
             te.remove(typeId);
         }
     }

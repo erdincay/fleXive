@@ -39,10 +39,7 @@ import com.flexive.shared.security.ACL;
 import com.flexive.shared.security.ACLCategory;
 import com.flexive.shared.security.LifeCycleInfo;
 import com.flexive.shared.security.PermissionSet;
-import com.flexive.shared.structure.FxEnvironment;
-import com.flexive.shared.structure.FxMultiplicity;
-import com.flexive.shared.structure.FxPropertyAssignment;
-import com.flexive.shared.structure.FxType;
+import com.flexive.shared.structure.*;
 import com.flexive.shared.value.*;
 import com.flexive.shared.workflow.Step;
 import com.flexive.shared.workflow.StepDefinition;
@@ -983,26 +980,159 @@ public class FxContent implements Serializable {
      * @throws FxInvalidParameterException if required properties are not present or the content is not valid
      */
     public void checkValidity() throws FxInvalidParameterException {
-        _checkGroupValidity(data);
+//        _checkGroupValidity(data);
+            checkGroupValidityNonRec(data);
     }
 
     /**
+     * check a group and its properties and subgroups if required properties are present
+     *
+     * @param data FxGroupData to check
+     * @throws FxInvalidParameterException if required properties are not present
+     * @since 3.1.4
+     */
+    private void checkGroupValidityNonRec(FxGroupData data) throws FxInvalidParameterException {
+        if (data.getAssignmentMultiplicity().isOptional() && data.isEmpty())
+            return; //if optional groups have required properties or subgroups it still is ok if they are empty!
+
+//        long start = System.nanoTime();
+        final FxType currentType = CacheAdmin.getEnvironment().getType(typeId);
+        final int len = currentType.getName().length();
+
+        //  xpath, multiplicity        
+        Map<String, Integer> curMults = new HashMap<String, Integer>();
+        //  Group-xpath, xpath, assignment
+        Map<String, Map<String, FxAssignment>> allAssignemnts = new HashMap<String, Map<String, FxAssignment>>();
+
+        //  xpath, assignment
+        Map<String, FxAssignment> currAssignment = new HashMap<String, FxAssignment>();
+
+        // First create a list containing all groups in the root
+
+        List<FxGroupAssignment> allTypeGroup = new LinkedList<FxGroupAssignment>();
+        allTypeGroup.addAll(currentType.getAssignedGroups());
+
+        // and add all properties of the root to the list
+        allAssignemnts.put("/", currAssignment);
+        for (FxPropertyAssignment prop : currentType.getAssignedProperties()){
+            if (!prop.isSystemInternal()) {
+                String xPath = prop.getXPath().substring(len);
+                currAssignment.put(xPath, prop);
+            }
+        }
+
+        // instead a recursion have a (linked)list where we put groups at the end and add properties of the first group as long
+        // as there are groups
+        while (allTypeGroup.size() > 0) {
+            FxGroupAssignment currData = allTypeGroup.remove(0);
+            String xPath = currData.getXPath().substring(len);
+            currAssignment.put(xPath, currData);
+            currAssignment = new HashMap<String, FxAssignment>();
+            allAssignemnts.put(xPath, currAssignment);
+            for (FxPropertyAssignment ass : currData.getAssignedProperties()) {
+                xPath = ass.getXPath().substring(len);
+                currAssignment.put(xPath, ass);
+            }
+            allTypeGroup.addAll(currData.getAssignedGroups());
+        }
+
+        // afterwards create a (linked) list with all groups of the current data-root and do as before instead of recursive checking
+        List<FxGroupData> allData = new LinkedList<FxGroupData>();
+        allData.add(data);
+        String currentXPath = "";
+
+        while (allData.size() > 0) {
+            FxGroupData currData = allData.remove(0);
+            if (!currentXPath.equals(currData.getXPath())) {
+                allAssignemnts.remove(currentXPath);
+            }
+            currentXPath = currData.getXPath();
+            // we just need keep track of the current group
+            curMults.clear();
+            for (FxData curr : currData.getChildren()) {
+                final String xPath = curr.getXPath();
+                // so if the current XPath is known we increase the counter otherwise we set it to 1
+                Integer tmp = curMults.get(xPath);
+                if (tmp == null){
+                    tmp = 0;
+                    curMults.put(xPath, 1);
+                }
+                else curMults.put(xPath, tmp + 1);
+                // if the property or group is empty we need to undo the increment of current multiplicities
+                if (curr.isEmpty()) {
+                    if (curr instanceof FxGroupData) {
+                        if (curr.getAssignmentMultiplicity().isOptional()) {
+                            curMults.put(xPath, tmp);
+                        }
+                    } else {
+                        curMults.put(xPath, tmp);
+                    }
+                } else {
+                    // if we got a group we add it to the list so that it is checked later (only if it is not empty)
+                    if (curr instanceof FxGroupData) {
+                        allData.add((FxGroupData) curr);
+                    } else {
+                        ((FxPropertyData) curr).checkMaxLength();
+                    }
+                }
+            }
+            // after we build a list with the properties of the current group, we check if all found properties has a valid length
+            currAssignment = allAssignemnts.get(currentXPath);
+            for (String key : currAssignment.keySet()) {
+                Integer curMult = curMults.get(key);
+                FxAssignment curAss = currAssignment.get(key);
+                if (curMult == null)
+                    curMult = 0;
+                if (!curAss.getMultiplicity().isValid(curMult)) {
+                    if (curMult > 0)
+                        throw new FxInvalidParameterException(/*curAss.getAlias()*/key, "ex.content.required.missing",
+                                curAss.getDisplayName(true), curMult, curAss.getMultiplicity().toString());
+                    else
+                        throw new FxInvalidParameterException(/*curAss.getAlias()*/key, "ex.content.required.missing.none",
+                                /*curAss.getDisplayName(true)*/ key, curAss.getMultiplicity().toString());
+                }
+
+            }
+        }
+        allAssignemnts.remove(currentXPath);
+
+        // after we checked all groups, and removed the not needed corrects the only entries are invalid so if there are any, throw an exception.
+        if (allAssignemnts.size() == 0) return;
+        groups : for (Map<String, FxAssignment> tmp : allAssignemnts.values()) {
+            for (FxAssignment currAss : tmp.values()) {
+                // optional groups could be missing but we have to add them so if they are present, they need to have the right fields
+                final FxGroupAssignment parentGroupAssignment = currAss.getParentGroupAssignment();
+                if (parentGroupAssignment != null) {
+                    if (currAss.getParentGroupAssignment().getMultiplicity().isOptional())
+                        continue groups;
+                }
+                if (!currAss.getMultiplicity().isOptional())
+                throw new FxInvalidParameterException(/*currAss.getAlias()*/ currAss.getXPath(), "ex.content.required.missing.none",
+                        currAss.getDisplayName(true), currAss.getMultiplicity().toString());
+
+            }
+        }
+    }
+
+
+    /*
      * Recursively check a group and its properties and subgroups if required properties are present
      *
      * @param data FxGroupData to check
      * @throws FxInvalidParameterException if required properties are not present
-     */
-    private void _checkGroupValidity(FxGroupData data) throws FxInvalidParameterException {
+     *
+     private void _checkGroupValidity(FxGroupData data) throws FxInvalidParameterException {
         if (data.getAssignmentMultiplicity().isOptional() && data.isEmpty())
             return; //if optional groups have required properties or subgroups it still is ok if they are empty!
         for (FxData curr : data.getChildren()) {
             if (curr instanceof FxPropertyData) {
-                ((FxPropertyData) curr).checkRequired();
-                ((FxPropertyData) curr).checkMaxLength();
+                final FxPropertyData propertyData = (FxPropertyData) curr;
+                propertyData.checkRequired();
+                propertyData.checkMaxLength();
             } else
                 _checkGroupValidity((FxGroupData) curr);
         }
-    }
+    }*/
 
     public FxContent initSystemProperties() {
         FxEnvironment env = CacheAdmin.getEnvironment();

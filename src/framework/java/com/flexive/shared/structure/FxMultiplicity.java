@@ -175,7 +175,7 @@ public class FxMultiplicity implements Serializable {
      */
     public static FxMultiplicity fromString(String s) {
         String[] range = s.split("\\.\\.");
-        return new FxMultiplicity(getStringToInt(range[0]), getStringToInt(range[1]));
+        return new FxMultiplicity(getStringToInt(range[0], false), getStringToInt(range[1], true));
     }
 
 
@@ -240,7 +240,18 @@ public class FxMultiplicity implements Serializable {
      * @return valid
      */
     public boolean isValid(int index) {
-        return index <= getMax();
+        return index >= getMin() && index <= getMax();
+    }
+
+    /**
+     * Check if the given index is valid for this multiplicity (only the upperbounds)
+     *
+     * @param index the index to check
+     * @return valid
+     * @since 3.1.4
+     */
+    public boolean isValidMax(int index) {
+        return index >= 1 && index <= getMax();
     }
 
      /**
@@ -250,9 +261,25 @@ public class FxMultiplicity implements Serializable {
      * @return the number as int or Integer.MAX_VALUE
      */
     public static int getStringToInt(String m) {
+         return getStringToInt(m, true);
+     }
+
+     /**
+     * Converts a String that represents a Number or "N" to int
+     *
+     * @param m representing a Number or "N"
+     * @param canBeN can ghe given symbol be "N"
+     * @return the number as int or Integer.MAX_VALUE
+     * @since 3.1.4
+     */
+    public static int getStringToInt(String m, boolean canBeN) {
         int mul;
         if (SYMBOL_UNLIMITED.equals(m.toUpperCase())) {
-            mul= N;
+            if (canBeN)
+                mul= N;
+            else {
+                throw new FxInvalidParameterException("minMultiplicity", "ex.structure.multiplicity.minimum.notN").asRuntimeException();
+            }
         }
         else {
             mul = Integer.parseInt(m);

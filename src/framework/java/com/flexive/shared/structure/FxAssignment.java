@@ -497,6 +497,17 @@ public abstract class FxAssignment implements Serializable, Comparable<FxAssignm
     public abstract FxData createEmptyData(FxGroupData parent, int index);
 
     /**
+     * Create an empty FxData entry for this assignment
+     *
+     * @param parent the parent group
+     * @param index  the index of the new entry
+     * @return FxData
+     * @param position the position to use (to avoid puting multiple elemtns of the same type on the same position)
+     * @throws FxCreateException on errors
+     */
+    public abstract FxData createEmptyData(FxGroupData parent, int index, int position);
+
+    /**
      * Create a random FxData entry for this assignment
      *
      * @param rnd             the Random to use
