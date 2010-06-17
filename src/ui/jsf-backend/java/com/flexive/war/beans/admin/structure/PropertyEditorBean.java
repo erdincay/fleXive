@@ -37,8 +37,11 @@ import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.beans.ActionBean;
 import com.flexive.faces.beans.SelectBean;
 import com.flexive.faces.messages.FxFacesMsgErr;
+import com.flexive.faces.messages.FxFacesMsgWarn;
+import com.flexive.faces.messages.FxFacesMessage;
 import com.flexive.faces.messages.FxFacesMsgInfo;
 import com.flexive.shared.*;
+import com.flexive.shared.interfaces.AssignmentEngine;
 import com.flexive.shared.exceptions.FxApplicationException;
 import com.flexive.shared.exceptions.FxInvalidParameterException;
 import com.flexive.shared.exceptions.FxRuntimeException;
@@ -106,6 +109,27 @@ public class PropertyEditorBean implements ActionBean, Serializable {
     private boolean showParentAssignmentOptions = false;
     private OptionWrapper optionWrapperParent = null;
     private String openParentOptions = "false"; // toggle panel f. parent assignment options
+
+    // indicates if there are messages to print
+    private boolean hasMsg = false;
+
+    // stores messages from creating properties
+    private List<FxFacesMessage> msgs = new ArrayList<FxFacesMessage>();
+
+    /**
+     * print the saved messages
+     * @return
+     */
+    public boolean isHasMsg() {
+        if (hasMsg) {
+            for (FxFacesMessage curMsg : msgs) {
+                curMsg.addToContext();
+            }
+        }
+        msgs.clear();
+        hasMsg = false;
+        return hasMsg;
+    }
 
     public long getAssignmentId() {
         return assignment != null ? assignment.getId() : -1;
@@ -1101,7 +1125,7 @@ public class PropertyEditorBean implements ActionBean, Serializable {
      */
     private void initNewPropertyEditing() {
         structureManagement = FxJsfUtils.getRequest().getUserTicket().isInRole(Role.StructureManagement);
-        property.setAutoUniquePropertyName(false);
+        property.setAutoUniquePropertyName(true);
         setPropertyMinMultiplicity(FxMultiplicity.getIntToString(property.getMultiplicity().getMin()));
         setPropertyMaxMultiplicity(FxMultiplicity.getIntToString(property.getMultiplicity().getMax()));
         optionWrapper = new OptionWrapper(property.getOptions(), null, true);
@@ -1122,7 +1146,6 @@ public class PropertyEditorBean implements ActionBean, Serializable {
                     property.getDataType().getId() == FxDataType.SelectOne.getId());
     }
 
-
     /**
      * Stores a newly created property in DB
      */
@@ -1132,16 +1155,22 @@ public class PropertyEditorBean implements ActionBean, Serializable {
             try {
                 applyPropertyChanges();
                 long assignmentId;
+                AssignmentEngine assignmentEngine = EJBLookup.getAssignmentEngine();
+                String oName = property.getName();
                 if (parentType != null) {
-                    assignmentId = EJBLookup.getAssignmentEngine().createProperty(parentType.getId(), property, parentXPath);
+                    assignmentId = assignmentEngine.createProperty(parentType.getId(), property, parentXPath);
                 }
                 else {
-                    assignmentId = EJBLookup.getAssignmentEngine().createProperty(property, parentXPath);
+                    assignmentId = assignmentEngine.createProperty(property, parentXPath);
                 }
+                String newName = CacheAdmin.getEnvironment().getPropertyAssignment(assignmentId).getProperty().getName();
+                if (!newName.equals(oName))
+                    msgs.add(new FxFacesMsgWarn("ex.structure.property.notUnique", oName, newName));
+
                 StructureTreeControllerBean s = (StructureTreeControllerBean) FxJsfUtils.getManagedBean("structureTreeControllerBean");
                 s.addAction(StructureTreeControllerBean.ACTION_RELOAD_OPEN_ASSIGNMENT, assignmentId, "");
-                // TODO messages were not shown... (when successfull)
-                new FxFacesMsgInfo("PropertyEditor.message.info.created").addToContext();
+                hasMsg = true;
+                msgs.add(new FxFacesMsgInfo("PropertyEditor.message.info.created"));
             } catch (Throwable t) {
                 new FxFacesMsgErr(t).addToContext();
             }

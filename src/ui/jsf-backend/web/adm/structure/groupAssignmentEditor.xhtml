@@ -18,6 +18,7 @@
     <ui:define name="body">
         <h:form id="frm" enctype="multipart/form-data">
             <c:if test="#{empty groupEditorBean.parseRequestParameters}"> </c:if>
+            <!--#{groupEditorBean.hasMsg}-->
             <c:if test="#{structureTreeControllerBean.doAction}">
                 <script type="text/javascript">
                     var treeframe=parent.getStructureNavFrame();

@@ -19,6 +19,7 @@
     <ui:define name="body">
         <a4j:form id="frm" enctype="multipart/form-data">
             <c:if test="#{empty propertyEditorBean.parseRequestParameters}"> </c:if>
+            <!--#{propertyEditorBean.hasMsg}-->
             <h:panelGroup rendered="#{structureTreeControllerBean.doAction}">
                 <script type="text/javascript">
                     var treeframe=parent.getStructureNavFrame();

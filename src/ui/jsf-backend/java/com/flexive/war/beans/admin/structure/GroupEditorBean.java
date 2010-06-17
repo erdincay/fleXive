@@ -35,6 +35,7 @@ package com.flexive.war.beans.admin.structure;
 
 import com.flexive.faces.FxJsfUtils;
 import com.flexive.faces.messages.FxFacesMsgErr;
+import com.flexive.faces.messages.FxFacesMessage;
 import com.flexive.faces.messages.FxFacesMsgInfo;
 import com.flexive.shared.CacheAdmin;
 import com.flexive.shared.EJBLookup;
@@ -90,6 +91,27 @@ public class GroupEditorBean implements Serializable {
     private boolean showParentAssignmentOptions = false;
     private OptionWrapper optionWrapperParent = null;
     private String openParentOptions = "false"; // toggle panel f. parent assignment options
+
+    // indicates if there are messages to print
+    private boolean hasMsg = false;
+
+    // stores messages from creating properties
+    private List<FxFacesMessage> msgs = new ArrayList<FxFacesMessage>();
+
+    /**
+     * print the saved messages
+     * @return
+     */
+    public boolean isHasMsg() {
+        if (hasMsg) {
+            for (FxFacesMessage curMsg : msgs) {
+                curMsg.addToContext();
+            }
+        }
+        msgs.clear();
+        hasMsg = false;
+        return hasMsg;
+    }
 
     public String getParseRequestParameters() {
         try {
@@ -430,6 +452,8 @@ public class GroupEditorBean implements Serializable {
                     assignmentId = EJBLookup.getAssignmentEngine().createGroup(group, parentXPath);
                 StructureTreeControllerBean s = (StructureTreeControllerBean) FxJsfUtils.getManagedBean("structureTreeControllerBean");
                 s.addAction(StructureTreeControllerBean.ACTION_RELOAD_OPEN_ASSIGNMENT, assignmentId, "");
+                hasMsg = true;
+                msgs.add(new FxFacesMsgInfo("GroupEditor.message.info.created"));
             }
             catch (Throwable t) {
                 new FxFacesMsgErr(t).addToContext();
