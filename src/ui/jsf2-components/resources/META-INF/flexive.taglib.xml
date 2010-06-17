@@ -103,4 +103,11 @@
         <function-signature>java.lang.String encodeEnum(java.lang.Enum)</function-signature>
     </function>
 
+
+    <function>
+        <function-name>concat</function-name>
+        <function-class>com.flexive.faces.beans.SystemBean</function-class>
+        <function-signature>java.lang.String concat(java.lang.Object,java.lang.Object)</function-signature>
+    </function>
+
 </facelet-taglib>
