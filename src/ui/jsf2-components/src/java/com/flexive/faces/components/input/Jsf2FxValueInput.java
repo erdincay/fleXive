@@ -42,7 +42,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 /**
- * JSF2 implementation of fx:fxValueInput.
+ * JSF2 implementation of fx:fxValueInput. Optional resource dependencies like TinyMCE are currently not
+ * loaded automatically, until this issue is resolved use fx:includes to include them manually.
  *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
@@ -50,9 +51,6 @@ import org.apache.commons.logging.LogFactory;
 @ResourceDependencies({
     @ResourceDependency(library=FxJsf2Const.RESOURCE_LIBRARY, name=FxJsf2Const.RESOURCE_CSS_COMPONENTS, target="head"),
     @ResourceDependency(library=FxJsf2Const.RESOURCE_LIBRARY, name=FxJsf2Const.RESOURCE_JS_COMPONENTS, target="head"),
-    @ResourceDependency(library=FxJsf2Const.RESOURCE_LIBRARY, name=FxJsf2Const.RESOURCE_JS_HTMLEDITOR, target="head"),
-    @ResourceDependency(library=FxJsf2Const.RESOURCE_LIBRARY, name=FxJsf2Const.RESOURCE_JS_YUILOADER, target="head"),
-    @ResourceDependency(library=FxJsf2Const.RESOURCE_LIBRARY, name=FxJsf2Const.RESOURCE_JS_INIT, target="body")
 })
 public class Jsf2FxValueInput extends AbstractFxValueInput {
     private static final Log LOG = LogFactory.getLog(Jsf2FxValueInput.class);
