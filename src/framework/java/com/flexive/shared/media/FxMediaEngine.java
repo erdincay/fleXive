@@ -89,6 +89,22 @@ public class FxMediaEngine {
      * Identify a file, returning metadata
      *
      * @param mimeType if not null it will be used to call the correct identify routine
+     * @param fileName the name (path) of the file to identify
+     * @return metadata
+     * @since 3.1.4
+     */
+    public static FxMetadata identify(String mimeType, String fileName) {
+        File file = new File(fileName);
+        if( !file.exists())
+            //noinspection ThrowableInstanceNeverThrown
+            throw new FxApplicationException("ex.content.binary.fileNotFound", fileName).asRuntimeException();
+        return identify(mimeType, file);
+    }
+
+    /**
+     * Identify a file, returning metadata
+     *
+     * @param mimeType if not null it will be used to call the correct identify routine
      * @param file     the file to identify
      * @return metadata
      */
@@ -200,6 +216,25 @@ public class FxMediaEngine {
         if (FxMediaImageMagickEngine.IM_AVAILABLE)
             return FxMediaImageMagickEngine.scale(original, scaled, extension, width, height);
         return FxMediaNativeEngine.scale(original, scaled, extension, width, height);
+    }
+
+    /**
+     * Scale an image and return the dimensions (width and height) as int array
+     *
+     * @param originalFileName original file name (+path)
+     * @param scaled           scaled file
+     * @param extension        extension
+     * @param width            desired width
+     * @param height           desired height
+     * @return actual width ([0]) and height ([1]) of scaled image
+     * @throws FxApplicationException on errors
+     * @since 3.1.4
+     */
+    public static int[] scale(String originalFileName, File scaled, String extension, int width, int height) throws FxApplicationException {
+        File original = new File(originalFileName);
+        if (!original.exists())
+            throw new FxApplicationException("ex.content.binary.fileNotFound", originalFileName);
+        return scale(original, scaled, extension, width, height);
     }
 
     /**

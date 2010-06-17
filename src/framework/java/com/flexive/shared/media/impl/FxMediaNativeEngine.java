@@ -140,6 +140,25 @@ public class FxMediaNativeEngine {
         return new int[]{bi2.getWidth(), bi2.getHeight()};
     }
 
+    /**
+     * Scale an image and return the dimensions (width and height) as int array
+     *
+     * @param originalFileName original file name (+path)
+     * @param scaled           scaled file
+     * @param extension        extension
+     * @param width            desired width
+     * @param height           desired height
+     * @return actual width ([0]) and height ([1]) of scaled image
+     * @throws FxApplicationException on errors
+     * @since 3.1.4
+     */
+    public static int[] scale(String originalFileName, File scaled, String extension, int width, int height) throws FxApplicationException {
+        File original = new File(originalFileName);
+        if (!original.exists())
+            throw new FxApplicationException("ex.content.binary.fileNotFound", originalFileName);
+        return scale(original, scaled, extension, width, height);
+    }
+
     public static BufferedImage scale(BufferedImage bi, int width, int height) {
         BufferedImage bi2;
         int scaleWidth = bi.getWidth(null);
