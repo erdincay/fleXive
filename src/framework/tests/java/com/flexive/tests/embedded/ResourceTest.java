@@ -37,32 +37,36 @@ public class ResourceTest {
 
     @Test
     public void resourceTest() throws FxApplicationException {
-        final String key1 = "res.Test.AbC-123";
-        final String key1same = "res.test.abc-123";
+        final String key1 = "res.test.abc-123";
+        final String key1mixed = "res.Test.AbC-123";
         final String SINGLE_TEST = "Single lang test";
 
         DivisionConfigurationEngine dc = EJBLookup.getDivisionConfigurationEngine();
+
+        //clean up first
+        dc.removeResourceValues("res.test.");
 
         //single language
         Assert.assertNull(dc.getResourceValue(key1, FxLanguage.SYSTEM_ID));
         FxString test = new FxString(false, SINGLE_TEST);
         dc.setResourceValue(key1, test);
-        FxString comp = dc.getResourceValue(key1same, FxLanguage.SYSTEM_ID);
+        FxString comp = dc.getResourceValue(key1, FxLanguage.SYSTEM_ID);
         Assert.assertEquals(test, comp);
-        comp = dc.getResourceValue(key1same, FxLanguage.ENGLISH);
+        comp = dc.getResourceValue(key1, FxLanguage.ENGLISH);
         Assert.assertEquals(test, comp);
         comp.setEmpty();
         dc.setResourceValue(key1, comp);
         Assert.assertNull(dc.getResourceValue(key1, FxLanguage.SYSTEM_ID));
         dc.setResourceValue(key1, test);
         Assert.assertNotNull(dc.getResourceValue(key1, FxLanguage.SYSTEM_ID));
+        Assert.assertNull(dc.getResourceValue(key1mixed, FxLanguage.SYSTEM_ID));
         dc.setResourceValue(key1, null);
         Assert.assertNull(dc.getResourceValue(key1, FxLanguage.SYSTEM_ID));
 
         //multi language
         test = new FxString(true, FxLanguage.ENGLISH, "en");
         dc.setResourceValue(key1, test);
-        comp = dc.getResourceValue(key1same, FxLanguage.SYSTEM_ID);
+        comp = dc.getResourceValue(key1, FxLanguage.SYSTEM_ID);
         Assert.assertTrue(comp.isMultiLanguage());
         Assert.assertNotNull(comp);
         Assert.assertTrue(comp.getDefaultLanguage() == FxLanguage.ENGLISH);
@@ -70,7 +74,7 @@ public class ResourceTest {
         Assert.assertNotNull(comp);
         Assert.assertTrue(comp.getDefaultLanguage() == FxLanguage.ENGLISH);
         test.setTranslation(FxLanguage.GERMAN, "de");
-        dc.setResourceValue(key1same, test);
+        dc.setResourceValue(key1, test);
         comp = dc.getResourceValue(key1, FxLanguage.ENGLISH);
         Assert.assertTrue(comp.translationExists(FxLanguage.ENGLISH));
         Assert.assertTrue(comp.translationExists(FxLanguage.GERMAN));

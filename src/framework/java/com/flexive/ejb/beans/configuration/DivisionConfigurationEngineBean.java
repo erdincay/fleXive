@@ -614,7 +614,7 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
     public void setResourceValue(String key, FxString value) throws FxApplicationException {
         if (StringUtils.isBlank(key))
             return;
-        key = key.trim().toLowerCase();
+        key = key.trim();
         if (key.length() > 50)
             throw new FxApplicationException("ex.configuration.resource.key.tooLong", key);
         if (!StringUtils.isAsciiPrintable(key))
@@ -651,7 +651,7 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
     public void removeResourceValues(String keyPrefix) throws FxApplicationException {
         if (StringUtils.isBlank(keyPrefix))
             return;
-        keyPrefix = keyPrefix.trim().toLowerCase();
+        keyPrefix = keyPrefix.trim();
         if (keyPrefix.length() > 50)
             throw new FxApplicationException("ex.configuration.resource.key.tooLong", keyPrefix);
         if (!StringUtils.isAsciiPrintable(keyPrefix))
@@ -699,8 +699,7 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
         if (StringUtils.isBlank(key)) {
             return null;
         }
-        FxString value;
-        key = key.trim().toLowerCase();
+        key = key.trim();
         Connection con = null;
         PreparedStatement ps = null;
         try {
@@ -733,7 +732,7 @@ public class DivisionConfigurationEngineBean extends GenericConfigurationImpl im
             return ret;
         }
 
-        keyPrefix = keyPrefix.trim().toLowerCase();
+        keyPrefix = keyPrefix.trim();
         Connection con = null;
         PreparedStatement ps = null;
         try {
