@@ -50,7 +50,7 @@ import org.apache.commons.logging.LogFactory;
  */
 @ResourceDependencies({
     @ResourceDependency(library=FxJsf2Const.RESOURCE_LIBRARY, name=FxJsf2Const.RESOURCE_CSS_COMPONENTS, target="head"),
-    @ResourceDependency(library=FxJsf2Const.RESOURCE_LIBRARY, name=FxJsf2Const.RESOURCE_JS_COMPONENTS, target="head"),
+    @ResourceDependency(library=FxJsf2Const.RESOURCE_LIBRARY, name=FxJsf2Const.RESOURCE_JS_COMPONENTS, target="head")
 })
 public class Jsf2FxValueInput extends AbstractFxValueInput {
     private static final Log LOG = LogFactory.getLog(Jsf2FxValueInput.class);
