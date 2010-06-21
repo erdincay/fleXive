@@ -696,10 +696,10 @@ public class ConfigurationManagerBean {
     }
 
     /**
-     * @return <code>true</code> if the edit-value is longer then <code>TA_LENGTH</code> chars
+     * @return <code>true</code> if the edit-value is longer then <code>TA_LENGTH</code> chars or has a line break
      */
     public boolean isTa() {
-        return curEdit_STR_Value.length() > TA_LENGTH;
+        return curEdit_STR_Value.length() > TA_LENGTH || curEdit_STR_Value.indexOf('\n') > 0;
     }
 
     public void changePath() {

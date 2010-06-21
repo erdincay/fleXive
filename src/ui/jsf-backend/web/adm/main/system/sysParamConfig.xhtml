@@ -26,6 +26,8 @@
         .hidden { display:none; }
         .red {color:red; }
     </STYLE>
+    <script language="javascript" type="text/javascript"
+            src="#{fxSystemBean.contextPath}/adm/js/edit_area/edit_area_full.js"></script>
 </ui:define>
 <ui:define name="body">
 
@@ -184,7 +186,7 @@
                                            onclick="#{rich:component('newMPanel')}.show();"
                                            id="createNew_H"
                                            reRender="newPanel, editPanel, confirmPanel">
-                        <a4j:actionparam value="curKey" assignTo="#{configManager.selectedKey}"/>
+                        <a4j:actionparam value="#{curTable.TID}" assignTo="#{configManager.selectedKey}"/>
                     </adm:ajaxCommandButton>
                     <!--New Button (toolbar)-->
                     <!--onclick is overwritten!-->
@@ -327,6 +329,13 @@
     </f:facet>
 
     <a4j:outputPanel id="editPanel">
+        <script type="text/javascript">
+            try {
+                activateEditArea('editForm:bigTA', true);
+            } catch (e) {
+                alert(e);
+            }
+        </script>
         <h:form id="editForm">
             <h:inputHidden value="#{configManager.selectedKey}"/>
             <h:inputHidden value="#{configManager.showValues}"/>
@@ -348,7 +357,7 @@
                             <h:inputText value="#{configManager.curEdit_STR_Value}" size="#{configManager.strLen}"/>
                         </span>
                         <span class="#{configManager.TAVisible}">
-                            <h:inputTextarea value="#{configManager.curEdit_TA_Value}" rows="4" cols="50"/>
+                            <h:inputTextarea id="bigTA" value="#{configManager.curEdit_TA_Value}" rows="8" cols="80"/>
                         </span>
                     </td>
                 </tr>
