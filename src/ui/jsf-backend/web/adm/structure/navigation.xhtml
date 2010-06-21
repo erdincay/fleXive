@@ -38,6 +38,20 @@
             var reloadContentTreeNavFrame=false;
             //flag indicating if the tree is shown hierarchically or flat
             var isViewFlat=true;
+            var nameEQ = "viewMode=";
+                var ca = document.cookie.split(';');
+                for(var i=0;i < ca.length;i++) {
+                    var c = ca[i];
+                    while (c.charAt(0)==' ') c = c.substring(1,c.length);
+                    if (c.indexOf(nameEQ) == 0){
+                        var value=c.substring(nameEQ.length,c.length);
+                        if (value == '0') {
+                            isViewFlat = false;
+
+                            break;
+                        }
+                    }
+                }
             var isViewLabels=true;
 
                 //actions defined in StructureTreeControllerBean
@@ -165,7 +179,7 @@
                     var node = childArray[i];
                     if (node.isExpanded) {
                        harray.push(new Array(getNodeId(node), node.nodeType));
-                       harray = _buildExpandedArray(node.children, harray)
+                       harray = _buildExpandedArray(node.children, harray);
                     }
                 }
                 return harray;
@@ -177,6 +191,14 @@
             function reloadAndKeepExpanded() {
                 var ea = getExpandedNodes();
                 reloadStructureTree();
+                try {
+                    // if we show hierarchical view and there are no expanded nodes expand the root node
+                    if (ea.length == 0 && !isViewFlat) {
+                       expandToNodeWithId(0, true).expand();
+                    }
+                } catch (e) {
+                    alert (e);
+                }
                 for (var i=0;i<ea.length;i++) {
                     var node = expandToNodeWithId(ea[i][0], isType(ea[i][1]));
                     if (node != null)
@@ -613,7 +635,7 @@
                 try {
                     invokeContentAction("adm/main/importexport/structureExport.jsf");
                 } catch(ex) {
-                    alertDialog(ex)
+                    alertDialog(ex);
                 }
             }
 
@@ -623,7 +645,7 @@
                     var nodeId = getNodeId(menu.getTreeNode());
                     invokeContentAction("adm/main/importexport/structureExportResult.jsf", "exportType", {typeId: nodeId});
                 } catch(ex) {
-                    alertDialog(ex)
+                    alertDialog(ex);
                 }
             }
 
@@ -633,7 +655,7 @@
                     var nodeId = getNodeId(menu.getTreeNode());
                     invokeContentAction("adm/main/importexport/structureExportResult.jsf", "exportTypeNoDeps", {typeId: nodeId});
                 } catch(ex) {
-                    alertDialog(ex)
+                    alertDialog(ex);
                 }
             }
 
@@ -732,6 +754,9 @@
 
             function toggleHierarchyView() {
                 isViewFlat = !isViewFlat;
+                var date = new Date();
+                date.setTime(date.getTime()+(60*24*60*60*1000));    // remember for 60 days
+                document.cookie = 'viewMode=' + (isViewFlat ? '1':'0') + '; expires=' +date.toGMTString() + '; path=/';
                 setImage("mainNavForm:imgTreeHierarchy", "adm/images/layout/tree_view_" + (isViewFlat ? "flat" : "hierarchical") + ".png");
                 reloadAndKeepExpanded();
             }
@@ -745,6 +770,14 @@
             dojo.addOnLoad(function() {
                 if (getContentFrame().isQueryEditor) {
                     enableSearchMode();
+                }
+                // so if we need hierarchical view, just add another onLoad function to change it
+                if (!isViewFlat){
+                    dojo.addOnLoad(function() {
+                        // so that the toggle work right we must set the flag to ture
+                        isViewFlat = true;
+                        toggleHierarchyView();
+                    });
                 }
             });
         //-->
