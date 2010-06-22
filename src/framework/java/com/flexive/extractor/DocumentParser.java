@@ -107,19 +107,20 @@ public class DocumentParser {
     }
 
     /**
-     * Initialise content / contentType vars
+     * Initialize content / contentType vars
      *
      * @param reloadContent reload the content if necessary
-     * @return true if successfull
+     * @return true if successful
      */
     private boolean init(boolean reloadContent) {
         if (content == null || reloadContent) {
             try {
                 this.content = EJBLookup.getContentEngine().load(pk);
             } catch (FxApplicationException e) {
-                if (LOG.isDebugEnabled()) {
+                if (LOG.isErrorEnabled()) {
                     LOG.error("Could not load content for pk " + pk + " - conversion aborted " + e.getMessage(), e);
                 }
+                return false;
             }
         }
         if (contentType == null || reloadContent) {

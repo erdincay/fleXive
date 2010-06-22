@@ -114,10 +114,10 @@ public class MySQLHierarchicalStorage extends GenericHierarchicalStorage {
                 if (version > 0) ps.setInt(2, version);
                 ps.executeQuery();
                 ps.close();
-                ps = con.prepareStatement("SELECT 1 FROM " + DatabaseConst.TBL_CONTENT_BINARY + " WHERE ID=?" + ver + LOCK_MODE);
+                /*ps = con.prepareStatement("SELECT 1 FROM " + DatabaseConst.TBL_CONTENT_BINARY + " WHERE ID=?" + ver + LOCK_MODE);
                 ps.setLong(1, id);
                 if (version > 0) ps.setInt(2, version);
-                ps.executeQuery();
+                ps.executeQuery();*/
                 //fulltext table uses MyISAM engine and can not be locked
             } finally {
                 Database.closeObjects(MySQLHierarchicalStorage.class, null, ps);

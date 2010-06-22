@@ -34,8 +34,8 @@ package com.flexive.core.stream;
 import com.flexive.core.Database;
 import com.flexive.core.storage.StorageManager;
 import com.flexive.core.storage.binary.BinaryInputStream;
-import com.flexive.core.storage.genericSQL.GenericBinarySQLInputStream;
 import com.flexive.shared.FxContext;
+import com.flexive.shared.FxSharedUtils;
 import com.flexive.shared.exceptions.FxNotFoundException;
 import com.flexive.shared.media.FxMediaEngine;
 import com.flexive.shared.stream.BinaryDownloadPayload;
@@ -61,7 +61,8 @@ public class BinaryDownloadProtocol extends StreamProtocol<BinaryDownloadPayload
 
     protected static final Log LOG = LogFactory.getLog(BinaryDownloadProtocol.class);
 
-    private BinaryInputStream bin = null;
+    private Connection con;
+    private BinaryInputStream bin;
     private byte[] _buffer;
     private int pre_read = 0;
 
@@ -99,6 +100,7 @@ public class BinaryDownloadProtocol extends StreamProtocol<BinaryDownloadPayload
 
             final BinaryDescriptor.PreviewSizes previewSize = BinaryDescriptor.PreviewSizes.fromSize(dataPacket.getPayload().getSize());
             try {
+                con = Database.getNonTXDataSource(dataPacket.getPayload().getDivision()).getConnection();
                 bin = loadBinaryDescriptor(dataPacket, previewSize);
 
                 if (dataPacket.getPayload().isForceImage()
@@ -112,6 +114,9 @@ public class BinaryDownloadProtocol extends StreamProtocol<BinaryDownloadPayload
                 return new DataPacket<BinaryDownloadPayload>(new BinaryDownloadPayload(true, "ex.stream.notFound"), false);
             } catch (FxNotFoundException e) {
                 LOG.error("Failed to lookup content storage for division #" + dataPacket.getPayload().getDivision() + ": " + e.getLocalizedMessage());
+                return new DataPacket<BinaryDownloadPayload>(new BinaryDownloadPayload(true, "ex.stream.notFound"), false);
+            } catch (SQLException e) {
+                throw new StreamException("Database connection error: " + e.getMessage(), e);
             }
             if (bin == null || !bin.isBinaryFound())
                 return new DataPacket<BinaryDownloadPayload>(new BinaryDownloadPayload(true, "ex.stream.notFound"), false);
@@ -135,24 +140,19 @@ public class BinaryDownloadProtocol extends StreamProtocol<BinaryDownloadPayload
     }
 
     private BinaryInputStream loadBinaryDescriptor(DataPacket<BinaryDownloadPayload> dataPacket, BinaryDescriptor.PreviewSizes previewSize) throws FxNotFoundException {
-        try {
-            final Connection con = Database.getDbConnection(dataPacket.getPayload().getDivision());
-            // set division information in context for the storage engine
-            FxContext.get().setDivisionId(dataPacket.getPayload().getDivision());
-            BinaryInputStream o = StorageManager.getContentStorage(TypeStorageMode.Hierarchical).fetchBinary(
-                    con,
-                    dataPacket.getPayload().getDivision(),
-                    previewSize,
-                    dataPacket.getPayload().getId(),
-                    dataPacket.getPayload().getVersion(),
-                    dataPacket.getPayload().getQuality());
-            if (!o.isBinaryFound())
-                Database.closeObjects(BinaryDownloadProtocol.class, con, null);
-            return o;
-        } catch (SQLException e) {
-            LOG.error(e);
-            return new GenericBinarySQLInputStream(false);
-        } 
+        // set division information in context for the storage engine
+        FxContext.get().setDivisionId(dataPacket.getPayload().getDivision());
+        BinaryInputStream o = StorageManager.getContentStorage(TypeStorageMode.Hierarchical).fetchBinary(
+                con,
+                dataPacket.getPayload().getDivision(),
+                previewSize,
+                dataPacket.getPayload().getId(),
+                dataPacket.getPayload().getVersion(),
+                dataPacket.getPayload().getQuality());
+        if (!o.isBinaryFound()) {
+            Database.closeObjects(BinaryDownloadProtocol.class, con, null);
+        }
+        return o;
     }
 
     /**
@@ -160,11 +160,8 @@ public class BinaryDownloadProtocol extends StreamProtocol<BinaryDownloadPayload
      */
     @Override
     public void closeResources() {
-        try {
-            if (bin != null) bin.close();
-        } catch (IOException e) {
-            LOG.error("Failed to close binary input stream: " + e.getMessage(), e);
-        }
+        FxSharedUtils.close(bin);
+        Database.closeObjects(BinaryDownloadProtocol.class, con, null);
     }
 
     /**

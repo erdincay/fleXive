@@ -106,7 +106,7 @@ public class SystemParameters {
      */
     public static final Parameter<Boolean> TREE_LIVE_ENABLED = ParameterFactory.newInstance(Boolean.class, DIVISION_TREE, "liveTree", true);
     /**
-     * Wether to store binary transit files in the database or filesystem
+     * Whether to store binary transit files in the database or filesystem
      */
     public static final Parameter<Boolean> BINARY_TRANSIT_DB = ParameterFactory.newInstance(Boolean.class, DIVISION_CONFIG, "binaryTransitDB", false);
     /**
@@ -120,11 +120,11 @@ public class SystemParameters {
     /**
      * Path on the current nodes filesystem for binary transit files
      */
-    public static final Parameter<String> NODE_TRANSIT_PATH = ParameterFactory.newInstance(String.class, NODE_CONFIG, "nodeTransitPath", "flexive-storage/transit");
+    public static final Parameter<String> NODE_TRANSIT_PATH = ParameterFactory.newInstance(String.class, NODE_CONFIG, "nodeTransitPath", true, "flexive-storage/transit");
     /**
      * Path on the current nodes filesystem for binary files
      */
-    public static final Parameter<String> NODE_BINARY_PATH = ParameterFactory.newInstance(String.class, NODE_CONFIG, "nodeBinaryPath", "flexive-storage/binaries");
+    public static final Parameter<String> NODE_BINARY_PATH = ParameterFactory.newInstance(String.class, NODE_CONFIG, "nodeBinaryPath", true, "flexive-storage/binaries");
     /**
      * Download URL for exports
      */

@@ -104,7 +104,7 @@ public class SqlSearch {
      * @param query          the query to execute
      * @param startIndex     the start index (0 based)
      * @param maxFetchRows   the number of rows to return with the resultset, or -1 to fetch all rows
-     * @param params         all aditional search parameters
+     * @param params         all additional search parameters
      * @param conf           the result set configuration
      * @param location       the location that started the search
      * @param viewType       the view type @throws com.flexive.shared.exceptions.FxSqlSearchException
@@ -220,10 +220,10 @@ public class SqlSearch {
             df.build();
 
             // Wildcard handling depending on the found entries
-            replaceWildcard(df);
+            final ResultPreferences resultPreferences = getResultPreferences(df);
+            replaceWildcard(df, resultPreferences);
             if (statement.getOrderByValues().isEmpty()) {
                 // add user-defined order by
-                final ResultPreferences resultPreferences = getResultPreferences(df);
                 for (ResultOrderByInfo column : resultPreferences.getOrderByColumns()) {
                     try {
                         statement.addOrderByValue(new OrderByValue(column.getColumnName(),
@@ -485,10 +485,9 @@ public class SqlSearch {
      * @param df the datafilter
      * @throws FxSqlSearchException if the function fails
      */
-    private void replaceWildcard(DataFilter df) throws FxSqlSearchException {
+    private void replaceWildcard(DataFilter df, ResultPreferences prefs) throws FxSqlSearchException {
 
         try {
-            ResultPreferences prefs = getResultPreferences(df);
             ArrayList<SelectedValue> selValues = new ArrayList<SelectedValue>(
                     (statement.getSelectedValues().size() - 1) + prefs.getSelectedColumns().size());
             for (SelectedValue _value : statement.getSelectedValues()) {

@@ -74,6 +74,7 @@ public final class Database {
     private static final Log LOG = LogFactory.getLog(Database.class);
     private static DataSource globalDataSource = null;
     private static DataSource testDataSource = null;
+    private static DataSource testDataSourceNoTX = null;
     // cached data source references - index = division ID
     private static final DataSource[] dataSources = new DataSource[MAX_DIVISIONS];
     // cached data sources without transaction support
@@ -179,8 +180,10 @@ public final class Database {
         }
         DataSource[] dataSourceCache = useTX ? dataSources : dataSourcesNoTX;
         // use cached datasource, if available
-        if (divisionId == DivisionData.DIVISION_TEST && testDataSource != null) {
+        if (divisionId == DivisionData.DIVISION_TEST && useTX && testDataSource != null) {
             return testDataSource;
+        } else if (divisionId == DivisionData.DIVISION_TEST && !useTX && testDataSourceNoTX != null) {
+            return testDataSourceNoTX;
         } else if (divisionId != DivisionData.DIVISION_TEST && dataSourceCache[divisionId] != null) {
             return dataSourceCache[divisionId];
         }
@@ -201,8 +204,11 @@ public final class Database {
                 LOG.info("Looking up datasource for division " + divisionId + ": " + finalDsName);
                 final DataSource dataSource = getDataSource(finalDsName);
                 if (divisionId == DivisionData.DIVISION_TEST) {
-                    testDataSource = dataSource;
-                    return testDataSource;
+                    if (useTX) {
+                        return (testDataSource = dataSource);
+                    } else {
+                        return (testDataSourceNoTX = dataSource);
+                    }
                 } else {
                     dataSourceCache[divisionId] = dataSource;
                     return dataSourceCache[divisionId];

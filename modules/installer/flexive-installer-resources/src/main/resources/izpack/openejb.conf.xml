@@ -37,6 +37,7 @@
         JdbcUrl jdbc:h2:../database/h2/flexive;SCHEMA=flexive;LOCK_TIMEOUT=10000;MVCC=TRUE;TRACE_LEVEL_FILE=0
         UserName sa
         Password
+        JtaManaged false
     ]]></Resource>
 
     <!--SecurityService id="Default Security Service"/-->

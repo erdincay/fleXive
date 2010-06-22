@@ -96,7 +96,15 @@ public abstract class ParameterImpl<T>  implements Parameter<T>, Serializable {
     public ParameterScope getScope() {
         return data.getPath().getScope();
     }
-    
+
+    /**
+     * {@inheritDoc}
+     */
+    public boolean isCached() {
+        return data.isCached();
+    }
+
+
     /** {@inheritDoc} */
     public boolean isValid(T value) {
         // by default all parameters of the given type are valid

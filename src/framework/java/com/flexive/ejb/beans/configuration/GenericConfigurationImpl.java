@@ -334,7 +334,7 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
     @SuppressWarnings({"RedundantCast"})
     protected <T extends Serializable> Object getParameter(Parameter<T> parameter, String path, String key) throws FxLoadException, FxNotFoundException {
         String cachePath = getCachePath(path);
-        if (cachePath != null) {
+        if (parameter.isCached() && cachePath != null) {
             // try cache first
             try {
                 Object value = getCache(cachePath, key);
@@ -355,8 +355,8 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
         }
         // load parameter from config table
         logCacheMiss(path, key);
-        Serializable value = loadParameterFromDb(path, key);
-        if (cachePath != null) {
+        Serializable value = loadParameterFromDb(path, key, parameter.isCached());
+        if (parameter.isCached() && cachePath != null) {
             // add value to cache
             putCache(cachePath, key, (Serializable) parameter.getValue(value));
         }
@@ -561,20 +561,25 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
      * @throws FxLoadException     if the parameter could not be loaded
      */
     protected <T> T loadParameterFromDb(Parameter<T> parameter) throws FxNotFoundException, FxLoadException {
-        return parameter.getValue(loadParameterFromDb(parameter.getPath().getValue(),
-                parameter.getData().getKey()));
+        return parameter.getValue(loadParameterFromDb(
+                parameter.getPath().getValue(),
+                parameter.getData().getKey(),
+                parameter.isCached()
+        ));
     }
 
     /**
      * Loads the given parameter from the database. Helper method for implementors.
      *
-     * @param path path of the parameter
-     * @param key  key of the parameter
+     * @param path      path of the parameter
+     * @param key       key of the parameter
+     * @param cached    true if the cache can be used for this parameter (the value itself is not cached here,
+     * but a placeholder if <strong>no</strong> value is defined).
      * @return the parameter value
      * @throws FxLoadException     if the parameter could not be loaded
      * @throws FxNotFoundException if the parameter does not exist
      */
-    protected Serializable loadParameterFromDb(String path, String key) throws FxLoadException, FxNotFoundException {
+    protected Serializable loadParameterFromDb(String path, String key, boolean cached) throws FxLoadException, FxNotFoundException {
         // get from DB
         Connection conn = null;
         PreparedStatement stmt = null;
@@ -586,7 +591,7 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
                 return rs.getString(1);
             } else {
                 String cachePath = getCachePath(path);
-                if (cachePath != null) {
+                if (cachePath != null && cached) {
                     // store null object in cache to avoid hitting the DB every time
                     putCache(cachePath, key, new UnsetParameter());
                 }
@@ -648,7 +653,7 @@ public abstract class GenericConfigurationImpl implements GenericConfigurationEn
      * @param path the parameter path
      * @param key  the parameter key
      * @return the cached value of the given parameter
-     * @throws FxCacheException if a cache exception occured
+     * @throws FxCacheException if a cache exception occurred
      */
     protected Serializable getCache(String path, String key) throws FxCacheException {
         return (Serializable) SerializationUtils.clone((Serializable) CacheAdmin.getInstance().get(path, key));

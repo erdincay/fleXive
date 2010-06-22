@@ -157,7 +157,7 @@ public class CacheAdmin {
                 EJBLookup.getGlobalConfigurationEngine().registerCacheMBean(((FxCacheProxy) cache).getName());
                 LOG.debug("Registered: " + server.isRegistered(((FxCacheProxy) cache).getName()));
                 cache.create();
-            } 
+            }
             return cache;
         } catch (Exception e) {
             LOG.error(e.getMessage(), e);

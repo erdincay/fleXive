@@ -90,6 +90,16 @@ public interface Parameter<T> {
      * @return  the parameter's scope.
      */
     ParameterScope getScope();
+
+    /**
+     * Should this parameter be cached once it has been retrieved? By default all parameters are cached, but
+     * you can disable this for individual parameters that are seldom used or very large.
+     *
+     * @return  true if this parameter should be cached. If false, each lookup is performed directly on the
+     * database.
+     * @since   3.1.4
+     */
+    boolean isCached();
     
     /**
      * Return the parameter's key.

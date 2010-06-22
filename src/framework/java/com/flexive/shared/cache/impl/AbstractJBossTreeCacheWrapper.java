@@ -64,7 +64,8 @@ public abstract class AbstractJBossTreeCacheWrapper implements FxBackingCache {
      * {@inheritDoc}
      */
     public boolean exists(String path, Object key) throws FxCacheException {
-        return getCache().get(Fqn.fromString(path), key) != null;
+        final Set<Object> keys = getCache().getKeys(path);
+        return keys != null && keys.contains(key);
     }
 
     /**

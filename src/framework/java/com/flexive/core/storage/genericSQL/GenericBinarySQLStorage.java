@@ -156,7 +156,7 @@ public class GenericBinarySQLStorage implements BinaryStorage {
             else {
                 Connection con;
                 PreparedStatement ps = null;
-                con = Database.getDbConnection(divisionId);
+                con = Database.getNonTXDataSource(divisionId).getConnection();
                 try {
                     //create a dummy entry
                     ps = con.prepareStatement("INSERT INTO " + DatabaseConst.TBL_BINARY_TRANSIT + " (BKEY,MIMETYPE,FBLOB,TFER_DONE,EXPIRE) VALUES(?,?,NULL,?,?)");
@@ -342,12 +342,7 @@ public class GenericBinarySQLStorage implements BinaryStorage {
         } catch (SQLException e) {
             throw new FxUpdateException(LOG, e, "ex.db.sqlError", e.getMessage());
         } finally {
-            if (ps != null)
-                try {
-                    ps.close();
-                } catch (SQLException e) {
-                    //ignore
-                }
+            Database.closeObjects(GenericBinarySQLStorage.class, ps);
         }
     }
 
@@ -369,12 +364,7 @@ public class GenericBinarySQLStorage implements BinaryStorage {
         } catch (SQLException e) {
             throw new FxDbException(e, "ex.db.sqlError", e.getMessage());
         } finally {
-            try {
-                if (ps != null) ps.close();
-            } catch (SQLException e) {
-                //noinspection ThrowFromFinallyBlock
-                throw new FxDbException(e, "ex.db.sqlError", e.getMessage());
-            }
+            Database.closeObjects(GenericBinarySQLStorage.class, ps);
         }
         throw new FxDbException("ex.content.binary.loadDescriptor.failed", id);
     }
@@ -425,7 +415,7 @@ public class GenericBinarySQLStorage implements BinaryStorage {
      * @return descriptor of final binary
      * @throws FxDbException on errors looking up the sequencer
      */
-    private BinaryDescriptor binaryTransit(Connection con, BinaryDescriptor binary, long id, int version, int quality) throws FxDbException {
+    private BinaryDescriptor binaryTransit(Connection _con, BinaryDescriptor binary, long id, int version, int quality) throws FxDbException {
         PreparedStatement ps = null;
         BinaryDescriptor created;
         FileInputStream fis = null;
@@ -449,7 +439,10 @@ public class GenericBinarySQLStorage implements BinaryStorage {
         } catch (FxApplicationException e) {
             throw e.asRuntimeException();
         }
+        Connection con = null;
         try {
+            con = Database.getNonTXDataSource(divisionId).getConnection();
+            con.setAutoCommit(false);
             double resolution = 0.0;
             int width = 0;
             int height = 0;
@@ -661,23 +654,14 @@ public class GenericBinarySQLStorage implements BinaryStorage {
                         throw new FxDbException(LOG, "ex.content.binary.fsCopyFailedError", created.getId() + "[" + PreviewSizes.SCREENVIEW.getBlobIndex() + "]", e.getMessage());
                     }
             }
+            con.commit();
         } catch (SQLException e) {
             throw new FxDbException(e, "ex.db.sqlError", e.getMessage());
         } catch (FileNotFoundException e) {
             throw new FxDbException(e, "ex.content.binary.IOError", binary.getHandle());
         } finally {
-            try {
-                if (ps != null) ps.close();
-            } catch (SQLException e) {
-                //noinspection ThrowFromFinallyBlock
-                throw new FxDbException(e, "ex.db.sqlError", e.getMessage());
-            }
-            try {
-                if (fis != null) fis.close();
-            } catch (IOException e) {
-                //noinspection ThrowFromFinallyBlock
-                throw new FxDbException(e, "ex.content.binary.IOError", binary.getHandle());
-            }
+            Database.closeObjects(GenericBinarySQLStorage.class, con, ps);
+            FxSharedUtils.close(fis);
         }
         return created;
     }
@@ -718,7 +702,7 @@ public class GenericBinarySQLStorage implements BinaryStorage {
      * @return BinaryDescriptor
      * @throws FxApplicationException on errors
      */
-    private BinaryDescriptor identifyAndTransferTransitBinary(Connection con, BinaryDescriptor binary) throws FxApplicationException {
+    private BinaryDescriptor identifyAndTransferTransitBinary(Connection _con, BinaryDescriptor binary) throws FxApplicationException {
         //check if already identified
         if (!StringUtils.isEmpty(binary.getMetadata()))
             return binary;
@@ -733,7 +717,10 @@ public class GenericBinarySQLStorage implements BinaryStorage {
         String metaData = "<empty/>";
         ResultSet rs = null;
         String md5sum = "";
+        Connection con = null;
         try {
+            con = Database.getNonTXDataSource().getConnection();
+            con.setAutoCommit(false);
             binaryTransitFileInfo = getBinaryTransitFileInfo(binary);
             boolean processed = false;
             boolean useDefaultPreview = true;
@@ -802,23 +789,14 @@ public class GenericBinarySQLStorage implements BinaryStorage {
                 ps.executeUpdate();
             }
             md5sum = FxSharedUtils.getMD5Sum(binaryTransitFileInfo.getBinaryTransitFile());
+            con.commit();
         } catch (IOException e) {
             LOG.error("Stream reading failed:" + e.getMessage(), e);
         } catch (SQLException e) {
             throw new FxDbException(e, "ex.db.sqlError", e.getMessage());
         } finally {
-            try {
-                if (pin1 != null)
-                    pin1.close();
-                if (pin2 != null)
-                    pin2.close();
-                if (pin3 != null)
-                    pin3.close();
-                if (pin4 != null)
-                    pin4.close();
-            } catch (IOException e) {
-                LOG.error("Stream closing failed: " + e.getMessage(), e);
-            }
+            Database.closeObjects(GenericBinarySQLStorage.class, con, null);
+            FxSharedUtils.close(pin1, pin2, pin3, pin4);
             if (binaryTransitFileInfo != null && binaryTransitFileInfo.isDBStorage())
                 FxFileUtils.removeFile(binaryTransitFileInfo.getBinaryTransitFile());
             FxFileUtils.removeFile(previewFile1);
@@ -945,13 +923,7 @@ public class GenericBinarySQLStorage implements BinaryStorage {
             } catch (SQLException e) {
                 throw new FxDbException(e, "ex.db.sqlError", e.getMessage());
             } finally {
-                try {
-                    if (fos != null) fos.close();
-                    if (in != null) in.close();
-                } catch (IOException e) {
-                    //noinspection ThrowFromFinallyBlock
-                    throw new FxApplicationException(e, "ex.content.binary.IOError", binary.getHandle());
-                }
+                FxSharedUtils.close(fos, in);
                 try {
                     if (rs != null) rs.close();
                 } catch (SQLException e) {
@@ -1107,13 +1079,7 @@ public class GenericBinarySQLStorage implements BinaryStorage {
         } catch (SQLException e) {
             throw new FxDbException(e, "ex.db.sqlError", e.getMessage());
         } finally {
-            try {
-                if (ps != null)
-                    ps.close();
-            } catch (SQLException e) {
-                //noinspection ThrowFromFinallyBlock
-                throw new FxDbException(e, "ex.db.sqlError", e.getMessage());
-            }
+            Database.closeObjects(GenericBinarySQLStorage.class, ps);
         }
     }
 
@@ -1137,12 +1103,7 @@ public class GenericBinarySQLStorage implements BinaryStorage {
         } catch (FxApplicationException e) {
             LOG.error(e, e);
         } finally {
-            if (ps != null)
-                try {
-                    ps.close();
-                } catch (SQLException e) {
-                    //ignore
-                }
+            Database.closeObjects(GenericBinarySQLStorage.class, ps);
         }
     }
 
@@ -1202,12 +1163,7 @@ public class GenericBinarySQLStorage implements BinaryStorage {
                 FxBinaryUtils.removeBinary(divisionId, id);
             }
         } finally {
-            Database.closeObjects(GenericBinarySQLStorage.class, null, psRemove);
-            Database.closeObjects(GenericBinarySQLStorage.class, null, psUsage1);
-            Database.closeObjects(GenericBinarySQLStorage.class, null, psUsage2);
-            Database.closeObjects(GenericBinarySQLStorage.class, null, psUsage3);
-            Database.closeObjects(GenericBinarySQLStorage.class, null, psUsage4);
-
+            Database.closeObjects(GenericBinarySQLStorage.class, psRemove, psUsage1, psUsage2, psUsage3, psUsage4);
         }
     }
 }

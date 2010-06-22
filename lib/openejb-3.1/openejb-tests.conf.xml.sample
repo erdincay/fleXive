@@ -13,6 +13,13 @@
         UserName root
         Password a
     </Resource>
+    <Resource id="jdbc/flexiveTestNoTX" type="DataSource">
+        JdbcDriver com.mysql.jdbc.Driver
+        JdbcUrl jdbc:mysql://localhost/flexiveTest
+        UserName root
+        Password a
+        JtaManaged false
+    </Resource>
 
     <!-- H2 settings (Embedded mode, faster, but no external connection possible) -->
     <!--
@@ -27,6 +34,13 @@
         JdbcUrl jdbc:h2:flexive-db/h2/flexive;SCHEMA=flexiveTest;LOCK_TIMEOUT=10000;MVCC=TRUE;TRACE_LEVEL_FILE=0
         UserName sa
         Password
+    </Resource>
+    <Resource id="jdbc/flexiveTestNoTX" type="DataSource">
+        JdbcDriver org.h2.Driver
+        JdbcUrl jdbc:h2:flexive-db/h2/flexive;SCHEMA=flexiveTest;LOCK_TIMEOUT=10000;MVCC=TRUE;TRACE_LEVEL_FILE=0
+        UserName sa
+        Password
+        JtaManaged false
     </Resource>
     -->
 
@@ -44,6 +58,13 @@
         UserName sa
         Password
     </Resource>
+    <Resource id="jdbc/flexiveTestNoTX" type="DataSource">
+        JdbcDriver org.h2.Driver
+        JdbcUrl jdbc:h2:tcp://localhost:9092/[flexive-db-path]/flexive;SCHEMA=flexiveTest;LOCK_TIMEOUT=10000;MVCC=TRUE;TRACE_LEVEL_FILE=0
+        UserName sa
+        Password
+        JtaManaged false
+    </Resource>
     -->
 
     <!-- PostgreSQL settings -->
@@ -60,6 +81,13 @@
         UserName postgres
         Password a
     </Resource>
+    <Resource id="jdbc/flexiveTestNoTX" type="DataSource">
+        JdbcDriver org.postgresql.Driver
+        JdbcUrl jdbc:postgresql://localhost:5432/flexiveTest
+        UserName postgres
+        Password a
+        JtaManaged false
+    </Resource>
     -->
     <!-- Oracle XE settings -->
     <!--
@@ -74,6 +102,13 @@
         JdbcUrl jdbc:oracle:thin:@localhost:1521/XE
         UserName flexiveTest
         Password a
+    </Resource>
+    <Resource id="jdbc/flexiveTestNoTX" type="DataSource">
+        JdbcDriver oracle.jdbc.OracleDriver
+        JdbcUrl jdbc:oracle:thin:@localhost:1521/XE
+        UserName flexiveTest
+        Password a
+        JtaManaged false
     </Resource>
     -->
     <SecurityService id="Default Security Service"/>

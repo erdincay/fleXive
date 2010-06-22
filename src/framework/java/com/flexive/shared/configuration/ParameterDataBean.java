@@ -44,6 +44,7 @@ public class ParameterDataBean<T> implements ParameterData<T> {
     protected ParameterPath path;
     protected String key;
     protected T defaultValue;
+    protected boolean cached;
 
     /**
 	 * Constructor.
@@ -53,9 +54,7 @@ public class ParameterDataBean<T> implements ParameterData<T> {
 	 * @param defaultValue	default value
 	 */
 	public ParameterDataBean(ParameterPath path, String key, T defaultValue) {
-		this.key = key;
-		this.path = path;
-		this.defaultValue = defaultValue;
+        this(path, key, true, defaultValue);
 	}
 	
 	
@@ -66,11 +65,40 @@ public class ParameterDataBean<T> implements ParameterData<T> {
 	 * @param defaultValue	the default value
 	 */
 	public ParameterDataBean(ParameterPath path, T defaultValue) {
+		this(path, true, defaultValue);
+	}
+
+
+    /**
+	 * Constructor.
+	 *
+	 * @param path	path for the parameter
+	 * @param key	key for the parameter (unless for aggregate parameters)
+     * @param cached    true if this parameter should be cached
+	 * @param defaultValue	default value
+     * @since   3.1.4
+	 */
+	public ParameterDataBean(ParameterPath path, String key, boolean cached, T defaultValue) {
+        this.path = path;
+        this.key = key;
+        this.cached = cached;
+        this.defaultValue = defaultValue;
+    }
+
+    /**
+	 * Constructor for aggregate parameters (with generated keys).
+	 *
+	 * @param path	path to be used for the parameters
+     * @param cached    true if this parameter should be cached
+	 * @param defaultValue	the default value
+     * @since   3.1.4
+	 */
+	public ParameterDataBean(ParameterPath path, boolean cached, T defaultValue) {
 		this.path = path;
 		this.key = "";
 		this.defaultValue = defaultValue;
+        this.cached = cached;
 	}
-
 
     /** {@inheritDoc} */
 	public synchronized ParameterPath getPath() {
@@ -86,6 +114,11 @@ public class ParameterDataBean<T> implements ParameterData<T> {
 	public synchronized T getDefaultValue() {
 		return defaultValue;
 	}
+
+    public boolean isCached() {
+        return cached;
+    }
+
 
     /** {@inheritDoc} */
     @Override

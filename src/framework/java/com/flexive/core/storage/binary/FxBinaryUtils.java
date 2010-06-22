@@ -46,9 +46,6 @@ import java.util.List;
 /**
  * Helper class for filesystem related binary handling.
  *
- * <p><small>IMPLEMENTATION NOTE: any EJB lookups in this class must be added to EJBLookup#resolveInterfacesForStreamServer
- * </small></p>
- *
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @since 3.1
  */
@@ -67,15 +64,17 @@ public class FxBinaryUtils {
      *
      * @return transit directory for the current node
      */
-    public static synchronized String getTransitDirectory() {
+    public static String getTransitDirectory() {
         String cacheDir = (String) FxContext.get().getAttribute(CTX_TRANSIT_DIR);
         if (cacheDir != null)
             return cacheDir;
         String path;
         try {
-            path = EJBLookup.getNodeConfigurationEngine().get(SystemParameters.NODE_TRANSIT_PATH);
+            path = EJBLookup.getConfigurationEngine().get(SystemParameters.NODE_TRANSIT_PATH);
         } catch (FxApplicationException e) {
-            LOG.error(e);
+            if (!e.isMessageLogged()) {
+                LOG.error("Failed to get binary transit path: " + e.getMessage(), e);
+            }
             path = "~" + File.separatorChar + "flexive" + File.separatorChar + "transit";
         }
         File dir = new File(FxFileUtils.expandPath(path));
@@ -91,15 +90,17 @@ public class FxBinaryUtils {
      *
      * @return binary directory for the current node
      */
-    public static synchronized String getBinaryDirectory() {
+    public static String getBinaryDirectory() {
         String cacheDir = (String) FxContext.get().getAttribute(CTX_BINARY_DIR);
         if (cacheDir != null)
             return cacheDir;
         String path;
         try {
-            path = EJBLookup.getNodeConfigurationEngine().get(SystemParameters.NODE_BINARY_PATH);
+            path = EJBLookup.getConfigurationEngine().get(SystemParameters.NODE_BINARY_PATH);
         } catch (FxApplicationException e) {
-            LOG.error(e);
+            if (!e.isMessageLogged()) {
+                LOG.error("Failed to get binary storage path: " + e.getMessage(), e);
+            }
             path = "~" + File.separatorChar + "flexive" + File.separatorChar + "binaries";
         }
         File dir = new File(FxFileUtils.expandPath(path));

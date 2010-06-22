@@ -60,4 +60,14 @@ public interface ParameterData<T> extends Serializable {
      * @return	the default value of the parameter.
      */
     T getDefaultValue();
+
+    /**
+     * Should this parameter be cached once it has been retrieved? By default all parameters are cached, but
+     * you can disable this for individual parameters that are seldom used or very large.
+     *
+     * @return  true if this parameter should be cached. If false, each lookup is performed directly on the
+     * database.
+     * @since   3.1.4
+     */
+    boolean isCached();
 }

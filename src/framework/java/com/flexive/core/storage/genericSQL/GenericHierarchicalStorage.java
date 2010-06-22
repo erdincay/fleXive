@@ -1551,6 +1551,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         PreparedStatement ps = null;
         FxPK contentPK, sourcePK = null, destinationPK = null;
         int srcPos = 0, dstPos = 0;
+        Connection conNoTX = null;
         try {
             ps = con.prepareStatement(sql.toString());
             ps.setLong(1, pk.getId());
@@ -1566,7 +1567,10 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
             final long aclId = rs.getLong(4);
             Step step = env.getStep(rs.getLong(5));
             Mandator mand = env.getMandator(rs.getInt(22));
-            FxGroupData root = loadDetails(con, type, env, contentPK, pk.getVersion());
+            if (!type.getAssignmentsForDataType(FxDataType.Binary).isEmpty()) {
+                conNoTX = Database.getNonTXDataSource().getConnection();
+            }
+            FxGroupData root = loadDetails(con, conNoTX, type, env, contentPK, pk.getVersion());
             rs.getLong(12);
             if (!rs.wasNull()) {
                 sourcePK = new FxPK(rs.getLong(12), rs.getInt(13));
@@ -1593,12 +1597,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
         } catch (FxLockException e) {
             throw new FxLoadException(e);
         } finally {
-            try {
-                if (ps != null)
-                    ps.close();
-            } catch (SQLException e) {
-                LOG.warn(e, e);
-            }
+            Database.closeObjects(GenericHierarchicalStorage.class, conNoTX, ps);;
         }
     }
 
@@ -1626,6 +1625,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      * Load all detail entries for a content instance
      *
      * @param con              open and valid(!) connection
+     * @param conNoTX          a non-transactional connection (only used if the content contains binary properties)
      * @param type             FxType used
      * @param env              FxEnvironment
      * @param pk               primary key of the content data to load
@@ -1638,7 +1638,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
      * @throws FxDbException               on errors
      */
     @SuppressWarnings("unchecked")
-    protected FxGroupData loadDetails(Connection con, FxType type, FxEnvironment env, FxPK pk, int requestedVersion) throws FxLoadException, SQLException, FxInvalidParameterException, FxDbException {
+    protected FxGroupData loadDetails(Connection con, Connection conNoTX, FxType type, FxEnvironment env, FxPK pk, int requestedVersion) throws FxLoadException, SQLException, FxInvalidParameterException, FxDbException {
         FxGroupData root;
         PreparedStatement ps = null;
         try {
@@ -1801,7 +1801,7 @@ public abstract class GenericHierarchicalStorage implements ContentStorage {
                                 );
                             break;
                         case Binary:
-                            BinaryDescriptor desc = binaryStorage.loadBinaryDescriptor(server, con, rs.getLong(columns[0]));
+                            BinaryDescriptor desc = binaryStorage.loadBinaryDescriptor(server, conNoTX, rs.getLong(columns[0]));
                             if (currValue == null)
                                 currValue = new FxBinary(multiLang, currLang, desc);
                             else

@@ -103,6 +103,21 @@ public final class ParameterFactory {
     }
 
     /**
+     * Create a new parameter with key and default value, using path information from a {@link ParameterPath} object.
+     *
+     * @param cls   the parameter type class
+     * @param path  the path description
+     * @param key   the parameter key
+     * @param cached if the value should be cached once it has been retrieved (default: true)
+     * @param defaultValue  the default value (if null, no default value will be used)
+     * @return      a new parameter instance
+     * @since       3.1.4
+     */
+    public static <T> Parameter<T> newInstance(Class<T> cls, ParameterPath path, String key, boolean cached, T defaultValue) {
+        return newInstance(cls, new ParameterDataBean<T>(path, key, cached, defaultValue));
+    }
+
+    /**
      * Create a new parameter without a specific key and a default value. The key has to be specified
      * in configuration queries. This is useful for dynamic keys, e.g. for storing user preferences
      * for different pages (using the page path for the key).
@@ -114,6 +129,22 @@ public final class ParameterFactory {
      */
     public static <T> Parameter<T> newInstance(Class<T> cls, ParameterPath path, T defaultValue) {
         return newInstance(cls, path, "", defaultValue);
+    }
+
+    /**
+     * Create a new parameter without a specific key and a default value. The key has to be specified
+     * in configuration queries. This is useful for dynamic keys, e.g. for storing user preferences
+     * for different pages (using the page path for the key).
+     *
+     * @param cls   the parameter type class
+     * @param path  the path description
+     * @param cached if the value should be cached once it has been retrieved (default: true)
+     * @param defaultValue  the default value (if null, no default value will be used)
+     * @return      a new parameter instance
+     * @since       3.1.4
+     */
+    public static <T> Parameter<T> newInstance(Class<T> cls, ParameterPath path, boolean cached, T defaultValue) {
+        return newInstance(cls, path, "", cached, defaultValue);
     }
 
     /**
