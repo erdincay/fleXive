@@ -12,6 +12,7 @@
         <module>flexive-modules-parent</module>
         <module>chemistry</module>
         <module>standalone</module>
+        <module>installer</module>
   </modules>
 
 </project>

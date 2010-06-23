@@ -31,6 +31,9 @@
  ***************************************************************/
 package com.flexive.core;
 
+import com.flexive.core.storage.DBStorage;
+import com.flexive.core.storage.StorageManager;
+import com.flexive.ejb.beans.configuration.GlobalConfigurationEngineBean;
 import com.flexive.shared.EJBLookup;
 import com.flexive.shared.FxContext;
 import com.flexive.shared.FxLanguage;
@@ -202,7 +205,7 @@ public final class Database {
                         finalDsName += NO_TX_SUFFIX;
                 }
                 LOG.info("Looking up datasource for division " + divisionId + ": " + finalDsName);
-                final DataSource dataSource = getDataSource(finalDsName);
+                final DataSource dataSource = getDataSource(finalDsName, false);
                 if (divisionId == DivisionData.DIVISION_TEST) {
                     if (useTX) {
                         return (testDataSource = dataSource);
@@ -210,10 +213,36 @@ public final class Database {
                         return (testDataSourceNoTX = dataSource);
                     }
                 } else {
-                    dataSourceCache[divisionId] = dataSource;
-                    return dataSourceCache[divisionId];
+                    return (dataSourceCache[divisionId] = dataSource);
                 }
             } catch (NamingException exc) {
+                if (divisionId == 1) {
+                    // try default JavaEE 6 data source
+                    try {
+                        final DataSource ds = tryGetDefaultDataSource(
+                                EJBLookup.getInitialContext(), 
+                                GlobalConfigurationEngineBean.DEFAULT_DS + (useTX ? "" : NO_TX_SUFFIX), new
+                                DefaultDivisionDataSourceInitializer()
+                        );
+                        if (ds != null) {
+                            if (LOG.isInfoEnabled()) {
+                                LOG.info("No datasource configured for division 1, using default datasource: " 
+                                        + GlobalConfigurationEngineBean.DEFAULT_DS);
+                            }
+                            // remember data source for #getDataSource(String)
+                            dataSourcesByName.put(finalDsName, ds);
+                            // set division data source, return
+                            return (dataSourceCache[divisionId] = ds);
+                        } else {
+                            if (LOG.isErrorEnabled()) {
+                                LOG.error("Default datasource for division 1 not found (not a JavaEE 6 container?)");
+                            }
+                            // fall through to error handling
+                        }
+                    } catch (NamingException e) {
+                        // not bound, throw error
+                    }
+                }
                 String sErr = "Naming Exception, unable to retrieve Connection to [" + finalDsName
                         + "]: " + exc.getMessage();
                 LOG.error(sErr);
@@ -245,6 +274,10 @@ public final class Database {
      * @throws NamingException on lookup errors
      */
     public static synchronized DataSource getDataSource(String dataSourceName) throws NamingException, SQLException {
+        return getDataSource(dataSourceName, true);
+    }
+
+    private static DataSource getDataSource(String dataSourceName, boolean useDefaultDataSource) throws NamingException, SQLException {
         if (dataSourcesByName.containsKey(dataSourceName)) {
             return dataSourcesByName.get(dataSourceName);
         }
@@ -261,28 +294,45 @@ public final class Database {
         if (dataSource == null) {
             // Geronimo
             String name = dataSourceName;
-            if (name.startsWith("jdbc/"))
+            if (name.startsWith("jdbc/")) {
                 name = name.substring(5);
-            Object o = c.lookup("jca:/console.dbpool/" + name + "/JCAManagedConnectionFactory/" + name);
+            }
+            Object o = null;
             try {
+                o = c.lookup("jca:/console.dbpool/" + name + "/JCAManagedConnectionFactory/" + name);
                 dataSource = (DataSource) o.getClass().getMethod("$getResource").invoke(o);
+            } catch (NamingException e) {
+                // pass
             } catch (NoSuchMethodException e) {
-                if (o instanceof DataSource)
+                if (o instanceof DataSource) {
                     return (DataSource) o;
-                String sErr = "Unable to retrieve Connection to [" + dataSourceName
-                        + "]: JNDI resource is no DataSource and method $getResource not found!";
+                }
+                String sErr =
+                        "Unable to retrieve Connection to [" + dataSourceName +
+                        "]: JNDI resource is no DataSource and method $getResource not found!";
                 LOG.error(sErr);
                 throw new SQLException(sErr);
             } catch (Exception ex) {
-                String sErr = "Unable to retrieve Connection to [" + dataSourceName
-                        + "]: " + ex.getMessage();
+                String sErr = "Unable to retrieve Connection to [" + dataSourceName + "]: " + ex.getMessage();
                 LOG.error(sErr);
                 throw new SQLException(sErr);
             }
         }
+        if (dataSource == null && useDefaultDataSource) {
+            dataSource = tryGetDefaultDataSource(
+                    c,
+                    GlobalConfigurationEngineBean.DEFAULT_DS + (dataSourceName.endsWith(NO_TX_SUFFIX) ? NO_TX_SUFFIX : ""),
+                    new DefaultDivisionDataSourceInitializer()
+            );
+        }
+        if (dataSource == null) {
+            // throw exception with the base datasource name, not the last looked-up path
+            throw new NamingException("JNDI data source not found: " + dataSourceName);
+        }
         dataSourcesByName.put(dataSourceName, dataSource);
         return dataSource;
     }
+
 
     /**
      * Retrieve data source for global configuration table, regardless
@@ -324,11 +374,23 @@ public final class Database {
                     String sErr = "Unable to retrieve Connection to [" + DS_GLOBAL_CONFIG + "]: JNDI resource is no DataSource and method $getResource not found!";
                     LOG.error(sErr);
                     throw new SQLException(sErr);
-                } catch (Exception ex) {
-                    String msg = "Unable to retrieve Connection to [" + DS_GLOBAL_CONFIG + "]: " + ex.getMessage();
+                } catch (NamingException e) {
+                    // not bound, try next path
+                } catch (Exception e) {
+                    final String msg = "Unable to retrieve Connection to [" + DS_GLOBAL_CONFIG + "]: " + e.getMessage();
                     LOG.error(msg);
                     throw new SQLException(msg);
                 }
+            }
+            if (globalDataSource == null) {
+                globalDataSource = tryGetDefaultDataSource(
+                        c, GlobalConfigurationEngineBean.DEFAULT_DS_CONFIG, new DefaultGlobalDataSourceInitializer()
+                );
+            }
+            if (globalDataSource == null) {
+                final String msg = "Unable to retrieve Connection to [" + DS_GLOBAL_CONFIG + "]: no datasource found in JNDI";
+                LOG.error(msg);
+                throw new SQLException(msg);
             }
             return globalDataSource;
         } catch (NamingException exc) {
@@ -338,6 +400,94 @@ public final class Database {
             throw new SQLException(msg);
         }
     }
+
+    private static DataSource tryGetDefaultDataSource(Context c, String dataSourceName, DefaultDataSourceInitializer initializer) throws SQLException {
+        // try to get and initialize the default datasource in JavaEE 6 containers,
+        // as configured in the GlobalConfigurationEngineBean EJB
+        Connection con = null;
+        Statement stmt = null;
+        try {
+            DataSource ds = (DataSource) c.lookup(dataSourceName);
+            if (!isDefaultDataSourceInitialized(ds)) {
+                // try to initialize schema
+                con = getDefaultInitConnection(c);
+                if (con != null) {
+                    if (LOG.isInfoEnabled()) {
+                        LOG.info("Schema not initialized for default datasource " +
+                                dataSourceName + ", initializing...");
+                    }
+                    stmt = con.createStatement();
+                    stmt.execute("CREATE SCHEMA " + initializer.getSchema());
+                    stmt.close();
+                    try {
+                        initializer.initSchema(con, StorageManager.getStorageImpl("H2"));
+                    } catch (Exception ex) {
+                        if (LOG.isErrorEnabled()) {
+                            LOG.error("Failed to initialize schema " + initializer.getSchema() + " for " +
+                                    dataSourceName + ": " + ex.getMessage(), ex);
+                        }
+                    }
+                } else {
+                    if (LOG.isErrorEnabled()) {
+                        LOG.error("Default configuration schema not initialized, but failed to retrieve" +
+                                " data source " + GlobalConfigurationEngineBean.DEFAULT_DS_INIT);
+                    }
+                    // ignore for now, the caller will get an exception when calling getConnection()
+                    // on the data source anyway
+                }
+            }
+            return ds;
+        } catch (NamingException e) {
+            // not bound
+            return null;
+        } finally {
+            closeObjects(Database.class, con, stmt);
+        }
+    }
+
+    /**
+     * Checks if the given data source is initialized by opening a connection.
+     *
+     * @param ds    the data source to be checked
+     * @return      true if the query succeeded
+     */
+    private static boolean isDefaultDataSourceInitialized(DataSource ds) {
+        Connection con = null;
+        try {
+            con = ds.getConnection();
+            return true;
+        } catch (SQLException e) {
+            // probable cause: schema not initialized, since we're using an embedded database
+            // there should be no connection problems
+            return false;
+        } finally {
+            closeObjects(Database.class, con, null);
+        }
+    }
+
+
+    /**
+     * Return a connection for initializing the embedded default database.
+     *
+     * @param c             the initial context for looking up the data source
+     * @return              an open connection, or null if the data source was not found
+     * @throws SQLException if the connection could not be created
+     */
+    private static Connection getDefaultInitConnection(final Context c) throws SQLException {
+        try {
+            final DataSource initDs =
+                    (DataSource) c.lookup(GlobalConfigurationEngineBean.DEFAULT_DS_INIT);
+            return initDs.getConnection();
+        } catch (NamingException e) {
+            if (LOG.isErrorEnabled()) {
+                LOG.error("Default configuration schema not initialized, but could not find " +
+                        GlobalConfigurationEngineBean.DEFAULT_DS_INIT);
+                // continue, the caller will get a related exception when creating a connection anyway
+            }
+            return null;
+        }
+    }
+
 
     /**
      * Get a list of possible JNDI datasource lookup strings
@@ -484,7 +634,7 @@ public final class Database {
      * @param column      the name of the column from the translations table to load
      * @param whereClause mandatory where clause
      * @return FxString created from the data table
-     * @throws SQLException if a database error occured
+     * @throws SQLException if a database error occurred
      */
     public static FxString loadContentDataFxString(Connection con, String column, String whereClause)
             throws SQLException {
@@ -689,6 +839,55 @@ public final class Database {
         } finally {
             if (ps != null)
                 ps.close();
+        }
+    }
+
+    /**
+     * Helper class for {@link Database#tryGetDefaultDataSource}. Called to initialize the schema
+     * of the default data source in JEE 6 containers.
+     */
+    private abstract static class DefaultDataSourceInitializer {
+        private final String schema;
+
+        public DefaultDataSourceInitializer(String schema) {
+            this.schema = schema;
+        }
+
+        public String getSchema() {
+            return schema;
+        }
+
+        public abstract void initSchema(Connection con, DBStorage storage) throws Exception;
+
+    }
+
+    /**
+     * Initialize the default global (configuration) data source.
+     */
+    private static class DefaultGlobalDataSourceInitializer extends DefaultDataSourceInitializer {
+
+        public DefaultGlobalDataSourceInitializer() {
+            super("flexiveConfiguration");
+        }
+
+        @Override
+        public void initSchema(Connection con, DBStorage storage) throws Exception {
+            storage.initConfiguration(con, getSchema(), false);
+        }
+    }
+
+    /**
+     * Initialize the default division data source.
+     */
+    private static class DefaultDivisionDataSourceInitializer extends DefaultDataSourceInitializer {
+
+        public DefaultDivisionDataSourceInitializer() {
+            super("flexive");
+        }
+
+        @Override
+        public void initSchema(Connection con, DBStorage storage) throws Exception {
+            storage.initDivision(con, getSchema(), false);
         }
     }
 }

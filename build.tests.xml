@@ -50,7 +50,7 @@
 	</path>
 
     <path id="build.classpath.testng">
-        <fileset dir="${flexive.lib.dir}" includes="*.jar" excludes="qdox.jar"/>
+        <fileset dir="${flexive.lib.dir}" includes="*.jar" excludes="qdox.jar,javaee6.jar"/>
         <fileset dir="${flexive.lib.dir}/testNG" includes="*.jar"/>
         <fileset dir="${flexive.lib.dir}/xstream" includes="*.jar"/>
         <fileset dir="${flexive.lib.dir}/groovy" includes="*.jar"/>

@@ -70,18 +70,79 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicLong;
+import javax.annotation.sql.DataSourceDefinition;
+import javax.annotation.sql.DataSourceDefinitions;
 
 /**
  * Global configuration MBean.
  *
+ * <p> This bean also configures a default data source for Java EE 6 containers, using an embedded (file-based) H2 database.
+ * This will be used as a fallback <strong>for division 1</strong> if no database connection is configured.
+ * Also, a fallback global data source is configured.</p>
+ *
+ * <p>The data source uses a relative path for the database file,
+ * so it will usually be created somewhere in the application server's directory. This has the advantage over
+ * an absolute URL that multiple installations are possible for the same user, although all applications
+ * in that application server will necessarily share the same default data source.
+ * </p>
+ *
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 
+@DataSourceDefinitions({
+    @DataSourceDefinition(
+        name = GlobalConfigurationEngineBean.DEFAULT_DS,
+        className = "org.h2.jdbcx.JdbcDataSource",
+        properties="URL=jdbc:h2:h2/flexive;SCHEMA=flexive;LOCK_TIMEOUT=10000;MVCC=TRUE;TRACE_LEVEL_FILE=0",
+        user = "sa",
+        password = "sa",
+        transactional=true
+    ),
+    @DataSourceDefinition(
+        name = GlobalConfigurationEngineBean.DEFAULT_DS + "NoTX",
+        className = "org.h2.jdbcx.JdbcDataSource",
+        properties="URL=jdbc:h2:h2/flexive;SCHEMA=flexive;LOCK_TIMEOUT=10000;MVCC=TRUE;TRACE_LEVEL_FILE=0",
+        user = "sa",
+        password = "sa",
+        transactional=false
+    ),
+    @DataSourceDefinition(
+        name = GlobalConfigurationEngineBean.DEFAULT_DS_CONFIG,
+        className = "org.h2.jdbcx.JdbcDataSource",
+        properties = "URL=jdbc:h2:h2/flexive;SCHEMA=flexiveConfiguration;LOCK_TIMEOUT=10000;MVCC=TRUE;TRACE_LEVEL_FILE=0",
+        user = "sa",
+        password = "sa",
+        transactional=true
+    ),
+    @DataSourceDefinition(
+        name = GlobalConfigurationEngineBean.DEFAULT_DS_INIT,
+        className = "org.h2.jdbcx.JdbcDataSource",
+        properties= "URL=jdbc:h2:h2/flexive;LOCK_TIMEOUT=10000;MVCC=TRUE;TRACE_LEVEL_FILE=0",
+        user = "sa",
+        password = "sa",
+        transactional=false
+    )
+})
 @TransactionManagement(TransactionManagementType.CONTAINER)
 @TransactionAttribute(TransactionAttributeType.REQUIRED)
 @Stateless(name = "GlobalConfigurationEngine", mappedName = "GlobalConfigurationEngine")
 public class GlobalConfigurationEngineBean extends GenericConfigurationImpl implements GlobalConfigurationEngine, GlobalConfigurationEngineLocal {
+
     /**
+     * The default data source bound in JEE 6 containers.
+     */
+    public static final String DEFAULT_DS = "java:global/flexive-ejb/DefaultDS";
+    /**
+     * The default configuration data source bound in JEE 6 containers.
+     */
+    public static final String DEFAULT_DS_CONFIG = "java:global/flexive-ejb/DefaultConfigurationDS";
+    /**
+     * An extra data source without a schema for initialization.
+     */
+    public static final String DEFAULT_DS_INIT = "java:global/flexive-ejb/DefaultInitDS";
+
+
+   /**
      * Maximum number of cached domains per hit/miss cache
      * This should be at least roughly equal to the number of configured
      * domains since the miss cache will likely be thrashed otherwise.
@@ -356,7 +417,8 @@ public class GlobalConfigurationEngineBean extends GenericConfigurationImpl impl
         boolean available = false;
         Connection con = null;
         try {
-            con = Database.getDataSource(dataSource).getConnection();
+            // lookup non-transactional datasource to avoid issues with the default JEE6 data source in Glassfish
+            con = Database.getDataSource(dataSource + "NoTX").getConnection();
             DatabaseMetaData dbmd = con.getMetaData();
             dbVendor = dbmd.getDatabaseProductName();
             dbVersion = dbmd.getDatabaseProductVersion();

@@ -153,6 +153,8 @@ public class MockExternalContext extends ExternalContext {
         public Enumeration getAttributeNames() {
             return null;  //To change body of implemented methods use File | Settings | File Templates.
         }
+
+
     }
     private Map requestParameterMap = new HashMap();
 	private Map requestMap = new HashMap();
