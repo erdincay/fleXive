@@ -34,6 +34,7 @@ package com.flexive.faces.components.input;
 import com.flexive.faces.messages.FxFacesMsgErr;
 import com.flexive.shared.XPathElement;
 import com.flexive.shared.value.FxValue;
+import javax.faces.component.StateHolder;
 import org.apache.commons.lang.StringUtils;
 
 import javax.faces.component.UIComponent;
@@ -47,8 +48,8 @@ import javax.faces.validator.ValidatorException;
  * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  * @version $Rev$
  */
-public class FxValueInputValidator implements Validator {
-
+public class FxValueInputValidator implements Validator, StateHolder {
+    
     /**
      * {@inheritDoc}
      */
@@ -88,4 +89,24 @@ public class FxValueInputValidator implements Validator {
             return "?";
         return XPathElement.stripType(fxValue.getXPath());
     }
+
+    public boolean isTransient() {
+        // Mark transient to avoid troubles with JSF2's partial state saving
+        return true;
+    }
+
+    public void restoreState(FacesContext context, Object state) {
+        // nop
+    }
+
+    public Object saveState(FacesContext context) {
+        return null;
+    }
+
+    public void setTransient(boolean newTransientValue) {
+        if (!newTransientValue) {
+            throw new UnsupportedOperationException("FxValueInputValidator is always transient.");
+        }
+    }
+
 }

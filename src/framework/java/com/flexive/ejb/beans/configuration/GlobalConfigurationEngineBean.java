@@ -659,10 +659,10 @@ public class GlobalConfigurationEngineBean extends GenericConfigurationImpl impl
     }
 
     /**
-     * Returns true if the calling user is authorized for manipulationg
+     * Returns true if the calling user is authorized for manipulating
      * the global configuration.
      *
-     * @return true if the calling user is authorized for manipulationg
+     * @return true if the calling user is authorized for manipulating
      *         the global configuration.
      */
     private boolean isAuthorized() {

@@ -318,7 +318,7 @@ public final class Database {
                 throw new SQLException(sErr);
             }
         }
-        if (dataSource == null && useDefaultDataSource) {
+        if (dataSource == null && useDefaultDataSource && !dataSourceName.contains("/flexiveTest")) {
             dataSource = tryGetDefaultDataSource(
                     c,
                     GlobalConfigurationEngineBean.DEFAULT_DS + (dataSourceName.endsWith(NO_TX_SUFFIX) ? NO_TX_SUFFIX : ""),
