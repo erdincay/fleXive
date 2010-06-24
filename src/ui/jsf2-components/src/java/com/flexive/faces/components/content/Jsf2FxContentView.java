@@ -29,33 +29,26 @@
  *
  *  This copyright notice MUST APPEAR in all copies of the file!
  ***************************************************************/
-package com.flexive.faces.components.tree;
+package com.flexive.faces.components.content;
 
-import com.flexive.faces.FxJsf2Const;
 import com.flexive.faces.FxJsf2Utils;
-import javax.faces.application.ResourceDependencies;
-import javax.faces.application.ResourceDependency;
+import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.event.AbortProcessingException;
 import javax.faces.event.FacesEvent;
 
 /**
- * JSF wrapper for the fx:navigation component.
+ * JSF 2 implementation of {@code fx:content}.
  *
- * @author Daniel Lichtenberger (daniel.lichtenberger@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
+ * @author Daniel Lichtenberger, UCS
  * @version $Rev$
  */
-@ResourceDependencies({
-    @ResourceDependency(library=FxJsf2Const.RESOURCE_LIBRARY, name=FxJsf2Const.RESOURCE_CSS_COMPONENTS, target="head"),
-    @ResourceDependency(library=FxJsf2Const.RESOURCE_LIBRARY, name=FxJsf2Const.RESOURCE_JS_COMPONENTS, target="head"),
-    @ResourceDependency(library=FxJsf2Const.RESOURCE_LIBRARY, name=FxJsf2Const.RESOURCE_JS_YUILOADER, target="head"),
-    @ResourceDependency(library=FxJsf2Const.RESOURCE_LIBRARY, name=FxJsf2Const.RESOURCE_JS_INIT, target="body")
-})
-public class Jsf2TreeNavigation extends TreeNavigation {
+public class Jsf2FxContentView extends FxContentView {
 
     @Override
     protected void performBroadcast(FacesContext ctx, FacesEvent event) {
         FxJsf2Utils.broadcast(ctx, event);
     }
+
 
 }

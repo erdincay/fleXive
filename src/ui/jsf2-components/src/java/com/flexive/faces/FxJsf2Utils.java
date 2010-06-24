@@ -38,6 +38,7 @@ import javax.faces.application.Resource;
 import javax.faces.application.ResourceHandler;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
+import javax.faces.event.FacesEvent;
 import org.apache.commons.lang.StringUtils;
 
 /**
@@ -100,4 +101,38 @@ public class FxJsf2Utils {
         return resource.getRequestPath();
     }
 
+    /**
+     * Broadcast the event and setup the composite component parent of the event source.
+     * 
+     * @param ctx   the current faces context
+     * @param event the event to be broadcasted
+     */
+    public static void broadcast(FacesContext ctx, FacesEvent event) {
+        final UIComponent source = event.getComponent();
+
+        UIComponent compositeParent = null;
+        try {
+
+            // push composite parent
+            if (!UIComponent.isCompositeComponent(source)) {
+                compositeParent = UIComponent.getCompositeComponentParent(source);
+                if (compositeParent != null) {
+                    compositeParent.pushComponentToEL(ctx, null);
+                }
+            }
+
+            source.pushComponentToEL(ctx, null);
+
+            // perform broadcast
+            source.broadcast(event);
+
+        } finally {
+            // undo EL changes
+            source.popComponentFromEL(ctx);
+            if (compositeParent != null) {
+                compositeParent.popComponentFromEL(ctx);
+            }
+        }
+
+    }
 }

@@ -195,16 +195,22 @@ public class TreeNavigation extends UIOutput implements NamingContainer {
     public void broadcast(FacesEvent event) throws AbortProcessingException {
         if (event instanceof NodeEvent) {
             final NodeEvent nodeEvent = (NodeEvent) event;
-            final Object oldValue = provideVar(getCurrentInstance(), nodeEvent.getNode());
+            final FacesContext ctx = getCurrentInstance();
+            final Object oldValue = provideVar(ctx,nodeEvent.getNode());
             try {
-                nodeEvent.getTarget().getComponent().broadcast(nodeEvent.getTarget());
+                performBroadcast(ctx, nodeEvent.getTarget());
             } finally {
-                removeVar(getCurrentInstance(), oldValue);
+                removeVar(ctx, oldValue);
             }
         } else {
             super.broadcast(event);
         }
     }
+
+    protected void performBroadcast(FacesContext ctx, FacesEvent event) {
+        event.getComponent().broadcast(event);
+    }
+
 
     /**
      * Return the entire tree that should be rendered.
@@ -713,7 +719,7 @@ public class TreeNavigation extends UIOutput implements NamingContainer {
         this.includeFolders = includeFolders;
     }
 
-    private static class NodeEvent extends FacesEvent {
+    protected static class NodeEvent extends FacesEvent {
         private static final long serialVersionUID = 5274895541939738723L;
         private final FacesEvent target;
         private final FxTreeNode node;

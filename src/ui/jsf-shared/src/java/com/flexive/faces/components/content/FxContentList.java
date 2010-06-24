@@ -146,16 +146,21 @@ public class FxContentList extends UIComponentBase implements NamingContainer {
         if (event instanceof IndexedEvent) {
             final IndexedEvent indexedEvent = (IndexedEvent) event;
             final int prevIndex = getIndex();
+            final FacesContext ctx = FacesContext.getCurrentInstance();
             try {
-                this.setIndex(indexedEvent.getIndex());
-                final FacesEvent target = indexedEvent.getTarget();
-                target.getComponent().broadcast(target);
+                this.setIndex(ctx, indexedEvent.getIndex());
+                performBroadcast(ctx, indexedEvent.target);
+                
             } finally {
-                setIndex(prevIndex);
+                setIndex(ctx, prevIndex);
             }
         } else {
             super.broadcast(event);
         }
+    }
+
+    protected void performBroadcast(FacesContext ctx, FacesEvent event) {
+        event.getComponent().broadcast(event);
     }
 
     @SuppressWarnings({"ThrowableInstanceNeverThrown"})
@@ -194,7 +199,7 @@ public class FxContentList extends UIComponentBase implements NamingContainer {
                 return;
             }
             // process result
-            setIndex(0);
+            setIndex(context, 0);
             if (result.getRowCount() > 0) {
                 // initialize data
                 provideContent();
@@ -204,7 +209,7 @@ public class FxContentList extends UIComponentBase implements NamingContainer {
                 applyPhase(context, getFacet("header"), phase);
             }
             for (int i = 0; i < result.getRowCount(); i++) {
-                setIndex(i);
+                setIndex(context, i);
                 applyPhase(context, contentView, phase);
             }
         } catch (FxApplicationException e) {
@@ -318,12 +323,12 @@ public class FxContentList extends UIComponentBase implements NamingContainer {
         return index;
     }
 
-    public void setIndex(int index) {
-        saveChildState();
+    public void setIndex(FacesContext ctx, int index) {
+        saveChildState(ctx);
         this.index = index;
         provideContent();
 
-        restoreChildState();
+        restoreChildState(ctx);
     }
 
     private void provideContent() {
@@ -371,20 +376,17 @@ public class FxContentList extends UIComponentBase implements NamingContainer {
         return this.childState;
     }
 
-    private void saveChildState() {
+    private void saveChildState(FacesContext ctx) {
         if (this.getChildCount() > 0) {
-
-            FacesContext faces = FacesContext.getCurrentInstance();
-
             for (UIComponent uiComponent : this.getChildren()) {
-                this.saveChildState(faces, uiComponent);
+                this.saveChildState(ctx, uiComponent);
             }
         }
     }
 
-    private void saveChildState(FacesContext faces, UIComponent c) {
+    private void saveChildState(FacesContext ctx, UIComponent c) {
         if (c instanceof EditableValueHolder && !c.isTransient()) {
-            String clientId = c.getClientId(faces);
+            String clientId = c.getClientId(ctx);
             SavedState ss = (SavedState) this.getChildState().get(clientId);
             if (ss == null) {
                 ss = new SavedState();
@@ -397,21 +399,19 @@ public class FxContentList extends UIComponentBase implements NamingContainer {
         // continue hack
         Iterator itr = c.getFacetsAndChildren();
         while (itr.hasNext()) {
-            saveChildState(faces, (UIComponent) itr.next());
+            saveChildState(ctx, (UIComponent) itr.next());
         }
     }
 
-    private void restoreChildState() {
+    private void restoreChildState(FacesContext ctx) {
         if (this.getChildCount() > 0) {
-            FacesContext faces = FacesContext.getCurrentInstance();
-
             for (UIComponent uiComponent : this.getChildren()) {
-                this.restoreChildState(faces, uiComponent);
+                this.restoreChildState(ctx, uiComponent);
             }
         }
     }
 
-    private void restoreChildState(FacesContext faces, UIComponent c) {
+    private void restoreChildState(FacesContext ctx, UIComponent c) {
         // reset id
         String id = c.getId();
         c.setId(id);
@@ -419,7 +419,7 @@ public class FxContentList extends UIComponentBase implements NamingContainer {
         // hack
         if (c instanceof EditableValueHolder) {
             EditableValueHolder evh = (EditableValueHolder) c;
-            String clientId = c.getClientId(faces);
+            String clientId = c.getClientId(ctx);
             SavedState ss = (SavedState) this.getChildState().get(clientId);
             if (ss != null) {
                 ss.apply(evh);
@@ -431,17 +431,17 @@ public class FxContentList extends UIComponentBase implements NamingContainer {
         // continue hack
         Iterator itr = c.getFacetsAndChildren();
         while (itr.hasNext()) {
-            restoreChildState(faces, (UIComponent) itr.next());
+            restoreChildState(ctx, (UIComponent) itr.next());
         }
     }
 
     /**
      * Taken from Facelets' UIRepeat component
      */
-    private static class IndexedEvent extends FacesEvent {
+    protected static class IndexedEvent extends FacesEvent {
         private static final long serialVersionUID = 5274895541939738723L;
-        private final FacesEvent target;
-        private final int index;
+        protected final FacesEvent target;
+        protected final int index;
 
         public IndexedEvent(FxContentList owner, FacesEvent target, int index) {
             super(owner);
@@ -468,11 +468,12 @@ public class FxContentList extends UIComponentBase implements NamingContainer {
         public void processListener(FacesListener listener) {
             FxContentList owner = (FxContentList) this.getComponent();
             int prevIndex = owner.index;
+            final FacesContext ctx = FacesContext.getCurrentInstance();
             try {
-                owner.setIndex(this.index);
+                owner.setIndex(ctx, this.index);
                 this.target.processListener(listener);
             } finally {
-                owner.setIndex(prevIndex);
+                owner.setIndex(ctx, prevIndex);
             }
         }
 

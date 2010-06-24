@@ -35,12 +35,12 @@
 
     <component>
         <component-type>flexive.FxContentList</component-type>
-        <component-class>com.flexive.faces.components.content.FxContentList</component-class>
+        <component-class>com.flexive.faces.components.content.Jsf2FxContentList</component-class>
     </component>
 
     <component>
         <component-type>flexive.FxContentView</component-type>
-        <component-class>com.flexive.faces.components.content.FxContentView</component-class>
+        <component-class>com.flexive.faces.components.content.Jsf2FxContentView</component-class>
     </component>
 
     <component>

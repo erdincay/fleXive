@@ -189,7 +189,7 @@ public class FxContentView extends UIOutput {
         removeContent(context);
     }
 
-    private void removeContent(FacesContext context) {
+    protected void removeContent(FacesContext context) {
         //context.getELContext().getVariableMapper().setVariable(getVar(), null);
         context.getExternalContext().getRequestMap().remove(getVar());
 //        context.getExternalContext().getRequestMap().remove(getVar() + "_content");
@@ -231,14 +231,20 @@ public class FxContentView extends UIOutput {
     @Override
     public void broadcast(FacesEvent event) throws AbortProcessingException {
         if (event instanceof WrappedEvent) {
-            // unwrap and provide content variable in the event context
-            final FacesEvent target = ((WrappedEvent) event).event;
-            provideContent(FacesContext.getCurrentInstance());
-            target.getComponent().broadcast(target);
-            removeContent(FacesContext.getCurrentInstance());
+            final FacesContext ctx = FacesContext.getCurrentInstance();
+            try {
+                provideContent(ctx);
+                performBroadcast(ctx, ((WrappedEvent) event).event);
+            } finally {
+                removeContent(ctx);
+            }
         } else {
             super.broadcast(event);
         }
+    }
+
+    protected void performBroadcast(FacesContext ctx, FacesEvent event) {
+        event.getComponent().broadcast(event);
     }
 
     /**
@@ -611,10 +617,10 @@ public class FxContentView extends UIOutput {
         }
     }
 
-    private static class WrappedEvent extends FacesEvent {
+    protected static class WrappedEvent extends FacesEvent {
         private static final long serialVersionUID = 3341414461609445709L;
         
-        private final FacesEvent event;
+        protected final FacesEvent event;
 
         public WrappedEvent(FxContentView component, FacesEvent event) {
             super(component);
