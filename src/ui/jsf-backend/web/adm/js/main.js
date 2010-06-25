@@ -254,7 +254,7 @@ function addDynTab(responseId,caller,id,title,active) {
     // First get the document of the caller
     var _document;
     try {
-        _caller = caller;
+        setCaller(caller);
         _document = caller.document;
         if (!_document || _document==null) {
             return;
@@ -304,7 +304,7 @@ function addTab(responseId,caller,id,title,url,active) {
     // First get the document of the caller
     var _document;
     try {
-        _caller = caller;
+        setCaller(caller);
         _document = caller.document;
         if (!_document || _document==null) {
             return;
@@ -467,7 +467,7 @@ function getCallerElement(caller,id) {
 //======================================================================================================================
 function addToolbarItem(responseId,caller,id,helpTxt,url,iconUrl,disabled) {
     try {
-        _caller = caller;
+        setCaller(caller);
 
         // Clear the tabs of an old request/response if needed
         if (_toolbarResponseId!=responseId) {
@@ -606,9 +606,16 @@ function clearclientIdsWithError() {
     clientIdsWithError = [];
 }
 
+function setCaller(caller) {
+    // only set the _caller if caller is a window object (or has a name value) to prevent overwriting _call on ajax responses
+    if (caller.name) {
+        _caller = caller;
+    }
+}
+
 function addClientIdWithError(caller,clientId,detailTxt) {
     if (!clientId || clientId=='') return;
-    _caller = caller;
+    setCaller(caller);
     var i;
     var clientIdInput = clientId + '_input_';
     for( i=0; i<clientIdsWithError.length; i++ ) {
