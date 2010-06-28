@@ -52,6 +52,16 @@ import java.util.concurrent.ConcurrentMap;
  * @author Markus Plesser (markus.plesser@flexive.com), UCS - unique computing solutions gmbh (http://www.ucs.at)
  */
 public class EJBLookup {
+    /**
+     * EJB 3.1+ embedded application name. This must be the application name set in the container
+     * and will be used for building the JNDI paths of our EJBs. The resulting path will look like this:
+     *
+     * <p>{@code java:global/flexive-embedded/ScriptingEngine!com.flexive.shared.interfaces.ScriptingEngine}</p>
+     *
+     * @since 3.1.4
+     */
+    public static final String EJB31_EMBEDDED_APPNAME = "flexive-embedded";
+
     private static final Log LOG = LogFactory.getLog(EJBLookup.class);
     private static String APPNAME = "flexive";
 
@@ -59,6 +69,7 @@ public class EJBLookup {
         APP_SIMPLENAME_LOCAL,
         EJB31_APP_MODULE,
         EJB31_MODULE,
+        EJB31_EMBEDDED,
         JAVA_COMP_ENV,
         APP_SIMPLENAME_REMOTE,
         COMPLEXNAME,
@@ -616,6 +627,10 @@ public class EJBLookup {
             case EJB31_APP_MODULE:
                 // EJB 3.1: flexive-ejb module in EAR
                 return "java:app/flexive-ejb/" + type.getSimpleName() + "!" + type.getCanonicalName() + "Local";
+            case EJB31_EMBEDDED:
+                // EJB 3.1: embedded container with global paths
+                return "java:global/" + EJB31_EMBEDDED_APPNAME + "/" + type.getSimpleName()
+                        + "!" + type.getCanonicalName() + "Local";
             default:
                 throw new FxLookupException("Unsupported/unknown lookup strategy " + used_strategy + "!").asRuntimeException();
         }
